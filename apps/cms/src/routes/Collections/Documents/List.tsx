@@ -121,10 +121,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 									collectionKey: collectionKey(),
 									useDrafts: collection.data?.data.useDrafts,
 								}),
-								permission: userStore.get.hasPermission([
-									"create_content",
-									"publish_content",
-								]).some,
+								permission: userStore.get.hasPermission(["create_content"])
+									.some,
 								show: collection.data?.data.locked !== true,
 								label: T()("create_dynamic", {
 									name: collection.data?.data.singular || "",

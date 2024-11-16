@@ -53,6 +53,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					},
 					permission:
 						userStore.get.hasPermission(["delete_user"]).all && !currentUser(),
+					actionExclude: true,
 				},
 				{
 					label: T()("reset_password"),
@@ -63,6 +64,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					},
 					permission:
 						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
+					actionExclude: true,
 				},
 			]}
 			options={props.options}

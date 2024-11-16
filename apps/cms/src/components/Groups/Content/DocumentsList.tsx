@@ -25,6 +25,7 @@ import Layout from "@/components/Groups/Layout";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import PromoteToDraft from "@/components/Modals/Documents/PromoteToDraft";
+import PublishDocument from "@/components/Modals/Documents/PublishDocument";
 import Table from "@/components/Groups/Table";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 
@@ -46,10 +47,12 @@ export const DocumentsList: Component<{
 		triggers: {
 			delete: false,
 			promote: false,
+			publish: false,
 		},
 	});
 	const [getDocumentId, setDocumentId] = createSignal<number>();
 	const [getPublishedVersionId, setPublishedVersionId] = createSignal<number>();
+	const [getDraftVersionId, setDraftVersionId] = createSignal<number>();
 
 	// ----------------------------------
 	// Memos
@@ -65,6 +68,9 @@ export const DocumentsList: Component<{
 			props.state.searchParams.getSettled() === true &&
 			props.state.collectionIsSuccess() === true,
 	);
+	const hasDeletePermission = createMemo(() => {
+		return userStore.get.hasPermission(["delete_content"]).some;
+	});
 
 	// ----------------------------------
 	// Queries
@@ -123,6 +129,9 @@ export const DocumentsList: Component<{
 					}),
 				},
 			}}
+			permissions={{
+				create: userStore.get.hasPermission(["create_content"]).some,
+			}}
 			callback={{
 				createEntry: () => {
 					navigate(
@@ -156,7 +165,7 @@ export const DocumentsList: Component<{
 					isSuccess: documents.isSuccess,
 				}}
 				options={{
-					isSelectable: true,
+					isSelectable: hasDeletePermission(),
 				}}
 				callbacks={{
 					deleteRows: async (selected) => {
@@ -220,10 +229,23 @@ export const DocumentsList: Component<{
 												}),
 											);
 										},
-										permission: userStore.get.hasPermission([
-											"update_content",
-											"publish_content",
-										]).all,
+										permission: userStore.get.hasPermission(["update_content"])
+											.some,
+									},
+									{
+										label: T()("publish"),
+										type: "button",
+										onClick: () => {
+											setDraftVersionId(doc().versionId as number);
+											rowTarget.setTargetId(doc().id);
+											rowTarget.setTrigger("publish", true);
+										},
+										permission: userStore.get.hasPermission(["publish_content"])
+											.all,
+										hide:
+											props.state.collection?.useDrafts !== true ||
+											props.state.status() !== "draft",
+										actionExclude: true,
 									},
 									{
 										label: T()("delete"),
@@ -234,6 +256,7 @@ export const DocumentsList: Component<{
 										},
 										permission: userStore.get.hasPermission(["delete_content"])
 											.all,
+										actionExclude: true,
 									},
 								]}
 							/>
@@ -269,6 +292,29 @@ export const DocumentsList: Component<{
 								useDrafts: props.state.collection?.useDrafts,
 								documentId: getDocumentId(),
 								statusOverride: "draft",
+							}),
+						);
+					},
+				}}
+			/>
+			<PublishDocument
+				id={rowTarget.getTargetId}
+				draftVersionId={getDraftVersionId}
+				collection={props.state.collection as CollectionResponse}
+				state={{
+					open: rowTarget.getTriggers().publish,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("publish", state);
+					},
+				}}
+				callbacks={{
+					onSuccess: () => {
+						navigate(
+							getDocumentRoute("edit", {
+								collectionKey: props.state.collection?.key as string,
+								useDrafts: props.state.collection?.useDrafts,
+								documentId: getDocumentId(),
+								statusOverride: "published",
 							}),
 						);
 					},

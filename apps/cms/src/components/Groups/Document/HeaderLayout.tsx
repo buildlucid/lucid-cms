@@ -17,6 +17,7 @@ import {
 	FaSolidTrash,
 	FaSolidLanguage,
 } from "solid-icons/fa";
+import userStore from "@/store/userStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import Layout from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
@@ -112,6 +113,21 @@ export const HeaderLayout: Component<{
 		if (props.state.selectedRevision?.() === undefined) return false;
 		if (!props.actions?.restoreRevisionAction) return false;
 		return true;
+	});
+	const hasUpdatePermission = createMemo(() => {
+		if (props.state.mode === "create") {
+			return userStore.get.hasPermission(["create_content"]).all;
+		}
+		return userStore.get.hasPermission(["update_content"]).all;
+	});
+	const hasPublishPermission = createMemo(() => {
+		return userStore.get.hasPermission(["publish_content"]).all;
+	});
+	const hasRestorePermission = createMemo(() => {
+		return userStore.get.hasPermission(["restore_content"]).all;
+	});
+	const hasDeletePermission = createMemo(() => {
+		return userStore.get.hasPermission(["delete_content"]).all;
 	});
 
 	// ---------------------------------
@@ -313,6 +329,7 @@ export const HeaderLayout: Component<{
 							size="x-small"
 							onClick={props.actions?.upsertDocumentAction}
 							disabled={props.state.canSaveDocument?.()}
+							permission={hasUpdatePermission()}
 						>
 							{T()("save")}
 						</Button>
@@ -324,6 +341,7 @@ export const HeaderLayout: Component<{
 							size="x-small"
 							onClick={props.actions?.publishDocumentAction}
 							disabled={!props.state.canPublishDocument?.()}
+							permission={hasPublishPermission()}
 						>
 							{T()("publish")}
 						</Button>
@@ -335,6 +353,7 @@ export const HeaderLayout: Component<{
 							size="x-small"
 							onClick={props.actions?.restoreRevisionAction}
 							disabled={props.state.selectedRevision?.() === undefined}
+							permission={hasRestorePermission()}
 						>
 							{T()("restore_revision")}
 						</Button>
@@ -350,6 +369,7 @@ export const HeaderLayout: Component<{
 							size="x-icon"
 							type="button"
 							onClick={() => props.actions?.setDeleteOpen?.(true)}
+							permission={hasDeletePermission()}
 						>
 							<span class="sr-only">{T()("delete")}</span>
 							<FaSolidTrash />

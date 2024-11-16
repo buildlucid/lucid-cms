@@ -110,7 +110,7 @@ export const Standard: Component<{
 							>
 								<FaSolidPlus />
 								<span class="sr-only">
-									{props.actions?.createLink?.label ?? T()("create")}
+									{props.actions?.createLink?.label ?? T()("create")} -{" "}
 								</span>
 							</Link>
 						</Show>

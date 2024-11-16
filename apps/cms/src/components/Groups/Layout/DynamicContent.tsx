@@ -33,6 +33,9 @@ export const DynamicContent: Component<{
 			description?: string;
 		};
 	};
+	permissions?: {
+		create?: boolean;
+	};
 	callback?: {
 		createEntry?: () => void;
 	};
@@ -77,6 +80,9 @@ export const DynamicContent: Component<{
 									}}
 									callbacks={{
 										action: props.callback?.createEntry,
+									}}
+									permissions={{
+										create: props.permissions?.create,
 									}}
 								/>
 							</Show>

@@ -17,6 +17,7 @@ export interface ActionDropdownProps {
 		permission?: boolean;
 		hide?: boolean;
 		isLoading?: boolean;
+		actionExclude?: boolean;
 	}>;
 	options?: {
 		border?: boolean;

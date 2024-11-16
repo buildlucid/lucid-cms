@@ -24,9 +24,11 @@ export const Tr: Component<TrProps> = (props) => {
 	// Memos
 	const firstPermittedAction = createMemo(() => {
 		if (props.actions) {
-			return props.actions.find((action) => {
-				return action.permission !== false;
-			});
+			return props.actions
+				.filter((a) => a.actionExclude !== true)
+				.find((action) => {
+					return action.permission !== false;
+				});
 		}
 	});
 

@@ -11,6 +11,9 @@ interface NoEntriesBlockProps {
 	callbacks?: {
 		action?: () => void;
 	};
+	permissions?: {
+		create?: boolean;
+	};
 }
 
 const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
@@ -29,6 +32,7 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 						size="medium"
 						classes="mt-30"
 						onClick={props.callbacks?.action}
+						permission={props.permissions?.create}
 					>
 						{props.copy?.button || T()("create_entry")}
 					</Button>

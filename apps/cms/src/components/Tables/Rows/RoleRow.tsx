@@ -39,6 +39,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 						props.rowTarget.setTrigger("delete", true);
 					},
 					permission: userStore.get.hasPermission(["delete_role"]).all,
+					actionExclude: true,
 				},
 			]}
 			options={props.options}

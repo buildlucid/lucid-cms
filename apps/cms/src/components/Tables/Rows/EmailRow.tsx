@@ -42,6 +42,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTrigger("resend", true);
 					},
 					permission: userStore.get.hasPermission(["send_email"]).all,
+					actionExclude: true,
 				},
 				{
 					label: T()("delete"),
@@ -51,6 +52,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTrigger("delete", true);
 					},
 					permission: userStore.get.hasPermission(["delete_email"]).all,
+					actionExclude: true,
 				},
 			]}
 		>

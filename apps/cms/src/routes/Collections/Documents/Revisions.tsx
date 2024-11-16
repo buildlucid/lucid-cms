@@ -56,7 +56,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			revisionsSearchParams.getSettled()
 		);
 	});
-	const canFetchDocument = createMemo(() => {
+	const canFetchRevisionDocument = createMemo(() => {
 		return (
 			contentLocale() !== undefined &&
 			documentId() !== undefined &&
@@ -75,7 +75,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		enabled: () => !!collectionKey(),
 		refetchOnWindowFocus: false,
 	});
-	const doc = api.collections.document.useGetSingleVersion({
+	const revisionDoc = api.collections.document.useGetSingleVersion({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -86,7 +86,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				bricks: true,
 			},
 		},
-		enabled: () => canFetchDocument(),
+		enabled: () => canFetchRevisionDocument(),
 		refetchOnWindowFocus: false,
 	});
 	const revisionVersions = api.collections.document.useGetMultipleRevisions({
@@ -98,6 +98,37 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			},
 		},
 		enabled: () => canFetchRevisions(),
+		refetchOnWindowFocus: false,
+	});
+
+	// ----------------------------------
+	// Fallback document
+	const canFetchFallbackDocument = createMemo(() => {
+		if (versionId() !== undefined) return false;
+		if (collection.isFetched === false) return false;
+
+		return (
+			contentLocale() !== undefined &&
+			documentId() !== undefined &&
+			collection.data?.data.useDrafts !== undefined
+		);
+	});
+	const fallbackVersionType = createMemo(() => {
+		return collection.data?.data.useDrafts ? "draft" : "published";
+	});
+
+	const fallbackDoc = api.collections.document.useGetSingle({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+				id: documentId,
+				version: fallbackVersionType,
+			},
+			include: {
+				bricks: true,
+			},
+		},
+		enabled: () => canFetchFallbackDocument(),
 		refetchOnWindowFocus: false,
 	});
 
@@ -126,17 +157,20 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 
 	// ----------------------------------
 	// Memos
+	const doc = createMemo(() => {
+		return canFetchRevisionDocument() ? revisionDoc : fallbackDoc;
+	});
 	const documentIsLoading = createMemo(() => {
 		if (versionIdParam() === "latest") {
 			return collection.isLoading || revisionVersions.isLoading;
 		}
-		return collection.isLoading || doc.isLoading;
+		return collection.isLoading || doc().isLoading;
 	});
 	const documentIsSuccess = createMemo(() => {
 		if (versionIdParam() === "latest") {
 			return collection.isSuccess && revisionVersions.isSuccess;
 		}
-		return collection.isSuccess && doc.isSuccess;
+		return collection.isSuccess && doc().isSuccess;
 	});
 	const revisionsIsLoading = createMemo(() => {
 		return revisionVersions.isLoading;
@@ -145,12 +179,12 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		return revisionVersions.isSuccess;
 	});
 	const anyIsError = createMemo(() => {
-		return revisionVersions.isError || collection.isError || doc.isError;
+		return revisionVersions.isError || collection.isError || doc().isError;
 	});
 	const isPublished = createMemo(() => {
 		return (
-			doc.data?.data.version?.published?.id !== null &&
-			doc.data?.data.version?.published?.id !== undefined
+			doc().data?.data.version?.published?.id !== null &&
+			doc().data?.data.version?.published?.id !== undefined
 		);
 	});
 
@@ -162,7 +196,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			"collectionTranslations",
 			collection.data?.data.translations || false,
 		);
-		brickStore.get.setBricks(doc.data?.data, collection.data?.data);
+		brickStore.get.setBricks(doc().data?.data, collection.data?.data);
 		brickStore.set("locked", true);
 	};
 	const restoreRevisionAction = () => {
@@ -192,7 +226,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 
 	createEffect(
 		on(
-			() => doc.data,
+			() => doc().data,
 			() => {
 				setDocumentState();
 			},
@@ -232,7 +266,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 						restoreRevisionAction: restoreRevisionAction,
 					}}
 				>
-					<Show when={!doc.data}>
+					<Show when={!revisionDoc.data}>
 						<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 flex-col z-20">
 							<div class="w-full max-w-xl px-15 py-15 text-center flex flex-col items-center">
 								<h2 class="mb-2.5">{T()("no_revisions_found")}</h2>
