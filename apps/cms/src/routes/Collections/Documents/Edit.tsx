@@ -163,7 +163,8 @@ const CollectionsDocumentsEditRoute: Component<
 		return (
 			updateSingle.action.isPending ||
 			createDocument.action.isPending ||
-			doc.isRefetching
+			doc.isRefetching ||
+			doc.isLoading
 		);
 	});
 	const mutateErrors = createMemo(() => {
@@ -284,7 +285,6 @@ const CollectionsDocumentsEditRoute: Component<
 			<Match when={isLoading()}>
 				<div class="fixed top-15 left-[325px] bottom-15 right-15 flex flex-col">
 					<span class="h-32 w-full skeleton block mb-15" />
-					<span class="h-64 w-full skeleton block mb-15" />
 					<span class="h-full w-full skeleton block" />
 				</div>
 			</Match>
@@ -460,7 +460,7 @@ const CollectionsDocumentsEditRoute: Component<
 					}}
 				/>
 				<Show when={isSaving()}>
-					<div class="fixed inset-0 bg-black bg-opacity-40 animate-pulse z-50" />
+					<div class="fixed inset-0 bg-black bg-opacity-60 animate-pulse z-50" />
 				</Show>
 			</Match>
 		</Switch>
