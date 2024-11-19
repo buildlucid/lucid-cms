@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import constants from "../../constants.js";
-import { sql } from "kysely";
 import type {
 	ServiceFn,
 	FieldSchemaType,
@@ -24,7 +23,7 @@ const checkCircularParents: ServiceFn<
 	undefined
 > = async (context, data) => {
 	try {
-		if (!data.documentId) {
+		if (!data.documentId || !data.fields.parentPage.value) {
 			return {
 				error: undefined,
 				data: undefined,
@@ -32,65 +31,50 @@ const checkCircularParents: ServiceFn<
 		}
 
 		const result = await context.db
-			.with("recursive_cte", (db) =>
+			.with("ancestors", (db) =>
 				db
-					.selectFrom("lucid_collection_document_fields")
+					.selectFrom("lucid_collection_document_fields as fields")
 					.innerJoin(
-						"lucid_collection_document_versions",
-						"lucid_collection_document_versions.id",
-						"lucid_collection_document_fields.collection_document_version_id",
+						"lucid_collection_document_versions as versions",
+						"versions.id",
+						"fields.collection_document_version_id",
 					)
 					.select([
-						"lucid_collection_document_versions.document_id",
-						"lucid_collection_document_fields.document_id as parent_document_id",
-						sql<number>`1`.as("depth"),
+						"versions.document_id as current_id",
+						"fields.document_id as parent_id",
 					])
-					.where(
-						"lucid_collection_document_versions.document_id",
-						"=",
-						data.fields.parentPage.value,
-					)
-					.where("lucid_collection_document_fields.key", "=", "parentPage")
-					.where(
-						"lucid_collection_document_versions.version_type",
-						"=",
-						data.versionType,
-					)
+					.where("fields.key", "=", "parentPage")
+					.where("versions.version_type", "=", data.versionType)
+					.where("versions.document_id", "=", data.fields.parentPage.value)
 					.unionAll(
 						db
-							.selectFrom("lucid_collection_document_fields as lcdf")
+							.selectFrom("lucid_collection_document_fields as fields")
 							.innerJoin(
-								"lucid_collection_document_versions as lcdv",
-								"lcdv.id",
-								"lcdf.collection_document_version_id",
+								"lucid_collection_document_versions as versions",
+								"versions.id",
+								"fields.collection_document_version_id",
 							)
 							.innerJoin(
 								// @ts-expect-error
-								"recursive_cte as rc",
-								"rc.parent_document_id",
-								"lcdv.document_id",
+								"ancestors",
+								"ancestors.parent_id",
+								"versions.document_id",
 							)
 							// @ts-expect-error
 							.select([
-								"lcdv.document_id",
-								"lcdf.document_id as parent_document_id",
-								sql<number>`rc.depth + 1`.as("depth"),
+								"versions.document_id as current_id",
+								"fields.document_id as parent_id",
 							])
-							.where("lcdf.key", "=", "parentPage")
-							.where("lcdv.version_type", "=", data.versionType)
-							.where("rc.depth", "<", constants.maxHierarchyDepth),
+							.where("fields.key", "=", "parentPage")
+							.where("versions.version_type", "=", data.versionType),
 					),
 			)
-			.selectFrom("recursive_cte")
-			.select(
-				sql<number>`case when count(*) > 0 then 1 else 0 end`.as(
-					"has_circular_ref",
-				),
-			)
-			.where("document_id", "=", data.documentId)
-			.executeTakeFirstOrThrow();
+			.selectFrom("ancestors")
+			.select("parent_id")
+			.where("parent_id", "=", data.documentId)
+			.executeTakeFirst();
 
-		if (result.has_circular_ref === 1) {
+		if (result) {
 			return {
 				error: {
 					type: "basic",
