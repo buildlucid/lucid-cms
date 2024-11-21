@@ -54,7 +54,7 @@ const joinSlugs = (...parts: string[]): string => {
 	return parts.filter(Boolean).join("/").replace(/\/+/g, "/");
 };
 
-const postSlugFormat = (slug: string | null): string | null => {
+const postSlugFormat = (slug: string | null | undefined): string | null => {
 	if (!slug) return null;
 	let res = slug;
 	if (!res.startsWith("/")) {

@@ -10,9 +10,9 @@ const buildFullSlug = (data: {
 		document_id: number | null;
 	}>;
 	targetLocale: string;
-	slug: string | null;
+	slug: string | null | undefined;
 }): string | null => {
-	if (data.slug === null) return null;
+	if (data.slug === null || data.slug === undefined) return null;
 	let result = data.slug;
 
 	const targetParentFullSlugField = data.parentFields.find((field) => {
