@@ -64,7 +64,7 @@ const processImage: ServiceFn<
 	}
 
 	const stream = new PassThrough();
-	stream.end(Buffer.from(imageRes.data.buffer));
+	stream.end(imageRes.data.buffer);
 
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
 	if (processedCountRes.data >= context.config.media.processed.limit) {
