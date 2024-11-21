@@ -47,36 +47,52 @@ test("collection config is correct along with field includes and filters", async
 			},
 		],
 	})
-		.addText("text_test", undefined, {
-			list: true,
-			filterable: true,
+		.addText("text_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
-		.addTextarea("textarea_test", undefined, {
-			list: true,
-			filterable: true,
+		.addTextarea("textarea_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
-		.addNumber("number_test", undefined, {
-			list: true,
-			filterable: true,
+		.addNumber("number_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
-		.addCheckbox("checkbox_test", undefined, {
-			list: true,
-			filterable: true,
+		.addCheckbox("checkbox_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
-		.addSelect("select_test", undefined, {
-			list: true,
-			filterable: true,
+		.addSelect("select_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
-		.addDateTime("datetime_test", undefined, {
-			list: true,
-			filterable: true,
+		.addDateTime("datetime_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
-		.addUser("user_test", undefined, {
-			list: true,
+		.addUser("user_test", {
+			collection: {
+				column: true,
+			},
 		})
-		.addMedia("media_test", undefined, {
-			list: true,
-			filterable: true,
+		.addMedia("media_test", {
+			collection: {
+				column: true,
+				filterable: true,
+			},
 		})
 		.addWysiwyg("wysiwyg_test")
 		.addLink("link_test")

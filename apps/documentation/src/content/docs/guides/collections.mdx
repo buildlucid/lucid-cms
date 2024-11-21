@@ -17,7 +17,7 @@ export const PageCollection = new CollectionBuilder("page", {
   title: "Pages",
   singular: "Page",
   description: "Pages are used to create static content on your website.",
-  translations: true,
+  useTranslations: true,
   hooks: [
     {
       event: "beforeUpsert",
@@ -29,39 +29,37 @@ export const PageCollection = new CollectionBuilder("page", {
     builder: [Banner],
   },
 })
-  .addText(
-    "pageTitle",
-    {
-      labels: {
-        title: {
-          en: "Page title",
-        },
-        description: "The title of the page.",
+  .addText("pageTitle", {
+    labels: {
+      title: {
+        en: "Page title",
       },
-      hidden: false,
-      disabled: false,
+      description: "The title of the page.",
     },
-    {
-      list: true,
+    hidden: false,
+    disabled: false,
+    collection: {
+      column: true,
       filterable: true,
     }
-  )
-  .addTextarea("pageExcerpt", undefined, {
-    list: true,
-    filterable: true,
   })
-  .addCheckbox(
-    "pageFeatured",
-    {
-      translations: true,
-    },
-    {
-      list: true,
+  .addTextarea("pageExcerpt", {
+    collection: {
+      column: true,
+      filterable: true,
+    }  
+  })
+  .addCheckbox("pageFeatured", {
+    translations: true,
+    collection: {
+      column: true,
       filterable: true,
     }
-  )
-  .addUser("author", undefined, {
-    list: true,
+  })
+  .addUser("author", {
+    collection: {
+      column: true,
+    } 
   });
 
 export const SettingsCollection = new CollectionBuilder("settings", {
@@ -69,14 +67,15 @@ export const SettingsCollection = new CollectionBuilder("settings", {
   title: "Settings",
   singular: "Setting",
   description: "Set shared settings for your website.",
-  translations: false,
+  useTranslations: false,
   bricks: {
     fixed: [],
     builder: [],
   },
-}).addMedia("siteLogo", {
-  labels: {
-    title: "Logo",
-  },
-});
+})
+  .addMedia("siteLogo", {
+    labels: {
+      title: "Logo",
+    },
+  });
 ```

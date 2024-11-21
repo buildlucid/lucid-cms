@@ -36,73 +36,81 @@ class CollectionBuilder extends FieldBuilder {
 	// Builder Methods
 	addText(
 		key: string,
-		props?: CFProps<"text">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"text"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "text", collection);
+		this.#fieldCollectionHelper(key, "text", props?.collection);
 		super.addText(key, props);
 		return this;
 	}
 	addNumber(
 		key: string,
-		props?: CFProps<"number">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"number"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "number", collection);
+		this.#fieldCollectionHelper(key, "number", props?.collection);
 		super.addNumber(key, props);
 		return this;
 	}
 	addCheckbox(
 		key: string,
-		props?: CFProps<"checkbox">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"checkbox"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "checkbox", collection);
+		this.#fieldCollectionHelper(key, "checkbox", props?.collection);
 		super.addCheckbox(key, props);
 		return this;
 	}
 	addSelect(
 		key: string,
-		props?: CFProps<"select">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"select"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "select", collection);
+		this.#fieldCollectionHelper(key, "select", props?.collection);
 		super.addSelect(key, props);
 		return this;
 	}
 	addTextarea(
 		key: string,
-		props?: CFProps<"textarea">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"textarea"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "textarea", collection);
+		this.#fieldCollectionHelper(key, "textarea", props?.collection);
 		super.addTextarea(key, props);
 		return this;
 	}
 	addDateTime(
 		key: string,
-		props?: CFProps<"datetime">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"datetime"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "datetime", collection);
+		this.#fieldCollectionHelper(key, "datetime", props?.collection);
 		super.addDateTime(key, props);
 		return this;
 	}
 	addUser(
 		key: string,
-		props?: CFProps<"user">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"user"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "user", collection);
+		this.#fieldCollectionHelper(key, "user", props?.collection);
 		super.addUser(key, props);
 		return this;
 	}
 	addMedia(
 		key: string,
-		props?: CFProps<"media">,
-		collection?: FieldCollectionConfig,
+		props?: CFProps<"media"> & {
+			collection?: FieldCollectionConfig;
+		},
 	) {
-		this.#fieldCollectionHelper(key, "media", collection);
+		this.#fieldCollectionHelper(key, "media", props?.collection);
 		super.addMedia(key, props);
 		return this;
 	}
@@ -157,7 +165,7 @@ class CollectionBuilder extends FieldBuilder {
 		type: FieldTypes,
 		config?: FieldCollectionConfig,
 	) => {
-		if (config?.list) this.includeFieldKeys.push(key);
+		if (config?.column) this.includeFieldKeys.push(key);
 		if (config?.filterable)
 			this.filterableFieldKeys.push({
 				key,

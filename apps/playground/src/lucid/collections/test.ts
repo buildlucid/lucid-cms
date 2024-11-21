@@ -13,25 +13,22 @@ const TestCollection = new CollectionBuilder("test", {
 	isLocked: false,
 	hooks: [],
 	bricks: {},
-}).addText(
-	"title",
-	{
-		labels: {
-			title: {
-				en: "Title",
-			},
-		},
-		hidden: false,
-		disabled: false,
-		validation: {
-			required: true,
-			zod: z.string().min(2).max(128),
+}).addText("title", {
+	labels: {
+		title: {
+			en: "Title",
 		},
 	},
-	{
-		list: true,
+	hidden: false,
+	disabled: false,
+	validation: {
+		required: true,
+		zod: z.string().min(2).max(128),
+	},
+	collection: {
+		column: true,
 		filterable: true,
 	},
-);
+});
 
 export default TestCollection;

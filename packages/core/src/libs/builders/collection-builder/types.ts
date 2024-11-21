@@ -10,8 +10,8 @@ import type {
 } from "../../../types/query-params.js";
 
 export interface FieldCollectionConfig {
-	list?: true;
-	filterable?: true;
+	column?: boolean; //* internally its called "include", "column" is just the public facing name as it makes it clear how it impacts the CMS
+	filterable?: boolean;
 }
 
 export interface CollectionConfigSchemaType

@@ -9,50 +9,42 @@ const registerFields = (
 	config: CollectionConfig,
 ) => {
 	collection
-		.addText(
-			constants.fields.fullSlug.key,
-			{
-				labels: {
-					title: T("full_slug"),
-				},
-				translations: config.enableTranslations,
-				hidden: !config.displayFullSlug,
-				disabled: true,
+		.addText(constants.fields.fullSlug.key, {
+			labels: {
+				title: T("full_slug"),
 			},
-			{
-				// @ts-expect-error
-				list: config.displayFullSlug,
-				// @ts-expect-error
+			translations: config.enableTranslations,
+			hidden: !config.displayFullSlug,
+			disabled: true,
+			collection: {
+				column: config.displayFullSlug,
 				filterable: config.displayFullSlug,
 			},
-		)
-		.addText(
-			constants.fields.slug.key,
-			{
-				labels: {
-					title: T("slug"),
-				},
-				translations: config.enableTranslations,
-				hidden: false,
-				disabled: false,
-				validation: {
-					required: true,
-					zod: z.union([
-						z.literal("/"),
-						z
-							.string()
-							.regex(
-								/^[a-zA-Z0-9_-]+$/,
-								T("slug_field_validation_error_message"),
-							),
-					]),
-				},
+		})
+		.addText(constants.fields.slug.key, {
+			labels: {
+				title: T("slug"),
 			},
-			{
-				list: true,
+			translations: config.enableTranslations,
+			hidden: false,
+			disabled: false,
+			validation: {
+				required: true,
+				zod: z.union([
+					z.literal("/"),
+					z
+						.string()
+						.regex(
+							/^[a-zA-Z0-9_-]+$/,
+							T("slug_field_validation_error_message"),
+						),
+				]),
+			},
+			collection: {
+				column: true,
 				filterable: true,
 			},
-		)
+		})
 		.addDocument(constants.fields.parentPage.key, {
 			collection: collection.key,
 			labels: {

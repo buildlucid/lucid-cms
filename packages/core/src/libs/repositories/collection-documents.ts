@@ -38,7 +38,6 @@ export default class CollectionDocumentsRepo {
 			Pick<Select<LucidCollectionDocuments>, K> | undefined
 		>;
 	};
-	// TODO: update this to join current version - done
 	selectSingleById = async (props: {
 		id: number;
 		collectionKey: string;
@@ -168,7 +167,6 @@ export default class CollectionDocumentsRepo {
 			)
 			.executeTakeFirst();
 	};
-	// TODO: update this to join current version
 	selectSingleFiltered = async (props: {
 		documentFilters: QueryParamFilters;
 		documentFieldFilters: DocumentFieldFilters[];
@@ -567,7 +565,6 @@ export default class CollectionDocumentsRepo {
 			Array<Pick<Select<LucidCollectionDocuments>, K>>
 		>;
 	};
-	// TODO: update this to join current version
 	selectMultipleFiltered = async (props: {
 		status: DocumentVersionType;
 		/** The status used to determine which version of the document custom field relations to fetch */
