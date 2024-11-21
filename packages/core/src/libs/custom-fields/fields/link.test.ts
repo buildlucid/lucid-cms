@@ -16,7 +16,7 @@ const LinkCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addLink("standard_link")
 	.addLink("required_link", {

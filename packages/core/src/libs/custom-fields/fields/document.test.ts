@@ -15,7 +15,7 @@ const DocumentCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addDocument("standard_doc", {
 		collection: "page",

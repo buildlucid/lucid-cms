@@ -194,7 +194,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		brickStore.get.reset();
 		brickStore.set(
 			"collectionTranslations",
-			collection.data?.data.translations || false,
+			collection.data?.data.useTranslations || false,
 		);
 		brickStore.get.setBricks(doc().data?.data, collection.data?.data);
 		brickStore.set("locked", true);

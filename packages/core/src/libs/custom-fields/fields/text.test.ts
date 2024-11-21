@@ -16,7 +16,7 @@ const TextCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addText("standard_text")
 	.addText("required_text", {

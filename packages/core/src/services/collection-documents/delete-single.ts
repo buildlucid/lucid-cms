@@ -19,7 +19,7 @@ const deleteSingle: ServiceFn<
 		});
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.config.locked === true) {
+	if (collectionRes.data.config.isLocked === true) {
 		return {
 			error: {
 				type: "basic",

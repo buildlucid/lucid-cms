@@ -32,7 +32,7 @@ const restoreRevision: ServiceFn<
 		};
 	}
 
-	await context.services.collection.document.versions.promoteVersioe(context, {
+	await context.services.collection.document.versions.promoteVersion(context, {
 		documentId: data.documentId,
 		collectionKey: data.collectionKey,
 		fromVersionId: data.versionId,

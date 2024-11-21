@@ -65,7 +65,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							document={props.document}
 							include={props.include}
 							index={i()}
-							collectionTranslations={props.collection.translations}
+							collectionTranslations={props.collection.useTranslations}
 						/>
 					);
 				}}

@@ -19,7 +19,7 @@ const promoteVersionController: RouteController<
 	)(request);
 
 	const restoreRevisionRes = await serviceWrapper(
-		request.server.services.collection.document.versions.promoteVersioe,
+		request.server.services.collection.document.versions.promoteVersion,
 		{
 			transaction: true,
 			defaultError: {

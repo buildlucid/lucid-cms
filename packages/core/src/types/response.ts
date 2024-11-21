@@ -158,10 +158,10 @@ export interface CollectionResponse {
 	singular: string;
 	description: string | null;
 	documentId?: number | null;
-	translations: boolean;
+	useTranslations: boolean;
 	useDrafts: boolean;
 	useRevisions: boolean;
-	locked: boolean;
+	isLocked: boolean;
 	fixedBricks: Array<CollectionBrickConfig>;
 	builderBricks: Array<CollectionBrickConfig>;
 	fields: CFConfig<FieldTypes>[];

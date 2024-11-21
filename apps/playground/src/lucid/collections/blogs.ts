@@ -5,7 +5,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 	title: "Blogs",
 	singular: "Blog",
 	description: "Manage your blogs.",
-	translations: true,
+	useTranslations: true,
 })
 	.addText(
 		"page_title",

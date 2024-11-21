@@ -191,7 +191,7 @@ const CollectionsDocumentsEditRoute: Component<
 	});
 	const isBuilderLocked = createMemo(() => {
 		// lock builder if collection is locked
-		if (collection.data?.data.locked === true) {
+		if (collection.data?.data.isLocked === true) {
 			return true;
 		}
 
@@ -253,7 +253,7 @@ const CollectionsDocumentsEditRoute: Component<
 		brickStore.get.reset();
 		brickStore.set(
 			"collectionTranslations",
-			collection.data?.data.translations || false,
+			collection.data?.data.useTranslations || false,
 		);
 		brickStore.get.setBricks(doc.data?.data, collection.data?.data);
 		brickStore.set("locked", isBuilderLocked());

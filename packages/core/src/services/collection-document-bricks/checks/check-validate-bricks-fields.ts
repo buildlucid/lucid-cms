@@ -2,12 +2,7 @@ import T from "../../../translations/index.js";
 import logger from "../../../utils/logging/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import type { FieldErrors } from "../../../types/errors.js";
-import type {
-	FieldTypes,
-	MediaReferenceData,
-	UserReferenceData,
-	DocumentReferenceData,
-} from "../../../libs/custom-fields/types.js";
+import type { FieldTypes } from "../../../libs/custom-fields/types.js";
 import type { FieldInsertItem } from "../helpers/flatten-fields.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";

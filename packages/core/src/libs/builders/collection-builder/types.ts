@@ -29,11 +29,11 @@ export type CollectionData = {
 	title: CollectionConfigSchemaType["title"];
 	singular: CollectionConfigSchemaType["singular"];
 	description: string | null;
-	locked: boolean;
+	isLocked: boolean;
 	useDrafts: boolean;
 	useRevisions: boolean;
 	config: {
-		translations: boolean;
+		useTranslations: boolean;
 		fields: {
 			filter: FieldFilters;
 			include: string[];

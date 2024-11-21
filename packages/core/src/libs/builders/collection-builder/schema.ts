@@ -2,12 +2,11 @@ import z from "zod";
 
 const CollectionConfigSchema = z.object({
 	mode: z.enum(["single", "multiple"]),
-
 	title: z.string(),
 	singular: z.string(),
 	description: z.string().optional(),
-	translations: z.boolean().default(false).optional(),
-	locked: z.boolean().default(false).optional(),
+	isLocked: z.boolean().default(false).optional(),
+	useTranslations: z.boolean().default(false).optional(),
 	useDrafts: z.boolean().default(false).optional(),
 	useRevisions: z.boolean().default(false).optional(),
 	hooks: z

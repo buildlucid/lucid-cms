@@ -15,7 +15,7 @@ const CheckboxCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addCheckbox("standard_checkbox")
 	.addCheckbox("required_chekbox", {

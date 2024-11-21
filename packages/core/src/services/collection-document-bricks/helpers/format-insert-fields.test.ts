@@ -23,7 +23,7 @@ const Collection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Pages",
 	singular: "Page",
-	translations: true,
+	useTranslations: true,
 	bricks: {
 		builder: [Brick],
 	},

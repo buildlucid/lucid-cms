@@ -95,7 +95,10 @@ const flattenFields = (
 				continue;
 			}
 
-			if (field.translations && collection.data.config.translations === true) {
+			if (
+				field.translations &&
+				collection.data.config.useTranslations === true
+			) {
 				for (let i = 0; i < localisation.locales.length; i++) {
 					const locale = localisation.locales[i];
 					if (!locale) continue;

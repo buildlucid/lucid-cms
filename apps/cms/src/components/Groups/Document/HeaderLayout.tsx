@@ -304,14 +304,15 @@ export const HeaderLayout: Component<{
 					)}
 				>
 					<div class="w-full relative">
-						<Show when={props.state.collection?.translations}>
+						<Show when={props.state.collection?.useTranslations}>
 							<ContentLocaleSelect
 								hasError={props.state.brickTranslationErrors?.()}
 							/>
 						</Show>
 						<Show
 							when={
-								props.state.collection?.translations !== true && defaultLocale()
+								props.state.collection?.useTranslations !== true &&
+								defaultLocale()
 							}
 						>
 							<div class="flex items-center">

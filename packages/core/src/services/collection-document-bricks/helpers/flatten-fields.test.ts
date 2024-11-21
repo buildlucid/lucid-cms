@@ -6,7 +6,7 @@ const pagesCollection = new CollectionBuilder("pages", {
 	mode: "multiple",
 	title: "Pages",
 	singular: "Page",
-	translations: true,
+	useTranslations: true,
 })
 	.addText("page_title")
 	.addRepeater("call_to_actions")

@@ -15,7 +15,7 @@ const ColourCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addColour("standard_colour")
 	.addColour("required_colour", {

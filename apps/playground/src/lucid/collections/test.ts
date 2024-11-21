@@ -7,10 +7,10 @@ const TestCollection = new CollectionBuilder("test", {
 	singular: "Test",
 	description:
 		"A test collection for the revisions and draft/published functionality.",
-	translations: true,
+	useTranslations: false,
 	useDrafts: true,
 	useRevisions: true,
-	// locked: true,
+	isLocked: false,
 	hooks: [],
 	bricks: {},
 }).addText(

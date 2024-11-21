@@ -6,7 +6,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	singular: "Main Menu",
 	description: "The main menu for your website.",
 	useRevisions: true,
-	translations: true,
+	useTranslations: true,
 })
 	.addRepeater("items", {
 		labels: {

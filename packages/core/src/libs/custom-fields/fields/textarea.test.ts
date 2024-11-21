@@ -16,7 +16,7 @@ const TextareaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addTextarea("standard_textarea")
 	.addTextarea("required_textarea", {

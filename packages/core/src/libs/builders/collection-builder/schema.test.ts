@@ -8,7 +8,7 @@ test("collection builder config passes schema validation", async () => {
 		title: "Pages",
 		singular: "Page",
 		description: "Pages are used to create static content on your website.",
-		translations: true,
+		useTranslations: true,
 		hooks: [
 			{
 				event: "beforeUpsert",

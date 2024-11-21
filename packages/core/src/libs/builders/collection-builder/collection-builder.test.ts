@@ -7,7 +7,7 @@ test("collection config is correct along with field includes and filters", async
 		title: "Pages",
 		singular: "Page",
 		description: "Pages are used to create static content on your website.",
-		translations: true,
+		useTranslations: true,
 		hooks: [
 			{
 				event: "beforeUpsert",
@@ -94,11 +94,11 @@ test("collection config is correct along with field includes and filters", async
 		title: "Pages",
 		singular: "Page",
 		description: "Pages are used to create static content on your website.",
-		locked: false,
+		isLocked: false,
 		useDrafts: false,
 		useRevisions: false,
 		config: {
-			translations: true,
+			useTranslations: true,
 			fields: {
 				filter: [
 					{ key: "text_test", type: "text" },

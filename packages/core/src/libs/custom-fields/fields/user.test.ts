@@ -15,7 +15,7 @@ const UserCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addUser("standard_user")
 	.addUser("required_user", {

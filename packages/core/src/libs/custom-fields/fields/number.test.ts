@@ -16,7 +16,7 @@ const NumberCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addNumber("standard_number")
 	.addNumber("required_number", {

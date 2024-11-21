@@ -16,7 +16,7 @@ const JSONCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addJSON("standard_json")
 	.addJSON("required_json", {

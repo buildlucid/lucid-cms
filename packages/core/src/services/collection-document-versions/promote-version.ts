@@ -107,7 +107,7 @@ const promoteVersion: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (collectionRes.data.config.locked === true) {
+	if (collectionRes.data.config.isLocked === true) {
 		return {
 			error: {
 				type: "basic",

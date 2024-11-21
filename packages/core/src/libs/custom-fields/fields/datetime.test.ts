@@ -16,7 +16,7 @@ const DateTimeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addDateTime("standard_datetime")
 	.addDateTime("required_datetime", {

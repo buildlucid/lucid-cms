@@ -29,7 +29,7 @@ const SelectCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	title: "Test",
 	singular: "Test",
-	translations: true,
+	useTranslations: true,
 })
 	.addSelect("standard_select", {
 		options: CONSTANTS.selectOptions,

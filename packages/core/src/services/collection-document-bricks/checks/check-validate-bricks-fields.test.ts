@@ -33,7 +33,7 @@ test("validate brick along with brick field validation", async () => {
 		mode: "multiple",
 		title: "Test",
 		singular: "Test",
-		translations: true,
+		useTranslations: true,
 	})
 		.addText("text_test")
 		.addWysiwyg("wysiwyg_test")

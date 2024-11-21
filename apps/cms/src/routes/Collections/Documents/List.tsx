@@ -103,7 +103,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							{
 								type: "warning",
 								message: T()("locked_collection_message"),
-								show: collection.data?.data.locked === true,
+								show: collection.data?.data.isLocked === true,
 							},
 						]}
 					/>
@@ -115,7 +115,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							description: collection.data?.data?.description || "",
 						}}
 						actions={{
-							contentLocale: collection.data?.data.translations ?? false,
+							contentLocale: collection.data?.data.useTranslations ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey(),
@@ -123,7 +123,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 								}),
 								permission: userStore.get.hasPermission(["create_content"])
 									.some,
-								show: collection.data?.data.locked !== true,
+								show: collection.data?.data.isLocked !== true,
 								label: T()("create_dynamic", {
 									name: collection.data?.data.singular || "",
 								}),
