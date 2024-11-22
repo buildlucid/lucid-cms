@@ -32,7 +32,7 @@ const constructChildFullSlug = (data: {
 
 	for (const descendant of data.descendants) {
 		const fullSlug: Record<string, string | null> = {};
-		if (data.collection.enableTranslations) {
+		if (data.collection.useTranslations) {
 			if (
 				data.parentFullSlugField !== undefined &&
 				!data.parentFullSlugField.translations

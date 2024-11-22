@@ -238,7 +238,7 @@ export default class CollectionDocumentFieldsFormatter {
 		if (
 			meta.fieldConfig.type !== "repeater" &&
 			meta.fieldConfig.type !== "tab" &&
-			meta.fieldConfig.translations === true &&
+			meta.fieldConfig.useTranslations === true &&
 			meta.collectionTranslations === true
 		) {
 			// reduce same fields with different languages into 1 field

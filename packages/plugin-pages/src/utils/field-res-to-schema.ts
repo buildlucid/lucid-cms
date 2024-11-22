@@ -2,7 +2,7 @@ import type { FieldSchemaType, CustomFieldMap } from "@lucidcms/core/types";
 
 const fieldResToSchema = (
 	key: string,
-	enableTranslations: boolean,
+	useTranslations: boolean,
 	defaultLocale: string,
 	items: Array<{
 		key: string;
@@ -26,7 +26,7 @@ const fieldResToSchema = (
 		type: item.type as FieldSchemaType["type"],
 	};
 
-	if (enableTranslations) {
+	if (useTranslations) {
 		result.translations = {};
 		for (const item of relevantItems) {
 			if (item.type === "text") {

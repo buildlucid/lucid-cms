@@ -35,7 +35,7 @@ const constructParentFullSlug = (data: {
 		);
 
 	// if translations are enabled/set
-	if (data.collection.enableTranslations && data.fields.slug.translations) {
+	if (data.collection.useTranslations && data.fields.slug.translations) {
 		for (let i = 0; i < data.localisation.locales.length; i++) {
 			const locale = data.localisation.locales[i];
 			if (!locale) continue;

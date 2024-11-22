@@ -188,8 +188,7 @@ export interface TextFieldConfig extends SharedFieldConfig {
 		description?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	translations: boolean;
+	useTranslations: boolean;
 	default: string;
 	hidden?: boolean;
 	disabled?: boolean;
@@ -208,7 +207,7 @@ export interface WysiwygFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	default: string;
 	hidden?: boolean;
 	disabled?: boolean;
@@ -226,7 +225,7 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 		description?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: number;
@@ -254,7 +253,7 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 		description?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: number | null;
@@ -284,7 +283,7 @@ export interface NumberFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: number | null;
@@ -304,7 +303,7 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 		false?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: BooleanInt;
@@ -323,7 +322,7 @@ export interface SelectFieldConfig extends SharedFieldConfig {
 	};
 	options: Array<{ label: LocaleValue; value: string }>;
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: string;
@@ -341,7 +340,7 @@ export interface TextareaFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: string;
@@ -360,7 +359,7 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: Record<string, unknown>;
@@ -379,7 +378,7 @@ export interface ColourFieldConfig extends SharedFieldConfig {
 	};
 	presets: string[];
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: string;
@@ -397,7 +396,7 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: string;
@@ -416,7 +415,7 @@ export interface LinkFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	default?: LinkResValue;
@@ -434,7 +433,7 @@ export interface UserFieldConfig extends SharedFieldConfig {
 	};
 	default?: number;
 
-	translations: boolean;
+	useTranslations: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 

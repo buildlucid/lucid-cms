@@ -19,7 +19,7 @@ const checkRootSlugWithParent = (data: {
 		parentPage: FieldSchemaType;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
-	if (data.collection.enableTranslations && data.fields.slug.translations) {
+	if (data.collection.useTranslations && data.fields.slug.translations) {
 		const fieldErrors: FieldErrors[] = [];
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
 			if (value === "/" && data.fields.parentPage.value) {

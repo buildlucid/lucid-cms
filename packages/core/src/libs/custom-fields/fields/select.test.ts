@@ -173,7 +173,7 @@ test("custom field config passes schema validation", async () => {
 				en: "placeholder",
 			},
 		},
-		translations: true,
+		useTranslations: true,
 		default: "",
 		hidden: false,
 		disabled: false,

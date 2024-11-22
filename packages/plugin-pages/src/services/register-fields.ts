@@ -13,7 +13,7 @@ const registerFields = (
 			labels: {
 				title: T("full_slug"),
 			},
-			translations: config.enableTranslations,
+			useTranslations: config.useTranslations,
 			hidden: !config.displayFullSlug,
 			disabled: true,
 			collection: {
@@ -25,7 +25,7 @@ const registerFields = (
 			labels: {
 				title: T("slug"),
 			},
-			translations: config.enableTranslations,
+			useTranslations: config.useTranslations,
 			hidden: false,
 			disabled: false,
 			validation: {

@@ -217,7 +217,7 @@ test("custom field config passes schema validation", async () => {
 				en: "placeholder",
 			},
 		},
-		translations: true,
+		useTranslations: true,
 		default: "2024-06-15T14:14:21.704Z",
 		hidden: false,
 		disabled: false,

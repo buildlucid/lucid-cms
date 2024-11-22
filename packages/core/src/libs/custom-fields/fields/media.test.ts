@@ -544,7 +544,7 @@ test("custom field config passes schema validation", async () => {
 				en: "description",
 			},
 		},
-		translations: true,
+		useTranslations: true,
 		hidden: false,
 		disabled: false,
 		validation: {

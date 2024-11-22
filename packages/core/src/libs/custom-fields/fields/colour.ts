@@ -27,7 +27,7 @@ class ColourCustomField extends CustomField<"colour"> {
 				description: this.props?.labels?.description,
 			},
 			presets: this.props?.presets ?? [],
-			translations: this.props?.translations ?? false,
+			useTranslations: this.props?.useTranslations ?? false,
 			default: this.props?.default ?? "",
 			hidden: this.props?.hidden,
 			disabled: this.props?.disabled,

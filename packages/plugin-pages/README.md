@@ -26,7 +26,7 @@ export default lucid.config({
       collections: [
         {
           collectionKey: "page",
-          enableTranslations: true,
+          useTranslations: true,
           displayFullSlug: true,
         },
       ],
@@ -42,7 +42,7 @@ This plugin provides a few configuration options to control how it behaves. Asid
 ```ts
 collections: Array<{
   collectionKey: string;
-  enableTranslations?: boolean;
+  useTranslations?: boolean;
   displayFullSlug?: boolean;
 }
 ```
@@ -51,7 +51,7 @@ collections: Array<{
 
 The `collectionKey` is the key of the collection that you wish to enable the plugin on.
 
-### enableTranslations (false by default)
+### useTranslations (false by default)
 
 If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields. This means that in the documents page builder, the `slug` and `fullSlug` fields will require translations for each locale that you have registered in your `lucid.config.ts` file.
 

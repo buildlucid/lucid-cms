@@ -33,7 +33,7 @@ class UserCustomField extends CustomField<"user"> {
 				title: this.props?.labels?.title ?? keyToTitle(this.key),
 				description: this.props?.labels?.description,
 			},
-			translations: this.props?.translations ?? false,
+			useTranslations: this.props?.useTranslations ?? false,
 			hidden: this.props?.hidden,
 			disabled: this.props?.disabled,
 			validation: this.props?.validation,

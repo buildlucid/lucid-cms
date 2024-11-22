@@ -12,7 +12,7 @@ const setFullSlug = (data: {
 		fullSlug: FieldSchemaType;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
-	if (data.collection.enableTranslations) {
+	if (data.collection.useTranslations) {
 		data.fields.fullSlug.translations = data.fullSlug;
 	} else {
 		data.fields.fullSlug.value = data.fullSlug[data.defaultLocale];

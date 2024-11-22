@@ -29,7 +29,7 @@ class SelectCustomField extends CustomField<"select"> {
 				description: this.props?.labels?.description,
 				placeholder: this.props?.labels?.placeholder,
 			},
-			translations: this.props?.translations ?? false,
+			useTranslations: this.props?.useTranslations ?? false,
 			default: this.props?.default ?? "",
 			options: this.props?.options ?? [],
 			hidden: this.props?.hidden,

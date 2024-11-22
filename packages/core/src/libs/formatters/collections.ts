@@ -122,7 +122,7 @@ export default class CollectionsFormatter {
 				type: "boolean",
 				nullable: true,
 			},
-			translations: {
+			useTranslations: {
 				type: "boolean",
 				nullable: true,
 			},

@@ -29,7 +29,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 				title: this.props?.labels?.title ?? keyToTitle(this.key),
 				description: this.props?.labels?.description,
 			},
-			translations: this.props?.translations ?? false,
+			useTranslations: this.props?.useTranslations ?? false,
 			default: this.props?.default ?? 0,
 			hidden: this.props?.hidden,
 			disabled: this.props?.disabled,
