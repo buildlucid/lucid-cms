@@ -85,12 +85,12 @@ export default lucid.config({
 			collections: [
 				{
 					collectionKey: "page",
-					enableTranslations: true,
-					displayFullSlug: true,
+					useTranslations: true,
+					displayFullSlug: false,
 				},
 				{
 					collectionKey: "test",
-					enableTranslations: true,
+					useTranslations: true,
 					displayFullSlug: true,
 				},
 			],
