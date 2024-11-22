@@ -24,7 +24,8 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();
 		},
-		getCollectionName: () => props.collection.singular || T()("collection"),
+		getCollectionName: () =>
+			props.collection.details.singularName || T()("collection"),
 	});
 
 	// ------------------------------
@@ -39,10 +40,10 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 			}}
 			copy={{
 				title: T()("delete_document_modal_title", {
-					name: props.collection.singular,
+					name: props.collection.details.singularName,
 				}),
 				description: T()("delete_document_modal_description", {
-					name: props.collection.singular.toLowerCase(),
+					name: props.collection.details.singularName.toLowerCase(),
 				}),
 				error: deleteDocument.errors()?.message,
 			}}

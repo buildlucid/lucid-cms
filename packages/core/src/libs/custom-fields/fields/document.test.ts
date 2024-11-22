@@ -13,9 +13,13 @@ const CONSTANTS = {
 // Validation
 const DocumentCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addDocument("standard_doc", {
 		collection: "page",

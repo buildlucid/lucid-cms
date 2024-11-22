@@ -20,7 +20,7 @@ const restoreRevision: ServiceFn<
 	);
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.config.useRevisions === false) {
+	if (collectionRes.data.getData.config.useRevisions === false) {
 		return {
 			error: {
 				type: "basic",
@@ -36,7 +36,9 @@ const restoreRevision: ServiceFn<
 		documentId: data.documentId,
 		collectionKey: data.collectionKey,
 		fromVersionId: data.versionId,
-		toVersionType: collectionRes.data.config.useDrafts ? "draft" : "published",
+		toVersionType: collectionRes.data.getData.config.useDrafts
+			? "draft"
+			: "published",
 		userId: data.userId,
 		skipRevisionCheck: true,
 	});

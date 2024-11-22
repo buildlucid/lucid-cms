@@ -26,7 +26,7 @@ const deleteMultiple: ServiceFn<
 		});
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.config.isLocked === true) {
+	if (collectionRes.data.getData.config.isLocked) {
 		return {
 			error: {
 				type: "basic",

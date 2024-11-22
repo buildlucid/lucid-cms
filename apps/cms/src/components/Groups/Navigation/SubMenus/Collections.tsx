@@ -52,7 +52,7 @@ export const CollectionSubMenu: Component<{
 								<For each={props.state.multiCollections}>
 									{(collection) => (
 										<Navigation.Link
-											title={collection.title}
+											title={collection.details.name}
 											href={`/admin/collections/${collection.key}`}
 											icon="page"
 											activeIfIncludes={`/admin/collections/${collection.key}`}
@@ -67,17 +67,17 @@ export const CollectionSubMenu: Component<{
 								<For each={props.state.singleCollections}>
 									{(collection) => (
 										<Navigation.Link
-											title={collection.title}
+											title={collection.details.name}
 											href={
 												collection.documentId
 													? getDocumentRoute("edit", {
 															collectionKey: collection.key,
-															useDrafts: collection.useDrafts,
+															useDrafts: collection.config.useDrafts,
 															documentId: collection.documentId,
 														})
 													: getDocumentRoute("create", {
 															collectionKey: collection.key,
-															useDrafts: collection.useDrafts,
+															useDrafts: collection.config.useDrafts,
 														})
 											}
 											activeIfIncludes={`/admin/collections/${collection.key}`}

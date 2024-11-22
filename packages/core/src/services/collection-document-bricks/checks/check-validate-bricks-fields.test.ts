@@ -31,9 +31,13 @@ const CONSTANTS = {
 test("validate brick along with brick field validation", async () => {
 	const Collection = new CollectionBuilder("collection", {
 		mode: "multiple",
-		title: "Test",
-		singular: "Test",
-		useTranslations: true,
+		details: {
+			name: "Test",
+			singularName: "Test",
+		},
+		config: {
+			useTranslations: true,
+		},
 	})
 		.addText("text_test")
 		.addWysiwyg("wysiwyg_test")

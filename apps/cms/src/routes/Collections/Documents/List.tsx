@@ -67,7 +67,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (collection.isSuccess) {
-			setStatus(collection.data.data.useDrafts ? "draft" : "published");
+			setStatus(collection.data.data.config.useDrafts ? "draft" : "published");
 			if (collection.data.data.mode === "single") {
 				navigate("/admin/collections");
 			}
@@ -103,7 +103,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							{
 								type: "warning",
 								message: T()("locked_collection_message"),
-								show: collection.data?.data.isLocked === true,
+								show: collection.data?.data.config.isLocked === true,
 							},
 						]}
 					/>
@@ -111,21 +111,22 @@ const CollectionsDocumentsListRoute: Component = () => {
 				header: (
 					<Headers.Standard
 						copy={{
-							title: collection.data?.data?.title,
-							description: collection.data?.data?.description || "",
+							title: collection.data?.data?.details.name,
+							description: collection.data?.data?.details.summary || "",
 						}}
 						actions={{
-							contentLocale: collection.data?.data.useTranslations ?? false,
+							contentLocale:
+								collection.data?.data.config.useTranslations ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey(),
-									useDrafts: collection.data?.data.useDrafts,
+									useDrafts: collection.data?.data.config.useDrafts,
 								}),
 								permission: userStore.get.hasPermission(["create_content"])
 									.some,
-								show: collection.data?.data.isLocked !== true,
+								show: collection.data?.data.config.isLocked !== true,
 								label: T()("create_dynamic", {
-									name: collection.data?.data.singular || "",
+									name: collection.data?.data.details.singularName || "",
 								}),
 							},
 						}}
@@ -177,7 +178,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 										}
 									})}
 									custom={
-										<Show when={collection.data?.data.useDrafts}>
+										<Show when={collection.data?.data.config.useDrafts}>
 											<Form.Switch
 												id="status"
 												value={getStatus() === "published"}

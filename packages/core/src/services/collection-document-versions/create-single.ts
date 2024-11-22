@@ -24,10 +24,9 @@ const createSingle: ServiceFn<
 		"collection-document-versions",
 		context.db,
 	);
-	const useRevisions = data.collection.config.useRevisions ?? false;
 	const versionType = data.publish ? "published" : "draft";
 
-	if (useRevisions) {
+	if (data.collection.getData.config.useRevisions) {
 		await VersionsRepo.updateSingle({
 			where: [
 				{

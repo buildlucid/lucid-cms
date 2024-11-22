@@ -89,7 +89,7 @@ export const DocumentsList: Component<{
 	// Mutations
 	const deleteMultiple = api.collections.document.useDeleteMultiple({
 		getCollectionName: () =>
-			props.state.collection?.singular || T()("collection"),
+			props.state.collection?.details.singularName || T()("collection"),
 	});
 
 	// ----------------------------------------
@@ -118,14 +118,16 @@ export const DocumentsList: Component<{
 			copy={{
 				noEntries: {
 					title: T()("no_documents", {
-						collectionMultiple: props.state.collection?.title,
+						collectionMultiple: props.state.collection?.details.name,
 					}),
 					description: T()("no_documents_description", {
-						collectionMultiple: props.state.collection?.title.toLowerCase(),
-						collectionSingle: props.state.collection?.singular.toLowerCase(),
+						collectionMultiple:
+							props.state.collection?.details.name.toLowerCase(),
+						collectionSingle:
+							props.state.collection?.details.singularName.toLowerCase(),
 					}),
 					button: T()("create_document", {
-						collectionSingle: props.state.collection?.singular,
+						collectionSingle: props.state.collection?.details.singularName,
 					}),
 				},
 			}}
@@ -137,7 +139,7 @@ export const DocumentsList: Component<{
 					navigate(
 						getDocumentRoute("create", {
 							collectionKey: collectionKey(),
-							useDrafts: props.state.collection?.useDrafts,
+							useDrafts: props.state.collection?.config.useDrafts,
 						}),
 					);
 				},
@@ -209,7 +211,7 @@ export const DocumentsList: Component<{
 											if (props.state.status() === "published") {
 												// use drafts are enabled, but there is no draft version for this document
 												if (
-													props.state.collection?.useDrafts &&
+													props.state.collection?.config.useDrafts &&
 													typeof doc().version?.draft?.id !== "number"
 												) {
 													// show promote to draft dialog
@@ -223,7 +225,7 @@ export const DocumentsList: Component<{
 											navigate(
 												getDocumentRoute("edit", {
 													collectionKey: props.state.collection?.key as string,
-													useDrafts: props.state.collection?.useDrafts,
+													useDrafts: props.state.collection?.config.useDrafts,
 													documentId: doc().id,
 													statusOverride: props.state.status(),
 												}),
@@ -243,7 +245,7 @@ export const DocumentsList: Component<{
 										permission: userStore.get.hasPermission(["publish_content"])
 											.all,
 										hide:
-											props.state.collection?.useDrafts !== true ||
+											props.state.collection?.config.useDrafts !== true ||
 											props.state.status() !== "draft",
 										actionExclude: true,
 									},
@@ -289,7 +291,7 @@ export const DocumentsList: Component<{
 						navigate(
 							getDocumentRoute("edit", {
 								collectionKey: props.state.collection?.key as string,
-								useDrafts: props.state.collection?.useDrafts,
+								useDrafts: props.state.collection?.config.useDrafts,
 								documentId: getDocumentId(),
 								statusOverride: "draft",
 							}),
@@ -312,7 +314,7 @@ export const DocumentsList: Component<{
 						navigate(
 							getDocumentRoute("edit", {
 								collectionKey: props.state.collection?.key as string,
-								useDrafts: props.state.collection?.useDrafts,
+								useDrafts: props.state.collection?.config.useDrafts,
 								documentId: getDocumentId(),
 								statusOverride: "published",
 							}),

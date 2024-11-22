@@ -26,13 +26,15 @@ export interface CollectionConfigSchemaType
 export type CollectionData = {
 	key: string;
 	mode: CollectionConfigSchemaType["mode"];
-	title: CollectionConfigSchemaType["title"];
-	singular: CollectionConfigSchemaType["singular"];
-	description: string | null;
-	isLocked: boolean;
-	useDrafts: boolean;
-	useRevisions: boolean;
+	details: {
+		name: string;
+		singularName: string;
+		summary: string | null;
+	};
 	config: {
+		isLocked: boolean;
+		useDrafts: boolean;
+		useRevisions: boolean;
 		useTranslations: boolean;
 		fields: {
 			filter: FieldFilters;

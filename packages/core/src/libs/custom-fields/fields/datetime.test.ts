@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const DateTimeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addDateTime("standard_datetime")
 	.addDateTime("required_datetime", {

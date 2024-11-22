@@ -18,14 +18,12 @@ import CollectionsListRoute from "@/routes/Collections/List";
 import CollectionsDocumentsListRoute from "./routes/Collections/Documents/List";
 import CollectionsDocumentsEditRoute from "./routes/Collections/Documents/Edit";
 import CollectionsDocumentsRevisionsRoute from "./routes/Collections/Documents/Revisions";
-import TestRoute from "./routes/Test";
 
 const AppRouter: Component = () => {
 	return (
 		<Router>
 			{/* Authenticated */}
 			<Route path="/admin" component={MainLayout}>
-				<Route path="/test" component={TestRoute} />
 				<Route path="/" component={DashboardRoute} />
 				<Route path="/account" component={AccountRoute} />
 				{/* Collections */}

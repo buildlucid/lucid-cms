@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const WysiwygCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addWysiwyg("standard_wysiwyg")
 	.addWysiwyg("required_wysiwyg", {

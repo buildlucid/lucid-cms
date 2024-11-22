@@ -17,7 +17,7 @@ const getAll: ServiceFn<
 
 	if (data.includeDocumentId === true) {
 		const singleCollections = collections.filter(
-			(collection) => collection.data.mode === "single",
+			(collection) => collection.getData.mode === "single",
 		);
 
 		const CollectionDocumentsRepo = Repository.get(

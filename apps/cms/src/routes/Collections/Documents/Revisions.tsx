@@ -110,11 +110,11 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		return (
 			contentLocale() !== undefined &&
 			documentId() !== undefined &&
-			collection.data?.data.useDrafts !== undefined
+			collection.data?.data.config.useDrafts !== undefined
 		);
 	});
 	const fallbackVersionType = createMemo(() => {
-		return collection.data?.data.useDrafts ? "draft" : "published";
+		return collection.data?.data.config.useDrafts ? "draft" : "published";
 	});
 
 	const fallbackDoc = api.collections.document.useGetSingle({
@@ -142,7 +142,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: collectionKey(),
-					useDrafts: collection.data?.data.useDrafts,
+					useDrafts: collection.data?.data.config.useDrafts,
 					documentId: documentId(),
 				}),
 			);
@@ -152,7 +152,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: () =>
-			collection.data?.data.singular || T()("collection"),
+			collection.data?.data.details.singularName || T()("collection"),
 	});
 
 	// ----------------------------------
@@ -194,7 +194,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		brickStore.get.reset();
 		brickStore.set(
 			"collectionTranslations",
-			collection.data?.data.useTranslations || false,
+			collection.data?.data.config.useTranslations || false,
 		);
 		brickStore.get.setBricks(doc().data?.data, collection.data?.data);
 		brickStore.set("locked", true);
@@ -274,7 +274,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 								<Link
 									href={getDocumentRoute("edit", {
 										collectionKey: collectionKey(),
-										useDrafts: collection.data?.data.useDrafts,
+										useDrafts: collection.data?.data.config.useDrafts,
 										documentId: documentId(),
 									})}
 									theme="primary"

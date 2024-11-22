@@ -70,7 +70,8 @@ class DocumentCustomField extends CustomField<"document"> {
 				},
 				{
 					builder: CollectionBuilder,
-					collectionTranslations: CollectionBuilder.data.config.useTranslations,
+					collectionTranslations:
+						CollectionBuilder.getData.config.useTranslations,
 					localisation: props.formatMeta.localisation,
 					collections: props.formatMeta.collections,
 					host: props.formatMeta.host,

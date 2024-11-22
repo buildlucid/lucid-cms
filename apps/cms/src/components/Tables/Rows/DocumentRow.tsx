@@ -36,7 +36,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 	// Memos
 	const isPublished = createMemo(() => {
 		if (props.document.status === "published") return true;
-		if (props.collection.useDrafts) {
+		if (props.collection.config.useDrafts) {
 			return typeof props.document.version?.published?.id === "number";
 		}
 		return true; // if not using drafts and a row exists, it is published
@@ -65,7 +65,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							document={props.document}
 							include={props.include}
 							index={i()}
-							collectionTranslations={props.collection.useTranslations}
+							collectionTranslations={props.collection.config.useTranslations}
 						/>
 					);
 				}}

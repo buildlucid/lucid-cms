@@ -113,7 +113,7 @@ const DocumentSelectContent: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (collection.isSuccess) {
-			setStatus(collection.data.data.useDrafts ? "draft" : "published");
+			setStatus(collection.data.data.config.useDrafts ? "draft" : "published");
 			const filterConfig: FilterSchema = {};
 			for (const field of getCollectionFieldFilters()) {
 				switch (field.type) {
@@ -186,7 +186,7 @@ const DocumentSelectContent: Component = () => {
 							})}
 							searchParams={searchParams}
 						/>
-						<Show when={collection.data?.data.useDrafts}>
+						<Show when={collection.data?.data.config.useDrafts}>
 							<Form.Switch
 								id="status"
 								value={getStatus() === "published"}
@@ -223,14 +223,16 @@ const DocumentSelectContent: Component = () => {
 					copy={{
 						noEntries: {
 							title: T()("no_documents", {
-								collectionMultiple: collection.data?.data.title,
+								collectionMultiple: collection.data?.data.details.name,
 							}),
 							description: T()("no_documents_description_doc_select", {
-								collectionMultiple: collection.data?.data?.title.toLowerCase(),
-								collectionSingle: collection.data?.data?.singular.toLowerCase(),
+								collectionMultiple:
+									collection.data?.data?.details.name.toLowerCase(),
+								collectionSingle:
+									collection.data?.data?.details.singularName.toLowerCase(),
 							}),
 							button: T()("create_document", {
-								collectionSingle: collection.data?.data?.singular,
+								collectionSingle: collection.data?.data?.details.singularName,
 							}),
 						},
 					}}

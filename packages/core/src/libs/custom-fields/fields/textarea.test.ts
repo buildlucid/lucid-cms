@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const TextareaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addTextarea("standard_textarea")
 	.addTextarea("required_textarea", {

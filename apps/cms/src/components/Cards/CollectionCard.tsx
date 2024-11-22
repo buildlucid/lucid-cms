@@ -4,10 +4,6 @@ import { A } from "@solidjs/router";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { FaSolidBox, FaSolidBoxesStacked } from "solid-icons/fa";
 
-interface CollectionCardProps {
-	collection: CollectionResponse;
-}
-
 export const CollectionCardLoading: Component = () => {
 	// ----------------------------------
 	// Return
@@ -19,7 +15,9 @@ export const CollectionCardLoading: Component = () => {
 	);
 };
 
-const CollectionCard: Component<CollectionCardProps> = (props) => {
+const CollectionCard: Component<{
+	collection: CollectionResponse;
+}> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const collectionLink = createMemo(() => {
@@ -27,12 +25,12 @@ const CollectionCard: Component<CollectionCardProps> = (props) => {
 			if (props.collection.documentId)
 				return getDocumentRoute("edit", {
 					collectionKey: props.collection.key,
-					useDrafts: props.collection.useDrafts,
+					useDrafts: props.collection.config.useDrafts,
 					documentId: props.collection.documentId,
 				});
 			return getDocumentRoute("create", {
 				collectionKey: props.collection.key,
-				useDrafts: props.collection.useDrafts,
+				useDrafts: props.collection.config.useDrafts,
 			});
 		}
 		return `/admin/collections/${props.collection.key}`;
@@ -53,12 +51,12 @@ const CollectionCard: Component<CollectionCardProps> = (props) => {
 					<Show when={props.collection.mode === "multiple"}>
 						<FaSolidBoxesStacked class="text-base text-primary-base" />
 					</Show>
-					<h3 class="text-base">{props.collection.title}</h3>
+					<h3 class="text-base">{props.collection.details.name}</h3>
 				</div>
 
-				{props.collection.description && (
+				{props.collection.details.summary && (
 					<p class="line-clamp-2 text-sm mt-1.5">
-						{props.collection.description}
+						{props.collection.details.summary}
 					</p>
 				)}
 			</A>

@@ -6,12 +6,16 @@ import SEOBrick from "../bricks/seo.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
-	title: "Pages",
-	singular: "Page",
-	description: "Manage the pages and content on your website.",
-	useTranslations: true,
-	useDrafts: true,
-	useRevisions: true,
+	details: {
+		name: "Pages",
+		singularName: "Page",
+		summary: "Manage the pages and content on your website.",
+	},
+	config: {
+		useTranslations: true,
+		useDrafts: true,
+		useRevisions: true,
+	},
 	hooks: [
 		{
 			event: "beforeUpsert",

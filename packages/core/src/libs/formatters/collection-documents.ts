@@ -89,7 +89,7 @@ export default class CollectionDocumentsFormatter {
 						host: props.config.host,
 						builder: props.collection,
 						collectionTranslations:
-							props.collection.data.config.useTranslations,
+							props.collection.getData.config.useTranslations,
 						localisation: {
 							locales: props.config.localisation.locales.map((l) => l.code),
 							default: props.config.localisation.defaultLocale,
@@ -108,7 +108,7 @@ export default class CollectionDocumentsFormatter {
 						host: props.config.host,
 						builder: props.collection,
 						collectionTranslations:
-							props.collection.data.config.useTranslations,
+							props.collection.getData.config.useTranslations,
 						localisation: {
 							locales: props.config.localisation.locales.map((l) => l.code),
 							default: props.config.localisation.defaultLocale,

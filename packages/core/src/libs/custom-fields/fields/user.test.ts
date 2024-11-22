@@ -13,9 +13,13 @@ const CONSTANTS = {
 // Validation
 const UserCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addUser("standard_user")
 	.addUser("required_user", {

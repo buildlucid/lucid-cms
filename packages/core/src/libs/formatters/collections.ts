@@ -34,22 +34,28 @@ export default class CollectionsFormatter {
 			collection_key: string;
 		}>;
 	}): CollectionResponse => {
-		const collectionData = props.collection.data;
+		const collectionData = props.collection.getData;
 		const key = props.collection.key;
 
 		return {
 			key: key,
 			mode: collectionData.mode,
-			title: collectionData.title,
-			singular: collectionData.singular,
-			description: collectionData.description ?? null,
 			documentId: props.include?.document_id
 				? this.getDocumentId(key, props.documents)
 				: undefined,
-			useTranslations: collectionData.config.useTranslations ?? false,
-			useDrafts: props.collection.config.useDrafts ?? false,
-			useRevisions: props.collection.config.useRevisions ?? false,
-			isLocked: props.collection.config.isLocked ?? false,
+			details: {
+				name: collectionData.details.name,
+				singularName: collectionData.details.singularName,
+				summary: collectionData.details.summary,
+			},
+			config: {
+				useTranslations: collectionData.config.useTranslations,
+				useDrafts: collectionData.config.useDrafts,
+				useRevisions: collectionData.config.useRevisions,
+				isLocked: collectionData.config.isLocked,
+				fieldIncludes: props.collection.includeFieldKeys,
+				fieldFilters: props.collection.filterableFieldKeys.map((f) => f.key),
+			},
 			fixedBricks: props.include?.bricks
 				? props.collection.fixedBricks ?? []
 				: [],
@@ -57,8 +63,6 @@ export default class CollectionsFormatter {
 				? props.collection.builderBricks ?? []
 				: [],
 			fields: props.include?.fields ? props.collection.fieldTree ?? [] : [],
-			fieldIncludes: props.collection.includeFieldKeys,
-			fieldFilters: props.collection.filterableFieldKeys.map((f) => f.key),
 		};
 	};
 	private getDocumentId = (
@@ -167,26 +171,48 @@ export default class CollectionsFormatter {
 		properties: {
 			key: { type: "string", example: "pages" },
 			mode: { type: "string", example: "single" },
-			title: { type: "string", example: "Pages" },
-			singular: { type: "string", example: "Page" },
-			description: {
-				type: "string",
-				example: "A collection of pages",
-				nullable: true,
-			},
 			documentId: { type: "number", example: 1, nullable: true },
-			useTranslations: { type: "boolean", example: false },
-			useDrafts: {
-				type: "boolean",
-				nullable: true,
+			details: {
+				type: "object",
+				properties: {
+					name: { type: "string", example: "Pages" },
+					singularName: { type: "string", example: "Page" },
+					summary: {
+						type: "string",
+						example: "A collection of pages",
+						nullable: true,
+					},
+				},
 			},
-			useRevisions: {
-				type: "boolean",
-				nullable: true,
-			},
-			isLocked: {
-				type: "boolean",
-				nullable: true,
+			config: {
+				type: "object",
+				properties: {
+					useTranslations: { type: "boolean", example: false },
+					useDrafts: {
+						type: "boolean",
+						nullable: true,
+					},
+					useRevisions: {
+						type: "boolean",
+						nullable: true,
+					},
+					isLocked: {
+						type: "boolean",
+						nullable: true,
+					},
+					fieldIncludes: {
+						type: "array",
+						items: {
+							type: "string",
+						},
+					},
+					fieldFilters: {
+						type: "array",
+						items: {
+							type: "string",
+						},
+					},
+				},
 			},
 			fixedBricks: {
 				type: "array",
@@ -199,18 +225,6 @@ export default class CollectionsFormatter {
 			fields: {
 				type: "array",
 				items: this.swaggerFieldsConfig,
-			},
-			fieldIncludes: {
-				type: "array",
-				items: {
-					type: "string",
-				},
-			},
-			fieldFilters: {
-				type: "array",
-				items: {
-					type: "string",
-				},
 			},
 		},
 	};

@@ -98,7 +98,7 @@ const CollectionsDocumentsEditRoute: Component<
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: collectionKey(),
-					useDrafts: collection.data?.data.useDrafts,
+					useDrafts: collection.data?.data.config.useDrafts,
 					documentId: data.data.id,
 				}),
 			);
@@ -114,7 +114,7 @@ const CollectionsDocumentsEditRoute: Component<
 			);
 		},
 		getCollectionName: () =>
-			collection.data?.data.singular || T()("collection"),
+			collection.data?.data.details.singularName || T()("collection"),
 	});
 	const updateSingle = api.collections.document.useUpdateSingle({
 		onSuccess: () => {
@@ -129,7 +129,7 @@ const CollectionsDocumentsEditRoute: Component<
 			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: () =>
-			collection.data?.data.singular || T()("collection"),
+			collection.data?.data.details.singularName || T()("collection"),
 	});
 	const promoteToPublished = api.collections.document.usePromoteSingle({
 		onSuccess: () => {
@@ -144,7 +144,7 @@ const CollectionsDocumentsEditRoute: Component<
 			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: () =>
-			collection.data?.data.singular || T()("collection"),
+			collection.data?.data.details.singularName || T()("collection"),
 		getVersionType: () => "published",
 	});
 
@@ -191,14 +191,14 @@ const CollectionsDocumentsEditRoute: Component<
 	});
 	const isBuilderLocked = createMemo(() => {
 		// lock builder if collection is locked
-		if (collection.data?.data.isLocked === true) {
+		if (collection.data?.data.config.isLocked === true) {
 			return true;
 		}
 
 		// lock published version, if in edit mode and the collection supports drafts
 		if (props.version === "published") {
 			if (props.mode === "edit") {
-				return collection.data?.data.useDrafts ?? false;
+				return collection.data?.data.config.useDrafts ?? false;
 			}
 		}
 
@@ -253,7 +253,7 @@ const CollectionsDocumentsEditRoute: Component<
 		brickStore.get.reset();
 		brickStore.set(
 			"collectionTranslations",
-			collection.data?.data.useTranslations || false,
+			collection.data?.data.config.useTranslations || false,
 		);
 		brickStore.get.setBricks(doc.data?.data, collection.data?.data);
 		brickStore.set("locked", isBuilderLocked());
@@ -352,7 +352,7 @@ const CollectionsDocumentsEditRoute: Component<
 										items={[
 											{
 												label: T()("collection"),
-												value: collection.data?.data.title,
+												value: collection.data?.data.details.name,
 											},
 											{
 												label: T()("document_id"),

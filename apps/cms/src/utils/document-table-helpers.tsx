@@ -3,7 +3,7 @@ import type {
 	FieldTypes,
 	CollectionResponse,
 } from "@lucidcms/core/types";
-import { FaSolidT, FaSolidCalendar, FaSolidUser } from "solid-icons/fa";
+import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import helpers from "@/utils/helpers";
 
 export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
@@ -42,7 +42,7 @@ export const collectionFieldFilters = (collection?: CollectionResponse) => {
 				fieldRecursive(field.fields);
 				return;
 			}
-			if (collection?.fieldFilters.includes(field.key)) {
+			if (collection?.config.fieldFilters.includes(field.key)) {
 				fieldsRes.push(field);
 			}
 		}
@@ -62,7 +62,7 @@ export const collectionFieldIncludes = (collection?: CollectionResponse) => {
 				fieldRecursive(field.fields);
 				return;
 			}
-			if (collection?.fieldIncludes.includes(field.key)) {
+			if (collection?.config.fieldIncludes.includes(field.key)) {
 				fieldsRes.push(field);
 			}
 		}

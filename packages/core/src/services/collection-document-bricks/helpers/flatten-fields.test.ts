@@ -4,9 +4,13 @@ import CollectionBuilder from "../../../libs/builders/collection-builder/index.j
 
 const pagesCollection = new CollectionBuilder("pages", {
 	mode: "multiple",
-	title: "Pages",
-	singular: "Page",
-	useTranslations: true,
+	details: {
+		name: "Pages",
+		singularName: "Page",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addText("page_title")
 	.addRepeater("call_to_actions")

@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const TextCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addText("standard_text")
 	.addText("required_text", {

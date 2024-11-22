@@ -13,9 +13,13 @@ const CONSTANTS = {
 // Validation
 const CheckboxCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Pages",
+		singularName: "Page",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addCheckbox("standard_checkbox")
 	.addCheckbox("required_chekbox", {

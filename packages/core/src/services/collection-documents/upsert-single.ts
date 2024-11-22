@@ -35,7 +35,7 @@ const upsertSingle: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	// Check collection is locked
-	if (collectionRes.data.config.isLocked === true) {
+	if (collectionRes.data.getData.config.isLocked) {
 		return {
 			error: {
 				type: "basic",
@@ -83,7 +83,7 @@ const upsertSingle: ServiceFn<
 			context,
 			{
 				collectionKey: data.collectionKey,
-				collectionMode: collectionRes.data.data.mode,
+				collectionMode: collectionRes.data.getData.mode,
 				documentId: data.documentId,
 			},
 		);

@@ -13,9 +13,13 @@ const CONSTANTS = {
 // Validation
 const ColourCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addColour("standard_colour")
 	.addColour("required_colour", {

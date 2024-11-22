@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const NumberCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addNumber("standard_number")
 	.addNumber("required_number", {

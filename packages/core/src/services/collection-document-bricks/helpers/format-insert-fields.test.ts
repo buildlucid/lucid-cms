@@ -21,9 +21,13 @@ const Brick = new BrickBuilder("brick")
 
 const Collection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Pages",
-	singular: "Page",
-	useTranslations: true,
+	details: {
+		name: "Pages",
+		singularName: "Page",
+	},
+	config: {
+		useTranslations: true,
+	},
 	bricks: {
 		builder: [Brick],
 	},

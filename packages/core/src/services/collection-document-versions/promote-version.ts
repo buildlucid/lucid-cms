@@ -95,7 +95,7 @@ const promoteVersion: ServiceFn<
 		};
 	}
 	if (
-		collectionRes.data.config.useDrafts !== true &&
+		collectionRes.data.getData.config.useDrafts !== true &&
 		data.toVersionType === "draft"
 	) {
 		return {
@@ -107,7 +107,7 @@ const promoteVersion: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (collectionRes.data.config.isLocked === true) {
+	if (collectionRes.data.getData.config.isLocked === true) {
 		return {
 			error: {
 				type: "basic",
@@ -121,10 +121,8 @@ const promoteVersion: ServiceFn<
 
 	//-------------------------------------------------------------------------------
 	// Mutate/create revisions and update the document
-	const useRevisions = collectionRes.data.config.useRevisions ?? false;
-
 	const [, document, version] = await Promise.all([
-		useRevisions
+		collectionRes.data.getData.config.useRevisions
 			? VersionsRepo.updateSingle({
 					where: [
 						{

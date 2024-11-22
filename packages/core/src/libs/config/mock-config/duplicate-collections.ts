@@ -18,13 +18,17 @@ export default lucid.config({
 	collections: [
 		new CollectionBuilder("page", {
 			mode: "multiple",
-			title: "Pages",
-			singular: "Page",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
 		}),
 		new CollectionBuilder("page", {
 			mode: "multiple",
-			title: "Pages",
-			singular: "Page",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
 		}),
 	],
 	plugins: [],

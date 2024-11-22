@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const LinkCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addLink("standard_link")
 	.addLink("required_link", {

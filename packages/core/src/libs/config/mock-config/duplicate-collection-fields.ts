@@ -6,8 +6,10 @@ import testingConstants from "../../../constants/testing-constants.js";
 
 const collection = new CollectionBuilder("page", {
 	mode: "multiple",
-	title: "Pages",
-	singular: "Page",
+	details: {
+		name: "Pages",
+		singularName: "Page",
+	},
 })
 	.addText("title")
 	.addText("title");

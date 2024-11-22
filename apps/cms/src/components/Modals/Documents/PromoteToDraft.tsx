@@ -23,7 +23,8 @@ const PromoteToDraft: Component<{
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();
 		},
-		getCollectionName: () => props.collection.singular || T()("collection"),
+		getCollectionName: () =>
+			props.collection.details.singularName || T()("collection"),
 		getVersionType: () => "draft",
 	});
 

@@ -1,14 +1,27 @@
 import z from "zod";
+import C from "../../../constants/constants.js";
 
 const CollectionConfigSchema = z.object({
 	mode: z.enum(["single", "multiple"]),
-	title: z.string(),
-	singular: z.string(),
-	description: z.string().optional(),
-	isLocked: z.boolean().default(false).optional(),
-	useTranslations: z.boolean().default(false).optional(),
-	useDrafts: z.boolean().default(false).optional(),
-	useRevisions: z.boolean().default(false).optional(),
+	details: z.object({
+		name: z.string(),
+		singularName: z.string(),
+		summary: z.string().optional(),
+	}),
+	config: z
+		.object({
+			isLocked: z.boolean().default(C.collectionBuilder.isLocked).optional(),
+			useTranslations: z
+				.boolean()
+				.default(C.collectionBuilder.useTranslations)
+				.optional(),
+			useDrafts: z.boolean().default(C.collectionBuilder.useDrafts).optional(),
+			useRevisions: z
+				.boolean()
+				.default(C.collectionBuilder.useRevisions)
+				.optional(),
+		})
+		.optional(),
 	hooks: z
 		.array(
 			z.object({

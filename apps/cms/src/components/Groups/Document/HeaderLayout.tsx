@@ -80,7 +80,7 @@ export const HeaderLayout: Component<{
 		if (props.state.version === "draft") return true;
 		if (
 			props.state.version === "published" &&
-			props.state.collection?.useDrafts === false
+			props.state.collection?.config.useDrafts === false
 		)
 			return true;
 		return false;
@@ -99,10 +99,10 @@ export const HeaderLayout: Component<{
 	});
 	const showRevisions = createMemo(() => {
 		if (props.state.mode === "create") return false;
-		return props.state.collection?.useRevisions ?? false;
+		return props.state.collection?.config.useRevisions ?? false;
 	});
 	const isPublished = createMemo(() => {
-		if (props.state.collection?.useDrafts) {
+		if (props.state.collection?.config.useDrafts) {
 			return props.state.isPublished?.();
 		}
 		if (props.state.mode === "revisions") return true;
@@ -188,7 +188,7 @@ export const HeaderLayout: Component<{
 						breadcrumbs={[
 							{
 								link: `/admin/collections/${props.state.collectionKey()}`,
-								label: props.state.collection?.title || "",
+								label: props.state.collection?.details.name || "",
 								include: props.state.collection?.mode === "multiple",
 							},
 							{
@@ -196,17 +196,17 @@ export const HeaderLayout: Component<{
 									props.state.mode === "create"
 										? getDocumentRoute("create", {
 												collectionKey: props.state.collectionKey(),
-												useDrafts: props.state.collection?.useDrafts,
+												useDrafts: props.state.collection?.config.useDrafts,
 											})
 										: getDocumentRoute("edit", {
 												collectionKey: props.state.collectionKey(),
-												useDrafts: props.state.collection?.useDrafts,
+												useDrafts: props.state.collection?.config.useDrafts,
 												documentId: props.state.documentId(),
 											}),
 								label:
 									props.state.mode === "create"
-										? `${T()("create")} ${props.state.collection?.singular || T()("document")}`
-										: `${T()("edit")} ${props.state.collection?.singular || T()("document")} (#${props.state.documentId()})`,
+										? `${T()("create")} ${props.state.collection?.details.singularName || T()("document")}`
+										: `${T()("edit")} ${props.state.collection?.details.singularName || T()("document")} (#${props.state.documentId()})`,
 							},
 						]}
 						options={{
@@ -226,13 +226,13 @@ export const HeaderLayout: Component<{
 						},
 					)}
 				>
-					<Show when={props.state.collection?.useDrafts}>
+					<Show when={props.state.collection?.config.useDrafts}>
 						<A
 							href={
 								props.state.mode !== "create"
 									? getDocumentRoute("edit", {
 											collectionKey: props.state.collectionKey(),
-											useDrafts: props.state.collection?.useDrafts,
+											useDrafts: props.state.collection?.config.useDrafts,
 											documentId: props.state.documentId(),
 										})
 									: "#"
@@ -304,14 +304,14 @@ export const HeaderLayout: Component<{
 					)}
 				>
 					<div class="w-full relative">
-						<Show when={props.state.collection?.useTranslations}>
+						<Show when={props.state.collection?.config.useTranslations}>
 							<ContentLocaleSelect
 								hasError={props.state.brickTranslationErrors?.()}
 							/>
 						</Show>
 						<Show
 							when={
-								props.state.collection?.useTranslations !== true &&
+								props.state.collection?.config.useTranslations !== true &&
 								defaultLocale()
 							}
 						>

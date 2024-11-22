@@ -4,10 +4,14 @@ import CollectionBuilder from "./index.js";
 test("collection config is correct along with field includes and filters", async () => {
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
-		title: "Pages",
-		singular: "Page",
-		description: "Pages are used to create static content on your website.",
-		useTranslations: true,
+		details: {
+			name: "Pages",
+			singularName: "Page",
+			summary: "Pages are used to create static content on your website.",
+		},
+		config: {
+			useTranslations: true,
+		},
 		hooks: [
 			{
 				event: "beforeUpsert",
@@ -104,16 +108,18 @@ test("collection config is correct along with field includes and filters", async
 
 	expect(pagesCollection.fields.size).toBe(14);
 
-	expect(pagesCollection.data).toEqual({
+	expect(pagesCollection.getData).toEqual({
 		key: "pages",
 		mode: "multiple",
-		title: "Pages",
-		singular: "Page",
-		description: "Pages are used to create static content on your website.",
-		isLocked: false,
-		useDrafts: false,
-		useRevisions: false,
+		details: {
+			name: "Pages",
+			singularName: "Page",
+			summary: "Pages are used to create static content on your website.",
+		},
 		config: {
+			isLocked: false,
+			useDrafts: false,
+			useRevisions: false,
 			useTranslations: true,
 			fields: {
 				filter: [

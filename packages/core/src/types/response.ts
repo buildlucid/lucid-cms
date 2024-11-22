@@ -1,5 +1,8 @@
 import type { BooleanInt, DocumentVersionType } from "../libs/db/types.js";
-import type { CollectionBrickConfig } from "../libs/builders/collection-builder/types.js";
+import type {
+	CollectionBrickConfig,
+	CollectionConfigSchemaType,
+} from "../libs/builders/collection-builder/types.js";
 import type { ErrorResult } from "./errors.js";
 import type {
 	CFConfig,
@@ -153,20 +156,24 @@ export interface EmailResponse {
 
 export interface CollectionResponse {
 	key: string;
-	mode: "single" | "multiple";
-	title: string;
-	singular: string;
-	description: string | null;
 	documentId?: number | null;
-	useTranslations: boolean;
-	useDrafts: boolean;
-	useRevisions: boolean;
-	isLocked: boolean;
+	mode: CollectionConfigSchemaType["mode"];
+	details: {
+		name: string;
+		singularName: string;
+		summary: string | null;
+	};
+	config: {
+		useTranslations: boolean;
+		useDrafts: boolean;
+		useRevisions: boolean;
+		isLocked: boolean;
+		fieldIncludes: string[];
+		fieldFilters: string[];
+	};
 	fixedBricks: Array<CollectionBrickConfig>;
 	builderBricks: Array<CollectionBrickConfig>;
 	fields: CFConfig<FieldTypes>[];
-	fieldIncludes: string[];
-	fieldFilters: string[];
 }
 
 export interface BrickResponse {

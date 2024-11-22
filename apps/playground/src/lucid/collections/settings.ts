@@ -4,10 +4,14 @@ import SEOBrick from "../bricks/seo.js";
 
 const SettingsCollection = new CollectionBuilder("settings", {
 	mode: "single",
-	title: "Settings",
-	singular: "Setting",
-	description: "Set shared settings for your website.",
-	useRevisions: true,
+	details: {
+		name: "Settings",
+		singularName: "Setting",
+		summary: "Set shared settings for your website.",
+	},
+	config: {
+		useRevisions: true,
+	},
 	bricks: {
 		fixed: [SEOBrick],
 	},

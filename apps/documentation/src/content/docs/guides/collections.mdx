@@ -14,10 +14,14 @@ import SEO from "./bricks/seo.js";
 
 export const PageCollection = new CollectionBuilder("page", {
   mode: "multiple",
-  title: "Pages",
-  singular: "Page",
-  description: "Pages are used to create static content on your website.",
-  useTranslations: true,
+  details: {
+    name: "Pages",
+    singularName: "Page",
+    summary: "Pages are used to create static content on your website.",
+  },
+  config: {
+    useTranslations: true,
+  },
   hooks: [
     {
       event: "beforeUpsert",
@@ -64,10 +68,14 @@ export const PageCollection = new CollectionBuilder("page", {
 
 export const SettingsCollection = new CollectionBuilder("settings", {
   mode: "single",
-  title: "Settings",
-  singular: "Setting",
-  description: "Set shared settings for your website.",
-  useTranslations: false,
+  details: {
+    name: "Settings",
+    singularName: "Setting",
+    summary: "Set shared settings for your website.",
+  },
+  config: {
+    useTranslations: false,
+  },
   bricks: {
     fixed: [],
     builder: [],

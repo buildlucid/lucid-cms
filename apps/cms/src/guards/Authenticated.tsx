@@ -1,5 +1,4 @@
-import { type Component, Switch, Match, type JSXElement } from "solid-js";
-import { Navigate } from "@solidjs/router";
+import type { Component, JSXElement } from "solid-js";
 
 interface AuthenticatedProps {
 	requiredState?: boolean;

@@ -38,7 +38,7 @@ const lucidConfig = async (config: LucidConfig) => {
 		// collection checks
 		checks.checkDuplicateBuilderKeys(
 			"collections",
-			configRes.collections.map((c) => c.data.key),
+			configRes.collections.map((c) => c.getData.key),
 		);
 
 		for (const collection of configRes.collections) {

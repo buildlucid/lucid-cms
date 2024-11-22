@@ -6,7 +6,7 @@ const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 	switch (field.type) {
 		case "document": {
 			const allMultipleCollections = config.collections
-				.filter((collection) => collection.data.mode === "multiple")
+				.filter((collection) => collection.getData.mode === "multiple")
 				.map((collection) => collection.key);
 
 			if (!allMultipleCollections.includes(field.collection)) {

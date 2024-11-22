@@ -46,6 +46,12 @@ export default {
 	fieldBuiler: {
 		maxRepeaterDepth: 3,
 	},
+	collectionBuilder: {
+		isLocked: false,
+		useDrafts: false,
+		useRevisions: false,
+		useTranslations: false,
+	},
 	customFields: {
 		link: {
 			targets: ["_self", "_blank", "_parent", "_top", "framename"],

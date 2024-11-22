@@ -77,7 +77,7 @@ export default class CollectionDocumentBricksFormatter {
 								default: props.config.localisation.defaultLocale,
 							},
 							collectionTranslations:
-								props.collection.data.config.useTranslations,
+								props.collection.getData.config.useTranslations,
 							collections: props.config.collections,
 						},
 					),
@@ -109,7 +109,7 @@ export default class CollectionDocumentBricksFormatter {
 						host: props.config.host,
 						builder: props.collection,
 						collectionTranslations:
-							props.collection.data.config.useTranslations,
+							props.collection.getData.config.useTranslations,
 						localisation: {
 							locales: props.config.localisation.locales.map((l) => l.code),
 							default: props.config.localisation.defaultLocale,

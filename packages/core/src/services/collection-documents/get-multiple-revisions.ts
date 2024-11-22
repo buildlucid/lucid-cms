@@ -29,7 +29,7 @@ const getMultipleRevisions: ServiceFn<
 	);
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.config.useRevisions === false) {
+	if (collectionRes.data.getData.config.useRevisions === false) {
 		return {
 			error: {
 				type: "basic",

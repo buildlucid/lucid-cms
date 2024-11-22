@@ -55,13 +55,13 @@ export const NavigationSidebar: Component = () => {
 			if (collection.documentId) {
 				return getDocumentRoute("edit", {
 					collectionKey: collection.key,
-					useDrafts: collection.useDrafts,
+					useDrafts: collection.config.useDrafts,
 					documentId: collection.documentId,
 				});
 			}
 			return getDocumentRoute("create", {
 				collectionKey: collection.key,
-				useDrafts: collection.useDrafts,
+				useDrafts: collection.config.useDrafts,
 			});
 		}
 		return "/admin/collections";

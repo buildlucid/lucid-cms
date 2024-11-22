@@ -14,9 +14,13 @@ const CONSTANTS = {
 // Validation
 const JSONCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
-	title: "Test",
-	singular: "Test",
-	useTranslations: true,
+	details: {
+		name: "Test",
+		singularName: "Test",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addJSON("standard_json")
 	.addJSON("required_json", {

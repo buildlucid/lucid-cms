@@ -15,7 +15,6 @@ import { DropdownMenu } from "@kobalte/core";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import Form from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
-import classNames from "classnames";
 
 interface FilterItemProps {
 	filter: {

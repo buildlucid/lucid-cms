@@ -1,3 +1,4 @@
+import C from "../../../constants/constants.js";
 import FieldBuilder from "../field-builder/index.js";
 import type BrickBuilder from "../brick-builder/index.js";
 import type { FieldTypes, CFProps } from "../../custom-fields/types.js";
@@ -175,18 +176,24 @@ class CollectionBuilder extends FieldBuilder {
 
 	// ------------------------------------
 	// Getters
-	get data(): CollectionData {
+	get getData(): CollectionData {
 		return {
 			key: this.key,
 			mode: this.config.mode,
-			title: this.config.title,
-			singular: this.config.singular,
-			description: this.config.description ?? null,
-			isLocked: this.config.isLocked ?? false,
-			useDrafts: this.config.useDrafts ?? false,
-			useRevisions: this.config.useRevisions ?? false,
+			details: {
+				name: this.config.details.name,
+				singularName: this.config.details.singularName,
+				summary: this.config.details.summary ?? null,
+			},
 			config: {
-				useTranslations: this.config?.useTranslations ?? false,
+				isLocked: this.config.config?.isLocked ?? C.collectionBuilder.isLocked,
+				useDrafts:
+					this.config.config?.useDrafts ?? C.collectionBuilder.useDrafts,
+				useRevisions:
+					this.config.config?.useRevisions ?? C.collectionBuilder.useRevisions,
+				useTranslations:
+					this.config.config?.useTranslations ??
+					C.collectionBuilder.useTranslations,
 				fields: {
 					filter: this.filterableFieldKeys,
 					include: this.includeFieldKeys,
@@ -217,10 +224,9 @@ class CollectionBuilder extends FieldBuilder {
 		);
 	}
 	get brickInstances(): Array<BrickBuilder> {
-		return [
-			...(this.config.bricks?.builder || []),
-			...(this.config.bricks?.fixed || []),
-		];
+		return (this.config.bricks?.builder || []).concat(
+			this.config.bricks?.fixed || [],
+		);
 	}
 }
 

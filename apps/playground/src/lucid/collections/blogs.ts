@@ -2,10 +2,14 @@ import { CollectionBuilder } from "@lucidcms/core/builders";
 
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
-	title: "Blogs",
-	singular: "Blog",
-	description: "Manage your blogs.",
-	useTranslations: true,
+	details: {
+		name: "Blogs",
+		singularName: "Blog",
+		summary: "Manage your blogs.",
+	},
+	config: {
+		useTranslations: true,
+	},
 })
 	.addText("page_title", {
 		hidden: false,

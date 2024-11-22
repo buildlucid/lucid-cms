@@ -2,11 +2,15 @@ import { CollectionBuilder } from "@lucidcms/core/builders";
 
 const MainMenuCollection = new CollectionBuilder("main-menu", {
 	mode: "single",
-	title: "Main Menu",
-	singular: "Main Menu",
-	description: "The main menu for your website.",
-	useRevisions: true,
-	useTranslations: true,
+	details: {
+		name: "Main Menu",
+		singularName: "Main Menu",
+		summary: "The main menu for your website.",
+	},
+	config: {
+		useRevisions: true,
+		useTranslations: true,
+	},
 })
 	.addRepeater("items", {
 		labels: {

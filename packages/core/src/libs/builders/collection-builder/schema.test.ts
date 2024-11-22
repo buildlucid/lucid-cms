@@ -5,10 +5,14 @@ import CollectionConfigSchema from "./schema.js";
 test("collection builder config passes schema validation", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
-		title: "Pages",
-		singular: "Page",
-		description: "Pages are used to create static content on your website.",
-		useTranslations: true,
+		details: {
+			name: "Pages",
+			singularName: "Page",
+			summary: "Pages are used to create static content on your website.",
+		},
+		config: {
+			useTranslations: true,
+		},
 		hooks: [
 			{
 				event: "beforeUpsert",
