@@ -248,7 +248,6 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			<Match when={documentIsLoading()}>
 				<div class="fixed top-15 left-[325px] bottom-15 right-15 flex flex-col">
 					<span class="h-32 w-full skeleton block mb-15" />
-					<span class="h-64 w-full skeleton block mb-15" />
 					<span class="h-full w-full skeleton block" />
 				</div>
 			</Match>
