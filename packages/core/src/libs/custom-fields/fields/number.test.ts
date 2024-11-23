@@ -168,21 +168,23 @@ test("fail to validate field - number", async () => {
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new NumberCustomField("field", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 			placeholder: {
 				en: "placeholder",
 			},
 		},
-		useTranslations: true,
-		default: 10,
-		hidden: false,
-		disabled: false,
+		config: {
+			useTranslations: true,
+			default: 10,
+			isHidden: false,
+			isDisabled: false,
+		},
 		validation: {
 			required: true,
 			zod: z.string().min(5),

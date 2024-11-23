@@ -64,14 +64,16 @@ const PageCollection = new CollectionBuilder("page", {
 	},
 })
 	.addText("page_title", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "Page title",
 			},
-			description: "The title of the page.",
+			summary: "The title of the page.",
 		},
-		hidden: false,
-		disabled: false,
+		config: {
+			isHidden: false,
+			isDisabled: false,
+		},
 		validation: {
 			required: true,
 			zod: z.string().min(2).max(128),

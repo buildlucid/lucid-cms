@@ -12,8 +12,10 @@ const BlogCollection = new CollectionBuilder("blog", {
 	},
 })
 	.addText("page_title", {
-		hidden: false,
-		disabled: false,
+		config: {
+			isHidden: false,
+			isDisabled: false,
+		},
 		collection: {
 			column: true,
 			filterable: true,

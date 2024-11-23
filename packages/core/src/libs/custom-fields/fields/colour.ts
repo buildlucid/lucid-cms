@@ -22,15 +22,17 @@ class ColourCustomField extends CustomField<"colour"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
 			},
 			presets: this.props?.presets ?? [],
-			useTranslations: this.props?.useTranslations ?? false,
-			default: this.props?.default ?? "",
-			hidden: this.props?.hidden,
-			disabled: this.props?.disabled,
+			config: {
+				useTranslations: this.props?.config?.useTranslations ?? false,
+				default: this.props?.config?.default ?? "",
+				isHidden: this.props?.config?.isHidden,
+				isDisabled: this.props?.config?.isDisabled,
+			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"colour">;
 	}
@@ -40,7 +42,7 @@ class ColourCustomField extends CustomField<"colour"> {
 		formatMeta: FieldFormatMeta;
 	}) {
 		return {
-			value: props.data.text_value ?? this.config.default ?? null,
+			value: props.data.text_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"colour">;
 	}

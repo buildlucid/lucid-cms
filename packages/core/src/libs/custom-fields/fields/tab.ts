@@ -15,9 +15,9 @@ class TabCustomField extends CustomField<"tab"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
 			},
 			fields: [],
 		} satisfies CFConfig<"tab">;

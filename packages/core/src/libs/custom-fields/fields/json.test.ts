@@ -181,23 +181,25 @@ test("fail to validate field - json", async () => {
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new JsonCustomField("field", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 			placeholder: {
 				en: "placeholder",
 			},
 		},
-		useTranslations: true,
-		default: {
-			hello: "world",
+		config: {
+			useTranslations: true,
+			default: {
+				hello: "world",
+			},
+			isHidden: false,
+			isDisabled: false,
 		},
-		hidden: false,
-		disabled: false,
 		validation: {
 			required: true,
 			zod: z.object({

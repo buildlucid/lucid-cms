@@ -1,35 +1,40 @@
 import z from "zod";
+import { stringTranslations } from "../../schemas/locales.js";
 
+// TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const CustomFieldSchema = z.object({
 	type: z.string(),
 	key: z.string(),
-	labels: z
+	collection: z.string().optional(),
+	details: z
 		.object({
-			title: z.union([z.string(), z.record(z.string(), z.string())]).optional(),
-			description: z
-				.union([z.string(), z.record(z.string(), z.string())])
-				.optional(),
-			placeholder: z
-				.union([z.string(), z.record(z.string(), z.string())])
-				.optional(),
+			label: stringTranslations.optional(),
+			summary: stringTranslations.optional(),
+			true: stringTranslations.optional(),
+			false: stringTranslations.optional(),
 		})
 		.optional(),
-	collection: z.string().optional(),
-	previewField: z.string().optional(),
-	default: z
-		.union([
-			z.boolean(),
-			z.string(),
-			z.number(),
-			z.undefined(),
-			z.object({}),
-			z.null(),
-		])
+	config: z
+		.object({
+			default: z
+				.union([
+					z.boolean(),
+					z.string(),
+					z.number(),
+					z.undefined(),
+					z.object({}),
+					z.null(),
+				])
+				.optional(),
+			useTranslations: z.boolean().optional(),
+			isHidden: z.boolean().optional(),
+			isDisabled: z.boolean().optional(),
+		})
 		.optional(),
 	options: z
 		.array(
 			z.object({
-				label: z.string(),
+				label: stringTranslations,
 				value: z.string(),
 			}),
 		)

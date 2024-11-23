@@ -121,18 +121,20 @@ test("fail to validate field - checkbox", async () => {
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new CheckboxCustomField("field", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 		},
-		useTranslations: true,
-		default: 1,
-		hidden: false,
-		disabled: false,
+		config: {
+			useTranslations: true,
+			default: 1,
+			isHidden: false,
+			isDisabled: false,
+		},
 		validation: {
 			required: true,
 		},

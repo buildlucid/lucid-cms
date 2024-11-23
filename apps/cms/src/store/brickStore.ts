@@ -226,7 +226,7 @@ const [get, set] = createStore<BrickStoreT>({
 				if (!field) return;
 
 				if (
-					params.fieldConfig.useTranslations === true &&
+					params.fieldConfig.config.useTranslations === true &&
 					get.collectionTranslations === true
 				) {
 					if (!field.translations) field.translations = {};
@@ -252,16 +252,16 @@ const [get, set] = createStore<BrickStoreT>({
 
 		if (params.fieldConfig.type !== "repeater") {
 			if (
-				params.fieldConfig.useTranslations === true &&
+				params.fieldConfig.config.useTranslations === true &&
 				get.collectionTranslations === true
 			) {
 				for (const locale of params.locales) {
 					newField.translations = {
-						[locale]: params.fieldConfig.default,
+						[locale]: params.fieldConfig.config.default,
 					};
 				}
 			} else {
-				newField.value = params.fieldConfig.default;
+				newField.value = params.fieldConfig.config.default;
 			}
 		}
 
@@ -323,16 +323,16 @@ const [get, set] = createStore<BrickStoreT>({
 
 					if (field.type !== "repeater") {
 						if (
-							field.useTranslations === true &&
+							field.config.useTranslations === true &&
 							get.collectionTranslations === true
 						) {
 							for (const locale of params.locales) {
 								newField.translations = {
-									[locale]: field.default,
+									[locale]: field.config.default,
 								};
 							}
 						} else {
-							newField.value = field.default;
+							newField.value = field.config.default;
 						}
 					}
 

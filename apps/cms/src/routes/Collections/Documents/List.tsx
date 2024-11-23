@@ -139,7 +139,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 											case "checkbox": {
 												return {
 													label: helpers.getLocaleValue({
-														value: field.labels.title,
+														value: field.details.label,
 														fallback: field.key,
 													}),
 													key: field.key,
@@ -149,7 +149,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 											case "select": {
 												return {
 													label: helpers.getLocaleValue({
-														value: field.labels.title,
+														value: field.details.label,
 														fallback: field.key,
 													}),
 													key: field.key,
@@ -168,7 +168,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 											default: {
 												return {
 													label: helpers.getLocaleValue({
-														value: field.labels.title,
+														value: field.details.label,
 														fallback: field.key,
 													}),
 													key: field.key,

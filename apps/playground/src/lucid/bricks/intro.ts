@@ -6,20 +6,20 @@ const IntroBrick = new BrickBuilder("intro", {
 	},
 })
 	.addTab("content_tab", {
-		labels: {
-			title: "Content",
+		details: {
+			label: "Content",
 		},
 	})
 	.addText("title")
 	.addWysiwyg("intro")
 	.addTab("advanced_tab", {
-		labels: {
-			title: "Advanced",
+		details: {
+			label: "Advanced",
 		},
 	})
 	.addJSON("json", {
-		labels: {
-			title: "JSON",
+		details: {
+			label: "JSON",
 		},
 		validation: {
 			required: true,

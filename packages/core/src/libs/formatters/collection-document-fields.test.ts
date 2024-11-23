@@ -16,13 +16,13 @@ const BannerBrick = new BrickBuilder("banner", {
 	},
 })
 	.addTab("content_tab", {
-		labels: {
-			title: "Content",
+		details: {
+			label: "Content",
 		},
 	})
 	.addText("title", {
-		labels: {
-			description: "The title of the banner. This is displayed as an H1 tag.",
+		details: {
+			summary: "The title of the banner. This is displayed as an H1 tag.",
 		},
 		validation: {
 			required: true,
@@ -30,27 +30,27 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addWysiwyg("intro")
 	.addRepeater("call_to_actions", {
-		labels: {
-			title: "Call to Actions",
+		details: {
+			label: "Call to Actions",
 		},
 		validation: {
 			maxGroups: 3,
 		},
 	})
 	.addLink("link", {
-		labels: {
-			title: "Link",
+		details: {
+			label: "Link",
 		},
 	})
 	.endRepeater()
 	.addTab("config_tab", {
-		labels: {
-			title: "Config",
+		details: {
+			label: "Config",
 		},
 	})
 	.addCheckbox("full_width", {
-		labels: {
-			description: "Make the banner fullwidth",
+		details: {
+			summary: "Make the banner fullwidth",
 		},
 	});
 

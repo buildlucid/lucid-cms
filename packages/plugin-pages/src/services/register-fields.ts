@@ -10,24 +10,28 @@ const registerFields = (
 ) => {
 	collection
 		.addText(constants.fields.fullSlug.key, {
-			labels: {
-				title: T("full_slug"),
+			details: {
+				label: T("full_slug"),
 			},
-			useTranslations: config.useTranslations,
-			hidden: !config.displayFullSlug,
-			disabled: true,
+			config: {
+				useTranslations: config.useTranslations,
+				isHidden: !config.displayFullSlug,
+				isDisabled: true,
+			},
 			collection: {
 				column: config.displayFullSlug,
 				filterable: config.displayFullSlug,
 			},
 		})
 		.addText(constants.fields.slug.key, {
-			labels: {
-				title: T("slug"),
+			details: {
+				label: T("slug"),
 			},
-			useTranslations: config.useTranslations,
-			hidden: false,
-			disabled: false,
+			config: {
+				useTranslations: config.useTranslations,
+				isHidden: false,
+				isDisabled: false,
+			},
 			validation: {
 				required: true,
 				zod: z.union([
@@ -47,11 +51,13 @@ const registerFields = (
 		})
 		.addDocument(constants.fields.parentPage.key, {
 			collection: collection.key,
-			labels: {
-				title: T("parent_page"),
+			details: {
+				label: T("parent_page"),
 			},
-			hidden: false,
-			disabled: false,
+			config: {
+				isHidden: false,
+				isDisabled: false,
+			},
 		});
 };
 

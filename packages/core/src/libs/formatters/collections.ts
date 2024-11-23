@@ -1,3 +1,4 @@
+import { nullable } from "zod";
 import type { CollectionResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 
@@ -85,15 +86,22 @@ export default class CollectionsFormatter {
 			type: {
 				type: "string",
 			},
-			labels: {
+			key: {
+				type: "string",
+			},
+			collection: {
+				type: "string",
+				nullable: true,
+			},
+			details: {
 				type: "object",
 				additionalProperties: true,
 				properties: {
-					title: {
+					label: {
 						type: ["object", "string"],
 						additionalProperties: true,
 					},
-					description: {
+					summary: {
 						type: ["object", "string"],
 						additionalProperties: true,
 					},
@@ -111,20 +119,23 @@ export default class CollectionsFormatter {
 					},
 				},
 			},
-			key: {
-				type: "string",
-			},
-			hidden: {
-				type: "boolean",
-				nullable: true,
-			},
-			disabled: {
-				type: "boolean",
-				nullable: true,
-			},
-			useTranslations: {
-				type: "boolean",
-				nullable: true,
+			config: {
+				type: "object",
+				additionalProperties: true,
+				properties: {
+					isHidden: {
+						type: "boolean",
+						nullable: true,
+					},
+					isDisabled: {
+						type: "boolean",
+						nullable: true,
+					},
+					useTranslations: {
+						type: "boolean",
+						nullable: true,
+					},
+				},
 			},
 			fields: {
 				type: "array",

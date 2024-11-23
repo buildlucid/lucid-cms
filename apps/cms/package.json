@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build --emptyOutDir",
+		"build": "tsc --noEmit --skipLibCheck && vite build --emptyOutDir",
 		"serve": "vite preview",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",

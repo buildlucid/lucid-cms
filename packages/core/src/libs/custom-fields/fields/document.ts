@@ -34,13 +34,15 @@ class DocumentCustomField extends CustomField<"document"> {
 			key: this.key,
 			type: this.type,
 			collection: this.props.collection,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
 			},
-			useTranslations: this.props?.useTranslations ?? false,
-			hidden: this.props?.hidden,
-			disabled: this.props?.disabled,
+			config: {
+				useTranslations: this.props?.config?.useTranslations ?? false,
+				isHidden: this.props?.config?.isHidden,
+				isDisabled: this.props?.config?.isDisabled,
+			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"document">;
 	}

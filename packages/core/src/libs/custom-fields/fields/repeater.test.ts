@@ -6,15 +6,17 @@ import RepeaterCustomField from "./repeater.js";
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new RepeaterCustomField("field", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 		},
-		disabled: false,
+		config: {
+			isDisabled: false,
+		},
 		validation: {
 			maxGroups: 3,
 		},

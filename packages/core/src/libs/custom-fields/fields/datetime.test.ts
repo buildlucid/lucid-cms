@@ -206,21 +206,23 @@ test("fail to validate field - datetime", async () => {
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new DatetimeCustomField("field", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 			placeholder: {
 				en: "placeholder",
 			},
 		},
-		useTranslations: true,
-		default: "2024-06-15T14:14:21.704Z",
-		hidden: false,
-		disabled: false,
+		config: {
+			useTranslations: true,
+			default: "2024-06-15T14:14:21.704Z",
+			isHidden: false,
+			isDisabled: false,
+		},
 		validation: {
 			required: true,
 			zod: z.date().min(new Date("2024-06-15T14:14:21.704Z")),

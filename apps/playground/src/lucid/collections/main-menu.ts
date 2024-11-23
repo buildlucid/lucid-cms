@@ -13,8 +13,8 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	},
 })
 	.addRepeater("items", {
-		labels: {
-			title: "Items",
+		details: {
+			label: "Items",
 		},
 		validation: {
 			maxGroups: 5,

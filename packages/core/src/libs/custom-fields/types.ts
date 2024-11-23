@@ -164,35 +164,33 @@ export type CFResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];
 export type SharedFieldConfig = {
 	key: string;
 	type: FieldTypes;
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
 };
 
 export interface TabFieldConfig extends SharedFieldConfig {
 	type: "tab";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
 }
 export interface TextFieldConfig extends SharedFieldConfig {
 	type: "text";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-	useTranslations: boolean;
-	default: string;
-	hidden?: boolean;
-	disabled?: boolean;
-
+	config: {
+		useTranslations?: boolean;
+		default?: string;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+	};
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown> | undefined;
@@ -200,18 +198,17 @@ export interface TextFieldConfig extends SharedFieldConfig {
 }
 export interface WysiwygFieldConfig extends SharedFieldConfig {
 	type: "wysiwyg";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	default: string;
-	hidden?: boolean;
-	disabled?: boolean;
-
+	config: {
+		useTranslations?: boolean;
+		default?: string;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+	};
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown> | undefined;
@@ -219,17 +216,16 @@ export interface WysiwygFieldConfig extends SharedFieldConfig {
 }
 export interface MediaFieldConfig extends SharedFieldConfig {
 	type: "media";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: number;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: number;
+	};
 	validation?: {
 		required?: boolean;
 		extensions?: string[];
@@ -247,17 +243,16 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 export interface DocumentFieldConfig extends SharedFieldConfig {
 	type: "document";
 	collection: string;
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: number | null;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: number | null;
+	};
 	validation?: {
 		required?: boolean;
 	};
@@ -265,29 +260,30 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 export interface RepeaterFieldConfig extends SharedFieldConfig {
 	type: "repeater";
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
-	disabled?: boolean;
+	config: {
+		isDisabled?: boolean;
+	};
 	validation?: {
 		maxGroups?: number;
 	};
 }
 export interface NumberFieldConfig extends SharedFieldConfig {
 	type: "number";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: number | null;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: number | null;
+	};
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;
@@ -295,56 +291,53 @@ export interface NumberFieldConfig extends SharedFieldConfig {
 }
 export interface CheckboxFieldConfig extends SharedFieldConfig {
 	type: "checkbox";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		true?: LocaleValue;
 		false?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: BooleanInt;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: BooleanInt;
+	};
 	validation?: {
 		required?: boolean;
 	};
 }
 export interface SelectFieldConfig extends SharedFieldConfig {
 	type: "select";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
 	options: Array<{ label: LocaleValue; value: string }>;
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: string;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: string;
+	};
 	validation?: {
 		required?: boolean;
 	};
 }
 export interface TextareaFieldConfig extends SharedFieldConfig {
 	type: "textarea";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: string;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: string;
+	};
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;
@@ -352,18 +345,17 @@ export interface TextareaFieldConfig extends SharedFieldConfig {
 }
 export interface JsonFieldConfig extends SharedFieldConfig {
 	type: "json";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: Record<string, unknown>;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: Record<string, unknown>;
+	};
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;
@@ -371,36 +363,34 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 }
 export interface ColourFieldConfig extends SharedFieldConfig {
 	type: "colour";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
 	presets: string[];
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: string;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: string;
+	};
 	validation?: {
 		required?: boolean;
 	};
 }
 export interface DatetimeFieldConfig extends SharedFieldConfig {
 	type: "datetime";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: string;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: string;
+	};
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;
@@ -408,35 +398,33 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 }
 export interface LinkFieldConfig extends SharedFieldConfig {
 	type: "link";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-	default?: LinkResValue;
-
+	config: {
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+		default?: LinkResValue;
+	};
 	validation?: {
 		required?: boolean;
 	};
 }
 export interface UserFieldConfig extends SharedFieldConfig {
 	type: "user";
-
-	labels: {
-		title?: LocaleValue;
-		description?: LocaleValue;
+	details: {
+		label?: LocaleValue;
+		summary?: LocaleValue;
 	};
-	default?: number;
-
-	useTranslations: boolean;
-	hidden?: boolean;
-	disabled?: boolean;
-
+	config: {
+		default?: number;
+		useTranslations?: boolean;
+		isHidden?: boolean;
+		isDisabled?: boolean;
+	};
 	validation?: {
 		required?: boolean;
 	};
@@ -445,16 +433,24 @@ export interface UserFieldConfig extends SharedFieldConfig {
 // -----------------------------------------------
 // Custom Field Props
 
+type OmitDefault<T> = T extends { config: unknown }
+	? Omit<T, "config"> & {
+			config?: Omit<T["config"], "default">;
+		}
+	: T;
+
 export type TabFieldProps = Partial<Omit<TabFieldConfig, "type" | "fields">>;
 export type TextFieldProps = Partial<Omit<TextFieldConfig, "type">>;
 export type WysiwygFieldProps = Partial<Omit<WysiwygFieldConfig, "type">>;
 export type MediaFieldProps = Partial<
-	Omit<MediaFieldConfig, "type" | "default">
+	OmitDefault<Omit<MediaFieldConfig, "type">>
 >;
 export type RepeaterFieldProps = Partial<
 	Omit<RepeaterFieldConfig, "type" | "fields">
 >;
-export type DocumentFieldProps = Partial<Omit<DocumentFieldConfig, "type">> & {
+export type DocumentFieldProps = Partial<
+	OmitDefault<Omit<DocumentFieldConfig, "type">>
+> & {
 	collection: string;
 };
 export type NumberFieldProps = Partial<Omit<NumberFieldConfig, "type">>;
@@ -465,7 +461,9 @@ export type JsonFieldProps = Partial<Omit<JsonFieldConfig, "type">>;
 export type ColourFieldProps = Partial<Omit<ColourFieldConfig, "type">>;
 export type DatetimeFieldProps = Partial<Omit<DatetimeFieldConfig, "type">>;
 export type LinkFieldProps = Partial<Omit<LinkFieldConfig, "type">>;
-export type UserFieldProps = Partial<Omit<UserFieldConfig, "type" | "default">>;
+export type UserFieldProps = Partial<
+	OmitDefault<Omit<UserFieldConfig, "type">>
+>;
 
 // -----------------------------------------------
 // Data

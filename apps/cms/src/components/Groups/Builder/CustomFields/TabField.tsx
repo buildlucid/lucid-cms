@@ -53,7 +53,7 @@ export const TabField: Component<{
 			type="button"
 		>
 			{helpers.getLocaleValue({
-				value: props.tab.labels?.title,
+				value: props.tab.details?.label,
 			})}
 		</button>
 	);

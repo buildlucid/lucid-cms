@@ -173,18 +173,20 @@ test("fail to validate field - document", async () => {
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new DocumentCustomField("field", {
-		labels: {
-			title: {
+		collection: "page",
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 		},
-		useTranslations: true,
-		collection: "page",
-		hidden: false,
-		disabled: false,
+		config: {
+			useTranslations: true,
+			isHidden: false,
+			isDisabled: false,
+		},
 		validation: {
 			required: true,
 		},

@@ -1,13 +1,11 @@
 import z from "zod";
+import { stringTranslations } from "../../../schemas/locales.js";
 
 const BrickConfigSchema = z.object({
-	details: z.object({
-		name: z.union([z.string(), z.record(z.string(), z.string())]),
-		summary: z.union([z.string(), z.record(z.string(), z.string())]).optional(),
-	}),
-	preview: z
+	details: z
 		.object({
-			image: z.string().optional(),
+			name: stringTranslations,
+			summary: stringTranslations.optional(),
 		})
 		.optional(),
 });

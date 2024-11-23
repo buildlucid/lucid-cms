@@ -44,7 +44,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		return props.state.fields;
 	});
 	const isDisabled = createMemo(
-		() => props.state.fieldConfig.disabled || brickStore.get.locked,
+		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -134,7 +134,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					</button>
 					<h3 class="text-sm text-body">
 						{helpers.getLocaleValue({
-							value: props.state.fieldConfig.labels?.title,
+							value: props.state.fieldConfig.details?.label,
 						})}
 						-{props.state.groupIndex + 1}
 					</h3>

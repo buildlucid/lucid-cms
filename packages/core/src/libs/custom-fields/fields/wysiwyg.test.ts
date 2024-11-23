@@ -194,21 +194,23 @@ test("fail to validate field - wysiwyg", async () => {
 // Custom field config
 test("custom field config passes schema validation", async () => {
 	const field = new WysiwygCustomField("field", {
-		labels: {
-			title: {
+		details: {
+			label: {
 				en: "title",
 			},
-			description: {
+			summary: {
 				en: "description",
 			},
 			placeholder: {
 				en: "placeholder",
 			},
 		},
-		useTranslations: true,
-		default: "",
-		hidden: false,
-		disabled: false,
+		config: {
+			useTranslations: true,
+			default: "",
+			isHidden: false,
+			isDisabled: false,
+		},
 		validation: {
 			required: true,
 			zod: z.string().min(5),

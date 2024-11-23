@@ -17,23 +17,23 @@ const SettingsCollection = new CollectionBuilder("settings", {
 	},
 })
 	.addText("site_title", {
-		labels: {
-			title: "Site Title",
+		details: {
+			label: "Site Title",
 		},
 	})
 	.addMedia("site_logo", {
-		labels: {
-			title: "Site Logo",
+		details: {
+			label: "Site Logo",
 		},
 	})
 	.addRepeater("social_links", {
-		labels: {
-			title: "Social Links",
+		details: {
+			label: "Social Links",
 		},
 	})
 	.addText("social_name", {
-		labels: {
-			title: "Name",
+		details: {
+			label: "Name",
 		},
 		validation: {
 			zod: z.string(),
@@ -41,8 +41,8 @@ const SettingsCollection = new CollectionBuilder("settings", {
 		},
 	})
 	.addText("social_url", {
-		labels: {
-			title: "URL",
+		details: {
+			label: "URL",
 		},
 		validation: {
 			zod: z.string().url(),

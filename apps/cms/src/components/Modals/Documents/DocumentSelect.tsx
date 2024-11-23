@@ -146,7 +146,7 @@ const DocumentSelectContent: Component = () => {
 									case "checkbox": {
 										return {
 											label: helpers.getLocaleValue({
-												value: field.labels.title,
+												value: field.details.label,
 												fallback: field.key,
 											}),
 											key: field.key,
@@ -156,7 +156,7 @@ const DocumentSelectContent: Component = () => {
 									case "select": {
 										return {
 											label: helpers.getLocaleValue({
-												value: field.labels.title,
+												value: field.details.label,
 												fallback: field.key,
 											}),
 											key: field.key,
@@ -175,7 +175,7 @@ const DocumentSelectContent: Component = () => {
 									default: {
 										return {
 											label: helpers.getLocaleValue({
-												value: field.labels.title,
+												value: field.details.label,
 												fallback: field.key,
 											}),
 											key: field.key,

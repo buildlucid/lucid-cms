@@ -2,18 +2,19 @@ import { BrickBuilder } from "@lucidcms/core/builders";
 
 const TestingBrick = new BrickBuilder("testing", {
 	preview: {
-		image: "https://usersnap.com/blog/wp-content/uploads/2021/03/7-Common-Types-of-Software-Testing@1x-1280x720.png",
+		image:
+			"https://usersnap.com/blog/wp-content/uploads/2021/03/7-Common-Types-of-Software-Testing@1x-1280x720.png",
 	},
 })
 	.addTab("content_tab", {
-		labels: {
-			title: "Content",
+		details: {
+			label: "Content",
 		},
 	})
 	.addText("text-key", {
-		labels: {
-			title: "Text",
-			description: "Testing title",
+		details: {
+			label: "Text",
+			summary: "Testing title",
 			placeholder: "Testing title",
 		},
 	})
@@ -32,8 +33,8 @@ const TestingBrick = new BrickBuilder("testing", {
 	.endRepeater()
 	.addNumber("number-key")
 	.addCheckbox("checkbox-key", {
-		labels: {
-			title: "Checkbox",
+		details: {
+			label: "Checkbox",
 			true: "Show",
 			false: "Hide",
 		},
@@ -58,15 +59,15 @@ const TestingBrick = new BrickBuilder("testing", {
 		},
 	})
 	.addTextarea("textarea-key", {
-		labels: {
-			title: "Textarea",
+		details: {
+			label: "Textarea",
 			placeholder: "Testing textarea",
-			description: "Testing textarea",
+			summary: "Testing textarea",
 		},
 	})
 	.addTab("advanced_tab", {
-		labels: {
-			title: "Advanced",
+		details: {
+			label: "Advanced",
 		},
 	})
 	.addJSON("json-key")

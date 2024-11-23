@@ -6,63 +6,63 @@ const SEOBrick = new BrickBuilder("seo", {
 	},
 })
 	.addTab("basic_tab", {
-		labels: {
-			title: "Basic",
+		details: {
+			label: "Basic",
 		},
 	})
-	.addText("title", {
-		labels: {
-			title: "SEO Title",
-			description:
+	.addText("label", {
+		details: {
+			label: "SEO Title",
+			summary:
 				"The optimal title tag length for SEO is between 50 to 60 characters long.",
 		},
 	})
 	.addTextarea("meta_description", {
-		labels: {
-			title: "Meta Description",
-			description:
+		details: {
+			label: "Meta Description",
+			summary:
 				"The optimal meta description length for SEO is between 50 to 160 characters long.",
 		},
 	})
 	.addTab("social_tab", {
-		labels: {
-			title: "Social",
+		details: {
+			label: "Social",
 		},
 	})
 	.addText("social_title", {
-		labels: {
-			title: "Social Title",
+		details: {
+			label: "Social Title",
 		},
 	})
 	.addTextarea("social_description", {
-		labels: {
-			title: "Social Description",
+		details: {
+			label: "Social Description",
 		},
 	})
 	.addMedia("social_image", {
-		labels: {
-			title: "Social Image",
+		details: {
+			label: "Social Image",
 		},
 		validation: {
 			type: "image",
 		},
 	})
 	.addTab("advanced_tab", {
-		labels: {
-			title: "Advanced",
+		details: {
+			label: "Advanced",
 		},
 	})
 	.addText("canonical_url", {
-		labels: {
-			title: "Canonical URL",
-			description:
+		details: {
+			label: "Canonical URL",
+			summary:
 				"The canonical URL is the preferred version of a web page that search engines should index.",
 		},
 	})
 	.addText("robots", {
-		labels: {
-			title: "Robots",
-			description:
+		details: {
+			label: "Robots",
+			summary:
 				"The robots meta tag and X-Robots-Tag HTTP header controls crawling and indexing of a web page.",
 		},
 	});

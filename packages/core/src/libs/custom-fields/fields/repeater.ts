@@ -15,11 +15,13 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
 			},
-			disabled: this.props?.disabled,
+			config: {
+				isDisabled: this.props?.config?.isDisabled,
+			},
 			fields: [],
 			validation: this.props?.validation,
 		} satisfies CFConfig<"repeater">;

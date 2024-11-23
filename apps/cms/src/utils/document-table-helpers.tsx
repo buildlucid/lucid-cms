@@ -12,7 +12,7 @@ export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
 			case "user":
 				return {
 					label: helpers.getLocaleValue({
-						value: field.labels.title,
+						value: field.details.label,
 						fallback: field.key,
 					}),
 					key: field.key,
@@ -21,7 +21,7 @@ export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
 			default: {
 				return {
 					label: helpers.getLocaleValue({
-						value: field.labels.title,
+						value: field.details.label,
 						fallback: field.key,
 					}),
 					key: field.key,

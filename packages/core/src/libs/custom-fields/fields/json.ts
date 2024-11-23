@@ -23,15 +23,17 @@ class JsonCustomField extends CustomField<"json"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
-				placeholder: this.props?.labels?.placeholder,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
+				placeholder: this.props?.details?.placeholder,
 			},
-			useTranslations: this.props?.useTranslations ?? false,
-			default: this.props?.default,
-			hidden: this.props?.hidden,
-			disabled: this.props?.disabled,
+			config: {
+				useTranslations: this.props?.config?.useTranslations ?? false,
+				default: this.props?.config?.default || {},
+				isHidden: this.props?.config?.isHidden,
+				isDisabled: this.props?.config?.isDisabled,
+			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"json">;
 	}
@@ -43,7 +45,7 @@ class JsonCustomField extends CustomField<"json"> {
 		return {
 			value:
 				Formatter.parseJSON<Record<string, unknown>>(props.data.json_value) ??
-				this.config.default ??
+				this.config.config.default ??
 				null,
 			meta: null,
 		} satisfies CFResponse<"json">;

@@ -82,8 +82,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		<div
 			class={classNames("w-full mb-15 last:mb-0 relative", {
 				"!mb-0": !activeTab(),
-				// @ts-expect-error
-				"invisible h-0 opacity-0 !mb-0": fieldConfig()?.hidden === true,
+				"invisible h-0 opacity-0 !mb-0":
+					fieldConfig().type !== "tab"
+						? // @ts-expect-error
+							fieldConfig()?.config?.isHidden === true
+						: false,
 			})}
 		>
 			<Show when={fieldConfig().type !== "tab"}>

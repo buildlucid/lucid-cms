@@ -1,5 +1,10 @@
 import z from "zod";
 
+export const stringTranslations = z.union([
+	z.string(),
+	z.record(z.string(), z.string()),
+]);
+
 export default {
 	getSingle: {
 		query: undefined,

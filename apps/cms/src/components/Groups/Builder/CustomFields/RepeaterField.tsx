@@ -39,7 +39,10 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		}`;
 	});
 	const isDisabled = createMemo(
-		() => !canAddGroup() || fieldConfig().disabled || brickStore.get.locked,
+		() =>
+			!canAddGroup() ||
+			fieldConfig().config.isDisabled ||
+			brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -68,7 +71,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 				class={"block text-sm transition-colors duration-200 ease-in-out mb-2"}
 			>
 				{helpers.getLocaleValue({
-					value: fieldConfig().labels?.title,
+					value: fieldConfig().details?.label,
 				})}
 			</p>
 			{/* Repeater Body */}

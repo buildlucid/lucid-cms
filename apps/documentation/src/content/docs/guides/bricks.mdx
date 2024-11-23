@@ -24,13 +24,13 @@ const Banner = new BrickBuilder("banner", {
   },
 })
   .addTab("contentTab", {
-    labels: {
-      title: "Content",
+    details: {
+      label: "Content",
     },
   })
   .addText("title", {
-    labels: {
-      description: "The title of the banner. This is displayed as an H1 tag.",
+    details: {
+      summary: "The title of the banner. This is displayed as an H1 tag.",
     },
     validation: {
       required: true,
@@ -38,32 +38,32 @@ const Banner = new BrickBuilder("banner", {
   })
   .addWysiwyg("intro")
   .addRepeater("callToActions", {
-    labels: {
-      title: "Call to Actions",
+    details: {
+      label: "Call to Actions",
     },
     validation: {
       maxGroups: 3,
     },
   })
   .addText("ctaTitle", {
-    labels: {
-      title: "Title",
+    details: {
+      label: "Title",
     },
   })
   .addText("ctaUrl", {
-    labels: {
-      title: "URL",
+    details: {
+      label: "URL",
     },
   })
   .endRepeater()
   .addTab("configTab", {
-    labels: {
-      title: "Config",
+    details: {
+      label: "Config",
     },
   })
   .addCheckbox("fullWidth", {
-    labels: {
-      description: "Make the banner full-width",
+    details: {
+      summary: "Make the banner full-width",
     },
   });
 
@@ -87,3 +87,4 @@ export default Banner;
 - `addDateTime`
 - `addLink`
 - `addUser`
+- `addDocument`

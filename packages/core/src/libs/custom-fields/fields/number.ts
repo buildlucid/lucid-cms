@@ -22,15 +22,17 @@ class NumberCustomField extends CustomField<"number"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
-				placeholder: this.props?.labels?.placeholder,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
+				placeholder: this.props?.details?.placeholder,
 			},
-			useTranslations: this.props?.useTranslations ?? false,
-			default: this.props?.default,
-			hidden: this.props?.hidden,
-			disabled: this.props?.disabled,
+			config: {
+				useTranslations: this.props?.config?.useTranslations ?? false,
+				default: this.props?.config?.default,
+				isHidden: this.props?.config?.isHidden,
+				isDisabled: this.props?.config?.isDisabled,
+			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"number">;
 	}
@@ -40,7 +42,7 @@ class NumberCustomField extends CustomField<"number"> {
 		formatMeta: FieldFormatMeta;
 	}) {
 		return {
-			value: props.data.int_value ?? this.config.default ?? null,
+			value: props.data.int_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"number">;
 	}

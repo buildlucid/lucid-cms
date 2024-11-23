@@ -46,7 +46,7 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 		});
 	});
 	const isDisabled = createMemo(
-		() => props.state.fieldConfig.disabled || brickStore.get.locked,
+		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -82,13 +82,13 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 			name={props.state.fieldConfig.key}
 			copy={{
 				label: helpers.getLocaleValue({
-					value: props.state.fieldConfig.labels.title,
+					value: props.state.fieldConfig.details.label,
 				}),
 				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.labels.description,
+					value: props.state.fieldConfig.details.summary,
 				}),
 				placeholder: helpers.getLocaleValue({
-					value: props.state.fieldConfig.labels.placeholder,
+					value: props.state.fieldConfig.details.placeholder,
 				}),
 			}}
 			altLocaleError={props.state.altLocaleError}

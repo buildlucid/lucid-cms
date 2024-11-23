@@ -18,13 +18,15 @@ const TestCollection = new CollectionBuilder("test", {
 	hooks: [],
 	bricks: {},
 }).addText("title", {
-	labels: {
-		title: {
+	details: {
+		label: {
 			en: "Title",
 		},
 	},
-	hidden: false,
-	disabled: false,
+	config: {
+		isHidden: false,
+		isDisabled: false,
+	},
 	validation: {
 		required: true,
 		zod: z.string().min(2).max(128),
@@ -34,38 +36,5 @@ const TestCollection = new CollectionBuilder("test", {
 		filterable: true,
 	},
 });
-
-// new CollectionBuilder("test", {
-// 	mode: "multiple",
-//     details: {
-//         name: "Test",
-//         singularName: "Test",
-//         summary: "A test collection for the revisions and draft/published functionality.",
-//     },
-//     config: {
-//         useTranslations: false,
-//         useDrafts: true,
-//         useRevisions: true,
-// 	    isLocked: false,
-//     }
-// 	hooks: [],
-// 	bricks: {},
-// }).addText("title", {
-// 	labels: {
-// 		title: {
-// 			en: "Title",
-// 		},
-// 	},
-// 	hidden: false,
-// 	disabled: false,
-// 	validation: {
-// 		required: true,
-// 		zod: z.string().min(2).max(128),
-// 	},
-// 	collection: {
-// 		column: true,
-// 		filterable: true,
-// 	},
-// });
 
 export default TestCollection;

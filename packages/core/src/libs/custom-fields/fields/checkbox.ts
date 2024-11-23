@@ -25,14 +25,18 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
+				true: this.props?.details?.true,
+				false: this.props?.details?.false,
 			},
-			useTranslations: this.props?.useTranslations ?? false,
-			default: this.props?.default ?? 0,
-			hidden: this.props?.hidden,
-			disabled: this.props?.disabled,
+			config: {
+				useTranslations: this.props?.config?.useTranslations ?? false,
+				default: this.props?.config?.default ?? 0,
+				isHidden: this.props?.config?.isHidden,
+				isDisabled: this.props?.config?.isDisabled,
+			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"checkbox">;
 	}
@@ -42,7 +46,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		formatMeta: FieldFormatMeta;
 	}) {
 		return {
-			value: props.data.bool_value ?? this.config.default ?? null,
+			value: props.data.bool_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"checkbox">;
 	}

@@ -238,7 +238,7 @@ export default class CollectionDocumentFieldsFormatter {
 		if (
 			meta.fieldConfig.type !== "repeater" &&
 			meta.fieldConfig.type !== "tab" &&
-			meta.fieldConfig.useTranslations === true &&
+			meta.fieldConfig.config.useTranslations === true &&
 			meta.collectionTranslations === true
 		) {
 			// reduce same fields with different languages into 1 field
@@ -383,7 +383,7 @@ export default class CollectionDocumentFieldsFormatter {
 		);
 		for (const locale of emptyLocales) {
 			(data.field.translations as Record<string, FieldResponseValue>)[locale] =
-				meta.fieldConfig.default ?? null;
+				meta.fieldConfig.config.default ?? null;
 			(data.field.meta as Record<string, FieldResponseMeta>)[locale] = null;
 		}
 		return data.field;

@@ -49,7 +49,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 		});
 	});
 	const isDisabled = createMemo(
-		() => props.state.fieldConfig.disabled || brickStore.get.locked,
+		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -85,10 +85,10 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 				}}
 				copy={{
 					label: helpers.getLocaleValue({
-						value: props.state.fieldConfig.labels.title,
+						value: props.state.fieldConfig.details.label,
 					}),
 					describedBy: helpers.getLocaleValue({
-						value: props.state.fieldConfig.labels.description,
+						value: props.state.fieldConfig.details.summary,
 					}),
 				}}
 				altLocaleError={props.state.altLocaleError}

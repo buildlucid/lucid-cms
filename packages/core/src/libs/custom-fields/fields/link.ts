@@ -26,19 +26,21 @@ class LinkCustomField extends CustomField<"link"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			labels: {
-				title: this.props?.labels?.title ?? keyToTitle(this.key),
-				description: this.props?.labels?.description,
-				placeholder: this.props?.labels?.placeholder,
+			details: {
+				label: this.props?.details?.label ?? keyToTitle(this.key),
+				summary: this.props?.details?.summary,
+				placeholder: this.props?.details?.placeholder,
 			},
-			useTranslations: this.props?.useTranslations ?? false,
-			default: this.props?.default ?? {
-				url: null,
-				label: null,
-				target: null,
+			config: {
+				useTranslations: this.props?.config?.useTranslations ?? false,
+				default: this.props?.config?.default ?? {
+					url: null,
+					label: null,
+					target: null,
+				},
+				isHidden: this.props?.config?.isHidden,
+				isDisabled: this.props?.config?.isDisabled,
 			},
-			hidden: this.props?.hidden,
-			disabled: this.props?.disabled,
 			validation: this.props?.validation,
 		} satisfies CFConfig<"link">;
 	}
@@ -50,9 +52,9 @@ class LinkCustomField extends CustomField<"link"> {
 		const linkVal = Formatter.parseJSON<LinkResValue>(props.data.json_value);
 		return {
 			value: {
-				url: linkVal?.url ?? this.config.default.url ?? null,
-				label: linkVal?.label ?? this.config.default.label ?? null,
-				target: linkVal?.target ?? this.config.default.target ?? null,
+				url: linkVal?.url ?? this.config.config.default.url ?? null,
+				label: linkVal?.label ?? this.config.config.default.label ?? null,
+				target: linkVal?.target ?? this.config.config.default.target ?? null,
 			},
 			meta: null,
 		} satisfies CFResponse<"link">;
