@@ -62,6 +62,21 @@ const CollectionsDocumentsListRoute: Component = () => {
 		collectionFieldFilters(collection.data?.data),
 	);
 	const collectionIsSuccess = createMemo(() => collection.isSuccess);
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: collection.data?.data.details.name,
+		}),
+	);
+	const collectionSingularName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: collection.data?.data.details.singularName,
+		}),
+	);
+	const collectionSummary = createMemo(() =>
+		helpers.getLocaleValue({
+			value: collection.data?.data.details.summary,
+		}),
+	);
 
 	// ----------------------------------
 	// Effects
@@ -111,8 +126,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 				header: (
 					<Headers.Standard
 						copy={{
-							title: collection.data?.data?.details.name,
-							description: collection.data?.data?.details.summary || "",
+							title: collectionName(),
+							description: collectionSummary(),
 						}}
 						actions={{
 							contentLocale:
@@ -126,7 +141,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 									.some,
 								show: collection.data?.data.config.isLocked !== true,
 								label: T()("create_dynamic", {
-									name: collection.data?.data.details.singularName || "",
+									name: collectionSingularName() || "",
 								}),
 							},
 						}}

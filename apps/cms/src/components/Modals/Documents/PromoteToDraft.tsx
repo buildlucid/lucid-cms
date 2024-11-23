@@ -1,13 +1,14 @@
 import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
+import { type Component, type Accessor, createMemo } from "solid-js";
 import Modal from "@/components/Groups/Modal";
+import helpers from "@/utils/helpers";
 import type { CollectionResponse } from "@lucidcms/core/types";
 import api from "@/services/api";
 
 const PromoteToDraft: Component<{
 	id: Accessor<number | undefined> | number | undefined;
 	publishedVersionId: Accessor<number | undefined> | number | undefined;
-	collection: CollectionResponse;
+	collection: CollectionResponse | undefined;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -17,14 +18,22 @@ const PromoteToDraft: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: props.collection?.details.singularName,
+			}) || T()("collection"),
+	);
+
+	// ----------------------------------------
 	// Mutations
 	const promoteToDraft = api.collections.document.usePromoteSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();
 		},
-		getCollectionName: () =>
-			props.collection.details.singularName || T()("collection"),
+		getCollectionName: collectionSingularName,
 		getVersionType: () => "draft",
 	});
 
@@ -53,6 +62,7 @@ const PromoteToDraft: Component<{
 							: props.publishedVersionId;
 					if (!id) return console.error("No id provided");
 					if (!versionId) return console.error("No versionId provided");
+					if (!props.collection?.key) return;
 
 					promoteToDraft.action.mutate({
 						id: id,

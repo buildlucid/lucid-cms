@@ -17,6 +17,7 @@ import {
 	FaSolidTrash,
 	FaSolidLanguage,
 } from "solid-icons/fa";
+import helpers from "@/utils/helpers";
 import userStore from "@/store/userStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import Layout from "@/components/Groups/Layout";
@@ -129,6 +130,17 @@ export const HeaderLayout: Component<{
 	const hasDeletePermission = createMemo(() => {
 		return userStore.get.hasPermission(["delete_content"]).all;
 	});
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.state.collection?.details.name,
+		}),
+	);
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: props.state.collection?.details.singularName,
+			}) || T()("document"),
+	);
 
 	// ---------------------------------
 	// Effects
@@ -188,7 +200,7 @@ export const HeaderLayout: Component<{
 						breadcrumbs={[
 							{
 								link: `/admin/collections/${props.state.collectionKey()}`,
-								label: props.state.collection?.details.name || "",
+								label: collectionName() || "",
 								include: props.state.collection?.mode === "multiple",
 							},
 							{
@@ -205,8 +217,8 @@ export const HeaderLayout: Component<{
 											}),
 								label:
 									props.state.mode === "create"
-										? `${T()("create")} ${props.state.collection?.details.singularName || T()("document")}`
-										: `${T()("edit")} ${props.state.collection?.details.singularName || T()("document")} (#${props.state.documentId()})`,
+										? `${T()("create")} ${collectionSingularName()}`
+										: `${T()("edit")} ${collectionSingularName()} (#${props.state.documentId()})`,
 							},
 						]}
 						options={{

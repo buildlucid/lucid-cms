@@ -1,13 +1,14 @@
 import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
+import { type Component, type Accessor, createMemo } from "solid-js";
 import Modal from "@/components/Groups/Modal";
+import helpers from "@/utils/helpers";
 import type { CollectionResponse } from "@lucidcms/core/types";
 import api from "@/services/api";
 
 interface PublishDocumentProps {
 	id: Accessor<number | undefined> | number | undefined;
 	draftVersionId: Accessor<number | undefined> | number | undefined;
-	collection: CollectionResponse;
+	collection: CollectionResponse | undefined;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -19,14 +20,22 @@ interface PublishDocumentProps {
 
 const PublishDocument: Component<PublishDocumentProps> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: props.collection?.details.singularName,
+			}) || T()("collection"),
+	);
+
+	// ----------------------------------------
 	// Mutations
 	const publishDocument = api.collections.document.usePromoteSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();
 		},
-		getCollectionName: () =>
-			props.collection.details.singularName || T()("collection"),
+		getCollectionName: () => collectionSingularName(),
 		getVersionType: () => "published",
 	});
 
@@ -42,10 +51,10 @@ const PublishDocument: Component<PublishDocumentProps> = (props) => {
 			}}
 			copy={{
 				title: T()("publish_document_modal_title", {
-					name: props.collection.details.singularName,
+					name: collectionSingularName(),
 				}),
 				description: T()("publish_document_modal_description", {
-					name: props.collection.details.singularName.toLowerCase(),
+					name: collectionSingularName().toLowerCase(),
 				}),
 				error: publishDocument.errors()?.message,
 			}}
@@ -58,6 +67,7 @@ const PublishDocument: Component<PublishDocumentProps> = (props) => {
 							: props.draftVersionId;
 					if (!id) return console.error("No id provided");
 					if (!draftId) return console.error("No draft id provided");
+					if (!props.collection?.key) return;
 
 					publishDocument.action.mutate({
 						collectionKey: props.collection.key,

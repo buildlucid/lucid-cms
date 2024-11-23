@@ -28,6 +28,7 @@ import PromoteToDraft from "@/components/Modals/Documents/PromoteToDraft";
 import PublishDocument from "@/components/Modals/Documents/PublishDocument";
 import Table from "@/components/Groups/Table";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
+import helpers from "@/utils/helpers";
 
 export const DocumentsList: Component<{
 	state: {
@@ -71,6 +72,17 @@ export const DocumentsList: Component<{
 	const hasDeletePermission = createMemo(() => {
 		return userStore.get.hasPermission(["delete_content"]).some;
 	});
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.state.collection?.details.name,
+		}),
+	);
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: props.state.collection?.details.singularName,
+			}) || T()("collection"),
+	);
 
 	// ----------------------------------
 	// Queries
@@ -88,8 +100,7 @@ export const DocumentsList: Component<{
 	// ----------------------------------
 	// Mutations
 	const deleteMultiple = api.collections.document.useDeleteMultiple({
-		getCollectionName: () =>
-			props.state.collection?.details.singularName || T()("collection"),
+		getCollectionName: collectionSingularName,
 	});
 
 	// ----------------------------------------
@@ -118,16 +129,14 @@ export const DocumentsList: Component<{
 			copy={{
 				noEntries: {
 					title: T()("no_documents", {
-						collectionMultiple: props.state.collection?.details.name,
+						collectionMultiple: collectionName(),
 					}),
 					description: T()("no_documents_description", {
-						collectionMultiple:
-							props.state.collection?.details.name.toLowerCase(),
-						collectionSingle:
-							props.state.collection?.details.singularName.toLowerCase(),
+						collectionMultiple: collectionName().toLowerCase(),
+						collectionSingle: collectionSingularName().toLowerCase(),
 					}),
 					button: T()("create_document", {
-						collectionSingle: props.state.collection?.details.singularName,
+						collectionSingle: collectionSingularName(),
 					}),
 				},
 			}}

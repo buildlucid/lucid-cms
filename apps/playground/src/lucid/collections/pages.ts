@@ -8,7 +8,9 @@ const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
 		name: "Pages",
-		singularName: "Page",
+		singularName: {
+			en: "Page",
+		},
 		summary: "Manage the pages and content on your website.",
 	},
 	config: {

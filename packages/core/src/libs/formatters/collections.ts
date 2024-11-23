@@ -191,11 +191,17 @@ export default class CollectionsFormatter {
 			details: {
 				type: "object",
 				properties: {
-					name: { type: "string", example: "Pages" },
-					singularName: { type: "string", example: "Page" },
+					name: {
+						type: ["object", "string"],
+						additionalProperties: true,
+					},
+					singularName: {
+						type: ["object", "string"],
+						additionalProperties: true,
+					},
 					summary: {
-						type: "string",
-						example: "A collection of pages",
+						type: ["object", "string"],
+						additionalProperties: true,
 						nullable: true,
 					},
 				},

@@ -1,5 +1,6 @@
 import T from "@/translations";
 import { type Component, createMemo, Show, Switch, Match, For } from "solid-js";
+import helpers from "@/utils/helpers";
 import { useLocation } from "@solidjs/router";
 import Navigation from "@/components/Groups/Navigation";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -52,7 +53,9 @@ export const CollectionSubMenu: Component<{
 								<For each={props.state.multiCollections}>
 									{(collection) => (
 										<Navigation.Link
-											title={collection.details.name}
+											title={helpers.getLocaleValue({
+												value: collection.details.name,
+											})}
 											href={`/admin/collections/${collection.key}`}
 											icon="page"
 											activeIfIncludes={`/admin/collections/${collection.key}`}
@@ -67,7 +70,9 @@ export const CollectionSubMenu: Component<{
 								<For each={props.state.singleCollections}>
 									{(collection) => (
 										<Navigation.Link
-											title={collection.details.name}
+											title={helpers.getLocaleValue({
+												value: collection.details.name,
+											})}
 											href={
 												collection.documentId
 													? getDocumentRoute("edit", {

@@ -8,6 +8,7 @@ import {
 	on,
 	Show,
 } from "solid-js";
+import helpers from "@/utils/helpers";
 import { useNavigate, useParams } from "@solidjs/router";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -152,7 +153,9 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: () =>
-			collection.data?.data.details.singularName || T()("collection"),
+			helpers.getLocaleValue({
+				value: collection.data?.data.details.singularName,
+			}) || T()("collection"),
 	});
 
 	// ----------------------------------

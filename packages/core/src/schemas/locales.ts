@@ -1,8 +1,9 @@
 import z from "zod";
+import C from "../constants/constants.js";
 
 export const stringTranslations = z.union([
 	z.string(),
-	z.record(z.string(), z.string()),
+	z.record(z.enum(C.locales), z.string()),
 ]);
 
 export default {

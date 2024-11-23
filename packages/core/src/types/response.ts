@@ -11,6 +11,7 @@ import type {
 	FieldResponseValue,
 } from "../libs/custom-fields/types.js";
 import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
+import type { LocaleValue } from "./shared.js";
 
 export interface UserResponse {
 	id: number;
@@ -159,9 +160,9 @@ export interface CollectionResponse {
 	documentId?: number | null;
 	mode: CollectionConfigSchemaType["mode"];
 	details: {
-		name: string;
-		singularName: string;
-		summary: string | null;
+		name: LocaleValue;
+		singularName: LocaleValue;
+		summary: LocaleValue | null;
 	};
 	config: {
 		useTranslations: boolean;

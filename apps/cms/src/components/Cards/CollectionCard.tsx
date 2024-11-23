@@ -1,6 +1,7 @@
 import { Show, createMemo, type Component } from "solid-js";
 import type { CollectionResponse } from "@lucidcms/core/types";
 import { A } from "@solidjs/router";
+import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { FaSolidBox, FaSolidBoxesStacked } from "solid-icons/fa";
 
@@ -35,6 +36,16 @@ const CollectionCard: Component<{
 		}
 		return `/admin/collections/${props.collection.key}`;
 	});
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.collection.details.name,
+		}),
+	);
+	const collectionSummary = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.collection.details.summary,
+		}),
+	);
 
 	// ----------------------------------------
 	// Render
@@ -51,13 +62,11 @@ const CollectionCard: Component<{
 					<Show when={props.collection.mode === "multiple"}>
 						<FaSolidBoxesStacked class="text-base text-primary-base" />
 					</Show>
-					<h3 class="text-base">{props.collection.details.name}</h3>
+					<h3 class="text-base">{collectionName()}</h3>
 				</div>
 
-				{props.collection.details.summary && (
-					<p class="line-clamp-2 text-sm mt-1.5">
-						{props.collection.details.summary}
-					</p>
+				{collectionSummary() && (
+					<p class="line-clamp-2 text-sm mt-1.5">{collectionSummary()}</p>
 				)}
 			</A>
 		</li>

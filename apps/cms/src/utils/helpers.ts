@@ -214,10 +214,11 @@ const getRecordTranslation = (
 // ---------------------------------------------
 // Content Locale Value
 const getLocaleValue = (props: {
-	value: LocaleValue | undefined;
+	value: LocaleValue | undefined | null;
 	fallback?: string;
 }) => {
-	if (props.value === undefined) return props.fallback ?? "";
+	if (props.value === undefined || props.value === null)
+		return props.fallback ?? "";
 	if (typeof props.value === "string") return props.value;
 	return props.value[getLocale()] ?? props.fallback ?? "";
 };

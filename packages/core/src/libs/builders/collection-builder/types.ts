@@ -8,6 +8,7 @@ import type {
 	FilterValue,
 	FilterOperator,
 } from "../../../types/query-params.js";
+import type { LocaleValue } from "../../../types/shared.js";
 
 export interface FieldCollectionConfig {
 	column?: boolean; //* internally its called "include", "column" is just the public facing name as it makes it clear how it impacts the CMS
@@ -27,9 +28,9 @@ export type CollectionData = {
 	key: string;
 	mode: CollectionConfigSchemaType["mode"];
 	details: {
-		name: string;
-		singularName: string;
-		summary: string | null;
+		name: LocaleValue;
+		singularName: LocaleValue;
+		summary: LocaleValue | null;
 	};
 	config: {
 		isLocked: boolean;

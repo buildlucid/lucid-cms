@@ -1,12 +1,13 @@
 import z from "zod";
 import C from "../../../constants/constants.js";
+import { stringTranslations } from "../../../schemas/locales.js";
 
 const CollectionConfigSchema = z.object({
 	mode: z.enum(["single", "multiple"]),
 	details: z.object({
-		name: z.string(),
-		singularName: z.string(),
-		summary: z.string().optional(),
+		name: stringTranslations,
+		singularName: stringTranslations,
+		summary: stringTranslations.optional(),
 	}),
 	config: z
 		.object({

@@ -103,7 +103,17 @@ const DocumentSelectContent: Component = () => {
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(getCollectionFieldIncludes()),
 	);
-
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: collection.data?.data.details.name,
+		}),
+	);
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: collection.data?.data.details.singularName,
+			}) || T()("collection"),
+	);
 	const isSuccess = createMemo(
 		() => documents.isSuccess || collection.isSuccess,
 	);
@@ -223,16 +233,14 @@ const DocumentSelectContent: Component = () => {
 					copy={{
 						noEntries: {
 							title: T()("no_documents", {
-								collectionMultiple: collection.data?.data.details.name,
+								collectionMultiple: collectionName(),
 							}),
 							description: T()("no_documents_description_doc_select", {
-								collectionMultiple:
-									collection.data?.data?.details.name.toLowerCase(),
-								collectionSingle:
-									collection.data?.data?.details.singularName.toLowerCase(),
+								collectionMultiple: collectionName().toLowerCase(),
+								collectionSingle: collectionSingularName().toLowerCase(),
 							}),
 							button: T()("create_document", {
-								collectionSingle: collection.data?.data?.details.singularName,
+								collectionSingle: collectionSingularName(),
 							}),
 						},
 					}}

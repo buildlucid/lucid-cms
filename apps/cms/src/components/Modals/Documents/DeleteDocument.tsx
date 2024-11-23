@@ -1,5 +1,6 @@
 import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
+import { type Component, type Accessor, createMemo } from "solid-js";
+import helpers from "@/utils/helpers";
 import Modal from "@/components/Groups/Modal";
 import type { CollectionResponse } from "@lucidcms/core/types";
 import api from "@/services/api";
@@ -18,14 +19,23 @@ interface DeleteDocumentProps {
 
 const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: props.collection?.details.singularName,
+			}) || T()("collection"),
+	);
+
+	// ----------------------------------------
 	// Mutations
+
 	const deleteDocument = api.collections.document.useDeleteSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();
 		},
-		getCollectionName: () =>
-			props.collection.details.singularName || T()("collection"),
+		getCollectionName: collectionSingularName,
 	});
 
 	// ------------------------------
@@ -40,10 +50,10 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 			}}
 			copy={{
 				title: T()("delete_document_modal_title", {
-					name: props.collection.details.singularName,
+					name: collectionSingularName(),
 				}),
 				description: T()("delete_document_modal_description", {
-					name: props.collection.details.singularName.toLowerCase(),
+					name: collectionSingularName().toLowerCase(),
 				}),
 				error: deleteDocument.errors()?.message,
 			}}

@@ -6,7 +6,9 @@ test("collection config is correct along with field includes and filters", async
 		mode: "multiple",
 		details: {
 			name: "Pages",
-			singularName: "Page",
+			singularName: {
+				en: "Page",
+			},
 			summary: "Pages are used to create static content on your website.",
 		},
 		config: {
@@ -113,7 +115,9 @@ test("collection config is correct along with field includes and filters", async
 		mode: "multiple",
 		details: {
 			name: "Pages",
-			singularName: "Page",
+			singularName: {
+				en: "Page",
+			},
 			summary: "Pages are used to create static content on your website.",
 		},
 		config: {

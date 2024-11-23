@@ -12,6 +12,7 @@ import {
 } from "solid-js";
 import classNames from "classnames";
 import { useQueryClient } from "@tanstack/solid-query";
+import helpers from "@/utils/helpers";
 import type { CollectionResponse, FieldErrors } from "@lucidcms/core/types";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
@@ -91,6 +92,20 @@ const CollectionsDocumentsEditRoute: Component<
 	});
 
 	// ----------------------------------
+	// Collection Translations
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: collection.data?.data.details.name,
+		}),
+	);
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: collection.data?.data.details.singularName,
+			}) || T()("collection"),
+	);
+
+	// ----------------------------------
 	// Mutations
 	const createDocument = api.collections.document.useCreateSingle({
 		onSuccess: (data) => {
@@ -113,8 +128,7 @@ const CollectionsDocumentsEditRoute: Component<
 				getBodyError<FieldErrors[]>("fields", errors) || [],
 			);
 		},
-		getCollectionName: () =>
-			collection.data?.data.details.singularName || T()("collection"),
+		getCollectionName: collectionSingularName,
 	});
 	const updateSingle = api.collections.document.useUpdateSingle({
 		onSuccess: () => {
@@ -128,8 +142,7 @@ const CollectionsDocumentsEditRoute: Component<
 			);
 			brickStore.set("documentMutated", false);
 		},
-		getCollectionName: () =>
-			collection.data?.data.details.singularName || T()("collection"),
+		getCollectionName: collectionSingularName,
 	});
 	const promoteToPublished = api.collections.document.usePromoteSingle({
 		onSuccess: () => {
@@ -143,8 +156,7 @@ const CollectionsDocumentsEditRoute: Component<
 			);
 			brickStore.set("documentMutated", false);
 		},
-		getCollectionName: () =>
-			collection.data?.data.details.singularName || T()("collection"),
+		getCollectionName: collectionSingularName,
 		getVersionType: () => "published",
 	});
 
@@ -352,7 +364,7 @@ const CollectionsDocumentsEditRoute: Component<
 										items={[
 											{
 												label: T()("collection"),
-												value: collection.data?.data.details.name,
+												value: collectionName(),
 											},
 											{
 												label: T()("document_id"),
