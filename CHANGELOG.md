@@ -1,5 +1,28 @@
 # @lucidcms/core
 
+## v0.10.0-alpha.0
+
+### Features:
+- Support for revisions, drafts and published document versions. Document data is now never lost, and past revisions can be restored.
+- New publish content permission added to control who can publish documents. There is now fine grained control for creating, updating drafts, publishing documents and restoring revisions. ([26956a6](https://github.com/ProtoDigitalUK/lucid/commit/26956a6c4478457b13cc9b5f9f05c89037363fcf))
+- Pages plugin has been updated to support new document versioning system. ([2943e91](https://github.com/ProtoDigitalUK/lucid/commit/2943e91574f7596fbb2a17cc12e540a806fe09a5?w=1&diff=unified))
+- New version promote hook added thats fires when a version has been restored. Down the line when publishing clones the draft version this will also fire then. ([c3aadc5](https://github.com/ProtoDigitalUK/lucid/commit/c3aadc51995cd82214b45a92e55cdf4a7fbe99a8))
+- WebP prioritised over AVIF on stream media service. ([b7ee0ff](https://github.com/ProtoDigitalUK/lucid_cms/commit/b7ee0fff18e189210376e9cc3daefc8ae5d3bcba))
+- Collection details config now supports translations allowing you to create a better experience to content editors. ([795ffdc](https://github.com/ProtoDigitalUK/lucid_cms/commit/795ffdc9aae8f6344e826918b960a4d8bc59ed6b))
+- WebP is now prioritised over AVIF for the on-request image optimisation when the Accept header is being used. ([b7ee0ff](https://github.com/ProtoDigitalUK/lucid_cms/commit/b7ee0fff18e189210376e9cc3daefc8ae5d3bcba))
+
+### Breaking changes:
+- Collections migration edits to support new versions and revisions tables. You’ll need to delete any existing DB. ([a107840](https://github.com/ProtoDigitalUK/lucid/commit/a107840507285bd3d7ca051ad40f0b98e67bb346))
+- The route to upsert documents has now been split up for creating a document, updating a draft and updating the published version. ([26956a6](https://github.com/ProtoDigitalUK/lucid/commit/26956a6c4478457b13cc9b5f9f05c89037363fcf))
+- The translations and locked config keys on the collection builder have been renamed for clarity and consistency. ([1642943](https://github.com/ProtoDigitalUK/lucid_cms/commit/1642943c649db476cc8a3e5296782fd0fae6a97f))
+- Collection builder field list and filterable flags moved directly into field config instead of being a separate param in the aims to simplify field config. ([fd16c67](https://github.com/ProtoDigitalUK/lucid_cms/commit/fd16c675246d494322ad234de028505507cb829d))
+- Collection builder config updated to be more consistent and descriptive. ([96fdc62](https://github.com/ProtoDigitalUK/lucid_cms/commit/96fdc62f32b9822e9cd963d435b8026ecd8f3a25))
+- Brick builder config updated to be more consistent and descriptive. ([c4743b1](https://github.com/ProtoDigitalUK/lucid_cms/commit/c4743b14076b072ecacf47007dec7aff9b7d3a69))
+- Field config updated to be more consistent and descriptive. ([529ee7c](https://github.com/ProtoDigitalUK/lucid_cms/commit/529ee7c24094acc86caff1aba503f6c5bf07b366))
+
+### Bug Fixes:
+- Removed redundant Buffer creation in image stream processing. ([09796bf](https://github.com/ProtoDigitalUK/lucid_cms/commit/09796bfa4ed116cab19abbed26722da8e25ea90f#diff-9c90be207b7363dffe5a3e438304460af906725b8add431d9eb89db36e182b1cR67))
+
 ## v0.9.0-alpha.0
 
 ### Features:

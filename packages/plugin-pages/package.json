@@ -44,7 +44,7 @@
 		"typescript": "^5.5.4"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.8.0-alpha.0"
+		"@lucidcms/core": "^0.10.0-alpha.0"
 	},
 	"volta": {
 		"node": "20.15.0"

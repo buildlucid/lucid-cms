@@ -1,5 +1,11 @@
 # @lucidcms/plugin-s3
 
+## 1.1.0
+
+### Minor Changes
+
+- Swapped over to use presigned URLs and bumped core peer dependency version
+
 ## 1.0.6
 
 ### Patch Changes

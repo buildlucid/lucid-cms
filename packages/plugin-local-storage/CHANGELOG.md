@@ -1,5 +1,11 @@
 # @lucidcms/plugin-local-storage
 
+## 1.1.0
+
+### Minor Changes
+
+- Updated to use new media strategy with presigined URLS and bumped core peer dependency version
+
 ## 1.0.5
 
 ### Patch Changes

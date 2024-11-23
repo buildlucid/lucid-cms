@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/core",
-	"version": "0.9.0-alpha.0",
+	"version": "0.10.0-alpha.0",
 	"description": "The core of the Lucid CMS. It's responsible for spinning up the API and serving the CMS.",
 	"type": "module",
 	"types": "./dist/index.d.ts",

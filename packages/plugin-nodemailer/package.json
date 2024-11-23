@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/plugin-nodemailer",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "The official Nodemailer plugin for Lucid",
 	"type": "module",
 	"types": "./dist/index.d.ts",
@@ -44,7 +44,7 @@
 		"typescript": "^5.5.2"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.8.0-alpha.0"
+		"@lucidcms/core": "^0.10.0-alpha.0"
 	},
 	"dependencies": {
 		"nodemailer": "^6.9.13"
