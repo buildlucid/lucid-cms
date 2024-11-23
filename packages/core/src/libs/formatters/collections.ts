@@ -142,14 +142,19 @@ export default class CollectionsFormatter {
 			key: {
 				type: "string",
 			},
-			title: {
-				type: ["object", "string"],
-				additionalProperties: true,
-			},
-			description: {
-				type: ["object", "string"],
-				additionalProperties: true,
-				nullable: true,
+			details: {
+				type: "object",
+				properties: {
+					name: {
+						type: ["object", "string"],
+						additionalProperties: true,
+					},
+					summary: {
+						type: ["object", "string"],
+						additionalProperties: true,
+						nullable: true,
+					},
+				},
 			},
 			preview: {
 				type: "object",

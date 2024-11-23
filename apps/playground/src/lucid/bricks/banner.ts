@@ -1,10 +1,12 @@
 import { BrickBuilder } from "@lucidcms/core/builders";
 
 const BannerBrick = new BrickBuilder("banner", {
-	title: {
-		en: "Banner",
+	details: {
+		name: {
+			en: "Banner",
+		},
+		summary: "A banner with a title and intro text",
 	},
-	description: "A banner with a title and intro text",
 	preview: {
 		image: "https://headless-dev.up.railway.app/public/banner-brick.png",
 	},
@@ -16,8 +18,7 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addText("title", {
 		labels: {
-			description:
-				"The title of the banner. This is displayed as an H1 tag.",
+			description: "The title of the banner. This is displayed as an H1 tag.",
 		},
 		validation: {
 			required: true,

@@ -61,16 +61,20 @@ test("tab fields are added and nesting is correct", async () => {
 
 test("brick config is correct", async () => {
 	const brick = new BrickBuilder("brick", {
-		title: "Brick",
-		description: "Brick description",
+		details: {
+			name: "Brick",
+			summary: "Brick Summary",
+		},
 		preview: {
 			image: "https://placehold.co/600x400",
 		},
 	}).addText("text_test");
 
 	expect(brick.config).toEqual({
-		title: "Brick",
-		description: "Brick description",
+		details: {
+			name: "Brick",
+			summary: "Brick Summary",
+		},
 		preview: { image: "https://placehold.co/600x400" },
 	});
 });

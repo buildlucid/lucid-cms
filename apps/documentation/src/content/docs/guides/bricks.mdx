@@ -13,10 +13,12 @@ To create a brick, simply import the `BrickBuilder` class and create a new insta
 import { BrickBuilder } from "@lucidcms/core/builders";
 
 const Banner = new BrickBuilder("banner", {
-  title: {
-    en: "Banner",
+  details: {
+    name: {
+        en: "Banner",
+    },
+    summary: "A banner with a title and intro text"
   },
-  description: "A banner with a title and intro text",
   preview: {
     image: "https://placehold.co/600x400",
   },

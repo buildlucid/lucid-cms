@@ -10,8 +10,10 @@ class BrickBuilder extends FieldBuilder {
 		super();
 		this.key = key;
 		this.config = {
-			title: config?.title || key,
-			description: config?.description,
+			details: {
+				name: config?.details?.name || key,
+				summary: config?.details?.summary,
+			},
 			preview: config?.preview || {},
 		};
 	}

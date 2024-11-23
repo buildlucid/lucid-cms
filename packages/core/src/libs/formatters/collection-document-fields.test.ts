@@ -5,10 +5,12 @@ import BrickBuilder from "../builders/brick-builder/index.js";
 import CollectionDocumentFieldsFormatter from "./collection-document-fields.js";
 
 const BannerBrick = new BrickBuilder("banner", {
-	title: {
-		en: "Banner",
+	details: {
+		name: {
+			en: "Banner",
+		},
+		summary: "A banner with a title and intro text",
 	},
-	description: "A banner with a title and intro text",
 	preview: {
 		image: "https://headless-dev.up.railway.app/public/banner-brick.png",
 	},

@@ -50,8 +50,7 @@ export type FieldFilters = Array<{
 
 export interface CollectionBrickConfig {
 	key: BrickBuilder["key"];
-	title: BrickBuilder["config"]["title"];
-	description: BrickBuilder["config"]["description"];
+	details: BrickBuilder["config"]["details"];
 	preview: BrickBuilder["config"]["preview"];
 	fields: CFConfig<FieldTypes>[];
 }

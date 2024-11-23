@@ -27,11 +27,11 @@ export const BrickImagePreviewButton: Component<
 						open: true,
 						data: {
 							title: helpers.getLocaleValue({
-								value: props.brickConfig?.title,
+								value: props.brickConfig?.details.name,
 								fallback: props.brickConfig?.key,
 							}),
 							description: helpers.getLocaleValue({
-								value: props.brickConfig?.description,
+								value: props.brickConfig?.details.summary,
 								fallback: props.brickConfig?.key,
 							}),
 							image: props.brickConfig?.preview?.image,

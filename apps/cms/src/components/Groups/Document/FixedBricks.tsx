@@ -87,7 +87,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					<FaSolidShield class="text-white text-lg mr-2.5" />
 					<h2>
 						{helpers.getLocaleValue({
-							value: config()?.title,
+							value: config()?.details.name,
 							fallback: config()?.key,
 						})}
 					</h2>

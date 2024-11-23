@@ -1,7 +1,9 @@
 import { BrickBuilder } from "@lucidcms/core/builders";
 
 const SEOBrick = new BrickBuilder("seo", {
-	title: "SEO",
+	details: {
+		name: "SEO",
+	},
 })
 	.addTab("basic_tab", {
 		labels: {

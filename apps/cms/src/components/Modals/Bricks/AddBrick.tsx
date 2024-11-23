@@ -35,7 +35,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 			if (!getSearchQuery()) return true;
 			return helpers
 				.getLocaleValue({
-					value: brickConfig.title,
+					value: brickConfig.details.name,
 					fallback: brickConfig.key,
 				})
 				.toLowerCase()
@@ -126,7 +126,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 											loading="lazy"
 										/>
 										{helpers.getLocaleValue({
-											value: brickConfig.title,
+											value: brickConfig.details.name,
 											fallback: brickConfig.key,
 										})}
 									</button>
@@ -143,7 +143,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 								data={{
 									brick: {
 										title: helpers.getLocaleValue({
-											value: highlightedBrick()?.title,
+											value: highlightedBrick()?.details.name,
 											fallback: highlightedBrick()?.key,
 										}),
 										image: highlightedBrick()?.preview?.image,
@@ -154,10 +154,10 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 								}}
 							/>
 						</div>
-						<Show when={highlightedBrick()?.description}>
+						<Show when={highlightedBrick()?.details.summary}>
 							<Tooltip
 								copy={helpers.getLocaleValue({
-									value: highlightedBrick()?.description,
+									value: highlightedBrick()?.details.summary,
 									fallback: highlightedBrick()?.key,
 								})}
 							/>

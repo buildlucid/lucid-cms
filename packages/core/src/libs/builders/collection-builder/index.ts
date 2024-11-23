@@ -205,8 +205,7 @@ class CollectionBuilder extends FieldBuilder {
 		return (
 			this.config.bricks?.fixed?.map((brick) => ({
 				key: brick.key,
-				title: brick.config.title,
-				description: brick.config.description,
+				details: brick.config.details,
 				preview: brick.config.preview,
 				fields: brick.fieldTree,
 			})) ?? []
@@ -216,8 +215,7 @@ class CollectionBuilder extends FieldBuilder {
 		return (
 			this.config.bricks?.builder?.map((brick) => ({
 				key: brick.key,
-				title: brick.config.title,
-				description: brick.config.description,
+				details: brick.config.details,
 				preview: brick.config.preview,
 				fields: brick.fieldTree,
 			})) ?? []

@@ -201,7 +201,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					</button>
 					<h3>
 						{helpers.getLocaleValue({
-							value: config()?.title,
+							value: config()?.details.name,
 							fallback: config()?.key,
 						})}
 					</h3>

@@ -2,6 +2,7 @@ import T from "../translations/index.js";
 import permissionGroups from "./permission-groups.js";
 
 export default {
+	locales: ["en"] as const,
 	tempDir: "./tmp",
 	swaggerRoutePrefix: "/documentation",
 	headers: {
