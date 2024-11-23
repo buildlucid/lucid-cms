@@ -248,6 +248,7 @@ export const DocumentsList: Component<{
 										type: "button",
 										onClick: () => {
 											setDraftVersionId(doc().versionId as number);
+											setDocumentId(doc().id);
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("publish", true);
 										},
