@@ -11,24 +11,24 @@
 			"types": "./dist/index.d.ts"
 		},
 		"./adapters": {
-			"types": "./dist/exports/adapters.d.ts",
-			"default": "./dist/exports/adapters.js"
+			"types": "./dist/adapters.d.ts",
+			"default": "./dist/adapters.js"
 		},
 		"./api": {
-			"types": "./dist/exports/api.d.ts",
-			"default": "./dist/exports/api.js"
+			"types": "./dist/api.d.ts",
+			"default": "./dist/api.js"
 		},
 		"./builders": {
-			"types": "./dist/exports/builders.d.ts",
-			"default": "./dist/exports/builders.js"
+			"types": "./dist/builders.d.ts",
+			"default": "./dist/builders.js"
 		},
 		"./middleware": {
-			"types": "./dist/exports/middleware.d.ts",
-			"default": "./dist/exports/middleware.js"
+			"types": "./dist/middleware.d.ts",
+			"default": "./dist/middleware.js"
 		},
 		"./types": {
-			"types": "./dist/exports/types.d.ts",
-			"default": "./dist/exports/types.js"
+			"types": "./dist/types.d.ts",
+			"default": "./dist/types.js"
 		}
 	},
 	"scripts": {

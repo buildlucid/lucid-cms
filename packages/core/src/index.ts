@@ -1,10 +1,10 @@
-import { start, fastify } from "./server.js";
+import { start, fastify } from "./libs/fastify/server.js";
+import lucidPlugin from "./libs/fastify/plugins/lucid.js";
 import config from "./libs/config/lucid-config.js";
 import toolkit from "./libs/toolkit/toolkit.js";
 import { LucidError } from "./utils/errors/index.js";
 import logger from "./utils/logging/index.js";
 import z from "zod";
-import lucidPlugin from "./lucid-plugin.js";
 
 export { toolkit, logger, z, LucidError, lucidPlugin };
 
