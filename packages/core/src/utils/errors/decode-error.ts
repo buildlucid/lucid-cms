@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import { LucidAPIError } from "./index.js";
 import constants from "../../constants/constants.js";
-import type { LucidErrorData } from "../../exports/types.js";
+import type { LucidErrorData } from "../../types.js";
 
 const decodeError = (error: Error): Exclude<LucidErrorData, "zod"> => {
 	if (error instanceof LucidAPIError) {

@@ -4,7 +4,7 @@ import CustomField from "../custom-field.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
 import constants from "../../../constants/constants.js";
-import type { LinkResValue } from "../../../exports/types.js";
+import type { LinkResValue } from "../../../types.js";
 import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
 import keyToTitle from "../utils/key-to-title.js";
 import type {

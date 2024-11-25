@@ -5,7 +5,7 @@ import keyToTitle from "../utils/key-to-title.js";
 import { createCdnUrl } from "../../../utils/media/index.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { objectifyTranslations } from "../../../utils/translations/index.js";
-import type { MediaType } from "../../../exports/types.js";
+import type { MediaType } from "../../../types.js";
 import type {
 	CFConfig,
 	CFProps,

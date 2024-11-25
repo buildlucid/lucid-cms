@@ -1,5 +1,5 @@
 import type { QueryParamFilters } from "../../types/query-params.js";
-import type { DocumentFieldFilters } from "../../exports/types.js";
+import type { DocumentFieldFilters } from "../../types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 
 const splitDocumentFilters = (

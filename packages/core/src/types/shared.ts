@@ -1,6 +1,6 @@
-import type C from "../constants/constants.js";
+import type constants from "../constants/constants.js";
 
-export type SupportedLocales = (typeof C.locales)[number];
+export type SupportedLocales = (typeof constants.locales)[number];
 export type LocaleValue = Partial<Record<SupportedLocales, string>> | string;
 
 export interface TranslationsObj {

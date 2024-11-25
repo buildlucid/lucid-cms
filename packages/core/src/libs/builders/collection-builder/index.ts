@@ -1,4 +1,4 @@
-import C from "../../../constants/constants.js";
+import constants from "../../../constants/constants.js";
 import FieldBuilder from "../field-builder/index.js";
 import type BrickBuilder from "../brick-builder/index.js";
 import type { FieldTypes, CFProps } from "../../custom-fields/types.js";
@@ -186,14 +186,17 @@ class CollectionBuilder extends FieldBuilder {
 				summary: this.config.details.summary ?? null,
 			},
 			config: {
-				isLocked: this.config.config?.isLocked ?? C.collectionBuilder.isLocked,
+				isLocked:
+					this.config.config?.isLocked ?? constants.collectionBuilder.isLocked,
 				useDrafts:
-					this.config.config?.useDrafts ?? C.collectionBuilder.useDrafts,
+					this.config.config?.useDrafts ??
+					constants.collectionBuilder.useDrafts,
 				useRevisions:
-					this.config.config?.useRevisions ?? C.collectionBuilder.useRevisions,
+					this.config.config?.useRevisions ??
+					constants.collectionBuilder.useRevisions,
 				useTranslations:
 					this.config.config?.useTranslations ??
-					C.collectionBuilder.useTranslations,
+					constants.collectionBuilder.useTranslations,
 				fields: {
 					filter: this.filterableFieldKeys,
 					include: this.includeFieldKeys,

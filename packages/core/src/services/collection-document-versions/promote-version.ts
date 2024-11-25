@@ -9,7 +9,7 @@ import type {
 	CollectionDocumentResponse,
 	FieldResponse,
 	BrickResponse,
-} from "../../exports/types.js";
+} from "../../types.js";
 
 const promoteVersion: ServiceFn<
 	[

@@ -1,5 +1,5 @@
 import z from "zod";
-import C from "../../../constants/constants.js";
+import constants from "../../../constants/constants.js";
 import { stringTranslations } from "../../../schemas/locales.js";
 
 const CollectionConfigSchema = z.object({
@@ -11,15 +11,21 @@ const CollectionConfigSchema = z.object({
 	}),
 	config: z
 		.object({
-			isLocked: z.boolean().default(C.collectionBuilder.isLocked).optional(),
+			isLocked: z
+				.boolean()
+				.default(constants.collectionBuilder.isLocked)
+				.optional(),
 			useTranslations: z
 				.boolean()
-				.default(C.collectionBuilder.useTranslations)
+				.default(constants.collectionBuilder.useTranslations)
 				.optional(),
-			useDrafts: z.boolean().default(C.collectionBuilder.useDrafts).optional(),
+			useDrafts: z
+				.boolean()
+				.default(constants.collectionBuilder.useDrafts)
+				.optional(),
 			useRevisions: z
 				.boolean()
-				.default(C.collectionBuilder.useRevisions)
+				.default(constants.collectionBuilder.useRevisions)
 				.optional(),
 		})
 		.optional(),

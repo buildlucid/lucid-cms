@@ -1,4 +1,4 @@
-import C from "../../../constants/constants.js";
+import constants from "../../../constants/constants.js";
 import { join } from "node:path";
 import { build } from "vite";
 import solidPlugin from "vite-plugin-solid";
@@ -14,12 +14,12 @@ const buildApp = async () => {
 
 	await build({
 		plugins: [solidPlugin()],
-		root: join(cwd, C.vite.outputDir),
+		root: join(cwd, constants.vite.outputDir),
 		build: {
-			outDir: join(cwd, C.vite.outputDir, C.vite.dist),
+			outDir: join(cwd, constants.vite.outputDir, constants.vite.dist),
 			emptyOutDir: true,
 			rollupOptions: {
-				input: join(cwd, C.vite.outputDir, C.vite.html),
+				input: join(cwd, constants.vite.outputDir, constants.vite.html),
 			},
 		},
 	});

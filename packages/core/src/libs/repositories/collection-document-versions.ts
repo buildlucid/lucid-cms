@@ -1,6 +1,6 @@
 import type z from "zod";
 import type collectionDocumentsSchema from "../../schemas/collection-documents.js";
-import type { Config } from "../../exports/types.js";
+import type { Config } from "../../types.js";
 import { sql } from "kysely";
 import queryBuilder, {
 	type QueryBuilderWhere,

@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import fs from "node:fs/promises";
-import C from "../../../constants/constants.js";
+import constants from "../../../constants/constants.js";
 
 const generateHTML = async () => {
 	const cwd = process.cwd();
@@ -18,14 +18,14 @@ const generateHTML = async () => {
             </head>
             <body class="h-full bg-container-1">
                 <noscript>You need to enable JavaScript to run this app.</noscript>
-                <div id="${C.vite.rootSelector}" class="h-full"></div>
-                <script src="/${C.vite.mount}" type="module"></script>
+                <div id="${constants.vite.rootSelector}" class="h-full"></div>
+                <script src="/${constants.vite.mount}" type="module"></script>
             </body>
         </html>`;
 
-	await fs.mkdir(join(cwd, C.vite.outputDir), { recursive: true });
+	await fs.mkdir(join(cwd, constants.vite.outputDir), { recursive: true });
 	await fs.writeFile(
-		join(cwd, C.vite.outputDir, C.vite.html),
+		join(cwd, constants.vite.outputDir, constants.vite.html),
 		content,
 		"utf-8",
 	);

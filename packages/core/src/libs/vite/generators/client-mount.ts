@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import fs from "node:fs/promises";
-import C from "../../../constants/constants.js";
+import constants from "../../../constants/constants.js";
 
 const generateClientMount = async () => {
 	const cwd = process.cwd();
@@ -12,12 +12,12 @@ const generateClientMount = async () => {
 
         render(
             app,
-            document.getElementById('${C.vite.rootSelector}')
+            document.getElementById('${constants.vite.rootSelector}')
         );`;
 
-	await fs.mkdir(join(cwd, C.vite.outputDir), { recursive: true });
+	await fs.mkdir(join(cwd, constants.vite.outputDir), { recursive: true });
 	await fs.writeFile(
-		join(cwd, C.vite.outputDir, C.vite.mount),
+		join(cwd, constants.vite.outputDir, constants.vite.mount),
 		content,
 		"utf-8",
 	);

@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import type { LucidErrorData } from "../../exports/types.js";
+import type { LucidErrorData } from "../../types.js";
 
 const errorTypeDefaults = (error: LucidErrorData) => {
 	switch (error.type) {

@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
-import type { Config } from "../../../exports/types.js";
+import type { Config } from "../../../types.js";
 
 const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 	switch (field.type) {

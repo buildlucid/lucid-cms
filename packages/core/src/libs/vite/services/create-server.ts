@@ -1,4 +1,4 @@
-import C from "../../../constants/constants.js";
+import constants from "../../../constants/constants.js";
 import { join } from "node:path";
 import { createServer } from "vite";
 import solidPlugin from "vite-plugin-solid";
@@ -14,9 +14,9 @@ const createDevServer = async () => {
 
 	const server = await createServer({
 		plugins: [solidPlugin()],
-		root: join(cwd, C.vite.outputDir),
+		root: join(cwd, constants.vite.outputDir),
 		server: {
-			port: C.vite.port,
+			port: constants.vite.port,
 		},
 	});
 

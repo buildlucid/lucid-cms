@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import type { Config } from "../../../exports/types.js";
+import type { Config } from "../../../types.js";
 
 const checkLocales = (localisation: Config["localisation"]) => {
 	if (localisation.locales.length === 0) {

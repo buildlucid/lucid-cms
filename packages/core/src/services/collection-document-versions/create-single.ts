@@ -3,7 +3,7 @@ import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
-import type { CollectionBuilder } from "../../exports/builders.js";
+import type { CollectionBuilder } from "../../builders.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { BooleanInt } from "../../libs/db/types.js";
 

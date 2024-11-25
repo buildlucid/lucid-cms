@@ -2,7 +2,7 @@ import constants from "../../../constants/constants.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../../schemas/collection-fields.js";
-import type { Config } from "../../../exports/types.js";
+import type { Config } from "../../../types.js";
 import flattenFields, {
 	type GroupInsertItem,
 	type FieldInsertItem,

@@ -4,7 +4,7 @@ import type {
 	FieldSchemaSimpleType,
 	FieldValueSchemaType,
 } from "../../../schemas/collection-fields.js";
-import type { Config } from "../../../exports/types.js";
+import type { Config } from "../../../types.js";
 import type { BooleanInt } from "../../../libs/db/types.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 

@@ -7,7 +7,7 @@ import { encode } from "blurhash";
 import { getAverageColor } from "fast-average-color-node";
 import { getMonth, getYear } from "date-fns";
 import type { Readable } from "node:stream";
-import type { Config, MediaType } from "../../exports/types.js";
+import type { Config, MediaType } from "../../types.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type { BooleanInt } from "../db/types.js";
 

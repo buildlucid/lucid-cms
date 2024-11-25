@@ -13,7 +13,7 @@ import Formatter from "./index.js";
 import CollectionDocumentBricksFormatter, {
 	type GroupProp,
 } from "./collection-document-bricks.js";
-import type { Config } from "../../exports/types.js";
+import type { Config } from "../../types.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 
 interface DocumentPropT {

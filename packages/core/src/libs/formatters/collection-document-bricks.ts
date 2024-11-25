@@ -7,7 +7,7 @@ import type { BrickResponse, FieldResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
 import type { BooleanInt } from "../db/types.js";
-import type { Config } from "../../exports/types.js";
+import type { Config } from "../../types.js";
 
 export interface GroupProp {
 	group_id: number;

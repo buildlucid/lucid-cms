@@ -16,7 +16,7 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
-import type { Config } from "../../../exports/types.js";
+import type { Config } from "../../../types.js";
 
 const FieldsFormatter = Formatter.get("collection-document-fields");
 

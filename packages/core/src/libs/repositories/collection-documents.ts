@@ -14,7 +14,7 @@ import type {
 import type { Config } from "../../types/config.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type collectionDocumentsSchema from "../../schemas/collection-documents.js";
-import type { DocumentFieldFilters } from "../../exports/types.js";
+import type { DocumentFieldFilters } from "../../types.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
 
 export default class CollectionDocumentsRepo {
