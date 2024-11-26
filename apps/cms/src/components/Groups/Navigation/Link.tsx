@@ -38,7 +38,7 @@ export const NavigationLink: Component<NavigationLinkProps> = (props) => {
 					},
 				)}
 				activeClass={classNames(
-					"!bg-primary-base !text-primary-contrast !fill-primary-base-contrast",
+					"bg-primary-base! text-primary-contrast! fill-primary-base-contrast!",
 				)}
 				end
 			>

@@ -61,11 +61,11 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 	};
 
 	return (
-		<li class="w-full border-b border-border focus-within:outline-none focus-within:ring-1 ring-inset ring-primary-base">
+		<li class="w-full border-b border-border focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base">
 			{/* Header */}
 			<div
 				class={classNames(
-					"flex justify-between cursor-pointer pt-15 px-15 md:px-30 md:pt-30 focus:outline-none",
+					"flex justify-between cursor-pointer pt-15 px-15 md:px-30 md:pt-30 focus:outline-hidden",
 					{
 						"pb-0": getBrickOpen(),
 						"pb-15 md:pb-30": !getBrickOpen(),
@@ -80,6 +80,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				id={`fixed-brick-${props.brick.key}`}
 				aria-expanded={getBrickOpen()}
 				aria-controls={`fixed-brick-content-${props.brick.key}`}
+				// biome-ignore lint/a11y/useSemanticElements: <explanation>
 				role="button"
 				tabIndex="0"
 			>

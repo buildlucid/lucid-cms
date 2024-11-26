@@ -137,7 +137,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				"view-transition-name": `brick-item-${props.brick.id}`,
 			}}
 			class={classNames(
-				"drag-item w-full bg-container-2 border border-border rounded-md mb-15 last:mb-0 focus-within:outline-none focus-within:ring-1 ring-inset ring-primary-base",
+				"drag-item w-full bg-container-2 border border-border rounded-md mb-15 last:mb-0 focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base",
 				{
 					"opacity-60": props.dragDrop.getDragging()?.index === brickIndex(),
 					"ring-1 ring-inset":
@@ -162,7 +162,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			{/* Header */}
 			<div
 				class={classNames(
-					"flex items-center justify-between cursor-pointer px-15 py-2.5 rounded-md focus:outline-none",
+					"flex items-center justify-between cursor-pointer px-15 py-2.5 rounded-md focus:outline-hidden",
 				)}
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
@@ -172,13 +172,14 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				}}
 				aria-expanded={getBrickOpen()}
 				aria-controls={`bulder-brick-content-${props.brick.key}`}
+				// biome-ignore lint/a11y/useSemanticElements: <explanation>
 				role="button"
 				tabIndex="0"
 			>
 				<div class="flex items-center">
 					<button
 						type="button"
-						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-none focus:ring-1 ring-primary-base disabled:hover:!text-icon-base disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								index: brickIndex(),

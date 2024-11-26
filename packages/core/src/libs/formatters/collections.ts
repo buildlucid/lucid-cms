@@ -58,12 +58,12 @@ export default class CollectionsFormatter {
 				fieldFilters: props.collection.filterableFieldKeys.map((f) => f.key),
 			},
 			fixedBricks: props.include?.bricks
-				? props.collection.fixedBricks ?? []
+				? (props.collection.fixedBricks ?? [])
 				: [],
 			builderBricks: props.include?.bricks
-				? props.collection.builderBricks ?? []
+				? (props.collection.builderBricks ?? [])
 				: [],
-			fields: props.include?.fields ? props.collection.fieldTree ?? [] : [],
+			fields: props.include?.fields ? (props.collection.fieldTree ?? []) : [],
 		};
 	};
 	private getDocumentId = (

@@ -159,9 +159,9 @@ export const TableRoot: Component<TableRootProps> = (props) => {
 			<div class="w-full overflow-x-auto scrollbar" ref={overflowRef}>
 				<table class="w-full table h-auto border-collapse">
 					<Show when={props?.caption}>
-						<caption class="caption-bottom border-t-primary-base border-t-2 border-b border-b-border bg-container-4 text-title py-2 text-sm">
+						<div class="caption-bottom border-t-primary-base border-t-2 border-b border-b-border bg-container-4 text-title py-2 text-sm">
 							{props?.caption}
-						</caption>
+						</div>
 					</Show>
 					<thead>
 						<tr class="h-10">

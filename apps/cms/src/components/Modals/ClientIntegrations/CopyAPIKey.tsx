@@ -29,7 +29,7 @@ const CopyAPIKey: Component<CopyAPIKeyProps> = (props) => {
 		>
 			<input
 				class={
-					"focus:outline-none px-2.5 text-sm text-title font-medium h-14 rounded-md bg-container-4 w-full"
+					"focus:outline-hidden px-2.5 text-sm text-title font-medium h-14 rounded-md bg-container-4 w-full"
 				}
 				type={"text"}
 				value={props.apiKey || ""}

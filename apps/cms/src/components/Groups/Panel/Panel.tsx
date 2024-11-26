@@ -103,10 +103,10 @@ export const Panel: Component<{
 			onOpenChange={() => props.state.setOpen(!props.state.open)}
 		>
 			<Dialog.Portal>
-				<Dialog.Overlay class="fixed inset-0 z-40 bg-black bg-opacity-80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-[expanded]:animate-animate-overlay-show" />
+				<Dialog.Overlay class="fixed inset-0 z-40 bg-black bg-opacity-80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-15 z-40 flex justify-end">
 					<Dialog.Content
-						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-container-3 animate-animate-slide-from-right-out data-[expanded]:animate-animate-slide-from-right-in outline-none overflow-y-auto"
+						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-container-3 animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.hasAttribute("data-panel-ignore")) {
@@ -144,7 +144,7 @@ export const Panel: Component<{
 												<p class="mt-1">{props.copy?.description}</p>
 											</Show>
 										</div>
-										<Dialog.CloseButton class="flex items-center w-10 h-10 min-w-10 rounded-full focus:outline-none focus:ring-1 ring-primary-base bg-container-4 border border-border hover:bg-container-3 justify-center">
+										<Dialog.CloseButton class="flex items-center w-10 h-10 min-w-10 rounded-full focus:outline-hidden focus:ring-1 ring-primary-base bg-container-4 border border-border hover:bg-container-3 justify-center">
 											<FaSolidArrowRight class="text-title" />
 											<span class="sr-only">{T()("back")}</span>
 										</Dialog.CloseButton>
@@ -161,7 +161,7 @@ export const Panel: Component<{
 								</div>
 								{/* Body */}
 								<form
-									class="flex-grow flex flex-col justify-between"
+									class="grow flex flex-col justify-between"
 									onSubmit={(e) => {
 										e.preventDefault();
 										if (props.callbacks?.onSubmit) props.callbacks?.onSubmit();

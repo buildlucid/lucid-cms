@@ -81,8 +81,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	return (
 		<div
 			class={classNames("w-full mb-15 last:mb-0 relative", {
-				"!mb-0": !activeTab(),
-				"invisible h-0 opacity-0 !mb-0":
+				"mb-0!": !activeTab(),
+				"invisible h-0 opacity-0 mb-0!":
 					fieldConfig().type !== "tab"
 						? // @ts-expect-error
 							fieldConfig()?.config?.isHidden === true

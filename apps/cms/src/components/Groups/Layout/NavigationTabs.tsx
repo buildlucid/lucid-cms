@@ -21,7 +21,7 @@ export const NavigationTabs: Component<NavigationTabsProps> = (props) => {
 						<li class="mr-15">
 							<A
 								class="flex pb-2.5 font-medium text-body border-b-2 border-transparent hover:border-primary-base transition-colors duration-200"
-								activeClass="!border-primary-base text-title"
+								activeClass="border-primary-base! text-title"
 								href={tab.href || "#"}
 								onClick={tab.onClick}
 								end

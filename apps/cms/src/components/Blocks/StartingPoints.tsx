@@ -32,7 +32,7 @@ const StartingPoints: Component<StartingPointsProps> = (props) => {
 			<For each={props.links}>
 				{(link) => (
 					<li class="relative bg-container-2 border border-border p-15 rounded-md h-full flex space-x-2.5 focus-within:ring-1 focus-within:ring-primary-base">
-						<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary-base">
+						<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-base">
 							<Switch>
 								<Match when={link.icon === "collection"}>
 									<FaSolidBox class={iconClasses} />
@@ -56,7 +56,7 @@ const StartingPoints: Component<StartingPointsProps> = (props) => {
 						</div>
 						<div>
 							<h3 class="text-sm font-medium text-title">
-								<A href={link.href} class="focus:outline-none">
+								<A href={link.href} class="focus:outline-hidden">
 									<span class="absolute inset-0" aria-hidden="true" />
 									<span>{link.title}</span>
 									<span aria-hidden="true"> &rarr;</span>

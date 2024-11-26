@@ -74,7 +74,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 					<FaSolidMagnifyingGlass class="w-15 text-unfocused" />
 				</div>
 				<input
-					class="h-full bg-container-3 w-full border-b border-border px-10 focus:outline-none text-title placeholder:text-unfocused"
+					class="h-full bg-container-3 w-full border-b border-border px-10 focus:outline-hidden text-title placeholder:text-unfocused"
 					placeholder="search"
 					value={getSearchQuery()}
 					onInput={(e) => setSearchQuery(e.currentTarget.value)}

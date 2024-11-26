@@ -267,7 +267,7 @@ export default class CollectionDocumentFieldsFormatter {
 			key: meta.fieldConfig.key,
 			type: meta.fieldConfig.type as FieldTypes,
 			groupId: meta.includeGroupId
-				? defaultField.group_id ?? undefined
+				? (defaultField.group_id ?? undefined)
 				: undefined,
 			...cfInstance.responseValueFormat({
 				data: defaultField,

@@ -412,7 +412,7 @@ export const HeaderLayout: Component<{
 			</header>
 			<div
 				ref={contentRef}
-				class="w-full flex flex-col flex-grow overflow-hidden bg-container-3 rounded-t-xl border-x border-t border-border z-10 relative mt-[191px] duration-75 ease-out opacity-0 transition-all"
+				class="w-full flex flex-col grow overflow-hidden bg-container-3 rounded-t-xl border-x border-t border-border z-10 relative mt-[191px] duration-75 ease-out opacity-0 transition-all"
 			>
 				{props.children}
 			</div>

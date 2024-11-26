@@ -124,7 +124,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 	// Render
 	return (
 		<DropdownMenu.Item
-			class="mb-2 last-of-type:mb-0 focus:outline-none"
+			class="mb-2 last-of-type:mb-0 focus:outline-hidden"
 			closeOnSelect={false}
 		>
 			<label
@@ -268,7 +268,7 @@ export const Filter: Component<FilterProps> = (props) => {
 				options={{
 					as: "ul",
 					rounded: true,
-					class: "w-[300px] z-[60]",
+					class: "w-[300px] z-60",
 				}}
 			>
 				<For each={props.filters}>

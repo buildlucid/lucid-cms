@@ -8,7 +8,7 @@ interface SpinnerProps {
 
 const Spinner: Component<SpinnerProps> = (props) => {
 	return (
-		<div role="status">
+		<div>
 			<svg
 				aria-hidden="true"
 				class={classNames("animate-spin text-gray-300 fill-primary-base", {

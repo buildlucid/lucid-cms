@@ -26,7 +26,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
 					<FaSolidInfo size={10} />
 				</HoverCard.Trigger>
 				<HoverCard.Portal>
-					<HoverCard.Content class="z-50 bg-primary-base w-80 mt-2.5 rounded-md p-15 border border-primary-hover shadow-sm">
+					<HoverCard.Content class="z-50 bg-primary-base w-80 mt-2.5 rounded-md p-15 border border-primary-hover shadow-xs">
 						<p class="text-sm text-primary-contrast">{props.copy}</p>
 					</HoverCard.Content>
 				</HoverCard.Portal>

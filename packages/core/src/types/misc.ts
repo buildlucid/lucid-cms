@@ -1,1 +1,1 @@
-export { type FieldSchemaType } from "../schemas/collection-fields.js";
+export type { FieldSchemaType } from "../schemas/collection-fields.js";

@@ -334,7 +334,7 @@ const CollectionsDocumentsEditRoute: Component<
 							]}
 						/>
 					</Show>
-					<div class="w-full flex flex-grow">
+					<div class="w-full flex grow">
 						{/* Fields & Bricks */}
 						<div class="w-full flex flex-col">
 							<Document.CollectionPseudoBrick

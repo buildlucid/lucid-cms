@@ -40,7 +40,7 @@ export const PerPage: Component<PerPageProps> = (props) => {
 				options={{
 					as: "ul",
 					rounded: true,
-					class: "w-[180px] z-[60] !p-2.5",
+					class: "w-[180px] z-60 p-2.5!",
 				}}
 			>
 				<For each={options()}>
@@ -49,7 +49,7 @@ export const PerPage: Component<PerPageProps> = (props) => {
 							<button
 								tabIndex={0}
 								class={classNames(
-									"w-full flex items-center justify-between group focus:outline-none focus:ring-1 focus:ring-primary-base px-1.5 py-1 rounded-md",
+									"w-full flex items-center justify-between group focus:outline-hidden focus:ring-1 focus:ring-primary-base px-1.5 py-1 rounded-md",
 									{
 										"bg-container-2 text-body": currentPerPage() === perpage,
 									},

@@ -30,13 +30,13 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 					<Button
 						theme="border-outline"
 						size="x-small"
-						classes="!py-1"
+						classes="py-1!"
 						onClick={props.callbacks.reset}
 					>
 						{T()("reset")}
 					</Button>
 					<Button
-						classes="ml-2.5 !py-1"
+						classes="ml-2.5 py-1!"
 						theme="danger"
 						size="x-small"
 						onClick={props.callbacks.delete}

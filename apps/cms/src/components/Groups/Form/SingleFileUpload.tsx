@@ -263,7 +263,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	// ------------------------------------
 	// Classes
 	const actionButtonClasses = classNames(
-		"bg-secondary-base text-secondary-contrast h-10 flex justify-center items-center font-display font-medium text-sm py-2 px-5 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-none focus:ring-1 focus:ring-primary-base",
+		"bg-secondary-base text-secondary-contrast h-10 flex justify-center items-center font-display font-medium text-sm py-2 px-5 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus:ring-1 focus:ring-primary-base",
 	);
 
 	// ------------------------------------

@@ -97,7 +97,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					{/* Select */}
 					<div
 						class={classnames(
-							"w-full pointer-events-none z-10 focus:outline-none px-2.5 text-sm text-title font-medium justify-between flex ",
+							"w-full pointer-events-none z-10 focus:outline-hidden px-2.5 text-sm text-title font-medium justify-between flex ",
 							{
 								"pt-2 min-h-[40px]": props.copy?.label === undefined,
 								"min-h-[32px] mt-1": props.copy?.label !== undefined,
@@ -111,11 +111,11 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						<div class="flex flex-wrap gap-1">
 							<For each={props.values}>
 								{(value) => (
-									<span class="bg-primary-base hover:bg-primary-hover duration-200 transition-colors rounded-md text-primary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-none">
+									<span class="bg-primary-base hover:bg-primary-hover duration-200 transition-colors rounded-md text-primary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
 										{value.label}
 										<button
 											type="button"
-											class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-none focus:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
+											class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-hidden focus:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
 											onClick={(e) => {
 												e.stopPropagation();
 												e.preventDefault();
@@ -138,7 +138,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					</div>
 					{/* Trigger */}
 					<DropdownMenu.Trigger
-						class="absolute inset-0 w-full left-0 rounded-md focus:outline-none"
+						class="absolute inset-0 w-full left-0 rounded-md focus:outline-hidden"
 						onFocus={() => setInputFocus(true)}
 						onBlur={() => setInputFocus(false)}
 					/>
@@ -147,7 +147,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					options={{
 						anchorWidth: true,
 						rounded: true,
-						class: "max-h-36 overflow-y-auto z-[70] !p-1.5",
+						class: "max-h-36 overflow-y-auto z-70 p-1.5!",
 					}}
 				>
 					<Switch>
@@ -156,7 +156,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<DropdownMenu.Item
-											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2.5 py-1 rounded-md cursor-pointer focus:outline-none focus:bg-primary-hover focus:text-primary-contrast"
+											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2.5 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
 											onSelect={() => {
 												toggleValue(option);
 											}}

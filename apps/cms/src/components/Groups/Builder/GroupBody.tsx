@@ -89,7 +89,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			{/* Group Header */}
 			<div
 				class={classNames(
-					"w-full bg-container-4 focus:outline-none focus:ring-1 ring-inset ring-primary-base cursor-pointer p-2.5 rounded-md border border-border-input flex justify-between items-center",
+					"w-full bg-container-4 focus:outline-hidden focus:ring-1 ring-inset ring-primary-base cursor-pointer p-2.5 rounded-md border border-border-input flex justify-between items-center",
 					{
 						"border-b-0 rounded-b-none": getGroupOpen(),
 						"ring-1 ring-inset":
@@ -105,13 +105,14 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				id={`accordion-header-${groupId()}`}
 				aria-expanded={getGroupOpen()}
 				aria-controls={`accordion-content-${groupId()}`}
+				// biome-ignore lint/a11y/useSemanticElements: <explanation>
 				role="button"
 				tabIndex="0"
 			>
 				<div class="flex items-center">
 					<button
 						type="button"
-						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-none focus:ring-1 ring-primary-base disabled:hover:!text-icon-base disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.state.dragDrop.onDragStart(e, {
 								index: groupId(),
@@ -176,7 +177,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						"scale-y-0 h-0 opacity-0 invisible": !getGroupOpen(),
 					},
 				)}
-				role="region"
 				aria-labelledby={`accordion-header-${groupId()}`}
 			>
 				<div class="p-15">

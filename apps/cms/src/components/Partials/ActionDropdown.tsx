@@ -54,7 +54,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 
 			<DropdownContent
 				options={{
-					class: "w-[200px] !p-1.5",
+					class: "w-[200px] p-1.5!",
 					rounded: true,
 				}}
 			>

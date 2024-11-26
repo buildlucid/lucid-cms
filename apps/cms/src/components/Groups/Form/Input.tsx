@@ -72,7 +72,7 @@ export const Input: Component<InputProps> = (props) => {
 				/>
 				<input
 					class={classnames(
-						"focus:outline-none px-2.5 text-sm text-title font-medium disabled:cursor-not-allowed disabled:opacity-80",
+						"focus:outline-hidden px-2.5 text-sm text-title font-medium disabled:cursor-not-allowed disabled:opacity-80",
 						{
 							"pr-[38px]": props.type === "password",
 							"pt-2": props.copy?.label === undefined,

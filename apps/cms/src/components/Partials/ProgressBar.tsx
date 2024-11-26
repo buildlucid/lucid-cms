@@ -32,6 +32,7 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 				aria-valuemin="0"
 				aria-valuemax="100"
 				aria-valuetext={`${getProgress()}% progress`}
+				tabIndex={-1}
 			>
 				<div
 					class={classNames("h-full rounded-md duration-200 transition-all", {

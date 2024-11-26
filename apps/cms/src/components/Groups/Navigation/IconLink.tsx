@@ -86,13 +86,13 @@ export const IconLink: Component<IconLinkProps> = (props) => {
 								<A
 									href={props.href || "/"}
 									class={classNames(
-										"w-10 h-10 focus:outline-none focus:!border-primary-base focus:ring-0 flex items-center justify-center bg-container-1 rounded-lg border border-transparent transition-colors duration-200 ease-in-out hover:border-container-4",
+										"w-10 h-10 focus:outline-hidden focus:border-primary-base! focus:ring-0 flex items-center justify-center bg-container-1 rounded-lg border border-transparent transition-colors duration-200 ease-in-out hover:border-container-4",
 										{
-											"!border-container-4": props.active,
+											"border-container-4!": props.active,
 											"animate-pulse pointer-events-none": props.loading,
 										},
 									)}
-									activeClass={!props.active ? "!border-container-4" : ""}
+									activeClass={!props.active ? "border-container-4!" : ""}
 									end={props.href === "/admin"}
 								>
 									<Icons />
@@ -104,9 +104,9 @@ export const IconLink: Component<IconLinkProps> = (props) => {
 								tabIndex={0}
 								as="button"
 								class={classNames(
-									"w-10 h-10 focus:outline-none focus:!border-primary-base focus:ring-0 flex items-center justify-center bg-container-1 rounded-lg border border-transparent transition-colors duration-200 ease-in-out hover:border-container-4",
+									"w-10 h-10 focus:outline-hidden focus:border-primary-base! focus:ring-0 flex items-center justify-center bg-container-1 rounded-lg border border-transparent transition-colors duration-200 ease-in-out hover:border-container-4",
 									{
-										"!border-container-4": props.active,
+										"border-container-4!": props.active,
 										"animate-pulse pointer-events-none": props.loading,
 									},
 								)}

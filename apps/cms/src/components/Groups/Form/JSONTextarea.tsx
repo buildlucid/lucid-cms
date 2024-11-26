@@ -103,7 +103,7 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				<div class="relative">
 					<textarea
 						class={classnames(
-							"focus:outline-none disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium resize-none w-full h-52 block",
+							"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium resize-none w-full h-52 block",
 							{
 								"pt-2": props.copy?.label === undefined,
 								"bg-container-4 border border-border-input rounded-md mt-1 p-2.5 focus:border-primary-base duration-200 transition-colors":

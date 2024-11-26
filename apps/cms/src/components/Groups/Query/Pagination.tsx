@@ -72,7 +72,7 @@ export const Pagination: Component<{
 					count={lastPage()}
 					itemComponent={(props) => (
 						<KobPagination.Item
-							class="h-10 w-10 flex items-center justify-center [&[data-current]]:bg-primary-base [&[data-current]]:text-primary-contrast hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors"
+							class="h-10 w-10 flex items-center justify-center data-current:bg-primary-base data-current:text-primary-contrast hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors"
 							page={props.page}
 						>
 							{props.page}

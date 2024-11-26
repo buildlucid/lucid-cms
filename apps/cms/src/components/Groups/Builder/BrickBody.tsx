@@ -57,14 +57,13 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						!props.state.open,
 				},
 			)}
-			role="region"
 			aria-labelledby={props.state.labelledby}
 		>
 			<div
 				class={classNames({
 					"p-15 pt-0": props.options.padding === "15",
 					"p-15 md:p-30": props.options.padding === "30",
-					"!pt-15": props.options.bleedTop,
+					"pt-15!": props.options.bleedTop,
 				})}
 			>
 				{/* Tabs */}

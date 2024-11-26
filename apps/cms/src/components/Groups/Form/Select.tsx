@@ -123,7 +123,7 @@ export const Select: Component<SelectProps> = (props) => {
 					{/* Trigger */}
 					<DropdownMenu.Trigger
 						class={classNames(
-							"focus:outline-none px-2.5 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
+							"focus:outline-hidden px-2.5 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
 							{
 								"bg-container-4 border border-border-input flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic" || props.theme === "basic-small",
@@ -152,7 +152,7 @@ export const Select: Component<SelectProps> = (props) => {
 							<Show when={props.noClear !== true}>
 								<button
 									type="button"
-									class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-none focus:ring-1 ring-error-base focus:fill-error-base"
+									class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus:ring-1 ring-error-base focus:fill-error-base"
 									onClick={(e) => {
 										e.stopPropagation();
 										props.onChange(undefined);
@@ -169,7 +169,7 @@ export const Select: Component<SelectProps> = (props) => {
 					options={{
 						anchorWidth: true,
 						rounded: true,
-						class: "max-h-80 overflow-y-auto z-[70] !p-1.5",
+						class: "max-h-80 overflow-y-auto z-70 p-1.5!",
 					}}
 				>
 					<Show when={props.search !== undefined}>
@@ -182,7 +182,7 @@ export const Select: Component<SelectProps> = (props) => {
 							<div class="relative">
 								<input
 									type="text"
-									class="bg-container-1 px-2.5 rounded-md w-full border border-border text-sm text-title font-medium h-10 focus:outline-none focus:border-primary-base"
+									class="bg-container-1 px-2.5 rounded-md w-full border border-border text-sm text-title font-medium h-10 focus:outline-hidden focus:border-primary-base"
 									placeholder={props.copy?.searchPlaceholder || T()("search")}
 									value={props.search?.value || ""}
 									onKeyDown={(e) => {
@@ -201,7 +201,7 @@ export const Select: Component<SelectProps> = (props) => {
 										<div class="absolute right-2.5 top-0 bottom-0 flex items-center">
 											<button
 												type="button"
-												class="bg-primary-base pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-none focus:ring-1 ring-error-base focus:fill-error-base"
+												class="bg-primary-base pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus:ring-1 ring-error-base focus:fill-error-base"
 												onClick={() => {
 													setDebouncedValue("");
 												}}
@@ -231,7 +231,7 @@ export const Select: Component<SelectProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<li
-											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2.5 py-1 rounded-md cursor-pointer focus:outline-none focus:bg-primary-hover focus:text-primary-contrast"
+											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2.5 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
 											onClick={() => {
 												props.onChange(option.value);
 												setDebouncedValue("");
