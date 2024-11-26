@@ -269,7 +269,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 					}}
 				>
 					<Show when={!revisionDoc.data}>
-						<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 flex-col z-20">
+						<div class="absolute inset-0 flex items-center justify-center bg-black/60 flex-col z-20">
 							<div class="w-full max-w-xl px-15 py-15 text-center flex flex-col items-center">
 								<h2 class="mb-2.5">{T()("no_revisions_found")}</h2>
 								<p class="mb-30">{T()("no_revisions_found_message")}</p>

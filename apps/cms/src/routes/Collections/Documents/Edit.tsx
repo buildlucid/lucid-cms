@@ -472,7 +472,7 @@ const CollectionsDocumentsEditRoute: Component<
 					}}
 				/>
 				<Show when={isSaving()}>
-					<div class="fixed inset-0 bg-black bg-opacity-60 animate-pulse z-50" />
+					<div class="fixed inset-0 bg-black/60 animate-pulse z-50" />
 				</Show>
 			</Match>
 		</Switch>
