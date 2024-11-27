@@ -1,31 +1,35 @@
 {
-	"private": true,
-	"scripts": {
-		"start": "turbo run start",
-		"build": "turbo run build",
-		"dev:full": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/cms --filter=@lucidcms/core",
-		"dev:core": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/core",
-		"dev:cms": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/cms",
-		"test": "vitest run",
-		"test:watch": "vitest watch",
-		"format": "turbo run format",
-		"format:fix": "turbo run format:fix",
-		"lint": "turbo run lint",
-		"lint:fix": "turbo run lint:fix",
-		"prepare": "husky"
-	},
-	"devDependencies": {
-		"husky": "^9.0.11",
-		"turbo": "^2.3.1",
-		"vitest": "^2.0.1"
-	},
-	"optionalDependencies": {
-		"@rollup/rollup-linux-x64-gnu": "4.18.1"
-	},
-	"name": "lucid",
-	"packageManager": "npm@10.2.4",
-	"workspaces": ["apps/*", "packages/*", "examples/*"],
-	"volta": {
-		"node": "20.15.0"
-	}
+    "private": true,
+    "scripts": {
+        "start": "turbo run start",
+        "build": "turbo run build",
+        "dev:full": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/admin --filter=@lucidcms/core",
+        "dev:core": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/core",
+        "dev:cms": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/admin",
+        "test": "vitest run",
+        "test:watch": "vitest watch",
+        "format": "turbo run format",
+        "format:fix": "turbo run format:fix",
+        "lint": "turbo run lint",
+        "lint:fix": "turbo run lint:fix",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "husky": "^9.0.11",
+        "turbo": "^2.3.1",
+        "vitest": "^2.0.1"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.18.1"
+    },
+    "name": "lucid",
+    "packageManager": "npm@10.2.4",
+    "workspaces": [
+        "apps/*",
+        "packages/*",
+        "examples/*"
+    ],
+    "volta": {
+        "node": "20.15.0"
+    }
 }

@@ -16,10 +16,6 @@ export default defineConfig({
 	server: {
 		port: 3000,
 	},
-	build: {
-		target: "esnext",
-		outDir: "../../packages/core/cms",
-	},
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
