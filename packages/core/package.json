@@ -65,6 +65,7 @@
         "Kysely"
     ],
     "devDependencies": {
+        "@lucidcms/admin": "*",
         "@biomejs/biome": "^1.8.3",
         "@lucidcms/config": "*",
         "@types/fs-extra": "^11.0.4",
@@ -117,10 +118,14 @@
         "vite-plugin-solid": "^2.10.2",
         "winston": "^3.17.0",
         "zod": "^3.23.8",
-        "zod-validation-error": "^3.4.0"
+        "zod-validation-error": "^3.4.0",
+        "@tailwindcss/vite": "^4.0.0-beta.2",
+        "tailwindcss": "^4.0.0-beta.2"
     },
-    "peerDependencies": {
-        "@lucidcms/admin": "0.10.0-alpha.0"
+    "publishConfig": {
+        "dependencies": {
+            "@lucidcms/admin": "0.10.0-alpha.0"
+        }
     },
     "volta": {
         "node": "20.15.1"
