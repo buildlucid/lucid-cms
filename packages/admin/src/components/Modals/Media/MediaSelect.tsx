@@ -4,14 +4,14 @@ import useSearchParamsState from "@/hooks/useSearchParamsState";
 import mediaSelectStore from "@/store/forms/mediaSelectStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import api from "@/services/api";
-import Query from "@/components/Groups/Query";
-import Grid from "@/components/Groups/Grid";
+import { PerPage, Filter, Sort } from "@/components/Groups/Query";
+import { Grid } from "@/components/Groups/Grid";
 import MediaBasicCard, {
 	MediaBasicCardLoading,
 } from "@/components/Cards/MediaBasicCard";
-import Modal from "@/components/Groups/Modal";
-import Layout from "@/components/Groups/Layout";
-import Footers from "@/components/Groups/Footers";
+import { Modal } from "@/components/Groups/Modal";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Paginated } from "@/components/Groups/Footers";
 
 const MediaSelectModal: Component = () => {
 	const open = createMemo(() => mediaSelectStore.get.open);
@@ -19,7 +19,7 @@ const MediaSelectModal: Component = () => {
 	// ---------------------------------
 	// Render
 	return (
-		<Modal.Root
+		<Modal
 			state={{
 				open: open(),
 				setOpen: () => mediaSelectStore.set("open", false),
@@ -30,7 +30,7 @@ const MediaSelectModal: Component = () => {
 			}}
 		>
 			<SelectMediaContent />
-		</Modal.Root>
+		</Modal>
 	);
 };
 
@@ -105,7 +105,7 @@ const SelectMediaContent: Component = () => {
 				<p class="mt-1">{T()("select_media_description")}</p>
 				<div class="w-full mt-15 flex justify-between">
 					<div class="flex gap-2.5">
-						<Query.Filter
+						<Filter
 							filters={[
 								{
 									label: T()("title"),
@@ -161,7 +161,7 @@ const SelectMediaContent: Component = () => {
 							]}
 							searchParams={searchParams}
 						/>
-						<Query.Sort
+						<Sort
 							sorts={[
 								{
 									label: T()("title"),
@@ -200,13 +200,13 @@ const SelectMediaContent: Component = () => {
 						/>
 					</div>
 					<div>
-						<Query.PerPage options={[10, 20, 40]} searchParams={searchParams} />
+						<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 					</div>
 				</div>
 			</div>
 			{/* Body */}
 			<div class="flex-1 flex w-full flex-col">
-				<Layout.DynamicContent
+				<DynamicContent
 					state={{
 						isError: media.isError,
 						isSuccess: media.isSuccess,
@@ -225,7 +225,7 @@ const SelectMediaContent: Component = () => {
 					}}
 					slot={{
 						footer: (
-							<Footers.Paginated
+							<Paginated
 								state={{
 									searchParams: searchParams,
 									meta: media.data?.meta,
@@ -237,7 +237,7 @@ const SelectMediaContent: Component = () => {
 						),
 					}}
 				>
-					<Grid.Root
+					<Grid
 						state={{
 							isLoading: media.isLoading,
 							totalItems: media.data?.data.length || 0,
@@ -260,8 +260,8 @@ const SelectMediaContent: Component = () => {
 								/>
 							)}
 						</For>
-					</Grid.Root>
-				</Layout.DynamicContent>
+					</Grid>
+				</DynamicContent>
 			</div>
 		</div>
 	);

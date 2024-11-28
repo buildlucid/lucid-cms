@@ -6,8 +6,8 @@ import {
 	createEffect,
 } from "solid-js";
 import linkFieldStore from "@/store/forms/linkFieldStore";
-import Modal from "@/components/Groups/Modal";
-import Form from "@/components/Groups/Form";
+import { Modal } from "@/components/Groups/Modal";
+import { Checkbox, Input } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 
 const LinkSelect: Component = () => {
@@ -45,7 +45,7 @@ const LinkSelect: Component = () => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Root
+		<Modal
 			state={{
 				open: open(),
 				setOpen: () => {
@@ -62,7 +62,7 @@ const LinkSelect: Component = () => {
 					<h2>{T()("set_link")}</h2>
 				</div>
 				<div class="mb-5 pb-5 border-b border-border">
-					<Form.Input
+					<Input
 						id="label"
 						value={getLabel()}
 						onChange={(value) => setLabel(value)}
@@ -74,7 +74,7 @@ const LinkSelect: Component = () => {
 						required={false}
 						theme={"basic"}
 					/>
-					<Form.Input
+					<Input
 						id="url"
 						value={getUrl()}
 						onChange={(value) => setUrl(value)}
@@ -86,7 +86,7 @@ const LinkSelect: Component = () => {
 						required={false}
 						theme={"basic"}
 					/>
-					<Form.Checkbox
+					<Checkbox
 						id="open_in_new_tab"
 						value={getOpenInNewTab()}
 						onChange={(value) => setOpenInNewTab(value)}
@@ -121,7 +121,7 @@ const LinkSelect: Component = () => {
 					</Button>
 				</div>
 			</div>
-		</Modal.Root>
+		</Modal>
 	);
 };
 

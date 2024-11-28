@@ -2,9 +2,9 @@ import T from "@/translations";
 import type { Component } from "solid-js";
 import type useRowTarget from "@/hooks/useRowTarget";
 import type { TableRowProps } from "@/types/components";
-import type { EmailResponse } from "@lucidcms/core/types";
+import type { EmailResponse } from "@types";
 import userStore from "@/store/userStore";
-import Table from "@/components/Groups/Table";
+import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
@@ -19,7 +19,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Tr
+		<Tr
 			index={props.index}
 			selected={props.selected}
 			options={props.options}
@@ -110,7 +110,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				date={props.email.lastSuccessAt}
 				options={{ include: props?.include[10] }}
 			/>
-		</Table.Tr>
+		</Tr>
 	);
 };
 

@@ -1,11 +1,11 @@
 import T from "@/translations/index";
 import classNames from "classnames";
 import { type Component, For, createMemo, Show, Switch, Match } from "solid-js";
-import type { CFConfig, FieldResponse } from "@lucidcms/core/types";
+import type { CFConfig, FieldResponse } from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
-import Builder from "@/components/Groups/Builder";
+import { GroupBody } from "@/components/Groups/Builder";
 import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
 
@@ -93,7 +93,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 						{({ dragDrop }) => (
 							<For each={groups()}>
 								{(g, i) => (
-									<Builder.GroupBody
+									<GroupBody
 										state={{
 											brickIndex: brickIndex(),
 											fieldConfig: fieldConfig(),

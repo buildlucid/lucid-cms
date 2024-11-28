@@ -10,7 +10,7 @@ import {
 	Match,
 } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import Table from "@/components/Groups/Table";
+import { SelectAction, Th, ColumnToggle } from "@/components/Groups/Table";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
 
@@ -43,7 +43,7 @@ interface TableRootProps {
 	}) => JSXElement;
 }
 
-export const TableRoot: Component<TableRootProps> = (props) => {
+export const Table: Component<TableRootProps> = (props) => {
 	let overflowRef: HTMLDivElement | undefined;
 
 	const [include, setInclude] = createSignal<boolean[]>([]);
@@ -174,7 +174,7 @@ export const TableRoot: Component<TableRootProps> = (props) => {
 							</Show>
 							<Index each={props.head}>
 								{(head, index) => (
-									<Table.Th
+									<Th
 										key={head().key}
 										index={index}
 										label={head().label}
@@ -187,14 +187,14 @@ export const TableRoot: Component<TableRootProps> = (props) => {
 									/>
 								)}
 							</Index>
-							<Table.Th classes={"text-right right-0 hover:bg-container-3"}>
-								<Table.ColumnToggle
+							<Th classes={"text-right right-0 hover:bg-container-3"}>
+								<ColumnToggle
 									columns={includeRows() || []}
 									callbacks={{
 										toggle: toggleInclude,
 									}}
 								/>
-							</Table.Th>
+							</Th>
 						</tr>
 					</thead>
 					<tbody>
@@ -247,7 +247,7 @@ export const TableRoot: Component<TableRootProps> = (props) => {
 			<Show
 				when={selectedCount() > 0 && props.callbacks?.deleteRows !== undefined}
 			>
-				<Table.SelectAction
+				<SelectAction
 					data={{
 						selected: selectedCount(),
 					}}

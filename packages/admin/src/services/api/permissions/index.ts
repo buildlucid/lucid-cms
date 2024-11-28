@@ -1,7 +1,8 @@
 import useGetAll from "./useGetAll";
 
-const exportObject = {
+const exportObject: {
+	useGetAll: typeof useGetAll;
+} = {
 	useGetAll,
 };
-
 export default exportObject;

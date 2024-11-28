@@ -1,15 +1,5 @@
-import { FixedBricks } from "./FixedBricks";
-import { BuilderBricks } from "./BuilderBricks";
-import { CollectionPseudoBrick } from "./CollectionPseudoBrick";
-import { HeaderLayout } from "./HeaderLayout";
-import { RevisionsSidebar } from "./RevisionsSidebar";
-
-const Document = {
-	FixedBricks,
-	BuilderBricks,
-	CollectionPseudoBrick: CollectionPseudoBrick,
-	HeaderLayout,
-	RevisionsSidebar,
-};
-
-export default Document;
+export { FixedBricks } from "./FixedBricks";
+export { BuilderBricks } from "./BuilderBricks";
+export { CollectionPseudoBrick } from "./CollectionPseudoBrick";
+export { HeaderLayout } from "./HeaderLayout";
+export { RevisionsSidebar } from "./RevisionsSidebar";

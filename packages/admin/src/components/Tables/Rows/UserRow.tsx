@@ -1,10 +1,10 @@
 import T from "@/translations";
 import { createMemo, type Component } from "solid-js";
 import type { TableRowProps } from "@/types/components";
-import type { UserResponse } from "@lucidcms/core/types";
+import type { UserResponse } from "@types";
 import userStore from "@/store/userStore";
 import type useRowTarget from "@/hooks/useRowTarget";
-import Table from "@/components/Groups/Table";
+import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import DateCol from "../Columns/DateCol";
 import PillCol from "../Columns/PillCol";
@@ -30,7 +30,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Tr
+		<Tr
 			index={props.index}
 			selected={props.selected}
 			actions={[
@@ -91,7 +91,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				date={props.user.createdAt}
 				options={{ include: props?.include[5] }}
 			/>
-		</Table.Tr>
+		</Tr>
 	);
 };
 

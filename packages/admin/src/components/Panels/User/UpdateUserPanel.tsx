@@ -12,8 +12,8 @@ import api from "@/services/api";
 import { getBodyError } from "@/utils/error-helpers";
 import userStore from "@/store/userStore";
 import helpers from "@/utils/helpers";
-import Panel from "@/components/Groups/Panel";
-import Form from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
+import { Checkbox, SelectMultiple } from "@/components/Groups/Form";
 
 interface UpdateUserPanelProps {
 	id: Accessor<number | undefined>;
@@ -99,7 +99,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 	// ---------------------------------
 	// Render
 	return (
-		<Panel.Root
+		<Panel
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -135,7 +135,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 		>
 			{() => (
 				<>
-					<Form.SelectMultiple
+					<SelectMultiple
 						id="roles"
 						values={getSelectedRoles()}
 						onChange={setSelectedRoles}
@@ -155,7 +155,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 						theme="full"
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
-						<Form.Checkbox
+						<Checkbox
 							id="superAdmin"
 							value={getIsSuperAdmin() === 1}
 							onChange={(value) => setIsSuperAdmin(value ? 1 : 0)}
@@ -169,7 +169,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 					</Show>
 				</>
 			)}
-		</Panel.Root>
+		</Panel>
 	);
 };
 

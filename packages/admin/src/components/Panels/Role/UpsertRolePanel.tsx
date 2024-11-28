@@ -10,9 +10,9 @@ import {
 import api from "@/services/api";
 import helpers from "@/utils/helpers";
 import { getBodyError } from "@/utils/error-helpers";
-import Panel from "@/components/Groups/Panel";
+import { Panel } from "@/components/Groups/Panel";
 import SectionHeading from "@/components/Blocks/SectionHeading";
-import Form from "@/components/Groups/Form";
+import { Checkbox, Input } from "@/components/Groups/Form";
 import InputGrid from "@/components/Containers/InputGrid";
 
 interface UpsertRolePanelProps {
@@ -142,7 +142,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 	// ---------------------------------
 	// Return
 	return (
-		<Panel.Root
+		<Panel
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -191,7 +191,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 					{/* Details */}
 					<SectionHeading title={T()("details")} />
 					<InputGrid columns={2}>
-						<Form.Input
+						<Input
 							id="name"
 							name="name"
 							type="text"
@@ -210,7 +210,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 					<div class="w-full mb-30 last:mb-0">
 						<SectionHeading title={T()("permissions")} headingType="h3">
 							<div>
-								<Form.Checkbox
+								<Checkbox
 									value={allSelected()}
 									onChange={(value) => {
 										if (value) {
@@ -238,7 +238,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 										<div class="mt-2.5 border border-border p-15 rounded-md grid grid-cols-2 gap-x-15 gap-y-2.5">
 											<For each={option.permissions}>
 												{(permission) => (
-													<Form.Checkbox
+													<Checkbox
 														value={selectedPermissions().includes(permission)}
 														onChange={() =>
 															setSelectedPermissions((prev) => {
@@ -267,7 +267,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 					</div>
 				</>
 			)}
-		</Panel.Root>
+		</Panel>
 	);
 };
 

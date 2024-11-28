@@ -1,6 +1,6 @@
 import T from "@/translations";
 import { type Component, createMemo, For, Show, createSignal } from "solid-js";
-import type { CollectionBrickConfig } from "@lucidcms/core/types";
+import type { CollectionBrickConfig } from "@types";
 import {
 	FaSolidCircleChevronUp,
 	FaSolidGripLines,
@@ -8,7 +8,10 @@ import {
 } from "solid-icons/fa";
 import classNames from "classnames";
 import brickStore, { type BrickData } from "@/store/brickStore";
-import Builder from "@/components/Groups/Builder";
+import {
+	BrickBody,
+	BrickImagePreviewButton,
+} from "@/components/Groups/Builder";
 import Button from "@/components/Partials/Button";
 import AddBrick from "@/components/Modals/Bricks/AddBrick";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
@@ -208,7 +211,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					</h3>
 				</div>
 				<div class="flex gap-2">
-					<Builder.BrickImagePreviewButton brickConfig={config()} />
+					<BrickImagePreviewButton brickConfig={config()} />
 					<DeleteDebounceButton
 						callback={() => {
 							brickStore.get.removeBrick(brickIndex());
@@ -230,7 +233,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				</div>
 			</div>
 			{/* Body */}
-			<Builder.BrickBody
+			<BrickBody
 				state={{
 					open: getBrickOpen(),
 					brick: props.brick,

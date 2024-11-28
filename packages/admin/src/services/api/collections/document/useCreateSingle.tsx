@@ -2,11 +2,7 @@ import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { BrickData } from "@/store/brickStore";
-import type {
-	ResponseBody,
-	ErrorResponse,
-	FieldResponse,
-} from "@lucidcms/core/types";
+import type { ResponseBody, ErrorResponse, FieldResponse } from "@types";
 
 interface Params {
 	collectionKey: string;

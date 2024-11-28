@@ -1,7 +1,7 @@
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, RoleResponse } from "@lucidcms/core/types";
+import type { ResponseBody, RoleResponse } from "@types";
 
 interface Params {
 	name: string;

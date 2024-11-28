@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import classNames from "classnames";
-import Table from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table";
 
 interface TextColProps {
 	text?: string | number | null;
@@ -14,7 +14,7 @@ const TextCol: Component<TextColProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Td
+		<Td
 			options={{
 				include: props?.options?.include,
 			}}
@@ -29,7 +29,7 @@ const TextCol: Component<TextColProps> = (props) => {
 			>
 				{props.text || "-"}
 			</span>
-		</Table.Td>
+		</Td>
 	);
 };
 

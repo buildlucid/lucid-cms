@@ -1,7 +1,7 @@
 import { type Component, Show, createSignal } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, FieldErrors } from "@types";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface JSONTextareaProps {
 	id: string;
@@ -92,7 +92,7 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 					},
 				)}
 			>
-				<Form.Label
+				<Label
 					id={props.id}
 					label={props.copy?.label}
 					focused={inputFocus()}
@@ -153,8 +153,8 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 					</Show>
 				</div>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

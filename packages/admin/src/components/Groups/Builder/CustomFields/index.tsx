@@ -1,33 +1,14 @@
-import { DynamicField } from "./DynamicField";
-import { RepeaterField } from "./RepeaterField";
-import { InputField } from "./InputField";
-import { CheckboxField } from "./CheckboxField";
-import { ColourField } from "./ColourField";
-import { JSONField } from "./JSONField";
-import { LinkField } from "./LinkField";
-import { MediaField } from "./MediaField";
-import { SelectField } from "./SelectField";
-import { TextareaField } from "./TextareaField";
-import { WYSIWYGField } from "./WYSIWYGField";
-import { UserField } from "./UserField";
-import { TabField } from "./TabField";
-import { DocumentField } from "./DocumentField";
-
-const CustomFields = {
-	DynamicField,
-	RepeaterField,
-	InputField,
-	CheckboxField,
-	ColourField,
-	JSONField,
-	LinkField,
-	MediaField,
-	SelectField,
-	TextareaField,
-	WYSIWYGField,
-	UserField,
-	TabField,
-	DocumentField,
-};
-
-export default CustomFields;
+export { DynamicField } from "./DynamicField";
+export { RepeaterField } from "./RepeaterField";
+export { InputField } from "./InputField";
+export { CheckboxField } from "./CheckboxField";
+export { ColourField } from "./ColourField";
+export { JSONField } from "./JSONField";
+export { LinkField } from "./LinkField";
+export { MediaField } from "./MediaField";
+export { SelectField } from "./SelectField";
+export { TextareaField } from "./TextareaField";
+export { WYSIWYGField } from "./WYSIWYGField";
+export { UserField } from "./UserField";
+export { TabField } from "./TabField";
+export { DocumentField } from "./DocumentField";

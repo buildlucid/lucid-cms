@@ -1,8 +1,7 @@
 import { type Component, Show, createMemo } from "solid-js";
-import Modal from "@/components/Groups/Modal";
+import { Modal } from "@/components/Groups/Modal";
 import BrickPreview from "@/components/Partials/BrickPreview";
 import brickStore from "@/store/brickStore";
-import Tooltip from "@/components/Partials/Tooltip";
 import { Dialog } from "@kobalte/core";
 import { FaSolidXmark } from "solid-icons/fa";
 
@@ -15,7 +14,7 @@ const BrickImagePreview: Component = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Root
+		<Modal
 			state={{
 				open: open(),
 				setOpen: (state) => {
@@ -52,7 +51,7 @@ const BrickImagePreview: Component = (props) => {
 					}}
 				/>
 			</div>
-		</Modal.Root>
+		</Modal>
 	);
 };
 

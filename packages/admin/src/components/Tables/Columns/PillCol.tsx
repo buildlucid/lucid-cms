@@ -1,5 +1,5 @@
 import { type Component, Match, Switch } from "solid-js";
-import Table from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table";
 import Pill, { type PillProps } from "@/components/Partials/Pill";
 
 interface PillColProps {
@@ -14,7 +14,7 @@ const PillCol: Component<PillColProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Td
+		<Td
 			options={{
 				include: props?.options?.include,
 			}}
@@ -25,7 +25,7 @@ const PillCol: Component<PillColProps> = (props) => {
 				</Match>
 				<Match when={props.text === undefined}>{"-"}</Match>
 			</Switch>
-		</Table.Td>
+		</Td>
 	);
 };
 

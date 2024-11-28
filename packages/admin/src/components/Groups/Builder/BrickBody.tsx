@@ -6,10 +6,13 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import type { CFConfig, FieldTypes } from "@lucidcms/core/types";
+import type { CFConfig, FieldTypes } from "@types";
 import type { BrickData } from "@/store/brickStore";
 import classNames from "classnames";
-import CustomFields from "@/components/Groups/Builder/CustomFields";
+import {
+	TabField,
+	DynamicField,
+} from "@/components/Groups/Builder/CustomFields";
 
 interface BrickProps {
 	state: {
@@ -71,7 +74,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					<div class="border-b border-border mb-6 flex flex-wrap">
 						<For each={allTabs()}>
 							{(tab) => (
-								<CustomFields.TabField
+								<TabField
 									tab={tab}
 									setActiveTab={setActiveTab}
 									getActiveTab={getActiveTab}
@@ -83,7 +86,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 				{/* Body */}
 				<For each={props.state.configFields}>
 					{(config) => (
-						<CustomFields.DynamicField
+						<DynamicField
 							state={{
 								fields: props.state.brick.fields,
 								brickIndex: props.state.brickIndex,

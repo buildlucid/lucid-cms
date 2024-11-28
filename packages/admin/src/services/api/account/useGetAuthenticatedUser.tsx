@@ -4,7 +4,7 @@ import { useNavigate } from "@solidjs/router";
 import userStore from "@/store/userStore";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, UserResponse } from "@lucidcms/core/types";
+import type { ResponseBody, UserResponse } from "@types";
 
 // biome-ignore lint/suspicious/noEmptyInterface: <explanation>
 interface QueryParams {}

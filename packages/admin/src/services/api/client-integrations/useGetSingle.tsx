@@ -2,10 +2,7 @@ import { createMemo, type Accessor } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type {
-	ResponseBody,
-	ClientIntegrationResponse,
-} from "@lucidcms/core/types";
+import type { ResponseBody, ClientIntegrationResponse } from "@types";
 
 interface QueryParams {
 	location: {

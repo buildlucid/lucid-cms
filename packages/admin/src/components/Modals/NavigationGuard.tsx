@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Component, createSignal, onCleanup, onMount } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import brickStore from "@/store/brickStore";
-import Modal from "@/components/Groups/Modal";
+import { Confirmation } from "@/components/Groups/Modal";
 
 interface NavigationGuardProps {
 	state: {
@@ -21,7 +21,7 @@ const NavigationGuard: Component<NavigationGuardProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Confirmation
+		<Confirmation
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,

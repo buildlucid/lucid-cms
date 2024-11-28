@@ -4,8 +4,8 @@ import classNames from "classnames";
 import Button from "@/components/Partials/Button";
 import ErrorMessage from "@/components/Partials/ErrorMessage";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
-import notifySvg from "@/assets/illustrations/notify.svg";
-import type { ErrorResponse } from "@lucidcms/core/types";
+import notifySvg from "@assets/illustrations/notify.svg";
+import type { ErrorResponse } from "@types";
 
 export const Form: Component<{
 	queryState?: {

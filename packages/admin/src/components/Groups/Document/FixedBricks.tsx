@@ -1,9 +1,12 @@
 import { type Component, createMemo, For, createSignal } from "solid-js";
-import type { CollectionBrickConfig } from "@lucidcms/core/types";
+import type { CollectionBrickConfig } from "@types";
 import classNames from "classnames";
 import { FaSolidCircleChevronUp, FaSolidShield } from "solid-icons/fa";
 import brickStore, { type BrickData } from "@/store/brickStore";
-import Builder from "@/components/Groups/Builder";
+import {
+	BrickImagePreviewButton,
+	BrickBody,
+} from "@/components/Groups/Builder";
 import helpers from "@/utils/helpers";
 
 interface FixedBricksProps {
@@ -94,7 +97,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					</h2>
 				</div>
 				<div class="flex gap-2">
-					<Builder.BrickImagePreviewButton brickConfig={config()} />
+					<BrickImagePreviewButton brickConfig={config()} />
 					<button
 						type="button"
 						tabIndex="-1"
@@ -110,7 +113,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				</div>
 			</div>
 			{/* Body */}
-			<Builder.BrickBody
+			<BrickBody
 				state={{
 					open: getBrickOpen(),
 					brick: props.brick,

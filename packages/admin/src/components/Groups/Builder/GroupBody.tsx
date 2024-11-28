@@ -1,11 +1,11 @@
 import T from "@/translations/index";
 import { type Component, For, createMemo, createSignal } from "solid-js";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
-import type { CFConfig, FieldResponse } from "@lucidcms/core/types";
+import type { CFConfig, FieldResponse } from "@types";
 import classNames from "classnames";
 import { FaSolidGripLines, FaSolidCircleChevronUp } from "solid-icons/fa";
 import brickStore from "@/store/brickStore";
-import CustomFields from "@/components/Groups/Builder/CustomFields";
+import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import helpers from "@/utils/helpers";
 
@@ -182,7 +182,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				<div class="p-15">
 					<For each={configChildrenFields()}>
 						{(config) => (
-							<CustomFields.DynamicField
+							<DynamicField
 								state={{
 									brickIndex: brickIndex(),
 									fieldConfig: config,

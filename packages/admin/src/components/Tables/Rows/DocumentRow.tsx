@@ -7,11 +7,11 @@ import type {
 	CFConfig,
 	UserResMeta,
 	FieldTypes,
-} from "@lucidcms/core/types";
+} from "@types";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import brickHelpers from "@/utils/brick-helpers";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import Table from "@/components/Groups/Table";
+import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import AuthorCol from "@/components/Tables/Columns/AuthorCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
@@ -45,7 +45,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Tr
+		<Tr
 			index={props.index}
 			selected={props.selected}
 			options={props.options}
@@ -79,7 +79,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 				date={props.document.updatedAt}
 				options={{ include: props?.include[props.fieldInclude.length] }}
 			/>
-		</Table.Tr>
+		</Tr>
 	);
 };
 

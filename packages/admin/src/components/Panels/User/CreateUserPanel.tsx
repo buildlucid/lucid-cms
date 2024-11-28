@@ -4,8 +4,8 @@ import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultip
 import userStore from "@/store/userStore";
 import api from "@/services/api";
 import { getBodyError } from "@/utils/error-helpers";
-import Panel from "@/components/Groups/Panel";
-import Form from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
+import { Input, Checkbox, SelectMultiple } from "@/components/Groups/Form";
 import InputGrid from "@/components/Containers/InputGrid";
 
 interface CreateUserPanelProps {
@@ -62,7 +62,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	// ---------------------------------
 	// Render
 	return (
-		<Panel.Root
+		<Panel
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -111,7 +111,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 		>
 			{() => (
 				<>
-					<Form.Input
+					<Input
 						id="username"
 						value={getUsername()}
 						onChange={setUsername}
@@ -125,7 +125,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						theme="full"
 					/>
 					<InputGrid columns={2}>
-						<Form.Input
+						<Input
 							id="firstName"
 							value={getFirstName()}
 							onChange={setFirstName}
@@ -138,7 +138,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							errors={getBodyError("firstName", createUser.errors)}
 							theme="full"
 						/>
-						<Form.Input
+						<Input
 							id="lastName"
 							value={getLastName()}
 							onChange={setLastName}
@@ -153,7 +153,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						/>
 					</InputGrid>
 					<InputGrid columns={1}>
-						<Form.Input
+						<Input
 							id="email"
 							value={getEmail()}
 							onChange={setEmail}
@@ -168,7 +168,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							theme="full"
 						/>
 					</InputGrid>
-					<Form.SelectMultiple
+					<SelectMultiple
 						id="roleIds"
 						values={getSelectedRoles()}
 						onChange={setSelectedRoles}
@@ -188,7 +188,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						theme="full"
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
-						<Form.Checkbox
+						<Checkbox
 							id="superAdmin"
 							value={getIsSuperAdmin() === 1}
 							onChange={(value) => setIsSuperAdmin(value ? 1 : 0)}
@@ -202,7 +202,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 					</Show>
 				</>
 			)}
-		</Panel.Root>
+		</Panel>
 	);
 };
 

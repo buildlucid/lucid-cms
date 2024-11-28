@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import Table from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table";
 import DateText from "@/components/Partials/DateText";
 
 interface DateColProps {
@@ -13,13 +13,13 @@ const DateCol: Component<DateColProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Td
+		<Td
 			options={{
 				include: props?.options?.include,
 			}}
 		>
 			<DateText date={props.date} />
-		</Table.Td>
+		</Td>
 	);
 };
 

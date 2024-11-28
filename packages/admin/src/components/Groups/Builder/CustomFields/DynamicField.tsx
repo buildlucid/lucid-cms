@@ -1,10 +1,23 @@
-import { type Component, Match, Switch, Show, createMemo, For } from "solid-js";
-import classNames from "classnames";
-import type { CFConfig, FieldResponse, FieldTypes } from "@lucidcms/core/types";
+import {
+	InputField,
+	RepeaterField,
+	WYSIWYGField,
+	UserField,
+	DocumentField,
+	CheckboxField,
+	ColourField,
+	JSONField,
+	LinkField,
+	MediaField,
+	SelectField,
+	TextareaField,
+} from "@/components/Groups/Builder/CustomFields";
+import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import CustomFields from "@/components/Groups/Builder/CustomFields";
-import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
+import type { CFConfig, FieldResponse, FieldTypes } from "@types";
+import classNames from "classnames";
+import { type Component, For, Match, Show, Switch, createMemo } from "solid-js";
 
 interface DynamicFieldProps {
 	state: {
@@ -123,7 +136,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={fieldConfig().type === "repeater"}>
-						<CustomFields.RepeaterField
+						<RepeaterField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"repeater">,
@@ -136,7 +149,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					</Match>
 
 					<Match when={fieldConfig().type === "text"}>
-						<CustomFields.InputField
+						<InputField
 							type="text"
 							state={{
 								brickIndex: props.state.brickIndex,
@@ -151,7 +164,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "user"}>
-						<CustomFields.UserField
+						<UserField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"user">,
@@ -165,7 +178,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "document"}>
-						<CustomFields.DocumentField
+						<DocumentField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"document">,
@@ -179,7 +192,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "number"}>
-						<CustomFields.InputField
+						<InputField
 							type="number"
 							state={{
 								brickIndex: props.state.brickIndex,
@@ -194,7 +207,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "datetime"}>
-						<CustomFields.InputField
+						<InputField
 							type="datetime-local"
 							state={{
 								brickIndex: props.state.brickIndex,
@@ -209,7 +222,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "checkbox"}>
-						<CustomFields.CheckboxField
+						<CheckboxField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"checkbox">,
@@ -223,7 +236,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "colour"}>
-						<CustomFields.ColourField
+						<ColourField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"colour">,
@@ -237,7 +250,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "json"}>
-						<CustomFields.JSONField
+						<JSONField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"json">,
@@ -251,7 +264,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "link"}>
-						<CustomFields.LinkField
+						<LinkField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"link">,
@@ -265,7 +278,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "media"}>
-						<CustomFields.MediaField
+						<MediaField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"media">,
@@ -279,7 +292,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "select"}>
-						<CustomFields.SelectField
+						<SelectField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"select">,
@@ -293,7 +306,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "textarea"}>
-						<CustomFields.TextareaField
+						<TextareaField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"textarea">,
@@ -307,7 +320,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						/>
 					</Match>
 					<Match when={fieldConfig().type === "wysiwyg"}>
-						<CustomFields.WYSIWYGField
+						<WYSIWYGField
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"wysiwyg">,

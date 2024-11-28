@@ -9,9 +9,9 @@ import {
 } from "solid-icons/fa";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
-import Footers from "@/components/Groups/Footers";
-import Layout from "@/components/Groups/Layout";
-import Table from "@/components/Groups/Table";
+import { Paginated } from "@/components/Groups/Footers";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Table } from "@/components/Groups/Table";
 import EmailRow from "@/components/Tables/Rows/EmailRow";
 import PreviewEmailPanel from "@/components/Panels/Email/PreviewEmailPanel";
 import DeleteEmail from "@/components/Modals/Email/DeleteEmail";
@@ -44,7 +44,7 @@ export const EmailsList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			state={{
 				isError: emails.isError,
 				isSuccess: emails.isSuccess,
@@ -53,7 +53,7 @@ export const EmailsList: Component<{
 			}}
 			slot={{
 				footer: (
-					<Footers.Paginated
+					<Paginated
 						state={{
 							searchParams: props.state.searchParams,
 							meta: emails.data?.meta,
@@ -71,7 +71,7 @@ export const EmailsList: Component<{
 				},
 			}}
 		>
-			<Table.Root
+			<Table
 				key={"emails.list"}
 				rows={emails.data?.data.length || 0}
 				searchParams={props.state.searchParams}
@@ -164,7 +164,7 @@ export const EmailsList: Component<{
 						)}
 					</Index>
 				)}
-			</Table.Root>
+			</Table>
 			<PreviewEmailPanel
 				id={rowTarget.getTargetId}
 				state={{
@@ -192,6 +192,6 @@ export const EmailsList: Component<{
 					},
 				}}
 			/>
-		</Layout.DynamicContent>
+		</DynamicContent>
 	);
 };

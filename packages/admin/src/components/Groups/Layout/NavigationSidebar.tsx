@@ -4,12 +4,12 @@ import api from "@/services/api";
 import { useLocation } from "@solidjs/router";
 import packageJson from "../../../../../../packages/core/package.json";
 import { A } from "@solidjs/router";
-import LogoIcon from "@/assets/svgs/logo-icon.svg";
+import LogoIcon from "@assets/svgs/logo-icon.svg";
 import userStore from "@/store/userStore";
-import Navigation from "@/components/Groups/Navigation";
+import { IconLink } from "@/components/Groups/Navigation";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import SubMenus from "@/components/Groups/Navigation/SubMenus";
+import { CollectionSubMenu } from "@/components/Groups/Navigation/SubMenus";
 
 export const NavigationSidebar: Component = () => {
 	// ----------------------------------------
@@ -81,13 +81,13 @@ export const NavigationSidebar: Component = () => {
 						<img src={LogoIcon} alt="logo" class="size-6" />
 					</div>
 					<ul class="py-15">
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							href="/admin"
 							icon="dashboard"
 							title={T()("home")}
 						/>
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							icon="collection"
 							title={T()("collections")}
@@ -95,7 +95,7 @@ export const NavigationSidebar: Component = () => {
 							loading={collectionsIsLoading()}
 							active={isCollectionsRoute()}
 						/>
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							href="/admin/media"
 							icon="media"
@@ -108,7 +108,7 @@ export const NavigationSidebar: Component = () => {
 								]).some
 							}
 						/>
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							href="/admin/users"
 							icon="users"
@@ -121,7 +121,7 @@ export const NavigationSidebar: Component = () => {
 								]).some
 							}
 						/>
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							href="/admin/roles"
 							icon="roles"
@@ -134,14 +134,14 @@ export const NavigationSidebar: Component = () => {
 								]).some
 							}
 						/>
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							href="/admin/emails"
 							icon="email"
 							title={T()("emails")}
 							permission={userStore.get.hasPermission(["read_email"]).all}
 						/>
-						<Navigation.IconLink
+						<IconLink
 							type="link"
 							href="/admin/settings"
 							icon="settings"
@@ -151,7 +151,7 @@ export const NavigationSidebar: Component = () => {
 				</div>
 				<div class="pb-30">
 					<ul class="flex flex-col items-center">
-						<Navigation.IconLink
+						<IconLink
 							type="button"
 							icon="logout"
 							loading={logout.action.isPending}
@@ -181,7 +181,7 @@ export const NavigationSidebar: Component = () => {
 				</div>
 			</div>
 			{/* SUbMenus */}
-			<SubMenus.Collections
+			<CollectionSubMenu
 				state={{
 					isLoading: collectionsIsLoading(),
 					isError: collectionsIsError(),

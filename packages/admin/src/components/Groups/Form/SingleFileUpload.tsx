@@ -17,8 +17,8 @@ import {
 	FaSolidFile,
 } from "solid-icons/fa";
 import helpers from "@/utils/helpers";
-import type { ErrorResult, MediaResponse } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, MediaResponse } from "@types";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 export interface SingleFileUploadProps {
 	id: string;
@@ -123,7 +123,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 				"mb-5": !props.noMargin,
 			})}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				required={props.required}
@@ -240,8 +240,8 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

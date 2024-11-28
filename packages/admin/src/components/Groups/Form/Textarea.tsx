@@ -1,7 +1,7 @@
 import { type Component, createSignal } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, FieldErrors } from "@types";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface TextareaProps {
 	id: string;
@@ -49,7 +49,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 					},
 				)}
 			>
-				<Form.Label
+				<Label
 					id={props.id}
 					label={props.copy?.label}
 					focused={inputFocus()}
@@ -91,8 +91,8 @@ export const Textarea: Component<TextareaProps> = (props) => {
 					rows={props.rows ?? 6}
 				/>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

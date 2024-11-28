@@ -5,15 +5,11 @@ import {
 	createMemo,
 	createEffect,
 } from "solid-js";
-import type {
-	CFConfig,
-	FieldResponse,
-	FieldErrors,
-} from "@lucidcms/core/types";
+import type { CFConfig, FieldResponse, FieldErrors } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import Form from "@/components/Groups/Form";
+import { Input } from "@/components/Groups/Form";
 
 interface InputFieldProps {
 	type: "number" | "text" | "datetime-local";
@@ -69,7 +65,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<Form.Input
+		<Input
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,

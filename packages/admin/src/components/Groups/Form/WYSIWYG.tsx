@@ -2,8 +2,8 @@ import { type Component, createSignal, onMount, onCleanup } from "solid-js";
 import classnames from "classnames";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, FieldErrors } from "@types";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface WYSIWYGProps {
 	id: string;
@@ -72,7 +72,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 				"mb-5 last:mb-0": !props.noMargin,
 			})}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				focused={inputFocus()}
@@ -92,8 +92,8 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 					class="[&>.ql-editor]:min-h-72"
 				/>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

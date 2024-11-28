@@ -1,6 +1,8 @@
 import useGetMultiple from "./useGetMultiple";
 
-const exportObject = {
+const exportObject: {
+	useGetMultiple: typeof useGetMultiple;
+} = {
 	useGetMultiple,
 };
 

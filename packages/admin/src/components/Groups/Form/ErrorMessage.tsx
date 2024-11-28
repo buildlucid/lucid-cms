@@ -1,6 +1,6 @@
 import { type Component, Show } from "solid-js";
 import { FaSolidTriangleExclamation } from "solid-icons/fa";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
+import type { ErrorResult, FieldErrors } from "@types";
 
 interface ErrorMessageProps {
 	id?: string;

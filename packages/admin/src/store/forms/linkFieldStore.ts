@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import type { LinkResValue } from "@lucidcms/core/types";
+import type { LinkResValue } from "@types";
 
 type SelectCallbackT = (_link: LinkResValue) => void;
 

@@ -1,6 +1,8 @@
 import useGetSettings from "./useGetSettings";
 
-const exportObject = {
+const exportObject: {
+	useGetSettings: typeof useGetSettings;
+} = {
 	useGetSettings,
 };
 

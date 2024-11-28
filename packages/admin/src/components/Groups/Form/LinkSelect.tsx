@@ -2,14 +2,10 @@ import T from "@/translations";
 import { type Component, Match, Switch } from "solid-js";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
-import type {
-	ErrorResult,
-	FieldErrors,
-	LinkResValue,
-} from "@lucidcms/core/types";
+import type { ErrorResult, FieldErrors, LinkResValue } from "@types";
 import linkFieldStore from "@/store/forms/linkFieldStore";
 import Button from "@/components/Partials/Button";
-import Form from "@/components/Groups/Form";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface LinkSelectProps {
 	id: string;
@@ -55,7 +51,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				"mb-2.5 last:mb-0": !props.noMargin,
 			})}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				required={props.required}
@@ -107,8 +103,8 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

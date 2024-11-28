@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import type { UserResponse, Permission } from "@lucidcms/core/types";
+import type { UserResponse, Permission } from "@types";
 
 type UserStoreT = {
 	user: UserResponse | null;

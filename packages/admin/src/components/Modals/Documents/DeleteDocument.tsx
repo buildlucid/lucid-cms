@@ -1,8 +1,8 @@
 import T from "@/translations";
 import { type Component, type Accessor, createMemo } from "solid-js";
 import helpers from "@/utils/helpers";
-import Modal from "@/components/Groups/Modal";
-import type { CollectionResponse } from "@lucidcms/core/types";
+import { Confirmation } from "@/components/Groups/Modal";
+import type { CollectionResponse } from "@types";
 import api from "@/services/api";
 
 interface DeleteDocumentProps {
@@ -41,7 +41,7 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Confirmation
+		<Confirmation
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,

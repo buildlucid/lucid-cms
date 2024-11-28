@@ -1,11 +1,3 @@
-import { Confirmation } from "./Confirmation";
-import { Alert } from "./Alert";
-import { Modal as Root } from "./Modal";
-
-const Modal = {
-	Confirmation,
-	Alert,
-	Root,
-};
-
-export default Modal;
+export { Confirmation } from "./Confirmation";
+export { Alert } from "./Alert";
+export { Modal } from "./Modal";

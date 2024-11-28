@@ -6,15 +6,11 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type {
-	CFConfig,
-	FieldResponse,
-	FieldErrors,
-} from "@lucidcms/core/types";
+import type { CFConfig, FieldResponse, FieldErrors } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import Form from "@/components/Groups/Form";
+import { Select } from "@/components/Groups/Form";
 
 interface SelectFieldProps {
 	state: {
@@ -59,7 +55,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<Form.Select
+		<Select
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,

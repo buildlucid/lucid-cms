@@ -1,5 +1,5 @@
 import { Show, createMemo, type Component } from "solid-js";
-import type { CollectionResponse } from "@lucidcms/core/types";
+import type { CollectionResponse } from "@types";
 import { A } from "@solidjs/router";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";

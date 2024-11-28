@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, MediaResponse } from "@lucidcms/core/types";
+import type { ResponseBody, MediaResponse } from "@types";
 
 interface Params {
 	key?: string;

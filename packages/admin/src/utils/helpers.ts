@@ -1,10 +1,6 @@
 import type { Accessor, Setter } from "solid-js";
 import equal from "fast-deep-equal/es6";
-import type {
-	UserResponse,
-	MediaResponse,
-	LocaleValue,
-} from "@lucidcms/core/types";
+import type { UserResponse, MediaResponse, LocaleValue } from "@types";
 import { getLocale } from "@/translations";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>

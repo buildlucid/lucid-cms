@@ -1,17 +1,6 @@
-import { Pagination } from "./Pagination";
-import { QueryRow as Row } from "./Row";
-import { Filter } from "./Filter";
-import { Sort } from "./Sort";
-import { PerPage } from "./PerPage";
-import { SimplifiedPagination } from "./SimplifiedPagination";
-
-const Query = {
-	Pagination,
-	Row,
-	Filter,
-	Sort,
-	PerPage,
-	SimplifiedPagination,
-};
-
-export default Query;
+export { Pagination } from "./Pagination";
+export { QueryRow } from "./Row";
+export { Filter } from "./Filter";
+export { Sort } from "./Sort";
+export { PerPage } from "./PerPage";
+export { SimplifiedPagination } from "./SimplifiedPagination";

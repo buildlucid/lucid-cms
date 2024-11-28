@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
-import type { ResponseBody } from "@lucidcms/core/types";
+import type { ResponseBody } from "@types";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import Query from "@/components/Groups/Query";
+import { Pagination } from "@/components/Groups/Query";
 import classNames from "classnames";
 
 export const Paginated: Component<{
@@ -25,7 +25,7 @@ export const Paginated: Component<{
 				"p-15": props.options?.padding === "15",
 			})}
 		>
-			<Query.Pagination
+			<Pagination
 				state={{
 					meta: props.state.meta,
 					searchParams: props.state.searchParams,

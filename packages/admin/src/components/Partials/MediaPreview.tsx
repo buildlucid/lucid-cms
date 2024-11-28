@@ -6,7 +6,7 @@ import {
 	FaSolidFile,
 	FaSolidFileLines,
 } from "solid-icons/fa";
-import type { MediaResponse } from "@lucidcms/core/types";
+import type { MediaResponse } from "@types";
 import Image from "@/components/Partials/Image";
 import classNames from "classnames";
 

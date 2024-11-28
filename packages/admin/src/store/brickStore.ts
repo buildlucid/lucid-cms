@@ -11,7 +11,7 @@ import type {
 	CFConfig,
 	CollectionBrickConfig,
 	FieldTypes,
-} from "@lucidcms/core/types";
+} from "@types";
 
 export interface BrickData {
 	id: string | number;

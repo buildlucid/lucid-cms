@@ -15,9 +15,16 @@
         "isolatedModules": true,
         "baseUrl": ".",
         "resolveJsonModule": true,
+        "skipLibCheck": true,
         "paths": {
             "@/*": [
                 "src/*"
+            ],
+            "@types": [
+                "../core/src/types.ts"
+            ],
+            "@assets/*": [
+                "assets/*"
             ]
         }
     }

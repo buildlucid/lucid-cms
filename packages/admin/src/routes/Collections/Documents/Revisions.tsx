@@ -15,7 +15,13 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
-import Document from "@/components/Groups/Document";
+import {
+	RevisionsSidebar,
+	HeaderLayout,
+	CollectionPseudoBrick,
+	FixedBricks,
+	BuilderBricks,
+} from "@/components/Groups/Document";
 import Alert from "@/components/Blocks/Alert";
 import Link from "@/components/Partials/Link";
 
@@ -255,7 +261,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				</div>
 			</Match>
 			<Match when={documentIsSuccess()}>
-				<Document.HeaderLayout
+				<HeaderLayout
 					state={{
 						mode: "revisions",
 						collectionKey: collectionKey,
@@ -300,18 +306,18 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 					<div class="w-full flex grow">
 						{/* Fields & Bricks */}
 						<div class="w-full flex flex-col">
-							<Document.CollectionPseudoBrick
+							<CollectionPseudoBrick
 								fields={collection.data?.data.fields || []}
 							/>
-							<Document.FixedBricks
+							<FixedBricks
 								brickConfig={collection.data?.data.fixedBricks || []}
 							/>
-							<Document.BuilderBricks
+							<BuilderBricks
 								brickConfig={collection.data?.data.builderBricks || []}
 							/>
 						</div>
 						{/* Sidebar */}
-						<Document.RevisionsSidebar
+						<RevisionsSidebar
 							state={{
 								revisions: revisionVersions.data?.data || [],
 								meta: revisionVersions.data?.meta,
@@ -326,7 +332,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 							}}
 						/>
 					</div>
-				</Document.HeaderLayout>
+				</HeaderLayout>
 			</Match>
 		</Switch>
 	);

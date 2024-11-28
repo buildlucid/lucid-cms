@@ -10,11 +10,11 @@ import type {
 	LinkResValue,
 	FieldResponse,
 	FieldErrors,
-} from "@lucidcms/core/types";
+} from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import Form from "@/components/Groups/Form";
+import { LinkSelect } from "@/components/Groups/Form";
 
 interface LinkFieldProps {
 	state: {
@@ -62,7 +62,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 	// Render
 	return (
 		<>
-			<Form.LinkSelect
+			<LinkSelect
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
 					brickIndex: props.state.brickIndex,

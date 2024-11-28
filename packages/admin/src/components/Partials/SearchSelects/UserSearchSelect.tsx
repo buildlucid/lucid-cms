@@ -1,10 +1,10 @@
 import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
 import type { ValueT, SelectProps } from "@/components/Groups/Form/Select";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
+import type { ErrorResult, FieldErrors } from "@types";
 import api from "@/services/api";
 import helpers from "@/utils/helpers";
-import Form from "@/components/Groups/Form";
+import { Select } from "@/components/Groups/Form";
 
 interface UserSearchSelectProps {
 	value: ValueT;
@@ -35,7 +35,7 @@ const UserSearchSelect: Component<UserSearchSelectProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Form.Select
+		<Select
 			id={props.id}
 			value={props.value}
 			onChange={props.setValue}

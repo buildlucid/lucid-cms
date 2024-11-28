@@ -1,7 +1,7 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, FieldErrors } from "@types";
+import { ErrorMessage, Label, DescribedBy } from "@/components/Groups/Form";
 
 interface ColourProps {
 	id: string;
@@ -30,7 +30,7 @@ export const Colour: Component<ColourProps> = (props) => {
 				"mb-2.5 last:mb-0 flex flex-col transition-colors duration-200 ease-in-out relative w-full",
 			)}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				focused={inputFocus()}
@@ -79,8 +79,8 @@ export const Colour: Component<ColourProps> = (props) => {
 					</For>
 				</ul>
 			</Show>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

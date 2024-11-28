@@ -1,6 +1,6 @@
 import { type Component, Switch, Match } from "solid-js";
-import type { UserResMeta } from "@lucidcms/core/types";
-import Table from "@/components/Groups/Table";
+import type { UserResMeta } from "@types";
+import { Td } from "@/components/Groups/Table";
 import UserDisplay from "@/components/Partials/UserDisplay";
 
 interface AuthorColProps {
@@ -14,7 +14,7 @@ const AuthorCol: Component<AuthorColProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Td
+		<Td
 			options={{
 				include: props?.options?.include,
 			}}
@@ -33,7 +33,7 @@ const AuthorCol: Component<AuthorColProps> = (props) => {
 					/>
 				</Match>
 			</Switch>
-		</Table.Td>
+		</Td>
 	);
 };
 

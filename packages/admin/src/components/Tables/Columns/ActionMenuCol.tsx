@@ -2,7 +2,7 @@ import { type Component, Switch, Match } from "solid-js";
 import ActionDropdown, {
 	type ActionDropdownProps,
 } from "@/components/Partials/ActionDropdown";
-import Table from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table";
 
 interface ActionMenuColProps {
 	actions: ActionDropdownProps["actions"];
@@ -14,7 +14,7 @@ const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
 	return (
 		<Switch>
 			<Match when={props.actions.length > 0}>
-				<Table.Td
+				<Td
 					classes={
 						"row-actions-td text-right sticky right-0 bg-container-3 pointer-events-none"
 					}
@@ -23,10 +23,10 @@ const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
 					}}
 				>
 					<ActionDropdown actions={props.actions} />
-				</Table.Td>
+				</Td>
 			</Match>
 			<Match when={props.actions.length === 0}>
-				<Table.Td
+				<Td
 					options={{
 						noMinWidth: true,
 					}}

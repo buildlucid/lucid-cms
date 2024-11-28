@@ -2,7 +2,7 @@ import { type Component, type JSXElement, Switch, Match } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import SkeletonCard from "@/components/Cards/SkeletonCard";
 
-export const GridRoot: Component<{
+export const Grid: Component<{
 	state?: {
 		isLoading?: boolean;
 		totalItems: number;

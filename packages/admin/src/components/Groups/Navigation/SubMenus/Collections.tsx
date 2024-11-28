@@ -2,9 +2,9 @@ import T from "@/translations";
 import { type Component, createMemo, Show, Switch, Match, For } from "solid-js";
 import helpers from "@/utils/helpers";
 import { useLocation } from "@solidjs/router";
-import Navigation from "@/components/Groups/Navigation";
+import { NavigationLink, LinkGroup } from "@/components/Groups/Navigation";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import type { CollectionResponse } from "@lucidcms/core/types";
+import type { CollectionResponse } from "@types";
 
 export const CollectionSubMenu: Component<{
 	state: {
@@ -49,10 +49,10 @@ export const CollectionSubMenu: Component<{
 					<Match when={true}>
 						{/* Multi Collections */}
 						<Show when={props.state.multiCollections.length > 0}>
-							<Navigation.LinkGroup title={T()("multiple_documents")}>
+							<LinkGroup title={T()("multiple_documents")}>
 								<For each={props.state.multiCollections}>
 									{(collection) => (
-										<Navigation.Link
+										<NavigationLink
 											title={helpers.getLocaleValue({
 												value: collection.details.name,
 											})}
@@ -62,14 +62,14 @@ export const CollectionSubMenu: Component<{
 										/>
 									)}
 								</For>
-							</Navigation.LinkGroup>
+							</LinkGroup>
 						</Show>
 						{/* Single Collections */}
 						<Show when={props.state.singleCollections.length > 0}>
-							<Navigation.LinkGroup title={T()("single_documents")}>
+							<LinkGroup title={T()("single_documents")}>
 								<For each={props.state.singleCollections}>
 									{(collection) => (
-										<Navigation.Link
+										<NavigationLink
 											title={helpers.getLocaleValue({
 												value: collection.details.name,
 											})}
@@ -90,7 +90,7 @@ export const CollectionSubMenu: Component<{
 										/>
 									)}
 								</For>
-							</Navigation.LinkGroup>
+							</LinkGroup>
 						</Show>
 					</Match>
 				</Switch>

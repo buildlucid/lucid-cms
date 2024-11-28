@@ -1,8 +1,8 @@
 import { type Accessor, createSignal } from "solid-js";
 import type { SingleFileUploadProps } from "@/components/Groups/Form/SingleFileUpload";
-import type { ErrorResponse } from "@lucidcms/core/types";
+import type { ErrorResponse } from "@types";
 import { getBodyError } from "@/utils/error-helpers";
-import Form from "@/components/Groups/Form";
+import { SingleFileUpload } from "@/components/Groups/Form";
 
 interface UseSingleFileUploadProps {
 	id: SingleFileUploadProps["id"];
@@ -53,7 +53,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setCurrentFile(data.currentFile);
 		},
 		Render: () => (
-			<Form.SingleFileUpload
+			<SingleFileUpload
 				state={{
 					value: getFile(),
 					setValue: setGetFile,

@@ -13,18 +13,18 @@ import helpers from "@/utils/helpers";
 import useSearchParamsLocation, {
 	type FilterSchema,
 } from "@/hooks/useSearchParamsLocation";
-import Query from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
 } from "@/utils/document-table-helpers";
-import Layout from "@/components/Groups/Layout";
-import Headers from "@/components/Groups/Headers";
-import Content from "@/components/Groups/Content";
+import { Wrapper } from "@/components/Groups/Layout";
+import { Standard } from "@/components/Groups/Headers";
+import { DocumentsList } from "@/components/Groups/Content";
 import Alert from "@/components/Blocks/Alert";
-import Form from "@/components/Groups/Form";
-import type { DocumentVersionType } from "@lucidcms/core/types";
+import { Switch } from "@/components/Groups/Form";
+import type { DocumentVersionType } from "@types";
 
 const CollectionsDocumentsListRoute: Component = () => {
 	// ----------------------------------
@@ -109,7 +109,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 	// ----------------------------------
 	// Render
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				topBar: (
 					<Alert
@@ -124,7 +124,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 					/>
 				),
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: collectionName(),
 							description: collectionSummary(),
@@ -147,7 +147,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 						}}
 						slots={{
 							bottom: (
-								<Query.Row
+								<QueryRow
 									searchParams={searchParams}
 									filters={getCollectionFieldFilters().map((field) => {
 										switch (field.type) {
@@ -194,7 +194,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 									})}
 									custom={
 										<Show when={collection.data?.data.config.useDrafts}>
-											<Form.Switch
+											<Switch
 												id="status"
 												value={getStatus() === "published"}
 												onChange={(value) => {
@@ -219,7 +219,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 				),
 			}}
 		>
-			<Content.DocumentsList
+			<DocumentsList
 				state={{
 					collection: collection.data?.data,
 					fieldIncludes: getCollectionFieldIncludes,
@@ -229,7 +229,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 					status: getStatus,
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

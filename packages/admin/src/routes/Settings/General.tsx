@@ -9,8 +9,12 @@ import Button from "@/components/Partials/Button";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
 import DetailsList from "@/components/Partials/DetailsList";
-import Layout from "@/components/Groups/Layout";
-import Headers from "@/components/Groups/Headers";
+import {
+	Wrapper,
+	DynamicContent,
+	NavigationTabs,
+} from "@/components/Groups/Layout";
+import { Standard } from "@/components/Groups/Headers";
 
 const GeneralSettingsRoute: Component = (props) => {
 	// ----------------------------------------
@@ -40,17 +44,17 @@ const GeneralSettingsRoute: Component = (props) => {
 	// Render
 
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: T()("settings_route_title"),
 							description: T()("settings_route_description"),
 						}}
 						slots={{
 							bottom: (
-								<Layout.NavigationTabs
+								<NavigationTabs
 									tabs={[
 										{
 											label: T()("general"),
@@ -68,7 +72,7 @@ const GeneralSettingsRoute: Component = (props) => {
 				),
 			}}
 		>
-			<Layout.DynamicContent
+			<DynamicContent
 				state={{
 					isError: settingsData.isError,
 					isSuccess: settingsData.isSuccess,
@@ -180,7 +184,7 @@ const GeneralSettingsRoute: Component = (props) => {
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
-			</Layout.DynamicContent>
+			</DynamicContent>
 
 			{/* Modals */}
 			<ClearAllProcessedImages
@@ -189,7 +193,7 @@ const GeneralSettingsRoute: Component = (props) => {
 					setOpen: setOpenClearAllProcessedImages,
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

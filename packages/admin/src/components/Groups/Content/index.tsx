@@ -1,21 +1,8 @@
-import { MediaList } from "./MediaList";
-import { Dashboard } from "./Dashboard";
-import { Account } from "./Account";
-import { UserList } from "./UserList";
-import { RolesList } from "./RolesList";
-import { EmailsList } from "./EmailsList";
-import { CollectionsList } from "./CollectionsList";
-import { DocumentsList } from "./DocumentsList";
-
-const Content = {
-	MediaList,
-	Dashboard,
-	Account,
-	UserList,
-	RolesList,
-	EmailsList,
-	CollectionsList,
-	DocumentsList,
-};
-
-export default Content;
+export { MediaList } from "./MediaList";
+export { Dashboard } from "./Dashboard";
+export { Account } from "./Account";
+export { UserList } from "./UserList";
+export { RolesList } from "./RolesList";
+export { EmailsList } from "./EmailsList";
+export { CollectionsList } from "./CollectionsList";
+export { DocumentsList } from "./DocumentsList";

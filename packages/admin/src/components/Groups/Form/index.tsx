@@ -1,45 +1,20 @@
-import { Form as Root } from "./Form";
-import { CheckboxInput as Checkbox } from "./Checkbox";
-import { Input } from "./Input";
-import { Textarea } from "./Textarea";
-import { Select } from "./Select";
-import { SelectMultiple } from "./SelectMultiple";
-import { SingleFileUpload } from "./SingleFileUpload";
-import { Colour } from "./Colour";
-import { Switch } from "./Switch";
-import { JSONTextarea } from "./JSONTextarea";
-import { WYSIWYG } from "./WYSIWYG";
-import { MediaSelect } from "./MediaSelect";
-import { LinkSelect } from "./LinkSelect";
-import { Search } from "./Search";
-import { DocumentSelect } from "./DocumentSelect";
+export { Form } from "./Form";
+export { CheckboxInput as Checkbox } from "./Checkbox";
+export { Input } from "./Input";
+export { Textarea } from "./Textarea";
+export { Select } from "./Select";
+export { SelectMultiple } from "./SelectMultiple";
+export { SingleFileUpload } from "./SingleFileUpload";
+export { Colour } from "./Colour";
+export { Switch } from "./Switch";
+export { JSONTextarea } from "./JSONTextarea";
+export { WYSIWYG } from "./WYSIWYG";
+export { MediaSelect } from "./MediaSelect";
+export { LinkSelect } from "./LinkSelect";
+export { Search } from "./Search";
+export { DocumentSelect } from "./DocumentSelect";
 
-import { ErrorMessage } from "./ErrorMessage";
-import { DescribedBy } from "./DescribedBy";
-import { Label } from "./Label";
-import { Tooltip } from "./Tooltip";
-
-const Form = {
-	Root,
-	Checkbox,
-	Input,
-	Textarea,
-	Select,
-	SelectMultiple,
-	DocumentSelect,
-	SingleFileUpload,
-	Colour,
-	Switch,
-	JSONTextarea,
-	WYSIWYG,
-	MediaSelect,
-	LinkSelect,
-	Search,
-
-	ErrorMessage,
-	DescribedBy,
-	Label,
-	Tooltip,
-};
-
-export default Form;
+export { ErrorMessage } from "./ErrorMessage";
+export { DescribedBy } from "./DescribedBy";
+export { Label } from "./Label";
+export { Tooltip } from "./Tooltip";

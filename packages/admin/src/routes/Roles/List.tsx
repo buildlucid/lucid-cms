@@ -2,11 +2,11 @@ import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
-import Query from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
-import Layout from "@/components/Groups/Layout";
-import Headers from "@/components/Groups/Headers";
-import Content from "@/components/Groups/Content";
+import { Wrapper } from "@/components/Groups/Layout";
+import { Standard } from "@/components/Groups/Headers";
+import { RolesList } from "@/components/Groups/Content";
 
 const RolesListRoute: Component = () => {
 	// ----------------------------------
@@ -33,10 +33,10 @@ const RolesListRoute: Component = () => {
 	// ----------------------------------
 	// Render
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: T()("roles_route_title"),
 							description: T()("roles_route_description"),
@@ -50,7 +50,7 @@ const RolesListRoute: Component = () => {
 						}}
 						slots={{
 							bottom: (
-								<Query.Row
+								<QueryRow
 									searchParams={searchParams}
 									filters={[
 										{
@@ -77,7 +77,7 @@ const RolesListRoute: Component = () => {
 				),
 			}}
 		>
-			<Content.RolesList
+			<RolesList
 				state={{
 					searchParams: searchParams,
 					setOpenCreateRolePanel: setOpenCreateRolePanel,
@@ -90,7 +90,7 @@ const RolesListRoute: Component = () => {
 					setOpen: setOpenCreateRolePanel,
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

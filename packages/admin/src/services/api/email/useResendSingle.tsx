@@ -2,7 +2,7 @@ import T from "@/translations";
 import serviceHelpers from "@/utils/service-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import request from "@/utils/request";
-import type { ResponseBody } from "@lucidcms/core/types";
+import type { ResponseBody } from "@types";
 
 interface Params {
 	id: number;

@@ -1,7 +1,7 @@
 import T from "@/translations";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
-import type { ErrorResponse, MediaResponse } from "@lucidcms/core/types";
+import type { ErrorResponse, MediaResponse } from "@types";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getTitle, setTitle] = createSignal<MediaResponse["title"]>([]);

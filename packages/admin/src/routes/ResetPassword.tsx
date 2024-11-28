@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Component, Switch, Match } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 import api from "@/services/api";
-import notifyIllustration from "@/assets/illustrations/notify.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg";
 import ResetPasswordForm from "@/components/Forms/Auth/ResetPasswordForm";
 import Loading from "@/components/Partials/Loading";
 import ErrorBlock from "@/components/Partials/ErrorBlock";

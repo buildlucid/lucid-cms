@@ -13,7 +13,7 @@ import { FaSolidFilter, FaSolidXmark } from "solid-icons/fa";
 import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
 import { DropdownMenu } from "@kobalte/core";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import Form from "@/components/Groups/Form";
+import { SelectMultiple, Input, Select } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 
 interface FilterItemProps {
@@ -160,7 +160,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 			</label>
 			<Switch>
 				<Match when={props.filter.type === "text"}>
-					<Form.Input
+					<Input
 						id={`${props.filter.key}-${props.filter.type}`}
 						value={value()}
 						onChange={setValue}
@@ -177,7 +177,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 					/>
 				</Match>
 				<Match when={props.filter.type === "select"}>
-					<Form.Select
+					<Select
 						id={`${props.filter.key}-${props.filter.type}`}
 						value={value()}
 						onChange={(value) => {
@@ -232,7 +232,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 					</div>
 				</Match>
 				<Match when={props.filter.type === "multi-select"}>
-					<Form.SelectMultiple
+					<SelectMultiple
 						id={`${props.filter.key}-${props.filter.type}`}
 						values={multiValue()}
 						onChange={(values) => {

@@ -2,8 +2,8 @@ import T from "@/translations";
 import { type Component, For } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
-import Layout from "@/components/Groups/Layout";
-import Grid from "@/components/Groups/Grid";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Grid } from "@/components/Groups/Grid";
 import CollectionCard, {
 	CollectionCardLoading,
 } from "@/components/Cards/CollectionCard";
@@ -25,7 +25,7 @@ export const CollectionsList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			state={{
 				isError: collections.isError,
 				isSuccess: collections.isSuccess,
@@ -42,7 +42,7 @@ export const CollectionsList: Component<{
 				padding: "30",
 			}}
 		>
-			<Grid.Root
+			<Grid
 				state={{
 					isLoading: collections.isLoading,
 					totalItems: collections.data?.data.length || 0,
@@ -55,7 +55,7 @@ export const CollectionsList: Component<{
 				<For each={collections.data?.data}>
 					{(item) => CollectionCard({ collection: item })}
 				</For>
-			</Grid.Root>
-		</Layout.DynamicContent>
+			</Grid>
+		</DynamicContent>
 	);
 };

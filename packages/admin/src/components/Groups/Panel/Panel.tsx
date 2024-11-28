@@ -10,8 +10,8 @@ import {
 	type Accessor,
 } from "solid-js";
 import { FaSolidArrowRight } from "solid-icons/fa";
-import notifyIllustration from "@/assets/illustrations/notify.svg";
-import type { ErrorResponse } from "@lucidcms/core/types";
+import notifyIllustration from "@assets/illustrations/notify.svg";
+import type { ErrorResponse } from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import { Dialog } from "@kobalte/core";
 import ErrorBlock from "@/components/Partials/ErrorBlock";

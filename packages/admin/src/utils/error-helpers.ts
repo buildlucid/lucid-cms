@@ -1,9 +1,5 @@
 import type { Accessor } from "solid-js";
-import type {
-	ErrorResponse,
-	ErrorResultObj,
-	ErrorResultValue,
-} from "@lucidcms/core/types";
+import type { ErrorResponse, ErrorResultObj, ErrorResultValue } from "@types";
 
 export const getBodyError = <T = ErrorResultObj>(
 	key: string,

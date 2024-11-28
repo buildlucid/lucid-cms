@@ -1,5 +1,5 @@
 import { type Component, Show } from "solid-js";
-import type { CollectionBrickConfig } from "@lucidcms/core/types";
+import type { CollectionBrickConfig } from "@types";
 import brickStore from "@/store/brickStore";
 import { FaSolidEye } from "solid-icons/fa";
 import helpers from "@/utils/helpers";

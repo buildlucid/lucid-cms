@@ -8,22 +8,19 @@ import {
 	Show,
 } from "solid-js";
 import { FaSolidCalendar, FaSolidSatelliteDish } from "solid-icons/fa";
-import type {
-	CollectionResponse,
-	DocumentVersionType,
-} from "@lucidcms/core/types";
+import type { CollectionResponse, DocumentVersionType } from "@types";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import type { FilterSchema } from "@/hooks/useSearchParamsLocation";
 import documentSelectStore from "@/store/forms/documentSelectStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import api from "@/services/api";
-import Query from "@/components/Groups/Query";
+import { PerPage, Filter } from "@/components/Groups/Query";
 import helpers from "@/utils/helpers";
-import Modal from "@/components/Groups/Modal";
-import Table from "@/components/Groups/Table";
+import { Modal } from "@/components/Groups/Modal";
+import { Table } from "@/components/Groups/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import Layout from "@/components/Groups/Layout";
-import Form from "@/components/Groups/Form";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Switch } from "@/components/Groups/Form";
 import {
 	tableHeadColumns,
 	collectionFieldFilters,
@@ -36,7 +33,7 @@ const DocumentSelectModal: Component = () => {
 	// ---------------------------------
 	// Render
 	return (
-		<Modal.Root
+		<Modal
 			state={{
 				open: open(),
 				setOpen: () => documentSelectStore.set("open", false),
@@ -47,7 +44,7 @@ const DocumentSelectModal: Component = () => {
 			}}
 		>
 			<DocumentSelectContent />
-		</Modal.Root>
+		</Modal>
 	);
 };
 
@@ -150,7 +147,7 @@ const DocumentSelectContent: Component = () => {
 				<p class="mt-1">{T()("select_document_description")}</p>
 				<div class="w-full mt-15 flex justify-between">
 					<div class="flex gap-2.5">
-						<Query.Filter
+						<Filter
 							filters={getCollectionFieldFilters().map((field) => {
 								switch (field.type) {
 									case "checkbox": {
@@ -197,7 +194,7 @@ const DocumentSelectContent: Component = () => {
 							searchParams={searchParams}
 						/>
 						<Show when={collection.data?.data.config.useDrafts}>
-							<Form.Switch
+							<Switch
 								id="status"
 								value={getStatus() === "published"}
 								onChange={(value) => {
@@ -215,13 +212,13 @@ const DocumentSelectContent: Component = () => {
 						</Show>
 					</div>
 					<div>
-						<Query.PerPage options={[10, 20, 40]} searchParams={searchParams} />
+						<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 					</div>
 				</div>
 			</div>
 			{/* Body */}
 			<div class="flex-1 flex w-full flex-col">
-				<Layout.DynamicContent
+				<DynamicContent
 					state={{
 						isError: isError(),
 						isSuccess: isSuccess(),
@@ -245,7 +242,7 @@ const DocumentSelectContent: Component = () => {
 						},
 					}}
 				>
-					<Table.Root
+					<Table
 						key={`collections.document.list.${collection.data?.data?.key}`}
 						rows={documents.data?.data.length || 0}
 						searchParams={searchParams}
@@ -293,8 +290,8 @@ const DocumentSelectContent: Component = () => {
 								)}
 							</Index>
 						)}
-					</Table.Root>
-				</Layout.DynamicContent>
+					</Table>
+				</DynamicContent>
 			</div>
 		</div>
 	);

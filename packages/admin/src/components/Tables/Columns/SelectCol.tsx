@@ -1,6 +1,6 @@
 import { type Component, Switch, Match } from "solid-js";
-import Table from "@/components/Groups/Table";
-import Form from "@/components/Groups/Form";
+import { Td, Th } from "@/components/Groups/Table";
+import { Checkbox } from "@/components/Groups/Form";
 
 interface SelectColProps {
 	type?: "th" | "td";
@@ -14,34 +14,34 @@ const SelectCol: Component<SelectColProps> = (props) => {
 	return (
 		<Switch>
 			<Match when={props.type === "th"}>
-				<Table.Th
+				<Th
 					options={{
 						width: 65,
 					}}
 				>
-					<Form.Checkbox
+					<Checkbox
 						value={props.value}
 						onChange={props.onChange}
 						copy={{}}
 						noMargin={true}
 						theme="full"
 					/>
-				</Table.Th>
+				</Th>
 			</Match>
 			<Match when={props.type === "td"}>
-				<Table.Td
+				<Td
 					options={{
 						width: 65,
 					}}
 				>
-					<Form.Checkbox
+					<Checkbox
 						value={props.value}
 						onChange={props.onChange}
 						copy={{}}
 						noMargin={true}
 						theme="full"
 					/>
-				</Table.Td>
+				</Td>
 			</Match>
 		</Switch>
 	);

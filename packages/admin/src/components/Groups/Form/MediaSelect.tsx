@@ -6,12 +6,12 @@ import type {
 	FieldErrors,
 	MediaResponse,
 	MediaResMeta,
-} from "@lucidcms/core/types";
+} from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import mediaSelectStore from "@/store/forms/mediaSelectStore";
 import helpers from "@/utils/helpers";
 import Button from "@/components/Partials/Button";
-import Form from "@/components/Groups/Form";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
 
@@ -96,7 +96,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				"mb-2.5 last:mb-0": !props.noMargin,
 			})}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				required={props.required}
@@ -170,8 +170,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

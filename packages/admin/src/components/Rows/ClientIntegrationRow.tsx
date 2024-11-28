@@ -4,7 +4,7 @@ import classNames from "classnames";
 import userStore from "@/store/userStore";
 import ActionDropdown from "../Partials/ActionDropdown";
 import type useRowTarget from "@/hooks/useRowTarget";
-import type { ClientIntegrationResponse } from "@lucidcms/core/types";
+import type { ClientIntegrationResponse } from "@types";
 
 interface ClientIntegrationRow {
 	clientIntegration: ClientIntegrationResponse;

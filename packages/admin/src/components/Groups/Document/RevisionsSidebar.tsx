@@ -2,15 +2,12 @@ import T from "@/translations";
 import { type Accessor, type Component, For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
-import type {
-	CollectionDocumentVersionResponse,
-	ResponseBody,
-} from "@lucidcms/core/types";
+import type { CollectionDocumentVersionResponse, ResponseBody } from "@types";
 import type useSearchParamsState from "@/hooks/useSearchParamsState";
 import DateText from "@/components/Partials/DateText";
 import Pill from "@/components/Partials/Pill";
-import Layout from "@/components/Groups/Layout";
-import Query from "@/components/Groups/Query";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Sort, SimplifiedPagination } from "@/components/Groups/Query";
 
 export const RevisionsSidebar: Component<{
 	state: {
@@ -41,7 +38,7 @@ export const RevisionsSidebar: Component<{
 			<div>
 				<div class="flex items-center justify-between border-b border-border gap-2.5 p-15 md:p-30">
 					<h3>{T()("revisions")}</h3>
-					<Query.Sort
+					<Sort
 						sorts={[
 							{
 								label: T()("created_at"),
@@ -51,7 +48,7 @@ export const RevisionsSidebar: Component<{
 						searchParams={props.state.searchParams}
 					/>
 				</div>
-				<Layout.DynamicContent
+				<DynamicContent
 					state={{
 						isError: props.state.isError(),
 						isSuccess: props.state.isSuccess(),
@@ -112,10 +109,10 @@ export const RevisionsSidebar: Component<{
 							</button>
 						)}
 					</For>
-				</Layout.DynamicContent>
+				</DynamicContent>
 			</div>
 			<div class="p-15 md:p-30 border-t border-border">
-				<Query.SimplifiedPagination
+				<SimplifiedPagination
 					state={{
 						meta: props.state.meta,
 						searchParams: props.state.searchParams,

@@ -5,7 +5,14 @@ import useRegenerateAPIKey from "./useRegenerateAPIKey";
 import useGetSingle from "./useGetSingle";
 import useUpdateSingle from "./useUpdateSingle";
 
-const exportObject = {
+const exportObject: {
+	useGetAll: typeof useGetAll;
+	useCreateSingle: typeof useCreateSingle;
+	useDeleteSingle: typeof useDeleteSingle;
+	useRegenerateAPIKey: typeof useRegenerateAPIKey;
+	useGetSingle: typeof useGetSingle;
+	useUpdateSingle: typeof useUpdateSingle;
+} = {
 	useGetAll,
 	useCreateSingle,
 	useDeleteSingle,
@@ -13,5 +20,4 @@ const exportObject = {
 	useGetSingle,
 	useUpdateSingle,
 };
-
 export default exportObject;

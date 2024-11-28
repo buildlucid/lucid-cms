@@ -5,11 +5,7 @@ import {
 	createMemo,
 	createEffect,
 } from "solid-js";
-import type {
-	CFConfig,
-	FieldResponse,
-	FieldErrors,
-} from "@lucidcms/core/types";
+import type { CFConfig, FieldResponse, FieldErrors } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";

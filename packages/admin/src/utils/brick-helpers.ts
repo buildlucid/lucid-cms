@@ -4,7 +4,7 @@ import type {
 	FieldTypes,
 	FieldResponse,
 	FieldResponseMeta,
-} from "@lucidcms/core/types";
+} from "@types";
 
 const findFieldRecursive = (props: {
 	fields: FieldResponse[];

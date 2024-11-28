@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Component, createSignal, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import api from "@/services/api";
-import Form from "@/components/Groups/Form";
+import { Form, Input } from "@/components/Groups/Form";
 import { getBodyError } from "@/utils/error-helpers";
 
 interface LoginFormProps {
@@ -22,7 +22,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Form.Root
+		<Form
 			state={{
 				isLoading: login.action.isPending,
 				errors: login.errors(),
@@ -40,7 +40,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				});
 			}}
 		>
-			<Form.Input
+			<Input
 				id="usernameOrEmail"
 				name="usernameOrEmail"
 				type="text"
@@ -55,7 +55,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				errors={getBodyError("usernameOrEmail", login.errors)}
 				theme="full"
 			/>
-			<Form.Input
+			<Input
 				id="password"
 				name="password"
 				type="password"
@@ -78,7 +78,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 					{T()("forgot_password")}
 				</A>
 			</Show>
-		</Form.Root>
+		</Form>
 	);
 };
 

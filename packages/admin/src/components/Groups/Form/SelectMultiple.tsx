@@ -8,11 +8,11 @@ import {
 	Match,
 } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult } from "@lucidcms/core/types";
+import type { ErrorResult } from "@types";
 import { FaSolidCheck, FaSolidXmark, FaSolidSort } from "solid-icons/fa";
 import { DropdownMenu } from "@kobalte/core";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import Form from "@/components/Groups/Form";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 export type SelectMultipleValueT = {
 	value: string | number;
@@ -87,7 +87,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					)}
 				>
 					{/* Label */}
-					<Form.Label
+					<Label
 						id={props.id}
 						label={props.copy?.label}
 						required={props.required}
@@ -184,8 +184,8 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 				</DropdownContent>
 			</DropdownMenu.Root>
 
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

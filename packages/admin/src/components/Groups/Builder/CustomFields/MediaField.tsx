@@ -10,11 +10,11 @@ import type {
 	MediaResMeta,
 	FieldResponse,
 	FieldErrors,
-} from "@lucidcms/core/types";
+} from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import Form from "@/components/Groups/Form";
+import { MediaSelect } from "@/components/Groups/Form";
 
 interface MediaFieldProps {
 	state: {
@@ -70,7 +70,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<Form.MediaSelect
+		<MediaSelect
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,

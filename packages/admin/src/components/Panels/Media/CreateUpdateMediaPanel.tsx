@@ -14,8 +14,8 @@ import helpers from "@/utils/helpers";
 import dateHelpers from "@/utils/date-helpers";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import Panel from "@/components/Groups/Panel";
-import Form from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
+import { Input } from "@/components/Groups/Form";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import DetailsList from "@/components/Partials/DetailsList";
 
@@ -191,7 +191,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	// ---------------------------------
 	// Render
 	return (
-		<Panel.Root
+		<Panel
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -231,7 +231,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										code: locale.code,
 									})}
 								/>
-								<Form.Input
+								<Input
 									id={`name-${locale.code}`}
 									value={
 										helpers.getTranslation(
@@ -255,7 +255,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									theme="full"
 								/>
 								<Show when={showAltInput()}>
-									<Form.Input
+									<Input
 										id={`alt-${locale.code}`}
 										value={
 											helpers.getTranslation(
@@ -318,7 +318,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					</Show>
 				</>
 			)}
-		</Panel.Root>
+		</Panel>
 	);
 };
 

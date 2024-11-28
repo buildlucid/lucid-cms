@@ -1,6 +1,6 @@
 import { type Component, Match, Switch, createMemo } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import Form from "@/components/Groups/Form";
+import { Select } from "@/components/Groups/Form";
 
 interface ContentLocaleSelectProps {
 	value?: string | undefined;
@@ -29,7 +29,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 	return (
 		<Switch>
 			<Match when={props.value === undefined}>
-				<Form.Select
+				<Select
 					id={"content-locale"}
 					value={contentLocale()}
 					onChange={(value) => {
@@ -45,7 +45,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 				/>
 			</Match>
 			<Match when={props.value !== undefined}>
-				<Form.Select
+				<Select
 					id={"content-locale"}
 					value={props.value}
 					onChange={(value) => {

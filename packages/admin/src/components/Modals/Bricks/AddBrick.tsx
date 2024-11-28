@@ -1,11 +1,11 @@
 import { type Component, For, createSignal, createMemo, Show } from "solid-js";
 import { FaSolidMagnifyingGlass, FaSolidXmark } from "solid-icons/fa";
 import classNames from "classnames";
-import type { CollectionBrickConfig } from "@lucidcms/core/types";
-import brickIcon from "@/assets/svgs/default-brick-icon-white.svg";
+import type { CollectionBrickConfig } from "@types";
+import brickIcon from "@assets/svgs/default-brick-icon-white.svg";
 import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
-import Modal from "@/components/Groups/Modal";
+import { Modal } from "@/components/Groups/Modal";
 import BrickPreview from "@/components/Partials/BrickPreview";
 import Tooltip from "@/components/Partials/Tooltip";
 
@@ -59,7 +59,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Root
+		<Modal
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -165,7 +165,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 					</div>
 				</div>
 			</div>
-		</Modal.Root>
+		</Modal>
 	);
 };
 

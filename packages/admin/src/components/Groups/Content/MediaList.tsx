@@ -4,9 +4,9 @@ import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import Footers from "@/components/Groups/Footers";
-import Layout from "@/components/Groups/Layout";
-import Grid from "@/components/Groups/Grid";
+import { Paginated } from "@/components/Groups/Footers";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Grid } from "@/components/Groups/Grid";
 import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
@@ -47,7 +47,7 @@ export const MediaList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			state={{
 				isError: media.isError,
 				isSuccess: media.isSuccess,
@@ -56,7 +56,7 @@ export const MediaList: Component<{
 			}}
 			slot={{
 				footer: (
-					<Footers.Paginated
+					<Paginated
 						state={{
 							searchParams: props.state.searchParams,
 							meta: media.data?.meta,
@@ -81,7 +81,7 @@ export const MediaList: Component<{
 				padding: "30",
 			}}
 		>
-			<Grid.Root
+			<Grid
 				state={{
 					isLoading: media.isLoading,
 					totalItems: media.data?.data.length || 0,
@@ -100,7 +100,7 @@ export const MediaList: Component<{
 						/>
 					)}
 				</For>
-			</Grid.Root>
+			</Grid>
 
 			<CreateUpdateMediaPanel
 				id={rowTarget.getTargetId}
@@ -129,6 +129,6 @@ export const MediaList: Component<{
 					},
 				}}
 			/>
-		</Layout.DynamicContent>
+		</DynamicContent>
 	);
 };

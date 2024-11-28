@@ -6,10 +6,10 @@ import type {
 	ErrorResult,
 	FieldErrors,
 	CollectionDocumentResponse,
-} from "@lucidcms/core/types";
+} from "@types";
 import documentSelectStore from "@/store/forms/documentSelectStore";
 import Button from "@/components/Partials/Button";
-import Form from "@/components/Groups/Form";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface DocumentSelectProps {
 	id: string;
@@ -50,7 +50,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				"mb-2.5 last:mb-0": !props.noMargin,
 			})}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				required={props.required}
@@ -107,8 +107,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

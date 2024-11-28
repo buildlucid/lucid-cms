@@ -3,7 +3,7 @@ import { type Component, createSignal, createMemo, Show } from "solid-js";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import api from "@/services/api";
-import Form from "@/components/Groups/Form";
+import { Form, Input } from "@/components/Groups/Form";
 
 interface UpdateAccountFormProps {
 	firstName: string | undefined;
@@ -64,7 +64,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Form.Root
+		<Form
 			state={{
 				isLoading: updateMe.action.isPending,
 				errors: updateMe.errors(),
@@ -79,7 +79,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 		>
 			<h3 class="mb-15">{T()("details")}</h3>
 			<div class="grid grid-cols-2 gap-15">
-				<Form.Input
+				<Input
 					id="firstName"
 					name="firstName"
 					type="text"
@@ -91,7 +91,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					errors={getBodyError("firstName", updateMe.errors)}
 					theme="full"
 				/>
-				<Form.Input
+				<Input
 					id="lastName"
 					name="lastName"
 					type="text"
@@ -104,7 +104,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					theme="full"
 				/>
 			</div>
-			<Form.Input
+			<Input
 				id="username"
 				name="username"
 				type="text"
@@ -117,7 +117,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				errors={getBodyError("username", updateMe.errors)}
 				theme="full"
 			/>
-			<Form.Input
+			<Input
 				id="email"
 				name="email"
 				type="email"
@@ -132,7 +132,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 			/>
 			<div class="mt-30">
 				<h3 class="mb-15">{T()("update_password")}</h3>
-				<Form.Input
+				<Input
 					id="currentPassword"
 					name="currentPassword"
 					type="password"
@@ -144,7 +144,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					errors={getBodyError("currentPassword", updateMe.errors)}
 					theme="full"
 				/>
-				<Form.Input
+				<Input
 					id="newPassword"
 					name="newPassword"
 					type="password"
@@ -157,7 +157,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					theme="full"
 				/>
 				<Show when={newPassword() !== ""}>
-					<Form.Input
+					<Input
 						id="passwordConfirmation"
 						name="passwordConfirmation"
 						type="password"
@@ -171,7 +171,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					/>
 				</Show>
 			</div>
-		</Form.Root>
+		</Form>
 	);
 };
 

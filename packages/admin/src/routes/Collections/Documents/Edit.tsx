@@ -13,7 +13,7 @@ import {
 import classNames from "classnames";
 import { useQueryClient } from "@tanstack/solid-query";
 import helpers from "@/utils/helpers";
-import type { CollectionResponse, FieldErrors } from "@lucidcms/core/types";
+import type { CollectionResponse, FieldErrors } from "@types";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -26,7 +26,12 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 import NavigationGuard, {
 	navGuardHook,
 } from "@/components/Modals/NavigationGuard";
-import Document from "@/components/Groups/Document";
+import {
+	BuilderBricks,
+	HeaderLayout,
+	CollectionPseudoBrick,
+	FixedBricks,
+} from "@/components/Groups/Document";
 import MediaSelectModal from "@/components/Modals/Media/MediaSelect";
 import DocumentSelectModal from "@/components/Modals/Documents/DocumentSelect";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
@@ -301,7 +306,7 @@ const CollectionsDocumentsEditRoute: Component<
 				</div>
 			</Match>
 			<Match when={isSuccess()}>
-				<Document.HeaderLayout
+				<HeaderLayout
 					state={{
 						mode: props.mode,
 						version: props.version,
@@ -337,13 +342,13 @@ const CollectionsDocumentsEditRoute: Component<
 					<div class="w-full flex grow">
 						{/* Fields & Bricks */}
 						<div class="w-full flex flex-col">
-							<Document.CollectionPseudoBrick
+							<CollectionPseudoBrick
 								fields={collection.data?.data.fields || []}
 							/>
-							<Document.FixedBricks
+							<FixedBricks
 								brickConfig={collection.data?.data.fixedBricks || []}
 							/>
-							<Document.BuilderBricks
+							<BuilderBricks
 								brickConfig={collection.data?.data.builderBricks || []}
 							/>
 						</div>
@@ -444,7 +449,7 @@ const CollectionsDocumentsEditRoute: Component<
 							</aside>
 						</Show>
 					</div>
-				</Document.HeaderLayout>
+				</HeaderLayout>
 				{/* Modals */}
 				<NavigationGuard
 					state={{

@@ -1,8 +1,13 @@
 import T from "@/translations";
 import { type Component, createSignal, createEffect, onMount } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, FieldErrors } from "@types";
+import {
+	Label,
+	DescribedBy,
+	ErrorMessage,
+	Tooltip,
+} from "@/components/Groups/Form";
 
 interface SwitchProps {
 	id: string;
@@ -61,7 +66,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				"w-full": props.options?.queryRow !== true,
 			})}
 		>
-			<Form.Label
+			<Label
 				id={props.id}
 				label={props.copy?.label}
 				focused={inputFocus()}
@@ -130,9 +135,9 @@ export const Switch: Component<SwitchProps> = (props) => {
 					style={overlayStyle()}
 				/>
 			</button>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.Tooltip copy={props.copy?.tooltip} theme={undefined} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<Tooltip copy={props.copy?.tooltip} theme={undefined} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

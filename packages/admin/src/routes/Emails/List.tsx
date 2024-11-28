@@ -2,11 +2,11 @@ import T from "@/translations";
 import type { Component } from "solid-js";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
-import Query from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query";
 import Alert from "@/components/Blocks/Alert";
-import Layout from "@/components/Groups/Layout";
-import Headers from "@/components/Groups/Headers";
-import Content from "@/components/Groups/Content";
+import { Wrapper } from "@/components/Groups/Layout";
+import { Standard } from "@/components/Groups/Headers";
+import { EmailsList } from "@/components/Groups/Content";
 
 const EmailListRoute: Component = () => {
 	// ----------------------------------
@@ -58,7 +58,7 @@ const EmailListRoute: Component = () => {
 	// Render
 
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				topBar: (
 					<Alert
@@ -73,14 +73,14 @@ const EmailListRoute: Component = () => {
 					/>
 				),
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: T()("email_route_title"),
 							description: T()("email_route_description"),
 						}}
 						slots={{
 							bottom: (
-								<Query.Row
+								<QueryRow
 									searchParams={searchParams}
 									filters={[
 										{
@@ -163,12 +163,12 @@ const EmailListRoute: Component = () => {
 				),
 			}}
 		>
-			<Content.EmailsList
+			<EmailsList
 				state={{
 					searchParams: searchParams,
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

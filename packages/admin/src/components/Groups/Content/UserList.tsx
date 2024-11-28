@@ -10,12 +10,12 @@ import {
 } from "solid-icons/fa";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
-import Footers from "@/components/Groups/Footers";
-import Layout from "@/components/Groups/Layout";
+import { Paginated } from "@/components/Groups/Footers";
+import { DynamicContent } from "@/components/Groups/Layout";
 import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import DeleteUser from "@/components/Modals/User/DeleteUser";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
-import Table from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table";
 import UserRow from "@/components/Tables/Rows/UserRow";
 
 export const UserList: Component<{
@@ -46,7 +46,7 @@ export const UserList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			state={{
 				isError: users.isError,
 				isSuccess: users.isSuccess,
@@ -55,7 +55,7 @@ export const UserList: Component<{
 			}}
 			slot={{
 				footer: (
-					<Footers.Paginated
+					<Paginated
 						state={{
 							searchParams: props.state.searchParams,
 							meta: users.data?.meta,
@@ -79,7 +79,7 @@ export const UserList: Component<{
 				},
 			}}
 		>
-			<Table.Root
+			<Table
 				key={"users.list"}
 				rows={users.data?.data.length || 0}
 				searchParams={props.state.searchParams}
@@ -143,7 +143,7 @@ export const UserList: Component<{
 						)}
 					</Index>
 				)}
-			</Table.Root>
+			</Table>
 			<UpdateUserPanel
 				id={rowTarget.getTargetId}
 				state={{
@@ -171,6 +171,6 @@ export const UserList: Component<{
 					},
 				}}
 			/>
-		</Layout.DynamicContent>
+		</DynamicContent>
 	);
 };

@@ -3,7 +3,7 @@ import { type Component, createSignal, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { getBodyError } from "@/utils/error-helpers";
 import api from "@/services/api";
-import Form from "@/components/Groups/Form";
+import { Form, Input } from "@/components/Groups/Form";
 
 interface ForgotPasswordFormProps {
 	showBackToLogin?: boolean;
@@ -25,7 +25,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Form.Root
+		<Form
 			state={{
 				isLoading: forgotPassword.action.isPending,
 				errors: forgotPassword.errors(),
@@ -40,7 +40,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				forgotPassword.action.mutate({ email: email() });
 			}}
 		>
-			<Form.Input
+			<Input
 				id="email"
 				name="email"
 				type="email"
@@ -63,7 +63,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 					{T()("back_to_login")}
 				</A>
 			</Show>
-		</Form.Root>
+		</Form>
 	);
 };
 

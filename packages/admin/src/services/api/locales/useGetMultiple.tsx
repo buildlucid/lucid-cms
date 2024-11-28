@@ -3,7 +3,7 @@ import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import type { ResponseBody, LocalesResponse } from "@lucidcms/core/types";
+import type { ResponseBody, LocalesResponse } from "@types";
 
 interface QueryParams {
 	queryString?: Accessor<string> | string;

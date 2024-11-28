@@ -4,9 +4,9 @@ import { FaSolidT, FaSolidCalendar } from "solid-icons/fa";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
-import Footers from "@/components/Groups/Footers";
-import Layout from "@/components/Groups/Layout";
-import Table from "@/components/Groups/Table";
+import { Paginated } from "@/components/Groups/Footers";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Table } from "@/components/Groups/Table";
 import RoleRow from "@/components/Tables/Rows/RoleRow";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import DeleteRole from "@/components/Modals/Role/DeleteRole";
@@ -41,7 +41,7 @@ export const RolesList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			state={{
 				isError: roles.isError,
 				isSuccess: roles.isSuccess,
@@ -50,7 +50,7 @@ export const RolesList: Component<{
 			}}
 			slot={{
 				footer: (
-					<Footers.Paginated
+					<Paginated
 						state={{
 							searchParams: props.state.searchParams,
 							meta: roles.data?.meta,
@@ -74,7 +74,7 @@ export const RolesList: Component<{
 				},
 			}}
 		>
-			<Table.Root
+			<Table
 				key={"roles.list"}
 				rows={roles.data?.data.length || 0}
 				searchParams={props.state.searchParams}
@@ -124,7 +124,7 @@ export const RolesList: Component<{
 						)}
 					</Index>
 				)}
-			</Table.Root>
+			</Table>
 			<UpsertRolePanel
 				id={rowTarget.getTargetId}
 				state={{
@@ -143,6 +143,6 @@ export const RolesList: Component<{
 					},
 				}}
 			/>
-		</Layout.DynamicContent>
+		</DynamicContent>
 	);
 };

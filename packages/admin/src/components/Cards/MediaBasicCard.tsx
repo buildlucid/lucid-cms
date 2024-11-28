@@ -1,7 +1,7 @@
 import T from "@/translations";
 import { type Component, createMemo } from "solid-js";
 import classNames from "classnames";
-import type { MediaResponse } from "@lucidcms/core/types";
+import type { MediaResponse } from "@types";
 import helpers from "@/utils/helpers";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";

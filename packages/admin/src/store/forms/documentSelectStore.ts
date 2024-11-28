@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import type { CollectionDocumentResponse } from "@lucidcms/core/types";
+import type { CollectionDocumentResponse } from "@types";
 
 type SelectCallbackT = (_document: CollectionDocumentResponse) => void;
 

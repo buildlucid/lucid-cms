@@ -1,11 +1,7 @@
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type {
-	DocumentVersionType,
-	ResponseBody,
-	ErrorResponse,
-} from "@lucidcms/core/types";
+import type { DocumentVersionType, ResponseBody, ErrorResponse } from "@types";
 
 interface Params {
 	id: number;

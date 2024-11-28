@@ -4,7 +4,7 @@ import { createMutation, useQueryClient } from "@tanstack/solid-query";
 import helpers from "@/utils/helpers";
 import { validateSetError } from "@/utils/error-handling";
 import spawnToast from "@/utils/spawn-toast";
-import type { ErrorResponse } from "@lucidcms/core/types";
+import type { ErrorResponse } from "@types";
 import type { QueryBuilderProps } from "@/utils/query-builder";
 
 type QueryParamsValueT = Accessor<unknown> | unknown;

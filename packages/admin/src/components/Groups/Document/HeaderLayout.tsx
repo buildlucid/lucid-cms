@@ -20,11 +20,11 @@ import {
 import helpers from "@/utils/helpers";
 import userStore from "@/store/userStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import Layout from "@/components/Groups/Layout";
+import { Breadcrumbs } from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import type { CollectionResponse } from "@lucidcms/core/types";
+import type { CollectionResponse } from "@types";
 
 export const HeaderLayout: Component<{
 	state: {
@@ -195,7 +195,7 @@ export const HeaderLayout: Component<{
 						},
 					)}
 				>
-					<Layout.Breadcrumbs
+					<Breadcrumbs
 						breadcrumbs={[
 							{
 								link: `/admin/collections/${props.state.collectionKey()}`,

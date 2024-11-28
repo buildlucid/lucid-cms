@@ -2,8 +2,8 @@ import { type Component, createSignal } from "solid-js";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
 import { Checkbox } from "@kobalte/core";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
-import Form from "@/components/Groups/Form";
+import type { ErrorResult, FieldErrors } from "@types";
+import { ErrorMessage, DescribedBy, Tooltip } from "@/components/Groups/Form";
 
 interface CheckboxInputProps {
 	id?: string;
@@ -77,9 +77,9 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 				)}
 			</Checkbox.Root>
 
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.Tooltip copy={props.copy?.tooltip} theme={undefined} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<Tooltip copy={props.copy?.tooltip} theme={undefined} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

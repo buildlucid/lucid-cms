@@ -5,15 +5,11 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type {
-	CFConfig,
-	FieldResponse,
-	FieldErrors,
-} from "@lucidcms/core/types";
+import type { CFConfig, FieldResponse, FieldErrors } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import Form from "@/components/Groups/Form";
+import { WYSIWYG } from "@/components/Groups/Form";
 
 interface WYSIWYGFieldProps {
 	state: {
@@ -58,7 +54,7 @@ export const WYSIWYGField: Component<WYSIWYGFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<Form.WYSIWYG
+		<WYSIWYG
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,

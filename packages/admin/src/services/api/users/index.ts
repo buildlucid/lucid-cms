@@ -4,7 +4,13 @@ import useUpdateSingle from "./useUpdateSingle";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteSingle from "./useDeleteSingle";
 
-const exportObject = {
+const exportObject: {
+	useGetMultiple: typeof useGetMultiple;
+	useGetSingle: typeof useGetSingle;
+	useUpdateSingle: typeof useUpdateSingle;
+	useCreateSingle: typeof useCreateSingle;
+	useDeleteSingle: typeof useDeleteSingle;
+} = {
 	useGetMultiple,
 	useGetSingle,
 	useUpdateSingle,

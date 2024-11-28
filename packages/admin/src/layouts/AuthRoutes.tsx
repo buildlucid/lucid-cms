@@ -1,7 +1,7 @@
 import { createEffect, type Component, type JSXElement } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import api from "@/services/api";
-import LogoIcon from "@/assets/svgs/logo-icon.svg";
+import LogoIcon from "@assets/svgs/logo-icon.svg";
 
 interface AuthRoutesProps {
 	children?: JSXElement;

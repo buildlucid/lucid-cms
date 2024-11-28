@@ -1,6 +1,6 @@
 import queryBuilder, { type QueryBuilderProps } from "@/utils/query-builder";
 import { LucidError, handleSiteErrors } from "@/utils/error-handling";
-import type { ErrorResponse } from "@lucidcms/core/types";
+import type { ErrorResponse } from "@types";
 import { csrfReq, clearCsrfSession } from "@/services/api/auth/useCsrf";
 import useRefreshToken from "@/services/api/auth/useRefreshToken";
 

@@ -3,12 +3,12 @@ import { type Component, createSignal } from "solid-js";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
 import api from "@/services/api";
-import Layout from "@/components/Groups/Layout";
-import Headers from "@/components/Groups/Headers";
-import Content from "@/components/Groups/Content";
+import { Wrapper } from "@/components/Groups/Layout";
+import { Standard } from "@/components/Groups/Headers";
+import { MediaList } from "@/components/Groups/Content";
 import Alert from "@/components/Blocks/Alert";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
-import Query from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -67,7 +67,7 @@ const MediaListRoute: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				topBar: (
 					<Alert
@@ -82,7 +82,7 @@ const MediaListRoute: Component = () => {
 					/>
 				),
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: T()("media_route_title"),
 							description: T()("media_route_description"),
@@ -97,7 +97,7 @@ const MediaListRoute: Component = () => {
 						}}
 						slots={{
 							bottom: (
-								<Query.Row
+								<QueryRow
 									searchParams={searchParams}
 									filters={[
 										{
@@ -194,7 +194,7 @@ const MediaListRoute: Component = () => {
 				),
 			}}
 		>
-			<Content.MediaList
+			<MediaList
 				state={{
 					searchParams: searchParams,
 					setOpenCreateMediaPanel: setOpenCreateMediaPanel,
@@ -206,7 +206,7 @@ const MediaListRoute: Component = () => {
 					setOpen: setOpenCreateMediaPanel,
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

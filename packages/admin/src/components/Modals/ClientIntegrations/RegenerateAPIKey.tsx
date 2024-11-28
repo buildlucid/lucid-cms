@@ -1,6 +1,6 @@
 import T from "@/translations";
 import type { Component, Accessor } from "solid-js";
-import Modal from "@/components/Groups/Modal";
+import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
 
 interface RegenerateAPIKeyProps {
@@ -28,7 +28,7 @@ const RegenerateAPIKey: Component<RegenerateAPIKeyProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Confirmation
+		<Confirmation
 			theme="primary"
 			state={{
 				open: props.state.open,

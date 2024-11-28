@@ -9,7 +9,7 @@ import {
 	Match,
 } from "solid-js";
 import { FaSolidChevronLeft, FaSolidChevronRight } from "solid-icons/fa";
-import type { ResponseBody } from "@lucidcms/core/types";
+import type { ResponseBody } from "@types";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import { Pagination as KobPagination } from "@kobalte/core";
 

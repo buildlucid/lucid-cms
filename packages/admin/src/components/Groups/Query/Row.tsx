@@ -5,7 +5,7 @@ import classNames from "classnames";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
-import Query from "@/components/Groups/Query";
+import { PerPage, Filter, Sort } from "@/components/Groups/Query";
 
 interface QueryRowProps {
 	filters?: FilterProps["filters"];
@@ -20,7 +20,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 		<div class="w-full px-15 md:px-30 pb-30 flex justify-between">
 			<div class="flex gap-2.5 items-center">
 				<Show when={props.filters !== undefined}>
-					<Query.Filter
+					<Filter
 						filters={props.filters as FilterProps["filters"]}
 						searchParams={props.searchParams}
 						disabled={props.filters?.length === 0}
@@ -28,7 +28,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 				</Show>
 				<Show when={props.custom !== undefined}>{props.custom}</Show>
 				<Show when={props.sorts !== undefined}>
-					<Query.Sort
+					<Sort
 						sorts={props.sorts as SortProps["sorts"]}
 						searchParams={props.searchParams}
 					/>
@@ -60,7 +60,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 			</div>
 			<div>
 				<Show when={props.perPage !== undefined}>
-					<Query.PerPage
+					<PerPage
 						options={props.perPage?.length === 0 ? undefined : props.perPage}
 						searchParams={props.searchParams}
 					/>

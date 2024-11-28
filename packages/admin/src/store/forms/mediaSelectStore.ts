@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import type { MediaResponse } from "@lucidcms/core/types";
+import type { MediaResponse } from "@types";
 
 type SelectCallbackT = (_media: MediaResponse) => void;
 

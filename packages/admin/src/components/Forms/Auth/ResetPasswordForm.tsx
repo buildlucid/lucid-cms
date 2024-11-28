@@ -1,6 +1,6 @@
 import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
-import Form from "@/components/Groups/Form";
+import { Form, Input } from "@/components/Groups/Form";
 import api from "@/services/api";
 import { getBodyError } from "@/utils/error-helpers";
 
@@ -21,7 +21,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Form.Root
+		<Form
 			state={{
 				isLoading: resetPassword.action.isPending,
 				errors: resetPassword.errors(),
@@ -40,7 +40,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				});
 			}}
 		>
-			<Form.Input
+			<Input
 				id="password"
 				name="password"
 				type="password"
@@ -54,7 +54,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				errors={getBodyError("password", resetPassword.errors)}
 				theme="full"
 			/>
-			<Form.Input
+			<Input
 				id="passwordConfirmation"
 				name="passwordConfirmation"
 				type="password"
@@ -67,7 +67,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				errors={getBodyError("passwordConfirmation", resetPassword.errors)}
 				theme="full"
 			/>
-		</Form.Root>
+		</Form>
 	);
 };
 

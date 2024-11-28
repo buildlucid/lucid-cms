@@ -6,7 +6,7 @@ import type {
 	ResponseBody,
 	CollectionDocumentResponse,
 	DocumentVersionType,
-} from "@lucidcms/core/types";
+} from "@types";
 
 interface QueryParams {
 	queryString?: Accessor<string>;

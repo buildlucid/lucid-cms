@@ -1,7 +1,7 @@
 import { type Component, createMemo, Show } from "solid-js";
-import type { CFConfig, FieldTypes } from "@lucidcms/core/types";
+import type { CFConfig, FieldTypes } from "@types";
 import brickStore, { type BrickData } from "@/store/brickStore";
-import Builder from "@/components/Groups/Builder";
+import { BrickBody } from "@/components/Groups/Builder";
 
 interface CollectionPseudoBrickProps {
 	fields: CFConfig<FieldTypes>[];
@@ -29,7 +29,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	return (
 		<Show when={collectionPseudoBrick() !== undefined}>
 			<div class="px-15 md:px-30 py-15 md:py-30  border-b border-border">
-				<Builder.BrickBody
+				<BrickBody
 					state={{
 						open: true,
 						brick: collectionPseudoBrick() as BrickData,

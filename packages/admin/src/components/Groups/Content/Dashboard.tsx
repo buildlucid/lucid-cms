@@ -1,7 +1,7 @@
 import T from "@/translations";
 import type { Component } from "solid-js";
 import api from "@/services/api";
-import Layout from "@/components/Groups/Layout";
+import { DynamicContent } from "@/components/Groups/Layout";
 import StartingPoints from "@/components/Blocks/StartingPoints";
 import Alert from "@/components/Blocks/Alert";
 
@@ -15,7 +15,7 @@ export const Dashboard: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			options={{
 				padding: "30",
 			}}
@@ -75,6 +75,6 @@ export const Dashboard: Component = () => {
 					},
 				]}
 			/>
-		</Layout.DynamicContent>
+		</DynamicContent>
 	);
 };

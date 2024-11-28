@@ -1,8 +1,4 @@
-import type {
-	CFConfig,
-	FieldTypes,
-	CollectionResponse,
-} from "@lucidcms/core/types";
+import type { CFConfig, FieldTypes, CollectionResponse } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import helpers from "@/utils/helpers";
 

@@ -9,8 +9,8 @@ import {
 import api from "@/services/api";
 import helpers from "@/utils/helpers";
 import { getBodyError } from "@/utils/error-helpers";
-import Panel from "@/components/Groups/Panel";
-import Form from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
+import { Checkbox, Input, Textarea } from "@/components/Groups/Form";
 
 interface UpsertClientIntegrationPanelProps {
 	id?: Accessor<number | undefined>;
@@ -131,7 +131,7 @@ const UpsertClientIntegrationPanel: Component<
 	// ---------------------------------
 	// Return
 	return (
-		<Panel.Root
+		<Panel
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -179,7 +179,7 @@ const UpsertClientIntegrationPanel: Component<
 		>
 			{() => (
 				<>
-					<Form.Input
+					<Input
 						id="name"
 						name="name"
 						type="text"
@@ -192,7 +192,7 @@ const UpsertClientIntegrationPanel: Component<
 						errors={getBodyError("name", errors)}
 						theme="full"
 					/>
-					<Form.Textarea
+					<Textarea
 						id="description"
 						name="description"
 						value={getDescription()}
@@ -204,7 +204,7 @@ const UpsertClientIntegrationPanel: Component<
 						errors={getBodyError("description", errors)}
 						theme="full"
 					/>
-					<Form.Checkbox
+					<Checkbox
 						id="enabled"
 						name="enabled"
 						value={getEnabled() === 1}
@@ -217,7 +217,7 @@ const UpsertClientIntegrationPanel: Component<
 					/>
 				</>
 			)}
-		</Panel.Root>
+		</Panel>
 	);
 };
 

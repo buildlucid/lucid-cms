@@ -10,7 +10,19 @@ import locales from "./locales";
 import collections from "./collections";
 import clientIntegrations from "./client-integrations";
 
-const exportObject = {
+const exportObject: {
+	auth: typeof auth;
+	account: typeof account;
+	users: typeof users;
+	roles: typeof roles;
+	permissions: typeof permissions;
+	media: typeof media;
+	settings: typeof settings;
+	email: typeof email;
+	locales: typeof locales;
+	collections: typeof collections;
+	clientIntegrations: typeof clientIntegrations;
+} = {
 	auth,
 	account,
 	users,

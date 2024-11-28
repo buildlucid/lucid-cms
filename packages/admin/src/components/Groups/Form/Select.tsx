@@ -10,11 +10,11 @@ import {
 } from "solid-js";
 import classNames from "classnames";
 import { debounce } from "@solid-primitives/scheduled";
-import type { ErrorResult, FieldErrors } from "@lucidcms/core/types";
+import type { ErrorResult, FieldErrors } from "@types";
 import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
 import { DropdownMenu } from "@kobalte/core";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import Form from "@/components/Groups/Form";
+import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 import Spinner from "@/components/Partials/Spinner";
 
 export type ValueT = string | number | undefined;
@@ -112,7 +112,7 @@ export const Select: Component<SelectProps> = (props) => {
 					)}
 				>
 					{/* Label */}
-					<Form.Label
+					<Label
 						id={props.id}
 						label={props.copy?.label}
 						focused={inputFocus()}
@@ -267,8 +267,8 @@ export const Select: Component<SelectProps> = (props) => {
 					</Switch>
 				</DropdownContent>
 			</DropdownMenu.Root>
-			<Form.DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Form.ErrorMessage id={props.id} errors={props.errors} />
+			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
 };

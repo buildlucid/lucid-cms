@@ -2,9 +2,9 @@ import T from "@/translations";
 import type { Component } from "solid-js";
 import type useRowTarget from "@/hooks/useRowTarget";
 import type { TableRowProps } from "@/types/components";
-import type { RoleResponse } from "@lucidcms/core/types";
+import type { RoleResponse } from "@types";
 import userStore from "@/store/userStore";
-import Table from "@/components/Groups/Table";
+import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import DateCol from "../Columns/DateCol";
 
@@ -18,7 +18,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Table.Tr
+		<Tr
 			index={props.index}
 			selected={props.selected}
 			actions={[
@@ -57,7 +57,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 				date={props.role.updatedAt}
 				options={{ include: props?.include[2] }}
 			/>
-		</Table.Tr>
+		</Tr>
 	);
 };
 

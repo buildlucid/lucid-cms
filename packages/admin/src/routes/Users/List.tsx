@@ -2,11 +2,11 @@ import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
 import userStore from "@/store/userStore";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import Query from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
-import Layout from "@/components/Groups/Layout";
-import Headers from "@/components/Groups/Headers";
-import Content from "@/components/Groups/Content";
+import { Wrapper } from "@/components/Groups/Layout";
+import { Standard } from "@/components/Groups/Headers";
+import { UserList } from "@/components/Groups/Content";
 
 const UsersListRoute: Component = () => {
 	// ----------------------------------
@@ -44,10 +44,10 @@ const UsersListRoute: Component = () => {
 	// ----------------------------------
 	// Render
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: T()("users_route_title"),
 							description: T()("users_route_description"),
@@ -61,7 +61,7 @@ const UsersListRoute: Component = () => {
 						}}
 						slots={{
 							bottom: (
-								<Query.Row
+								<QueryRow
 									searchParams={searchParams}
 									filters={[
 										{
@@ -99,7 +99,7 @@ const UsersListRoute: Component = () => {
 				),
 			}}
 		>
-			<Content.UserList
+			<UserList
 				state={{
 					searchParams: searchParams,
 					setOpenCreateUserPanel: setOpenCreateUserPanel,
@@ -111,7 +111,7 @@ const UsersListRoute: Component = () => {
 					setOpen: setOpenCreateUserPanel,
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

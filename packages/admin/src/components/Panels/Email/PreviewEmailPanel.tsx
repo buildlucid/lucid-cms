@@ -1,7 +1,7 @@
 import T from "@/translations";
 import type { Component, Accessor } from "solid-js";
 import api from "@/services/api";
-import Panel from "@/components/Groups/Panel";
+import { Panel } from "@/components/Groups/Panel";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import DetailsList from "@/components/Partials/DetailsList";
 import JSONPreview from "@/components/Partials/JSONPreview";
@@ -29,7 +29,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 	// ---------------------------------
 	// Render
 	return (
-		<Panel.Root
+		<Panel
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -101,7 +101,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 					/>
 				</>
 			)}
-		</Panel.Root>
+		</Panel>
 	);
 };
 

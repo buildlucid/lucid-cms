@@ -8,9 +8,9 @@ import {
 	createEffect,
 } from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router";
-import LogoIcon from "@/assets/svgs/logo-icon.svg";
+import LogoIcon from "@assets/svgs/logo-icon.svg";
 import api from "@/services/api";
-import Layout from "@/components/Groups/Layout";
+import { NavigationSidebar } from "@/components/Groups/Layout";
 import spawnToast from "@/utils/spawn-toast";
 
 interface MainLayoutProps {
@@ -62,7 +62,7 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 	// Render
 	return (
 		<div class="grid grid-cols-main-layout min-h-full relative">
-			<Layout.NavigationSidebar />
+			<NavigationSidebar />
 			<main class="flex flex-col overflow-x-hidden mt-15 mr-15 rounded-t-xl">
 				<Switch>
 					<Match when={isSuccess()}>{props.children}</Match>

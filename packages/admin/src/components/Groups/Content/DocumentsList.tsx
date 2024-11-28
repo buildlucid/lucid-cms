@@ -13,20 +13,20 @@ import type {
 	CFConfig,
 	FieldTypes,
 	DocumentVersionType,
-} from "@lucidcms/core/types";
+} from "@types";
 import userStore from "@/store/userStore";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import useRowTarget from "@/hooks/useRowTarget";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import Footers from "@/components/Groups/Footers";
-import Layout from "@/components/Groups/Layout";
+import { Paginated } from "@/components/Groups/Footers";
+import { DynamicContent } from "@/components/Groups/Layout";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import PromoteToDraft from "@/components/Modals/Documents/PromoteToDraft";
 import PublishDocument from "@/components/Modals/Documents/PublishDocument";
-import Table from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 
@@ -106,7 +106,7 @@ export const DocumentsList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.DynamicContent
+		<DynamicContent
 			state={{
 				isError: documents.isError,
 				isSuccess: documents.isSuccess,
@@ -115,7 +115,7 @@ export const DocumentsList: Component<{
 			}}
 			slot={{
 				footer: (
-					<Footers.Paginated
+					<Paginated
 						state={{
 							searchParams: props.state.searchParams,
 							meta: documents.data?.meta,
@@ -154,7 +154,7 @@ export const DocumentsList: Component<{
 				},
 			}}
 		>
-			<Table.Root
+			<Table
 				key={`collections.document.list.${props.state.collection?.key}`}
 				rows={documents.data?.data.length || 0}
 				searchParams={props.state.searchParams}
@@ -275,7 +275,7 @@ export const DocumentsList: Component<{
 						)}
 					</Index>
 				)}
-			</Table.Root>
+			</Table>
 			<DeleteDocument
 				id={rowTarget.getTargetId}
 				state={{
@@ -332,6 +332,6 @@ export const DocumentsList: Component<{
 					},
 				}}
 			/>
-		</Layout.DynamicContent>
+		</DynamicContent>
 	);
 };

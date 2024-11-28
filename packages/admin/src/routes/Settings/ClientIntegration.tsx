@@ -12,14 +12,18 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import UpsertClientIntegrationPanel from "@/components/Panels/ClientIntegrations/UpsertClientIntegrationPanel";
 import InfoRow from "@/components/Blocks/InfoRow";
-import Layout from "@/components/Groups/Layout";
+import {
+	Wrapper,
+	NavigationTabs,
+	DynamicContent,
+} from "@/components/Groups/Layout";
 import DeleteClientIntegration from "@/components/Modals/ClientIntegrations/DeleteClientIntegration";
 import CopyAPIKey from "@/components/Modals/ClientIntegrations/CopyAPIKey";
 import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";
 import Button from "@/components/Partials/Button";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import ClientIntegrationRow from "@/components/Rows/ClientIntegrationRow";
-import Headers from "@/components/Groups/Headers";
+import { Standard } from "@/components/Groups/Headers";
 
 const GeneralSettingsRoute: Component = (props) => {
 	// ----------------------------------------
@@ -53,10 +57,10 @@ const GeneralSettingsRoute: Component = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Layout.Wrapper
+		<Wrapper
 			slots={{
 				header: (
-					<Headers.Standard
+					<Standard
 						copy={{
 							title: T()("settings_route_title"),
 							description: T()("settings_route_description"),
@@ -73,7 +77,7 @@ const GeneralSettingsRoute: Component = (props) => {
 						}}
 						slots={{
 							bottom: (
-								<Layout.NavigationTabs
+								<NavigationTabs
 									tabs={[
 										{
 											label: T()("general"),
@@ -91,7 +95,7 @@ const GeneralSettingsRoute: Component = (props) => {
 				),
 			}}
 		>
-			<Layout.DynamicContent
+			<DynamicContent
 				state={{
 					isError: clientIntegrations.isError,
 					isSuccess: clientIntegrations.isSuccess,
@@ -150,7 +154,7 @@ const GeneralSettingsRoute: Component = (props) => {
 						</Match>
 					</Switch>
 				</InfoRow.Root>
-			</Layout.DynamicContent>
+			</DynamicContent>
 
 			{/* Panels & Modals */}
 			<DeleteClientIntegration
@@ -206,7 +210,7 @@ const GeneralSettingsRoute: Component = (props) => {
 					},
 				}}
 			/>
-		</Layout.Wrapper>
+		</Wrapper>
 	);
 };
 

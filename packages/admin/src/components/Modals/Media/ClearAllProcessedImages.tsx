@@ -1,6 +1,6 @@
 import T from "@/translations";
 import type { Component } from "solid-js";
-import Modal from "@/components/Groups/Modal";
+import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
 
 interface ClearAllProcessedImagesProps {
@@ -24,7 +24,7 @@ const ClearAllProcessedImages: Component<ClearAllProcessedImagesProps> = (
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Confirmation
+		<Confirmation
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,

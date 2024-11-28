@@ -1,7 +1,6 @@
 import T from "@/translations";
 import { type Component, Show } from "solid-js";
-import Modal from "@/components/Groups/Modal";
-import Form from "@/components/Groups/Form";
+import { Alert } from "@/components/Groups/Modal";
 
 interface CopyAPIKeyProps {
 	apiKey: string | undefined;
@@ -18,7 +17,7 @@ const CopyAPIKey: Component<CopyAPIKeyProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Alert
+		<Alert
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -37,7 +36,7 @@ const CopyAPIKey: Component<CopyAPIKeyProps> = (props) => {
 				aria-label={T()("copy_api_key_modal_description")}
 			/>
 			<p class="mt-15">{T()("copy_api_key_modal_description")}</p>
-		</Modal.Alert>
+		</Alert>
 	);
 };
 

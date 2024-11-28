@@ -2,7 +2,7 @@ import { createMemo } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, SettingsResponse } from "@lucidcms/core/types";
+import type { ResponseBody, SettingsResponse } from "@types";
 
 // biome-ignore lint/suspicious/noEmptyInterface: <explanation>
 interface QueryParams {}

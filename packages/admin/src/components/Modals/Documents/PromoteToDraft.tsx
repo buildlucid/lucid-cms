@@ -1,8 +1,8 @@
 import T from "@/translations";
 import { type Component, type Accessor, createMemo } from "solid-js";
-import Modal from "@/components/Groups/Modal";
+import { Confirmation } from "@/components/Groups/Modal";
 import helpers from "@/utils/helpers";
-import type { CollectionResponse } from "@lucidcms/core/types";
+import type { CollectionResponse } from "@types";
 import api from "@/services/api";
 
 const PromoteToDraft: Component<{
@@ -40,7 +40,7 @@ const PromoteToDraft: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<Modal.Confirmation
+		<Confirmation
 			theme="primary"
 			state={{
 				open: props.state.open,
