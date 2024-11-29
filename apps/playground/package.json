@@ -1,32 +1,32 @@
 {
-	"name": "@lucidcms/playground",
-	"private": true,
-	"description": "",
-	"main": "src/index.ts",
-	"type": "module",
-	"scripts": {
-		"start": "dotenvx run -- tsx ./src/index.ts",
-		"dev": "dotenvx run -- tsx watch ./src/index.ts",
-		"dotenvx:encrypt": "dotenvx encrypt"
-	},
-	"dependencies": {
-		"@lucidcms/core": "*",
-		"@lucidcms/plugin-local-storage": "*",
-		"@lucidcms/plugin-nodemailer": "*",
-		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/plugin-s3": "*",
-		"better-sqlite3": "^11.1.2",
-		"nodemailer": "^6.9.14"
-	},
-	"author": "",
-	"license": "ISC",
-	"devDependencies": {
-		"@dotenvx/dotenvx": "^1.8.0",
-		"@types/better-sqlite3": "^7.6.11",
-		"tsx": "^4.16.2",
-		"typescript": "^5.5.4"
-	},
-	"volta": {
-		"node": "20.15.0"
-	}
+    "name": "@lucidcms/playground",
+    "private": true,
+    "description": "",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "start": "dotenvx run -- tsx ./src/index.ts",
+        "dev": "dotenvx run -- tsx watch ./src/index.ts",
+        "dotenvx:encrypt": "dotenvx encrypt"
+    },
+    "dependencies": {
+        "@lucidcms/core": "*",
+        "@lucidcms/plugin-local-storage": "*",
+        "@lucidcms/plugin-nodemailer": "*",
+        "@lucidcms/plugin-pages": "*",
+        "@lucidcms/plugin-s3": "*",
+        "better-sqlite3": "^11.1.2",
+        "nodemailer": "^6.9.14"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@dotenvx/dotenvx": "^1.8.0",
+        "@types/better-sqlite3": "^7.6.11",
+        "tsx": "^4.16.2",
+        "typescript": "^5.5.4"
+    },
+    "volta": {
+        "node": "20.18.1"
+    }
 }

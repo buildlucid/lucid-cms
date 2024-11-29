@@ -5,7 +5,6 @@ import solidPlugin from "vite-plugin-solid";
 import tailwindcss from "@tailwindcss/vite";
 import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
-import resolvePackagePath from "../../../utils/helpers/resolve-package-path.js";
 
 // TODO: improve error handling
 
@@ -21,11 +20,6 @@ const createDevServer = async () => {
 			port: constants.vite.port,
 		},
 		base: "/admin",
-		resolve: {
-			alias: {
-				"@lucidcms/admin": resolvePackagePath("@lucidcms/admin"),
-			},
-		},
 		// logLevel: 'silent',
 	});
 

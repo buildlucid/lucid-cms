@@ -1,58 +1,5 @@
 @import "tailwindcss";
-@config '../tailwind.config.js';
-
-@layer utilities {
-	/* Fonts */
-	@font-face {
-		font-family: "Inter";
-		src: url(./assets/fonts/inter-light.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 300;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: "Inter";
-		src: url(./assets/fonts/inter-regular.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 400;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: "Inter";
-		src: url(./assets/fonts/inter-medium.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 500;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: "Inter";
-		src: url(./assets/fonts/inter-semibold.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 600;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: "Inter";
-		src: url(./assets/fonts/inter-bold.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 700;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: "Archivo";
-		src: url(./assets/fonts/archivo-bold.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 700;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: "Archivo";
-		src: url(./assets/fonts/archivo-black.woff2) format("woff2");
-		font-style: normal;
-		font-weight: 900;
-		font-display: swap;
-	}
-}
+@config './tailwind.config.js';
 
 @layer base {
 	*,

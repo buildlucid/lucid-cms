@@ -93,7 +93,7 @@
         "@fastify/swagger": "^8.15.0",
         "@fastify/swagger-ui": "^4.1.0",
         "@libsql/kysely-libsql": "^0.4.1",
-        "@tailwindcss/vite": "^4.0.0-beta.3",
+        "@tailwindcss/vite": "^4.0.0-beta.4",
         "argon2": "^0.41.1",
         "better-sqlite3": "^11.5.0",
         "blurhash": "^2.0.5",
@@ -115,9 +115,9 @@
         "sharp": "^0.33.5",
         "slug": "^10.0.0",
         "solid-js": "^1.9.3",
-        "tailwindcss": "^4.0.0-beta.3",
+        "tailwindcss": "^4.0.0-beta.4",
         "uuid": "^11.0.3",
-        "vite": "^5.4.11",
+        "vite": "^5.3.3",
         "vite-plugin-solid": "^2.11.0",
         "winston": "^3.17.0",
         "zod": "^3.23.8",
@@ -129,7 +129,7 @@
         }
     },
     "volta": {
-        "node": "20.15.1"
+        "node": "20.18.1"
     },
     "license": "MIT"
 }

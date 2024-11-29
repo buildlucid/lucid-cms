@@ -9,9 +9,11 @@ const generateClientMount = async () => {
 	// TODO: add config option for users to specify their own css entryy
 	// - In this case users will need to import tailwind and the admin css file within theirs
 	// - We then dont add our own to this client mount and theirs instead
+
 	const content = `
         import { render } from 'solid-js/web';
         import LucidAdmin from '@lucidcms/admin';
+        import '@lucidcms/admin/assets/fonts.css';
         import '@lucidcms/admin/assets/index.css';
 
         render(
