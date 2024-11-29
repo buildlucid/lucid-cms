@@ -4,8 +4,8 @@ import { solidPlugin } from "esbuild-plugin-solid";
 const assetsPathPlugin = {
     name: 'assets-path',
     setup(build) {
-        build.onResolve({ filter: /^.*\/assets\// }, args => {
-            const assetPath = args.path.replace(/^.*\/assets\//, '../assets/');
+        build.onResolve({ filter: /^@assets\// }, args => {
+            const assetPath = args.path.replace(/^@assets\//, '../assets/');
             return {
                 path: assetPath,
                 external: true
@@ -18,6 +18,7 @@ export default defineConfig({
     entry: ['src/index.ts'],
     format: ['esm', 'cjs'],
     dts: true,
+    clean: true,
     external: [],
     esbuildPlugins: [
         solidPlugin(),
