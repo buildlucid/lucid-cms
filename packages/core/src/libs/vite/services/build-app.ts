@@ -4,8 +4,10 @@ import { build } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
+import resolvePackagePath from "../../../utils/helpers/resolve-package-path.js";
 
 // TODO: improve error handling
+// TODO: allow users to extend vite config within lucid.config.ts
 
 const buildApp = async () => {
 	const cwd = process.cwd();
@@ -22,6 +24,12 @@ const buildApp = async () => {
 				input: join(cwd, constants.vite.outputDir, constants.vite.html),
 			},
 		},
+		resolve: {
+			alias: {
+				"@lucidcms/admin": resolvePackagePath("@lucidcms/admin"),
+			},
+		},
+		// logLevel: 'silent',
 	});
 };
 

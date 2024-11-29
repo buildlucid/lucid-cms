@@ -6,14 +6,13 @@ const generateHTML = async () => {
 	const cwd = process.cwd();
 
 	//* this needs to be kept in sync with apps/cms/index.html
-	// TODO: solution for favicon needed
 	const content = `<!doctype html>
         <html lang="en" class="h-full">
             <head>
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#000000" />
-                <link rel="shortcut icon" type="image/ico" href="/src/assets/favicon.ico" />
+                <link rel="shortcut icon" type="image/ico" href="@lucidcms/admin/assets/favicon.ico" />
                 <title>Lucid CMS</title>
             </head>
             <body class="h-full bg-container-1">

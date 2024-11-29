@@ -6,12 +6,16 @@ const generateClientMount = async () => {
 	const cwd = process.cwd();
 
 	// TODO: when plugin support registering components, this needs to extract them and pass them down to the app
+	// TODO: add config option for users to specify their own css entryy
+	// - In this case users will need to import tailwind and the admin css file within theirs
+	// - We then dont add our own to this client mount and theirs instead
 	const content = `
         import { render } from 'solid-js/web';
-        import { app } from '@lucidcms/core';
+        import LucidAdmin from '@lucidcms/admin';
+        import '@lucidcms/admin/assets/index.css';
 
         render(
-            app,
+            LucidAdmin,
             document.getElementById('${constants.vite.rootSelector}')
         );`;
 

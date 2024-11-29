@@ -4,6 +4,7 @@ import { createServer } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
+import resolvePackagePath from "../../../utils/helpers/resolve-package-path.js";
 
 // TODO: improve error handling
 
@@ -18,6 +19,12 @@ const createDevServer = async () => {
 		server: {
 			port: constants.vite.port,
 		},
+		resolve: {
+			alias: {
+				"@lucidcms/admin": resolvePackagePath("@lucidcms/admin"),
+			},
+		},
+		// logLevel: 'silent',
 	});
 
 	await server.listen();
