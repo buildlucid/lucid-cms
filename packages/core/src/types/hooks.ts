@@ -1,4 +1,3 @@
-import type { E } from "vitest/dist/reporters-BU_vXAUX.js";
 import type { DocumentVersionType } from "../libs/db/types.js";
 import type { BrickSchema } from "../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../schemas/collection-fields.js";

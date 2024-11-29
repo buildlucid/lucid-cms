@@ -19,14 +19,15 @@ import T from "../../../translations/index.js";
 import { LucidError, decodeError } from "../../../utils/errors/index.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import logger from "../../../utils/logging/index.js";
+import lucidFrontend from "./frontend.js";
 
 const currentDir = getDirName(import.meta.url);
 
 const lucidPlugin = async (fastify: FastifyInstance) => {
 	try {
-		const [config, cmsEntryFile, landingPageFile] = await Promise.all([
+		const [config, landingPageFile] = await Promise.all([
 			getConfig(),
-			fs.readFile(path.resolve(currentDir, "../cms/index.html")),
+			// fs.readFile(path.resolve(currentDir, "../cms/index.html")),
 			fs.readFile(path.resolve(currentDir, "../assets/landing.html")),
 		]);
 		await executeStartTasks({
@@ -103,20 +104,21 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		});
 
 		// Serve CMS
-		fastify.register(fastifyStatic, {
-			root: path.join(currentDir, "../cms"),
-			prefix: "/admin",
-			wildcard: false,
-			decorateReply: false,
-		});
+		// fastify.register(fastifyStatic, {
+		// 	root: path.join(currentDir, "../cms"),
+		// 	prefix: "/admin",
+		// 	wildcard: false,
+		// 	decorateReply: false,
+		// });
 
-		fastify.get("/admin", async (_, reply) => {
-			reply.type("text/html").send(cmsEntryFile);
-		});
+		// fastify.get("/admin", async (_, reply) => {
+		// 	reply.type("text/html").send(cmsEntryFile);
+		// });
 
-		fastify.get("/admin/*", async (_, reply) => {
-			reply.type("text/html").send(cmsEntryFile);
-		});
+		// fastify.get("/admin/*", async (_, reply) => {
+		// 	reply.type("text/html").send(cmsEntryFile);
+		// });
+		fastify.register(lucidFrontend);
 
 		// Serve landing page
 		fastify.get("/", async (_, reply) => {
