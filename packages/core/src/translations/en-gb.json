@@ -223,6 +223,7 @@
 	"seed_error_message": "An error occurred while seeding the database.",
 	"running_database_seed_jobs": "Running database seed jobs...",
 	"lucid_server_unknow_error": "An error occurred during the initialisation of the Lucid server",
+	"lucid_server_unknow_build_error": "An error occured during the vite admin SPA build step",
 	"media_error_getting_metadata": "An error occurred while getting the media metadata.",
 	"client_integration_key_already_exists": "The unique key for the client integration already exists, please re-send the request",
 	"client_integration_key_missing": "The client key header is missing",

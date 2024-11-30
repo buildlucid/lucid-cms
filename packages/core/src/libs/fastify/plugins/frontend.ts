@@ -1,40 +1,35 @@
-import fs from "node:fs/promises";
+import T from "../../../translations/index.js";
+import fs from "node:fs";
 import path, { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import constants from "../../../constants/constants.js";
-import fastifyHttpProxy from "@fastify/http-proxy";
 import fastifyStatic from "@fastify/static";
 import vite from "../../vite/index.js";
+import LucidError from "../../../utils/errors/lucid-error.js";
+// import fastifyHttpProxy from "@fastify/http-proxy";
 
 const lucidFrontend = async (fastify: FastifyInstance) => {
-	const cwd = process.cwd();
-	const outDir = join(cwd, constants.vite.outputDir, constants.vite.dist);
+	try {
+		const cwd = process.cwd();
+		const outDir = join(cwd, constants.vite.outputDir, constants.vite.dist);
 
-	//* Hacky - just example
-	// TODO:
-	//  - error handling
-	//  - args planned ouut
-	//      - arg for creating dev server
-	//      - arg for forcing rebuild of admin
+		// TODO: when plugins support custom components, the following needs to be supported
+		//* proxy fastify /admin to it instead of serving built version
+		// if (process.argv[2] === "--watch") {
+		// 	await vite.createServer();
+		// 	fastify.register(fastifyHttpProxy, {
+		// 		upstream: "http://localhost:3000",
+		// 		prefix: "/admin",
+		// 		rewritePrefix: "/",
+		// 		websocket: true,
+		// 	});
+		// }
 
-	if (process.argv[2] === "--watch") {
-		await vite.createServer();
+		//* build the vite frontend.
+		// TODO: handle buildApp errors appropriately
+		if (vite.shouldBuild()) await vite.buildApp();
 
-		// proxy fastify /admin to it instead of serving built version
-		fastify.register(fastifyHttpProxy, {
-			upstream: "http://localhost:3000",
-			prefix: "/admin",
-			rewritePrefix: "/",
-			websocket: true,
-		});
-	} else {
-		// build the vite frontend.
-		// determine if frontend has had any edits before deciding if we need to rebuild it.
-		await vite.buildApp();
-
-		// serve it
-		const cmsEntry = await fs.readFile(path.resolve(outDir, "index.html"));
 		fastify.register(fastifyStatic, {
 			root: outDir,
 			prefix: "/admin",
@@ -42,12 +37,28 @@ const lucidFrontend = async (fastify: FastifyInstance) => {
 			decorateReply: false,
 		});
 
-		fastify.get("/admin", async (_, reply) => {
-			reply.type("text/html").send(cmsEntry);
-		});
+		fastify.get("/admin", (_, reply) => {
+			const indexPath = path.resolve(outDir, "index.html");
+			const stream = fs.createReadStream(indexPath);
 
-		fastify.get("/admin/*", async (_, reply) => {
-			reply.type("text/html").send(cmsEntry);
+			reply.type("text/html");
+			return reply.send(stream);
+		});
+		fastify.get("/admin/*", (_, reply) => {
+			const indexPath = path.resolve(outDir, "index.html");
+			const stream = fs.createReadStream(indexPath);
+
+			reply.type("text/html");
+			return reply.send(stream);
+		});
+	} catch (error) {
+		throw new LucidError({
+			scope: "lucid",
+			message:
+				error instanceof Error
+					? error?.message
+					: T("lucid_server_unknow_build_error"),
+			kill: true,
 		});
 	}
 };

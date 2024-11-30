@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import path from "node:path";
 import fastifyCookie from "@fastify/cookie";
 import cors from "@fastify/cors";
@@ -25,11 +25,8 @@ const currentDir = getDirName(import.meta.url);
 
 const lucidPlugin = async (fastify: FastifyInstance) => {
 	try {
-		const [config, landingPageFile] = await Promise.all([
-			getConfig(),
-			// fs.readFile(path.resolve(currentDir, "../cms/index.html")),
-			fs.readFile(path.resolve(currentDir, "../assets/landing.html")),
-		]);
+		const config = await getConfig();
+
 		await executeStartTasks({
 			db: config.db.client,
 			config: config,
@@ -103,26 +100,16 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 			wildcard: false,
 		});
 
-		// Serve CMS
-		// fastify.register(fastifyStatic, {
-		// 	root: path.join(currentDir, "../cms"),
-		// 	prefix: "/admin",
-		// 	wildcard: false,
-		// 	decorateReply: false,
-		// });
-
-		// fastify.get("/admin", async (_, reply) => {
-		// 	reply.type("text/html").send(cmsEntryFile);
-		// });
-
-		// fastify.get("/admin/*", async (_, reply) => {
-		// 	reply.type("text/html").send(cmsEntryFile);
-		// });
+		// Build & serve CMS
 		fastify.register(lucidFrontend);
 
 		// Serve landing page
 		fastify.get("/", async (_, reply) => {
-			reply.type("text/html").send(landingPageFile);
+			const indexPath = path.resolve(currentDir, "../assets/landing.html");
+			const stream = fs.createReadStream(indexPath);
+
+			reply.type("text/html");
+			return reply.send(stream);
 		});
 
 		// Handle 404 errors
@@ -172,8 +159,9 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		throw new LucidError({
 			scope: "lucid",
 			message:
-				// @ts-expect-error
-				error?.message || T("lucid_server_unknow_error"),
+				error instanceof Error
+					? error?.message
+					: T("lucid_server_unknow_error"),
 			kill: true,
 		});
 	}
