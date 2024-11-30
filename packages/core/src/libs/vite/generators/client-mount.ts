@@ -2,13 +2,13 @@ import { join } from "node:path";
 import fs from "node:fs/promises";
 import constants from "../../../constants/constants.js";
 
+/**
+ * Generate the client mount js for the admin SPA. This is placed in the CWD .lucid directory and used by the Vite build that happens on startup
+ * @todo When we have plugin custom component support: this will need to imports them and pass them to the App.
+ * @todo When we have plugin custom component support: this will need to read config for user specified css entry files and use that instead of @lucidcms/admin/assets/index.css.
+ */
 const generateClientMount = async () => {
 	const cwd = process.cwd();
-
-	// TODO: when plugin support registering components, this needs to extract them and pass them down to the app
-	// TODO: add config option for users to specify their own css entryy
-	// - In this case users will need to import tailwind and the admin css file within theirs
-	// - We then dont add our own to this client mount and theirs instead
 
 	const content = `
         import { render } from 'solid-js/web';

@@ -6,8 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
 
-// TODO: improve error handling
-
+//* while plugins dont support registering custom components this is not used. This will need proper error handling, logging and config etc.
 const createDevServer = async () => {
 	const cwd = process.cwd();
 

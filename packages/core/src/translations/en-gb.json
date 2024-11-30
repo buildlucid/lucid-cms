@@ -251,5 +251,8 @@
 	"media_duplicate_key_error_message": "The media key you have provided already exists.",
 	"route_media_create_error_name": "Media Create Error",
 	"route_media_create_error_message": "There was an error creating the media item.",
-	"media_error_not_awaiting_sync": "The media key has either expired, been created already or has been deleted."
+	"media_error_not_awaiting_sync": "The media key has either expired, been created already or has been deleted.",
+	"vite_build_error_name": "Vite Build Error",
+	"vite_build_error_copy_assets_error": "An error occured while copying over a @lucidcms/admin asset export to the Vite build directory.",
+	"vite_build_error_message": "An unknown error occured while building the SPA via Vite."
 }
