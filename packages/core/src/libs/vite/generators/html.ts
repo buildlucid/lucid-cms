@@ -12,6 +12,7 @@ const generateHTML = async () => {
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#000000" />
+                <link rel="shortcut icon" type="image/ico" href="/admin/assets/favicon.ico" />
                 <title>Lucid CMS</title>
             </head>
             <body class="h-full bg-container-1">
