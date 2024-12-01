@@ -27,6 +27,7 @@ const start = async (config?: {
 				});
 				process.exit(1);
 			}
+
 			serverStarted(address, startTime);
 		},
 	);
