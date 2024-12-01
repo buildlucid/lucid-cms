@@ -7,6 +7,7 @@ import generateHTML from "../generators/html.js";
 import copyAdminAssets from "./copy-assets.js";
 import type { ServiceResponse } from "../../../types.js";
 import getPaths from "./get-paths.js";
+import shouldBuild from "./should-build.js";
 
 /**
  * Programatically build the admin SPA with Vite.
@@ -14,6 +15,14 @@ import getPaths from "./get-paths.js";
  */
 const buildApp = async (): ServiceResponse<undefined> => {
 	try {
+		const buildAdmin = await shouldBuild();
+		if (buildAdmin.error) return buildAdmin;
+		if (buildAdmin.data === false)
+			return {
+				data: undefined,
+				error: undefined,
+			};
+
 		const paths = getPaths();
 
 		const [clientMountRes, clientHtmlRes] = await Promise.all([

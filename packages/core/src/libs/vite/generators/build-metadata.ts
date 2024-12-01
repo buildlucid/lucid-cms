@@ -12,28 +12,42 @@ export type BuildMetadata = {
 		| "admin-package-hash"
 		| "core-package-hash";
 	timestamp: number;
-	configHash: string;
-	cwdPackageHash: string;
-	adminPackageHash: string;
-	corePackageHash: string;
+	configHash: number;
+	cwdPackageHash: number;
+	adminPackageHash: number;
+	corePackageHash: number;
 };
 
 /**
  * Generates the .lucid/client/build-metadata.json file
  */
 const generateBuildMetadata = async (
-	data: Omit<BuildMetadata, "timestamp">,
+	trigger: BuildMetadata["buildTrigger"],
+	configPath: string,
+	hashes?: {
+		config?: number;
+		cwdPackage?: number;
+		adminPackage?: number;
+		corePackage?: number;
+	},
 ): ServiceResponse<undefined> => {
 	try {
 		const paths = getPaths();
 
+		const [configStat, cwdStat, adminStat, coreStat] = await Promise.all([
+			hashes?.config ? null : fs.stat(configPath),
+			hashes?.cwdPackage ? null : fs.stat(paths.cwdPackageJson),
+			hashes?.adminPackage ? null : fs.stat(paths.adminPackageJson),
+			hashes?.corePackage ? null : fs.stat(paths.corePackageJson),
+		]);
+
 		const content = JSON.stringify({
-			timestamp: new Date().getMilliseconds(),
-			buildTrigger: data.buildTrigger,
-			configHash: data.configHash,
-			cwdPackageHash: data.cwdPackageHash,
-			adminPackageHash: data.adminPackageHash,
-			corePackageHash: data.corePackageHash,
+			timestamp: Date.now(),
+			buildTrigger: trigger,
+			configHash: hashes?.config ?? configStat?.mtimeMs ?? -1,
+			cwdPackageHash: hashes?.cwdPackage ?? cwdStat?.mtimeMs ?? -1,
+			adminPackageHash: hashes?.adminPackage ?? adminStat?.mtimeMs ?? -1,
+			corePackageHash: hashes?.corePackage ?? coreStat?.mtimeMs ?? -1,
 		} satisfies BuildMetadata);
 
 		await fs.mkdir(paths.clientDirectory, { recursive: true });

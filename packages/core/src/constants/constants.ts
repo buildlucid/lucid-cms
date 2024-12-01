@@ -94,6 +94,9 @@ export default {
 		buildMetadata: "build-metadata.json",
 		port: 24678,
 	},
+	arguments: {
+		noCache: "--no-cache",
+	},
 	brickTypes: {
 		builder: "builder",
 		fixed: "fixed",

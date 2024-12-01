@@ -29,7 +29,8 @@
         "./types": {
             "types": "./dist/types.d.ts",
             "default": "./dist/types.js"
-        }
+        },
+        "./package.json": "./package.json"
     },
     "scripts": {
         "build": "tsc && tsup",

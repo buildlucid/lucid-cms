@@ -1,10 +1,16 @@
-import path, { join } from "node:path";
+import { join } from "node:path";
 import constants from "../../../constants/constants.js";
+import { createRequire } from "node:module";
 
 /**
  * Resolve all the required paths for the Vite build
  */
 const getPaths = (cwd = process.cwd()) => {
+	const require = createRequire(import.meta.url);
+
+	const adminPackagePath = require.resolve("@lucidcms/admin/package.json");
+	const corePackagePath = require.resolve("@lucidcms/core/package.json");
+
 	return {
 		clientMount: join(
 			cwd,
@@ -42,6 +48,9 @@ const getPaths = (cwd = process.cwd()) => {
 			constants.vite.outputDir,
 			constants.vite.buildMetadata,
 		),
+		adminPackageJson: adminPackagePath,
+		corePackageJson: corePackagePath,
+		cwdPackageJson: join(cwd, "package.json"),
 	};
 };
 

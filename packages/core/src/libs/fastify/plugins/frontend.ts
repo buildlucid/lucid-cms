@@ -8,11 +8,15 @@ import vite from "../../vite/index.js";
 import LucidError from "../../../utils/errors/lucid-error.js";
 // import fastifyHttpProxy from "@fastify/http-proxy";
 
+/**
+ * The Lucid Frontend Fastify Plugin
+ * Responsible for building and serving the admin SPA for both production and development
+ * @todo When plugins support custom components, re-enable and configure the vite.createServer service.
+ */
 const lucidFrontend = async (fastify: FastifyInstance) => {
 	try {
 		const paths = vite.getPaths();
 
-		// TODO: when plugins support custom components, the following needs to be supported
 		//* proxy fastify /admin to it instead of serving built version
 		// if (process.env.NODE_ENV === "development") {
 		// 	await vite.createServer();
@@ -23,10 +27,10 @@ const lucidFrontend = async (fastify: FastifyInstance) => {
 		// 		websocket: true,
 		// 	});
 		// }
-
+		// else {
 		//* build the vite frontend.
-		// TODO: handle buildApp errors appropriately
-		if (vite.shouldBuild()) await vite.buildApp();
+		const buildResponse = await vite.buildApp();
+		if (buildResponse.error) throw new Error(buildResponse.error.message);
 
 		fastify.register(fastifyStatic, {
 			root: paths.clientDist,
@@ -45,6 +49,7 @@ const lucidFrontend = async (fastify: FastifyInstance) => {
 			reply.type("text/html");
 			return reply.send(stream);
 		});
+		// }
 	} catch (error) {
 		throw new LucidError({
 			scope: "lucid",
