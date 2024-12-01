@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import lucidPlugin from "./plugins/lucid.js";
 import logger from "../../utils/logging/index.js";
-import serverStartLog from "../../utils/logging/server-start-log.js";
+import { serverStarted } from "../../utils/logging/lucid-startup-logs.js";
 
 const startTime = process.hrtime();
 const fastify = Fastify();
@@ -27,7 +27,7 @@ const start = async (config?: {
 				});
 				process.exit(1);
 			}
-			serverStartLog(address, startTime);
+			serverStarted(address, startTime);
 		},
 	);
 };
