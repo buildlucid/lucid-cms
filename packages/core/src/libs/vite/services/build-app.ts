@@ -1,19 +1,17 @@
 import T from "../../../translations/index.js";
-import tailwindcss from "@tailwindcss/vite";
 import { build } from "vite";
-import solidPlugin from "vite-plugin-solid";
 import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
 import copyAdminAssets from "./copy-assets.js";
-import type { ServiceResponse } from "../../../types.js";
-import getPaths from "./get-paths.js";
+import mergeViteConfig from "./merge-vite-config.js";
+import type { Config, ServiceResponse } from "../../../types.js";
 import shouldBuild from "./should-build.js";
 
 /**
  * Programatically build the admin SPA with Vite.
  * @todo Allow users to extend the vite config within the lucid.config.ts/js
  */
-const buildApp = async (): ServiceResponse<undefined> => {
+const buildApp = async (config: Config): ServiceResponse<undefined> => {
 	try {
 		const buildAdmin = await shouldBuild();
 		if (buildAdmin.error) return buildAdmin;
@@ -23,8 +21,6 @@ const buildApp = async (): ServiceResponse<undefined> => {
 				error: undefined,
 			};
 
-		const paths = getPaths();
-
 		const [clientMountRes, clientHtmlRes] = await Promise.all([
 			generateClientMount(),
 			generateHTML(),
@@ -32,19 +28,8 @@ const buildApp = async (): ServiceResponse<undefined> => {
 		if (clientHtmlRes.error) return clientHtmlRes;
 		if (clientMountRes.error) return clientMountRes;
 
-		await build({
-			plugins: [tailwindcss(), solidPlugin()],
-			root: paths.clientDirectory,
-			build: {
-				outDir: paths.clientDist,
-				emptyOutDir: true,
-				rollupOptions: {
-					input: paths.clientHtml,
-				},
-			},
-			base: "/admin",
-			// logLevel: "silent",
-		});
+		const inlineConfig = mergeViteConfig(config);
+		await build(inlineConfig);
 
 		const copyAssetRes = await copyAdminAssets(["favicon.ico"]);
 		if (copyAssetRes.error) return copyAssetRes;

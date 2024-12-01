@@ -64,6 +64,7 @@ const ConfigSchema = z.object({
 		.optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
+	vite: z.unknown().optional(),
 });
 
 export default ConfigSchema;

@@ -7,6 +7,7 @@ import type { MediaKitMeta } from "../libs/media-kit/index.js";
 import type { AllHooks } from "./hooks.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { FastifyInstance } from "fastify";
+import type { InlineConfig } from "vite";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -184,6 +185,8 @@ export interface LucidConfig {
 	collections?: CollectionBuilder[];
 	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
 	plugins?: LucidPlugin[];
+	/** Extend Vites config */
+	vite?: InlineConfig;
 }
 
 export interface Config extends z.infer<typeof ConfigSchema> {
@@ -217,4 +220,5 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPlugin>;
+	vite?: InlineConfig;
 }
