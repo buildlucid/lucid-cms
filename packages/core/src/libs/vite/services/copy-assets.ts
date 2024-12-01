@@ -20,6 +20,7 @@ const copyAdminAssets = async (
 			const source = require.resolve(`@lucidcms/admin/assets/${asset}`);
 			const destination = join(
 				cwd,
+				constants.runtimeStore.dist,
 				constants.vite.outputDir,
 				constants.vite.dist,
 				"assets",
@@ -34,11 +35,13 @@ const copyAdminAssets = async (
 			data: undefined,
 			error: undefined,
 		};
-	} catch (error) {
+	} catch (err) {
 		return {
 			error: {
-				name: T("vite_build_error_name"),
-				message: T("vite_build_error_copy_assets_error"),
+				message:
+					err instanceof Error
+						? err.message
+						: T("vite_build_error_copy_assets_error"),
 			},
 			data: undefined,
 		};

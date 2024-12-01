@@ -1,6 +1,5 @@
 import T from "../../../translations/index.js";
 import fs from "node:fs";
-import path, { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import constants from "../../../constants/constants.js";
@@ -11,12 +10,11 @@ import LucidError from "../../../utils/errors/lucid-error.js";
 
 const lucidFrontend = async (fastify: FastifyInstance) => {
 	try {
-		const cwd = process.cwd();
-		const outDir = join(cwd, constants.vite.outputDir, constants.vite.dist);
+		const paths = vite.getPaths();
 
 		// TODO: when plugins support custom components, the following needs to be supported
 		//* proxy fastify /admin to it instead of serving built version
-		// if (process.argv[2] === "--watch") {
+		// if (process.env.NODE_ENV === "development") {
 		// 	await vite.createServer();
 		// 	fastify.register(fastifyHttpProxy, {
 		// 		upstream: "http://localhost:3000",
@@ -31,23 +29,19 @@ const lucidFrontend = async (fastify: FastifyInstance) => {
 		if (vite.shouldBuild()) await vite.buildApp();
 
 		fastify.register(fastifyStatic, {
-			root: outDir,
+			root: paths.clientDist,
 			prefix: "/admin",
 			wildcard: false,
 			decorateReply: false,
 		});
 
 		fastify.get("/admin", (_, reply) => {
-			const indexPath = path.resolve(outDir, "index.html");
-			const stream = fs.createReadStream(indexPath);
-
+			const stream = fs.createReadStream(paths.clientDistHtml);
 			reply.type("text/html");
 			return reply.send(stream);
 		});
 		fastify.get("/admin/*", (_, reply) => {
-			const indexPath = path.resolve(outDir, "index.html");
-			const stream = fs.createReadStream(indexPath);
-
+			const stream = fs.createReadStream(paths.clientDistHtml);
 			reply.type("text/html");
 			return reply.send(stream);
 		});

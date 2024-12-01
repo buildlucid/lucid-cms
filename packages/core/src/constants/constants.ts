@@ -82,12 +82,16 @@ export default {
 		max: 100,
 		timeWindow: "1 minute", // ms format - https://github.com/vercel/ms
 	},
+	runtimeStore: {
+		dist: ".lucid",
+	},
 	vite: {
-		outputDir: ".lucid/client",
+		outputDir: "client",
 		dist: "dist",
 		mount: "mount.jsx",
 		html: "index.html",
 		rootSelector: "root",
+		buildMetadata: "build-metadata.json",
 		port: 24678,
 	},
 	brickTypes: {

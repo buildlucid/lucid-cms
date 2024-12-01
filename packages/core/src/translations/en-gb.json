@@ -255,5 +255,9 @@
 	"media_error_not_awaiting_sync": "The media key has either expired, been created already or has been deleted.",
 	"vite_build_error_name": "Vite Build Error",
 	"vite_build_error_copy_assets_error": "An error occured while copying over a @lucidcms/admin asset export to the Vite build directory.",
-	"vite_build_error_message": "An unknown error occured while building the SPA via Vite."
+	"vite_build_error_message": "An unknown error occured while building the SPA via Vite.",
+	"vite_build_meta_generation_error": "An unknown error occured while generating the client build metadata file.",
+	"vite_client_mount_generation_error": "An unknown error occured while generating the admin client JS mount.",
+	"vite_client_index_generation_error": "An unknown error occured while generating the admin index.html entry.",
+	"vite_build_meta_read_error": "An unknown error occured while reading the client build metadata file."
 }

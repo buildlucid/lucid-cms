@@ -1,12 +1,18 @@
-import { join } from "node:path";
+import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
 import constants from "../../../constants/constants.js";
+import getPaths from "../services/get-paths.js";
+import type { ServiceResponse } from "../../../types.js";
 
-const generateHTML = async () => {
-	const cwd = process.cwd();
+/**
+ * Generates the vite index.html entry point
+ ** This needs to be kept in sync with the @lucidcms/admin/index.html file
+ */
+const generateHTML = async (): ServiceResponse<undefined> => {
+	try {
+		const paths = getPaths();
 
-	//* this needs to be kept in sync with apps/cms/index.html
-	const content = `<!doctype html>
+		const content = `<!doctype html>
         <html lang="en" class="h-full">
             <head>
                 <meta charset="utf-8" />
@@ -22,12 +28,24 @@ const generateHTML = async () => {
             </body>
         </html>`;
 
-	await fs.mkdir(join(cwd, constants.vite.outputDir), { recursive: true });
-	await fs.writeFile(
-		join(cwd, constants.vite.outputDir, constants.vite.html),
-		content,
-		"utf-8",
-	);
+		await fs.mkdir(paths.clientDirectory, { recursive: true });
+		await fs.writeFile(paths.clientHtml, content, "utf-8");
+
+		return {
+			data: undefined,
+			error: undefined,
+		};
+	} catch (err) {
+		return {
+			data: undefined,
+			error: {
+				message:
+					err instanceof Error
+						? err.message
+						: T("vite_client_index_generation_error"),
+			},
+		};
+	}
 };
 
 export default generateHTML;

@@ -1,6 +1,4 @@
 import T from "../../../translations/index.js";
-import constants from "../../../constants/constants.js";
-import { join } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { build } from "vite";
 import solidPlugin from "vite-plugin-solid";
@@ -8,30 +6,39 @@ import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
 import copyAdminAssets from "./copy-assets.js";
 import type { ServiceResponse } from "../../../types.js";
+import getPaths from "./get-paths.js";
 
-// TODO: improve error handling
-// TODO: allow users to extend vite config within lucid.config.ts
-
+/**
+ * Programatically build the admin SPA with Vite.
+ * @todo Allow users to extend the vite config within the lucid.config.ts/js
+ */
 const buildApp = async (): ServiceResponse<undefined> => {
 	try {
-		const cwd = process.cwd();
+		const paths = getPaths();
 
-		await Promise.all([generateClientMount(), generateHTML()]);
+		const [clientMountRes, clientHtmlRes] = await Promise.all([
+			generateClientMount(),
+			generateHTML(),
+		]);
+		if (clientHtmlRes.error) return clientHtmlRes;
+		if (clientMountRes.error) return clientMountRes;
 
 		await build({
 			plugins: [tailwindcss(), solidPlugin()],
-			root: join(cwd, constants.vite.outputDir),
+			root: paths.clientDirectory,
 			build: {
-				outDir: join(cwd, constants.vite.outputDir, constants.vite.dist),
+				outDir: paths.clientDist,
 				emptyOutDir: true,
 				rollupOptions: {
-					input: join(cwd, constants.vite.outputDir, constants.vite.html),
+					input: paths.clientHtml,
 				},
 			},
 			base: "/admin",
 			// logLevel: "silent",
 		});
-		await copyAdminAssets(["favicon.ico"]);
+
+		const copyAssetRes = await copyAdminAssets(["favicon.ico"]);
+		if (copyAssetRes.error) return copyAssetRes;
 
 		return {
 			data: undefined,
@@ -41,8 +48,8 @@ const buildApp = async (): ServiceResponse<undefined> => {
 		return {
 			data: undefined,
 			error: {
-				name: T("vite_build_error_name"),
-				message: T("vite_build_error_message"),
+				message:
+					err instanceof Error ? err.message : T("vite_build_error_message"),
 			},
 		};
 	}
