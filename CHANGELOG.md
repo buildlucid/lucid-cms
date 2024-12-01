@@ -1,5 +1,10 @@
 # @lucidcms/core
 
+## v0.10.1-alpha.0
+
+## Features:
+- Admin SPA is now built programatically on start instead of serving the pre-built SPA as we did before. This means down the line we can support plugins registering custom components and routes and have them built into the client bundle.
+
 ## v0.10.0-alpha.0
 
 ### Features:
