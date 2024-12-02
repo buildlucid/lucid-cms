@@ -101,7 +101,7 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		});
 
 		// Build & serve CMS
-		await fastify.register(lucidFrontend);
+		fastify.register(lucidFrontend);
 
 		// Serve landing page
 		fastify.get("/", async (_, reply) => {
