@@ -8,6 +8,13 @@
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "noImplicitAny": false,
-        "skipLibCheck": true
-    }
+        "skipLibCheck": true,
+        "outDir": "dist"
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }

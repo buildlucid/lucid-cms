@@ -7,7 +7,9 @@
 	"scripts": {
 		"start": "dotenvx run -- tsx ./src/index.ts",
 		"dev": "dotenvx run -- tsx watch ./src/index.ts",
-		"dotenvx:encrypt": "dotenvx encrypt"
+		"dotenvx:encrypt": "dotenvx encrypt",
+		"build:js": "tsc",
+		"start:js": "dotenvx run -- node dist/index.js"
 	},
 	"dependencies": {
 		"@lucidcms/core": "*",

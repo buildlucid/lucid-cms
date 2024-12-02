@@ -2,3 +2,4 @@ db.sqlite
 /uploads/
 /.env.keys
 /.lucid
+/dist
