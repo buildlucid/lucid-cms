@@ -37,7 +37,7 @@
 		"typescript": "^5.5.4"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.10.0-alpha.0"
+		"@lucidcms/core": "^0.10.2-alpha.0"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.654.0",

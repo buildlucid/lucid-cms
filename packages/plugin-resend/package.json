@@ -30,7 +30,7 @@
 		"typescript": "^5.5.2"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.10.0-alpha.0"
+		"@lucidcms/core": "^0.10.2-alpha.0"
 	},
 	"dependencies": {},
 	"volta": {

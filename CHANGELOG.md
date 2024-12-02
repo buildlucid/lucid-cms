@@ -1,5 +1,10 @@
 # @lucidcms/core
 
+## v0.10.2-alpha.0
+
+## Bug Fixes:
+- Fixed cookie functionality broken when explicitly awaiting frontend plugin registration in fastify. ([21b530f](https://github.com/ProtoDigitalUK/lucid_cms/commit/21b530f2689ecbc962fda56042033e091e829df7))
+
 ## v0.10.1-alpha.0
 
 ## Features:
