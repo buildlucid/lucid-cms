@@ -9,7 +9,9 @@ let config: Config | undefined = undefined;
 
 export const getConfig = async (props?: {
 	config?: Config;
-	givenPath?: string;
+	path?: string;
+	/** Required when tests need to spyOn winstonLogger  */
+	dynamicImport?: boolean;
 }) => {
 	if (props?.config) {
 		config = props.config;
@@ -20,14 +22,16 @@ export const getConfig = async (props?: {
 		return config;
 	}
 
-	const configPath = props?.givenPath
-		? props.givenPath
-		: getConfigPath(process.cwd());
+	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
-	const configModule = await jiti.import(importPath, { default: true });
-
-	config = configModule as Config;
+	if (props?.dynamicImport) {
+		const configModule = await import(importPath);
+		config = configModule.default as Config;
+	} else {
+		const configModule = await jiti.import(importPath, { default: true });
+		config = configModule as Config;
+	}
 
 	return config;
 };

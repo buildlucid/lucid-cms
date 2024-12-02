@@ -1,17 +1,15 @@
-import winston from "winston";
+import { format, createLogger } from "winston";
+import transports from "winston/lib/winston/transports/index.js";
 
-const winstonLogger = winston.createLogger({
+const winstonLogger = createLogger({
 	level: "info",
-	format: winston.format.json(),
+	format: format.json(),
 });
 
 if (process.env.NODE_ENV !== "production") {
 	winstonLogger.add(
-		new winston.transports.Console({
-			format: winston.format.combine(
-				winston.format.colorize(),
-				winston.format.simple(),
-			),
+		new transports.Console({
+			format: format.combine(format.colorize(), format.simple()),
 		}),
 	);
 }

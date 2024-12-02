@@ -6,7 +6,7 @@ const currentDir = getDirName(import.meta.url);
 
 const getBasicConfig = (file: string) => async () => {
 	const config = await getConfig({
-		givenPath: path.resolve(currentDir, "./config/", file),
+		path: path.resolve(currentDir, "./config/", file),
 	});
 
 	return config;

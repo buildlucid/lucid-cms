@@ -19,7 +19,8 @@ test("should throw lucid version support error", async () => {
 		.mockImplementation(() => {});
 
 	await getConfig({
-		givenPath: path.resolve(__dirname, "./check-plugin-semver.ts"),
+		path: path.resolve(__dirname, "./check-plugin-semver.ts"),
+		dynamicImport: true,
 	});
 
 	const version = semver.coerce(packageJson.version) ?? packageJson.version;

@@ -4,7 +4,7 @@ import getConfig from "./get-config.js";
 
 test("should return lucid config object", async () => {
 	const config = await getConfig({
-		givenPath: path.resolve(__dirname, "./mock-config/lucid.config.ts"),
+		path: path.resolve(__dirname, "./mock-config/lucid.config.ts"),
 	});
 
 	expect(typeof config).toBe("object");

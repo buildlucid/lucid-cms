@@ -17,7 +17,8 @@ test("should throw duplicate collection field key error", async () => {
 		.mockImplementation(() => {});
 
 	await getConfig({
-		givenPath: path.resolve(__dirname, "./duplicate-collection-fields.ts"),
+		path: path.resolve(__dirname, "./duplicate-collection-fields.ts"),
+		dynamicImport: true,
 	});
 
 	expect(consoleLogSpy).toHaveBeenCalledWith(
