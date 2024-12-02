@@ -1,5 +1,11 @@
 # @lucidcms/plugin-pages
 
+## 0.2.1
+
+### Patch Changes
+
+- Bumped core peer dependency version
+
 ## 0.2.0
 
 ### Minor Changes
