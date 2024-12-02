@@ -1,5 +1,5 @@
-import projectPackage from "../../../package.json" assert { type: "json" };
-import adminPackage from "@lucidcms/admin/package.json" assert { type: "json" };
+import projectPackage from "../../../package.json" with { type: "json" };
+import adminPackage from "@lucidcms/admin/package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import type { AddressInfo } from "node:net";
 

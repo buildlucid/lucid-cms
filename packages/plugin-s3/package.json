@@ -44,7 +44,10 @@
 		"@aws-sdk/s3-request-presigner": "^3.654.0"
 	},
 	"volta": {
-		"node": "20.15.0"
+		"node": "22.11.0"
+	},
+	"engines": {
+		"node": ">=22.0.0 <23.0.0"
 	},
 	"license": "MIT"
 }

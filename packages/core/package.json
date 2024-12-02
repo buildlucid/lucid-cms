@@ -120,7 +120,10 @@
 		"@lucidcms/admin": "0.10.2-alpha.0"
 	},
 	"volta": {
-		"node": "20.18.1"
+		"node": "22.11.0"
+	},
+	"engines": {
+		"node": ">=22.0.0 <23.0.0"
 	},
 	"license": "MIT"
 }

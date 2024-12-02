@@ -1,4 +1,4 @@
-import enGb from "./en-gb.json" assert { type: "json" };
+import enGb from "./en-gb.json" with { type: "json" };
 
 const selectedLang = enGb;
 

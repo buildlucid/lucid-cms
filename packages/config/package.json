@@ -4,5 +4,8 @@
 	"license": "UNLICENSED",
 	"publishConfig": {
 		"access": "public"
+	},
+	"volta": {
+		"node": "22.11.0"
 	}
 }

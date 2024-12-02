@@ -9,7 +9,7 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import packageJson from "../../../../package.json" assert { type: "json" };
+import packageJson from "../../../../package.json" with { type: "json" };
 import executeStartTasks from "../../../actions/execute-start-tasks.js";
 import constants from "../../../constants/constants.js";
 import getConfig from "../../../libs/config/get-config.js";

@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
 import { LucidError } from "../../../utils/errors/index.js";
-import packageJson from "../../../../package.json" assert { type: "json" };
+import packageJson from "../../../../package.json" with { type: "json" };
 import semver from "semver";
 
 const checkPluginVersion = (data: {
