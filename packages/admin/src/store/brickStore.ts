@@ -1,5 +1,5 @@
 import { createStore, produce } from "solid-js/store";
-import shortUUID from "short-uuid";
+import { nanoid } from "nanoid";
 import brickHelpers from "@/utils/brick-helpers";
 import type {
 	FieldErrors,
@@ -145,7 +145,7 @@ const [get, set] = createStore<BrickStoreT>({
 					if (brickIndex !== -1) continue;
 
 					draft.push({
-						id: `ref-${shortUUID.generate()}}`,
+						id: `ref-${nanoid()}}`,
 						key: brick.key,
 						fields: [],
 						type: "fixed",
@@ -165,7 +165,7 @@ const [get, set] = createStore<BrickStoreT>({
 				});
 
 				draft.push({
-					id: `ref-${shortUUID.generate()}`,
+					id: `ref-${nanoid()}`,
 					key: props.brickConfig.key,
 					order: largestOrder ? largestOrder.order + 1 : 0,
 					type: "builder",
@@ -342,7 +342,7 @@ const [get, set] = createStore<BrickStoreT>({
 				if (field.groups.length === 0) {
 					field.groups = [
 						{
-							id: `ref-${shortUUID.generate()}`,
+							id: `ref-${nanoid()}`,
 							order: 0,
 							open: 0,
 							fields: groupFields,
@@ -356,7 +356,7 @@ const [get, set] = createStore<BrickStoreT>({
 				});
 
 				field.groups.push({
-					id: `ref-${shortUUID.generate()}`,
+					id: `ref-${nanoid()}`,
 					order: largestOrder.order + 1,
 					open: 0,
 					fields: groupFields,
