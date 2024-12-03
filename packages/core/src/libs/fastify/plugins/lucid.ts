@@ -13,7 +13,7 @@ import packageJson from "../../../../package.json" with { type: "json" };
 import executeStartTasks from "../../../actions/execute-start-tasks.js";
 import constants from "../../../constants/constants.js";
 import getConfig from "../../../libs/config/get-config.js";
-import routes from "../../../routes/index.js";
+import routes from "../routes/index.js";
 import lucidServices from "../../../services/index.js";
 import T from "../../../translations/index.js";
 import { LucidError, decodeError } from "../../../utils/errors/index.js";

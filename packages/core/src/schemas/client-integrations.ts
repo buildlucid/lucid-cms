@@ -1,5 +1,5 @@
 import z from "zod";
-import type getSingle from "../controllers/roles/get-single.js";
+import type getSingle from "../libs/fastify/controllers/roles/get-single.js";
 
 export default {
 	createSingle: {
