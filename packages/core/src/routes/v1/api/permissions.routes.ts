@@ -9,7 +9,6 @@ const permissionRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
-		swaggerSchema: permissions.getAll.swaggerSchema,
 		zodSchema: permissions.getAll.zodSchema,
 		controller: permissions.getAll.controller,
 	});

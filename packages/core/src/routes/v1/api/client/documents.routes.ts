@@ -9,7 +9,6 @@ const clientDocumentsRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			clientAuthentication: true,
 		},
-		swaggerSchema: collectionDocuments.client.getSingle.swaggerSchema,
 		zodSchema: collectionDocuments.client.getSingle.zodSchema,
 		controller: collectionDocuments.client.getSingle.controller,
 	});
@@ -20,7 +19,6 @@ const clientDocumentsRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			clientAuthentication: true,
 		},
-		swaggerSchema: collectionDocuments.client.getMultiple.swaggerSchema,
 		zodSchema: collectionDocuments.client.getMultiple.zodSchema,
 		controller: collectionDocuments.client.getMultiple.controller,
 	});

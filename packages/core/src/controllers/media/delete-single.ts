@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import mediaSchema from "../../schemas/media.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -38,19 +37,4 @@ const deleteSingleController: RouteController<
 export default {
 	controller: deleteSingleController,
 	zodSchema: mediaSchema.deleteSingle,
-	swaggerSchema: {
-		description:
-			"Delete a single media item by id and clear its processed images if media is an image.",
-		tags: ["media"],
-		summary: "Delete a single media item.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

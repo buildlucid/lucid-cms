@@ -1,8 +1,5 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
-import { swaggerBodyBricksObj } from "../../schemas/collection-bricks.js";
-import { swaggerFieldObj } from "../../schemas/collection-fields.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
@@ -58,41 +55,4 @@ const updateSingleController: RouteController<
 export default {
 	controller: updateSingleController,
 	zodSchema: collectionDocumentsSchema.updateSingle,
-	swaggerSchema: {
-		description: "Update a single collection document version.",
-		tags: ["collection-documents"],
-		summary: "Update a single collection document version.",
-		body: {
-			type: "object",
-			properties: {
-				publish: {
-					type: "boolean",
-				},
-				bricks: {
-					type: "array",
-					items: swaggerBodyBricksObj,
-				},
-				fields: {
-					type: "array",
-					items: swaggerFieldObj,
-				},
-			},
-		},
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "object",
-					properties: {
-						id: {
-							type: "number",
-						},
-					},
-				},
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

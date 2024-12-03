@@ -33,29 +33,6 @@ type Route = <
 			body?: BodyT;
 			query?: QueryT;
 		};
-		swaggerSchema?: {
-			description?: string;
-			tags?: string[];
-			summary?: string;
-			response?: Record<
-				string | number,
-				{
-					description?: string;
-					type?: string;
-					properties?: unknown;
-				}
-			>;
-			body?: {
-				type?: string;
-				properties?: unknown;
-				required?: string[];
-			};
-			headers?: {
-				type: string;
-				properties: unknown;
-				required: string[];
-			};
-		};
 		bodyLimit?: number;
 		controller: RouteController<ParamsT, BodyT, QueryT>;
 	},
@@ -66,8 +43,7 @@ type PreHookT = Array<
 >;
 
 const route: Route = (fastify, opts) => {
-	const { method, url, controller, swaggerSchema, zodSchema, middleware } =
-		opts;
+	const { method, url, controller, zodSchema, middleware } = opts;
 
 	const preValidation: PreHookT = [];
 	const preHandler: PreHookT = [logRoute("prehandler")];
@@ -91,7 +67,6 @@ const route: Route = (fastify, opts) => {
 		handler: controller,
 		preValidation: preValidation,
 		preHandler: preHandler,
-		schema: swaggerSchema,
 		onResponse: [logRoute("onResponse")],
 		bodyLimit: opts.bodyLimit,
 	});

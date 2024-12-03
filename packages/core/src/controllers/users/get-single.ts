@@ -1,8 +1,6 @@
 import T from "../../translations/index.js";
 import usersSchema from "../../schemas/users.js";
-import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import UsersFormatter from "../../libs/formatters/users.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -41,15 +39,4 @@ const getSingleController: RouteController<
 export default {
 	controller: getSingleController,
 	zodSchema: usersSchema.getSingle,
-	swaggerSchema: {
-		description: "Get a single user.",
-		tags: ["users"],
-		summary: "Get a single user.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: UsersFormatter.swagger,
-			}),
-		},
-	},
 };

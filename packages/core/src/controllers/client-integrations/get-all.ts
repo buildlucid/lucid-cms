@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import clientIntegrationsSchema from "../../schemas/client-integrations.js";
-import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import ClientIntegrationsFormatter from "../../libs/formatters/client-integrations.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
@@ -39,18 +38,4 @@ const getAllController: RouteController<
 export default {
 	controller: getAllController,
 	zodSchema: clientIntegrationsSchema.getAll,
-	swaggerSchema: {
-		description: "Get all client integrations.",
-		tags: ["client-integrations"],
-		summary: "Get all client integrations",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: ClientIntegrationsFormatter.swagger,
-				},
-			}),
-		},
-	},
 };

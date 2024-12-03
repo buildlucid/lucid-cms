@@ -1,12 +1,6 @@
 import T from "../../../translations/index.js";
 import collectionDocumentsSchema from "../../../schemas/collection-documents.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-	swaggerHeaders,
-} from "../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
-import CollectionDocumentsFormatter from "../../../libs/formatters/collection-documents.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import type { RouteController } from "../../../types/types.js";
@@ -50,40 +44,4 @@ const getSingleController: RouteController<
 export default {
 	controller: getSingleController,
 	zodSchema: collectionDocumentsSchema.client.getSingle,
-	swaggerSchema: {
-		description:
-			"Get a single collection document by filters via the client integration.",
-		tags: ["client-integrations", "collection-documents"],
-		summary: "Get a single collection document entry.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: CollectionDocumentsFormatter.swaggerClient,
-			}),
-		},
-		headers: swaggerHeaders({
-			authorization: true,
-			clientKey: true,
-		}),
-		querystring: swaggerQueryString({
-			include: ["bricks"],
-			filters: [
-				{
-					key: "documentId",
-				},
-				{
-					key: "documentCreatedBy",
-				},
-				{
-					key: "documentUpdatedBy",
-				},
-				{
-					key: "documentCreatedAt",
-				},
-				{
-					key: "documentUpdatedAt",
-				},
-			],
-		}),
-	},
 };

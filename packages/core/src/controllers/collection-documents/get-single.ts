@@ -1,11 +1,6 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-} from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import CollectionDocumentsFormatter from "../../libs/formatters/collection-documents.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -60,18 +55,4 @@ const getSingleController: RouteController<
 export default {
 	controller: getSingleController,
 	zodSchema: collectionDocumentsSchema.getSingle,
-	swaggerSchema: {
-		description: "Get a single collection document entry by ID.",
-		tags: ["collection-documents"],
-		summary: "Get a single collection document entry.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: CollectionDocumentsFormatter.swagger,
-			}),
-		},
-		querystring: swaggerQueryString({
-			include: ["bricks"],
-		}),
-	},
 };

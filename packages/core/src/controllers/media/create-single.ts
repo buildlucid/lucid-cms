@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import mediaSchema from "../../schemas/media.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -42,18 +41,4 @@ const createSingleController: RouteController<
 export default {
 	controller: createSingleController,
 	zodSchema: mediaSchema.createSingle,
-	swaggerSchema: {
-		description: "Create a single media item.",
-		tags: ["media"],
-		summary: "Create a single media item.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

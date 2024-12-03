@@ -7,7 +7,6 @@ const authRoutes = async (fastify: FastifyInstance) => {
 		method: "get",
 		url: "/csrf",
 		zodSchema: auth.getCSRF.zodSchema,
-		swaggerSchema: auth.getCSRF.swaggerSchema,
 		controller: auth.getCSRF.controller,
 	});
 
@@ -20,7 +19,6 @@ const authRoutes = async (fastify: FastifyInstance) => {
 			// and if it is it will return the user data, this handles authorisatio itsself via the refresh token.
 		},
 		zodSchema: auth.token.zodSchema,
-		swaggerSchema: auth.token.swaggerSchema,
 		controller: auth.token.controller,
 	});
 
@@ -31,7 +29,6 @@ const authRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		zodSchema: auth.login.zodSchema,
-		swaggerSchema: auth.login.swaggerSchema,
 		controller: auth.login.controller,
 	});
 
@@ -43,7 +40,6 @@ const authRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		zodSchema: auth.logout.zodSchema,
-		swaggerSchema: auth.logout.swaggerSchema,
 		controller: auth.logout.controller,
 	});
 };

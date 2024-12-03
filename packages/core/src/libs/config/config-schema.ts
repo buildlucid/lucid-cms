@@ -19,7 +19,6 @@ const ConfigSchema = z.object({
 			emailTemplates: z.string().optional(),
 		})
 		.optional(),
-	disableSwagger: z.boolean(),
 	localisation: z
 		.object({
 			locales: z.array(

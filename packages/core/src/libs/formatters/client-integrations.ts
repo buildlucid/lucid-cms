@@ -35,31 +35,4 @@ export default class ClientIntegrationsFormatter {
 			updatedAt: Formatter.formatDate(props.integration.updated_at),
 		};
 	};
-	static swagger = {
-		type: "object",
-		additionalProperties: true,
-		properties: {
-			id: {
-				type: "number",
-			},
-			key: {
-				type: "string",
-			},
-			name: {
-				type: "string",
-			},
-			description: {
-				type: "string",
-			},
-			enabled: {
-				type: "number",
-			},
-			createdAt: {
-				type: "string",
-			},
-			updatedAt: {
-				type: "string",
-			},
-		},
-	};
 }

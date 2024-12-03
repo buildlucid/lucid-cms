@@ -1,5 +1,4 @@
 import authSchema from "../../schemas/auth.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
 
@@ -33,19 +32,4 @@ const tokenController: RouteController<
 export default {
 	controller: tokenController,
 	zodSchema: authSchema.token,
-	swaggerSchema: {
-		description:
-			"Verifies the refresh token and issues a new access and refresh token.",
-		tags: ["auth"],
-		summary: "Issues a new access and refresh token.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

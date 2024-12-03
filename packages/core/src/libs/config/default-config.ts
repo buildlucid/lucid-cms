@@ -5,7 +5,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		emailTemplates: "./templates",
 	},
 	email: undefined,
-	disableSwagger: false,
 	localisation: {
 		locales: [
 			{

@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import clientIntegrationsSchema from "../../schemas/client-integrations.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import ClientIntegrationsFormatter from "../../libs/formatters/client-integrations.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
@@ -44,18 +43,4 @@ const regenerateKeysController: RouteController<
 export default {
 	controller: regenerateKeysController,
 	zodSchema: clientIntegrationsSchema.regenerateKeys,
-	swaggerSchema: {
-		description: "Regenerates the API key for the given client integration.",
-		tags: ["client-integrations"],
-		summary: "Regenerate a single client integration API key.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: ClientIntegrationsFormatter.swagger,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

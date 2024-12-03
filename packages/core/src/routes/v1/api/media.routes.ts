@@ -9,7 +9,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
-		swaggerSchema: media.getSingle.swaggerSchema,
 		zodSchema: media.getSingle.zodSchema,
 		controller: media.getSingle.controller,
 	});
@@ -21,7 +20,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			contentLocale: true,
 		},
-		swaggerSchema: media.getMultiple.swaggerSchema,
 		zodSchema: media.getMultiple.zodSchema,
 		controller: media.getMultiple.controller,
 	});
@@ -34,7 +32,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: media.getPresignedUrl.swaggerSchema,
 		zodSchema: media.getPresignedUrl.zodSchema,
 		controller: media.getPresignedUrl.controller,
 	});
@@ -47,7 +44,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: media.createSingle.swaggerSchema,
 		zodSchema: media.createSingle.zodSchema,
 		controller: media.createSingle.controller,
 	});
@@ -60,7 +56,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: media.updateSingle.swaggerSchema,
 		zodSchema: media.updateSingle.zodSchema,
 		controller: media.updateSingle.controller,
 	});
@@ -73,7 +68,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: media.deleteSingle.swaggerSchema,
 		zodSchema: media.deleteSingle.zodSchema,
 		controller: media.deleteSingle.controller,
 	});
@@ -86,7 +80,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: media.clearSingleProcessed.swaggerSchema,
 		zodSchema: media.clearSingleProcessed.zodSchema,
 		controller: media.clearSingleProcessed.controller,
 	});
@@ -99,7 +92,6 @@ const mediaRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: media.clearAllProcessed.swaggerSchema,
 		zodSchema: media.clearAllProcessed.zodSchema,
 		controller: media.clearAllProcessed.controller,
 	});

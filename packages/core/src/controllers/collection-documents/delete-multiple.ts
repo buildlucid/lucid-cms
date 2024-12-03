@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -40,30 +39,4 @@ const deleteMultipleController: RouteController<
 export default {
 	controller: deleteMultipleController,
 	zodSchema: collectionDocumentsSchema.deleteMultiple,
-	swaggerSchema: {
-		description: "Delete a multiple collection documents.",
-		tags: ["collection-documents"],
-		summary: "Delete multiple collection documents.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				ids: {
-					type: "array",
-					items: {
-						type: "number",
-					},
-				},
-			},
-			required: ["ids"],
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

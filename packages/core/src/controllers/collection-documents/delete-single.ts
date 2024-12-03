@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -40,18 +39,4 @@ const deleteSingleController: RouteController<
 export default {
 	controller: deleteSingleController,
 	zodSchema: collectionDocumentsSchema.deleteSingle,
-	swaggerSchema: {
-		description: "Delete a single collection document.",
-		tags: ["collection-documents"],
-		summary: "Delete a collection document",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

@@ -12,7 +12,6 @@ const usersRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		zodSchema: users.createSingle.zodSchema,
-		swaggerSchema: users.createSingle.swaggerSchema,
 		controller: users.createSingle.controller,
 	});
 
@@ -23,7 +22,6 @@ const usersRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 		},
 		zodSchema: users.getSingle.zodSchema,
-		swaggerSchema: users.getSingle.swaggerSchema,
 		controller: users.getSingle.controller,
 	});
 
@@ -34,7 +32,6 @@ const usersRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 		},
 		zodSchema: users.getMultiple.zodSchema,
-		swaggerSchema: users.getMultiple.swaggerSchema,
 		controller: users.getMultiple.controller,
 	});
 
@@ -47,7 +44,6 @@ const usersRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		zodSchema: users.deleteSingle.zodSchema,
-		swaggerSchema: users.deleteSingle.swaggerSchema,
 		controller: users.deleteSingle.controller,
 	});
 
@@ -60,7 +56,6 @@ const usersRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		zodSchema: users.updateSingle.zodSchema,
-		swaggerSchema: users.updateSingle.swaggerSchema,
 		controller: users.updateSingle.controller,
 	});
 };

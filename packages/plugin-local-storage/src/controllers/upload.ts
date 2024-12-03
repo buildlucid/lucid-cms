@@ -43,14 +43,4 @@ const uploadSingleController =
 export default {
 	controller: uploadSingleController,
 	zodSchema: uploadSchema,
-	swaggerSchema: {
-		description: "Upload a single media file.",
-		tags: ["localstorage-plugin"],
-		summary: "Upload a single media file.",
-		response: {
-			200: {
-				type: "null",
-			},
-		},
-	},
 };

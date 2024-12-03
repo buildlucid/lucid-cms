@@ -1,8 +1,6 @@
 import T from "../../translations/index.js";
 import rolesSchema from "../../schemas/roles.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import RolesFormatter from "../../libs/formatters/roles.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -65,37 +63,4 @@ const createSingleController: RouteController<
 export default {
 	controller: createSingleController,
 	zodSchema: rolesSchema.createSingle,
-	swaggerSchema: {
-		description:
-			"Create a single role with the given name and permission groups.",
-		tags: ["roles"],
-		summary: "Create a single role",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: RolesFormatter.swagger,
-			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				name: {
-					type: "string",
-				},
-				description: {
-					type: "string",
-				},
-				permissions: {
-					type: "array",
-					items: {
-						type: "string",
-					},
-				},
-			},
-			required: ["name", "permissions"],
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

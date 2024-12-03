@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import accountSchema from "../../schemas/account.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -39,18 +38,4 @@ const resetPasswordController: RouteController<
 export default {
 	controller: resetPasswordController,
 	zodSchema: accountSchema.resetPassword,
-	swaggerSchema: {
-		description: "Resets the password for the user if the token is valid",
-		tags: ["account"],
-		summary: "Resets users password",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

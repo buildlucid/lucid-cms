@@ -11,7 +11,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: collectionDocuments.createSingle.swaggerSchema,
 		zodSchema: collectionDocuments.createSingle.zodSchema,
 		controller: collectionDocuments.createSingle.controller,
 	});
@@ -24,7 +23,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: collectionDocuments.updateSingle.swaggerSchema,
 		zodSchema: collectionDocuments.updateSingle.zodSchema,
 		controller: collectionDocuments.updateSingle.controller,
 	});
@@ -38,7 +36,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: collectionDocuments.restoreRevision.swaggerSchema,
 		zodSchema: collectionDocuments.restoreRevision.zodSchema,
 		controller: collectionDocuments.restoreRevision.controller,
 	});
@@ -51,7 +48,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: collectionDocuments.promoteVersion.swaggerSchema,
 		zodSchema: collectionDocuments.promoteVersion.zodSchema,
 		controller: collectionDocuments.promoteVersion.controller,
 	});
@@ -63,7 +59,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
-		swaggerSchema: collectionDocuments.getSingle.swaggerSchema,
 		zodSchema: collectionDocuments.getSingle.zodSchema,
 		controller: collectionDocuments.getSingle.controller,
 	});
@@ -77,7 +72,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: collectionDocuments.deleteSingle.swaggerSchema,
 		zodSchema: collectionDocuments.deleteSingle.zodSchema,
 		controller: collectionDocuments.deleteSingle.controller,
 	});
@@ -91,7 +85,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: collectionDocuments.deleteMultiple.swaggerSchema,
 		zodSchema: collectionDocuments.deleteMultiple.zodSchema,
 		controller: collectionDocuments.deleteMultiple.controller,
 	});
@@ -103,7 +96,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
-		swaggerSchema: collectionDocuments.getMultiple.swaggerSchema,
 		zodSchema: collectionDocuments.getMultiple.zodSchema,
 		controller: collectionDocuments.getMultiple.controller,
 	});
@@ -115,7 +107,6 @@ const collectionDocumentsRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
-		swaggerSchema: collectionDocuments.getMultipleRevisions.swaggerSchema,
 		zodSchema: collectionDocuments.getMultipleRevisions.zodSchema,
 		controller: collectionDocuments.getMultipleRevisions.controller,
 	});

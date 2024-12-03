@@ -37,14 +37,4 @@ export default class LocalesFormatter {
 			updatedAt: Formatter.formatDate(props.locale.updated_at),
 		};
 	};
-	static swagger = {
-		type: "object",
-		properties: {
-			code: { type: "string", example: "en" },
-			name: { type: "string", example: "English" },
-			isDefault: { type: "number", example: 1 },
-			createdAt: { type: "string", example: "2021-10-05T14:48:00.000Z" },
-			updatedAt: { type: "string", example: "2021-10-05T14:48:00.000Z" },
-		},
-	};
 }

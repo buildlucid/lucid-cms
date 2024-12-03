@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import collectionsSchema from "../../schemas/collections.js";
-import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import CollectionsFormatter from "../../libs/formatters/collections.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
@@ -44,18 +43,4 @@ const getAllController: RouteController<
 export default {
 	controller: getAllController,
 	zodSchema: collectionsSchema.getAll,
-	swaggerSchema: {
-		description: "Get all collection instances.",
-		tags: ["collections"],
-		summary: "Get all collections",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: CollectionsFormatter.swagger,
-				},
-			}),
-		},
-	},
 };

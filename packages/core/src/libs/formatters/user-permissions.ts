@@ -37,21 +37,4 @@ export default class UserPermissionsFormatter {
 			permissions: Array.from(permissionsSet),
 		};
 	};
-	static swaggerPermissions = {
-		type: "array",
-		items: {
-			type: "string",
-			example: "create_user",
-		},
-	};
-	static swaggerRoles = {
-		type: "array",
-		items: {
-			type: "object",
-			properties: {
-				id: { type: "number", example: 1 },
-				name: { type: "string", example: "Admin" },
-			},
-		},
-	};
 }

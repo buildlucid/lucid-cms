@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import usersSchema from "../../schemas/users.js";
-import { swaggerResponse } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -46,15 +45,4 @@ const updateSingleController: RouteController<
 export default {
 	controller: updateSingleController,
 	zodSchema: usersSchema.updateSingle,
-	swaggerSchema: {
-		description: "Update a single user.",
-		tags: ["users"],
-		summary: "Update a single user.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-	},
 };

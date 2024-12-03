@@ -55,20 +55,4 @@ export default class UsersFormatter {
 			updatedAt: Formatter.formatDate(props.user.updated_at),
 		};
 	};
-	static swagger = {
-		type: "object",
-		properties: {
-			id: { type: "number", example: 1 },
-			superAdmin: { type: "number", example: 1 },
-			email: { type: "string", example: "admin@lucidcms.io" },
-			username: { type: "string", example: "admin" },
-			firstName: { type: "string", example: "Admin" },
-			lastName: { type: "string", example: "User" },
-			triggerPasswordReset: { type: "number", example: 0 },
-			roles: UserPermissionsFormatter.swaggerRoles,
-			permissions: UserPermissionsFormatter.swaggerPermissions,
-			createdAt: { type: "string", example: "2021-06-10T20:00:00.000Z" },
-			updatedAt: { type: "string", example: "2021-06-10T20:00:00.000Z" },
-		},
-	};
 }

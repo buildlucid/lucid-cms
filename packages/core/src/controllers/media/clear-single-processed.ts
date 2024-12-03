@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import mediaSchema from "../../schemas/media.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -38,19 +37,4 @@ const clearSingleProcessedController: RouteController<
 export default {
 	controller: clearSingleProcessedController,
 	zodSchema: mediaSchema.clearSingleProcessed,
-	swaggerSchema: {
-		description:
-			"Clear all processed images for a single media item based on the given key.",
-		tags: ["media"],
-		summary: "Clear all processed image for a single media item.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

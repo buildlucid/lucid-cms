@@ -10,7 +10,6 @@ const accountRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 		},
 		zodSchema: account.getMe.zodSchema,
-		swaggerSchema: account.getMe.swaggerSchema,
 		controller: account.getMe.controller,
 	});
 
@@ -21,7 +20,6 @@ const accountRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
-		swaggerSchema: account.updateMe.swaggerSchema,
 		zodSchema: account.updateMe.zodSchema,
 		controller: account.updateMe.controller,
 	});
@@ -32,7 +30,6 @@ const accountRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			validateCSRF: true,
 		},
-		swaggerSchema: account.sendResetPassword.swaggerSchema,
 		zodSchema: account.sendResetPassword.zodSchema,
 		controller: account.sendResetPassword.controller,
 	});
@@ -40,7 +37,6 @@ const accountRoutes = async (fastify: FastifyInstance) => {
 	r(fastify, {
 		method: "get",
 		url: "/reset-password/:token",
-		swaggerSchema: account.verifyResetPassword.swaggerSchema,
 		zodSchema: account.verifyResetPassword.zodSchema,
 		controller: account.verifyResetPassword.controller,
 	});
@@ -51,7 +47,6 @@ const accountRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			validateCSRF: true,
 		},
-		swaggerSchema: account.resetPassword.swaggerSchema,
 		zodSchema: account.resetPassword.zodSchema,
 		controller: account.resetPassword.controller,
 	});

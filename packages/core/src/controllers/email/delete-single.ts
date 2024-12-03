@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import emailsSchema from "../../schemas/email.js";
-import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -38,18 +37,4 @@ const deleteSingleController: RouteController<
 export default {
 	controller: deleteSingleController,
 	zodSchema: emailsSchema.deleteSingle,
-	swaggerSchema: {
-		description: "Deletes a single email based on the the id.",
-		tags: ["emails"],
-		summary: "Delete a single email",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
-			csrf: true,
-		}),
-	},
 };

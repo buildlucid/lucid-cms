@@ -9,7 +9,6 @@ const settingsRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
-		swaggerSchema: settings.getSettings.swaggerSchema,
 		zodSchema: settings.getSettings.zodSchema,
 		controller: settings.getSettings.controller,
 	});
