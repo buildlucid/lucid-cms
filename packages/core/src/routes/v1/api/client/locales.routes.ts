@@ -9,6 +9,7 @@ const clientLocalesRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			clientAuthentication: true,
 		},
+		swaggerSchema: locales.client.getAll.swaggerSchema,
 		zodSchema: locales.client.getAll.zodSchema,
 		controller: locales.client.getAll.controller,
 	});

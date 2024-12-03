@@ -1,6 +1,11 @@
 import T from "../../translations/index.js";
 import rolesSchema from "../../schemas/roles.js";
+import {
+	swaggerResponse,
+	swaggerQueryString,
+} from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import RolesFormatter from "../../libs/formatters/roles.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -44,4 +49,33 @@ const getMultipleController: RouteController<
 export default {
 	controller: getMultipleController,
 	zodSchema: rolesSchema.getMultiple,
+	swaggerSchema: {
+		description: "Returns multiple roles based on the query parameters.",
+		tags: ["roles"],
+		summary: "Get multiple roles",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: {
+					type: "array",
+					items: RolesFormatter.swagger,
+				},
+				paginated: true,
+			}),
+		},
+		querystring: swaggerQueryString({
+			include: ["permissions"],
+			filters: [
+				{
+					key: "name",
+				},
+				{
+					key: "roleIds",
+				},
+			],
+			sorts: ["name", "createdAt"],
+			page: true,
+			perPage: true,
+		}),
+	},
 };

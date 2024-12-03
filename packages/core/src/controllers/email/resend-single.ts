@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import emailsSchema from "../../schemas/email.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
@@ -42,4 +43,28 @@ const resendSingleController: RouteController<
 export default {
 	controller: resendSingleController,
 	zodSchema: emailsSchema.resendSingle,
+	swaggerSchema: {
+		description: "Resends the email with the given ID",
+		tags: ["emails"],
+		summary: "Resend email",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: {
+					type: "object",
+					properties: {
+						success: {
+							type: "boolean",
+						},
+						message: {
+							type: "string",
+						},
+					},
+				},
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

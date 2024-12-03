@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import accountSchema from "../../schemas/account.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -44,4 +45,41 @@ const updateMeController: RouteController<
 export default {
 	controller: updateMeController,
 	zodSchema: accountSchema.updateMe,
+	swaggerSchema: {
+		description: "Used to update the current authenticated users information",
+		tags: ["account"],
+		summary: "Update the authenticated user",
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+		body: {
+			type: "object",
+			properties: {
+				firstName: {
+					type: "string",
+				},
+				lastName: {
+					type: "string",
+				},
+				username: {
+					type: "string",
+				},
+				email: {
+					type: "string",
+				},
+				roleIds: {
+					type: "array",
+					items: {
+						type: "number",
+					},
+				},
+			},
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

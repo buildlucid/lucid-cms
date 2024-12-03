@@ -1,6 +1,8 @@
 import T from "../../translations/index.js";
 import localeSchema from "../../schemas/locales.js";
+import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import LocalesFormatter from "../../libs/formatters/locales.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -42,4 +44,15 @@ const getSingleController: RouteController<
 export default {
 	controller: getSingleController,
 	zodSchema: localeSchema.getSingle,
+	swaggerSchema: {
+		description: "Returns a single locale based on the code URL parameter.",
+		tags: ["locales"],
+		summary: "Get a single locale",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: LocalesFormatter.swagger,
+			}),
+		},
+	},
 };

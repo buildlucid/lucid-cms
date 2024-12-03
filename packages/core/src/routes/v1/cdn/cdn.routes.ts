@@ -6,6 +6,7 @@ const cdnRoutes = async (fastify: FastifyInstance) => {
 	r(fastify, {
 		method: "get",
 		url: "/*",
+		swaggerSchema: cdn.streamSingle.swaggerSchema,
 		zodSchema: cdn.streamSingle.zodSchema,
 		controller: cdn.streamSingle.controller,
 	});

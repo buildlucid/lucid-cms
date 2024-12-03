@@ -1,6 +1,11 @@
 import T from "../../translations/index.js";
 import emailsSchema from "../../schemas/email.js";
+import {
+	swaggerResponse,
+	swaggerQueryString,
+} from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import EmailsFormatter from "../../libs/formatters/emails.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -47,4 +52,43 @@ const getMultipleController: RouteController<
 export default {
 	controller: getMultipleController,
 	zodSchema: emailsSchema.getMultiple,
+	swaggerSchema: {
+		description: "Returns multiple emails based on the query parameters.",
+		tags: ["emails"],
+		summary: "Get multiple emails",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: {
+					type: "array",
+					items: EmailsFormatter.swagger,
+				},
+				paginated: true,
+			}),
+		},
+		querystring: swaggerQueryString({
+			filters: [
+				{
+					key: "toAddress",
+				},
+				{
+					key: "subject",
+				},
+				{
+					key: "deliveryStatus",
+					enum: ["sent", "failed", "pending"],
+				},
+				{
+					key: "type",
+					enum: ["internal", "external"],
+				},
+				{
+					key: "template",
+				},
+			],
+			sorts: ["sentCount", "createdAt", "updatedAt"],
+			page: true,
+			perPage: true,
+		}),
+	},
 };

@@ -64,4 +64,32 @@ const streamSingleController: RouteController<
 export default {
 	controller: streamSingleController,
 	zodSchema: cdnSchema.streamSingle,
+	swaggerSchema: {
+		description:
+			"Stream a piece of media. If its an image, you can resize and format it on request. These will count towards the parent images processed image usage. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
+		tags: ["cdn"],
+		summary: "Steam media",
+		querystring: {
+			type: "object",
+			properties: {
+				width: {
+					type: "string",
+				},
+				height: {
+					type: "string",
+				},
+				format: {
+					type: "string",
+					enum: ["jpeg", "png", "webp", "avif"],
+				},
+				quality: {
+					type: "string",
+				},
+				fallback: {
+					type: "string",
+					enum: ["1", "0"],
+				},
+			},
+		},
+	},
 };

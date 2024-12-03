@@ -5,10 +5,14 @@ import type {
 	ClientDocumentResponse,
 	BrickAltResponse,
 } from "../../types/response.js";
-import type { FieldProp } from "./collection-document-fields.js";
+import CollectionDocumentFieldsFormatterClass, {
+	type FieldProp,
+} from "./collection-document-fields.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import Formatter from "./index.js";
-import type { GroupProp } from "./collection-document-bricks.js";
+import CollectionDocumentBricksFormatter, {
+	type GroupProp,
+} from "./collection-document-bricks.js";
 import type { Config } from "../../types.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 
@@ -224,5 +228,169 @@ export default class CollectionDocumentsFormatter {
 					? FieldsFormatter.objectifyFields(res.fields)
 					: null,
 		} satisfies ClientDocumentResponse;
+	};
+	static swagger = {
+		type: "object",
+		properties: {
+			id: {
+				type: "number",
+			},
+			versionId: {
+				type: "number",
+				nullable: true,
+			},
+			collectionKey: {
+				type: "string",
+				nullable: true,
+			},
+			status: {
+				type: "string",
+				nullable: true,
+				enum: ["published", "draft", "revision"],
+			},
+			version: {
+				type: "object",
+				properties: {
+					draft: {
+						type: "object",
+						properties: {
+							id: {
+								type: "number",
+								nullable: true,
+							},
+							promotedFrom: {
+								type: "number",
+								nullable: true,
+							},
+							createdAt: {
+								type: "string",
+								nullable: true,
+							},
+							createdBy: {
+								type: "number",
+								nullable: true,
+							},
+						},
+						nullable: true,
+					},
+					published: {
+						type: "object",
+						properties: {
+							id: {
+								type: "number",
+								nullable: true,
+							},
+							promotedFrom: {
+								type: "number",
+								nullable: true,
+							},
+							createdAt: {
+								type: "string",
+								nullable: true,
+							},
+							createdBy: {
+								type: "number",
+								nullable: true,
+							},
+						},
+						nullable: true,
+					},
+				},
+			},
+			bricks: {
+				type: "array",
+				items: CollectionDocumentBricksFormatter.swagger,
+				nullable: true,
+			},
+			fields: {
+				type: "array",
+				nullable: true,
+				items: CollectionDocumentFieldsFormatterClass.swagger,
+			},
+			createdBy: {
+				type: "object",
+				nullable: true,
+				properties: {
+					id: {
+						type: "number",
+					},
+					email: {
+						type: "string",
+						nullable: true,
+					},
+					firstName: {
+						type: "string",
+						nullable: true,
+					},
+					lastName: {
+						type: "string",
+						nullable: true,
+					},
+					username: {
+						type: "string",
+						nullable: true,
+					},
+				},
+			},
+			createdAt: {
+				type: "string",
+				nullable: true,
+			},
+			updatedAt: {
+				type: "string",
+				nullable: true,
+			},
+			updatedBy: {
+				type: "object",
+				nullable: true,
+				properties: {
+					id: {
+						type: "number",
+					},
+					email: {
+						type: "string",
+						nullable: true,
+					},
+					firstName: {
+						type: "string",
+						nullable: true,
+					},
+					lastName: {
+						type: "string",
+						nullable: true,
+					},
+					username: {
+						type: "string",
+						nullable: true,
+					},
+				},
+			},
+		},
+	};
+	static swaggerClient = {
+		type: "object",
+		properties: {
+			...CollectionDocumentsFormatter.swagger.properties,
+			bricks: {
+				type: "array",
+				nullable: true,
+				items: {
+					type: "object",
+					additionalProperties: true,
+					properties: {
+						...CollectionDocumentBricksFormatter.swagger.properties,
+						fields: {
+							type: "object",
+							additionalProperties: true,
+						},
+					},
+				},
+			},
+			fields: {
+				type: "object",
+				nullable: true,
+				additionalProperties: true,
+			},
+		},
 	};
 }

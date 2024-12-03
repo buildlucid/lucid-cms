@@ -64,3 +64,52 @@ export type FieldSchemaType = z.infer<typeof FieldBaseSchema> & {
 export type FieldSchemaSimpleType = z.infer<typeof FieldBaseSchema> & {
 	groups?: FieldSchemaType[][];
 };
+
+export const swaggerFieldObj = {
+	type: "object",
+	additionalProperties: true,
+	properties: {
+		key: {
+			type: "string",
+		},
+		type: {
+			type: "string",
+		},
+		translations: {
+			type: "object",
+			additionalProperties: true,
+			nullable: true,
+		},
+		value: {},
+		groups: {
+			type: "array",
+			items: {
+				type: "object",
+				additionalProperties: true,
+				properties: {
+					id: {
+						anyOf: [
+							{
+								type: "string",
+							},
+							{
+								type: "number",
+							},
+						],
+					},
+					order: {
+						type: "number",
+						nullable: true,
+					},
+					fields: {
+						type: "array",
+						items: {
+							type: "object",
+							additionalProperties: true,
+						},
+					},
+				},
+			},
+		},
+	},
+};

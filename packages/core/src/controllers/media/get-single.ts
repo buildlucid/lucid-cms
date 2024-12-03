@@ -1,6 +1,8 @@
 import T from "../../translations/index.js";
 import mediaSchema from "../../schemas/media.js";
+import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import MediaFormatter from "../../libs/formatters/media.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -39,4 +41,15 @@ const getSingleController: RouteController<
 export default {
 	controller: getSingleController,
 	zodSchema: mediaSchema.getSingle,
+	swaggerSchema: {
+		description: "Get a single media item by id.",
+		tags: ["media"],
+		summary: "Get a single media item.",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: MediaFormatter.swagger,
+			}),
+		},
+	},
 };

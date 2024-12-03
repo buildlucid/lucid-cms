@@ -10,6 +10,7 @@ const emailsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 		},
 		permissions: ["read_email"],
+		swaggerSchema: emails.getSingle.swaggerSchema,
 		zodSchema: emails.getSingle.zodSchema,
 		controller: emails.getSingle.controller,
 	});
@@ -21,6 +22,7 @@ const emailsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 		},
 		permissions: ["read_email"],
+		swaggerSchema: emails.getMultiple.swaggerSchema,
 		zodSchema: emails.getMultiple.zodSchema,
 		controller: emails.getMultiple.controller,
 	});
@@ -32,6 +34,7 @@ const emailsRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 		},
 		permissions: ["delete_email"],
+		swaggerSchema: emails.deleteSingle.swaggerSchema,
 		zodSchema: emails.deleteSingle.zodSchema,
 		controller: emails.deleteSingle.controller,
 	});
@@ -44,6 +47,7 @@ const emailsRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["send_email"],
+		swaggerSchema: emails.resendSingle.swaggerSchema,
 		zodSchema: emails.resendSingle.zodSchema,
 		controller: emails.resendSingle.controller,
 	});

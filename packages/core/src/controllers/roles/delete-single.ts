@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import rolesSchema from "../../schemas/roles.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -37,4 +38,18 @@ const deleteSingleController: RouteController<
 export default {
 	controller: deleteSingleController,
 	zodSchema: rolesSchema.deleteSingle,
+	swaggerSchema: {
+		description: "Delete a single role based on the given role id.",
+		tags: ["roles"],
+		summary: "Delete a single role",
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

@@ -1,6 +1,8 @@
 import T from "../../translations/index.js";
 import settingsSchema from "../../schemas/settings.js";
+import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import SettingsFormatter from "../../libs/formatters/settings.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -37,4 +39,15 @@ const getSettingsController: RouteController<
 export default {
 	controller: getSettingsController,
 	zodSchema: settingsSchema.getSettings,
+	swaggerSchema: {
+		description: "Returns the settings",
+		tags: ["settings"],
+		summary: "Get settings",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: SettingsFormatter.swagger,
+			}),
+		},
+	},
 };

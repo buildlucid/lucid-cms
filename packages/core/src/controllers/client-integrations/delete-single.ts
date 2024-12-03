@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import clientIntegrationsSchema from "../../schemas/client-integrations.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -37,4 +38,18 @@ const deleteSingleController: RouteController<
 export default {
 	controller: deleteSingleController,
 	zodSchema: clientIntegrationsSchema.deleteSingle,
+	swaggerSchema: {
+		description: "Delete a single client integration.",
+		tags: ["client-integrations"],
+		summary: "Delete a single client integration",
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

@@ -9,6 +9,7 @@ const collectionRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: collections.getSingle.swaggerSchema,
 		zodSchema: collections.getSingle.zodSchema,
 		controller: collections.getSingle.controller,
 	});
@@ -18,6 +19,7 @@ const collectionRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: collections.getAll.swaggerSchema,
 		zodSchema: collections.getAll.zodSchema,
 		controller: collections.getAll.controller,
 	});

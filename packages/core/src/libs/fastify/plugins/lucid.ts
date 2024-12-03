@@ -5,6 +5,8 @@ import cors from "@fastify/cors";
 import fastifyHelmet from "@fastify/helmet";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyStatic from "@fastify/static";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import packageJson from "../../../../package.json" with { type: "json" };
@@ -35,6 +37,31 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		fastify.decorate("config", config);
 		fastify.decorate("logger", logger);
 		fastify.decorate("services", lucidServices);
+
+		// Register Swagger for API documentation
+		fastify.register(fastifySwagger, {
+			swagger: {
+				info: {
+					title: "Lucid CMS",
+					description: "Lucid CMS",
+					version: packageJson.version,
+				},
+				host: config.host.replace("http://", "").replace("https://", ""),
+				schemes: ["http"],
+				consumes: ["application/json", "multipart/form-data"],
+				produces: ["application/json"],
+			},
+		});
+
+		if (!config.disableSwagger) {
+			fastify.register(fastifySwaggerUi, {
+				routePrefix: constants.swaggerRoutePrefix,
+			});
+		}
+
+		fastify.setValidatorCompiler(() => {
+			return () => ({ value: false });
+		});
 
 		// Register server-wide middleware
 		fastify.register(cors, {

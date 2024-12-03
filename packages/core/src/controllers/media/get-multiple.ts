@@ -1,6 +1,12 @@
 import T from "../../translations/index.js";
 import mediaSchema from "../../schemas/media.js";
+import {
+	swaggerResponse,
+	swaggerHeaders,
+	swaggerQueryString,
+} from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import MediaFormatter from "../../libs/formatters/media.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -48,4 +54,53 @@ const getMultipleController: RouteController<
 export default {
 	controller: getMultipleController,
 	zodSchema: mediaSchema.getMultiple,
+	swaggerSchema: {
+		description: "Get a multiple media items.",
+		tags: ["media"],
+		summary: "Get a multiple media items.",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: {
+					type: "array",
+					items: MediaFormatter.swagger,
+				},
+				paginated: true,
+			}),
+		},
+		headers: swaggerHeaders({
+			contentLocale: true,
+		}),
+		querystring: swaggerQueryString({
+			filters: [
+				{
+					key: "key",
+				},
+				{
+					key: "mimeType",
+				},
+				{
+					key: "extension",
+				},
+				{
+					key: "type",
+				},
+				{
+					key: "title",
+				},
+			],
+			sorts: [
+				"createdAt",
+				"updatedAt",
+				"title",
+				"fileSize",
+				"width",
+				"height",
+				"mimeType",
+				"extension",
+			],
+			page: true,
+			perPage: true,
+		}),
+	},
 };

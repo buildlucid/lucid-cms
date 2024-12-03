@@ -1,6 +1,8 @@
 import Formatter from "./index.js";
 import constants from "../../constants/constants.js";
-import type { FieldProp } from "./collection-document-fields.js";
+import CollectionDocumentFieldsFormatter, {
+	type FieldProp,
+} from "./collection-document-fields.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
@@ -116,5 +118,32 @@ export default class CollectionDocumentBricksFormatter {
 					},
 				),
 			);
+	};
+	static swagger = {
+		type: "object",
+		additionalProperties: true,
+		properties: {
+			id: {
+				type: "number",
+			},
+			key: {
+				type: "string",
+			},
+			order: {
+				type: "number",
+			},
+			open: {
+				type: "number",
+				nullable: true,
+			},
+			type: {
+				type: "string",
+				enum: ["builder", "fixed"],
+			},
+			fields: {
+				type: "array",
+				items: CollectionDocumentFieldsFormatter.swagger,
+			},
+		},
 	};
 }

@@ -1,4 +1,5 @@
 import authSchema from "../../schemas/auth.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
 
@@ -22,4 +23,19 @@ const logoutController: RouteController<
 export default {
 	controller: logoutController,
 	zodSchema: authSchema.logout,
+	swaggerSchema: {
+		description:
+			"Logs out a user by clearing the refresh token and access token, it also clears the CSRF token",
+		tags: ["auth"],
+		summary: "Logs out a user",
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

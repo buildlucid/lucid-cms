@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -41,4 +42,18 @@ const restoreRevisionController: RouteController<
 export default {
 	controller: restoreRevisionController,
 	zodSchema: collectionDocumentsSchema.restoreRevision,
+	swaggerSchema: {
+		description: "Restore a single document revision.",
+		tags: ["collection-documents"],
+		summary: "Restore a single document revision.",
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

@@ -1,5 +1,8 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
+import { swaggerBodyBricksObj } from "../../schemas/collection-bricks.js";
+import { swaggerFieldObj } from "../../schemas/collection-fields.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
@@ -54,4 +57,41 @@ const createSingleController: RouteController<
 export default {
 	controller: createSingleController,
 	zodSchema: collectionDocumentsSchema.createSingle,
+	swaggerSchema: {
+		description: "Create a single collection document.",
+		tags: ["collection-documents"],
+		summary: "Create a single collection document.",
+		body: {
+			type: "object",
+			properties: {
+				publish: {
+					type: "boolean",
+				},
+				bricks: {
+					type: "array",
+					items: swaggerBodyBricksObj,
+				},
+				fields: {
+					type: "array",
+					items: swaggerFieldObj,
+				},
+			},
+		},
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: {
+					type: "object",
+					properties: {
+						id: {
+							type: "number",
+						},
+					},
+				},
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

@@ -66,4 +66,87 @@ export default class EmailsFormatter {
 			createdAt: Formatter.formatDate(props.email.created_at),
 		};
 	};
+	static swagger = {
+		type: "object",
+		properties: {
+			id: {
+				type: "number",
+			},
+			emailHash: {
+				type: "string",
+			},
+			type: {
+				type: "string",
+				enum: ["external", "internal"],
+			},
+			deliveryStatus: {
+				type: "string",
+				enum: ["sent", "failed", "pending"],
+			},
+			mailDetails: {
+				type: "object",
+				properties: {
+					from: {
+						type: "object",
+						properties: {
+							address: {
+								type: "string",
+							},
+							name: {
+								type: "string",
+							},
+						},
+					},
+					to: {
+						type: "string",
+					},
+					subject: {
+						type: "string",
+					},
+					cc: {
+						type: "string",
+						nullable: true,
+					},
+					bcc: {
+						type: "string",
+						nullable: true,
+					},
+					template: {
+						type: "string",
+					},
+				},
+			},
+			data: {
+				type: "object",
+				nullable: true,
+				additionalProperties: true,
+			},
+			sentCount: {
+				type: "number",
+			},
+			errorCount: {
+				type: "number",
+			},
+			errorMessage: {
+				type: "string",
+				nullable: true,
+			},
+			html: {
+				type: "string",
+				nullable: true,
+			},
+			lastSuccessAt: {
+				type: "string",
+				nullable: true,
+			},
+			lastAttemptAt: {
+				type: "string",
+				nullable: true,
+			},
+			createdAt: {
+				type: "string",
+				nullable: true,
+			},
+		},
+	};
 }

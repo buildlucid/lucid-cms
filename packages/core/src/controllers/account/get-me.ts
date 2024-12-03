@@ -1,6 +1,8 @@
 import T from "../../translations/index.js";
 import accountSchema from "../../schemas/account.js";
+import { swaggerResponse } from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import UsersFormatter from "../../libs/formatters/users.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -39,4 +41,15 @@ const getMeController: RouteController<
 export default {
 	controller: getMeController,
 	zodSchema: accountSchema.getMe,
+	swaggerSchema: {
+		description: "Returns user data based on the authenticated user",
+		tags: ["account"],
+		summary: "Returns user data based on the authenticated user",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: UsersFormatter.swagger,
+			}),
+		},
+	},
 };

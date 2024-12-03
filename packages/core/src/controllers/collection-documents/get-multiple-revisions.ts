@@ -1,6 +1,11 @@
 import T from "../../translations/index.js";
 import collectionDocumentsSchema from "../../schemas/collection-documents.js";
+import {
+	swaggerResponse,
+	swaggerQueryString,
+} from "../../utils/swagger/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import CollectionDocumentsVersionsFormatter from "../../libs/formatters/collection-document-versions.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -49,4 +54,29 @@ const getMultipleRevisionsController: RouteController<
 export default {
 	controller: getMultipleRevisionsController,
 	zodSchema: collectionDocumentsSchema.getMultipleRevisions,
+	swaggerSchema: {
+		description: "Get multiple revisions entries for a collection document.",
+		tags: ["collection-documents"],
+		summary: "Get multiple revisions for a collection document.",
+		response: {
+			200: swaggerResponse({
+				type: 200,
+				data: {
+					type: "array",
+					items: CollectionDocumentsVersionsFormatter.swagger,
+				},
+				paginated: true,
+			}),
+		},
+		querystring: swaggerQueryString({
+			filters: [
+				{
+					key: "createdBy",
+				},
+			],
+			sorts: ["createdAt"],
+			page: true,
+			perPage: true,
+		}),
+	},
 };

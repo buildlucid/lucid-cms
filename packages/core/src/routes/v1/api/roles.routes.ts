@@ -11,6 +11,7 @@ const roleRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["create_role"],
+		swaggerSchema: roles.createSingle.swaggerSchema,
 		zodSchema: roles.createSingle.zodSchema,
 		controller: roles.createSingle.controller,
 	});
@@ -21,6 +22,7 @@ const roleRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: roles.getSingle.swaggerSchema,
 		zodSchema: roles.getSingle.zodSchema,
 		controller: roles.getSingle.controller,
 	});
@@ -31,6 +33,7 @@ const roleRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: roles.getMultiple.swaggerSchema,
 		zodSchema: roles.getMultiple.zodSchema,
 		controller: roles.getMultiple.controller,
 	});
@@ -43,6 +46,7 @@ const roleRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["delete_role"],
+		swaggerSchema: roles.deleteSingle.swaggerSchema,
 		zodSchema: roles.deleteSingle.zodSchema,
 		controller: roles.deleteSingle.controller,
 	});
@@ -55,6 +59,7 @@ const roleRoutes = async (fastify: FastifyInstance) => {
 			authenticate: true,
 			validateCSRF: true,
 		},
+		swaggerSchema: roles.updateSingle.swaggerSchema,
 		zodSchema: roles.updateSingle.zodSchema,
 		controller: roles.updateSingle.controller,
 	});

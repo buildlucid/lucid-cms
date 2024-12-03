@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import accountSchema from "../../schemas/account.js";
+import { swaggerResponse } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -38,4 +39,15 @@ const verifyResetPasswordController: RouteController<
 export default {
 	controller: verifyResetPasswordController,
 	zodSchema: accountSchema.verifyResetPassword,
+	swaggerSchema: {
+		description: "Verifies the password reset token is valid",
+		tags: ["account"],
+		summary: "Verify reset token",
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+	},
 };

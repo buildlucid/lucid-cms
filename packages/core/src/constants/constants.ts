@@ -4,6 +4,7 @@ import permissionGroups from "./permission-groups.js";
 export default {
 	locales: ["en"] as const,
 	tempDir: "./tmp",
+	swaggerRoutePrefix: "/documentation",
 	headers: {
 		accessToken: "_access",
 		csrf: "_csrf",

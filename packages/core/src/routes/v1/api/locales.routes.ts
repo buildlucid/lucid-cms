@@ -9,6 +9,7 @@ const localeRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: locales.getSingle.swaggerSchema,
 		zodSchema: locales.getSingle.zodSchema,
 		controller: locales.getSingle.controller,
 	});
@@ -19,6 +20,7 @@ const localeRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: locales.getAll.swaggerSchema,
 		zodSchema: locales.getAll.zodSchema,
 		controller: locales.getAll.controller,
 	});

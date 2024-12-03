@@ -11,6 +11,7 @@ const clientIntegrationRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["create_client_integration"],
+		swaggerSchema: clientIntegration.createSingle.swaggerSchema,
 		zodSchema: clientIntegration.createSingle.zodSchema,
 		controller: clientIntegration.createSingle.controller,
 	});
@@ -21,6 +22,7 @@ const clientIntegrationRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: clientIntegration.getAll.swaggerSchema,
 		zodSchema: clientIntegration.getAll.zodSchema,
 		controller: clientIntegration.getAll.controller,
 	});
@@ -31,6 +33,7 @@ const clientIntegrationRoutes = async (fastify: FastifyInstance) => {
 		middleware: {
 			authenticate: true,
 		},
+		swaggerSchema: clientIntegration.getSingle.swaggerSchema,
 		zodSchema: clientIntegration.getSingle.zodSchema,
 		controller: clientIntegration.getSingle.controller,
 	});
@@ -43,6 +46,7 @@ const clientIntegrationRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["delete_client_integration"],
+		swaggerSchema: clientIntegration.deleteSingle.swaggerSchema,
 		zodSchema: clientIntegration.deleteSingle.zodSchema,
 		controller: clientIntegration.deleteSingle.controller,
 	});
@@ -55,6 +59,7 @@ const clientIntegrationRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["update_client_integration"],
+		swaggerSchema: clientIntegration.updateSingle.swaggerSchema,
 		zodSchema: clientIntegration.updateSingle.zodSchema,
 		controller: clientIntegration.updateSingle.controller,
 	});
@@ -67,6 +72,7 @@ const clientIntegrationRoutes = async (fastify: FastifyInstance) => {
 			validateCSRF: true,
 		},
 		permissions: ["regenerate_client_integration"],
+		swaggerSchema: clientIntegration.regenerateKeys.swaggerSchema,
 		zodSchema: clientIntegration.regenerateKeys.zodSchema,
 		controller: clientIntegration.regenerateKeys.controller,
 	});

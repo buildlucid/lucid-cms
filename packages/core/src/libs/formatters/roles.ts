@@ -41,4 +41,50 @@ export default class RolesFormatter {
 			updatedAt: Formatter.formatDate(props.role.updated_at),
 		};
 	};
+	static swagger = {
+		type: "object",
+		properties: {
+			id: { type: "number" },
+			name: {
+				type: "string",
+				example: "Admin",
+			},
+			description: {
+				type: "string",
+				example: "Admin role description",
+			},
+			permissions: {
+				type: "array",
+				example: [
+					{
+						id: 1,
+						permission: "create_role",
+					},
+					{
+						id: 2,
+						permission: "update_role",
+					},
+				],
+				items: {
+					type: "object",
+					properties: {
+						id: {
+							type: "number",
+						},
+						permission: {
+							type: "string",
+						},
+					},
+				},
+			},
+			createdAt: {
+				type: "string",
+				example: "2021-06-10T20:00:00.000Z",
+			},
+			updatedAt: {
+				type: "string",
+				example: "2021-06-10T20:00:00.000Z",
+			},
+		},
+	};
 }

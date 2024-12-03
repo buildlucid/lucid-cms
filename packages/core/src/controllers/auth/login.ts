@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import authSchema from "../../schemas/auth.js";
+import { swaggerResponse, swaggerHeaders } from "../../utils/swagger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import type { RouteController } from "../../types/types.js";
@@ -51,4 +52,27 @@ const loginController: RouteController<
 export default {
 	controller: loginController,
 	zodSchema: authSchema.login,
+	swaggerSchema: {
+		description:
+			"Authenticates a user and sets a refresh and access token as httpOnly cookies.",
+		tags: ["auth"],
+		summary: "Authenticates a user and sets httpOnly cookies",
+		body: {
+			type: "object",
+			properties: {
+				usernameOrEmail: { type: "string" },
+				password: { type: "string" },
+			},
+			required: ["usernameOrEmail", "password"],
+		},
+		response: {
+			204: swaggerResponse({
+				type: 204,
+				noPropertise: true,
+			}),
+		},
+		headers: swaggerHeaders({
+			csrf: true,
+		}),
+	},
 };

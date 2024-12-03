@@ -124,6 +124,8 @@ export interface LucidConfig {
 		/** Used to sign the refresh token JWT. Must be `64 characters` long. */
 		refreshTokenSecret: string;
 	};
+	/** Disables the swagger documentation site. */
+	disableSwagger?: boolean;
 	/** Localisation settings. */
 	localisation?: {
 		/** A list of locales you want to write content in. */
@@ -196,6 +198,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		};
 		strategy: EmailStrategy;
 	};
+	disableSwagger: boolean;
 	localisation: {
 		locales: {
 			label: string;
