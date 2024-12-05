@@ -1,7 +1,7 @@
 export type TableType =
 	| "document"
 	| "versions"
-	| "fields"
+	| "document-fields"
 	| "brick"
 	| "repeater";
 
