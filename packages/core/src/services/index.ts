@@ -20,6 +20,7 @@ import crons from "./crons/index.js";
 import seed from "./seed/index.js";
 import start from "./start/index.js";
 import clientIntegrations from "./client-integrations/index.js";
+import collectionMigrator from "./collection-migrator/index.js";
 
 const lucidServices = {
 	auth: auth,
@@ -30,6 +31,7 @@ const lucidServices = {
 			versions: collectionDocumentVersions,
 			brick: collectionDocumentBricks,
 		},
+		migrator: collectionMigrator,
 	},
 	account: account,
 	user: {

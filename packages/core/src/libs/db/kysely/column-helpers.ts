@@ -15,6 +15,17 @@ export const defaultTimestamp = (
 	}
 };
 
+export const defaultTimestampSimple = (adapter: AdapterType) => {
+	switch (adapter) {
+		case AdapterType.SQLITE:
+			return "CURRENT_TIMESTAMP";
+		case AdapterType.POSTGRES:
+			return "NOW()";
+		case AdapterType.LIBSQL:
+			return "CURRENT_TIMESTAMP";
+	}
+};
+
 export const primaryKeyColumnType = (adapter: AdapterType) => {
 	switch (adapter) {
 		case AdapterType.SQLITE:

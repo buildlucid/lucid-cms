@@ -1,4 +1,7 @@
 import type { ServiceFn } from "../../types.js";
+import inferSchema from "./schema/infer-schema.js";
+import type { CollectionSchema } from "./schema/types.js";
+import { inspect } from "node:util";
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data
@@ -8,10 +11,22 @@ import type { ServiceFn } from "../../types.js";
  * - lucid_collection_{key}_{brick-key} * all potential bricks
  * - lucid_collection_{key}_{brick-key}_{repeater-field-key} * for each repeater for a single brick
  */
-const migrateCollections: ServiceFn<[undefined], undefined> = async (
-	context,
-	data,
-) => {
+const migrateCollections: ServiceFn<[], undefined> = async (context) => {
+	const inferedSchemas: Array<CollectionSchema> = [];
+	for (const [_, collection] of context.config.collections.entries()) {
+		const res = inferSchema(collection, context.config.db.adapter);
+		if (res.error) return res;
+		inferedSchemas.push(res.data);
+	}
+
+	console.log(
+		inspect(inferedSchemas, {
+			depth: Number.POSITIVE_INFINITY,
+			colors: true,
+			numericSeparator: true,
+		}),
+	);
+
 	return {
 		data: undefined,
 		error: undefined,

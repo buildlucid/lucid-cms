@@ -259,5 +259,6 @@
 	"vite_build_meta_generation_error": "An unknown error occured while generating the client build metadata file.",
 	"vite_client_mount_generation_error": "An unknown error occured while generating the admin client JS mount.",
 	"vite_client_index_generation_error": "An unknown error occured while generating the admin index.html entry.",
-	"vite_build_meta_read_error": "An unknown error occured while reading the client build metadata file."
+	"vite_build_meta_read_error": "An unknown error occured while reading the client build metadata file.",
+	"collection_migrator_error_name": "Collection Migrate Error"
 }

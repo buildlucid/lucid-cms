@@ -9,6 +9,7 @@ export type DataType =
 	| "text"
 	| "int"
 	| "timestamp"
+	| "integer"
 	| "serial"
 	| "float"
 	| "varchar";
@@ -18,6 +19,11 @@ export type CollectionSchema = {
 	tables: Array<{
 		name: string;
 		type: TableType;
+		key: {
+			collection: string;
+			brick?: string;
+			repeater?: string;
+		};
 		columns: Array<{
 			key: string;
 			source: "core" | "field";
