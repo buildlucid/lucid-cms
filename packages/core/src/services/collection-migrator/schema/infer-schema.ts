@@ -1,4 +1,8 @@
-import type { CollectionSchema } from "./types.js";
+import type {
+	CollectionSchema,
+	CollectionSchemaTable,
+	TableType,
+} from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { BrickBuilder, CollectionBuilder } from "../../../builders.js";
 import type { AdapterType } from "../../../libs/db/types.js";
@@ -7,6 +11,8 @@ import {
 	defaultTimestampSimple,
 } from "../../../libs/db/kysely/column-helpers.js";
 import type { CFConfig, FieldTypes, TabFieldConfig } from "../../../types.js";
+import buildTableName from "../helpers/build-table-name.js";
+import createDocumentTable from "./document-table.js";
 
 /**
  * Infers the collection schema from a given CollectionBuilder instance
@@ -20,94 +26,25 @@ import type { CFConfig, FieldTypes, TabFieldConfig } from "../../../types.js";
  */
 const inferSchema = (
 	collection: CollectionBuilder,
-	dbAdapter: AdapterType,
+	options: {
+		dbAdapter: AdapterType;
+	},
 ): Awaited<ServiceResponse<CollectionSchema>> => {
 	const tablePreix = `lucid_collection_${collection.key}`;
-	const tables: CollectionSchema["tables"] = [];
+	const tables: Array<CollectionSchemaTable> = [];
+	// const diffs: [];
 
 	// base tables
-	tables.push({
-		name: tablePreix,
-		type: "document",
-		key: {
-			collection: collection.key,
+	const documentTableRes = createDocumentTable({
+		collection: collection,
+		// previousSchema: unknown,
+		options: {
+			dbAdapter: options.dbAdapter,
 		},
-		columns: [
-			{
-				key: "id",
-				source: "core",
-				dataType: primaryKeyColumnType(dbAdapter),
-				nullable: false,
-				primary: true,
-			},
-			{
-				key: "collection_key",
-				source: "core",
-				dataType: "text",
-				nullable: false,
-			},
-			{
-				key: "is_deleted",
-				source: "core",
-				dataType: "integer",
-				defaultValue: 0,
-				nullable: false,
-			},
-			{
-				key: "is_deleted_at",
-				source: "core",
-				dataType: "timestamp",
-				nullable: true,
-			},
-			{
-				key: "deleted_by",
-				source: "core",
-				dataType: "integer",
-				nullable: true,
-				foreignKey: {
-					table: "lucid_users",
-					column: "id",
-					onDelete: "SET NULL",
-				},
-			},
-			{
-				key: "created_by",
-				source: "core",
-				dataType: "integer",
-				nullable: true,
-				foreignKey: {
-					table: "lucid_users",
-					column: "id",
-					onDelete: "SET NULL",
-				},
-			},
-			{
-				key: "updated_by",
-				source: "core",
-				dataType: "integer",
-				nullable: true,
-				foreignKey: {
-					table: "lucid_users",
-					column: "id",
-					onDelete: "SET NULL",
-				},
-			},
-			{
-				key: "created_at",
-				source: "core",
-				dataType: "timestamp",
-				nullable: true,
-				defaultValue: defaultTimestampSimple(dbAdapter),
-			},
-			{
-				key: "updated_at",
-				source: "core",
-				dataType: "timestamp",
-				nullable: true,
-				defaultValue: defaultTimestampSimple(dbAdapter),
-			},
-		],
 	});
+	if (documentTableRes.error) return documentTableRes;
+	tables.push(documentTableRes.data.schema);
+
 	tables.push({
 		name: `${tablePreix}_versions`,
 		type: "versions",
@@ -118,7 +55,7 @@ const inferSchema = (
 			{
 				key: "id",
 				source: "core",
-				dataType: primaryKeyColumnType(dbAdapter),
+				dataType: primaryKeyColumnType(options.dbAdapter),
 				nullable: false,
 				primary: true,
 			},
@@ -163,7 +100,7 @@ const inferSchema = (
 			{
 				key: "id",
 				source: "core",
-				dataType: primaryKeyColumnType(dbAdapter),
+				dataType: primaryKeyColumnType(options.dbAdapter),
 				nullable: false,
 				primary: true,
 			},
@@ -248,7 +185,7 @@ const inferSchema = (
 		});
 	}
 	buildFieldTables(collection.fieldTreeNoTab, {
-		type: "document-fields",
+		type: "brick",
 		key: "fields",
 		tableName: tablePreix,
 	});
