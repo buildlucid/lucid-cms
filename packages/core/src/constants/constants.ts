@@ -1,7 +1,7 @@
 import T from "../translations/index.js";
 import permissionGroups from "./permission-groups.js";
 
-export default {
+export default Object.freeze({
 	locales: ["en"] as const,
 	tempDir: "./tmp",
 	swaggerRoutePrefix: "/documentation",
@@ -114,4 +114,4 @@ export default {
 	fastify: {
 		version: "4.x",
 	},
-};
+});
