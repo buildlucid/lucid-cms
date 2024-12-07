@@ -13,6 +13,7 @@ import {
 import type { CFConfig, FieldTypes, TabFieldConfig } from "../../../types.js";
 import buildTableName from "../helpers/build-table-name.js";
 import createDocumentTable from "./document-table.js";
+import createVersionsTable from "./versions-table.js";
 
 /**
  * Infers the collection schema from a given CollectionBuilder instance
@@ -34,7 +35,7 @@ const inferSchema = (
 	const tables: Array<CollectionSchemaTable> = [];
 	// const diffs: [];
 
-	// base tables
+	//* document table
 	const documentTableRes = createDocumentTable({
 		collection: collection,
 		// previousSchema: unknown,
@@ -45,46 +46,16 @@ const inferSchema = (
 	if (documentTableRes.error) return documentTableRes;
 	tables.push(documentTableRes.data.schema);
 
-	tables.push({
-		name: `${tablePreix}_versions`,
-		type: "versions",
-		key: {
-			collection: collection.key,
+	//* version table
+	const versionTableRes = createDocumentTable({
+		collection: collection,
+		// previousSchema: unknown,
+		options: {
+			dbAdapter: options.dbAdapter,
 		},
-		columns: [
-			{
-				key: "id",
-				source: "core",
-				dataType: primaryKeyColumnType(options.dbAdapter),
-				nullable: false,
-				primary: true,
-			},
-			{
-				key: "collection_key",
-				source: "core",
-				dataType: "text",
-				nullable: false,
-			},
-			{
-				key: "document_id",
-				source: "core",
-				dataType: "integer",
-				nullable: false,
-				foreignKey: {
-					table: tablePreix,
-					column: "id",
-					onDelete: "CASCADE",
-				},
-			},
-			{
-				key: "type",
-				source: "core",
-				dataType: "text",
-				defaultValue: "draft",
-				nullable: false,
-			},
-		],
 	});
+	if (versionTableRes.error) return versionTableRes;
+	tables.push(versionTableRes.data.schema);
 
 	// Fields
 	const buildFieldTables = (

@@ -14,7 +14,9 @@ import { inspect } from "node:util";
 const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	const inferedSchemas: Array<CollectionSchema> = [];
 	for (const [_, collection] of context.config.collections.entries()) {
-		const res = inferSchema(collection, context.config.db.adapter);
+		const res = inferSchema(collection, {
+			dbAdapter: context.config.db.adapter,
+		});
 		if (res.error) return res;
 		inferedSchemas.push(res.data);
 	}
