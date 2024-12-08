@@ -156,7 +156,7 @@ const inferSchema = (
 		});
 	}
 	buildFieldTables(collection.fieldTreeNoTab, {
-		type: "brick",
+		type: "document-fields",
 		key: "fields",
 		tableName: tablePreix,
 	});
