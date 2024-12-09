@@ -47,7 +47,7 @@ const inferSchema = (
 	tables.push(documentTableRes.data.schema);
 
 	//* version table
-	const versionTableRes = createDocumentTable({
+	const versionTableRes = createVersionsTable({
 		collection: collection,
 		// previousSchema: unknown,
 		options: {
