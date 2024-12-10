@@ -20,7 +20,6 @@ import createVersionsTable from "./versions-table.js";
  * @todo sort tables based on foreign keys
  * @todo plan out core table columns and create a helper for adding them
  * @todo extend the CustomField classes to support defining their column data type
- * @todo split up table creation depedning on types
  * @todo update to accept existing schema for the collection and use to generate the migration strategy
  * @todo returns the migration strategy instead for this collection
  * @todo table names likley need special key to denote the start of the brick key, field key etc to avoid naming conflicts. BrickBuilder will need to validate these names to not include they special keys
