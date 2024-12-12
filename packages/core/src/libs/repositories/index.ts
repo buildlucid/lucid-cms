@@ -21,6 +21,7 @@ import TranslationsRepo from "./translations.js";
 import UserRolesRepo from "./user-roles.js";
 import UsersRepo from "./users.js";
 import ClientIntegrationsRepo from "./client-integrations.js";
+import CollectionSchemaRepo from "./collection-schema.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {
@@ -43,6 +44,8 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "collection-documents":
 				return new CollectionDocumentsRepo(db) as RepositoryReturnType<T>;
+			case "collection-schema":
+				return new CollectionSchemaRepo(db) as RepositoryReturnType<T>;
 			case "emails":
 				return new EmailsRepo(db) as RepositoryReturnType<T>;
 			case "locales":
@@ -86,6 +89,7 @@ type RepositoryClassMap = {
 	"collection-document-groups": CollectionDocumentGroupsRepo;
 	"collection-document-versions": CollectionDocumentVersionsRepo;
 	"collection-documents": CollectionDocumentsRepo;
+	"collection-schema": CollectionSchemaRepo;
 	emails: EmailsRepo;
 	locales: LocalesRepo;
 	media: MediaRepo;

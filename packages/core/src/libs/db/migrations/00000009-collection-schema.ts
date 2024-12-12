@@ -10,7 +10,7 @@ const Migration00000009: MigrationFn = (adapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
-				.createTable("lucid_collection_schemas")
+				.createTable("lucid_collection_schema")
 				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
@@ -27,8 +27,8 @@ const Migration00000009: MigrationFn = (adapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_collection_schemas_latest")
-				.on("lucid_collection_schemas")
+				.createIndex("idx_lucid_collection_schema_latest")
+				.on("lucid_collection_schema")
 				.columns(["collection_key", "created_at"])
 				.execute();
 		},
