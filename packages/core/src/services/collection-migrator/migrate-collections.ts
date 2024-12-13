@@ -1,3 +1,4 @@
+import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import inferSchema from "./schema/infer-schema.js";
 import type { CollectionSchema } from "./schema/types.js";
@@ -12,6 +13,8 @@ import { inspect } from "node:util";
  * - lucid_collection_{key}_{brick-key}_{repeater-field-key} * for each repeater for a single brick
  */
 const migrateCollections: ServiceFn<[], undefined> = async (context) => {
+	const SchemaRepo = Repository.get("collection-schema", context.db);
+
 	const inferedSchemas: Array<CollectionSchema> = [];
 	for (const [_, collection] of context.config.collections.entries()) {
 		const res = inferSchema(collection, {
