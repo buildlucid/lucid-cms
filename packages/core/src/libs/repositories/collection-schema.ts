@@ -22,4 +22,20 @@ export default class CollectionSchemaRepo {
 			Pick<Select<LucidCollectionSchema>, K> | undefined
 		>;
 	};
+	selectMultiple = async <
+		K extends keyof Select<LucidCollectionSchema>,
+	>(props: {
+		select: K[];
+		where: QueryBuilderWhere<"lucid_collection_schema">;
+	}) => {
+		let query = this.db
+			.selectFrom("lucid_collection_schema")
+			.select(props.select);
+
+		query = queryBuilder.select(query, props.where);
+
+		return query.execute() as Promise<
+			Array<Pick<Select<LucidCollectionSchema>, K>>
+		>;
+	};
 }
