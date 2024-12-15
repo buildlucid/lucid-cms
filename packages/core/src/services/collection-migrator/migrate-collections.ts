@@ -23,7 +23,7 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		if (res.error) return res;
 		inferedSchemas.push(res.data);
 	}
-
+	// gen checksum on schemas, use migratio details to update db
 	console.log(
 		inspect(inferedSchemas, {
 			depth: Number.POSITIVE_INFINITY,
