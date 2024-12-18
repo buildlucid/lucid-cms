@@ -10,14 +10,10 @@ import buildTableName from "../helpers/build-table-name.js";
  */
 const createVersionsTable = (props: {
 	collection: CollectionBuilder;
-	// previousSchema: CollectionSchemaTable;
-	options: {
-		dbAdapter: AdapterType;
-	};
+	dbAdapter: AdapterType;
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
-		diffs: undefined;
 	}>
 > => {
 	const tableNameRes = buildTableName("versions", {
@@ -34,7 +30,7 @@ const createVersionsTable = (props: {
 		data: {
 			schema: {
 				name: tableNameRes.data,
-				type: "document",
+				type: "versions",
 				key: {
 					collection: props.collection.key,
 				},
@@ -42,7 +38,7 @@ const createVersionsTable = (props: {
 					{
 						key: "id",
 						source: "core",
-						dataType: primaryKeyColumnType(props.options.dbAdapter),
+						dataType: primaryKeyColumnType(props.dbAdapter),
 						nullable: false,
 						primary: true,
 					},
@@ -72,7 +68,6 @@ const createVersionsTable = (props: {
 					},
 				],
 			},
-			diffs: undefined,
 		},
 		error: undefined,
 	};

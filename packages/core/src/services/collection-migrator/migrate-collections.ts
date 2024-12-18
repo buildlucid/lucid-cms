@@ -16,13 +16,21 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	const SchemaRepo = Repository.get("collection-schema", context.db);
 
 	const inferedSchemas: Array<CollectionSchema> = [];
-	for (const [_, collection] of context.config.collections.entries()) {
-		const res = inferSchema(collection, {
-			dbAdapter: context.config.db.adapter,
-		});
-		if (res.error) return res;
-		inferedSchemas.push(res.data);
-	}
+	// for (const [_, collection] of context.config.collections.entries()) {
+	// 	const res = inferSchema(collection, {
+	// 		dbAdapter: context.config.db.adapter,
+	// 	});
+	// 	if (res.error) return res;
+	// 	inferedSchemas.push(res.data);
+	// }
+
+	// @ts-expect-error
+	const res = inferSchema(context.config.collections.at(0), {
+		dbAdapter: context.config.db.adapter,
+	});
+	if (res.error) return res;
+	inferedSchemas.push(res.data);
+
 	// gen checksum on schemas, use migratio details to update db
 	console.log(
 		inspect(inferedSchemas, {

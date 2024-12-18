@@ -13,14 +13,10 @@ import buildTableName from "../helpers/build-table-name.js";
  */
 const createDocumentTable = (props: {
 	collection: CollectionBuilder;
-	// previousSchema: CollectionSchemaTable;
-	options: {
-		dbAdapter: AdapterType;
-	};
+	dbAdapter: AdapterType;
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
-		diffs: undefined;
 	}>
 > => {
 	const tableNameRes = buildTableName("document", {
@@ -40,7 +36,7 @@ const createDocumentTable = (props: {
 					{
 						key: "id",
 						source: "core",
-						dataType: primaryKeyColumnType(props.options.dbAdapter),
+						dataType: primaryKeyColumnType(props.dbAdapter),
 						nullable: false,
 						primary: true,
 					},
@@ -101,18 +97,17 @@ const createDocumentTable = (props: {
 						source: "core",
 						dataType: "timestamp",
 						nullable: true,
-						defaultValue: defaultTimestampSimple(props.options.dbAdapter),
+						defaultValue: defaultTimestampSimple(props.dbAdapter),
 					},
 					{
 						key: "updated_at",
 						source: "core",
 						dataType: "timestamp",
 						nullable: true,
-						defaultValue: defaultTimestampSimple(props.options.dbAdapter),
+						defaultValue: defaultTimestampSimple(props.dbAdapter),
 					},
 				],
 			},
-			diffs: undefined,
 		},
 		error: undefined,
 	};
