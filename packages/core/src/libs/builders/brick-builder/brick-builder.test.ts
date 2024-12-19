@@ -71,6 +71,7 @@ test("brick config is correct", async () => {
 	}).addText("text_test");
 
 	expect(brick.config).toEqual({
+		key: "brick",
 		details: {
 			name: "Brick",
 			summary: "Brick Summary",
