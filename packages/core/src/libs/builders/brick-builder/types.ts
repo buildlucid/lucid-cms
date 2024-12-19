@@ -11,6 +11,7 @@ export interface BrickConfigProps {
 	};
 }
 export interface BrickConfig {
+	key: string;
 	details: {
 		name: LocaleValue;
 		summary?: LocaleValue;

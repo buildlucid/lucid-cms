@@ -1,4 +1,5 @@
 import T from "../../../translations/index.js";
+import constants from "../../../constants/constants.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { TableType } from "../schema/types.js";
 
@@ -17,7 +18,7 @@ const buildTableName = (
 		fields: "fields",
 		versions: "versions",
 	};
-	const parts = ["lucid", "document", keys.collection];
+	const parts = ["document", keys.collection];
 
 	switch (type) {
 		case "document": {
@@ -69,7 +70,7 @@ const buildTableName = (
 	}
 
 	return {
-		data: parts.join("_"),
+		data: `${constants.db.prefix}${parts.join(constants.db.collectionKeysJoin)}`,
 		error: undefined,
 	};
 };

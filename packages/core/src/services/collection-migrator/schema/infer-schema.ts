@@ -10,7 +10,6 @@ import createFieldTables from "./fields-table.js";
  * Infers the collection schema from a given CollectionBuilder instance
  * @todo create a lookup table for column names to make any future changes easier / in a single place
  * @todo extend the CustomField classes to support defining their column data type
- * @todo table names likley need special key to denote the start of the brick key, field key etc to avoid naming conflicts. BrickBuilder will need to validate these names to not include they special keys
  */
 const inferSchema = (
 	collection: CollectionBuilder,

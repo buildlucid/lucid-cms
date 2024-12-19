@@ -1,10 +1,15 @@
 import z from "zod";
 import { stringTranslations } from "../../schemas/locales.js";
+import constants from "../../constants/constants.js";
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const CustomFieldSchema = z.object({
 	type: z.string(),
-	key: z.string(),
+	key: z
+		.string()
+		.refine((val) => !val.includes(constants.db.collectionKeysJoin), {
+			message: `Field key cannot contain '${constants.db.collectionKeysJoin}'`,
+		}),
 	collection: z.string().optional(),
 	details: z
 		.object({

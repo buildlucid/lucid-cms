@@ -17,10 +17,13 @@ class CollectionBuilder extends FieldBuilder {
 	config: CollectionConfigSchemaType;
 	includeFieldKeys: string[] = [];
 	filterableFieldKeys: FieldFilters = [];
-	constructor(key: string, config: CollectionConfigSchemaType) {
+	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
 		super();
 		this.key = key;
-		this.config = config;
+		this.config = {
+			key: this.key,
+			...config,
+		};
 
 		if (this.config.bricks?.fixed) {
 			this.config.bricks.fixed = this.#removeDuplicateBricks(

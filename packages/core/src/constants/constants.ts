@@ -102,6 +102,10 @@ export default Object.freeze({
 		fixed: "fixed",
 		collectionFields: "collection-fields",
 	} as const,
+	db: {
+		prefix: "lucid_",
+		collectionKeysJoin: "__",
+	},
 	cronSchedule: "0 0 * * *",
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds
