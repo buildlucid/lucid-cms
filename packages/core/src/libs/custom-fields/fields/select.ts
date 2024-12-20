@@ -4,12 +4,21 @@ import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	CFInsertItem,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
+} from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { AdapterType } from "../../db/types.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
 
 class SelectCustomField extends CustomField<"select"> {
 	type = "select" as const;
@@ -40,6 +49,17 @@ class SelectCustomField extends CustomField<"select"> {
 		} satisfies CFConfig<"select">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("text", props.adapterType),
+					nullable: true,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

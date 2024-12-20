@@ -3,7 +3,15 @@ import CustomField from "../custom-field.js";
 import sanitizeHtml from "sanitize-html";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import keyToTitle from "../utils/key-to-title.js";
-import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	CFInsertItem,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
+} from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
@@ -38,6 +46,18 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 		} satisfies CFConfig<"wysiwyg">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("text", props.adapterType),
+					nullable: true,
+					default: this.config.config.default,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

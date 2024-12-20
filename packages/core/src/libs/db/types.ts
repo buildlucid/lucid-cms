@@ -20,6 +20,18 @@ export type Select<T> = {
 
 export type DocumentVersionType = "draft" | "published" | "revision";
 
+export type ColumnTypes =
+	| "integer"
+	| "text"
+	| "timestamp"
+	| "json"
+	| "boolean"
+	| "jsonb"
+	| "serial";
+
+export type OnDelete = "CASCADE" | "SET NULL" | "RESTRICT";
+export type OnUpdate = "CASCADE" | "SET NULL" | "RESTRICT";
+
 // ------------------------------------------------------------------------------
 // Column types
 

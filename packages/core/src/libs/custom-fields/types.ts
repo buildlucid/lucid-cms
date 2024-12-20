@@ -1,6 +1,12 @@
 import type { ZodType } from "zod";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
-import type { BooleanInt } from "../db/types.js";
+import type {
+	AdapterType,
+	BooleanInt,
+	ColumnTypes,
+	OnDelete,
+	OnUpdate,
+} from "../db/types.js";
 import type { LocaleValue } from "../../types/shared.js";
 
 // -----------------------------------------------
@@ -613,3 +619,36 @@ export interface DocumentReferenceData {
 	id: number;
 	collection_key: string;
 }
+
+// -----------------------------------------------
+//
+
+export type GetSchemaDefinitionProps = {
+	adapterType: AdapterType;
+	tables: {
+		document: string;
+		version: string;
+	};
+};
+
+export type ColumnDefinition = {
+	name: string;
+	type: ColumnTypes;
+	nullable?: boolean;
+	default?: unknown;
+	foreignKey?: {
+		table: string;
+		column: string;
+		onDelete?: OnDelete;
+		onUpdate?: OnUpdate;
+	};
+};
+
+export type SchemaDefinition = {
+	columns: ColumnDefinition[];
+	// indexes?: {
+	// 	name: string;
+	// 	columns: string[];
+	// 	type?: "unique" | "index";
+	// }[];
+};

@@ -15,6 +15,7 @@ import type {
 	FieldFormatMeta,
 } from "../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { SchemaDefinition, GetSchemaDefinitionProps } from "./types.js";
 
 abstract class CustomField<T extends FieldTypes> {
 	repeater: string | null = null;
@@ -40,6 +41,12 @@ abstract class CustomField<T extends FieldTypes> {
 		brickId: number;
 		groupId: number | null;
 	}): CFInsertItem<T> | null;
+	/**
+	 * Determins how the field should be defined in the database
+	 */
+	abstract getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): SchemaDefinition;
 
 	// Methods
 	public validate(props: {

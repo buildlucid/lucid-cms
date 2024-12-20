@@ -5,6 +5,7 @@ import keyToTitle from "../utils/key-to-title.js";
 import { createCdnUrl } from "../../../utils/media/index.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { objectifyTranslations } from "../../../utils/translations/index.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type { MediaType } from "../../../types.js";
 import type {
 	CFConfig,
@@ -12,6 +13,8 @@ import type {
 	CFResponse,
 	CFInsertItem,
 	MediaReferenceData,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
 } from "../types.js";
 import type {
 	FieldProp,
@@ -45,6 +48,22 @@ class MediaCustomField extends CustomField<"media"> {
 		} satisfies CFConfig<"media">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("integer", props.adapterType),
+					nullable: true,
+					foreignKey: {
+						table: "lucid_media",
+						column: "id",
+						onDelete: "SET NULL",
+					},
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

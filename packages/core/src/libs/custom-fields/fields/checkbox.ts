@@ -4,7 +4,15 @@ import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	CFInsertItem,
+	SchemaDefinition,
+	GetSchemaDefinitionProps,
+} from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
@@ -41,6 +49,18 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		} satisfies CFConfig<"checkbox">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("boolean", props.adapterType),
+					nullable: true,
+					default: this.config.config.default,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

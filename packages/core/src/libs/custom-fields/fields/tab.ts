@@ -1,6 +1,11 @@
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
-import type { CFConfig, CFProps, CFResponse } from "../types.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	SchemaDefinition,
+} from "../types.js";
 
 class TabCustomField extends CustomField<"tab"> {
 	type = "tab" as const;
@@ -23,6 +28,11 @@ class TabCustomField extends CustomField<"tab"> {
 		} satisfies CFConfig<"tab">;
 	}
 	// Methods
+	getSchemaDefinition(): SchemaDefinition {
+		return {
+			columns: [],
+		};
+	}
 	responseValueFormat() {
 		return {
 			value: null,

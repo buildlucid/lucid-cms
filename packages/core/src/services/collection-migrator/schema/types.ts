@@ -1,3 +1,9 @@
+import type {
+	ColumnTypes,
+	OnDelete,
+	OnUpdate,
+} from "../../../libs/db/types.js";
+
 export type TableType =
 	| "document"
 	| "versions"
@@ -5,26 +11,17 @@ export type TableType =
 	| "brick"
 	| "repeater";
 
-export type DataType =
-	| "text"
-	| "int"
-	| "timestamp"
-	| "integer"
-	| "serial"
-	| "float"
-	| "varchar";
-
 export type CollectionSchemaColumn = {
-	key: string;
+	name: string;
 	source: "core" | "field";
-	dataType: DataType;
-	nullable: boolean;
-	defaultValue?: unknown;
+	type: ColumnTypes;
+	nullable?: boolean;
+	default?: unknown;
 	foreignKey?: {
 		table: string;
 		column: string;
-		onDelete?: "CASCADE" | "SET NULL" | "RESTRICT";
-		onUpdate?: "CASCADE" | "SET NULL" | "RESTRICT";
+		onDelete?: OnDelete;
+		onUpdate?: OnUpdate;
 	};
 	unique?: boolean;
 	primary?: boolean;

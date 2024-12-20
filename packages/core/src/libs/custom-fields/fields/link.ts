@@ -4,8 +4,16 @@ import CustomField from "../custom-field.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
 import constants from "../../../constants/constants.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type { LinkResValue } from "../../../types.js";
-import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	CFInsertItem,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
+} from "../types.js";
 import keyToTitle from "../utils/key-to-title.js";
 import type {
 	FieldProp,
@@ -45,6 +53,18 @@ class LinkCustomField extends CustomField<"link"> {
 		} satisfies CFConfig<"link">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("jsonb", props.adapterType),
+					nullable: true,
+					default: this.config.config.default,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

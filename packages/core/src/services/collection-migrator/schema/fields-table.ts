@@ -1,3 +1,6 @@
+import T from "../../../translations/index.js";
+import { primaryKeyColumnType } from "../../../libs/db/kysely/column-helpers.js";
+import buildTableName from "../helpers/build-table-name.js";
 import type {
 	CollectionSchemaTable,
 	CollectionSchemaColumn,
@@ -7,8 +10,7 @@ import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
 import type { AdapterType } from "../../../libs/db/types.js";
 import type { CFConfig, FieldTypes, TabFieldConfig } from "../../../types.js";
-import { primaryKeyColumnType } from "../../../libs/db/kysely/column-helpers.js";
-import buildTableName from "../helpers/build-table-name.js";
+import type { BrickBuilder } from "../../../builders.js";
 
 /**
  * Creates table schemas for fields
@@ -21,7 +23,7 @@ const createFieldTables = (props: {
 	type: Extract<TableType, "document-fields" | "brick" | "repeater">;
 	documentTable: string;
 	versionTable: string;
-	brick?: string;
+	brick?: BrickBuilder;
 	repeaterKeys?: string[];
 	parentTable?: string;
 }): Awaited<
@@ -32,7 +34,7 @@ const createFieldTables = (props: {
 > => {
 	const tableNameRes = buildTableName(props.type, {
 		collection: props.collection.key,
-		brick: props.brick,
+		brick: props.brick?.key,
 		repeater: props.repeaterKeys,
 	});
 	if (tableNameRes.error) return tableNameRes;
@@ -40,22 +42,22 @@ const createFieldTables = (props: {
 	const childTables: CollectionSchemaTable[] = [];
 	const columns: CollectionSchemaColumn[] = [
 		{
-			key: "id",
+			name: "id",
 			source: "core",
-			dataType: primaryKeyColumnType(props.dbAdapter),
+			type: primaryKeyColumnType(props.dbAdapter),
 			nullable: false,
 			primary: true,
 		},
 		{
-			key: "collection_key",
+			name: "collection_key",
 			source: "core",
-			dataType: "text",
+			type: "text",
 			nullable: false,
 		},
 		{
-			key: "document_id",
+			name: "document_id",
 			source: "core",
-			dataType: "integer",
+			type: "integer",
 			nullable: false,
 			foreignKey: {
 				table: props.documentTable,
@@ -64,9 +66,9 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			key: "document_version_id",
+			name: "document_version_id",
 			source: "core",
-			dataType: "integer",
+			type: "integer",
 			nullable: false,
 			foreignKey: {
 				table: props.versionTable,
@@ -75,9 +77,9 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			key: "locale",
+			name: "locale",
 			source: "core",
-			dataType: "text",
+			type: "text",
 			nullable: false,
 			foreignKey: {
 				table: "lucid_locales",
@@ -92,9 +94,9 @@ const createFieldTables = (props: {
 		// add parent reference for repeater fields
 		if (props.parentTable) {
 			columns.push({
-				key: "parent_id",
+				name: "parent_id",
 				source: "core",
-				dataType: "integer",
+				type: "integer",
 				nullable: false,
 				foreignKey: {
 					table: props.parentTable,
@@ -105,11 +107,11 @@ const createFieldTables = (props: {
 		}
 		// add sorting for repeater items
 		columns.push({
-			key: "sort_order",
+			name: "sort_order",
 			source: "core",
-			dataType: "integer",
+			type: "integer",
 			nullable: false,
-			defaultValue: 0,
+			default: 0,
 		});
 	}
 
@@ -134,13 +136,40 @@ const createFieldTables = (props: {
 			childTables.push(repeaterTableRes.data.schema);
 			childTables.push(...repeaterTableRes.data.childTables);
 		} else {
-			// TODO: default values, replacing field.type === "text" with call to field method to get corresponding type
-			columns.push({
-				key: field.key,
-				source: "field",
-				dataType: field.type === "text" ? "text" : "text", //* needs to call new dataType getter
-				nullable: true,
+			//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and repeaters) we need to update this
+			const fieldInstance = (props.brick || props.collection).fields.get(
+				field.key,
+			);
+			if (!fieldInstance) {
+				return {
+					data: undefined,
+					error: {
+						message: T("cannot_find_field_with_key_in_collection_brick", {
+							key: field.key,
+							type: props.brick ? "brick" : "collection",
+							typeKey: props.brick ? props.brick.key : props.collection.key,
+						}),
+					},
+				};
+			}
+
+			const fieldSchema = fieldInstance.getSchemaDefinition({
+				adapterType: props.dbAdapter,
+				tables: {
+					document: props.documentTable,
+					version: props.versionTable,
+				},
 			});
+
+			for (const column of fieldSchema.columns) {
+				columns.push({
+					name: column.name,
+					source: "field",
+					type: column.type,
+					nullable: column.nullable,
+					foreignKey: column.foreignKey,
+				});
+			}
 		}
 	}
 
@@ -151,7 +180,7 @@ const createFieldTables = (props: {
 				type: props.type,
 				key: {
 					collection: props.collection.key,
-					brick: props.brick,
+					brick: props.brick?.key,
 					repeater: props.repeaterKeys,
 				},
 				columns: columns,

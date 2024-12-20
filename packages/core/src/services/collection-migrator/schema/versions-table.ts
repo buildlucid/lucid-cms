@@ -36,22 +36,22 @@ const createVersionsTable = (props: {
 				},
 				columns: [
 					{
-						key: "id",
+						name: "id",
 						source: "core",
-						dataType: primaryKeyColumnType(props.dbAdapter),
+						type: primaryKeyColumnType(props.dbAdapter),
 						nullable: false,
 						primary: true,
 					},
 					{
-						key: "collection_key",
+						name: "collection_key",
 						source: "core",
-						dataType: "text",
+						type: "text",
 						nullable: false,
 					},
 					{
-						key: "document_id",
+						name: "document_id",
 						source: "core",
-						dataType: "integer",
+						type: "integer",
 						nullable: false,
 						foreignKey: {
 							table: documentTableRes.data,
@@ -60,10 +60,10 @@ const createVersionsTable = (props: {
 						},
 					},
 					{
-						key: "type",
+						name: "type",
 						source: "core",
-						dataType: "text",
-						defaultValue: "draft",
+						type: "text",
+						default: "draft",
 						nullable: false,
 					},
 				],

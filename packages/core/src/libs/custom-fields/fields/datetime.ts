@@ -4,7 +4,15 @@ import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { isValid } from "date-fns";
-import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	CFInsertItem,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
+} from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
@@ -39,6 +47,18 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 		} satisfies CFConfig<"datetime">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("timestamp", props.adapterType),
+					nullable: true,
+					default: this.config.config.default,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

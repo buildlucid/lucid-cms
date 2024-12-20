@@ -1,5 +1,5 @@
 import { type ColumnDefinitionBuilder, sql } from "kysely";
-import { AdapterType } from "../types.js";
+import { AdapterType, type ColumnTypes } from "../types.js";
 
 export const defaultTimestamp = (
 	col: ColumnDefinitionBuilder,
@@ -34,6 +34,38 @@ export const primaryKeyColumnType = (adapter: AdapterType) => {
 			return "serial";
 		case AdapterType.LIBSQL:
 			return "integer";
+	}
+};
+
+export const typeLookup = (
+	type: "serial" | "integer" | "boolean" | "jsonb" | "text" | "timestamp",
+	adapter: AdapterType,
+): ColumnTypes => {
+	switch (adapter) {
+		case AdapterType.SQLITE:
+			switch (type) {
+				case "serial":
+					return "integer";
+				case "jsonb":
+					return "json";
+				case "boolean":
+					return "integer";
+				default:
+					return type;
+			}
+		case AdapterType.POSTGRES:
+			return type;
+		case AdapterType.LIBSQL:
+			switch (type) {
+				case "serial":
+					return "integer";
+				case "jsonb":
+					return "json";
+				case "boolean":
+					return "integer";
+				default:
+					return type;
+			}
 	}
 };
 

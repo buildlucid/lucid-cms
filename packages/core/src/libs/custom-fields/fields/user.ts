@@ -3,12 +3,15 @@ import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
 	CFInsertItem,
 	UserReferenceData,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
 } from "../types.js";
 import type {
 	FieldProp,
@@ -42,6 +45,22 @@ class UserCustomField extends CustomField<"user"> {
 		} satisfies CFConfig<"user">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("integer", props.adapterType),
+					nullable: true,
+					foreignKey: {
+						table: "lucid_users",
+						column: "id",
+						onDelete: "SET NULL",
+					},
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

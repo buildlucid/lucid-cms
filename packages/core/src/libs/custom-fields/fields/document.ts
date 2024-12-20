@@ -4,19 +4,21 @@ import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
 	CFInsertItem,
 	DocumentReferenceData,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
 } from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
-import type { Config } from "../../../types.js";
 
 const FieldsFormatter = Formatter.get("collection-document-fields");
 
@@ -47,6 +49,22 @@ class DocumentCustomField extends CustomField<"document"> {
 		} satisfies CFConfig<"document">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("integer", props.adapterType),
+					nullable: true,
+					foreignKey: {
+						table: props.tables.document,
+						column: "id",
+						onDelete: "SET NULL",
+					},
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

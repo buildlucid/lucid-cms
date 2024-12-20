@@ -2,7 +2,15 @@ import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import type { CFConfig, CFProps, CFResponse, CFInsertItem } from "../types.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFResponse,
+	CFInsertItem,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
+} from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
@@ -37,6 +45,18 @@ class NumberCustomField extends CustomField<"number"> {
 		} satisfies CFConfig<"number">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("integer", props.adapterType),
+					nullable: true,
+					default: this.config.config.default,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;

@@ -44,7 +44,7 @@ const inferSchema = (
 			type: "brick",
 			documentTable: documentTableRes.data.schema.name,
 			versionTable: versionTableRes.data.schema.name,
-			brick: brick.key,
+			brick: brick,
 		});
 		if (brickFieldsTableRes.error) return brickFieldsTableRes;
 

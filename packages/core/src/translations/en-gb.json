@@ -262,5 +262,6 @@
 	"vite_build_meta_read_error": "An unknown error occured while reading the client build metadata file.",
 	"collection_migrator_error_name": "Collection Migrate Error",
 	"collection_migrator_table_name_brick_key_missing_message": "The collection buildTableName function recieved type 'brick' but recieved no brick key.",
-	"collection_migrator_table_name_repeater_keys_missing_message": "The collection buildTableName function recieved type 'repeater' but recieved no repeater keys."
+	"collection_migrator_table_name_repeater_keys_missing_message": "The collection buildTableName function recieved type 'repeater' but recieved no repeater keys.",
+	"cannot_find_field_with_key_in_collection_brick": "Cannot find field with key '{{key}}' in {{type}} '{{typeKey}}'."
 }

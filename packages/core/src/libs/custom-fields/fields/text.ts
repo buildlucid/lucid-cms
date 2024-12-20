@@ -2,7 +2,15 @@ import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import type { CFConfig, CFProps, CFInsertItem, CFResponse } from "../types.js";
+import { typeLookup } from "../../db/kysely/column-helpers.js";
+import type {
+	CFConfig,
+	CFProps,
+	CFInsertItem,
+	CFResponse,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
+} from "../types.js";
 import type {
 	FieldProp,
 	FieldFormatMeta,
@@ -37,6 +45,18 @@ class TextCustomField extends CustomField<"text"> {
 		} satisfies CFConfig<"text">;
 	}
 	// Methods
+	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		return {
+			columns: [
+				{
+					name: this.key,
+					type: typeLookup("text", props.adapterType),
+					nullable: true,
+					default: this.config.config.default,
+				},
+			],
+		};
+	}
 	responseValueFormat(props: {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;
