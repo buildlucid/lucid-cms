@@ -1,9 +1,9 @@
+import { typeLookup } from "../../../libs/db/kysely/column-helpers.js";
+import buildTableName from "../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
 import type { AdapterType } from "../../../libs/db/types.js";
-import { primaryKeyColumnType } from "../../../libs/db/kysely/column-helpers.js";
-import buildTableName from "../helpers/build-table-name.js";
 
 /**
  * Returns the versions table
@@ -38,20 +38,20 @@ const createVersionsTable = (props: {
 					{
 						name: "id",
 						source: "core",
-						type: primaryKeyColumnType(props.dbAdapter),
+						type: typeLookup("serial", props.dbAdapter),
 						nullable: false,
 						primary: true,
 					},
 					{
 						name: "collection_key",
 						source: "core",
-						type: "text",
+						type: typeLookup("text", props.dbAdapter),
 						nullable: false,
 					},
 					{
 						name: "document_id",
 						source: "core",
-						type: "integer",
+						type: typeLookup("integer", props.dbAdapter),
 						nullable: false,
 						foreignKey: {
 							table: documentTableRes.data,
@@ -62,7 +62,7 @@ const createVersionsTable = (props: {
 					{
 						name: "type",
 						source: "core",
-						type: "text",
+						type: typeLookup("text", props.dbAdapter),
 						default: "draft",
 						nullable: false,
 					},

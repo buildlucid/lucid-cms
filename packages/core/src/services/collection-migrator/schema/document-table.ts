@@ -3,7 +3,7 @@ import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
 import type { AdapterType } from "../../../libs/db/types.js";
 import {
-	primaryKeyColumnType,
+	typeLookup,
 	defaultTimestampSimple,
 } from "../../../libs/db/kysely/column-helpers.js";
 import buildTableName from "../helpers/build-table-name.js";
@@ -36,33 +36,33 @@ const createDocumentTable = (props: {
 					{
 						name: "id",
 						source: "core",
-						type: primaryKeyColumnType(props.dbAdapter),
+						type: typeLookup("serial", props.dbAdapter),
 						nullable: false,
 						primary: true,
 					},
 					{
 						name: "collection_key",
 						source: "core",
-						type: "text",
+						type: typeLookup("text", props.dbAdapter),
 						nullable: false,
 					},
 					{
 						name: "is_deleted",
 						source: "core",
-						type: "integer",
+						type: typeLookup("integer", props.dbAdapter),
 						default: 0,
 						nullable: false,
 					},
 					{
 						name: "is_deleted_at",
 						source: "core",
-						type: "timestamp",
+						type: typeLookup("timestamp", props.dbAdapter),
 						nullable: true,
 					},
 					{
 						name: "deleted_by",
 						source: "core",
-						type: "integer",
+						type: typeLookup("integer", props.dbAdapter),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -73,7 +73,7 @@ const createDocumentTable = (props: {
 					{
 						name: "created_by",
 						source: "core",
-						type: "integer",
+						type: typeLookup("integer", props.dbAdapter),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -84,7 +84,7 @@ const createDocumentTable = (props: {
 					{
 						name: "updated_by",
 						source: "core",
-						type: "integer",
+						type: typeLookup("integer", props.dbAdapter),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -95,14 +95,14 @@ const createDocumentTable = (props: {
 					{
 						name: "created_at",
 						source: "core",
-						type: "timestamp",
+						type: typeLookup("timestamp", props.dbAdapter),
 						nullable: true,
 						default: defaultTimestampSimple(props.dbAdapter),
 					},
 					{
 						name: "updated_at",
 						source: "core",
-						type: "timestamp",
+						type: typeLookup("timestamp", props.dbAdapter),
 						nullable: true,
 						default: defaultTimestampSimple(props.dbAdapter),
 					},

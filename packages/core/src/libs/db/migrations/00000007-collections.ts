@@ -2,7 +2,7 @@ import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
 import {
 	defaultTimestamp,
-	primaryKeyColumnType,
+	typeLookup,
 	primaryKeyColumn,
 } from "../kysely/column-helpers.js";
 
@@ -12,7 +12,7 @@ const Migration00000007: MigrationFn = (adapter) => {
 			// Collection Documents
 			await db.schema
 				.createTable("lucid_collection_documents")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("collection_key", "text", (col) => col.notNull())
@@ -38,7 +38,7 @@ const Migration00000007: MigrationFn = (adapter) => {
 			// Document Versions
 			await db.schema
 				.createTable("lucid_collection_document_versions")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("document_id", "integer", (col) =>
@@ -70,7 +70,7 @@ const Migration00000007: MigrationFn = (adapter) => {
 			// Bricks
 			await db.schema
 				.createTable("lucid_collection_document_bricks")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("collection_document_version_id", "integer", (col) =>
@@ -88,7 +88,7 @@ const Migration00000007: MigrationFn = (adapter) => {
 			// Groups
 			await db.schema
 				.createTable("lucid_collection_document_groups")
-				.addColumn("group_id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("group_id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("collection_document_version_id", "integer", (col) =>
@@ -135,7 +135,7 @@ const Migration00000007: MigrationFn = (adapter) => {
 			// Fields
 			await db.schema
 				.createTable("lucid_collection_document_fields")
-				.addColumn("fields_id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("fields_id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("collection_document_version_id", "integer", (col) =>

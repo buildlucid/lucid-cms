@@ -2,7 +2,7 @@ import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
 import {
 	defaultTimestamp,
-	primaryKeyColumnType,
+	typeLookup,
 	primaryKeyColumn,
 } from "../kysely/column-helpers.js";
 
@@ -11,7 +11,7 @@ const Migration00000004: MigrationFn = (adapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_users")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("super_admin", "integer", (col) =>
@@ -41,7 +41,7 @@ const Migration00000004: MigrationFn = (adapter) => {
 
 			await db.schema
 				.createTable("lucid_roles")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("name", "text", (col) => col.notNull().unique())
@@ -56,7 +56,7 @@ const Migration00000004: MigrationFn = (adapter) => {
 
 			await db.schema
 				.createTable("lucid_role_permissions")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("role_id", "integer", (col) =>
@@ -73,7 +73,7 @@ const Migration00000004: MigrationFn = (adapter) => {
 
 			await db.schema
 				.createTable("lucid_user_roles")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("user_id", "integer", (col) =>
@@ -92,7 +92,7 @@ const Migration00000004: MigrationFn = (adapter) => {
 
 			await db.schema
 				.createTable("lucid_user_tokens")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("user_id", "integer", (col) =>

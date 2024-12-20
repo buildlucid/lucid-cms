@@ -26,17 +26,6 @@ export const defaultTimestampSimple = (adapter: AdapterType) => {
 	}
 };
 
-export const primaryKeyColumnType = (adapter: AdapterType) => {
-	switch (adapter) {
-		case AdapterType.SQLITE:
-			return "integer";
-		case AdapterType.POSTGRES:
-			return "serial";
-		case AdapterType.LIBSQL:
-			return "integer";
-	}
-};
-
 export const typeLookup = (
 	type: "serial" | "integer" | "boolean" | "jsonb" | "text" | "timestamp",
 	adapter: AdapterType,

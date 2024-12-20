@@ -1,16 +1,13 @@
 import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
-import {
-	primaryKeyColumnType,
-	primaryKeyColumn,
-} from "../kysely/column-helpers.js";
+import { typeLookup, primaryKeyColumn } from "../kysely/column-helpers.js";
 
 const Migration00000002: MigrationFn = (adapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_translation_keys")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("created_at", "timestamp", (col) => col.notNull())
@@ -18,7 +15,7 @@ const Migration00000002: MigrationFn = (adapter) => {
 
 			await db.schema
 				.createTable("lucid_translations")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("translation_key_id", "integer", (col) =>

@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import { primaryKeyColumnType } from "../../../libs/db/kysely/column-helpers.js";
+import { typeLookup } from "../../../libs/db/kysely/column-helpers.js";
 import buildTableName from "../helpers/build-table-name.js";
 import type {
 	CollectionSchemaTable,
@@ -44,20 +44,20 @@ const createFieldTables = (props: {
 		{
 			name: "id",
 			source: "core",
-			type: primaryKeyColumnType(props.dbAdapter),
+			type: typeLookup("serial", props.dbAdapter),
 			nullable: false,
 			primary: true,
 		},
 		{
 			name: "collection_key",
 			source: "core",
-			type: "text",
+			type: typeLookup("text", props.dbAdapter),
 			nullable: false,
 		},
 		{
 			name: "document_id",
 			source: "core",
-			type: "integer",
+			type: typeLookup("integer", props.dbAdapter),
 			nullable: false,
 			foreignKey: {
 				table: props.documentTable,
@@ -68,7 +68,7 @@ const createFieldTables = (props: {
 		{
 			name: "document_version_id",
 			source: "core",
-			type: "integer",
+			type: typeLookup("integer", props.dbAdapter),
 			nullable: false,
 			foreignKey: {
 				table: props.versionTable,
@@ -79,7 +79,7 @@ const createFieldTables = (props: {
 		{
 			name: "locale",
 			source: "core",
-			type: "text",
+			type: typeLookup("text", props.dbAdapter),
 			nullable: false,
 			foreignKey: {
 				table: "lucid_locales",
@@ -96,7 +96,7 @@ const createFieldTables = (props: {
 			columns.push({
 				name: "parent_id",
 				source: "core",
-				type: "integer",
+				type: typeLookup("integer", props.dbAdapter),
 				nullable: false,
 				foreignKey: {
 					table: props.parentTable,
@@ -109,7 +109,7 @@ const createFieldTables = (props: {
 		columns.push({
 			name: "sort_order",
 			source: "core",
-			type: "integer",
+			type: typeLookup("integer", props.dbAdapter),
 			nullable: false,
 			default: 0,
 		});

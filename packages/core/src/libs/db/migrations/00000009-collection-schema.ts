@@ -2,7 +2,7 @@ import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
 import {
 	defaultTimestamp,
-	primaryKeyColumnType,
+	typeLookup,
 	primaryKeyColumn,
 } from "../kysely/column-helpers.js";
 
@@ -11,7 +11,7 @@ const Migration00000009: MigrationFn = (adapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_collection_schema")
-				.addColumn("id", primaryKeyColumnType(adapter), (col) =>
+				.addColumn("id", typeLookup("serial", adapter), (col) =>
 					primaryKeyColumn(col, adapter),
 				)
 				.addColumn("collection_key", "text", (col) => col.notNull())
