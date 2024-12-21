@@ -1,50 +1,64 @@
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
-import {
-	defaultTimestamp,
-	typeLookup,
-	primaryKeyColumn,
-} from "../kysely/column-helpers.js";
+import type DatabaseAdapter from "../adapter.js";
 
-const Migration00000006: MigrationFn = (adapter) => {
+const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_media")
-				.addColumn("id", typeLookup("serial", adapter), (col) =>
-					primaryKeyColumn(col, adapter),
+				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+					adapter.createPrimaryKeyColumn(col),
 				)
-				.addColumn("key", "text", (col) => col.unique().notNull())
-				.addColumn("e_tag", "text")
-				.addColumn("visible", "integer", (col) => col.notNull().defaultTo(1))
-				.addColumn("type", "text", (col) => col.notNull())
-				.addColumn("mime_type", "text", (col) => col.notNull())
-				.addColumn("file_extension", "text", (col) => col.notNull())
-				.addColumn("file_size", "integer", (col) => col.notNull())
-				.addColumn("width", "integer")
-				.addColumn("height", "integer")
-				.addColumn("blur_hash", "text")
-				.addColumn("average_colour", "text")
-				.addColumn("is_dark", "integer")
-				.addColumn("is_light", "integer")
-				.addColumn("title_translation_key_id", "integer", (col) =>
-					col
-						.references("lucid_translation_keys.id")
-						.onDelete("set null")
-						.onUpdate("cascade"),
+				.addColumn("key", adapter.getColumnType("text"), (col) =>
+					col.unique().notNull(),
 				)
-				.addColumn("alt_translation_key_id", "integer", (col) =>
-					col
-						.references("lucid_translation_keys.id")
-						.onDelete("set null")
-						.onUpdate("cascade"),
+				.addColumn("e_tag", adapter.getColumnType("text"))
+				.addColumn("visible", adapter.getColumnType("boolean"), (col) =>
+					col.notNull().defaultTo(1),
 				)
-				.addColumn("custom_meta", "text")
-				.addColumn("created_at", "timestamp", (col) =>
-					defaultTimestamp(col, adapter),
+				.addColumn("type", adapter.getColumnType("text"), (col) =>
+					col.notNull(),
 				)
-				.addColumn("updated_at", "timestamp", (col) =>
-					defaultTimestamp(col, adapter),
+				.addColumn("mime_type", adapter.getColumnType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("file_extension", adapter.getColumnType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("file_size", adapter.getColumnType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("width", adapter.getColumnType("integer"))
+				.addColumn("height", adapter.getColumnType("integer"))
+				.addColumn("blur_hash", adapter.getColumnType("text"))
+				.addColumn("average_colour", adapter.getColumnType("text"))
+				.addColumn("is_dark", adapter.getColumnType("boolean"))
+				.addColumn("is_light", adapter.getColumnType("boolean"))
+				.addColumn(
+					"title_translation_key_id",
+					adapter.getColumnType("integer"),
+					(col) =>
+						col
+							.references("lucid_translation_keys.id")
+							.onDelete("set null")
+							.onUpdate("cascade"),
+				)
+				.addColumn(
+					"alt_translation_key_id",
+					adapter.getColumnType("integer"),
+					(col) =>
+						col
+							.references("lucid_translation_keys.id")
+							.onDelete("set null")
+							.onUpdate("cascade"),
+				)
+				.addColumn("custom_meta", adapter.getColumnType("text"))
+				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+				)
+				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
 				)
 				.execute();
 
@@ -56,20 +70,28 @@ const Migration00000006: MigrationFn = (adapter) => {
 
 			await db.schema
 				.createTable("lucid_media_awaiting_sync")
-				.addColumn("key", "text", (col) => col.primaryKey())
-				.addColumn("timestamp", "timestamp", (col) => col.notNull())
+				.addColumn("key", adapter.getColumnType("text"), (col) =>
+					col.primaryKey(),
+				)
+				.addColumn("timestamp", adapter.getColumnType("timestamp"), (col) =>
+					col.notNull(),
+				)
 				.execute();
 
 			await db.schema
 				.createTable("lucid_processed_images")
-				.addColumn("key", "text", (col) => col.primaryKey())
-				.addColumn("media_key", "text", (col) =>
+				.addColumn("key", adapter.getColumnType("text"), (col) =>
+					col.primaryKey(),
+				)
+				.addColumn("media_key", adapter.getColumnType("text"), (col) =>
 					col
 						.references("lucid_media.key")
 						.onDelete("cascade")
 						.onUpdate("cascade"),
 				)
-				.addColumn("file_size", "integer", (col) => col.notNull())
+				.addColumn("file_size", adapter.getColumnType("integer"), (col) =>
+					col.notNull(),
+				)
 				.execute();
 
 			await db.schema
@@ -81,5 +103,4 @@ const Migration00000006: MigrationFn = (adapter) => {
 		async down(db: Kysely<unknown>) {},
 	};
 };
-
 export default Migration00000006;

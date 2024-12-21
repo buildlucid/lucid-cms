@@ -1,16 +1,15 @@
-import { typeLookup } from "../../../libs/db/kysely/column-helpers.js";
 import buildTableName from "../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
-import type { AdapterType } from "../../../libs/db/types.js";
+import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 /**
  * Returns the versions table
  */
 const createVersionsTable = (props: {
 	collection: CollectionBuilder;
-	dbAdapter: AdapterType;
+	db: DatabaseAdapter;
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
@@ -38,20 +37,20 @@ const createVersionsTable = (props: {
 					{
 						name: "id",
 						source: "core",
-						type: typeLookup("serial", props.dbAdapter),
+						type: props.db.getColumnType("serial"),
 						nullable: false,
 						primary: true,
 					},
 					{
 						name: "collection_key",
 						source: "core",
-						type: typeLookup("text", props.dbAdapter),
+						type: props.db.getColumnType("text"),
 						nullable: false,
 					},
 					{
 						name: "document_id",
 						source: "core",
-						type: typeLookup("integer", props.dbAdapter),
+						type: props.db.getColumnType("integer"),
 						nullable: false,
 						foreignKey: {
 							table: documentTableRes.data,
@@ -62,7 +61,7 @@ const createVersionsTable = (props: {
 					{
 						name: "type",
 						source: "core",
-						type: typeLookup("text", props.dbAdapter),
+						type: props.db.getColumnType("text"),
 						default: "draft",
 						nullable: false,
 					},

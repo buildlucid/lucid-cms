@@ -1,8 +1,9 @@
 import type { Kysely } from "kysely";
-import type { Migration, Generated, ColumnType } from "kysely";
+import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
 import type { FieldTypes } from "../custom-fields/types.js";
 import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
+import type DatabaseAdapter from "./adapter.js";
 
 export type KyselyDB = Kysely<LucidDB>;
 
@@ -12,7 +13,7 @@ export enum AdapterType {
 	LIBSQL = 2,
 }
 
-export type MigrationFn = (adapter: AdapterType) => Migration;
+export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
 
 export type Select<T> = {
 	[P in keyof T]: T[P] extends { __select__: infer S } ? S : T[P];
@@ -31,6 +32,25 @@ export type ColumnTypes =
 
 export type OnDelete = "CASCADE" | "SET NULL" | "RESTRICT";
 export type OnUpdate = "CASCADE" | "SET NULL" | "RESTRICT";
+
+export type DatabaseConfig = {
+	dataTypes: {
+		serial: ColumnDataType;
+		integer: ColumnDataType;
+		boolean: ColumnDataType;
+		jsonb: ColumnDataType;
+		text: ColumnDataType;
+		timestamp: ColumnDataType;
+		char: ((length: number) => ColumnDataType) | ColumnDataType;
+		varchar: ((length?: number) => ColumnDataType) | ColumnDataType;
+	};
+	defaults: {
+		timestamp: string;
+		primaryKey: {
+			autoIncrement: boolean;
+		};
+	};
+};
 
 // ------------------------------------------------------------------------------
 // Column types

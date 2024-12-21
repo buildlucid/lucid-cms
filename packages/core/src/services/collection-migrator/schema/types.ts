@@ -1,8 +1,5 @@
-import type {
-	ColumnTypes,
-	OnDelete,
-	OnUpdate,
-} from "../../../libs/db/types.js";
+import type { OnDelete, OnUpdate } from "../../../libs/db/types.js";
+import type { ColumnDataType } from "kysely";
 
 export type TableType =
 	| "document"
@@ -14,7 +11,7 @@ export type TableType =
 export type CollectionSchemaColumn = {
 	name: string;
 	source: "core" | "field";
-	type: ColumnTypes;
+	type: ColumnDataType;
 	nullable?: boolean;
 	default?: unknown;
 	foreignKey?: {

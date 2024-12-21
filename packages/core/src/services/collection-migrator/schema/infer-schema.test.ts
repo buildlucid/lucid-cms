@@ -1,9 +1,19 @@
-import { expect, test, describe, beforeEach } from "vitest";
+import { expect, test, describe, beforeEach, afterAll } from "vitest";
 import { BrickBuilder, CollectionBuilder } from "../../../builders.js";
 import inferSchema from "./infer-schema.js";
+import testConfig from "../../../utils/test-helpers/test-config.js";
+import testDatabase from "../../../utils/test-helpers/test-database.js";
 
-describe("Schema inference", () => {
+// -----------------------------------------------
+// Setup and Teardown
+
+describe("Schema inference", async () => {
 	let pagesCollection: CollectionBuilder;
+	const config = await testConfig.basic();
+
+	afterAll(async () => {
+		await testDatabase.destroy();
+	});
 
 	beforeEach(() => {
 		pagesCollection = new CollectionBuilder("pages", {
@@ -21,7 +31,7 @@ describe("Schema inference", () => {
 	});
 
 	test("infers basic document table structure", () => {
-		const res = inferSchema(pagesCollection, { dbAdapter: 0 });
+		const res = inferSchema(pagesCollection, config.db);
 		expect(res.data?.tables[0]).toMatchObject({
 			name: "lucid_document__pages",
 			type: "document",
@@ -29,7 +39,7 @@ describe("Schema inference", () => {
 	});
 
 	test("infers version table structure", () => {
-		const res = inferSchema(pagesCollection, { dbAdapter: 0 });
+		const res = inferSchema(pagesCollection, config.db);
 		expect(res.data?.tables[1]).toMatchObject({
 			name: "lucid_document__pages__versions",
 			type: "versions",
@@ -39,7 +49,7 @@ describe("Schema inference", () => {
 	test("correctly handles repeater fields", () => {
 		pagesCollection.addRepeater("authors").addUser("author").endRepeater();
 
-		const res = inferSchema(pagesCollection, { dbAdapter: 0 });
+		const res = inferSchema(pagesCollection, config.db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_document__pages__fields__authors",
@@ -59,7 +69,7 @@ describe("Schema inference", () => {
 			.endRepeater()
 			.endRepeater();
 
-		const res = inferSchema(pagesCollection, { dbAdapter: 0 });
+		const res = inferSchema(pagesCollection, config.db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_document__pages__fields__authors__books",
@@ -72,7 +82,7 @@ describe("Schema inference", () => {
 	});
 
 	test("creates brick tables", () => {
-		const res = inferSchema(pagesCollection, { dbAdapter: 0 });
+		const res = inferSchema(pagesCollection, config.db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_document__pages__hero",

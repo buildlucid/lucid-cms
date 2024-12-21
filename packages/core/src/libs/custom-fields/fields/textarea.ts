@@ -2,7 +2,6 @@ import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -50,7 +49,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("text", props.adapterType),
+					type: props.db.getColumnType("text"),
 					nullable: true,
 					default: this.config.config.default,
 				},

@@ -1,30 +1,36 @@
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
-import {
-	defaultTimestamp,
-	typeLookup,
-	primaryKeyColumn,
-} from "../kysely/column-helpers.js";
+import type DatabaseAdapter from "../adapter.js";
 
-const Migration00000008: MigrationFn = (adapter) => {
+const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_client_integrations")
-				.addColumn("id", typeLookup("serial", adapter), (col) =>
-					primaryKeyColumn(col, adapter),
+				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+					adapter.createPrimaryKeyColumn(col),
 				)
-				.addColumn("name", "text", (col) => col.notNull())
-				.addColumn("description", "text")
-				.addColumn("enabled", "integer", (col) => col.notNull())
-				.addColumn("key", "text", (col) => col.notNull().unique())
-				.addColumn("api_key", "text", (col) => col.notNull())
-				.addColumn("secret", "text", (col) => col.notNull())
-				.addColumn("created_at", "timestamp", (col) =>
-					defaultTimestamp(col, adapter),
+				.addColumn("name", adapter.getColumnType("text"), (col) =>
+					col.notNull(),
 				)
-				.addColumn("updated_at", "timestamp", (col) =>
-					defaultTimestamp(col, adapter),
+				.addColumn("description", adapter.getColumnType("text"))
+				.addColumn("enabled", adapter.getColumnType("boolean"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("key", adapter.getColumnType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("api_key", adapter.getColumnType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("secret", adapter.getColumnType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+				)
+				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
 				)
 				.execute();
 

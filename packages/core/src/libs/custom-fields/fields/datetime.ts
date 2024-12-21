@@ -4,7 +4,6 @@ import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { isValid } from "date-fns";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -52,7 +51,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("timestamp", props.adapterType),
+					type: props.db.getColumnType("timestamp"),
 					nullable: true,
 					default: this.config.config.default,
 				},

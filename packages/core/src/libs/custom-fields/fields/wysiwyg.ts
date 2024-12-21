@@ -3,7 +3,6 @@ import CustomField from "../custom-field.js";
 import sanitizeHtml from "sanitize-html";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import keyToTitle from "../utils/key-to-title.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -51,7 +50,7 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("text", props.adapterType),
+					type: props.db.getColumnType("text"),
 					nullable: true,
 					default: this.config.config.default,
 				},

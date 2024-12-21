@@ -3,7 +3,6 @@ import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -50,7 +49,7 @@ class UserCustomField extends CustomField<"user"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("integer", props.adapterType),
+					type: props.db.getColumnType("integer"),
 					nullable: true,
 					foreignKey: {
 						table: "lucid_users",

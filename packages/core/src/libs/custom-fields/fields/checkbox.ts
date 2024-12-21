@@ -4,7 +4,6 @@ import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -54,7 +53,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("boolean", props.adapterType),
+					type: props.db.getColumnType("boolean"),
 					nullable: true,
 					default: this.config.config.default,
 				},

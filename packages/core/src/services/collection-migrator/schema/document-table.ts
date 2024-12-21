@@ -1,11 +1,7 @@
 import type { CollectionSchemaTable } from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
-import type { AdapterType } from "../../../libs/db/types.js";
-import {
-	typeLookup,
-	defaultTimestampSimple,
-} from "../../../libs/db/kysely/column-helpers.js";
+import type DatabaseAdapter from "../../../libs/db/adapter.js";
 import buildTableName from "../helpers/build-table-name.js";
 
 /**
@@ -13,7 +9,7 @@ import buildTableName from "../helpers/build-table-name.js";
  */
 const createDocumentTable = (props: {
 	collection: CollectionBuilder;
-	dbAdapter: AdapterType;
+	db: DatabaseAdapter;
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
@@ -36,33 +32,33 @@ const createDocumentTable = (props: {
 					{
 						name: "id",
 						source: "core",
-						type: typeLookup("serial", props.dbAdapter),
+						type: props.db.getColumnType("serial"),
 						nullable: false,
 						primary: true,
 					},
 					{
 						name: "collection_key",
 						source: "core",
-						type: typeLookup("text", props.dbAdapter),
+						type: props.db.getColumnType("text"),
 						nullable: false,
 					},
 					{
 						name: "is_deleted",
 						source: "core",
-						type: typeLookup("integer", props.dbAdapter),
+						type: props.db.getColumnType("integer"),
 						default: 0,
 						nullable: false,
 					},
 					{
 						name: "is_deleted_at",
 						source: "core",
-						type: typeLookup("timestamp", props.dbAdapter),
+						type: props.db.getColumnType("timestamp"),
 						nullable: true,
 					},
 					{
 						name: "deleted_by",
 						source: "core",
-						type: typeLookup("integer", props.dbAdapter),
+						type: props.db.getColumnType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -73,7 +69,7 @@ const createDocumentTable = (props: {
 					{
 						name: "created_by",
 						source: "core",
-						type: typeLookup("integer", props.dbAdapter),
+						type: props.db.getColumnType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -84,7 +80,7 @@ const createDocumentTable = (props: {
 					{
 						name: "updated_by",
 						source: "core",
-						type: typeLookup("integer", props.dbAdapter),
+						type: props.db.getColumnType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -95,16 +91,16 @@ const createDocumentTable = (props: {
 					{
 						name: "created_at",
 						source: "core",
-						type: typeLookup("timestamp", props.dbAdapter),
+						type: props.db.getColumnType("timestamp"),
 						nullable: true,
-						default: defaultTimestampSimple(props.dbAdapter),
+						default: props.db.config.defaults.timestamp,
 					},
 					{
 						name: "updated_at",
 						source: "core",
-						type: typeLookup("timestamp", props.dbAdapter),
+						type: props.db.getColumnType("timestamp"),
 						nullable: true,
-						default: defaultTimestampSimple(props.dbAdapter),
+						default: props.db.config.defaults.timestamp,
 					},
 				],
 			},

@@ -3,7 +3,6 @@ import CustomField from "../custom-field.js";
 import Formatter from "../../formatters/index.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -51,7 +50,7 @@ class JsonCustomField extends CustomField<"json"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("jsonb", props.adapterType),
+					type: props.db.getColumnType("jsonb"),
 					nullable: true,
 					default: this.config.config.default,
 				},

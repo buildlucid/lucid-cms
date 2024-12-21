@@ -17,8 +17,6 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
-import type { AdapterType } from "../../db/types.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 
 class SelectCustomField extends CustomField<"select"> {
 	type = "select" as const;
@@ -54,7 +52,7 @@ class SelectCustomField extends CustomField<"select"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("text", props.adapterType),
+					type: props.db.getColumnType("text"),
 					nullable: true,
 				},
 			],

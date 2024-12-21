@@ -4,7 +4,7 @@ import {
 	type SqliteDialectConfig,
 	ParseJSONResultsPlugin,
 } from "kysely";
-import { AdapterType } from "../../types.js";
+import { AdapterType, type DatabaseConfig } from "../../types.js";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 
 export default class SqliteAdapter extends DatabaseAdapter {
@@ -21,5 +21,25 @@ export default class SqliteAdapter extends DatabaseAdapter {
 	}
 	get fuzzOperator() {
 		return "like" as const;
+	}
+	get config(): DatabaseConfig {
+		return {
+			dataTypes: {
+				serial: "integer",
+				integer: "integer",
+				boolean: "integer",
+				jsonb: "json",
+				text: "text",
+				timestamp: "timestamp",
+				char: "text",
+				varchar: "text",
+			},
+			defaults: {
+				timestamp: "CURRENT_TIMESTAMP",
+				primaryKey: {
+					autoIncrement: true,
+				},
+			},
+		};
 	}
 }

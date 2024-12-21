@@ -5,11 +5,13 @@ import {
 	Kysely,
 	Migrator,
 	type KyselyPlugin,
+	type ColumnDataType,
+	type ColumnDefinitionBuilder,
 } from "kysely";
-import { jsonArrayFrom } from "kysely/helpers/sqlite";
+import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { LucidError } from "../../utils/errors/index.js";
 import logger from "../../utils/logging/index.js";
-import type { AdapterType, LucidDB } from "./types.js";
+import type { AdapterType, LucidDB, DatabaseConfig } from "./types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
 import Migration00000002 from "./migrations/00000002-translations.js";
@@ -21,7 +23,7 @@ import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
 import Migration00000009 from "./migrations/00000009-collection-schema.js";
 
-export default class DatabaseAdapter {
+export default abstract class DatabaseAdapter {
 	db: Kysely<LucidDB> | undefined;
 	adapter: AdapterType;
 	constructor(config: {
@@ -35,6 +37,10 @@ export default class DatabaseAdapter {
 			plugins: config.plugins,
 		});
 	}
+	abstract get fuzzOperator(): "like" | "ilike" | "%";
+	abstract get jsonArrayFrom(): typeof jsonArrayFrom;
+	abstract get config(): DatabaseConfig;
+
 	// Public methods
 	async migrateToLatest() {
 		const migrator = this.migrator;
@@ -67,6 +73,22 @@ export default class DatabaseAdapter {
 			});
 		}
 	}
+	getColumnType(
+		type: keyof DatabaseConfig["dataTypes"],
+		...args: unknown[]
+	): ColumnDataType {
+		const dataType = this.config.dataTypes[type];
+		if (typeof dataType === "function") {
+			// @ts-expect-error
+			return dataType(...args);
+		}
+		return dataType;
+	}
+	createPrimaryKeyColumn(col: ColumnDefinitionBuilder) {
+		return this.config.defaults.primaryKey.autoIncrement
+			? col.primaryKey().autoIncrement()
+			: col.primaryKey();
+	}
 	// getters
 	get client() {
 		if (!this.db) {
@@ -76,23 +98,17 @@ export default class DatabaseAdapter {
 		}
 		return this.db;
 	}
-	get jsonArrayFrom() {
-		return jsonArrayFrom;
-	}
-	get fuzzOperator(): "like" | "ilike" | "%" {
-		return "like";
-	}
 	private get migrations(): Record<string, Migration> {
 		return {
-			"00000001-locales": Migration00000001(this.adapter),
-			"00000002-translations": Migration00000002(this.adapter),
-			"00000003-options": Migration00000003(this.adapter),
-			"00000004-users-and-permissions": Migration00000004(this.adapter),
-			"00000005-emails": Migration00000005(this.adapter),
-			"00000006-media": Migration00000006(this.adapter),
-			"00000007-collections": Migration00000007(this.adapter),
-			"00000008-integrations": Migration00000008(this.adapter),
-			"00000009-collection-schema": Migration00000009(this.adapter),
+			"00000001-locales": Migration00000001(this),
+			"00000002-translations": Migration00000002(this),
+			"00000003-options": Migration00000003(this),
+			"00000004-users-and-permissions": Migration00000004(this),
+			"00000005-emails": Migration00000005(this),
+			"00000006-media": Migration00000006(this),
+			"00000007-collections": Migration00000007(this),
+			"00000008-integrations": Migration00000008(this),
+			"00000009-collection-schema": Migration00000009(this),
 		};
 	}
 	private get migrator() {

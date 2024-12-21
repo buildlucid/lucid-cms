@@ -1,13 +1,9 @@
 import type { ZodType } from "zod";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
-import type {
-	AdapterType,
-	BooleanInt,
-	ColumnTypes,
-	OnDelete,
-	OnUpdate,
-} from "../db/types.js";
+import type { BooleanInt, OnDelete, OnUpdate } from "../db/types.js";
+import type { ColumnDataType } from "kysely";
 import type { LocaleValue } from "../../types/shared.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 // -----------------------------------------------
 // Custom Field
@@ -624,7 +620,7 @@ export interface DocumentReferenceData {
 //
 
 export type GetSchemaDefinitionProps = {
-	adapterType: AdapterType;
+	db: DatabaseAdapter;
 	tables: {
 		document: string;
 		version: string;
@@ -633,7 +629,7 @@ export type GetSchemaDefinitionProps = {
 
 export type ColumnDefinition = {
 	name: string;
-	type: ColumnTypes;
+	type: ColumnDataType;
 	nullable?: boolean;
 	default?: unknown;
 	foreignKey?: {

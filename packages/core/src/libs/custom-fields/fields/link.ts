@@ -4,7 +4,6 @@ import CustomField from "../custom-field.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
 import constants from "../../../constants/constants.js";
-import { typeLookup } from "../../db/kysely/column-helpers.js";
 import type { LinkResValue } from "../../../types.js";
 import type {
 	CFConfig,
@@ -58,7 +57,7 @@ class LinkCustomField extends CustomField<"link"> {
 			columns: [
 				{
 					name: this.key,
-					type: typeLookup("jsonb", props.adapterType),
+					type: props.db.getColumnType("jsonb"),
 					nullable: true,
 					default: this.config.config.default,
 				},

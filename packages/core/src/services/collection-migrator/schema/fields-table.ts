@@ -1,5 +1,4 @@
 import T from "../../../translations/index.js";
-import { typeLookup } from "../../../libs/db/kysely/column-helpers.js";
 import buildTableName from "../helpers/build-table-name.js";
 import type {
 	CollectionSchemaTable,
@@ -8,9 +7,9 @@ import type {
 } from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
-import type { AdapterType } from "../../../libs/db/types.js";
 import type { CFConfig, FieldTypes, TabFieldConfig } from "../../../types.js";
 import type { BrickBuilder } from "../../../builders.js";
+import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 /**
  * Creates table schemas for fields
@@ -19,7 +18,7 @@ import type { BrickBuilder } from "../../../builders.js";
 const createFieldTables = (props: {
 	collection: CollectionBuilder;
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
-	dbAdapter: AdapterType;
+	db: DatabaseAdapter;
 	type: Extract<TableType, "document-fields" | "brick" | "repeater">;
 	documentTable: string;
 	versionTable: string;
@@ -44,20 +43,20 @@ const createFieldTables = (props: {
 		{
 			name: "id",
 			source: "core",
-			type: typeLookup("serial", props.dbAdapter),
+			type: props.db.getColumnType("serial"),
 			nullable: false,
 			primary: true,
 		},
 		{
 			name: "collection_key",
 			source: "core",
-			type: typeLookup("text", props.dbAdapter),
+			type: props.db.getColumnType("text"),
 			nullable: false,
 		},
 		{
 			name: "document_id",
 			source: "core",
-			type: typeLookup("integer", props.dbAdapter),
+			type: props.db.getColumnType("integer"),
 			nullable: false,
 			foreignKey: {
 				table: props.documentTable,
@@ -68,7 +67,7 @@ const createFieldTables = (props: {
 		{
 			name: "document_version_id",
 			source: "core",
-			type: typeLookup("integer", props.dbAdapter),
+			type: props.db.getColumnType("integer"),
 			nullable: false,
 			foreignKey: {
 				table: props.versionTable,
@@ -79,7 +78,7 @@ const createFieldTables = (props: {
 		{
 			name: "locale",
 			source: "core",
-			type: typeLookup("text", props.dbAdapter),
+			type: props.db.getColumnType("text"),
 			nullable: false,
 			foreignKey: {
 				table: "lucid_locales",
@@ -96,7 +95,7 @@ const createFieldTables = (props: {
 			columns.push({
 				name: "parent_id",
 				source: "core",
-				type: typeLookup("integer", props.dbAdapter),
+				type: props.db.getColumnType("integer"),
 				nullable: false,
 				foreignKey: {
 					table: props.parentTable,
@@ -109,7 +108,7 @@ const createFieldTables = (props: {
 		columns.push({
 			name: "sort_order",
 			source: "core",
-			type: typeLookup("integer", props.dbAdapter),
+			type: props.db.getColumnType("integer"),
 			nullable: false,
 			default: 0,
 		});
@@ -123,7 +122,7 @@ const createFieldTables = (props: {
 			const repeaterTableRes = createFieldTables({
 				collection: props.collection,
 				fields: field.fields,
-				dbAdapter: props.dbAdapter,
+				db: props.db,
 				type: "repeater",
 				documentTable: props.documentTable,
 				versionTable: props.versionTable,
@@ -154,7 +153,7 @@ const createFieldTables = (props: {
 			}
 
 			const fieldSchema = fieldInstance.getSchemaDefinition({
-				adapterType: props.dbAdapter,
+				db: props.db,
 				tables: {
 					document: props.documentTable,
 					version: props.versionTable,

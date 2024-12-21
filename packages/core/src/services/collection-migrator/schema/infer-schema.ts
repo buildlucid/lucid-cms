@@ -1,10 +1,10 @@
 import type { CollectionSchema, CollectionSchemaTable } from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionBuilder } from "../../../builders.js";
-import type { AdapterType } from "../../../libs/db/types.js";
 import createDocumentTable from "./document-table.js";
 import createVersionsTable from "./versions-table.js";
 import createFieldTables from "./fields-table.js";
+import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 /**
  * Infers the collection schema from a given CollectionBuilder instance
@@ -13,16 +13,14 @@ import createFieldTables from "./fields-table.js";
  */
 const inferSchema = (
 	collection: CollectionBuilder,
-	options: {
-		dbAdapter: AdapterType;
-	},
+	db: DatabaseAdapter,
 ): Awaited<ServiceResponse<CollectionSchema>> => {
 	const tables: Array<CollectionSchemaTable> = [];
 
 	//* document table
 	const documentTableRes = createDocumentTable({
 		collection: collection,
-		dbAdapter: options.dbAdapter,
+		db: db,
 	});
 	if (documentTableRes.error) return documentTableRes;
 	tables.push(documentTableRes.data.schema);
@@ -30,7 +28,7 @@ const inferSchema = (
 	//* version table
 	const versionTableRes = createVersionsTable({
 		collection: collection,
-		dbAdapter: options.dbAdapter,
+		db: db,
 	});
 	if (versionTableRes.error) return versionTableRes;
 	tables.push(versionTableRes.data.schema);
@@ -40,7 +38,7 @@ const inferSchema = (
 		const brickFieldsTableRes = createFieldTables({
 			collection: collection,
 			fields: brick.fieldTreeNoTab,
-			dbAdapter: options.dbAdapter,
+			db: db,
 			type: "brick",
 			documentTable: documentTableRes.data.schema.name,
 			versionTable: versionTableRes.data.schema.name,
@@ -55,7 +53,7 @@ const inferSchema = (
 	const collectionFieldsTableRes = createFieldTables({
 		collection: collection,
 		fields: collection.fieldTreeNoTab,
-		dbAdapter: options.dbAdapter,
+		db: db,
 		documentTable: documentTableRes.data.schema.name,
 		versionTable: versionTableRes.data.schema.name,
 		type: "document-fields",

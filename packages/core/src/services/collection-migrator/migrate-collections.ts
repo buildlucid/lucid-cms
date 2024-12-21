@@ -26,7 +26,7 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 
 	// @ts-expect-error
 	const res = inferSchema(context.config.collections.at(0), {
-		dbAdapter: context.config.db.adapter,
+		db: context.config.db,
 	});
 	if (res.error) return res;
 	inferedSchemas.push(res.data);
