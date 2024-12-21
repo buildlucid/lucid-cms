@@ -30,7 +30,7 @@ describe("Schema inference", async () => {
 
 	test("infers basic document table structure", () => {
 		const res = inferSchema(pagesCollection, db);
-		expect(res.data?.tables[0]).toMatchObject({
+		expect(res.data?.schema.tables[0]).toMatchObject({
 			name: "lucid_document__pages",
 			type: "document",
 		});
@@ -38,7 +38,7 @@ describe("Schema inference", async () => {
 
 	test("infers version table structure", () => {
 		const res = inferSchema(pagesCollection, db);
-		expect(res.data?.tables[1]).toMatchObject({
+		expect(res.data?.schema.tables[1]).toMatchObject({
 			name: "lucid_document__pages__versions",
 			type: "versions",
 		});
@@ -48,7 +48,7 @@ describe("Schema inference", async () => {
 		pagesCollection.addRepeater("authors").addUser("author").endRepeater();
 
 		const res = inferSchema(pagesCollection, db);
-		expect(res.data?.tables).toContainEqual(
+		expect(res.data?.schema.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_document__pages__fields__authors",
 				type: "repeater",
@@ -68,7 +68,7 @@ describe("Schema inference", async () => {
 			.endRepeater();
 
 		const res = inferSchema(pagesCollection, db);
-		expect(res.data?.tables).toContainEqual(
+		expect(res.data?.schema.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_document__pages__fields__authors__books",
 				type: "repeater",
@@ -81,7 +81,7 @@ describe("Schema inference", async () => {
 
 	test("creates brick tables", () => {
 		const res = inferSchema(pagesCollection, db);
-		expect(res.data?.tables).toContainEqual(
+		expect(res.data?.schema.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_document__pages__hero",
 				type: "brick",
