@@ -6,7 +6,7 @@ import testingConstants from "../../../constants/testing-constants.js";
 export default lucid.config({
 	host: "http://localhost:8080",
 	db: new SQLiteAdapter({
-		database: async () => new Database("db.sqlite"),
+		database: async () => new Database(":memory:"),
 	}),
 	keys: {
 		encryptionKey: testingConstants.key,

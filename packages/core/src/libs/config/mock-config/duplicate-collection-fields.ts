@@ -17,7 +17,7 @@ const collection = new CollectionBuilder("page", {
 export default lucid.config({
 	host: "http://localhost:8080",
 	db: new SQLiteAdapter({
-		database: async () => new Database("db.sqlite"),
+		database: async () => new Database(":memory:"),
 	}),
 	keys: {
 		encryptionKey: testingConstants.key,

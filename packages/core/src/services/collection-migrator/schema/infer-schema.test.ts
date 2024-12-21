@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach } from "vitest";
+import { expect, test, describe, beforeEach, afterAll } from "vitest";
 import Database from "better-sqlite3";
 import { BrickBuilder, CollectionBuilder } from "../../../builders.js";
 import inferSchema from "./infer-schema.js";
@@ -10,7 +10,7 @@ import SQLiteAdapter from "../../../libs/db/adapters/sqlite/index.js";
 describe("Schema inference", async () => {
 	let pagesCollection: CollectionBuilder;
 	const db = new SQLiteAdapter({
-		database: async () => new Database("infer-schema-db.sqlite"), //* this is never actually created so doesnt need cleaning up
+		database: async () => new Database(":memory:"),
 	});
 
 	beforeEach(() => {
@@ -26,6 +26,9 @@ describe("Schema inference", async () => {
 				],
 			},
 		});
+	});
+	afterAll(() => {
+		db.client.destroy();
 	});
 
 	test("infers basic document table structure", () => {
