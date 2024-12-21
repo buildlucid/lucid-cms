@@ -8,12 +8,6 @@ import type DatabaseAdapter from "./adapter.js";
 
 export type KyselyDB = Kysely<LucidDB>;
 
-export enum AdapterType {
-	SQLITE = 0,
-	POSTGRES = 1,
-	LIBSQL = 2,
-}
-
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
 
 export type Select<T> = {

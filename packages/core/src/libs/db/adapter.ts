@@ -11,7 +11,7 @@ import {
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { LucidError } from "../../utils/errors/index.js";
 import logger from "../../utils/logging/index.js";
-import type { AdapterType, LucidDB, DatabaseConfig } from "./types.js";
+import type { LucidDB, DatabaseConfig } from "./types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
 import Migration00000002 from "./migrations/00000002-translations.js";
@@ -25,9 +25,9 @@ import Migration00000009 from "./migrations/00000009-collection-schema.js";
 
 export default abstract class DatabaseAdapter {
 	db: Kysely<LucidDB> | undefined;
-	adapter: AdapterType;
+	adapter: string;
 	constructor(config: {
-		adapter: AdapterType;
+		adapter: string;
 		dialect: Dialect;
 		plugins?: Array<KyselyPlugin>;
 	}) {
