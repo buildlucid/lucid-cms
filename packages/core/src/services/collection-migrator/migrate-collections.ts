@@ -16,32 +16,25 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	const SchemaRepo = Repository.get("collection-schema", context.db);
 
 	const inferedSchemas: Array<CollectionSchema> = [];
-	// for (const [_, collection] of context.config.collections.entries()) {
-	// 	const res = inferSchema(collection, {
-	// 		dbAdapter: context.config.db.adapter,
-	// 	});
-	// 	if (res.error) return res;
-	// 	inferedSchemas.push(res.data);
-	// }
+	for (const [_, collection] of context.config.collections.entries()) {
+		const res = inferSchema(collection, context.config.db);
+		if (res.error) return res;
+		inferedSchemas.push(res.data.schema);
+		console.log(res.data.checksum);
+	}
 
-	// @ts-expect-error
-	const res = inferSchema(context.config.collections.at(0), context.config.db);
-	if (res.error) return res;
-	inferedSchemas.push(res.data);
+	// console.log(
+	// 	inspect(inferedSchemas, {
+	// 		depth: Number.POSITIVE_INFINITY,
+	// 		colors: true,
+	// 		numericSeparator: true,
+	// 	}),
+	// );
 
-	// gen checksum on schemas, use migratio details to update db
-	console.log(
-		inspect(inferedSchemas, {
-			depth: Number.POSITIVE_INFINITY,
-			colors: true,
-			numericSeparator: true,
-		}),
-	);
-
-	const latestSchemas = await SchemaRepo.selectLatest({
-		select: ["collection_key", "schema", "checksum"],
-	});
-	console.log(latestSchemas[0]?.schema);
+	// const latestSchemas = await SchemaRepo.selectLatest({
+	// 	select: ["collection_key", "schema", "checksum"],
+	// });
+	// console.log(latestSchemas[0]?.schema);
 
 	return {
 		data: undefined,
