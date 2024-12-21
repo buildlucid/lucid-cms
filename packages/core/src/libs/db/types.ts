@@ -1,8 +1,9 @@
-import type { Kysely } from "kysely";
+import type { Kysely, JSONColumnType } from "kysely";
 import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
 import type { FieldTypes } from "../custom-fields/types.js";
 import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
+import type { CollectionSchema } from "../../services/collection-migrator/schema/types.js";
 import type DatabaseAdapter from "./adapter.js";
 
 export type KyselyDB = Kysely<LucidDB>;
@@ -209,7 +210,7 @@ export interface HeadlessProcessedImages {
 export interface LucidCollectionSchema {
 	id: Generated<number>;
 	collection_key: string;
-	schema: string;
+	schema: JSONColumnType<CollectionSchema>;
 	checksum: string;
 	created_at: TimestampImmutable;
 }

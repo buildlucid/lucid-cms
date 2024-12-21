@@ -13,7 +13,7 @@ const Migration00000009: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("collection_key", adapter.getColumnType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("schema", adapter.getColumnType("text"), (col) =>
+				.addColumn("schema", adapter.getColumnType("jsonb"), (col) =>
 					col.notNull(),
 				)
 				.addColumn("checksum", adapter.getColumnType("text"), (col) =>

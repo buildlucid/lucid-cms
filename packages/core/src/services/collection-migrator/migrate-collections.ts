@@ -38,6 +38,11 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		}),
 	);
 
+	const latestSchemas = await SchemaRepo.selectLatest({
+		select: ["collection_key", "schema", "checksum"],
+	});
+	console.log(latestSchemas[0]?.schema);
+
 	return {
 		data: undefined,
 		error: undefined,
