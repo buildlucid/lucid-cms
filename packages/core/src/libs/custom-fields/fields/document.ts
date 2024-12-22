@@ -49,6 +49,7 @@ class DocumentCustomField extends CustomField<"document"> {
 	}
 	// Methods
 	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		// TODO: add support for foreign key to use different collections
 		return {
 			columns: [
 				{

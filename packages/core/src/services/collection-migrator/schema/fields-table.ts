@@ -167,6 +167,7 @@ const createFieldTables = (props: {
 					type: column.type,
 					nullable: column.nullable,
 					foreignKey: column.foreignKey,
+					default: column.default,
 				});
 			}
 		}

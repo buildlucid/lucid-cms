@@ -20,6 +20,9 @@ const BannerBrick = new BrickBuilder("banner", {
 		details: {
 			summary: "The title of the banner. This is displayed as an H1 tag.",
 		},
+		config: {
+			default: "Welcome to our website",
+		},
 		validation: {
 			required: true,
 		},
