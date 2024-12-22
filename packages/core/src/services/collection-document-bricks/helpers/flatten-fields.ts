@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import crypto from "node:crypto";
 import type {
 	FieldSchemaType,
 	FieldSchemaSimpleType,
@@ -61,7 +61,7 @@ const flattenFields = (
 					const groupFields = field.groups[j];
 					if (groupFields === undefined) continue;
 
-					const groupRef = uuidv4();
+					const groupRef = crypto.randomUUID();
 
 					if (Array.isArray(groupFields)) {
 						groupsRes.push({
