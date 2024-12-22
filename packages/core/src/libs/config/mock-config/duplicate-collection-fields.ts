@@ -1,5 +1,5 @@
 import lucid from "../../../index.js";
-import { SQLiteAdapter } from "../../../adapters.js";
+import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import { CollectionBuilder } from "../../../builders.js";
 import Database from "better-sqlite3";
 import testingConstants from "../../../constants/testing-constants.js";

@@ -8,4 +8,4 @@ export * from "./libs/builders/collection-builder/types.js";
 export * from "./libs/custom-fields/types.js";
 export * from "./types/misc.js";
 export * from "./utils/services/types.js";
-export type { DocumentVersionType } from "./libs/db/types.js";
+export * from "./libs/db/types.js";

@@ -4,7 +4,6 @@ export default defineConfig({
     entry: [
         "src/index.ts",
         "src/types.ts",
-        "src/adapters.ts",
         "src/builders.ts",
         "src/api.ts",
         "src/middleware.ts",

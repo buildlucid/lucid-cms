@@ -1,10 +1,10 @@
+import { DatabaseAdapter } from "@lucidcms/core";
+import type { DatabaseConfig } from "@lucidcms/core/types";
 import { LibsqlDialect, type LibsqlDialectConfig } from "@libsql/kysely-libsql";
 import { ParseJSONResultsPlugin } from "kysely";
-import DatabaseAdapter from "../../adapter.js";
-import type { DatabaseConfig } from "../../types.js";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 
-export default class LibsqlAdapter extends DatabaseAdapter {
+class LibSQLAdapter extends DatabaseAdapter {
 	constructor(config: LibsqlDialectConfig) {
 		super({
 			adapter: "libsql",
@@ -15,9 +15,6 @@ export default class LibsqlAdapter extends DatabaseAdapter {
 	// Getters
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
-	}
-	get fuzzOperator() {
-		return "like" as const;
 	}
 	get config(): DatabaseConfig {
 		return {
@@ -37,6 +34,9 @@ export default class LibsqlAdapter extends DatabaseAdapter {
 					autoIncrement: true,
 				},
 			},
+			fuzzOperator: "like",
 		};
 	}
 }
+
+export default LibSQLAdapter;

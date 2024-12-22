@@ -1,4 +1,4 @@
-# @lucidcms/sqlite-adapter
+# @lucidcms/postgres-adapter
 
 ## 1.0.0
 

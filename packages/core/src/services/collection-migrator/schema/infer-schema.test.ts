@@ -2,7 +2,7 @@ import { expect, test, describe, beforeEach, afterAll } from "vitest";
 import Database from "better-sqlite3";
 import { BrickBuilder, CollectionBuilder } from "../../../builders.js";
 import inferSchema from "./infer-schema.js";
-import SQLiteAdapter from "../../../libs/db/adapters/sqlite/index.js";
+import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 
 // -----------------------------------------------
 // Setup and Teardown

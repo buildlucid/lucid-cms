@@ -114,8 +114,8 @@ export default class EmailsRepo {
 						},
 					},
 					defaultOperators: {
-						subject: props.config.db.fuzzOperator,
-						template: props.config.db.fuzzOperator,
+						subject: props.config.db.config.fuzzOperator,
+						template: props.config.db.config.fuzzOperator,
 					},
 				},
 			},

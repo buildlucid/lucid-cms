@@ -45,6 +45,7 @@ export type DatabaseConfig = {
 			autoIncrement: boolean;
 		};
 	};
+	fuzzOperator: "like" | "ilike" | "%";
 };
 
 // ------------------------------------------------------------------------------

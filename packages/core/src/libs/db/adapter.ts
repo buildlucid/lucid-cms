@@ -37,7 +37,6 @@ export default abstract class DatabaseAdapter {
 			plugins: config.plugins,
 		});
 	}
-	abstract get fuzzOperator(): "like" | "ilike" | "%";
 	abstract get jsonArrayFrom(): typeof jsonArrayFrom;
 	abstract get config(): DatabaseConfig;
 
@@ -98,7 +97,7 @@ export default abstract class DatabaseAdapter {
 		}
 		return this.db;
 	}
-	private get migrations(): Record<string, Migration> {
+	get migrations(): Record<string, Migration> {
 		return {
 			"00000001-locales": Migration00000001(this),
 			"00000002-translations": Migration00000002(this),
@@ -111,7 +110,7 @@ export default abstract class DatabaseAdapter {
 			"00000009-collection-schema": Migration00000009(this),
 		};
 	}
-	private get migrator() {
+	get migrator() {
 		const m = this.migrations;
 		return new Migrator({
 			db: this.client,

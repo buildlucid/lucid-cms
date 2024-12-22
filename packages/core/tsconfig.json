@@ -9,7 +9,10 @@
         "./temp",
         "./.turbo",
         "./scripts",
-        "./vitest.config.ts"
+        "./vitest.config.ts",
+        "**/*.test.ts",
+        "**/mock-config/**",
+        "./src/utils/test-helpers/config/**",
     ],
     "compilerOptions": {
         "rootDir": "./src",
@@ -17,6 +20,11 @@
         "typeRoots": [
             "node_modules/@types",
             "src/types/*"
-        ]
+        ],
+        "paths": {
+            "@lucidcms/sqlite-adapter": [
+                "../sqlite-adapter/src"
+            ],
+        }
     },
 }

@@ -131,7 +131,7 @@ export default class RolesRepo {
 						},
 					},
 					defaultOperators: {
-						name: props.config.db.fuzzOperator,
+						name: props.config.db.config.fuzzOperator,
 					},
 				},
 			},

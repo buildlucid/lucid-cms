@@ -17,6 +17,9 @@
 		"@lucidcms/plugin-nodemailer": "*",
 		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/plugin-s3": "*",
+		"@lucidcms/sqlite-adapter": "*",
+		"@lucidcms/postgres-adapter": "*",
+		"@lucidcms/libsql-adapter": "*",
 		"better-sqlite3": "^11.1.2",
 		"nodemailer": "^6.9.14"
 	},

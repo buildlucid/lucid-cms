@@ -1,12 +1,12 @@
+import { DatabaseAdapter } from "@lucidcms/core";
+import type { DatabaseConfig } from "@lucidcms/core/types";
 import pg from "pg";
 import { PostgresDialect } from "kysely";
-import DatabaseAdapter from "../../adapter.js";
-import type { DatabaseConfig } from "../../types.js";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 
 const { Pool } = pg;
 
-export default class PostgresAdapter extends DatabaseAdapter {
+class PostgresAdapter extends DatabaseAdapter {
 	constructor(config: pg.PoolConfig) {
 		super({
 			adapter: "postgres",
@@ -18,9 +18,6 @@ export default class PostgresAdapter extends DatabaseAdapter {
 	// Getters
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
-	}
-	get fuzzOperator() {
-		return "%" as const;
 	}
 	get config(): DatabaseConfig {
 		return {
@@ -41,6 +38,9 @@ export default class PostgresAdapter extends DatabaseAdapter {
 					autoIncrement: false,
 				},
 			},
+			fuzzOperator: "%",
 		};
 	}
 }
+
+export default PostgresAdapter;
