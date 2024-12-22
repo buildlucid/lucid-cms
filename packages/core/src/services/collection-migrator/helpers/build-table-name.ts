@@ -4,6 +4,14 @@ import type { ServiceResponse } from "../../../types.js";
 import type { TableType } from "../schema/types.js";
 
 /**
+ * Default parts for table names
+ */
+export const collectionTableParts = {
+	fields: "fields",
+	versions: "versions",
+};
+
+/**
  * Builds out the table name based on its type and available keys
  */
 const buildTableName = (
@@ -14,10 +22,6 @@ const buildTableName = (
 		repeater?: Array<string>;
 	},
 ): Awaited<ServiceResponse<string>> => {
-	const partDefault = {
-		fields: "fields",
-		versions: "versions",
-	};
 	const parts = ["document", keys.collection];
 
 	switch (type) {
@@ -25,7 +29,7 @@ const buildTableName = (
 			break;
 		}
 		case "versions": {
-			parts.push(partDefault.versions);
+			parts.push(collectionTableParts.versions);
 			break;
 		}
 		case "brick": {
@@ -43,7 +47,7 @@ const buildTableName = (
 			break;
 		}
 		case "document-fields": {
-			parts.push(partDefault.fields);
+			parts.push(collectionTableParts.fields);
 			break;
 		}
 		case "repeater": {
@@ -61,7 +65,7 @@ const buildTableName = (
 			// add brick key first - repeater tables are scoped to them
 			//* assumes document-fields type when brick key isnt present
 			if (!keys.brick) {
-				parts.push(partDefault.fields);
+				parts.push(collectionTableParts.fields);
 			} else parts.push(keys.brick);
 
 			// push all repeater keys - repeaters can have have children/parent repeaters
