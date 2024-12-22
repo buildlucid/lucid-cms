@@ -2,6 +2,8 @@ import T from "../../../translations/index.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type { Config } from "../../../types.js";
 
+// TODO: Handle this within the custom field class
+
 const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 	switch (field.type) {
 		case "document": {

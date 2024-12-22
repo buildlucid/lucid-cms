@@ -1,4 +1,5 @@
 import determineColumnMods from "./determine-column-mods.js";
+import logger from "../../../utils/logging/index.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionSchema } from "../schema/types.js";
 import type { MigrationPlan, ColumnOperation } from "./types.js";
@@ -32,7 +33,10 @@ const generateMigrationPlan = (props: {
 				column,
 			})),
 		}));
-		console.log("Full migration plan for:", props.schemas.current.key);
+
+		logger("debug", {
+			message: `Full migration plan for: ${props.schemas.current.key}`,
+		});
 
 		return {
 			data: plan,
@@ -42,7 +46,9 @@ const generateMigrationPlan = (props: {
 
 	//* if the checksums match, no migration is required
 	if (props.checksums.existing === props.checksums.current) {
-		console.log("No migration required for:", props.schemas.current.key);
+		logger("debug", {
+			message: `No migration required for: ${props.schemas.current.key}`,
+		});
 		return {
 			data: plan,
 			error: undefined,
@@ -50,7 +56,9 @@ const generateMigrationPlan = (props: {
 	}
 
 	//* create a partial migration plan
-	console.log("Partial migration plan for:", props.schemas.current.key);
+	logger("debug", {
+		message: `Partial migration plan for: ${props.schemas.current.key}`,
+	});
 
 	for (const table of props.schemas.current.tables) {
 		const targetTable = props.schemas.existing.tables.find(
@@ -107,6 +115,7 @@ const generateMigrationPlan = (props: {
 			});
 		}
 	}
+
 	for (const table of props.schemas.existing.tables) {
 		const tableStillExists = props.schemas.current.tables.some(
 			(t) => t.name === table.name,
