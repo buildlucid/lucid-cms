@@ -1,9 +1,47 @@
 import type { CollectionSchemaColumn } from "../schema/types.js";
+import type { ColumnDataType } from "kysely";
 
-export type ColumnOperation = {
-	type: "add" | "modify" | "remove";
+export type ModifyColumnOperation = {
+	type: "modify";
+	columnName: string;
+	changes: {
+		type?: {
+			from: ColumnDataType;
+			to: ColumnDataType;
+		};
+		nullable?: {
+			from: boolean | undefined;
+			to: boolean | undefined;
+		};
+		default?: {
+			from: unknown;
+			to: unknown;
+		};
+		foreignKey?: {
+			from: CollectionSchemaColumn["foreignKey"];
+			to: CollectionSchemaColumn["foreignKey"];
+		};
+		unique?: {
+			from: boolean | undefined;
+			to: boolean | undefined;
+		};
+	};
+};
+
+export type AddColumnOperation = {
+	type: "add";
 	column: CollectionSchemaColumn;
 };
+
+export type RemoveColumnOperation = {
+	type: "remove";
+	columnName: string;
+};
+
+export type ColumnOperation =
+	| AddColumnOperation
+	| ModifyColumnOperation
+	| RemoveColumnOperation;
 
 export type TableMigration = {
 	type: "create" | "modify" | "remove";

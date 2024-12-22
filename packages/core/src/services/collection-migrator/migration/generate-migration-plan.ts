@@ -1,39 +1,12 @@
+import determineColumnMods from "./determine-column-mods.js";
 import type { ServiceResponse } from "../../../types.js";
-import type {
-	CollectionSchema,
-	CollectionSchemaColumn,
-} from "../schema/types.js";
+import type { CollectionSchema } from "../schema/types.js";
 import type { MigrationPlan, ColumnOperation } from "./types.js";
 
-const needsModification = (
-	newColumn: CollectionSchemaColumn,
-	existingColumn: CollectionSchemaColumn,
-): boolean => {
-	return (
-		newColumn.type !== existingColumn.type ||
-		newColumn.nullable !== existingColumn.nullable ||
-		JSON.stringify(newColumn.default) !==
-			JSON.stringify(existingColumn.default) ||
-		!areForeignKeysEqual(newColumn.foreignKey, existingColumn.foreignKey) ||
-		newColumn.unique !== existingColumn.unique
-	);
-};
-
-const areForeignKeysEqual = (
-	newKey?: CollectionSchemaColumn["foreignKey"],
-	existingKey?: CollectionSchemaColumn["foreignKey"],
-): boolean => {
-	if (!newKey && !existingKey) return true;
-	if (!newKey || !existingKey) return false;
-
-	return (
-		newKey.table === existingKey.table &&
-		newKey.column === existingKey.column &&
-		newKey.onDelete === existingKey.onDelete &&
-		newKey.onUpdate === existingKey.onUpdate
-	);
-};
-
+/**
+ * Generates a migration plan for a collection
+ * @todo add error handling, logging, etc. Console.log should be replaced with proper logging
+ */
 const generateMigrationPlan = (props: {
 	schemas: {
 		existing: CollectionSchema | null;
@@ -49,6 +22,7 @@ const generateMigrationPlan = (props: {
 		tables: [],
 	};
 
+	//* if there is no existing schema, create a full migration plan
 	if (props.schemas.existing === null) {
 		plan.tables = props.schemas.current.tables.map((table) => ({
 			type: "create",
@@ -59,12 +33,14 @@ const generateMigrationPlan = (props: {
 			})),
 		}));
 		console.log("Full migration plan for:", props.schemas.current.key);
+
 		return {
 			data: plan,
 			error: undefined,
 		};
 	}
 
+	//* if the checksums match, no migration is required
 	if (props.checksums.existing === props.checksums.current) {
 		console.log("No migration required for:", props.schemas.current.key);
 		return {
@@ -72,6 +48,9 @@ const generateMigrationPlan = (props: {
 			error: undefined,
 		};
 	}
+
+	//* create a partial migration plan
+	console.log("Partial migration plan for:", props.schemas.current.key);
 
 	for (const table of props.schemas.current.tables) {
 		const targetTable = props.schemas.existing.tables.find(
@@ -100,11 +79,11 @@ const generateMigrationPlan = (props: {
 					type: "add",
 					column: column,
 				});
-			} else if (needsModification(column, targetColumn)) {
-				columnOperations.push({
-					type: "modify",
-					column: column,
-				});
+			} else {
+				const modifications = determineColumnMods(column, targetColumn);
+				if (modifications) {
+					columnOperations.push(modifications);
+				}
 			}
 		}
 
@@ -115,7 +94,7 @@ const generateMigrationPlan = (props: {
 			if (!columnStillExists) {
 				columnOperations.push({
 					type: "remove",
-					column: column,
+					columnName: column.name,
 				});
 			}
 		}
@@ -128,7 +107,6 @@ const generateMigrationPlan = (props: {
 			});
 		}
 	}
-
 	for (const table of props.schemas.existing.tables) {
 		const tableStillExists = props.schemas.current.tables.some(
 			(t) => t.name === table.name,
@@ -142,7 +120,6 @@ const generateMigrationPlan = (props: {
 		}
 	}
 
-	console.log("Partial migration plan for:", props.schemas.current.key);
 	return {
 		data: plan,
 		error: undefined,
