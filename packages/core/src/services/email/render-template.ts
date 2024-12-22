@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import fs from "fs-extra";
+import { readFile, access } from "node:fs/promises";
 import Handlebars from "handlebars";
 import mjml2html from "mjml";
 import path from "node:path";
@@ -8,6 +8,15 @@ import type { Config } from "../../types/config.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 
 const currentDir = getDirName(import.meta.url);
+
+const pathExists = async (path: string): Promise<boolean> => {
+	try {
+		await access(path);
+		return true;
+	} catch {
+		return false;
+	}
+};
 
 const getTemplateData = async (
 	config: Config,
@@ -18,10 +27,11 @@ const getTemplateData = async (
 		const projectTemplatePath = config.paths?.emailTemplates
 			? `${config.paths?.emailTemplates}/${template}.mjml`
 			: path.resolve("./templates", `${template}.mjml`);
-		if (await fs.pathExists(projectTemplatePath)) {
+
+		if (await pathExists(projectTemplatePath)) {
 			return {
 				error: undefined,
-				data: await fs.readFile(projectTemplatePath, "utf-8"),
+				data: await readFile(projectTemplatePath, "utf-8"),
 			};
 		}
 
@@ -30,10 +40,10 @@ const getTemplateData = async (
 			currentDir,
 			`../templates/${template}.mjml`,
 		);
-		if (await fs.pathExists(packageTemplatePath)) {
+		if (await pathExists(packageTemplatePath)) {
 			return {
 				error: undefined,
-				data: await fs.readFile(packageTemplatePath, "utf-8"),
+				data: await readFile(packageTemplatePath, "utf-8"),
 			};
 		}
 

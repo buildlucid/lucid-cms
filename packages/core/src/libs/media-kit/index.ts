@@ -2,7 +2,6 @@ import T from "../../translations/index.js";
 import mime from "mime-types";
 import sharp from "sharp";
 import slug from "slug";
-import type fs from "fs-extra";
 import { encode } from "blurhash";
 import { getAverageColor } from "fast-average-color-node";
 import { getMonth, getYear } from "date-fns";

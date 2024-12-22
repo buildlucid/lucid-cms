@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import path from "node:path";
-import fs from "fs-extra";
+import fs from "node:fs";
 
 const getConfigPath = (cwd: string, filename?: string): string => {
 	let configPath: string | undefined = undefined;

@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import path from "node:path";
-import fs from "fs-extra";
+import { createReadStream, type ReadStream } from "node:fs";
 import pipeRemoteUrl from "./helpers/pipe-remote-url.js";
 import { getDirName } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -16,7 +16,7 @@ const streamErrorImage: ServiceFn<
 		},
 	],
 	{
-		body: fs.ReadStream | Buffer;
+		body: ReadStream | Buffer;
 		contentType: string;
 	}
 > = async (context, data) => {
@@ -68,9 +68,7 @@ const streamErrorImage: ServiceFn<
 const pipeLocalImage = () => {
 	const pathVal = path.join(currentDir, "../assets/404.jpg");
 	const contentType = "image/jpeg";
-
-	const steam = fs.createReadStream(pathVal);
-
+	const steam = createReadStream(pathVal);
 	return {
 		body: steam,
 		contentType: contentType,
