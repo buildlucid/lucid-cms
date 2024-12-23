@@ -1,9 +1,11 @@
 import Repository from "../../libs/repositories/index.js";
 import inferSchema from "./schema/infer-schema.js";
 import generateMigrationPlan from "./migration/generate-migration-plan.js";
+import buildMigrations from "./migration/build-migrations.js";
 import logger from "../../utils/logging/index.js";
 import type { ServiceFn } from "../../types.js";
 import type { CollectionSchema } from "./schema/types.js";
+import type { MigrationPlan } from "./migration/types.js";
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data
@@ -41,22 +43,26 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	}
 
 	//* generate migration plan
-	const migrationPlans = inferedSchemas.map((proposed) => {
+	const migrationPlans: MigrationPlan[] = [];
+	for (const i of inferedSchemas) {
 		const existing = latestSchemas.find(
-			(s) => s.collection_key === proposed.schema.key,
+			(s) => s.collection_key === i.schema.key,
 		);
 
-		return generateMigrationPlan({
+		const migraitonPlanRes = generateMigrationPlan({
 			schemas: {
 				existing: existing?.schema || null,
-				current: proposed.schema,
+				current: i.schema,
 			},
 			checksums: {
 				existing: existing?.checksum || null,
-				current: proposed.checksum,
+				current: i.checksum,
 			},
 		});
-	});
+		if (migraitonPlanRes.error) return migraitonPlanRes;
+
+		migrationPlans.push(migraitonPlanRes.data);
+	}
 
 	//* inactive collections
 	const inactiveCollections = latestSchemas.filter(
@@ -71,6 +77,13 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 			message: `Found ${inactiveCollections.length} inactive collections: ${inactiveCollections.map((c) => c.collection_key).join(", ")}.`,
 		});
 	}
+
+	//* build and run migrations
+	await buildMigrations(context, {
+		migrationPlan: migrationPlans,
+	});
+
+	//* save migration and inferedSchema to the DB
 
 	return {
 		data: undefined,

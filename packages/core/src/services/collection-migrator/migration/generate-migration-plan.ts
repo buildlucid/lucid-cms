@@ -1,5 +1,6 @@
 import determineColumnMods from "./determine-column-mods.js";
 import logger from "../../../utils/logging/index.js";
+import getTablePriority from "../helpers/get-table-priority.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionSchema } from "../schema/types.js";
 import type { MigrationPlan, ColumnOperation } from "./types.js";
@@ -28,6 +29,7 @@ const generateMigrationPlan = (props: {
 		plan.tables = props.schemas.current.tables.map((table) => ({
 			type: "create",
 			tableName: table.name,
+			priority: getTablePriority(table),
 			columnOperations: table.columns.map((column) => ({
 				type: "add",
 				column,
@@ -68,6 +70,7 @@ const generateMigrationPlan = (props: {
 			plan.tables.push({
 				type: "create",
 				tableName: table.name,
+				priority: getTablePriority(table),
 				columnOperations: table.columns.map((column) => ({
 					type: "add",
 					column,
@@ -111,6 +114,7 @@ const generateMigrationPlan = (props: {
 			plan.tables.push({
 				type: "modify",
 				tableName: table.name,
+				priority: getTablePriority(table),
 				columnOperations,
 			});
 		}
@@ -124,6 +128,7 @@ const generateMigrationPlan = (props: {
 			plan.tables.push({
 				type: "remove",
 				tableName: table.name,
+				priority: getTablePriority(table),
 				columnOperations: [],
 			});
 		}

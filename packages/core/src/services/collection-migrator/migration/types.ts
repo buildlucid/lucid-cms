@@ -45,6 +45,7 @@ export type ColumnOperation =
 
 export type TableMigration = {
 	type: "create" | "modify" | "remove";
+	priority: number;
 	tableName: string;
 	columnOperations: ColumnOperation[];
 };
