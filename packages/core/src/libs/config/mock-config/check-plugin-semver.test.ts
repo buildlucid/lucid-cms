@@ -24,9 +24,8 @@ test("should throw lucid version support error", async () => {
 	});
 
 	const version = semver.coerce(packageJson.version) ?? packageJson.version;
-
 	expect(consoleLogSpy).toHaveBeenCalledWith(
-		messageFormat({
+		messageFormat("error", {
 			scope: "plugin-testing",
 			message: T("plugin_version_not_supported", {
 				version: version as string,

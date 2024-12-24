@@ -1,6 +1,7 @@
 import determineColumnMods from "./determine-column-mods.js";
 import logger from "../../../utils/logging/index.js";
 import getTablePriority from "../helpers/get-table-priority.js";
+import constants from "../../../constants/constants.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { CollectionSchema } from "../schema/types.js";
 import type { MigrationPlan, ColumnOperation } from "./types.js";
@@ -37,7 +38,8 @@ const generateMigrationPlan = (props: {
 		}));
 
 		logger("debug", {
-			message: `Full migration plan for: ${props.schemas.current.key}`,
+			message: `Generated a full migration plan for collection "${props.schemas.current.key}"`,
+			scope: constants.logScopes.migrations,
 		});
 
 		return {
@@ -49,7 +51,8 @@ const generateMigrationPlan = (props: {
 	//* if the checksums match, no migration is required
 	if (props.checksums.existing === props.checksums.current) {
 		logger("debug", {
-			message: `No migration required for: ${props.schemas.current.key}`,
+			message: `No migration required for collection "${props.schemas.current.key}"`,
+			scope: constants.logScopes.migrations,
 		});
 		return {
 			data: plan,
@@ -59,7 +62,8 @@ const generateMigrationPlan = (props: {
 
 	//* create a partial migration plan
 	logger("debug", {
-		message: `Partial migration plan for: ${props.schemas.current.key}`,
+		message: `Generated a partial migration plan for collection "${props.schemas.current.key}"`,
+		scope: constants.logScopes.migrations,
 	});
 
 	for (const table of props.schemas.current.tables) {

@@ -18,6 +18,7 @@ import TestCollection from "./src/lucid/collections/test.js";
 
 export default lucid.config({
 	host: "http://[::1]:8080",
+	logLevel: "debug",
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),
 	}),

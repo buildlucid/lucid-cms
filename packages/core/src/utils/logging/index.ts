@@ -1,10 +1,10 @@
 import winstonLogger from "./logger.js";
+import type constants from "../../constants/constants.js";
 
 export type LogLevel = "error" | "warn" | "info" | "debug";
 
-export enum LoggerScopes {
-	CONFIG = "config",
-}
+export type LoggerScopes =
+	(typeof constants.logScopes)[keyof typeof constants.logScopes];
 
 const logger = (
 	level: LogLevel,
@@ -34,18 +34,29 @@ const logger = (
 			break;
 	}
 
-	logFn(messageFormat(data), data.data);
+	logFn(messageFormat(level, data), data.data);
 };
 
-export const messageFormat = (data: {
-	message: string;
-	scope?: LoggerScopes | string;
-}) => {
+export const messageFormat = (
+	level: LogLevel,
+	data: {
+		message: string;
+		scope?: LoggerScopes | string;
+	},
+) => {
+	// const timestamp = new Date().toISOString();
+	const msgParts = [data.message];
+
+	// TODO: get this implemented - tests need a solution for this as at the time of console log spy the times differ
+	// if (level === "debug" || level === "error") {
+	// 	msgParts.unshift(`[${timestamp}]`);
+	// }
+
 	if (data.scope) {
-		return `[${data.scope}]: ${data.message}`;
+		msgParts.unshift(`[${data.scope}]`);
 	}
 
-	return data.message;
+	return msgParts.join(" ");
 };
 
 export default logger;

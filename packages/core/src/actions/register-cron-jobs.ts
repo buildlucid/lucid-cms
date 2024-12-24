@@ -10,6 +10,7 @@ const registerCronJobs = async (service: ServiceContext) => {
 		cron.schedule(constants.cronSchedule, async () => {
 			logger("info", {
 				message: T("running_cron_jobs"),
+				scope: constants.logScopes.cron,
 			});
 
 			await Promise.allSettled([
@@ -54,6 +55,7 @@ const registerCronJobs = async (service: ServiceContext) => {
 	} catch (error) {
 		logger("error", {
 			message: T("cron_job_error_message"),
+			scope: constants.logScopes.cron,
 		});
 	}
 };

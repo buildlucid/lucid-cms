@@ -8,6 +8,7 @@ import type { AllHooks } from "./hooks.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { FastifyInstance } from "fastify";
 import type { InlineConfig } from "vite";
+import type { LogLevel } from "../utils/logging/index.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -124,6 +125,8 @@ export interface LucidConfig {
 		/** Used to sign the refresh token JWT. Must be `64 characters` long. */
 		refreshTokenSecret: string;
 	};
+	/** The log level to use. */
+	logLevel?: LogLevel;
 	/** Disables the swagger documentation site. */
 	disableSwagger?: boolean;
 	/** Localisation settings. */

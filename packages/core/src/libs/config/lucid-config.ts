@@ -9,7 +9,9 @@ import CollectionConfigSchema from "../builders/collection-builder/schema.js";
 import BrickConfigSchema from "../builders/brick-builder/schema.js";
 import { LucidError } from "../../utils/errors/index.js";
 import CustomFieldSchema from "../custom-fields/schema.js";
-import logger, { LoggerScopes } from "../../utils/logging/index.js";
+import logger from "../../utils/logging/index.js";
+import winstonLogger from "../../utils/logging/logger.js";
+import constants from "../../constants/constants.js";
 
 const lucidConfig = async (config: LucidConfig) => {
 	let configRes = mergeConfig(config, defaultConfig);
@@ -82,13 +84,16 @@ const lucidConfig = async (config: LucidConfig) => {
 			}
 		}
 
+		// misc
+		winstonLogger.level = configRes.logLevel;
+
 		return configRes;
 	} catch (err) {
 		if (err instanceof ZodError) {
 			for (const error of err.errors) {
 				logger("error", {
 					message: error.message,
-					scope: LoggerScopes.CONFIG,
+					scope: constants.logScopes.config,
 					data: {
 						path: error.path.join("."),
 					},
@@ -97,12 +102,12 @@ const lucidConfig = async (config: LucidConfig) => {
 		} else if (err instanceof LucidError) {
 		} else if (err instanceof Error) {
 			logger("error", {
-				scope: LoggerScopes.CONFIG,
+				scope: constants.logScopes.config,
 				message: err.message,
 			});
 		} else {
 			logger("error", {
-				scope: LoggerScopes.CONFIG,
+				scope: constants.logScopes.config,
 				message: T("an_unknown_error_occurred"),
 			});
 		}

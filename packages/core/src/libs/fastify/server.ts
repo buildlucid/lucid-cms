@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import lucidPlugin from "./plugins/lucid.js";
 import logger from "../../utils/logging/index.js";
 import { serverStarted } from "../../utils/logging/lucid-startup-logs.js";
+import constants from "../../constants/constants.js";
 
 const startTime = process.hrtime();
 const fastify = Fastify();
@@ -24,6 +25,7 @@ const start = async (config?: {
 			if (err) {
 				logger("error", {
 					message: err?.message,
+					scope: constants.logScopes.lucid,
 				});
 				process.exit(1);
 			}

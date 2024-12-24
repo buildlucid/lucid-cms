@@ -66,8 +66,10 @@ const serviceWrapper =
 		} catch (error) {
 			if (wrapperConfig.logError) {
 				logger("error", {
-					// @ts-expect-error
-					message: error?.message ?? T("an_unknown_error_occurred"),
+					message:
+						error instanceof Error
+							? error?.message
+							: T("an_unknown_error_occurred"),
 				});
 			}
 
@@ -93,8 +95,7 @@ const serviceWrapper =
 			return {
 				error: mergeServiceError(
 					{
-						// @ts-expect-error
-						message: error?.message ?? undefined,
+						message: error instanceof Error ? error?.message : undefined,
 					},
 					wrapperConfig.defaultError,
 				),

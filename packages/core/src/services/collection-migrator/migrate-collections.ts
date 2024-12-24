@@ -6,6 +6,7 @@ import logger from "../../utils/logging/index.js";
 import type { ServiceFn } from "../../types.js";
 import type { CollectionSchema } from "./schema/types.js";
 import type { MigrationPlan } from "./migration/types.js";
+import constants from "../../constants/constants.js";
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data
@@ -75,6 +76,7 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		// TODO: save this to the DB. Down the line we can use this to track how long a collection has been inactive and potentially delete it after a grace period.
 		logger("debug", {
 			message: `Found ${inactiveCollections.length} inactive collections: ${inactiveCollections.map((c) => c.collection_key).join(", ")}.`,
+			scope: constants.logScopes.migrations,
 		});
 	}
 

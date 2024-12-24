@@ -1,7 +1,6 @@
 import { format, createLogger } from "winston";
 import transports from "winston/lib/winston/transports/index.js";
 
-// TODO: expose log level
 // TODO: write logs to file
 const winstonLogger = createLogger({
 	level: "info",

@@ -22,6 +22,7 @@ import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
 import Migration00000009 from "./migrations/00000009-collection-schema.js";
+import constants from "../../constants/constants.js";
 
 export default abstract class DatabaseAdapter {
 	db: Kysely<LucidDB> | undefined;
@@ -49,14 +50,14 @@ export default abstract class DatabaseAdapter {
 		if (results) {
 			for (const it of results) {
 				if (it.status === "Success") {
-					logger("info", {
+					logger("debug", {
 						message: `"${it.migrationName}" was executed successfully`,
-						scope: "migration",
+						scope: constants.logScopes.migrations,
 					});
 				} else if (it.status === "Error") {
 					logger("error", {
 						message: `failed to execute migration "${it.migrationName}"`,
-						scope: "migration",
+						scope: constants.logScopes.migrations,
 					});
 				}
 			}

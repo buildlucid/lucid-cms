@@ -3,7 +3,8 @@ import T from "../../../translations/index.js";
 import path from "node:path";
 import getConfig from "../get-config.js";
 import winstonLogger from "../../../utils/logging/logger.js";
-import { messageFormat, LoggerScopes } from "../../../utils/logging/index.js";
+import { messageFormat } from "../../../utils/logging/index.js";
+import constants from "../../../constants/constants.js";
 
 test("should throw duplicate collection field key error", async () => {
 	const consoleLogSpy = vi
@@ -22,8 +23,8 @@ test("should throw duplicate collection field key error", async () => {
 	});
 
 	expect(consoleLogSpy).toHaveBeenCalledWith(
-		messageFormat({
-			scope: LoggerScopes.CONFIG,
+		messageFormat("error", {
+			scope: constants.logScopes.config,
 			message: T("duplicate_field_keys_message", {
 				type: "collection",
 				keys: ["title"].join(", "),

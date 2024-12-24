@@ -14,6 +14,12 @@ const ConfigSchema = z.object({
 		accessTokenSecret: z.string().length(64),
 		refreshTokenSecret: z.string().length(64),
 	}),
+	logLevel: z.union([
+		z.literal("error"),
+		z.literal("warn"),
+		z.literal("info"),
+		z.literal("debug"),
+	]),
 	paths: z
 		.object({
 			emailTemplates: z.string().optional(),

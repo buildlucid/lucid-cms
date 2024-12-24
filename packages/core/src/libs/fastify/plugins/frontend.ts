@@ -52,7 +52,7 @@ const lucidFrontend = async (fastify: FastifyInstance) => {
 		// }
 	} catch (error) {
 		throw new LucidError({
-			scope: "lucid",
+			scope: constants.logScopes.lucid,
 			message:
 				error instanceof Error
 					? error?.message

@@ -106,6 +106,12 @@ export default Object.freeze({
 		prefix: "lucid_",
 		collectionKeysJoin: "__",
 	},
+	logScopes: {
+		lucid: "lucid",
+		migrations: "migrations",
+		cron: "cron",
+		config: "config",
+	} as const,
 	cronSchedule: "0 0 * * *",
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds
