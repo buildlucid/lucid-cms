@@ -57,7 +57,7 @@ class MediaCustomField extends CustomField<"media"> {
 					foreignKey: {
 						table: "lucid_media",
 						column: "id",
-						onDelete: "SET NULL",
+						onDelete: "set null",
 					},
 				},
 			],

@@ -25,8 +25,8 @@ export type ColumnTypes =
 	| "jsonb"
 	| "serial";
 
-export type OnDelete = "CASCADE" | "SET NULL" | "RESTRICT";
-export type OnUpdate = "CASCADE" | "SET NULL" | "RESTRICT";
+export type OnDelete = "cascade" | "set null" | "restrict";
+export type OnUpdate = "cascade" | "set null";
 
 export type DatabaseConfig = {
 	dataTypes: {

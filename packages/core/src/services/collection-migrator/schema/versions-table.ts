@@ -55,7 +55,7 @@ const createVersionsTable = (props: {
 						foreignKey: {
 							table: documentTableRes.data,
 							column: "id",
-							onDelete: "CASCADE",
+							onDelete: "cascade",
 						},
 					},
 					{

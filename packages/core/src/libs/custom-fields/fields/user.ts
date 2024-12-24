@@ -54,7 +54,7 @@ class UserCustomField extends CustomField<"user"> {
 					foreignKey: {
 						table: "lucid_users",
 						column: "id",
-						onDelete: "SET NULL",
+						onDelete: "set null",
 					},
 				},
 			],

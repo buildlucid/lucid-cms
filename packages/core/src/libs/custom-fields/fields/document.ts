@@ -59,7 +59,7 @@ class DocumentCustomField extends CustomField<"document"> {
 					foreignKey: {
 						table: props.tables.document,
 						column: "id",
-						onDelete: "SET NULL",
+						onDelete: "set null",
 					},
 				},
 			],

@@ -61,7 +61,7 @@ const createFieldTables = (props: {
 			foreignKey: {
 				table: props.documentTable,
 				column: "id",
-				onDelete: "CASCADE",
+				onDelete: "cascade",
 			},
 		},
 		{
@@ -72,7 +72,7 @@ const createFieldTables = (props: {
 			foreignKey: {
 				table: props.versionTable,
 				column: "id",
-				onDelete: "CASCADE",
+				onDelete: "cascade",
 			},
 		},
 		{
@@ -83,7 +83,7 @@ const createFieldTables = (props: {
 			foreignKey: {
 				table: "lucid_locales",
 				column: "code",
-				onDelete: "CASCADE",
+				onDelete: "cascade",
 			},
 		},
 	];
@@ -100,7 +100,7 @@ const createFieldTables = (props: {
 				foreignKey: {
 					table: props.parentTable,
 					column: "id",
-					onDelete: "CASCADE",
+					onDelete: "cascade",
 				},
 			});
 		}

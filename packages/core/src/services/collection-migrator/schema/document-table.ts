@@ -63,7 +63,7 @@ const createDocumentTable = (props: {
 						foreignKey: {
 							table: "lucid_users",
 							column: "id",
-							onDelete: "SET NULL",
+							onDelete: "set null",
 						},
 					},
 					{
@@ -74,7 +74,7 @@ const createDocumentTable = (props: {
 						foreignKey: {
 							table: "lucid_users",
 							column: "id",
-							onDelete: "SET NULL",
+							onDelete: "set null",
 						},
 					},
 					{
@@ -85,7 +85,7 @@ const createDocumentTable = (props: {
 						foreignKey: {
 							table: "lucid_users",
 							column: "id",
-							onDelete: "SET NULL",
+							onDelete: "set null",
 						},
 					},
 					{
