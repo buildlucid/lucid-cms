@@ -17,7 +17,6 @@ type QueryBuilder =
 
 /**
  * Adds a column to a table using the provided query builder
- * @todo Default value needs parsing, if json and using sqlite/libsql it needs stringifying. Move logic to DB Adapter class
  */
 export const addColumn = <T extends QueryBuilder>(
 	query: T,
@@ -39,7 +38,9 @@ export const addColumn = <T extends QueryBuilder>(
 			}
 
 			if (operation.column.default !== undefined) {
-				columnBuilder = columnBuilder.defaultTo(operation.column.default);
+				columnBuilder = columnBuilder.defaultTo(
+					db.formatDefaultValue(operation.column.default),
+				);
 			}
 
 			if (operation.column.foreignKey) {

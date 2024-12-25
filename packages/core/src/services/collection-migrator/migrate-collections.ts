@@ -1,4 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
+import constants from "../../constants/constants.js";
 import inferSchema from "./schema/infer-schema.js";
 import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import buildMigrations from "./migration/build-migrations.js";
@@ -6,7 +7,6 @@ import logger from "../../utils/logging/index.js";
 import type { ServiceFn } from "../../types.js";
 import type { CollectionSchema } from "./schema/types.js";
 import type { MigrationPlan } from "./migration/types.js";
-import constants from "../../constants/constants.js";
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data

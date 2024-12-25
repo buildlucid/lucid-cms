@@ -89,6 +89,9 @@ export default abstract class DatabaseAdapter {
 			? col.primaryKey().autoIncrement()
 			: col.primaryKey();
 	}
+	formatDefaultValue(value: unknown): unknown {
+		return value;
+	}
 	// getters
 	get client() {
 		if (!this.db) {

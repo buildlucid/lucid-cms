@@ -37,6 +37,12 @@ class LibSQLAdapter extends DatabaseAdapter {
 			fuzzOperator: "like",
 		};
 	}
+	formatDefaultValue(value: unknown): unknown {
+		if (typeof value === "object" && value !== null) {
+			return JSON.stringify(value);
+		}
+		return value;
+	}
 }
 
 export default LibSQLAdapter;
