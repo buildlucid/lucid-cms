@@ -9,7 +9,6 @@ import type {
 	AlterTableColumnAlteringBuilder,
 	AlterTableBuilder,
 	AlteredColumnBuilder,
-	AlterColumnBuilder,
 } from "kysely";
 
 /**
@@ -82,8 +81,9 @@ export const dropColumn = <
 };
 
 /**
- * Modifies an existing column in a table using the provided query builder
- * @todo need to pass down column type as we likely need to use the modifyColumn method which requires it for its second arg
+ * Modifies an existing column in a table using the provided query builder.
+ * For simple changes (type, nullable, default), uses alterColumn.
+ * For complex changes (unique, foreign key), drops and recreates the column. Data will be lost in these situations.
  */
 export const modifyColumn = <
 	T extends AlterTableColumnAlteringBuilder | AlterTableBuilder,
@@ -92,41 +92,38 @@ export const modifyColumn = <
 	operation: ModifyColumnOperation,
 	db: DatabaseAdapter,
 ): T => {
-	const { columnName, changes } = operation;
-	let modifiedQuery = query;
+	const hasComplexChanges =
+		operation.changes.unique !== undefined ||
+		operation.changes.foreignKey !== undefined;
 
-	//* handles type, nullable and default changes
-	if (
-		changes.type ||
-		changes.nullable !== undefined ||
-		changes.default !== undefined
-	) {
-		modifiedQuery = modifiedQuery.alterColumn(columnName, (col) => {
-			if (changes.type) {
-				col.setDataType(changes.type.to);
+	if (!hasComplexChanges) {
+		return query.alterColumn(operation.column.name, (col) => {
+			if (operation.changes.type) {
+				col.setDataType(operation.changes.type.to);
 			}
-
-			if (changes.nullable !== undefined) {
-				if (changes.nullable.to) col.dropNotNull();
+			if (operation.changes.nullable !== undefined) {
+				if (operation.changes.nullable.to) col.dropNotNull();
 				else col.setNotNull();
 			}
-
-			if (changes.default !== undefined) {
-				if (changes.default.to === undefined) col.dropDefault();
-				else col.setDefault(db.formatDefaultValue(changes.default.to));
+			if (operation.changes.default !== undefined) {
+				if (operation.changes.default.to === undefined) col.dropDefault();
+				else
+					col.setDefault(db.formatDefaultValue(operation.changes.default.to));
 			}
-
 			return col as unknown as AlteredColumnBuilder;
 		}) as T;
 	}
 
-	//* handle unique
-	if (changes.unique) {
-	}
-
-	//*andle foreign key changes
-	if (changes.foreignKey) {
-	}
-
-	return modifiedQuery;
+	return addColumn(
+		dropColumn(
+			query,
+			{ type: "remove", columnName: operation.column.name },
+			db,
+		),
+		{
+			type: "add",
+			column: operation.column,
+		},
+		db,
+	);
 };

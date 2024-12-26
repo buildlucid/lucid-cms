@@ -68,7 +68,7 @@ const determineColumnMods = (
 	return Object.keys(changes).length > 0
 		? {
 				type: "modify",
-				columnName: newColumn.name,
+				column: newColumn,
 				changes,
 			}
 		: null;

@@ -3,7 +3,7 @@ import type { ColumnDataType } from "kysely";
 
 export type ModifyColumnOperation = {
 	type: "modify";
-	columnName: string;
+	column: CollectionSchemaColumn;
 	changes: {
 		type?: {
 			from: ColumnDataType;
