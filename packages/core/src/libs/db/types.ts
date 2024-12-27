@@ -1,4 +1,4 @@
-import type { Kysely, JSONColumnType } from "kysely";
+import type { Kysely, JSONColumnType, Transaction } from "kysely";
 import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
 import type { FieldTypes } from "../custom-fields/types.js";
 import type { OptionName } from "../../types/response.js";
@@ -6,7 +6,7 @@ import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type { CollectionSchema } from "../../services/collection-migrator/schema/types.js";
 import type DatabaseAdapter from "./adapter.js";
 
-export type KyselyDB = Kysely<LucidDB>;
+export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
 
@@ -25,8 +25,8 @@ export type ColumnTypes =
 	| "jsonb"
 	| "serial";
 
-export type OnDelete = "cascade" | "set null" | "restrict";
-export type OnUpdate = "cascade" | "set null";
+export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
+export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
 
 export type DatabaseConfig = {
 	dataTypes: {
@@ -44,9 +44,33 @@ export type DatabaseConfig = {
 		primaryKey: {
 			autoIncrement: boolean;
 		};
+		boolean: {
+			true: true | 1 | unknown;
+			false: false | 0 | unknown;
+		};
 	};
 	fuzzOperator: "like" | "ilike" | "%";
 };
+
+export interface InferredColumn {
+	name: string;
+	type: ColumnDataType;
+	nullable: boolean;
+	default: unknown | null;
+	unique?: boolean;
+	primary?: boolean;
+	foreignKey?: {
+		table: string;
+		column: string;
+		onDelete?: OnDelete;
+		onUpdate?: OnUpdate;
+	};
+}
+
+export interface InferredTable {
+	name: string;
+	columns: InferredColumn[];
+}
 
 // ------------------------------------------------------------------------------
 // Column types

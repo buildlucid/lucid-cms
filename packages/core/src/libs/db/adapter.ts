@@ -11,7 +11,12 @@ import {
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { LucidError } from "../../utils/errors/index.js";
 import logger from "../../utils/logging/index.js";
-import type { LucidDB, DatabaseConfig } from "./types.js";
+import type {
+	LucidDB,
+	DatabaseConfig,
+	InferredTable,
+	KyselyDB,
+} from "./types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
 import Migration00000002 from "./migrations/00000002-translations.js";
@@ -40,6 +45,10 @@ export default abstract class DatabaseAdapter {
 	}
 	abstract get jsonArrayFrom(): typeof jsonArrayFrom;
 	abstract get config(): DatabaseConfig;
+	/**
+	 * Infers the database schema. Uses the transaction client if provided, otherwise falls back to the base client
+	 */
+	abstract inferSchema(tx?: KyselyDB): Promise<InferredTable[]>;
 
 	// Public methods
 	async migrateToLatest() {
@@ -65,8 +74,8 @@ export default abstract class DatabaseAdapter {
 
 		if (error) {
 			throw new LucidError({
-				// @ts-expect-error
-				message: error?.message || T("db_migration_failed"),
+				message:
+					error instanceof Error ? error?.message : T("db_migration_failed"),
 				// @ts-expect-error
 				data: error.errors,
 				kill: true,
@@ -89,7 +98,7 @@ export default abstract class DatabaseAdapter {
 			? col.primaryKey().autoIncrement()
 			: col.primaryKey();
 	}
-	formatDefaultValue(value: unknown): unknown {
+	formatInsertValue(type: ColumnDataType, value: unknown): unknown {
 		return value;
 	}
 	// getters

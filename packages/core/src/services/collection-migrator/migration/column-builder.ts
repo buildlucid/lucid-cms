@@ -40,7 +40,7 @@ export const addColumn = <
 
 			if (operation.column.default !== undefined) {
 				columnBuilder = columnBuilder.defaultTo(
-					db.formatDefaultValue(operation.column.default),
+					db.formatInsertValue(operation.column.type, operation.column.default),
 				);
 			}
 
@@ -108,7 +108,12 @@ export const modifyColumn = <
 			if (operation.changes.default !== undefined) {
 				if (operation.changes.default.to === undefined) col.dropDefault();
 				else
-					col.setDefault(db.formatDefaultValue(operation.changes.default.to));
+					col.setDefault(
+						db.formatInsertValue(
+							operation.column.type,
+							operation.changes.default.to,
+						),
+					);
 			}
 			return col as unknown as AlteredColumnBuilder;
 		}) as T;

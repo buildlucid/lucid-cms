@@ -27,6 +27,8 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
         - Execute the migration plan
     */
 
+	// const dbSchema = await context.config.db.inferSchema(context.db);
+
 	const SchemaRepo = Repository.get("collection-schema", context.db);
 	const latestSchemas = await SchemaRepo.selectLatest({
 		select: ["collection_key", "schema", "checksum"],
