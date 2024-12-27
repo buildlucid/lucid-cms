@@ -8,14 +8,20 @@ const formatDefaultValue = (
 
 	if (defaultValue === "''") return "";
 
-	if (defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
-		const unquoted = defaultValue.slice(1, -1);
-
-		if (unquoted.toUpperCase() === "CURRENT_TIMESTAMP") {
+	if (
+		type === "json" &&
+		defaultValue.startsWith("'") &&
+		defaultValue.endsWith("'")
+	) {
+		try {
+			return JSON.parse(defaultValue.slice(1, -1));
+		} catch {
 			return null;
 		}
+	}
 
-		return unquoted;
+	if (defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
+		return defaultValue.slice(1, -1);
 	}
 
 	if (/^-?\d+(\.\d+)?$/.test(defaultValue)) {

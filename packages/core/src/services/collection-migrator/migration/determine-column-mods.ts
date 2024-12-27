@@ -1,75 +1,57 @@
+import foreignKeysEqual from "../helpers/foreign-keys-equal.js";
+import defaultValuesEqual from "../helpers/default-values-equal.js";
 import type { InferredColumn } from "../../../types.js";
 import type { CollectionSchemaColumn } from "../schema/types.js";
 import type { ModifyColumnOperation } from "./types.js";
 
 /**
- * Determines if two foreign keys are equal
- */
-const areForeignKeysEqual = (
-	newKey?: CollectionSchemaColumn["foreignKey"],
-	existingKey?: CollectionSchemaColumn["foreignKey"],
-): boolean => {
-	if (!newKey && !existingKey) return true;
-	if (!newKey || !existingKey) return false;
-
-	return (
-		newKey.table === existingKey.table &&
-		newKey.column === existingKey.column &&
-		newKey.onDelete === existingKey.onDelete &&
-		newKey.onUpdate === existingKey.onUpdate
-	);
-};
-
-/**
  * Determines the modifications required to convert an existing column to a new column
  */
 const determineColumnMods = (
-	newColumn: CollectionSchemaColumn,
-	existingColumn: InferredColumn,
+	collectionInfCol: CollectionSchemaColumn,
+	dbInfCol: CollectionSchemaColumn | InferredColumn,
 ): ModifyColumnOperation | null => {
 	const changes: ModifyColumnOperation["changes"] = {};
 
-	if (newColumn.type !== existingColumn.type) {
+	if (collectionInfCol.type !== dbInfCol.type) {
 		changes.type = {
-			from: existingColumn.type,
-			to: newColumn.type,
+			from: dbInfCol.type,
+			to: collectionInfCol.type,
 		};
 	}
 
-	if (newColumn.nullable !== existingColumn.nullable) {
+	if (collectionInfCol.nullable !== dbInfCol.nullable) {
 		changes.nullable = {
-			from: existingColumn.nullable,
-			to: newColumn.nullable,
+			from: dbInfCol.nullable,
+			to: collectionInfCol.nullable,
 		};
 	}
 
-	if (
-		JSON.stringify(newColumn.default) !== JSON.stringify(existingColumn.default)
-	) {
+	if (!defaultValuesEqual(collectionInfCol.default, dbInfCol.default)) {
 		changes.default = {
-			from: existingColumn.default,
-			to: newColumn.default,
+			from: dbInfCol.default,
+			to: collectionInfCol.default,
 		};
 	}
 
-	if (!areForeignKeysEqual(newColumn.foreignKey, existingColumn.foreignKey)) {
+	if (!foreignKeysEqual(collectionInfCol.foreignKey, dbInfCol.foreignKey)) {
 		changes.foreignKey = {
-			from: existingColumn.foreignKey,
-			to: newColumn.foreignKey,
+			from: dbInfCol.foreignKey,
+			to: collectionInfCol.foreignKey,
 		};
 	}
 
-	if (newColumn.unique !== existingColumn.unique) {
+	if (collectionInfCol.unique !== dbInfCol.unique) {
 		changes.unique = {
-			from: existingColumn.unique,
-			to: newColumn.unique,
+			from: dbInfCol.unique,
+			to: collectionInfCol.unique,
 		};
 	}
 
 	return Object.keys(changes).length > 0
 		? {
 				type: "modify",
-				column: newColumn,
+				column: collectionInfCol,
 				changes,
 			}
 		: null;

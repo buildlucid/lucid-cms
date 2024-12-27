@@ -17,10 +17,6 @@ const formatDefaultValue = (
 		return null;
 	}
 
-	if (withoutTypeCast.includes("(")) {
-		return null;
-	}
-
 	if (withoutTypeCast.toLowerCase() === "true") return true;
 	if (withoutTypeCast.toLowerCase() === "false") return false;
 

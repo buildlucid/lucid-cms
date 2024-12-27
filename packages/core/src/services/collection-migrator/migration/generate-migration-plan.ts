@@ -1,4 +1,5 @@
 import determineColumnMods from "./determine-column-mods.js";
+import normaliseColumn from "../helpers/normalise-column.js";
 import logger from "../../../utils/logging/index.js";
 import getTablePriority from "../helpers/get-table-priority.js";
 import constants from "../../../constants/constants.js";
@@ -26,7 +27,7 @@ const generateMigrationPlan = (props: {
 	};
 
 	//* if there is no existing schema, create a full migration plan
-	if (props.schemas.existing === null) {
+	if (props.schemas.existing.length === 0) {
 		plan.tables = props.schemas.current.tables
 			.map((table) => {
 				const tablePrioRes = getTablePriority("collection-inferred", table);
@@ -38,7 +39,7 @@ const generateMigrationPlan = (props: {
 					priority: tablePrioRes.data,
 					columnOperations: table.columns.map((column) => ({
 						type: "add",
-						column,
+						column: normaliseColumn(column, column.source),
 					})),
 				} satisfies TableMigration;
 			})
@@ -56,10 +57,6 @@ const generateMigrationPlan = (props: {
 	}
 
 	//* create a partial migration plan
-	logger("debug", {
-		message: `Generated a partial migration plan for collection "${props.schemas.current.key}"`,
-		scope: constants.logScopes.migrations,
-	});
 
 	for (const table of props.schemas.current.tables) {
 		const targetTable = props.schemas.existing.find(
@@ -75,7 +72,7 @@ const generateMigrationPlan = (props: {
 				priority: tablePrioRes.data,
 				columnOperations: table.columns.map((column) => ({
 					type: "add",
-					column,
+					column: normaliseColumn(column, column.source),
 				})),
 			});
 			continue;
@@ -93,7 +90,10 @@ const generateMigrationPlan = (props: {
 					column: column,
 				});
 			} else {
-				const modifications = determineColumnMods(column, targetColumn);
+				const modifications = determineColumnMods(
+					normaliseColumn(column, column.source),
+					normaliseColumn(targetColumn, column.source),
+				);
 				if (modifications) {
 					columnOperations.push(modifications);
 				}
@@ -140,6 +140,13 @@ const generateMigrationPlan = (props: {
 				columnOperations: [],
 			});
 		}
+	}
+
+	if (plan.tables.length > 0) {
+		logger("debug", {
+			message: `Generated a partial migration plan for collection "${props.schemas.current.key}"`,
+			scope: constants.logScopes.migrations,
+		});
 	}
 
 	return {

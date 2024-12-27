@@ -13,7 +13,7 @@ import type { MigrationPlan } from "./migration/types.js";
  * - lucid_document__{key}__fields
  * - lucid_document__{key}__{brick-key} * all potential bricks
  * - lucid_document__{key}__{brick-key}__{repeater-field-key} * for each repeater for a single brick
- * @todo Test migrations now we have the db inferSchema inmplemented
+ * @todo Test the plan gen and buildMigrations for modify table/columns - not sure its working atm
  * @todo Update the inactive collection check to work with new db inferSchema data
  * @todo Save the migrations plans to the db
  */
@@ -36,9 +36,9 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		});
 		if (tableNameRes.error) return tableNameRes;
 
-		const existingTables = dbSchema.filter((t) => {
-			t.name.startsWith(tableNameRes.data);
-		});
+		const existingTables = dbSchema.filter((t) =>
+			t.name.startsWith(tableNameRes.data),
+		);
 
 		const migraitonPlanRes = generateMigrationPlan({
 			schemas: {
