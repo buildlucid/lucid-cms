@@ -15,8 +15,8 @@ const Migration00000001: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("code", adapter.getColumnType("text"), (col) =>
 					col.primaryKey(),
 				)
-				.addColumn("is_deleted", adapter.getColumnType("integer"), (col) =>
-					col.defaultTo(0),
+				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
+					col.defaultTo(adapter.config.defaults.boolean.false),
 				)
 				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"), (col) =>
 					col.defaultTo(null),

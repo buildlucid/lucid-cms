@@ -15,7 +15,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(0),
+					col.defaultTo(adapter.config.defaults.boolean.false),
 				)
 				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
 				.addColumn("deleted_by", adapter.getColumnType("integer"), (col) =>
@@ -90,7 +90,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("brick_key", adapter.getColumnType("text"))
 				.addColumn("brick_order", adapter.getColumnType("integer"))
 				.addColumn("brick_open", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(0),
+					col.defaultTo(adapter.config.defaults.boolean.false),
 				)
 				.execute();
 
@@ -133,7 +133,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 						.onDelete("cascade"),
 				)
 				.addColumn("group_open", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(0),
+					col.defaultTo(adapter.config.defaults.boolean.false),
 				)
 				.addColumn("repeater_key", adapter.getColumnType("text"), (col) =>
 					col.notNull(),

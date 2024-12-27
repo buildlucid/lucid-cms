@@ -11,7 +11,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 					adapter.createPrimaryKeyColumn(col),
 				)
 				.addColumn("super_admin", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(0).notNull(),
+					col.defaultTo(adapter.config.defaults.boolean.false).notNull(),
 				)
 				.addColumn("email", adapter.getColumnType("text"), (col) =>
 					col.notNull().unique(),
@@ -28,10 +28,10 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn(
 					"triggered_password_reset",
 					adapter.getColumnType("boolean"),
-					(col) => col.defaultTo(0),
+					(col) => col.defaultTo(adapter.config.defaults.boolean.false),
 				)
 				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(0),
+					col.defaultTo(adapter.config.defaults.boolean.false),
 				)
 				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
 				.addColumn("deleted_by", adapter.getColumnType("integer"), (col) =>
