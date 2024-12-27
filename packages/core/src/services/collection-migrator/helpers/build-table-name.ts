@@ -7,6 +7,7 @@ import type { TableType } from "../schema/types.js";
  * Default parts for table names
  */
 export const collectionTableParts = {
+	document: "document",
 	fields: "fields",
 	versions: "versions",
 };
@@ -22,7 +23,7 @@ const buildTableName = (
 		repeater?: Array<string>;
 	},
 ): Awaited<ServiceResponse<string>> => {
-	const parts = ["document", keys.collection];
+	const parts = [collectionTableParts.document, keys.collection];
 
 	switch (type) {
 		case "document": {

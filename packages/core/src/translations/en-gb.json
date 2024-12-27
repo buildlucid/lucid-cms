@@ -264,5 +264,8 @@
 	"collection_migrator_table_name_brick_key_missing_message": "The collection buildTableName function recieved type 'brick' but recieved no brick key.",
 	"collection_migrator_table_name_repeater_keys_missing_message": "The collection buildTableName function recieved type 'repeater' but recieved no repeater keys.",
 	"cannot_find_field_with_key_in_collection_brick": "Cannot find field with key '{{key}}' in {{type}} '{{typeKey}}'.",
-	"infer_collection_schema_error": "An error occurred while inferring the collection schema."
+	"infer_collection_schema_error": "An error occurred while inferring the collection schema.",
+	"invalid_table_name_format_start_with": "Invalid table name format, must start with '{{prefix}}'.",
+	"invalid_table_name_format_insufficient_parts": "Invalid table name format. Contains insufficient parts.",
+	"failed_to_infer_table_parts": "Failed to infer table parts."
 }

@@ -1,5 +1,4 @@
 import T from "../../../translations/index.js";
-import crypto from "node:crypto";
 import createDocumentTable from "./document-table.js";
 import createVersionsTable from "./versions-table.js";
 import createFieldTables from "./fields-table.js";
@@ -14,12 +13,7 @@ import type DatabaseAdapter from "../../../libs/db/adapter.js";
 const inferSchema = (
 	collection: CollectionBuilder,
 	db: DatabaseAdapter,
-): Awaited<
-	ServiceResponse<{
-		schema: CollectionSchema;
-		checksum: string;
-	}>
-> => {
+): Awaited<ServiceResponse<CollectionSchema>> => {
 	try {
 		const tables: Array<CollectionSchemaTable> = [];
 
@@ -69,18 +63,10 @@ const inferSchema = (
 		tables.push(collectionFieldsTableRes.data.schema);
 		tables.push(...collectionFieldsTableRes.data.childTables);
 
-		const checksum = crypto
-			.createHash("sha256")
-			.update(JSON.stringify(tables))
-			.digest("hex");
-
 		return {
 			data: {
-				schema: {
-					key: collection.key,
-					tables: tables,
-				},
-				checksum: checksum,
+				key: collection.key,
+				tables: tables,
 			},
 			error: undefined,
 		};

@@ -226,14 +226,6 @@ export interface HeadlessProcessedImages {
 	file_size: number;
 }
 
-export interface LucidCollectionSchema {
-	id: Generated<number>;
-	collection_key: string;
-	schema: JSONColumnType<CollectionSchema>;
-	checksum: string;
-	created_at: TimestampImmutable;
-}
-
 export interface LucidCollectionDocuments {
 	id: Generated<number>;
 	collection_key: string;
@@ -323,7 +315,6 @@ export interface LucidDB {
 	lucid_media: LucidMedia;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_processed_images: HeadlessProcessedImages;
-	lucid_collection_schema: LucidCollectionSchema;
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;
 	lucid_collection_document_bricks: LucidCollectionDocumentBricks;

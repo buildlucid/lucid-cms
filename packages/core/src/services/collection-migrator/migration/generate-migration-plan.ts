@@ -2,9 +2,13 @@ import determineColumnMods from "./determine-column-mods.js";
 import logger from "../../../utils/logging/index.js";
 import getTablePriority from "../helpers/get-table-priority.js";
 import constants from "../../../constants/constants.js";
-import type { ServiceResponse } from "../../../types.js";
+import type { ServiceResponse, InferredTable } from "../../../types.js";
 import type { CollectionSchema } from "../schema/types.js";
-import type { MigrationPlan, ColumnOperation } from "./types.js";
+import type {
+	MigrationPlan,
+	ColumnOperation,
+	TableMigration,
+} from "./types.js";
 
 /**
  * Generates a migration plan for a collection
@@ -12,12 +16,8 @@ import type { MigrationPlan, ColumnOperation } from "./types.js";
  */
 const generateMigrationPlan = (props: {
 	schemas: {
-		existing: CollectionSchema | null;
+		existing: InferredTable[];
 		current: CollectionSchema;
-	};
-	checksums: {
-		existing: string | null;
-		current: string;
 	};
 }): Awaited<ServiceResponse<MigrationPlan>> => {
 	const plan: MigrationPlan = {
@@ -27,33 +27,28 @@ const generateMigrationPlan = (props: {
 
 	//* if there is no existing schema, create a full migration plan
 	if (props.schemas.existing === null) {
-		plan.tables = props.schemas.current.tables.map((table) => ({
-			type: "create",
-			tableName: table.name,
-			priority: getTablePriority(table),
-			columnOperations: table.columns.map((column) => ({
-				type: "add",
-				column,
-			})),
-		}));
+		plan.tables = props.schemas.current.tables
+			.map((table) => {
+				const tablePrioRes = getTablePriority("collection-inferred", table);
+				if (tablePrioRes.error) return null;
+
+				return {
+					type: "create",
+					tableName: table.name,
+					priority: tablePrioRes.data,
+					columnOperations: table.columns.map((column) => ({
+						type: "add",
+						column,
+					})),
+				} satisfies TableMigration;
+			})
+			.filter((t) => t !== null);
 
 		logger("debug", {
 			message: `Generated a full migration plan for collection "${props.schemas.current.key}"`,
 			scope: constants.logScopes.migrations,
 		});
 
-		return {
-			data: plan,
-			error: undefined,
-		};
-	}
-
-	//* if the checksums match, no migration is required
-	if (props.checksums.existing === props.checksums.current) {
-		logger("debug", {
-			message: `No migration required for collection "${props.schemas.current.key}"`,
-			scope: constants.logScopes.migrations,
-		});
 		return {
 			data: plan,
 			error: undefined,
@@ -67,14 +62,17 @@ const generateMigrationPlan = (props: {
 	});
 
 	for (const table of props.schemas.current.tables) {
-		const targetTable = props.schemas.existing.tables.find(
+		const targetTable = props.schemas.existing.find(
 			(t) => t.name === table.name,
 		);
 		if (!targetTable) {
+			const tablePrioRes = getTablePriority("collection-inferred", table);
+			if (tablePrioRes.error) return tablePrioRes;
+
 			plan.tables.push({
 				type: "create",
 				tableName: table.name,
-				priority: getTablePriority(table),
+				priority: tablePrioRes.data,
 				columnOperations: table.columns.map((column) => ({
 					type: "add",
 					column,
@@ -115,24 +113,30 @@ const generateMigrationPlan = (props: {
 		}
 
 		if (columnOperations.length) {
+			const tablePrioRes = getTablePriority("collection-inferred", table);
+			if (tablePrioRes.error) return tablePrioRes;
+
 			plan.tables.push({
 				type: "modify",
 				tableName: table.name,
-				priority: getTablePriority(table),
+				priority: tablePrioRes.data,
 				columnOperations,
 			});
 		}
 	}
 
-	for (const table of props.schemas.existing.tables) {
+	for (const table of props.schemas.existing) {
 		const tableStillExists = props.schemas.current.tables.some(
 			(t) => t.name === table.name,
 		);
 		if (!tableStillExists) {
+			const tablePrioRes = getTablePriority("db-inferred", table);
+			if (tablePrioRes.error) return tablePrioRes;
+
 			plan.tables.push({
 				type: "remove",
 				tableName: table.name,
-				priority: getTablePriority(table),
+				priority: tablePrioRes.data,
 				columnOperations: [],
 			});
 		}

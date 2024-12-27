@@ -1,3 +1,4 @@
+import type { InferredColumn } from "../../../types.js";
 import type { CollectionSchemaColumn } from "../schema/types.js";
 import type { ModifyColumnOperation } from "./types.js";
 
@@ -24,7 +25,7 @@ const areForeignKeysEqual = (
  */
 const determineColumnMods = (
 	newColumn: CollectionSchemaColumn,
-	existingColumn: CollectionSchemaColumn,
+	existingColumn: InferredColumn,
 ): ModifyColumnOperation | null => {
 	const changes: ModifyColumnOperation["changes"] = {};
 
