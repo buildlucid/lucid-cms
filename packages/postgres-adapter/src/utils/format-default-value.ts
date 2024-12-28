@@ -9,6 +9,21 @@ const formatDefaultValue = (
 	const withoutTypeCast = defaultValue.split("::")[0];
 	if (withoutTypeCast === undefined) return null;
 
+	if (withoutTypeCast.toLowerCase() === "now()") {
+		return "NOW()";
+	}
+
+	if (type === "jsonb") {
+		try {
+			if (withoutTypeCast.startsWith("'") && withoutTypeCast.endsWith("'")) {
+				return JSON.parse(withoutTypeCast.slice(1, -1));
+			}
+			return JSON.parse(withoutTypeCast);
+		} catch (e) {
+			return null;
+		}
+	}
+
 	if (withoutTypeCast.startsWith("'") && withoutTypeCast.endsWith("'")) {
 		return withoutTypeCast.slice(1, -1);
 	}

@@ -151,9 +151,12 @@ class PostgresAdapter extends DatabaseAdapter {
 
 			table.columns.push({
 				name: row.name,
-				type: formatType(row.type),
+				type: formatType(row.type, row.dflt_value),
 				nullable: !row.notnull,
-				default: formatDefaultValue(formatType(row.type), row.dflt_value),
+				default: formatDefaultValue(
+					formatType(row.type, row.dflt_value),
+					row.dflt_value,
+				),
 				primary: row.pk,
 				unique: row.is_unique,
 				foreignKey:
