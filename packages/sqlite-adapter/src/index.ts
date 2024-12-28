@@ -33,6 +33,10 @@ class SQLiteAdapter extends DatabaseAdapter {
 	}
 	get config(): DatabaseConfig {
 		return {
+			support: {
+				alterColumn: false,
+				multipleAlterTables: false,
+			},
 			dataTypes: {
 				serial: "integer",
 				integer: "integer",

@@ -32,6 +32,10 @@ class PostgresAdapter extends DatabaseAdapter {
 	}
 	get config(): DatabaseConfig {
 		return {
+			support: {
+				alterColumn: true,
+				multipleAlterTables: true,
+			},
 			dataTypes: {
 				serial: "serial",
 				integer: "integer",

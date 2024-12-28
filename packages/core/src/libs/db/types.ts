@@ -29,6 +29,10 @@ export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
 export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
 
 export type DatabaseConfig = {
+	support: {
+		alterColumn: boolean;
+		multipleAlterTables: boolean;
+	};
 	dataTypes: {
 		serial: ColumnDataType;
 		integer: ColumnDataType;
