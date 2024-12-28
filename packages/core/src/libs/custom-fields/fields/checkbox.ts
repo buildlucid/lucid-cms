@@ -49,13 +49,17 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	}
 	// Methods
 	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+		const booleanType = props.db.getColumnType("boolean");
 		return {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("boolean"),
+					type: booleanType,
 					nullable: true,
-					default: this.config.config.default,
+					default:
+						booleanType === "boolean"
+							? Boolean(this.config.config.default)
+							: this.config.config.default,
 				},
 			],
 		};
