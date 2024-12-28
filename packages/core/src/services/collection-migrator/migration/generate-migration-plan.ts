@@ -10,16 +10,17 @@ import type {
 	ColumnOperation,
 	TableMigration,
 } from "./types.js";
+import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 /**
  * Generates a migration plan for a collection
- * @todo add error handling, logging, etc. Console.log should be replaced with proper logging
  */
 const generateMigrationPlan = (props: {
 	schemas: {
 		existing: InferredTable[];
 		current: CollectionSchema;
 	};
+	db: DatabaseAdapter;
 }): Awaited<ServiceResponse<MigrationPlan>> => {
 	const plan: MigrationPlan = {
 		collectionKey: props.schemas.current.key,
@@ -57,7 +58,6 @@ const generateMigrationPlan = (props: {
 	}
 
 	//* create a partial migration plan
-
 	for (const table of props.schemas.current.tables) {
 		const targetTable = props.schemas.existing.find(
 			(t) => t.name === table.name,
@@ -95,7 +95,36 @@ const generateMigrationPlan = (props: {
 					normaliseColumn(targetColumn, column.source),
 				);
 				if (modifications) {
-					columnOperations.push(modifications);
+					//* db alter column support
+					if (props.db.config.support.alterColumn) {
+						if (
+							modifications.changes.unique === undefined &&
+							modifications.changes.foreignKey === undefined
+						) {
+							//* if no unique or foreign key changes - carry on with modify type
+							columnOperations.push(modifications);
+						} else {
+							//* if there is a unique or foreign key change - add a drop and then add column operation
+							columnOperations.push({
+								type: "remove",
+								columnName: modifications.column.name,
+							});
+							columnOperations.push({
+								type: "add",
+								column: modifications.column,
+							});
+						}
+					} else {
+						//* add drop then add column operations
+						columnOperations.push({
+							type: "remove",
+							columnName: modifications.column.name,
+						});
+						columnOperations.push({
+							type: "add",
+							column: modifications.column,
+						});
+					}
 				}
 			}
 		}

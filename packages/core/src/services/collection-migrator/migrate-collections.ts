@@ -45,6 +45,7 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 				existing: existingTables,
 				current: i,
 			},
+			db: context.config.db,
 		});
 		if (migraitonPlanRes.error) return migraitonPlanRes;
 
@@ -67,9 +68,10 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	// }
 
 	//* build and run migrations
-	await buildMigrations(context, {
+	const migrationRes = await buildMigrations(context, {
 		migrationPlan: migrationPlans,
 	});
+	if (migrationRes.error) return migrationRes;
 
 	//* save migration and inferedSchema to the DB
 

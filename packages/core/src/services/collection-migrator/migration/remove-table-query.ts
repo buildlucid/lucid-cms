@@ -10,6 +10,11 @@ const removeTableQuery: ServiceFn<
 	undefined
 > = async (context, data) => {
 	try {
+		await context.db.schema
+			.dropTable(data.migration.tableName)
+			.ifExists()
+			.execute();
+
 		return {
 			data: undefined,
 			error: undefined,

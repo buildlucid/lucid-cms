@@ -83,7 +83,7 @@ export const dropColumn = <
 /**
  * Modifies an existing column in a table using the provided query builder.
  * For simple changes (type, nullable, default), uses alterColumn.
- * For complex changes (unique, foreign key), drops and recreates the column. Data will be lost in these situations.
+ * For complex changes (unique, foreign key), a drop then add column operation is created
  */
 export const modifyColumn = <
 	T extends AlterTableColumnAlteringBuilder | AlterTableBuilder,
@@ -92,43 +92,26 @@ export const modifyColumn = <
 	operation: ModifyColumnOperation,
 	db: DatabaseAdapter,
 ): T => {
-	const hasComplexChanges =
-		operation.changes.unique !== undefined ||
-		operation.changes.foreignKey !== undefined;
+	if (db.config.support.alterColumn !== true) return query;
 
-	if (!hasComplexChanges) {
-		return query.alterColumn(operation.column.name, (col) => {
-			if (operation.changes.type) {
-				col.setDataType(operation.changes.type.to);
-			}
-			if (operation.changes.nullable !== undefined) {
-				if (operation.changes.nullable.to) col.dropNotNull();
-				else col.setNotNull();
-			}
-			if (operation.changes.default !== undefined) {
-				if (operation.changes.default.to === undefined) col.dropDefault();
-				else
-					col.setDefault(
-						db.formatInsertValue(
-							operation.column.type,
-							operation.changes.default.to,
-						),
-					);
-			}
-			return col as unknown as AlteredColumnBuilder;
-		}) as T;
-	}
-
-	return addColumn(
-		dropColumn(
-			query,
-			{ type: "remove", columnName: operation.column.name },
-			db,
-		),
-		{
-			type: "add",
-			column: operation.column,
-		},
-		db,
-	);
+	return query.alterColumn(operation.column.name, (col) => {
+		if (operation.changes.type) {
+			col.setDataType(operation.changes.type.to);
+		}
+		if (operation.changes.nullable !== undefined) {
+			if (operation.changes.nullable.to) col.dropNotNull();
+			else col.setNotNull();
+		}
+		if (operation.changes.default !== undefined) {
+			if (operation.changes.default.to === undefined) col.dropDefault();
+			else
+				col.setDefault(
+					db.formatInsertValue(
+						operation.column.type,
+						operation.changes.default.to,
+					),
+				);
+		}
+		return col as unknown as AlteredColumnBuilder;
+	}) as T;
 };
