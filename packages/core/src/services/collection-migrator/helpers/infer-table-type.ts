@@ -5,8 +5,8 @@ import type { TableType } from "../schema/types.js";
 import type { ServiceResponse } from "../../../types.js";
 
 const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
-	const parts = name.split("__");
-	const prefix = `${constants.db.prefix}${constants.db.collectionKeysJoin}${collectionTableParts.document}`;
+	const parts = name.split(constants.db.collectionKeysJoin);
+	const prefix = `${constants.db.prefix}${collectionTableParts.document}`;
 
 	if (!parts[0] || parts[0] !== prefix) {
 		return {
