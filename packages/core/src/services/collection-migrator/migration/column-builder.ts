@@ -39,9 +39,13 @@ export const addColumn = <
 			}
 
 			if (operation.column.default !== undefined) {
-				columnBuilder = columnBuilder.defaultTo(
-					db.formatInsertValue(operation.column.type, operation.column.default),
+				const defaultVal = db.formatInsertValue(
+					operation.column.type,
+					operation.column.default,
 				);
+				if (defaultVal !== null) {
+					columnBuilder = columnBuilder.defaultTo(defaultVal);
+				}
 			}
 
 			if (operation.column.foreignKey) {
@@ -82,8 +86,8 @@ export const dropColumn = <
 
 /**
  * Modifies an existing column in a table using the provided query builder.
- * For simple changes (type, nullable, default), uses alterColumn.
- * For complex changes (unique, foreign key), a drop then add column operation is created
+ * For simple changes (nullable, default), uses alterColumn.
+ * For complex changes (type, unique, foreign key), a drop then add column operation is created
  */
 export const modifyColumn = <
 	T extends AlterTableColumnAlteringBuilder | AlterTableBuilder,
@@ -94,24 +98,32 @@ export const modifyColumn = <
 ): T => {
 	if (db.config.support.alterColumn !== true) return query;
 
-	return query.alterColumn(operation.column.name, (col) => {
-		if (operation.changes.type) {
-			col.setDataType(operation.changes.type.to);
-		}
-		if (operation.changes.nullable !== undefined) {
-			if (operation.changes.nullable.to) col.dropNotNull();
-			else col.setNotNull();
-		}
-		if (operation.changes.default !== undefined) {
-			if (operation.changes.default.to === undefined) col.dropDefault();
-			else
-				col.setDefault(
-					db.formatInsertValue(
-						operation.column.type,
-						operation.changes.default.to,
-					),
-				);
-		}
-		return col as unknown as AlteredColumnBuilder;
-	}) as T;
+	let alteredQuery = query;
+
+	//* change nullable if needed
+	if (operation.changes.nullable !== undefined) {
+		alteredQuery = alteredQuery.alterColumn(operation.column.name, (col) =>
+			operation.changes.nullable?.to ? col.dropNotNull() : col.setNotNull(),
+		) as T;
+	}
+
+	//* change default if needed
+	if (operation.changes.default !== undefined) {
+		// @ts-expect-error
+		alteredQuery = alteredQuery.alterColumn(operation.column.name, (col) => {
+			if (
+				operation.changes.default?.to === undefined ||
+				operation.changes.default?.to === null
+			) {
+				return col.dropDefault();
+			}
+			const defaultValue = db.formatInsertValue(
+				operation.column.type,
+				operation.changes.default?.to,
+			);
+			return defaultValue !== null ? col.setDefault(defaultValue) : col;
+		}) as T;
+	}
+
+	return alteredQuery;
 };

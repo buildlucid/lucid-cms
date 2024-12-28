@@ -1,4 +1,5 @@
 import determineColumnMods from "./determine-column-mods.js";
+import determineColumnModType from "../helpers/column-mod-type.js";
 import normaliseColumn from "../helpers/normalise-column.js";
 import logger from "../../../utils/logging/index.js";
 import getTablePriority from "../helpers/get-table-priority.js";
@@ -95,27 +96,12 @@ const generateMigrationPlan = (props: {
 					normaliseColumn(targetColumn, column.source),
 				);
 				if (modifications) {
-					//* db alter column support
-					if (props.db.config.support.alterColumn) {
-						if (
-							modifications.changes.unique === undefined &&
-							modifications.changes.foreignKey === undefined
-						) {
-							//* if no unique or foreign key changes - carry on with modify type
-							columnOperations.push(modifications);
-						} else {
-							//* if there is a unique or foreign key change - add a drop and then add column operation
-							columnOperations.push({
-								type: "remove",
-								columnName: modifications.column.name,
-							});
-							columnOperations.push({
-								type: "add",
-								column: modifications.column,
-							});
-						}
-					} else {
-						//* add drop then add column operations
+					const modType = determineColumnModType(
+						modifications,
+						props.db.config,
+					);
+
+					if (modType === "drop-and-add") {
 						columnOperations.push({
 							type: "remove",
 							columnName: modifications.column.name,
@@ -124,6 +110,8 @@ const generateMigrationPlan = (props: {
 							type: "add",
 							column: modifications.column,
 						});
+					} else {
+						columnOperations.push(modifications);
 					}
 				}
 			}
