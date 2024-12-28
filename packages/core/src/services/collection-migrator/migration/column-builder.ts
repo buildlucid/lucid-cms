@@ -8,7 +8,6 @@ import type {
 	CreateTableBuilder,
 	AlterTableColumnAlteringBuilder,
 	AlterTableBuilder,
-	AlteredColumnBuilder,
 } from "kysely";
 
 /**

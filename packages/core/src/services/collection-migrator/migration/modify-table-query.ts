@@ -5,6 +5,7 @@ import type { AlterTableColumnAlteringBuilder } from "kysely";
 
 /**
  * Executes table modifications, handling databases with and without multiple ALTER TABLE support
+ *  @todo add logging for column query types
  */
 const modifyTableQuery: ServiceFn<
 	[

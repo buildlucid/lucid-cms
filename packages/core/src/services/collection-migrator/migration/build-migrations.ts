@@ -6,6 +6,7 @@ import type { MigrationPlan } from "./types.js";
 
 /**
  * Builds and runs migrations based on the migration plan
+ * @todo add logging for query types
  */
 const buildMigrations: ServiceFn<
 	[
