@@ -114,6 +114,10 @@ export default Object.freeze({
 		config: "config",
 		sync: "sync",
 	} as const,
+	retention: {
+		deletedCollections: 30, // days
+		deletedLocales: 30, // days
+	},
 	cronSchedule: "0 0 * * *",
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds

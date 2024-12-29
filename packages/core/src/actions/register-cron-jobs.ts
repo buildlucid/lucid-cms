@@ -23,6 +23,15 @@ const registerCronJobs = async (service: ServiceContext) => {
 						message: T("an_error_occurred_clearing_expired_locales"),
 					},
 				})(service),
+				serviceWrapper(service.services.crons.clearExpiredCollections, {
+					transaction: true,
+					logError: true,
+					defaultError: {
+						type: "cron",
+						name: T("cron_job_error_name"),
+						message: T("an_error_occurred_clearing_expired_collections"),
+					},
+				})(service),
 				serviceWrapper(service.services.crons.clearExpiredTokens, {
 					transaction: true,
 					logError: true,

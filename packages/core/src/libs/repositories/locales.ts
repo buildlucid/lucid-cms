@@ -114,7 +114,7 @@ export default class LocalesRepo {
 	deleteMultiple = async (props: {
 		where: QueryBuilderWhere<"lucid_locales">;
 	}) => {
-		let query = this.db.deleteFrom("lucid_locales");
+		let query = this.db.deleteFrom("lucid_locales").returning("code");
 
 		query = queryBuilder.delete(query, props.where);
 

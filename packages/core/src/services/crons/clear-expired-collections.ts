@@ -5,17 +5,17 @@ import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
- * After 30 days of inactivity, non-active locales will be deleted from the database.
- *  @todo Expose the retention time?
+ * After 30 days of inactivity, non-active collections will be deleted from the database.
+ * @todo Expose the retention time?
  */
-const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
-	const LocalesRepo = Repository.get("locales", context.db);
+const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
+	const CollectionsRepo = Repository.get("collections", context.db);
 
 	const now = new Date();
-	const thirtyDaysAgo = subDays(now, constants.retention.deletedLocales);
+	const thirtyDaysAgo = subDays(now, constants.retention.deletedCollections);
 	const thirtyDaysAgoTimestamp = thirtyDaysAgo.toISOString();
 
-	const res = await LocalesRepo.deleteMultiple({
+	const res = await CollectionsRepo.deleteMultiple({
 		where: [
 			{
 				key: "is_deleted_at",
@@ -31,7 +31,7 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	});
 
 	logger("debug", {
-		message: `The following ${res.length} locales have been deleted: ${res.map((l) => l.code).join(", ")}`,
+		message: `The following ${res.length} collections have been deleted: ${res.map((c) => c.key).join(", ")}`,
 		scope: constants.logScopes.cron,
 	});
 
@@ -41,4 +41,4 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	};
 };
 
-export default clearExpiredLocales;
+export default clearExpiredCollections;

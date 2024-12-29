@@ -13,6 +13,7 @@
 	"collection_error_occured_saving_default": "An error occured while syncing the collections",
 	"an_error_occurred_clearing_expired_tokens": "An error occurred while clearing expired tokens.",
 	"an_error_occurred_clearing_expired_locales": "An error occurred while clearing expired locales.",
+	"an_error_occurred_clearing_expired_collections": "An error occured while clearing expired collections.",
 	"swagger_response_200": "Successfull response",
 	"swagger_response_201": "Resource created response",
 	"swagger_response_204": "No content response",

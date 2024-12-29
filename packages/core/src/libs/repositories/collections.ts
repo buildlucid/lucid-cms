@@ -81,4 +81,13 @@ export default class EmailsRepo {
 
 		return query.executeTakeFirst();
 	};
+	deleteMultiple = async (props: {
+		where: QueryBuilderWhere<"lucid_collections">;
+	}) => {
+		let query = this.db.deleteFrom("lucid_collections").returning("key");
+
+		query = queryBuilder.delete(query, props.where);
+
+		return query.execute();
+	};
 }
