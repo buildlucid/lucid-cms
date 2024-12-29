@@ -46,6 +46,11 @@ const createVersionsTable = (props: {
 						source: "core",
 						type: props.db.getColumnType("text"),
 						nullable: false,
+						foreignKey: {
+							table: "lucid_collections",
+							column: "key",
+							onDelete: "cascade",
+						},
 					},
 					{
 						name: "document_id",

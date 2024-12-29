@@ -53,6 +53,11 @@ const createFieldTables = (props: {
 			source: "core",
 			type: props.db.getColumnType("text"),
 			nullable: false,
+			foreignKey: {
+				table: "lucid_collections",
+				column: "key",
+				onDelete: "cascade",
+			},
 		},
 		{
 			name: buildCoreColumnName("document_id"),

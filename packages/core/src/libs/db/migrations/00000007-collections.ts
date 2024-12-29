@@ -5,6 +5,42 @@ import type DatabaseAdapter from "../adapter.js";
 const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
+			// Collections
+			await db.schema
+				.createTable("lucid_collections")
+				.addColumn("key", adapter.getColumnType("text"), (col) =>
+					col.primaryKey(),
+				)
+				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
+					col.defaultTo(adapter.config.defaults.boolean.false),
+				)
+				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
+				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+				)
+				.execute();
+
+			// Migrations
+			await db.schema
+				.createTable("lucid_collection_migrations")
+				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+					adapter.createPrimaryKeyColumn(col),
+				)
+				.addColumn("collection_key", adapter.getColumnType("text"), (col) =>
+					col.references("lucid_collections.key").onDelete("cascade").notNull(),
+				)
+				.addColumn("migration_plans", adapter.getColumnType("jsonb"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+				)
+				.execute();
+
+			// ---------------------------------------------
+			// EVERYTHING BELOW WILL BE DELETED
+			// ---------------------------------------------
+
 			// Collection Documents
 			await db.schema
 				.createTable("lucid_collection_documents")

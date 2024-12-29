@@ -3,8 +3,8 @@ import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
 import type { FieldTypes } from "../custom-fields/types.js";
 import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
-import type { CollectionSchema } from "../../services/collection-migrator/schema/types.js";
 import type DatabaseAdapter from "./adapter.js";
+import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -230,6 +230,21 @@ export interface HeadlessProcessedImages {
 	file_size: number;
 }
 
+export interface LucidCollections {
+	id: Generated<number>;
+	key: string;
+	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
+	is_deleted_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+}
+
+export interface LucidCollectionMigrations {
+	id: Generated<number>;
+	collection_key: string;
+	migration_plans: JSONColumnType<MigrationPlan>;
+	created_at: TimestampImmutable;
+}
+
 export interface LucidCollectionDocuments {
 	id: Generated<number>;
 	collection_key: string;
@@ -319,6 +334,8 @@ export interface LucidDB {
 	lucid_media: LucidMedia;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_processed_images: HeadlessProcessedImages;
+	lucid_collections: LucidCollections;
+	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;
 	lucid_collection_document_bricks: LucidCollectionDocumentBricks;
