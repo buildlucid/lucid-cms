@@ -8,7 +8,7 @@ import type {
 	BooleanInt,
 } from "../db/types.js";
 
-export default class EmailsRepo {
+export default class CollectionsRepo {
 	constructor(private db: KyselyDB) {}
 
 	// ----------------------------------------
