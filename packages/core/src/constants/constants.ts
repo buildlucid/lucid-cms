@@ -105,6 +105,7 @@ export default Object.freeze({
 	db: {
 		prefix: "lucid_",
 		collectionKeysJoin: "__",
+		coreColumnPrefix: "_",
 	},
 	logScopes: {
 		lucid: "lucid",

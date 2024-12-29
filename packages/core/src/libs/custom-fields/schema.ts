@@ -9,6 +9,9 @@ const CustomFieldSchema = z.object({
 		.string()
 		.refine((val) => !val.includes(constants.db.collectionKeysJoin), {
 			message: `Field key cannot contain '${constants.db.collectionKeysJoin}'`,
+		})
+		.refine((val) => !val.startsWith(constants.db.coreColumnPrefix), {
+			message: `Field key cannot start with a '${constants.db.coreColumnPrefix}' prefix`,
 		}),
 	collection: z.string().optional(),
 	details: z

@@ -1,5 +1,6 @@
 import T from "../../../translations/index.js";
 import buildTableName from "../helpers/build-table-name.js";
+import buildCoreColumnName from "../helpers/build-core-column-name.js";
 import type {
 	CollectionSchemaTable,
 	CollectionSchemaColumn,
@@ -41,20 +42,20 @@ const createFieldTables = (props: {
 	const childTables: CollectionSchemaTable[] = [];
 	const columns: CollectionSchemaColumn[] = [
 		{
-			name: "id",
+			name: buildCoreColumnName("id"),
 			source: "core",
 			type: props.db.getColumnType("serial"),
 			nullable: false,
 			primary: true,
 		},
 		{
-			name: "collection_key",
+			name: buildCoreColumnName("collection_key"),
 			source: "core",
 			type: props.db.getColumnType("text"),
 			nullable: false,
 		},
 		{
-			name: "document_id",
+			name: buildCoreColumnName("document_id"),
 			source: "core",
 			type: props.db.getColumnType("integer"),
 			nullable: false,
@@ -65,7 +66,7 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			name: "document_version_id",
+			name: buildCoreColumnName("document_version_id"),
 			source: "core",
 			type: props.db.getColumnType("integer"),
 			nullable: false,
@@ -76,7 +77,7 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			name: "locale",
+			name: buildCoreColumnName("locale"),
 			source: "core",
 			type: props.db.getColumnType("text"),
 			nullable: false,
@@ -93,7 +94,7 @@ const createFieldTables = (props: {
 		// add parent reference for repeater fields
 		if (props.parentTable) {
 			columns.push({
-				name: "parent_id",
+				name: buildCoreColumnName("parent_id"),
 				source: "core",
 				type: props.db.getColumnType("integer"),
 				nullable: false,
@@ -106,7 +107,7 @@ const createFieldTables = (props: {
 		}
 		// add sorting for repeater items
 		columns.push({
-			name: "sort_order",
+			name: buildCoreColumnName("sort_order"),
 			source: "core",
 			type: props.db.getColumnType("integer"),
 			nullable: false,

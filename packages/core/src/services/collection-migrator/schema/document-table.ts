@@ -78,25 +78,7 @@ const createDocumentTable = (props: {
 						},
 					},
 					{
-						name: "updated_by",
-						source: "core",
-						type: props.db.getColumnType("integer"),
-						nullable: true,
-						foreignKey: {
-							table: "lucid_users",
-							column: "id",
-							onDelete: "set null",
-						},
-					},
-					{
 						name: "created_at",
-						source: "core",
-						type: props.db.getColumnType("timestamp"),
-						nullable: true,
-						default: props.db.config.defaults.timestamp,
-					},
-					{
-						name: "updated_at",
 						source: "core",
 						type: props.db.getColumnType("timestamp"),
 						nullable: true,
