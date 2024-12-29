@@ -1,3 +1,5 @@
+import logger from "../../../utils/logging/index.js";
+import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../types.js";
 import type { TableMigration } from "./types.js";
 
@@ -14,6 +16,11 @@ const removeTableQuery: ServiceFn<
 			.dropTable(data.migration.tableName)
 			.ifExists()
 			.execute();
+
+		logger("debug", {
+			message: `Table with the name of '${data.migration.tableName}' has been dropped`,
+			scope: constants.logScopes.migrations,
+		});
 
 		return {
 			data: undefined,

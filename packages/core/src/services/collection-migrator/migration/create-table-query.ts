@@ -1,4 +1,6 @@
 import { addColumn } from "./column-builder.js";
+import logger from "../../../utils/logging/index.js";
+import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../types.js";
 import type { TableMigration } from "./types.js";
 
@@ -17,6 +19,10 @@ const createTableQuery: ServiceFn<
 			if (op.type !== "add") continue; //* if its a new table, only columns can be added
 
 			query = addColumn(query, op, context.config.db);
+			logger("debug", {
+				message: `Operation of type 'add' ran on column '${op.column.name}' for table '${data.migration.tableName}'`,
+				scope: constants.logScopes.migrations,
+			});
 		}
 
 		await query.execute();
