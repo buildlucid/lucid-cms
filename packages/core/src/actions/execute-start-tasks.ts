@@ -22,14 +22,27 @@ const executeStartTasks = async (service: ServiceContext) => {
 				message: T("locale_error_occured_saving_default"),
 			},
 		})(service),
-		serviceWrapper(service.services.collection.migrator.migrateCollections, {
+		serviceWrapper(service.services.start.syncCollections, {
+			transaction: true,
+			logError: true,
+			defaultError: {
+				name: T("start_error_name"),
+				message: T("collection_error_occured_saving_default"),
+			},
+		})(service),
+	]);
+
+	//* relies on collection sync
+	await serviceWrapper(
+		service.services.collection.migrator.migrateCollections,
+		{
 			transaction: true,
 			logError: true,
 			defaultError: {
 				name: T("collection_migrator_error_name"),
 			},
-		})(service),
-	]);
+		},
+	)(service);
 
 	registerCronJobs(service);
 };

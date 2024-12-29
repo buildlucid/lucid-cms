@@ -82,7 +82,7 @@ export interface InferredTable {
 export type TimestampMutateable = ColumnType<
 	string | Date | null,
 	string | undefined,
-	string
+	string | null
 >;
 export type TimestampImmutable = ColumnType<
 	string | Date,
@@ -231,7 +231,6 @@ export interface HeadlessProcessedImages {
 }
 
 export interface LucidCollections {
-	id: Generated<number>;
 	key: string;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;

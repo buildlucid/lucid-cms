@@ -83,7 +83,7 @@ export default class LocalesRepo {
 		where: QueryBuilderWhere<"lucid_locales">;
 		data: {
 			isDeleted?: BooleanInt;
-			isDeletedAt?: string;
+			isDeletedAt?: string | null;
 			updatedAt?: string;
 		};
 	}) => {

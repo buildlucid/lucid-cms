@@ -21,6 +21,7 @@ import TranslationsRepo from "./translations.js";
 import UserRolesRepo from "./user-roles.js";
 import UsersRepo from "./users.js";
 import ClientIntegrationsRepo from "./client-integrations.js";
+import CollectionsRepo from "./collections.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {
@@ -31,6 +32,8 @@ class Repository {
 		switch (repository) {
 			case "user-tokens":
 				return new UserTokensRepo(db) as RepositoryReturnType<T>;
+			case "collections":
+				return new CollectionsRepo(db) as RepositoryReturnType<T>;
 			case "collection-document-bricks":
 				return new CollectionDocumentBricksRepo(db) as RepositoryReturnType<T>;
 			case "collection-document-fields":
@@ -81,6 +84,7 @@ class Repository {
 
 type RepositoryClassMap = {
 	"user-tokens": UserTokensRepo;
+	collections: CollectionsRepo;
 	"collection-document-bricks": CollectionDocumentBricksRepo;
 	"collection-document-fields": CollectionDocumentFieldsRepo;
 	"collection-document-groups": CollectionDocumentGroupsRepo;

@@ -112,6 +112,7 @@ export default Object.freeze({
 		migrations: "migrations",
 		cron: "cron",
 		config: "config",
+		sync: "sync",
 	} as const,
 	cronSchedule: "0 0 * * *",
 	csrfExpiration: 604800, // 7 days in seconds
