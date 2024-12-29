@@ -9,11 +9,10 @@ const TABLE_PRIORITY: Record<TableType, number> = {
 	brick: 700,
 	repeater: 600,
 };
-// const EXTERNAL_REFERENCE_PRIORITY = 100;
+const EXTERNAL_REFERENCE_PRIORITY = 100;
 
 /**
  * Works out the table priority based on its type and foreign keys
- * @todo implement solution for determining foreign key prio
  */
 const getTablePriority = (
 	type: "db-inferred" | "collection-inferred",
@@ -27,16 +26,14 @@ const getTablePriority = (
 		tableType = tableTypeRes.data;
 	} else tableType = (table as CollectionSchemaTable).type;
 
-	const basePriority = TABLE_PRIORITY[tableType];
+	let basePriority = TABLE_PRIORITY[tableType];
 
-	// const hasExternalReferences = table.columns.some((column) => {
-	// 	if (!column.foreignKey) return false;
-	// });
-
-	// Reduce priority if table has external references
-	// if (hasExternalReferences) {
-	// 	basePriority -= EXTERNAL_REFERENCE_PRIORITY;
-	// }
+	const hasExternalReferences = table.columns.some((column) => {
+		if (!column.foreignKey) return false;
+	});
+	if (hasExternalReferences) {
+		basePriority -= EXTERNAL_REFERENCE_PRIORITY;
+	}
 
 	return {
 		data: basePriority,
