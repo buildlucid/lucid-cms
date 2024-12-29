@@ -105,7 +105,7 @@ const createFieldTables = (props: {
 				nullable: false,
 				foreignKey: {
 					table: props.parentTable,
-					column: "id",
+					column: buildCoreColumnName("id"),
 					onDelete: "cascade",
 				},
 			});
