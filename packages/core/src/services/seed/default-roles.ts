@@ -9,7 +9,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const RolesRepo = Repository.get("roles", context.db);
+		const RolesRepo = Repository.get("roles", context.db, context.config.db);
 
 		const totalRoleCount = await RolesRepo.count();
 		if (Formatter.parseCount(totalRoleCount?.count) > 0) {

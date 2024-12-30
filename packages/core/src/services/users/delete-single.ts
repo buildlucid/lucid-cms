@@ -11,7 +11,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	if (data.currentUserId === data.userId) {
 		return {
@@ -28,7 +28,7 @@ const deleteSingle: ServiceFn<
 
 	const deleteUserRes = await UsersRepo.updateSingle({
 		data: {
-			isDeleted: 1,
+			isDeleted: true,
 			isDeletedAt: new Date().toISOString(),
 			deletedBy: data.currentUserId,
 		},

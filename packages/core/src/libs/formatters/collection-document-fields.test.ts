@@ -344,7 +344,7 @@ test("document field formatter success with translation support", async () => {
 				{
 					id: 3,
 					order: 0,
-					open: 1,
+					open: true,
 					fields: [
 						{
 							key: "link",
@@ -358,7 +358,7 @@ test("document field formatter success with translation support", async () => {
 				{
 					id: 4,
 					order: 1,
-					open: 1,
+					open: true,
 					fields: [
 						{
 							key: "link",

@@ -224,7 +224,7 @@ const getAllMedia = async (
 		const ids = allFieldIdsOfType<number>(fields, "media");
 		if (ids.length === 0) return [];
 
-		const MediaRepo = Repository.get("media", context.db);
+		const MediaRepo = Repository.get("media", context.db, context.config.db);
 
 		return MediaRepo.selectMultiple({
 			select: ["id", "file_extension", "width", "height", "type"],
@@ -248,7 +248,7 @@ const getAllUsers = async (
 		const ids = allFieldIdsOfType<number>(fields, "user");
 		if (ids.length === 0) return [];
 
-		const UsersRepo = Repository.get("users", context.db);
+		const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 		return await UsersRepo.selectMultiple({
 			select: ["id", "username", "email", "first_name", "last_name"],
@@ -273,7 +273,11 @@ const getAllDocuments = async (
 		const ids = allFieldIdsOfType<number>(fields, "document");
 		if (ids.length === 0) return [];
 
-		const DocumentsRepo = Repository.get("collection-documents", context.db);
+		const DocumentsRepo = Repository.get(
+			"collection-documents",
+			context.db,
+			context.config.db,
+		);
 
 		return await DocumentsRepo.selectMultiple({
 			select: ["id", "collection_key"],

@@ -2,9 +2,13 @@ import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
 import type { LucidUserTokens, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class UserTokensRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// selects

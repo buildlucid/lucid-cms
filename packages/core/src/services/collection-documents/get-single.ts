@@ -19,7 +19,11 @@ const getSingle: ServiceFn<
 	],
 	CollectionDocumentResponse
 > = async (context, data) => {
-	const DocumentsRepo = Repository.get("collection-documents", context.db);
+	const DocumentsRepo = Repository.get(
+		"collection-documents",
+		context.db,
+		context.config.db,
+	);
 	const DocumentsFormatter = Formatter.get("collection-documents");
 
 	const [document, collectionRes] = await Promise.all([

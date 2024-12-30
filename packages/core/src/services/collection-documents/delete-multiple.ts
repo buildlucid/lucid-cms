@@ -41,10 +41,12 @@ const deleteMultiple: ServiceFn<
 	const CollectionDocumentsRepo = Repository.get(
 		"collection-documents",
 		context.db,
+		context.config.db,
 	);
 	const CollectionDocumentFieldsRepo = Repository.get(
 		"collection-document-fields",
 		context.db,
+		context.config.db,
 	);
 
 	const getDocuments = await CollectionDocumentsRepo.selectMultiple({
@@ -63,7 +65,7 @@ const deleteMultiple: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: 0,
+				value: context.config.db.config.defaults.boolean.false,
 			},
 		],
 	});
@@ -119,7 +121,7 @@ const deleteMultiple: ServiceFn<
 				},
 			],
 			data: {
-				isDeleted: 1,
+				isDeleted: true,
 				isDeletedAt: new Date().toISOString(),
 				deletedBy: data.userId,
 			},

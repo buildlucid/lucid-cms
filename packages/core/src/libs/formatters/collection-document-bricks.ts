@@ -1,5 +1,6 @@
 import Formatter from "./index.js";
 import constants from "../../constants/constants.js";
+import { boolean } from "../../utils/helpers/index.js";
 import CollectionDocumentFieldsFormatter, {
 	type FieldProp,
 } from "./collection-document-fields.js";
@@ -63,7 +64,7 @@ export default class CollectionDocumentBricksFormatter {
 					key: brick.brick_key as string,
 					order: brick.brick_order as number,
 					type: brick.brick_type as "builder" | "fixed",
-					open: brick.brick_open,
+					open: boolean.responseFormat(brick.brick_open),
 					fields: CollectionDocumentFieldsFormatter.formatMultiple(
 						{
 							fields: brick.fields,
@@ -133,7 +134,7 @@ export default class CollectionDocumentBricksFormatter {
 				type: "number",
 			},
 			open: {
-				type: "number",
+				type: "boolean",
 				nullable: true,
 			},
 			type: {

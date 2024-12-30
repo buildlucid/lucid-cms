@@ -19,7 +19,7 @@ const sendEmail: ServiceFn<
 	],
 	EmailResponse
 > = async (context, data) => {
-	const EmailsRepo = Repository.get("emails", context.db);
+	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
 	const emailConfigRes =

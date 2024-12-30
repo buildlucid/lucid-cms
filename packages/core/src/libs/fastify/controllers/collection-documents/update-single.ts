@@ -40,7 +40,7 @@ const updateSingleController: RouteController<
 		},
 		{
 			collectionKey: request.params.collectionKey,
-			publish: request.body.publish ? 1 : 0,
+			publish: request.body.publish,
 			userId: request.auth.id,
 			documentId: Number.parseInt(request.params.id),
 			bricks: request.body.bricks,

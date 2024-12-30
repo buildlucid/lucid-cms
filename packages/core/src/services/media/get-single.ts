@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	MediaResponse
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db);
+	const MediaRepo = Repository.get("media", context.db, context.config.db);
 	const MediaFormatter = Formatter.get("media");
 
 	const media = await MediaRepo.selectSingleById({

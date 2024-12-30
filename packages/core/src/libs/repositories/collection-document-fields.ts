@@ -1,11 +1,16 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type { BooleanInt, KyselyDB } from "../db/types.js";
+import boolean from "../../utils/helpers/boolean.js";
+import type DatabaseAdapter from "../db/adapter.js";
+import type { KyselyDB } from "../db/types.js";
 import type { FieldTypes } from "../custom-fields/types.js";
 
 export default class CollectionDocumentFieldsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// upsert
@@ -19,7 +24,7 @@ export default class CollectionDocumentFieldsRepo {
 			groupId?: number | null;
 			textValue: string | null;
 			intValue: number | null;
-			boolValue: BooleanInt | null;
+			boolValue: boolean | null;
 			jsonValue: string | null;
 			userId: number | null;
 			mediaId: number | null;
@@ -40,7 +45,7 @@ export default class CollectionDocumentFieldsRepo {
 						group_id: f.groupId,
 						text_value: f.textValue,
 						int_value: f.intValue,
-						bool_value: f.boolValue,
+						bool_value: boolean.insertFormat(f.boolValue, this.dbAdapter),
 						json_value: f.jsonValue,
 						user_id: f.userId,
 						media_id: f.mediaId,

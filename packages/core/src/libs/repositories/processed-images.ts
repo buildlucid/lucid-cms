@@ -3,9 +3,13 @@ import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
 import type { HeadlessProcessedImages, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class ProcessedImagesRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	count = async (props: {
 		where: QueryBuilderWhere<"lucid_processed_images">;

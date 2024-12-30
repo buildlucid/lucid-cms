@@ -23,58 +23,91 @@ import UsersRepo from "./users.js";
 import ClientIntegrationsRepo from "./client-integrations.js";
 import CollectionsRepo from "./collections.js";
 import CollectionMigrationsRepo from "./collection-migrations.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {
 	static get<T extends keyof RepositoryClassMap>(
 		repository: T,
 		db: KyselyDB,
+		dbAdapter: DatabaseAdapter,
 	): RepositoryReturnType<T> {
 		switch (repository) {
 			case "user-tokens":
-				return new UserTokensRepo(db) as RepositoryReturnType<T>;
+				return new UserTokensRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "collections":
-				return new CollectionsRepo(db) as RepositoryReturnType<T>;
+				return new CollectionsRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "collection-migrations":
-				return new CollectionMigrationsRepo(db) as RepositoryReturnType<T>;
+				return new CollectionMigrationsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "collection-document-bricks":
-				return new CollectionDocumentBricksRepo(db) as RepositoryReturnType<T>;
+				return new CollectionDocumentBricksRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "collection-document-fields":
-				return new CollectionDocumentFieldsRepo(db) as RepositoryReturnType<T>;
+				return new CollectionDocumentFieldsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "collection-document-groups":
-				return new CollectionDocumentGroupsRepo(db) as RepositoryReturnType<T>;
+				return new CollectionDocumentGroupsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "collection-document-versions":
 				return new CollectionDocumentVersionsRepo(
 					db,
+					dbAdapter,
 				) as RepositoryReturnType<T>;
 			case "collection-documents":
-				return new CollectionDocumentsRepo(db) as RepositoryReturnType<T>;
+				return new CollectionDocumentsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "emails":
-				return new EmailsRepo(db) as RepositoryReturnType<T>;
+				return new EmailsRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "locales":
-				return new LocalesRepo(db) as RepositoryReturnType<T>;
+				return new LocalesRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "media":
-				return new MediaRepo(db) as RepositoryReturnType<T>;
+				return new MediaRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "media-awaiting-sync":
-				return new MediaAwaitingSyncRepo(db) as RepositoryReturnType<T>;
+				return new MediaAwaitingSyncRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "options":
-				return new OptionsRepo(db) as RepositoryReturnType<T>;
+				return new OptionsRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "processed-images":
-				return new ProcessedImagesRepo(db) as RepositoryReturnType<T>;
+				return new ProcessedImagesRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "role-permissions":
-				return new RolePermissionsRepo(db) as RepositoryReturnType<T>;
+				return new RolePermissionsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "roles":
-				return new RolesRepo(db) as RepositoryReturnType<T>;
+				return new RolesRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "translation-keys":
-				return new TranslationKeysRepo(db) as RepositoryReturnType<T>;
+				return new TranslationKeysRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "translations":
-				return new TranslationsRepo(db) as RepositoryReturnType<T>;
+				return new TranslationsRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "user-roles":
-				return new UserRolesRepo(db) as RepositoryReturnType<T>;
+				return new UserRolesRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "users":
-				return new UsersRepo(db) as RepositoryReturnType<T>;
+				return new UsersRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "client-integrations":
-				return new ClientIntegrationsRepo(db) as RepositoryReturnType<T>;
+				return new ClientIntegrationsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			default:
 				throw new LucidError({
 					message: T("cannot_find_repository", {

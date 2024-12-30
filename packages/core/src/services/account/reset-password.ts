@@ -14,8 +14,12 @@ const resetPassword: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UserTokensRepo = Repository.get("user-tokens", context.db);
-	const UsersRepo = Repository.get("users", context.db);
+	const UserTokensRepo = Repository.get(
+		"user-tokens",
+		context.db,
+		context.config.db,
+	);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	const tokenRes = await context.services.user.token.getSingle(context, {
 		token: data.token,

@@ -14,7 +14,11 @@ const getSingle: ServiceFn<
 		user_id: number | null;
 	}
 > = async (context, data) => {
-	const UserTokensRepo = Repository.get("user-tokens", context.db);
+	const UserTokensRepo = Repository.get(
+		"user-tokens",
+		context.db,
+		context.config.db,
+	);
 
 	const userToken = await UserTokensRepo.selectSingle({
 		select: ["id", "user_id"],

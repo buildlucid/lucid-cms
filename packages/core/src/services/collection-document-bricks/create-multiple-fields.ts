@@ -25,6 +25,7 @@ const createMultipleFields: ServiceFn<
 	const CollectionDocumentFieldsRepo = Repository.get(
 		"collection-document-fields",
 		context.db,
+		context.config.db,
 	);
 
 	await CollectionDocumentFieldsRepo.createMultiple({

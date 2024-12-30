@@ -17,7 +17,11 @@ const updateMultipleRoles: ServiceFn<
 		};
 	}
 
-	const UserRolesRepo = Repository.get("user-roles", context.db);
+	const UserRolesRepo = Repository.get(
+		"user-roles",
+		context.db,
+		context.config.db,
+	);
 
 	const [roleExistsRes] = await Promise.all([
 		context.services.user.checks.checkRolesExist(context, {

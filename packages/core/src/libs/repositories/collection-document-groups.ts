@@ -1,10 +1,15 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type { BooleanInt, KyselyDB } from "../db/types.js";
+import boolean from "../../utils/helpers/boolean.js";
+import type { KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class CollectionDocumentGroupsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// upsert
@@ -15,7 +20,7 @@ export default class CollectionDocumentGroupsRepo {
 			collectionBrickId: number;
 			groupOrder: number;
 			repeaterKey: string;
-			groupOpen: BooleanInt;
+			groupOpen: boolean;
 			ref: string;
 		}>;
 	}) => {
@@ -28,7 +33,7 @@ export default class CollectionDocumentGroupsRepo {
 					collection_brick_id: g.collectionBrickId,
 					group_order: g.groupOrder,
 					repeater_key: g.repeaterKey,
-					group_open: g.groupOpen,
+					group_open: boolean.insertFormat(g.groupOpen, this.dbAdapter),
 					ref: g.ref,
 				})),
 			)
@@ -46,7 +51,7 @@ export default class CollectionDocumentGroupsRepo {
 			collectionBrickId: number;
 			groupOrder: number;
 			repeaterKey: string;
-			groupOpen: BooleanInt;
+			groupOpen: boolean;
 			ref: string;
 		}>;
 	}) => {
@@ -63,7 +68,7 @@ export default class CollectionDocumentGroupsRepo {
 						group_order: g.groupOrder,
 						repeater_key: g.repeaterKey,
 						ref: g.ref,
-						group_open: g.groupOpen,
+						group_open: boolean.insertFormat(g.groupOpen, this.dbAdapter),
 					};
 				}),
 			)

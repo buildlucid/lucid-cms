@@ -13,6 +13,7 @@ const deleteSingle: ServiceFn<
 	const ClientIntegrationsRepo = Repository.get(
 		"client-integrations",
 		context.db,
+		context.config.db,
 	);
 
 	const checkExists = await ClientIntegrationsRepo.selectSingle({

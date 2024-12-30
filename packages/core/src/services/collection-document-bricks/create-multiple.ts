@@ -20,7 +20,11 @@ const createMultiple: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const BricksRepo = Repository.get("collection-document-bricks", context.db);
+	const BricksRepo = Repository.get(
+		"collection-document-bricks",
+		context.db,
+		context.config.db,
+	);
 
 	// -------------------------------------------------------------------------------
 	// set bricks
@@ -100,6 +104,7 @@ const createMultiple: ServiceFn<
 						groups: groups.data,
 						brick: b,
 						collection: data.collection,
+						db: context.config.db,
 					}),
 				),
 			},

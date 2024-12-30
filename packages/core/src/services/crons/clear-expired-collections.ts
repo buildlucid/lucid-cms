@@ -9,7 +9,11 @@ import type { ServiceFn } from "../../utils/services/types.js";
  * @todo Expose the retention time?
  */
 const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
-	const CollectionsRepo = Repository.get("collections", context.db);
+	const CollectionsRepo = Repository.get(
+		"collections",
+		context.db,
+		context.config.db,
+	);
 
 	const now = new Date();
 	const thirtyDaysAgo = subDays(now, constants.retention.deletedCollections);
@@ -25,7 +29,7 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: 1,
+				value: context.config.db.config.defaults.boolean.true,
 			},
 		],
 	});

@@ -23,6 +23,7 @@ const getAll: ServiceFn<
 		const CollectionDocumentsRepo = Repository.get(
 			"collection-documents",
 			context.db,
+			context.config.db,
 		);
 
 		const documents = await CollectionDocumentsRepo.selectMultiple({
@@ -31,7 +32,7 @@ const getAll: ServiceFn<
 				{
 					key: "is_deleted",
 					operator: "=",
-					value: 0,
+					value: context.config.db.config.defaults.boolean.false,
 				},
 				{
 					key: "collection_key",

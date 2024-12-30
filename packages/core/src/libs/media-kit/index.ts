@@ -8,7 +8,6 @@ import { getMonth, getYear } from "date-fns";
 import type { Readable } from "node:stream";
 import type { Config, MediaType } from "../../types.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
-import type { BooleanInt } from "../db/types.js";
 
 export interface MediaKitMeta {
 	mimeType: string;
@@ -23,8 +22,8 @@ export interface MediaKitMeta {
 	height: number | null;
 	blurHash: string | null;
 	averageColour: string | null;
-	isDark: BooleanInt | null;
-	isLight: BooleanInt | null;
+	isDark: boolean | null;
+	isLight: boolean | null;
 }
 
 class MediaKit {
@@ -104,8 +103,8 @@ class MediaKit {
 				height: this.height,
 				blurHash: this.blurHash,
 				averageColour: this.averageColour,
-				isDark: this.isDark === null ? null : this.isDark ? 1 : 0,
-				isLight: this.isLight === null ? null : this.isLight ? 1 : 0,
+				isDark: this.isDark === null ? null : this.isDark,
+				isLight: this.isLight === null ? null : this.isLight,
 			},
 		};
 	}

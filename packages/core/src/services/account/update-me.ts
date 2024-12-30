@@ -19,7 +19,7 @@ const updateMe: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	const getUserRes = await UsersRepo.selectSingle({
 		select: ["super_admin", "password", "first_name", "secret"],

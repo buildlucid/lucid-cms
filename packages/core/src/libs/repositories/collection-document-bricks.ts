@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import boolean from "../../utils/helpers/boolean.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
@@ -6,14 +7,17 @@ import type {
 	LucidCollectionDocumentBricks,
 	Select,
 	KyselyDB,
-	BooleanInt,
 	DocumentVersionType,
 } from "../db/types.js";
 import type { Config } from "../../types/config.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class CollectionDocumentBricksRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// select
@@ -287,7 +291,7 @@ export default class CollectionDocumentBricksRepo {
 			brickType: BrickSchema["type"];
 			brickKey?: string;
 			brickOrder?: number;
-			brickOpen?: BooleanInt;
+			brickOpen?: boolean;
 			collectionDocumentVersionId: number;
 		}>;
 	}) => {
@@ -300,7 +304,7 @@ export default class CollectionDocumentBricksRepo {
 						brick_type: b.brickType,
 						brick_key: b.brickKey,
 						brick_order: b.brickOrder,
-						brick_open: b.brickOpen,
+						brick_open: boolean.insertFormat(b.brickOpen, this.dbAdapter),
 						collection_document_version_id: b.collectionDocumentVersionId,
 					};
 				}),

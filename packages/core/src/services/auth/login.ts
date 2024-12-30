@@ -2,6 +2,7 @@ import T from "../../translations/index.js";
 import argon2 from "argon2";
 import Repository from "../../libs/repositories/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import { boolean } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const login: ServiceFn<
@@ -15,7 +16,7 @@ const login: ServiceFn<
 		id: number;
 	}
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	const user = await UsersRepo.selectSingleByEmailUsername({
 		select: ["id", "password", "is_deleted", "secret"],
@@ -36,7 +37,7 @@ const login: ServiceFn<
 		};
 	}
 
-	if (user !== undefined && user.is_deleted === 1) {
+	if (user !== undefined && boolean.responseFormat(user.is_deleted)) {
 		return {
 			error: {
 				type: "authorisation",

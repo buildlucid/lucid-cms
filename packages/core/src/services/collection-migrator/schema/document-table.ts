@@ -50,8 +50,8 @@ const createDocumentTable = (props: {
 					{
 						name: "is_deleted",
 						source: "core",
-						type: props.db.getColumnType("integer"),
-						default: 0,
+						type: props.db.getColumnType("boolean"),
+						default: props.db.config.defaults.boolean.false,
 						nullable: false,
 					},
 					{

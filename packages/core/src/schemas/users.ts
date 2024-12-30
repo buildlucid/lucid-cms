@@ -9,7 +9,7 @@ export default {
 			roleIds: z.array(z.number()),
 			firstName: z.string().optional(),
 			lastName: z.string().optional(),
-			superAdmin: z.union([z.literal(1), z.literal(0)]).optional(),
+			superAdmin: z.boolean().optional(),
 		}),
 		query: undefined,
 		params: undefined,
@@ -17,9 +17,9 @@ export default {
 	updateSingle: {
 		body: z.object({
 			roleIds: z.array(z.number()).optional(),
-			superAdmin: z.union([z.literal(1), z.literal(0)]).optional(),
-			triggerPasswordReset: z.union([z.literal(1), z.literal(0)]).optional(),
-			isDeleted: z.literal(0).optional(),
+			superAdmin: z.boolean().optional(),
+			triggerPasswordReset: z.boolean().optional(),
+			isDeleted: z.literal(false).optional(),
 		}),
 		query: undefined,
 		params: z.object({

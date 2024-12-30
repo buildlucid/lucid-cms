@@ -6,9 +6,13 @@ import type z from "zod";
 import type { LucidEmails, Select, KyselyDB } from "../db/types.js";
 import type { Config } from "../../types/config.js";
 import type emailsSchema from "../../schemas/email.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class EmailsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// selects

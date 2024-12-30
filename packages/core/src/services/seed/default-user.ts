@@ -10,7 +10,7 @@ const defaultUser: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const UsersRepo = Repository.get("users", context.db);
+		const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 		const totalUserCount = await UsersRepo.count();
 		if (Formatter.parseCount(totalUserCount?.count) > 0) {
@@ -31,12 +31,12 @@ const defaultUser: ServiceFn<[], undefined> = async (
 		);
 
 		await UsersRepo.createSingle({
-			superAdmin: constants.seedDefaults.user.superAdmin as 0 | 1,
+			superAdmin: constants.seedDefaults.user.superAdmin,
 			email: constants.seedDefaults.user.email,
 			username: constants.seedDefaults.user.username,
 			firstName: constants.seedDefaults.user.firstName,
 			lastName: constants.seedDefaults.user.lastName,
-			triggerPasswordReset: 1,
+			triggerPasswordReset: true,
 			password: hashedPassword,
 			secret: encryptSecret,
 		});

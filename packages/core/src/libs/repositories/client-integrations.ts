@@ -1,15 +1,15 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type {
-	LucidClientIntegrations,
-	Select,
-	KyselyDB,
-	BooleanInt,
-} from "../db/types.js";
+import boolean from "../../utils/helpers/boolean.js";
+import type { LucidClientIntegrations, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class ClientIntegrationsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// select
@@ -50,7 +50,7 @@ export default class ClientIntegrationsRepo {
 	createSingle = async (props: {
 		name: string;
 		description?: string;
-		enabled: BooleanInt;
+		enabled: boolean;
 		key: string;
 		apiKey: string;
 		secret: string;
@@ -62,7 +62,7 @@ export default class ClientIntegrationsRepo {
 			.values({
 				name: props.name,
 				description: props.description,
-				enabled: props.enabled,
+				enabled: boolean.insertFormat(props.enabled, this.dbAdapter),
 				key: props.key,
 				api_key: props.apiKey,
 				secret: props.secret,
@@ -79,7 +79,7 @@ export default class ClientIntegrationsRepo {
 		data: {
 			name?: string;
 			description?: string;
-			enabled?: BooleanInt;
+			enabled?: boolean;
 			apiKey?: string;
 			secret?: string;
 			updatedAt?: string;
@@ -90,7 +90,7 @@ export default class ClientIntegrationsRepo {
 			.set({
 				name: props.data.name,
 				description: props.data.description,
-				enabled: props.data.enabled,
+				enabled: boolean.insertFormat(props.data.enabled, this.dbAdapter),
 				api_key: props.data.apiKey,
 				secret: props.data.secret,
 				updated_at: props.data.updatedAt,

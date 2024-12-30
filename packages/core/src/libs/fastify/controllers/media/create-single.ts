@@ -34,7 +34,7 @@ const createSingleController: RouteController<
 			fileName: request.body.fileName,
 			title: request.body.title,
 			alt: request.body.alt,
-			visible: 1,
+			visible: true,
 		},
 	);
 	if (mediaIdRes.error) throw new LucidAPIError(mediaIdRes.error);

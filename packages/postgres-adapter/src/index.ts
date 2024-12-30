@@ -35,6 +35,7 @@ class PostgresAdapter extends DatabaseAdapter {
 			support: {
 				alterColumn: true,
 				multipleAlterTables: true,
+				boolean: true,
 			},
 			dataTypes: {
 				serial: "serial",

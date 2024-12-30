@@ -1,16 +1,16 @@
 import { sql } from "kysely";
+import boolean from "../../utils/helpers/boolean.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type {
-	LucidLocales,
-	Select,
-	BooleanInt,
-	KyselyDB,
-} from "../db/types.js";
+import type { LucidLocales, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class LocalesRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	count = async () => {
 		return this.db
@@ -82,7 +82,7 @@ export default class LocalesRepo {
 	updateSingle = async (props: {
 		where: QueryBuilderWhere<"lucid_locales">;
 		data: {
-			isDeleted?: BooleanInt;
+			isDeleted?: boolean;
 			isDeletedAt?: string | null;
 			updatedAt?: string;
 		};
@@ -90,7 +90,7 @@ export default class LocalesRepo {
 		let query = this.db
 			.updateTable("lucid_locales")
 			.set({
-				is_deleted: props.data.isDeleted,
+				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
 				is_deleted_at: props.data.isDeletedAt,
 				updated_at: props.data.updatedAt,
 			})

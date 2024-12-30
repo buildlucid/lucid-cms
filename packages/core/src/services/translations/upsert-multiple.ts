@@ -47,7 +47,11 @@ const upsertMultiple: ServiceFn<[ServiceData<string>], undefined> = async <
 			};
 		}
 
-		const TranslationsRepo = Repository.get("translations", context.db);
+		const TranslationsRepo = Repository.get(
+			"translations",
+			context.db,
+			context.config.db,
+		);
 
 		await TranslationsRepo.upsertMultiple(translations);
 

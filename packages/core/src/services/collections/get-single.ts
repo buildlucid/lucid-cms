@@ -41,6 +41,7 @@ const getSingle: ServiceFn<
 		const CollectionDocumentsRepo = Repository.get(
 			"collection-documents",
 			context.db,
+			context.config.db,
 		);
 
 		const document = await CollectionDocumentsRepo.selectSingle({
@@ -49,7 +50,7 @@ const getSingle: ServiceFn<
 				{
 					key: "is_deleted",
 					operator: "=",
-					value: 0,
+					value: context.config.db.config.defaults.boolean.false,
 				},
 				{
 					key: "collection_key",

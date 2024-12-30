@@ -19,6 +19,7 @@ const clearToken = async (
 	const UserTokensRepo = Repository.get(
 		"user-tokens",
 		request.server.config.db.client,
+		request.server.config.db,
 	);
 
 	const decode = jwt.verify(

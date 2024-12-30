@@ -31,6 +31,7 @@ const getMultiple: ServiceFn<
 	const CollectionDocumentsRepo = Repository.get(
 		"collection-documents",
 		context.db,
+		context.config.db,
 	);
 	const CollectionDocumentsFormatter = Formatter.get("collection-documents");
 

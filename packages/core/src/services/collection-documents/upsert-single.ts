@@ -4,14 +4,13 @@ import Repository from "../../libs/repositories/index.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 
 const upsertSingle: ServiceFn<
 	[
 		{
 			collectionKey: string;
 			userId: number;
-			publish: BooleanInt;
+			publish: boolean;
 
 			documentId?: number;
 			bricks?: Array<BrickSchema>;
@@ -23,6 +22,7 @@ const upsertSingle: ServiceFn<
 	const CollectionDocumentsRepo = Repository.get(
 		"collection-documents",
 		context.db,
+		context.config.db,
 	);
 
 	// ----------------------------------------------
@@ -96,7 +96,7 @@ const upsertSingle: ServiceFn<
 		collectionKey: data.collectionKey,
 		createdBy: data.userId,
 		updatedBy: data.userId,
-		isDeleted: 0,
+		isDeleted: false,
 		updatedAt: new Date().toISOString(),
 	});
 	if (document === undefined) {

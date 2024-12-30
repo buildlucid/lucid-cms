@@ -1,15 +1,15 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type {
-	LucidCollections,
-	Select,
-	KyselyDB,
-	BooleanInt,
-} from "../db/types.js";
+import boolean from "../../utils/helpers/boolean.js";
+import type { LucidCollections, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class CollectionsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdpter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// selects
@@ -54,14 +54,14 @@ export default class CollectionsRepo {
 	updateSingle = async (props: {
 		where: QueryBuilderWhere<"lucid_collections">;
 		data: {
-			isDeleted: BooleanInt;
+			isDeleted: boolean;
 			isDeletedAt: string | null;
 		};
 	}) => {
 		let query = this.db
 			.updateTable("lucid_collections")
 			.set({
-				is_deleted: props.data.isDeleted,
+				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdpter),
 				is_deleted_at: props.data.isDeletedAt,
 			})
 			.returningAll();

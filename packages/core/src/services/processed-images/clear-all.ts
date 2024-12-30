@@ -6,7 +6,11 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		await context.services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const ProcessedImagesRepo = Repository.get("processed-images", context.db);
+	const ProcessedImagesRepo = Repository.get(
+		"processed-images",
+		context.db,
+		context.config.db,
+	);
 
 	const [storageUsedRes, processedImages] = await Promise.all([
 		context.services.option.getSingle(context, {

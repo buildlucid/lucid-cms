@@ -22,13 +22,13 @@ export default lucid.config({
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
-	// db: new PostgresAdapter({
-	// 	connectionString: process.env.DATABASE_URL as string,
-	// }),
-	db: new LibSQLAdapter({
-		url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-		// authToken: process.env.TURSO_AUTH_TOKEN as string,
+	db: new PostgresAdapter({
+		connectionString: process.env.DATABASE_URL as string,
 	}),
+	// db: new LibSQLAdapter({
+	// 	url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
+	// 	// authToken: process.env.TURSO_AUTH_TOKEN as string,
+	// }),
 	keys: {
 		encryptionKey: process.env.LUCID_ENCRYPTION_KEY as string,
 		cookieSecret: process.env.LUCID_COOKIE_SECRET as string,

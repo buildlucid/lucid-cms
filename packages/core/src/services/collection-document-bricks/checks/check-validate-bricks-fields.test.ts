@@ -140,7 +140,7 @@ test("validate brick along with brick field validation", async () => {
 				groups: [
 					{
 						id: "ref-group1",
-						open: 0,
+						open: false,
 						fields: [
 							{
 								key: "test_repeater_text",
@@ -153,7 +153,7 @@ test("validate brick along with brick field validation", async () => {
 					},
 					{
 						id: "ref-group2",
-						open: 0,
+						open: false,
 						fields: [
 							{
 								key: "test_repeater_text",

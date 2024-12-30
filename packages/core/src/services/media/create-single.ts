@@ -3,8 +3,6 @@ import {
 	getUniqueLocaleCodes,
 } from "../../utils/translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-
-import type { BooleanInt } from "../../libs/db/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createSingle: ServiceFn<
@@ -20,15 +18,16 @@ const createSingle: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
-			visible?: BooleanInt;
+			visible?: boolean;
 		},
 	],
 	number
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db);
+	const MediaRepo = Repository.get("media", context.db, context.config.db);
 	const MediaAwaitingSyncRepo = Repository.get(
 		"media-awaiting-sync",
 		context.db,
+		context.config.db,
 	);
 
 	const [localeExistsRes, awaitingSyncRes] = await Promise.all([
@@ -71,7 +70,7 @@ const createSingle: ServiceFn<
 		MediaRepo.createSingle({
 			key: syncMediaRes.data.key,
 			eTag: syncMediaRes.data.etag ?? undefined,
-			visible: data.visible ?? 1,
+			visible: data.visible ?? true,
 			type: syncMediaRes.data.type,
 			mimeType: syncMediaRes.data.mimeType,
 			extension: syncMediaRes.data.extension,

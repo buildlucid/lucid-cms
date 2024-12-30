@@ -1,8 +1,12 @@
 import type { KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 // import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
 
 export default class CollectionMigrationsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// create

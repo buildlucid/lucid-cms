@@ -7,6 +7,7 @@ const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 	const ClientIntegrationsRepo = Repository.get(
 		"client-integrations",
 		context.db,
+		context.config.db,
 	);
 	const ClientIntegrationFormatter = Formatter.get("client-integrations");
 

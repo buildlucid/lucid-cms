@@ -1,7 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -9,7 +8,7 @@ const updateSingle: ServiceFn<
 			id: number;
 			name?: string;
 			description?: string;
-			enabled?: BooleanInt;
+			enabled?: boolean;
 		},
 	],
 	undefined
@@ -17,6 +16,7 @@ const updateSingle: ServiceFn<
 	const ClientIntegrationsRepo = Repository.get(
 		"client-integrations",
 		context.db,
+		context.config.db,
 	);
 
 	const checkExists = await ClientIntegrationsRepo.selectSingle({

@@ -27,7 +27,7 @@ const generateToken = async (
 				username: userRes.data.username,
 				email: userRes.data.email,
 				permissions: userRes.data.permissions,
-				superAdmin: userRes.data.superAdmin ?? 0,
+				superAdmin: userRes.data.superAdmin ?? false,
 			} satisfies FastifyRequest["auth"],
 			request.server.config.keys.accessTokenSecret,
 			{

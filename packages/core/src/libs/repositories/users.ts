@@ -2,13 +2,18 @@ import { sql } from "kysely";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
+import boolean from "../../utils/helpers/boolean.js";
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import type usersSchema from "../../schemas/users.js";
-import type { BooleanInt, LucidUsers, Select, KyselyDB } from "../db/types.js";
+import type { LucidUsers, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class UsersRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	count = async () => {
 		return this.db
@@ -20,7 +25,7 @@ export default class UsersRepo {
 		return this.db
 			.selectFrom("lucid_users")
 			.select(sql`count(*)`.as("count"))
-			.where("is_deleted", "=", 0)
+			.where("is_deleted", "=", this.dbAdapter.config.defaults.boolean.false)
 			.executeTakeFirst() as Promise<{ count: string } | undefined>;
 	};
 	// ----------------------------------------
@@ -80,7 +85,7 @@ export default class UsersRepo {
 					.as("roles"),
 			])
 			.where("id", "=", props.id)
-			.where("is_deleted", "=", 0)
+			.where("is_deleted", "=", this.dbAdapter.config.defaults.boolean.false)
 			.executeTakeFirst();
 	};
 	selectSingleByEmailUsername = async <
@@ -149,7 +154,11 @@ export default class UsersRepo {
 			.leftJoin("lucid_user_roles", (join) =>
 				join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 			)
-			.where("lucid_users.is_deleted", "=", 0)
+			.where(
+				"lucid_users.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.groupBy("lucid_users.id");
 
 		const usersCountQuery = this.db
@@ -158,7 +167,11 @@ export default class UsersRepo {
 			.leftJoin("lucid_user_roles", (join) =>
 				join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 			)
-			.where("lucid_users.is_deleted", "=", 0);
+			.where(
+				"lucid_users.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			);
 
 		const { main, count } = queryBuilder.main(
 			{
@@ -242,13 +255,13 @@ export default class UsersRepo {
 			firstName?: string;
 			lastName?: string;
 			username?: string;
-			superAdmin?: BooleanInt;
+			superAdmin?: boolean;
 			secret?: string;
 			email?: string;
-			isDeleted?: BooleanInt;
+			isDeleted?: boolean;
 			isDeletedAt?: string;
 			deletedBy?: number;
-			triggerPasswordReset?: BooleanInt;
+			triggerPasswordReset?: boolean;
 		};
 	}) => {
 		let query = this.db
@@ -260,12 +273,18 @@ export default class UsersRepo {
 				email: props.data.email,
 				password: props.data.password,
 				secret: props.data.secret,
-				super_admin: props.data.superAdmin,
+				super_admin: boolean.insertFormat(
+					props.data.superAdmin,
+					this.dbAdapter,
+				),
 				updated_at: props.data.updatedAt,
-				is_deleted: props.data.isDeleted,
+				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
 				is_deleted_at: props.data.isDeletedAt,
 				deleted_by: props.data.deletedBy,
-				triggered_password_reset: props.data.triggerPasswordReset,
+				triggered_password_reset: boolean.insertFormat(
+					props.data.triggerPasswordReset,
+					this.dbAdapter,
+				),
 			})
 			.returning(["id", "first_name", "last_name", "email"]);
 
@@ -276,10 +295,10 @@ export default class UsersRepo {
 	// ----------------------------------------
 	// create
 	createSingle = async (props: {
-		superAdmin?: BooleanInt;
+		superAdmin?: boolean;
 		email: string;
 		username: string;
-		triggerPasswordReset: BooleanInt;
+		triggerPasswordReset: boolean;
 		secret: string;
 		firstName?: string;
 		lastName?: string;
@@ -289,14 +308,17 @@ export default class UsersRepo {
 			.insertInto("lucid_users")
 			.returning("id")
 			.values({
-				super_admin: props.superAdmin,
+				super_admin: boolean.insertFormat(props.superAdmin, this.dbAdapter),
 				email: props.email,
 				username: props.username,
 				first_name: props.firstName,
 				last_name: props.lastName,
 				password: props.password,
 				secret: props.secret,
-				triggered_password_reset: props.triggerPasswordReset,
+				triggered_password_reset: boolean.insertFormat(
+					props.triggerPasswordReset,
+					this.dbAdapter,
+				),
 			})
 			.executeTakeFirst();
 	};

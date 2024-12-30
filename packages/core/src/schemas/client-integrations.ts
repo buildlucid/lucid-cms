@@ -1,5 +1,4 @@
 import z from "zod";
-import type getSingle from "../libs/fastify/controllers/roles/get-single.js";
 
 export default {
 	createSingle: {
@@ -33,7 +32,7 @@ export default {
 		body: z.object({
 			name: z.string().min(2).optional(),
 			description: z.string().optional(),
-			enabled: z.union([z.literal(1), z.literal(0)]).optional(),
+			enabled: z.boolean().optional(),
 		}),
 		query: undefined,
 		params: z.object({

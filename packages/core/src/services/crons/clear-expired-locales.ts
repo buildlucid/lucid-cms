@@ -9,7 +9,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
  *  @todo Expose the retention time?
  */
 const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
-	const LocalesRepo = Repository.get("locales", context.db);
+	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
 
 	const now = new Date();
 	const thirtyDaysAgo = subDays(now, constants.retention.deletedLocales);
@@ -25,7 +25,7 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: 1,
+				value: context.config.db.config.defaults.boolean.true,
 			},
 		],
 	});

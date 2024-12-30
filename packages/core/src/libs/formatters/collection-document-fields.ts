@@ -3,6 +3,7 @@ import type {
 	FieldGroupResponse,
 	FieldAltResponse,
 } from "../../types/response.js";
+import { boolean } from "../../utils/helpers/index.js";
 import type { JSONString, BooleanInt } from "../db/types.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
@@ -300,7 +301,7 @@ export default class CollectionDocumentFieldsFormatter {
 			groups.push({
 				id: group.group_id,
 				order: group.group_order,
-				open: group.group_open,
+				open: boolean.responseFormat(group.group_open),
 				fields: this.buildFieldTree(
 					{
 						fields: data.fields,
@@ -472,11 +473,11 @@ export default class CollectionDocumentFieldsFormatter {
 						nullable: true,
 					},
 					isDark: {
-						type: "number",
+						type: "boolean",
 						nullable: true,
 					},
 					isLight: {
-						type: "number",
+						type: "boolean",
 						nullable: true,
 					},
 					title: {
@@ -528,7 +529,7 @@ export default class CollectionDocumentFieldsFormatter {
 							type: "number",
 						},
 						open: {
-							type: "number",
+							type: "boolean",
 							nullable: true,
 						},
 						fields: {

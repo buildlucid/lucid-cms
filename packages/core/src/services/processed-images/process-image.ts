@@ -96,7 +96,11 @@ const processImage: ServiceFn<
 		};
 	}
 
-	const ProcessedImagesRepo = Repository.get("processed-images", context.db);
+	const ProcessedImagesRepo = Repository.get(
+		"processed-images",
+		context.db,
+		context.config.db,
+	);
 
 	if (context.config.media.processed.store === true) {
 		await Promise.all([

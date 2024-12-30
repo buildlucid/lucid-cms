@@ -40,7 +40,7 @@ const createSingleController: RouteController<
 		},
 		{
 			collectionKey: request.params.collectionKey,
-			publish: request.body.publish ? 1 : 0,
+			publish: request.body.publish,
 			userId: request.auth.id,
 			bricks: request.body.bricks,
 			fields: request.body.fields,

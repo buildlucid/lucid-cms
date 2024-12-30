@@ -34,7 +34,7 @@ test("flatten fields - group object[] variation", async () => {
 				groups: [
 					{
 						id: "ref-group1",
-						open: 0,
+						open: false,
 						fields: [
 							{
 								key: "cta_title",
@@ -48,7 +48,7 @@ test("flatten fields - group object[] variation", async () => {
 					},
 					{
 						id: "ref-group2",
-						open: 0,
+						open: false,
 						fields: [
 							{
 								key: "cta_title",

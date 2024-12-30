@@ -5,7 +5,6 @@ import queryBuilder, {
 } from "../query-builder/index.js";
 import type z from "zod";
 import type {
-	BooleanInt,
 	LucidCollectionDocuments,
 	Select,
 	KyselyDB,
@@ -16,9 +15,14 @@ import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type collectionDocumentsSchema from "../../schemas/collection-documents.js";
 import type { DocumentFieldFilters } from "../../types.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
+import type DatabaseAdapter from "../db/adapter.js";
+import boolean from "../../utils/helpers/boolean.js";
 
 export default class CollectionDocumentsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// select
@@ -159,7 +163,11 @@ export default class CollectionDocumentsRepo {
 				"ub_user.username as ub_user_username",
 			])
 			.where("lucid_collection_documents.id", "=", props.id)
-			.where("lucid_collection_documents.is_deleted", "=", 0)
+			.where(
+				"lucid_collection_documents.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.where(
 				"lucid_collection_documents.collection_key",
 				"=",
@@ -255,7 +263,11 @@ export default class CollectionDocumentsRepo {
 				"lucid_collection_document_versions.created_at as version_created_at",
 				"lucid_collection_document_versions.created_by as version_created_by",
 			])
-			.where("lucid_collection_documents.is_deleted", "=", 0)
+			.where(
+				"lucid_collection_documents.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.where(
 				"lucid_collection_documents.collection_key",
 				"=",
@@ -637,7 +649,11 @@ export default class CollectionDocumentsRepo {
 				"lucid_users.id",
 				"lucid_collection_documents.created_by",
 			)
-			.where("lucid_collection_documents.is_deleted", "=", 0)
+			.where(
+				"lucid_collection_documents.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.where(
 				"lucid_collection_documents.collection_key",
 				"=",
@@ -672,7 +688,11 @@ export default class CollectionDocumentsRepo {
 				"=",
 				props.collection.key,
 			)
-			.where("lucid_collection_documents.is_deleted", "=", 0)
+			.where(
+				"lucid_collection_documents.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.where(
 				"lucid_collection_document_versions.version_type",
 				"=",
@@ -986,7 +1006,7 @@ export default class CollectionDocumentsRepo {
 		collectionKey: string;
 		createdBy: number;
 		updatedBy: number;
-		isDeleted: BooleanInt;
+		isDeleted: boolean;
 		updatedAt: string;
 	}) => {
 		return this.db
@@ -996,13 +1016,13 @@ export default class CollectionDocumentsRepo {
 				collection_key: props.collectionKey,
 				created_by: props.createdBy,
 				updated_by: props.updatedBy,
-				is_deleted: props.isDeleted,
+				is_deleted: boolean.insertFormat(props.isDeleted, this.dbAdapter),
 			})
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet({
 					created_by: props.createdBy,
 					updated_by: props.updatedBy,
-					is_deleted: props.isDeleted,
+					is_deleted: boolean.insertFormat(props.isDeleted, this.dbAdapter),
 					updated_at: props.updatedAt,
 				}),
 			)
@@ -1014,7 +1034,7 @@ export default class CollectionDocumentsRepo {
 	updateSingle = async (props: {
 		where: QueryBuilderWhere<"lucid_collection_documents">;
 		data: {
-			isDeleted?: BooleanInt;
+			isDeleted?: boolean;
 			isDeletedAt?: string;
 			deletedBy?: number;
 		};
@@ -1022,7 +1042,7 @@ export default class CollectionDocumentsRepo {
 		let query = this.db
 			.updateTable("lucid_collection_documents")
 			.set({
-				is_deleted: props.data.isDeleted,
+				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
 				is_deleted_at: props.data.isDeletedAt,
 				deleted_by: props.data.deletedBy,
 			})
@@ -1035,7 +1055,7 @@ export default class CollectionDocumentsRepo {
 	updateMultiple = async (props: {
 		where: QueryBuilderWhere<"lucid_collection_documents">;
 		data: {
-			isDeleted?: BooleanInt;
+			isDeleted?: boolean;
 			isDeletedAt?: string;
 			deletedBy?: number;
 		};
@@ -1043,7 +1063,7 @@ export default class CollectionDocumentsRepo {
 		let query = this.db
 			.updateTable("lucid_collection_documents")
 			.set({
-				is_deleted: props.data.isDeleted,
+				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
 				is_deleted_at: props.data.isDeletedAt,
 				deleted_by: props.data.deletedBy,
 			})

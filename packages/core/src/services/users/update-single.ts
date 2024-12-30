@@ -3,7 +3,6 @@ import argon2 from "argon2";
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const updateSingle: ServiceFn<
@@ -16,18 +15,18 @@ const updateSingle: ServiceFn<
 			email?: string;
 			password?: string;
 			roleIds?: number[];
-			superAdmin?: BooleanInt;
-			triggerPasswordReset?: BooleanInt;
-			isDeleted?: BooleanInt;
+			superAdmin?: boolean;
+			triggerPasswordReset?: boolean;
+			isDeleted?: boolean;
 			auth: {
 				id: number;
-				superAdmin: BooleanInt;
+				superAdmin: boolean;
 			};
 		},
 	],
 	number
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	if (data.auth.id === data.userId) {
 		return {
@@ -51,7 +50,7 @@ const updateSingle: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: 0,
+				value: context.config.db.config.defaults.boolean.false,
 			},
 		],
 	});
@@ -148,7 +147,7 @@ const updateSingle: ServiceFn<
 				email: data.email,
 				password: hashedPassword,
 				secret: encryptSecret,
-				superAdmin: data.auth.superAdmin === 1 ? data.superAdmin : undefined,
+				superAdmin: data.auth.superAdmin ? data.superAdmin : undefined,
 				updatedAt: new Date().toISOString(),
 				triggerPasswordReset: data.triggerPasswordReset,
 				isDeleted: data.isDeleted,

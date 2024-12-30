@@ -4,6 +4,7 @@ import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
+import { boolean } from "../../../utils/helpers/index.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -17,7 +18,7 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
-import type { BooleanInt } from "../../db/types.js";
+import type DatabaseAdapter from "../../db/adapter.js";
 
 class CheckboxCustomField extends CustomField<"checkbox"> {
 	type = "checkbox" as const;
@@ -40,7 +41,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			},
 			config: {
 				useTranslations: this.props?.config?.useTranslations ?? false,
-				default: this.props?.config?.default ?? 0,
+				default: this.props?.config?.default ?? false,
 				isHidden: this.props?.config?.isHidden,
 				isDisabled: this.props?.config?.isDisabled,
 			},
@@ -49,17 +50,13 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	}
 	// Methods
 	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
-		const booleanType = props.db.getColumnType("boolean");
 		return {
 			columns: [
 				{
 					name: this.key,
-					type: booleanType,
+					type: props.db.getColumnType("boolean"),
 					nullable: true,
-					default:
-						booleanType === "boolean"
-							? Boolean(this.config.config.default)
-							: this.config.config.default,
+					default: boolean.insertFormat(this.config.config.default, props.db),
 				},
 			],
 		};
@@ -69,7 +66,9 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		formatMeta: FieldFormatMeta;
 	}) {
 		return {
-			value: props.data.bool_value ?? this.config.config.default ?? null,
+			value: boolean.responseFormat(
+				props.data.bool_value ?? this.config.config.default,
+			),
 			meta: null,
 		} satisfies CFResponse<"checkbox">;
 	}
@@ -77,14 +76,14 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		item: FieldInsertItem;
 		brickId: number;
 		groupId: number | null;
+		db: DatabaseAdapter;
 	}) {
-		let value: BooleanInt | undefined = props.item.value;
+		let value: boolean | undefined = props.item.value;
+
 		if (typeof value === "string") {
-			value = value === "true" ? 1 : 0;
-		} else if (typeof value === "boolean") {
-			value = value ? 1 : 0;
+			value = value === "true";
 		} else if (typeof value === "number") {
-			value = value === 1 ? 1 : 0;
+			value = value === 1;
 		} else {
 			value = undefined;
 		}

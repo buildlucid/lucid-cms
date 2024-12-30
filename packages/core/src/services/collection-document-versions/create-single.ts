@@ -5,7 +5,6 @@ import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 
 const createSingle: ServiceFn<
 	[
@@ -13,7 +12,7 @@ const createSingle: ServiceFn<
 			documentId: number;
 			collection: CollectionBuilder;
 			userId: number;
-			publish: BooleanInt;
+			publish: boolean;
 			bricks?: Array<BrickSchema>;
 			fields?: Array<FieldSchemaType>;
 		},
@@ -23,6 +22,7 @@ const createSingle: ServiceFn<
 	const VersionsRepo = Repository.get(
 		"collection-document-versions",
 		context.db,
+		context.config.db,
 	);
 	const versionType = data.publish ? "published" : "draft";
 

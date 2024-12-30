@@ -17,7 +17,7 @@ const resendSingle: ServiceFn<
 		await context.services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
-	const EmailsRepo = Repository.get("emails", context.db);
+	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 
 	const email = await EmailsRepo.selectSingleById({
 		id: data.id,

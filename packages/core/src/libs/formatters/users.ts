@@ -2,6 +2,7 @@ import type { BooleanInt } from "../db/types.js";
 import type { UserResponse } from "../../types/response.js";
 import UserPermissionsFormatter from "./user-permissions.js";
 import Formatter from "./index.js";
+import boolean from "../../utils/helpers/boolean.js";
 
 interface UserPropT {
 	created_at: Date | string | null;
@@ -43,14 +44,16 @@ export default class UsersFormatter {
 
 		return {
 			id: props.user.id,
-			superAdmin: props.user.super_admin ?? 0,
+			superAdmin: boolean.responseFormat(props.user.super_admin ?? false),
 			email: props.user.email,
 			username: props.user.username,
 			firstName: props.user.first_name,
 			lastName: props.user.last_name,
 			roles: roles,
 			permissions: permissions,
-			triggerPasswordReset: props.user.triggered_password_reset,
+			triggerPasswordReset: boolean.responseFormat(
+				props.user.triggered_password_reset,
+			),
 			createdAt: Formatter.formatDate(props.user.created_at),
 			updatedAt: Formatter.formatDate(props.user.updated_at),
 		};
@@ -59,12 +62,12 @@ export default class UsersFormatter {
 		type: "object",
 		properties: {
 			id: { type: "number", example: 1 },
-			superAdmin: { type: "number", example: 1 },
+			superAdmin: { type: "boolean", example: true },
 			email: { type: "string", example: "admin@lucidcms.io" },
 			username: { type: "string", example: "admin" },
 			firstName: { type: "string", example: "Admin" },
 			lastName: { type: "string", example: "User" },
-			triggerPasswordReset: { type: "number", example: 0 },
+			triggerPasswordReset: { type: "boolean", example: false, nullable: true },
 			roles: UserPermissionsFormatter.swaggerRoles,
 			permissions: UserPermissionsFormatter.swaggerPermissions,
 			createdAt: { type: "string", example: "2021-06-10T20:00:00.000Z" },

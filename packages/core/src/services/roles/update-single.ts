@@ -13,7 +13,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const RolesRepo = Repository.get("roles", context.db);
+	const RolesRepo = Repository.get("roles", context.db, context.config.db);
 
 	const [validatePermsRes, checkNameIsUnique] = await Promise.all([
 		data.permissions !== undefined
@@ -85,7 +85,11 @@ const updateSingle: ServiceFn<
 	}
 
 	if (validatePermsRes?.data !== undefined) {
-		const RolePermissionsRepo = Repository.get("role-permissions", context.db);
+		const RolePermissionsRepo = Repository.get(
+			"role-permissions",
+			context.db,
+			context.config.db,
+		);
 
 		await RolePermissionsRepo.deleteMultiple({
 			where: [

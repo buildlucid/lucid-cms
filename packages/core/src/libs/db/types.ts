@@ -32,6 +32,11 @@ export type DatabaseConfig = {
 	support: {
 		alterColumn: boolean;
 		multipleAlterTables: boolean;
+		/**
+		 * Set to true if the database supports boolean column data types.
+		 * If you're database doesnt, booleans are stored as integers as either 1 or 0.
+		 */
+		boolean: boolean;
 	};
 	dataTypes: {
 		serial: ColumnDataType;
@@ -49,8 +54,8 @@ export type DatabaseConfig = {
 			autoIncrement: boolean;
 		};
 		boolean: {
-			true: true | 1 | unknown;
-			false: false | 0 | unknown;
+			true: true | 1;
+			false: false | 0;
 		};
 	};
 	fuzzOperator: "like" | "ilike" | "%";
@@ -89,7 +94,8 @@ export type TimestampImmutable = ColumnType<
 	string | undefined,
 	never
 >;
-export type BooleanInt = 0 | 1;
+/** Should only be used for DB column insert/response values. Everything else should be using booleans and can be converted for response/insert with boolean helpers */
+export type BooleanInt = 0 | 1 | boolean;
 export type JSONString = string;
 
 // ------------------------------------------------------------------------------

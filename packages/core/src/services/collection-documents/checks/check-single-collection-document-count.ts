@@ -33,6 +33,7 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 	const CollectionDocumentsRepo = Repository.get(
 		"collection-documents",
 		context.db,
+		context.config.db,
 	);
 
 	const hasDocument = await CollectionDocumentsRepo.selectSingle({
@@ -46,7 +47,7 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: 0,
+				value: context.config.db.config.defaults.boolean.false,
 			},
 		],
 	});

@@ -17,7 +17,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db);
+	const MediaRepo = Repository.get("media", context.db, context.config.db);
 	const MediaFormatter = Formatter.get("media");
 
 	const [medias, mediasCount] = await MediaRepo.selectMultipleFiltered({

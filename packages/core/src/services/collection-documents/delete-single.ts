@@ -34,10 +34,12 @@ const deleteSingle: ServiceFn<
 	const CollectionDocumentsRepo = Repository.get(
 		"collection-documents",
 		context.db,
+		context.config.db,
 	);
 	const CollectionDocumentFieldsRepo = Repository.get(
 		"collection-document-fields",
 		context.db,
+		context.config.db,
 	);
 
 	const getDocument = await CollectionDocumentsRepo.selectSingle({
@@ -56,7 +58,7 @@ const deleteSingle: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: 0,
+				value: context.config.db.config.defaults.boolean.false,
 			},
 		],
 	});
@@ -102,7 +104,7 @@ const deleteSingle: ServiceFn<
 				},
 			],
 			data: {
-				isDeleted: 1,
+				isDeleted: true,
 				isDeletedAt: new Date().toISOString(),
 				deletedBy: data.userId,
 			},

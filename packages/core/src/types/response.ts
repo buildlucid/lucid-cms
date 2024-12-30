@@ -1,4 +1,4 @@
-import type { BooleanInt, DocumentVersionType } from "../libs/db/types.js";
+import type { DocumentVersionType } from "../libs/db/types.js";
 import type {
 	CollectionBrickConfig,
 	CollectionConfigSchemaType,
@@ -15,12 +15,12 @@ import type { LocaleValue } from "./shared.js";
 
 export interface UserResponse {
 	id: number;
-	superAdmin?: BooleanInt;
+	superAdmin?: boolean;
 	email: string;
 	username: string;
 	firstName: string | null;
 	lastName: string | null;
-	triggerPasswordReset?: BooleanInt;
+	triggerPasswordReset: boolean | null;
 
 	roles?: UserPermissionsResponse["roles"];
 	permissions?: UserPermissionsResponse["permissions"];
@@ -81,7 +81,7 @@ export interface OptionsResponse {
 	name: OptionName;
 	valueText: string | null;
 	valueInt: number | null;
-	valueBool: BooleanInt | null;
+	valueBool: boolean | null;
 }
 
 export type MediaType =
@@ -113,8 +113,8 @@ export interface MediaResponse {
 		height: number | null;
 		blurHash: string | null;
 		averageColour: string | null;
-		isDark: BooleanInt | null;
-		isLight: BooleanInt | null;
+		isDark: boolean | null;
+		isLight: boolean | null;
 	};
 	createdAt: string | null;
 	updatedAt: string | null;
@@ -123,7 +123,7 @@ export interface MediaResponse {
 export interface LocalesResponse {
 	code: string;
 	name: string | null;
-	isDefault: BooleanInt;
+	isDefault: boolean;
 	createdAt: string | null;
 	updatedAt: string | null;
 }
@@ -181,7 +181,7 @@ export interface BrickResponse {
 	id: number;
 	key: string;
 	order: number;
-	open: BooleanInt | null;
+	open: boolean | null;
 	type: "builder" | "fixed";
 	fields: Array<FieldResponse>;
 }
@@ -189,7 +189,7 @@ export interface BrickAltResponse {
 	id: number;
 	key: string;
 	order: number;
-	open: BooleanInt | null;
+	open: boolean | null;
 	type: "builder" | "fixed";
 	fields: Record<string, FieldAltResponse>;
 }
@@ -215,13 +215,13 @@ export interface FieldAltResponse {
 export interface FieldGroupResponse {
 	id: number | string;
 	order: number;
-	open: BooleanInt | null;
+	open: boolean | null;
 	fields: Array<FieldResponse>;
 }
 export interface FieldGroupAltResponse {
 	id: number | string;
 	order: number;
-	open: BooleanInt | null;
+	open: boolean | null;
 	fields: Record<string, FieldAltResponse>;
 }
 
@@ -403,7 +403,7 @@ export interface ClientIntegrationResponse {
 	key: string;
 	name: string;
 	description: string | null;
-	enabled: BooleanInt;
+	enabled: boolean;
 	createdAt: string | null;
 	updatedAt: string | null;
 }

@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
-import type { BooleanInt, OnDelete, OnUpdate } from "../db/types.js";
+import type { OnDelete, OnUpdate } from "../db/types.js";
 import type { ColumnDataType } from "kysely";
 import type { LocaleValue } from "../../types/shared.js";
 import type DatabaseAdapter from "../db/adapter.js";
@@ -303,7 +303,7 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 		useTranslations?: boolean;
 		isHidden?: boolean;
 		isDisabled?: boolean;
-		default?: BooleanInt;
+		default?: boolean;
 	};
 	validation?: {
 		required?: boolean;
@@ -478,7 +478,7 @@ export type CFInsertItem<T extends FieldTypes> = {
 	groupId?: number | null;
 	textValue?: string | null;
 	intValue?: number | null;
-	boolValue?: BooleanInt | null;
+	boolValue?: boolean | null;
 	jsonValue?: string | null;
 	mediaId?: number | null;
 	userId?: number | null;
@@ -494,7 +494,7 @@ export type WysiwygResValue = string | null;
 export type MediaResValue = number | null;
 export type RepeaterResValue = null;
 export type NumberResValue = number | null;
-export type CheckboxResValue = BooleanInt | null;
+export type CheckboxResValue = boolean | null;
 export type SelectReValue = string | null;
 export type TextareaResValue = string | null;
 export type JsonResValue = Record<string, unknown> | null;
@@ -542,8 +542,8 @@ export type MediaResMeta = {
 	height: number | null;
 	blurHash: string | null;
 	averageColour: string | null;
-	isDark: BooleanInt | null;
-	isLight: BooleanInt | null;
+	isDark: boolean | null;
+	isLight: boolean | null;
 	title: Record<string, string>;
 	alt: Record<string, string>;
 	type: MediaType | null;

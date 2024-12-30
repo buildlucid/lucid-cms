@@ -20,6 +20,7 @@ const checkAwaitingSync: ServiceFn<
 	const MediaAwaitingSyncRepo = Repository.get(
 		"media-awaiting-sync",
 		context.db,
+		context.config.db,
 	);
 
 	const awaitingSync = await MediaAwaitingSyncRepo.selectSingle({

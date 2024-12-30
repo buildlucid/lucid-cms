@@ -4,7 +4,6 @@ import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 import type {
 	CollectionDocumentResponse,
 	FieldResponse,
@@ -27,8 +26,13 @@ const promoteVersion: ServiceFn<
 	const VersionsRepo = Repository.get(
 		"collection-document-versions",
 		context.db,
+		context.config.db,
 	);
-	const DocumentRepo = Repository.get("collection-documents", context.db);
+	const DocumentRepo = Repository.get(
+		"collection-documents",
+		context.db,
+		context.config.db,
+	);
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
@@ -161,7 +165,7 @@ const promoteVersion: ServiceFn<
 			collectionKey: data.collectionKey,
 			createdBy: data.userId,
 			updatedBy: data.userId,
-			isDeleted: 0,
+			isDeleted: false,
 			updatedAt: new Date().toISOString(),
 		}),
 		VersionsRepo.createSingle({
@@ -249,7 +253,7 @@ const documentResponseToSchemaFormat = (
 			formattedField.groups = field.groups.map((group) => ({
 				id: group.id,
 				order: group.order,
-				open: group.open as BooleanInt | undefined,
+				open: group.open ?? undefined,
 				fields: group.fields.map(formatField).filter((f) => f !== null),
 			}));
 		}
@@ -262,7 +266,7 @@ const documentResponseToSchemaFormat = (
 		key: brick.key,
 		order: brick.order,
 		type: brick.type,
-		open: brick.open as BooleanInt | undefined,
+		open: brick.open ?? undefined,
 		fields: brick.fields.map(formatField).filter((f) => f !== null),
 	});
 

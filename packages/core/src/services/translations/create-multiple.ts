@@ -31,7 +31,11 @@ const createMultiple: ServiceFn<
 		};
 	}
 
-	const TranslationKeysRepo = Repository.get("translation-keys", context.db);
+	const TranslationKeysRepo = Repository.get(
+		"translation-keys",
+		context.db,
+		context.config.db,
+	);
 
 	const translationKeyEntries = await TranslationKeysRepo.createMultiple(
 		data.keys.map((k) => ({ createdAt: new Date().toISOString() })),
@@ -66,7 +70,11 @@ const createMultiple: ServiceFn<
 		};
 	}
 
-	const TranslationsRepo = Repository.get("translations", context.db);
+	const TranslationsRepo = Repository.get(
+		"translations",
+		context.db,
+		context.config.db,
+	);
 
 	await TranslationsRepo.upsertMultiple(
 		data.translations.map((translation) => {

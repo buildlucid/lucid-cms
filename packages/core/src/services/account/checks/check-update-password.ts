@@ -21,7 +21,7 @@ const checkUpdatePassword: ServiceFn<
 	],
 	{
 		newPassword: string | undefined;
-		triggerPasswordReset: 0 | 1 | undefined;
+		triggerPasswordReset: boolean | undefined;
 		encryptSecret: string | undefined;
 	}
 > = async (_, data) => {
@@ -138,7 +138,7 @@ const checkUpdatePassword: ServiceFn<
 	newPassword = await argon2.hash(data.newPassword as string, {
 		secret: Buffer.from(secret),
 	});
-	triggerPasswordReset = 0 as const;
+	triggerPasswordReset = false as const;
 
 	return {
 		error: undefined,

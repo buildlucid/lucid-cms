@@ -1,5 +1,4 @@
 import Repository from "../../libs/repositories/index.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { GroupInsertItem } from "./helpers/flatten-fields.js";
 
@@ -40,6 +39,7 @@ const createMultipleGroups: ServiceFn<
 	const CollectionDocumentGroupsRepo = Repository.get(
 		"collection-document-groups",
 		context.db,
+		context.config.db,
 	);
 
 	// -------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ const createMultipleGroups: ServiceFn<
 		groupOrder: number;
 		repeaterKey: string;
 		ref: string;
-		groupOpen: BooleanInt;
+		groupOpen: boolean;
 	}[] = [];
 	for (const bg of data.brickGroups) {
 		for (const group of bg.groups || []) {

@@ -3,7 +3,6 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import type { Config } from "./config.js";
 import type lucidServices from "../services/index.js";
 import type { UserPermissionsResponse, LocalesResponse } from "./response.js";
-import type { BooleanInt } from "../libs/db/types.js";
 import type logger from "../utils/logging/index.js";
 
 declare module "fastify" {
@@ -18,7 +17,7 @@ declare module "fastify" {
 			id: number;
 			username: string;
 			email: string;
-			superAdmin: BooleanInt;
+			superAdmin: boolean;
 			permissions: UserPermissionsResponse["permissions"] | undefined;
 		};
 		locale: {

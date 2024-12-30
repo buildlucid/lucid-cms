@@ -21,6 +21,7 @@ const getMultiple: ServiceFn<
 	const CollectionDocumentBricksRepo = Repository.get(
 		"collection-document-bricks",
 		context.db,
+		context.config.db,
 	);
 
 	const CollectionDocumentBricksFormatter = Formatter.get(

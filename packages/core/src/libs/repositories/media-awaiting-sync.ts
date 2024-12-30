@@ -2,9 +2,13 @@ import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
 import type { LucidMediaAwaitingSync, Select, KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class MediaAwaitingSyncRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// select

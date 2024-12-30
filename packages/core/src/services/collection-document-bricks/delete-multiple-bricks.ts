@@ -17,6 +17,7 @@ const deleteMultipleBricks: ServiceFn<
 	const CollectionDocumentBricksRepo = Repository.get(
 		"collection-document-bricks",
 		context.db,
+		context.config.db,
 	);
 
 	if (data.apply.collectionFields) {

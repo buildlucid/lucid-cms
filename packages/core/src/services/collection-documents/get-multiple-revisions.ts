@@ -44,6 +44,7 @@ const getMultipleRevisions: ServiceFn<
 	const VersionsRepo = Repository.get(
 		"collection-document-versions",
 		context.db,
+		context.config.db,
 	);
 	const VersionsFormatter = Formatter.get("collection-document-versions");
 

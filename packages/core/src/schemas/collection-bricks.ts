@@ -1,7 +1,6 @@
 import z from "zod";
 import { FieldSchema, swaggerFieldObj } from "./collection-fields.js";
 import constants from "../constants/constants.js";
-import type { BooleanInt } from "../libs/db/types.js";
 import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 
 export const BrickSchema = z.object({
@@ -9,7 +8,7 @@ export const BrickSchema = z.object({
 	key: z.string(),
 	order: z.number(),
 	type: z.union([z.literal("builder"), z.literal("fixed")]),
-	open: z.union([z.literal(1), z.literal(0)]).optional(),
+	open: z.boolean().optional(),
 	fields: z.array(FieldSchema).optional(),
 });
 export interface BrickSchema {
@@ -17,7 +16,7 @@ export interface BrickSchema {
 	key?: string;
 	order?: number;
 	type: BrickTypes;
-	open?: BooleanInt;
+	open?: boolean;
 	fields?: z.infer<typeof FieldSchema>[];
 }
 
@@ -35,7 +34,7 @@ export const swaggerBodyBricksObj = {
 			enum: Object.values(constants.brickTypes),
 		},
 		open: {
-			type: "number",
+			type: "boolean",
 			nullable: true,
 		},
 		fields: {

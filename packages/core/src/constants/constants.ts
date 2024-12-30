@@ -19,7 +19,7 @@ export default Object.freeze({
 			email: "admin@lucidcms.io",
 			username: "admin",
 			password: "password",
-			superAdmin: 1,
+			superAdmin: true,
 		},
 		roles: [
 			{

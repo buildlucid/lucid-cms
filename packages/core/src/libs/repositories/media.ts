@@ -2,13 +2,18 @@ import { sql } from "kysely";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
+import boolean from "../../utils/helpers/boolean.js";
 import type z from "zod";
-import type { BooleanInt, LucidMedia, Select, KyselyDB } from "../db/types.js";
+import type { LucidMedia, Select, KyselyDB } from "../db/types.js";
 import type mediaSchema from "../../schemas/media.js";
 import type { Config } from "../../types/config.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class MediaRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// select
@@ -81,7 +86,7 @@ export default class MediaRepo {
 					)
 					.as("alt_translations"),
 			])
-			.where("visible", "=", 1)
+			.where("visible", "=", this.dbAdapter.config.defaults.boolean.true)
 			.where("id", "=", props.id)
 			.executeTakeFirst();
 	};
@@ -180,7 +185,7 @@ export default class MediaRepo {
 				"title_translations.value",
 				"alt_translations.value",
 			])
-			.where("visible", "=", 1);
+			.where("visible", "=", this.dbAdapter.config.defaults.boolean.true);
 
 		const mediasCountQuery = this.db
 			.selectFrom("lucid_media")
@@ -207,7 +212,7 @@ export default class MediaRepo {
 				"title_translations.value as title_translation_value",
 				"alt_translations.value as alt_translation_value",
 			])
-			.where("visible", "=", 1);
+			.where("visible", "=", this.dbAdapter.config.defaults.boolean.true);
 
 		const { main, count } = queryBuilder.main(
 			{
@@ -259,7 +264,7 @@ export default class MediaRepo {
 	// create
 	createSingle = async (props: {
 		key: string;
-		visible: BooleanInt;
+		visible: boolean;
 		eTag?: string;
 		type: LucidMedia["type"];
 		mimeType: string;
@@ -272,15 +277,15 @@ export default class MediaRepo {
 		altTranslationKeyId?: number;
 		blurHash?: string | null;
 		averageColour?: string | null;
-		isDark?: BooleanInt | null;
-		isLight?: BooleanInt | null;
+		isDark?: boolean | null;
+		isLight?: boolean | null;
 	}) => {
 		return this.db
 			.insertInto("lucid_media")
 			.values({
 				key: props.key,
 				e_tag: props.eTag,
-				visible: props.visible,
+				visible: boolean.insertFormat(props.visible, this.dbAdapter),
 				type: props.type,
 				mime_type: props.mimeType,
 				file_extension: props.extension,
@@ -291,8 +296,8 @@ export default class MediaRepo {
 				alt_translation_key_id: props.altTranslationKeyId,
 				blur_hash: props.blurHash,
 				average_colour: props.averageColour,
-				is_dark: props.isDark,
-				is_light: props.isLight,
+				is_dark: boolean.insertFormat(props.isDark, this.dbAdapter),
+				is_light: boolean.insertFormat(props.isLight, this.dbAdapter),
 			})
 			.returning("id")
 			.executeTakeFirst();
@@ -313,8 +318,8 @@ export default class MediaRepo {
 			updatedAt?: string;
 			blurHash?: string | null;
 			averageColour?: string | null;
-			isDark?: BooleanInt | null;
-			isLight?: BooleanInt | null;
+			isDark?: boolean | null;
+			isLight?: boolean | null;
 		};
 	}) => {
 		let query = this.db
@@ -331,8 +336,8 @@ export default class MediaRepo {
 				updated_at: props.data.updatedAt,
 				blur_hash: props.data.blurHash,
 				average_colour: props.data.averageColour,
-				is_dark: props.data.isDark,
-				is_light: props.data.isLight,
+				is_dark: boolean.insertFormat(props.data.isDark, this.dbAdapter),
+				is_light: boolean.insertFormat(props.data.isLight, this.dbAdapter),
 			})
 			.returning("id");
 

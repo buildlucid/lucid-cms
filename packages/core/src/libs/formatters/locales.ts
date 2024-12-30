@@ -32,7 +32,7 @@ export default class LocalesFormatter {
 		return {
 			code: props.locale.code,
 			name: props.configLocale.label,
-			isDefault: props.locale.code === props.defaultLocale ? 1 : 0,
+			isDefault: props.locale.code === props.defaultLocale,
 			createdAt: Formatter.formatDate(props.locale.created_at),
 			updatedAt: Formatter.formatDate(props.locale.updated_at),
 		};
@@ -42,7 +42,7 @@ export default class LocalesFormatter {
 		properties: {
 			code: { type: "string", example: "en" },
 			name: { type: "string", example: "English" },
-			isDefault: { type: "number", example: 1 },
+			isDefault: { type: "boolean", example: true },
 			createdAt: { type: "string", example: "2021-10-05T14:48:00.000Z" },
 			updatedAt: { type: "string", example: "2021-10-05T14:48:00.000Z" },
 		},

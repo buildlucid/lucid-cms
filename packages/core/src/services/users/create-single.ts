@@ -3,7 +3,6 @@ import Repository from "../../libs/repositories/index.js";
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createSingle: ServiceFn<
@@ -13,14 +12,14 @@ const createSingle: ServiceFn<
 			username: string;
 			firstName?: string;
 			lastName?: string;
-			superAdmin?: BooleanInt;
+			superAdmin?: boolean;
 			roleIds: Array<number>;
-			authSuperAdmin: BooleanInt;
+			authSuperAdmin: boolean;
 		},
 	],
 	number
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	const [userExists, roleExistsRes] = await Promise.all([
 		UsersRepo.selectSingleByEmailUsername({
@@ -71,8 +70,8 @@ const createSingle: ServiceFn<
 		username: data.username,
 		firstName: data.firstName,
 		lastName: data.lastName,
-		superAdmin: data.authSuperAdmin === 1 ? data.superAdmin : 0,
-		triggerPasswordReset: 0,
+		superAdmin: data.authSuperAdmin ? data.superAdmin : false,
+		triggerPasswordReset: false,
 		secret: encryptSecret,
 	});
 
@@ -120,7 +119,11 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const UserRolesRepo = Repository.get("user-roles", context.db);
+	const UserRolesRepo = Repository.get(
+		"user-roles",
+		context.db,
+		context.config.db,
+	);
 
 	await UserRolesRepo.createMultiple({
 		items: data.roleIds.map((r) => ({

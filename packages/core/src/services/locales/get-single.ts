@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	LocalesResponse
 > = async (context, data) => {
-	const LocalesRepo = Repository.get("locales", context.db);
+	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
 	const LocalesFormatter = Formatter.get("locales");
 
 	const configLocale = context.config.localisation.locales.find(
@@ -41,7 +41,7 @@ const getSingle: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "!=",
-				value: 1,
+				value: context.config.db.config.defaults.boolean.true,
 			},
 		],
 	});

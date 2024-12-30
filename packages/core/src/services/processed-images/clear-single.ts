@@ -13,8 +13,12 @@ const clearSingle: ServiceFn<
 		context.services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const ProcessedImagesRepo = Repository.get("processed-images", context.db);
-	const MediaRepo = Repository.get("media", context.db);
+	const ProcessedImagesRepo = Repository.get(
+		"processed-images",
+		context.db,
+		context.config.db,
+	);
+	const MediaRepo = Repository.get("media", context.db, context.config.db);
 
 	const mediaRes = await MediaRepo.selectSingle({
 		select: ["key"],

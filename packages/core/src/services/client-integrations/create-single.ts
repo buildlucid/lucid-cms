@@ -17,6 +17,7 @@ const createSingle: ServiceFn<
 	const ClientIntegrationsRepo = Repository.get(
 		"client-integrations",
 		context.db,
+		context.config.db,
 	);
 
 	const { key, apiKey, apiKeyHash, secret } = await generateKeys(
@@ -47,7 +48,7 @@ const createSingle: ServiceFn<
 	const newIntegrationRes = await ClientIntegrationsRepo.createSingle({
 		name: data.name,
 		description: data.description,
-		enabled: 1,
+		enabled: true,
 		key: key,
 		secret: secret,
 		apiKey: apiKeyHash,

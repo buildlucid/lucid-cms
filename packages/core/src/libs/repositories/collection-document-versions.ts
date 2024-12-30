@@ -11,9 +11,13 @@ import type {
 	LucidCollectionDocumentVersions,
 	Select,
 } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class CollectionDocumentVersionsRepo {
-	constructor(private db: KyselyDB) {}
+	constructor(
+		private db: KyselyDB,
+		private dbAdapter: DatabaseAdapter,
+	) {}
 
 	// ----------------------------------------
 	// select
@@ -95,7 +99,11 @@ export default class CollectionDocumentVersionsRepo {
 				"lucid_collection_documents.updated_by as document_updated_by",
 				"lucid_collection_documents.updated_at as document_updated_at",
 			])
-			.where("lucid_collection_documents.is_deleted", "=", 0)
+			.where(
+				"lucid_collection_documents.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.where(
 				"lucid_collection_documents.collection_key",
 				"=",
@@ -127,7 +135,11 @@ export default class CollectionDocumentVersionsRepo {
 					"lucid_collection_document_versions.document_id",
 				),
 			)
-			.where("lucid_collection_documents.is_deleted", "=", 0)
+			.where(
+				"lucid_collection_documents.is_deleted",
+				"=",
+				this.dbAdapter.config.defaults.boolean.false,
+			)
 			.where(
 				"lucid_collection_documents.collection_key",
 				"=",

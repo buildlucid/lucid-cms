@@ -1,4 +1,5 @@
 import Formatter from "./index.js";
+import { boolean } from "../../utils/helpers/index.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 
@@ -30,7 +31,7 @@ export default class ClientIntegrationsFormatter {
 			key: props.integration.key,
 			name: props.integration.name,
 			description: props.integration.description,
-			enabled: props.integration.enabled,
+			enabled: boolean.responseFormat(props.integration.enabled),
 			createdAt: Formatter.formatDate(props.integration.created_at),
 			updatedAt: Formatter.formatDate(props.integration.updated_at),
 		};
@@ -52,7 +53,7 @@ export default class ClientIntegrationsFormatter {
 				type: "string",
 			},
 			enabled: {
-				type: "number",
+				type: "boolean",
 			},
 			createdAt: {
 				type: "string",

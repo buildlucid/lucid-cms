@@ -1,7 +1,6 @@
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { OptionName } from "../../types/response.js";
-import type { BooleanInt } from "../../libs/db/types.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -9,12 +8,12 @@ const updateSingle: ServiceFn<
 			name: OptionName;
 			valueText?: string;
 			valueInt?: number;
-			valueBool?: BooleanInt;
+			valueBool?: boolean;
 		},
 	],
 	undefined
 > = async (context, data) => {
-	const OptionsRepo = Repository.get("options", context.db);
+	const OptionsRepo = Repository.get("options", context.db, context.config.db);
 
 	const updateOption = await OptionsRepo.updateSingle({
 		where: [

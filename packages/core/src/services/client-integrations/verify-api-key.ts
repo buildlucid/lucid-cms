@@ -19,6 +19,7 @@ const verifyApiKey: ServiceFn<
 	const ClientIntegrationSRepo = Repository.get(
 		"client-integrations",
 		context.db,
+		context.config.db,
 	);
 
 	const clientIntegration = await ClientIntegrationSRepo.selectSingle({

@@ -32,6 +32,7 @@ class LibSQLAdapter extends DatabaseAdapter {
 			support: {
 				alterColumn: false,
 				multipleAlterTables: false,
+				boolean: false,
 			},
 			dataTypes: {
 				serial: "integer",

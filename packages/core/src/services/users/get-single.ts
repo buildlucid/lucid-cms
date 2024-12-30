@@ -16,7 +16,7 @@ const getSingle: ServiceFn<
 	],
 	UserResponse
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 	const UsersFormatter = Formatter.get("users");
 
 	const user = await UsersRepo.selectSingleById({

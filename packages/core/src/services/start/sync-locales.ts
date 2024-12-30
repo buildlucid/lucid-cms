@@ -1,13 +1,14 @@
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import logger from "../../utils/logging/index.js";
+import boolean from "../../utils/helpers/boolean.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 const syncLocales: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	// Responsible for syncing locales config with the database
-	const LocalesRepo = Repository.get("locales", context.db);
+	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
 	const localeCodes = context.config.localisation.locales.map(
 		(locale) => locale.code,
 	);
@@ -37,7 +38,9 @@ const syncLocales: ServiceFn<[], undefined> = async (
 
 	// Get locale codes that are in the database but not in the config
 	const localesToDelete = locales.filter(
-		(locale) => !localeCodes.includes(locale.code) && locale.is_deleted === 0,
+		(locale) =>
+			!localeCodes.includes(locale.code) &&
+			boolean.responseFormat(locale.is_deleted) === false,
 	);
 	const localesToDeleteCodes = localesToDelete.map((locale) => locale.code);
 	if (localesToDeleteCodes.length > 0) {
@@ -49,7 +52,9 @@ const syncLocales: ServiceFn<[], undefined> = async (
 
 	// Get locals that are in the database as is_deleted but in the config
 	const unDeletedLocales = locales.filter(
-		(locale) => locale.is_deleted === 1 && localeCodes.includes(locale.code),
+		(locale) =>
+			boolean.responseFormat(locale.is_deleted) &&
+			localeCodes.includes(locale.code),
 	);
 	const unDeletedLocalesCodes = unDeletedLocales.map((locale) => locale.code);
 	if (unDeletedLocalesCodes.length > 0) {
@@ -69,7 +74,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 		localesToDeleteCodes.length > 0 &&
 			LocalesRepo.updateSingle({
 				data: {
-					isDeleted: 1,
+					isDeleted: true,
 					isDeletedAt: new Date().toISOString(),
 					updatedAt: new Date().toISOString(),
 				},
@@ -84,7 +89,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 		unDeletedLocalesCodes.length > 0 &&
 			LocalesRepo.updateSingle({
 				data: {
-					isDeleted: 0,
+					isDeleted: false,
 					isDeletedAt: null,
 					updatedAt: new Date().toISOString(),
 				},

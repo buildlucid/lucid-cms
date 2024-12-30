@@ -13,7 +13,7 @@ const getSingle: ServiceFn<
 	],
 	OptionsResponse
 > = async (context, data) => {
-	const OptionsRepo = Repository.get("options", context.db);
+	const OptionsRepo = Repository.get("options", context.db, context.config.db);
 	const OptionsFormatter = Formatter.get("options");
 
 	const optionRes = await OptionsRepo.selectSingle({

@@ -4,7 +4,7 @@ import Repository from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkNotLastUser: ServiceFn<[], undefined> = async (context) => {
-	const UsersRepo = Repository.get("users", context.db);
+	const UsersRepo = Repository.get("users", context.db, context.config.db);
 
 	const activeUserCountRes = await UsersRepo.activeCount();
 	const activeUserCount = Formatter.parseCount(activeUserCountRes?.count);

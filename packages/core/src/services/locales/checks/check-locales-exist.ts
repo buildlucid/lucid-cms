@@ -19,7 +19,7 @@ const checkLocalesExist: ServiceFn<
 		};
 	}
 
-	const LocalesRepo = Repository.get("locales", context.db);
+	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
 
 	const locales = await LocalesRepo.selectMultiple({
 		select: ["code"],
@@ -32,7 +32,7 @@ const checkLocalesExist: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "!=",
-				value: 1,
+				value: context.config.db.config.defaults.boolean.true,
 			},
 		],
 	});

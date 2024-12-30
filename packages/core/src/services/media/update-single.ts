@@ -20,10 +20,11 @@ const updateSingle: ServiceFn<
 	],
 	number | undefined
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db);
+	const MediaRepo = Repository.get("media", context.db, context.config.db);
 	const MediaAwaitingSyncRepo = Repository.get(
 		"media-awaiting-sync",
 		context.db,
+		context.config.db,
 	);
 
 	const media = await MediaRepo.selectSingle({
