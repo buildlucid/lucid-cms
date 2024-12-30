@@ -37,6 +37,7 @@ class SQLiteAdapter extends DatabaseAdapter {
 				alterColumn: false,
 				multipleAlterTables: false,
 				boolean: false,
+				autoIncrement: true,
 			},
 			dataTypes: {
 				serial: "integer",
@@ -50,9 +51,6 @@ class SQLiteAdapter extends DatabaseAdapter {
 			},
 			defaults: {
 				timestamp: "CURRENT_TIMESTAMP",
-				primaryKey: {
-					autoIncrement: true,
-				},
 				boolean: {
 					true: 1,
 					false: 0,

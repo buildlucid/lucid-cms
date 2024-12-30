@@ -7,7 +7,7 @@ const Migration00000002: MigrationFn = (adapter) => {
 			await db.schema
 				.createTable("lucid_translation_keys")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
 					col.notNull(),
@@ -17,7 +17,7 @@ const Migration00000002: MigrationFn = (adapter) => {
 			await db.schema
 				.createTable("lucid_translations")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"translation_key_id",

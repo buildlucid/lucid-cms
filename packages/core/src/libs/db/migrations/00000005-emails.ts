@@ -8,7 +8,7 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_emails")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("email_hash", adapter.getColumnType("char", 64), (col) =>
 					col.unique().notNull(),

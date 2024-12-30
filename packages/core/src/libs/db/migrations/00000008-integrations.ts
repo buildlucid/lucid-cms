@@ -8,7 +8,7 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_client_integrations")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("name", adapter.getColumnType("text"), (col) =>
 					col.notNull(),

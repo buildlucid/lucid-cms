@@ -1,13 +1,13 @@
 import T from "../../translations/index.js";
 import {
 	type Dialect,
-	type Migration,
 	Kysely,
 	Migrator,
 	type KyselyPlugin,
 	type ColumnDataType,
 	type ColumnDefinitionBuilder,
 } from "kysely";
+import constants from "../../constants/constants.js";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { LucidError } from "../../utils/errors/index.js";
 import logger from "../../utils/logging/index.js";
@@ -26,7 +26,6 @@ import Migration00000005 from "./migrations/00000005-emails.js";
 import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
-import constants from "../../constants/constants.js";
 
 export default abstract class DatabaseAdapter {
 	db: Kysely<LucidDB> | undefined;
@@ -44,14 +43,37 @@ export default abstract class DatabaseAdapter {
 	}
 	abstract get jsonArrayFrom(): typeof jsonArrayFrom;
 	abstract get config(): DatabaseConfig;
+	abstract formatInsertValue(type: ColumnDataType, value: unknown): unknown;
+
 	/**
 	 * Infers the database schema. Uses the transaction client if provided, otherwise falls back to the base client
 	 */
 	abstract inferSchema(tx?: KyselyDB): Promise<InferredTable[]>;
 
-	// Public methods
+	/**
+	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections
+	 * @todo expose migrations so they can be extended?
+	 */
 	async migrateToLatest() {
-		const migrator = this.migrator;
+		const migrations = {
+			"00000001-locales": Migration00000001(this),
+			"00000002-translations": Migration00000002(this),
+			"00000003-options": Migration00000003(this),
+			"00000004-users-and-permissions": Migration00000004(this),
+			"00000005-emails": Migration00000005(this),
+			"00000006-media": Migration00000006(this),
+			"00000007-collections": Migration00000007(this),
+			"00000008-integrations": Migration00000008(this),
+		};
+
+		const migrator = new Migrator({
+			db: this.client,
+			provider: {
+				async getMigrations() {
+					return migrations;
+				},
+			},
+		});
 
 		const { error, results } = await migrator.migrateToLatest();
 
@@ -81,6 +103,9 @@ export default abstract class DatabaseAdapter {
 			});
 		}
 	}
+	/**
+	 * A helper for returning supported column data types
+	 */
 	getColumnType(
 		type: keyof DatabaseConfig["dataTypes"],
 		...args: unknown[]
@@ -92,15 +117,17 @@ export default abstract class DatabaseAdapter {
 		}
 		return dataType;
 	}
-	createPrimaryKeyColumn(col: ColumnDefinitionBuilder) {
-		return this.config.defaults.primaryKey.autoIncrement
+	/**
+	 * A helper for extending a column definition based on auto increment support
+	 */
+	primaryKeyColumnBuilder(col: ColumnDefinitionBuilder) {
+		return this.config.support.autoIncrement
 			? col.primaryKey().autoIncrement()
 			: col.primaryKey();
 	}
-	formatInsertValue(type: ColumnDataType, value: unknown): unknown {
-		return value;
-	}
-	// getters
+	/**
+	 * Returns the database client instance
+	 */
 	get client() {
 		if (!this.db) {
 			throw new LucidError({
@@ -108,28 +135,5 @@ export default abstract class DatabaseAdapter {
 			});
 		}
 		return this.db;
-	}
-	get migrations(): Record<string, Migration> {
-		return {
-			"00000001-locales": Migration00000001(this),
-			"00000002-translations": Migration00000002(this),
-			"00000003-options": Migration00000003(this),
-			"00000004-users-and-permissions": Migration00000004(this),
-			"00000005-emails": Migration00000005(this),
-			"00000006-media": Migration00000006(this),
-			"00000007-collections": Migration00000007(this),
-			"00000008-integrations": Migration00000008(this),
-		};
-	}
-	get migrator() {
-		const m = this.migrations;
-		return new Migrator({
-			db: this.client,
-			provider: {
-				async getMigrations() {
-					return m;
-				},
-			},
-		});
 	}
 }

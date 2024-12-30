@@ -30,7 +30,7 @@ export const addColumn = <
 			let columnBuilder = column;
 
 			if (operation.column.primary) {
-				columnBuilder = db.createPrimaryKeyColumn(columnBuilder);
+				columnBuilder = db.primaryKeyColumnBuilder(columnBuilder);
 			}
 
 			if (operation.column.nullable === false) {

@@ -8,7 +8,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_users")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("super_admin", adapter.getColumnType("boolean"), (col) =>
 					col.defaultTo(adapter.config.defaults.boolean.false).notNull(),
@@ -48,7 +48,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_roles")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("name", adapter.getColumnType("text"), (col) =>
 					col.notNull().unique(),
@@ -65,7 +65,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_role_permissions")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("role_id", adapter.getColumnType("integer"), (col) =>
 					col.references("lucid_roles.id").onDelete("cascade"),
@@ -84,7 +84,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_user_roles")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("user_id", adapter.getColumnType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("cascade"),
@@ -103,7 +103,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_user_tokens")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("user_id", adapter.getColumnType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("cascade"),

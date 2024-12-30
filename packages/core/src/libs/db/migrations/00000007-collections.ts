@@ -24,7 +24,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_collection_migrations")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("collection_key", adapter.getColumnType("text"), (col) =>
 					col.references("lucid_collections.key").onDelete("cascade").notNull(),
@@ -45,7 +45,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_collection_documents")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("collection_key", adapter.getColumnType("text"), (col) =>
 					col.notNull(),
@@ -75,7 +75,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_collection_document_versions")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("document_id", adapter.getColumnType("integer"), (col) =>
 					col
@@ -109,7 +109,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_collection_document_bricks")
 				.addColumn("id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"collection_document_version_id",
@@ -134,7 +134,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_collection_document_groups")
 				.addColumn("group_id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"collection_document_version_id",
@@ -196,7 +196,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			await db.schema
 				.createTable("lucid_collection_document_fields")
 				.addColumn("fields_id", adapter.getColumnType("serial"), (col) =>
-					adapter.createPrimaryKeyColumn(col),
+					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"collection_document_version_id",

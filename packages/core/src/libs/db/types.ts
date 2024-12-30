@@ -37,6 +37,10 @@ export type DatabaseConfig = {
 		 * If you're database doesnt, booleans are stored as integers as either 1 or 0.
 		 */
 		boolean: boolean;
+		/**
+		 * Determines if a primary key colum needs auto increment
+		 */
+		autoIncrement: boolean;
 	};
 	dataTypes: {
 		serial: ColumnDataType;
@@ -50,9 +54,6 @@ export type DatabaseConfig = {
 	};
 	defaults: {
 		timestamp: string;
-		primaryKey: {
-			autoIncrement: boolean;
-		};
 		boolean: {
 			true: true | 1;
 			false: false | 0;
