@@ -2,6 +2,9 @@
 
 > The official Postgres adapter for Lucid CMS
 
+> [!CAUTION]
+> Some queries in Lucid are currently not working with this adapter. Full support is in the works.
+
 This package exports the Postgres adapter for Lucid CMS.
 
 ## Installation
