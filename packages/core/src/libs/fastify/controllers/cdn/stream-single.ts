@@ -38,7 +38,9 @@ const streamSingleController: RouteController<
 				services: request.server.services,
 			},
 			{
-				fallback: request.query?.fallback,
+				fallback: request.query?.fallback
+					? Boolean(request.query?.fallback)
+					: undefined,
 				error: response.error,
 			},
 		);
@@ -87,7 +89,7 @@ export default {
 				},
 				fallback: {
 					type: "string",
-					enum: ["1", "0"],
+					enum: ["true", "false"],
 				},
 			},
 		},

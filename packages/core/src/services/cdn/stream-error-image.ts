@@ -11,7 +11,7 @@ const currentDir = getDirName(import.meta.url);
 const streamErrorImage: ServiceFn<
 	[
 		{
-			fallback?: "1" | "0";
+			fallback?: boolean;
 			error: LucidErrorData;
 		},
 	],
@@ -27,7 +27,7 @@ const streamErrorImage: ServiceFn<
 		};
 	}
 
-	if (context.config.media?.fallbackImage === false || data.fallback === "0") {
+	if (context.config.media?.fallbackImage === false || !data.fallback) {
 		return {
 			error: {
 				type: "basic",

@@ -32,7 +32,7 @@ export default {
 					message: "Quality must be less than or equal to 100",
 				})
 				.optional(),
-			fallback: z.enum(["1", "0"]).optional(),
+			fallback: z.enum(["true", "false"]).optional(),
 		}),
 		params: z.object({
 			"*": z.string(),
