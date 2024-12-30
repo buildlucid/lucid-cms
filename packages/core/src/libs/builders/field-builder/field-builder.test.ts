@@ -179,7 +179,7 @@ test("flat fields should return correct config", async () => {
 			details: { label: "Checkbox Test", summary: undefined },
 			config: {
 				useTranslations: false,
-				default: 0,
+				default: false,
 				isHidden: undefined,
 				isDisabled: undefined,
 			},

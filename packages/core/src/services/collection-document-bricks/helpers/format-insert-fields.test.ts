@@ -233,7 +233,7 @@ describe("Format insert fields", async () => {
 				{
 					key: "checkbox_test",
 					type: "checkbox",
-					value: 1,
+					value: true,
 				},
 				{
 					key: "select_test",
@@ -359,7 +359,7 @@ describe("Format insert fields", async () => {
 				groupId: null,
 				textValue: null,
 				intValue: null,
-				boolValue: 1,
+				boolValue: true,
 				jsonValue: null,
 				mediaId: null,
 				userId: null,

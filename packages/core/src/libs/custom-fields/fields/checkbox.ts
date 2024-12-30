@@ -78,16 +78,6 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		groupId: number | null;
 		db: DatabaseAdapter;
 	}) {
-		let value: boolean | undefined = props.item.value;
-
-		if (typeof value === "string") {
-			value = value === "true";
-		} else if (typeof value === "number") {
-			value = value === 1;
-		} else {
-			value = undefined;
-		}
-
 		return {
 			key: this.config.key,
 			type: this.config.type,
@@ -96,7 +86,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			groupId: props.groupId,
 			textValue: null,
 			intValue: null,
-			boolValue: value,
+			boolValue: Boolean(props.item.value),
 			jsonValue: null,
 			mediaId: null,
 			userId: null,

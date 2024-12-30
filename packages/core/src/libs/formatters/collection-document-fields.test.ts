@@ -256,7 +256,7 @@ const fields: FieldProp[] = [
 		type: "checkbox",
 		text_value: null,
 		int_value: null,
-		bool_value: 0,
+		bool_value: false,
 		json_value: null,
 		media_id: null,
 		collection_document_version_id: 1,
@@ -288,7 +288,7 @@ const groups: BrickProp["groups"] = [
 		parent_group_id: null,
 		repeater_key: "call_to_actions",
 		group_order: 0,
-		group_open: 1,
+		group_open: true,
 		ref: "9295f118-8d43-4610-a5ff-7c66e315f8d7",
 	},
 	{
@@ -298,7 +298,7 @@ const groups: BrickProp["groups"] = [
 		parent_group_id: null,
 		repeater_key: "call_to_actions",
 		group_order: 1,
-		group_open: 1,
+		group_open: true,
 		ref: "cbc4c6f0-3658-4c88-9acf-88290f6d1121",
 	},
 ];
@@ -375,7 +375,7 @@ test("document field formatter success with translation support", async () => {
 			key: "full_width",
 			type: "checkbox",
 			groupId: undefined,
-			value: 0,
+			value: false,
 			meta: null,
 		},
 	]);
@@ -478,7 +478,7 @@ test("document field flat formatter success with translation support", async () 
 			key: "full_width",
 			type: "checkbox",
 			groupId: undefined,
-			value: 0,
+			value: false,
 			meta: null,
 		},
 	]);
