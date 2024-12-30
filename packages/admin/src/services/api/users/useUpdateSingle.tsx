@@ -7,9 +7,9 @@ interface Params {
 	id: number;
 	body: {
 		roleIds?: number[];
-		superAdmin?: 1 | 0;
-		triggerPasswordReset?: 1 | 0;
-		isDeleted?: 0;
+		superAdmin?: boolean;
+		triggerPasswordReset?: boolean;
+		isDeleted?: false;
 	};
 }
 

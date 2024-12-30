@@ -151,7 +151,7 @@ const GeneralSettingsRoute: Component = (props) => {
 								contentLocales().map((locale) => ({
 									label: locale.name || locale.code,
 									value: `${locale.code} ${
-										locale.isDefault === 1 ? `(${T()("default")})` : ""
+										locale.isDefault ? `(${T()("default")})` : ""
 									} `,
 								})) || []
 							}

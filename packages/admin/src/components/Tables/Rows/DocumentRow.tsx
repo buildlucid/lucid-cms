@@ -144,7 +144,7 @@ const DocumentDynamicColumns: Component<{
 			<Match when={fieldData()?.type === "checkbox"}>
 				<PillCol
 					text={
-						(fieldValue() as 1 | 0 | undefined | null) === 1
+						(fieldValue() as boolean | undefined | null)
 							? T()("yes")
 							: T()("no")
 					}

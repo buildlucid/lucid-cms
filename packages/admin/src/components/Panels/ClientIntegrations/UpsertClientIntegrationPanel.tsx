@@ -30,7 +30,7 @@ const UpsertClientIntegrationPanel: Component<
 	// State
 	const [getName, setName] = createSignal("");
 	const [getDescription, setDescription] = createSignal("");
-	const [getEnabled, setEnabled] = createSignal<1 | 0>(1);
+	const [getEnabled, setEnabled] = createSignal<boolean>(true);
 
 	// ---------------------------------
 	// Query
@@ -64,7 +64,7 @@ const UpsertClientIntegrationPanel: Component<
 		if (clientIntegration.isSuccess) {
 			setName(clientIntegration.data?.data.name || "");
 			setDescription(clientIntegration.data?.data.description || "");
-			setEnabled(clientIntegration.data?.data.enabled || 0);
+			setEnabled(clientIntegration.data?.data.enabled || false);
 		}
 	});
 
@@ -163,7 +163,7 @@ const UpsertClientIntegrationPanel: Component<
 				reset: () => {
 					setName("");
 					setDescription("");
-					setEnabled(1);
+					setEnabled(true);
 					createClientIntegration.reset();
 					updateClientIntegration.reset();
 				},
@@ -207,8 +207,8 @@ const UpsertClientIntegrationPanel: Component<
 					<Checkbox
 						id="enabled"
 						name="enabled"
-						value={getEnabled() === 1}
-						onChange={(value) => setEnabled(value ? 1 : 0)}
+						value={getEnabled()}
+						onChange={(value) => setEnabled(value)}
 						copy={{
 							label: T()("enabled"),
 						}}

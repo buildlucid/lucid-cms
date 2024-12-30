@@ -4,10 +4,7 @@
 	"description": "The admin SolidJS SPA for Lucid CMS.",
 	"private": false,
 	"type": "module",
-	"files": [
-		"dist",
-		"assets"
-	],
+	"files": ["dist", "assets"],
 	"exports": {
 		".": {
 			"import": "./dist/index.js",
@@ -31,12 +28,7 @@
 		"url": "git+https://github.com/ProtoDigitalUK/lucid_cms.git",
 		"directory": "packages/admin"
 	},
-	"keywords": [
-		"CMS",
-		"Headless",
-		"SolidJS",
-		"Typescript"
-	],
+	"keywords": ["CMS", "Headless", "SolidJS", "Typescript"],
 	"license": "MIT",
 	"devDependencies": {
 		"@types/classnames": "^2.3.4",

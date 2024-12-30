@@ -29,7 +29,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
 		SelectMultipleValueT[]
 	>([]);
-	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal<1 | 0>(0);
+	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
 
 	// ---------------------------------
 	// Queries
@@ -71,7 +71,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 					};
 				}) || [],
 			);
-			setIsSuperAdmin(user.data?.data.superAdmin || 0);
+			setIsSuperAdmin(user.data?.data.superAdmin || false);
 		}
 	});
 
@@ -157,8 +157,8 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 					<Show when={userStore.get.user?.superAdmin}>
 						<Checkbox
 							id="superAdmin"
-							value={getIsSuperAdmin() === 1}
-							onChange={(value) => setIsSuperAdmin(value ? 1 : 0)}
+							value={getIsSuperAdmin()}
+							onChange={(value) => setIsSuperAdmin(value)}
 							name={"superAdmin"}
 							copy={{
 								label: T()("is_super_admin"),

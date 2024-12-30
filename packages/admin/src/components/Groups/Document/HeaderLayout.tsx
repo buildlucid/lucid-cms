@@ -94,9 +94,7 @@ export const HeaderLayout: Component<{
 		return true;
 	});
 	const defaultLocale = createMemo(() => {
-		return contentLocaleStore.get.locales.find(
-			(locale) => locale.isDefault === 1,
-		);
+		return contentLocaleStore.get.locales.find((locale) => locale.isDefault);
 	});
 	const showRevisions = createMemo(() => {
 		if (props.state.mode === "create") return false;

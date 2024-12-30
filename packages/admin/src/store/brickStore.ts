@@ -18,7 +18,7 @@ export interface BrickData {
 	key: string;
 	order: number;
 	type: "builder" | "fixed" | "collection-fields";
-	open: 1 | 0 | null;
+	open: boolean | null;
 	fields: Array<FieldResponse>;
 }
 
@@ -129,7 +129,7 @@ const [get, set] = createStore<BrickStoreT>({
 					key: "collection-pseudo-brick",
 					order: -1,
 					type: "collection-fields",
-					open: 0,
+					open: false,
 					fields: document?.fields || [],
 				});
 
@@ -149,7 +149,7 @@ const [get, set] = createStore<BrickStoreT>({
 						key: brick.key,
 						fields: [],
 						type: "fixed",
-						open: 0,
+						open: false,
 						order: -1,
 					});
 				}
@@ -169,7 +169,7 @@ const [get, set] = createStore<BrickStoreT>({
 					key: props.brickConfig.key,
 					order: largestOrder ? largestOrder.order + 1 : 0,
 					type: "builder",
-					open: 0,
+					open: false,
 					fields: [],
 				});
 			}),
@@ -190,7 +190,7 @@ const [get, set] = createStore<BrickStoreT>({
 		set(
 			"bricks",
 			produce((draft) => {
-				draft[brickIndex].open = draft[brickIndex].open === 1 ? 0 : 1;
+				draft[brickIndex].open = draft[brickIndex].open !== true;
 			}),
 		);
 		set("documentMutated", true);
@@ -344,7 +344,7 @@ const [get, set] = createStore<BrickStoreT>({
 						{
 							id: `ref-${nanoid()}`,
 							order: 0,
-							open: 0,
+							open: false,
 							fields: groupFields,
 						},
 					];
@@ -358,7 +358,7 @@ const [get, set] = createStore<BrickStoreT>({
 				field.groups.push({
 					id: `ref-${nanoid()}`,
 					order: largestOrder.order + 1,
-					open: 0,
+					open: false,
 					fields: groupFields,
 				});
 			}),
@@ -443,7 +443,7 @@ const [get, set] = createStore<BrickStoreT>({
 				const group = field.groups.find((g) => g.id === props.groupId);
 				if (!group) return;
 
-				group.open = group.open === 1 ? 0 : 1;
+				group.open = group.open !== true;
 			}),
 		);
 		set("documentMutated", true);

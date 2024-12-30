@@ -9,7 +9,7 @@ interface Params {
 		username: string;
 		firstName?: string;
 		lastName?: string;
-		superAdmin?: 1 | 0;
+		superAdmin?: boolean;
 		roleIds: number[];
 	};
 }

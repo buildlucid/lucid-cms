@@ -6,7 +6,7 @@ import type { ResponseBody } from "@types";
 interface Params {
 	name: string;
 	description: string;
-	enabled: 1 | 0;
+	enabled: boolean;
 }
 
 interface CreateSingleResponse {

@@ -33,8 +33,8 @@ const ClientIntegrationRow: Component<ClientIntegrationRow> = (props) => {
 			<div class="flex items-start">
 				<span
 					class={classNames("w-4 h-4 rounded-full block mr-2.5", {
-						"bg-primary-base": props.clientIntegration.enabled === 1,
-						"bg-error-base": props.clientIntegration.enabled === 0,
+						"bg-primary-base": props.clientIntegration.enabled,
+						"bg-error-base": !props.clientIntegration.enabled,
 					})}
 				/>
 				<div>

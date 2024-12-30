@@ -25,7 +25,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	const [getFirstName, setFirstName] = createSignal<string>("");
 	const [getLastName, setLastName] = createSignal<string>("");
 	const [getEmail, setEmail] = createSignal<string>("");
-	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal<1 | 0>(0);
+	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
 
 	// ---------------------------------
 	// Queries
@@ -96,7 +96,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 					setFirstName("");
 					setLastName("");
 					setEmail("");
-					setIsSuperAdmin(0);
+					setIsSuperAdmin(false);
 					setSelectedRoles([]);
 				},
 			}}
@@ -190,8 +190,8 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 					<Show when={userStore.get.user?.superAdmin}>
 						<Checkbox
 							id="superAdmin"
-							value={getIsSuperAdmin() === 1}
-							onChange={(value) => setIsSuperAdmin(value ? 1 : 0)}
+							value={getIsSuperAdmin()}
+							onChange={(value) => setIsSuperAdmin(value)}
 							name={"superAdmin"}
 							copy={{
 								label: T()("is_super_admin"),

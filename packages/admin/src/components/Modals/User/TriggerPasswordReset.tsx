@@ -43,7 +43,7 @@ const TriggerPasswordReset: Component<TriggerPasswordResetProps> = (props) => {
 					updateUser.action.mutate({
 						id: id,
 						body: {
-							triggerPasswordReset: 1,
+							triggerPasswordReset: true,
 						},
 					});
 				},

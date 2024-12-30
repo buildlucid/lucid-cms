@@ -23,7 +23,7 @@ const AccountRoute: Component = () => {
 							{
 								type: "error",
 								message: T()("please_reset_password_message"),
-								show: user()?.triggerPasswordReset === 1,
+								show: user()?.triggerPasswordReset === true,
 							},
 						]}
 					/>

@@ -15,7 +15,7 @@ interface GroupBodyProps {
 		fields: FieldResponse[];
 		fieldConfig: CFConfig<"repeater">;
 		groupId: number | string;
-		groupOpen: 1 | 0 | null;
+		groupOpen: boolean | null;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
 		dragDropKey: string;

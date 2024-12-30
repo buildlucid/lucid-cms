@@ -45,7 +45,7 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		if (
-			authenticatedUser.data?.data.triggerPasswordReset === 1 &&
+			authenticatedUser.data?.data.triggerPasswordReset === true &&
 			location.pathname !== "/admin/account"
 		) {
 			spawnToast({

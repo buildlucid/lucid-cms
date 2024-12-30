@@ -27,7 +27,7 @@ interface CheckboxFieldProps {
 export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 	// -------------------------------
 	// State
-	const [getValue, setValue] = createSignal(0);
+	const [getValue, setValue] = createSignal(false);
 
 	// -------------------------------
 	// Memos
@@ -35,7 +35,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<1 | 0>({
+		return brickHelpers.getFieldValue<boolean>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
@@ -48,7 +48,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 	// -------------------------------
 	// Effects
 	createEffect(() => {
-		setValue(fieldValue() || 0);
+		setValue(fieldValue() || false);
 	});
 
 	// -------------------------------
@@ -60,7 +60,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupId: props.state.groupId,
 			})}
-			value={getValue() === 1}
+			value={getValue()}
 			onChange={(value) => {
 				batch(() => {
 					brickStore.get.setFieldValue({
@@ -69,10 +69,10 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 						key: props.state.fieldConfig.key,
 						groupId: props.state.groupId,
 						repeaterKey: props.state.repeaterKey,
-						value: value ? 1 : 0,
+						value: value,
 						contentLocale: props.state.contentLocale,
 					});
-					setValue(value ? 1 : 0);
+					setValue(value);
 				});
 			}}
 			name={props.state.fieldConfig.key}

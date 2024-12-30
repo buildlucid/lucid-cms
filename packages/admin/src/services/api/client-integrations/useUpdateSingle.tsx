@@ -9,7 +9,7 @@ interface Params {
 	body: {
 		name?: string;
 		description?: string | null;
-		enabled?: 1 | 0 | null;
+		enabled?: boolean | null;
 	};
 }
 
