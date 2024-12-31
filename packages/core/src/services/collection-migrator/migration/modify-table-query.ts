@@ -18,7 +18,7 @@ const modifyTableQuery: ServiceFn<
 > = async (context, data) => {
 	try {
 		const supportsMultipleAlter =
-			context.config.db.config.support?.multipleAlterTables ?? false;
+			context.config.db.supports("multipleAlterTables") ?? false;
 		let altered = false;
 
 		//* for db that support multiple ALTER TABLE operations (postgres)

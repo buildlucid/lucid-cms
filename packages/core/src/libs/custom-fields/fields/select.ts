@@ -52,7 +52,7 @@ class SelectCustomField extends CustomField<"select"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("text"),
+					type: props.db.getDataType("text"),
 					nullable: true,
 				},
 			],

@@ -57,7 +57,7 @@ class LinkCustomField extends CustomField<"link"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("jsonb"),
+					type: props.db.getDataType("jsonb"),
 					nullable: true,
 					default: this.config.config.default,
 				},

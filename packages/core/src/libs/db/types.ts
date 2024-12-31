@@ -14,6 +14,12 @@ export type Select<T> = {
 	[P in keyof T]: T[P] extends { __select__: infer S } ? S : T[P];
 };
 
+export type DefaultValueType<T> = T extends object
+	? keyof T extends never
+		? T
+		: { [K in keyof T]: T[K] }
+	: T;
+
 export type DocumentVersionType = "draft" | "published" | "revision";
 
 export type ColumnTypes =
@@ -30,7 +36,14 @@ export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
 
 export type DatabaseConfig = {
 	support: {
+		/**
+		 * Whether the database supports the ALTER COLUMN statement.
+		 */
 		alterColumn: boolean;
+		/**
+		 * Whether multiple columns can be altered in a single ALTER TABLE statement.
+		 * Some databases require separate statements for each column modification.
+		 */
 		multipleAlterTables: boolean;
 		/**
 		 * Set to true if the database supports boolean column data types.
@@ -38,12 +51,21 @@ export type DatabaseConfig = {
 		 */
 		boolean: boolean;
 		/**
-		 * Determines if a primary key colum needs auto increment
+		 * Determines if a primary key colum needs auto increment.
 		 */
 		autoIncrement: boolean;
 	};
+	/**
+	 * Maps column data types to their database-specific implementations.
+	 * Each adapter maps these standard types to what their database supports:
+	 *
+	 * Examples:
+	 * - 'primary' maps to 'serial' in PostgreSQL, 'integer' in SQLite (with autoincrement)
+	 * - 'boolean' maps to 'boolean' in PostgreSQL, 'integer' in SQLite
+	 * - 'jsonb' maps to 'jsonb' in PostgreSQL, 'json' in SQLite
+	 */
 	dataTypes: {
-		serial: ColumnDataType;
+		primary: ColumnDataType;
 		integer: ColumnDataType;
 		boolean: ColumnDataType;
 		jsonb: ColumnDataType;
@@ -52,6 +74,16 @@ export type DatabaseConfig = {
 		char: ((length: number) => ColumnDataType) | ColumnDataType;
 		varchar: ((length?: number) => ColumnDataType) | ColumnDataType;
 	};
+	/**
+	 * Maps column default values to their database-specific implementations.
+	 * Each adapter maps these values to what their database supports:
+	 *
+	 * Examples:
+	 * - 'timestamp.now' maps to 'NOW()' in PostgreSQL and 'CURRENT_TIMESTAMP' in SQLite
+	 * - 'boolean.true' maps to 'true' in PostgreSQL and '1' in SQLite
+	 *
+	 * Remember that the values used here should reflect the column dataTypes as well as database support.
+	 */
 	defaults: {
 		timestamp: {
 			now: string;
@@ -61,6 +93,9 @@ export type DatabaseConfig = {
 			false: false | 0;
 		};
 	};
+	/**
+	 * The operator used for fuzzy text matching.
+	 */
 	fuzzOperator: "like" | "ilike" | "%";
 };
 

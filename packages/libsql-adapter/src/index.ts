@@ -36,7 +36,7 @@ class LibSQLAdapter extends DatabaseAdapter {
 				autoIncrement: true,
 			},
 			dataTypes: {
-				serial: "integer",
+				primary: "integer",
 				integer: "integer",
 				boolean: "integer",
 				jsonb: "json",

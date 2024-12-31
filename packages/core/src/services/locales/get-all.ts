@@ -13,7 +13,7 @@ const getAll: ServiceFn<[], LocalesResponse[]> = async (context) => {
 			{
 				key: "is_deleted",
 				operator: "!=",
-				value: context.config.db.config.defaults.boolean.true,
+				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
 	});

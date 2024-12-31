@@ -65,7 +65,7 @@ const deleteMultiple: ServiceFn<
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: context.config.db.config.defaults.boolean.false,
+				value: context.config.db.getDefault("boolean", "false"),
 			},
 		],
 	});

@@ -7,44 +7,42 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_media")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("key", adapter.getColumnType("text"), (col) =>
+				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.unique().notNull(),
 				)
-				.addColumn("e_tag", adapter.getColumnType("text"))
-				.addColumn("visible", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("e_tag", adapter.getDataType("text"))
+				.addColumn("visible", adapter.getDataType("boolean"), (col) =>
 					col
 						.notNull()
 						.defaultTo(
 							adapter.formatDefaultValue(
 								"boolean",
-								adapter.config.defaults.boolean.true,
+								adapter.getDefault("boolean", "true"),
 							),
 						),
 				)
-				.addColumn("type", adapter.getColumnType("text"), (col) =>
+				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("mime_type", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("mime_type", adapter.getColumnType("text"), (col) =>
+				.addColumn("file_extension", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("file_extension", adapter.getColumnType("text"), (col) =>
+				.addColumn("file_size", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("file_size", adapter.getColumnType("integer"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("width", adapter.getColumnType("integer"))
-				.addColumn("height", adapter.getColumnType("integer"))
-				.addColumn("blur_hash", adapter.getColumnType("text"))
-				.addColumn("average_colour", adapter.getColumnType("text"))
-				.addColumn("is_dark", adapter.getColumnType("boolean"))
-				.addColumn("is_light", adapter.getColumnType("boolean"))
+				.addColumn("width", adapter.getDataType("integer"))
+				.addColumn("height", adapter.getDataType("integer"))
+				.addColumn("blur_hash", adapter.getDataType("text"))
+				.addColumn("average_colour", adapter.getDataType("text"))
+				.addColumn("is_dark", adapter.getDataType("boolean"))
+				.addColumn("is_light", adapter.getDataType("boolean"))
 				.addColumn(
 					"title_translation_key_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_translation_keys.id")
@@ -53,27 +51,27 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn(
 					"alt_translation_key_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_translation_keys.id")
 							.onDelete("set null")
 							.onUpdate("cascade"),
 				)
-				.addColumn("custom_meta", adapter.getColumnType("text"))
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("custom_meta", adapter.getDataType("text"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -87,26 +85,26 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 
 			await db.schema
 				.createTable("lucid_media_awaiting_sync")
-				.addColumn("key", adapter.getColumnType("text"), (col) =>
+				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.primaryKey(),
 				)
-				.addColumn("timestamp", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("timestamp", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),
 				)
 				.execute();
 
 			await db.schema
 				.createTable("lucid_processed_images")
-				.addColumn("key", adapter.getColumnType("text"), (col) =>
+				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.primaryKey(),
 				)
-				.addColumn("media_key", adapter.getColumnType("text"), (col) =>
+				.addColumn("media_key", adapter.getDataType("text"), (col) =>
 					col
 						.references("lucid_media.key")
 						.onDelete("cascade")
 						.onUpdate("cascade"),
 				)
-				.addColumn("file_size", adapter.getColumnType("integer"), (col) =>
+				.addColumn("file_size", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
 				.execute();

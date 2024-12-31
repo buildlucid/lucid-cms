@@ -1,5 +1,5 @@
 import type { ModifyColumnOperation } from "../migration/types.js";
-import type { DatabaseConfig } from "../../../types.js";
+import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 /**
  * Determines if the column needs to be dropeed and re-created or altered. Only alters if:
@@ -12,10 +12,10 @@ import type { DatabaseConfig } from "../../../types.js";
  */
 const determineColumnModType = (
 	modifications: ModifyColumnOperation,
-	dbConfig: DatabaseConfig,
+	dbAdapter: DatabaseAdapter,
 ): "drop-and-add" | "alter" => {
 	const needsRecreation =
-		!dbConfig.support.alterColumn ||
+		!dbAdapter.supports("alterColumn") ||
 		modifications.changes.unique !== undefined ||
 		modifications.changes.foreignKey !== undefined ||
 		modifications.changes.type !== undefined;

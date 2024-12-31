@@ -44,14 +44,14 @@ const createFieldTables = (props: {
 		{
 			name: buildCoreColumnName("id"),
 			source: "core",
-			type: props.db.getColumnType("serial"),
+			type: props.db.getDataType("primary"),
 			nullable: false,
 			primary: true,
 		},
 		{
 			name: buildCoreColumnName("collection_key"),
 			source: "core",
-			type: props.db.getColumnType("text"),
+			type: props.db.getDataType("text"),
 			nullable: false,
 			foreignKey: {
 				table: "lucid_collections",
@@ -62,7 +62,7 @@ const createFieldTables = (props: {
 		{
 			name: buildCoreColumnName("document_id"),
 			source: "core",
-			type: props.db.getColumnType("integer"),
+			type: props.db.getDataType("integer"),
 			nullable: false,
 			foreignKey: {
 				table: props.documentTable,
@@ -73,7 +73,7 @@ const createFieldTables = (props: {
 		{
 			name: buildCoreColumnName("document_version_id"),
 			source: "core",
-			type: props.db.getColumnType("integer"),
+			type: props.db.getDataType("integer"),
 			nullable: false,
 			foreignKey: {
 				table: props.versionTable,
@@ -84,7 +84,7 @@ const createFieldTables = (props: {
 		{
 			name: buildCoreColumnName("locale"),
 			source: "core",
-			type: props.db.getColumnType("text"),
+			type: props.db.getDataType("text"),
 			nullable: false,
 			foreignKey: {
 				table: "lucid_locales",
@@ -101,7 +101,7 @@ const createFieldTables = (props: {
 			columns.push({
 				name: buildCoreColumnName("parent_id"),
 				source: "core",
-				type: props.db.getColumnType("integer"),
+				type: props.db.getDataType("integer"),
 				nullable: false,
 				foreignKey: {
 					table: props.parentTable,
@@ -114,7 +114,7 @@ const createFieldTables = (props: {
 		columns.push({
 			name: buildCoreColumnName("sort_order"),
 			source: "core",
-			type: props.db.getColumnType("integer"),
+			type: props.db.getDataType("integer"),
 			nullable: false,
 			default: 0,
 		});
@@ -175,7 +175,7 @@ const createFieldTables = (props: {
 					foreignKey: column.foreignKey,
 					//* holding off on default value contraint on custom field columns due to sqlite/libsql adapters not supporting the alter column operation and instead having to drop+add the column again resulting in data loss.
 					//* CF default values are a lot more likely to be edited than the others and in a way where a user wouldnt expect data loss - so until we have a solution here, no default contraints for CF exist
-					default: props.db.config.support.alterColumn ? column.default : null,
+					default: props.db.supports("alterColumn") ? column.default : null,
 				});
 			}
 		}

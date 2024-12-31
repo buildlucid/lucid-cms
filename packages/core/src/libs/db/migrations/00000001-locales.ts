@@ -12,33 +12,33 @@ const Migration00000001: MigrationFn = (adapter: DatabaseAdapter) => {
 
 			await db.schema
 				.createTable("lucid_locales")
-				.addColumn("code", adapter.getColumnType("text"), (col) =>
+				.addColumn("code", adapter.getDataType("text"), (col) =>
 					col.primaryKey(),
 				)
-				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"boolean",
-							adapter.config.defaults.boolean.false,
+							adapter.getDefault("boolean", "false"),
 						),
 					),
 				)
-				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("is_deleted_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(null),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)

@@ -37,14 +37,14 @@ const createVersionsTable = (props: {
 					{
 						name: "id",
 						source: "core",
-						type: props.db.getColumnType("serial"),
+						type: props.db.getDataType("primary"),
 						nullable: false,
 						primary: true,
 					},
 					{
 						name: "collection_key",
 						source: "core",
-						type: props.db.getColumnType("text"),
+						type: props.db.getDataType("text"),
 						nullable: false,
 						foreignKey: {
 							table: "lucid_collections",
@@ -55,7 +55,7 @@ const createVersionsTable = (props: {
 					{
 						name: "document_id",
 						source: "core",
-						type: props.db.getColumnType("integer"),
+						type: props.db.getDataType("integer"),
 						nullable: false,
 						foreignKey: {
 							table: documentTableRes.data,
@@ -66,14 +66,14 @@ const createVersionsTable = (props: {
 					{
 						name: "type",
 						source: "core",
-						type: props.db.getColumnType("text"),
+						type: props.db.getDataType("text"),
 						default: "draft",
 						nullable: false,
 					},
 					{
 						name: "created_by",
 						source: "core",
-						type: props.db.getColumnType("integer"),
+						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -84,7 +84,7 @@ const createVersionsTable = (props: {
 					{
 						name: "updated_by",
 						source: "core",
-						type: props.db.getColumnType("integer"),
+						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -95,16 +95,16 @@ const createVersionsTable = (props: {
 					{
 						name: "created_at",
 						source: "core",
-						type: props.db.getColumnType("timestamp"),
+						type: props.db.getDataType("timestamp"),
 						nullable: true,
-						default: props.db.config.defaults.timestamp.now,
+						default: props.db.getDefault("timestamp", "now"),
 					},
 					{
 						name: "updated_at",
 						source: "core",
-						type: props.db.getColumnType("timestamp"),
+						type: props.db.getDataType("timestamp"),
 						nullable: true,
-						default: props.db.config.defaults.timestamp.now,
+						default: props.db.getDefault("timestamp", "now"),
 					},
 				],
 			},

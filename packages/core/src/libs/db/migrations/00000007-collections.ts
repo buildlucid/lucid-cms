@@ -8,23 +8,23 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Collections
 			await db.schema
 				.createTable("lucid_collections")
-				.addColumn("key", adapter.getColumnType("text"), (col) =>
+				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.primaryKey(),
 				)
-				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"boolean",
-							adapter.config.defaults.boolean.false,
+							adapter.getDefault("boolean", "false"),
 						),
 					),
 				)
-				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("is_deleted_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -33,20 +33,20 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Migrations
 			await db.schema
 				.createTable("lucid_collection_migrations")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("collection_key", adapter.getColumnType("text"), (col) =>
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
 					col.references("lucid_collections.key").onDelete("cascade").notNull(),
 				)
-				.addColumn("migration_plans", adapter.getColumnType("jsonb"), (col) =>
+				.addColumn("migration_plans", adapter.getDataType("jsonb"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -59,43 +59,43 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Collection Documents
 			await db.schema
 				.createTable("lucid_collection_documents")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("collection_key", adapter.getColumnType("text"), (col) =>
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"boolean",
-							adapter.config.defaults.boolean.false,
+							adapter.getDefault("boolean", "false"),
 						),
 					),
 				)
-				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
-				.addColumn("deleted_by", adapter.getColumnType("integer"), (col) =>
+				.addColumn("is_deleted_at", adapter.getDataType("timestamp"))
+				.addColumn("deleted_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("created_by", adapter.getColumnType("integer"), (col) =>
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("updated_by", adapter.getColumnType("integer"), (col) =>
+				.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -104,32 +104,32 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Document Versions
 			await db.schema
 				.createTable("lucid_collection_document_versions")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("document_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col
 						.references("lucid_collection_documents.id")
 						.onDelete("cascade")
 						.notNull(),
 				)
-				.addColumn("version_type", adapter.getColumnType("text"), (col) =>
+				.addColumn("version_type", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				) // draft, published, revision
-				.addColumn("promoted_from", adapter.getColumnType("integer"), (col) =>
+				.addColumn("promoted_from", adapter.getDataType("integer"), (col) =>
 					col
 						.references("lucid_collection_document_versions.id")
 						.onDelete("set null"),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("created_by", adapter.getColumnType("integer"), (col) =>
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
 				.execute();
@@ -143,28 +143,28 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Bricks
 			await db.schema
 				.createTable("lucid_collection_document_bricks")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"collection_document_version_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_document_versions.id")
 							.onDelete("cascade")
 							.notNull(),
 				)
-				.addColumn("brick_type", adapter.getColumnType("text"), (col) =>
+				.addColumn("brick_type", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				) // builder, fixed, collection-fields
-				.addColumn("brick_key", adapter.getColumnType("text"))
-				.addColumn("brick_order", adapter.getColumnType("integer"))
-				.addColumn("brick_open", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("brick_key", adapter.getDataType("text"))
+				.addColumn("brick_order", adapter.getDataType("integer"))
+				.addColumn("brick_open", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"boolean",
-							adapter.config.defaults.boolean.false,
+							adapter.getDefault("boolean", "false"),
 						),
 					),
 				)
@@ -173,12 +173,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Groups
 			await db.schema
 				.createTable("lucid_collection_document_groups")
-				.addColumn("group_id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("group_id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"collection_document_version_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_document_versions.id")
@@ -187,7 +187,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn(
 					"collection_document_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_documents.id")
@@ -196,33 +196,33 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn(
 					"collection_brick_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_document_bricks.id")
 							.onDelete("cascade")
 							.notNull(),
 				)
-				.addColumn("parent_group_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("parent_group_id", adapter.getDataType("integer"), (col) =>
 					col
 						.references("lucid_collection_document_groups.group_id")
 						.onDelete("cascade"),
 				)
-				.addColumn("group_open", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("group_open", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"boolean",
-							adapter.config.defaults.boolean.false,
+							adapter.getDefault("boolean", "false"),
 						),
 					),
 				)
-				.addColumn("repeater_key", adapter.getColumnType("text"), (col) =>
+				.addColumn("repeater_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("group_order", adapter.getColumnType("integer"), (col) =>
+				.addColumn("group_order", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("ref", adapter.getColumnType("text"))
+				.addColumn("ref", adapter.getDataType("text"))
 				.execute();
 
 			await db.schema
@@ -240,12 +240,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 			// Fields
 			await db.schema
 				.createTable("lucid_collection_document_fields")
-				.addColumn("fields_id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("fields_id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
 					"collection_document_version_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_document_versions.id")
@@ -254,7 +254,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn(
 					"collection_document_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_documents.id")
@@ -263,36 +263,34 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn(
 					"collection_brick_id",
-					adapter.getColumnType("integer"),
+					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.references("lucid_collection_document_bricks.id")
 							.onDelete("cascade")
 							.notNull(),
 				)
-				.addColumn("group_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("group_id", adapter.getDataType("integer"), (col) =>
 					col
 						.references("lucid_collection_document_groups.group_id")
 						.onDelete("cascade"),
 				)
-				.addColumn("locale_code", adapter.getColumnType("text"), (col) =>
+				.addColumn("locale_code", adapter.getDataType("text"), (col) =>
 					col.references("lucid_locales.code").onDelete("cascade").notNull(),
 				)
-				.addColumn("key", adapter.getColumnType("text"), (col) => col.notNull())
-				.addColumn("type", adapter.getColumnType("text"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("text_value", adapter.getColumnType("text"))
-				.addColumn("int_value", adapter.getColumnType("integer"))
-				.addColumn("bool_value", adapter.getColumnType("boolean"))
-				.addColumn("json_value", adapter.getColumnType("text"))
-				.addColumn("media_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("key", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("text_value", adapter.getDataType("text"))
+				.addColumn("int_value", adapter.getDataType("integer"))
+				.addColumn("bool_value", adapter.getDataType("boolean"))
+				.addColumn("json_value", adapter.getDataType("text"))
+				.addColumn("media_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media.id").onDelete("set null"),
 				)
-				.addColumn("document_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_collection_documents.id").onDelete("set null"),
 				)
-				.addColumn("user_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
 				.execute();

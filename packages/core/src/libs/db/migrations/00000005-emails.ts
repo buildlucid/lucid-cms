@@ -7,60 +7,55 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_emails")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("email_hash", adapter.getColumnType("char", 64), (col) =>
+				.addColumn("email_hash", adapter.getDataType("char", 64), (col) =>
 					col.unique().notNull(),
 				)
-				.addColumn("from_address", adapter.getColumnType("text"), (col) =>
+				.addColumn("from_address", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("from_name", adapter.getColumnType("text"), (col) =>
+				.addColumn("from_name", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("to_address", adapter.getColumnType("text"), (col) =>
+				.addColumn("to_address", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("subject", adapter.getColumnType("text"), (col) =>
+				.addColumn("subject", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("cc", adapter.getColumnType("text"))
-				.addColumn("bcc", adapter.getColumnType("text"))
-				.addColumn("delivery_status", adapter.getColumnType("text"), (col) =>
+				.addColumn("cc", adapter.getDataType("text"))
+				.addColumn("bcc", adapter.getDataType("text"))
+				.addColumn("delivery_status", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				) // 'pending', 'delivered', 'failed'
-				.addColumn("template", adapter.getColumnType("text"), (col) =>
+				.addColumn("template", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("data", adapter.getColumnType("text"))
-				.addColumn("type", adapter.getColumnType("text"), (col) =>
-					col.notNull(),
-				) // 'internal' or 'external'
-				.addColumn("sent_count", adapter.getColumnType("integer"), (col) =>
+				.addColumn("data", adapter.getDataType("text"))
+				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull()) // 'internal' or 'external'
+				.addColumn("sent_count", adapter.getDataType("integer"), (col) =>
 					col.notNull().defaultTo(0),
 				)
-				.addColumn("error_count", adapter.getColumnType("integer"), (col) =>
+				.addColumn("error_count", adapter.getDataType("integer"), (col) =>
 					col.notNull().defaultTo(0),
 				)
-				.addColumn("last_error_message", adapter.getColumnType("text"))
-				.addColumn(
-					"last_attempt_at",
-					adapter.getColumnType("timestamp"),
-					(col) =>
-						col.defaultTo(
-							adapter.formatDefaultValue(
-								"timestamp",
-								adapter.config.defaults.timestamp.now,
-							),
-						),
-				)
-				.addColumn("last_success_at", adapter.getColumnType("timestamp"))
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("last_error_message", adapter.getDataType("text"))
+				.addColumn("last_attempt_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("last_success_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)

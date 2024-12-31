@@ -49,7 +49,7 @@ class ColourCustomField extends CustomField<"colour"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("text"),
+					type: props.db.getDataType("text"),
 					nullable: true,
 					default: this.config.config.default,
 				},

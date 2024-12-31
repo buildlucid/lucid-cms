@@ -16,6 +16,7 @@ import type {
 	DatabaseConfig,
 	InferredTable,
 	KyselyDB,
+	DefaultValueType,
 } from "./types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
@@ -66,7 +67,7 @@ export default abstract class DatabaseAdapter {
 		if (value === null || value === undefined) return value as T;
 
 		if (type === "boolean" && typeof value === "boolean") {
-			if (this.config.support.boolean) return value as T;
+			if (this.supports("boolean")) return value as T;
 			return (value ? 1 : 0) as T;
 		}
 		if (type === "jsonb" || type === "json") {
@@ -85,7 +86,7 @@ export default abstract class DatabaseAdapter {
 	/**
 	 * A helper for returning supported column data types
 	 */
-	getColumnType(
+	getDataType(
 		type: keyof DatabaseConfig["dataTypes"],
 		...args: unknown[]
 	): ColumnDataType {
@@ -100,9 +101,34 @@ export default abstract class DatabaseAdapter {
 	 * A helper for extending a column definition based on auto increment support
 	 */
 	primaryKeyColumnBuilder(col: ColumnDefinitionBuilder) {
-		return this.config.support.autoIncrement
+		return this.supports("autoIncrement")
 			? col.primaryKey().autoIncrement()
 			: col.primaryKey();
+	}
+	/**
+	 * A helper for feature support
+	 */
+	supports(key: keyof DatabaseConfig["support"]) {
+		return this.config.support[key];
+	}
+	/**
+	 * A helper for accessing the config default values
+	 */
+	getDefault<
+		T extends keyof DatabaseConfig["defaults"],
+		K extends keyof DatabaseConfig["defaults"][T] | undefined = undefined,
+	>(
+		type: T,
+		key?: K,
+	): K extends keyof DatabaseConfig["defaults"][T]
+		? DatabaseConfig["defaults"][T][K]
+		: DatabaseConfig["defaults"][T] {
+		const defaultValue = this.config.defaults[type];
+		return (
+			key ? defaultValue[key] : defaultValue
+		) as K extends keyof DatabaseConfig["defaults"][T]
+			? DatabaseConfig["defaults"][T][K]
+			: DatabaseConfig["defaults"][T];
 	}
 	/**
 	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections

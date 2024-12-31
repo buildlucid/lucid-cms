@@ -51,7 +51,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("timestamp"),
+					type: props.db.getDataType("timestamp"),
 					nullable: true,
 					default: this.config.config.default,
 				},

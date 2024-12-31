@@ -45,7 +45,7 @@ class PostgresAdapter extends DatabaseAdapter {
 				boolean: true,
 			},
 			dataTypes: {
-				serial: "serial",
+				primary: "serial",
 				integer: "integer",
 				boolean: "boolean",
 				jsonb: "jsonb",

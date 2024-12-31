@@ -102,7 +102,7 @@ export default class CollectionDocumentVersionsRepo {
 			.where(
 				"lucid_collection_documents.is_deleted",
 				"=",
-				this.dbAdapter.config.defaults.boolean.false,
+				this.dbAdapter.getDefault("boolean", "false"),
 			)
 			.where(
 				"lucid_collection_documents.collection_key",
@@ -138,7 +138,7 @@ export default class CollectionDocumentVersionsRepo {
 			.where(
 				"lucid_collection_documents.is_deleted",
 				"=",
-				this.dbAdapter.config.defaults.boolean.false,
+				this.dbAdapter.getDefault("boolean", "false"),
 			)
 			.where(
 				"lucid_collection_documents.collection_key",

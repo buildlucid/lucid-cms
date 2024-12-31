@@ -32,14 +32,14 @@ const createDocumentTable = (props: {
 					{
 						name: "id",
 						source: "core",
-						type: props.db.getColumnType("serial"),
+						type: props.db.getDataType("primary"),
 						nullable: false,
 						primary: true,
 					},
 					{
 						name: "collection_key",
 						source: "core",
-						type: props.db.getColumnType("text"),
+						type: props.db.getDataType("text"),
 						nullable: false,
 						foreignKey: {
 							table: "lucid_collections",
@@ -50,20 +50,20 @@ const createDocumentTable = (props: {
 					{
 						name: "is_deleted",
 						source: "core",
-						type: props.db.getColumnType("boolean"),
-						default: props.db.config.defaults.boolean.false,
+						type: props.db.getDataType("boolean"),
+						default: props.db.getDefault("boolean", "false"),
 						nullable: false,
 					},
 					{
 						name: "is_deleted_at",
 						source: "core",
-						type: props.db.getColumnType("timestamp"),
+						type: props.db.getDataType("timestamp"),
 						nullable: true,
 					},
 					{
 						name: "deleted_by",
 						source: "core",
-						type: props.db.getColumnType("integer"),
+						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -74,7 +74,7 @@ const createDocumentTable = (props: {
 					{
 						name: "created_by",
 						source: "core",
-						type: props.db.getColumnType("integer"),
+						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
@@ -85,9 +85,9 @@ const createDocumentTable = (props: {
 					{
 						name: "created_at",
 						source: "core",
-						type: props.db.getColumnType("timestamp"),
+						type: props.db.getDataType("timestamp"),
 						nullable: true,
-						default: props.db.config.defaults.timestamp.now,
+						default: props.db.getDefault("timestamp", "now"),
 					},
 				],
 			},

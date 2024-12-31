@@ -7,67 +7,67 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_users")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("super_admin", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("super_admin", adapter.getDataType("boolean"), (col) =>
 					col
 						.defaultTo(
 							adapter.formatDefaultValue(
 								"boolean",
-								adapter.config.defaults.boolean.false,
+								adapter.getDefault("boolean", "false"),
 							),
 						)
 						.notNull(),
 				)
-				.addColumn("email", adapter.getColumnType("text"), (col) =>
+				.addColumn("email", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
 				)
-				.addColumn("username", adapter.getColumnType("text"), (col) =>
+				.addColumn("username", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
 				)
-				.addColumn("first_name", adapter.getColumnType("text"))
-				.addColumn("last_name", adapter.getColumnType("text"))
-				.addColumn("password", adapter.getColumnType("text"))
-				.addColumn("secret", adapter.getColumnType("text"), (col) =>
+				.addColumn("first_name", adapter.getDataType("text"))
+				.addColumn("last_name", adapter.getDataType("text"))
+				.addColumn("password", adapter.getDataType("text"))
+				.addColumn("secret", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
 				.addColumn(
 					"triggered_password_reset",
-					adapter.getColumnType("boolean"),
+					adapter.getDataType("boolean"),
 					(col) =>
 						col.defaultTo(
 							adapter.formatDefaultValue(
 								"boolean",
-								adapter.config.defaults.boolean.false,
+								adapter.getDefault("boolean", "false"),
 							),
 						),
 				)
-				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
+				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"boolean",
-							adapter.config.defaults.boolean.false,
+							adapter.getDefault("boolean", "false"),
 						),
 					),
 				)
-				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
-				.addColumn("deleted_by", adapter.getColumnType("integer"), (col) =>
+				.addColumn("is_deleted_at", adapter.getDataType("timestamp"))
+				.addColumn("deleted_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -75,26 +75,26 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 
 			await db.schema
 				.createTable("lucid_roles")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("name", adapter.getColumnType("text"), (col) =>
+				.addColumn("name", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
 				)
-				.addColumn("description", adapter.getColumnType("text"))
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("description", adapter.getDataType("text"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -102,28 +102,28 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 
 			await db.schema
 				.createTable("lucid_role_permissions")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("role_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("role_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_roles.id").onDelete("cascade"),
 				)
-				.addColumn("permission", adapter.getColumnType("text"), (col) =>
+				.addColumn("permission", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -131,28 +131,28 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 
 			await db.schema
 				.createTable("lucid_user_roles")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("user_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("cascade"),
 				)
-				.addColumn("role_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("role_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_roles.id").onDelete("cascade"),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
@@ -160,25 +160,25 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 
 			await db.schema
 				.createTable("lucid_user_tokens")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("user_id", adapter.getColumnType("integer"), (col) =>
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("cascade"),
 				)
-				.addColumn("token_type", adapter.getColumnType("varchar", 255))
-				.addColumn("token", adapter.getColumnType("varchar", 255), (col) =>
+				.addColumn("token_type", adapter.getDataType("varchar", 255))
+				.addColumn("token", adapter.getDataType("varchar", 255), (col) =>
 					col.notNull().unique(),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("expiry_date", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("expiry_date", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),
 				)
 				.execute();

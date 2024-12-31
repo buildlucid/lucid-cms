@@ -24,7 +24,7 @@ export default class UsersRepo {
 		return this.db
 			.selectFrom("lucid_users")
 			.select(sql`count(*)`.as("count"))
-			.where("is_deleted", "=", this.dbAdapter.config.defaults.boolean.false)
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
 			.executeTakeFirst() as Promise<{ count: string } | undefined>;
 	};
 	// ----------------------------------------
@@ -84,7 +84,7 @@ export default class UsersRepo {
 					.as("roles"),
 			])
 			.where("id", "=", props.id)
-			.where("is_deleted", "=", this.dbAdapter.config.defaults.boolean.false)
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
 			.executeTakeFirst();
 	};
 	selectSingleByEmailUsername = async <
@@ -156,7 +156,7 @@ export default class UsersRepo {
 			.where(
 				"lucid_users.is_deleted",
 				"=",
-				this.dbAdapter.config.defaults.boolean.false,
+				this.dbAdapter.getDefault("boolean", "false"),
 			)
 			.groupBy("lucid_users.id");
 
@@ -169,7 +169,7 @@ export default class UsersRepo {
 			.where(
 				"lucid_users.is_deleted",
 				"=",
-				this.dbAdapter.config.defaults.boolean.false,
+				this.dbAdapter.getDefault("boolean", "false"),
 			);
 
 		const { main, count } = queryBuilder.main(

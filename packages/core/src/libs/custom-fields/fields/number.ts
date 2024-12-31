@@ -49,7 +49,7 @@ class NumberCustomField extends CustomField<"number"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("integer"),
+					type: props.db.getDataType("integer"),
 					nullable: true,
 					default: this.config.config.default,
 				},

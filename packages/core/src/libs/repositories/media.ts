@@ -85,7 +85,7 @@ export default class MediaRepo {
 					)
 					.as("alt_translations"),
 			])
-			.where("visible", "=", this.dbAdapter.config.defaults.boolean.true)
+			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "=", props.id)
 			.executeTakeFirst();
 	};
@@ -184,7 +184,7 @@ export default class MediaRepo {
 				"title_translations.value",
 				"alt_translations.value",
 			])
-			.where("visible", "=", this.dbAdapter.config.defaults.boolean.true);
+			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 		const mediasCountQuery = this.db
 			.selectFrom("lucid_media")
@@ -211,7 +211,7 @@ export default class MediaRepo {
 				"title_translations.value as title_translation_value",
 				"alt_translations.value as alt_translation_value",
 			])
-			.where("visible", "=", this.dbAdapter.config.defaults.boolean.true);
+			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 		const { main, count } = queryBuilder.main(
 			{

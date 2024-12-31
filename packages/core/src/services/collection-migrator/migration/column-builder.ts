@@ -95,7 +95,7 @@ export const modifyColumn = <
 	operation: ModifyColumnOperation,
 	db: DatabaseAdapter,
 ): T => {
-	if (db.config.support.alterColumn !== true) return query;
+	if (db.supports("alterColumn")) return query;
 
 	let alteredQuery = query;
 

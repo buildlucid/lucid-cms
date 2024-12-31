@@ -49,7 +49,7 @@ class UserCustomField extends CustomField<"user"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("integer"),
+					type: props.db.getDataType("integer"),
 					nullable: true,
 					foreignKey: {
 						table: "lucid_users",

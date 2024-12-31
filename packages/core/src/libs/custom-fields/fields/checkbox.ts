@@ -54,7 +54,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("boolean"),
+					type: props.db.getDataType("boolean"),
 					nullable: true,
 					default: props.db.formatInsertValue<BooleanInt>(
 						"boolean",

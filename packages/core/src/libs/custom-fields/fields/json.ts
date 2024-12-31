@@ -49,7 +49,7 @@ class JsonCustomField extends CustomField<"json"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("jsonb"),
+					type: props.db.getDataType("jsonb"),
 					nullable: true,
 					default: this.config.config.default,
 				},

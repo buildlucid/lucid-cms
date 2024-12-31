@@ -7,38 +7,36 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_client_integrations")
-				.addColumn("id", adapter.getColumnType("serial"), (col) =>
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("name", adapter.getColumnType("text"), (col) =>
+				.addColumn("name", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("description", adapter.getDataType("text"))
+				.addColumn("enabled", adapter.getDataType("boolean"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("description", adapter.getColumnType("text"))
-				.addColumn("enabled", adapter.getColumnType("boolean"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("key", adapter.getColumnType("text"), (col) =>
+				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
 				)
-				.addColumn("api_key", adapter.getColumnType("text"), (col) =>
+				.addColumn("api_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("secret", adapter.getColumnType("text"), (col) =>
+				.addColumn("secret", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)
-				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
-							adapter.config.defaults.timestamp.now,
+							adapter.getDefault("timestamp", "now"),
 						),
 					),
 				)

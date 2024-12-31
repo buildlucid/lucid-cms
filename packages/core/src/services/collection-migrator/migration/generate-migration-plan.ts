@@ -97,10 +97,7 @@ const generateMigrationPlan = (props: {
 					normaliseColumn(targetColumn, column.source),
 				);
 				if (modifications) {
-					const modType = determineColumnModType(
-						modifications,
-						props.db.config,
-					);
+					const modType = determineColumnModType(modifications, props.db);
 
 					if (modType === "drop-and-add") {
 						columnOperations.push({

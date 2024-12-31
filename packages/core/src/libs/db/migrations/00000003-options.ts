@@ -7,12 +7,12 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 		async up(db: Kysely<unknown>) {
 			await db.schema
 				.createTable("lucid_options")
-				.addColumn("name", adapter.getColumnType("text"), (col) =>
+				.addColumn("name", adapter.getDataType("text"), (col) =>
 					col.unique().notNull().primaryKey(),
 				)
-				.addColumn("value_int", adapter.getColumnType("integer"))
-				.addColumn("value_text", adapter.getColumnType("text"))
-				.addColumn("value_bool", adapter.getColumnType("boolean"))
+				.addColumn("value_int", adapter.getDataType("integer"))
+				.addColumn("value_text", adapter.getDataType("text"))
+				.addColumn("value_bool", adapter.getDataType("boolean"))
 				.execute();
 		},
 		async down(db: Kysely<unknown>) {},

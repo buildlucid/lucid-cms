@@ -50,7 +50,7 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 			columns: [
 				{
 					name: this.key,
-					type: props.db.getColumnType("text"),
+					type: props.db.getDataType("text"),
 					nullable: true,
 					default: this.config.config.default,
 				},
