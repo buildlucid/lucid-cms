@@ -237,7 +237,7 @@ describe("Format insert fields", async () => {
 				{
 					key: "json_test",
 					type: "json",
-					value: "{}",
+					value: {},
 				},
 				{
 					key: "colour_test",
@@ -387,7 +387,7 @@ describe("Format insert fields", async () => {
 				textValue: null,
 				intValue: null,
 				boolValue: null,
-				jsonValue: '"{}"',
+				jsonValue: {},
 				mediaId: null,
 				userId: null,
 			},
@@ -426,7 +426,7 @@ describe("Format insert fields", async () => {
 				textValue: "https://example.com",
 				intValue: null,
 				boolValue: null,
-				jsonValue: '{"target":"_blank","label":"Example"}',
+				jsonValue: { target: "_blank", label: "Example" },
 				mediaId: null,
 				userId: null,
 			},
