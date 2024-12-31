@@ -8,7 +8,12 @@ import type {
 	InferredColumn,
 } from "@lucidcms/core/types";
 import pg from "pg";
-import { PostgresDialect, sql, type ColumnDataType } from "kysely";
+import {
+	PostgresDialect,
+	sql,
+	ParseJSONResultsPlugin,
+	type ColumnDataType,
+} from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
@@ -24,6 +29,7 @@ class PostgresAdapter extends DatabaseAdapter {
 			dialect: new PostgresDialect({
 				pool: new Pool(config),
 			}),
+			plugins: [new ParseJSONResultsPlugin()],
 		});
 	}
 	// Getters
