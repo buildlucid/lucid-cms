@@ -68,7 +68,7 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 			if (mp.tables.length === 0) return null;
 			return {
 				collectionKey: mp.collectionKey,
-				migrationPlans: JSON.stringify(mp),
+				migrationPlans: mp,
 			};
 		})
 		.filter((mp) => mp !== null);

@@ -85,6 +85,7 @@ const generateMigrationPlan = (props: {
 			const targetColumn = targetTable.columns.find(
 				(c) => c.name === column.name,
 			);
+
 			if (!targetColumn) {
 				columnOperations.push({
 					type: "add",

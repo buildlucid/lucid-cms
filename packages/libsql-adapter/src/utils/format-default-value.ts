@@ -30,7 +30,7 @@ const formatDefaultValue = (
 			: Number.parseFloat(defaultValue);
 	}
 
-	return null;
+	return defaultValue;
 };
 
 export default formatDefaultValue;

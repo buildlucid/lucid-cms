@@ -38,7 +38,7 @@ export const addColumn = <
 			}
 
 			if (operation.column.default !== undefined) {
-				const defaultVal = db.formatInsertValue(
+				const defaultVal = db.formatDefaultValue(
 					operation.column.type,
 					operation.column.default,
 				);
@@ -116,7 +116,7 @@ export const modifyColumn = <
 			) {
 				return col.dropDefault();
 			}
-			const defaultValue = db.formatInsertValue(
+			const defaultValue = db.formatDefaultValue(
 				operation.column.type,
 				operation.changes.default?.to,
 			);

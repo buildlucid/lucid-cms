@@ -35,6 +35,7 @@ class PostgresAdapter extends DatabaseAdapter {
 			support: {
 				alterColumn: true,
 				multipleAlterTables: true,
+				autoIncrement: false,
 				boolean: true,
 			},
 			dataTypes: {
@@ -49,9 +50,8 @@ class PostgresAdapter extends DatabaseAdapter {
 					length ? `varchar(${length})` : "varchar",
 			},
 			defaults: {
-				timestamp: "NOW()",
-				primaryKey: {
-					autoIncrement: false,
+				timestamp: {
+					now: "NOW()",
 				},
 				boolean: {
 					true: true,
@@ -174,13 +174,12 @@ class PostgresAdapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	formatInsertValue(type: ColumnDataType, value: unknown): unknown {
+	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "text" && typeof value === "string") {
 			return sql.raw(`'${value}'`);
 		}
-
-		if (type === "timestamp" && value === "NOW()") {
-			return sql.raw("NOW()");
+		if (type === "timestamp" && typeof value === "string") {
+			return sql.raw(value);
 		}
 
 		if (

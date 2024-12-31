@@ -2,9 +2,8 @@ import { sql } from "kysely";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import boolean from "../../utils/helpers/boolean.js";
 import type z from "zod";
-import type { LucidMedia, Select, KyselyDB } from "../db/types.js";
+import type { LucidMedia, Select, KyselyDB, BooleanInt } from "../db/types.js";
 import type mediaSchema from "../../schemas/media.js";
 import type { Config } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter.js";
@@ -285,7 +284,10 @@ export default class MediaRepo {
 			.values({
 				key: props.key,
 				e_tag: props.eTag,
-				visible: boolean.insertFormat(props.visible, this.dbAdapter),
+				visible: this.dbAdapter.formatInsertValue<BooleanInt>(
+					"boolean",
+					props.visible,
+				),
 				type: props.type,
 				mime_type: props.mimeType,
 				file_extension: props.extension,
@@ -296,8 +298,12 @@ export default class MediaRepo {
 				alt_translation_key_id: props.altTranslationKeyId,
 				blur_hash: props.blurHash,
 				average_colour: props.averageColour,
-				is_dark: boolean.insertFormat(props.isDark, this.dbAdapter),
-				is_light: boolean.insertFormat(props.isLight, this.dbAdapter),
+				is_dark: this.dbAdapter.formatInsertValue<
+					BooleanInt | null | undefined
+				>("boolean", props.isDark),
+				is_light: this.dbAdapter.formatInsertValue<
+					BooleanInt | null | undefined
+				>("boolean", props.isLight),
 			})
 			.returning("id")
 			.executeTakeFirst();
@@ -336,8 +342,12 @@ export default class MediaRepo {
 				updated_at: props.data.updatedAt,
 				blur_hash: props.data.blurHash,
 				average_colour: props.data.averageColour,
-				is_dark: boolean.insertFormat(props.data.isDark, this.dbAdapter),
-				is_light: boolean.insertFormat(props.data.isLight, this.dbAdapter),
+				is_dark: this.dbAdapter.formatInsertValue<
+					BooleanInt | null | undefined
+				>("boolean", props.data.isDark),
+				is_light: this.dbAdapter.formatInsertValue<
+					BooleanInt | null | undefined
+				>("boolean", props.data.isLight),
 			})
 			.returning("id");
 

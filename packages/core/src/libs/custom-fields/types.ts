@@ -479,7 +479,7 @@ export type CFInsertItem<T extends FieldTypes> = {
 	textValue?: string | null;
 	intValue?: number | null;
 	boolValue?: boolean | null;
-	jsonValue?: string | null;
+	jsonValue?: Record<string, unknown> | null;
 	mediaId?: number | null;
 	userId?: number | null;
 	documentId?: number | null;

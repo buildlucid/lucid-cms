@@ -33,6 +33,7 @@ class LibSQLAdapter extends DatabaseAdapter {
 				alterColumn: false,
 				multipleAlterTables: false,
 				boolean: false,
+				autoIncrement: true,
 			},
 			dataTypes: {
 				serial: "integer",
@@ -45,9 +46,8 @@ class LibSQLAdapter extends DatabaseAdapter {
 				varchar: "text",
 			},
 			defaults: {
-				timestamp: "CURRENT_TIMESTAMP",
-				primaryKey: {
-					autoIncrement: true,
+				timestamp: {
+					now: "CURRENT_TIMESTAMP",
 				},
 				boolean: {
 					true: 1,
@@ -157,7 +157,10 @@ class LibSQLAdapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	formatInsertValue(type: ColumnDataType, value: unknown): unknown {
+	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
+		if (type === "timestamp" && typeof value === "string") {
+			return sql.raw(value);
+		}
 		if (typeof value === "object" && value !== null) {
 			return JSON.stringify(value);
 		}

@@ -1,6 +1,6 @@
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-// import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
+import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
 
 export default class CollectionMigrationsRepo {
 	constructor(
@@ -10,11 +10,10 @@ export default class CollectionMigrationsRepo {
 
 	// ----------------------------------------
 	// create
-	// TODO: need to handle JSON columns in a way that supports all adapters
 	createMultiple = async (props: {
 		items: Array<{
 			collectionKey: string;
-			migrationPlans: string; // MigrationPlan
+			migrationPlans: MigrationPlan;
 		}>;
 	}) => {
 		return this.db
@@ -22,7 +21,10 @@ export default class CollectionMigrationsRepo {
 			.values(
 				props.items.map((i) => ({
 					collection_key: i.collectionKey,
-					migration_plans: i.migrationPlans,
+					migration_plans: this.dbAdapter.formatInsertValue<string>(
+						"jsonb",
+						i.migrationPlans,
+					),
 				})),
 			)
 			.execute();

@@ -41,7 +41,7 @@ const formatDefaultValue = (
 			: Number.parseFloat(withoutTypeCast);
 	}
 
-	return null;
+	return defaultValue;
 };
 
 export default formatDefaultValue;

@@ -42,7 +42,7 @@ const getSingle: ServiceFn<
 
 	const html = await context.services.email.renderTemplate(context, {
 		template: email.template,
-		data: Formatter.parseJSON<Record<string, unknown>>(email.data),
+		data: email.data,
 	});
 	if (html.error) return html;
 

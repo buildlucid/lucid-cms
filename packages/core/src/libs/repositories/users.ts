@@ -2,11 +2,10 @@ import { sql } from "kysely";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import boolean from "../../utils/helpers/boolean.js";
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import type usersSchema from "../../schemas/users.js";
-import type { LucidUsers, Select, KyselyDB } from "../db/types.js";
+import type { LucidUsers, Select, KyselyDB, BooleanInt } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
 export default class UsersRepo {
@@ -273,18 +272,20 @@ export default class UsersRepo {
 				email: props.data.email,
 				password: props.data.password,
 				secret: props.data.secret,
-				super_admin: boolean.insertFormat(
+				super_admin: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
 					props.data.superAdmin,
-					this.dbAdapter,
 				),
 				updated_at: props.data.updatedAt,
-				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
+				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
+					props.data.isDeleted,
+				),
 				is_deleted_at: props.data.isDeletedAt,
 				deleted_by: props.data.deletedBy,
-				triggered_password_reset: boolean.insertFormat(
-					props.data.triggerPasswordReset,
-					this.dbAdapter,
-				),
+				triggered_password_reset: this.dbAdapter.formatInsertValue<
+					BooleanInt | undefined
+				>("boolean", props.data.triggerPasswordReset),
 			})
 			.returning(["id", "first_name", "last_name", "email"]);
 
@@ -308,16 +309,19 @@ export default class UsersRepo {
 			.insertInto("lucid_users")
 			.returning("id")
 			.values({
-				super_admin: boolean.insertFormat(props.superAdmin, this.dbAdapter),
+				super_admin: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
+					props.superAdmin,
+				),
 				email: props.email,
 				username: props.username,
 				first_name: props.firstName,
 				last_name: props.lastName,
 				password: props.password,
 				secret: props.secret,
-				triggered_password_reset: boolean.insertFormat(
+				triggered_password_reset: this.dbAdapter.formatInsertValue<BooleanInt>(
+					"boolean",
 					props.triggerPasswordReset,
-					this.dbAdapter,
 				),
 			})
 			.executeTakeFirst();

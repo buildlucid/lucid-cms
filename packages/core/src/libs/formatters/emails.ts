@@ -1,6 +1,5 @@
 import Formatter from "./index.js";
 import type { EmailResponse } from "../../types/response.js";
-import type { JSONString } from "../db/types.js";
 
 interface EmailPropT {
 	id: number;
@@ -20,7 +19,7 @@ interface EmailPropT {
 	last_attempt_at: Date | string | null;
 	last_success_at: Date | string | null;
 	created_at: Date | string | null;
-	data?: JSONString | null;
+	data?: Record<string, unknown> | null;
 }
 
 export default class EmailsFormatter {
@@ -56,7 +55,7 @@ export default class EmailsFormatter {
 				bcc: props.email.bcc,
 				template: props.email.template,
 			},
-			data: (props.email.data as Record<string, unknown> | null) ?? null,
+			data: props.email.data ?? null,
 			sentCount: props.email.sent_count || 0,
 			errorCount: props.email.error_count || 0,
 			errorMessage: props.email.last_error_message,

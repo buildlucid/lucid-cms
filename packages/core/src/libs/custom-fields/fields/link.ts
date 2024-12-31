@@ -68,10 +68,10 @@ class LinkCustomField extends CustomField<"link"> {
 		data: FieldProp;
 		formatMeta: FieldFormatMeta;
 	}) {
-		const linkVal = Formatter.parseJSON<LinkResValue>(props.data.json_value);
+		const linkVal = props.data.json_value as LinkResValue;
 		return {
 			value: {
-				url: linkVal?.url ?? this.config.config.default.url ?? null,
+				url: props.data.text_value ?? this.config.config.default.url ?? null,
 				label: linkVal?.label ?? this.config.config.default.label ?? null,
 				target: linkVal?.target ?? this.config.config.default.target ?? null,
 			},
@@ -95,10 +95,10 @@ class LinkCustomField extends CustomField<"link"> {
 			intValue: null,
 			boolValue: null,
 			jsonValue: value
-				? Formatter.stringifyJSON({
+				? {
 						target: value.target,
 						label: value.label,
-					})
+					}
 				: null,
 			mediaId: null,
 			userId: null,

@@ -1,5 +1,4 @@
 import constants from "../../constants/constants.js";
-import boolean from "../../utils/helpers/boolean.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
@@ -8,6 +7,7 @@ import type {
 	Select,
 	KyselyDB,
 	DocumentVersionType,
+	BooleanInt,
 } from "../db/types.js";
 import type { Config } from "../../types/config.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
@@ -304,7 +304,9 @@ export default class CollectionDocumentBricksRepo {
 						brick_type: b.brickType,
 						brick_key: b.brickKey,
 						brick_order: b.brickOrder,
-						brick_open: boolean.insertFormat(b.brickOpen, this.dbAdapter),
+						brick_open: this.dbAdapter.formatInsertValue<
+							BooleanInt | undefined
+						>("boolean", b.brickOpen),
 						collection_document_version_id: b.collectionDocumentVersionId,
 					};
 				}),

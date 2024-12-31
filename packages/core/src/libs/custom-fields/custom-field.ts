@@ -16,7 +16,6 @@ import type {
 } from "../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { SchemaDefinition, GetSchemaDefinitionProps } from "./types.js";
-import type DatabaseAdapter from "../db/adapter.js";
 
 abstract class CustomField<T extends FieldTypes> {
 	repeater: string | null = null;
@@ -41,7 +40,6 @@ abstract class CustomField<T extends FieldTypes> {
 		item: FieldInsertItem;
 		brickId: number;
 		groupId: number | null;
-		db: DatabaseAdapter;
 	}): CFInsertItem<T> | null;
 	/**
 	 * Determins how the field should be defined in the database

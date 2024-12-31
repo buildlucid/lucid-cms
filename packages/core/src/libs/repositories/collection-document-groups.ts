@@ -1,8 +1,7 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import boolean from "../../utils/helpers/boolean.js";
-import type { KyselyDB } from "../db/types.js";
+import type { KyselyDB, BooleanInt } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
 export default class CollectionDocumentGroupsRepo {
@@ -33,7 +32,10 @@ export default class CollectionDocumentGroupsRepo {
 					collection_brick_id: g.collectionBrickId,
 					group_order: g.groupOrder,
 					repeater_key: g.repeaterKey,
-					group_open: boolean.insertFormat(g.groupOpen, this.dbAdapter),
+					group_open: this.dbAdapter.formatInsertValue<BooleanInt>(
+						"boolean",
+						g.groupOpen,
+					),
 					ref: g.ref,
 				})),
 			)
@@ -68,7 +70,10 @@ export default class CollectionDocumentGroupsRepo {
 						group_order: g.groupOrder,
 						repeater_key: g.repeaterKey,
 						ref: g.ref,
-						group_open: boolean.insertFormat(g.groupOpen, this.dbAdapter),
+						group_open: this.dbAdapter.formatInsertValue<BooleanInt>(
+							"boolean",
+							g.groupOpen,
+						),
 					};
 				}),
 			)

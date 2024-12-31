@@ -1,14 +1,18 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import boolean from "../../utils/helpers/boolean.js";
-import type { LucidCollections, Select, KyselyDB } from "../db/types.js";
+import type {
+	LucidCollections,
+	Select,
+	KyselyDB,
+	BooleanInt,
+} from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
 export default class CollectionsRepo {
 	constructor(
 		private db: KyselyDB,
-		private dbAdpter: DatabaseAdapter,
+		private dbAdapter: DatabaseAdapter,
 	) {}
 
 	// ----------------------------------------
@@ -61,7 +65,10 @@ export default class CollectionsRepo {
 		let query = this.db
 			.updateTable("lucid_collections")
 			.set({
-				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdpter),
+				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt>(
+					"boolean",
+					props.data.isDeleted,
+				),
 				is_deleted_at: props.data.isDeletedAt,
 			})
 			.returningAll();

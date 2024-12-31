@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
+import Formatter from "../../libs/formatters/index.js";
 import logger from "../../utils/logging/index.js";
-import { boolean } from "../../utils/helpers/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -38,7 +38,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 	const collectionsToDelete = collections.filter(
 		(collection) =>
 			!activeCollections.includes(collection.key) &&
-			boolean.responseFormat(collection.is_deleted) === false,
+			Formatter.formatBoolean(collection.is_deleted) === false,
 	);
 	const collectionsToDeleteKeys = collectionsToDelete.map(
 		(collection) => collection.key,
@@ -53,7 +53,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 	//* previously deleted, now active
 	const unDeletedCollections = collections.filter(
 		(collection) =>
-			boolean.responseFormat(collection.is_deleted) &&
+			Formatter.formatBoolean(collection.is_deleted) &&
 			activeCollections.includes(collection.key),
 	);
 	const unDeletedCollectionKeys = unDeletedCollections.map(

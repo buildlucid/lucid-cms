@@ -9,6 +9,7 @@ import type {
 	Select,
 	KyselyDB,
 	DocumentVersionType,
+	BooleanInt,
 } from "../db/types.js";
 import type { Config } from "../../types/config.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
@@ -16,7 +17,6 @@ import type collectionDocumentsSchema from "../../schemas/collection-documents.j
 import type { DocumentFieldFilters } from "../../types.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
 import type DatabaseAdapter from "../db/adapter.js";
-import boolean from "../../utils/helpers/boolean.js";
 
 export default class CollectionDocumentsRepo {
 	constructor(
@@ -1016,13 +1016,19 @@ export default class CollectionDocumentsRepo {
 				collection_key: props.collectionKey,
 				created_by: props.createdBy,
 				updated_by: props.updatedBy,
-				is_deleted: boolean.insertFormat(props.isDeleted, this.dbAdapter),
+				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt>(
+					"boolean",
+					props.isDeleted,
+				),
 			})
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet({
 					created_by: props.createdBy,
 					updated_by: props.updatedBy,
-					is_deleted: boolean.insertFormat(props.isDeleted, this.dbAdapter),
+					is_deleted: this.dbAdapter.formatInsertValue<BooleanInt>(
+						"boolean",
+						props.isDeleted,
+					),
 					updated_at: props.updatedAt,
 				}),
 			)
@@ -1042,7 +1048,10 @@ export default class CollectionDocumentsRepo {
 		let query = this.db
 			.updateTable("lucid_collection_documents")
 			.set({
-				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
+				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
+					props.data.isDeleted,
+				),
 				is_deleted_at: props.data.isDeletedAt,
 				deleted_by: props.data.deletedBy,
 			})
@@ -1063,7 +1072,10 @@ export default class CollectionDocumentsRepo {
 		let query = this.db
 			.updateTable("lucid_collection_documents")
 			.set({
-				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
+				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
+					props.data.isDeleted,
+				),
 				is_deleted_at: props.data.isDeletedAt,
 				deleted_by: props.data.deletedBy,
 			})

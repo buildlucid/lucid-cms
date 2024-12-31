@@ -1,4 +1,4 @@
-import { sql, type Kysely } from "kysely";
+import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
 import type DatabaseAdapter from "../adapter.js";
 
@@ -12,11 +12,21 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.primaryKey(),
 				)
 				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(adapter.config.defaults.boolean.false),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.config.defaults.boolean.false,
+						),
+					),
 				)
 				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.execute();
 
@@ -33,7 +43,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.execute();
 
@@ -51,7 +66,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(adapter.config.defaults.boolean.false),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.config.defaults.boolean.false,
+						),
+					),
 				)
 				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"))
 				.addColumn("deleted_by", adapter.getColumnType("integer"), (col) =>
@@ -64,10 +84,20 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.references("lucid_users.id").onDelete("set null"),
 				)
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.execute();
 
@@ -92,7 +122,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 						.onDelete("set null"),
 				)
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.addColumn("created_by", adapter.getColumnType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
@@ -126,7 +161,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("brick_key", adapter.getColumnType("text"))
 				.addColumn("brick_order", adapter.getColumnType("integer"))
 				.addColumn("brick_open", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(adapter.config.defaults.boolean.false),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.config.defaults.boolean.false,
+						),
+					),
 				)
 				.execute();
 
@@ -169,7 +209,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 						.onDelete("cascade"),
 				)
 				.addColumn("group_open", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(adapter.config.defaults.boolean.false),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.config.defaults.boolean.false,
+						),
+					),
 				)
 				.addColumn("repeater_key", adapter.getColumnType("text"), (col) =>
 					col.notNull(),

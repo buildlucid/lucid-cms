@@ -1,9 +1,13 @@
 import { sql } from "kysely";
-import boolean from "../../utils/helpers/boolean.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type { LucidLocales, Select, KyselyDB } from "../db/types.js";
+import type {
+	LucidLocales,
+	Select,
+	KyselyDB,
+	BooleanInt,
+} from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
 export default class LocalesRepo {
@@ -90,7 +94,10 @@ export default class LocalesRepo {
 		let query = this.db
 			.updateTable("lucid_locales")
 			.set({
-				is_deleted: boolean.insertFormat(props.data.isDeleted, this.dbAdapter),
+				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
+					props.data.isDeleted,
+				),
 				is_deleted_at: props.data.isDeletedAt,
 				updated_at: props.data.updatedAt,
 			})

@@ -1,8 +1,8 @@
 import T from "../../translations/index.js";
 import argon2 from "argon2";
 import Repository from "../../libs/repositories/index.js";
+import Formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import { boolean } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const login: ServiceFn<
@@ -37,7 +37,7 @@ const login: ServiceFn<
 		};
 	}
 
-	if (user !== undefined && boolean.responseFormat(user.is_deleted)) {
+	if (user !== undefined && Formatter.formatBoolean(user.is_deleted)) {
 		return {
 			error: {
 				type: "authorisation",

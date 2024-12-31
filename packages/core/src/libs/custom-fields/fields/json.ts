@@ -1,6 +1,5 @@
 import z from "zod";
 import CustomField from "../custom-field.js";
-import Formatter from "../../formatters/index.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import type {
@@ -62,10 +61,7 @@ class JsonCustomField extends CustomField<"json"> {
 		formatMeta: FieldFormatMeta;
 	}) {
 		return {
-			value:
-				Formatter.parseJSON<Record<string, unknown>>(props.data.json_value) ??
-				this.config.config.default ??
-				null,
+			value: props.data.json_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"json">;
 	}
@@ -83,7 +79,7 @@ class JsonCustomField extends CustomField<"json"> {
 			textValue: null,
 			intValue: null,
 			boolValue: null,
-			jsonValue: Formatter.stringifyJSON(props.item.value),
+			jsonValue: props.item.value,
 			mediaId: null,
 			userId: null,
 		} satisfies CFInsertItem<"json">;

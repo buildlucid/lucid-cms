@@ -5,7 +5,7 @@ import keyToTitle from "../utils/key-to-title.js";
 import { createCdnUrl } from "../../../utils/media/index.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { objectifyTranslations } from "../../../utils/translations/index.js";
-import { boolean } from "../../../utils/helpers/index.js";
+import Formatter from "../../formatters/index.js";
 import type { MediaType } from "../../../types.js";
 import type {
 	CFConfig,
@@ -81,8 +81,8 @@ class MediaCustomField extends CustomField<"media"> {
 				height: props.data?.media_height ?? null,
 				blurHash: props.data?.media_blur_hash ?? null,
 				averageColour: props.data?.media_average_colour ?? null,
-				isDark: boolean.responseFormat(props.data?.media_is_dark ?? null),
-				isLight: boolean.responseFormat(props.data?.media_is_light ?? null),
+				isDark: Formatter.formatBoolean(props.data?.media_is_dark ?? null),
+				isLight: Formatter.formatBoolean(props.data?.media_is_light ?? null),
 				title: objectifyTranslations(
 					props.data?.media_title_translations || [],
 					props.formatMeta.localisation.locales,

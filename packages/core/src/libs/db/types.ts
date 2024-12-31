@@ -53,7 +53,9 @@ export type DatabaseConfig = {
 		varchar: ((length?: number) => ColumnDataType) | ColumnDataType;
 	};
 	defaults: {
-		timestamp: string;
+		timestamp: {
+			now: string;
+		};
 		boolean: {
 			true: true | 1;
 			false: false | 0;
@@ -95,9 +97,9 @@ export type TimestampImmutable = ColumnType<
 	string | undefined,
 	never
 >;
+
 /** Should only be used for DB column insert/response values. Everything else should be using booleans and can be converted for response/insert with boolean helpers */
 export type BooleanInt = 0 | 1 | boolean;
-export type JSONString = string;
 
 // ------------------------------------------------------------------------------
 // Tables
@@ -194,7 +196,7 @@ export interface LucidEmails {
 	bcc: string | null;
 	delivery_status: "pending" | "delivered" | "failed";
 	template: string;
-	data: JSONString | null;
+	data: JSONColumnType<Record<string, unknown>, string | null, string | null>;
 	type: "internal" | "external";
 	sent_count: number;
 	error_count: number;
@@ -305,7 +307,11 @@ export interface LucidCollectionDocumentFields {
 	text_value: string | null;
 	int_value: number | null;
 	bool_value: BooleanInt | null;
-	json_value: JSONString | null;
+	json_value: JSONColumnType<
+		Record<string, unknown>,
+		string | null,
+		string | null
+	>;
 	user_id: number | null;
 	media_id: number | null;
 	document_id: number | null;

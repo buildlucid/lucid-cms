@@ -104,7 +104,6 @@ const createMultiple: ServiceFn<
 						groups: groups.data,
 						brick: b,
 						collection: data.collection,
-						db: context.config.db,
 					}),
 				),
 			},

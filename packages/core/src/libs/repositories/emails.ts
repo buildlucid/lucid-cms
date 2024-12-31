@@ -141,7 +141,7 @@ export default class EmailsRepo {
 		template: string;
 		cc?: string;
 		bcc?: string;
-		data: string | null;
+		data: Record<string, unknown> | null;
 		type: LucidEmails["type"];
 		sentCount: number;
 		errorCount: number;
@@ -160,7 +160,10 @@ export default class EmailsRepo {
 				template: props.template,
 				cc: props.cc,
 				bcc: props.bcc,
-				data: props.data,
+				data: this.dbAdapter.formatInsertValue<string | null>(
+					"jsonb",
+					props.data,
+				),
 				type: props.type,
 				sent_count: props.sentCount,
 				error_count: props.errorCount,

@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import { LucidError } from "../../utils/errors/index.js";
+import type { BooleanInt } from "../db/types.js";
 // Formatters
 import UsersFormatter from "./users.js";
 import UserPermissionsFormatter from "./user-permissions.js";
@@ -92,6 +93,16 @@ class Formatter {
 	static parseCount = (count: string | undefined) => {
 		return Number.parseInt(count || "0") || 0;
 	};
+	/**
+	 * Handles formatting a BooleanInt response from the DB to a boolean
+	 */
+	static formatBoolean(bool: BooleanInt): boolean;
+	static formatBoolean(bool: BooleanInt | null | undefined): boolean | null;
+	static formatBoolean(bool: BooleanInt | null | undefined): boolean | null {
+		if (bool === null || bool === undefined) return null;
+		if (typeof bool === "boolean") return bool;
+		return bool === 1;
+	}
 }
 
 type FormatterClassMap = {

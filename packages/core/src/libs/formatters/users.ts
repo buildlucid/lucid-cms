@@ -2,7 +2,6 @@ import type { BooleanInt } from "../db/types.js";
 import type { UserResponse } from "../../types/response.js";
 import UserPermissionsFormatter from "./user-permissions.js";
 import Formatter from "./index.js";
-import boolean from "../../utils/helpers/boolean.js";
 
 interface UserPropT {
 	created_at: Date | string | null;
@@ -44,14 +43,14 @@ export default class UsersFormatter {
 
 		return {
 			id: props.user.id,
-			superAdmin: boolean.responseFormat(props.user.super_admin ?? false),
+			superAdmin: Formatter.formatBoolean(props.user.super_admin ?? false),
 			email: props.user.email,
 			username: props.user.username,
 			firstName: props.user.first_name,
 			lastName: props.user.last_name,
 			roles: roles,
 			permissions: permissions,
-			triggerPasswordReset: boolean.responseFormat(
+			triggerPasswordReset: Formatter.formatBoolean(
 				props.user.triggered_password_reset,
 			),
 			createdAt: Formatter.formatDate(props.user.created_at),

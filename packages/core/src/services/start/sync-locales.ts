@@ -1,7 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
+import Formatter from "../../libs/formatters/index.js";
 import logger from "../../utils/logging/index.js";
-import boolean from "../../utils/helpers/boolean.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 const syncLocales: ServiceFn<[], undefined> = async (
@@ -40,7 +40,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	const localesToDelete = locales.filter(
 		(locale) =>
 			!localeCodes.includes(locale.code) &&
-			boolean.responseFormat(locale.is_deleted) === false,
+			Formatter.formatBoolean(locale.is_deleted) === false,
 	);
 	const localesToDeleteCodes = localesToDelete.map((locale) => locale.code);
 	if (localesToDeleteCodes.length > 0) {
@@ -53,7 +53,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	// Get locals that are in the database as is_deleted but in the config
 	const unDeletedLocales = locales.filter(
 		(locale) =>
-			boolean.responseFormat(locale.is_deleted) &&
+			Formatter.formatBoolean(locale.is_deleted) &&
 			localeCodes.includes(locale.code),
 	);
 	const unDeletedLocalesCodes = unDeletedLocales.map((locale) => locale.code);

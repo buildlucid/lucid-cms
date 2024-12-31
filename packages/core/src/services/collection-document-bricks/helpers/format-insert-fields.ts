@@ -8,7 +8,6 @@ import type {
 } from "../../../libs/custom-fields/types.js";
 import type { BrickTypes } from "../../../libs/builders/brick-builder/types.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
-import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 const formatInsertFields = (props: {
 	brick: {
@@ -19,7 +18,6 @@ const formatInsertFields = (props: {
 	};
 	groups: GroupSimpleResponse[];
 	collection: CollectionBuilder;
-	db: DatabaseAdapter;
 }): CFInsertItem<FieldTypes>[] => {
 	return props.brick.fields
 		.map((field) => {
@@ -35,7 +33,6 @@ const formatInsertFields = (props: {
 				item: field,
 				brickId: props.brick.id,
 				groupId: targetGroup?.group_id ?? null,
-				db: props.db,
 			});
 		})
 		.filter((f) => f !== null);

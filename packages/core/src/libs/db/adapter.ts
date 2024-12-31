@@ -41,15 +41,69 @@ export default abstract class DatabaseAdapter {
 			plugins: config.plugins,
 		});
 	}
+	/**
+	 * Return your Kysely DB's adapters jsonArrayFrom helper that aggregates a subquery into a JSON array
+	 */
 	abstract get jsonArrayFrom(): typeof jsonArrayFrom;
+	/**
+	 * Configure the features your DB supports, default values and fallback data types
+	 */
 	abstract get config(): DatabaseConfig;
-	abstract formatInsertValue(type: ColumnDataType, value: unknown): unknown;
-
 	/**
 	 * Infers the database schema. Uses the transaction client if provided, otherwise falls back to the base client
 	 */
 	abstract inferSchema(tx?: KyselyDB): Promise<InferredTable[]>;
+	/**
+	 * Handles formatting of certain values based on the columns data type. This is used specifically for default values
+	 */
+	abstract formatDefaultValue(type: ColumnDataType, value: unknown): unknown;
+	/**
+	 * Handles formatting of certain values based on the columns data type
+	 * - booleans are returned as either a boolean or 1/0 depending on adapter support
+	 * - json is stringified
+	 */
+	formatInsertValue<T>(type: ColumnDataType, value: unknown): T {
+		if (value === null || value === undefined) return value as T;
 
+		if (type === "boolean" && typeof value === "boolean") {
+			if (this.config.support.boolean) return value as T;
+			return (value ? 1 : 0) as T;
+		}
+		if (type === "jsonb" || type === "json") {
+			try {
+				if (typeof value === "object" && value !== null) {
+					return JSON.stringify(value) as T;
+				}
+				return null as T;
+			} catch (err) {
+				return null as T;
+			}
+		}
+
+		return value as T;
+	}
+	/**
+	 * A helper for returning supported column data types
+	 */
+	getColumnType(
+		type: keyof DatabaseConfig["dataTypes"],
+		...args: unknown[]
+	): ColumnDataType {
+		const dataType = this.config.dataTypes[type];
+		if (typeof dataType === "function") {
+			// @ts-expect-error
+			return dataType(...args);
+		}
+		return dataType;
+	}
+	/**
+	 * A helper for extending a column definition based on auto increment support
+	 */
+	primaryKeyColumnBuilder(col: ColumnDefinitionBuilder) {
+		return this.config.support.autoIncrement
+			? col.primaryKey().autoIncrement()
+			: col.primaryKey();
+	}
 	/**
 	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections
 	 * @todo expose migrations so they can be extended?
@@ -102,28 +156,6 @@ export default abstract class DatabaseAdapter {
 				kill: true,
 			});
 		}
-	}
-	/**
-	 * A helper for returning supported column data types
-	 */
-	getColumnType(
-		type: keyof DatabaseConfig["dataTypes"],
-		...args: unknown[]
-	): ColumnDataType {
-		const dataType = this.config.dataTypes[type];
-		if (typeof dataType === "function") {
-			// @ts-expect-error
-			return dataType(...args);
-		}
-		return dataType;
-	}
-	/**
-	 * A helper for extending a column definition based on auto increment support
-	 */
-	primaryKeyColumnBuilder(col: ColumnDefinitionBuilder) {
-		return this.config.support.autoIncrement
-			? col.primaryKey().autoIncrement()
-			: col.primaryKey();
 	}
 	/**
 	 * Returns the database client instance

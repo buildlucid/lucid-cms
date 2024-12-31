@@ -50,7 +50,9 @@ class SQLiteAdapter extends DatabaseAdapter {
 				varchar: "text",
 			},
 			defaults: {
-				timestamp: "CURRENT_TIMESTAMP",
+				timestamp: {
+					now: "CURRENT_TIMESTAMP",
+				},
 				boolean: {
 					true: 1,
 					false: 0,
@@ -159,7 +161,10 @@ class SQLiteAdapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	formatInsertValue(type: ColumnDataType, value: unknown): unknown {
+	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
+		if (type === "timestamp" && typeof value === "string") {
+			return sql.raw(value);
+		}
 		if (typeof value === "object" && value !== null) {
 			return JSON.stringify(value);
 		}

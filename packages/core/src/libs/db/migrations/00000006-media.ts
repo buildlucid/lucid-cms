@@ -1,4 +1,4 @@
-import { sql, type Kysely } from "kysely";
+import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
 import type DatabaseAdapter from "../adapter.js";
 
@@ -15,7 +15,14 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("e_tag", adapter.getColumnType("text"))
 				.addColumn("visible", adapter.getColumnType("boolean"), (col) =>
-					col.notNull().defaultTo(adapter.config.defaults.boolean.true),
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.config.defaults.boolean.true,
+							),
+						),
 				)
 				.addColumn("type", adapter.getColumnType("text"), (col) =>
 					col.notNull(),
@@ -55,10 +62,20 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("custom_meta", adapter.getColumnType("text"))
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.execute();
 

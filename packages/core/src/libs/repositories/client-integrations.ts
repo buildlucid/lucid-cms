@@ -1,8 +1,12 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import boolean from "../../utils/helpers/boolean.js";
-import type { LucidClientIntegrations, Select, KyselyDB } from "../db/types.js";
+import type {
+	LucidClientIntegrations,
+	Select,
+	KyselyDB,
+	BooleanInt,
+} from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
 export default class ClientIntegrationsRepo {
@@ -62,7 +66,10 @@ export default class ClientIntegrationsRepo {
 			.values({
 				name: props.name,
 				description: props.description,
-				enabled: boolean.insertFormat(props.enabled, this.dbAdapter),
+				enabled: this.dbAdapter.formatInsertValue<BooleanInt>(
+					"boolean",
+					props.enabled,
+				),
 				key: props.key,
 				api_key: props.apiKey,
 				secret: props.secret,
@@ -90,7 +97,10 @@ export default class ClientIntegrationsRepo {
 			.set({
 				name: props.data.name,
 				description: props.data.description,
-				enabled: boolean.insertFormat(props.data.enabled, this.dbAdapter),
+				enabled: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
+					"boolean",
+					props.data.enabled,
+				),
 				api_key: props.data.apiKey,
 				secret: props.data.secret,
 				updated_at: props.data.updatedAt,

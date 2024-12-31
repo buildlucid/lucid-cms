@@ -3,8 +3,8 @@ import type {
 	FieldGroupResponse,
 	FieldAltResponse,
 } from "../../types/response.js";
-import { boolean } from "../../utils/helpers/index.js";
-import type { JSONString, BooleanInt } from "../db/types.js";
+import Formatter from "./index.js";
+import type { BooleanInt } from "../db/types.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
 import type { BrickProp, GroupProp } from "./collection-document-bricks.js";
@@ -28,7 +28,7 @@ export interface FieldProp {
 	text_value: string | null;
 	int_value: number | null;
 	bool_value: BooleanInt | null;
-	json_value?: JSONString | null;
+	json_value?: Record<string, unknown> | null;
 	user_id?: number | null;
 	user_email?: string | null;
 	user_first_name?: string | null;
@@ -301,7 +301,7 @@ export default class CollectionDocumentFieldsFormatter {
 			groups.push({
 				id: group.group_id,
 				order: group.group_order,
-				open: boolean.responseFormat(group.group_open),
+				open: Formatter.formatBoolean(group.group_open),
 				fields: this.buildFieldTree(
 					{
 						fields: data.fields,

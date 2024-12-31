@@ -116,7 +116,7 @@ const sendEmail: ServiceFn<
 		template: data.template,
 		cc: data.cc,
 		bcc: data.bcc,
-		data: Formatter.stringifyJSON(data.data),
+		data: data.data,
 		type: data.type,
 		sentCount: result.success ? 1 : 0,
 		errorCount: result.success ? 0 : 1,

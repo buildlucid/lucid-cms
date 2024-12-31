@@ -1,17 +1,11 @@
-import { expect, test, describe, afterAll } from "vitest";
+import { expect, test, describe } from "vitest";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import formatInsertFields from "./format-insert-fields.js";
 import flattenFields from "./flatten-fields.js";
 import constants from "../../../constants/constants.js";
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
 
 describe("Format insert fields", async () => {
-	const db = new SQLiteAdapter({
-		database: async () => new Database(":memory:"),
-	});
-
 	const Brick = new BrickBuilder("brick")
 		.addText("text_test")
 		.addWysiwyg("wysiwyg_test")
@@ -43,10 +37,6 @@ describe("Format insert fields", async () => {
 		.addRepeater("call_to_actions")
 		.addText("cta_title")
 		.endRepeater();
-
-	afterAll(() => {
-		db.client.destroy();
-	});
 
 	test("collection format insert fields", async () => {
 		const collectionFlatten = flattenFields(
@@ -121,7 +111,6 @@ describe("Format insert fields", async () => {
 				ref: g.ref,
 			})),
 			collection: Collection,
-			db: db,
 		});
 		expect(collectionFieldsFormatted).toEqual([
 			{
@@ -295,7 +284,6 @@ describe("Format insert fields", async () => {
 			},
 			groups: [],
 			collection: Collection,
-			db: db,
 		});
 
 		expect(bricksFormatted).toEqual([

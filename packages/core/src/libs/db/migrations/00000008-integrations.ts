@@ -1,4 +1,4 @@
-import { sql, type Kysely } from "kysely";
+import type { Kysely } from "kysely";
 import type { MigrationFn } from "../types.js";
 import type DatabaseAdapter from "../adapter.js";
 
@@ -27,10 +27,20 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.execute();
 

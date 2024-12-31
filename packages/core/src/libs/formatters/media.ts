@@ -1,6 +1,5 @@
 import Formatter from "./index.js";
 import { createCdnUrl } from "../../utils/media/index.js";
-import boolean from "../../utils/helpers/boolean.js";
 import type { BooleanInt } from "../../libs/db/types.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
 
@@ -73,8 +72,8 @@ export default class MediaFormatter {
 				height: props.media.height,
 				blurHash: props.media.blur_hash,
 				averageColour: props.media.average_colour,
-				isDark: boolean.responseFormat(props.media.is_dark),
-				isLight: boolean.responseFormat(props.media.is_light),
+				isDark: Formatter.formatBoolean(props.media.is_dark),
+				isLight: Formatter.formatBoolean(props.media.is_light),
 			},
 			createdAt: Formatter.formatDate(props.media.created_at),
 			updatedAt: Formatter.formatDate(props.media.updated_at),

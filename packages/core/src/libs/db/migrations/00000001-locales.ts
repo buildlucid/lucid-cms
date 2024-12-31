@@ -16,16 +16,31 @@ const Migration00000001: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.primaryKey(),
 				)
 				.addColumn("is_deleted", adapter.getColumnType("boolean"), (col) =>
-					col.defaultTo(adapter.config.defaults.boolean.false),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.config.defaults.boolean.false,
+						),
+					),
 				)
 				.addColumn("is_deleted_at", adapter.getColumnType("timestamp"), (col) =>
 					col.defaultTo(null),
 				)
 				.addColumn("created_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.addColumn("updated_at", adapter.getColumnType("timestamp"), (col) =>
-					col.defaultTo(sql.raw(adapter.config.defaults.timestamp)),
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.config.defaults.timestamp.now,
+						),
+					),
 				)
 				.execute();
 		},

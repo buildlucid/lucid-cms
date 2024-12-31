@@ -87,7 +87,7 @@ const createDocumentTable = (props: {
 						source: "core",
 						type: props.db.getColumnType("timestamp"),
 						nullable: true,
-						default: props.db.config.defaults.timestamp,
+						default: props.db.config.defaults.timestamp.now,
 					},
 				],
 			},
