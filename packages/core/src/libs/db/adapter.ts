@@ -42,6 +42,7 @@ export default abstract class DatabaseAdapter {
 			plugins: config.plugins,
 		});
 	}
+	abstract initialise(): Promise<void>;
 	/**
 	 * Return your Kysely DB's adapters jsonArrayFrom helper that aggregates a subquery into a JSON array
 	 */
@@ -155,6 +156,7 @@ export default abstract class DatabaseAdapter {
 			},
 		});
 
+		await this.initialise();
 		const { error, results } = await migrator.migrateToLatest();
 
 		if (results) {

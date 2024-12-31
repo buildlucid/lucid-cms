@@ -28,6 +28,13 @@ class SQLiteAdapter extends DatabaseAdapter {
 			plugins: [new ParseJSONResultsPlugin()],
 		});
 	}
+	async initialise() {
+		await sql`PRAGMA journal_mode = WAL`.execute(this.client);
+		await sql`PRAGMA foreign_keys = ON`.execute(this.client);
+		await sql`PRAGMA synchronous = NORMAL`.execute(this.client);
+		await sql`PRAGMA cache_size = -2000`.execute(this.client);
+		await sql`PRAGMA temp_store = MEMORY`.execute(this.client);
+	}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
 	}

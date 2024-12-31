@@ -32,7 +32,10 @@ class PostgresAdapter extends DatabaseAdapter {
 			plugins: [new ParseJSONResultsPlugin()],
 		});
 	}
-	// Getters
+	async initialise() {
+		await sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`.execute(this.client);
+		await sql`SET timezone = 'UTC'`.execute(this.client);
+	}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
 	}
