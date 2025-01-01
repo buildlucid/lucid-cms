@@ -1,7 +1,7 @@
-import type z from "zod";
-import type emailSchema from "../../schemas/email.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import type z from "zod";
+import type emailSchema from "../../schemas/email.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
 
@@ -20,8 +20,26 @@ const getMultiple: ServiceFn<
 	const EmailsFormatter = Formatter.get("emails");
 
 	const [emails, emailsCount] = await EmailsRepo.selectMultipleFiltered({
-		query: data.query,
-		config: context.config,
+		select: [
+			"id",
+			"email_hash",
+			"from_address",
+			"from_name",
+			"to_address",
+			"subject",
+			"cc",
+			"bcc",
+			"delivery_status",
+			"template",
+			"type",
+			"sent_count",
+			"error_count",
+			"last_error_message",
+			"last_attempt_at",
+			"last_success_at",
+			"created_at",
+		],
+		queryParams: data.query,
 	});
 
 	return {

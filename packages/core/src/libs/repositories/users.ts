@@ -205,7 +205,7 @@ export default class UsersRepo {
 							username: "lucid_users.username",
 						},
 					},
-					defaultOperators: {
+					operators: {
 						firstName: props.config.db.config.fuzzOperator,
 						lastName: props.config.db.config.fuzzOperator,
 						email: props.config.db.config.fuzzOperator,

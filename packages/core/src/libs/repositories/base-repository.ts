@@ -1,21 +1,26 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type { ColumnDataType } from "kysely";
+import {
+	sql,
+	type ColumnDataType,
+	type ReferenceExpression,
+	type ComparisonOperatorExpression,
+} from "kysely";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { Select, Insert, Update, LucidDB, KyselyDB } from "../db/types.js";
+import type { QueryParams } from "../../types/query-params.js";
 
 /**
- * The base repository class that all repositories should extend.
+ * The base repository class that all repositories should extend. This class provides basic CRUD operations for a single table.
  *
- * This class provides basic CRUD operations for a single table.
+ * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
- * @todo Add a solution for selectMultipleFiltered methods.
- * @todo Any query that deals with column data needs some more R&D arround casing and how we handle JSON and Boolean formatting with this.dbAdapter.formatInsertValue().
  * @todo Validation method to be added so we can validate the response data.
+ * @todo Add logging for the queries along with execution time.
  * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
  * @todo Only implemented in the EmailsRepo class while testing it out. Will need to be fully implemented across all repositories.
- * @todo Add a solution for verifying if the Repos columnFormats are in sync with the database. Run a check on startup.
+ * @todo Add a solution for verifying if the Repos columnFormats are in sync with the database. This should be done via a test as opposed to runtime.
  */
 abstract class BaseRepository<
 	Table extends keyof LucidDB,
@@ -30,6 +35,16 @@ abstract class BaseRepository<
 	 * The column data types for the table. Repositories need to keep these in sync with the migrations and the database.
 	 */
 	protected abstract columnFormats: Partial<Record<keyof T, ColumnDataType>>;
+	/**
+	 * The query configuration for the table. The main query builder fn uses this to map filter and sort query params to table columns, along with deciding which operators to use.
+	 */
+	protected abstract queryConfig?: {
+		tableKeys?: {
+			filters?: Record<string, ReferenceExpression<LucidDB, Table>>;
+			sorts?: Record<string, ReferenceExpression<LucidDB, Table>>;
+		};
+		operators?: Record<string, ComparisonOperatorExpression | "%">;
+	};
 
 	/**
 	 * Formats values that need special handling (like JSON or booleans)
@@ -90,6 +105,34 @@ abstract class BaseRepository<
 		}
 
 		return query.execute() as Promise<Pick<Select<T>, K>[]>;
+	}
+	async selectMultipleFiltered<K extends keyof Select<T>>(props: {
+		select: K[];
+		queryParams: Partial<QueryParams>;
+	}) {
+		// @ts-expect-error
+		const emailsQuery = this.db.selectFrom(this.tableName).select(props.select);
+
+		const emailsCountQuery = this.db
+			.selectFrom(this.tableName)
+			.select(sql`count(*)`.as("count"));
+
+		const { main, count } = queryBuilder.main(
+			{
+				main: emailsQuery,
+				count: emailsCountQuery,
+			},
+			{
+				queryParams: props.queryParams,
+				// @ts-expect-error
+				meta: this.queryConfig,
+			},
+		);
+
+		return Promise.all([
+			main.execute() as Promise<Pick<Select<T>, K>[]>,
+			count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+		]);
 	}
 
 	// ----------------------------------------

@@ -134,7 +134,7 @@ export default class RolesRepo {
 							createdAt: "created_at",
 						},
 					},
-					defaultOperators: {
+					operators: {
 						name: props.config.db.config.fuzzOperator,
 					},
 				},

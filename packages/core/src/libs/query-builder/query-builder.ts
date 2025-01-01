@@ -27,7 +27,7 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 				filters?: Record<string, ReferenceExpression<DB, Table>>;
 				sorts?: Record<string, ReferenceExpression<DB, Table>>;
 			};
-			defaultOperators?: Record<string, ComparisonOperatorExpression | "%">;
+			operators?: Record<string, ComparisonOperatorExpression | "%">;
 		};
 	},
 ) => {
@@ -45,7 +45,7 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 		);
 		if (!tableKey) continue;
 
-		const operator = getFilterOperator(key, f, config.meta?.defaultOperators);
+		const operator = getFilterOperator(key, f, config.meta?.operators);
 
 		mainQuery = mainQuery.where(
 			tableKey,

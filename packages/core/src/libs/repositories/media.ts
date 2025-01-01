@@ -247,7 +247,7 @@ export default class MediaRepo {
 							extension: "file_extension",
 						},
 					},
-					defaultOperators: {
+					operators: {
 						title: props.config.db.config.fuzzOperator,
 					},
 				},
