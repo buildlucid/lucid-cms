@@ -50,7 +50,7 @@ class SQLiteAdapter extends DatabaseAdapter {
 				primary: "integer",
 				integer: "integer",
 				boolean: "integer",
-				jsonb: "json",
+				json: "json",
 				text: "text",
 				timestamp: "timestamp",
 				char: "text",

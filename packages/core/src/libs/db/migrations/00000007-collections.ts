@@ -39,7 +39,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
 					col.references("lucid_collections.key").onDelete("cascade").notNull(),
 				)
-				.addColumn("migration_plans", adapter.getDataType("jsonb"), (col) =>
+				.addColumn("migration_plans", adapter.getDataType("json"), (col) =>
 					col.notNull(),
 				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>

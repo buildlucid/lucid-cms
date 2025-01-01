@@ -22,7 +22,7 @@ export default class EmailsRepo extends BaseRepository<"lucid_emails"> {
 		bcc: this.dbAdapter.getDataType("text"),
 		delivery_status: this.dbAdapter.getDataType("text"),
 		template: this.dbAdapter.getDataType("text"),
-		data: this.dbAdapter.getDataType("jsonb"),
+		data: this.dbAdapter.getDataType("json"),
 		type: this.dbAdapter.getDataType("text"),
 		sent_count: this.dbAdapter.getDataType("integer"),
 		error_count: this.dbAdapter.getDataType("integer"),

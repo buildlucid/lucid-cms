@@ -33,7 +33,7 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("template", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("data", adapter.getDataType("jsonb"))
+				.addColumn("data", adapter.getDataType("json"))
 				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull()) // 'internal' or 'external'
 				.addColumn("sent_count", adapter.getDataType("integer"), (col) =>
 					col.notNull().defaultTo(0),

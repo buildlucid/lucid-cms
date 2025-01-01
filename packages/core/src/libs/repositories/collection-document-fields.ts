@@ -49,7 +49,7 @@ export default class CollectionDocumentFieldsRepo {
 							f.boolValue,
 						),
 						json_value: this.dbAdapter.formatInsertValue<string | null>(
-							"jsonb",
+							"json",
 							f.jsonValue,
 						),
 						user_id: f.userId,

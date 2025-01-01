@@ -51,7 +51,7 @@ class PostgresAdapter extends DatabaseAdapter {
 				primary: "serial",
 				integer: "integer",
 				boolean: "boolean",
-				jsonb: "jsonb",
+				json: "jsonb",
 				text: "text",
 				timestamp: "timestamp",
 				char: (length: number) => `char(${length})`,

@@ -22,7 +22,7 @@ export default class CollectionMigrationsRepo {
 				props.items.map((i) => ({
 					collection_key: i.collectionKey,
 					migration_plans: this.dbAdapter.formatInsertValue<string>(
-						"jsonb",
+						"json",
 						i.migrationPlans,
 					),
 				})),

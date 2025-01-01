@@ -30,15 +30,6 @@ export type DefaultValueType<T> = T extends object
 
 export type DocumentVersionType = "draft" | "published" | "revision";
 
-export type ColumnTypes =
-	| "integer"
-	| "text"
-	| "timestamp"
-	| "json"
-	| "boolean"
-	| "jsonb"
-	| "serial";
-
 export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
 export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
 
@@ -70,13 +61,13 @@ export type DatabaseConfig = {
 	 * Examples:
 	 * - 'primary' maps to 'serial' in PostgreSQL, 'integer' in SQLite (with autoincrement)
 	 * - 'boolean' maps to 'boolean' in PostgreSQL, 'integer' in SQLite
-	 * - 'jsonb' maps to 'jsonb' in PostgreSQL, 'json' in SQLite
+	 * - 'json' maps to 'jsonb' in PostgreSQL, 'json' in SQLite
 	 */
 	dataTypes: {
 		primary: ColumnDataType;
 		integer: ColumnDataType;
 		boolean: ColumnDataType;
-		jsonb: ColumnDataType;
+		json: ColumnDataType;
 		text: ColumnDataType;
 		timestamp: ColumnDataType;
 		char: ((length: number) => ColumnDataType) | ColumnDataType;
