@@ -1,61 +1,39 @@
 import { sql } from "kysely";
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
+import queryBuilder from "../query-builder/index.js";
+import BaseRepository from "./base-repository.js";
 import type z from "zod";
-import type { LucidEmails, Select, KyselyDB } from "../db/types.js";
+import type { KyselyDB } from "../db/types.js";
 import type { Config } from "../../types/config.js";
 import type emailsSchema from "../../schemas/email.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class EmailsRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
+export default class EmailsRepo extends BaseRepository<"lucid_emails"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_emails");
+	}
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		email_hash: this.dbAdapter.getDataType("char", 64),
+		from_address: this.dbAdapter.getDataType("text"),
+		from_name: this.dbAdapter.getDataType("text"),
+		to_address: this.dbAdapter.getDataType("text"),
+		subject: this.dbAdapter.getDataType("text"),
+		cc: this.dbAdapter.getDataType("text"),
+		bcc: this.dbAdapter.getDataType("text"),
+		delivery_status: this.dbAdapter.getDataType("text"),
+		template: this.dbAdapter.getDataType("text"),
+		data: this.dbAdapter.getDataType("jsonb"),
+		type: this.dbAdapter.getDataType("text"),
+		sent_count: this.dbAdapter.getDataType("integer"),
+		error_count: this.dbAdapter.getDataType("integer"),
+		last_error_message: this.dbAdapter.getDataType("text"),
+		last_attempt_at: this.dbAdapter.getDataType("timestamp"),
+		last_success_at: this.dbAdapter.getDataType("timestamp"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
+	};
 
 	// ----------------------------------------
 	// selects
-	selectSingle = async <K extends keyof Select<LucidEmails>>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_emails">;
-	}) => {
-		let query = this.db.selectFrom("lucid_emails").select(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.executeTakeFirst() as Promise<
-			Pick<Select<LucidEmails>, K> | undefined
-		>;
-	};
-	selectSingleById = async (props: {
-		id: number;
-	}) => {
-		return this.db
-			.selectFrom("lucid_emails")
-			.select([
-				"id",
-				"email_hash",
-				"from_address",
-				"from_name",
-				"to_address",
-				"subject",
-				"cc",
-				"bcc",
-				"delivery_status",
-				"template",
-				"data",
-				"type",
-				"sent_count",
-				"error_count",
-				"last_error_message",
-				"last_attempt_at",
-				"last_success_at",
-				"created_at",
-			])
-			.where("id", "=", props.id)
-			.executeTakeFirst();
-	};
 	selectMultipleFiltered = async (props: {
 		query: z.infer<typeof emailsSchema.getMultiple.query>;
 		config: Config;
@@ -129,89 +107,5 @@ export default class EmailsRepo {
 			main.execute(),
 			count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
 		]);
-	};
-	// ----------------------------------------
-	// create
-	createSingle = async (props: {
-		emailHash: string;
-		fromAddress: string;
-		fromName: string;
-		toAddress: string;
-		subject: string;
-		template: string;
-		cc?: string;
-		bcc?: string;
-		data: Record<string, unknown> | null;
-		type: LucidEmails["type"];
-		sentCount: number;
-		errorCount: number;
-		deliveryStatus: LucidEmails["delivery_status"];
-		lastErrorMessage?: string;
-		lastSuccessAt?: string;
-	}) => {
-		return this.db
-			.insertInto("lucid_emails")
-			.values({
-				email_hash: props.emailHash,
-				from_address: props.fromAddress,
-				from_name: props.fromName,
-				to_address: props.toAddress,
-				subject: props.subject,
-				template: props.template,
-				cc: props.cc,
-				bcc: props.bcc,
-				data: this.dbAdapter.formatInsertValue<string | null>(
-					"jsonb",
-					props.data,
-				),
-				type: props.type,
-				sent_count: props.sentCount,
-				error_count: props.errorCount,
-				delivery_status: props.deliveryStatus,
-				last_error_message: props.lastErrorMessage,
-				last_success_at: props.lastSuccessAt,
-			})
-			.returningAll()
-			.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// update
-	updateSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_emails">;
-		data: {
-			deliveryStatus?: LucidEmails["delivery_status"];
-			lastErrorMessage?: string;
-			lastSuccessAt?: string;
-			sentCount?: number;
-			errorCount?: number;
-			lastAttemptAt?: string;
-		};
-	}) => {
-		let query = this.db
-			.updateTable("lucid_emails")
-			.set({
-				delivery_status: props.data.deliveryStatus,
-				last_error_message: props.data.lastErrorMessage,
-				last_success_at: props.data.lastSuccessAt,
-				sent_count: props.data.sentCount,
-				error_count: props.data.errorCount,
-				last_attempt_at: props.data.lastAttemptAt,
-			})
-			.returningAll();
-
-		query = queryBuilder.update(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// delete
-	deleteSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_emails">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_emails").returning("id");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.executeTakeFirst();
 	};
 }

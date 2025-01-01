@@ -16,8 +16,34 @@ const getSingle: ServiceFn<
 	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
-	const email = await EmailsRepo.selectSingleById({
-		id: data.id,
+	const email = await EmailsRepo.selectSingle({
+		select: [
+			"id",
+			"email_hash",
+			"from_address",
+			"from_name",
+			"to_address",
+			"subject",
+			"cc",
+			"bcc",
+			"delivery_status",
+			"template",
+			"data",
+			"type",
+			"sent_count",
+			"error_count",
+			"last_error_message",
+			"last_attempt_at",
+			"last_success_at",
+			"created_at",
+		],
+		where: [
+			{
+				key: "id",
+				operator: "=",
+				value: data.id,
+			},
+		],
 	});
 
 	if (email === undefined) {

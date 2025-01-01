@@ -80,12 +80,12 @@ const sendEmail: ServiceFn<
 				},
 			],
 			data: {
-				deliveryStatus: emailRecord.deliveryStatus,
-				lastErrorMessage: emailRecord.lastErrorMessage,
-				lastSuccessAt: emailRecord.lastSuccessAt,
-				sentCount: emailExists.sent_count + (result.success ? 1 : 0),
-				errorCount: emailExists.error_count + (result.success ? 0 : 1),
-				lastAttemptAt: new Date().toISOString(),
+				delivery_status: emailRecord.deliveryStatus,
+				last_error_message: emailRecord.lastErrorMessage,
+				last_success_at: emailRecord.lastSuccessAt,
+				sent_count: emailExists.sent_count + (result.success ? 1 : 0),
+				error_count: emailExists.error_count + (result.success ? 0 : 1),
+				last_attempt_at: new Date().toISOString(),
 			},
 		});
 
@@ -108,21 +108,24 @@ const sendEmail: ServiceFn<
 		};
 	}
 	const newEmail = await EmailsRepo.createSingle({
-		emailHash: emailHash,
-		fromAddress: emailConfigRes.data.from.email,
-		fromName: emailConfigRes.data.from.name,
-		toAddress: data.to,
-		subject: data.subject,
-		template: data.template,
-		cc: data.cc,
-		bcc: data.bcc,
-		data: data.data,
-		type: data.type,
-		sentCount: result.success ? 1 : 0,
-		errorCount: result.success ? 0 : 1,
-		deliveryStatus: emailRecord.deliveryStatus,
-		lastErrorMessage: emailRecord.lastErrorMessage,
-		lastSuccessAt: emailRecord.lastSuccessAt,
+		data: {
+			email_hash: emailHash,
+			from_address: emailConfigRes.data.from.email,
+			from_name: emailConfigRes.data.from.name,
+			to_address: data.to,
+			subject: data.subject,
+			template: data.template,
+			cc: data.cc,
+			bcc: data.bcc,
+			data: data.data,
+			type: data.type,
+			sent_count: result.success ? 1 : 0,
+			error_count: result.success ? 0 : 1,
+			delivery_status: emailRecord.deliveryStatus,
+			last_error_message: emailRecord.lastErrorMessage,
+			last_success_at: emailRecord.lastSuccessAt,
+		},
+		returnAll: true,
 	});
 
 	if (newEmail === undefined) {

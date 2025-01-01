@@ -14,6 +14,14 @@ export type Select<T> = {
 	[P in keyof T]: T[P] extends { __select__: infer S } ? S : T[P];
 };
 
+export type Insert<T> = {
+	[P in keyof T]: T[P] extends { __insert__: infer S } ? S : T[P];
+};
+
+export type Update<T> = {
+	[P in keyof T]: T[P] extends { __update__: infer S } ? S : T[P];
+};
+
 export type DefaultValueType<T> = T extends object
 	? keyof T extends never
 		? T
@@ -231,7 +239,12 @@ export interface LucidEmails {
 	bcc: string | null;
 	delivery_status: "pending" | "delivered" | "failed";
 	template: string;
-	data: JSONColumnType<Record<string, unknown>, string | null, string | null>;
+	data: JSONColumnType<
+		Record<string, unknown>,
+		//* __insert__ includes a Record as the base repository handles formatting via formatData method
+		Record<string, unknown> | null,
+		string | null
+	>;
 	type: "internal" | "external";
 	sent_count: number;
 	error_count: number;
