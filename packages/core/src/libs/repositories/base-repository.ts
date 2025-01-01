@@ -1,6 +1,8 @@
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
+import z, { type ZodObject } from "zod";
+import type { ServiceResponse } from "../../types.js";
 import {
 	sql,
 	type ColumnDataType,
@@ -32,6 +34,12 @@ abstract class BaseRepository<
 		public readonly tableName: keyof LucidDB,
 	) {}
 	/**
+	 * A Zod schema for the table.
+	 */
+
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	protected abstract tableSchema: ZodObject<any>;
+	/**
 	 * The column data types for the table. Repositories need to keep these in sync with the migrations and the database.
 	 */
 	protected abstract columnFormats: Partial<Record<keyof T, ColumnDataType>>;
@@ -62,6 +70,48 @@ abstract class BaseRepository<
 
 		return formatted;
 	}
+	/**
+	 * A helper that creates a partial zod schema based on selected columns.
+	 */
+	protected createSelectSchema<K extends keyof Select<T>>(select: K[]) {
+		return this.tableSchema
+			.pick(
+				select.reduce<Record<string, true>>((acc, key) => {
+					acc[key as string] = true;
+					return acc;
+				}, {}),
+			)
+			.partial();
+	}
+	/**
+	 * Builds the schema based on selected/returned columns and the mode and validates the data against it.
+	 * @todo Improve error message
+	 */
+	protected async validateResult<R, K extends keyof Select<T>>(props: {
+		select: K[];
+		mode: "single" | "multiple";
+		data: R;
+	}): ServiceResponse<R> {
+		const selectSchema = this.createSelectSchema(props.select);
+		const schema =
+			props.mode === "single" ? selectSchema : z.array(selectSchema);
+
+		const res = await schema.safeParseAsync(props.data);
+
+		if (res.success) {
+			return {
+				data: props.data,
+				error: undefined,
+			};
+		}
+
+		return {
+			data: undefined,
+			error: {
+				message: "error",
+			},
+		};
+	}
 
 	// ----------------------------------------
 	// selects
@@ -73,7 +123,17 @@ abstract class BaseRepository<
 		let query = this.db.selectFrom(this.tableName).select(props.select);
 		// @ts-expect-error
 		query = queryBuilder.select(query, props.where);
-		return query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>;
+
+		const data = (await query.executeTakeFirst()) as
+			| Pick<Select<T>, K>
+			| undefined;
+
+		const validateRes = await this.validateResult({
+			select: props.select,
+			mode: "single",
+			data: data,
+		});
+		return validateRes;
 	}
 	async selectMultiple<K extends keyof Select<T>>(props: {
 		select: K[];

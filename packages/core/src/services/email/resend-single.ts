@@ -19,7 +19,7 @@ const resendSingle: ServiceFn<
 
 	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 
-	const email = await EmailsRepo.selectSingle({
+	const emailRes = await EmailsRepo.selectSingle({
 		select: [
 			"id",
 			"email_hash",
@@ -48,8 +48,9 @@ const resendSingle: ServiceFn<
 			},
 		],
 	});
+	if (emailRes.error) return emailRes;
 
-	if (email === undefined) {
+	if (emailRes.data === undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -60,30 +61,30 @@ const resendSingle: ServiceFn<
 		};
 	}
 
-	const templateData = (email.data ?? {}) as Record<string, unknown>;
+	const templateData = (emailRes.data.data ?? {}) as Record<string, unknown>;
 
 	const html = await context.services.email.renderTemplate(context, {
-		template: email.template,
+		template: emailRes.data.template,
 		data: templateData,
 	});
 	if (html.error) return html;
 
 	const result = await emailConfigRes.data.strategy(
 		{
-			to: email.to_address,
-			subject: email.subject ?? "",
+			to: emailRes.data.to_address,
+			subject: emailRes.data.subject ?? "",
 			from: {
-				name: email.from_name,
-				email: email.from_address,
+				name: emailRes.data.from_name,
+				email: emailRes.data.from_address,
 			},
 			html: html.data,
-			cc: email.cc ?? undefined,
-			bcc: email.bcc ?? undefined,
+			cc: emailRes.data.cc ?? undefined,
+			bcc: emailRes.data.bcc ?? undefined,
 		},
 		{
 			data: templateData,
-			template: email.template,
-			hash: email.email_hash,
+			template: emailRes.data.template,
+			hash: emailRes.data.email_hash,
 		},
 	);
 
@@ -92,15 +93,15 @@ const resendSingle: ServiceFn<
 			{
 				key: "id",
 				operator: "=",
-				value: email.id,
+				value: emailRes.data.id,
 			},
 		],
 		data: {
 			delivery_status: result.success ? "delivered" : "failed",
 			last_error_message: result.success ? undefined : result.message,
 			last_success_at: result.success ? new Date().toISOString() : undefined,
-			sent_count: email.sent_count + (result.success ? 1 : 0),
-			error_count: email.error_count + (result.success ? 0 : 1),
+			sent_count: emailRes.data.sent_count + (result.success ? 1 : 0),
+			error_count: emailRes.data.error_count + (result.success ? 0 : 1),
 			last_attempt_at: new Date().toISOString(),
 		},
 	});

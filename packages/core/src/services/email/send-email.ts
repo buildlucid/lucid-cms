@@ -59,7 +59,7 @@ const sendEmail: ServiceFn<
 		lastSuccessAt: result.success ? new Date().toISOString() : undefined,
 	};
 
-	const emailExists = await EmailsRepo.selectSingle({
+	const emailExistsRes = await EmailsRepo.selectSingle({
 		select: ["id", "email_hash", "sent_count", "error_count"],
 		where: [
 			{
@@ -69,22 +69,23 @@ const sendEmail: ServiceFn<
 			},
 		],
 	});
+	// if (emailExistsRes.error) return emailExistsRes;
 
-	if (emailExists) {
+	if (emailExistsRes.data) {
 		const emailUpdated = await EmailsRepo.updateSingle({
 			where: [
 				{
 					key: "id",
 					operator: "=",
-					value: emailExists.id,
+					value: emailExistsRes.data.id,
 				},
 			],
 			data: {
 				delivery_status: emailRecord.deliveryStatus,
 				last_error_message: emailRecord.lastErrorMessage,
 				last_success_at: emailRecord.lastSuccessAt,
-				sent_count: emailExists.sent_count + (result.success ? 1 : 0),
-				error_count: emailExists.error_count + (result.success ? 0 : 1),
+				sent_count: emailExistsRes.data.sent_count + (result.success ? 1 : 0),
+				error_count: emailExistsRes.data.error_count + (result.success ? 0 : 1),
 				last_attempt_at: new Date().toISOString(),
 			},
 		});

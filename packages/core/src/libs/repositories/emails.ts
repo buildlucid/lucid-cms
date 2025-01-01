@@ -1,4 +1,5 @@
 import BaseRepository from "./base-repository.js";
+import z from "zod";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
@@ -6,6 +7,30 @@ export default class EmailsRepo extends BaseRepository<"lucid_emails"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_emails");
 	}
+	tableSchema = z.object({
+		id: z.number(),
+		email_hash: z.string(),
+		from_address: z.string(),
+		from_name: z.string(),
+		to_address: z.string(),
+		subject: z.string(),
+		cc: z.string().nullable(),
+		bcc: z.string().nullable(),
+		delivery_status: z.union([
+			z.literal("pending"),
+			z.literal("delivered"),
+			z.literal("failed"),
+		]),
+		template: z.string(),
+		data: z.record(z.string(), z.unknown()).nullable(),
+		type: z.string(),
+		sent_count: z.number(),
+		error_count: z.number(),
+		last_error_message: z.string().nullable(),
+		last_attempt_at: z.string().nullable(),
+		last_success_at: z.string().nullable(),
+		created_at: z.string().nullable(),
+	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		email_hash: this.dbAdapter.getDataType("char", 64),

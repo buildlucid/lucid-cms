@@ -16,7 +16,7 @@ const getSingle: ServiceFn<
 	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
-	const email = await EmailsRepo.selectSingle({
+	const emailRes = await EmailsRepo.selectSingle({
 		select: [
 			"id",
 			"email_hash",
@@ -45,8 +45,9 @@ const getSingle: ServiceFn<
 			},
 		],
 	});
+	if (emailRes.error) return emailRes;
 
-	if (email === undefined) {
+	if (emailRes.data === undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -61,21 +62,21 @@ const getSingle: ServiceFn<
 		return {
 			error: undefined,
 			data: EmailsFormatter.formatSingle({
-				email: email,
+				email: emailRes.data,
 			}),
 		};
 	}
 
 	const html = await context.services.email.renderTemplate(context, {
-		template: email.template,
-		data: email.data,
+		template: emailRes.data.template,
+		data: emailRes.data.data,
 	});
 	if (html.error) return html;
 
 	return {
 		error: undefined,
 		data: EmailsFormatter.formatSingle({
-			email: email,
+			email: emailRes.data,
 			html: html.data,
 		}),
 	};
