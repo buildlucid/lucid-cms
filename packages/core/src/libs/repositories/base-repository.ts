@@ -17,24 +17,19 @@ import type { QueryParams } from "../../types/query-params.js";
 import logger from "../../utils/logging/index.js";
 import constants from "../../constants/constants.js";
 
-type QueryMethodProps<T> = {
-	/**
-	 * Custom schema to override the default table schema
-	 */
+type QueryMethodConfig = {
+	/** Custom schema to override the default table schema */
 	schema?: ZodSchema;
-	/**
-	 * Whether to run validation on the response
-	 */
+	/** Whether to run validation on the response */
 	validateResponse?: boolean;
-	/**
-	 * Require the response to exist (not undefined/null)
-	 * Will return an error if the response is undefined/null
-	 */
+	/** Require the response to exist (not undefined/null) - only works when validateResponse is true */
 	required?: boolean;
-	/**
-	 * Custom error to return when validation fails
-	 */
+	/** Custom error to return when validation fails */
 	validationError?: LucidErrorData;
+};
+
+type QueryMethodProps<T> = {
+	config?: QueryMethodConfig;
 } & T;
 
 /**
@@ -42,6 +37,7 @@ type QueryMethodProps<T> = {
  *
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
+ * @todo Split validation and error handling from the query execution into separate methods for easier type narrowing.
  * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
  * @todo Only implemented in the EmailsRepo class while testing it out. Will need to be fully implemented across all repositories.
  * @todo Add a solution for verifying if the Repos columnFormats are in sync with the database. This should be done via a test as opposed to runtime.
@@ -139,13 +135,10 @@ abstract class BaseRepository<
 	protected async executeQuery<Result>(
 		queryFn: () => Promise<Result>,
 		options: {
-			schema?: ZodSchema;
 			mode: "single" | "multiple" | "multiple-count";
 			method: string;
-			validateResponse?: boolean;
+			config?: QueryMethodConfig;
 			select?: Array<keyof Select<T>>;
-			required?: boolean;
-			validationError?: LucidErrorData;
 		},
 	): ServiceResponse<Result> {
 		const startTime = process.hrtime();
@@ -168,34 +161,37 @@ abstract class BaseRepository<
 					executionTime: `${executionTime}ms`,
 					select: options.select,
 					hasValidation:
-						options.validateResponse !== false &&
-						(!!options.schema || !!options.select),
-					required: options.required,
+						options.config?.validateResponse !== false &&
+						(!!options.config?.schema || !!options.select),
+					required: options.config?.required,
 				},
 			});
 
 			//* checks for undefined or null
-			if (options.required && (result === undefined || result === null)) {
+			if (
+				options.config?.validateResponse &&
+				options.config?.required &&
+				(result === undefined || result === null)
+			) {
 				return {
 					data: undefined,
 					error: {
-						message: options.validationError?.message,
-						type: options.validationError?.type,
-						status: options.validationError?.status ?? 404,
+						...options.config.validationError,
+						status: options.config.validationError?.status ?? 404,
 					},
 				};
 			}
 
 			//* skips validation if validateResponse is false or no schema or select is provided
 			if (
-				options.validateResponse === false ||
-				(!options.schema && !options.select)
+				options.config?.validateResponse === false ||
+				(!options.config?.schema && !options.select)
 			) {
 				return { data: result, error: undefined };
 			}
 
 			const validationSchema =
-				options.schema ||
+				options.config?.schema ||
 				(options.select &&
 					this.createValidationSchema(options.select, options.mode));
 
@@ -219,9 +215,11 @@ abstract class BaseRepository<
 				return {
 					data: undefined,
 					error: {
-						message: options.validationError?.message ?? T("validation_error"),
-						type: options.validationError?.type ?? "validation",
-						status: options.validationError?.status ?? 400,
+						...options.config?.validationError,
+						message:
+							options.config?.validationError?.message ?? T("validation_error"),
+						type: options.config?.validationError?.type ?? "validation",
+						status: options.config?.validationError?.status ?? 400,
 					},
 				};
 			}
@@ -241,7 +239,9 @@ abstract class BaseRepository<
 					method: options.method,
 					executionTime: `${executionTime}ms`,
 					error:
-						error instanceof Error ? error.message : "Unknown error occurred",
+						error instanceof Error
+							? error.message
+							: T("an_unknown_error_occurred"),
 				},
 			});
 
@@ -249,7 +249,9 @@ abstract class BaseRepository<
 				data: undefined,
 				error: {
 					message:
-						error instanceof Error ? error.message : "Unknown error occurred",
+						error instanceof Error
+							? error.message
+							: T("an_unknown_error_occurred"),
 					status: 500,
 				},
 			};
@@ -277,8 +279,7 @@ abstract class BaseRepository<
 			{
 				method: "selectSingle",
 				mode: "single",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.select,
 			},
 		);
@@ -321,8 +322,7 @@ abstract class BaseRepository<
 			{
 				method: "selectMultiple",
 				mode: "multiple",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.select,
 			},
 		);
@@ -364,8 +364,7 @@ abstract class BaseRepository<
 			{
 				method: "selectMultipleFiltered",
 				mode: "multiple-count",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.select,
 			},
 		);
@@ -395,8 +394,7 @@ abstract class BaseRepository<
 			{
 				method: "deleteSingle",
 				mode: "single",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.returning,
 			},
 		);
@@ -421,8 +419,7 @@ abstract class BaseRepository<
 			{
 				method: "deleteMultiple",
 				mode: "multiple",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.returning,
 			},
 		);
@@ -461,8 +458,7 @@ abstract class BaseRepository<
 			{
 				method: "createSingle",
 				mode: "single",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.returning,
 			},
 		);
@@ -498,8 +494,7 @@ abstract class BaseRepository<
 			{
 				method: "createMultiple",
 				mode: "multiple",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.returning,
 			},
 		);
@@ -514,7 +509,7 @@ abstract class BaseRepository<
 			returning?: K[];
 			returnAll?: boolean;
 		}>,
-	): ServiceResponse<Pick<Select<T>, K> | undefined> {
+	) {
 		return this.executeQuery(
 			async () => {
 				let query = this.db
@@ -536,6 +531,7 @@ abstract class BaseRepository<
 
 				// @ts-expect-error
 				query = queryBuilder.update(query, props.where);
+
 				return query.executeTakeFirst() as Promise<
 					Pick<Select<T>, K> | undefined
 				>;
@@ -543,8 +539,7 @@ abstract class BaseRepository<
 			{
 				method: "updateSingle",
 				mode: "single",
-				schema: props.schema,
-				validateResponse: props.validateResponse,
+				config: props.config,
 				select: props.returning,
 			},
 		);

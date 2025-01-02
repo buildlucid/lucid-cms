@@ -20,9 +20,11 @@ const deleteSingle: ServiceFn<
 				value: data.id,
 			},
 		],
-		required: true,
-		validationError: {
-			status: 500,
+		config: {
+			required: true,
+			validationError: {
+				status: 500,
+			},
 		},
 	});
 	if (deleteEmailRes.error) return deleteEmailRes;
