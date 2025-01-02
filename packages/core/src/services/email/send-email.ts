@@ -72,7 +72,7 @@ const sendEmail: ServiceFn<
 	// if (emailExistsRes.error) return emailExistsRes;
 
 	if (emailExistsRes.data) {
-		const emailUpdated = await EmailsRepo.updateSingle({
+		const emailUpdatedRes = await EmailsRepo.updateSingle({
 			where: [
 				{
 					key: "id",
@@ -89,8 +89,9 @@ const sendEmail: ServiceFn<
 				last_attempt_at: new Date().toISOString(),
 			},
 		});
+		if (emailUpdatedRes.error) return emailUpdatedRes;
 
-		if (emailUpdated === undefined) {
+		if (emailUpdatedRes.data === undefined) {
 			return {
 				error: {
 					type: "basic",
@@ -103,12 +104,12 @@ const sendEmail: ServiceFn<
 		return {
 			error: undefined,
 			data: EmailsFormatter.formatSingle({
-				email: emailUpdated,
+				email: emailUpdatedRes.data,
 				html: html.data,
 			}),
 		};
 	}
-	const newEmail = await EmailsRepo.createSingle({
+	const newEmailRes = await EmailsRepo.createSingle({
 		data: {
 			email_hash: emailHash,
 			from_address: emailConfigRes.data.from.email,
@@ -128,8 +129,9 @@ const sendEmail: ServiceFn<
 		},
 		returnAll: true,
 	});
+	if (newEmailRes.error) return newEmailRes;
 
-	if (newEmail === undefined) {
+	if (newEmailRes.data === undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -142,7 +144,7 @@ const sendEmail: ServiceFn<
 	return {
 		error: undefined,
 		data: EmailsFormatter.formatSingle({
-			email: newEmail,
+			email: newEmailRes.data,
 			html: html.data,
 		}),
 	};

@@ -113,6 +113,7 @@ export default Object.freeze({
 		cron: "cron",
 		config: "config",
 		sync: "sync",
+		query: "query",
 	} as const,
 	retention: {
 		deletedCollections: 30, // days

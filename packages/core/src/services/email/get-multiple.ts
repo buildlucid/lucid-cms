@@ -19,7 +19,7 @@ const getMultiple: ServiceFn<
 	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
-	const [emails, emailsCount] = await EmailsRepo.selectMultipleFiltered({
+	const emailsRes = await EmailsRepo.selectMultipleFiltered({
 		select: [
 			"id",
 			"email_hash",
@@ -41,14 +41,15 @@ const getMultiple: ServiceFn<
 		],
 		queryParams: data.query,
 	});
+	if (emailsRes.error) return emailsRes;
 
 	return {
 		error: undefined,
 		data: {
 			data: EmailsFormatter.formatMultiple({
-				emails: emails,
+				emails: emailsRes.data[0],
 			}),
-			count: Formatter.parseCount(emailsCount?.count),
+			count: Formatter.parseCount(emailsRes.data[1]?.count),
 		},
 	};
 };

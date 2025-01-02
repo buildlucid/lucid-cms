@@ -88,7 +88,7 @@ const resendSingle: ServiceFn<
 		},
 	);
 
-	await EmailsRepo.updateSingle({
+	const updateRes = await EmailsRepo.updateSingle({
 		where: [
 			{
 				key: "id",
@@ -105,6 +105,7 @@ const resendSingle: ServiceFn<
 			last_attempt_at: new Date().toISOString(),
 		},
 	});
+	if (updateRes.error) return updateRes;
 
 	return {
 		error: undefined,

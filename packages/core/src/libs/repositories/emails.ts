@@ -3,6 +3,7 @@ import z from "zod";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
+// TODO: go through all instances and update the methods to use new error handling props
 export default class EmailsRepo extends BaseRepository<"lucid_emails"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_emails");

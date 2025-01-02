@@ -11,7 +11,7 @@ const deleteSingle: ServiceFn<
 > = async (context, data) => {
 	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
 
-	const deleteEmail = await EmailsRepo.deleteSingle({
+	const deleteEmailRes = await EmailsRepo.deleteSingle({
 		returning: ["id"],
 		where: [
 			{
@@ -20,17 +20,12 @@ const deleteSingle: ServiceFn<
 				value: data.id,
 			},
 		],
+		required: true,
+		validationError: {
+			status: 500,
+		},
 	});
-
-	if (deleteEmail === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	if (deleteEmailRes.error) return deleteEmailRes;
 
 	return {
 		error: undefined,
