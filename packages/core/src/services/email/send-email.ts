@@ -74,7 +74,7 @@ const sendEmail: ServiceFn<
 	});
 
 	if (emailExistsRes.data) {
-		const emailUpdatedRes = await EmailsRepo.updateSingle({
+		const updateRes = await EmailsRepo.updateSingle({
 			where: [
 				{
 					key: "id",
@@ -91,29 +91,17 @@ const sendEmail: ServiceFn<
 				last_attempt_at: new Date().toISOString(),
 			},
 			returnAll: true,
-			config: {
-				required: true,
-				validationError: {
-					status: 500,
-				},
-			},
+		}).validate({
+			required: true,
+			validationError: { status: 500 },
 		});
-		if (emailUpdatedRes.error) return emailUpdatedRes;
 
-		if (emailUpdatedRes.data === undefined) {
-			return {
-				error: {
-					type: "basic",
-					status: 500,
-				},
-				data: undefined,
-			};
-		}
+		if (updateRes.error) return updateRes;
 
 		return {
 			error: undefined,
 			data: EmailsFormatter.formatSingle({
-				email: emailUpdatedRes.data,
+				email: updateRes.data,
 				html: html.data,
 			}),
 		};
