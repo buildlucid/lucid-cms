@@ -128,8 +128,11 @@ const sendEmail: ServiceFn<
 			last_success_at: emailRecord.lastSuccessAt,
 		},
 		returnAll: true,
+		// validate: true,
 	});
 	if (newEmailRes.error) return newEmailRes;
+
+	console.log(newEmailRes.data); // data is not undefined here due to the validate method NonNullable
 
 	if (newEmailRes.data === undefined) {
 		return {
