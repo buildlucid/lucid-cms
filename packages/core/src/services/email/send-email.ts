@@ -68,9 +68,6 @@ const sendEmail: ServiceFn<
 				value: emailHash,
 			},
 		],
-		config: {
-			validateResponse: false,
-		},
 	});
 
 	if (emailExistsRes.data) {
@@ -91,12 +88,17 @@ const sendEmail: ServiceFn<
 				last_attempt_at: new Date().toISOString(),
 			},
 			returnAll: true,
-		}).validate({
-			required: true,
-			validationError: { status: 500 },
 		});
-
 		if (updateRes.error) return updateRes;
+
+		if (updateRes.data === undefined) {
+			return {
+				error: {
+					status: 500,
+				},
+				data: undefined,
+			};
+		}
 
 		return {
 			error: undefined,
@@ -106,6 +108,7 @@ const sendEmail: ServiceFn<
 			}),
 		};
 	}
+
 	const newEmailRes = await EmailsRepo.createSingle({
 		data: {
 			email_hash: emailHash,

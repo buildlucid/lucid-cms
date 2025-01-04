@@ -47,9 +47,9 @@ const getMultiple: ServiceFn<
 		error: undefined,
 		data: {
 			data: EmailsFormatter.formatMultiple({
-				emails: emailsRes.data[0],
+				emails: emailsRes.data.main,
 			}),
-			count: Formatter.parseCount(emailsRes.data[1]?.count),
+			count: Formatter.parseCount(emailsRes.data?.count?.count),
 		},
 	};
 };

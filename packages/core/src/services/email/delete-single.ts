@@ -20,14 +20,17 @@ const deleteSingle: ServiceFn<
 				value: data.id,
 			},
 		],
-		config: {
-			required: true,
-			validationError: {
-				status: 500,
-			},
-		},
 	});
 	if (deleteEmailRes.error) return deleteEmailRes;
+
+	if (!deleteEmailRes.data) {
+		return {
+			error: {
+				status: 500,
+			},
+			data: undefined,
+		};
+	}
 
 	return {
 		error: undefined,
