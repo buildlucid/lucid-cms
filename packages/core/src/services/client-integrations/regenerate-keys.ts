@@ -13,13 +13,13 @@ const regenerateKeys: ServiceFn<
 		apiKey: string;
 	}
 > = async (context, data) => {
-	const ClientIntegrationsRepo = Repository.get(
+	const ClientIntegrations = Repository.get(
 		"client-integrations",
 		context.db,
 		context.config.db,
 	);
 
-	const checkExists = await ClientIntegrationsRepo.selectSingle({
+	const checkExistsRes = await ClientIntegrations.selectSingle({
 		select: ["id"],
 		where: [
 			{
@@ -28,23 +28,21 @@ const regenerateKeys: ServiceFn<
 				value: data.id,
 			},
 		],
-	});
-	if (checkExists === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("client_integration_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (checkExistsRes.error) return checkExistsRes;
 
 	const { apiKey, apiKeyHash, secret } = await generateKeys(
 		context.config.keys.encryptionKey,
 	);
 
-	const updateKeysRes = await ClientIntegrationsRepo.updateSingle({
+	const updateKeysRes = await ClientIntegrations.updateSingle({
 		where: [
 			{
 				key: "id",
@@ -53,20 +51,16 @@ const regenerateKeys: ServiceFn<
 			},
 		],
 		data: {
-			apiKey: apiKeyHash,
+			api_key: apiKeyHash,
 			secret: secret,
-			updatedAt: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
+		},
+		returning: ["id"],
+		validation: {
+			enabled: true,
 		},
 	});
-	if (updateKeysRes === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	if (updateKeysRes.error) return updateKeysRes;
 
 	return {
 		error: undefined,

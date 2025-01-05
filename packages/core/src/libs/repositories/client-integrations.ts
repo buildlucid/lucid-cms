@@ -1,127 +1,54 @@
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
-import type {
-	LucidClientIntegrations,
-	Select,
-	KyselyDB,
-	BooleanInt,
-} from "../db/types.js";
+import z from "zod";
+import BaseRepository from "./base-repository.js";
+import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class ClientIntegrationsRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
-
-	// ----------------------------------------
-	// select
-	selectSingle = async <
-		K extends keyof Select<LucidClientIntegrations>,
-	>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_client_integrations">;
-	}) => {
-		let query = this.db
-			.selectFrom("lucid_client_integrations")
-			.select(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.executeTakeFirst() as Promise<
-			Pick<Select<LucidClientIntegrations>, K> | undefined
-		>;
+export default class ClientIntegrationsRepository extends BaseRepository<"lucid_client_integrations"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_client_integrations");
+	}
+	tableSchema = z.object({
+		id: z.number(),
+		name: z.string(),
+		description: z.string().nullable(),
+		enabled: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		key: z.string(),
+		api_key: z.string(),
+		secret: z.string(),
+		created_at: z.string().nullable(),
+		updated_at: z.string().nullable(),
+	});
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		name: this.dbAdapter.getDataType("text"),
+		description: this.dbAdapter.getDataType("text"),
+		enabled: this.dbAdapter.getDataType("boolean"),
+		key: this.dbAdapter.getDataType("text"),
+		api_key: this.dbAdapter.getDataType("text"),
+		secret: this.dbAdapter.getDataType("text"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
+		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
-	selectMultiple = async <
-		K extends keyof Select<LucidClientIntegrations>,
-	>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_client_integrations">;
-	}) => {
-		let query = this.db
-			.selectFrom("lucid_client_integrations")
-			.select(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.execute() as Promise<
-			Array<Pick<Select<LucidClientIntegrations>, K>>
-		>;
-	};
-	// ----------------------------------------
-	// create
-	createSingle = async (props: {
-		name: string;
-		description?: string;
-		enabled: boolean;
-		key: string;
-		apiKey: string;
-		secret: string;
-		createdAt: string;
-		updatedAt: string;
-	}) => {
-		return this.db
-			.insertInto("lucid_client_integrations")
-			.values({
-				name: props.name,
-				description: props.description,
-				enabled: this.dbAdapter.formatInsertValue<BooleanInt>(
-					"boolean",
-					props.enabled,
-				),
-				key: props.key,
-				api_key: props.apiKey,
-				secret: props.secret,
-				created_at: props.createdAt,
-				updated_at: props.updatedAt,
-			})
-			.returning(["id", "api_key"])
-			.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// update
-	updateSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_client_integrations">;
-		data: {
-			name?: string;
-			description?: string;
-			enabled?: boolean;
-			apiKey?: string;
-			secret?: string;
-			updatedAt?: string;
-		};
-	}) => {
-		let query = this.db
-			.updateTable("lucid_client_integrations")
-			.set({
-				name: props.data.name,
-				description: props.data.description,
-				enabled: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
-					"boolean",
-					props.data.enabled,
-				),
-				api_key: props.data.apiKey,
-				secret: props.data.secret,
-				updated_at: props.data.updatedAt,
-			})
-			.returning(["id"]);
-
-		query = queryBuilder.update(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// delete
-	deleteSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_client_integrations">;
-	}) => {
-		let query = this.db
-			.deleteFrom("lucid_client_integrations")
-			.returning(["id"]);
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.executeTakeFirst();
-	};
+	queryConfig = {
+		tableKeys: {
+			filters: {
+				name: "name",
+				description: "description",
+				enabled: "enabled",
+			},
+			sorts: {
+				name: "name",
+				enabled: "enabled",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
+			},
+		},
+		operators: {
+			name: this.dbAdapter.config.fuzzOperator,
+			description: this.dbAdapter.config.fuzzOperator,
+		},
+	} as const;
 }

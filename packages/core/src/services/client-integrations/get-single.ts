@@ -12,14 +12,14 @@ const getSingle: ServiceFn<
 	],
 	ClientIntegrationResponse
 > = async (context, data) => {
-	const ClientIntegrationsRepo = Repository.get(
+	const ClientIntegrations = Repository.get(
 		"client-integrations",
 		context.db,
 		context.config.db,
 	);
 	const ClientIntegrationFormatter = Formatter.get("client-integrations");
 
-	const integrationsRes = await ClientIntegrationsRepo.selectSingle({
+	const integrationsRes = await ClientIntegrations.selectSingle({
 		select: [
 			"id",
 			"key",
@@ -36,22 +36,20 @@ const getSingle: ServiceFn<
 				value: data.id,
 			},
 		],
-	});
-	if (integrationsRes === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("client_integration_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (integrationsRes.error) return integrationsRes;
 
 	return {
 		error: undefined,
 		data: ClientIntegrationFormatter.formatSingle({
-			integration: integrationsRes,
+			integration: integrationsRes.data,
 		}),
 	};
 };

@@ -12,6 +12,7 @@ import {
 	type ColumnDataType,
 	type ReferenceExpression,
 	type ComparisonOperatorExpression,
+	type SelectExpression,
 } from "kysely";
 import type { LucidErrorData } from "../../types.js";
 import type DatabaseAdapter from "../db/adapter.js";
@@ -30,6 +31,8 @@ import type {
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
  * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
+ * @todo look into using $if for conditional query builder options
+ * @todo try and get the retuning and select props correctly typed instead of typing it ourselved with the Select helper. Likley allows us to get rid of the 'as Promise<Pick<Select<T>, K> | undefined>' and lets Kysely handle the return type
  */
 abstract class BaseRepository<
 	Table extends keyof LucidDB,
@@ -584,21 +587,15 @@ abstract class BaseRepository<
 	) {
 		let query = this.db
 			.updateTable(this.tableName)
-			.set(this.formatData(props.data));
-
-		if (
-			props.returnAll !== true &&
-			props.returning &&
-			props.returning.length > 0
-		) {
-			// @ts-expect-error
-			query = query.returning(props.returning);
-		}
-
-		if (props.returnAll) {
-			// @ts-expect-error
-			query = query.returningAll();
-		}
+			.set(this.formatData(props.data))
+			.$if(
+				props.returnAll !== true &&
+					props.returning !== undefined &&
+					props.returning.length > 0,
+				// @ts-expect-error
+				(qb) => qb.returning(props.returning),
+			)
+			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
 		// @ts-expect-error
 		query = queryBuilder.update(query, props.where);

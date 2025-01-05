@@ -34,6 +34,7 @@ const createSingleController: RouteController<
 		{
 			name: request.body.name,
 			description: request.body.description,
+			enabled: request.body.enabled,
 		},
 	);
 	if (clientIntegrationRes.error)

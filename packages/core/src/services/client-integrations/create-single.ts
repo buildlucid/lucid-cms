@@ -8,13 +8,14 @@ const createSingle: ServiceFn<
 		{
 			name: string;
 			description?: string;
+			enabled?: boolean;
 		},
 	],
 	{
 		apiKey: string;
 	}
 > = async (context, data) => {
-	const ClientIntegrationsRepo = Repository.get(
+	const ClientIntegrations = Repository.get(
 		"client-integrations",
 		context.db,
 		context.config.db,
@@ -24,7 +25,7 @@ const createSingle: ServiceFn<
 		context.config.keys.encryptionKey,
 	);
 
-	const keyExistsRes = await ClientIntegrationsRepo.selectSingle({
+	const keyExistsRes = await ClientIntegrations.selectSingle({
 		select: ["id"],
 		where: [
 			{
@@ -34,7 +35,9 @@ const createSingle: ServiceFn<
 			},
 		],
 	});
-	if (keyExistsRes !== undefined) {
+	if (keyExistsRes.error) return keyExistsRes;
+
+	if (keyExistsRes.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -45,25 +48,23 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const newIntegrationRes = await ClientIntegrationsRepo.createSingle({
-		name: data.name,
-		description: data.description,
-		enabled: true,
-		key: key,
-		secret: secret,
-		apiKey: apiKeyHash,
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
+	const newIntegrationRes = await ClientIntegrations.createSingle({
+		data: {
+			name: data.name,
+			description: data.description,
+			enabled: data.enabled !== undefined ? data.enabled : true,
+			key: key,
+			secret: secret,
+			api_key: apiKeyHash,
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
+		},
+		returning: ["id", "api_key"],
+		validation: {
+			enabled: true,
+		},
 	});
-	if (newIntegrationRes === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	if (newIntegrationRes.error) return newIntegrationRes;
 
 	return {
 		error: undefined,

@@ -20,7 +20,7 @@ import TranslationKeysRepo from "./translation-keys.js";
 import TranslationsRepo from "./translations.js";
 import UserRolesRepo from "./user-roles.js";
 import UsersRepo from "./users.js";
-import ClientIntegrationsRepo from "./client-integrations.js";
+import ClientIntegrationsRepository from "./client-integrations.js";
 import CollectionsRepo from "./collections.js";
 import CollectionMigrationsRepo from "./collection-migrations.js";
 import type DatabaseAdapter from "../db/adapter.js";
@@ -104,7 +104,7 @@ class Repository {
 			case "users":
 				return new UsersRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "client-integrations":
-				return new ClientIntegrationsRepo(
+				return new ClientIntegrationsRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -139,7 +139,7 @@ type RepositoryClassMap = {
 	translations: TranslationsRepo;
 	"user-roles": UserRolesRepo;
 	users: UsersRepo;
-	"client-integrations": ClientIntegrationsRepo;
+	"client-integrations": ClientIntegrationsRepository;
 };
 
 type RepositoryReturnType<T extends keyof RepositoryClassMap> =

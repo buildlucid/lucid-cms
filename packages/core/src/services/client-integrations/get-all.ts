@@ -4,14 +4,14 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
 
 const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
-	const ClientIntegrationsRepo = Repository.get(
+	const ClientIntegrations = Repository.get(
 		"client-integrations",
 		context.db,
 		context.config.db,
 	);
 	const ClientIntegrationFormatter = Formatter.get("client-integrations");
 
-	const integrationsRes = await ClientIntegrationsRepo.selectMultiple({
+	const integrationsRes = await ClientIntegrations.selectMultiple({
 		select: [
 			"id",
 			"key",
@@ -22,12 +22,16 @@ const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 			"updated_at",
 		],
 		where: [],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (integrationsRes.error) return integrationsRes;
 
 	return {
 		error: undefined,
 		data: ClientIntegrationFormatter.formatMultiple({
-			integrations: integrationsRes,
+			integrations: integrationsRes.data,
 		}),
 	};
 };
