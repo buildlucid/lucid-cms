@@ -40,6 +40,9 @@ const getMultiple: ServiceFn<
 			"created_at",
 		],
 		queryParams: data.query,
+		validation: {
+			enabled: true,
+		},
 	});
 	if (emailsRes.error) return emailsRes;
 
@@ -47,9 +50,9 @@ const getMultiple: ServiceFn<
 		error: undefined,
 		data: {
 			data: EmailsFormatter.formatMultiple({
-				emails: emailsRes.data.main,
+				emails: emailsRes.data[0],
 			}),
-			count: Formatter.parseCount(emailsRes.data?.count?.count),
+			count: Formatter.parseCount(emailsRes.data[1]?.count),
 		},
 	};
 };

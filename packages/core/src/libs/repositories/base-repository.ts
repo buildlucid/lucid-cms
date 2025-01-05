@@ -1,53 +1,34 @@
 import T from "../../translations/index.js";
+import crypto from "node:crypto";
+import logger from "../../utils/logging/index.js";
+import constants from "../../constants/constants.js";
+import { fromError } from "zod-validation-error";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type { ZodObject } from "zod";
-import type { LucidErrorData } from "../../types.js";
+import z, { type ZodSchema, type ZodObject } from "zod";
 import {
 	sql,
 	type ColumnDataType,
 	type ReferenceExpression,
 	type ComparisonOperatorExpression,
 } from "kysely";
+import type { LucidErrorData } from "../../types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { Select, Insert, Update, LucidDB, KyselyDB } from "../db/types.js";
 import type { QueryParams } from "../../types/query-params.js";
-import logger from "../../utils/logging/index.js";
-import constants from "../../constants/constants.js";
-
-export type QueryResponse<T> = Promise<
-	{ error: LucidErrorData; data: undefined } | { error: undefined; data: T }
->;
-
-export type QueryErrorResult = {
-	error: LucidErrorData;
-	data: undefined;
-};
-
-export type QuerySuccessResult<T> = {
-	error: undefined;
-	data: T;
-};
-
-export type ValidatedQueryResult<T> =
-	| QuerySuccessResult<NonNullable<T>>
-	| QueryErrorResult;
-
-export type RawQueryResult<T> =
-	| QuerySuccessResult<T | undefined>
-	| QueryErrorResult;
-
-export type QueryResult<T, V extends boolean = false> = V extends true
-	? ValidatedQueryResult<T>
-	: RawQueryResult<T>;
+import type {
+	QueryResult,
+	ValidationConfigExtend,
+	QueryProps,
+	ExecuteMeta,
+} from "./types.js";
 
 /**
  * The base repository class that all repositories should extend. This class provides basic CRUD operations for a single table.
  *
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
- * @todo Implement validation
  * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
  * @todo Only implemented in the EmailsRepo class while testing it out. Will need to be fully implemented across all repositories.
  * @todo Add a solution for verifying if the Repos columnFormats are in sync with the database. This should be done via a test as opposed to runtime.
@@ -99,12 +80,126 @@ abstract class BaseRepository<
 		return formatted;
 	}
 	/**
+	 * Creates a validation schema based on selected columns
+	 *
+	 * - when selectAll is true, returns the full schema
+	 * - when the select array is passed, picks only those columns from the schema
+	 * - otherwise, makes all fields optional
+	 */
+	protected createValidationSchema<V extends boolean = false>(
+		config: ValidationConfigExtend<V>,
+	): ZodSchema {
+		if (config.schema) {
+			return this.wrapSchemaForMode(config.schema, config.mode);
+		}
+
+		let selectSchema: ZodSchema;
+		if (config.selectAll) {
+			selectSchema = this.tableSchema;
+		} else if (Array.isArray(config.select) && config.select.length > 0) {
+			selectSchema = this.tableSchema.pick(
+				config.select.reduce<Record<string, true>>((acc, key) => {
+					acc[key as string] = true;
+					return acc;
+				}, {}),
+			);
+		} else {
+			selectSchema = this.tableSchema.partial();
+		}
+
+		return this.wrapSchemaForMode(selectSchema, config.mode);
+	}
+	/**
+	 * Responsible for creating schemas based on the mode
+	 */
+	private wrapSchemaForMode(
+		schema: ZodSchema,
+		mode: "single" | "multiple" | "multiple-count",
+	): ZodSchema {
+		switch (mode) {
+			case "multiple-count":
+				return z.tuple([
+					z.array(schema),
+					z.object({ count: z.number() }).optional(),
+				]);
+			case "multiple":
+				return z.array(schema);
+			case "single":
+				return schema;
+		}
+	}
+	/**
+	 * Checks if the response data exists and successfully validates against a schema.
+	 *
+	 * Type narrows the response to not be undefined when the validation is enabled.
+	 */
+	protected async validateResponse<QueryData, V extends boolean = false>(
+		executeResponse: Awaited<
+			ReturnType<typeof this.executeQuery<QueryData | undefined>>
+		>,
+		config?: ValidationConfigExtend<V>,
+	): Promise<QueryResult<QueryData, V>> {
+		const res = executeResponse.response as QueryResult<QueryData, V>;
+
+		if (config?.enabled !== true) return res;
+
+		//* undefined and null checks
+		if (res.data === undefined || res.data === null) {
+			return {
+				error: {
+					...config.defaultError,
+					status: config.defaultError?.status ?? 404,
+				},
+				data: undefined,
+			};
+		}
+
+		const schema = this.createValidationSchema(config);
+		if (!schema) return res;
+
+		const validationResult = await schema.safeParseAsync(res.data);
+
+		if (!validationResult.success) {
+			const validationError = fromError(validationResult.error);
+			logger("error", {
+				message: validationError.toString(),
+				scope: constants.logScopes.query,
+				data: {
+					id: executeResponse.meta.id,
+					table: this.tableName,
+					method: executeResponse.meta.method,
+					executionTime: executeResponse.meta.executionTime,
+				},
+			});
+			return {
+				data: undefined,
+				error: {
+					...config?.defaultError,
+					message: config?.defaultError?.message ?? T("validation_error"),
+					type: config?.defaultError?.type ?? "validation",
+					status: config?.defaultError?.status ?? 400,
+				},
+			};
+		}
+
+		return {
+			data: res.data as NonNullable<QueryData>,
+			error: undefined,
+		};
+	}
+	/**
 	 * Handles executing a query and logging
 	 */
 	protected async executeQuery<QueryData>(
 		method: string,
 		executeFn: () => Promise<QueryData>,
-	): QueryResponse<QueryData> {
+	): Promise<{
+		response:
+			| { error: LucidErrorData; data: undefined }
+			| { error: undefined; data: QueryData };
+		meta: ExecuteMeta;
+	}> {
+		const uuid = crypto.randomUUID();
 		const startTime = process.hrtime();
 
 		try {
@@ -119,13 +214,24 @@ abstract class BaseRepository<
 				message: "Query execution completed",
 				scope: constants.logScopes.query,
 				data: {
+					id: uuid,
 					table: this.tableName,
 					method: method,
 					executionTime: `${executionTime}ms`,
 				},
 			});
 
-			return { data: result, error: undefined };
+			return {
+				response: {
+					data: result,
+					error: undefined,
+				},
+				meta: {
+					id: uuid,
+					method: method,
+					executionTime: `${executionTime}ms`,
+				},
+			};
 		} catch (error) {
 			const endTime = process.hrtime(startTime);
 			const executionTime = (endTime[0] * 1000 + endTime[1] / 1000000).toFixed(
@@ -136,6 +242,7 @@ abstract class BaseRepository<
 				message: "Query execution failed",
 				scope: constants.logScopes.query,
 				data: {
+					id: uuid,
 					table: this.tableName,
 					method: method,
 					executionTime: `${executionTime}ms`,
@@ -147,82 +254,66 @@ abstract class BaseRepository<
 			});
 
 			return {
-				data: undefined,
-				error: {
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
-					status: 500,
+				response: {
+					data: undefined,
+
+					error: {
+						message:
+							error instanceof Error
+								? error.message
+								: T("an_unknown_error_occurred"),
+						status: 500,
+					},
+				},
+				meta: {
+					id: uuid,
+					method: method,
+					executionTime: `${executionTime}ms`,
 				},
 			};
 		}
 	}
-	protected async validateResponse<QueryData, V extends boolean = false>(
-		result:
-			| Promise<
-					| { error: LucidErrorData; data: undefined }
-					| { error: undefined; data: QueryData | undefined }
-			  >
-			| { error: LucidErrorData; data: undefined }
-			| { error: undefined; data: QueryData | undefined },
-		validate?: V,
-	): Promise<QueryResult<QueryData, V>> {
-		const res = await result;
-		if (validate) {
-			if (res.error) return res as QueryResult<QueryData, V>;
-			if (res.data === undefined) {
-				return {
-					error: {
-						message: "No data returned",
-						status: 500,
-					},
-					data: undefined,
-				} as QueryResult<QueryData, V>;
-			}
-			return {
-				data: res.data as NonNullable<QueryData>,
-				error: undefined,
-			} as QueryResult<QueryData, V>;
-		}
-
-		return res as QueryResult<QueryData, V>;
-	}
 
 	// ----------------------------------------
 	// selects
-	async selectSingle<
-		K extends keyof Select<T>,
-		V extends boolean = false,
-	>(props: {
-		select: K[];
-		where: QueryBuilderWhere<Table>;
-		validate?: V;
-	}) {
+	async selectSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				select: K[];
+				where: QueryBuilderWhere<Table>;
+			}
+		>,
+	) {
 		// @ts-expect-error
 		let query = this.db.selectFrom(this.tableName).select(props.select);
 		// @ts-expect-error
 		query = queryBuilder.select(query, props.where);
 
-		return this.validateResponse(
-			this.executeQuery(
-				"selectSingle",
-				query.executeTakeFirst as () => Promise<Pick<Select<T>, K> | undefined>,
-			),
-			props.validate,
+		const exec = await this.executeQuery(
+			"selectSingle",
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
 		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.select as string[],
+		});
 	}
-	async selectMultiple<
-		K extends keyof Select<T>,
-		V extends boolean = false,
-	>(props: {
-		select: K[];
-		where?: QueryBuilderWhere<Table>;
-		orderBy?: { column: K; direction: "asc" | "desc" }[];
-		limit?: number;
-		offset?: number;
-		validate?: V;
-	}) {
+	async selectMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				select: K[];
+				where?: QueryBuilderWhere<Table>;
+				orderBy?: { column: K; direction: "asc" | "desc" }[];
+				limit?: number;
+				offset?: number;
+			}
+		>,
+	) {
 		// @ts-expect-error
 		let query = this.db.selectFrom(this.tableName).select(props.select);
 
@@ -245,127 +336,88 @@ abstract class BaseRepository<
 			query = query.offset(props.offset);
 		}
 
-		return this.validateResponse(
-			this.executeQuery(
-				"selectMultiple",
-				query.execute as () => Promise<Pick<Select<T>, K>[]>,
-			),
-			props.validate,
+		const exec = await this.executeQuery(
+			"selectMultiple",
+			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
 		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: props.select as string[],
+		});
 	}
-	// async selectMultipleFiltered<
-	// 	K extends keyof Select<T>,
-	// 	V extends boolean = false,
-	// >(props: {
-	// 	select: K[];
-	// 	queryParams: Partial<QueryParams>;
-	// 	validate?: V;
-	// }) {
-	// 	return this.executeQuery("selectMultipleFiltered", async () => {
-	// 		const mainQuery = this.db
-	// 			.selectFrom(this.tableName)
-	// 			// @ts-expect-error
-	// 			.select(props.select);
+	async selectMultipleFiltered<
+		K extends keyof Select<T>,
+		V extends boolean = false,
+	>(
+		props: QueryProps<
+			V,
+			{
+				select: K[];
+				queryParams: Partial<QueryParams>;
+			}
+		>,
+	) {
+		const exec = await this.executeQuery("selectMultipleFiltered", async () => {
+			const mainQuery = this.db
+				.selectFrom(this.tableName)
+				// @ts-expect-error
+				.select(props.select);
 
-	// 		const countQuery = this.db
-	// 			.selectFrom(this.tableName)
-	// 			.select(sql`count(*)`.as("count"));
+			const countQuery = this.db
+				.selectFrom(this.tableName)
+				.select(sql`count(*)`.as("count"));
 
-	// 		const { main, count } = queryBuilder.main(
-	// 			{
-	// 				main: mainQuery,
-	// 				count: countQuery,
-	// 			},
-	// 			{
-	// 				queryParams: props.queryParams,
-	// 				// @ts-expect-error
-	// 				meta: this.queryConfig,
-	// 			},
-	// 		);
+			const { main, count } = queryBuilder.main(
+				{
+					main: mainQuery,
+					count: countQuery,
+				},
+				{
+					queryParams: props.queryParams,
+					// @ts-expect-error
+					meta: this.queryConfig,
+				},
+			);
 
-	// 		const res = await Promise.all([
-	// 			main.execute() as Promise<Pick<Select<T>, K>[]>,
-	// 			count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
-	// 		]);
+			const [mainResult, countResult] = await Promise.all([
+				main.execute() as Promise<Pick<Select<T>, K>[]>,
+				count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+			]);
 
-	// 		return {
-	// 			main: res[0],
-	// 			count: res[1],
-	// 		};
-	// 	});
-	// }
+			return [mainResult, countResult] as const;
+		});
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple-count",
+			select: props.select as string[],
+		});
+	}
 
 	// ----------------------------------------
 	// deletes
-	async deleteSingle<
-		K extends keyof Select<T>,
-		V extends boolean = false,
-	>(props: {
-		returning?: K[];
-		where: QueryBuilderWhere<Table>;
-		validate?: V;
-	}) {
+	async deleteSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				returning?: K[];
+				returnAll?: true;
+				where: QueryBuilderWhere<Table>;
+			}
+		>,
+	) {
 		let query = this.db.deleteFrom(this.tableName);
 
-		if (props.returning && props.returning.length > 0) {
-			// @ts-expect-error
-			query = query.returning(props.returning);
-		}
-
-		// @ts-expect-error
-		query = queryBuilder.delete(query, props.where);
-
-		return this.validateResponse(
-			this.executeQuery(
-				"deleteSingle",
-				query.executeTakeFirst as () => Promise<Pick<Select<T>, K> | undefined>,
-			),
-			props.validate,
-		);
-	}
-	async deleteMultiple<
-		K extends keyof Select<T>,
-		V extends boolean = false,
-	>(props: {
-		returning?: K[];
-		where: QueryBuilderWhere<Table>;
-		validate?: V;
-	}) {
-		let query = this.db.deleteFrom(this.tableName);
-
-		if (props.returning && props.returning.length > 0) {
-			// @ts-expect-error
-			query = query.returning(props.returning);
-		}
-
-		// @ts-expect-error
-		query = queryBuilder.delete(query, props.where);
-
-		return this.validateResponse(
-			this.executeQuery(
-				"deleteMultiple",
-				query.execute as () => Promise<Pick<Select<T>, K>[]>,
-			),
-			props.validate,
-		);
-	}
-
-	// ----------------------------------------
-	// creates
-	async createSingle<
-		K extends keyof Select<T>,
-		V extends boolean = false,
-	>(props: {
-		data: Partial<Insert<T>>;
-		returning?: K[];
-		returnAll?: boolean;
-		validate?: V;
-	}) {
-		let query = this.db
-			.insertInto(this.tableName)
-			.values(this.formatData(props.data));
-
-		if (props.returning?.length && !props.returnAll) {
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
 			// @ts-expect-error
 			query = query.returning(props.returning);
 		}
@@ -375,13 +427,196 @@ abstract class BaseRepository<
 			query = query.returningAll();
 		}
 
-		return this.validateResponse(
-			this.executeQuery(
-				"createSingle",
-				query.executeTakeFirst as () => Promise<Pick<Select<T>, K> | undefined>,
-			),
-			props.validate,
+		// @ts-expect-error
+		query = queryBuilder.delete(query, props.where);
+
+		const exec = await this.executeQuery(
+			"deleteSingle",
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
 		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+		});
+	}
+	async deleteMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				returning?: K[];
+				returnAll?: true;
+				where: QueryBuilderWhere<Table>;
+			}
+		>,
+	) {
+		let query = this.db.deleteFrom(this.tableName);
+
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
+
+		// @ts-expect-error
+		query = queryBuilder.delete(query, props.where);
+
+		const exec = await this.executeQuery(
+			"deleteMultiple",
+			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+		});
+	}
+
+	// ----------------------------------------
+	// creates
+	async createSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Insert<T>>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+	) {
+		let query = this.db
+			.insertInto(this.tableName)
+			.values(this.formatData(props.data));
+
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
+
+		const exec = await this.executeQuery(
+			"createSingle",
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+		});
+	}
+	async createMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Insert<T>>[];
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+	) {
+		let query = this.db
+			.insertInto(this.tableName)
+			.values(props.data.map(this.formatData));
+
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
+
+		const exec = await this.executeQuery(
+			"createMultiple",
+			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+		});
+	}
+
+	// ----------------------------------------
+	// updates
+	async updateSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Update<T>>;
+				where: QueryBuilderWhere<Table>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+	) {
+		let query = this.db
+			.updateTable(this.tableName)
+			.set(this.formatData(props.data));
+
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
+
+		// @ts-expect-error
+		query = queryBuilder.update(query, props.where);
+
+		const exec = await this.executeQuery(
+			"updateSingle",
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+		});
 	}
 }
 

@@ -68,9 +68,11 @@ const sendEmail: ServiceFn<
 				value: emailHash,
 			},
 		],
+		//* not validated as we dont want to error out when the email exists
 	});
+	if (emailExistsRes.error) return emailExistsRes;
 
-	if (emailExistsRes.data) {
+	if (emailExistsRes.data !== undefined) {
 		const updateRes = await EmailsRepo.updateSingle({
 			where: [
 				{
@@ -88,17 +90,14 @@ const sendEmail: ServiceFn<
 				last_attempt_at: new Date().toISOString(),
 			},
 			returnAll: true,
-		});
-		if (updateRes.error) return updateRes;
-
-		if (updateRes.data === undefined) {
-			return {
-				error: {
+			validation: {
+				enabled: true,
+				defaultError: {
 					status: 500,
 				},
-				data: undefined,
-			};
-		}
+			},
+		});
+		if (updateRes.error) return updateRes;
 
 		return {
 			error: undefined,
@@ -128,21 +127,14 @@ const sendEmail: ServiceFn<
 			last_success_at: emailRecord.lastSuccessAt,
 		},
 		returnAll: true,
-		// validate: true,
-	});
-	if (newEmailRes.error) return newEmailRes;
-
-	console.log(newEmailRes.data); // data is not undefined here due to the validate method NonNullable
-
-	if (newEmailRes.data === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				status: 500,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (newEmailRes.error) return newEmailRes;
 
 	return {
 		error: undefined,

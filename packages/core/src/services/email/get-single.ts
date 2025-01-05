@@ -44,19 +44,15 @@ const getSingle: ServiceFn<
 				value: data.id,
 			},
 		],
-	});
-	if (emailRes.error) return emailRes;
-
-	if (emailRes.data === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("email_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (emailRes.error) return emailRes;
 
 	if (!data.renderTemplate) {
 		return {
