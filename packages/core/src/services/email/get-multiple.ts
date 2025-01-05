@@ -16,10 +16,10 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
+	const Emails = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
-	const emailsRes = await EmailsRepo.selectMultipleFiltered({
+	const emailsRes = await Emails.selectMultipleFiltered({
 		select: [
 			"id",
 			"email_hash",

@@ -13,10 +13,10 @@ const getSingle: ServiceFn<
 	],
 	EmailResponse
 > = async (context, data) => {
-	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
+	const Emails = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
-	const emailRes = await EmailsRepo.selectSingle({
+	const emailRes = await Emails.selectSingle({
 		select: [
 			"id",
 			"email_hash",

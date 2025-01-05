@@ -30,8 +30,6 @@ import type {
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
  * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
- * @todo Only implemented in the EmailsRepo class while testing it out. Will need to be fully implemented across all repositories.
- * @todo Add a solution for verifying if the Repos columnFormats are in sync with the database. This should be done via a test as opposed to runtime.
  */
 abstract class BaseRepository<
 	Table extends keyof LucidDB,

@@ -17,9 +17,9 @@ const resendSingle: ServiceFn<
 		await context.services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
-	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
+	const Emails = Repository.get("emails", context.db, context.config.db);
 
-	const emailRes = await EmailsRepo.selectSingle({
+	const emailRes = await Emails.selectSingle({
 		select: [
 			"id",
 			"email_hash",
@@ -84,7 +84,7 @@ const resendSingle: ServiceFn<
 		},
 	);
 
-	const updateRes = await EmailsRepo.updateSingle({
+	const updateRes = await Emails.updateSingle({
 		where: [
 			{
 				key: "id",

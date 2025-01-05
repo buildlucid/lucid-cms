@@ -19,7 +19,7 @@ const sendEmail: ServiceFn<
 	],
 	EmailResponse
 > = async (context, data) => {
-	const EmailsRepo = Repository.get("emails", context.db, context.config.db);
+	const Emails = Repository.get("emails", context.db, context.config.db);
 	const EmailsFormatter = Formatter.get("emails");
 
 	const emailConfigRes =
@@ -59,7 +59,7 @@ const sendEmail: ServiceFn<
 		lastSuccessAt: result.success ? new Date().toISOString() : undefined,
 	};
 
-	const emailExistsRes = await EmailsRepo.selectSingle({
+	const emailExistsRes = await Emails.selectSingle({
 		select: ["id", "email_hash", "sent_count", "error_count"],
 		where: [
 			{
@@ -73,7 +73,7 @@ const sendEmail: ServiceFn<
 	if (emailExistsRes.error) return emailExistsRes;
 
 	if (emailExistsRes.data !== undefined) {
-		const updateRes = await EmailsRepo.updateSingle({
+		const updateRes = await Emails.updateSingle({
 			where: [
 				{
 					key: "id",
@@ -108,7 +108,7 @@ const sendEmail: ServiceFn<
 		};
 	}
 
-	const newEmailRes = await EmailsRepo.createSingle({
+	const newEmailRes = await Emails.createSingle({
 		data: {
 			email_hash: emailHash,
 			from_address: emailConfigRes.data.from.email,
