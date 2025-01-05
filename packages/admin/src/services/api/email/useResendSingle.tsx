@@ -51,7 +51,7 @@ const useResendSingle = (props: UseResendSingleProps) => {
 			} else {
 				spawnToast({
 					title: T()("email_resent_toast_error_title"),
-					message: T()("email_resent_toast_error_message"),
+					message: data.data.message ?? T()("email_resent_toast_error_message"),
 					status: "error",
 				});
 			}
