@@ -119,18 +119,15 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const UserRolesRepo = Repository.get(
-		"user-roles",
-		context.db,
-		context.config.db,
-	);
+	const UserRoles = Repository.get("user-roles", context.db, context.config.db);
 
-	await UserRolesRepo.createMultiple({
-		items: data.roleIds.map((r) => ({
-			userId: newUser.id,
-			roleId: r,
+	const createMultipleRes = await UserRoles.createMultiple({
+		data: data.roleIds.map((r) => ({
+			user_id: newUser.id,
+			role_id: r,
 		})),
 	});
+	if (createMultipleRes.error) return createMultipleRes;
 
 	return {
 		error: undefined,

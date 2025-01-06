@@ -17,17 +17,13 @@ const updateMultipleRoles: ServiceFn<
 		};
 	}
 
-	const UserRolesRepo = Repository.get(
-		"user-roles",
-		context.db,
-		context.config.db,
-	);
+	const UserRoles = Repository.get("user-roles", context.db, context.config.db);
 
-	const [roleExistsRes] = await Promise.all([
+	const [roleExistsRes, deleteMultipleRes] = await Promise.all([
 		context.services.user.checks.checkRolesExist(context, {
 			roleIds: data.roleIds || [],
 		}),
-		UserRolesRepo.deleteMultiple({
+		UserRoles.deleteMultiple({
 			where: [
 				{
 					key: "user_id",
@@ -35,9 +31,14 @@ const updateMultipleRoles: ServiceFn<
 					value: data.userId,
 				},
 			],
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
 		}),
 	]);
 	if (roleExistsRes.error) return roleExistsRes;
+	if (deleteMultipleRes.error) return deleteMultipleRes;
 
 	if (data.roleIds.length === 0) {
 		return {
@@ -46,12 +47,13 @@ const updateMultipleRoles: ServiceFn<
 		};
 	}
 
-	await UserRolesRepo.createMultiple({
-		items: data.roleIds.map((r) => ({
-			userId: data.userId,
-			roleId: r,
+	const createMultipleRes = await UserRoles.createMultiple({
+		data: data.roleIds.map((r) => ({
+			user_id: data.userId,
+			role_id: r,
 		})),
 	});
+	if (createMultipleRes.error) return createMultipleRes;
 
 	return {
 		error: undefined,

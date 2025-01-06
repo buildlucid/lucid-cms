@@ -12,7 +12,6 @@ import {
 	type ColumnDataType,
 	type ReferenceExpression,
 	type ComparisonOperatorExpression,
-	type SelectExpression,
 } from "kysely";
 import type { LucidErrorData } from "../../types.js";
 import type DatabaseAdapter from "../db/adapter.js";
@@ -542,7 +541,7 @@ abstract class BaseRepository<
 	) {
 		let query = this.db
 			.insertInto(this.tableName)
-			.values(props.data.map(this.formatData));
+			.values(props.data.map((d) => this.formatData(d)));
 
 		if (
 			props.returnAll !== true &&
