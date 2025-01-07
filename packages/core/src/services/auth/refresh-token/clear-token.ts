@@ -16,7 +16,7 @@ const clearToken = async (
 		};
 	}
 
-	const UserTokensRepo = Repository.get(
+	const UserTokens = Repository.get(
 		"user-tokens",
 		request.server.config.db.client,
 		request.server.config.db,
@@ -31,7 +31,7 @@ const clearToken = async (
 
 	reply.clearCookie(constants.headers.refreshToken, { path: "/" });
 
-	await UserTokensRepo.deleteMultiple({
+	const deleteMultipleTokenRes = await UserTokens.deleteMultiple({
 		where: [
 			{
 				key: "token",
@@ -50,6 +50,7 @@ const clearToken = async (
 			},
 		],
 	});
+	if (deleteMultipleTokenRes.error) return deleteMultipleTokenRes;
 
 	return {
 		error: undefined,

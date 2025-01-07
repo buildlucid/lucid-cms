@@ -14,13 +14,13 @@ const getSingle: ServiceFn<
 		user_id: number | null;
 	}
 > = async (context, data) => {
-	const UserTokensRepo = Repository.get(
+	const UserTokens = Repository.get(
 		"user-tokens",
 		context.db,
 		context.config.db,
 	);
 
-	const userToken = await UserTokensRepo.selectSingle({
+	const userTokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],
 		where: [
 			{
@@ -39,22 +39,19 @@ const getSingle: ServiceFn<
 				value: new Date().toISOString(),
 			},
 		],
-	});
-
-	if (userToken === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("token_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (userTokenRes.error) return userTokenRes;
 
 	return {
 		error: undefined,
-		data: userToken,
+		data: userTokenRes.data,
 	};
 };
 

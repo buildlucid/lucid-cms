@@ -13,7 +13,7 @@ const generateToken = async (
 	const clearRes = await clearToken(request, reply);
 	if (clearRes.error) return clearRes;
 
-	const UserTokensRepo = Repository.get(
+	const UserTokens = Repository.get(
 		"user-tokens",
 		request.server.config.db.client,
 		request.server.config.db,
@@ -37,14 +37,21 @@ const generateToken = async (
 		path: "/",
 	});
 
-	await UserTokensRepo.createSingle({
-		userId: userId,
-		token: token,
-		tokenType: "refresh",
-		expiryDate: new Date(
-			Date.now() + constants.refreshTokenExpiration * 1000, // convert to ms
-		).toISOString(),
+	const createTokenRes = await UserTokens.createSingle({
+		data: {
+			user_id: userId,
+			token: token,
+			token_type: "refresh",
+			expiry_date: new Date(
+				Date.now() + constants.refreshTokenExpiration * 1000, // convert to ms
+			).toISOString(),
+		},
+		returning: ["token"],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (createTokenRes.error) return createTokenRes;
 
 	return {
 		error: undefined,

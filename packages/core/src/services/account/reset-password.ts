@@ -14,7 +14,7 @@ const resetPassword: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UserTokensRepo = Repository.get(
+	const UserTokens = Repository.get(
 		"user-tokens",
 		context.db,
 		context.config.db,
@@ -81,8 +81,8 @@ const resetPassword: ServiceFn<
 		};
 	}
 
-	const [_, sendEmail] = await Promise.all([
-		UserTokensRepo.deleteMultiple({
+	const [deleteMultipleTokensRes, sendEmail] = await Promise.all([
+		UserTokens.deleteMultiple({
 			where: [
 				{
 					key: "id",
@@ -102,6 +102,7 @@ const resetPassword: ServiceFn<
 			},
 		}),
 	]);
+	if (deleteMultipleTokensRes.error) return deleteMultipleTokensRes;
 	if (sendEmail.error) return sendEmail;
 
 	return {

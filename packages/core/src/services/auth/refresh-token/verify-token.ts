@@ -25,7 +25,7 @@ const verifyToken = async (
 			};
 		}
 
-		const UserTokensRepo = Repository.get(
+		const UserTokens = Repository.get(
 			"user-tokens",
 			request.server.config.db.client,
 			request.server.config.db,
@@ -38,7 +38,7 @@ const verifyToken = async (
 			id: number;
 		};
 
-		const token = await UserTokensRepo.selectSingle({
+		const tokenRes = await UserTokens.selectSingle({
 			select: ["id", "user_id"],
 			where: [
 				{
@@ -62,23 +62,21 @@ const verifyToken = async (
 					value: new Date().toISOString(),
 				},
 			],
-		});
-
-		if (token === undefined) {
-			return {
-				error: {
+			validation: {
+				enabled: true,
+				defaultError: {
 					type: "authorisation",
 					name: T("refresh_token_error_name"),
 					message: T("no_refresh_token_found"),
 				},
-				data: undefined,
-			};
-		}
+			},
+		});
+		if (tokenRes.error) return tokenRes;
 
 		return {
 			error: undefined,
 			data: {
-				user_id: token.user_id as number,
+				user_id: tokenRes.data.user_id as number,
 			},
 		};
 	} catch (err) {

@@ -15,7 +15,7 @@ const createSingle: ServiceFn<
 		token: string;
 	}
 > = async (context, data) => {
-	const UserTokensRepo = Repository.get(
+	const UserTokens = Repository.get(
 		"user-tokens",
 		context.db,
 		context.config.db,
@@ -23,27 +23,24 @@ const createSingle: ServiceFn<
 
 	const token = crypto.randomBytes(32).toString("hex");
 
-	const userToken = await UserTokensRepo.createSingle({
-		userId: data.userId,
-		tokenType: data.tokenType,
-		expiryDate: data.expiryDate,
-		token: token,
+	const userTokenRes = await UserTokens.createSingle({
+		data: {
+			user_id: data.userId,
+			token_type: data.tokenType,
+			expiry_date: data.expiryDate,
+			token: token,
+		},
+		returning: ["token"],
+		validation: {
+			enabled: true,
+		},
 	});
-
-	if (userToken === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	if (userTokenRes.error) return userTokenRes;
 
 	return {
 		error: undefined,
 		data: {
-			token: userToken.token,
+			token: userTokenRes.data.token,
 		},
 	};
 };

@@ -2,7 +2,7 @@ import T from "../../translations/index.js";
 import { LucidError } from "../../utils/errors/index.js";
 import type { KyselyDB } from "../db/types.js";
 // Repositories
-import UserTokensRepo from "./user-tokens.js";
+import UserTokensRepository from "./user-tokens.js";
 import CollectionDocumentBricksRepo from "./collection-document-bricks.js";
 import CollectionDocumentFieldsRepo from "./collection-document-fields.js";
 import CollectionDocumentGroupsRepo from "./collection-document-groups.js";
@@ -34,7 +34,10 @@ class Repository {
 	): RepositoryReturnType<T> {
 		switch (repository) {
 			case "user-tokens":
-				return new UserTokensRepo(db, dbAdapter) as RepositoryReturnType<T>;
+				return new UserTokensRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "collections":
 				return new CollectionsRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "collection-migrations":
@@ -122,7 +125,7 @@ class Repository {
 }
 
 type RepositoryClassMap = {
-	"user-tokens": UserTokensRepo;
+	"user-tokens": UserTokensRepository;
 	collections: CollectionsRepo;
 	"collection-migrations": CollectionMigrationsRepo;
 	"collection-document-bricks": CollectionDocumentBricksRepo;
