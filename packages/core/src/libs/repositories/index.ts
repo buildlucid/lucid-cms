@@ -22,7 +22,7 @@ import UserRolesRepository from "./user-roles.js";
 import UsersRepo from "./users.js";
 import ClientIntegrationsRepository from "./client-integrations.js";
 import CollectionsRepo from "./collections.js";
-import CollectionMigrationsRepo from "./collection-migrations.js";
+import CollectionMigrationsRepository from "./collection-migrations.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
@@ -41,7 +41,7 @@ class Repository {
 			case "collections":
 				return new CollectionsRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "collection-migrations":
-				return new CollectionMigrationsRepo(
+				return new CollectionMigrationsRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -127,7 +127,7 @@ class Repository {
 type RepositoryClassMap = {
 	"user-tokens": UserTokensRepository;
 	collections: CollectionsRepo;
-	"collection-migrations": CollectionMigrationsRepo;
+	"collection-migrations": CollectionMigrationsRepository;
 	"collection-document-bricks": CollectionDocumentBricksRepo;
 	"collection-document-fields": CollectionDocumentFieldsRepo;
 	"collection-document-groups": CollectionDocumentGroupsRepo;

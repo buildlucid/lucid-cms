@@ -17,7 +17,7 @@ import Repository from "../../libs/repositories/index.js";
  * @todo Handle saving saving JSON to migrations table in a way that works with all DB adapters - this will require a lot of changes elsewhere as well in regards to using the boolean column data type when Postgres adapter is used.
  */
 const migrateCollections: ServiceFn<[], undefined> = async (context) => {
-	const MigrationsRepo = Repository.get(
+	const CollectionMigrations = Repository.get(
 		"collection-migrations",
 		context.db,
 		context.config.db,
@@ -67,16 +67,17 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		.map((mp) => {
 			if (mp.tables.length === 0) return null;
 			return {
-				collectionKey: mp.collectionKey,
-				migrationPlans: mp,
+				collection_key: mp.collectionKey,
+				migration_plans: mp,
 			};
 		})
 		.filter((mp) => mp !== null);
 
 	if (migrationPlanEntries.length > 0) {
-		await MigrationsRepo.createMultiple({
-			items: migrationPlanEntries,
+		const migrationsRes = await CollectionMigrations.createMultiple({
+			data: migrationPlanEntries,
 		});
+		if (migrationsRes.error) return migrationRes;
 	}
 
 	return {

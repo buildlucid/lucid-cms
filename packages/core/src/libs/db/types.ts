@@ -288,7 +288,12 @@ export interface LucidCollections {
 export interface LucidCollectionMigrations {
 	id: Generated<number>;
 	collection_key: string;
-	migration_plans: JSONColumnType<MigrationPlan>;
+	migration_plans: JSONColumnType<
+		MigrationPlan,
+		//* __insert__ includes a Record as the base repository handles formatting via formatData method
+		MigrationPlan,
+		MigrationPlan
+	>;
 	created_at: TimestampImmutable;
 }
 

@@ -1,32 +1,23 @@
+import z from "zod";
+import BaseRepository from "./base-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
 
-export default class CollectionMigrationsRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
-
-	// ----------------------------------------
-	// create
-	createMultiple = async (props: {
-		items: Array<{
-			collectionKey: string;
-			migrationPlans: MigrationPlan;
-		}>;
-	}) => {
-		return this.db
-			.insertInto("lucid_collection_migrations")
-			.values(
-				props.items.map((i) => ({
-					collection_key: i.collectionKey,
-					migration_plans: this.dbAdapter.formatInsertValue<string>(
-						"json",
-						i.migrationPlans,
-					),
-				})),
-			)
-			.execute();
+export default class CollectionMigrationsRepository extends BaseRepository<"lucid_collection_migrations"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_collection_migrations");
+	}
+	tableSchema = z.object({
+		id: z.number(),
+		collection_key: z.string(),
+		migration_plans: z.unknown(),
+		created_at: z.string().nullable(),
+	});
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		collection_key: this.dbAdapter.getDataType("text"),
+		migration_plans: this.dbAdapter.getDataType("json"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
+	queryConfig = undefined;
 }
