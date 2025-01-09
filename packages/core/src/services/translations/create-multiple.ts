@@ -31,17 +31,22 @@ const createMultiple: ServiceFn<
 		};
 	}
 
-	const TranslationKeysRepo = Repository.get(
+	const TranslationKeys = Repository.get(
 		"translation-keys",
 		context.db,
 		context.config.db,
 	);
 
-	const translationKeyEntries = await TranslationKeysRepo.createMultiple(
-		data.keys.map((k) => ({ createdAt: new Date().toISOString() })),
-	);
+	const translationKeyRes = await TranslationKeys.createMultiple({
+		data: data.keys.map((k) => ({ created_at: new Date().toISOString() })),
+		returning: ["id"],
+		validation: {
+			enabled: true,
+		},
+	});
+	if (translationKeyRes.error) return translationKeyRes;
 
-	if (translationKeyEntries.length !== data.keys.length) {
+	if (translationKeyRes.data.length !== data.keys.length) {
 		return {
 			error: {
 				type: "basic",
@@ -53,7 +58,7 @@ const createMultiple: ServiceFn<
 
 	const keys: Record<K, number> = data.keys.reduce(
 		(keys, key, index) => {
-			const translationKeyId = translationKeyEntries[index]?.id;
+			const translationKeyId = translationKeyRes.data[index]?.id;
 			if (translationKeyId === undefined) {
 				return keys;
 			}

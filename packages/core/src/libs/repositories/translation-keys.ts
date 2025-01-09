@@ -1,37 +1,19 @@
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
+import z from "zod";
+import BaseRepository from "./base-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class TranslationKeysRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
-
-	// ----------------------------------------
-	// delete
-	deleteMultiple = async (props: {
-		where: QueryBuilderWhere<"lucid_translation_keys">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_translation_keys");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.execute();
+export default class TranslationKeysRepository extends BaseRepository<"lucid_translation_keys"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_translation_keys");
+	}
+	tableSchema = z.object({
+		id: z.number(),
+		created_at: z.string(),
+	});
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
-	// ----------------------------------------
-	// create
-	createMultiple = async (
-		props: {
-			createdAt: string;
-		}[],
-	) => {
-		return this.db
-			.insertInto("lucid_translation_keys")
-			.values(props.map((d) => ({ created_at: d.createdAt })))
-			.returning("id")
-			.execute();
-	};
+	queryConfig = undefined;
 }

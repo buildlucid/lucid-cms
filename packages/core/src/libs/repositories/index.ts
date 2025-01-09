@@ -16,7 +16,7 @@ import OptionsRepo from "./options.js";
 import ProcessedImagesRepo from "./processed-images.js";
 import RolePermissionsRepo from "./role-permissions.js";
 import RolesRepo from "./roles.js";
-import TranslationKeysRepo from "./translation-keys.js";
+import TranslationKeysRepository from "./translation-keys.js";
 import TranslationsRepo from "./translations.js";
 import UserRolesRepository from "./user-roles.js";
 import UsersRepo from "./users.js";
@@ -96,7 +96,7 @@ class Repository {
 			case "roles":
 				return new RolesRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "translation-keys":
-				return new TranslationKeysRepo(
+				return new TranslationKeysRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -141,7 +141,7 @@ type RepositoryClassMap = {
 	"processed-images": ProcessedImagesRepo;
 	"role-permissions": RolePermissionsRepo;
 	roles: RolesRepo;
-	"translation-keys": TranslationKeysRepo;
+	"translation-keys": TranslationKeysRepository;
 	translations: TranslationsRepo;
 	"user-roles": UserRolesRepository;
 	users: UsersRepo;

@@ -9,13 +9,13 @@ const deleteMultiple: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const TranslationKeysRepo = Repository.get(
+	const TranslationKeys = Repository.get(
 		"translation-keys",
 		context.db,
 		context.config.db,
 	);
 
-	await TranslationKeysRepo.deleteMultiple({
+	const deleteRes = await TranslationKeys.deleteMultiple({
 		where: [
 			{
 				key: "id",
@@ -23,7 +23,12 @@ const deleteMultiple: ServiceFn<
 				value: data.ids.filter((id) => id !== null),
 			},
 		],
+		returning: ["id"],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (deleteRes.error) return deleteRes;
 
 	return {
 		error: undefined,
