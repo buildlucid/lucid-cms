@@ -21,7 +21,7 @@ import TranslationsRepo from "./translations.js";
 import UserRolesRepository from "./user-roles.js";
 import UsersRepo from "./users.js";
 import ClientIntegrationsRepository from "./client-integrations.js";
-import CollectionsRepo from "./collections.js";
+import CollectionsRepository from "./collections.js";
 import CollectionMigrationsRepository from "./collection-migrations.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
@@ -39,7 +39,10 @@ class Repository {
 					dbAdapter,
 				) as RepositoryReturnType<T>;
 			case "collections":
-				return new CollectionsRepo(db, dbAdapter) as RepositoryReturnType<T>;
+				return new CollectionsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "collection-migrations":
 				return new CollectionMigrationsRepository(
 					db,
@@ -126,7 +129,7 @@ class Repository {
 
 type RepositoryClassMap = {
 	"user-tokens": UserTokensRepository;
-	collections: CollectionsRepo;
+	collections: CollectionsRepository;
 	"collection-migrations": CollectionMigrationsRepository;
 	"collection-document-bricks": CollectionDocumentBricksRepo;
 	"collection-document-fields": CollectionDocumentFieldsRepo;

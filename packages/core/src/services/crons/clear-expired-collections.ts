@@ -9,7 +9,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
  * @todo Expose the retention time?
  */
 const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
-	const CollectionsRepo = Repository.get(
+	const Collections = Repository.get(
 		"collections",
 		context.db,
 		context.config.db,
@@ -19,7 +19,7 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 	const thirtyDaysAgo = subDays(now, constants.retention.deletedCollections);
 	const thirtyDaysAgoTimestamp = thirtyDaysAgo.toISOString();
 
-	const res = await CollectionsRepo.deleteMultiple({
+	const deleteRes = await Collections.deleteMultiple({
 		where: [
 			{
 				key: "is_deleted_at",
@@ -32,10 +32,15 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
+		returning: ["key"],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (deleteRes.error) return deleteRes;
 
 	logger("debug", {
-		message: `The following ${res.length} collections have been deleted: ${res.map((c) => c.key).join(", ")}`,
+		message: `The following ${deleteRes.data.length} collections have been deleted: ${deleteRes.data.map((c) => c.key).join(", ")}`,
 		scope: constants.logScopes.cron,
 	});
 

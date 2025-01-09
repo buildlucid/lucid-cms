@@ -11,17 +11,23 @@ import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 const syncCollections: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
-	const CollectionsRepo = Repository.get(
+	const Collections = Repository.get(
 		"collections",
 		context.db,
 		context.config.db,
 	);
 	const activeCollections = context.config.collections.map((c) => c.key);
 
-	const collections = await CollectionsRepo.selectAll({
+	const collectionsRes = await Collections.selectMultiple({
 		select: ["key", "is_deleted"],
+		validation: {
+			enabled: true,
+		},
 	});
-	const collectionsFromDB = collections.map((collection) => collection.key);
+	if (collectionsRes.error) return collectionsRes;
+	const collectionsFromDB = collectionsRes.data.map(
+		(collection) => collection.key,
+	);
 
 	//* new collections
 	const missingCollections = activeCollections.filter(
@@ -35,7 +41,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 	}
 
 	//* deleted collections
-	const collectionsToDelete = collections.filter(
+	const collectionsToDelete = collectionsRes.data.filter(
 		(collection) =>
 			!activeCollections.includes(collection.key) &&
 			Formatter.formatBoolean(collection.is_deleted) === false,
@@ -51,7 +57,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 	}
 
 	//* previously deleted, now active
-	const unDeletedCollections = collections.filter(
+	const unDeletedCollections = collectionsRes.data.filter(
 		(collection) =>
 			Formatter.formatBoolean(collection.is_deleted) &&
 			activeCollections.includes(collection.key),
@@ -66,40 +72,47 @@ const syncCollections: ServiceFn<[], undefined> = async (
 		});
 	}
 
-	await Promise.all([
-		missingCollections.length > 0 &&
-			CollectionsRepo.createMultiple({
-				items: missingCollections.map((key) => ({ key })),
-			}),
-		collectionsToDeleteKeys.length > 0 &&
-			CollectionsRepo.updateSingle({
-				data: {
-					isDeleted: true,
-					isDeletedAt: new Date().toISOString(),
-				},
-				where: [
-					{
-						key: "key",
-						operator: "in",
-						value: collectionsToDeleteKeys,
+	const [createMultipleRes, updateDeletedRes, updateRestoredRes] =
+		await Promise.all([
+			missingCollections.length > 0 &&
+				Collections.createMultiple({
+					data: missingCollections.map((key) => ({ key })),
+				}),
+			collectionsToDeleteKeys.length > 0 &&
+				Collections.updateSingle({
+					data: {
+						is_deleted: true,
+						is_deleted_at: new Date().toISOString(),
 					},
-				],
-			}),
-		unDeletedCollectionKeys.length > 0 &&
-			CollectionsRepo.updateSingle({
-				data: {
-					isDeleted: false,
-					isDeletedAt: null,
-				},
-				where: [
-					{
-						key: "key",
-						operator: "in",
-						value: unDeletedCollectionKeys,
+					where: [
+						{
+							key: "key",
+							operator: "in",
+							value: collectionsToDeleteKeys,
+						},
+					],
+				}),
+			unDeletedCollectionKeys.length > 0 &&
+				Collections.updateSingle({
+					data: {
+						is_deleted: false,
+						is_deleted_at: null,
 					},
-				],
-			}),
-	]);
+					where: [
+						{
+							key: "key",
+							operator: "in",
+							value: unDeletedCollectionKeys,
+						},
+					],
+				}),
+		]);
+	if (typeof createMultipleRes !== "boolean" && createMultipleRes.error)
+		return createMultipleRes;
+	if (typeof updateDeletedRes !== "boolean" && updateDeletedRes.error)
+		return updateDeletedRes;
+	if (typeof updateRestoredRes !== "boolean" && updateRestoredRes.error)
+		return updateRestoredRes;
 
 	return {
 		error: undefined,

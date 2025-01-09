@@ -1,100 +1,42 @@
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
-import type {
-	LucidCollections,
-	Select,
-	KyselyDB,
-	BooleanInt,
-} from "../db/types.js";
+import z from "zod";
+import BaseRepository from "./base-repository.js";
+import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class CollectionsRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
-
-	// ----------------------------------------
-	// selects
-	selectAll = async <K extends keyof Select<LucidCollections>>(props: {
-		select: K[];
-	}) => {
-		return this.db
-			.selectFrom("lucid_collections")
-			.select<K>(props.select)
-			.execute() as Promise<Array<Pick<Select<LucidCollections>, K>>>;
+export default class CollectionsRepository extends BaseRepository<"lucid_collections"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_collections");
+	}
+	tableSchema = z.object({
+		key: z.string(),
+		is_deleted: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		is_deleted_at: z.string().nullable(),
+		created_at: z.string().nullable(),
+	});
+	columnFormats = {
+		key: this.dbAdapter.getDataType("text"),
+		is_deleted: this.dbAdapter.getDataType("boolean"),
+		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
-
-	// ----------------------------------------
-	// create
-	createSingle = async (props: {
-		key: string;
-	}) => {
-		return this.db
-			.insertInto("lucid_collections")
-			.values({
-				key: props.key,
-			})
-			.returningAll()
-			.executeTakeFirst();
-	};
-	createMultiple = async (props: {
-		items: Array<{
-			key: string;
-		}>;
-	}) => {
-		return this.db
-			.insertInto("lucid_collections")
-			.values(
-				props.items.map((i) => ({
-					key: i.key,
-				})),
-			)
-			.execute();
-	};
-	// ----------------------------------------
-	// update
-	updateSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_collections">;
-		data: {
-			isDeleted: boolean;
-			isDeletedAt: string | null;
-		};
-	}) => {
-		let query = this.db
-			.updateTable("lucid_collections")
-			.set({
-				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt>(
-					"boolean",
-					props.data.isDeleted,
-				),
-				is_deleted_at: props.data.isDeletedAt,
-			})
-			.returningAll();
-
-		query = queryBuilder.update(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// delete
-	deleteSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_collections">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_collections").returning("key");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	deleteMultiple = async (props: {
-		where: QueryBuilderWhere<"lucid_collections">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_collections").returning("key");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.execute();
-	};
+	queryConfig = {
+		tableKeys: {
+			filters: {
+				isDeleted: "is_deleted",
+				key: "key",
+			},
+			sorts: {
+				key: "key",
+				isDeleted: "is_deleted",
+				isDeletedAt: "is_deleted_at",
+				createdAt: "created_at",
+			},
+		},
+		operators: {
+			key: this.dbAdapter.config.fuzzOperator,
+		},
+	} as const;
 }
