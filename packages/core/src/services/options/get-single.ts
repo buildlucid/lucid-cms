@@ -13,10 +13,10 @@ const getSingle: ServiceFn<
 	],
 	OptionsResponse
 > = async (context, data) => {
-	const OptionsRepo = Repository.get("options", context.db, context.config.db);
+	const Options = Repository.get("options", context.db, context.config.db);
 	const OptionsFormatter = Formatter.get("options");
 
-	const optionRes = await OptionsRepo.selectSingle({
+	const optionRes = await Options.selectSingle({
 		select: ["name", "value_bool", "value_int", "value_text"],
 		where: [
 			{
@@ -25,23 +25,20 @@ const getSingle: ServiceFn<
 				value: data.name,
 			},
 		],
-	});
-
-	if (optionRes === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("option_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (optionRes.error) return optionRes;
 
 	return {
 		error: undefined,
 		data: OptionsFormatter.formatSingle({
-			option: optionRes,
+			option: optionRes.data,
 		}),
 	};
 };

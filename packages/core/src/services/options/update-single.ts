@@ -13,9 +13,9 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const OptionsRepo = Repository.get("options", context.db, context.config.db);
+	const Options = Repository.get("options", context.db, context.config.db);
 
-	const updateOption = await OptionsRepo.updateSingle({
+	const updateOptionRes = await Options.updateSingle({
 		where: [
 			{
 				key: "name",
@@ -24,21 +24,16 @@ const updateSingle: ServiceFn<
 			},
 		],
 		data: {
-			valueBool: data.valueBool,
-			valueInt: data.valueInt,
-			valueText: data.valueText,
+			value_bool: data.valueBool,
+			value_int: data.valueInt,
+			value_text: data.valueText,
+		},
+		returning: ["name"],
+		validation: {
+			enabled: true,
 		},
 	});
-
-	if (updateOption === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
+	if (updateOptionRes.error) return updateOptionRes;
 
 	return {
 		error: undefined,

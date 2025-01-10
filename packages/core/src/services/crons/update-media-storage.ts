@@ -11,7 +11,7 @@ const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
 		context.db,
 		context.config.db,
 	);
-	const OptionsRepo = Repository.get("options", context.db, context.config.db);
+	const Options = Repository.get("options", context.db, context.config.db);
 
 	const [mediaItems, processeddImagesItems] = await Promise.all([
 		MediaRepo.selectMultiple({
@@ -31,7 +31,7 @@ const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
 		return acc + item.file_size;
 	}, 0);
 
-	await OptionsRepo.updateSingle({
+	const updateMediaStorageRes = await Options.updateSingle({
 		where: [
 			{
 				key: "name",
@@ -40,9 +40,14 @@ const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
 			},
 		],
 		data: {
-			valueInt: totlaMediaSize + totalProcessedImagesSize,
+			value_int: totlaMediaSize + totalProcessedImagesSize,
+		},
+		returning: ["name"],
+		validation: {
+			enabled: true,
 		},
 	});
+	if (updateMediaStorageRes.error) return updateMediaStorageRes;
 
 	return {
 		error: undefined,

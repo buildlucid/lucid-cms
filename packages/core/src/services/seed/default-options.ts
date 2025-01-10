@@ -6,13 +6,9 @@ const defaultOptions: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const OptionsRepo = Repository.get(
-			"options",
-			context.db,
-			context.config.db,
-		);
+		const Options = Repository.get("options", context.db, context.config.db);
 
-		const mediaStorageOption = await OptionsRepo.selectSingle({
+		const mediaStorageOptionRes = await Options.selectSingle({
 			select: ["name"],
 			where: [
 				{
@@ -22,12 +18,20 @@ const defaultOptions: ServiceFn<[], undefined> = async (
 				},
 			],
 		});
+		if (mediaStorageOptionRes.error) return mediaStorageOptionRes;
 
-		if (mediaStorageOption === undefined) {
-			await OptionsRepo.createSingle({
-				name: "media_storage_used",
-				valueInt: 0,
+		if (mediaStorageOptionRes.data === undefined) {
+			const createStorageOptionRes = await Options.createSingle({
+				data: {
+					name: "media_storage_used",
+					value_int: 0,
+				},
+				returning: ["name", "value_int"],
+				validation: {
+					enabled: true,
+				},
 			});
+			if (createStorageOptionRes.error) return createStorageOptionRes;
 		}
 
 		return {
