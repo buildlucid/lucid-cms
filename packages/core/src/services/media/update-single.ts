@@ -20,14 +20,14 @@ const updateSingle: ServiceFn<
 	],
 	number | undefined
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db, context.config.db);
+	const Media = Repository.get("media", context.db, context.config.db);
 	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
 		context.config.db,
 	);
 
-	const media = await MediaRepo.selectSingle({
+	const mediaRes = await Media.selectSingle({
 		select: [
 			"id",
 			"key",
@@ -42,23 +42,21 @@ const updateSingle: ServiceFn<
 				value: data.id,
 			},
 		],
-	});
-	if (media === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("media_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (mediaRes.error) return mediaRes;
 
 	const upsertTranslationsRes =
 		await context.services.translation.upsertMultiple(context, {
 			keys: {
-				title: media.title_translation_key_id,
-				alt: media.alt_translation_key_id,
+				title: mediaRes.data.title_translation_key_id,
+				alt: mediaRes.data.alt_translation_key_id,
 			},
 			items: [
 				{
@@ -111,9 +109,9 @@ const updateSingle: ServiceFn<
 	const updateObjectRes = await context.services.media.strategies.update(
 		context,
 		{
-			id: media.id,
-			previousSize: media.file_size,
-			previousKey: media.key,
+			id: mediaRes.data.id,
+			previousSize: mediaRes.data.file_size,
+			previousKey: mediaRes.data.key,
 			updatedKey: data.key,
 			fileName: data.fileName,
 		},
@@ -121,7 +119,7 @@ const updateSingle: ServiceFn<
 	if (updateObjectRes.error) return updateObjectRes;
 
 	const [mediaUpdateRes, deleteMediaSyncRes] = await Promise.all([
-		MediaRepo.updateSingle({
+		Media.updateSingle({
 			where: [
 				{
 					key: "id",
@@ -131,18 +129,22 @@ const updateSingle: ServiceFn<
 			],
 			data: {
 				key: updateObjectRes.data.key,
-				eTag: updateObjectRes.data.etag,
+				e_tag: updateObjectRes.data.etag,
 				type: updateObjectRes.data.type,
-				mimeType: updateObjectRes.data.mimeType,
-				extension: updateObjectRes.data.extension,
-				fileSize: updateObjectRes.data.size,
+				mime_type: updateObjectRes.data.mimeType,
+				file_extension: updateObjectRes.data.extension,
+				file_size: updateObjectRes.data.size,
 				width: updateObjectRes.data.width,
 				height: updateObjectRes.data.height,
-				updatedAt: new Date().toISOString(),
-				blurHash: updateObjectRes.data.blurHash,
-				averageColour: updateObjectRes.data.averageColour,
-				isDark: updateObjectRes.data.isDark,
-				isLight: updateObjectRes.data.isLight,
+				updated_at: new Date().toISOString(),
+				blur_hash: updateObjectRes.data.blurHash,
+				average_colour: updateObjectRes.data.averageColour,
+				is_dark: updateObjectRes.data.isDark,
+				is_light: updateObjectRes.data.isLight,
+			},
+			returning: ["id"],
+			validation: {
+				enabled: true,
 			},
 		}),
 		MediaAwaitingSync.deleteSingle({
@@ -160,20 +162,11 @@ const updateSingle: ServiceFn<
 		}),
 	]);
 	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
-
-	if (mediaUpdateRes === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	if (mediaUpdateRes.error) return mediaUpdateRes;
 
 	return {
 		error: undefined,
-		data: mediaUpdateRes.id,
+		data: mediaUpdateRes.data.id,
 	};
 };
 

@@ -16,7 +16,7 @@ const getPresignedUrl: ServiceFn<
 		key: string;
 	}
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db, context.config.db);
+	const Media = Repository.get("media", context.db, context.config.db);
 	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
@@ -31,7 +31,7 @@ const getPresignedUrl: ServiceFn<
 	});
 	if (keyRes.error) return keyRes;
 
-	const duplicateKeyRes = await MediaRepo.selectSingle({
+	const duplicateKeyRes = await Media.selectSingle({
 		select: ["key"],
 		where: [
 			{
@@ -41,7 +41,9 @@ const getPresignedUrl: ServiceFn<
 			},
 		],
 	});
-	if (duplicateKeyRes !== undefined) {
+	if (duplicateKeyRes.error) return duplicateKeyRes;
+
+	if (duplicateKeyRes.data !== undefined) {
 		return {
 			error: {
 				type: "basic",

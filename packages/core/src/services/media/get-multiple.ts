@@ -17,23 +17,26 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db, context.config.db);
+	const Media = Repository.get("media", context.db, context.config.db);
 	const MediaFormatter = Formatter.get("media");
 
-	const [medias, mediasCount] = await MediaRepo.selectMultipleFiltered({
+	const mediaRes = await Media.selectMultipleFilteredFixed({
 		localeCode: data.localeCode,
-		query: data.query,
-		config: context.config,
+		queryParams: data.query,
+		validation: {
+			enabled: true,
+		},
 	});
+	if (mediaRes.error) return mediaRes;
 
 	return {
 		error: undefined,
 		data: {
 			data: MediaFormatter.formatMultiple({
-				media: medias,
+				media: mediaRes.data[0],
 				host: context.config.host,
 			}),
-			count: Formatter.parseCount(mediasCount?.count),
+			count: Formatter.parseCount(mediaRes.data[1]?.count),
 		},
 	};
 };

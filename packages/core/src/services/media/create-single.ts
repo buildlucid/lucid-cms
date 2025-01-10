@@ -23,7 +23,7 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db, context.config.db);
+	const Media = Repository.get("media", context.db, context.config.db);
 	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
@@ -67,22 +67,25 @@ const createSingle: ServiceFn<
 	if (syncMediaRes.error) return syncMediaRes;
 
 	const [mediaRes, deleteMediaSyncRes] = await Promise.all([
-		MediaRepo.createSingle({
-			key: syncMediaRes.data.key,
-			eTag: syncMediaRes.data.etag ?? undefined,
-			visible: data.visible ?? true,
-			type: syncMediaRes.data.type,
-			mimeType: syncMediaRes.data.mimeType,
-			extension: syncMediaRes.data.extension,
-			fileSize: syncMediaRes.data.size,
-			width: syncMediaRes.data.width,
-			height: syncMediaRes.data.height,
-			titleTranslationKeyId: translationKeyIdsRes.data.title,
-			altTranslationKeyId: translationKeyIdsRes.data.alt,
-			blurHash: syncMediaRes.data.blurHash,
-			averageColour: syncMediaRes.data.averageColour,
-			isDark: syncMediaRes.data.isDark,
-			isLight: syncMediaRes.data.isLight,
+		Media.createSingle({
+			data: {
+				key: syncMediaRes.data.key,
+				e_tag: syncMediaRes.data.etag ?? undefined,
+				visible: data.visible ?? true,
+				type: syncMediaRes.data.type,
+				mime_type: syncMediaRes.data.mimeType,
+				file_extension: syncMediaRes.data.extension,
+				file_size: syncMediaRes.data.size,
+				width: syncMediaRes.data.width,
+				height: syncMediaRes.data.height,
+				title_translation_key_id: translationKeyIdsRes.data.title,
+				alt_translation_key_id: translationKeyIdsRes.data.alt,
+				blur_hash: syncMediaRes.data.blurHash,
+				average_colour: syncMediaRes.data.averageColour,
+				is_dark: syncMediaRes.data.isDark,
+				is_light: syncMediaRes.data.isLight,
+			},
+			returning: ["id"],
 		}),
 		MediaAwaitingSync.deleteSingle({
 			where: [
@@ -98,9 +101,10 @@ const createSingle: ServiceFn<
 			},
 		}),
 	]);
+	if (mediaRes.error) return mediaRes;
 	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
 
-	if (mediaRes === undefined) {
+	if (mediaRes.data === undefined) {
 		await context.config.media?.strategy?.deleteSingle(syncMediaRes.data.key);
 		return {
 			error: {
@@ -113,7 +117,7 @@ const createSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: mediaRes.id,
+		data: mediaRes.data.id,
 	};
 };
 

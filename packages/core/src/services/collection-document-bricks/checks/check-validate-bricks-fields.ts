@@ -224,9 +224,9 @@ const getAllMedia = async (
 		const ids = allFieldIdsOfType<number>(fields, "media");
 		if (ids.length === 0) return [];
 
-		const MediaRepo = Repository.get("media", context.db, context.config.db);
+		const Media = Repository.get("media", context.db, context.config.db);
 
-		return MediaRepo.selectMultiple({
+		const mediaRes = await Media.selectMultiple({
 			select: ["id", "file_extension", "width", "height", "type"],
 			where: [
 				{
@@ -235,7 +235,13 @@ const getAllMedia = async (
 					value: ids,
 				},
 			],
+			validation: {
+				enabled: true,
+			},
 		});
+		if (mediaRes.error) return mediaRes;
+
+		return mediaRes.data;
 	} catch (err) {
 		return [];
 	}

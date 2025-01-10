@@ -18,9 +18,9 @@ const clearSingle: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const MediaRepo = Repository.get("media", context.db, context.config.db);
+	const Media = Repository.get("media", context.db, context.config.db);
 
-	const mediaRes = await MediaRepo.selectSingle({
+	const mediaRes = await Media.selectSingle({
 		select: ["key"],
 		where: [
 			{
@@ -29,16 +29,11 @@ const clearSingle: ServiceFn<
 				value: data.id,
 			},
 		],
+		validation: {
+			enabled: true,
+		},
 	});
-	if (mediaRes === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
+	if (mediaRes.error) return mediaRes;
 
 	const [storageUsedRes, processedImages] = await Promise.all([
 		context.services.option.getSingle(context, {
@@ -50,7 +45,7 @@ const clearSingle: ServiceFn<
 				{
 					key: "media_key",
 					operator: "=",
-					value: mediaRes.key,
+					value: mediaRes.data.key,
 				},
 			],
 		}),
@@ -75,7 +70,7 @@ const clearSingle: ServiceFn<
 				{
 					key: "media_key",
 					operator: "=",
-					value: mediaRes.key,
+					value: mediaRes.data.key,
 				},
 			],
 		}),

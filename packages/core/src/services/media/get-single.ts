@@ -12,29 +12,25 @@ const getSingle: ServiceFn<
 	],
 	MediaResponse
 > = async (context, data) => {
-	const MediaRepo = Repository.get("media", context.db, context.config.db);
+	const Media = Repository.get("media", context.db, context.config.db);
 	const MediaFormatter = Formatter.get("media");
 
-	const media = await MediaRepo.selectSingleById({
+	const mediaRes = await Media.selectSingleById({
 		id: data.id,
-		config: context.config,
-	});
-
-	if (media === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("media_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (mediaRes.error) return mediaRes;
 
 	return {
 		error: undefined,
 		data: MediaFormatter.formatSingle({
-			media: media,
+			media: mediaRes.data,
 			host: context.config.host,
 		}),
 	};

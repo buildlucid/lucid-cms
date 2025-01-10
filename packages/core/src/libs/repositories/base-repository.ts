@@ -29,10 +29,12 @@ import type {
  *
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
- * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
+ * @todo Add callback support for the validation / tweak required. Sometimes instead of returning an error on required failing we want to handle it differently
  * @todo Improve validation error messages. Allow error overides for differnt types, required, validation etc.
  * @todo look into using $if for conditional query builder options
  * @todo try and get the retuning and select props correctly typed instead of typing it ourselved with the Select helper. Likley allows us to get rid of the 'as Promise<Pick<Select<T>, K> | undefined>' and lets Kysely handle the return type
+ * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
+ *
  */
 abstract class BaseRepository<
 	Table extends keyof LucidDB,
