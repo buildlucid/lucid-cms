@@ -31,7 +31,7 @@ export type ValidationConfig<V extends boolean = false> = {
 
 export interface ValidationConfigExtend<V extends boolean = false>
 	extends ValidationConfig<V> {
-	mode: "single" | "multiple" | "multiple-count";
+	mode: "single" | "multiple" | "multiple-count" | "count";
 	select?: string[];
 	selectAll?: boolean;
 }

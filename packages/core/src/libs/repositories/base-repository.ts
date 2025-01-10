@@ -114,9 +114,12 @@ abstract class BaseRepository<
 	 */
 	private wrapSchemaForMode(
 		schema: ZodSchema,
-		mode: "single" | "multiple" | "multiple-count",
+		mode: "single" | "multiple" | "multiple-count" | "count",
 	): ZodSchema {
 		switch (mode) {
+			case "count": {
+				return z.object({ count: z.number() }).optional();
+			}
 			case "multiple-count":
 				return z.tuple([
 					z.array(schema),
@@ -272,6 +275,26 @@ abstract class BaseRepository<
 				},
 			};
 		}
+	}
+
+	// ----------------------------------------
+	// Queries
+	// biome-ignore lint/complexity/noBannedTypes: <explanation>
+	async count<V extends boolean = false>(props: QueryProps<V, {}>) {
+		const query = this.db
+			.selectFrom(this.tableName)
+			.select(sql`count(*)`.as("count"));
+
+		const exec = await this.executeQuery(
+			"count",
+			() => query.executeTakeFirst() as Promise<{ count: string } | undefined>,
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "count",
+		});
 	}
 
 	// ----------------------------------------
