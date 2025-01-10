@@ -17,13 +17,13 @@ const checkAwaitingSync: ServiceFn<
 	],
 	true
 > = async (context, data) => {
-	const MediaAwaitingSyncRepo = Repository.get(
+	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
 		context.config.db,
 	);
 
-	const awaitingSync = await MediaAwaitingSyncRepo.selectSingle({
+	const awaitingSyncRes = await MediaAwaitingSync.selectSingle({
 		select: ["key"],
 		where: [
 			{
@@ -41,8 +41,9 @@ const checkAwaitingSync: ServiceFn<
 			},
 		],
 	});
+	if (awaitingSyncRes.error) return awaitingSyncRes;
 
-	if (!awaitingSync) {
+	if (awaitingSyncRes.data === undefined) {
 		return {
 			error: {
 				type: "basic",

@@ -24,7 +24,7 @@ const createSingle: ServiceFn<
 	number
 > = async (context, data) => {
 	const MediaRepo = Repository.get("media", context.db, context.config.db);
-	const MediaAwaitingSyncRepo = Repository.get(
+	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
 		context.config.db,
@@ -66,7 +66,7 @@ const createSingle: ServiceFn<
 	);
 	if (syncMediaRes.error) return syncMediaRes;
 
-	const [mediaRes] = await Promise.all([
+	const [mediaRes, deleteMediaSyncRes] = await Promise.all([
 		MediaRepo.createSingle({
 			key: syncMediaRes.data.key,
 			eTag: syncMediaRes.data.etag ?? undefined,
@@ -84,7 +84,7 @@ const createSingle: ServiceFn<
 			isDark: syncMediaRes.data.isDark,
 			isLight: syncMediaRes.data.isLight,
 		}),
-		MediaAwaitingSyncRepo.deleteSingle({
+		MediaAwaitingSync.deleteSingle({
 			where: [
 				{
 					key: "key",
@@ -92,8 +92,14 @@ const createSingle: ServiceFn<
 					value: data.key,
 				},
 			],
+			returning: ["key"],
+			validation: {
+				enabled: true,
+			},
 		}),
 	]);
+	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
+
 	if (mediaRes === undefined) {
 		await context.config.media?.strategy?.deleteSingle(syncMediaRes.data.key);
 		return {

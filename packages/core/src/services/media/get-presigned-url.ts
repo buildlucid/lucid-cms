@@ -17,7 +17,7 @@ const getPresignedUrl: ServiceFn<
 	}
 > = async (context, data) => {
 	const MediaRepo = Repository.get("media", context.db, context.config.db);
-	const MediaAwaitingSyncRepo = Repository.get(
+	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
 		context.config.db,
@@ -53,10 +53,16 @@ const getPresignedUrl: ServiceFn<
 		};
 	}
 
-	const [_, getPresignedUrlRes] = await Promise.all([
-		MediaAwaitingSyncRepo.createSingle({
-			key: keyRes.data,
-			timestamp: new Date().toISOString(),
+	const [createMediaRes, getPresignedUrlRes] = await Promise.all([
+		MediaAwaitingSync.createSingle({
+			data: {
+				key: keyRes.data,
+				timestamp: new Date().toISOString(),
+			},
+			returning: ["key"],
+			validation: {
+				enabled: true,
+			},
 		}),
 		context.services.media.strategies.getPresignedUrl(context, {
 			key: keyRes.data,
@@ -64,6 +70,7 @@ const getPresignedUrl: ServiceFn<
 			extension: extension || undefined,
 		}),
 	]);
+	if (createMediaRes.error) return createMediaRes;
 	if (getPresignedUrlRes.error) return getPresignedUrlRes;
 
 	return {

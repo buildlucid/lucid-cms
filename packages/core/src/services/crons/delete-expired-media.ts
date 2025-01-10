@@ -7,7 +7,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
  * Any media keys that have expired and still exist in the lucid_media_awaiting_sync table will be deleted along with the media using the delete service strategy.
  */
 const deleteExpiredMedia: ServiceFn<[], undefined> = async (context) => {
-	const MediaAwaitingSyncRepo = Repository.get(
+	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
 		context.config.db,
@@ -17,7 +17,7 @@ const deleteExpiredMedia: ServiceFn<[], undefined> = async (context) => {
 		context.services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const allExpiredMedia = await MediaAwaitingSyncRepo.selectMultiple({
+	const allExpiredMediaRes = await MediaAwaitingSync.selectMultiple({
 		select: ["key"],
 		where: [
 			{
@@ -29,24 +29,33 @@ const deleteExpiredMedia: ServiceFn<[], undefined> = async (context) => {
 				).toISOString(),
 			},
 		],
+		validation: {
+			enabled: true,
+		},
 	});
-	if (allExpiredMedia.length === 0) {
+	if (allExpiredMediaRes.error) return allExpiredMediaRes;
+
+	if (allExpiredMediaRes.data.length === 0) {
 		return {
 			error: undefined,
 			data: undefined,
 		};
 	}
 
-	await mediaStrategyRes.data.deleteMultiple(allExpiredMedia.map((m) => m.key));
-	await MediaAwaitingSyncRepo.deleteMultiple({
+	await mediaStrategyRes.data.deleteMultiple(
+		allExpiredMediaRes.data.map((m) => m.key),
+	);
+	const deleteMultipleRes = await MediaAwaitingSync.deleteMultiple({
 		where: [
 			{
 				key: "key",
 				operator: "in",
-				value: allExpiredMedia.map((m) => m.key),
+				value: allExpiredMediaRes.data.map((m) => m.key),
 			},
 		],
 	});
+	if (deleteMultipleRes.error) return deleteMultipleRes;
+
 	return {
 		error: undefined,
 		data: undefined,
