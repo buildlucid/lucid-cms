@@ -19,9 +19,9 @@ const checkLocalesExist: ServiceFn<
 		};
 	}
 
-	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
+	const Locales = Repository.get("locales", context.db, context.config.db);
 
-	const locales = await LocalesRepo.selectMultiple({
+	const localesRes = await Locales.selectMultiple({
 		select: ["code"],
 		where: [
 			{
@@ -35,9 +35,13 @@ const checkLocalesExist: ServiceFn<
 				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (localesRes.error) return localesRes;
 
-	if (locales.length !== localeCodes.length) {
+	if (localesRes.data.length !== localeCodes.length) {
 		return {
 			error: {
 				type: "basic",

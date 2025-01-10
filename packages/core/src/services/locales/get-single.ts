@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	LocalesResponse
 > = async (context, data) => {
-	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
+	const Locales = Repository.get("locales", context.db, context.config.db);
 	const LocalesFormatter = Formatter.get("locales");
 
 	const configLocale = context.config.localisation.locales.find(
@@ -30,7 +30,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const locale = await LocalesRepo.selectSingle({
+	const localeRes = await Locales.selectSingle({
 		select: ["code", "created_at", "updated_at", "is_deleted", "is_deleted_at"],
 		where: [
 			{
@@ -44,23 +44,20 @@ const getSingle: ServiceFn<
 				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
-	});
-
-	if (locale === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("locale_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (localeRes.error) return localeRes;
 
 	return {
 		error: undefined,
 		data: LocalesFormatter.formatSingle({
-			locale: locale,
+			locale: localeRes.data,
 			configLocale: configLocale,
 			defaultLocale: context.config.localisation.defaultLocale,
 		}),

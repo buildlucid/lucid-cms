@@ -7,23 +7,20 @@ import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 const syncLocales: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
-	// Responsible for syncing locales config with the database
-	const LocalesRepo = Repository.get("locales", context.db, context.config.db);
+	const Locales = Repository.get("locales", context.db, context.config.db);
 	const localeCodes = context.config.localisation.locales.map(
 		(locale) => locale.code,
 	);
 
-	// Actions
-	// - If a locale exists in config but not in the database, create it
-	// - If a locale exists in the database but not in config, mark as is_deleted
-
-	// Get all locales
-	const locales = await LocalesRepo.selectAll({
+	const localesRes = await Locales.selectMultiple({
 		select: ["code", "is_deleted"],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (localesRes.error) return localesRes;
 
-	// Get locale codes from the database
-	const localeCodesFromDB = locales.map((locale) => locale.code);
+	const localeCodesFromDB = localesRes.data.map((locale) => locale.code);
 
 	// Get locale codes that are in the config but not in the database
 	const missingLocales = localeCodes.filter(
@@ -37,7 +34,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	}
 
 	// Get locale codes that are in the database but not in the config
-	const localesToDelete = locales.filter(
+	const localesToDelete = localesRes.data.filter(
 		(locale) =>
 			!localeCodes.includes(locale.code) &&
 			Formatter.formatBoolean(locale.is_deleted) === false,
@@ -51,7 +48,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	}
 
 	// Get locals that are in the database as is_deleted but in the config
-	const unDeletedLocales = locales.filter(
+	const unDeletedLocales = localesRes.data.filter(
 		(locale) =>
 			Formatter.formatBoolean(locale.is_deleted) &&
 			localeCodes.includes(locale.code),
@@ -64,19 +61,19 @@ const syncLocales: ServiceFn<[], undefined> = async (
 		});
 	}
 
-	await Promise.all([
+	const [createRes, deleteRes, restoreRes] = await Promise.all([
 		missingLocales.length > 0 &&
-			LocalesRepo.createMultiple({
-				items: missingLocales.map((locale) => ({
+			Locales.createMultiple({
+				data: missingLocales.map((locale) => ({
 					code: locale,
 				})),
 			}),
 		localesToDeleteCodes.length > 0 &&
-			LocalesRepo.updateSingle({
+			Locales.updateSingle({
 				data: {
-					isDeleted: true,
-					isDeletedAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
+					is_deleted: true,
+					is_deleted_at: new Date().toISOString(),
+					updated_at: new Date().toISOString(),
 				},
 				where: [
 					{
@@ -85,13 +82,17 @@ const syncLocales: ServiceFn<[], undefined> = async (
 						value: localesToDeleteCodes,
 					},
 				],
+				returning: ["code"],
+				validation: {
+					enabled: true,
+				},
 			}),
 		unDeletedLocalesCodes.length > 0 &&
-			LocalesRepo.updateSingle({
+			Locales.updateSingle({
 				data: {
-					isDeleted: false,
-					isDeletedAt: null,
-					updatedAt: new Date().toISOString(),
+					is_deleted: false,
+					is_deleted_at: null,
+					updated_at: new Date().toISOString(),
 				},
 				where: [
 					{
@@ -100,8 +101,15 @@ const syncLocales: ServiceFn<[], undefined> = async (
 						value: unDeletedLocales.map((locale) => locale.code),
 					},
 				],
+				returning: ["code"],
+				validation: {
+					enabled: true,
+				},
 			}),
 	]);
+	if (typeof createRes !== "boolean" && createRes.error) return createRes;
+	if (typeof deleteRes !== "boolean" && deleteRes.error) return deleteRes;
+	if (typeof restoreRes !== "boolean" && restoreRes.error) return restoreRes;
 
 	return {
 		error: undefined,

@@ -9,7 +9,7 @@ import CollectionDocumentGroupsRepo from "./collection-document-groups.js";
 import CollectionDocumentVersionsRepo from "./collection-document-versions.js";
 import CollectionDocumentsRepo from "./collection-documents.js";
 import EmailsRepository from "./emails.js";
-import LocalesRepo from "./locales.js";
+import LocalesRepository from "./locales.js";
 import MediaRepo from "./media.js";
 import MediaAwaitingSyncRepo from "./media-awaiting-sync.js";
 import OptionsRepo from "./options.js";
@@ -76,7 +76,7 @@ class Repository {
 			case "emails":
 				return new EmailsRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "locales":
-				return new LocalesRepo(db, dbAdapter) as RepositoryReturnType<T>;
+				return new LocalesRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "media":
 				return new MediaRepo(db, dbAdapter) as RepositoryReturnType<T>;
 			case "media-awaiting-sync":
@@ -137,7 +137,7 @@ type RepositoryClassMap = {
 	"collection-document-versions": CollectionDocumentVersionsRepo;
 	"collection-documents": CollectionDocumentsRepo;
 	emails: EmailsRepository;
-	locales: LocalesRepo;
+	locales: LocalesRepository;
 	media: MediaRepo;
 	"media-awaiting-sync": MediaAwaitingSyncRepo;
 	options: OptionsRepo;

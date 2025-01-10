@@ -1,130 +1,45 @@
-import { sql } from "kysely";
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
-import type {
-	LucidLocales,
-	Select,
-	KyselyDB,
-	BooleanInt,
-} from "../db/types.js";
+import z from "zod";
+import BaseRepository from "./base-repository.js";
+import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class LocalesRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
-
-	count = async () => {
-		return this.db
-			.selectFrom("lucid_locales")
-			.select(sql`count(*)`.as("count"))
-			.executeTakeFirst() as Promise<{ count: string } | undefined>;
+export default class LocalesRepository extends BaseRepository<"lucid_locales"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_locales");
+	}
+	tableSchema = z.object({
+		code: z.string(),
+		is_deleted: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		is_deleted_at: z.string().nullable(),
+		created_at: z.string().nullable(),
+		updated_at: z.string().nullable(),
+	});
+	columnFormats = {
+		code: this.dbAdapter.getDataType("text"),
+		is_deleted: this.dbAdapter.getDataType("boolean"),
+		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
+		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
-	// ----------------------------------------
-	// select
-	selectSingle = async <K extends keyof Select<LucidLocales>>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_locales">;
-	}) => {
-		let query = this.db.selectFrom("lucid_locales").select<K>(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.executeTakeFirst() as Promise<
-			Pick<Select<LucidLocales>, K> | undefined
-		>;
-	};
-	selectMultiple = async <K extends keyof Select<LucidLocales>>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_locales">;
-	}) => {
-		let query = this.db.selectFrom("lucid_locales").select<K>(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.execute() as Promise<Array<Pick<Select<LucidLocales>, K>>>;
-	};
-	selectAll = async <K extends keyof Select<LucidLocales>>(props: {
-		select: K[];
-	}) => {
-		return this.db
-			.selectFrom("lucid_locales")
-			.select<K>(props.select)
-			.execute() as Promise<Array<Pick<Select<LucidLocales>, K>>>;
-	};
-	// ----------------------------------------
-	// create
-	createSingle = async (props: {
-		code: string;
-	}) => {
-		return this.db
-			.insertInto("lucid_locales")
-			.values({
-				code: props.code,
-			})
-			.returning(["code"])
-			.executeTakeFirst();
-	};
-	createMultiple = async (props: {
-		items: Array<{
-			code: string;
-		}>;
-	}) => {
-		return this.db
-			.insertInto("lucid_locales")
-			.values(
-				props.items.map((i) => ({
-					code: i.code,
-				})),
-			)
-			.execute();
-	};
-	// ----------------------------------------
-	// update
-	updateSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_locales">;
-		data: {
-			isDeleted?: boolean;
-			isDeletedAt?: string | null;
-			updatedAt?: string;
-		};
-	}) => {
-		let query = this.db
-			.updateTable("lucid_locales")
-			.set({
-				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
-					"boolean",
-					props.data.isDeleted,
-				),
-				is_deleted_at: props.data.isDeletedAt,
-				updated_at: props.data.updatedAt,
-			})
-			.returning("code");
-
-		query = queryBuilder.update(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// delete
-	deleteSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_locales">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_locales").returning("code");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	deleteMultiple = async (props: {
-		where: QueryBuilderWhere<"lucid_locales">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_locales").returning("code");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.execute();
-	};
+	queryConfig = {
+		tableKeys: {
+			filters: {
+				code: "code",
+				isDeleted: "is_deleted",
+			},
+			sorts: {
+				code: "code",
+				isDeleted: "is_deleted",
+				isDeletedAt: "is_deleted_at",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
+			},
+		},
+		operators: {
+			code: this.dbAdapter.config.fuzzOperator,
+		},
+	} as const;
 }
