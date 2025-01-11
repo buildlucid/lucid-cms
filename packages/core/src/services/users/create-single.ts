@@ -19,12 +19,12 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 
-	const [userExists, roleExistsRes] = await Promise.all([
-		UsersRepo.selectSingleByEmailUsername({
+	const [userExistsRes, roleExistsRes] = await Promise.all([
+		Users.selectSingleByEmailUsername({
 			select: ["id", "username", "email"],
-			data: {
+			where: {
 				username: data.username,
 				email: data.email,
 			},
@@ -33,9 +33,10 @@ const createSingle: ServiceFn<
 			roleIds: data.roleIds,
 		}),
 	]);
+	if (userExistsRes.error) return userExistsRes;
 	if (roleExistsRes.error) return roleExistsRes;
 
-	if (userExists !== undefined) {
+	if (userExistsRes.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -43,14 +44,14 @@ const createSingle: ServiceFn<
 				errorResponse: {
 					body: {
 						email:
-							userExists.email === data.email
+							userExistsRes.data.email === data.email
 								? {
 										code: "invalid",
 										message: T("duplicate_entry_error_message"),
 									}
 								: undefined,
 						username:
-							userExists.username === data.username
+							userExistsRes.data.username === data.username
 								? {
 										code: "invalid",
 										message: T("duplicate_entry_error_message"),
@@ -65,25 +66,25 @@ const createSingle: ServiceFn<
 
 	const { encryptSecret } = generateSecret(context.config.keys.encryptionKey);
 
-	const newUser = await UsersRepo.createSingle({
-		email: data.email,
-		username: data.username,
-		firstName: data.firstName,
-		lastName: data.lastName,
-		superAdmin: data.authSuperAdmin ? data.superAdmin : false,
-		triggerPasswordReset: false,
-		secret: encryptSecret,
-	});
-
-	if (newUser === undefined) {
-		return {
-			error: {
-				type: "basic",
+	const newUserRes = await Users.createSingle({
+		data: {
+			email: data.email,
+			username: data.username,
+			first_name: data.firstName,
+			last_name: data.lastName,
+			super_admin: data.authSuperAdmin ? data.superAdmin : false,
+			triggered_password_reset: false,
+			secret: encryptSecret,
+		},
+		returning: ["id"],
+		validation: {
+			enabled: true,
+			defaultError: {
 				status: 500,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (newUserRes.error) return newUserRes;
 
 	// Email Invite
 	const expiryDate = add(new Date(), {
@@ -91,7 +92,7 @@ const createSingle: ServiceFn<
 	}).toISOString();
 
 	const userTokenRes = await context.services.user.token.createSingle(context, {
-		userId: newUser.id,
+		userId: newUserRes.data.id,
 		tokenType: "password_reset",
 		expiryDate: expiryDate,
 	});
@@ -115,7 +116,7 @@ const createSingle: ServiceFn<
 	if (data.roleIds === undefined || data.roleIds.length === 0) {
 		return {
 			error: undefined,
-			data: newUser.id,
+			data: newUserRes.data.id,
 		};
 	}
 
@@ -123,7 +124,7 @@ const createSingle: ServiceFn<
 
 	const createMultipleRes = await UserRoles.createMultiple({
 		data: data.roleIds.map((r) => ({
-			user_id: newUser.id,
+			user_id: newUserRes.data.id,
 			role_id: r,
 		})),
 	});
@@ -131,7 +132,7 @@ const createSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: newUser.id,
+		data: newUserRes.data.id,
 	};
 };
 

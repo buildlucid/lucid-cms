@@ -19,7 +19,7 @@ const resetPassword: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 
 	const tokenRes = await context.services.user.token.getSingle(context, {
 		token: data.token,
@@ -27,7 +27,7 @@ const resetPassword: ServiceFn<
 	});
 	if (tokenRes.error) return tokenRes;
 
-	const userRes = await UsersRepo.selectSingle({
+	const userRes = await Users.selectSingle({
 		select: ["id"],
 		where: [
 			{
@@ -36,17 +36,15 @@ const resetPassword: ServiceFn<
 				value: tokenRes.data.user_id,
 			},
 		],
-	});
-	if (userRes === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				status: 404,
 				message: T("user_not_found_message"),
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (userRes.error) return userRes;
 
 	const { secret, encryptSecret } = generateSecret(
 		context.config.keys.encryptionKey,
@@ -56,11 +54,11 @@ const resetPassword: ServiceFn<
 		secret: Buffer.from(secret),
 	});
 
-	const user = await UsersRepo.updateSingle({
+	const updatedUserRes = await Users.updateSingle({
 		data: {
 			password: hashedPassword,
 			secret: encryptSecret,
-			updatedAt: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
 		},
 		where: [
 			{
@@ -69,17 +67,15 @@ const resetPassword: ServiceFn<
 				value: tokenRes.data.user_id,
 			},
 		],
-	});
-
-	if (user === undefined) {
-		return {
-			error: {
-				type: "basic",
+		returning: ["id", "first_name", "last_name", "email"],
+		validation: {
+			enabled: true,
+			defaultError: {
 				status: 400,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (updatedUserRes.error) return updatedUserRes;
 
 	const [deleteMultipleTokensRes, sendEmail] = await Promise.all([
 		UserTokens.deleteMultiple({
@@ -94,11 +90,11 @@ const resetPassword: ServiceFn<
 		context.services.email.sendEmail(context, {
 			template: constants.emailTemplates.passwordResetSuccess,
 			type: "internal",
-			to: user.email,
+			to: updatedUserRes.data.email,
 			subject: T("password_reset_success_subject"),
 			data: {
-				firstName: user.first_name,
-				lastName: user.last_name,
+				firstName: updatedUserRes.data.first_name,
+				lastName: updatedUserRes.data.last_name,
 			},
 		}),
 	]);

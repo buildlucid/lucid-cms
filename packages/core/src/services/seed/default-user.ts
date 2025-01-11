@@ -10,10 +10,14 @@ const defaultUser: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const UsersRepo = Repository.get("users", context.db, context.config.db);
+		const Users = Repository.get("users", context.db, context.config.db);
 
-		const totalUserCount = await UsersRepo.count();
-		if (Formatter.parseCount(totalUserCount?.count) > 0) {
+		const totalUserCountRes = await Users.count({
+			where: [],
+		});
+		if (totalUserCountRes.error) return totalUserCountRes;
+
+		if (Formatter.parseCount(totalUserCountRes.data?.count) > 0) {
 			return {
 				error: undefined,
 				data: undefined,
@@ -30,16 +34,23 @@ const defaultUser: ServiceFn<[], undefined> = async (
 			},
 		);
 
-		await UsersRepo.createSingle({
-			superAdmin: constants.seedDefaults.user.superAdmin,
-			email: constants.seedDefaults.user.email,
-			username: constants.seedDefaults.user.username,
-			firstName: constants.seedDefaults.user.firstName,
-			lastName: constants.seedDefaults.user.lastName,
-			triggerPasswordReset: true,
-			password: hashedPassword,
-			secret: encryptSecret,
+		const userRes = await Users.createSingle({
+			data: {
+				super_admin: constants.seedDefaults.user.superAdmin,
+				email: constants.seedDefaults.user.email,
+				username: constants.seedDefaults.user.username,
+				first_name: constants.seedDefaults.user.firstName,
+				last_name: constants.seedDefaults.user.lastName,
+				triggered_password_reset: true,
+				password: hashedPassword,
+				secret: encryptSecret,
+			},
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
 		});
+		if (userRes.error) return userRes;
 
 		return {
 			error: undefined,

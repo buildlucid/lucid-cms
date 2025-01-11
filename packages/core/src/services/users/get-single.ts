@@ -16,29 +16,25 @@ const getSingle: ServiceFn<
 	],
 	UserResponse
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 	const UsersFormatter = Formatter.get("users");
 
-	const user = await UsersRepo.selectSingleById({
+	const userRes = await Users.selectSingleById({
 		id: data.userId,
-		config: context.config,
-	});
-
-	if (!user) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("user_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (userRes.error) return userRes;
 
 	return {
 		error: undefined,
 		data: UsersFormatter.formatSingle({
-			user: user,
+			user: userRes.data,
 		}),
 	};
 };

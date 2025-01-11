@@ -239,7 +239,7 @@ const getAllMedia = async (
 				enabled: true,
 			},
 		});
-		if (mediaRes.error) return mediaRes;
+		if (mediaRes.error) return [];
 
 		return mediaRes.data;
 	} catch (err) {
@@ -254,9 +254,9 @@ const getAllUsers = async (
 		const ids = allFieldIdsOfType<number>(fields, "user");
 		if (ids.length === 0) return [];
 
-		const UsersRepo = Repository.get("users", context.db, context.config.db);
+		const Users = Repository.get("users", context.db, context.config.db);
 
-		return await UsersRepo.selectMultiple({
+		const usersRes = await Users.selectMultiple({
 			select: ["id", "username", "email", "first_name", "last_name"],
 			where: [
 				{
@@ -265,7 +265,13 @@ const getAllUsers = async (
 					value: ids,
 				},
 			],
+			validation: {
+				enabled: true,
+			},
 		});
+		if (usersRes.error) return [];
+
+		return usersRes.data;
 	} catch (err) {
 		return [];
 	}

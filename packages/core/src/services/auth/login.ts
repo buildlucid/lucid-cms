@@ -16,28 +16,26 @@ const login: ServiceFn<
 		id: number;
 	}
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 
-	const user = await UsersRepo.selectSingleByEmailUsername({
+	const userRes = await Users.selectSingleByEmailUsername({
 		select: ["id", "password", "is_deleted", "secret"],
-		data: {
+		where: {
 			username: data.usernameOrEmail,
 			email: data.usernameOrEmail,
 		},
-	});
-
-	if (!user || !user.password) {
-		return {
-			error: {
+		validation: {
+			enabled: true,
+			defaultError: {
 				type: "authorisation",
 				message: T("login_error_message"),
 				status: 401,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (userRes.error) return userRes;
 
-	if (user !== undefined && Formatter.formatBoolean(user.is_deleted)) {
+	if (Formatter.formatBoolean(userRes.data.is_deleted)) {
 		return {
 			error: {
 				type: "authorisation",
@@ -48,9 +46,9 @@ const login: ServiceFn<
 		};
 	}
 
-	const valid = await argon2.verify(user.password, data.password, {
+	const valid = await argon2.verify(userRes.data.password, data.password, {
 		secret: Buffer.from(
-			decrypt(user.secret, context.config.keys.encryptionKey),
+			decrypt(userRes.data.secret, context.config.keys.encryptionKey),
 		),
 	});
 	if (!valid)
@@ -66,7 +64,7 @@ const login: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			id: user.id,
+			id: userRes.data.id,
 		},
 	};
 };

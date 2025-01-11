@@ -11,7 +11,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 
 	if (data.currentUserId === data.userId) {
 		return {
@@ -26,11 +26,11 @@ const deleteSingle: ServiceFn<
 
 	await context.services.user.checks.checkNotLastUser(context);
 
-	const deleteUserRes = await UsersRepo.updateSingle({
+	const deleteUserRes = await Users.updateSingle({
 		data: {
-			isDeleted: true,
-			isDeletedAt: new Date().toISOString(),
-			deletedBy: data.currentUserId,
+			is_deleted: true,
+			is_deleted_at: new Date().toISOString(),
+			deleted_by: data.currentUserId,
 		},
 		where: [
 			{
@@ -39,17 +39,15 @@ const deleteSingle: ServiceFn<
 				value: data.userId,
 			},
 		],
-	});
-
-	if (deleteUserRes === undefined) {
-		return {
-			error: {
-				type: "basic",
+		returning: ["id", "first_name", "last_name", "email"],
+		validation: {
+			enabled: true,
+			defaultError: {
 				status: 500,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (deleteUserRes.error) return deleteUserRes;
 
 	return {
 		error: undefined,

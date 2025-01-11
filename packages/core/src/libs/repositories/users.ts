@@ -1,51 +1,112 @@
+import z from "zod";
 import { sql } from "kysely";
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
-import type z from "zod";
-import type { Config } from "../../types/config.js";
-import type usersSchema from "../../schemas/users.js";
-import type { LucidUsers, Select, KyselyDB, BooleanInt } from "../db/types.js";
+import BaseRepository from "./base-repository.js";
+import queryBuilder from "../query-builder/index.js";
 import type DatabaseAdapter from "../db/adapter.js";
+import type { QueryProps } from "./types.js";
+import type usersSchema from "../../schemas/users.js";
+import type { Select, KyselyDB } from "../db/types.js";
+import type { LucidUsers } from "../db/types.js";
 
-export default class UsersRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
+export default class UsersRepository extends BaseRepository<"lucid_users"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_users");
+	}
+	tableSchema = z.object({
+		id: z.number(),
+		super_admin: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		email: z.string(),
+		username: z.string(),
+		first_name: z.string().nullable(),
+		last_name: z.string().nullable(),
+		password: z.string().nullable(),
+		secret: z.string(),
+		triggered_password_reset: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		is_deleted: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		is_deleted_at: z.string().nullable(),
+		deleted_by: z.number().nullable(),
+		roles: z
+			.array(
+				z.object({
+					id: z.number(),
+					description: z.string().nullable(),
+					name: z.string(),
+					permissions: z
+						.array(
+							z.object({
+								permission: z.string(),
+							}),
+						)
+						.optional(),
+				}),
+			)
+			.optional(),
+		created_at: z.string().nullable(),
+		updated_at: z.string().nullable(),
+	});
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		super_admin: this.dbAdapter.getDataType("boolean"),
+		email: this.dbAdapter.getDataType("text"),
+		username: this.dbAdapter.getDataType("text"),
+		first_name: this.dbAdapter.getDataType("text"),
+		last_name: this.dbAdapter.getDataType("text"),
+		password: this.dbAdapter.getDataType("text"),
+		secret: this.dbAdapter.getDataType("text"),
+		triggered_password_reset: this.dbAdapter.getDataType("boolean"),
+		is_deleted: this.dbAdapter.getDataType("boolean"),
+		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
+		deleted_by: this.dbAdapter.getDataType("integer"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
+		updated_at: this.dbAdapter.getDataType("timestamp"),
+	};
+	queryConfig = {
+		tableKeys: {
+			filters: {
+				firstName: "lucid_users.first_name",
+				lastName: "lucid_users.last_name",
+				email: "lucid_users.email",
+				username: "lucid_users.username",
+				roleIds: "lucid_user_roles.role_id",
+				id: "lucid_users.id",
+			},
+			sorts: {
+				createdAt: "lucid_users.created_at",
+				updatedAt: "lucid_users.updated_at",
+				firstName: "lucid_users.first_name",
+				lastName: "lucid_users.last_name",
+				email: "lucid_users.email",
+				username: "lucid_users.username",
+			},
+		},
+		operators: {
+			firstName: this.dbAdapter.config.fuzzOperator,
+			lastName: this.dbAdapter.config.fuzzOperator,
+			email: this.dbAdapter.config.fuzzOperator,
+			username: this.dbAdapter.config.fuzzOperator,
+		},
+	} as const;
 
-	count = async () => {
-		return this.db
-			.selectFrom("lucid_users")
-			.select(sql`count(*)`.as("count"))
-			.executeTakeFirst() as Promise<{ count: string } | undefined>;
-	};
-	activeCount = async () => {
-		return this.db
-			.selectFrom("lucid_users")
-			.select(sql`count(*)`.as("count"))
-			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
-			.executeTakeFirst() as Promise<{ count: string } | undefined>;
-	};
 	// ----------------------------------------
 	// selects
-	selectSingle = async <K extends keyof Select<LucidUsers>>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_users">;
-	}) => {
-		let query = this.db.selectFrom("lucid_users").select(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.executeTakeFirst() as Promise<
-			Pick<Select<LucidUsers>, K> | undefined
-		>;
-	};
-	selectSingleById = async (props: {
-		id: number;
-		config: Config;
-	}) => {
-		return this.db
+	async selectSingleById<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				id: number;
+			}
+		>,
+	) {
+		const query = this.db
 			.selectFrom("lucid_users")
 			.select((eb) => [
 				"email",
@@ -57,7 +118,7 @@ export default class UsersRepo {
 				"username",
 				"super_admin",
 				"triggered_password_reset",
-				props.config.db
+				this.dbAdapter
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_user_roles")
@@ -70,7 +131,7 @@ export default class UsersRepo {
 								"lucid_roles.id",
 								"lucid_roles.name",
 								"lucid_roles.description",
-								props.config.db
+								this.dbAdapter
 									.jsonArrayFrom(
 										eb
 											.selectFrom("lucid_role_permissions")
@@ -84,246 +145,167 @@ export default class UsersRepo {
 					.as("roles"),
 			])
 			.where("id", "=", props.id)
-			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
-			.executeTakeFirst();
-	};
-	selectSingleByEmailUsername = async <
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
+
+		const exec = await this.executeQuery("selectSingleById", () =>
+			query.executeTakeFirst(),
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: [
+				"email",
+				"first_name",
+				"last_name",
+				"id",
+				"created_at",
+				"updated_at",
+				"username",
+				"super_admin",
+				"triggered_password_reset",
+				"roles",
+			],
+		});
+	}
+	async selectSingleByEmailUsername<
 		K extends keyof Select<LucidUsers>,
-	>(props: {
-		select: K[];
-		data: {
-			username: string;
-			email: string;
-		};
-	}) => {
-		return this.db
+		V extends boolean = false,
+	>(
+		props: QueryProps<
+			V,
+			{
+				select: K[];
+				where: {
+					username: string;
+					email: string;
+				};
+			}
+		>,
+	) {
+		const query = this.db
 			.selectFrom("lucid_users")
 			.select(props.select)
 			.where((eb) =>
 				eb.or([
-					eb("username", "=", props.data.username),
-					eb("email", "=", props.data.email),
+					eb("username", "=", props.where.username),
+					eb("email", "=", props.where.email),
 				]),
-			)
-			.executeTakeFirst() as Promise<Pick<Select<LucidUsers>, K> | undefined>;
-	};
-	selectMultiple = async <K extends keyof Select<LucidUsers>>(props: {
-		select: K[];
-		where: QueryBuilderWhere<"lucid_users">;
-	}) => {
-		let query = this.db.selectFrom("lucid_users").select(props.select);
-
-		query = queryBuilder.select(query, props.where);
-
-		return query.execute() as Promise<Array<Pick<Select<LucidUsers>, K>>>;
-	};
-	selectMultipleFiltered = async (props: {
-		query: z.infer<typeof usersSchema.getMultiple.query>;
-		config: Config;
-	}) => {
-		const usersQuery = this.db
-			.selectFrom("lucid_users")
-			.select((eb) => [
-				"lucid_users.email",
-				"lucid_users.first_name",
-				"lucid_users.last_name",
-				"lucid_users.id",
-				"lucid_users.created_at",
-				"lucid_users.updated_at",
-				"lucid_users.username",
-				"lucid_users.super_admin",
-				props.config.db
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_user_roles")
-							.innerJoin(
-								"lucid_roles",
-								"lucid_roles.id",
-								"lucid_user_roles.role_id",
-							)
-							.select([
-								"lucid_roles.id",
-								"lucid_roles.name",
-								"lucid_roles.description",
-							])
-							.whereRef("user_id", "=", "lucid_users.id"),
-					)
-					.as("roles"),
-			])
-			.leftJoin("lucid_user_roles", (join) =>
-				join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
-			)
-			.where(
-				"lucid_users.is_deleted",
-				"=",
-				this.dbAdapter.getDefault("boolean", "false"),
-			)
-			.groupBy("lucid_users.id");
-
-		const usersCountQuery = this.db
-			.selectFrom("lucid_users")
-			.select(sql`count(distinct lucid_users.id)`.as("count"))
-			.leftJoin("lucid_user_roles", (join) =>
-				join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
-			)
-			.where(
-				"lucid_users.is_deleted",
-				"=",
-				this.dbAdapter.getDefault("boolean", "false"),
 			);
 
-		const { main, count } = queryBuilder.main(
+		const exec = await this.executeQuery(
+			"selectSingleByEmailUsername",
+			() =>
+				query.executeTakeFirst() as Promise<
+					Pick<Select<LucidUsers>, K> | undefined
+				>,
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.select,
+		});
+	}
+	async selectMultipleFilteredFixed<V extends boolean = false>(
+		props: QueryProps<
+			V,
 			{
-				main: usersQuery,
-				count: usersCountQuery,
-			},
-			{
-				queryParams: {
-					filter: props.query.filter,
-					sort: props.query.sort,
-					include: props.query.include,
-					exclude: props.query.exclude,
-					page: props.query.page,
-					perPage: props.query.perPage,
-				},
-				meta: {
-					tableKeys: {
-						filters: {
-							firstName: "lucid_users.first_name",
-							lastName: "lucid_users.last_name",
-							email: "lucid_users.email",
-							username: "lucid_users.username",
-							roleIds: "lucid_user_roles.role_id",
-							id: "lucid_users.id",
-						},
-						sorts: {
-							createdAt: "lucid_users.created_at",
-							updatedAt: "lucid_users.updated_at",
-							firstName: "lucid_users.first_name",
-							lastName: "lucid_users.last_name",
-							email: "lucid_users.email",
-							username: "lucid_users.username",
-						},
+				queryParams: z.infer<typeof usersSchema.getMultiple.query>;
+			}
+		>,
+	) {
+		const exec = await this.executeQuery(
+			"selectMultipleFilteredFixed",
+			async () => {
+				const mainQuery = this.db
+					.selectFrom("lucid_users")
+					.select((eb) => [
+						"lucid_users.email",
+						"lucid_users.first_name",
+						"lucid_users.last_name",
+						"lucid_users.id",
+						"lucid_users.created_at",
+						"lucid_users.updated_at",
+						"lucid_users.username",
+						"lucid_users.super_admin",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_user_roles")
+									.innerJoin(
+										"lucid_roles",
+										"lucid_roles.id",
+										"lucid_user_roles.role_id",
+									)
+									.select([
+										"lucid_roles.id",
+										"lucid_roles.name",
+										"lucid_roles.description",
+									])
+									.whereRef("user_id", "=", "lucid_users.id"),
+							)
+							.as("roles"),
+					])
+					.leftJoin("lucid_user_roles", (join) =>
+						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
+					)
+					.where(
+						"lucid_users.is_deleted",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					)
+					.groupBy("lucid_users.id");
+
+				const countQuery = this.db
+					.selectFrom("lucid_users")
+					.select(sql`count(distinct lucid_users.id)`.as("count"))
+					.leftJoin("lucid_user_roles", (join) =>
+						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
+					)
+					.where(
+						"lucid_users.is_deleted",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					);
+
+				const { main, count } = queryBuilder.main(
+					{
+						main: mainQuery,
+						count: countQuery,
 					},
-					operators: {
-						firstName: props.config.db.config.fuzzOperator,
-						lastName: props.config.db.config.fuzzOperator,
-						email: props.config.db.config.fuzzOperator,
-						username: props.config.db.config.fuzzOperator,
+					{
+						queryParams: props.queryParams,
+						meta: this.queryConfig,
 					},
-				},
+				);
+
+				const [mainResult, countResult] = await Promise.all([
+					main.execute(),
+					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+				]);
+
+				return [mainResult, countResult] as const;
 			},
 		);
+		if (exec.response.error) return exec.response;
 
-		/*
-
-        TODO: turn this into a filter, not sure why it was set up this way in the first place
-        		exclude: [
-						{
-							queryKey: "current",
-							tableKey: "lucid_users.id",
-							value: props.authId,
-							operator: "<>",
-						},
-					],
-        */
-
-		return Promise.all([
-			main.execute(),
-			count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
-		]);
-	};
-	// ----------------------------------------
-	// delete
-	deleteMultiple = async (props: {
-		where: QueryBuilderWhere<"lucid_users">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_users").returning("id");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.execute();
-	};
-	// ----------------------------------------
-	// update
-	updateSingle = async (props: {
-		where: QueryBuilderWhere<"lucid_users">;
-		data: {
-			password?: string;
-			updatedAt?: string;
-			firstName?: string;
-			lastName?: string;
-			username?: string;
-			superAdmin?: boolean;
-			secret?: string;
-			email?: string;
-			isDeleted?: boolean;
-			isDeletedAt?: string;
-			deletedBy?: number;
-			triggerPasswordReset?: boolean;
-		};
-	}) => {
-		let query = this.db
-			.updateTable("lucid_users")
-			.set({
-				first_name: props.data.firstName,
-				last_name: props.data.lastName,
-				username: props.data.username,
-				email: props.data.email,
-				password: props.data.password,
-				secret: props.data.secret,
-				super_admin: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
-					"boolean",
-					props.data.superAdmin,
-				),
-				updated_at: props.data.updatedAt,
-				is_deleted: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
-					"boolean",
-					props.data.isDeleted,
-				),
-				is_deleted_at: props.data.isDeletedAt,
-				deleted_by: props.data.deletedBy,
-				triggered_password_reset: this.dbAdapter.formatInsertValue<
-					BooleanInt | undefined
-				>("boolean", props.data.triggerPasswordReset),
-			})
-			.returning(["id", "first_name", "last_name", "email"]);
-
-		query = queryBuilder.update(query, props.where);
-
-		return query.executeTakeFirst();
-	};
-	// ----------------------------------------
-	// create
-	createSingle = async (props: {
-		superAdmin?: boolean;
-		email: string;
-		username: string;
-		triggerPasswordReset: boolean;
-		secret: string;
-		firstName?: string;
-		lastName?: string;
-		password?: string;
-	}) => {
-		return this.db
-			.insertInto("lucid_users")
-			.returning("id")
-			.values({
-				super_admin: this.dbAdapter.formatInsertValue<BooleanInt | undefined>(
-					"boolean",
-					props.superAdmin,
-				),
-				email: props.email,
-				username: props.username,
-				first_name: props.firstName,
-				last_name: props.lastName,
-				password: props.password,
-				secret: props.secret,
-				triggered_password_reset: this.dbAdapter.formatInsertValue<BooleanInt>(
-					"boolean",
-					props.triggerPasswordReset,
-				),
-			})
-			.executeTakeFirst();
-	};
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple-count",
+			select: [
+				"email",
+				"first_name",
+				"last_name",
+				"id",
+				"created_at",
+				"updated_at",
+				"username",
+				"super_admin",
+				"roles",
+			],
+		});
+	}
 }

@@ -31,6 +31,7 @@ import type {
  *
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
+ * @todo Any queryBuilder helper functions likley need to make use of the columnFormats config so they can correctly parse the data if needed. For ex if the where array includes an op on a boolean column, the value needs to be correctly formatted.
  * @todo Add callback support for the validation / tweak required. Sometimes instead of returning an error on required failing we want to handle it differently
  * @todo Improve validation error messages. Allow error overides for differnt types, required, validation etc.
  * @todo look into using $if for conditional query builder options
@@ -62,8 +63,8 @@ abstract class BaseRepository<
 	 */
 	protected abstract queryConfig?: {
 		tableKeys?: {
-			filters?: Record<string, ReferenceExpression<LucidDB, Table>>;
-			sorts?: Record<string, ReferenceExpression<LucidDB, Table>>;
+			filters?: Record<string, string>;
+			sorts?: Record<string, string>;
 		};
 		operators?: Record<string, ComparisonOperatorExpression | "%">;
 	};

@@ -16,21 +16,24 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 	const UsersFormatter = Formatter.get("users");
 
-	const [users, count] = await UsersRepo.selectMultipleFiltered({
-		query: data.query,
-		config: context.config,
+	const usersRes = await Users.selectMultipleFilteredFixed({
+		queryParams: data.query,
+		validation: {
+			enabled: true,
+		},
 	});
+	if (usersRes.error) return usersRes;
 
 	return {
 		error: undefined,
 		data: {
 			data: UsersFormatter.formatMultiple({
-				users: users,
+				users: usersRes.data[0],
 			}),
-			count: Formatter.parseCount(count?.count),
+			count: Formatter.parseCount(usersRes.data[1]?.count),
 		},
 	};
 };

@@ -14,9 +14,9 @@ const sendResetPassword: ServiceFn<
 		message: string;
 	}
 > = async (context, data) => {
-	const UsersRepo = Repository.get("users", context.db, context.config.db);
+	const Users = Repository.get("users", context.db, context.config.db);
 
-	const userExists = await UsersRepo.selectSingle({
+	const userExistsRes = await Users.selectSingle({
 		select: ["id", "first_name", "last_name", "email"],
 		where: [
 			{
@@ -26,8 +26,8 @@ const sendResetPassword: ServiceFn<
 			},
 		],
 	});
-
-	if (userExists === undefined) {
+	if (userExistsRes.error) return userExistsRes;
+	if (userExistsRes.data === undefined) {
 		return {
 			error: undefined,
 			data: {
@@ -41,7 +41,7 @@ const sendResetPassword: ServiceFn<
 	}).toISOString();
 
 	const userToken = await context.services.user.token.createSingle(context, {
-		userId: userExists.id,
+		userId: userExistsRes.data.id,
 		tokenType: "password_reset",
 		expiryDate: expiryDate,
 	});
@@ -49,13 +49,13 @@ const sendResetPassword: ServiceFn<
 
 	const sendEmail = await context.services.email.sendEmail(context, {
 		type: "internal",
-		to: userExists.email,
+		to: userExistsRes.data.email,
 		subject: T("reset_password_email_subject"),
 		template: constants.emailTemplates.resetPassword,
 		data: {
-			firstName: userExists.first_name,
-			lastName: userExists.last_name,
-			email: userExists.email,
+			firstName: userExistsRes.data.first_name,
+			lastName: userExistsRes.data.last_name,
+			email: userExistsRes.data.email,
 			resetLink: `${context.config.host}${constants.locations.resetPassword}?token=${userToken.data.token}`,
 		},
 	});
