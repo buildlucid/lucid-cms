@@ -1,43 +1,25 @@
-import queryBuilder, {
-	type QueryBuilderWhere,
-} from "../query-builder/index.js";
-import type { Permission } from "../../types/response.js";
+import z from "zod";
+import BaseRepository from "./base-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class RolePermissionsRepo {
-	constructor(
-		private db: KyselyDB,
-		private dbAdapter: DatabaseAdapter,
-	) {}
-
-	// ----------------------------------------
-	// create
-	createMultiple = async (props: {
-		items: Array<{
-			roleId: number;
-			permission: Permission;
-		}>;
-	}) => {
-		return this.db
-			.insertInto("lucid_role_permissions")
-			.values(
-				props.items.map((i) => ({
-					role_id: i.roleId,
-					permission: i.permission,
-				})),
-			)
-			.execute();
+export default class RolePermissionsRepository extends BaseRepository<"lucid_role_permissions"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_role_permissions");
+	}
+	tableSchema = z.object({
+		id: z.number(),
+		role_id: z.number(),
+		permission: z.string(),
+		created_at: z.string().nullable(),
+		updated_at: z.string().nullable(),
+	});
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		role_id: this.dbAdapter.getDataType("integer"),
+		permission: this.dbAdapter.getDataType("text"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
+		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
-	// ----------------------------------------
-	// delete
-	deleteMultiple = async (props: {
-		where: QueryBuilderWhere<"lucid_role_permissions">;
-	}) => {
-		let query = this.db.deleteFrom("lucid_role_permissions").returning("id");
-
-		query = queryBuilder.delete(query, props.where);
-
-		return query.execute();
-	};
+	queryConfig = undefined;
 }

@@ -66,18 +66,19 @@ const createSingle: ServiceFn<
 	}
 
 	if (validatePermsRes.data.length > 0) {
-		const RolePermissionsRepo = Repository.get(
+		const RolePermissions = Repository.get(
 			"role-permissions",
 			context.db,
 			context.config.db,
 		);
 
-		await RolePermissionsRepo.createMultiple({
-			items: validatePermsRes.data.map((p) => ({
-				roleId: newRoles.id,
+		const rolePermsRes = await RolePermissions.createMultiple({
+			data: validatePermsRes.data.map((p) => ({
+				role_id: newRoles.id,
 				permission: p.permission,
 			})),
 		});
+		if (rolePermsRes.error) return rolePermsRes;
 	}
 
 	return {

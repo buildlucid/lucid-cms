@@ -85,13 +85,13 @@ const updateSingle: ServiceFn<
 	}
 
 	if (validatePermsRes?.data !== undefined) {
-		const RolePermissionsRepo = Repository.get(
+		const RolePermissions = Repository.get(
 			"role-permissions",
 			context.db,
 			context.config.db,
 		);
 
-		await RolePermissionsRepo.deleteMultiple({
+		const deletePermsRes = await RolePermissions.deleteMultiple({
 			where: [
 				{
 					key: "role_id",
@@ -99,15 +99,21 @@ const updateSingle: ServiceFn<
 					value: data.id,
 				},
 			],
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
 		});
+		if (deletePermsRes.error) return deletePermsRes;
 
 		if (validatePermsRes.data.length > 0) {
-			await RolePermissionsRepo.createMultiple({
-				items: validatePermsRes.data.map((p) => ({
-					roleId: data.id,
+			const rolePermsRes = await RolePermissions.createMultiple({
+				data: validatePermsRes.data.map((p) => ({
+					role_id: data.id,
 					permission: p.permission,
 				})),
 			});
+			if (rolePermsRes.error) return rolePermsRes;
 		}
 	}
 
