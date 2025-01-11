@@ -282,11 +282,22 @@ abstract class BaseRepository<
 
 	// ----------------------------------------
 	// Queries
-	// biome-ignore lint/complexity/noBannedTypes: <explanation>
-	async count<V extends boolean = false>(props: QueryProps<V, {}>) {
-		const query = this.db
+	async count<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				where?: QueryBuilderWhere<Table>;
+			}
+		>,
+	) {
+		let query = this.db
 			.selectFrom(this.tableName)
 			.select(sql`count(*)`.as("count"));
+
+		if (props.where !== undefined && props.where.length > 0) {
+			// @ts-expect-error
+			query = queryBuilder.select(query, props.where);
+		}
 
 		const exec = await this.executeQuery(
 			"count",

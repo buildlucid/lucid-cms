@@ -96,7 +96,7 @@ const processImage: ServiceFn<
 		};
 	}
 
-	const ProcessedImagesRepo = Repository.get(
+	const ProcessedImages = Repository.get(
 		"processed-images",
 		context.db,
 		context.config.db,
@@ -104,10 +104,12 @@ const processImage: ServiceFn<
 
 	if (context.config.media.processed.store === true) {
 		await Promise.all([
-			ProcessedImagesRepo.createSingle({
-				key: data.processKey,
-				mediaKey: data.key,
-				fileSize: imageRes.data.size,
+			ProcessedImages.createSingle({
+				data: {
+					key: data.processKey,
+					media_key: data.key,
+					file_size: imageRes.data.size,
+				},
 			}),
 			mediaStrategyRes.data.uploadSingle({
 				key: data.processKey,

@@ -6,36 +6,44 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		await context.services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const ProcessedImagesRepo = Repository.get(
+	const ProcessedImages = Repository.get(
 		"processed-images",
 		context.db,
 		context.config.db,
 	);
 
-	const [storageUsedRes, processedImages] = await Promise.all([
+	const [storageUsedRes, processedImagesRes] = await Promise.all([
 		context.services.option.getSingle(context, {
 			name: "media_storage_used",
 		}),
-		ProcessedImagesRepo.selectMultiple({
+		ProcessedImages.selectMultiple({
 			select: ["key", "file_size"],
-			where: [],
+			validation: {
+				enabled: true,
+			},
 		}),
 	]);
+	if (processedImagesRes.error) return processedImagesRes;
 	if (storageUsedRes.error) return storageUsedRes;
 
-	if (processedImages.length === 0) {
+	if (processedImagesRes.data.length === 0) {
 		return {
 			error: undefined,
 			data: undefined,
 		};
 	}
 
-	const totalSize = processedImages.reduce((acc, i) => acc + i.file_size, 0);
+	const totalSize = processedImagesRes.data.reduce(
+		(acc, i) => acc + i.file_size,
+		0,
+	);
 	const newStorageUsed = (storageUsedRes.data.valueInt || 0) - totalSize;
 
-	const [_, __, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(processedImages.map((i) => i.key)),
-		ProcessedImagesRepo.deleteMultiple({
+	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
+		mediaStrategyRes.data.deleteMultiple(
+			processedImagesRes.data.map((i) => i.key),
+		),
+		ProcessedImages.deleteMultiple({
 			where: [],
 		}),
 		context.services.option.updateSingle(context, {
@@ -43,7 +51,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
 		}),
 	]);
-
+	if (clearProcessedRes.error) return clearProcessedRes;
 	if (updateStorageRes.error) return updateStorageRes;
 
 	return {

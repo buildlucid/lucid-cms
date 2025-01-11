@@ -15,7 +15,7 @@ const deleteSingle: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = Repository.get("media", context.db, context.config.db);
-	const ProcessedImagesRepo = Repository.get(
+	const ProcessedImages = Repository.get(
 		"processed-images",
 		context.db,
 		context.config.db,
@@ -40,8 +40,8 @@ const deleteSingle: ServiceFn<
 	});
 	if (getMediaRes.error) return getMediaRes;
 
-	const [processedImages, deleteMediaRes] = await Promise.all([
-		ProcessedImagesRepo.selectMultiple({
+	const [processedImagesRes, deleteMediaRes] = await Promise.all([
+		ProcessedImages.selectMultiple({
 			select: ["key", "file_size"],
 			where: [
 				{
@@ -50,6 +50,9 @@ const deleteSingle: ServiceFn<
 					value: getMediaRes.data.key,
 				},
 			],
+			validation: {
+				enabled: true,
+			},
 		}),
 		Media.deleteSingle({
 			where: [
@@ -71,14 +74,20 @@ const deleteSingle: ServiceFn<
 			},
 		}),
 	]);
+	if (processedImagesRes.error) return processedImagesRes;
 	if (deleteMediaRes.error) return deleteMediaRes;
 
 	const [_, deleteObjectRes, deleteTranslationsRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(processedImages.map((i) => i.key)),
+		mediaStrategyRes.data.deleteMultiple(
+			processedImagesRes.data.map((i) => i.key),
+		),
 		context.services.media.strategies.delete(context, {
 			key: deleteMediaRes.data.key,
 			size: deleteMediaRes.data.file_size,
-			processedSize: processedImages.reduce((acc, i) => acc + i.file_size, 0),
+			processedSize: processedImagesRes.data.reduce(
+				(acc, i) => acc + i.file_size,
+				0,
+			),
 		}),
 		context.services.translation.deleteMultiple(context, {
 			ids: [

@@ -10,13 +10,13 @@ const getSingleCount: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const ProcessedImagesRepo = Repository.get(
+	const ProcessedImages = Repository.get(
 		"processed-images",
 		context.db,
 		context.config.db,
 	);
 
-	const processedImageCount = await ProcessedImagesRepo.count({
+	const processedImageCountRes = await ProcessedImages.count({
 		where: [
 			{
 				key: "media_key",
@@ -24,11 +24,15 @@ const getSingleCount: ServiceFn<
 				value: data.key,
 			},
 		],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (processedImageCountRes.error) return processedImageCountRes;
 
 	return {
 		error: undefined,
-		data: Formatter.parseCount(processedImageCount?.count),
+		data: Formatter.parseCount(processedImageCountRes.data?.count),
 	};
 };
 
