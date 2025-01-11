@@ -75,21 +75,23 @@ const createMultiple: ServiceFn<
 		};
 	}
 
-	const TranslationsRepo = Repository.get(
+	const Translations = Repository.get(
 		"translations",
 		context.db,
 		context.config.db,
 	);
 
-	await TranslationsRepo.upsertMultiple(
-		data.translations.map((translation) => {
+	const translationsRes = await Translations.upsertMultiple({
+		data: data.translations.map((translation) => {
 			return {
-				translationKeyId: keys[translation.key],
-				localeCode: translation.localeCode,
+				translation_key_id: keys[translation.key],
+				locale_code: translation.localeCode,
 				value: translation.value,
 			};
 		}),
-	);
+		where: [],
+	});
+	if (translationsRes.error) return translationsRes;
 
 	return {
 		error: undefined,

@@ -34,11 +34,11 @@ const upsertMultiple: ServiceFn<[ServiceData<string>], undefined> = async <
 			.map((translation) => {
 				return {
 					value: translation.value ?? "",
-					localeCode: translation.localeCode,
-					translationKeyId: data.keys[translation.key] as number,
+					locale_code: translation.localeCode,
+					translation_key_id: data.keys[translation.key] as number,
 				};
 			})
-			.filter((translation) => translation.translationKeyId !== null);
+			.filter((translation) => translation.translation_key_id !== null);
 
 		if (translations.length === 0) {
 			return {
@@ -47,13 +47,17 @@ const upsertMultiple: ServiceFn<[ServiceData<string>], undefined> = async <
 			};
 		}
 
-		const TranslationsRepo = Repository.get(
+		const Translations = Repository.get(
 			"translations",
 			context.db,
 			context.config.db,
 		);
 
-		await TranslationsRepo.upsertMultiple(translations);
+		const translationsRes = await Translations.upsertMultiple({
+			data: translations,
+			where: [],
+		});
+		if (translationsRes.error) return translationsRes;
 
 		return {
 			error: undefined,

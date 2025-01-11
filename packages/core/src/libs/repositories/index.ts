@@ -17,7 +17,7 @@ import ProcessedImagesRepository from "./processed-images.js";
 import RolePermissionsRepository from "./role-permissions.js";
 import RolesRepository from "./roles.js";
 import TranslationKeysRepository from "./translation-keys.js";
-import TranslationsRepo from "./translations.js";
+import TranslationsRepository from "./translations.js";
 import UserRolesRepository from "./user-roles.js";
 import UsersRepo from "./users.js";
 import ClientIntegrationsRepository from "./client-integrations.js";
@@ -104,7 +104,10 @@ class Repository {
 					dbAdapter,
 				) as RepositoryReturnType<T>;
 			case "translations":
-				return new TranslationsRepo(db, dbAdapter) as RepositoryReturnType<T>;
+				return new TranslationsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "user-roles":
 				return new UserRolesRepository(
 					db,
@@ -145,7 +148,7 @@ type RepositoryClassMap = {
 	"role-permissions": RolePermissionsRepository;
 	roles: RolesRepository;
 	"translation-keys": TranslationKeysRepository;
-	translations: TranslationsRepo;
+	translations: TranslationsRepository;
 	"user-roles": UserRolesRepository;
 	users: UsersRepo;
 	"client-integrations": ClientIntegrationsRepository;

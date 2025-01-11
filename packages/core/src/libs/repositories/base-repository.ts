@@ -12,6 +12,8 @@ import {
 	type ColumnDataType,
 	type ReferenceExpression,
 	type ComparisonOperatorExpression,
+	type InsertObject,
+	type UpdateObject,
 } from "kysely";
 import type { LucidErrorData } from "../../types.js";
 import type DatabaseAdapter from "../db/adapter.js";
@@ -70,9 +72,13 @@ abstract class BaseRepository<
 	 * Formats values that need special handling (like JSON or booleans)
 	 * Leaves other values and column names unchanged
 	 */
-	protected formatData(data: Record<string, unknown>): Record<string, unknown> {
+	protected formatData<Type extends "insert" | "update">(
+		data: Partial<Insert<T>> | Partial<Update<T>>,
+		type: Type,
+	): Type extends "insert"
+		? InsertObject<LucidDB, Table>
+		: UpdateObject<LucidDB, Table> {
 		const formatted: Record<string, unknown> = {};
-
 		for (const [key, value] of Object.entries(data)) {
 			const columnType = this.columnFormats[key as keyof T];
 			formatted[key] = columnType
@@ -80,7 +86,8 @@ abstract class BaseRepository<
 				: value;
 		}
 
-		return formatted;
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		return formatted as any;
 	}
 	/**
 	 * Creates a validation schema based on selected columns
@@ -537,7 +544,7 @@ abstract class BaseRepository<
 	) {
 		let query = this.db
 			.insertInto(this.tableName)
-			.values(this.formatData(props.data));
+			.values(this.formatData(props.data, "insert"));
 
 		if (
 			props.returnAll !== true &&
@@ -578,7 +585,7 @@ abstract class BaseRepository<
 	) {
 		let query = this.db
 			.insertInto(this.tableName)
-			.values(props.data.map((d) => this.formatData(d)));
+			.values(props.data.map((d) => this.formatData(d, "insert")));
 
 		if (
 			props.returnAll !== true &&
@@ -623,7 +630,7 @@ abstract class BaseRepository<
 	) {
 		let query = this.db
 			.updateTable(this.tableName)
-			.set(this.formatData(props.data))
+			.set(this.formatData(props.data, "update"))
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&
