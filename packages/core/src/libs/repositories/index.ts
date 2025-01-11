@@ -15,7 +15,7 @@ import MediaAwaitingSyncRepository from "./media-awaiting-sync.js";
 import OptionsRepository from "./options.js";
 import ProcessedImagesRepository from "./processed-images.js";
 import RolePermissionsRepository from "./role-permissions.js";
-import RolesRepo from "./roles.js";
+import RolesRepository from "./roles.js";
 import TranslationKeysRepository from "./translation-keys.js";
 import TranslationsRepo from "./translations.js";
 import UserRolesRepository from "./user-roles.js";
@@ -97,7 +97,7 @@ class Repository {
 					dbAdapter,
 				) as RepositoryReturnType<T>;
 			case "roles":
-				return new RolesRepo(db, dbAdapter) as RepositoryReturnType<T>;
+				return new RolesRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "translation-keys":
 				return new TranslationKeysRepository(
 					db,
@@ -143,7 +143,7 @@ type RepositoryClassMap = {
 	options: OptionsRepository;
 	"processed-images": ProcessedImagesRepository;
 	"role-permissions": RolePermissionsRepository;
-	roles: RolesRepo;
+	roles: RolesRepository;
 	"translation-keys": TranslationKeysRepository;
 	translations: TranslationsRepo;
 	"user-roles": UserRolesRepository;

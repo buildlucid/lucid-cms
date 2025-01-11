@@ -9,9 +9,9 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const RolesRepo = Repository.get("roles", context.db, context.config.db);
+	const Roles = Repository.get("roles", context.db, context.config.db);
 
-	const deleteRoles = await RolesRepo.deleteMultiple({
+	const deleteRolesRes = await Roles.deleteMultiple({
 		where: [
 			{
 				key: "id",
@@ -19,9 +19,14 @@ const deleteSingle: ServiceFn<
 				value: data.id,
 			},
 		],
+		returning: ["id"],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (deleteRolesRes.error) return deleteRolesRes;
 
-	if (deleteRoles.length === 0) {
+	if (deleteRolesRes.data.length === 0) {
 		return {
 			error: {
 				type: "basic",

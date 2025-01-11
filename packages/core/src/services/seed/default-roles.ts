@@ -9,10 +9,17 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const RolesRepo = Repository.get("roles", context.db, context.config.db);
+		const Roles = Repository.get("roles", context.db, context.config.db);
 
-		const totalRoleCount = await RolesRepo.count();
-		if (Formatter.parseCount(totalRoleCount?.count) > 0) {
+		const totalRoleCountRes = await Roles.count({
+			where: [],
+			validation: {
+				enabled: true,
+			},
+		});
+		if (totalRoleCountRes.error) return totalRoleCountRes;
+
+		if (Formatter.parseCount(totalRoleCountRes.data?.count) > 0) {
 			return {
 				error: undefined,
 				data: undefined,

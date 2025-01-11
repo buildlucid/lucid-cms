@@ -17,8 +17,8 @@ const checkRolesExist: ServiceFn<
 		};
 	}
 
-	const RolesRepo = Repository.get("roles", context.db, context.config.db);
-	const roles = await RolesRepo.selectMultiple({
+	const Roles = Repository.get("roles", context.db, context.config.db);
+	const rolesRes = await Roles.selectMultiple({
 		select: ["id"],
 		where: [
 			{
@@ -27,9 +27,13 @@ const checkRolesExist: ServiceFn<
 				value: data.roleIds,
 			},
 		],
+		validation: {
+			enabled: true,
+		},
 	});
+	if (rolesRes.error) return rolesRes;
 
-	if (roles.length !== data.roleIds.length) {
+	if (rolesRes.data.length !== data.roleIds.length) {
 		return {
 			error: {
 				type: "basic",

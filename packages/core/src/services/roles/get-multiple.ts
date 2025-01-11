@@ -16,21 +16,24 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const RolesRepo = Repository.get("roles", context.db, context.config.db);
+	const Roles = Repository.get("roles", context.db, context.config.db);
 	const RolesFormatter = Formatter.get("roles");
 
-	const [roles, rolesCount] = await RolesRepo.selectMultipleFiltered({
-		query: data.query,
-		config: context.config,
+	const rolesRes = await Roles.selectMultipleFilteredFixed({
+		queryParams: data.query,
+		validation: {
+			enabled: true,
+		},
 	});
+	if (rolesRes.error) return rolesRes;
 
 	return {
 		error: undefined,
 		data: {
 			data: RolesFormatter.formatMultiple({
-				roles: roles,
+				roles: rolesRes.data[0],
 			}),
-			count: Formatter.parseCount(rolesCount?.count),
+			count: Formatter.parseCount(rolesRes.data[1]?.count),
 		},
 	};
 };

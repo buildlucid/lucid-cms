@@ -13,16 +13,16 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const RolesRepo = Repository.get("roles", context.db, context.config.db);
+	const Roles = Repository.get("roles", context.db, context.config.db);
 
-	const [validatePermsRes, checkNameIsUnique] = await Promise.all([
+	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		data.permissions !== undefined
 			? context.services.role.validatePermissions(context, {
 					permissions: data.permissions,
 				})
 			: undefined,
 		data.name !== undefined
-			? RolesRepo.selectSingle({
+			? Roles.selectSingle({
 					select: ["id"],
 					where: [
 						{
@@ -39,9 +39,10 @@ const updateSingle: ServiceFn<
 				})
 			: undefined,
 	]);
+	if (checkNameIsUniqueRes?.error) return checkNameIsUniqueRes;
 	if (validatePermsRes?.error) return validatePermsRes;
 
-	if (data.name !== undefined && checkNameIsUnique !== undefined) {
+	if (data.name !== undefined && checkNameIsUniqueRes?.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -59,11 +60,11 @@ const updateSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-	const updateRoleRes = await RolesRepo.updateSingle({
+	const updateRoleRes = await Roles.updateSingle({
 		data: {
 			name: data.name,
 			description: data.description,
-			updatedAt: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
 		},
 		where: [
 			{
@@ -72,17 +73,12 @@ const updateSingle: ServiceFn<
 				value: data.id,
 			},
 		],
+		returning: ["id"],
+		validation: {
+			enabled: true,
+		},
 	});
-
-	if (updateRoleRes === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
+	if (updateRoleRes.error) return updateRoleRes;
 
 	if (validatePermsRes?.data !== undefined) {
 		const RolePermissions = Repository.get(

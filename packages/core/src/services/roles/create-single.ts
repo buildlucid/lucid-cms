@@ -12,13 +12,13 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const RolesRepo = Repository.get("roles", context.db, context.config.db);
+	const Roles = Repository.get("roles", context.db, context.config.db);
 
-	const [validatePermsRes, checkNameIsUnique] = await Promise.all([
+	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		context.services.role.validatePermissions(context, {
 			permissions: data.permissions,
 		}),
-		RolesRepo.selectSingle({
+		Roles.selectSingle({
 			select: ["id"],
 			where: [
 				{
@@ -30,8 +30,9 @@ const createSingle: ServiceFn<
 		}),
 	]);
 	if (validatePermsRes.error) return validatePermsRes;
+	if (checkNameIsUniqueRes.error) return checkNameIsUniqueRes;
 
-	if (checkNameIsUnique !== undefined) {
+	if (checkNameIsUniqueRes.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -50,20 +51,17 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const newRoles = await RolesRepo.createSingle({
-		name: data.name,
-		description: data.description,
+	const newRolesRes = await Roles.createSingle({
+		data: {
+			name: data.name,
+			description: data.description,
+		},
+		returning: ["id"],
+		validation: {
+			enabled: true,
+		},
 	});
-
-	if (newRoles === undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	if (newRolesRes.error) return newRolesRes;
 
 	if (validatePermsRes.data.length > 0) {
 		const RolePermissions = Repository.get(
@@ -74,7 +72,7 @@ const createSingle: ServiceFn<
 
 		const rolePermsRes = await RolePermissions.createMultiple({
 			data: validatePermsRes.data.map((p) => ({
-				role_id: newRoles.id,
+				role_id: newRolesRes.data.id,
 				permission: p.permission,
 			})),
 		});
@@ -83,7 +81,7 @@ const createSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: newRoles.id,
+		data: newRolesRes.data.id,
 	};
 };
 

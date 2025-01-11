@@ -12,29 +12,25 @@ const getSingle: ServiceFn<
 	],
 	RoleResponse
 > = async (context, data) => {
-	const RolesRepo = Repository.get("roles", context.db, context.config.db);
+	const Roles = Repository.get("roles", context.db, context.config.db);
 	const RolesFormatter = Formatter.get("roles");
 
-	const role = await RolesRepo.selectSingleById({
+	const roleRes = await Roles.selectSingleById({
 		id: data.id,
-		config: context.config,
-	});
-
-	if (role === undefined) {
-		return {
-			error: {
-				type: "basic",
+		validation: {
+			enabled: true,
+			defaultError: {
 				message: T("role_not_found_message"),
 				status: 404,
 			},
-			data: undefined,
-		};
-	}
+		},
+	});
+	if (roleRes.error) return roleRes;
 
 	return {
 		error: undefined,
 		data: RolesFormatter.formatSingle({
-			role: role,
+			role: roleRes.data,
 		}),
 	};
 };

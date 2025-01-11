@@ -208,148 +208,151 @@ export default class MediaRepository extends BaseRepository<"lucid_media"> {
 			}
 		>,
 	) {
-		const exec = await this.executeQuery("selectMultipleFiltered", async () => {
-			const mainQuery = this.db
-				.selectFrom("lucid_media")
-				.select((eb) => [
-					"lucid_media.id",
-					"lucid_media.key",
-					"lucid_media.e_tag",
-					"lucid_media.type",
-					"lucid_media.mime_type",
-					"lucid_media.file_extension",
-					"lucid_media.file_size",
-					"lucid_media.width",
-					"lucid_media.height",
-					"lucid_media.blur_hash",
-					"lucid_media.average_colour",
-					"lucid_media.is_dark",
-					"lucid_media.is_light",
-					"lucid_media.title_translation_key_id",
-					"lucid_media.alt_translation_key_id",
-					"lucid_media.created_at",
-					"lucid_media.updated_at",
-					this.dbAdapter
-						.jsonArrayFrom(
-							eb
-								.selectFrom("lucid_translations")
-								.select([
-									"lucid_translations.value",
-									"lucid_translations.locale_code",
-								])
-								.where("lucid_translations.value", "is not", null)
-								.whereRef(
-									"lucid_translations.translation_key_id",
-									"=",
-									"lucid_media.title_translation_key_id",
-								),
-						)
-						.as("title_translations"),
-					this.dbAdapter
-						.jsonArrayFrom(
-							eb
-								.selectFrom("lucid_translations")
-								.select([
-									"lucid_translations.value",
-									"lucid_translations.locale_code",
-								])
-								.where("lucid_translations.value", "is not", null)
-								.whereRef(
-									"lucid_translations.translation_key_id",
-									"=",
-									"lucid_media.alt_translation_key_id",
-								),
-						)
-						.as("alt_translations"),
-				])
-				.leftJoin("lucid_translations as title_translations", (join) =>
-					join
-						.onRef(
-							"title_translations.translation_key_id",
-							"=",
-							"lucid_media.title_translation_key_id",
-						)
-						.on("title_translations.locale_code", "=", props.localeCode),
-				)
-				.leftJoin("lucid_translations as alt_translations", (join) =>
-					join
-						.onRef(
-							"alt_translations.translation_key_id",
-							"=",
-							"lucid_media.alt_translation_key_id",
-						)
-						.on("alt_translations.locale_code", "=", props.localeCode),
-				)
-				.select([
-					"title_translations.value as title_translation_value",
-					"alt_translations.value as alt_translation_value",
-				])
-				.groupBy([
-					"lucid_media.id",
-					"title_translations.value",
-					"alt_translations.value",
-				])
-				.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
+		const exec = await this.executeQuery(
+			"selectMultipleFilteredFixed",
+			async () => {
+				const mainQuery = this.db
+					.selectFrom("lucid_media")
+					.select((eb) => [
+						"lucid_media.id",
+						"lucid_media.key",
+						"lucid_media.e_tag",
+						"lucid_media.type",
+						"lucid_media.mime_type",
+						"lucid_media.file_extension",
+						"lucid_media.file_size",
+						"lucid_media.width",
+						"lucid_media.height",
+						"lucid_media.blur_hash",
+						"lucid_media.average_colour",
+						"lucid_media.is_dark",
+						"lucid_media.is_light",
+						"lucid_media.title_translation_key_id",
+						"lucid_media.alt_translation_key_id",
+						"lucid_media.created_at",
+						"lucid_media.updated_at",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_translations")
+									.select([
+										"lucid_translations.value",
+										"lucid_translations.locale_code",
+									])
+									.where("lucid_translations.value", "is not", null)
+									.whereRef(
+										"lucid_translations.translation_key_id",
+										"=",
+										"lucid_media.title_translation_key_id",
+									),
+							)
+							.as("title_translations"),
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_translations")
+									.select([
+										"lucid_translations.value",
+										"lucid_translations.locale_code",
+									])
+									.where("lucid_translations.value", "is not", null)
+									.whereRef(
+										"lucid_translations.translation_key_id",
+										"=",
+										"lucid_media.alt_translation_key_id",
+									),
+							)
+							.as("alt_translations"),
+					])
+					.leftJoin("lucid_translations as title_translations", (join) =>
+						join
+							.onRef(
+								"title_translations.translation_key_id",
+								"=",
+								"lucid_media.title_translation_key_id",
+							)
+							.on("title_translations.locale_code", "=", props.localeCode),
+					)
+					.leftJoin("lucid_translations as alt_translations", (join) =>
+						join
+							.onRef(
+								"alt_translations.translation_key_id",
+								"=",
+								"lucid_media.alt_translation_key_id",
+							)
+							.on("alt_translations.locale_code", "=", props.localeCode),
+					)
+					.select([
+						"title_translations.value as title_translation_value",
+						"alt_translations.value as alt_translation_value",
+					])
+					.groupBy([
+						"lucid_media.id",
+						"title_translations.value",
+						"alt_translations.value",
+					])
+					.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
 
-			const countQuery = this.db
-				.selectFrom("lucid_media")
-				.select(sql`count(distinct lucid_media.id)`.as("count"))
-				.leftJoin("lucid_translations as title_translations", (join) =>
-					join
-						.onRef(
-							"title_translations.translation_key_id",
-							"=",
-							"lucid_media.title_translation_key_id",
-						)
-						.on("title_translations.locale_code", "=", props.localeCode),
-				)
-				.leftJoin("lucid_translations as alt_translations", (join) =>
-					join
-						.onRef(
-							"alt_translations.translation_key_id",
-							"=",
-							"lucid_media.alt_translation_key_id",
-						)
-						.on("alt_translations.locale_code", "=", props.localeCode),
-				)
-				.select([
-					"title_translations.value as title_translation_value",
-					"alt_translations.value as alt_translation_value",
-				])
-				.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
+				const countQuery = this.db
+					.selectFrom("lucid_media")
+					.select(sql`count(distinct lucid_media.id)`.as("count"))
+					.leftJoin("lucid_translations as title_translations", (join) =>
+						join
+							.onRef(
+								"title_translations.translation_key_id",
+								"=",
+								"lucid_media.title_translation_key_id",
+							)
+							.on("title_translations.locale_code", "=", props.localeCode),
+					)
+					.leftJoin("lucid_translations as alt_translations", (join) =>
+						join
+							.onRef(
+								"alt_translations.translation_key_id",
+								"=",
+								"lucid_media.alt_translation_key_id",
+							)
+							.on("alt_translations.locale_code", "=", props.localeCode),
+					)
+					.select([
+						"title_translations.value as title_translation_value",
+						"alt_translations.value as alt_translation_value",
+					])
+					.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
 
-			const { main, count } = queryBuilder.main(
-				{
-					main: mainQuery,
-					count: countQuery,
-				},
-				{
-					queryParams: props.queryParams,
-					meta: {
-						tableKeys: {
-							filters: {
-								title: "title_translations.value",
-								...this.queryConfig.tableKeys.filters,
+				const { main, count } = queryBuilder.main(
+					{
+						main: mainQuery,
+						count: countQuery,
+					},
+					{
+						queryParams: props.queryParams,
+						meta: {
+							tableKeys: {
+								filters: {
+									title: "title_translations.value",
+									...this.queryConfig.tableKeys.filters,
+								},
+								sorts: {
+									title: "title_translations.value",
+									...this.queryConfig.tableKeys.sorts,
+								},
 							},
-							sorts: {
-								title: "title_translations.value",
-								...this.queryConfig.tableKeys.sorts,
+							operators: {
+								title: this.dbAdapter.config.fuzzOperator,
 							},
-						},
-						operators: {
-							title: this.dbAdapter.config.fuzzOperator,
 						},
 					},
-				},
-			);
+				);
 
-			const [mainResult, countResult] = await Promise.all([
-				main.execute(),
-				count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
-			]);
+				const [mainResult, countResult] = await Promise.all([
+					main.execute(),
+					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+				]);
 
-			return [mainResult, countResult] as const;
-		});
+				return [mainResult, countResult] as const;
+			},
+		);
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
