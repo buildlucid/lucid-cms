@@ -373,6 +373,16 @@ export interface LucidClientIntegrations {
 	updated_at: TimestampMutateable;
 }
 
+export interface LucidBaseDocumentTable {
+	id: Generated<number>;
+	collection_key: string;
+	is_deleted: BooleanInt;
+	is_deleted_at: TimestampMutateable;
+	deleted_by: number;
+	created_by: number;
+	created_at: TimestampImmutable;
+}
+
 // ------------------------------------------------------------------------------
 // Database
 
@@ -390,12 +400,14 @@ export interface LucidDB {
 	lucid_media: LucidMedia;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_processed_images: HeadlessProcessedImages;
+	lucid_client_integrations: LucidClientIntegrations;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
+	[key: `lucid_document__${string}`]: LucidBaseDocumentTable;
+	// TODO: delete bellow
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;
 	lucid_collection_document_bricks: LucidCollectionDocumentBricks;
 	lucid_collection_document_groups: LucidCollectionDocumentGroups;
 	lucid_collection_document_fields: LucidCollectionDocumentFields;
-	lucid_client_integrations: LucidClientIntegrations;
 }

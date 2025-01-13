@@ -14,7 +14,6 @@ import Repository from "../../libs/repositories/index.js";
  * - lucid_document__{key}__fields
  * - lucid_document__{key}__{brick-key} * all potential bricks
  * - lucid_document__{key}__{brick-key}__{repeater-field-key} * for each repeater for a single brick
- * @todo Handle saving saving JSON to migrations table in a way that works with all DB adapters - this will require a lot of changes elsewhere as well in regards to using the boolean column data type when Postgres adapter is used.
  */
 const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	const CollectionMigrations = Repository.get(

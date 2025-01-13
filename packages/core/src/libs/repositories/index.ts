@@ -1,13 +1,9 @@
 import T from "../../translations/index.js";
 import { LucidError } from "../../utils/errors/index.js";
 import type { KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 // Repositories
 import UserTokensRepository from "./user-tokens.js";
-import CollectionDocumentBricksRepo from "./collection-document-bricks.js";
-import CollectionDocumentFieldsRepo from "./collection-document-fields.js";
-import CollectionDocumentGroupsRepo from "./collection-document-groups.js";
-import CollectionDocumentVersionsRepo from "./collection-document-versions.js";
-import CollectionDocumentsRepo from "./collection-documents.js";
 import EmailsRepository from "./emails.js";
 import LocalesRepository from "./locales.js";
 import MediaRepository from "./media.js";
@@ -23,7 +19,13 @@ import UsersRepository from "./users.js";
 import ClientIntegrationsRepository from "./client-integrations.js";
 import CollectionsRepository from "./collections.js";
 import CollectionMigrationsRepository from "./collection-migrations.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import DocumentsRepository from "./documents.js";
+// TODO: delete bellow
+import CollectionDocumentBricksRepo from "./collection-document-bricks.js";
+import CollectionDocumentFieldsRepo from "./collection-document-fields.js";
+import CollectionDocumentGroupsRepo from "./collection-document-groups.js";
+import CollectionDocumentVersionsRepo from "./collection-document-versions.js";
+import CollectionDocumentsRepo from "./collection-documents.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {
@@ -70,6 +72,11 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "collection-documents":
 				return new CollectionDocumentsRepo(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
+			case "documents":
+				return new DocumentsRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -134,11 +141,6 @@ type RepositoryClassMap = {
 	"user-tokens": UserTokensRepository;
 	collections: CollectionsRepository;
 	"collection-migrations": CollectionMigrationsRepository;
-	"collection-document-bricks": CollectionDocumentBricksRepo;
-	"collection-document-fields": CollectionDocumentFieldsRepo;
-	"collection-document-groups": CollectionDocumentGroupsRepo;
-	"collection-document-versions": CollectionDocumentVersionsRepo;
-	"collection-documents": CollectionDocumentsRepo;
 	emails: EmailsRepository;
 	locales: LocalesRepository;
 	media: MediaRepository;
@@ -152,6 +154,13 @@ type RepositoryClassMap = {
 	"user-roles": UserRolesRepository;
 	users: UsersRepository;
 	"client-integrations": ClientIntegrationsRepository;
+	documents: DocumentsRepository;
+	// TODO: delete bellow
+	"collection-document-bricks": CollectionDocumentBricksRepo;
+	"collection-document-fields": CollectionDocumentFieldsRepo;
+	"collection-document-groups": CollectionDocumentGroupsRepo;
+	"collection-document-versions": CollectionDocumentVersionsRepo;
+	"collection-documents": CollectionDocumentsRepo;
 };
 
 type RepositoryReturnType<T extends keyof RepositoryClassMap> =
