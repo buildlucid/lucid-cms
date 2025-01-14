@@ -2,7 +2,7 @@ import z from "zod";
 import { sql } from "kysely";
 import BaseRepository from "./base-repository.js";
 import type {
-	LucidBaseDocumentTable,
+	LucidDocumentTable,
 	Insert,
 	KyselyDB,
 	Select,
@@ -40,14 +40,14 @@ export default class DocumentsRepository extends BaseRepository<"lucid_document_
 	// ----------------------------------------
 	// queries
 	async upsertMultiple<
-		K extends keyof Select<LucidBaseDocumentTable>,
+		K extends keyof Select<LucidDocumentTable>,
 		V extends boolean = false,
 	>(
 		props: QueryProps<
 			V,
 			{
 				collectionKey: string;
-				data: Partial<Insert<LucidBaseDocumentTable>>[];
+				data: Partial<Insert<LucidDocumentTable>>[];
 				returning?: K[];
 				returnAll?: true;
 			}

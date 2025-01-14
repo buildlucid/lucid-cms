@@ -20,6 +20,7 @@ import ClientIntegrationsRepository from "./client-integrations.js";
 import CollectionsRepository from "./collections.js";
 import CollectionMigrationsRepository from "./collection-migrations.js";
 import DocumentsRepository from "./documents.js";
+import DocumentVersionsRepository from "./document-versions.js";
 // TODO: delete bellow
 import CollectionDocumentBricksRepo from "./collection-document-bricks.js";
 import CollectionDocumentFieldsRepo from "./collection-document-fields.js";
@@ -77,6 +78,11 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "documents":
 				return new DocumentsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
+			case "document-versions":
+				return new DocumentVersionsRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -155,6 +161,7 @@ type RepositoryClassMap = {
 	users: UsersRepository;
 	"client-integrations": ClientIntegrationsRepository;
 	documents: DocumentsRepository;
+	"document-versions": DocumentVersionsRepository;
 	// TODO: delete bellow
 	"collection-document-bricks": CollectionDocumentBricksRepo;
 	"collection-document-fields": CollectionDocumentFieldsRepo;

@@ -29,7 +29,7 @@ export default class TranslationsRepository extends BaseRepository<"lucid_transl
 	queryConfig = undefined;
 
 	// ----------------------------------------
-	// update / create
+	// queries
 	async upsertMultiple<
 		K extends keyof Select<LucidTranslations>,
 		V extends boolean = false,

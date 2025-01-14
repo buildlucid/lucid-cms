@@ -103,7 +103,7 @@ export default class MediaRepository extends BaseRepository<"lucid_media"> {
 	} as const;
 
 	// ----------------------------------------
-	// select
+	// queries
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,

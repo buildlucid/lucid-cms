@@ -373,7 +373,7 @@ export interface LucidClientIntegrations {
 	updated_at: TimestampMutateable;
 }
 
-export interface LucidBaseDocumentTable {
+export interface LucidDocumentTable {
 	id: Generated<number>;
 	collection_key: string;
 	is_deleted: BooleanInt;
@@ -383,9 +383,31 @@ export interface LucidBaseDocumentTable {
 	created_at: TimestampImmutable;
 }
 
+export interface LucidVersionTable {
+	id: Generated<number>;
+	collection_key: string;
+	document_id: number;
+	type: "draft" | "revision" | "published";
+	created_by: number;
+	updated_by: number;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidFieldsTable {
+	id: Generated<number>;
+}
+
+export interface LucidRepeaterTable {
+	id: Generated<number>;
+}
+
+export interface LucidBrickTable {
+	id: Generated<number>;
+}
+
 // ------------------------------------------------------------------------------
 // Database
-
 export interface LucidDB {
 	lucid_locales: LucidLocales;
 	lucid_translation_keys: LucidTranslationKeys;
@@ -403,7 +425,9 @@ export interface LucidDB {
 	lucid_client_integrations: LucidClientIntegrations;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
-	[key: `lucid_document__${string}`]: LucidBaseDocumentTable;
+	[key: `lucid_document__${string}`]: LucidDocumentTable;
+	// @ts-expect-error
+	[key: `lucid_document__${string}__versions`]: LucidVersionTable;
 	// TODO: delete bellow
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;

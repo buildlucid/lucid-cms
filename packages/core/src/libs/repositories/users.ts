@@ -97,7 +97,7 @@ export default class UsersRepository extends BaseRepository<"lucid_users"> {
 	} as const;
 
 	// ----------------------------------------
-	// selects
+	// queries
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,

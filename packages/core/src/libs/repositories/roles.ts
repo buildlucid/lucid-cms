@@ -51,7 +51,7 @@ export default class RolesRepository extends BaseRepository<"lucid_roles"> {
 	} as const;
 
 	// ----------------------------------------
-	// select
+	// queries
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,
