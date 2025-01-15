@@ -396,14 +396,15 @@ export interface LucidVersionTable {
 
 export interface LucidFieldsTable {
 	id: Generated<number>;
-}
-
-export interface LucidRepeaterTable {
-	id: Generated<number>;
-}
-
-export interface LucidBrickTable {
-	id: Generated<number>;
+	collection_key: string;
+	document_id: number;
+	document_version_id: number;
+	locale: string;
+	// repeater specific
+	parent_id?: number;
+	sort_order?: number;
+	// dynamic
+	[key: string]: unknown;
 }
 
 // ------------------------------------------------------------------------------
@@ -428,6 +429,13 @@ export interface LucidDB {
 	[key: `lucid_document__${string}`]: LucidDocumentTable;
 	// @ts-expect-error
 	[key: `lucid_document__${string}__versions`]: LucidVersionTable;
+	// @ts-expect-error
+	[
+		key:
+			| `lucid_document__${string}__fields`
+			| `lucid_document__${string}__${string}`
+			| `lucid_document__${string}__${string}__${string}`
+	]: LucidFieldsTable;
 	// TODO: delete bellow
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;

@@ -1,5 +1,5 @@
 import z from "zod";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import queryBuilder from "../query-builder/index.js";
 import type {
 	KyselyDB,
@@ -10,7 +10,7 @@ import type {
 import type { QueryBuilderWhere } from "../query-builder/index.js";
 import type { QueryProps } from "./types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-export default class TranslationsRepository extends BaseRepository<"lucid_translations"> {
+export default class TranslationsRepository extends StaticRepository<"lucid_translations"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_translations");
 	}

@@ -1,13 +1,13 @@
 import z from "zod";
 import { sql } from "kysely";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import queryBuilder from "../query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
 import type rolesSchema from "../../schemas/roles.js";
 
-export default class RolesRepository extends BaseRepository<"lucid_roles"> {
+export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_roles");
 	}

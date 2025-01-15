@@ -1,6 +1,6 @@
 import z from "zod";
 import { sql } from "kysely";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import queryBuilder from "../query-builder/index.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
@@ -8,7 +8,7 @@ import type usersSchema from "../../schemas/users.js";
 import type { Select, KyselyDB } from "../db/types.js";
 import type { LucidUsers } from "../db/types.js";
 
-export default class UsersRepository extends BaseRepository<"lucid_users"> {
+export default class UsersRepository extends StaticRepository<"lucid_users"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_users");
 	}

@@ -1,9 +1,9 @@
 import z from "zod";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class MediaAwaitingSyncRepository extends BaseRepository<"lucid_media_awaiting_sync"> {
+export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid_media_awaiting_sync"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_media_awaiting_sync");
 	}

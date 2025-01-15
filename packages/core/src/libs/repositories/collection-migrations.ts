@@ -1,9 +1,9 @@
 import z from "zod";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class CollectionMigrationsRepository extends BaseRepository<"lucid_collection_migrations"> {
+export default class CollectionMigrationsRepository extends StaticRepository<"lucid_collection_migrations"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_collection_migrations");
 	}

@@ -1,13 +1,13 @@
 import z from "zod";
 import { sql } from "kysely";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import queryBuilder from "../query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
 import type mediaSchema from "../../schemas/media.js";
 
-export default class MediaRepository extends BaseRepository<"lucid_media"> {
+export default class MediaRepository extends StaticRepository<"lucid_media"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_media");
 	}

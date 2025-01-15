@@ -1,9 +1,9 @@
 import z from "zod";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class RolePermissionsRepository extends BaseRepository<"lucid_role_permissions"> {
+export default class RolePermissionsRepository extends StaticRepository<"lucid_role_permissions"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_role_permissions");
 	}

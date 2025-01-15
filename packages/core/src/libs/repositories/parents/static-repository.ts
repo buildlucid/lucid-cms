@@ -1,33 +1,38 @@
-import T from "../../translations/index.js";
+import T from "../../../translations/index.js";
 import crypto from "node:crypto";
-import logger from "../../utils/logging/index.js";
-import constants from "../../constants/constants.js";
+import logger from "../../../utils/logging/index.js";
+import constants from "../../../constants/constants.js";
 import { fromError } from "zod-validation-error";
 import queryBuilder, {
 	type QueryBuilderWhere,
-} from "../query-builder/index.js";
+} from "../../query-builder/index.js";
 import z, { type ZodSchema, type ZodObject } from "zod";
 import {
 	sql,
 	type ColumnDataType,
-	type ReferenceExpression,
 	type ComparisonOperatorExpression,
 	type InsertObject,
 	type UpdateObject,
 } from "kysely";
-import type { LucidErrorData } from "../../types.js";
-import type DatabaseAdapter from "../db/adapter.js";
-import type { Select, Insert, Update, LucidDB, KyselyDB } from "../db/types.js";
-import type { QueryParams } from "../../types/query-params.js";
+import type { LucidErrorData } from "../../../types.js";
+import type DatabaseAdapter from "../../db/adapter.js";
+import type {
+	Select,
+	Insert,
+	Update,
+	LucidDB,
+	KyselyDB,
+} from "../../db/types.js";
+import type { QueryParams } from "../../../types/query-params.js";
 import type {
 	QueryResult,
 	ValidationConfigExtend,
 	QueryProps,
 	ExecuteMeta,
-} from "./types.js";
+} from "../types.js";
 
 /**
- * The base repository class that all repositories should extend. This class provides basic CRUD operations for a single table.
+ * The static repository class that all repositories should extend. This class provides basic CRUD operations for a single table.
  *
  * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
  *
@@ -39,14 +44,14 @@ import type {
  * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
  *
  */
-abstract class BaseRepository<
+abstract class StaticRepository<
 	Table extends keyof LucidDB,
 	T extends LucidDB[Table] = LucidDB[Table],
 > {
 	constructor(
 		protected readonly db: KyselyDB,
 		protected readonly dbAdapter: DatabaseAdapter,
-		public readonly tableName: keyof LucidDB,
+		public tableName: keyof LucidDB,
 	) {}
 	/**
 	 * A Zod schema for the table.
@@ -659,4 +664,4 @@ abstract class BaseRepository<
 	}
 }
 
-export default BaseRepository;
+export default StaticRepository;

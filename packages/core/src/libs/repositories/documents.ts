@@ -1,6 +1,6 @@
 import z from "zod";
 import { sql } from "kysely";
-import BaseRepository from "./base-repository.js";
+import StaticRepository from "./parents/static-repository.js";
 import type {
 	LucidDocumentTable,
 	Insert,
@@ -10,7 +10,7 @@ import type {
 import type { QueryProps } from "./types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 
-export default class DocumentsRepository extends BaseRepository<"lucid_document__"> {
+export default class DocumentsRepository extends StaticRepository<"lucid_document__"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_document__");
 	}
