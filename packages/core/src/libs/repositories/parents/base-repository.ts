@@ -1,0 +1,271 @@
+import T from "../../../translations/index.js";
+import crypto from "node:crypto";
+import logger from "../../../utils/logging/index.js";
+import constants from "../../../constants/constants.js";
+import { fromError } from "zod-validation-error";
+import z, { type ZodSchema, type ZodObject } from "zod";
+import type {
+	ColumnDataType,
+	ComparisonOperatorExpression,
+	InsertObject,
+	UpdateObject,
+} from "kysely";
+import type { LucidErrorData } from "../../../types.js";
+import type DatabaseAdapter from "../../db/adapter.js";
+import type { Insert, Update, LucidDB, KyselyDB } from "../../db/types.js";
+import type {
+	QueryResult,
+	ValidationConfigExtend,
+	ExecuteMeta,
+} from "../types.js";
+
+abstract class BaseRepository<
+	Table extends keyof LucidDB,
+	T extends LucidDB[Table] = LucidDB[Table],
+> {
+	constructor(
+		protected readonly db: KyselyDB,
+		protected readonly dbAdapter: DatabaseAdapter,
+		public tableName: keyof LucidDB,
+	) {}
+	/**
+	 * A Zod schema for the table.
+	 */
+
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	protected abstract tableSchema: ZodObject<any>;
+	/**
+	 * The column data types for the table. Repositories need to keep these in sync with the migrations and the database.
+	 */
+	protected abstract columnFormats: Partial<Record<keyof T, ColumnDataType>>;
+	/**
+	 * The query configuration for the table. The main query builder fn uses this to map filter and sort query params to table columns, along with deciding which operators to use.
+	 */
+	protected abstract queryConfig?: {
+		tableKeys?: {
+			filters?: Record<string, string>;
+			sorts?: Record<string, string>;
+		};
+		operators?: Record<string, ComparisonOperatorExpression | "%">;
+	};
+
+	/**
+	 * Formats values that need special handling (like JSON or booleans)
+	 * Leaves other values and column names unchanged
+	 */
+	protected formatData<Type extends "insert" | "update">(
+		data: Partial<Insert<T>> | Partial<Update<T>>,
+		type: Type,
+	): Type extends "insert"
+		? InsertObject<LucidDB, Table>
+		: UpdateObject<LucidDB, Table> {
+		const formatted: Record<string, unknown> = {};
+		for (const [key, value] of Object.entries(data)) {
+			const columnType = this.columnFormats[key as keyof T];
+			formatted[key] = columnType
+				? this.dbAdapter.formatInsertValue(columnType, value)
+				: value;
+		}
+
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		return formatted as any;
+	}
+	/**
+	 * Creates a validation schema based on selected columns
+	 *
+	 * - when selectAll is true, returns the full schema
+	 * - when the select array is passed, picks only those columns from the schema
+	 * - otherwise, makes all fields optional
+	 */
+	protected createValidationSchema<V extends boolean = false>(
+		config: ValidationConfigExtend<V>,
+	): ZodSchema {
+		if (config.schema) {
+			return this.wrapSchemaForMode(config.schema, config.mode);
+		}
+
+		let selectSchema: ZodSchema;
+		if (config.selectAll) {
+			selectSchema = this.tableSchema;
+		} else if (Array.isArray(config.select) && config.select.length > 0) {
+			selectSchema = this.tableSchema.pick(
+				config.select.reduce<Record<string, true>>((acc, key) => {
+					acc[key as string] = true;
+					return acc;
+				}, {}),
+			);
+		} else {
+			selectSchema = this.tableSchema.partial();
+		}
+
+		return this.wrapSchemaForMode(selectSchema, config.mode);
+	}
+	/**
+	 * Responsible for creating schemas based on the mode
+	 */
+	private wrapSchemaForMode(
+		schema: ZodSchema,
+		mode: "single" | "multiple" | "multiple-count" | "count",
+	): ZodSchema {
+		switch (mode) {
+			case "count": {
+				return z.object({ count: z.number() }).optional();
+			}
+			case "multiple-count":
+				return z.tuple([
+					z.array(schema),
+					z.object({ count: z.number() }).optional(),
+				]);
+			case "multiple":
+				return z.array(schema);
+			case "single":
+				return schema;
+		}
+	}
+	/**
+	 * Checks if the response data exists and successfully validates against a schema.
+	 *
+	 * Type narrows the response to not be undefined when the validation is enabled.
+	 */
+	protected async validateResponse<QueryData, V extends boolean = false>(
+		executeResponse: Awaited<
+			ReturnType<typeof this.executeQuery<QueryData | undefined>>
+		>,
+		config?: ValidationConfigExtend<V>,
+	): Promise<QueryResult<QueryData, V>> {
+		const res = executeResponse.response as QueryResult<QueryData, V>;
+
+		if (config?.enabled !== true) return res;
+
+		//* undefined and null checks
+		if (res.data === undefined || res.data === null) {
+			return {
+				error: {
+					...config.defaultError,
+					status: config.defaultError?.status ?? 404,
+				},
+				data: undefined,
+			};
+		}
+
+		const schema = this.createValidationSchema(config);
+		if (!schema) return res;
+
+		const validationResult = await schema.safeParseAsync(res.data);
+
+		if (!validationResult.success) {
+			const validationError = fromError(validationResult.error);
+			logger("error", {
+				message: validationError.toString(),
+				scope: constants.logScopes.query,
+				data: {
+					id: executeResponse.meta.id,
+					table: this.tableName,
+					method: executeResponse.meta.method,
+					executionTime: executeResponse.meta.executionTime,
+				},
+			});
+			return {
+				data: undefined,
+				error: {
+					...config?.defaultError,
+					message: config?.defaultError?.message ?? T("validation_error"),
+					type: config?.defaultError?.type ?? "validation",
+					status: config?.defaultError?.status ?? 400,
+				},
+			};
+		}
+
+		return {
+			data: res.data as NonNullable<QueryData>,
+			error: undefined,
+		};
+	}
+	/**
+	 * Handles executing a query and logging
+	 */
+	protected async executeQuery<QueryData>(
+		method: string,
+		executeFn: () => Promise<QueryData>,
+	): Promise<{
+		response:
+			| { error: LucidErrorData; data: undefined }
+			| { error: undefined; data: QueryData };
+		meta: ExecuteMeta;
+	}> {
+		const uuid = crypto.randomUUID();
+		const startTime = process.hrtime();
+
+		try {
+			const result = await executeFn();
+
+			const endTime = process.hrtime(startTime);
+			const executionTime = (endTime[0] * 1000 + endTime[1] / 1000000).toFixed(
+				2,
+			);
+
+			logger("debug", {
+				message: "Query execution completed",
+				scope: constants.logScopes.query,
+				data: {
+					id: uuid,
+					table: this.tableName,
+					method: method,
+					executionTime: `${executionTime}ms`,
+				},
+			});
+
+			return {
+				response: {
+					data: result,
+					error: undefined,
+				},
+				meta: {
+					id: uuid,
+					method: method,
+					executionTime: `${executionTime}ms`,
+				},
+			};
+		} catch (error) {
+			const endTime = process.hrtime(startTime);
+			const executionTime = (endTime[0] * 1000 + endTime[1] / 1000000).toFixed(
+				2,
+			);
+
+			logger("error", {
+				message: "Query execution failed",
+				scope: constants.logScopes.query,
+				data: {
+					id: uuid,
+					table: this.tableName,
+					method: method,
+					executionTime: `${executionTime}ms`,
+					errorMessage:
+						error instanceof Error
+							? error.message
+							: T("an_unknown_error_occurred"),
+				},
+			});
+
+			return {
+				response: {
+					data: undefined,
+					error: {
+						message:
+							error instanceof Error
+								? error.message
+								: T("an_unknown_error_occurred"),
+						status: 500,
+					},
+				},
+				meta: {
+					id: uuid,
+					method: method,
+					executionTime: `${executionTime}ms`,
+				},
+			};
+		}
+	}
+}
+
+export default BaseRepository;

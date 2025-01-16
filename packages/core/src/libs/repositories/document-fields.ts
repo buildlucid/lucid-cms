@@ -1,8 +1,14 @@
 import z from "zod";
-import DynamicRepository, {
-	type PrepareQueryConfig,
-} from "./parents/dynamic-repository.js";
-
+import { sql } from "kysely";
+import DynamicRepository from "./parents/dynamic-repository.js";
+import type {
+	LucidDocumentTable,
+	Insert,
+	KyselyDB,
+	Select,
+} from "../db/types.js";
+import type { QueryProps } from "./types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 export default class DocumentFieldsRepository extends DynamicRepository<"lucid_document__collection-key__fields"> {
 	baseTableSchema = z.object({
 		id: z.number(),
@@ -27,10 +33,4 @@ export default class DocumentFieldsRepository extends DynamicRepository<"lucid_d
 		// plus unlimited* dynamic columns
 	};
 	queryConfig = undefined;
-
-	async exampleQuery(
-		config: PrepareQueryConfig<"lucid_document__collection-key__fields">,
-	) {
-		this.prepareQuery(config);
-	}
 }

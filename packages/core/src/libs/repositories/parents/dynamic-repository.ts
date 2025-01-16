@@ -1,8 +1,7 @@
-import StaticRepository from "./static-repository.js";
+import BaseRepository from "./base-repository.js";
 import type { ZodObject } from "zod";
 import type { ColumnDataType } from "kysely";
-import type DatabaseAdapter from "../../db/adapter.js";
-import type { LucidDB, KyselyDB } from "../../db/types.js";
+import type { LucidDB } from "../../db/types.js";
 
 export type PrepareQueryConfig<Pattern extends keyof LucidDB> = {
 	tableName: Pattern;
@@ -14,40 +13,33 @@ export type PrepareQueryConfig<Pattern extends keyof LucidDB> = {
 abstract class DynamicRepository<
 	Pattern extends keyof LucidDB,
 	T extends LucidDB[Pattern] = LucidDB[Pattern],
-> extends StaticRepository<Pattern, T> {
+> extends BaseRepository<Pattern, T> {
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	private currentSchema?: ZodObject<any>;
-	private currentColumns?: Partial<Record<string, ColumnDataType>>;
-
-	constructor(
-		protected readonly db: KyselyDB,
-		protected readonly dbAdapter: DatabaseAdapter,
-		tableName?: Pattern, // Make tableName optional
-	) {
-		super(db, dbAdapter, tableName ?? ("" as Pattern)); // Provide a placeholder
-	}
-
+	private dynamicSchema?: ZodObject<any>;
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	protected abstract baseTableSchema: ZodObject<any>;
+	private dynamicColumns?: Partial<Record<string, ColumnDataType>>;
 	protected abstract baseColumnFormats: Partial<
 		Record<keyof T, ColumnDataType>
 	>;
 
-	protected get tableSchema() {
-		return this.currentSchema
-			? this.baseTableSchema.merge(this.currentSchema)
-			: this.baseTableSchema;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	protected get tableSchema(): ZodObject<any> {
+		return this.dynamicSchema
+			? this.tableSchema.merge(this.dynamicSchema)
+			: this.tableSchema;
 	}
-	protected get columnFormats() {
+	protected get columnFormats(): Partial<Record<keyof T, ColumnDataType>> {
 		return {
-			...this.baseColumnFormats,
-			...this.currentColumns,
+			...this.columnFormats,
+			...this.dynamicColumns,
 		};
 	}
+
 	protected prepareQuery(config: PrepareQueryConfig<Pattern>) {
 		this.tableName = config.tableName;
-		this.currentSchema = config.schema;
-		this.currentColumns = config.columns;
+		this.dynamicSchema = config.schema;
+		this.dynamicColumns = config.columns;
 	}
 }
 
