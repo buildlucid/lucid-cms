@@ -1,15 +1,12 @@
 import z from "zod";
-import { sql } from "kysely";
 import DynamicRepository from "./parents/dynamic-repository.js";
-import type {
-	LucidDocumentTable,
-	Insert,
-	KyselyDB,
-	Select,
-} from "../db/types.js";
-import type { QueryProps } from "./types.js";
+import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
+
 export default class DocumentFieldsRepository extends DynamicRepository<"lucid_document__collection-key__fields"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_document__collection-key__fields");
+	}
 	baseTableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
