@@ -69,8 +69,10 @@ abstract class StaticRepository<
 		}
 
 		const exec = await this.executeQuery(
-			"count",
 			() => query.executeTakeFirst() as Promise<{ count: string } | undefined>,
+			{
+				method: "count",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -97,8 +99,10 @@ abstract class StaticRepository<
 		query = queryBuilder.select(query, props.where);
 
 		const exec = await this.executeQuery(
-			"selectSingle",
 			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "selectSingle",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -143,8 +147,10 @@ abstract class StaticRepository<
 		}
 
 		const exec = await this.executeQuery(
-			"selectMultiple",
 			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+			{
+				method: "selectMultiple",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -166,35 +172,40 @@ abstract class StaticRepository<
 			}
 		>,
 	) {
-		const exec = await this.executeQuery("selectMultipleFiltered", async () => {
-			const mainQuery = this.db
-				.selectFrom(this.tableName)
-				// @ts-expect-error
-				.select(props.select);
-
-			const countQuery = this.db
-				.selectFrom(this.tableName)
-				.select(sql`count(*)`.as("count"));
-
-			const { main, count } = queryBuilder.main(
-				{
-					main: mainQuery,
-					count: countQuery,
-				},
-				{
-					queryParams: props.queryParams,
+		const exec = await this.executeQuery(
+			async () => {
+				const mainQuery = this.db
+					.selectFrom(this.tableName)
 					// @ts-expect-error
-					meta: this.queryConfig,
-				},
-			);
+					.select(props.select);
 
-			const [mainResult, countResult] = await Promise.all([
-				main.execute() as Promise<Pick<Select<T>, K>[]>,
-				count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
-			]);
+				const countQuery = this.db
+					.selectFrom(this.tableName)
+					.select(sql`count(*)`.as("count"));
 
-			return [mainResult, countResult] as const;
-		});
+				const { main, count } = queryBuilder.main(
+					{
+						main: mainQuery,
+						count: countQuery,
+					},
+					{
+						queryParams: props.queryParams,
+						// @ts-expect-error
+						meta: this.queryConfig,
+					},
+				);
+
+				const [mainResult, countResult] = await Promise.all([
+					main.execute() as Promise<Pick<Select<T>, K>[]>,
+					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+				]);
+
+				return [mainResult, countResult] as const;
+			},
+			{
+				method: "selectMultipleFiltered",
+			},
+		);
 
 		if (exec.response.error) return exec.response;
 
@@ -237,8 +248,10 @@ abstract class StaticRepository<
 		query = queryBuilder.delete(query, props.where);
 
 		const exec = await this.executeQuery(
-			"deleteSingle",
 			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "deleteSingle",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -279,8 +292,10 @@ abstract class StaticRepository<
 		query = queryBuilder.delete(query, props.where);
 
 		const exec = await this.executeQuery(
-			"deleteMultiple",
 			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+			{
+				method: "deleteMultiple",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -304,9 +319,11 @@ abstract class StaticRepository<
 			}
 		>,
 	) {
-		let query = this.db
-			.insertInto(this.tableName)
-			.values(this.formatData(props.data, "insert"));
+		let query = this.db.insertInto(this.tableName).values(
+			this.formatData(props.data, {
+				type: "insert",
+			}),
+		);
 
 		if (
 			props.returnAll !== true &&
@@ -323,8 +340,10 @@ abstract class StaticRepository<
 		}
 
 		const exec = await this.executeQuery(
-			"createSingle",
 			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "createSingle",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -345,9 +364,13 @@ abstract class StaticRepository<
 			}
 		>,
 	) {
-		let query = this.db
-			.insertInto(this.tableName)
-			.values(props.data.map((d) => this.formatData(d, "insert")));
+		let query = this.db.insertInto(this.tableName).values(
+			props.data.map((d) =>
+				this.formatData(d, {
+					type: "insert",
+				}),
+			),
+		);
 
 		if (
 			props.returnAll !== true &&
@@ -364,8 +387,10 @@ abstract class StaticRepository<
 		}
 
 		const exec = await this.executeQuery(
-			"createMultiple",
 			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+			{
+				method: "createMultiple",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -392,7 +417,11 @@ abstract class StaticRepository<
 	) {
 		let query = this.db
 			.updateTable(this.tableName)
-			.set(this.formatData(props.data, "update"))
+			.set(
+				this.formatData(props.data, {
+					type: "update",
+				}),
+			)
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&
@@ -406,8 +435,10 @@ abstract class StaticRepository<
 		query = queryBuilder.update(query, props.where);
 
 		const exec = await this.executeQuery(
-			"updateSingle",
 			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "updateSingle",
+			},
 		);
 		if (exec.response.error) return exec.response;
 

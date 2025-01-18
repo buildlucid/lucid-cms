@@ -1,19 +1,15 @@
 import z from "zod";
 import { sql } from "kysely";
-import StaticRepository from "./parents/static-repository.js";
+import DynamicRepository from "./parents/dynamic-repository.js";
 import type {
 	LucidDocumentTable,
 	Insert,
-	KyselyDB,
 	Select,
+	LucidDocumentTableName,
 } from "../db/types.js";
-import type { QueryProps } from "./types.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import type { QueryProps, DynamicConfig } from "./types.js";
 
-export default class DocumentsRepository extends StaticRepository<"lucid_document__"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document__");
-	}
+export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
@@ -46,16 +42,23 @@ export default class DocumentsRepository extends StaticRepository<"lucid_documen
 		props: QueryProps<
 			V,
 			{
-				collectionKey: string;
 				data: Partial<Insert<LucidDocumentTable>>[];
 				returning?: K[];
 				returnAll?: true;
 			}
 		>,
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
 		const query = this.db
-			.insertInto(`lucid_document__${props.collectionKey}`)
-			.values(props.data.map((d) => this.formatData(d, "insert")))
+			.insertInto(dynamicConfig.tableName)
+			.values(
+				props.data.map((d) =>
+					this.formatData(d, {
+						type: "insert",
+						dynamicColumns: dynamicConfig.columns,
+					}),
+				),
+			)
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet((eb) => ({
 					is_deleted: sql`excluded.is_deleted`,
@@ -72,9 +75,10 @@ export default class DocumentsRepository extends StaticRepository<"lucid_documen
 			)
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
-		const exec = await this.executeQuery("upsertMultiple", () =>
-			query.executeTakeFirst(),
-		);
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "upsertMultiple",
+			tableName: dynamicConfig.tableName,
+		});
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
@@ -82,6 +86,7 @@ export default class DocumentsRepository extends StaticRepository<"lucid_documen
 			mode: "multiple",
 			select: props.returning as string[],
 			selectAll: props.returnAll,
+			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
 }

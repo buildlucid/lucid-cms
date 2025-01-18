@@ -87,9 +87,9 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			])
 			.where("id", "=", props.id);
 
-		const exec = await this.executeQuery("selectSingleById", () =>
-			query.executeTakeFirst(),
-		);
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSingleById",
+		});
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
@@ -114,7 +114,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		>,
 	) {
 		const exec = await this.executeQuery(
-			"selectMultipleFilteredFixed",
 			async () => {
 				const mainQuery = this.db
 					.selectFrom("lucid_roles")
@@ -163,6 +162,9 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				]);
 
 				return [mainResult, countResult] as const;
+			},
+			{
+				method: "selectMultipleFilteredFixed",
 			},
 		);
 		if (exec.response.error) return exec.response;

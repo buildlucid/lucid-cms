@@ -46,7 +46,13 @@ export default class TranslationsRepository extends StaticRepository<"lucid_tran
 	) {
 		let query = this.db
 			.insertInto("lucid_translations")
-			.values(props.data.map((d) => this.formatData(d, "insert")))
+			.values(
+				props.data.map((d) =>
+					this.formatData(d, {
+						type: "insert",
+					}),
+				),
+			)
 			.onConflict((oc) =>
 				oc.columns(["translation_key_id", "locale_code"]).doUpdateSet((eb) => ({
 					value: eb.ref("excluded.value"),
@@ -64,9 +70,9 @@ export default class TranslationsRepository extends StaticRepository<"lucid_tran
 		// @ts-expect-error
 		query = queryBuilder.update(query, props.where);
 
-		const exec = await this.executeQuery("upsertMultiple", () =>
-			query.execute(),
-		);
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "upsertMultiple",
+		});
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {

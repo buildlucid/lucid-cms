@@ -1,3 +1,4 @@
+import z from "zod";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -7,6 +8,20 @@ const upsertSingle: ServiceFn<[undefined], undefined> = async (
 ) => {
 	// ----------------------------------------------
 	// Checks
+
+	const Document = Repository.get("documents", context.db, context.config.db);
+
+	Document.upsertMultiple(
+		{
+			data: [],
+		},
+		{
+			tableName: "lucid_document__fds",
+			schema: z.object({
+				test: z.boolean(),
+			}),
+		},
+	);
 
 	// Check collection exists
 

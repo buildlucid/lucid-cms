@@ -1,13 +1,9 @@
 import z from "zod";
 import DynamicRepository from "./parents/dynamic-repository.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import type { LucidVersionTableName } from "../db/types.js";
 
-export default class DocumentVersionsRepository extends DynamicRepository<"lucid_document__collection-key__versions"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document__collection-key__versions");
-	}
-	baseTableSchema = z.object({
+export default class DocumentVersionsRepository extends DynamicRepository<LucidVersionTableName> {
+	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
 		document_id: z.number(),
@@ -21,7 +17,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<"lucid
 		updated_at: z.string().nullable(),
 		created_at: z.string().nullable(),
 	});
-	baseColumnFormats = {
+	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
 		document_id: this.dbAdapter.getDataType("integer"),

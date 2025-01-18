@@ -55,13 +55,23 @@ abstract class BaseRepository<
 	 */
 	protected formatData<Type extends "insert" | "update">(
 		data: Partial<Insert<T>> | Partial<Update<T>>,
-		type: Type,
+		config: {
+			type: Type;
+			dynamicColumns?: Record<string, ColumnDataType>;
+		},
 	): Type extends "insert"
 		? InsertObject<LucidDB, Table>
 		: UpdateObject<LucidDB, Table> {
 		const formatted: Record<string, unknown> = {};
+		const columnFormats =
+			config.dynamicColumns !== undefined
+				? {
+						...this.columnFormats,
+						...config.dynamicColumns,
+					}
+				: this.columnFormats;
 		for (const [key, value] of Object.entries(data)) {
-			const columnType = this.columnFormats[key as keyof T];
+			const columnType = columnFormats[key as keyof T];
 			formatted[key] = columnType
 				? this.dbAdapter.formatInsertValue(columnType, value)
 				: value;
@@ -80,22 +90,20 @@ abstract class BaseRepository<
 	protected createValidationSchema<V extends boolean = false>(
 		config: ValidationConfigExtend<V>,
 	): ZodSchema {
-		if (config.schema) {
-			return this.wrapSchemaForMode(config.schema, config.mode);
-		}
+		const baseSchema = config.schema || this.tableSchema;
 
 		let selectSchema: ZodSchema;
 		if (config.selectAll) {
-			selectSchema = this.tableSchema;
+			selectSchema = baseSchema;
 		} else if (Array.isArray(config.select) && config.select.length > 0) {
-			selectSchema = this.tableSchema.pick(
+			selectSchema = baseSchema.pick(
 				config.select.reduce<Record<string, true>>((acc, key) => {
 					acc[key as string] = true;
 					return acc;
 				}, {}),
 			);
 		} else {
-			selectSchema = this.tableSchema.partial();
+			selectSchema = baseSchema.partial();
 		}
 
 		return this.wrapSchemaForMode(selectSchema, config.mode);
@@ -160,7 +168,7 @@ abstract class BaseRepository<
 				scope: constants.logScopes.query,
 				data: {
 					id: executeResponse.meta.id,
-					table: this.tableName,
+					table: executeResponse.meta.tableName,
 					method: executeResponse.meta.method,
 					executionTime: executeResponse.meta.executionTime,
 				},
@@ -185,8 +193,11 @@ abstract class BaseRepository<
 	 * Handles executing a query and logging
 	 */
 	protected async executeQuery<QueryData>(
-		method: string,
 		executeFn: () => Promise<QueryData>,
+		config: {
+			method: string;
+			tableName?: string;
+		},
 	): Promise<{
 		response:
 			| { error: LucidErrorData; data: undefined }
@@ -209,8 +220,8 @@ abstract class BaseRepository<
 				scope: constants.logScopes.query,
 				data: {
 					id: uuid,
-					table: this.tableName,
-					method: method,
+					table: config?.tableName ?? this.tableName,
+					method: config.method,
 					executionTime: `${executionTime}ms`,
 				},
 			});
@@ -222,8 +233,9 @@ abstract class BaseRepository<
 				},
 				meta: {
 					id: uuid,
-					method: method,
+					method: config.method,
 					executionTime: `${executionTime}ms`,
+					tableName: config?.tableName ?? this.tableName,
 				},
 			};
 		} catch (error) {
@@ -237,8 +249,8 @@ abstract class BaseRepository<
 				scope: constants.logScopes.query,
 				data: {
 					id: uuid,
-					table: this.tableName,
-					method: method,
+					table: config?.tableName ?? this.tableName,
+					method: config.method,
 					executionTime: `${executionTime}ms`,
 					errorMessage:
 						error instanceof Error
@@ -260,8 +272,9 @@ abstract class BaseRepository<
 				},
 				meta: {
 					id: uuid,
-					method: method,
+					method: config.method,
 					executionTime: `${executionTime}ms`,
+					tableName: config?.tableName ?? this.tableName,
 				},
 			};
 		}

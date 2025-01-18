@@ -373,6 +373,7 @@ export interface LucidClientIntegrations {
 	updated_at: TimestampMutateable;
 }
 
+export type LucidDocumentTableName = `lucid_document__${string}`;
 export interface LucidDocumentTable {
 	id: Generated<number>;
 	collection_key: string;
@@ -383,6 +384,7 @@ export interface LucidDocumentTable {
 	created_at: TimestampImmutable;
 }
 
+export type LucidVersionTableName = `lucid_document__${string}__versions`;
 export interface LucidVersionTable {
 	id: Generated<number>;
 	collection_key: string;
@@ -394,6 +396,10 @@ export interface LucidVersionTable {
 	updated_at: TimestampMutateable;
 }
 
+export type LucidFieldTableName =
+	| `lucid_document__${string}__fields`
+	| `lucid_document__${string}__${string}`
+	| `lucid_document__${string}__${string}__${string}`;
 export interface LucidFieldsTable {
 	id: Generated<number>;
 	collection_key: string;
@@ -426,16 +432,11 @@ export interface LucidDB {
 	lucid_client_integrations: LucidClientIntegrations;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
-	[key: `lucid_document__${string}`]: LucidDocumentTable;
+	[key: LucidDocumentTableName]: LucidDocumentTable;
 	// @ts-expect-error
-	[key: `lucid_document__${string}__versions`]: LucidVersionTable;
+	[key: LucidVersionTableName]: LucidVersionTable;
 	// @ts-expect-error
-	[
-		key:
-			| `lucid_document__${string}__fields`
-			| `lucid_document__${string}__${string}`
-			| `lucid_document__${string}__${string}__${string}`
-	]: LucidFieldsTable;
+	[key: LucidFieldTableName]: LucidFieldsTable;
 	// TODO: delete bellow
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;

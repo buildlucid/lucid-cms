@@ -147,9 +147,9 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			.where("id", "=", props.id)
 			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
 
-		const exec = await this.executeQuery("selectSingleById", () =>
-			query.executeTakeFirst(),
-		);
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSingleById",
+		});
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
@@ -195,11 +195,13 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			);
 
 		const exec = await this.executeQuery(
-			"selectSingleByEmailUsername",
 			() =>
 				query.executeTakeFirst() as Promise<
 					Pick<Select<LucidUsers>, K> | undefined
 				>,
+			{
+				method: "selectSingleByEmailUsername",
+			},
 		);
 		if (exec.response.error) return exec.response;
 
@@ -218,7 +220,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		>,
 	) {
 		const exec = await this.executeQuery(
-			"selectMultipleFilteredFixed",
 			async () => {
 				const mainQuery = this.db
 					.selectFrom("lucid_users")
@@ -288,6 +289,9 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				]);
 
 				return [mainResult, countResult] as const;
+			},
+			{
+				method: "selectMultipleFilteredFixed",
 			},
 		);
 		if (exec.response.error) return exec.response;

@@ -168,9 +168,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "=", props.id);
 
-		const exec = await this.executeQuery("selectSingleById", () =>
-			query.executeTakeFirst(),
-		);
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSingleById",
+		});
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
@@ -209,7 +209,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		>,
 	) {
 		const exec = await this.executeQuery(
-			"selectMultipleFilteredFixed",
 			async () => {
 				const mainQuery = this.db
 					.selectFrom("lucid_media")
@@ -351,6 +350,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				]);
 
 				return [mainResult, countResult] as const;
+			},
+			{
+				method: "selectMultipleFilteredFixed",
 			},
 		);
 		if (exec.response.error) return exec.response;
