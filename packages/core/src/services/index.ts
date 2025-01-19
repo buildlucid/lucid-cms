@@ -4,6 +4,7 @@ import cdn from "./cdn/index.js";
 import collectionDocumentBricks from "./collection-document-bricks/index.js";
 import collectionDocuments from "./collection-documents/index.js";
 import collectionDocumentVersions from "./collection-document-versions/index.js";
+import documents from "./documents/index.js";
 import collections from "./collections/index.js";
 import emails from "./email/index.js";
 import locales from "./locales/index.js";
@@ -26,6 +27,7 @@ const lucidServices = {
 	auth: auth,
 	collection: {
 		...collections,
+		documents: documents,
 		document: {
 			...collectionDocuments,
 			versions: collectionDocumentVersions,

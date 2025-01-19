@@ -70,8 +70,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				props.returnAll !== true &&
 					props.returning !== undefined &&
 					props.returning.length > 0,
-				// @ts-expect-error
-				(qb) => qb.returning(props.returning),
+				(qb) => qb.returning(props.returning as K[]),
 			)
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 

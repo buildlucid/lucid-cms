@@ -1,11 +1,23 @@
 import z from "zod";
 import Repository from "../../libs/repositories/index.js";
+import type { BrickSchema } from "../../schemas/collection-bricks.js";
+import type { FieldSchemaType } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-const upsertSingle: ServiceFn<[undefined], undefined> = async (
-	context,
-	data,
-) => {
+const upsertSingle: ServiceFn<
+	[
+		{
+			collectionKey: string;
+			userId: number;
+			publish: boolean;
+
+			documentId?: number;
+			bricks?: Array<BrickSchema>;
+			fields?: Array<FieldSchemaType>;
+		},
+	],
+	number
+> = async (context, data) => {
 	// ----------------------------------------------
 	// Checks
 
@@ -39,7 +51,7 @@ const upsertSingle: ServiceFn<[undefined], undefined> = async (
 
 	return {
 		error: undefined,
-		data: undefined,
+		data: 1,
 	};
 };
 
