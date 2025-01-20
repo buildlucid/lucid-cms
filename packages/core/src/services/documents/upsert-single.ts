@@ -18,22 +18,10 @@ const upsertSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	// ----------------------------------------------
-	// Checks
-
 	const Document = Repository.get("documents", context.db, context.config.db);
 
-	Document.upsertMultiple(
-		{
-			data: [],
-		},
-		{
-			tableName: "lucid_document__fds",
-			schema: z.object({
-				test: z.boolean(),
-			}),
-		},
-	);
+	// ----------------------------------------------
+	// Checks
 
 	// Check collection exists
 

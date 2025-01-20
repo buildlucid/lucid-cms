@@ -1,8 +1,13 @@
 import z from "zod";
 import DynamicRepository from "./parents/dynamic-repository.js";
-import type { LucidFieldTableName } from "../db/types.js";
+import type { LucidBrickTableName } from "../db/types.js";
+import type { KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
-export default class DocumentFieldsRepository extends DynamicRepository<LucidFieldTableName> {
+export default class DocumentBricksRepository extends DynamicRepository<LucidBrickTableName> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_document__collection-key__fields");
+	}
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),

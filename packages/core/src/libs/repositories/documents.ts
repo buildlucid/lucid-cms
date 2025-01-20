@@ -8,8 +8,13 @@ import type {
 	LucidDocumentTableName,
 } from "../db/types.js";
 import type { QueryProps, DynamicConfig } from "./types.js";
+import type { KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_document__collection-key");
+	}
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),

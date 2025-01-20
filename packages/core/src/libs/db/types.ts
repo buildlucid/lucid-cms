@@ -396,11 +396,11 @@ export interface LucidVersionTable {
 	updated_at: TimestampMutateable;
 }
 
-export type LucidFieldTableName =
+export type LucidBrickTableName =
 	| `lucid_document__${string}__fields`
 	| `lucid_document__${string}__${string}`
 	| `lucid_document__${string}__${string}__${string}`;
-export interface LucidFieldsTable {
+export interface LucidBricksTable {
 	id: Generated<number>;
 	collection_key: string;
 	document_id: number;
@@ -436,7 +436,7 @@ export interface LucidDB {
 	// @ts-expect-error
 	[key: LucidVersionTableName]: LucidVersionTable;
 	// @ts-expect-error
-	[key: LucidFieldTableName]: LucidFieldsTable;
+	[key: LucidBrickTableName]: LucidBricksTable;
 	// TODO: delete bellow
 	lucid_collection_documents: LucidCollectionDocuments;
 	lucid_collection_document_versions: LucidCollectionDocumentVersions;
