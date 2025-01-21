@@ -131,6 +131,14 @@ abstract class BaseRepository<
 		}
 	}
 	/**
+	 * Merges the given schema with the tableSchema
+	 */
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	protected mergeSchema(schema?: ZodObject<any>) {
+		if (!schema) return this.tableSchema;
+		return this.tableSchema.merge(schema.shape);
+	}
+	/**
 	 * Checks if the response data exists and successfully validates against a schema.
 	 *
 	 * Type narrows the response to not be undefined when the validation is enabled.

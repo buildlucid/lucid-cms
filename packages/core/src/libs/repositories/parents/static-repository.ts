@@ -1,36 +1,11 @@
-import T from "../../../translations/index.js";
 import BaseRepository from "./base-repository.js";
-import crypto from "node:crypto";
-import logger from "../../../utils/logging/index.js";
-import constants from "../../../constants/constants.js";
-import { fromError } from "zod-validation-error";
+import { sql } from "kysely";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../../query-builder/index.js";
-import z, { type ZodSchema, type ZodObject } from "zod";
-import {
-	sql,
-	type ColumnDataType,
-	type ComparisonOperatorExpression,
-	type InsertObject,
-	type UpdateObject,
-} from "kysely";
-import type { LucidErrorData } from "../../../types.js";
-import type DatabaseAdapter from "../../db/adapter.js";
-import type {
-	Select,
-	Insert,
-	Update,
-	LucidDB,
-	KyselyDB,
-} from "../../db/types.js";
+import type { Select, Insert, Update, LucidDB } from "../../db/types.js";
 import type { QueryParams } from "../../../types/query-params.js";
-import type {
-	QueryResult,
-	ValidationConfigExtend,
-	QueryProps,
-	ExecuteMeta,
-} from "../types.js";
+import type { QueryProps } from "../types.js";
 
 /**
  * The static repository class that all repositories should extend. This class provides basic CRUD operations for a single table.

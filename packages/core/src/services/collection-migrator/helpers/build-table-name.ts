@@ -15,14 +15,14 @@ export const collectionTableParts = {
 /**
  * Builds out the table name based on its type and available keys
  */
-const buildTableName = (
+const buildTableName = <R extends string>(
 	type: TableType,
 	keys: {
 		collection: string;
 		brick?: string;
 		repeater?: Array<string>;
 	},
-): Awaited<ServiceResponse<string>> => {
+): Awaited<ServiceResponse<R>> => {
 	const parts = [collectionTableParts.document, keys.collection];
 
 	switch (type) {
@@ -75,7 +75,7 @@ const buildTableName = (
 	}
 
 	return {
-		data: `${constants.db.prefix}${parts.join(constants.db.collectionKeysJoin)}`,
+		data: `${constants.db.prefix}${parts.join(constants.db.collectionKeysJoin)}` as R,
 		error: undefined,
 	};
 };
