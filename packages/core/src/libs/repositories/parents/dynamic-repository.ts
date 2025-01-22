@@ -48,6 +48,59 @@ abstract class DynamicRepository<
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
+	async selectMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				select: K[];
+				where?: QueryBuilderWhere<Table>;
+				orderBy?: { column: K; direction: "asc" | "desc" }[];
+				limit?: number;
+				offset?: number;
+			}
+		>,
+		dynamicConfig: DynamicConfig<Table>,
+	) {
+		let query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			// @ts-expect-error
+			.select(props.select);
+
+		if (props.where) {
+			// @ts-expect-error
+			query = queryBuilder.select(query, props.where);
+		}
+
+		if (props.orderBy) {
+			for (const order of props.orderBy) {
+				query = query.orderBy(order.column as string, order.direction);
+			}
+		}
+
+		if (props.limit) {
+			query = query.limit(props.limit);
+		}
+
+		if (props.offset) {
+			query = query.offset(props.offset);
+		}
+
+		const exec = await this.executeQuery(
+			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+			{
+				method: "selectMultiple",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: props.select as string[],
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
 }
 
 export default DynamicRepository;

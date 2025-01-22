@@ -33,9 +33,12 @@ const upsertSingle: ServiceFn<
 
 	//* check collection exists
 	const collectionRes =
-		await context.services.collection.document.checks.checkCollection(context, {
-			key: data.collectionKey,
-		});
+		await context.services.collection.documents.checks.checkCollection(
+			context,
+			{
+				key: data.collectionKey,
+			},
+		);
 	if (collectionRes.error) return collectionRes;
 
 	//* check collection is locked
@@ -88,6 +91,17 @@ const upsertSingle: ServiceFn<
 	}
 
 	//* for single collections types, check if a document already exists
+	const checkDocumentCountRes =
+		await context.services.collection.documents.checks.checkSingleCollectionDocumentCount(
+			context,
+			{
+				collectionKey: data.collectionKey,
+				collectionMode: collectionRes.data.getData.mode,
+				documentId: data.documentId,
+				documentTable: documentTableRes.data,
+			},
+		);
+	if (checkDocumentCountRes.error) return checkDocumentCountRes;
 
 	// ----------------------------------------------
 	// Upsert document
