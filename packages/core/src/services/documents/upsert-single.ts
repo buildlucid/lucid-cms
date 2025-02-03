@@ -106,6 +106,9 @@ const upsertSingle: ServiceFn<
 	// ----------------------------------------------
 	// Upsert document
 
+	console.log(data.bricks);
+	console.log(data.fields);
+
 	// ----------------------------------------------
 	// Create and manage document versions
 
