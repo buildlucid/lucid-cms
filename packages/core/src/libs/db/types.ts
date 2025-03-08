@@ -403,14 +403,14 @@ export type LucidBrickTableName =
 	| `lucid_document__${string}__${string}`
 	| `lucid_document__${string}__${string}__${string}`;
 export interface LucidBricksTable {
-	id: Generated<number>;
-	collection_key: string;
-	document_id: number;
-	document_version_id: number;
-	locale: string;
+	_id: Generated<number>;
+	_collection_key: string;
+	_document_id: number;
+	_document_version_id: number;
+	_locale: string;
 	// repeater specific
-	parent_id?: number;
-	sort_order?: number;
+	_parent_id?: number;
+	_sort_order?: number;
 	// dynamic
 	[key: string]: unknown;
 }

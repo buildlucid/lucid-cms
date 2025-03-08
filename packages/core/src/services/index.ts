@@ -6,6 +6,7 @@ import collectionDocuments from "./collection-documents/index.js";
 import collectionDocumentVersions from "./collection-document-versions/index.js";
 import documents from "./documents/index.js";
 import documentVersions from "./documents-versions/index.js";
+import documentBricks from "./documents-bricks/index.js";
 import collections from "./collections/index.js";
 import emails from "./email/index.js";
 import locales from "./locales/index.js";
@@ -30,6 +31,7 @@ const lucidServices = {
 		...collections,
 		documents: documents,
 		documentVersions: documentVersions,
+		documentBricks: documentBricks,
 		migrator: collectionMigrator,
 		// TODO: remove bellow object after document rework is complete
 		document: {

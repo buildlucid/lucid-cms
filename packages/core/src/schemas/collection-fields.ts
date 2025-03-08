@@ -52,14 +52,17 @@ export const FieldSchema: z.ZodType<FieldSchemaType> = FieldBaseSchema.extend({
 		.optional(),
 });
 
-export type FieldSchemaType = z.infer<typeof FieldBaseSchema> & {
-	groups?: {
-		id: string | number;
-		order?: number;
-		open?: boolean;
-		fields: FieldSchemaType[];
-	}[];
+export type FieldRepeaterGroupSchemaType = {
+	id: string | number;
+	order?: number;
+	open?: boolean;
+	fields: FieldSchemaType[];
 };
+
+export type FieldSchemaType = z.infer<typeof FieldBaseSchema> & {
+	groups?: FieldRepeaterGroupSchemaType[];
+};
+// TODO: remove this after collection document DB rework
 export type FieldSchemaSimpleType = z.infer<typeof FieldBaseSchema> & {
 	groups?: FieldSchemaType[][];
 };

@@ -135,24 +135,15 @@ const createSingle: ServiceFn<
 	const bodyData = merge(data, hookResponse.data);
 
 	// Save bricks for the new version
-
-	console.log("save bricks", {
-		versionId: newVersionRes.data.id,
-		documentId: data.documentId,
-		bricks: bodyData.bricks,
-		fields: bodyData.fields,
-		collection: data.collection,
-	});
-	// const createMultipleBricks =
-	// 	await context.services.collection.document.brick.createMultiple(context, {
-	// 		versionId: newVersion.data.id,
-	// 		documentId: data.documentId,
-	// 		bricks: bodyData.bricks,
-	// 		fields: bodyData.fields,
-	// 		collection: data.collection,
-	// 	});
-
-	// if (createMultipleBricks.error) return createMultipleBricks;
+	const createMultipleBricks =
+		await context.services.collection.documentBricks.createMultiple(context, {
+			versionId: newVersionRes.data.id,
+			documentId: data.documentId,
+			bricks: bodyData.bricks,
+			fields: bodyData.fields,
+			collection: data.collection,
+		});
+	if (createMultipleBricks.error) return createMultipleBricks;
 
 	// ----------------------------------------------
 	// Fire afterUpsert hook
