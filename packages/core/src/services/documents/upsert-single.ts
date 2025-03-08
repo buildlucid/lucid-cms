@@ -1,5 +1,4 @@
 import T from "../../translations/index.js";
-import z from "zod";
 import Repository from "../../libs/repositories/index.js";
 import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
@@ -127,6 +126,16 @@ const upsertSingle: ServiceFn<
 
 	// ----------------------------------------------
 	// Create and manage document versions
+	const createVersionRes =
+		await context.services.collection.documentVersions.createSingle(context, {
+			documentId: upsertDocRes.data.id,
+			userId: data.userId,
+			publish: data.publish,
+			bricks: data.bricks,
+			fields: data.fields,
+			collection: collectionRes.data,
+		});
+	if (createVersionRes.error) return createVersionRes;
 
 	return {
 		error: undefined,
