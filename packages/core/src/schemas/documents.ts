@@ -14,4 +14,16 @@ export default {
 			collectionKey: z.string(),
 		}),
 	},
+	updateSingle: {
+		body: z.object({
+			publish: z.boolean(),
+			bricks: z.array(BrickSchema).optional(),
+			fields: z.array(FieldSchema).optional(),
+		}),
+		query: undefined,
+		params: z.object({
+			id: z.string(),
+			collectionKey: z.string(),
+		}),
+	},
 };

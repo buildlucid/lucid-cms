@@ -3,6 +3,7 @@ import r from "../../../route.js";
 import documents from "../../../controllers/documents/index.js";
 
 const documentRoutes = async (fastify: FastifyInstance) => {
+	// create
 	r(fastify, {
 		method: "post",
 		url: "/:collectionKey",
@@ -13,6 +14,19 @@ const documentRoutes = async (fastify: FastifyInstance) => {
 		swaggerSchema: documents.createSingle.swaggerSchema,
 		zodSchema: documents.createSingle.zodSchema,
 		controller: documents.createSingle.controller,
+	});
+
+	// update
+	r(fastify, {
+		method: "patch",
+		url: "/:collectionKey/:id",
+		middleware: {
+			authenticate: true,
+			validateCSRF: true,
+		},
+		swaggerSchema: documents.updateSingle.swaggerSchema,
+		zodSchema: documents.updateSingle.zodSchema,
+		controller: documents.updateSingle.controller,
 	});
 };
 

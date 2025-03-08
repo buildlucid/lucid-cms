@@ -1018,6 +1018,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update Single",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"publish\": false,\n    \"bricks\": [\n        {\n\t\t\t\"id\": \"ref-1\",\n            \"key\": \"simple\",\n            \"order\": 0,\n            \"type\": \"builder\",\n            \"open\": true,\n            \"fields\": [\n                {\n                    \"key\": \"heading\",\n                    \"type\": \"text\",\n                    \"value\": \"I am the heading\"\n                },\n                {\n                    \"key\": \"items\",\n                    \"type\": \"repeater\",\n                    \"groups\": [\n                        {\n                            \"id\": \"ref-group11\",\n                            \"open\": false,\n                            \"fields\": [\n                                {\n                                    \"key\": \"itemTitle\",\n                                    \"type\": \"text\",\n                                    \"translations\": {\n                                        \"en\": \"Title One\"\n                                    }\n                                }\n                            ]\n                        },\n                        {\n                            \"id\": \"ref-group12\",\n                            \"open\": true,\n                            \"fields\": [\n                                {\n                                    \"key\": \"itemTitle\",\n                                    \"type\": \"text\",\n                                    \"translations\": {\n                                        \"en\": \"Title Two\"\n                                    }\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"fields\": [\n        {\n            \"key\": \"simpleHeading\",\n            \"type\": \"text\",\n            \"translations\": {\n                \"en\": \"Homepage\",\n\t\t\t\t\"fr\": \"Homepage FR\"\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/documents/simple/1",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"simple",
+								"1"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

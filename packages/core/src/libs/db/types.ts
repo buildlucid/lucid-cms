@@ -382,6 +382,8 @@ export interface LucidDocumentTable {
 	deleted_by: number;
 	created_by: number;
 	created_at: TimestampImmutable;
+	updated_by: number;
+	updated_at: TimestampMutateable;
 }
 
 export type LucidVersionTableName = `lucid_document__${string}__versions`;
