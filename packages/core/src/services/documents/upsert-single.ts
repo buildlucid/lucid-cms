@@ -105,6 +105,25 @@ const upsertSingle: ServiceFn<
 
 	// ----------------------------------------------
 	// Upsert document
+	const upsertDocRes = await Document.upsertSingle(
+		{
+			data: {
+				id: data.documentId,
+				collection_key: data.collectionKey,
+				created_by: data.userId,
+				updated_by: data.userId,
+				is_deleted: false,
+				updated_at: new Date().toISOString(),
+			},
+			returning: ["id"],
+		},
+		{
+			tableName: documentTableRes.data,
+		},
+	);
+	if (upsertDocRes.error) return upsertDocRes;
+
+	console.log(upsertDocRes.data);
 
 	console.log(data.bricks);
 	console.log(data.fields);
