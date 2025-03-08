@@ -26,6 +26,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		deleted_by: z.number().nullable(),
 		created_by: z.number(),
 		created_at: z.string().nullable(),
+		updated_by: z.number(),
+		update_at: z.string().nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -35,6 +37,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		deleted_by: this.dbAdapter.getDataType("integer"),
 		created_by: this.dbAdapter.getDataType("integer"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
+		updated_by: this.dbAdapter.getDataType("integer"),
+		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
 	queryConfig = undefined;
 
