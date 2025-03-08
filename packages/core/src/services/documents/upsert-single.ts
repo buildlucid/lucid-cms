@@ -71,23 +71,19 @@ const upsertSingle: ServiceFn<
 						value: data.collectionKey,
 					},
 				],
+				validation: {
+					enabled: true,
+					defaultError: {
+						message: T("document_not_found_message"),
+						status: 404,
+					},
+				},
 			},
 			{
 				tableName: documentTableRes.data,
 			},
 		);
 		if (existingDocumentRes.error) return existingDocumentRes;
-
-		if (existingDocumentRes.data === undefined) {
-			return {
-				error: {
-					type: "basic",
-					message: T("document_not_found_message"),
-					status: 404,
-				},
-				data: undefined,
-			};
-		}
 	}
 
 	//* for single collections types, check if a document already exists
@@ -116,14 +112,15 @@ const upsertSingle: ServiceFn<
 				updated_at: new Date().toISOString(),
 			},
 			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
 		},
 		{
 			tableName: documentTableRes.data,
 		},
 	);
 	if (upsertDocRes.error) return upsertDocRes;
-
-	console.log(upsertDocRes.data);
 
 	console.log(data.bricks);
 	console.log(data.fields);
@@ -133,7 +130,7 @@ const upsertSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: 1,
+		data: upsertDocRes.data?.id,
 	};
 };
 

@@ -78,10 +78,16 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			)
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
-		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
-			method: "upsertSingle",
-			tableName: dynamicConfig.tableName,
-		});
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					Pick<Select<LucidDocumentTable>, K> | undefined
+				>,
+			{
+				method: "upsertSingle",
+				tableName: dynamicConfig.tableName,
+			},
+		);
 
 		if (exec.response.error) return exec.response;
 
@@ -133,10 +139,16 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			)
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
-		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
-			method: "upsertMultiple",
-			tableName: dynamicConfig.tableName,
-		});
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					Pick<Select<LucidDocumentTable>, K> | undefined
+				>,
+			{
+				method: "upsertMultiple",
+				tableName: dynamicConfig.tableName,
+			},
+		);
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
