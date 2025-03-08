@@ -2,7 +2,7 @@ import BaseRepository from "./base-repository.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../../query-builder/index.js";
-import type { Select, LucidDB } from "../../db/types.js";
+import type { Select, Insert, Update, LucidDB } from "../../db/types.js";
 import type { QueryProps, DynamicConfig } from "../types.js";
 
 abstract class DynamicRepository<
@@ -98,6 +98,159 @@ abstract class DynamicRepository<
 			...props.validation,
 			mode: "multiple",
 			select: props.select as string[],
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
+	// ----------------------------------------
+	// creates
+	async createSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Insert<T>>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+		dynamicConfig: DynamicConfig<Table>,
+	) {
+		let query = this.db.insertInto(dynamicConfig.tableName).values(
+			this.formatData(props.data, {
+				type: "insert",
+				dynamicColumns: dynamicConfig.columns,
+			}),
+		);
+
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
+
+		const exec = await this.executeQuery(
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "createSingle",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
+	// ----------------------------------------
+	// updates
+	async updateSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				where: QueryBuilderWhere<Table>;
+				data: Partial<Update<T>>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+		dynamicConfig: DynamicConfig<Table>,
+	) {
+		let query = this.db
+			.updateTable(dynamicConfig.tableName)
+			.set(
+				// @ts-expect-error
+				this.formatData(props.data, {
+					type: "update",
+					dynamicColumns: dynamicConfig.columns,
+				}),
+			)
+			.$if(
+				props.returnAll !== true &&
+					props.returning !== undefined &&
+					props.returning.length > 0,
+				// @ts-expect-error
+				(qb) => qb.returning(props.returning),
+			)
+			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+
+		// @ts-expect-error
+		query = queryBuilder.update(query, props.where);
+
+		const exec = await this.executeQuery(
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "updateSingle",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
+	// ----------------------------------------
+	// deletes
+	async deleteSingle<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				where: QueryBuilderWhere<Table>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+		dynamicConfig: DynamicConfig<Table>,
+	) {
+		let query = this.db
+			.deleteFrom(dynamicConfig.tableName)
+			.$if(
+				props.returnAll !== true &&
+					props.returning !== undefined &&
+					props.returning.length > 0,
+				// @ts-expect-error
+				(qb) => qb.returning(props.returning),
+			)
+			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+
+		// @ts-expect-error
+		query = queryBuilder.delete(query, props.where);
+
+		const exec = await this.executeQuery(
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "deleteSingle",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
