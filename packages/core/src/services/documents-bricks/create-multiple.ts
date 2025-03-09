@@ -1,13 +1,10 @@
 import Repository from "../../libs/repositories/index.js";
 import util from "node:util";
-import constructBrickTables, {
-	type InsertBrickTables,
-} from "./helpers/construct-brick-table.js";
+import aggregateBrickTables from "./helpers/aggregate-brick-tables.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
-import type { LucidBrickTableName } from "../../types.js";
 
 const createMultiple: ServiceFn<
 	[
@@ -33,46 +30,14 @@ const createMultiple: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// construct all required tables and rows grouped by prio
-
-	const brickTables: Array<InsertBrickTables> = [];
-	const brickKeyTableNameMap: Map<string, LucidBrickTableName> = new Map();
-
-	const locales = context.config.localisation.locales.map(
-		(locale) => locale.code,
-	);
-
-	if (data.fields !== undefined && data.fields.length > 0) {
-		constructBrickTables({
-			collection: data.collection,
-			documentId: data.documentId,
-			versionId: data.versionId,
-			locales,
-			defaultLocale: context.config.localisation.defaultLocale,
-			brickTables,
-			brickKeyTableNameMap,
-			type: "document-fields",
-			targetFields: data.fields,
-			level: 0,
-		});
-	}
-
-	if (data.bricks !== undefined) {
-		for (const brick of data.bricks) {
-			constructBrickTables({
-				collection: data.collection,
-				documentId: data.documentId,
-				versionId: data.versionId,
-				locales,
-				defaultLocale: context.config.localisation.defaultLocale,
-				brickTables,
-				brickKeyTableNameMap,
-				type: "brick",
-				brick: brick,
-				targetFields: brick.fields || [],
-				level: 0,
-			});
-		}
-	}
+	const brickTables = aggregateBrickTables({
+		collection: data.collection,
+		documentId: data.documentId,
+		versionId: data.versionId,
+		localisation: context.config.localisation,
+		bricks: data.bricks,
+		fields: data.fields,
+	});
 
 	console.log(
 		util.inspect(brickTables, { showHidden: false, depth: null, colors: true }),
