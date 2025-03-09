@@ -97,26 +97,40 @@ const createFieldTables = (props: {
 	//* add repeater columns
 	if (props.type === "repeater") {
 		// add parent reference for repeater fields
-		if (props.parentTable) {
-			columns.push({
-				name: buildCoreColumnName("parent_id"),
-				source: "core",
-				type: props.db.getDataType("integer"),
-				nullable: false,
-				foreignKey: {
-					table: props.parentTable,
-					column: buildCoreColumnName("id"),
-					onDelete: "cascade",
-				},
-			});
-		}
-		// add sorting for repeater items
 		columns.push({
-			name: buildCoreColumnName("sort_order"),
+			name: buildCoreColumnName("parent_id"),
+			source: "core",
+			type: props.db.getDataType("integer"),
+			nullable: true,
+			foreignKey: props.parentTable
+				? {
+						table: props.parentTable,
+						column: buildCoreColumnName("id"),
+						onDelete: "cascade",
+					}
+				: undefined,
+		});
+		// add parent reference temp ID for insertion tracking
+		columns.push({
+			name: buildCoreColumnName("parent_id_ref"),
+			source: "core",
+			type: props.db.getDataType("integer"),
+			nullable: true,
+		});
+		// add positioning for repeater row groups
+		columns.push({
+			name: buildCoreColumnName("group_position"),
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: false,
 			default: 0,
+		});
+		columns.push({
+			name: buildCoreColumnName("is_open"),
+			source: "core",
+			type: props.db.getDataType("boolean"),
+			nullable: false,
+			default: props.db.getDefault("boolean", "false"),
 		});
 	}
 

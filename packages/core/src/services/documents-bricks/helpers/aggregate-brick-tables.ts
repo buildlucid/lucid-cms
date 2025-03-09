@@ -23,34 +23,34 @@ const aggregateBrickTables = (params: {
 	const locales = params.localisation.locales.map((locale) => locale.code);
 
 	if (params.fields !== undefined && params.fields.length > 0) {
-		constructBrickTable({
+		constructBrickTable(brickTables, {
+			type: "document-fields",
 			collection: params.collection,
 			documentId: params.documentId,
 			versionId: params.versionId,
-			locales,
-			defaultLocale: params.localisation.defaultLocale,
-			brickTables,
-			brickKeyTableNameMap,
-			type: "document-fields",
 			targetFields: params.fields,
-			level: 0,
+			localisation: {
+				locales: locales,
+				defaultLocale: params.localisation.defaultLocale,
+			},
+			brickKeyTableNameMap: brickKeyTableNameMap,
 		});
 	}
 
 	if (params.bricks !== undefined) {
 		for (const brick of params.bricks) {
-			constructBrickTable({
+			constructBrickTable(brickTables, {
+				type: "brick",
 				collection: params.collection,
 				documentId: params.documentId,
 				versionId: params.versionId,
-				locales,
-				defaultLocale: params.localisation.defaultLocale,
-				brickTables,
-				brickKeyTableNameMap,
-				type: "brick",
-				brick: brick,
 				targetFields: brick.fields || [],
-				level: 0,
+				localisation: {
+					locales: locales,
+					defaultLocale: params.localisation.defaultLocale,
+				},
+				brick: brick,
+				brickKeyTableNameMap: brickKeyTableNameMap,
 			});
 		}
 	}

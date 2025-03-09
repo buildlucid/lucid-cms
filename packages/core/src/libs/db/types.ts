@@ -410,7 +410,9 @@ export interface LucidBricksTable {
 	_locale: string;
 	// repeater specific
 	_parent_id?: number;
-	_sort_order?: number;
+	_parent_id_ref?: number;
+	_group_position?: number;
+	_is_open?: BooleanInt;
 	// dynamic
 	[key: string]: unknown;
 }

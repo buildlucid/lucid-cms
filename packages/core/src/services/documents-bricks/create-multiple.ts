@@ -53,7 +53,7 @@ const createMultiple: ServiceFn<
 	);
 
 	// -------------------------------------------------------------------------------
-	// insert rows into corresponding table, updating children repeater _parent_id values on success
+	// insert rows into corresponding table, updating children repeater _parent_id/_parent_id_ref values on success
 
 	return {
 		error: undefined,
