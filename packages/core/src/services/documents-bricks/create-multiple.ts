@@ -1,6 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import util from "node:util";
 import aggregateBrickTables from "./helpers/aggregate-brick-tables.js";
+import prepareBricksAndFields from "./helpers/prepare-bricks-and-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
@@ -26,6 +27,14 @@ const createMultiple: ServiceFn<
 	);
 
 	// -------------------------------------------------------------------------------
+	// prepare data
+	const { preparedBricks, preparedFields } = prepareBricksAndFields({
+		collection: data.collection,
+		bricks: data.bricks,
+		fields: data.fields,
+	});
+
+	// -------------------------------------------------------------------------------
 	// validate bricks
 
 	// -------------------------------------------------------------------------------
@@ -35,8 +44,8 @@ const createMultiple: ServiceFn<
 		documentId: data.documentId,
 		versionId: data.versionId,
 		localisation: context.config.localisation,
-		bricks: data.bricks,
-		fields: data.fields,
+		bricks: preparedBricks,
+		fields: preparedFields,
 	});
 
 	console.log(
