@@ -23,13 +23,13 @@ export type InsertBrickTables = {
  * Generate a key for mapping brick to table names.
  * Stops us from doing duplicate work generating table names.
  */
-const genTableMapKey = (props: {
+const genTableMapKey = (params: {
 	brickKey?: string;
 	repeaterKeys?: Array<string>;
 }): string => {
-	const prefix = props.brickKey ?? "pseudo-brick";
-	if (!props.repeaterKeys || props.repeaterKeys.length === 0) return prefix;
-	return `${prefix}:${props.repeaterKeys.join(":")}`;
+	const prefix = params.brickKey ?? "pseudo-brick";
+	if (!params.repeaterKeys || params.repeaterKeys.length === 0) return prefix;
+	return `${prefix}:${params.repeaterKeys.join(":")}`;
 };
 
 /**
@@ -91,31 +91,31 @@ const constructBrickTable = (params: {
 	);
 
 	if (regularFields.length > 0) {
-		//* create rows for each locale
-		for (const locale of params.locales) {
-			const rowData: Partial<Insert<LucidBricksTable>> = {
-				[buildCoreColumnName("collection_key")]: params.collection.key,
-				[buildCoreColumnName("document_id")]: params.documentId,
-				[buildCoreColumnName("document_version_id")]: params.versionId,
-				[buildCoreColumnName("locale")]: locale,
-			};
+		for (const field of regularFields) {
+			//* create rows for each locale
+			for (const locale of params.locales) {
+				const rowData: Partial<Insert<LucidBricksTable>> = {
+					[buildCoreColumnName("collection_key")]: params.collection.key,
+					[buildCoreColumnName("document_id")]: params.documentId,
+					[buildCoreColumnName("document_version_id")]: params.versionId,
+					[buildCoreColumnName("locale")]: locale,
+				};
 
-			//* add repeater specific columns
-			if (params.type === "repeater") {
-				if (params.parentId !== undefined) {
-					rowData[buildCoreColumnName("parent_id")] = params.parentId;
+				//* add repeater specific columns
+				if (params.type === "repeater") {
+					if (params.parentId !== undefined) {
+						rowData[buildCoreColumnName("parent_id")] = params.parentId;
+					}
+
+					if (params.repeaterGroup?.order !== undefined) {
+						rowData[buildCoreColumnName("sort_order")] =
+							params.repeaterGroup.order;
+					} else {
+						rowData[buildCoreColumnName("sort_order")] = 0;
+					}
 				}
 
-				if (params.repeaterGroup?.order !== undefined) {
-					rowData[buildCoreColumnName("sort_order")] =
-						params.repeaterGroup.order;
-				} else {
-					rowData[buildCoreColumnName("sort_order")] = 0;
-				}
-			}
-
-			//* add field values for this locale
-			for (const field of regularFields) {
+				//* add field values for this locale
 				const valuesByLocale = processFieldValues(
 					field,
 					params.locales,
@@ -124,9 +124,9 @@ const constructBrickTable = (params: {
 				const value = valuesByLocale.get(locale);
 
 				rowData[field.key] = value;
-			}
 
-			tableEntry.data.push(rowData as Insert<LucidBricksTable>);
+				tableEntry.data.push(rowData as Insert<LucidBricksTable>);
+			}
 		}
 	}
 

@@ -54,6 +54,8 @@ const aggregateBrickTables = (params: {
 			});
 		}
 	}
+
+	return brickTables;
 };
 
 export default aggregateBrickTables;

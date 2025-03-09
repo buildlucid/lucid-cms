@@ -8,6 +8,9 @@ const SimpleBrick = new BrickBuilder("simple")
 	})
 	.addRepeater("items")
 	.addText("itemTitle")
+	.addRepeater("nestedItems")
+	.addText("nestedItemTitle")
+	.endRepeater()
 	.endRepeater();
 
 export default SimpleBrick;
