@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import processFieldValues from "./process-field-values.js";
 import type { FieldSchemaType } from "../../../types";
 
-describe("process field values", () => {
+describe("testing processFieldValues", () => {
 	const defaultLocale = "en";
 	const locales = ["en", "fr", "de"];
 

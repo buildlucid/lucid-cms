@@ -139,7 +139,7 @@ const upsertSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: upsertDocRes.data?.id,
+		data: upsertDocRes.data.id,
 	};
 };
 
