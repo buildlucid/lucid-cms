@@ -36,6 +36,24 @@ const createMultiple: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// validate bricks
+	if (data.skipValidation !== true) {
+		const checkBrickOrderRes =
+			context.services.collection.documentBricks.checks.checkDuplicateOrder(
+				data.bricks || [],
+			);
+		if (checkBrickOrderRes.error) return checkBrickOrderRes;
+
+		const checkValidateRes =
+			await context.services.collection.documentBricks.checks.checkValidateBricksFields(
+				context,
+				{
+					collection: data.collection,
+					bricks: data.bricks || [],
+					fields: data.fields || [],
+				},
+			);
+		if (checkValidateRes.error) return checkValidateRes;
+	}
 
 	// -------------------------------------------------------------------------------
 	// construct all required tables and rows grouped by prio
