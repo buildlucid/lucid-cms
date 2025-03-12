@@ -20,6 +20,9 @@ export interface FieldErrors {
 }
 
 interface BrickError {
+	id: number | string;
+	key?: string;
+	order?: number;
 	fields: FieldErrors[];
 }
 
@@ -57,15 +60,33 @@ const checkValidateBricksFields: ServiceFn<
 	};
 };
 
+/**
+ * Loops over bricks and runs validation against their fields recursively and return errors
+ */
 const validateBricks = (
-	brick: Array<BrickSchema>,
+	bricks: Array<BrickSchema>,
 	collection: CollectionBuilder,
 ): Array<BrickError> => {
 	const errors: BrickError[] = [];
 
+	for (const brick of bricks) {
+		const fieldErrors = recursiveFieldValidate(brick.fields || [], collection);
+		if (fieldErrors.length === 0) continue;
+
+		errors.push({
+			id: brick.id,
+			key: brick.key,
+			order: brick.order,
+			fields: fieldErrors,
+		});
+	}
+
 	return errors;
 };
 
+/**
+ * Recursively validate fields and return errors
+ */
 const recursiveFieldValidate = (
 	fields: Array<FieldSchemaType>,
 	collection: CollectionBuilder,
