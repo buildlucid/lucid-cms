@@ -269,5 +269,6 @@
 	"infer_collection_schema_error": "An error occurred while inferring the collection schema.",
 	"invalid_table_name_format_start_with": "Invalid table name format, must start with '{{prefix}}'.",
 	"invalid_table_name_format_insufficient_parts": "Invalid table name format. Contains insufficient parts.",
-	"failed_to_infer_table_parts": "Failed to infer table parts."
+	"failed_to_infer_table_parts": "Failed to infer table parts.",
+	"repeater_field_contains_errors": "Repeater field contains errors."
 }
