@@ -257,7 +257,7 @@ const getAllUsers = async (
 		const Users = Repository.get("users", context.db, context.config.db);
 
 		const usersRes = await Users.selectMultiple({
-			select: ["id", "username", "email", "first_name", "last_name"],
+			select: ["id"],
 			where: [
 				{
 					key: "id",
@@ -276,7 +276,6 @@ const getAllUsers = async (
 		return [];
 	}
 };
-
 const getAllDocuments = async (
 	context: ServiceContext,
 	fields: FieldInsertItem[],

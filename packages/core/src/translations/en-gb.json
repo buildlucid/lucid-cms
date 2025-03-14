@@ -270,5 +270,12 @@
 	"invalid_table_name_format_start_with": "Invalid table name format, must start with '{{prefix}}'.",
 	"invalid_table_name_format_insufficient_parts": "Invalid table name format. Contains insufficient parts.",
 	"failed_to_infer_table_parts": "Failed to infer table parts.",
-	"repeater_field_contains_errors": "Repeater field contains errors."
+	"repeater_field_contains_errors": "Repeater field contains errors.",
+	"repeater_max_groups_exceeded": "Too many groups have been added to the repeater. The group limit is set to \"{{groups}}\". ",
+	"repeater_groups_exceeded_min": "The minimum groups have not been added to the repeater. The group minimum is set to \"{{groups}}\".",
+	"error_fetching_users_for_validation": "An error occured while fetching users.",
+	"error_fetching_documents_for_validation": "An error occured while fetching documents.",
+	"error_fetching_documents_from_collection": "An error occured while fetching {{collection}} documents.",
+	"error_fetching_media_for_validation": "An error occured while fetching media.",
+	"field_is_required": "This field is required and not being supplied."
 }

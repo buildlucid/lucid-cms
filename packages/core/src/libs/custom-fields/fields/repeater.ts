@@ -1,3 +1,4 @@
+import T from "../../../translations/index.js";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import type {
@@ -46,10 +47,36 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	getInsertField() {
 		return null;
 	}
-	cfSpecificValidation() {
-		return {
-			valid: true,
-		};
+	cfSpecificValidation(value: unknown) {
+		if (
+			Array.isArray(value) &&
+			typeof this.config.validation?.maxGroups === "number"
+		) {
+			if (value.length > this.config.validation?.maxGroups) {
+				return {
+					valid: false,
+					message: T("repeater_max_groups_exceeded", {
+						groups: this.config.validation.maxGroups,
+					}),
+				};
+			}
+		}
+
+		if (
+			Array.isArray(value) &&
+			typeof this.config.validation?.minGroups === "number"
+		) {
+			if (this.config.validation?.minGroups > value.length) {
+				return {
+					valid: false,
+					message: T("repeater_groups_exceeded_min", {
+						groups: this.config.validation.minGroups,
+					}),
+				};
+			}
+		}
+
+		return { valid: true };
 	}
 }
 

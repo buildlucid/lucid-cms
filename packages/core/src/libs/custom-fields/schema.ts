@@ -65,6 +65,8 @@ const CustomFieldSchema = z.object({
 					max: z.number().optional(),
 				})
 				.optional(),
+			maxGroups: z.number().optional(),
+			minGroups: z.number().optional(),
 		})
 		.optional(),
 });

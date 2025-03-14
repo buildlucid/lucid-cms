@@ -271,6 +271,7 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 	};
 	validation?: {
 		maxGroups?: number;
+		minGroups?: number;
 	};
 }
 export interface NumberFieldConfig extends SharedFieldConfig {
@@ -606,10 +607,10 @@ export interface MediaReferenceData {
 }
 export interface UserReferenceData {
 	id: number;
-	username: string;
-	first_name: string | null;
-	last_name: string | null;
-	email: string;
+	// username: string;
+	// first_name: string | null;
+	// last_name: string | null;
+	// email: string;
 }
 export interface DocumentReferenceData {
 	id: number;

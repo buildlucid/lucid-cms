@@ -35,6 +35,7 @@ const BannerBrick = new BrickBuilder("banner", {
 		},
 		validation: {
 			maxGroups: 3,
+			minGroups: 1,
 		},
 	})
 	.addLink("link", {

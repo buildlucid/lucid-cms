@@ -66,9 +66,9 @@ const createMultiple: ServiceFn<
 		fields: preparedFields,
 	});
 
-	console.log(
-		util.inspect(brickTables, { showHidden: false, depth: null, colors: true }),
-	);
+	// console.log(
+	// 	util.inspect(brickTables, { showHidden: false, depth: null, colors: true }),
+	// );
 
 	// -------------------------------------------------------------------------------
 	// insert rows into corresponding table, updating children repeater _parent_id/_parent_id_ref values on success

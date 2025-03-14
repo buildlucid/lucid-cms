@@ -1,18 +1,19 @@
 import T from "../../../translations/index.js";
 import logger from "../../../utils/logging/index.js";
 import Repository from "../../../libs/repositories/index.js";
+import fetchValidationData, {
+	type ValidationData,
+} from "../helpers/fetch-validation-data.js";
 // import type { FieldErrors } from "../../../types/errors.js";
 import type { FieldTypes } from "../../../libs/custom-fields/types.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type {
-	ServiceContext,
-	ServiceFn,
-} from "../../../utils/services/types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../../types.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
 
+// TODO: move these into error types once old document storage method/validation is removed
 export interface FieldErrors {
 	key: string;
 	localeCode?: string;
@@ -33,7 +34,8 @@ interface BrickError {
 	fields: FieldErrors[];
 }
 
-//@ts-expect-error: TODO: remove once brickerror and fielderror is added to error response type
+// TODO: remove once BrickError, GroupError and FieldErrors is added to error response type
+//@ts-expect-error
 const checkValidateBricksFields: ServiceFn<
 	[
 		{
@@ -44,23 +46,19 @@ const checkValidateBricksFields: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	/*
-        1. work out and extract all media id's and user id's    
-        2. fetch data required for validation 
-            - users
-            - media
-        3. validate bricks
-            - loop through them all and call a recursiveFieldValidate fn
-            - return any/all of the errors
-        4. validate fields
-            - call recursiveFieldValidate fn
-            - return any/all of the errors
-        5. if either field or brick errors are > than 0 reurn an error object - this will parody the brick/field nested structure instead of being flat like before
-        6. return success
-    */
+	const relationDataRes = await fetchValidationData(context, data);
+	if (relationDataRes.error) return relationDataRes;
 
-	const brickErrors = validateBricks(data.bricks, data.collection);
-	const fieldErrors = recursiveFieldValidate(data.fields, data.collection);
+	const brickErrors = validateBricks(
+		data.bricks,
+		data.collection,
+		relationDataRes.data,
+	);
+	const fieldErrors = recursiveFieldValidate(
+		data.fields,
+		data.collection,
+		relationDataRes.data,
+	);
 
 	if (brickErrors.length > 0 || fieldErrors.length > 0) {
 		return {
@@ -92,6 +90,7 @@ const checkValidateBricksFields: ServiceFn<
 const validateBricks = (
 	bricks: Array<BrickSchema>,
 	collection: CollectionBuilder,
+	validationData: ValidationData,
 ): Array<BrickError> => {
 	const errors: BrickError[] = [];
 
@@ -126,7 +125,11 @@ const validateBricks = (
 			return errors;
 		}
 
-		const fieldErrors = recursiveFieldValidate(brick.fields || [], instance);
+		const fieldErrors = recursiveFieldValidate(
+			brick.fields || [],
+			instance,
+			validationData,
+		);
 		if (fieldErrors.length === 0) continue;
 
 		errors.push({
@@ -146,9 +149,12 @@ const validateBricks = (
 const recursiveFieldValidate = (
 	fields: Array<FieldSchemaType>,
 	instance: CollectionBuilder | BrickBuilder,
+	validationData: ValidationData,
+	parentRepeaterKey?: string,
 ) => {
 	const errors: FieldErrors[] = [];
 
+	//*  validate all provided fields
 	for (const field of fields) {
 		const fieldInstance = instance.fields.get(field.key);
 		if (!fieldInstance) {
@@ -163,11 +169,29 @@ const recursiveFieldValidate = (
 		if (field.type === "repeater" && field.groups) {
 			const groupErrors: Array<GroupError> = [];
 
+			// validates the repeater field and its group length
+			const validationResult = fieldInstance.validate({
+				type: field.type,
+				value: field.groups,
+			});
+			if (!validationResult.valid) {
+				errors.push({
+					key: field.key,
+					message:
+						validationResult.message || T("repeater_field_contains_errors"),
+				});
+			}
+
 			for (let i = 0; i < field.groups.length; i++) {
 				const group = field.groups[i];
 				if (!group) continue;
 
-				const groupFieldErrors = recursiveFieldValidate(group.fields, instance);
+				const groupFieldErrors = recursiveFieldValidate(
+					group.fields,
+					instance,
+					validationData,
+					field.key,
+				);
 
 				if (groupFieldErrors.length > 0) {
 					groupErrors.push({
@@ -190,20 +214,108 @@ const recursiveFieldValidate = (
 		}
 
 		//* handle regular fields
-		const fieldErrors = validateField(field, fieldInstance);
+		const fieldErrors = validateField(field, fieldInstance, validationData);
 		if (fieldErrors.length > 0) {
 			errors.push(...fieldErrors);
 		}
 	}
 
+	//* check for required fields that are missing
+	const submittedFieldKeys = new Set(fields.map((field) => field.key));
+	instance.fields.forEach((fieldInstance, key) => {
+		if (submittedFieldKeys.has(key)) return;
+
+		//* skip fields that belong to a different repeater context
+		const fieldRepeaterParent = fieldInstance.repeater;
+		if (
+			(fieldRepeaterParent && fieldRepeaterParent !== parentRepeaterKey) ||
+			(!fieldRepeaterParent && parentRepeaterKey)
+		) {
+			return;
+		}
+
+		// @ts-expect-error: not all custom fields have validation config
+		if (fieldInstance.config?.validation?.required) {
+			errors.push({
+				key,
+				message: T("field_is_required"),
+			});
+		}
+	});
+
 	return errors;
 };
 
+/**
+ * Helper function to get the appropriate relation data based on field type
+ */
+const getRelationData = (
+	fieldType: FieldTypes,
+	validationData: ValidationData,
+) => {
+	switch (fieldType) {
+		case "media":
+			return validationData.media;
+		case "user":
+			return validationData.users;
+		case "document":
+			return validationData.documents;
+		default:
+			return undefined;
+	}
+};
+
+/**
+ * Validates a single field, handling both direct values and translations
+ */
 const validateField = (
 	field: FieldSchemaType,
 	instance: CustomField<FieldTypes>,
+	validationData: ValidationData,
 ): FieldErrors[] => {
-	return [];
+	const errors: FieldErrors[] = [];
+	const relationData = getRelationData(field.type, validationData);
+
+	//* handle fields with translations
+	if (field.translations) {
+		for (const localeCode in field.translations) {
+			const value = field.translations[localeCode];
+			const validationResult = instance.validate({
+				type: field.type,
+				value,
+				relationData,
+			});
+
+			if (!validationResult.valid) {
+				errors.push({
+					key: field.key,
+					localeCode,
+					message:
+						validationResult.message ||
+						T("an_unknown_error_occurred_validating_the_field"),
+				});
+			}
+		}
+	}
+	//* handle direct value fields
+	else {
+		const validationResult = instance.validate({
+			type: field.type,
+			value: field.value,
+			relationData,
+		});
+
+		if (!validationResult.valid) {
+			errors.push({
+				key: field.key,
+				message:
+					validationResult.message ||
+					T("an_unknown_error_occurred_validating_the_field"),
+			});
+		}
+	}
+
+	return errors;
 };
 
 export default checkValidateBricksFields;

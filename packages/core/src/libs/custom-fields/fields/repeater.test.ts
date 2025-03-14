@@ -19,6 +19,7 @@ test("custom field config passes schema validation", async () => {
 		},
 		validation: {
 			maxGroups: 3,
+			minGroups: 1,
 		},
 	});
 
