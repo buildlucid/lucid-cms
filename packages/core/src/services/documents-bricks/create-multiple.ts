@@ -1,5 +1,4 @@
 import Repository from "../../libs/repositories/index.js";
-import util from "node:util";
 import aggregateBrickTables from "./helpers/aggregate-brick-tables.js";
 import prepareBricksAndFields from "./helpers/prepare-bricks-and-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -65,13 +64,79 @@ const createMultiple: ServiceFn<
 		bricks: preparedBricks,
 		fields: preparedFields,
 	});
-
-	console.log(
-		util.inspect(brickTables, { showHidden: false, depth: null, colors: true }),
-	);
+	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 
 	// -------------------------------------------------------------------------------
-	// insert rows into corresponding table, updating children repeater _parent_id/_parent_id_ref values on success
+	// insert rows
+	const idMapping: Record<number, number> = {};
+
+	for (const table of sortedTables) {
+		// update parent IDs using the mappings before inserting
+		for (const row of table.data) {
+			// check for parent_id_ref that needs updating
+			if (
+				"_parent_id_ref" in row &&
+				typeof row._parent_id_ref === "number" &&
+				row._parent_id_ref < 0
+			) {
+				// try primary mapping first
+				const mappedId = idMapping[row._parent_id_ref];
+				if (mappedId) row._parent_id = mappedId;
+				// fall back to parent_id mapping if available
+				else if (
+					"_parent_id" in row &&
+					typeof row._parent_id === "number" &&
+					row._parent_id < 0 &&
+					idMapping[row._parent_id]
+				) {
+					row._parent_id = idMapping[row._parent_id];
+				}
+			}
+		}
+
+		// determine which columns to return
+		const hasParentIdRef = table.data.some((row) => "_parent_id_ref" in row);
+		const returningColumns = hasParentIdRef
+			? ["_id", "_parent_id_ref"]
+			: ["_id"];
+
+		// insert rows for this table
+		const response = await Bricks.createMultiple(
+			{
+				data: table.data,
+				returning: returningColumns,
+			},
+			{
+				tableName: table.table,
+			},
+		);
+		if (response.error) return response;
+
+		// create mappings for the next tables
+		if (response.data?.length) {
+			for (let i = 0; i < response.data.length; i++) {
+				const insertedRow = response.data[i];
+				const originalRow = table.data[i];
+				if (!insertedRow || !originalRow) continue;
+
+				if (
+					"_parent_id_ref" in originalRow &&
+					typeof originalRow._parent_id_ref === "number" &&
+					originalRow._parent_id_ref < 0
+				) {
+					idMapping[originalRow._parent_id_ref] = insertedRow._id as number;
+				}
+
+				if (
+					"_parent_id" in originalRow &&
+					typeof originalRow._parent_id === "number" &&
+					originalRow._parent_id < 0
+				) {
+					idMapping[originalRow._parent_id] = insertedRow._id as number;
+				}
+			}
+		}
+	}
 
 	return {
 		error: undefined,

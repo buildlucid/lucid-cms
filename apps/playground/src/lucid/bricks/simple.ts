@@ -10,7 +10,7 @@ const SimpleBrick = new BrickBuilder("simple")
 	.addDocument("document", {
 		collection: "simple",
 		validation: {
-			required: true,
+			// required: true,
 		},
 	})
 	.addRepeater("items")

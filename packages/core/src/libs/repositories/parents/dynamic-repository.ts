@@ -189,7 +189,7 @@ abstract class DynamicRepository<
 		}
 
 		const exec = await this.executeQuery(
-			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			() => query.execute() as Promise<Pick<Select<T>, K>[] | undefined>,
 			{
 				method: "createMultiple",
 				tableName: dynamicConfig.tableName,
