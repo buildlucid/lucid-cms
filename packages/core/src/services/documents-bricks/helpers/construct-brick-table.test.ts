@@ -226,10 +226,10 @@ describe("brick table construction", () => {
 
 		// get parent references for further testing
 		const firstItemEn = itemsTable.data.find(
-			(item) => item._locale === "en" && item._group_position === 0,
+			(item) => item._locale === "en" && item._position === 0,
 		);
 		const secondItemEn = itemsTable.data.find(
-			(item) => item._locale === "en" && item._group_position === 1,
+			(item) => item._locale === "en" && item._position === 1,
 		);
 
 		expect(firstItemEn).toBeDefined();
@@ -266,10 +266,10 @@ describe("brick table construction", () => {
 
 		// test nested items under first parent
 		const firstNestedItemEn = nestedItemsUnderFirst.find(
-			(item) => item._locale === "en" && item._group_position === 0,
+			(item) => item._locale === "en" && item._position === 0,
 		);
 		const secondNestedItemEn = nestedItemsUnderFirst.find(
-			(item) => item._locale === "en" && item._group_position === 1,
+			(item) => item._locale === "en" && item._position === 1,
 		);
 
 		expect(firstNestedItemEn?.nestedItemTitle).toBe("Nested Title One One");
@@ -277,10 +277,10 @@ describe("brick table construction", () => {
 
 		// test nested items under second parent
 		const firstNestedSecondParentEn = nestedItemsUnderSecond.find(
-			(item) => item._locale === "en" && item._group_position === 0,
+			(item) => item._locale === "en" && item._position === 0,
 		);
 		const secondNestedSecondParentEn = nestedItemsUnderSecond.find(
-			(item) => item._locale === "en" && item._group_position === 1,
+			(item) => item._locale === "en" && item._position === 1,
 		);
 
 		expect(firstNestedSecondParentEn?.nestedItemTitle).toBe(

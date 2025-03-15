@@ -192,10 +192,6 @@ test("validate brick along with brick field validation", async () => {
 			users: [
 				{
 					id: 1,
-					email: "test@test.com",
-					first_name: "Test",
-					last_name: "User",
-					username: "test-user",
 				},
 			],
 			documents: [],

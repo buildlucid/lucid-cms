@@ -92,6 +92,21 @@ const createFieldTables = (props: {
 				onDelete: "cascade",
 			},
 		},
+		// used for repeater groups position along with brick position
+		{
+			name: buildCoreColumnName("position"),
+			source: "core",
+			type: props.db.getDataType("integer"),
+			nullable: false,
+			default: 0,
+		},
+		{
+			name: buildCoreColumnName("is_open"),
+			source: "core",
+			type: props.db.getDataType("boolean"),
+			nullable: false,
+			default: props.db.getDefault("boolean", "false"),
+		},
 	];
 
 	//* add repeater columns
@@ -116,21 +131,6 @@ const createFieldTables = (props: {
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: true,
-		});
-		// add positioning for repeater row groups
-		columns.push({
-			name: buildCoreColumnName("group_position"),
-			source: "core",
-			type: props.db.getDataType("integer"),
-			nullable: false,
-			default: 0,
-		});
-		columns.push({
-			name: buildCoreColumnName("is_open"),
-			source: "core",
-			type: props.db.getDataType("boolean"),
-			nullable: false,
-			default: props.db.getDefault("boolean", "false"),
 		});
 	}
 

@@ -408,11 +408,11 @@ export interface LucidBricksTable {
 	_document_id: number;
 	_document_version_id: number;
 	_locale: string;
+	_position: number;
+	_is_open: BooleanInt;
 	// repeater specific
 	_parent_id?: number;
 	_parent_id_ref?: number;
-	_group_position?: number;
-	_is_open?: BooleanInt;
 	// dynamic
 	[key: string]: unknown;
 }

@@ -17,6 +17,7 @@ const SimpleBrick = new BrickBuilder("simple")
 	.addText("itemTitle")
 	.addRepeater("nestedItems")
 	.addText("nestedItemTitle")
+	.addCheckbox("nestedCheckbox")
 	.endRepeater()
 	.endRepeater();
 

@@ -34,11 +34,16 @@ const aggregateBrickTables = (params: {
 				defaultLocale: params.localisation.defaultLocale,
 			},
 			brickKeyTableNameMap: brickKeyTableNameMap,
+			order: 0,
+			open: true,
 		});
 	}
 
 	if (params.bricks !== undefined) {
-		for (const brick of params.bricks) {
+		for (let i = 0; i < params.bricks.length; i++) {
+			const brick = params.bricks[i];
+			if (!brick) continue;
+
 			constructBrickTable(brickTables, {
 				type: "brick",
 				collection: params.collection,
@@ -51,6 +56,8 @@ const aggregateBrickTables = (params: {
 				},
 				brick: brick,
 				brickKeyTableNameMap: brickKeyTableNameMap,
+				order: brick.order !== undefined ? brick.order : i,
+				open: brick.open ?? false,
 			});
 		}
 	}
