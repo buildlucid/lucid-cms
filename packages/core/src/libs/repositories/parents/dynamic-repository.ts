@@ -154,6 +154,58 @@ abstract class DynamicRepository<
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
+	async createMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Insert<T>>[];
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+		dynamicConfig: DynamicConfig<Table>,
+	) {
+		let query = this.db.insertInto(dynamicConfig.tableName).values(
+			props.data.map((d) =>
+				this.formatData(d, {
+					type: "insert",
+					dynamicColumns: dynamicConfig.columns,
+				}),
+			),
+		);
+
+		if (
+			props.returnAll !== true &&
+			props.returning &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
+
+		const exec = await this.executeQuery(
+			() => query.executeTakeFirst() as Promise<Pick<Select<T>, K> | undefined>,
+			{
+				method: "createMultiple",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
 
 	// ----------------------------------------
 	// updates
