@@ -21,16 +21,6 @@ const deleteMultiple: ServiceFn<
 		};
 	}
 
-	/*
-        - Return early when no ids passed down
-        - check if the collection is locked
-        - select the documents from the db and compare the length
-        - pre delete hook
-        - mark the documents as deleted
-        - prev version would remove document referencesm we'll hold off for now, can probs just handle get queries better.
-        - post delete hook
-    */
-
 	const collectionRes =
 		await context.services.collection.documents.checks.checkCollection(
 			context,
@@ -105,6 +95,8 @@ const deleteMultiple: ServiceFn<
 		};
 	}
 
+	// TODO:? remove any reference to this document in field data? more complicated than before due to document table gen, makes more sense to just handle this on get
+
 	const hookBeforeRes = await executeHooks(
 		{
 			service: "collection-documents",
@@ -125,8 +117,9 @@ const deleteMultiple: ServiceFn<
 	);
 	if (hookBeforeRes.error) return hookBeforeRes;
 
-	const deleteDocUpdateRes = await Documents.updateMultiple(
+	const deleteDocUpdateRes = await Documents.updateSingle(
 		{
+			returning: ["id"],
 			where: [
 				{
 					key: "id",
@@ -139,22 +132,15 @@ const deleteMultiple: ServiceFn<
 				is_deleted_at: new Date().toISOString(),
 				deleted_by: data.userId,
 			},
+			validation: {
+				enabled: true,
+			},
 		},
 		{
 			tableName: documentTableRes.data,
 		},
 	);
 	if (deleteDocUpdateRes.error) return deleteDocUpdateRes;
-
-	if (deleteDocUpdateRes.data.length === 0) {
-		return {
-			error: {
-				type: "basic",
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
 
 	const hookAfterRes = await executeHooks(
 		{
@@ -170,7 +156,7 @@ const deleteMultiple: ServiceFn<
 				userId: data.userId,
 			},
 			data: {
-				ids: deletePages.map((page) => page.id),
+				ids: data.ids,
 			},
 		},
 	);
