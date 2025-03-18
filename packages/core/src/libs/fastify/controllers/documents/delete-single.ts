@@ -8,13 +8,13 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
-const deleteMultipleController: RouteController<
-	typeof documentsSchema.deleteMultiple.params,
-	typeof documentsSchema.deleteMultiple.body,
-	typeof documentsSchema.deleteMultiple.query
+const deleteSingleController: RouteController<
+	typeof documentsSchema.deleteSingle.params,
+	typeof documentsSchema.deleteSingle.body,
+	typeof documentsSchema.deleteSingle.query
 > = async (request, reply) => {
-	const deleteMultiple = await serviceWrapper(
-		request.server.services.collection.documents.deleteMultiple,
+	const deleteSingle = await serviceWrapper(
+		request.server.services.collection.documents.deleteSingle,
 		{
 			transaction: true,
 			defaultError: {
@@ -30,40 +30,28 @@ const deleteMultipleController: RouteController<
 			services: request.server.services,
 		},
 		{
-			ids: request.body.ids,
+			id: Number.parseInt(request.params.id),
 			collectionKey: request.params.collectionKey,
 			userId: request.auth.id,
 		},
 	);
-	if (deleteMultiple.error) throw new LucidAPIError(deleteMultiple.error);
+	if (deleteSingle.error) throw new LucidAPIError(deleteSingle.error);
 
 	reply.status(204).send();
 };
 
 export default {
-	controller: deleteMultipleController,
-	zodSchema: documentsSchema.deleteMultiple,
+	controller: deleteSingleController,
+	zodSchema: documentsSchema.deleteSingle,
 	swaggerSchema: {
-		description: "Delete a multiple collection documents.",
+		description: "Delete a single collection document.",
 		tags: ["collection-documents"],
-		summary: "Delete multiple collection documents.",
+		summary: "Delete a collection document",
 		response: {
 			204: swaggerResponse({
 				type: 204,
 				noPropertise: true,
 			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				ids: {
-					type: "array",
-					items: {
-						type: "number",
-					},
-				},
-			},
-			required: ["ids"],
 		},
 		headers: swaggerHeaders({
 			csrf: true,

@@ -42,6 +42,20 @@ const documentRoutes = async (fastify: FastifyInstance) => {
 		zodSchema: documents.deleteMultiple.zodSchema,
 		controller: documents.deleteMultiple.controller,
 	});
+
+	// delete single document
+	r(fastify, {
+		method: "delete",
+		url: "/:collectionKey/:id",
+		permissions: ["delete_content"],
+		middleware: {
+			authenticate: true,
+			validateCSRF: true,
+		},
+		swaggerSchema: documents.deleteSingle.swaggerSchema,
+		zodSchema: documents.deleteSingle.zodSchema,
+		controller: documents.deleteSingle.controller,
+	});
 };
 
 export default documentRoutes;

@@ -26,4 +26,21 @@ export default {
 			collectionKey: z.string(),
 		}),
 	},
+	deleteSingle: {
+		body: undefined,
+		query: undefined,
+		params: z.object({
+			collectionKey: z.string(),
+			id: z.string(),
+		}),
+	},
+	deleteMultiple: {
+		body: z.object({
+			ids: z.array(z.number()),
+		}),
+		query: undefined,
+		params: z.object({
+			collectionKey: z.string(),
+		}),
+	},
 };
