@@ -163,4 +163,28 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
+	async selectSingleById<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				id: number;
+			}
+		>,
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		const query = this.db.selectFrom(dynamicConfig.tableName);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSingleById",
+			tableName: dynamicConfig.tableName,
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			selectAll: true,
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
 }
