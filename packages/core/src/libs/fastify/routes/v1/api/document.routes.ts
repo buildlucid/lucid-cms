@@ -56,6 +56,18 @@ const documentRoutes = async (fastify: FastifyInstance) => {
 		zodSchema: documents.deleteSingle.zodSchema,
 		controller: documents.deleteSingle.controller,
 	});
+
+	// Get single document
+	r(fastify, {
+		method: "get",
+		url: "/:collectionKey/:id/:statusOrId",
+		middleware: {
+			authenticate: true,
+		},
+		swaggerSchema: documents.getSingle.swaggerSchema,
+		zodSchema: documents.getSingle.zodSchema,
+		controller: documents.getSingle.controller,
+	});
 };
 
 export default documentRoutes;

@@ -43,4 +43,19 @@ export default {
 			collectionKey: z.string(),
 		}),
 	},
+	getSingle: {
+		query: z.object({
+			include: z.array(z.enum(["bricks"])).optional(),
+		}),
+		params: z.object({
+			id: z.string(),
+			statusOrId: z.union([
+				z.literal("published"),
+				z.literal("draft"),
+				z.string(), // version id
+			]),
+			collectionKey: z.string(),
+		}),
+		body: undefined,
+	},
 };

@@ -82,10 +82,12 @@ const deleteMultiple: ServiceFn<
 				errorResponse: {
 					body: {
 						ids: {
-							code: "only_found",
-							message: T("only_found_ids_error_message", {
-								ids: documentsRes.data.map((doc) => doc.id).join(", "),
-							}),
+							message:
+								documentsRes.data.length > 0
+									? T("only_found_ids_error_message", {
+											ids: documentsRes.data.map((doc) => doc.id).join(", "),
+										})
+									: T("no_document_ids_found_message"),
 						},
 					},
 				},
