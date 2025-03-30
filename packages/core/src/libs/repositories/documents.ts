@@ -6,28 +6,53 @@ import type {
 	Insert,
 	Select,
 	LucidDocumentTableName,
+	LucidVersionTableName,
 } from "../db/types.js";
 import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
+
+import DocumentVersionsRepository from "./document-versions.js";
+import { versionTypesSchema } from "../../schemas/document-versions.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_document__collection-key");
 	}
 	tableSchema = z.object({
-		id: z.number(),
-		collection_key: z.string(),
 		is_deleted: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
 		is_deleted_at: z.string().optional(),
 		deleted_by: z.number().nullable(),
+
+		id: z.number(),
+		collection_key: z.string(),
 		created_by: z.number(),
 		created_at: z.string().nullable(),
 		updated_by: z.number(),
-		update_at: z.string().nullable(),
+		updated_at: z.string().nullable(),
+		versions: z.array(
+			z.object({
+				id: z.number(),
+				version_type: versionTypesSchema,
+				created_by: z.number(),
+				created_at: z.string(),
+				updated_by: z.number().nullable(),
+				updated_at: z.string().nullable(),
+			}),
+		),
+		cb_user_id: z.number(),
+		cb_user_email: z.string().email(),
+		cb_user_first_name: z.string().nullable(),
+		cb_user_last_name: z.string().nullable(),
+		cb_user_username: z.string(),
+		ub_user_id: z.number(),
+		ub_user_email: z.string().email(),
+		ub_user_first_name: z.string().nullable(),
+		ub_user_last_name: z.string().nullable(),
+		ub_user_username: z.string(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -168,11 +193,136 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			V,
 			{
 				id: number;
+				status?: "draft" | "published" | "revision";
+				versionId?: number;
+				tables: {
+					versions: LucidVersionTableName;
+				};
 			}
 		>,
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
-		const query = this.db.selectFrom(dynamicConfig.tableName);
+		const query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select([
+				`${dynamicConfig.tableName}.id`,
+				`${dynamicConfig.tableName}.collection_key`,
+				`${dynamicConfig.tableName}.created_by`,
+				`${dynamicConfig.tableName}.created_at`,
+				`${dynamicConfig.tableName}.updated_at`,
+				`${dynamicConfig.tableName}.updated_by`,
+			])
+			.select([
+				(eb) =>
+					this.dbAdapter
+						.jsonArrayFrom(
+							eb
+								.selectFrom(props.tables.versions)
+								// @ts-expect-error
+								.select([
+									`${props.tables.versions}.id`,
+									`${props.tables.versions}.type as version_type`,
+									`${props.tables.versions}.created_at`,
+									`${props.tables.versions}.created_by`,
+									`${props.tables.versions}.updated_at`,
+									`${props.tables.versions}.updated_by`,
+								])
+								.whereRef(
+									// @ts-expect-error
+									`${props.tables.versions}.document_id`,
+									"=",
+									`${dynamicConfig.tableName}.id`,
+								)
+								.where((eb) =>
+									eb.or([
+										// @ts-expect-error
+										eb(`${props.tables.versions}.type`, "=", "draft"),
+										// @ts-expect-error
+										eb(`${props.tables.versions}.type`, "=", "published"),
+									]),
+								),
+						)
+						.as("versions"),
+			])
+			.$if(props.status !== undefined, (qb) =>
+				qb
+					.leftJoin(props.tables.versions, (join) =>
+						join
+							.onRef(
+								// @ts-expect-error
+								`${props.tables.versions}.document_id`,
+								"=",
+								`${dynamicConfig.tableName}.id`,
+							)
+							// @ts-expect-error
+							.on(`${props.tables.versions}.type`, "=", props.status),
+					)
+					// @ts-expect-error
+					.select([
+						`${props.tables.versions}.id as version_id`,
+						`${props.tables.versions}.type as version_type`,
+						`${props.tables.versions}.created_at as version_created_at`,
+						`${props.tables.versions}.created_by as version_created_by`,
+						`${props.tables.versions}.updated_at as version_updated_at`,
+						`${props.tables.versions}.updated_by as version_updated_by`,
+					]),
+			)
+			.$if(props.versionId !== undefined, (qb) =>
+				qb
+					.leftJoin(props.tables.versions, (join) =>
+						join
+							.onRef(
+								// @ts-expect-error
+								`${props.tables.versions}.document_id`,
+								"=",
+								`${dynamicConfig.tableName}.id`,
+							)
+							.on(
+								`${props.tables.versions}.id`,
+								"=",
+								props.versionId as number,
+							),
+					)
+					// @ts-expect-error
+					.select([
+						`${props.tables.versions}.id as version_id`,
+						`${props.tables.versions}.type as version_type`,
+						`${props.tables.versions}.created_at as version_created_at`,
+						`${props.tables.versions}.created_by as version_created_by`,
+						`${props.tables.versions}.updated_at as version_updated_at`,
+						`${props.tables.versions}.updated_by as version_updated_by`,
+					]),
+			)
+			.leftJoin(
+				"lucid_users as cb_user",
+				"cb_user.id",
+				`${dynamicConfig.tableName}.created_by`,
+			)
+			.leftJoin(
+				"lucid_users as ub_user",
+				"ub_user.id",
+				`${dynamicConfig.tableName}.updated_by`,
+			)
+			.select([
+				// created by
+				"cb_user.id as cb_user_id",
+				"cb_user.email as cb_user_email",
+				"cb_user.first_name as cb_user_first_name",
+				"cb_user.last_name as cb_user_last_name",
+				"cb_user.username as cb_user_username",
+				// updated by
+				"ub_user.id as ub_user_id",
+				"ub_user.email as ub_user_email",
+				"ub_user.first_name as ub_user_first_name",
+				"ub_user.last_name as ub_user_last_name",
+				"ub_user.username as ub_user_username",
+			])
+			.where(`${dynamicConfig.tableName}.id`, "=", props.id)
+			.where(
+				`${dynamicConfig.tableName}.is_deleted`,
+				"=",
+				this.dbAdapter.getDefault("boolean", "false"),
+			);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -183,7 +333,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "single",
-			selectAll: true,
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}

@@ -18,7 +18,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
-		email: z.string(),
+		email: z.string().email(),
 		username: z.string(),
 		first_name: z.string().nullable(),
 		last_name: z.string().nullable(),
