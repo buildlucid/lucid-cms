@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
 import buildTableName from "../helpers/build-table-name.js";
-import buildCoreColumnName from "../helpers/build-core-column-name.js";
+import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaTable,
 	CollectionSchemaColumn,
@@ -42,14 +42,14 @@ const createFieldTables = (props: {
 	const childTables: CollectionSchemaTable[] = [];
 	const columns: CollectionSchemaColumn[] = [
 		{
-			name: buildCoreColumnName("id"),
+			name: "id",
 			source: "core",
 			type: props.db.getDataType("primary"),
 			nullable: false,
 			primary: true,
 		},
 		{
-			name: buildCoreColumnName("collection_key"),
+			name: "collection_key",
 			source: "core",
 			type: props.db.getDataType("text"),
 			nullable: false,
@@ -60,7 +60,7 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			name: buildCoreColumnName("document_id"),
+			name: "document_id",
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: false,
@@ -71,7 +71,7 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			name: buildCoreColumnName("document_version_id"),
+			name: "document_version_id",
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: false,
@@ -82,7 +82,7 @@ const createFieldTables = (props: {
 			},
 		},
 		{
-			name: buildCoreColumnName("locale"),
+			name: "locale",
 			source: "core",
 			type: props.db.getDataType("text"),
 			nullable: false,
@@ -94,14 +94,14 @@ const createFieldTables = (props: {
 		},
 		// used for repeater groups position along with brick position
 		{
-			name: buildCoreColumnName("position"),
+			name: "position",
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: false,
 			default: 0,
 		},
 		{
-			name: buildCoreColumnName("is_open"),
+			name: "is_open",
 			source: "core",
 			type: props.db.getDataType("boolean"),
 			nullable: false,
@@ -113,21 +113,21 @@ const createFieldTables = (props: {
 	if (props.type === "repeater") {
 		// add parent reference for repeater fields
 		columns.push({
-			name: buildCoreColumnName("parent_id"),
+			name: "parent_id",
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: true,
 			foreignKey: props.parentTable
 				? {
 						table: props.parentTable,
-						column: buildCoreColumnName("id"),
+						column: "id",
 						onDelete: "cascade",
 					}
 				: undefined,
 		});
 		// add parent reference temp ID for insertion tracking
 		columns.push({
-			name: buildCoreColumnName("parent_id_ref"),
+			name: "parent_id_ref",
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: true,
@@ -182,7 +182,7 @@ const createFieldTables = (props: {
 
 			for (const column of fieldSchema.columns) {
 				columns.push({
-					name: column.name,
+					name: prefixGeneratedColName(column.name),
 					source: "field",
 					type: column.type,
 					nullable: column.nullable,

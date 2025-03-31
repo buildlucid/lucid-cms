@@ -43,6 +43,8 @@ abstract class CustomField<T extends FieldTypes> {
 	}): CFInsertItem<T> | null;
 	/**
 	 * Determins how the field should be defined in the database
+	 *
+	 * If the foreign key is referencing a Custom Field key, use the `prefixGeneratedColName(key)` helper on the column
 	 */
 	abstract getSchemaDefinition(
 		props: GetSchemaDefinitionProps,

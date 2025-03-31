@@ -75,35 +75,34 @@ const createMultiple: ServiceFn<
 		for (const row of table.data) {
 			// check for parent_id_ref that needs updating
 			if (
-				"_parent_id_ref" in row &&
-				typeof row._parent_id_ref === "number" &&
-				row._parent_id_ref < 0
+				"parent_id_ref" in row &&
+				typeof row.parent_id_ref === "number" &&
+				row.parent_id_ref < 0
 			) {
 				// try primary mapping first
-				const mappedId = idMapping[row._parent_id_ref];
-				if (mappedId) row._parent_id = mappedId;
+				const mappedId = idMapping[row.parent_id_ref];
+				if (mappedId) row.parent_id = mappedId;
 				// fall back to parent_id mapping if available
 				else if (
-					"_parent_id" in row &&
-					typeof row._parent_id === "number" &&
-					row._parent_id < 0 &&
-					idMapping[row._parent_id]
+					"parent_id" in row &&
+					typeof row.parent_id === "number" &&
+					row.parent_id < 0 &&
+					idMapping[row.parent_id]
 				) {
-					row._parent_id = idMapping[row._parent_id];
+					row.parent_id = idMapping[row.parent_id];
 				}
 			}
 		}
 
 		// determine which columns to return
-		const hasParentIdRef = table.data.some((row) => "_parent_id_ref" in row);
-		const returningColumns = hasParentIdRef
-			? ["_id", "_parent_id_ref"]
-			: ["_id"];
+		const hasParentIdRef = table.data.some((row) => "parent_id_ref" in row);
+		const returningColumns = hasParentIdRef ? ["id", "parent_id_ref"] : ["id"];
 
 		// insert rows for this table
 		const response = await Bricks.createMultiple(
 			{
 				data: table.data,
+				// @ts-expect-error
 				returning: returningColumns,
 			},
 			{
@@ -120,19 +119,19 @@ const createMultiple: ServiceFn<
 				if (!insertedRow || !originalRow) continue;
 
 				if (
-					"_parent_id_ref" in originalRow &&
-					typeof originalRow._parent_id_ref === "number" &&
-					originalRow._parent_id_ref < 0
+					"parent_id_ref" in originalRow &&
+					typeof originalRow.parent_id_ref === "number" &&
+					originalRow.parent_id_ref < 0
 				) {
-					idMapping[originalRow._parent_id_ref] = insertedRow._id as number;
+					idMapping[originalRow.parent_id_ref] = insertedRow.id as number;
 				}
 
 				if (
-					"_parent_id" in originalRow &&
-					typeof originalRow._parent_id === "number" &&
-					originalRow._parent_id < 0
+					"parent_id" in originalRow &&
+					typeof originalRow.parent_id === "number" &&
+					originalRow.parent_id < 0
 				) {
-					idMapping[originalRow._parent_id] = insertedRow._id as number;
+					idMapping[originalRow.parent_id] = insertedRow.id as number;
 				}
 			}
 		}

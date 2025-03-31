@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import buildTableName from "../../collection-migrator/helpers/build-table-name.js";
-import buildCoreColumnName from "../../collection-migrator/helpers/build-core-column-name.js";
+import prefixGeneratedColName from "../../collection-migrator/helpers/prefix-generated-column-name.js";
 import processFieldValues from "./process-field-values.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
@@ -102,18 +102,18 @@ const constructBrickTable = (
 	//* initialize rows for each locale
 	for (const locale of params.localisation.locales) {
 		const baseRowData: Partial<Insert<LucidBricksTable>> = {
-			[buildCoreColumnName("collection_key")]: params.collection.key,
-			[buildCoreColumnName("document_id")]: params.documentId,
-			[buildCoreColumnName("document_version_id")]: params.versionId,
-			[buildCoreColumnName("locale")]: locale,
-			[buildCoreColumnName("position")]: params.order,
-			[buildCoreColumnName("is_open")]: params.open,
+			collection_key: params.collection.key,
+			document_id: params.documentId,
+			document_version_id: params.versionId,
+			locale: locale,
+			position: params.order,
+			is_open: params.open,
 		};
 
 		//* add repeater specific columns
 		if (params.type === "repeater") {
-			baseRowData[buildCoreColumnName("parent_id")] = params.parentId;
-			baseRowData[buildCoreColumnName("parent_id_ref")] = params.parentIdRef;
+			baseRowData.parent_id = params.parentId;
+			baseRowData.parent_id_ref = params.parentIdRef;
 		}
 
 		rowsByLocale.set(locale, baseRowData);
@@ -133,7 +133,7 @@ const constructBrickTable = (
 			const value = valuesByLocale.get(locale);
 			const row = rowsByLocale.get(locale);
 
-			if (row) row[field.key] = value;
+			if (row) row[prefixGeneratedColName(field.key)] = value;
 		}
 	}
 

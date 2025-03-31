@@ -1,5 +1,4 @@
 import z from "zod";
-import { sql } from "kysely";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type {
 	LucidDocumentTable,
@@ -11,8 +10,6 @@ import type {
 import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-
-import DocumentVersionsRepository from "./document-versions.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {

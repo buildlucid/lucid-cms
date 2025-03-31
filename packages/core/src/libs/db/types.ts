@@ -402,19 +402,21 @@ export type LucidBrickTableName =
 	| `lucid_document__${string}__fields`
 	| `lucid_document__${string}__${string}`
 	| `lucid_document__${string}__${string}__${string}`;
+
+type CustomFieldColumnName = `_${string}`;
 export interface LucidBricksTable {
-	_id: Generated<number>;
-	_collection_key: string;
-	_document_id: number;
-	_document_version_id: number;
-	_locale: string;
-	_position: number;
-	_is_open: BooleanInt;
+	id: Generated<number>;
+	collection_key: string;
+	document_id: number;
+	document_version_id: number;
+	locale: string;
+	position: number;
+	is_open: BooleanInt;
 	// repeater specific
-	_parent_id?: number;
-	_parent_id_ref?: number;
+	parent_id?: number | null;
+	parent_id_ref?: number | null;
 	// dynamic
-	[key: string]: unknown;
+	[key: CustomFieldColumnName]: unknown;
 }
 
 // ------------------------------------------------------------------------------

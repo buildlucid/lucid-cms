@@ -121,9 +121,6 @@ const upsertSingle: ServiceFn<
 	);
 	if (upsertDocRes.error) return upsertDocRes;
 
-	console.log(data.bricks);
-	console.log(data.fields);
-
 	// ----------------------------------------------
 	// Create and manage document versions
 	const createVersionRes =

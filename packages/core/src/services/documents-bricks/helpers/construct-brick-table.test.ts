@@ -202,63 +202,63 @@ describe("brick table construction", () => {
 		// test field data
 		expect(fieldsTable.data).toHaveLength(2); // one per locale
 
-		const enField = fieldsTable.data.find((item) => item._locale === "en");
-		const frField = fieldsTable.data.find((item) => item._locale === "fr");
+		const enField = fieldsTable.data.find((item) => item.locale === "en");
+		const frField = fieldsTable.data.find((item) => item.locale === "fr");
 
-		expect(enField?.simpleHeading).toBe("Homepage");
-		expect(frField?.simpleHeading).toBe("Homepage FR");
+		expect(enField?._simpleHeading).toBe("Homepage");
+		expect(frField?._simpleHeading).toBe("Homepage FR");
 
 		// test simple brick data
 		expect(simpleBrickTable.data).toHaveLength(2); // one per locale
 
 		const enSimpleBrick = simpleBrickTable.data.find(
-			(item) => item._locale === "en",
+			(item) => item.locale === "en",
 		);
 		const frSimpleBrick = simpleBrickTable.data.find(
-			(item) => item._locale === "fr",
+			(item) => item.locale === "fr",
 		);
 
-		expect(enSimpleBrick?.heading).toBe("I am the heading");
-		expect(frSimpleBrick?.heading).toBeNull();
+		expect(enSimpleBrick?._heading).toBe("I am the heading");
+		expect(frSimpleBrick?._heading).toBeNull();
 
 		// test items repeater data
 		expect(itemsTable.data).toHaveLength(4); // 2 items × 2 locales
 
 		// get parent references for further testing
 		const firstItemEn = itemsTable.data.find(
-			(item) => item._locale === "en" && item._position === 0,
+			(item) => item.locale === "en" && item.position === 0,
 		);
 		const secondItemEn = itemsTable.data.find(
-			(item) => item._locale === "en" && item._position === 1,
+			(item) => item.locale === "en" && item.position === 1,
 		);
 
 		expect(firstItemEn).toBeDefined();
 		expect(secondItemEn).toBeDefined();
 
-		const firstItemParentRef = firstItemEn?._parent_id_ref;
-		const secondItemParentRef = secondItemEn?._parent_id_ref;
+		const firstItemParentRef = firstItemEn?.parent_id_ref;
+		const secondItemParentRef = secondItemEn?.parent_id_ref;
 
 		expect(firstItemParentRef).not.toBe(secondItemParentRef);
 
 		// tst first item data
-		expect(firstItemEn?._parent_id).toBeNull();
-		expect(firstItemEn?._is_open).toBe(false);
-		expect(firstItemEn?.itemTitle).toBe("Title One");
+		expect(firstItemEn?.parent_id).toBeNull();
+		expect(firstItemEn?.is_open).toBe(false);
+		expect(firstItemEn?._itemTitle).toBe("Title One");
 
 		// test second item data
-		expect(secondItemEn?._parent_id).toBeNull();
-		expect(secondItemEn?._is_open).toBe(true);
-		expect(secondItemEn?.itemTitle).toBe("Title Two");
+		expect(secondItemEn?.parent_id).toBeNull();
+		expect(secondItemEn?.is_open).toBe(true);
+		expect(secondItemEn?._itemTitle).toBe("Title Two");
 
 		// test nested items
 		expect(nestedItemsTable.data).toHaveLength(8); // 4 nested items × 2 locales
 
 		// group nested items by parent
 		const nestedItemsUnderFirst = nestedItemsTable.data.filter(
-			(item) => item._parent_id === firstItemParentRef,
+			(item) => item.parent_id === firstItemParentRef,
 		);
 		const nestedItemsUnderSecond = nestedItemsTable.data.filter(
-			(item) => item._parent_id === secondItemParentRef,
+			(item) => item.parent_id === secondItemParentRef,
 		);
 
 		expect(nestedItemsUnderFirst).toHaveLength(4); // 2 nested items × 2 locales
@@ -266,27 +266,27 @@ describe("brick table construction", () => {
 
 		// test nested items under first parent
 		const firstNestedItemEn = nestedItemsUnderFirst.find(
-			(item) => item._locale === "en" && item._position === 0,
+			(item) => item.locale === "en" && item.position === 0,
 		);
 		const secondNestedItemEn = nestedItemsUnderFirst.find(
-			(item) => item._locale === "en" && item._position === 1,
+			(item) => item.locale === "en" && item.position === 1,
 		);
 
-		expect(firstNestedItemEn?.nestedItemTitle).toBe("Nested Title One One");
-		expect(secondNestedItemEn?.nestedItemTitle).toBe("Nested Title One Two");
+		expect(firstNestedItemEn?._nestedItemTitle).toBe("Nested Title One One");
+		expect(secondNestedItemEn?._nestedItemTitle).toBe("Nested Title One Two");
 
 		// test nested items under second parent
 		const firstNestedSecondParentEn = nestedItemsUnderSecond.find(
-			(item) => item._locale === "en" && item._position === 0,
+			(item) => item.locale === "en" && item.position === 0,
 		);
 		const secondNestedSecondParentEn = nestedItemsUnderSecond.find(
-			(item) => item._locale === "en" && item._position === 1,
+			(item) => item.locale === "en" && item.position === 1,
 		);
 
-		expect(firstNestedSecondParentEn?.nestedItemTitle).toBe(
+		expect(firstNestedSecondParentEn?._nestedItemTitle).toBe(
 			"Nested Title Two One",
 		);
-		expect(secondNestedSecondParentEn?.nestedItemTitle).toBe(
+		expect(secondNestedSecondParentEn?._nestedItemTitle).toBe(
 			"Nested Title Two Two",
 		);
 	});
@@ -418,27 +418,27 @@ describe("brick table construction", () => {
 		expect(level3Table.priority).toBe(2);
 
 		// test parent/child relatio
-		const level1Item = level1Table.data.find((item) => item._locale === "en");
+		const level1Item = level1Table.data.find((item) => item.locale === "en");
 		expect(level1Item).toBeDefined();
-		const level1Ref = level1Item?._parent_id_ref;
+		const level1Ref = level1Item?.parent_id_ref;
 
-		const level2Item = level2Table.data.find((item) => item._locale === "en");
+		const level2Item = level2Table.data.find((item) => item.locale === "en");
 		expect(level2Item).toBeDefined();
-		expect(level2Item?._parent_id).toBe(level1Ref);
-		const level2Ref = level2Item?._parent_id_ref;
+		expect(level2Item?.parent_id).toBe(level1Ref);
+		const level2Ref = level2Item?.parent_id_ref;
 
-		const level3Item = level3Table.data.find((item) => item._locale === "en");
+		const level3Item = level3Table.data.find((item) => item.locale === "en");
 		expect(level3Item).toBeDefined();
-		expect(level3Item?._parent_id).toBe(level2Ref);
+		expect(level3Item?.parent_id).toBe(level2Ref);
 
 		// test field values
-		expect(level1Item?.level1Title).toBe("Level 1 Item");
-		expect(level2Item?.level2Title).toBe("Level 2 Item");
-		expect(level3Item?.level3Title).toBe("Level 3 Item");
+		expect(level1Item?._level1Title).toBe("Level 1 Item");
+		expect(level2Item?._level2Title).toBe("Level 2 Item");
+		expect(level3Item?._level3Title).toBe("Level 3 Item");
 
 		// test open state propagation
-		expect(level1Item?._is_open).toBe(true);
-		expect(level2Item?._is_open).toBe(true);
-		expect(level3Item?._is_open).toBe(false);
+		expect(level1Item?.is_open).toBe(true);
+		expect(level2Item?.is_open).toBe(true);
+		expect(level3Item?.is_open).toBe(false);
 	});
 });
