@@ -64,6 +64,34 @@ const getSingle: ServiceFn<
 	if (documentRes.error) return documentRes;
 	if (collectionRes.error) return collectionRes;
 
+	// TODO: implement version checks to ensure we have the correct one targeted. Bellow is temporary.
+	const versionId = documentRes.data.versions[0]?.id;
+	const versionType = documentRes.data.versions[0]?.version_type;
+	if (!versionId || !versionType) {
+		return {
+			error: {
+				message: T("document_version_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
+	if (data.query.include?.includes("bricks")) {
+		const bricksRes =
+			await context.services.collection.documentBricks.getMultiple(context, {
+				versionId: versionId,
+				collectionKey: documentRes.data.collection_key,
+				versionType: versionType !== "revision" ? versionType : undefined, // if we're fetching a revision, let it default to the draft version
+			});
+		if (bricksRes.error) return bricksRes;
+
+		return {
+			error: undefined,
+			data: undefined,
+		};
+	}
+
 	return {
 		error: undefined,
 		data: documentRes.data,

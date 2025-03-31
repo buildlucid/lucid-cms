@@ -5,6 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
+import type { LucidBricksTable } from "../../types.js";
 
 const createMultiple: ServiceFn<
 	[
@@ -96,13 +97,14 @@ const createMultiple: ServiceFn<
 
 		// determine which columns to return
 		const hasParentIdRef = table.data.some((row) => "parent_id_ref" in row);
-		const returningColumns = hasParentIdRef ? ["id", "parent_id_ref"] : ["id"];
+		const returningColumns: Array<keyof LucidBricksTable> = hasParentIdRef
+			? ["id", "parent_id_ref"]
+			: ["id"];
 
 		// insert rows for this table
 		const response = await Bricks.createMultiple(
 			{
 				data: table.data,
-				// @ts-expect-error
 				returning: returningColumns,
 			},
 			{
