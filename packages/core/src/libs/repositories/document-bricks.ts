@@ -3,6 +3,7 @@ import DynamicRepository from "./parents/dynamic-repository.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
+	LucidBricksTable,
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../db/types.js";
@@ -46,19 +47,16 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 	// ----------------------------------------
 	// queries
 
-	/**
-	 * @todo make brickTable an array of objects containing column names
-	 */
-	async selectMultipleByVersionId<V extends boolean = false>(
-		props: QueryProps<
-			V,
-			{
-				/** The version type to use for any custom field document references  */
-				versionType: Exclude<DocumentVersionType, "revision">;
-				versionId: number;
-				brickTables: LucidBrickTableName[];
-			}
-		>,
+	async selectMultipleByVersionId(
+		props: {
+			/** The version type to use for any custom field document references  */
+			versionType: Exclude<DocumentVersionType, "revision">;
+			versionId: number;
+			bricks: Array<{
+				table: LucidBrickTableName;
+				columns: Array<keyof LucidBricksTable>;
+			}>;
+		},
 		dynamicConfig: DynamicConfig<LucidVersionTableName>,
 	) {
 		let query = this.db
@@ -66,26 +64,16 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			.where("id", "=", props.versionId)
 			.selectAll();
 
-		for (const brickTable of props.brickTables) {
+		for (const brick of props.bricks) {
 			query = query.select((eb) =>
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
-							.selectFrom(brickTable)
+							.selectFrom(brick.table)
 							.where("document_version_id", "=", props.versionId)
-							.select([
-								"id",
-								"collection_key",
-								"document_id",
-								"document_version_id",
-								"locale",
-								"position",
-								"is_open",
-								// "parent_id",
-								// "parent_id_ref",
-							]),
+							.select(brick.columns),
 					)
-					.as(brickTable),
+					.as(brick.table),
 			);
 		}
 
@@ -96,9 +84,8 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
-			...props.validation,
+			enabled: false,
 			mode: "single",
-			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
 }
