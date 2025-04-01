@@ -8,6 +8,7 @@ import type {
 	LucidVersionTableName,
 } from "../../libs/db/types.js";
 import buildTableName from "../collection-migrator/helpers/build-table-name.js";
+import getAllBrickTables from "../collection-migrator/helpers/get-all-brick-tables.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -39,28 +40,28 @@ const getMultiple: ServiceFn<
 	});
 	if (versionsTableRes.error) return versionsTableRes;
 
-	const [bricksRes, collectionRes] = await Promise.all([
-		DocumentBricks.selectMultipleByVersionId(
-			{
-				versionType: data.versionType ?? "draft",
-				versionId: data.versionId,
-				brickTables: [
-					"lucid_document__simple__fields",
-					"lucid_document__simple__simple",
-					"lucid_document__simple__simple__items",
-					"lucid_document__simple__simple__items__nestedItems",
-				],
-			},
-			{
-				tableName: versionsTableRes.data,
-			},
-		),
-		collectionsServices.getSingleInstance(context, {
-			key: data.collectionKey,
-		}),
-	]);
-	if (bricksRes.error) return bricksRes;
+	const collectionRes = await collectionsServices.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
+
+	const brickTablesRes = getAllBrickTables(
+		collectionRes.data,
+		context.config.db,
+	);
+	if (brickTablesRes.error) return brickTablesRes;
+
+	const bricksRes = await DocumentBricks.selectMultipleByVersionId(
+		{
+			versionType: data.versionType ?? "draft",
+			versionId: data.versionId,
+			bricks: brickTablesRes.data,
+		},
+		{
+			tableName: versionsTableRes.data,
+		},
+	);
+	if (bricksRes.error) return bricksRes;
 
 	console.log(bricksRes.data);
 
