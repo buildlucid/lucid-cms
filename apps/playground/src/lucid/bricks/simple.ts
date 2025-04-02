@@ -7,6 +7,7 @@ const SimpleBrick = new BrickBuilder("simple")
 			useTranslations: false,
 		},
 	})
+	.addMedia("image")
 	.addDocument("document", {
 		collection: "simple",
 		validation: {
