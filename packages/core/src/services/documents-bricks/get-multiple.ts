@@ -72,7 +72,6 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	// based on the brickTableRes.data and bricksQueryRes, extract all of the media, document, user IDs and fetch them.
 	console.log(bricksQueryRes.data);
 
 	const relationDataRes = await extractRelatedEntityIds(context, {
@@ -82,6 +81,9 @@ const getMultiple: ServiceFn<
 	if (relationDataRes.error) return relationDataRes;
 
 	console.log(relationDataRes.data);
+
+	// TODO: loop over the custom fields and let them handle how relation data is fetched.
+	// TODO: create a new formatter to marry the relation data to the brick rows and format the response to match the original implementation
 
 	return {
 		error: undefined,
