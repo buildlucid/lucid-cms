@@ -1,5 +1,6 @@
 import type { OnDelete, OnUpdate } from "../../../libs/db/types.js";
 import type { ColumnDataType } from "kysely";
+import type { FieldTypes } from "../../../types.js";
 
 export type TableType =
 	| "document"
@@ -19,6 +20,9 @@ export type CollectionSchemaColumn = {
 		column: string;
 		onDelete?: OnDelete;
 		onUpdate?: OnUpdate;
+	};
+	customField?: {
+		type: FieldTypes;
 	};
 	unique?: boolean;
 	primary?: boolean;

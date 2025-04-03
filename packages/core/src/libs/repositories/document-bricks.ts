@@ -5,12 +5,18 @@ import type {
 	LucidBrickTableName,
 	LucidBricksTable,
 	LucidDocumentTableName,
+	LucidVersionTable,
 	LucidVersionTableName,
+	Select,
 } from "../db/types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
 import type { CollectionSchemaColumn } from "../../services/collection-migrator/schema/types.js";
+
+export interface BrickQueryResponse extends Select<LucidVersionTable> {
+	[key: LucidBrickTableName]: LucidBricksTable[];
+}
 
 export default class DocumentBricksRepository extends DynamicRepository<LucidBrickTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -47,11 +53,6 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 
 	// ----------------------------------------
 	// queries
-
-	/**
-	 * @todo remove lucid_media join, that only works if one CF in the table has that relation.
-	 * @todo create a seperate query to run after this, this will include all document, user, media relation queries.
-	 */
 	async selectMultipleByVersionId(
 		props: {
 			/** The version type to use for any custom field document references  */
@@ -70,56 +71,29 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			.selectAll();
 
 		for (const brick of props.bricks) {
-			let brickQuery = this.db
-				.selectFrom(brick.table)
-				.where("document_version_id", "=", props.versionId);
-
-			for (const column of brick.columns) {
-				if (column.source === "core" || !column.foreignKey) continue;
-
-				switch (column.foreignKey.table) {
-					case "lucid_media": {
-						// @ts-expect-error
-						brickQuery = brickQuery
-							.leftJoin(
-								"lucid_media",
-								// @ts-expect-error
-								`${brick.table}.${column.name}`,
-								"lucid_media.id",
-							)
-							.select([
-								"lucid_media.key as media_key",
-								"lucid_media.mime_type as media_mime_type",
-								"lucid_media.file_extension as media_file_extension",
-								"lucid_media.file_size as media_file_size",
-								"lucid_media.width as media_width",
-								"lucid_media.height as media_height",
-								"lucid_media.type as media_type",
-								"lucid_media.blur_hash as media_blur_hash",
-								"lucid_media.average_colour as media_average_colour",
-								"lucid_media.is_dark as media_is_dark",
-								"lucid_media.is_light as media_is_light",
-							]);
-						break;
-					}
-				}
-			}
-
-			brickQuery = brickQuery.select(
-				brick.columns.map(
-					(c) => `${brick.table}.${c.name}` as keyof LucidBricksTable,
-				),
-			);
-
-			query = query.select((eb) =>
-				this.dbAdapter.jsonArrayFrom(brickQuery).as(brick.table),
+			query = query.select(() =>
+				this.dbAdapter
+					.jsonArrayFrom(
+						this.db
+							.selectFrom(brick.table)
+							.where("document_version_id", "=", props.versionId)
+							.select(
+								brick.columns.map(
+									(c) => `${brick.table}.${c.name}` as keyof LucidBricksTable,
+								),
+							),
+					)
+					.as(brick.table),
 			);
 		}
 
-		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
-			method: "selectMultipleByVersionId",
-			tableName: dynamicConfig.tableName,
-		});
+		const exec = await this.executeQuery(
+			() => query.executeTakeFirst() as Promise<BrickQueryResponse>,
+			{
+				method: "selectMultipleByVersionId",
+				tableName: dynamicConfig.tableName,
+			},
+		);
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {

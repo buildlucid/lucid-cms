@@ -9,6 +9,7 @@ import type {
 } from "../../libs/db/types.js";
 import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import getAllBrickTables from "../collection-migrator/helpers/get-all-brick-tables.js";
+import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -51,7 +52,7 @@ const getMultiple: ServiceFn<
 	);
 	if (brickTablesRes.error) return brickTablesRes;
 
-	const bricksRes = await DocumentBricks.selectMultipleByVersionId(
+	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionType: data.versionType ?? "draft",
 			versionId: data.versionId,
@@ -61,9 +62,26 @@ const getMultiple: ServiceFn<
 			tableName: versionsTableRes.data,
 		},
 	);
-	if (bricksRes.error) return bricksRes;
+	if (bricksQueryRes.error) return bricksQueryRes;
+	if (bricksQueryRes.data === undefined) {
+		return {
+			error: {
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 
-	console.log(bricksRes.data);
+	// based on the brickTableRes.data and bricksQueryRes, extract all of the media, document, user IDs and fetch them.
+	console.log(bricksQueryRes.data);
+
+	const relationDataRes = await extractRelatedEntityIds(context, {
+		brickSchema: brickTablesRes.data,
+		brickQuery: bricksQueryRes.data,
+	});
+	if (relationDataRes.error) return relationDataRes;
+
+	console.log(relationDataRes.data);
 
 	return {
 		error: undefined,
