@@ -26,6 +26,11 @@ export interface ValidationData {
 	documents: DocumentReferenceData[];
 }
 
+/**
+ * Responsible for fetching data used for validating custom field values.
+ *
+ * @todo For custom custom field support down the line - validation data fetch logic should be moved to custom field instances. Active custom fields would need to be registered in config.
+ */
 const fetchValidationData: ServiceFn<
 	[
 		{

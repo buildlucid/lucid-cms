@@ -7,6 +7,16 @@ import type {
 } from "../../../types.js";
 import type { CollectionSchemaColumn } from "../../collection-migrator/schema/types.js";
 
+export type FieldRelationValues = Partial<
+	Record<
+		FieldTypes,
+		Array<{
+			table: string;
+			values: Set<unknown>;
+		}>
+	>
+>;
+
 /**
  * Extracts any custom field reference data based on the DocumentVersionsRepository.selectMultipleByVersionId response and brick schemas foreign key information.
  * IDs can then be used to fetch the data seperately.
@@ -21,9 +31,9 @@ const extractRelatedEntityIds: ServiceFn<
 			brickQuery: BrickQueryResponse;
 		},
 	],
-	Partial<Record<FieldTypes, Set<unknown>>>
+	FieldRelationValues
 > = async (context, data) => {
-	const relationData: Partial<Record<FieldTypes, Set<unknown>>> = {};
+	const relationData: FieldRelationValues = {};
 
 	// for each brick in the schema
 	// check each row for that brick in the brickQuery response
@@ -43,12 +53,25 @@ const extractRelatedEntityIds: ServiceFn<
 				}
 
 				const targetColumn = row[schemaColumn.name as keyof LucidBricksTable];
+
 				if (targetColumn === undefined || targetColumn === null) continue;
 
-				if (relationData[schemaColumn.customField.type] === undefined) {
-					relationData[schemaColumn.customField.type] = new Set();
+				const fieldType = schemaColumn.customField.type;
+				const tableName = schemaColumn.foreignKey.table;
+
+				if (relationData[fieldType] === undefined) relationData[fieldType] = [];
+				let tableEntry = relationData[fieldType]?.find(
+					(entry) => entry.table === tableName,
+				);
+
+				if (!tableEntry) {
+					tableEntry = {
+						table: tableName,
+						values: new Set<unknown>(),
+					};
+					relationData[fieldType]?.push(tableEntry);
 				}
-				relationData[schemaColumn.customField.type]?.add(targetColumn);
+				tableEntry.values.add(targetColumn);
 			}
 		}
 	}

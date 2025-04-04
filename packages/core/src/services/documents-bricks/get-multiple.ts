@@ -72,18 +72,21 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	console.log(bricksQueryRes.data);
-
-	const relationDataRes = await extractRelatedEntityIds(context, {
+	const relationIdRes = await extractRelatedEntityIds(context, {
 		brickSchema: brickTablesRes.data,
 		brickQuery: bricksQueryRes.data,
 	});
-	if (relationDataRes.error) return relationDataRes;
+	if (relationIdRes.error) return relationIdRes;
 
-	console.log(relationDataRes.data);
+	console.log(relationIdRes.data);
 
 	// TODO: loop over the custom fields and let them handle how relation data is fetched.
 	// TODO: create a new formatter to marry the relation data to the brick rows and format the response to match the original implementation
+
+	const relatedDataPromises = [];
+	if (relationIdRes.data.media) {
+		relatedDataPromises.push();
+	}
 
 	return {
 		error: undefined,
