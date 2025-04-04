@@ -20,7 +20,7 @@ export interface UserResponse {
 	username: string;
 	firstName: string | null;
 	lastName: string | null;
-	triggerPasswordReset: boolean | null;
+	triggerPasswordReset?: boolean | null;
 
 	roles?: UserPermissionsResponse["roles"];
 	permissions?: UserPermissionsResponse["permissions"];

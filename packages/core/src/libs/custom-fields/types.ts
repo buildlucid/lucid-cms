@@ -1,5 +1,10 @@
 import type { ZodType } from "zod";
-import type { FieldAltResponse, MediaType } from "../../types/response.js";
+import type {
+	FieldAltResponse,
+	MediaResponse,
+	MediaType,
+	UserResponse,
+} from "../../types/response.js";
 import type { OnDelete, OnUpdate } from "../db/types.js";
 import type { ColumnDataType } from "kysely";
 import type { LocaleValue } from "../../types/shared.js";
@@ -532,25 +537,30 @@ export type FieldResponseValue =
 export type TabResMeta = null;
 export type TextResMeta = null;
 export type WysiwygResMeta = null;
-export type MediaResMeta = {
-	id: number | null;
-	url: string | null;
-	key: string | null;
-	mimeType: string | null;
-	extension: string | null;
-	fileSize: number | null;
-	width: number | null;
-	height: number | null;
-	blurHash: string | null;
-	averageColour: string | null;
-	isDark: boolean | null;
-	isLight: boolean | null;
-	title: Record<string, string>;
-	alt: Record<string, string>;
-	type: MediaType | null;
-} | null;
+// TODO: MediaResponse | null will be the new type for this once the collection migration is finished
+export type MediaResMeta =
+	| {
+			id: number | null;
+			url: string | null;
+			key: string | null;
+			mimeType: string | null;
+			extension: string | null;
+			fileSize: number | null;
+			width: number | null;
+			height: number | null;
+			blurHash: string | null;
+			averageColour: string | null;
+			isDark: boolean | null;
+			isLight: boolean | null;
+			title: Record<string, string>;
+			alt: Record<string, string>;
+			type: MediaType | null;
+	  }
+	| null
+	| MediaResponse;
 export type DocumentResMeta = {
 	id: number | null;
+	collection_key?: string | null;
 	fields: Record<string, FieldAltResponse> | null;
 };
 export type RepeaterResMeta = null;
@@ -562,12 +572,16 @@ export type JsonResMeta = null;
 export type ColourResMeta = null;
 export type DatetimeResMeta = null;
 export type LinkResMeta = null;
-export type UserResMeta = {
-	username: string | null;
-	email: string | null;
-	firstName: string | null;
-	lastName: string | null;
-} | null;
+// TODO: UserResMeta | null will be the new type for this once the collection migration is finished
+export type UserResMeta =
+	| {
+			username: string | null;
+			email: string | null;
+			firstName: string | null;
+			lastName: string | null;
+	  }
+	| null
+	| UserResponse;
 
 export type FieldResponseMeta =
 	| TabResMeta

@@ -2,6 +2,7 @@ import Formatter from "./index.js";
 import { createCdnUrl } from "../../utils/media/index.js";
 import type { BooleanInt } from "../../libs/db/types.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
+import type { CFResponse } from "../custom-fields/types.js";
 
 interface MediaPropsT {
 	id: number;

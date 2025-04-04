@@ -169,6 +169,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			],
 		});
 	}
+	async selectMultipleByIds<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				ids: number[];
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select((eb) => [
+				"email",
+				"first_name",
+				"last_name",
+				"id",
+				"created_at",
+				"updated_at",
+				"username",
+				"super_admin",
+			])
+			.where("id", "in", props.ids)
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleByIds",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: [
+				"email",
+				"first_name",
+				"last_name",
+				"id",
+				"created_at",
+				"updated_at",
+				"username",
+				"super_admin",
+			],
+		});
+	}
 	async selectSingleByEmailUsername<
 		K extends keyof Select<LucidUsers>,
 		V extends boolean = false,

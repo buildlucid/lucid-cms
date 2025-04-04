@@ -10,6 +10,7 @@ import type {
 import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import getAllBrickTables from "../collection-migrator/helpers/get-all-brick-tables.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
+import fetchRelationData from "./helpers/fetch-relation-data.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -72,6 +73,8 @@ const getMultiple: ServiceFn<
 		};
 	}
 
+	console.log(bricksQueryRes.data);
+
 	const relationIdRes = await extractRelatedEntityIds(context, {
 		brickSchema: brickTablesRes.data,
 		brickQuery: bricksQueryRes.data,
@@ -80,13 +83,14 @@ const getMultiple: ServiceFn<
 
 	console.log(relationIdRes.data);
 
-	// TODO: loop over the custom fields and let them handle how relation data is fetched.
-	// TODO: create a new formatter to marry the relation data to the brick rows and format the response to match the original implementation
+	const relationDataRes = await fetchRelationData(context, {
+		values: relationIdRes.data,
+	});
+	if (relationDataRes.error) return relationDataRes;
 
-	const relatedDataPromises = [];
-	if (relationIdRes.data.media) {
-		relatedDataPromises.push();
-	}
+	console.log(relationDataRes.data);
+
+	// TODO: create a new formatter to marry the relation data to the brick rows and format the response to match the original implementation
 
 	return {
 		error: undefined,

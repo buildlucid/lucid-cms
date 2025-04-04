@@ -199,6 +199,101 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			],
 		});
 	}
+	async selectMultipleByIds<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				ids: number[];
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_media")
+			.select((eb) => [
+				"id",
+				"key",
+				"e_tag",
+				"type",
+				"mime_type",
+				"file_extension",
+				"file_size",
+				"width",
+				"height",
+				"title_translation_key_id",
+				"alt_translation_key_id",
+				"created_at",
+				"updated_at",
+				"blur_hash",
+				"average_colour",
+				"is_dark",
+				"is_light",
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_translations")
+							.select([
+								"lucid_translations.value",
+								"lucid_translations.locale_code",
+							])
+							.where("lucid_translations.value", "is not", null)
+							.whereRef(
+								"lucid_translations.translation_key_id",
+								"=",
+								"lucid_media.title_translation_key_id",
+							),
+					)
+					.as("title_translations"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_translations")
+							.select([
+								"lucid_translations.value",
+								"lucid_translations.locale_code",
+							])
+							.where("lucid_translations.value", "is not", null)
+							.whereRef(
+								"lucid_translations.translation_key_id",
+								"=",
+								"lucid_media.alt_translation_key_id",
+							),
+					)
+					.as("alt_translations"),
+			])
+			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"))
+			.where("id", "in", props.ids);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleByIds",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: [
+				"id",
+				"key",
+				"e_tag",
+				"type",
+				"mime_type",
+				"file_extension",
+				"file_size",
+				"width",
+				"height",
+				"title_translation_key_id",
+				"alt_translation_key_id",
+				"created_at",
+				"updated_at",
+				"blur_hash",
+				"average_colour",
+				"is_dark",
+				"is_light",
+				"title_translations",
+				"alt_translations",
+			],
+		});
+	}
 	async selectMultipleFilteredFixed<V extends boolean = false>(
 		props: QueryProps<
 			V,

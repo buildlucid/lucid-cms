@@ -1,10 +1,8 @@
-import T from "../../../translations/index.js";
-import logger from "../../../utils/logging/index.js";
-import Repository from "../../../libs/repositories/index.js";
 import type {
 	CFResponse,
 	FieldTypes,
-	ServiceContext,
+	LucidDocumentTableName,
+	LucidErrorData,
 	ServiceFn,
 } from "../../../types.js";
 import type { FieldRelationValues } from "./extract-related-entity-ids.js";
@@ -27,7 +25,82 @@ const fetchRelationData: ServiceFn<
 	FieldRelationResponse
 > = async (context, data) => {
 	const response: FieldRelationResponse = {};
-	const fetchPromises: Promise<void>[] = [];
+	const fetchPromises = [];
+
+	let firstError = false;
+	let responseError: LucidErrorData;
+
+	if (data.values.media) {
+		const mediaIds: number[] = data.values.media
+			.flatMap((i) => Array.from(i.values))
+			.filter((i) => typeof i === "number");
+
+		fetchPromises.push(
+			context.services.media
+				.getMultipleFieldMeta(context, {
+					ids: mediaIds,
+				})
+				.then((res) => {
+					if (res.error && !firstError) {
+						firstError = true;
+						responseError = res.error;
+						return;
+					}
+
+					if (res.data && Array.isArray(res.data)) {
+						response.media = res.data;
+					}
+					return res.data;
+				}),
+		);
+	}
+	if (data.values.user) {
+		const userIds: number[] = data.values.user
+			.flatMap((i) => Array.from(i.values))
+			.filter((i) => typeof i === "number");
+
+		fetchPromises.push(
+			context.services.user
+				.getMultipleFieldMeta(context, {
+					ids: userIds,
+				})
+				.then((res) => {
+					if (res.error && !firstError) {
+						firstError = true;
+						responseError = res.error;
+						return;
+					}
+
+					if (res.data && Array.isArray(res.data)) {
+						response.user = res.data;
+					}
+					return res.data;
+				}),
+		);
+	}
+	if (data.values.document) {
+		fetchPromises.push(
+			context.services.collection.documents
+				.getMultipleFieldMeta(context, {
+					values: data.values.document.map((v) => ({
+						table: v.table as LucidDocumentTableName,
+						ids: Array.from(v.values).filter((i) => typeof i === "number"),
+					})),
+				})
+				.then((res) => {
+					if (res.error && !firstError) {
+						firstError = true;
+						responseError = res.error;
+						return;
+					}
+
+					if (res.data && Array.isArray(res.data)) {
+						response.document = res.data;
+					}
+					return res.data;
+				}),
+		);
+	}
 
 	await Promise.all(fetchPromises);
 
@@ -37,48 +110,4 @@ const fetchRelationData: ServiceFn<
 	};
 };
 
-/**
- * Fetches media data for all media entries
- */
-async function fetchMediaData(
-	context: ServiceContext,
-	mediaEntries: Array<{ table: string; values: Set<unknown> }>,
-): Promise<Array<CFResponse<"media">["meta"]>> {
-	const Media = Repository.get("media", context.db, context.config.db);
-	const mediaResponses: Array<CFResponse<"media">["meta"]> = [];
-
-	for (const mediaEntry of mediaEntries) {
-		if (mediaEntry.values.size === 0) continue;
-
-		const mediaIds = Array.from(mediaEntry.values).filter(
-			(id) => id !== null && id !== undefined,
-		) as number[];
-		if (mediaIds.length === 0) continue;
-
-		const mediaRes = await Media.selectMultiple({
-			select: ["id"],
-			where: [
-				{
-					key: "id",
-					operator: "in",
-					value: mediaIds,
-				},
-			],
-			validation: {
-				enabled: true,
-			},
-		});
-		if (mediaRes.error) {
-			logger("error", {
-				message: T("error_fetching_media_for_document"),
-			});
-			return [];
-		}
-
-		// TODO: format response to match meta
-		// @ts-expect-error
-		mediaResponses.push(mediaRes.data);
-	}
-
-	return mediaResponses;
-}
+export default fetchRelationData;
