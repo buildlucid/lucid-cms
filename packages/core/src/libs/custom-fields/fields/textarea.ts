@@ -15,6 +15,7 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { ServiceResponse } from "../../../types.js";
 
 class TextareaCustomField extends CustomField<"textarea"> {
 	type = "textarea" as const;
@@ -44,16 +45,21 @@ class TextareaCustomField extends CustomField<"textarea"> {
 		} satisfies CFConfig<"textarea">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("text"),
-					nullable: true,
-					default: this.config.config.default,
-				},
-			],
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("text"),
+						nullable: true,
+						default: this.config.config.default,
+					},
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {

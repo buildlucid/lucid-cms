@@ -4,7 +4,7 @@ import CustomField from "../custom-field.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
 import constants from "../../../constants/constants.js";
-import type { LinkResValue } from "../../../types.js";
+import type { LinkResValue, ServiceResponse } from "../../../types.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -52,16 +52,21 @@ class LinkCustomField extends CustomField<"link"> {
 		} satisfies CFConfig<"link">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("json"),
-					nullable: true,
-					default: this.config.config.default,
-				},
-			],
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("json"),
+						nullable: true,
+						default: this.config.config.default,
+					},
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {

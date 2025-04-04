@@ -172,15 +172,16 @@ const createFieldTables = (props: {
 				};
 			}
 
-			const fieldSchema = fieldInstance.getSchemaDefinition({
+			const fieldSchemaRes = fieldInstance.getSchemaDefinition({
 				db: props.db,
 				tables: {
 					document: props.documentTable,
 					version: props.versionTable,
 				},
 			});
+			if (fieldSchemaRes.error) return fieldSchemaRes;
 
-			for (const column of fieldSchema.columns) {
+			for (const column of fieldSchemaRes.data.columns) {
 				columns.push({
 					name: prefixGeneratedColName(column.name),
 					source: "field",

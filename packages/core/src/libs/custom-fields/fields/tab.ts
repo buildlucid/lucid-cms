@@ -6,6 +6,7 @@ import type {
 	CFResponse,
 	SchemaDefinition,
 } from "../types.js";
+import type { ServiceResponse } from "../../../types.js";
 
 class TabCustomField extends CustomField<"tab"> {
 	type = "tab" as const;
@@ -28,9 +29,12 @@ class TabCustomField extends CustomField<"tab"> {
 		} satisfies CFConfig<"tab">;
 	}
 	// Methods
-	getSchemaDefinition(): SchemaDefinition {
+	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [],
+			data: {
+				columns: [],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat() {

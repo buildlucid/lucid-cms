@@ -17,6 +17,7 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { ServiceResponse } from "../../../types.js";
 
 class SelectCustomField extends CustomField<"select"> {
 	type = "select" as const;
@@ -47,15 +48,20 @@ class SelectCustomField extends CustomField<"select"> {
 		} satisfies CFConfig<"select">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("text"),
-					nullable: true,
-				},
-			],
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("text"),
+						nullable: true,
+					},
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {

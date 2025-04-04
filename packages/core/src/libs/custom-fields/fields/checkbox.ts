@@ -19,6 +19,7 @@ import type {
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { BooleanInt } from "../../db/types.js";
+import type { ServiceResponse } from "../../../types.js";
 
 class CheckboxCustomField extends CustomField<"checkbox"> {
 	type = "checkbox" as const;
@@ -49,19 +50,24 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		} satisfies CFConfig<"checkbox">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("boolean"),
-					nullable: true,
-					default: props.db.formatInsertValue<BooleanInt>(
-						"boolean",
-						this.config.config.default,
-					),
-				},
-			],
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("boolean"),
+						nullable: true,
+						default: props.db.formatInsertValue<BooleanInt>(
+							"boolean",
+							this.config.config.default,
+						),
+					},
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {

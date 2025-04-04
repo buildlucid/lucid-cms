@@ -162,10 +162,7 @@ test("fail to validate field - document", async () => {
 		brickId: CONSTANTS.collectionBrickId,
 		localeCode: "en",
 		groupId: undefined,
-		message: T("field_document_collection_key_mismatch", {
-			received: "page",
-			expected: "wrong_collection",
-		}),
+		message: T("field_document_not_found"),
 	});
 });
 

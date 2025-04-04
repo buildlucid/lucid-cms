@@ -6,7 +6,7 @@ import { createCdnUrl } from "../../../utils/media/index.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { objectifyTranslations } from "../../../utils/translations/index.js";
 import Formatter from "../../formatters/index.js";
-import type { MediaType } from "../../../types.js";
+import type { MediaType, ServiceResponse } from "../../../types.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -48,20 +48,25 @@ class MediaCustomField extends CustomField<"media"> {
 		} satisfies CFConfig<"media">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("integer"),
-					nullable: true,
-					foreignKey: {
-						table: "lucid_media",
-						column: "id",
-						onDelete: "set null",
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("integer"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_media",
+							column: "id",
+							onDelete: "set null",
+						},
 					},
-				},
-			],
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {

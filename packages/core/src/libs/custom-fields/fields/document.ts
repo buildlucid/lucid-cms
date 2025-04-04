@@ -4,6 +4,7 @@ import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
+import buildTableName from "../../../services/collection-migrator/helpers/build-table-name.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -18,6 +19,7 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { ServiceResponse } from "../../../types.js";
 
 const FieldsFormatter = Formatter.get("collection-document-fields");
 
@@ -48,21 +50,30 @@ class DocumentCustomField extends CustomField<"document"> {
 		} satisfies CFConfig<"document">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
-		// TODO: add support for foreign key to use different collections
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
+		const documentTableRes = buildTableName("document", {
+			collection: this.config.collection,
+		});
+		if (documentTableRes.error) return documentTableRes;
+
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("integer"),
-					nullable: true,
-					foreignKey: {
-						table: props.tables.document,
-						column: "id",
-						onDelete: "set null",
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("integer"),
+						nullable: true,
+						foreignKey: {
+							table: documentTableRes.data,
+							column: "id",
+							onDelete: "set null",
+						},
 					},
-				},
-			],
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {
@@ -133,22 +144,14 @@ class DocumentCustomField extends CustomField<"document"> {
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		const findDocument = relationData?.find((d) => d.id === value);
+		const findDocument = relationData?.find(
+			(d) => d.id === value && d.collection_key === this.config.collection,
+		);
 
 		if (findDocument === undefined) {
 			return {
 				valid: false,
 				message: T("field_document_not_found"),
-			};
-		}
-
-		if (findDocument.collection_key !== this.config.collection) {
-			return {
-				valid: false,
-				message: T("field_document_collection_key_mismatch", {
-					expected: this.config.collection,
-					received: findDocument.collection_key,
-				}),
 			};
 		}
 

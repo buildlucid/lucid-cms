@@ -249,7 +249,6 @@
 	"send_email_error_name": "Send Email Error",
 	"field_document_collection_not_found": "The collection '{{collection}}' does not exist or is not of mode multiple for the document field '{{field}}'.",
 	"field_has_relation_data": "The is missing relation data",
-	"field_document_collection_key_mismatch": "The collection of this document does not match the collection set against the field. Received: '{{received}}' Expected: '{{expected}}'",
 	"invalid_encrypted_secret": "The encrypted secret is invalid.",
 	"media_duplicate_key_error_name": "Media Duplicate Key Error",
 	"media_duplicate_key_error_message": "The media key you have provided already exists.",

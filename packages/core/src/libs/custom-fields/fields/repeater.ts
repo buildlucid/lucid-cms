@@ -7,6 +7,7 @@ import type {
 	CFResponse,
 	SchemaDefinition,
 } from "../types.js";
+import type { ServiceResponse } from "../../../types.js";
 
 class RepeaterCustomField extends CustomField<"repeater"> {
 	type = "repeater" as const;
@@ -33,9 +34,12 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 		} satisfies CFConfig<"repeater">;
 	}
 	// Methods
-	getSchemaDefinition(): SchemaDefinition {
+	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [],
+			data: {
+				columns: [],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat() {

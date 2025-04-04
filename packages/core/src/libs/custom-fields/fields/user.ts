@@ -17,6 +17,7 @@ import type {
 	FieldFormatMeta,
 } from "../../formatters/collection-document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { ServiceResponse } from "../../../types.js";
 
 class UserCustomField extends CustomField<"user"> {
 	type = "user" as const;
@@ -44,20 +45,25 @@ class UserCustomField extends CustomField<"user"> {
 		} satisfies CFConfig<"user">;
 	}
 	// Methods
-	getSchemaDefinition(props: GetSchemaDefinitionProps): SchemaDefinition {
+	getSchemaDefinition(
+		props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
-			columns: [
-				{
-					name: this.key,
-					type: props.db.getDataType("integer"),
-					nullable: true,
-					foreignKey: {
-						table: "lucid_users",
-						column: "id",
-						onDelete: "set null",
+			data: {
+				columns: [
+					{
+						name: this.key,
+						type: props.db.getDataType("integer"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_users",
+							column: "id",
+							onDelete: "set null",
+						},
 					},
-				},
-			],
+				],
+			},
+			error: undefined,
 		};
 	}
 	responseValueFormat(props: {
