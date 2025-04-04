@@ -77,18 +77,14 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 						this.db
 							.selectFrom(brick.table)
 							.where("document_version_id", "=", props.versionId)
-							.select(
-								brick.columns.map(
-									(c) => `${brick.table}.${c.name}` as keyof LucidBricksTable,
-								),
-							),
+							.select(brick.columns.map((c) => `${brick.table}.${c.name}`)),
 					)
 					.as(brick.table),
 			);
 		}
 
 		const exec = await this.executeQuery(
-			() => query.executeTakeFirst() as Promise<BrickQueryResponse>,
+			() => query.executeTakeFirst() as unknown as Promise<BrickQueryResponse>,
 			{
 				method: "selectMultipleByVersionId",
 				tableName: dynamicConfig.tableName,

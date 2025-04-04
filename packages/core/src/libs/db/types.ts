@@ -403,7 +403,7 @@ export type LucidBrickTableName =
 	| `lucid_document__${string}__${string}`
 	| `lucid_document__${string}__${string}__${string}`;
 
-type CustomFieldColumnName = `_${string}`;
+type CustomFieldColumnName = string; // `_${string}`;
 export interface LucidBricksTable {
 	id: Generated<number>;
 	collection_key: string;
