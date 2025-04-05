@@ -89,14 +89,14 @@ const getMultiple: ServiceFn<
 		data: {
 			bricks: DocumentBricksFormatter.formatMultiple({
 				bricksQuery: bricksQueryRes.data,
-				brickSchema: bricksSchemaRes.data,
+				bricksSchema: bricksSchemaRes.data,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
 			}),
 			fields: DocumentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
-				brickSchema: bricksSchemaRes.data,
+				bricksSchema: bricksSchemaRes.data,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,

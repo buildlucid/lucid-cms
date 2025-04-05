@@ -1,12 +1,176 @@
 import Formatter from "./index.js";
 import constants from "../../constants/constants.js";
-import type { Config, FieldResponse } from "../../types.js";
+import type {
+	CFConfig,
+	Config,
+	FieldResponse,
+	FieldResponseMeta,
+	FieldResponseValue,
+	FieldTypes,
+	LucidBricksTable,
+	LucidBrickTableName,
+} from "../../types.js";
+import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
+import type { BrickQueryResponse } from "../repositories/document-bricks.js";
+import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
+
+export interface FieldFormatMeta {
+	builder: BrickBuilder | CollectionBuilder;
+	host: string;
+	collectionTranslations: boolean;
+	localisation: {
+		locales: string[];
+		default: string;
+	};
+}
+
+interface FieldFormatData {
+	/** The filtered target brick table rows, grouped by position, each row represent a different locale for the same brick instance */
+	brickRows: LucidBricksTable[];
+	/** The entire bricksQuery response data - used to select repeater rows from later */
+	bricksQuery: BrickQueryResponse;
+	/** The schema for the entire collection and all possible bricks */
+	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+	/** All relation meta data, users, media, documents etc. Used to populate the field meta data based on the CF type and value */
+	relationMetaData: FieldRelationResponse;
+}
+
+interface IntermediaryFieldValues {
+	value: unknown;
+	locale: string;
+}
 
 export default class DocumentFieldsFormatter {
-	formatMultiple = (props: {
-		config: Config;
-	}): FieldResponse[] => {
-		return [];
+	/**
+	 * The entry point for building out the FieldResponse array.
+	 *
+	 * Formats, creates groups, creates nested structure, marries relationMetaData etc.
+	 */
+	formatMultiple = (
+		data: FieldFormatData,
+		meta: FieldFormatMeta,
+	): FieldResponse[] => {
+		return this.buildFieldTree(data, {
+			builder: meta.builder,
+			fieldConfig: meta.builder.fieldTreeNoTab,
+			host: meta.host,
+			localisation: meta.localisation,
+			collectionTranslations: meta.collectionTranslations,
+		});
+	};
+
+	/**
+	 *  Recursively build out the FieldResponse based on the nested fieldConfig
+	 */
+	private buildFieldTree = (
+		data: FieldFormatData,
+		meta: FieldFormatMeta & {
+			fieldConfig: CFConfig<FieldTypes>[];
+		},
+	): FieldResponse[] => {
+		const fieldsRes: FieldResponse[] = [];
+
+		//* loop over fieldConfig (nested field structure - no tabs)
+		for (const config of meta.fieldConfig) {
+			if (config.type === "repeater") {
+				//* recursively build out repeater groups
+				continue;
+			}
+
+			const fieldKey = prefixGeneratedColName(config.key);
+
+			//* get all instaces of this field (config.key) accross the data.brickRows (so the value for each locale)
+			const fieldValues: IntermediaryFieldValues[] = data.brickRows.flatMap(
+				(row) => ({
+					value: row[fieldKey],
+					locale: row.locale,
+				}),
+			);
+
+			const fieldValue = this.buildField(
+				{
+					values: fieldValues,
+				},
+				{
+					builder: meta.builder,
+					fieldConfig: config,
+					host: meta.host,
+					localisation: meta.localisation,
+					collectionTranslations: meta.collectionTranslations,
+				},
+			);
+			if (fieldValue) fieldsRes.push(fieldValue);
+		}
+
+		return fieldsRes;
+	};
+
+	/**
+	 * Responsible for building a single FieldResponse object.
+	 *
+	 * Adds in empty locale values, formats the value and constructs either translations or values based on the fields config
+	 * @TODO add group, groupid supports and address TODO comments in block
+	 */
+	private buildField = (
+		data: {
+			values: IntermediaryFieldValues[];
+		},
+		meta: FieldFormatMeta & {
+			fieldConfig: CFConfig<FieldTypes>;
+		},
+	): FieldResponse | null => {
+		const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
+		if (!cfInstance) return null;
+
+		//* if the field supports translations, use the translations field key
+		if (
+			meta.fieldConfig.type !== "repeater" &&
+			meta.fieldConfig.type !== "tab" &&
+			meta.fieldConfig.config.useTranslations === true &&
+			meta.collectionTranslations === true
+		) {
+			const fieldTranslations: Record<string, FieldResponseValue> = {};
+			const fieldMeta: Record<string, FieldResponseMeta> = {};
+
+			//* populate the translations/meta
+			for (const locale of meta.localisation.locales) {
+				const localeValue = data.values.find((v) => v.locale === locale);
+
+				if (localeValue) {
+					// TODO: use the cfInstance to format the value and meta data.
+					fieldTranslations[locale] = localeValue.value as FieldResponseValue;
+					// TODO: add helper to get field meta values
+					fieldMeta[locale] = null;
+				} else {
+					fieldTranslations[locale] = null;
+					fieldMeta[locale] = null;
+				}
+			}
+
+			return {
+				key: meta.fieldConfig.key,
+				type: meta.fieldConfig.type,
+				translations: fieldTranslations,
+				meta: fieldMeta,
+			};
+		}
+
+		//* otherwise use the value key to just store the default locales value
+		const defaultValue = data.values.find(
+			(f) => f.locale === meta.localisation.default,
+		);
+		if (!defaultValue) return null;
+
+		return {
+			key: meta.fieldConfig.key,
+			type: meta.fieldConfig.type,
+			// TODO: use the cfInstance to format the value and meta data.
+			value: defaultValue.value as FieldResponseValue,
+			// TODO: add helper to get field meta values
+			meta: null,
+		};
 	};
 
 	static swagger = {

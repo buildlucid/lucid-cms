@@ -6,6 +6,7 @@ import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type {
 	Config,
 	FieldResponse,
+	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../types.js";
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
@@ -16,20 +17,21 @@ export default class DocumentBricksFormatter {
 	formatMultiple = (props: {
 		bricksQuery: BrickQueryResponse;
 		collection: CollectionBuilder;
-		brickSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 		relationMetaData: FieldRelationResponse;
 		config: Config;
 	}): BrickResponse[] => {
+		// console.log(props.bricksSchema);
 		return [];
 	};
 	formatDocumentFields = (props: {
 		bricksQuery: BrickQueryResponse;
 		collection: CollectionBuilder;
-		brickSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 		relationMetaData: FieldRelationResponse;
 		config: Config;
 	}): FieldResponse[] => {
-		const documentFieldsSchema = props.brickSchema.find(
+		const documentFieldsSchema = props.bricksSchema.find(
 			(bs) => bs.type === "document-fields",
 		);
 		if (!documentFieldsSchema) return [];
@@ -37,12 +39,93 @@ export default class DocumentBricksFormatter {
 		const tableData = props.bricksQuery[documentFieldsSchema.name];
 		if (!tableData) return [];
 
-		const tablesByPos = Map.groupBy(tableData, (item) => item.position);
+		const rowsByPos = Map.groupBy(tableData, (item) => item.position);
+		const rowOne = rowsByPos.get(0);
 
-		console.log(tablesByPos);
+		//* there should always be no more than 1
+		if (!rowOne) return [];
 
+		const DocumentFieldsFormatter = Formatter.get("document-fields");
+
+		const fields = DocumentFieldsFormatter.formatMultiple(
+			{
+				brickRows: rowOne,
+				bricksQuery: props.bricksQuery,
+				bricksSchema: props.bricksSchema,
+				relationMetaData: props.relationMetaData,
+			},
+			{
+				host: props.config.host,
+				builder: props.collection,
+				collectionTranslations: props.collection.getData.config.useTranslations,
+				localisation: {
+					locales: props.config.localisation.locales.map((l) => l.code),
+					default: props.config.localisation.defaultLocale,
+				},
+			},
+		);
+		console.log(fields);
+
+		// for (const field of props.collection.fieldTreeNoTab) {
+		// 	if (field.type === "repeater") {
+		// 		const repeaterTables = this.getBrickRepeaterRows({
+		// 			bricksQuery: props.bricksQuery,
+		// 			bricksSchema: props.bricksSchema,
+		// 			collectionKey: props.collection.key,
+		// 			brickKey: undefined,
+		// 			repeaterKey: field.key,
+		// 			repeaterLevel: 0,
+		// 		});
+		// 		console.log(field.key, repeaterTables);
+		// 	}
+		// }
+
+		return fields;
+	};
+
+	/**
+	 * Works out the target repeater table based on props and schema, and returns all the rows for it from the brciksQuery prop
+	 */
+	getBrickRepeaterRows = (props: {
+		bricksQuery: BrickQueryResponse;
+		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+		collectionKey: string;
+		brickKey: string | undefined; // document-fields type doesnt add a brick key,
+		repeaterKey: string;
+		repeaterLevel: number;
+	}): LucidBricksTable[] => {
+		const matchingSchema = props.bricksSchema.find((schema) => {
+			//* check if the collection key doesnt match
+			if (schema.key.collection !== props.collectionKey) return false;
+			//* match the brick key if provided
+			if (props.brickKey !== undefined && schema.key.brick !== props.brickKey)
+				return false;
+			//* check if this is a repeater schema
+			if (schema.type !== "repeater") return false;
+			//* for document fields without a brick key
+			if (props.brickKey === undefined && schema.key.brick !== undefined)
+				return false;
+			//* check if the repeater array exists and has the correct path
+			if (!schema.key.repeater || schema.key.repeater.length === 0)
+				return false;
+			//* ensure we're at the correct nesting level
+			if (schema.key.repeater.length !== props.repeaterLevel + 1) return false;
+			//* check repeater key if it matches the last item in the repeater path
+			if (
+				schema.key.repeater[schema.key.repeater.length - 1] !==
+				props.repeaterKey
+			)
+				return false;
+
+			return true;
+		});
+
+		if (matchingSchema && matchingSchema.name in props.bricksQuery) {
+			return props.bricksQuery[matchingSchema.name] || [];
+		}
 		return [];
 	};
+
 	static swagger = {
 		type: "object",
 		additionalProperties: true,

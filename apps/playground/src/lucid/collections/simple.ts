@@ -18,20 +18,24 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		builder: [SimpleBrick],
 		fixed: [SimpleFixedBrick],
 	},
-}).addText("simpleHeading", {
-	details: {
-		label: {
-			en: "Heading Default",
+})
+	.addText("simpleHeading", {
+		details: {
+			label: {
+				en: "Heading Default",
+			},
 		},
-	},
-	validation: {
-		required: true,
-		zod: z.string().min(2).max(128),
-	},
-	collection: {
-		column: true,
-		filterable: true,
-	},
-});
+		validation: {
+			required: true,
+			zod: z.string().min(2).max(128),
+		},
+		collection: {
+			column: true,
+			filterable: true,
+		},
+	})
+	.addRepeater("people")
+	.addText("firstName")
+	.endRepeater();
 
 export default SimpleCollection;
