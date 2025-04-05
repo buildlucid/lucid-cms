@@ -29,6 +29,7 @@ const inferBricksTableSchema = (
 				type: table.type,
 				columns: table.columns,
 				key: table.key,
+				brickType: table.brickType,
 			})),
 	};
 };

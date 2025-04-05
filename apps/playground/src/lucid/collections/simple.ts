@@ -15,7 +15,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		useRevisions: true,
 	},
 	bricks: {
-		builder: [SimpleBrick],
+		builder: [SimpleBrick, SimpleFixedBrick],
 		fixed: [SimpleFixedBrick],
 	},
 })

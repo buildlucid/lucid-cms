@@ -11,6 +11,7 @@ import type {
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../libs/db/types.js";
+import { inspect } from "node:util";
 
 // @ts-expect-error
 const getSingle: ServiceFn<
@@ -77,6 +78,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
+	// TODO: add brick res to response here
 	if (data.query.include?.includes("bricks")) {
 		const bricksRes =
 			await context.services.collection.documentBricks.getMultiple(context, {
@@ -85,6 +87,14 @@ const getSingle: ServiceFn<
 				versionType: versionType !== "revision" ? versionType : undefined, // if we're fetching a revision, let it default to the draft version
 			});
 		if (bricksRes.error) return bricksRes;
+
+		console.log(
+			inspect(bricksRes.data, {
+				depth: Number.POSITIVE_INFINITY,
+				colors: true,
+				numericSeparator: true,
+			}),
+		);
 
 		return {
 			error: undefined,

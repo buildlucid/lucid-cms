@@ -34,7 +34,7 @@ const inferSchema = (
 		tables.push(versionTableRes.data.schema);
 
 		//* field / repeater tables
-		for (const brick of collection.brickInstances) {
+		for (const brick of collection.config.bricks?.fixed || []) {
 			const brickFieldsTableRes = createFieldTables({
 				collection: collection,
 				fields: brick.fieldTreeNoTab,
@@ -43,6 +43,23 @@ const inferSchema = (
 				documentTable: documentTableRes.data.schema.name,
 				versionTable: versionTableRes.data.schema.name,
 				brick: brick,
+				brickType: "fixed",
+			});
+			if (brickFieldsTableRes.error) return brickFieldsTableRes;
+
+			tables.push(brickFieldsTableRes.data.schema);
+			tables.push(...brickFieldsTableRes.data.childTables);
+		}
+		for (const brick of collection.config.bricks?.builder || []) {
+			const brickFieldsTableRes = createFieldTables({
+				collection: collection,
+				fields: brick.fieldTreeNoTab,
+				db: db,
+				type: "brick",
+				documentTable: documentTableRes.data.schema.name,
+				versionTable: versionTableRes.data.schema.name,
+				brick: brick,
+				brickType: "builder",
 			});
 			if (brickFieldsTableRes.error) return brickFieldsTableRes;
 
@@ -57,16 +74,24 @@ const inferSchema = (
 			documentTable: documentTableRes.data.schema.name,
 			versionTable: versionTableRes.data.schema.name,
 			type: "document-fields",
+			brickType: "document-fields",
 		});
 		if (collectionFieldsTableRes.error) return collectionFieldsTableRes;
 
 		tables.push(collectionFieldsTableRes.data.schema);
 		tables.push(...collectionFieldsTableRes.data.childTables);
 
+		//* because the same brick can exist on both the fixed and builder bricks list at the same time, we need to dedupe the schema.
+		const uniqueTableNames = new Set<string>();
+
 		return {
 			data: {
 				key: collection.key,
-				tables: tables,
+				tables: tables.filter((table) => {
+					if (uniqueTableNames.has(table.name)) return false;
+					uniqueTableNames.add(table.name);
+					return true;
+				}),
 			},
 			error: undefined,
 		};

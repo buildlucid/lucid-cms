@@ -27,6 +27,7 @@ const createFieldTables = (props: {
 	repeaterKeys?: string[];
 	parentTable?: string;
 	brickTable?: string;
+	brickType: "fixed" | "builder" | "document-fields";
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
@@ -183,6 +184,7 @@ const createFieldTables = (props: {
 				brick: props.brick,
 				repeaterKeys: repeaterKeys,
 				parentTable: tableNameRes.data,
+				brickType: props.brickType,
 			});
 			if (repeaterTableRes.error) return repeaterTableRes;
 
@@ -243,6 +245,7 @@ const createFieldTables = (props: {
 					brick: props.brick?.key,
 					repeater: props.repeaterKeys,
 				},
+				brickType: props.brickType,
 				columns: columns,
 			},
 			childTables: childTables,

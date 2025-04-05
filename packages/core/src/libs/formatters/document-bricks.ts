@@ -8,6 +8,7 @@ import type {
 	FieldResponse,
 	LucidBricksTable,
 	LucidBrickTableName,
+	Select,
 } from "../../types.js";
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
@@ -21,8 +22,67 @@ export default class DocumentBricksFormatter {
 		relationMetaData: FieldRelationResponse;
 		config: Config;
 	}): BrickResponse[] => {
-		console.log(props.bricksQuery);
-		return [];
+		const brickSchemas = props.bricksSchema.filter(
+			(schema) => schema.type === "brick",
+		);
+		if (brickSchemas.length === 0) return [];
+
+		const brickResponses: BrickResponse[] = [];
+
+		for (const schema of brickSchemas) {
+			if (schema.brickType === "document-fields") continue;
+
+			const tableData = props.bricksQuery[schema.name];
+			if (!tableData || tableData.length === 0) continue;
+
+			const rowsByPosition = Map.groupBy(tableData, (item) => item.position);
+
+			for (const [position, rows] of rowsByPosition.entries()) {
+				if (position === undefined || !rows || rows.length === 0) continue;
+
+				//* take the first row to get the brick metadata, open value is shared acdross locale rows for now
+				const firstRow = rows[0];
+				if (!firstRow) continue;
+
+				const brickKey = schema.key.brick;
+				if (!brickKey) continue;
+
+				const brickBuilder = props.collection.brickInstances.find(
+					(b) => b.key === brickKey,
+				);
+				if (!brickBuilder) continue;
+
+				const DocumentFieldsFormatter = Formatter.get("document-fields");
+
+				brickResponses.push({
+					id: -1, // TODO: remove this from type, no longer needed. No such thing as a brick ID as a single brick spans accross multiple rows due to locales
+					key: brickKey,
+					order: position,
+					open: Formatter.formatBoolean(firstRow.is_open),
+					type: schema.brickType,
+					fields: DocumentFieldsFormatter.formatMultiple(
+						{
+							brickRows: rows,
+							bricksQuery: props.bricksQuery,
+							bricksSchema: props.bricksSchema,
+							relationMetaData: props.relationMetaData,
+						},
+						{
+							host: props.config.host,
+							builder: brickBuilder,
+							collection: props.collection,
+							localisation: {
+								locales: props.config.localisation.locales.map((l) => l.code),
+								default: props.config.localisation.defaultLocale,
+							},
+							brickKey: brickKey,
+						},
+					),
+				});
+			}
+		}
+
+		return brickResponses.sort((a, b) => a.order - b.order);
 	};
 	formatDocumentFields = (props: {
 		bricksQuery: BrickQueryResponse;
@@ -47,7 +107,7 @@ export default class DocumentBricksFormatter {
 
 		const DocumentFieldsFormatter = Formatter.get("document-fields");
 
-		const fields = DocumentFieldsFormatter.formatMultiple(
+		return DocumentFieldsFormatter.formatMultiple(
 			{
 				brickRows: rowOne,
 				bricksQuery: props.bricksQuery,
@@ -58,7 +118,6 @@ export default class DocumentBricksFormatter {
 				host: props.config.host,
 				builder: props.collection,
 				collection: props.collection,
-				// collectionTranslations: props.collection.getData.config.useTranslations,
 				localisation: {
 					locales: props.config.localisation.locales.map((l) => l.code),
 					default: props.config.localisation.defaultLocale,
@@ -66,23 +125,6 @@ export default class DocumentBricksFormatter {
 				brickKey: undefined,
 			},
 		);
-		console.log(fields);
-
-		// for (const field of props.collection.fieldTreeNoTab) {
-		// 	if (field.type === "repeater") {
-		// 		const repeaterTables = this.getBrickRepeaterRows({
-		// 			bricksQuery: props.bricksQuery,
-		// 			bricksSchema: props.bricksSchema,
-		// 			collectionKey: props.collection.key,
-		// 			brickKey: undefined,
-		// 			repeaterKey: field.key,
-		// 			repeaterLevel: 0,
-		// 		});
-		// 		console.log(field.key, repeaterTables);
-		// 	}
-		// }
-
-		return fields;
 	};
 
 	/**
@@ -95,7 +137,9 @@ export default class DocumentBricksFormatter {
 		brickKey: string | undefined; // document-fields type doesnt add a brick key,
 		repeaterKey: string;
 		repeaterLevel: number;
-	}): LucidBricksTable[] => {
+		/** Filters the response based on the given brick IDs or repeater IDs depending on the repeater depth */
+		relationIds: number[];
+	}): Select<LucidBricksTable>[] => {
 		const matchingSchema = props.bricksSchema.find((schema) => {
 			//* check if the collection key doesnt match
 			if (schema.key.collection !== props.collectionKey) return false;
@@ -123,7 +167,20 @@ export default class DocumentBricksFormatter {
 		});
 
 		if (matchingSchema && matchingSchema.name in props.bricksQuery) {
-			return props.bricksQuery[matchingSchema.name] || [];
+			const rows = props.bricksQuery[matchingSchema.name];
+			if (!rows) return [];
+
+			if (props.repeaterLevel === 0) {
+				//* filters the rows based on given brick IDs (each locale has its own unique brick ID, brick IDs are used on repeaters to build the relationship)
+				return rows.filter(
+					(r) => r.brick_id && props.relationIds.includes(r.brick_id),
+				);
+			}
+
+			//* filters the rows based on the given repeater IDs
+			return rows.filter(
+				(r) => r.parent_id && props.relationIds.includes(r.parent_id),
+			);
 		}
 		return [];
 	};

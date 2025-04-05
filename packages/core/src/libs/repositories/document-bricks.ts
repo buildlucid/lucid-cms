@@ -14,7 +14,7 @@ import type { DynamicConfig } from "./types.js";
 import type { CollectionSchemaColumn } from "../../services/collection-migrator/schema/types.js";
 
 export interface BrickQueryResponse extends Select<LucidVersionTable> {
-	[key: LucidBrickTableName]: LucidBricksTable[];
+	[key: LucidBrickTableName]: Select<LucidBricksTable>[];
 }
 
 export default class DocumentBricksRepository extends DynamicRepository<LucidBrickTableName> {

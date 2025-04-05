@@ -35,6 +35,7 @@ export type CollectionSchemaTable<TableName = string> = {
 		brick?: string;
 		repeater?: Array<string>;
 	};
+	brickType: "fixed" | "builder" | "document-fields";
 	columns: Array<CollectionSchemaColumn>;
 };
 

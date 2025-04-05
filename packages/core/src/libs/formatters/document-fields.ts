@@ -11,6 +11,7 @@ import type {
 	FieldTypes,
 	LucidBricksTable,
 	LucidBrickTableName,
+	Select,
 } from "../../types.js";
 import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
@@ -32,7 +33,7 @@ export interface FieldFormatMeta {
 
 interface FieldFormatData {
 	/** The filtered target brick table rows, grouped by position, each row represent a different locale for the same brick instance */
-	brickRows: LucidBricksTable[];
+	brickRows: Select<LucidBricksTable>[];
 	/** The entire bricksQuery response data - used to select repeater rows from later */
 	bricksQuery: BrickQueryResponse;
 	/** The schema for the entire collection and all possible bricks */
@@ -200,7 +201,6 @@ export default class DocumentFieldsFormatter {
 		data: FieldFormatData,
 		meta: FieldFormatMeta & {
 			repeaterConfig: CFConfig<"repeater">;
-			brickKey: string | undefined;
 			repeaterLevel: number;
 		},
 	): FieldGroupResponse[] => {
@@ -217,11 +217,42 @@ export default class DocumentFieldsFormatter {
 			brickKey: meta.brickKey,
 			repeaterKey: meta.repeaterConfig.key,
 			repeaterLevel: meta.repeaterLevel,
+			relationIds: data.brickRows.flatMap((b) => b.id),
 		});
 
-		// console.log(repeaterTables);
+		//* group by the position
+		const groups = Map.groupBy(repeaterTables, (item) => {
+			return item.position;
+		});
+		groups.forEach((localeRows, key) => {
+			//* open state is shared for now - if this is to change in the future, the insert/response format for this needs changing
+			const openState = localeRows[0]?.is_open ?? false;
 
-		return groupsRes;
+			groupsRes.push({
+				id: "ignore", // TODO: remove this from type, no longer needed. No such thing as a group ID as a single group spans accross multiple rows due to locales
+				order: key,
+				open: Formatter.formatBoolean(openState),
+				fields: this.buildFieldTree(
+					{
+						brickRows: localeRows,
+						bricksQuery: data.bricksQuery,
+						bricksSchema: data.bricksSchema,
+						relationMetaData: data.relationMetaData,
+					},
+					{
+						builder: meta.builder,
+						host: meta.host,
+						localisation: meta.localisation,
+						collection: meta.collection,
+						brickKey: meta.brickKey,
+						fieldConfig: repeaterFields,
+						repeaterLevel: meta.repeaterLevel + 1,
+					},
+				),
+			});
+		});
+
+		return groupsRes.sort((a, b) => a.order - b.order);
 	};
 
 	static swagger = {
