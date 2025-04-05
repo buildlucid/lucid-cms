@@ -4,14 +4,13 @@ import type {
 	DocumentVersionType,
 	LucidBrickTableName,
 	LucidBricksTable,
-	LucidDocumentTableName,
 	LucidVersionTable,
 	LucidVersionTableName,
 	Select,
 } from "../db/types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-import type { DynamicConfig, QueryProps } from "./types.js";
+import type { DynamicConfig } from "./types.js";
 import type { CollectionSchemaColumn } from "../../services/collection-migrator/schema/types.js";
 
 export interface BrickQueryResponse extends Select<LucidVersionTable> {
@@ -58,8 +57,8 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			/** The version type to use for any custom field document references  */
 			versionType: Exclude<DocumentVersionType, "revision">;
 			versionId: number;
-			bricks: Array<{
-				table: LucidBrickTableName;
+			bricksSchema: Array<{
+				name: LucidBrickTableName;
 				columns: Array<CollectionSchemaColumn>;
 			}>;
 		},
@@ -70,16 +69,16 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			.where("id", "=", props.versionId)
 			.selectAll();
 
-		for (const brick of props.bricks) {
+		for (const brick of props.bricksSchema) {
 			query = query.select(() =>
 				this.dbAdapter
 					.jsonArrayFrom(
 						this.db
-							.selectFrom(brick.table)
+							.selectFrom(brick.name)
 							.where("document_version_id", "=", props.versionId)
-							.select(brick.columns.map((c) => `${brick.table}.${c.name}`)),
+							.select(brick.columns.map((c) => `${brick.name}.${c.name}`)),
 					)
-					.as(brick.table),
+					.as(brick.name),
 			);
 		}
 

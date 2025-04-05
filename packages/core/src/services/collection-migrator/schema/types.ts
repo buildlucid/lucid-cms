@@ -27,8 +27,8 @@ export type CollectionSchemaColumn = {
 	unique?: boolean;
 	primary?: boolean;
 };
-export type CollectionSchemaTable = {
-	name: string;
+export type CollectionSchemaTable<TableName = string> = {
+	name: TableName;
 	type: TableType;
 	key: {
 		collection: string;

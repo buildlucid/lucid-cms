@@ -1,6 +1,7 @@
 import { z } from "@lucidcms/core";
 import { CollectionBuilder } from "@lucidcms/core/builders";
 import SimpleBrick from "../bricks/simple.js";
+import SimpleFixedBrick from "../bricks/simple-fixed.js";
 
 const SimpleCollection = new CollectionBuilder("simple", {
 	mode: "multiple",
@@ -15,6 +16,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 	},
 	bricks: {
 		builder: [SimpleBrick],
+		fixed: [SimpleFixedBrick],
 	},
 }).addText("simpleHeading", {
 	details: {

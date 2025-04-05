@@ -8,7 +8,7 @@ import type {
 	LucidVersionTableName,
 } from "../../libs/db/types.js";
 import buildTableName from "../collection-migrator/helpers/build-table-name.js";
-import getAllBrickTables from "../collection-migrator/helpers/get-all-brick-tables.js";
+import inferBricksTableSchema from "../collection-migrator/helpers/infer-bricks-table-schema.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 import fetchRelationData from "./helpers/fetch-relation-data.js";
 
@@ -25,17 +25,17 @@ const getMultiple: ServiceFn<
 			versionType?: Exclude<DocumentVersionType, "revision">;
 		},
 	],
-	// {
-	// 	bricks: Array<BrickResponse>;
-	// 	fields: Array<FieldResponse>;
-	// }
-	undefined
+	{
+		bricks: Array<BrickResponse>;
+		fields: Array<FieldResponse>;
+	}
 > = async (context, data) => {
 	const DocumentBricks = Repository.get(
 		"document-bricks",
 		context.db,
 		context.config.db,
 	);
+	const DocumentBricksFormatter = Formatter.get("document-bricks");
 
 	const versionsTableRes = buildTableName<LucidVersionTableName>("versions", {
 		collection: data.collectionKey,
@@ -47,17 +47,17 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const brickTablesRes = getAllBrickTables(
+	const bricksSchemaRes = inferBricksTableSchema(
 		collectionRes.data,
 		context.config.db,
 	);
-	if (brickTablesRes.error) return brickTablesRes;
+	if (bricksSchemaRes.error) return bricksSchemaRes;
 
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionType: data.versionType ?? "draft",
 			versionId: data.versionId,
-			bricks: brickTablesRes.data,
+			bricksSchema: bricksSchemaRes.data,
 		},
 		{
 			tableName: versionsTableRes.data,
@@ -73,40 +73,35 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	console.log(bricksQueryRes.data);
-
 	const relationIdRes = await extractRelatedEntityIds(context, {
-		brickSchema: brickTablesRes.data,
+		brickSchema: bricksSchemaRes.data,
 		brickQuery: bricksQueryRes.data,
 	});
 	if (relationIdRes.error) return relationIdRes;
-
-	console.log(relationIdRes.data);
 
 	const relationDataRes = await fetchRelationData(context, {
 		values: relationIdRes.data,
 	});
 	if (relationDataRes.error) return relationDataRes;
 
-	console.log(relationDataRes.data);
-
-	// TODO: create a new formatter to marry the relation data to the brick rows and format the response to match the original implementation
-
 	return {
 		error: undefined,
-		data: undefined,
-		// data: {
-		// bricks: CollectionDocumentBricksFormatter.formatMultiple({
-		// 	bricks: bricks,
-		// 	collection: collectionRes.data,
-		// 	config: context.config,
-		// }),
-		// fields: CollectionDocumentBricksFormatter.formatCollectionPseudoBrick({
-		// 	bricks: bricks,
-		// 	collection: collectionRes.data,
-		// 	config: context.config,
-		// }),
-		// },
+		data: {
+			bricks: DocumentBricksFormatter.formatMultiple({
+				bricksQuery: bricksQueryRes.data,
+				brickSchema: bricksSchemaRes.data,
+				relationMetaData: relationDataRes.data,
+				collection: collectionRes.data,
+				config: context.config,
+			}),
+			fields: DocumentBricksFormatter.formatDocumentFields({
+				bricksQuery: bricksQueryRes.data,
+				brickSchema: bricksSchemaRes.data,
+				relationMetaData: relationDataRes.data,
+				collection: collectionRes.data,
+				config: context.config,
+			}),
+		},
 	};
 };
 

@@ -12,11 +12,14 @@ import MediaFormatter from "./media.js";
 import LocalesFormatter from "./locales.js";
 import EmailsFormatter from "./emails.js";
 import CollectionsFormatter from "./collections.js";
+import ClientIntegrationsFormatter from "./client-integrations.js";
+import DocumentBricksFormatter from "./document-bricks.js";
+import DocumentFieldsFormatter from "./document-fields.js";
+// TODO: remove bellow
 import CollectionDocumentFieldsFormatter from "./collection-document-fields.js";
 import CollectionDocumentsFormatter from "./collection-documents.js";
 import CollectionDocumentBricksFormatter from "./collection-document-bricks.js";
 import CollectionDocumentVersions from "./collection-document-versions.js";
-import ClientIntegrationsFormatter from "./client-integrations.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Formatter {
@@ -44,6 +47,12 @@ class Formatter {
 				return new EmailsFormatter() as FormatterReturnType<T>;
 			case "collections":
 				return new CollectionsFormatter() as FormatterReturnType<T>;
+			case "client-integrations":
+				return new ClientIntegrationsFormatter() as FormatterReturnType<T>;
+			case "document-bricks":
+				return new DocumentBricksFormatter() as FormatterReturnType<T>;
+			case "document-fields":
+				return new DocumentFieldsFormatter() as FormatterReturnType<T>;
 			case "collection-documents":
 				return new CollectionDocumentsFormatter() as FormatterReturnType<T>;
 			case "collection-document-bricks":
@@ -52,8 +61,7 @@ class Formatter {
 				return new CollectionDocumentFieldsFormatter() as FormatterReturnType<T>;
 			case "collection-document-versions":
 				return new CollectionDocumentVersions() as FormatterReturnType<T>;
-			case "client-integrations":
-				return new ClientIntegrationsFormatter() as FormatterReturnType<T>;
+
 			default:
 				throw new LucidError({
 					message: T("cannot_find_formatter", {
@@ -116,11 +124,14 @@ type FormatterClassMap = {
 	locales: LocalesFormatter;
 	emails: EmailsFormatter;
 	collections: CollectionsFormatter;
+	"client-integrations": ClientIntegrationsFormatter;
+	"document-bricks": DocumentBricksFormatter;
+	"document-fields": DocumentFieldsFormatter;
+
 	"collection-documents": CollectionDocumentsFormatter;
 	"collection-document-bricks": CollectionDocumentBricksFormatter;
 	"collection-document-fields": CollectionDocumentFieldsFormatter;
 	"collection-document-versions": CollectionDocumentVersions;
-	"client-integrations": ClientIntegrationsFormatter;
 };
 
 type FormatterReturnType<T extends keyof FormatterClassMap> =
