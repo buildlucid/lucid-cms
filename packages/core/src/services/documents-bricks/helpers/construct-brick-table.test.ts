@@ -196,8 +196,8 @@ describe("brick table construction", () => {
 		// verify priorities
 		expect(fieldsTable.priority).toBe(0);
 		expect(simpleBrickTable.priority).toBe(0);
-		expect(itemsTable.priority).toBe(0);
-		expect(nestedItemsTable.priority).toBe(1);
+		expect(itemsTable.priority).toBe(1);
+		expect(nestedItemsTable.priority).toBe(2);
 
 		// test field data
 		expect(fieldsTable.data).toHaveLength(2); // one per locale
@@ -413,9 +413,9 @@ describe("brick table construction", () => {
 
 		// verify priorities
 		expect(rootTable.priority).toBe(0);
-		expect(level1Table.priority).toBe(0);
-		expect(level2Table.priority).toBe(1);
-		expect(level3Table.priority).toBe(2);
+		expect(level1Table.priority).toBe(1);
+		expect(level2Table.priority).toBe(2);
+		expect(level3Table.priority).toBe(3);
 
 		// test parent/child relatio
 		const level1Item = level1Table.data.find((item) => item.locale === "en");
