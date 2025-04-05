@@ -412,9 +412,11 @@ export interface LucidBricksTable {
 	locale: string;
 	position: number;
 	is_open: BooleanInt;
+	brick_id_ref?: number;
 	// repeater specific
 	parent_id?: number | null;
 	parent_id_ref?: number | null;
+	brick_id?: number;
 	// dynamic
 	[key: CustomFieldColumnName]: unknown;
 }

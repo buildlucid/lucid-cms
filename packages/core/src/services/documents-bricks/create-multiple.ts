@@ -72,7 +72,7 @@ const createMultiple: ServiceFn<
 	const idMapping: Record<number, number> = {};
 
 	for (const table of sortedTables) {
-		// update parent IDs using the mappings before inserting
+		// update parent and brick IDs using the mappings before inserting
 		for (const row of table.data) {
 			// check for parent_id_ref that needs updating
 			if (
@@ -93,13 +93,28 @@ const createMultiple: ServiceFn<
 					row.parent_id = idMapping[row.parent_id];
 				}
 			}
+
+			// check for brick_id that needs updating
+			if (
+				"brick_id" in row &&
+				typeof row.brick_id === "number" &&
+				row.brick_id < 0
+			) {
+				// Look up the actual brick ID from the mapping
+				const mappedBrickId = idMapping[row.brick_id];
+				if (mappedBrickId) row.brick_id = mappedBrickId;
+			}
 		}
 
 		// determine which columns to return
 		const hasParentIdRef = table.data.some((row) => "parent_id_ref" in row);
-		const returningColumns: Array<keyof LucidBricksTable> = hasParentIdRef
-			? ["id", "parent_id_ref"]
-			: ["id"];
+		const hasBrickIdRef = table.data.some((row) => "brick_id_ref" in row);
+		const returningColumns: Array<keyof LucidBricksTable> = [];
+		// always return ID
+		returningColumns.push("id");
+		// return additional columns as needed for mapping
+		if (hasParentIdRef) returningColumns.push("parent_id_ref");
+		if (hasBrickIdRef) returningColumns.push("brick_id_ref");
 
 		// insert rows for this table
 		const response = await Bricks.createMultiple(
@@ -134,6 +149,14 @@ const createMultiple: ServiceFn<
 					originalRow.parent_id < 0
 				) {
 					idMapping[originalRow.parent_id] = insertedRow.id as number;
+				}
+
+				if (
+					"brick_id_ref" in originalRow &&
+					typeof originalRow.brick_id_ref === "number" &&
+					originalRow.brick_id_ref < 0
+				) {
+					idMapping[originalRow.brick_id_ref] = insertedRow.id as number;
 				}
 			}
 		}

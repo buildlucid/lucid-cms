@@ -26,6 +26,7 @@ const createFieldTables = (props: {
 	brick?: BrickBuilder;
 	repeaterKeys?: string[];
 	parentTable?: string;
+	brickTable?: string;
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
@@ -109,8 +110,35 @@ const createFieldTables = (props: {
 		},
 	];
 
+	if (props.type === "brick" || props.type === "document-fields") {
+		// a temp reference ID for linking up with repeater temp brick_id values until insertion
+		columns.push({
+			name: "brick_id_ref",
+			source: "core",
+			type: props.db.getDataType("integer"),
+			nullable: false,
+		});
+	}
+
 	//* add repeater columns
 	if (props.type === "repeater") {
+		const brickTable =
+			props.brickTable === undefined ? props.parentTable : props.brickTable;
+		// add a parent reference to all repeaters that points to the top level parent which is always a 'brick' | 'document-fields' table
+		columns.push({
+			name: "brick_id",
+			source: "core",
+			type: props.db.getDataType("integer"),
+			nullable: false,
+			foreignKey: brickTable
+				? {
+						table: brickTable,
+						column: "id",
+						onDelete: "cascade",
+					}
+				: undefined,
+		});
+
 		// add parent reference for repeater fields
 		columns.push({
 			name: "parent_id",

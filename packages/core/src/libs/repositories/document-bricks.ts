@@ -32,9 +32,12 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
+		// brick specific
+		brick_id_ref: z.number().optional(),
 		// repeater specific
-		parent_id: z.string().optional(),
-		parent_id_ref: z.string().optional(),
+		brick_id: z.number().optional(),
+		parent_id: z.number().optional(),
+		parent_id_ref: z.number().optional(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -44,7 +47,10 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		locale: this.dbAdapter.getDataType("text"),
 		position: this.dbAdapter.getDataType("integer"),
 		is_open: this.dbAdapter.getDataType("boolean"),
+		// brick specific
+		brick_id_ref: this.dbAdapter.getDataType("integer"),
 		// repeater specific
+		brick_id: this.dbAdapter.getDataType("integer"),
 		parent_id: this.dbAdapter.getDataType("integer"),
 		parent_id_ref: this.dbAdapter.getDataType("integer"),
 	};

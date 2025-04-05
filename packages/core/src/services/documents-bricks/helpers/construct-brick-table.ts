@@ -43,6 +43,7 @@ const constructBrickTable = (
 		repeaterKeys?: Array<string>;
 		parentId?: number | null;
 		parentIdRef?: number;
+		brickIdByLocale?: Map<string, number>; // Track brick_id_refs by locale
 		collection: CollectionBuilder;
 		documentId: number;
 		versionId: number;
@@ -79,10 +80,10 @@ const constructBrickTable = (
 	//* find existing table or create new one
 	let tableIndex = brickTables.findIndex((table) => table.table === tableName);
 	if (tableIndex === -1) {
-		const tablePriority =
-			params.type === "repeater" && params.repeaterKeys
-				? params.repeaterKeys.length - 1
-				: 0;
+		let tablePriority = 0;
+		if (params.type === "repeater" && params.repeaterKeys) {
+			tablePriority = params.repeaterKeys.length;
+		}
 
 		brickTables.push({
 			table: tableName,
@@ -98,6 +99,7 @@ const constructBrickTable = (
 	);
 
 	const rowsByLocale = new Map<string, Partial<Insert<LucidBricksTable>>>();
+	const brickIdRefByLocale = new Map<string, number>();
 
 	//* initialize rows for each locale
 	for (const locale of params.localisation.locales) {
@@ -110,10 +112,24 @@ const constructBrickTable = (
 			is_open: params.open,
 		};
 
+		//* generate brick_id_ref for each brick by locale
+		if (params.type === "brick" || params.type === "document-fields") {
+			const localeSpecificBrickRef = -Math.abs(
+				Number.parseInt(crypto.randomBytes(10).toString("hex"), 16),
+			);
+			baseRowData.brick_id_ref = localeSpecificBrickRef;
+			brickIdRefByLocale.set(locale, localeSpecificBrickRef);
+		}
+
 		//* add repeater specific columns
 		if (params.type === "repeater") {
 			baseRowData.parent_id = params.parentId;
 			baseRowData.parent_id_ref = params.parentIdRef;
+
+			//* set brick_id to the corresponding locale's brick reference
+			if (params.brickIdByLocale?.has(locale)) {
+				baseRowData.brick_id = params.brickIdByLocale.get(locale); // will be populated after insertion
+			}
 		}
 
 		rowsByLocale.set(locale, baseRowData);
@@ -161,7 +177,7 @@ const constructBrickTable = (
 		repeaterField.groups?.forEach((group, groupIndex) => {
 			//* generate a temp ID for parent/child relation. This will be replaced before being inserted into the DB with its parents actual ID.
 			const groupRef = -Math.abs(
-				Number.parseInt(crypto.randomBytes(4).toString("hex"), 16) % 100000,
+				Number.parseInt(crypto.randomBytes(10).toString("hex"), 16),
 			);
 
 			if (group.fields) {
@@ -172,8 +188,13 @@ const constructBrickTable = (
 					versionId: params.versionId,
 					targetFields: group.fields,
 					repeaterKeys: newRepeaterKeys,
-					parentId: params.parentIdRef || null,
+					parentId:
+						params.type === "repeater" ? params.parentIdRef || null : null,
 					parentIdRef: groupRef,
+					brickIdByLocale:
+						params.type === "brick" || params.type === "document-fields"
+							? brickIdRefByLocale
+							: params.brickIdByLocale,
 					localisation: params.localisation,
 					brickKeyTableNameMap: params.brickKeyTableNameMap,
 					brick: params.brick,
