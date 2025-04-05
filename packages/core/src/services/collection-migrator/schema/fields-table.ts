@@ -139,19 +139,25 @@ const createFieldTables = (props: {
 				: undefined,
 		});
 
+		const isNestedRepeater =
+			props.repeaterKeys && props.repeaterKeys.length > 1;
+
 		// add parent reference for repeater fields
 		columns.push({
 			name: "parent_id",
 			source: "core",
 			type: props.db.getDataType("integer"),
 			nullable: true,
-			foreignKey: props.parentTable
-				? {
-						table: props.parentTable,
-						column: "id",
-						onDelete: "cascade",
-					}
-				: undefined,
+			foreignKey:
+				isNestedRepeater &&
+				props.parentTable &&
+				props.parentTable !== brickTable
+					? {
+							table: props.parentTable,
+							column: "id",
+							onDelete: "cascade",
+						}
+					: undefined,
 		});
 		// add parent reference temp ID for insertion tracking
 		columns.push({
