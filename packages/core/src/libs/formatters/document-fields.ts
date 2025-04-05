@@ -1,8 +1,10 @@
 import Formatter from "./index.js";
 import constants from "../../constants/constants.js";
+import DocumentBricksFormatter from "./document-bricks.js";
 import type {
 	CFConfig,
 	Config,
+	FieldGroupResponse,
 	FieldResponse,
 	FieldResponseMeta,
 	FieldResponseValue,
@@ -19,11 +21,13 @@ import prefixGeneratedColName from "../../services/collection-migrator/helpers/p
 export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;
 	host: string;
-	collectionTranslations: boolean;
+	collection: CollectionBuilder;
 	localisation: {
 		locales: string[];
 		default: string;
 	};
+	/** Used to help workout the target brick schema item and the table name. Set to `undefined` if the brick table you're creating fields for is the `document-fields` one */
+	brickKey: string | undefined;
 }
 
 interface FieldFormatData {
@@ -57,7 +61,8 @@ export default class DocumentFieldsFormatter {
 			fieldConfig: meta.builder.fieldTreeNoTab,
 			host: meta.host,
 			localisation: meta.localisation,
-			collectionTranslations: meta.collectionTranslations,
+			collection: meta.collection,
+			brickKey: meta.brickKey,
 		});
 	};
 
@@ -68,6 +73,7 @@ export default class DocumentFieldsFormatter {
 		data: FieldFormatData,
 		meta: FieldFormatMeta & {
 			fieldConfig: CFConfig<FieldTypes>[];
+			repeaterLevel?: number;
 		},
 	): FieldResponse[] => {
 		const fieldsRes: FieldResponse[] = [];
@@ -76,6 +82,19 @@ export default class DocumentFieldsFormatter {
 		for (const config of meta.fieldConfig) {
 			if (config.type === "repeater") {
 				//* recursively build out repeater groups
+				fieldsRes.push({
+					key: config.key,
+					type: config.type,
+					groups: this.buildGroups(data, {
+						builder: meta.builder,
+						repeaterConfig: config,
+						host: meta.host,
+						localisation: meta.localisation,
+						collection: meta.collection,
+						brickKey: meta.brickKey,
+						repeaterLevel: meta.repeaterLevel || 0,
+					}),
+				});
 				continue;
 			}
 
@@ -98,7 +117,8 @@ export default class DocumentFieldsFormatter {
 					fieldConfig: config,
 					host: meta.host,
 					localisation: meta.localisation,
-					collectionTranslations: meta.collectionTranslations,
+					collection: meta.collection,
+					brickKey: meta.brickKey,
 				},
 			);
 			if (fieldValue) fieldsRes.push(fieldValue);
@@ -129,7 +149,7 @@ export default class DocumentFieldsFormatter {
 			meta.fieldConfig.type !== "repeater" &&
 			meta.fieldConfig.type !== "tab" &&
 			meta.fieldConfig.config.useTranslations === true &&
-			meta.collectionTranslations === true
+			meta.collection.getData.config.useTranslations === true
 		) {
 			const fieldTranslations: Record<string, FieldResponseValue> = {};
 			const fieldMeta: Record<string, FieldResponseMeta> = {};
@@ -171,6 +191,37 @@ export default class DocumentFieldsFormatter {
 			// TODO: add helper to get field meta values
 			meta: null,
 		};
+	};
+
+	/**
+	 *
+	 */
+	private buildGroups = (
+		data: FieldFormatData,
+		meta: FieldFormatMeta & {
+			repeaterConfig: CFConfig<"repeater">;
+			brickKey: string | undefined;
+			repeaterLevel: number;
+		},
+	): FieldGroupResponse[] => {
+		const groupsRes: FieldGroupResponse[] = [];
+
+		const repeaterFields = meta.repeaterConfig.fields;
+		if (!repeaterFields) return groupsRes;
+
+		//* using DocumentBricksFormatter.getBrickRepeaterRows, get the target repeater brick table rows and construct groups from them
+		const repeaterTables = DocumentBricksFormatter.getBrickRepeaterRows({
+			bricksQuery: data.bricksQuery,
+			bricksSchema: data.bricksSchema,
+			collectionKey: meta.collection.key,
+			brickKey: meta.brickKey,
+			repeaterKey: meta.repeaterConfig.key,
+			repeaterLevel: meta.repeaterLevel,
+		});
+
+		// console.log(repeaterTables);
+
+		return groupsRes;
 	};
 
 	static swagger = {

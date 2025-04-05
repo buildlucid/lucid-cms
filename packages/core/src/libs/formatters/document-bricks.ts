@@ -21,7 +21,7 @@ export default class DocumentBricksFormatter {
 		relationMetaData: FieldRelationResponse;
 		config: Config;
 	}): BrickResponse[] => {
-		// console.log(props.bricksSchema);
+		console.log(props.bricksQuery);
 		return [];
 	};
 	formatDocumentFields = (props: {
@@ -57,11 +57,13 @@ export default class DocumentBricksFormatter {
 			{
 				host: props.config.host,
 				builder: props.collection,
-				collectionTranslations: props.collection.getData.config.useTranslations,
+				collection: props.collection,
+				// collectionTranslations: props.collection.getData.config.useTranslations,
 				localisation: {
 					locales: props.config.localisation.locales.map((l) => l.code),
 					default: props.config.localisation.defaultLocale,
 				},
+				brickKey: undefined,
 			},
 		);
 		console.log(fields);
@@ -86,7 +88,7 @@ export default class DocumentBricksFormatter {
 	/**
 	 * Works out the target repeater table based on props and schema, and returns all the rows for it from the brciksQuery prop
 	 */
-	getBrickRepeaterRows = (props: {
+	static getBrickRepeaterRows = (props: {
 		bricksQuery: BrickQueryResponse;
 		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 		collectionKey: string;
