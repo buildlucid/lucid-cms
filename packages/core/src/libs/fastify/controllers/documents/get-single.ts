@@ -67,7 +67,11 @@ export default {
 		response: {
 			200: swaggerResponse({
 				type: 200,
-				data: CollectionDocumentsFormatter.swagger,
+				// data: CollectionDocumentsFormatter.swagger,
+				data: {
+					type: "object",
+					additionalProperties: true,
+				},
 			}),
 		},
 		querystring: swaggerQueryString({

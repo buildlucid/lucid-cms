@@ -88,17 +88,21 @@ const getSingle: ServiceFn<
 			});
 		if (bricksRes.error) return bricksRes;
 
-		console.log(
-			inspect(bricksRes.data, {
-				depth: Number.POSITIVE_INFINITY,
-				colors: true,
-				numericSeparator: true,
-			}),
-		);
+		// console.log(
+		// 	inspect(bricksRes.data, {
+		// 		depth: Number.POSITIVE_INFINITY,
+		// 		colors: true,
+		// 		numericSeparator: true,
+		// 	}),
+		// );
 
 		return {
 			error: undefined,
-			data: undefined,
+			data: {
+				...documentRes.data,
+				bricks: bricksRes.data.bricks,
+				fields: bricksRes.data.fields,
+			},
 		};
 	}
 

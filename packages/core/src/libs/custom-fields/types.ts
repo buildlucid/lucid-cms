@@ -1,5 +1,6 @@
 import type { ZodType } from "zod";
 import type {
+	CollectionDocumentResponse,
 	FieldAltResponse,
 	MediaResponse,
 	MediaType,
@@ -558,11 +559,14 @@ export type MediaResMeta =
 	  }
 	| null
 	| MediaResponse;
-export type DocumentResMeta = {
-	id: number | null;
-	collection_key?: string | null;
-	fields: Record<string, FieldAltResponse> | null;
-};
+export type DocumentResMeta =
+	| {
+			id: number | null;
+			collection_key?: string | null;
+			collectionKey?: string | null;
+			fields: Record<string, FieldAltResponse> | null;
+	  }
+	| CollectionDocumentResponse;
 export type RepeaterResMeta = null;
 export type NumberResMeta = null;
 export type CheckboxResMeta = null;

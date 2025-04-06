@@ -3,6 +3,7 @@ import constants from "../../constants/constants.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import type {
 	CFConfig,
+	CFResponse,
 	Config,
 	FieldGroupResponse,
 	FieldResponse,
@@ -112,6 +113,7 @@ export default class DocumentFieldsFormatter {
 			const fieldValue = this.buildField(
 				{
 					values: fieldValues,
+					relationMetaData: data.relationMetaData,
 				},
 				{
 					builder: meta.builder,
@@ -137,6 +139,7 @@ export default class DocumentFieldsFormatter {
 	private buildField = (
 		data: {
 			values: IntermediaryFieldValues[];
+			relationMetaData: FieldRelationResponse;
 		},
 		meta: FieldFormatMeta & {
 			fieldConfig: CFConfig<FieldTypes>;
@@ -163,7 +166,11 @@ export default class DocumentFieldsFormatter {
 					// TODO: use the cfInstance to format the value and meta data.
 					fieldTranslations[locale] = localeValue.value as FieldResponseValue;
 					// TODO: add helper to get field meta values
-					fieldMeta[locale] = null;
+					fieldMeta[locale] = this.fetchRelationData(data.relationMetaData, {
+						type: meta.fieldConfig.type,
+						value: localeValue.value,
+						fieldConfig: meta.fieldConfig,
+					});
 				} else {
 					fieldTranslations[locale] = null;
 					fieldMeta[locale] = null;
@@ -190,7 +197,11 @@ export default class DocumentFieldsFormatter {
 			// TODO: use the cfInstance to format the value and meta data.
 			value: defaultValue.value as FieldResponseValue,
 			// TODO: add helper to get field meta values
-			meta: null,
+			meta: this.fetchRelationData(data.relationMetaData, {
+				type: meta.fieldConfig.type,
+				value: defaultValue.value,
+				fieldConfig: meta.fieldConfig,
+			}),
 		};
 	};
 
@@ -258,7 +269,32 @@ export default class DocumentFieldsFormatter {
 	/**
 	 * Fetch relation meta data
 	 */
-	private fetchRelationData = () => {};
+	private fetchRelationData = <T extends FieldTypes>(
+		relationData: FieldRelationResponse,
+		props: {
+			type: T;
+			value: unknown;
+			fieldConfig: CFConfig<T>;
+		},
+	) => {
+		switch (props.type) {
+			case "document": {
+				return (
+					relationData.document as Array<CFResponse<"document">["meta"]>
+				).find((d) => {
+					return (
+						d.collectionKey ===
+							(props.fieldConfig as CFConfig<"document">)?.collection &&
+						d.id === props.value
+					);
+				});
+			}
+			default: {
+				// @ts-expect-error
+				return relationData[props.type]?.find((i) => i?.id === props.value);
+			}
+		}
+	};
 
 	/**
 	 * The swagger response schema
