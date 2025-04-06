@@ -9,6 +9,7 @@ import type {
 	CFInsertItem,
 	SchemaDefinition,
 	GetSchemaDefinitionProps,
+	ColourResValue,
 } from "../types.js";
 import type {
 	FieldProp,
@@ -70,6 +71,14 @@ class ColourCustomField extends CustomField<"colour"> {
 			value: props.data.text_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"colour">;
+	}
+	formatResponseValue(value?: string | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"colour">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"colour">["meta"];
 	}
 	getInsertField(props: {
 		item: FieldInsertItem;

@@ -48,6 +48,12 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			meta: null,
 		} satisfies CFResponse<"repeater">;
 	}
+	formatResponseValue() {
+		return null satisfies CFResponse<"repeater">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"repeater">["meta"];
+	}
 	getInsertField() {
 		return null;
 	}

@@ -1,6 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CFResponse, LucidDocumentTableName } from "../../types.js";
+import type { LucidDocumentTableName } from "../../types.js";
+import type { DocumentPropsT } from "../../libs/formatters/documents.js";
 
 const getMultipleFieldMeta: ServiceFn<
 	[
@@ -11,7 +12,7 @@ const getMultipleFieldMeta: ServiceFn<
 			}>;
 		},
 	],
-	CFResponse<"document">["meta"][]
+	DocumentPropsT[]
 > = async (context, data) => {
 	const Documents = Repository.get("documents", context.db, context.config.db);
 
@@ -37,7 +38,7 @@ const getMultipleFieldMeta: ServiceFn<
 		data: documentsRes.data.map((d) => {
 			return {
 				id: d.id,
-				collectionKey: d.collection_key,
+				collection_key: d.collection_key,
 				fields: null,
 			};
 		}),

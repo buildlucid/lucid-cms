@@ -14,10 +14,12 @@ import type {
 } from "../types.js";
 import type {
 	FieldProp,
-	FieldFormatMeta,
+	FieldFormatMeta as FieldFormatMetaOld,
 } from "../../formatters/collection-document-fields.js";
+import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
+import type { UserPropT } from "../../formatters/users.js";
 
 class UserCustomField extends CustomField<"user"> {
 	type = "user" as const;
@@ -68,7 +70,7 @@ class UserCustomField extends CustomField<"user"> {
 	}
 	responseValueFormat(props: {
 		data: FieldProp;
-		formatMeta: FieldFormatMeta;
+		formatMeta: FieldFormatMetaOld;
 	}) {
 		return {
 			value: props.data.user_id ?? null,
@@ -79,6 +81,17 @@ class UserCustomField extends CustomField<"user"> {
 				lastName: props.data?.user_last_name ?? null,
 			},
 		} satisfies CFResponse<"user">;
+	}
+	formatResponseValue(value?: number | null) {
+		return (value ?? null) satisfies CFResponse<"user">["value"];
+	}
+	formatResponseMeta(value: UserPropT | undefined, meta: FieldFormatMeta) {
+		return {
+			email: value?.email ?? null,
+			username: value?.username ?? null,
+			firstName: value?.first_name ?? null,
+			lastName: value?.last_name ?? null,
+		} satisfies CFResponse<"user">["meta"];
 	}
 	getInsertField(props: {
 		item: FieldInsertItem;

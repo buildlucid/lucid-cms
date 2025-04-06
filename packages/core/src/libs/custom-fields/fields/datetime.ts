@@ -11,6 +11,7 @@ import type {
 	CFInsertItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
+	DatetimeResValue,
 } from "../types.js";
 import type {
 	FieldProp,
@@ -72,6 +73,14 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			value: props.data.text_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"datetime">;
+	}
+	formatResponseValue(value?: string | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"datetime">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"datetime">["meta"];
 	}
 	getInsertField(props: {
 		item: FieldInsertItem;

@@ -13,13 +13,16 @@ import type {
 	DocumentReferenceData,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
+	DocumentResValue,
 } from "../types.js";
 import type {
 	FieldProp,
-	FieldFormatMeta,
+	FieldFormatMeta as FieldFormatMetaOld,
 } from "../../formatters/collection-document-fields.js";
+import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
+import type { DocumentPropsT } from "../../formatters/documents.js";
 
 const FieldsFormatter = Formatter.get("collection-document-fields");
 
@@ -78,7 +81,7 @@ class DocumentCustomField extends CustomField<"document"> {
 	}
 	responseValueFormat(props: {
 		data: FieldProp;
-		formatMeta: FieldFormatMeta;
+		formatMeta: FieldFormatMetaOld;
 	}) {
 		const CollectionBuilder = props.formatMeta.collections.find(
 			(c) => c.key === this.props.collection,
@@ -117,6 +120,17 @@ class DocumentCustomField extends CustomField<"document"> {
 				fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 			},
 		} satisfies CFResponse<"document">;
+	}
+	formatResponseValue(value?: number | null) {
+		return (value ?? null) satisfies CFResponse<"document">["value"];
+	}
+	formatResponseMeta(value: DocumentPropsT | undefined, meta: FieldFormatMeta) {
+		// TODO: come back to finish the fields formatting
+		return {
+			id: value?.id ?? null,
+			collectionKey: value?.collection_key ?? null,
+			fields: null,
+		} satisfies CFResponse<"document">["meta"];
 	}
 	getInsertField(props: {
 		item: FieldInsertItem;

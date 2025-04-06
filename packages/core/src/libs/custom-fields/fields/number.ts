@@ -71,6 +71,14 @@ class NumberCustomField extends CustomField<"number"> {
 			meta: null,
 		} satisfies CFResponse<"number">;
 	}
+	formatResponseValue(value?: number | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"number">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"number">["meta"];
+	}
 	getInsertField(props: {
 		item: FieldInsertItem;
 		brickId: number;

@@ -72,6 +72,14 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 			meta: null,
 		} satisfies CFResponse<"wysiwyg">;
 	}
+	formatResponseValue(value?: string | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"wysiwyg">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"wysiwyg">["meta"];
+	}
 	getInsertField(props: {
 		item: FieldInsertItem;
 		brickId: number;

@@ -83,6 +83,16 @@ class LinkCustomField extends CustomField<"link"> {
 			meta: null,
 		} satisfies CFResponse<"link">;
 	}
+	formatResponseValue(value?: LinkResValue | null) {
+		return {
+			url: value?.url ?? this.config.config.default.url ?? null,
+			label: value?.label ?? this.config.config.default.label ?? null,
+			target: value?.target ?? this.config.config.default.target ?? null,
+		} satisfies CFResponse<"link">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"link">["meta"];
+	}
 	getInsertField(props: {
 		item: FieldInsertItem;
 		brickId: number;

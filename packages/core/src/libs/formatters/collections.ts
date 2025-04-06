@@ -1,4 +1,3 @@
-import { nullable } from "zod";
 import type { CollectionResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 

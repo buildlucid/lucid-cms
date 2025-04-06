@@ -1,3 +1,6 @@
+import type { DocumentPropsT } from "../../../libs/formatters/documents.js";
+import type { MediaPropsT } from "../../../libs/formatters/media.js";
+import type { UserPropT } from "../../../libs/formatters/users.js";
 import type {
 	CFResponse,
 	FieldTypes,
@@ -8,7 +11,10 @@ import type {
 import type { FieldRelationValues } from "./extract-related-entity-ids.js";
 
 export type FieldRelationResponse = Partial<
-	Record<FieldTypes, Array<CFResponse<FieldTypes>["meta"]>>
+	Record<
+		FieldTypes,
+		Array<MediaPropsT> | Array<UserPropT> | Array<DocumentPropsT>
+	>
 >;
 
 /**

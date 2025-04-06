@@ -81,6 +81,14 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			meta: null,
 		} satisfies CFResponse<"checkbox">;
 	}
+	formatResponseValue(value?: BooleanInt | null) {
+		return Formatter.formatBoolean(
+			Boolean(value) ?? this.config.config.default,
+		) satisfies CFResponse<"checkbox">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"checkbox">["meta"];
+	}
 	getInsertField(props: {
 		item: FieldInsertItem;
 		brickId: number;

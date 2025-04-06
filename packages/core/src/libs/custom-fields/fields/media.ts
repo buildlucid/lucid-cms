@@ -18,9 +18,11 @@ import type {
 } from "../types.js";
 import type {
 	FieldProp,
-	FieldFormatMeta,
+	FieldFormatMeta as FieldFormatMetaOld,
 } from "../../formatters/collection-document-fields.js";
+import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
+import type { MediaPropsT } from "../../formatters/media.js";
 
 class MediaCustomField extends CustomField<"media"> {
 	type = "media" as const;
@@ -71,7 +73,7 @@ class MediaCustomField extends CustomField<"media"> {
 	}
 	responseValueFormat(props: {
 		data: FieldProp;
-		formatMeta: FieldFormatMeta;
+		formatMeta: FieldFormatMetaOld;
 	}) {
 		return {
 			value: props.data?.media_id ?? null,
@@ -99,6 +101,34 @@ class MediaCustomField extends CustomField<"media"> {
 				type: (props.data?.media_type as MediaType) ?? null,
 			},
 		} satisfies CFResponse<"media">;
+	}
+	formatResponseValue(value?: number | null) {
+		return (value ?? null) satisfies CFResponse<"media">["value"];
+	}
+	formatResponseMeta(value: MediaPropsT | undefined, meta: FieldFormatMeta) {
+		return {
+			id: value?.id ?? null,
+			url: createCdnUrl(meta.host, value?.key ?? ""),
+			key: value?.key ?? null,
+			mimeType: value?.mime_type ?? null,
+			extension: value?.file_extension ?? null,
+			fileSize: value?.file_size ?? null,
+			width: value?.width ?? null,
+			height: value?.height ?? null,
+			blurHash: value?.blur_hash ?? null,
+			averageColour: value?.average_colour ?? null,
+			isDark: Formatter.formatBoolean(value?.is_dark ?? null),
+			isLight: Formatter.formatBoolean(value?.is_light ?? null),
+			title: objectifyTranslations(
+				value?.title_translations || [],
+				meta.localisation.locales,
+			),
+			alt: objectifyTranslations(
+				value?.alt_translations || [],
+				meta.localisation.locales,
+			),
+			type: (value?.type as MediaType) ?? null,
+		} satisfies CFResponse<"media">["meta"];
 	}
 	getInsertField(props: {
 		item: FieldInsertItem;

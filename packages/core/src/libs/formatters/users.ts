@@ -3,7 +3,7 @@ import type { UserResponse } from "../../types/response.js";
 import UserPermissionsFormatter from "./user-permissions.js";
 import Formatter from "./index.js";
 
-interface UserPropT {
+export interface UserPropT {
 	created_at: Date | string | null;
 	email: string;
 	first_name: string | null;

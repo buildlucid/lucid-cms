@@ -73,6 +73,14 @@ class SelectCustomField extends CustomField<"select"> {
 			meta: null,
 		} satisfies CFResponse<"select">;
 	}
+	formatResponseValue(value?: string | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"select">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"select">["meta"];
+	}
 	getInsertField(props: {
 		item: FieldInsertItem;
 		brickId: number;

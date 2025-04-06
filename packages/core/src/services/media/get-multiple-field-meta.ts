@@ -1,7 +1,6 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CFResponse } from "../../types.js";
+import type { MediaPropsT } from "../../libs/formatters/media.js";
 
 const getMultipleFieldMeta: ServiceFn<
 	[
@@ -9,10 +8,9 @@ const getMultipleFieldMeta: ServiceFn<
 			ids: number[];
 		},
 	],
-	CFResponse<"media">["meta"][]
+	MediaPropsT[]
 > = async (context, data) => {
 	const Media = Repository.get("media", context.db, context.config.db);
-	const MediaFormatter = Formatter.get("media");
 
 	if (data.ids.length === 0) {
 		return {
@@ -31,10 +29,7 @@ const getMultipleFieldMeta: ServiceFn<
 
 	return {
 		error: undefined,
-		data: MediaFormatter.formatMultiple({
-			media: mediaRes.data,
-			host: context.config.host,
-		}),
+		data: mediaRes.data,
 	};
 };
 

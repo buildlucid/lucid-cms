@@ -1,7 +1,6 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CFResponse } from "../../types.js";
+import type { UserPropT } from "../../libs/formatters/users.js";
 
 const getMultipleFieldMeta: ServiceFn<
 	[
@@ -9,10 +8,9 @@ const getMultipleFieldMeta: ServiceFn<
 			ids: number[];
 		},
 	],
-	CFResponse<"user">["meta"][]
+	UserPropT[]
 > = async (context, data) => {
 	const User = Repository.get("users", context.db, context.config.db);
-	const UsersFormatter = Formatter.get("users");
 
 	if (data.ids.length === 0) {
 		return {
@@ -31,9 +29,7 @@ const getMultipleFieldMeta: ServiceFn<
 
 	return {
 		error: undefined,
-		data: UsersFormatter.formatMultiple({
-			users: userRes.data,
-		}),
+		data: userRes.data,
 	};
 };
 

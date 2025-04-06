@@ -71,6 +71,14 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			meta: null,
 		} satisfies CFResponse<"textarea">;
 	}
+	formatResponseValue(value?: string | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"textarea">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"textarea">["meta"];
+	}
 	getInsertField(props: {
 		item: FieldInsertItem;
 		brickId: number;

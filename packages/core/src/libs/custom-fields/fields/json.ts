@@ -9,6 +9,7 @@ import type {
 	CFInsertItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
+	JsonResValue,
 } from "../types.js";
 import type {
 	FieldProp,
@@ -70,6 +71,14 @@ class JsonCustomField extends CustomField<"json"> {
 			value: props.data.json_value ?? this.config.config.default ?? null,
 			meta: null,
 		} satisfies CFResponse<"json">;
+	}
+	formatResponseValue(value?: Record<string, unknown> | null) {
+		return (value ??
+			this.config.config.default ??
+			null) satisfies CFResponse<"json">["value"];
+	}
+	formatResponseMeta() {
+		return null satisfies CFResponse<"json">["meta"];
 	}
 	getInsertField(props: {
 		item: FieldInsertItem;

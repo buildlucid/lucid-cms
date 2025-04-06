@@ -15,6 +15,7 @@ import CollectionsFormatter from "./collections.js";
 import ClientIntegrationsFormatter from "./client-integrations.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import DocumentFieldsFormatter from "./document-fields.js";
+import DocumentFormatter from "./documents.js";
 // TODO: remove bellow
 import CollectionDocumentFieldsFormatter from "./collection-document-fields.js";
 import CollectionDocumentsFormatter from "./collection-documents.js";
@@ -53,6 +54,8 @@ class Formatter {
 				return new DocumentBricksFormatter() as FormatterReturnType<T>;
 			case "document-fields":
 				return new DocumentFieldsFormatter() as FormatterReturnType<T>;
+			case "documents":
+				return new DocumentFormatter() as FormatterReturnType<T>;
 			case "collection-documents":
 				return new CollectionDocumentsFormatter() as FormatterReturnType<T>;
 			case "collection-document-bricks":
@@ -127,6 +130,7 @@ type FormatterClassMap = {
 	"client-integrations": ClientIntegrationsFormatter;
 	"document-bricks": DocumentBricksFormatter;
 	"document-fields": DocumentFieldsFormatter;
+	documents: DocumentFormatter;
 
 	"collection-documents": CollectionDocumentsFormatter;
 	"collection-document-bricks": CollectionDocumentBricksFormatter;

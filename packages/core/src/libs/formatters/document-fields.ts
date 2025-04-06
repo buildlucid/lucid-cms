@@ -19,6 +19,7 @@ import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
+import type { DocumentPropsT } from "./documents.js";
 
 export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;
@@ -163,14 +164,17 @@ export default class DocumentFieldsFormatter {
 				const localeValue = data.values.find((v) => v.locale === locale);
 
 				if (localeValue) {
-					// TODO: use the cfInstance to format the value and meta data.
-					fieldTranslations[locale] = localeValue.value as FieldResponseValue;
-					// TODO: add helper to get field meta values
-					fieldMeta[locale] = this.fetchRelationData(data.relationMetaData, {
-						type: meta.fieldConfig.type,
-						value: localeValue.value,
-						fieldConfig: meta.fieldConfig,
-					});
+					fieldTranslations[locale] = cfInstance.formatResponseValue(
+						localeValue.value,
+					);
+					fieldMeta[locale] = cfInstance.formatResponseMeta(
+						this.fetchRelationData(data.relationMetaData, {
+							type: meta.fieldConfig.type,
+							value: localeValue.value,
+							fieldConfig: meta.fieldConfig,
+						}),
+						meta,
+					);
 				} else {
 					fieldTranslations[locale] = null;
 					fieldMeta[locale] = null;
@@ -194,14 +198,15 @@ export default class DocumentFieldsFormatter {
 		return {
 			key: meta.fieldConfig.key,
 			type: meta.fieldConfig.type,
-			// TODO: use the cfInstance to format the value and meta data.
-			value: defaultValue.value as FieldResponseValue,
-			// TODO: add helper to get field meta values
-			meta: this.fetchRelationData(data.relationMetaData, {
-				type: meta.fieldConfig.type,
-				value: defaultValue.value,
-				fieldConfig: meta.fieldConfig,
-			}),
+			value: cfInstance.formatResponseValue(defaultValue.value),
+			meta: cfInstance.formatResponseMeta(
+				this.fetchRelationData(data.relationMetaData, {
+					type: meta.fieldConfig.type,
+					value: defaultValue.value,
+					fieldConfig: meta.fieldConfig,
+				}),
+				meta,
+			),
 		};
 	};
 
@@ -279,18 +284,15 @@ export default class DocumentFieldsFormatter {
 	) => {
 		switch (props.type) {
 			case "document": {
-				return (
-					relationData.document as Array<CFResponse<"document">["meta"]>
-				).find((d) => {
+				return (relationData.document as Array<DocumentPropsT>).find((d) => {
 					return (
-						d.collectionKey ===
+						d.collection_key ===
 							(props.fieldConfig as CFConfig<"document">)?.collection &&
 						d.id === props.value
 					);
 				});
 			}
 			default: {
-				// @ts-expect-error
 				return relationData[props.type]?.find((i) => i?.id === props.value);
 			}
 		}
