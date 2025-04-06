@@ -30,19 +30,21 @@ export default class DocumentBricksFormatter {
 		const brickResponses: BrickResponse[] = [];
 
 		for (const schema of brickSchemas) {
-			if (schema.brickType === "document-fields") continue;
-
 			const tableData = props.bricksQuery[schema.name];
 			if (!tableData || tableData.length === 0) continue;
 
-			const rowsByPosition = Map.groupBy(tableData, (item) => item.position);
+			const rowsByBrickInstanceId = Map.groupBy(
+				tableData,
+				(item) => item.brick_instance_id,
+			);
 
-			for (const [position, rows] of rowsByPosition.entries()) {
+			for (const [position, rows] of rowsByBrickInstanceId.entries()) {
 				if (position === undefined || !rows || rows.length === 0) continue;
 
 				//* take the first row to get the brick metadata, open value is shared acdross locale rows for now
 				const firstRow = rows[0];
 				if (!firstRow) continue;
+				if (!firstRow.brick_type) continue;
 
 				const brickKey = schema.key.brick;
 				if (!brickKey) continue;
@@ -57,9 +59,9 @@ export default class DocumentBricksFormatter {
 				brickResponses.push({
 					id: -1, // TODO: remove this from type, no longer needed. No such thing as a brick ID as a single brick spans accross multiple rows due to locales
 					key: brickKey,
-					order: position,
+					order: firstRow.position,
 					open: Formatter.formatBoolean(firstRow.is_open),
-					type: schema.brickType,
+					type: firstRow.brick_type,
 					fields: DocumentFieldsFormatter.formatMultiple(
 						{
 							brickRows: rows,

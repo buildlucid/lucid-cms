@@ -182,7 +182,7 @@ export interface BrickResponse {
 	key: string;
 	order: number;
 	open: boolean | null;
-	type: "builder" | "fixed";
+	type: BrickTypes;
 	fields: Array<FieldResponse>;
 }
 export interface BrickAltResponse {
@@ -190,7 +190,7 @@ export interface BrickAltResponse {
 	key: string;
 	order: number;
 	open: boolean | null;
-	type: "builder" | "fixed";
+	type: BrickTypes;
 	fields: Record<string, FieldAltResponse>;
 }
 

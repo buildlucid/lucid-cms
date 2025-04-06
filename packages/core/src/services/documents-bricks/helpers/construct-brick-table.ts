@@ -11,6 +11,7 @@ import type {
 	LucidBrickTableName,
 } from "../../../types.js";
 import type { TableType } from "../../collection-migrator/schema/types.js";
+import type { BrickTypes } from "../../../libs/builders/brick-builder/types.js";
 
 export type InsertBrickTables = {
 	table: LucidBrickTableName;
@@ -98,6 +99,7 @@ const constructBrickTable = (
 		(field) => field.type !== "repeater",
 	);
 
+	const brickInstanceId = crypto.randomUUID();
 	const rowsByLocale = new Map<string, Partial<Insert<LucidBricksTable>>>();
 	const brickIdRefByLocale = new Map<string, number>();
 
@@ -111,6 +113,11 @@ const constructBrickTable = (
 			position: params.order,
 			is_open: params.open,
 		};
+
+		if (params.type === "brick") {
+			baseRowData.brick_type = params.brick?.type;
+			baseRowData.brick_instance_id = brickInstanceId;
+		}
 
 		//* generate brick_id_ref for each brick by locale
 		if (params.type === "brick" || params.type === "document-fields") {

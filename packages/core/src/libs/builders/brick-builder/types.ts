@@ -21,5 +21,6 @@ export interface BrickConfig {
 	};
 }
 
+// TODO: remove "collection-fields" type
 export type BrickTypes =
 	(typeof constants.brickTypes)[keyof typeof constants.brickTypes];

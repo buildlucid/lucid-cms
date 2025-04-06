@@ -34,7 +34,7 @@ const inferSchema = (
 		tables.push(versionTableRes.data.schema);
 
 		//* field / repeater tables
-		for (const brick of collection.config.bricks?.fixed || []) {
+		for (const brick of collection.brickInstances || []) {
 			const brickFieldsTableRes = createFieldTables({
 				collection: collection,
 				fields: brick.fieldTreeNoTab,
@@ -43,23 +43,6 @@ const inferSchema = (
 				documentTable: documentTableRes.data.schema.name,
 				versionTable: versionTableRes.data.schema.name,
 				brick: brick,
-				brickType: "fixed",
-			});
-			if (brickFieldsTableRes.error) return brickFieldsTableRes;
-
-			tables.push(brickFieldsTableRes.data.schema);
-			tables.push(...brickFieldsTableRes.data.childTables);
-		}
-		for (const brick of collection.config.bricks?.builder || []) {
-			const brickFieldsTableRes = createFieldTables({
-				collection: collection,
-				fields: brick.fieldTreeNoTab,
-				db: db,
-				type: "brick",
-				documentTable: documentTableRes.data.schema.name,
-				versionTable: versionTableRes.data.schema.name,
-				brick: brick,
-				brickType: "builder",
 			});
 			if (brickFieldsTableRes.error) return brickFieldsTableRes;
 
@@ -74,7 +57,6 @@ const inferSchema = (
 			documentTable: documentTableRes.data.schema.name,
 			versionTable: versionTableRes.data.schema.name,
 			type: "document-fields",
-			brickType: "document-fields",
 		});
 		if (collectionFieldsTableRes.error) return collectionFieldsTableRes;
 

@@ -412,6 +412,10 @@ export interface LucidBricksTable {
 	locale: string;
 	position: number;
 	is_open: BooleanInt;
+	// brick specific
+	brick_type?: BrickTypes;
+	brick_instance_id?: string;
+	// brick and document-field specific
 	brick_id_ref?: number;
 	// repeater specific
 	parent_id?: number | null;

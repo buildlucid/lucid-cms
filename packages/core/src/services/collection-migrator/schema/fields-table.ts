@@ -27,7 +27,6 @@ const createFieldTables = (props: {
 	repeaterKeys?: string[];
 	parentTable?: string;
 	brickTable?: string;
-	brickType: "fixed" | "builder" | "document-fields";
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
@@ -111,6 +110,24 @@ const createFieldTables = (props: {
 		},
 	];
 
+	//* bricks only
+	if (props.type === "brick") {
+		columns.push({
+			name: "brick_type",
+			source: "core",
+			type: props.db.getDataType("text"),
+			nullable: false,
+		});
+		// used to group a single instance of a brick accross locales instead of relying on the position value for this which isnt unique*
+		columns.push({
+			name: "brick_instance_id",
+			source: "core",
+			type: props.db.getDataType("text"),
+			nullable: false,
+		});
+	}
+
+	//* both brick table types
 	if (props.type === "brick" || props.type === "document-fields") {
 		// a temp reference ID for linking up with repeater temp brick_id values until insertion
 		columns.push({
@@ -184,7 +201,6 @@ const createFieldTables = (props: {
 				brick: props.brick,
 				repeaterKeys: repeaterKeys,
 				parentTable: tableNameRes.data,
-				brickType: props.brickType,
 			});
 			if (repeaterTableRes.error) return repeaterTableRes;
 
@@ -245,7 +261,6 @@ const createFieldTables = (props: {
 					brick: props.brick?.key,
 					repeater: props.repeaterKeys,
 				},
-				brickType: props.brickType,
 				columns: columns,
 			},
 			childTables: childTables,

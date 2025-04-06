@@ -33,6 +33,9 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
 		// brick specific
+		brick_type: z.union([z.literal("fixed"), z.literal("builder")]).optional(),
+		brick_instance_id: z.string().optional(),
+		// brick and document-field specific
 		brick_id_ref: z.number().optional(),
 		// repeater specific
 		brick_id: z.number().optional(),
@@ -48,6 +51,9 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		position: this.dbAdapter.getDataType("integer"),
 		is_open: this.dbAdapter.getDataType("boolean"),
 		// brick specific
+		brick_type: this.dbAdapter.getDataType("text"),
+		brick_instance_id: this.dbAdapter.getDataType("text"),
+		// brick and document-field specific
 		brick_id_ref: this.dbAdapter.getDataType("integer"),
 		// repeater specific
 		brick_id: this.dbAdapter.getDataType("integer"),

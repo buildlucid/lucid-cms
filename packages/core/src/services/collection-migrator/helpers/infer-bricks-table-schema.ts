@@ -3,10 +3,7 @@ import type { CollectionBuilder } from "../../../builders.js";
 import type DatabaseAdapter from "../../../libs/db/adapter.js";
 import type { LucidBrickTableName } from "../../../types.js";
 import type { ServiceResponse } from "../../../types.js";
-import type {
-	CollectionSchemaColumn,
-	CollectionSchemaTable,
-} from "../schema/types.js";
+import type { CollectionSchemaTable } from "../schema/types.js";
 
 /**
  * Takes a collection, calls inferSchema and filters response to just include bricks
@@ -29,7 +26,6 @@ const inferBricksTableSchema = (
 				type: table.type,
 				columns: table.columns,
 				key: table.key,
-				brickType: table.brickType,
 			})),
 	};
 };
