@@ -195,7 +195,7 @@ export default class DocumentFieldsFormatter {
 	};
 
 	/**
-	 *
+	 * Responsible for building out groups for a repeater field
 	 */
 	private buildGroups = (
 		data: FieldFormatData,
@@ -255,6 +255,14 @@ export default class DocumentFieldsFormatter {
 		return groupsRes.sort((a, b) => a.order - b.order);
 	};
 
+	/**
+	 * Fetch relation meta data
+	 */
+	private fetchRelationData = () => {};
+
+	/**
+	 * The swagger response schema
+	 */
 	static swagger = {
 		type: "object",
 		additionalProperties: true,
