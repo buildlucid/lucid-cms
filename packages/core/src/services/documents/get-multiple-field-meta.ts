@@ -23,6 +23,8 @@ const getMultipleFieldMeta: ServiceFn<
 		};
 	}
 
+	console.log(data.values);
+
 	// TODO: add support to work out versions and collection fields table, then use that to fetch field data for the collection as well.
 	const documentsRes = await Documents.selectMultipleByIdsUnion({
 		unions: data.values,

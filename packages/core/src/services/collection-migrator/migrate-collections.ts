@@ -28,6 +28,7 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	for (const [_, collection] of context.config.collections.entries()) {
 		const res = inferSchema(collection, context.config.db);
 		if (res.error) return res;
+		collection.collectionTableSchema = res.data;
 		inferedSchemas.push(res.data);
 	}
 

@@ -11,12 +11,18 @@ import type {
 	CollectionBrickConfig,
 	FieldFilters,
 } from "./types.js";
+import type {
+	CollectionSchema,
+	CollectionSchemaTable,
+} from "../../../services/collection-migrator/schema/types.js";
+import type { LucidBrickTableName } from "../../../types.js";
 
 class CollectionBuilder extends FieldBuilder {
 	key: string;
 	config: CollectionConfigSchemaType;
 	includeFieldKeys: string[] = [];
 	filterableFieldKeys: FieldFilters = [];
+	collectionTableSchema?: CollectionSchema;
 	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
 		super();
 		this.key = key;
@@ -231,6 +237,19 @@ class CollectionBuilder extends FieldBuilder {
 		return (this.config.bricks?.builder || []).concat(
 			this.config.bricks?.fixed || [],
 		);
+	}
+
+	get bricksTableSchema(): Array<CollectionSchemaTable<LucidBrickTableName>> {
+		return (this.collectionTableSchema?.tables.filter(
+			(table) => table.type !== "document" && table.type !== "versions",
+		) ?? []) as Array<CollectionSchemaTable<LucidBrickTableName>>;
+	}
+	get documentBrickTableSchema():
+		| CollectionSchemaTable<LucidBrickTableName>
+		| undefined {
+		return this.collectionTableSchema?.tables.find(
+			(t) => t.type === "document-fields",
+		) as CollectionSchemaTable<LucidBrickTableName> | undefined;
 	}
 }
 

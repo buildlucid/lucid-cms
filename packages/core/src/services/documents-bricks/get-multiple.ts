@@ -8,13 +8,11 @@ import type {
 	LucidVersionTableName,
 } from "../../libs/db/types.js";
 import buildTableName from "../collection-migrator/helpers/build-table-name.js";
-import inferBricksTableSchema from "../collection-migrator/helpers/infer-bricks-table-schema.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 import fetchRelationData from "./helpers/fetch-relation-data.js";
 
 /**
  * Returns all of the bricks and collection fields
- * @todo implement helper to generate all possible brick tables names
  * @todo format query response
  */
 const getMultiple: ServiceFn<
@@ -47,17 +45,11 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const bricksSchemaRes = inferBricksTableSchema(
-		collectionRes.data,
-		context.config.db,
-	);
-	if (bricksSchemaRes.error) return bricksSchemaRes;
-
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionType: data.versionType ?? "draft",
 			versionId: data.versionId,
-			bricksSchema: bricksSchemaRes.data,
+			bricksSchema: collectionRes.data.bricksTableSchema,
 		},
 		{
 			tableName: versionsTableRes.data,
@@ -74,7 +66,7 @@ const getMultiple: ServiceFn<
 	}
 
 	const relationIdRes = await extractRelatedEntityIds(context, {
-		brickSchema: bricksSchemaRes.data,
+		brickSchema: collectionRes.data.bricksTableSchema,
 		brickQuery: bricksQueryRes.data,
 	});
 	if (relationIdRes.error) return relationIdRes;
@@ -89,14 +81,14 @@ const getMultiple: ServiceFn<
 		data: {
 			bricks: DocumentBricksFormatter.formatMultiple({
 				bricksQuery: bricksQueryRes.data,
-				bricksSchema: bricksSchemaRes.data,
+				bricksSchema: collectionRes.data.bricksTableSchema,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
 			}),
 			fields: DocumentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
-				bricksSchema: bricksSchemaRes.data,
+				bricksSchema: collectionRes.data.bricksTableSchema,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
