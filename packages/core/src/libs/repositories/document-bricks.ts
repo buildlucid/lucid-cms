@@ -62,8 +62,9 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 	};
 	queryConfig = undefined;
 
-	// ----------------------------------------
-	// queries
+	/**
+	 * Fetches all brick rows for a given document version ID
+	 */
 	async selectMultipleByVersionId(
 		props: {
 			/** The version type to use for any custom field document references  */

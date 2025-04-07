@@ -1,10 +1,8 @@
 import Formatter from "./index.js";
-import constants from "../../constants/constants.js";
 import DocumentBricksFormatter from "./document-bricks.js";
+import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
 import type {
 	CFConfig,
-	CFResponse,
-	Config,
 	FieldGroupResponse,
 	FieldResponse,
 	FieldResponseMeta,
@@ -18,8 +16,6 @@ import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
-import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
-import type { DocumentPropsT } from "./documents.js";
 
 export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;
@@ -284,13 +280,15 @@ export default class DocumentFieldsFormatter {
 	) => {
 		switch (props.type) {
 			case "document": {
-				return (relationData.document as Array<DocumentPropsT>).find((d) => {
-					return (
-						d.collection_key ===
-							(props.fieldConfig as CFConfig<"document">)?.collection &&
-						d.id === props.value
-					);
-				});
+				return (relationData.document as Array<BrickQueryResponse>).find(
+					(d) => {
+						return (
+							d.collection_key ===
+								(props.fieldConfig as CFConfig<"document">)?.collection &&
+							d.id === props.value
+						);
+					},
+				);
 			}
 			default: {
 				return relationData[props.type]?.find((i) => i?.id === props.value);

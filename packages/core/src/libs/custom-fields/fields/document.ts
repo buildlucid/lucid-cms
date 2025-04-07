@@ -23,6 +23,7 @@ import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { DocumentPropsT } from "../../formatters/documents.js";
+import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
 
 const FieldsFormatter = Formatter.get("collection-document-fields");
 
@@ -124,7 +125,10 @@ class DocumentCustomField extends CustomField<"document"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"document">["value"];
 	}
-	formatResponseMeta(value: DocumentPropsT | undefined, meta: FieldFormatMeta) {
+	formatResponseMeta(
+		value: BrickQueryResponse | undefined,
+		meta: FieldFormatMeta,
+	) {
 		// TODO: come back to finish the fields formatting
 		return {
 			id: value?.id ?? null,

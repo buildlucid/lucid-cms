@@ -1,8 +1,8 @@
 import type { DocumentPropsT } from "../../../libs/formatters/documents.js";
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
 import type { UserPropT } from "../../../libs/formatters/users.js";
+import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type {
-	CFResponse,
 	FieldTypes,
 	LucidDocumentTableName,
 	LucidErrorData,
@@ -13,7 +13,7 @@ import type { FieldRelationValues } from "./extract-related-entity-ids.js";
 export type FieldRelationResponse = Partial<
 	Record<
 		FieldTypes,
-		Array<MediaPropsT> | Array<UserPropT> | Array<DocumentPropsT>
+		Array<MediaPropsT> | Array<UserPropT> | Array<BrickQueryResponse>
 	>
 >;
 

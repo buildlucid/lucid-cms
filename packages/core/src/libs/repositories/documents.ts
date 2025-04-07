@@ -1,5 +1,6 @@
 import z from "zod";
 import DynamicRepository from "./parents/dynamic-repository.js";
+import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type {
 	LucidDocumentTable,
 	Insert,
@@ -10,7 +11,6 @@ import type {
 import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-import { versionTypesSchema } from "../../schemas/document-versions.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -331,68 +331,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			...props.validation,
 			mode: "single",
 			schema: this.mergeSchema(dynamicConfig.schema),
-		});
-	}
-	async selectMultipleByIdsUnion<V extends boolean = false>(
-		props: QueryProps<
-			V,
-			{
-				unions: Array<{
-					table: LucidDocumentTableName;
-					ids: number[];
-				}>;
-			}
-		>,
-	) {
-		if (props.unions.length === 0) {
-			return {
-				error: undefined,
-				data: [],
-			};
-		}
-
-		const unionQueries = props.unions.map(({ table, ids }) => {
-			return this.db
-				.selectFrom(table)
-				.select([
-					`${table}.id`,
-					`${table}.collection_key`,
-					`${table}.created_by`,
-					`${table}.created_at`,
-					`${table}.updated_at`,
-					`${table}.updated_by`,
-				])
-				.where(`${table}.id`, "in", ids)
-				.where(
-					`${table}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
-				);
-		});
-
-		let query = unionQueries[0];
-
-		if (query === undefined) {
-			return {
-				error: undefined,
-				data: [],
-			};
-		}
-
-		for (let i = 1; i < unionQueries.length; i++) {
-			const iQuery = unionQueries[i];
-			if (iQuery === undefined) continue;
-			query = query.unionAll(iQuery);
-		}
-
-		const exec = await this.executeQuery(() => query.execute(), {
-			method: "selectMultipleByIdsUnion",
-		});
-		if (exec.response.error) return exec.response;
-
-		return this.validateResponse(exec, {
-			...props.validation,
-			mode: "multiple",
 		});
 	}
 }
