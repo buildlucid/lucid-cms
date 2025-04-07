@@ -1,15 +1,16 @@
 import T from "../../translations/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 
-const getSingleInstance: ServiceFn<
-	[
-		{
-			key: string;
-		},
-	],
-	CollectionBuilder
-> = async (context, data) => {
+const getSingleInstance = (
+	context: ServiceContext,
+	data: {
+		key: string;
+	},
+): Awaited<ServiceResponse<CollectionBuilder>> => {
 	const collection = context.config.collections?.find(
 		(c) => c.key === data.key,
 	);

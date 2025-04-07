@@ -26,19 +26,18 @@ const getSingle: ServiceFn<
 	);
 	const DocumentsFormatter = Formatter.get("collection-documents");
 
-	const [document, collectionRes] = await Promise.all([
-		DocumentsRepo.selectSingleById({
-			id: data.id,
-			collectionKey: data.collectionKey,
-			config: context.config,
-			status: data.status,
-			versionId: data.versionId,
-		}),
-		context.services.collection.getSingleInstance(context, {
-			key: data.collectionKey,
-		}),
-	]);
+	const collectionRes = context.services.collection.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
+	if (collectionRes.error) return collectionRes;
 
+	const document = await DocumentsRepo.selectSingleById({
+		id: data.id,
+		collectionKey: data.collectionKey,
+		config: context.config,
+		status: data.status,
+		versionId: data.versionId,
+	});
 	if (document === undefined) {
 		return {
 			error: {
@@ -49,7 +48,6 @@ const getSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (collectionRes.error) return collectionRes;
 
 	// If given a status, but no version id is found, return 404
 	if (data.status !== undefined && !document.version_id) {

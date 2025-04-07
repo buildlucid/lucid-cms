@@ -36,10 +36,12 @@ const promoteVersion: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
-	const [collectionRes, versionRes, targetDocumentRes] = await Promise.all([
-		context.services.collection.getSingleInstance(context, {
-			key: data.collectionKey,
-		}),
+	const collectionRes = context.services.collection.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
+	if (collectionRes.error) return collectionRes;
+
+	const [versionRes, targetDocumentRes] = await Promise.all([
 		VersionsRepo.selectSingle({
 			select: ["id", "version_type"],
 			where: [
@@ -61,7 +63,6 @@ const promoteVersion: ServiceFn<
 	]);
 
 	// Error checking
-	if (collectionRes.error) return collectionRes;
 	if (versionRes === undefined) {
 		return {
 			error: {

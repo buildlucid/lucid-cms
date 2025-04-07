@@ -25,12 +25,9 @@ const getSingle: ServiceFn<
 	);
 	const CollectionDocumentsFormatter = Formatter.get("collection-documents");
 
-	const collectionRes = await context.services.collection.getSingleInstance(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = context.services.collection.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	const { documentFilters, documentFieldFilters } = splitDocumentFilters(

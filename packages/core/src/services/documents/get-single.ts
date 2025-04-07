@@ -38,32 +38,30 @@ const getSingle: ServiceFn<
 	});
 	if (versionsTableRes.error) return versionsTableRes;
 
-	const [documentRes, collectionRes] = await Promise.all([
-		Document.selectSingleById(
-			{
-				id: data.id,
-				tables: {
-					versions: versionsTableRes.data,
-				},
-				validation: {
-					enabled: true,
-					defaultError: {
-						message: T("document_version_not_found_message"),
-						status: 404,
-					},
-				},
-			},
-			{
-				tableName: documentTableRes.data,
-			},
-		),
-		context.services.collection.getSingleInstance(context, {
-			key: data.collectionKey,
-		}),
-	]);
-
-	if (documentRes.error) return documentRes;
+	const collectionRes = context.services.collection.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
+
+	const documentRes = await Document.selectSingleById(
+		{
+			id: data.id,
+			tables: {
+				versions: versionsTableRes.data,
+			},
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("document_version_not_found_message"),
+					status: 404,
+				},
+			},
+		},
+		{
+			tableName: documentTableRes.data,
+		},
+	);
+	if (documentRes.error) return documentRes;
 
 	// TODO: implement version checks to ensure we have the correct one targeted. Bellow is temporary.
 	const versionId = documentRes.data.versions[0]?.id;

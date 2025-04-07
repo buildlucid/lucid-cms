@@ -40,7 +40,7 @@ const getMultiple: ServiceFn<
 	});
 	if (versionsTableRes.error) return versionsTableRes;
 
-	const collectionRes = await collectionsServices.getSingleInstance(context, {
+	const collectionRes = collectionsServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

@@ -12,12 +12,9 @@ const restoreRevision: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = await context.services.collection.getSingleInstance(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = context.services.collection.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.useRevisions === false) {

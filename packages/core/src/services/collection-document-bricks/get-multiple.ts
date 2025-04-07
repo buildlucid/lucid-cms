@@ -28,18 +28,16 @@ const getMultiple: ServiceFn<
 		"collection-document-bricks",
 	);
 
-	const [bricks, collectionRes] = await Promise.all([
-		CollectionDocumentBricksRepo.selectMultipleByVersionId({
-			documentFieldsRelationStatus:
-				data.documentFieldsRelationStatus ?? "draft",
-			versionId: data.versionId,
-			config: context.config,
-		}),
-		collectionsServices.getSingleInstance(context, {
-			key: data.collectionKey,
-		}),
-	]);
+	const collectionRes = collectionsServices.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
+
+	const bricks = await CollectionDocumentBricksRepo.selectMultipleByVersionId({
+		documentFieldsRelationStatus: data.documentFieldsRelationStatus ?? "draft",
+		versionId: data.versionId,
+		config: context.config,
+	});
 
 	return {
 		error: undefined,

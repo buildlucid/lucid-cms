@@ -20,12 +20,9 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const collectionRes = await context.services.collection.getSingleInstance(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = context.services.collection.getSingleInstance(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	const CollectionDocumentsRepo = Repository.get(
