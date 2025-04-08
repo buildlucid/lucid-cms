@@ -45,9 +45,11 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
+	const targetVersionType = data.versionType ?? "draft";
+
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
-			versionType: data.versionType ?? "draft",
+			versionType: targetVersionType,
 			versionId: data.versionId,
 			bricksSchema: collectionRes.data.bricksTableSchema,
 		},
@@ -73,6 +75,7 @@ const getMultiple: ServiceFn<
 
 	const relationDataRes = await fetchRelationData(context, {
 		values: relationIdRes.data,
+		versionType: targetVersionType,
 	});
 	if (relationDataRes.error) return relationDataRes;
 

@@ -2,6 +2,7 @@ import Formatter from "./index.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
 import type {
+	Config,
 	CFConfig,
 	FieldGroupResponse,
 	FieldResponse,
@@ -11,6 +12,7 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 	Select,
+	FieldAltResponse,
 } from "../../types.js";
 import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
@@ -27,6 +29,7 @@ export interface FieldFormatMeta {
 	};
 	/** Used to help workout the target brick schema item and the table name. Set to `undefined` if the brick table you're creating fields for is the `document-fields` one */
 	brickKey: string | undefined;
+	config: Config;
 }
 
 interface FieldFormatData {
@@ -62,6 +65,7 @@ export default class DocumentFieldsFormatter {
 			localisation: meta.localisation,
 			collection: meta.collection,
 			brickKey: meta.brickKey,
+			config: meta.config,
 		});
 	};
 
@@ -92,6 +96,7 @@ export default class DocumentFieldsFormatter {
 						collection: meta.collection,
 						brickKey: meta.brickKey,
 						repeaterLevel: meta.repeaterLevel || 0,
+						config: meta.config,
 					}),
 				});
 				continue;
@@ -119,6 +124,7 @@ export default class DocumentFieldsFormatter {
 					localisation: meta.localisation,
 					collection: meta.collection,
 					brickKey: meta.brickKey,
+					config: meta.config,
 				},
 			);
 			if (fieldValue) fieldsRes.push(fieldValue);
@@ -259,12 +265,38 @@ export default class DocumentFieldsFormatter {
 						brickKey: meta.brickKey,
 						fieldConfig: repeaterFields,
 						repeaterLevel: meta.repeaterLevel + 1,
+						config: meta.config,
 					},
 				),
 			});
 		});
 
 		return groupsRes.sort((a, b) => a.order - b.order);
+	};
+
+	/**
+	 * Returns fields as an object, with the keys being the custom field keys instead of an array of fields
+	 */
+	objectifyFields = (
+		fields: FieldResponse[],
+	): Record<string, FieldAltResponse> => {
+		return fields.reduce(
+			(acc, field) => {
+				if (!field) return acc;
+
+				acc[field.key] = {
+					...field,
+					groups: field.groups?.map((g) => {
+						return {
+							...g,
+							fields: this.objectifyFields(g.fields || []),
+						};
+					}),
+				} satisfies FieldAltResponse;
+				return acc;
+			},
+			{} as Record<string, FieldAltResponse>,
+		);
 	};
 
 	/**

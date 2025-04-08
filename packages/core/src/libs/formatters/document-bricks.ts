@@ -78,6 +78,7 @@ export default class DocumentBricksFormatter {
 								default: props.config.localisation.defaultLocale,
 							},
 							brickKey: brickKey,
+							config: props.config,
 						},
 					),
 				});
@@ -125,6 +126,7 @@ export default class DocumentBricksFormatter {
 					default: props.config.localisation.defaultLocale,
 				},
 				brickKey: undefined,
+				config: props.config,
 			},
 		);
 	};

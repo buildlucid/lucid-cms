@@ -22,10 +22,11 @@ import type {
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
-import type { DocumentPropsT } from "../../formatters/documents.js";
 import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
 
 const FieldsFormatter = Formatter.get("collection-document-fields");
+const DocumentFieldsFormatter = Formatter.get("document-fields");
+const DocumentBricksFormatter = Formatter.get("document-bricks");
 
 class DocumentCustomField extends CustomField<"document"> {
 	type = "document" as const;
@@ -129,11 +130,31 @@ class DocumentCustomField extends CustomField<"document"> {
 		value: BrickQueryResponse | undefined,
 		meta: FieldFormatMeta,
 	) {
-		// TODO: come back to finish the fields formatting
+		const collection = meta.config.collections.find(
+			(c) => c.key === this.props.collection,
+		);
+		if (!collection || !value) {
+			return {
+				id: value?.document_id ?? null,
+				collectionKey: value?.collection_key ?? null,
+				fields: null,
+			};
+		}
+
+		const documentFields = DocumentFieldsFormatter.objectifyFields(
+			DocumentBricksFormatter.formatDocumentFields({
+				bricksQuery: value,
+				bricksSchema: collection.bricksTableSchema,
+				relationMetaData: {},
+				collection: collection,
+				config: meta.config,
+			}),
+		);
+
 		return {
 			id: value?.id ?? null,
 			collectionKey: value?.collection_key ?? null,
-			fields: null,
+			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies CFResponse<"document">["meta"];
 	}
 	getInsertField(props: {

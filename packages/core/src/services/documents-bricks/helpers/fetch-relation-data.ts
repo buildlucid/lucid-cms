@@ -1,8 +1,8 @@
-import type { DocumentPropsT } from "../../../libs/formatters/documents.js";
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
 import type { UserPropT } from "../../../libs/formatters/users.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type {
+	DocumentVersionType,
 	FieldTypes,
 	LucidDocumentTableName,
 	LucidErrorData,
@@ -26,6 +26,7 @@ const fetchRelationData: ServiceFn<
 	[
 		{
 			values: FieldRelationValues;
+			versionType: Exclude<DocumentVersionType, "revision">;
 		},
 	],
 	FieldRelationResponse
@@ -92,6 +93,7 @@ const fetchRelationData: ServiceFn<
 						table: v.table as LucidDocumentTableName,
 						ids: Array.from(v.values).filter((i) => typeof i === "number"),
 					})),
+					versionType: data.versionType,
 				})
 				.then((res) => {
 					if (res.error && !firstError) {
