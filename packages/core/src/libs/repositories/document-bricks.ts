@@ -67,8 +67,6 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 	 */
 	async selectMultipleByVersionId(
 		props: {
-			/** The version type to use for any custom field document references  */
-			versionType: Exclude<DocumentVersionType, "revision">;
 			versionId: number;
 			bricksSchema: Array<{
 				name: LucidBrickTableName;

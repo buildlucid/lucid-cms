@@ -5,15 +5,13 @@ import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import type z from "zod";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type documentsSchema from "../../schemas/documents.js";
-import type { CollectionDocumentResponse } from "../../types/response.js";
 import type {
 	DocumentVersionType,
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../libs/db/types.js";
-import { inspect } from "node:util";
+import type { CollectionDocumentResponse } from "../../types.js";
 
-// @ts-expect-error
 const getSingle: ServiceFn<
 	[
 		{
@@ -24,9 +22,10 @@ const getSingle: ServiceFn<
 			query: z.infer<typeof documentsSchema.getSingle.query>;
 		},
 	],
-	undefined // CollectionDocumentResponse
+	CollectionDocumentResponse
 > = async (context, data) => {
 	const Document = Repository.get("documents", context.db, context.config.db);
+	const DocumentFormatter = Formatter.get("documents");
 
 	const documentTableRes = buildTableName<LucidDocumentTableName>("document", {
 		collection: data.collectionKey,
@@ -49,6 +48,8 @@ const getSingle: ServiceFn<
 			tables: {
 				versions: versionsTableRes.data,
 			},
+			status: data.status,
+			versionId: data.versionId,
 			validation: {
 				enabled: true,
 				defaultError: {
@@ -63,12 +64,15 @@ const getSingle: ServiceFn<
 	);
 	if (documentRes.error) return documentRes;
 
-	// TODO: implement version checks to ensure we have the correct one targeted. Bellow is temporary.
-	const versionId = documentRes.data.versions[0]?.id;
-	const versionType = documentRes.data.versions[0]?.version_type;
+	const versionId =
+		data.status !== undefined ? documentRes.data.version_id : data.versionId;
+	const versionType =
+		data.status !== undefined ? data.status : documentRes.data.version_type;
+
 	if (!versionId || !versionType) {
 		return {
 			error: {
+				type: "basic",
 				message: T("document_version_not_found_message"),
 				status: 404,
 			},
@@ -76,37 +80,39 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	// TODO: add brick res to response here
 	if (data.query.include?.includes("bricks")) {
 		const bricksRes =
 			await context.services.collection.documentBricks.getMultiple(context, {
 				versionId: versionId,
 				collectionKey: documentRes.data.collection_key,
-				versionType: versionType !== "revision" ? versionType : undefined, // if we're fetching a revision, let it default to the draft version
+				//* if fetching a revision, we always default to the draft version so any sub-documents this may query due to the document custom field is always recent info
+				versionType: versionType !== "revision" ? versionType : "draft",
 			});
 		if (bricksRes.error) return bricksRes;
 
-		// console.log(
-		// 	inspect(bricksRes.data, {
-		// 		depth: Number.POSITIVE_INFINITY,
-		// 		colors: true,
-		// 		numericSeparator: true,
-		// 	}),
-		// );
-
 		return {
 			error: undefined,
-			data: {
-				...documentRes.data,
+			data: DocumentFormatter.formatSingle({
+				// @ts-expect-error
+				document: documentRes.data,
+				collection: collectionRes.data,
 				bricks: bricksRes.data.bricks,
 				fields: bricksRes.data.fields,
-			},
+				config: context.config,
+			}),
 		};
 	}
 
 	return {
 		error: undefined,
-		data: documentRes.data,
+		data: DocumentFormatter.formatSingle({
+			// @ts-expect-error
+			document: documentRes.data,
+			collection: collectionRes.data,
+			bricks: [],
+			fields: [],
+			config: context.config,
+		}),
 	};
 };
 

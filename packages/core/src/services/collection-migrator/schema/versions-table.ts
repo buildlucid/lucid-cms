@@ -71,6 +71,17 @@ const createVersionsTable = (props: {
 						nullable: false,
 					},
 					{
+						name: "promoted_from",
+						source: "core",
+						type: props.db.getDataType("integer"),
+						nullable: true,
+						foreignKey: {
+							table: tableNameRes.data,
+							column: "id",
+							onDelete: "set null",
+						},
+					},
+					{
 						name: "created_by",
 						source: "core",
 						type: props.db.getDataType("integer"),

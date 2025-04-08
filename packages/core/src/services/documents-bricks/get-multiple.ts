@@ -1,26 +1,27 @@
+import T from "../../translations/index.js";
 import collectionsServices from "../collections/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import buildTableName from "../collection-migrator/helpers/build-table-name.js";
+import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
+import fetchRelationData from "./helpers/fetch-relation-data.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
 import type {
 	DocumentVersionType,
 	LucidVersionTableName,
 } from "../../libs/db/types.js";
-import buildTableName from "../collection-migrator/helpers/build-table-name.js";
-import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
-import fetchRelationData from "./helpers/fetch-relation-data.js";
 
 /**
  * Returns all of the bricks and collection fields
- * @todo format query response
  */
 const getMultiple: ServiceFn<
 	[
 		{
 			versionId: number;
 			collectionKey: string;
-			versionType?: Exclude<DocumentVersionType, "revision">;
+			/** The version type to use for any custom field document references  */
+			versionType: Exclude<DocumentVersionType, "revision">;
 		},
 	],
 	{
@@ -45,11 +46,8 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const targetVersionType = data.versionType ?? "draft";
-
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
-			versionType: targetVersionType,
 			versionId: data.versionId,
 			bricksSchema: collectionRes.data.bricksTableSchema,
 		},
@@ -58,10 +56,12 @@ const getMultiple: ServiceFn<
 		},
 	);
 	if (bricksQueryRes.error) return bricksQueryRes;
+
 	if (bricksQueryRes.data === undefined) {
 		return {
 			error: {
 				status: 404,
+				message: T("document_version_not_found_message"),
 			},
 			data: undefined,
 		};
@@ -75,7 +75,7 @@ const getMultiple: ServiceFn<
 
 	const relationDataRes = await fetchRelationData(context, {
 		values: relationIdRes.data,
-		versionType: targetVersionType,
+		versionType: data.versionType,
 	});
 	if (relationDataRes.error) return relationDataRes;
 

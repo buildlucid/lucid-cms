@@ -247,7 +247,7 @@ export default class DocumentFieldsFormatter {
 			const openState = localeRows[0]?.is_open ?? false;
 
 			groupsRes.push({
-				id: "ignore", // TODO: remove this from type, no longer needed. No such thing as a group ID as a single group spans accross multiple rows due to locales
+				id: -1, // TODO: remove this from type, no longer needed. No such thing as a group ID as a single group spans accross multiple rows due to locales
 				order: key,
 				open: Formatter.formatBoolean(openState),
 				fields: this.buildFieldTree(

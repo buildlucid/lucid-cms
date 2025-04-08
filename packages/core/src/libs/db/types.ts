@@ -391,7 +391,8 @@ export interface LucidVersionTable {
 	id: Generated<number>;
 	collection_key: string;
 	document_id: number;
-	type: "draft" | "revision" | "published";
+	type: DocumentVersionType;
+	promoted_from: number | null;
 	created_by: number;
 	updated_by: number;
 	created_at: TimestampImmutable;

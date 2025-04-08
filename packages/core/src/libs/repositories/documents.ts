@@ -7,6 +7,7 @@ import type {
 	Select,
 	LucidDocumentTableName,
 	LucidVersionTableName,
+	DocumentVersionType,
 } from "../db/types.js";
 import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
@@ -190,7 +191,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			V,
 			{
 				id: number;
-				status?: "draft" | "published" | "revision";
+				status?: DocumentVersionType;
 				versionId?: number;
 				tables: {
 					versions: LucidVersionTableName;
@@ -219,6 +220,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.select([
 									`${props.tables.versions}.id`,
 									`${props.tables.versions}.type as version_type`,
+									`${props.tables.versions}.promoted_from`,
 									`${props.tables.versions}.created_at`,
 									`${props.tables.versions}.created_by`,
 									`${props.tables.versions}.updated_at`,

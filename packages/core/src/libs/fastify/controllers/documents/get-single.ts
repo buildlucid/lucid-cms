@@ -5,7 +5,7 @@ import {
 	swaggerQueryString,
 } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import CollectionDocumentsFormatter from "../../../formatters/collection-documents.js";
+import DocumentsFormatter from "../../../formatters/documents.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -67,11 +67,7 @@ export default {
 		response: {
 			200: swaggerResponse({
 				type: 200,
-				// data: CollectionDocumentsFormatter.swagger,
-				data: {
-					type: "object",
-					additionalProperties: true,
-				},
+				data: DocumentsFormatter.swagger,
 			}),
 		},
 		querystring: swaggerQueryString({
