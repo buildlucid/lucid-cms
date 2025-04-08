@@ -1,6 +1,7 @@
 import z from "zod";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
+import type documentsSchema from "../../schemas/documents.js";
 import type {
 	LucidDocumentTable,
 	Insert,
@@ -12,6 +13,9 @@ import type {
 import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
+import type { QueryParamFilters } from "../../types/query-params.js";
+import type { Config, DocumentFieldFilters } from "../../types.js";
+import type { CollectionBuilder } from "../../builders.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -325,6 +329,41 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
+			tableName: dynamicConfig.tableName,
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+	async selectMultipleFiltered<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				status: DocumentVersionType;
+				/** The status used to determine which version of the document custom field relations to fetch */
+				relationVersionType: Exclude<DocumentVersionType, "revision">;
+				documentFilters: QueryParamFilters;
+				documentFieldFilters: DocumentFieldFilters[];
+				query: z.infer<typeof documentsSchema.getMultiple.query>;
+				includeAllFields?: boolean;
+				includeGroups?: boolean;
+				collection: CollectionBuilder;
+				config: Config;
+				tables: {
+					versions: LucidVersionTableName;
+				};
+			}
+		>,
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		const query = this.db.selectFrom(dynamicConfig.tableName);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleFiltered",
 			tableName: dynamicConfig.tableName,
 		});
 		if (exec.response.error) return exec.response;
