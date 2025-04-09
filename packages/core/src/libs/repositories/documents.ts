@@ -20,6 +20,7 @@ import type {
 	LucidBrickTableName,
 } from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
+import { sql } from "kysely";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -365,9 +366,96 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		>,
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
-		const query = this.db.selectFrom(dynamicConfig.tableName);
+		const queryFn = async () => {
+			const query = this.db
+				.selectFrom(dynamicConfig.tableName)
+				.leftJoin(
+					props.tables.versions,
+					// @ts-expect-error
+					`${props.tables.versions}.document_id`,
+					`${dynamicConfig.tableName}.id`,
+				)
+				.select([
+					`${dynamicConfig.tableName}.id`,
+					`${dynamicConfig.tableName}.collection_key`,
+					`${dynamicConfig.tableName}.created_by`,
+					`${dynamicConfig.tableName}.created_at`,
+					`${dynamicConfig.tableName}.updated_at`,
+					`${dynamicConfig.tableName}.updated_by`,
+				])
+				.select([
+					(eb) =>
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom(props.tables.versions)
+									// @ts-expect-error
+									.select([
+										`${props.tables.versions}.id`,
+										`${props.tables.versions}.type as version_type`,
+										`${props.tables.versions}.promoted_from`,
+										`${props.tables.versions}.created_at`,
+										`${props.tables.versions}.created_by`,
+										`${props.tables.versions}.updated_at`,
+										`${props.tables.versions}.updated_by`,
+									])
+									.whereRef(
+										// @ts-expect-error
+										`${props.tables.versions}.document_id`,
+										"=",
+										`${dynamicConfig.tableName}.id`,
+									)
+									.where((eb) =>
+										eb.or([
+											// @ts-expect-error
+											eb(`${props.tables.versions}.type`, "=", "draft"),
+											// @ts-expect-error
+											eb(`${props.tables.versions}.type`, "=", "published"),
+										]),
+									),
+							)
+							.as("versions"),
+				])
+				.where(
+					`${dynamicConfig.tableName}.is_deleted`,
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				)
+				// @ts-expect-error
+				.where(`${props.tables.versions}.type`, "=", props.status);
 
-		const exec = await this.executeQuery(() => query.execute(), {
+			const queryCount = this.db
+				.selectFrom(dynamicConfig.tableName)
+				.leftJoin(
+					props.tables.versions,
+					// @ts-expect-error
+					`${props.tables.versions}.document_id`,
+					`${dynamicConfig.tableName}.id`,
+				)
+				.select((eb) =>
+					sql`count(distinct ${sql.ref(`${dynamicConfig.tableName}.id`)})`.as(
+						"count",
+					),
+				)
+				.where(
+					`${dynamicConfig.tableName}.is_deleted`,
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				)
+				// @ts-expect-error
+				.where(`${props.tables.versions}.type`, "=", props.status);
+
+			const [mainResult, countResult] = await Promise.all([
+				query.execute(),
+				queryCount?.executeTakeFirst() as Promise<
+					{ count: string } | undefined
+				>,
+			]);
+
+			return [mainResult, countResult] as const;
+		};
+
+		const exec = await this.executeQuery(queryFn, {
 			method: "selectMultipleFiltered",
 			tableName: dynamicConfig.tableName,
 		});
@@ -375,7 +463,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		return this.validateResponse(exec, {
 			...props.validation,
-			mode: "single",
+			mode: "multiple-count",
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}

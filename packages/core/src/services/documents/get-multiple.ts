@@ -1,3 +1,4 @@
+import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import { splitDocumentFilters } from "../../utils/helpers/index.js";
@@ -6,8 +7,8 @@ import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionDocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
-import T from "../../translations/index.js";
 
+// @ts-expect-error
 const getMultiple: ServiceFn<
 	[
 		{
@@ -48,7 +49,7 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	const [documents, documentCount] = await Document.selectMultipleFiltered(
+	const documentsRes = await Document.selectMultipleFiltered(
 		{
 			status: data.status,
 			query: data.query,
@@ -67,12 +68,13 @@ const getMultiple: ServiceFn<
 			tableName: documentTable,
 		},
 	);
+	if (documentsRes.error) return documentsRes;
 
 	return {
 		error: undefined,
 		data: {
-			data: [],
-			count: 0,
+			data: documentsRes.data?.[0],
+			count: documentsRes.data?.[1]?.count || 0,
 		},
 		// data: {
 		// 	data: DocumentFormatter.formatMultiple({

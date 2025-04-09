@@ -154,6 +154,7 @@ class CollectionBuilder extends FieldBuilder {
 			return acc;
 		}, []);
 	}
+	// TODO: remove once new collection/document storage method is complete
 	queryIncludeFields(all?: boolean) {
 		if (all)
 			return this.flatFields.filter((f) => f.type !== "tab").map((f) => f.key);
