@@ -14,7 +14,11 @@ import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
-import type { Config, DocumentFieldFilters } from "../../types.js";
+import type {
+	Config,
+	DocumentFieldFilters,
+	LucidBrickTableName,
+} from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
@@ -355,6 +359,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				config: Config;
 				tables: {
 					versions: LucidVersionTableName;
+					documentFields: LucidBrickTableName;
 				};
 			}
 		>,

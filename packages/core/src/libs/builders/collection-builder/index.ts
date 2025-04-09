@@ -17,6 +17,7 @@ import type {
 } from "../../../services/collection-migrator/schema/types.js";
 import type {
 	LucidBrickTableName,
+	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../../types.js";
 
@@ -247,16 +248,18 @@ class CollectionBuilder extends FieldBuilder {
 			(table) => table.type !== "document" && table.type !== "versions",
 		) ?? []) as Array<CollectionSchemaTable<LucidBrickTableName>>;
 	}
-	get documentFieldsTableSchema():
-		| CollectionSchemaTable<LucidBrickTableName>
-		| undefined {
+
+	get documentTableSchema() {
+		return this.collectionTableSchema?.tables.find(
+			(t) => t.type === "document",
+		) as CollectionSchemaTable<LucidDocumentTableName> | undefined;
+	}
+	get documentFieldsTableSchema() {
 		return this.collectionTableSchema?.tables.find(
 			(t) => t.type === "document-fields",
 		) as CollectionSchemaTable<LucidBrickTableName> | undefined;
 	}
-	get documentVersionTableSchema():
-		| CollectionSchemaTable<LucidVersionTableName>
-		| undefined {
+	get documentVersionTableSchema() {
 		return this.collectionTableSchema?.tables.find(
 			(t) => t.type === "versions",
 		) as CollectionSchemaTable<LucidVersionTableName> | undefined;

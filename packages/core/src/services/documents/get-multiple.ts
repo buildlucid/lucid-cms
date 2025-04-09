@@ -6,6 +6,7 @@ import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionDocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
+import T from "../../translations/index.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -33,6 +34,20 @@ const getMultiple: ServiceFn<
 		data.query.filter,
 	);
 
+	const versionTable = collectionRes.data.documentVersionTableSchema?.name;
+	const documentTable = collectionRes.data.documentTableSchema?.name;
+	const documentFieldTable = collectionRes.data.documentFieldsTableSchema?.name;
+
+	if (!versionTable || !documentTable || !documentFieldTable) {
+		return {
+			error: {
+				message: T("error_getting_collection_names"),
+				status: 500,
+			},
+			data: undefined,
+		};
+	}
+
 	const [documents, documentCount] = await Document.selectMultipleFiltered(
 		{
 			status: data.status,
@@ -44,11 +59,12 @@ const getMultiple: ServiceFn<
 			config: context.config,
 			relationVersionType: data.status !== "revision" ? data.status : "draft",
 			tables: {
-				versions: "",
+				versions: versionTable,
+				documentFields: documentFieldTable,
 			},
 		},
 		{
-			tableName: "",
+			tableName: documentTable,
 		},
 	);
 
