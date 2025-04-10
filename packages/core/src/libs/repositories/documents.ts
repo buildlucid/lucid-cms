@@ -20,7 +20,8 @@ import type {
 	LucidBrickTableName,
 } from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
-import { sql } from "kysely";
+import { sql, type SelectQueryBuilder } from "kysely";
+import queryBuilder from "../query-builder/index.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -352,10 +353,9 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				/** The status used to determine which version of the document custom field relations to fetch */
 				relationVersionType: Exclude<DocumentVersionType, "revision">;
 				documentFilters: QueryParamFilters;
+				// TODO: create reworked version of this that appends _ to CF keys for the column
 				documentFieldFilters: DocumentFieldFilters[];
 				query: z.infer<typeof documentsSchema.getMultiple.query>;
-				includeAllFields?: boolean;
-				includeGroups?: boolean;
 				collection: CollectionBuilder;
 				config: Config;
 				tables: {
@@ -367,7 +367,48 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
 		const queryFn = async () => {
-			const query = this.db
+			// TODO: make use of query builder operator helper and move this to QB main.
+			const applyFieldFilters = <DB, Table extends keyof DB, O>(
+				query: SelectQueryBuilder<DB, Table, O>,
+			) => {
+				let modifiedQuery = query;
+
+				if (
+					props.documentFieldFilters &&
+					props.documentFieldFilters.length > 0
+				) {
+					modifiedQuery = modifiedQuery.where((eb) => {
+						const conditions = props.documentFieldFilters.map((filter) => {
+							const columnName = `_${filter.key}`;
+
+							return eb.exists(
+								eb
+									// @ts-expect-error
+									.selectFrom(props.tables.documentFields)
+									.whereRef(
+										// @ts-expect-error
+										`${props.tables.documentFields}.document_id`,
+										"=",
+										`${dynamicConfig.tableName}.id`,
+									)
+									.where(
+										// @ts-expect-error
+										`${props.tables.documentFields}.${columnName}`,
+										filter.operator,
+										filter.value,
+									)
+									.select(sql.lit(1).as("exists")),
+							);
+						});
+
+						return eb.and(conditions);
+					});
+				}
+
+				return modifiedQuery;
+			};
+
+			let query = this.db
 				.selectFrom(dynamicConfig.tableName)
 				.leftJoin(
 					props.tables.versions,
@@ -390,7 +431,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								eb
 									.selectFrom(props.tables.versions)
 									// @ts-expect-error
-									.select([
+									.select((eb) => [
 										`${props.tables.versions}.id`,
 										`${props.tables.versions}.type as version_type`,
 										`${props.tables.versions}.promoted_from`,
@@ -415,6 +456,29 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									),
 							)
 							.as("versions"),
+					this.dbAdapter
+						.jsonArrayFrom(
+							this.db
+								.selectFrom(props.tables.documentFields)
+								.innerJoin(
+									props.tables.versions,
+									`${props.tables.versions}.id`,
+									`${props.tables.documentFields}.document_version_id`,
+								)
+								.where(
+									`${props.tables.versions}.document_id`,
+									"=",
+									// @ts-expect-error
+									sql.ref(`${dynamicConfig.tableName}.id`),
+								)
+								.where(`${props.tables.versions}.type`, "=", props.status)
+								.select(
+									props.collection.documentFieldsTableSchema?.columns.map(
+										(c) => `${props.tables.documentFields}.${c.name}`,
+									) || [],
+								),
+						)
+						.as(props.tables.documentFields),
 				])
 				.where(
 					`${dynamicConfig.tableName}.is_deleted`,
@@ -424,7 +488,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
-			const queryCount = this.db
+			let queryCount = this.db
 				.selectFrom(dynamicConfig.tableName)
 				.leftJoin(
 					props.tables.versions,
@@ -445,11 +509,44 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
+			query = applyFieldFilters(query);
+			queryCount = applyFieldFilters(queryCount);
+
+			const { main, count } = queryBuilder.main(
+				{
+					main: query,
+					count: queryCount,
+				},
+				{
+					queryParams: {
+						filter: props.documentFilters,
+						sort: props.query.sort,
+						page: props.query.page,
+						perPage: props.query.perPage,
+					},
+					// documentFieldFilters: props.documentFieldFilters,
+					meta: {
+						tableKeys: {
+							filters: {
+								documentId: `${dynamicConfig.tableName}.id`,
+								documentCollectionKey: `${dynamicConfig.tableName}.collection_key`,
+								documentCreatedBy: `${dynamicConfig.tableName}.created_by`,
+								documentUpdatedBy: `${dynamicConfig.tableName}.updated_by`,
+								documentCreatedAt: `${dynamicConfig.tableName}.created_at`,
+								documentUpdatedAt: `${dynamicConfig.tableName}.updated_at`,
+							},
+							sorts: {
+								createdAt: `${dynamicConfig.tableName}.created_at`,
+								updatedAt: `${dynamicConfig.tableName}.updated_at`,
+							},
+						},
+					},
+				},
+			);
+
 			const [mainResult, countResult] = await Promise.all([
-				query.execute(),
-				queryCount?.executeTakeFirst() as Promise<
-					{ count: string } | undefined
-				>,
+				main.execute(),
+				count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
 			]);
 
 			return [mainResult, countResult] as const;
