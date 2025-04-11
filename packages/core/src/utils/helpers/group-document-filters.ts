@@ -18,19 +18,18 @@ export type BrickFieldFilters = {
 	column: `_${string}`;
 };
 
-export type GroupedFilter = {
-	table: string;
+export type BrickFilters = {
+	table: LucidBrickTableName;
 	filters: BrickFieldFilters[];
 };
 
 /**
  * Splits filters based on document columns and brick tables for custom fields.
  *
- * @example
- * `filter[_customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
- * `filter[fields._customFieldKey]` Targets the `document-fiedls` table and checks for a CF with a key of `customFieldKey`.
- * `filter[brickKey._customFieldKey]` Targets the `brick` table with a key of `brickKey` and checks for a CF with a key of `customFieldKey`.
- * `filter[brickKey.repeaterKey._customFieldKey]`Targets the `repeater` table that belongs to the `brick` and checks for a CF with a key of `customFieldKey`.
+ * - `filter[_customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
+ * - `filter[fields._customFieldKey]` Targets the `document-fiedls` table and checks for a CF with a key of `customFieldKey`.
+ * - `filter[brickKey._customFieldKey]` Targets the `brick` table with a key of `brickKey` and checks for a CF with a key of `customFieldKey`.
+ * - `filter[brickKey.repeaterKey._customFieldKey]` Targets the `repeater` table that belongs to the `brick` and checks for a CF with a key of `customFieldKey`.
  *
  * This supports filtering on any repeater table, but you only need to include the repeater key of the level you're searching. This works as repeater keys within a brick are strictly unique.
  */
@@ -39,7 +38,7 @@ const groupDocumentFilters = (
 	filters?: QueryParamFilters,
 ): {
 	documentFilters: QueryParamFilters;
-	brickFilters: GroupedFilter[];
+	brickFilters: BrickFilters[];
 } => {
 	if (!filters) return { documentFilters: {}, brickFilters: [] };
 
@@ -52,7 +51,7 @@ const groupDocumentFilters = (
 	];
 
 	const documentFilters: QueryParamFilters = {};
-	const brickFiltersMap = new Map<string, BrickFieldFilters[]>();
+	const brickFiltersMap = new Map<LucidBrickTableName, BrickFieldFilters[]>();
 
 	for (const [key, value] of Object.entries(filters)) {
 		//* handle document core filters
@@ -93,7 +92,7 @@ const groupDocumentFilters = (
 		const parts = key.split(BRICK_SEPERATOR);
 		if (parts.length >= 2) {
 			const brickKey = parts[0];
-			let tableName: string | null = null;
+			let tableName: LucidBrickTableName | null = null;
 			let fieldKey: string | null = null;
 			let schemaTable = null;
 

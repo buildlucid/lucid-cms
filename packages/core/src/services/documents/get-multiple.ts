@@ -51,13 +51,12 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	// TODO: integrate the new brickFilters
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
 			status: data.status,
 			query: data.query,
 			documentFilters,
-			documentFieldFilters: [],
+			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,
 			relationVersionType: data.status !== "revision" ? data.status : "draft",
@@ -71,6 +70,8 @@ const getMultiple: ServiceFn<
 		},
 	);
 	if (documentsRes.error) return documentsRes;
+
+	// TODO: fetch relation data
 
 	return {
 		error: undefined,

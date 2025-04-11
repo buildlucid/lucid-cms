@@ -1152,6 +1152,61 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get Multiple",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/documents/simple/draft?filter[_simpleHeading]=Homepage",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"simple",
+								"draft"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "-createdAt",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "perPage",
+									"value": "-1",
+									"disabled": true
+								},
+								{
+									"key": "filter[id]",
+									"value": "2",
+									"description": "A document filter",
+									"disabled": true
+								},
+								{
+									"key": "filter[_simpleHeading]",
+									"value": "Homepage",
+									"description": "A document field filter"
+								},
+								{
+									"key": "filter[simple.items._itemTitle]",
+									"value": "Title One",
+									"description": "A brick with the key \"simple\" on the \"items\" repeater targeting the \"itemTitle\" custom field.",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

@@ -1,6 +1,8 @@
 import z from "zod";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
+import { sql, type SelectQueryBuilder } from "kysely";
+import queryBuilder from "../query-builder/index.js";
 import type documentsSchema from "../../schemas/documents.js";
 import type {
 	LucidDocumentTable,
@@ -14,14 +16,9 @@ import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
-import type {
-	Config,
-	DocumentFieldFilters,
-	LucidBrickTableName,
-} from "../../types.js";
+import type { Config, LucidBrickTableName } from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
-import { sql, type SelectQueryBuilder } from "kysely";
-import queryBuilder from "../query-builder/index.js";
+import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -353,8 +350,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				/** The status used to determine which version of the document custom field relations to fetch */
 				relationVersionType: Exclude<DocumentVersionType, "revision">;
 				documentFilters: QueryParamFilters;
-				// TODO: create reworked version of this that appends _ to CF keys for the column
-				documentFieldFilters: DocumentFieldFilters[];
+				brickFilters: BrickFilters[];
 				query: z.infer<typeof documentsSchema.getMultiple.query>;
 				collection: CollectionBuilder;
 				config: Config;
@@ -367,47 +363,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
 		const queryFn = async () => {
-			// TODO: make use of query builder operator helper and move this to QB main.
-			const applyFieldFilters = <DB, Table extends keyof DB, O>(
-				query: SelectQueryBuilder<DB, Table, O>,
-			) => {
-				let modifiedQuery = query;
-
-				if (
-					props.documentFieldFilters &&
-					props.documentFieldFilters.length > 0
-				) {
-					modifiedQuery = modifiedQuery.where((eb) => {
-						const conditions = props.documentFieldFilters.map((filter) => {
-							const columnName = `_${filter.key}`;
-
-							return eb.exists(
-								eb
-									// @ts-expect-error
-									.selectFrom(props.tables.documentFields)
-									.whereRef(
-										// @ts-expect-error
-										`${props.tables.documentFields}.document_id`,
-										"=",
-										`${dynamicConfig.tableName}.id`,
-									)
-									.where(
-										// @ts-expect-error
-										`${props.tables.documentFields}.${columnName}`,
-										filter.operator,
-										filter.value,
-									)
-									.select(sql.lit(1).as("exists")),
-							);
-						});
-
-						return eb.and(conditions);
-					});
-				}
-
-				return modifiedQuery;
-			};
-
 			let query = this.db
 				.selectFrom(dynamicConfig.tableName)
 				.leftJoin(
@@ -509,8 +464,16 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
-			query = applyFieldFilters(query);
-			queryCount = applyFieldFilters(queryCount);
+			query = this.applyBrickFiltersToQuery(
+				query,
+				props.brickFilters,
+				dynamicConfig.tableName,
+			);
+			queryCount = this.applyBrickFiltersToQuery(
+				queryCount,
+				props.brickFilters,
+				dynamicConfig.tableName,
+			);
 
 			const { main, count } = queryBuilder.main(
 				{
@@ -524,16 +487,15 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						page: props.query.page,
 						perPage: props.query.perPage,
 					},
-					// documentFieldFilters: props.documentFieldFilters,
 					meta: {
 						tableKeys: {
 							filters: {
-								documentId: `${dynamicConfig.tableName}.id`,
-								documentCollectionKey: `${dynamicConfig.tableName}.collection_key`,
-								documentCreatedBy: `${dynamicConfig.tableName}.created_by`,
-								documentUpdatedBy: `${dynamicConfig.tableName}.updated_by`,
-								documentCreatedAt: `${dynamicConfig.tableName}.created_at`,
-								documentUpdatedAt: `${dynamicConfig.tableName}.updated_at`,
+								id: `${dynamicConfig.tableName}.id`,
+								collectionKey: `${dynamicConfig.tableName}.collection_key`,
+								createdBy: `${dynamicConfig.tableName}.created_by`,
+								updatedBy: `${dynamicConfig.tableName}.updated_by`,
+								createdAt: `${dynamicConfig.tableName}.created_at`,
+								updatedAt: `${dynamicConfig.tableName}.updated_at`,
 							},
 							sorts: {
 								createdAt: `${dynamicConfig.tableName}.created_at`,
@@ -562,6 +524,49 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			...props.validation,
 			mode: "multiple-count",
 			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
+	// ----------------------------------------
+	// helpers
+	applyBrickFiltersToQuery<DB, Table extends keyof DB, O>(
+		query: SelectQueryBuilder<DB, Table, O>,
+		brickFilters: BrickFilters[],
+		documentTableName: string,
+	): SelectQueryBuilder<DB, Table, O> {
+		if (!brickFilters || brickFilters.length === 0) {
+			return query;
+		}
+
+		return query.where((eb) => {
+			const filterConditions = brickFilters.map((brickFilter) => {
+				return eb.exists(
+					eb
+						// @ts-expect-error
+						.selectFrom(brickFilter.table)
+						.whereRef(
+							// @ts-expect-error
+							`${brickFilter.table}.document_id`,
+							"=",
+							`${documentTableName}.id`,
+						)
+						.where((innerEb) => {
+							return innerEb.and(
+								brickFilter.filters.map((filter) => {
+									return innerEb(
+										// @ts-expect-error
+										`${brickFilter.table}.${filter.column}`,
+										filter.operator,
+										filter.value,
+									);
+								}),
+							);
+						})
+						.select(sql.lit(1).as("exists")),
+				);
+			});
+
+			return eb.and(filterConditions);
 		});
 	}
 }
