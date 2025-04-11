@@ -10,8 +10,10 @@ import type {
 } from "../../../types/query-params.js";
 import type { LocaleValue } from "../../../types/shared.js";
 
+// TODO: rework this slightly, have this flat on the field config and call it listable or something. This will only be used to determine if it shows in rows on the frontend, it no longer does anything server side
 export interface FieldCollectionConfig {
 	column?: boolean; //* internally its called "include", "column" is just the public facing name as it makes it clear how it impacts the CMS
+	// TODO: remove once document rework is complete
 	filterable?: boolean;
 }
 

@@ -130,6 +130,7 @@ class CollectionBuilder extends FieldBuilder {
 	}
 	// ------------------------------------
 	// Public Methods
+	// TODO: remove with document rework
 	documentFieldFilters(
 		filters?: QueryParamFilters,
 		allowAll?: boolean,

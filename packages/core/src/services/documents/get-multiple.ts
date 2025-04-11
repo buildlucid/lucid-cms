@@ -1,12 +1,14 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import { splitDocumentFilters } from "../../utils/helpers/index.js";
+// import { splitDocumentFilters } from "../../utils/helpers/index.js";
+import { groupDocumentFilters } from "../../utils/helpers/index.js";
 import type z from "zod";
 import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionDocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
+import { inspect } from "node:util";
 
 // @ts-expect-error
 const getMultiple: ServiceFn<
@@ -30,8 +32,8 @@ const getMultiple: ServiceFn<
 	const Document = Repository.get("documents", context.db, context.config.db);
 	const DocumentFormatter = Formatter.get("documents");
 
-	const { documentFilters, documentFieldFilters } = splitDocumentFilters(
-		collectionRes.data,
+	const { documentFilters, brickFilters } = groupDocumentFilters(
+		collectionRes.data.bricksTableSchema,
 		data.query.filter,
 	);
 
@@ -49,13 +51,13 @@ const getMultiple: ServiceFn<
 		};
 	}
 
+	// TODO: integrate the new brickFilters
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
 			status: data.status,
 			query: data.query,
 			documentFilters,
-			documentFieldFilters,
-			includeAllFields: false,
+			documentFieldFilters: [],
 			collection: collectionRes.data,
 			config: context.config,
 			relationVersionType: data.status !== "revision" ? data.status : "draft",

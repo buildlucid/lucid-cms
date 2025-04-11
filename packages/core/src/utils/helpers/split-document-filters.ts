@@ -2,6 +2,7 @@ import type { QueryParamFilters } from "../../types/query-params.js";
 import type { DocumentFieldFilters } from "../../types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 
+// TODO: remove on document rework
 const splitDocumentFilters = (
 	collection: CollectionBuilder,
 	filters?: QueryParamFilters,
