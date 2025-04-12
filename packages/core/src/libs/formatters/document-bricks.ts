@@ -12,11 +12,12 @@ import type {
 } from "../../types.js";
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
+import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 
 export default class DocumentBricksFormatter {
 	formatMultiple = (props: {
-		bricksQuery: BrickQueryResponse;
+		bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 		collection: CollectionBuilder;
 		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 		relationMetaData: FieldRelationResponse;
@@ -88,7 +89,7 @@ export default class DocumentBricksFormatter {
 		return brickResponses.sort((a, b) => a.order - b.order);
 	};
 	formatDocumentFields = (props: {
-		bricksQuery: BrickQueryResponse;
+		bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 		collection: CollectionBuilder;
 		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 		relationMetaData: FieldRelationResponse;
@@ -135,7 +136,7 @@ export default class DocumentBricksFormatter {
 	 * Works out the target repeater table based on props and schema, and returns all the rows for it from the brciksQuery prop
 	 */
 	static getBrickRepeaterRows = (props: {
-		bricksQuery: BrickQueryResponse;
+		bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 		bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 		collectionKey: string;
 		brickKey: string | undefined; // document-fields type doesnt add a brick key,

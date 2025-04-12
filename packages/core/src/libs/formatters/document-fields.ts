@@ -18,6 +18,7 @@ import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import type { DocumentQueryResponse } from "../repositories/documents.js";
 
 export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;
@@ -35,8 +36,8 @@ export interface FieldFormatMeta {
 interface FieldFormatData {
 	/** The filtered target brick table rows, grouped by position, each row represent a different locale for the same brick instance */
 	brickRows: Select<LucidBricksTable>[];
-	/** The entire bricksQuery response data - used to select repeater rows from later */
-	bricksQuery: BrickQueryResponse;
+	/** The entire bricksQuery or DocumentQueryResponse response data - used to select repeater rows from later */
+	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	/** The schema for the entire collection and all possible bricks */
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	/** All relation meta data, users, media, documents etc. Used to populate the field meta data based on the CF type and value */

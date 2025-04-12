@@ -127,9 +127,11 @@ class DocumentCustomField extends CustomField<"document"> {
 		return (value ?? null) satisfies CFResponse<"document">["value"];
 	}
 	formatResponseMeta(
-		value: BrickQueryResponse | undefined,
+		value: BrickQueryResponse | undefined | null,
 		meta: FieldFormatMeta,
 	) {
+		if (value === null || value === undefined) return null;
+
 		const collection = meta.config.collections.find(
 			(c) => c.key === this.props.collection,
 		);

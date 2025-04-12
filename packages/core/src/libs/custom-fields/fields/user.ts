@@ -85,7 +85,11 @@ class UserCustomField extends CustomField<"user"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"user">["value"];
 	}
-	formatResponseMeta(value: UserPropT | undefined, meta: FieldFormatMeta) {
+	formatResponseMeta(
+		value: UserPropT | undefined | null,
+		meta: FieldFormatMeta,
+	) {
+		if (value === null || value === undefined) return null;
 		return {
 			email: value?.email ?? null,
 			username: value?.username ?? null,

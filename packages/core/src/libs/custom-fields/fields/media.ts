@@ -105,7 +105,11 @@ class MediaCustomField extends CustomField<"media"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"media">["value"];
 	}
-	formatResponseMeta(value: MediaPropsT | undefined, meta: FieldFormatMeta) {
+	formatResponseMeta(
+		value: MediaPropsT | undefined | null,
+		meta: FieldFormatMeta,
+	) {
+		if (value === null || value === undefined) return null;
 		return {
 			id: value?.id ?? null,
 			url: createCdnUrl(meta.host, value?.key ?? ""),

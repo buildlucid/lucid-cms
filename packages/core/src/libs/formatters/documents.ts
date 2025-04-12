@@ -9,6 +9,8 @@ import type {
 	BrickResponse,
 	FieldResponse,
 } from "../../types.js";
+import type { DocumentQueryResponse } from "../repositories/documents.js";
+import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 
 export interface DocumentPropT {
 	id: number;
@@ -17,24 +19,7 @@ export interface DocumentPropT {
 	updated_by: number | null;
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
-	// Created by user join
-	cb_user_id?: number | null;
-	cb_user_email?: string | null;
-	cb_user_first_name?: string | null;
-	cb_user_last_name?: string | null;
-	cb_user_username?: string | null;
-	// Updated by user join
-	ub_user_id?: number | null;
-	ub_user_email?: string | null;
-	ub_user_first_name?: string | null;
-	ub_user_last_name?: string | null;
-	ub_user_username?: string | null;
-	// Target Version
-	version_id?: number | null;
-	version_type?: DocumentVersionType | null;
-	version_promoted_from?: number | null;
-	version_created_at?: Date | string | null;
-	version_created_by?: number | null;
+
 	// Versions
 	versions?: Array<{
 		id: number | null;
@@ -47,20 +32,48 @@ export interface DocumentPropT {
 
 export default class DocumentsFormatter {
 	formatMultiple = (props: {
-		documents: DocumentPropT[];
+		documents: DocumentQueryResponse[];
 		collection: CollectionBuilder;
 		config: Config;
+		hasFields: boolean;
+		hasBricks: boolean;
+		relationData?: FieldRelationResponse;
 	}) => {
-		return props.documents.map((d) =>
-			this.formatSingle({
+		const DocumentBricksFormatter = Formatter.get("document-bricks");
+
+		return props.documents.map((d) => {
+			let fields: FieldResponse[] | null = null;
+			let bricks: BrickResponse[] | null = null;
+			if (props.hasFields) {
+				fields = DocumentBricksFormatter.formatDocumentFields({
+					bricksQuery: d,
+					bricksSchema: props.collection.bricksTableSchema,
+					relationMetaData: props.relationData || {},
+					collection: props.collection,
+					config: props.config,
+				});
+			}
+			if (props.hasBricks) {
+				bricks = DocumentBricksFormatter.formatMultiple({
+					bricksQuery: d,
+					bricksSchema: props.collection.bricksTableSchema,
+					relationMetaData: props.relationData || {},
+					collection: props.collection,
+					config: props.config,
+				});
+			}
+
+			return this.formatSingle({
 				document: d,
 				collection: props.collection,
 				config: props.config,
-			}),
-		);
+				fields: fields,
+				bricks: bricks || undefined,
+			});
+		});
 	};
 	formatSingle = (props: {
-		document: DocumentPropT;
+		document: DocumentQueryResponse;
 		collection: CollectionBuilder;
 		bricks?: BrickResponse[];
 		fields?: FieldResponse[] | null;
@@ -99,13 +112,13 @@ export default class DocumentsFormatter {
 		} satisfies CollectionDocumentResponse;
 	};
 	formatVersion = (props: {
-		document: DocumentPropT;
+		document: DocumentQueryResponse;
 	}): CollectionDocumentResponse["version"] => {
 		const draftVersion = props.document.versions?.find(
-			(v) => v.version_type === "draft",
+			(v) => v.type === "draft",
 		);
 		const publishedVersion = props.document.versions?.find(
-			(v) => v.version_type === "published",
+			(v) => v.type === "published",
 		);
 
 		return {

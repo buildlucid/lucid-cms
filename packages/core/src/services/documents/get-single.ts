@@ -93,7 +93,6 @@ const getSingle: ServiceFn<
 		return {
 			error: undefined,
 			data: DocumentFormatter.formatSingle({
-				// @ts-expect-error
 				document: documentRes.data,
 				collection: collectionRes.data,
 				bricks: bricksRes.data.bricks,
@@ -106,7 +105,6 @@ const getSingle: ServiceFn<
 	return {
 		error: undefined,
 		data: DocumentFormatter.formatSingle({
-			// @ts-expect-error
 			document: documentRes.data,
 			collection: collectionRes.data,
 			bricks: [],

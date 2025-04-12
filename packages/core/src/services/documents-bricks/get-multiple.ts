@@ -69,7 +69,7 @@ const getMultiple: ServiceFn<
 
 	const relationIdRes = await extractRelatedEntityIds(context, {
 		brickSchema: collectionRes.data.bricksTableSchema,
-		brickQuery: bricksQueryRes.data,
+		responses: [bricksQueryRes.data],
 	});
 	if (relationIdRes.error) return relationIdRes;
 

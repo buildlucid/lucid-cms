@@ -63,11 +63,7 @@ export default {
 				type: 200,
 				data: {
 					type: "array",
-					// items: DocumentsFormatter.swagger,
-					items: {
-						type: "object",
-						additionalProperties: true,
-					},
+					items: DocumentsFormatter.swagger,
 				},
 				paginated: true,
 			}),

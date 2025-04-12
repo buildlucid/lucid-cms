@@ -1,16 +1,15 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-// import { splitDocumentFilters } from "../../utils/helpers/index.js";
 import { groupDocumentFilters } from "../../utils/helpers/index.js";
+import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
+import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
 import type z from "zod";
 import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionDocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
-import { inspect } from "node:util";
 
-// @ts-expect-error
 const getMultiple: ServiceFn<
 	[
 		{
@@ -71,22 +70,32 @@ const getMultiple: ServiceFn<
 	);
 	if (documentsRes.error) return documentsRes;
 
-	// TODO: fetch relation data
+	const relationIdRes = await extractRelatedEntityIds(context, {
+		brickSchema: collectionRes.data.bricksTableSchema,
+		responses: documentsRes.data?.[0] ?? [],
+		excludeTypes: ["document"],
+	});
+	if (relationIdRes.error) return relationIdRes;
+
+	const relationDataRes = await fetchRelationData(context, {
+		values: relationIdRes.data,
+		versionType: data.status !== "revision" ? data.status : "draft",
+	});
+	if (relationDataRes.error) return relationDataRes;
 
 	return {
 		error: undefined,
 		data: {
-			data: documentsRes.data?.[0],
-			count: documentsRes.data?.[1]?.count || 0,
+			data: DocumentFormatter.formatMultiple({
+				documents: documentsRes.data?.[0] || [],
+				collection: collectionRes.data,
+				config: context.config,
+				relationData: relationDataRes.data,
+				hasFields: true,
+				hasBricks: false,
+			}),
+			count: Formatter.parseCount(documentsRes.data?.[1]?.count),
 		},
-		// data: {
-		// 	data: DocumentFormatter.formatMultiple({
-		// 		documents: documents,
-		// 		collection: collectionRes.data,
-		// 		config: context.config,
-		// 	}),
-		// 	count: Formatter.parseCount(documentCount?.count),
-		// },
 	};
 };
 

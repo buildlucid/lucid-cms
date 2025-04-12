@@ -36,7 +36,7 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract formatResponseMeta(
 		value: unknown,
 		meta: FieldFormatMeta,
-	): CFResponse<T>["meta"];
+	): CFResponse<T>["meta"] | null;
 	abstract cfSpecificValidation(
 		value: unknown,
 		relationData?: unknown,

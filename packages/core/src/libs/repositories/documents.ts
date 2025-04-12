@@ -16,9 +16,37 @@ import type { QueryProps, DynamicConfig } from "./types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
-import type { Config, LucidBrickTableName } from "../../types.js";
+import type {
+	Config,
+	LucidBricksTable,
+	LucidBrickTableName,
+	LucidVersionTable,
+} from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
+
+export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
+	// Created by user join
+	cb_user_id?: number | null;
+	cb_user_email?: string | null;
+	cb_user_first_name?: string | null;
+	cb_user_last_name?: string | null;
+	cb_user_username?: string | null;
+	// Updated by user join
+	ub_user_id?: number | null;
+	ub_user_email?: string | null;
+	ub_user_first_name?: string | null;
+	ub_user_last_name?: string | null;
+	ub_user_username?: string | null;
+	// Target Version
+	version_id?: number | null;
+	version_type?: DocumentVersionType | null;
+	version_promoted_from?: number | null;
+	version_created_at?: Date | string | null;
+	version_created_by?: number | null;
+	versions: Select<LucidVersionTable>[];
+	[key: LucidBrickTableName]: Select<LucidBricksTable>[];
+}
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -41,7 +69,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		versions: z.array(
 			z.object({
 				id: z.number(),
-				version_type: versionTypesSchema,
+				type: versionTypesSchema,
 				created_by: z.number(),
 				created_at: z.string(),
 				updated_by: z.number().nullable(),
@@ -226,7 +254,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								// @ts-expect-error
 								.select([
 									`${props.tables.versions}.id`,
-									`${props.tables.versions}.type as version_type`,
+									`${props.tables.versions}.type`,
 									`${props.tables.versions}.promoted_from`,
 									`${props.tables.versions}.created_at`,
 									`${props.tables.versions}.created_by`,
@@ -330,10 +358,14 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				this.dbAdapter.getDefault("boolean", "false"),
 			);
 
-		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
-			method: "selectSingleById",
-			tableName: dynamicConfig.tableName,
-		});
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as unknown as Promise<DocumentQueryResponse>,
+			{
+				method: "selectSingleById",
+				tableName: dynamicConfig.tableName,
+			},
+		);
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
@@ -388,7 +420,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									// @ts-expect-error
 									.select((eb) => [
 										`${props.tables.versions}.id`,
-										`${props.tables.versions}.type as version_type`,
+										`${props.tables.versions}.type`,
 										`${props.tables.versions}.promoted_from`,
 										`${props.tables.versions}.created_at`,
 										`${props.tables.versions}.created_by`,
@@ -434,6 +466,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								),
 						)
 						.as(props.tables.documentFields),
+				])
+				// @ts-expect-error
+				.select([
+					`${props.tables.versions}.id as version_id`,
+					`${props.tables.versions}.type as version_type`,
 				])
 				.where(
 					`${dynamicConfig.tableName}.is_deleted`,
@@ -507,7 +544,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			);
 
 			const [mainResult, countResult] = await Promise.all([
-				main.execute(),
+				main.execute() as unknown as Promise<DocumentQueryResponse[]>,
 				count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
 			]);
 
