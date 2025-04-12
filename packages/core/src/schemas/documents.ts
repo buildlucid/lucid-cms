@@ -68,17 +68,15 @@ export default {
 						z.union([filterSchemas.single, filterSchemas.union]),
 					),
 					z.object({
-						documentId: z
+						id: z.union([filterSchemas.single, filterSchemas.union]).optional(),
+						createdBy: z
 							.union([filterSchemas.single, filterSchemas.union])
 							.optional(),
-						documentCreatedBy: z
+						updatedBy: z
 							.union([filterSchemas.single, filterSchemas.union])
 							.optional(),
-						documentUpdatedBy: z
-							.union([filterSchemas.single, filterSchemas.union])
-							.optional(),
-						documentCreatedAt: filterSchemas.single.optional(),
-						documentUpdatedAt: filterSchemas.single.optional(),
+						createdAt: filterSchemas.single.optional(),
+						updatedAt: filterSchemas.single.optional(),
 					}),
 				])
 				.optional(),
@@ -98,5 +96,31 @@ export default {
 			status: z.enum(["published", "draft"]),
 		}),
 		body: undefined,
+	},
+	getMultipleRevisions: {
+		body: undefined,
+		query: z.object({
+			filter: z
+				.object({
+					createdBy: z
+						.union([filterSchemas.single, filterSchemas.union])
+						.optional(),
+				})
+				.optional(),
+			sort: z
+				.array(
+					z.object({
+						key: z.enum(["createdAt"]),
+						value: z.enum(["asc", "desc"]),
+					}),
+				)
+				.optional(),
+			page: defaultQuery.page,
+			perPage: defaultQuery.perPage,
+		}),
+		params: z.object({
+			collectionKey: z.string(),
+			id: z.string(),
+		}),
 	},
 };

@@ -242,8 +242,10 @@ export interface CollectionDocumentVersionResponse {
 	bricks: Record<
 		Partial<BrickTypes>,
 		Array<{
+			// TODO: remove on collection documents rework
 			id: number;
 			brickKey: string | null;
+			// TODO: remove on collection documents rework
 			fields: number;
 		}>
 	>;

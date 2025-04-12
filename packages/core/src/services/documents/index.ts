@@ -5,6 +5,7 @@ import deleteSingle from "./delete-single.js";
 import getSingle from "./get-single.js";
 import getMultipleFieldMeta from "./get-multiple-field-meta.js";
 import getMultiple from "./get-multiple.js";
+import getMultipleRevisions from "./get-multiple-revisions.js";
 
 export default {
 	checks,
@@ -14,4 +15,5 @@ export default {
 	getSingle,
 	getMultiple,
 	getMultipleFieldMeta,
+	getMultipleRevisions,
 };

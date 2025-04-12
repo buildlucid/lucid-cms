@@ -1,17 +1,41 @@
 import z from "zod";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
+import { sql } from "kysely";
+import queryBuilder from "../query-builder/index.js";
+import type documentsSchema from "../../schemas/documents.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
 	LucidDocumentTableName,
+	LucidVersionTable,
 	LucidVersionTableName,
+	Select,
 } from "../db/types.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-import type { QueryProps } from "./types.js";
-import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { DynamicConfig, QueryProps } from "./types.js";
+import type {
+	CollectionSchemaColumn,
+	CollectionSchemaTable,
+} from "../../services/collection-migrator/schema/types.js";
 import type { BrickQueryResponse } from "./document-bricks.js";
+import type { BrickTypes } from "../builders/brick-builder/types.js";
+
+export interface RevisionsQueryResponse extends Select<LucidVersionTable> {
+	// documents
+	document_created_by?: number | null;
+	document_created_at?: Date | string | null;
+	document_updated_by?: number | null;
+	document_updated_at?: Date | string | null;
+	// brick count
+	[key: LucidBrickTableName]: Array<{
+		id: number;
+		locale: string;
+		brick_instance_id: string;
+		brick_type: BrickTypes;
+	}>;
+}
 
 export default class DocumentVersionsRepository extends DynamicRepository<LucidVersionTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -156,6 +180,148 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "multiple",
+		});
+	}
+	/**
+	 * Selects all of the revisions for a given document ID and returns basic info for each brick table for meta data
+	 */
+	async selectMultipleRevisions(
+		props: {
+			documentId: number;
+			query: z.infer<typeof documentsSchema.getMultipleRevisions.query>;
+			tables: {
+				document: LucidDocumentTableName;
+			};
+			bricksSchema: Array<{
+				name: LucidBrickTableName;
+				columns: Array<CollectionSchemaColumn>;
+			}>;
+		},
+		dynamicConfig: DynamicConfig<LucidVersionTableName>,
+	) {
+		const queryFn = async () => {
+			let query = this.db
+				.selectFrom(dynamicConfig.tableName)
+				.innerJoin(props.tables.document, (join) =>
+					join.onRef(
+						`${props.tables.document}.id`,
+						"=",
+						// @ts-expect-error
+						`${dynamicConfig.tableName}.document_id`,
+					),
+				)
+				// @ts-expect-error
+				.select([
+					`${dynamicConfig.tableName}.id`,
+					`${dynamicConfig.tableName}.type`,
+					`${dynamicConfig.tableName}.promoted_from`,
+					`${dynamicConfig.tableName}.created_at`,
+					`${dynamicConfig.tableName}.created_by`,
+					`${dynamicConfig.tableName}.document_id`,
+					`${dynamicConfig.tableName}.collection_key`,
+					`${props.tables.document}.created_by as document_created_by`,
+					`${props.tables.document}.created_at as document_created_at`,
+					`${props.tables.document}.updated_by as document_updated_by`,
+					`${props.tables.document}.updated_at as document_updated_at`,
+				])
+				.where(
+					`${props.tables.document}.is_deleted`,
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				)
+				// @ts-expect-error
+				.where(`${dynamicConfig.tableName}.document_id`, "=", props.documentId)
+				// @ts-expect-error
+				.where(`${dynamicConfig.tableName}.type`, "=", "revision");
+
+			for (const brick of props.bricksSchema) {
+				query = query.select(() =>
+					this.dbAdapter
+						.jsonArrayFrom(
+							this.db
+								.selectFrom(brick.name)
+								.whereRef(
+									`${brick.name}.document_version_id`,
+									"=",
+									`${dynamicConfig.tableName}.id`,
+								)
+								.select([
+									`${brick.name}.id`,
+									`${brick.name}.locale`,
+									`${brick.name}.brick_instance_id`,
+									`${brick.name}.brick_type`,
+								]),
+						)
+						.as(brick.name),
+				);
+			}
+
+			const queryCount = this.db
+				.selectFrom(dynamicConfig.tableName)
+				.innerJoin(props.tables.document, (join) =>
+					join.onRef(
+						`${props.tables.document}.id`,
+						"=",
+						// @ts-expect-error
+						`${dynamicConfig.tableName}.document_id`,
+					),
+				)
+				.select(
+					sql`count(distinct ${sql.ref(`${dynamicConfig.tableName}.id`)})`.as(
+						"count",
+					),
+				)
+				.where(
+					`${props.tables.document}.is_deleted`,
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				)
+				// @ts-expect-error
+				.where(`${dynamicConfig.tableName}.document_id`, "=", props.documentId)
+				// @ts-expect-error
+				.where(`${dynamicConfig.tableName}.type`, "=", "revision");
+
+			const { main, count } = queryBuilder.main(
+				{
+					main: query,
+					count: queryCount,
+				},
+				{
+					queryParams: {
+						filter: props.query.filter,
+						sort: props.query.sort,
+						page: props.query.page,
+						perPage: props.query.perPage,
+					},
+					meta: {
+						tableKeys: {
+							filters: {
+								createdBy: `${dynamicConfig.tableName}.created_by`,
+							},
+							sorts: {
+								createdAt: `${dynamicConfig.tableName}.created_at`,
+							},
+						},
+					},
+				},
+			);
+
+			const [mainResult, countResult] = await Promise.all([
+				main.execute() as unknown as Promise<RevisionsQueryResponse[]>,
+				count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+			]);
+
+			return [mainResult, countResult] as const;
+		};
+
+		const exec = await this.executeQuery(queryFn, {
+			method: "selectMultipleRevisions",
+			tableName: dynamicConfig.tableName,
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			mode: "multiple-count",
 		});
 	}
 }

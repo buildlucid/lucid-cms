@@ -80,6 +80,18 @@ const documentRoutes = async (fastify: FastifyInstance) => {
 		zodSchema: documents.getMultiple.zodSchema,
 		controller: documents.getMultiple.controller,
 	});
+
+	// Get multiple document revisions
+	r(fastify, {
+		method: "get",
+		url: "/:collectionKey/:id/revisions",
+		middleware: {
+			authenticate: true,
+		},
+		swaggerSchema: documents.getMultipleRevisions.swaggerSchema,
+		zodSchema: documents.getMultipleRevisions.zodSchema,
+		controller: documents.getMultipleRevisions.controller,
+	});
 };
 
 export default documentRoutes;

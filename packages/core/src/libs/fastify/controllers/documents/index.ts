@@ -4,6 +4,7 @@ import deleteMultiple from "./delete-multiple.js";
 import deleteSingle from "./delete-single.js";
 import getSingle from "./get-single.js";
 import getMultiple from "./get-multiple.js";
+import getMultipleRevisions from "./get-multiple-revisions.js";
 
 export default {
 	createSingle,
@@ -12,4 +13,5 @@ export default {
 	deleteSingle,
 	getSingle,
 	getMultiple,
+	getMultipleRevisions,
 };
