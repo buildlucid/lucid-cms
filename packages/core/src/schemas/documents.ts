@@ -123,4 +123,24 @@ export default {
 			id: z.string(),
 		}),
 	},
+	restoreRevision: {
+		body: undefined,
+		query: undefined,
+		params: z.object({
+			id: z.string(),
+			versionId: z.string(),
+			collectionKey: z.string(),
+		}),
+	},
+	promoteVersion: {
+		body: z.object({
+			versionType: z.enum(["draft", "published"]),
+		}),
+		query: undefined,
+		params: z.object({
+			collectionKey: z.string(),
+			id: z.string(),
+			versionId: z.string(),
+		}),
+	},
 };

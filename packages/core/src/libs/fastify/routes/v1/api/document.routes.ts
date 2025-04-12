@@ -92,6 +92,33 @@ const documentRoutes = async (fastify: FastifyInstance) => {
 		zodSchema: documents.getMultipleRevisions.zodSchema,
 		controller: documents.getMultipleRevisions.controller,
 	});
+
+	// Restore revision
+	r(fastify, {
+		method: "post",
+		url: "/:collectionKey/:id/:versionId/restore-revision",
+		permissions: ["restore_content"],
+		middleware: {
+			authenticate: true,
+			validateCSRF: true,
+		},
+		swaggerSchema: documents.restoreRevision.swaggerSchema,
+		zodSchema: documents.restoreRevision.zodSchema,
+		controller: documents.restoreRevision.controller,
+	});
+
+	// Promote version
+	r(fastify, {
+		method: "post",
+		url: "/:collectionKey/:id/:versionId/promote-version",
+		middleware: {
+			authenticate: true,
+			validateCSRF: true,
+		},
+		swaggerSchema: documents.promoteVersion.swaggerSchema,
+		zodSchema: documents.promoteVersion.zodSchema,
+		controller: documents.promoteVersion.controller,
+	});
 };
 
 export default documentRoutes;
