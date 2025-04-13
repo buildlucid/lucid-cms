@@ -13,6 +13,7 @@ lucid.fastify.post("/send-email", async (request, reply) => {
 		},
 	});
 	if (res.error) throw new LucidAPIError(res.error);
+
 	reply.send(
 		formatAPIResponse(request, {
 			data: res.data,
@@ -29,10 +30,10 @@ lucid.fastify.get("/get-documents", async (request, reply) => {
 		status: "draft",
 		query: {
 			filter: {
-				// documentId: {
-				// 	value: 1,
+				// id: {
+				// value: 1,
 				// },
-				// page_title: {
+				// _page_title: {
 				// 	value: "About",
 				// 	operator: "=",
 				// },
@@ -42,6 +43,7 @@ lucid.fastify.get("/get-documents", async (request, reply) => {
 		},
 	});
 	if (res.error) throw new LucidAPIError(res.error);
+
 	reply.send(
 		formatAPIResponse(request, {
 			data: res.data.data,
@@ -60,14 +62,21 @@ lucid.fastify.get("/get-document", async (request, reply) => {
 		status: "draft",
 		query: {
 			filter: {
-				documentId: {
+				id: {
 					value: 1,
 				},
+				// _simpleHeading: {
+				// 	value: "Homepage",
+				// },
+				// "simple.items._itemTitle": {
+				// 	value: "Title One",
+				// },
 			},
 			include: ["bricks"],
 		},
 	});
 	if (res.error) throw new LucidAPIError(res.error);
+
 	reply.send(
 		formatAPIResponse(request, {
 			data: res.data,
@@ -78,6 +87,7 @@ lucid.fastify.get("/get-document", async (request, reply) => {
 lucid.fastify.get("/get-locales", async (request, reply) => {
 	const res = await toolkit.locale.getAll();
 	if (res.error) throw new LucidAPIError(res.error);
+
 	reply.send(
 		formatAPIResponse(request, {
 			data: res.data,

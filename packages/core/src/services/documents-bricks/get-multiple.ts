@@ -22,6 +22,8 @@ const getMultiple: ServiceFn<
 			collectionKey: string;
 			/** The version type to use for any custom field document references  */
 			versionType: Exclude<DocumentVersionType, "revision">;
+			/** When enabled, only fetches from the `document-fields` table */
+			documentFieldsOnly?: boolean;
 		},
 	],
 	{
@@ -46,10 +48,21 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
+	console.log(
+		data.documentFieldsOnly,
+		collectionRes.data.bricksTableSchema.filter((t) => {
+			if (data.documentFieldsOnly) return t.type === "document-fields";
+			return true;
+		}),
+	);
+
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionId: data.versionId,
-			bricksSchema: collectionRes.data.bricksTableSchema,
+			bricksSchema: collectionRes.data.bricksTableSchema.filter((t) => {
+				if (data.documentFieldsOnly) return t.type === "document-fields";
+				return true;
+			}),
 		},
 		{
 			tableName: versionsTableRes.data,

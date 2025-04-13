@@ -1,3 +1,4 @@
+import client from "./client/index.js";
 import createSingle from "./create-single.js";
 import updateSingle from "./update-single.js";
 import deleteMultiple from "./delete-multiple.js";
@@ -9,6 +10,7 @@ import restoreRevision from "./restore-revision.js";
 import promoteVersion from "./promote-version.js";
 
 export default {
+	client,
 	createSingle,
 	updateSingle,
 	deleteMultiple,

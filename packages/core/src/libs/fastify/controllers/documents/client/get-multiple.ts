@@ -1,22 +1,23 @@
-import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import T from "../../../../../translations/index.js";
+import documentsSchema from "../../../../../schemas/documents.js";
 import {
 	swaggerResponse,
 	swaggerQueryString,
-} from "../../../../utils/swagger/index.js";
-import formatAPIResponse from "../../../../utils/build-response.js";
-import DocumentsFormatter from "../../../formatters/documents.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
-import type { RouteController } from "../../../../types/types.js";
+	swaggerHeaders,
+} from "../../../../../utils/swagger/index.js";
+import formatAPIResponse from "../../../../../utils/build-response.js";
+import DocumentsFormatter from "../../../../formatters/documents.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import type { RouteController } from "../../../../../types/types.js";
 
 const getMultipleController: RouteController<
-	typeof documentsSchema.getMultiple.params,
-	typeof documentsSchema.getMultiple.body,
-	typeof documentsSchema.getMultiple.query
+	typeof documentsSchema.client.getMultiple.params,
+	typeof documentsSchema.client.getMultiple.body,
+	typeof documentsSchema.client.getMultiple.query
 > = async (request, reply) => {
 	const documents = await serviceWrapper(
-		request.server.services.collection.documents.getMultiple,
+		request.server.services.collection.documents.client.getMultiple,
 		{
 			transaction: false,
 			defaultError: {
@@ -53,21 +54,26 @@ const getMultipleController: RouteController<
 
 export default {
 	controller: getMultipleController,
-	zodSchema: documentsSchema.getMultiple,
+	zodSchema: documentsSchema.client.getMultiple,
 	swaggerSchema: {
-		description: "Get a multiple collection document entries.",
-		tags: ["documents"],
-		summary: "Get a multiple collection document entries.",
+		description:
+			"Get multilple collection documents by filters via the client integration.",
+		tags: ["client-integrations", "documents"],
+		summary: "Get multiple collection document entries.",
 		response: {
 			200: swaggerResponse({
 				type: 200,
 				data: {
 					type: "array",
-					items: DocumentsFormatter.swagger,
+					items: DocumentsFormatter.swaggerClient,
 				},
 				paginated: true,
 			}),
 		},
+		headers: swaggerHeaders({
+			authorization: true,
+			clientKey: true,
+		}),
 		querystring: swaggerQueryString({
 			filters: [
 				{

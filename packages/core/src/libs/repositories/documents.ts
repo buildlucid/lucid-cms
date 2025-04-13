@@ -374,24 +374,21 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
-	async selectMultipleFiltered<V extends boolean = false>(
-		props: QueryProps<
-			V,
-			{
-				status: DocumentVersionType;
-				/** The status used to determine which version of the document custom field relations to fetch */
-				relationVersionType: Exclude<DocumentVersionType, "revision">;
-				documentFilters: QueryParamFilters;
-				brickFilters: BrickFilters[];
-				query: z.infer<typeof documentsSchema.getMultiple.query>;
-				collection: CollectionBuilder;
-				config: Config;
-				tables: {
-					versions: LucidVersionTableName;
-					documentFields: LucidBrickTableName;
-				};
-			}
-		>,
+	async selectMultipleFiltered(
+		props: {
+			status: DocumentVersionType;
+			/** The status used to determine which version of the document custom field relations to fetch */
+			relationVersionType: Exclude<DocumentVersionType, "revision">;
+			documentFilters: QueryParamFilters;
+			brickFilters: BrickFilters[];
+			query: z.infer<typeof documentsSchema.getMultiple.query>;
+			collection: CollectionBuilder;
+			config: Config;
+			tables: {
+				versions: LucidVersionTableName;
+				documentFields: LucidBrickTableName;
+			};
+		},
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
 		const queryFn = async () => {
@@ -558,8 +555,133 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
-			...props.validation,
 			mode: "multiple-count",
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+	async selectSingleFiltered(
+		props: {
+			status: DocumentVersionType;
+			/** The status used to determine which version of the document custom field relations to fetch */
+			relationVersionType: Exclude<DocumentVersionType, "revision">;
+			documentFilters: QueryParamFilters;
+			brickFilters: BrickFilters[];
+			query: z.infer<typeof documentsSchema.client.getSingle.query>;
+			collection: CollectionBuilder;
+			config: Config;
+			tables: {
+				versions: LucidVersionTableName;
+			};
+		},
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		const queryFn = async () => {
+			let query = this.db
+				.selectFrom(dynamicConfig.tableName)
+				.leftJoin(
+					props.tables.versions,
+					// @ts-expect-error
+					`${props.tables.versions}.document_id`,
+					`${dynamicConfig.tableName}.id`,
+				)
+				.select([
+					`${dynamicConfig.tableName}.id`,
+					`${dynamicConfig.tableName}.collection_key`,
+					`${dynamicConfig.tableName}.created_by`,
+					`${dynamicConfig.tableName}.created_at`,
+					`${dynamicConfig.tableName}.updated_at`,
+					`${dynamicConfig.tableName}.updated_by`,
+				])
+				.select([
+					(eb) =>
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom(props.tables.versions)
+									// @ts-expect-error
+									.select((eb) => [
+										`${props.tables.versions}.id`,
+										`${props.tables.versions}.type`,
+										`${props.tables.versions}.promoted_from`,
+										`${props.tables.versions}.created_at`,
+										`${props.tables.versions}.created_by`,
+										`${props.tables.versions}.updated_at`,
+										`${props.tables.versions}.updated_by`,
+									])
+									.whereRef(
+										// @ts-expect-error
+										`${props.tables.versions}.document_id`,
+										"=",
+										`${dynamicConfig.tableName}.id`,
+									)
+									.where((eb) =>
+										eb.or([
+											// @ts-expect-error
+											eb(`${props.tables.versions}.type`, "=", "draft"),
+											// @ts-expect-error
+											eb(`${props.tables.versions}.type`, "=", "published"),
+										]),
+									),
+							)
+							.as("versions"),
+				])
+				// @ts-expect-error
+				.select([
+					`${props.tables.versions}.id as version_id`,
+					`${props.tables.versions}.type as version_type`,
+				])
+				.where(
+					`${dynamicConfig.tableName}.is_deleted`,
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				)
+				// @ts-expect-error
+				.where(`${props.tables.versions}.type`, "=", props.status);
+
+			query = this.applyBrickFiltersToQuery(
+				query,
+				props.brickFilters,
+				dynamicConfig.tableName,
+			);
+
+			const { main } = queryBuilder.main(
+				{
+					main: query,
+				},
+				{
+					queryParams: {
+						filter: props.documentFilters,
+					},
+					meta: {
+						tableKeys: {
+							filters: {
+								id: `${dynamicConfig.tableName}.id`,
+								collectionKey: `${dynamicConfig.tableName}.collection_key`,
+								createdBy: `${dynamicConfig.tableName}.created_by`,
+								updatedBy: `${dynamicConfig.tableName}.updated_by`,
+								createdAt: `${dynamicConfig.tableName}.created_at`,
+								updatedAt: `${dynamicConfig.tableName}.updated_at`,
+							},
+							sorts: {
+								createdAt: `${dynamicConfig.tableName}.created_at`,
+								updatedAt: `${dynamicConfig.tableName}.updated_at`,
+							},
+						},
+					},
+				},
+			);
+
+			return main.executeTakeFirst() as unknown as Promise<DocumentQueryResponse>;
+		};
+
+		const exec = await this.executeQuery(queryFn, {
+			method: "selectSingleFiltered",
+			tableName: dynamicConfig.tableName,
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			mode: "single",
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}

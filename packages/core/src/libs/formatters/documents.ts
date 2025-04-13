@@ -8,27 +8,12 @@ import type {
 	DocumentVersionType,
 	BrickResponse,
 	FieldResponse,
+	ClientDocumentResponse,
+	BrickAltResponse,
+	FieldAltResponse,
 } from "../../types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
-
-export interface DocumentPropT {
-	id: number;
-	collection_key: string | null;
-	created_by: number | null;
-	updated_by: number | null;
-	created_at: Date | string | null;
-	updated_at: Date | string | null;
-
-	// Versions
-	versions?: Array<{
-		id: number | null;
-		version_type: DocumentVersionType | null;
-		promoted_from: number | null;
-		created_at: Date | string | null;
-		created_by: number | null;
-	}>;
-}
 
 export default class DocumentsFormatter {
 	formatMultiple = (props: {
@@ -139,6 +124,78 @@ export default class DocumentsFormatter {
 					}
 				: null,
 		};
+	};
+
+	formatClientMultiple = (props: {
+		documents: DocumentQueryResponse[];
+		collection: CollectionBuilder;
+		config: Config;
+		hasFields: boolean;
+		hasBricks: boolean;
+		relationData?: FieldRelationResponse;
+	}): ClientDocumentResponse[] => {
+		const DocumentBricksFormatter = Formatter.get("document-bricks");
+
+		return props.documents.map((d) => {
+			let fields: FieldResponse[] | null = null;
+			let bricks: BrickResponse[] | null = null;
+			if (props.hasFields) {
+				fields = DocumentBricksFormatter.formatDocumentFields({
+					bricksQuery: d,
+					bricksSchema: props.collection.bricksTableSchema,
+					relationMetaData: props.relationData || {},
+					collection: props.collection,
+					config: props.config,
+				});
+			}
+			if (props.hasBricks) {
+				bricks = DocumentBricksFormatter.formatMultiple({
+					bricksQuery: d,
+					bricksSchema: props.collection.bricksTableSchema,
+					relationMetaData: props.relationData || {},
+					collection: props.collection,
+					config: props.config,
+				});
+			}
+
+			return this.formatClientSingle({
+				document: d,
+				collection: props.collection,
+				config: props.config,
+				fields: fields,
+				bricks: bricks || undefined,
+			});
+		});
+	};
+	formatClientSingle = (props: {
+		document: DocumentQueryResponse;
+		collection: CollectionBuilder;
+		bricks?: BrickResponse[];
+		fields?: FieldResponse[] | null;
+		config: Config;
+	}): ClientDocumentResponse => {
+		const FieldsFormatter = Formatter.get("document-fields");
+
+		const res = this.formatSingle({
+			document: props.document,
+			collection: props.collection,
+			bricks: props.bricks,
+			fields: props.fields,
+			config: props.config,
+		});
+
+		return {
+			...res,
+			bricks: res.bricks
+				? res.bricks.map((b) => {
+						return {
+							...b,
+							fields: FieldsFormatter.objectifyFields(b.fields),
+						} satisfies BrickAltResponse;
+					})
+				: null,
+			fields: res.fields ? FieldsFormatter.objectifyFields(res.fields) : null,
+		} satisfies ClientDocumentResponse;
 	};
 
 	static swagger = {
@@ -276,6 +333,32 @@ export default class DocumentsFormatter {
 						nullable: true,
 					},
 				},
+			},
+		},
+	};
+	static swaggerClient = {
+		type: "object",
+		properties: {
+			...DocumentsFormatter.swagger.properties,
+			bricks: {
+				type: "array",
+				nullable: true,
+				items: {
+					type: "object",
+					additionalProperties: true,
+					properties: {
+						...DocumentBricksFormatter.swagger.properties,
+						fields: {
+							type: "object",
+							additionalProperties: true,
+						},
+					},
+				},
+			},
+			fields: {
+				type: "object",
+				nullable: true,
+				additionalProperties: true,
 			},
 		},
 	};
