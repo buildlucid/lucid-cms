@@ -6,12 +6,13 @@ import type CollectionBuilder from "../../../libs/builders/collection-builder/in
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../../schemas/collection-fields.js";
 import type {
+	BrickResponse,
+	FieldResponse,
 	Insert,
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../../types.js";
 import type { TableType } from "../../collection-migrator/schema/types.js";
-import type { BrickTypes } from "../../../libs/builders/brick-builder/types.js";
 
 export type InsertBrickTables = {
 	table: LucidBrickTableName;
@@ -39,8 +40,8 @@ const constructBrickTable = (
 	brickTables: Array<InsertBrickTables>,
 	params: {
 		type: Exclude<TableType, "versions" | "document">;
-		brick?: BrickSchema;
-		targetFields: Array<FieldSchemaType>;
+		brick?: BrickSchema | BrickResponse;
+		targetFields: Array<FieldSchemaType> | Array<FieldResponse>;
 		repeaterKeys?: Array<string>;
 		parentId?: Map<string, number> | null;
 		parentIdRef?: Map<string, number>;

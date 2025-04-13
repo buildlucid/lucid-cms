@@ -1,17 +1,10 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
-import type { BrickSchema } from "../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../schemas/collection-fields.js";
+import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
+import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type {
-	CollectionDocumentResponse,
-	FieldResponse,
-	BrickResponse,
-} from "../../types.js";
-import { inspect } from "node:util";
 
-// @ts-expect-error
 const promoteVersion: ServiceFn<
 	[
 		{
@@ -36,6 +29,7 @@ const promoteVersion: ServiceFn<
 		context.db,
 		context.config.db,
 	);
+	const DocumentBricksFormatter = Formatter.get("document-bricks");
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
@@ -57,7 +51,7 @@ const promoteVersion: ServiceFn<
 		};
 	}
 
-	const [versionRes, bricksRawRes] = await Promise.all([
+	const [versionRes, bricksQueryRes] = await Promise.all([
 		Versions.selectSingle(
 			{
 				select: ["id", "type", "document_id"],
@@ -80,25 +74,6 @@ const promoteVersion: ServiceFn<
 				tableName: versionTableName,
 			},
 		),
-		// Documents.selectSingleById(
-		// 	{
-		// 		id: data.documentId,
-		// 		tables: {
-		// 			versions: versionTableName,
-		// 		},
-		// 		versionId: data.fromVersionId,
-		// 		validation: {
-		// 			enabled: true,
-		// 			defaultError: {
-		// 				message: T("document_version_not_found_message"),
-		// 				status: 404,
-		// 			},
-		// 		},
-		// 	},
-		// 	{
-		// 		tableName: documentTableName,
-		// 	},
-		// ),
 		DocumentBricks.selectMultipleByVersionId(
 			{
 				versionId: data.fromVersionId,
@@ -111,8 +86,17 @@ const promoteVersion: ServiceFn<
 		),
 	]);
 	if (versionRes.error) return versionRes;
-	// if (documentRawRes.error) return documentRawRes;
-	if (bricksRawRes.error) return bricksRawRes;
+	if (bricksQueryRes.error) return bricksQueryRes;
+
+	if (bricksQueryRes.data === undefined) {
+		return {
+			error: {
+				status: 404,
+				message: T("document_version_not_found_message"),
+			},
+			data: undefined,
+		};
+	}
 
 	// Additional error checks
 	if (versionRes.data.document_id !== data.documentId) {
@@ -269,56 +253,39 @@ const promoteVersion: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// Create new brick tale rows for the new version
-
-	/*
-     - Based on the bricks schema, get the brick tables from the bricksRawRes response
-     - Update all version ID references with the new one
-     - Group the tables by priority, document-fields and bricks top level, then repeaters at an incremented priority 1-to-1 with how nested they are
-     - Insert the brick tables
-     */
-
-	console.log(
-		"TARGET VERSION",
-		inspect(versionRes.data, {
-			depth: Number.POSITIVE_INFINITY,
-			colors: true,
-			numericSeparator: true,
+	const brickTables = aggregateBrickTables({
+		collection: collectionRes.data,
+		documentId: data.documentId,
+		versionId: createVersionRes.data.id,
+		localisation: context.config.localisation,
+		bricks: DocumentBricksFormatter.formatMultiple({
+			bricksQuery: bricksQueryRes.data,
+			bricksSchema: collectionRes.data.bricksTableSchema,
+			relationMetaData: {},
+			collection: collectionRes.data,
+			config: context.config,
 		}),
-	);
-
-	console.log(
-		"BRICKS QUERY RESPONSE",
-		inspect(bricksRawRes.data, {
-			depth: Number.POSITIVE_INFINITY,
-			colors: true,
-			numericSeparator: true,
+		fields: DocumentBricksFormatter.formatDocumentFields({
+			bricksQuery: bricksQueryRes.data,
+			bricksSchema: collectionRes.data.bricksTableSchema,
+			relationMetaData: {},
+			collection: collectionRes.data,
+			config: context.config,
 		}),
-	);
+	});
+	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 
-	console.log(
-		"UPSERT DOCUMENT",
-		inspect(upsertDocumentRes.data, {
-			depth: Number.POSITIVE_INFINITY,
-			colors: true,
-			numericSeparator: true,
-		}),
-	);
-
-	console.log(
-		"CREATE VERSION",
-		inspect(createVersionRes.data, {
-			depth: Number.POSITIVE_INFINITY,
-			colors: true,
-			numericSeparator: true,
-		}),
-	);
-
-	throw new Error("Testing so the transaction rollsback");
+	const insertRes =
+		await context.services.collection.documentBricks.insertBrickTables(
+			context,
+			{
+				tables: sortedTables,
+			},
+		);
+	if (insertRes.error) return insertRes;
 
 	// -------------------------------------------------------------------------------
 	// Execute hook
-
-	// biome-ignore lint/correctness/noUnreachable: testing
 	const hookResponse = await executeHooks(
 		{
 			service: "collection-documents",
@@ -334,8 +301,6 @@ const promoteVersion: ServiceFn<
 			},
 			data: {
 				documentId: data.documentId,
-				// TODO: remove comment bellow after test throw has been removed
-				// @ts-expect-error
 				versionId: createVersionRes.data.id,
 				versionType: data.toVersionType,
 			},

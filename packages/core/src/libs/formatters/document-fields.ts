@@ -313,15 +313,15 @@ export default class DocumentFieldsFormatter {
 	) => {
 		switch (props.type) {
 			case "document": {
-				return (relationData.document as Array<BrickQueryResponse>).find(
-					(d) => {
-						return (
-							d.collection_key ===
-								(props.fieldConfig as CFConfig<"document">)?.collection &&
-							d.id === props.value
-						);
-					},
-				);
+				return (
+					relationData.document as Array<BrickQueryResponse> | undefined
+				)?.find((d) => {
+					return (
+						d.collection_key ===
+							(props.fieldConfig as CFConfig<"document">)?.collection &&
+						d.id === props.value
+					);
+				});
 			}
 			default: {
 				return relationData[props.type]?.find((i) => i?.id === props.value);

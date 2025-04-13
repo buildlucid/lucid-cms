@@ -1,5 +1,4 @@
 import Formatter from "./index.js";
-import constants from "../../constants/constants.js";
 import DocumentFieldsFormatter from "./document-fields.js";
 import type { BrickResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";

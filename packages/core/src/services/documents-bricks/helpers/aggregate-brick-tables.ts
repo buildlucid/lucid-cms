@@ -4,7 +4,12 @@ import constructBrickTable, {
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../../schemas/collection-fields.js";
-import type { Config, LucidBrickTableName } from "../../../types.js";
+import type {
+	BrickResponse,
+	Config,
+	FieldResponse,
+	LucidBrickTableName,
+} from "../../../types.js";
 
 /**
  * Aggregates brick tables generate from bricks and fields using the constructBrickTable helper
@@ -12,8 +17,8 @@ import type { Config, LucidBrickTableName } from "../../../types.js";
 const aggregateBrickTables = (params: {
 	versionId: number;
 	documentId: number;
-	bricks?: Array<BrickSchema>;
-	fields?: Array<FieldSchemaType>;
+	bricks?: Array<BrickSchema> | Array<BrickResponse>;
+	fields?: Array<FieldSchemaType> | Array<FieldResponse>;
 	collection: CollectionBuilder;
 	localisation: Config["localisation"];
 }) => {
