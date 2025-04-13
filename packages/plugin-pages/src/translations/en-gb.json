@@ -1,6 +1,6 @@
 {
 	"cannot_find_collection": "Cannot find the collection of {{collection}}.",
-	"cannot_find_required_fields_message": "Cannot find required fields for the pages plugin.",
+	"cannot_find_required_fields_message": "Cannot find required fields for the pages plugin (slug, parentPage and fullSlug).",
 	"cannot_have_self_as_parent_page_message": "A page cannot be its own parent, please select a different parent page.",
 	"slug_cannot_be_slash_and_parent_page_set_message": "The slug cannot be / when a parent page is set.",
 	"duplicate_slug_field_found_message": "Please ensure the slug field is unique within the collection.",

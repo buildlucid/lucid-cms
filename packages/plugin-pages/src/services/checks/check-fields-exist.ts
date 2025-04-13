@@ -18,8 +18,8 @@ const checkFieldsExist = (data: {
 	}>
 > => {
 	if (
-		data.fields.parentPage === undefined &&
-		data.fields.slug === undefined &&
+		data.fields.parentPage === undefined ||
+		data.fields.slug === undefined ||
 		data.fields.fullSlug === undefined
 	) {
 		return {
@@ -35,9 +35,9 @@ const checkFieldsExist = (data: {
 	return {
 		error: undefined,
 		data: {
-			slug: data.fields.slug as FieldSchemaType,
-			parentPage: data.fields.parentPage as FieldSchemaType,
-			fullSlug: data.fields.fullSlug as FieldSchemaType,
+			slug: data.fields.slug,
+			parentPage: data.fields.parentPage,
+			fullSlug: data.fields.fullSlug,
 		},
 	};
 };
