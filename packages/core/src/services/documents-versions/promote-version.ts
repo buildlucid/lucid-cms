@@ -60,7 +60,7 @@ const promoteVersion: ServiceFn<
 	const [versionRes, bricksRawRes] = await Promise.all([
 		Versions.selectSingle(
 			{
-				select: ["id", "type"],
+				select: ["id", "type", "document_id"],
 				where: [
 					{
 						key: "id",
@@ -102,6 +102,7 @@ const promoteVersion: ServiceFn<
 		DocumentBricks.selectMultipleByVersionId(
 			{
 				versionId: data.fromVersionId,
+				documentId: data.documentId,
 				bricksSchema: collectionRes.data.bricksTableSchema,
 			},
 			{
@@ -114,6 +115,16 @@ const promoteVersion: ServiceFn<
 	if (bricksRawRes.error) return bricksRawRes;
 
 	// Additional error checks
+	if (versionRes.data.document_id !== data.documentId) {
+		return {
+			error: {
+				type: "basic",
+				message: T("document_version_doesnt_belong_to_document"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 	if (versionRes.data.type === data.toVersionType) {
 		return {
 			error: {

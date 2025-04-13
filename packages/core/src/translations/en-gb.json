@@ -206,6 +206,7 @@
 	"media_not_found_message": "The media you are trying to access does not exist.",
 	"document_not_found_message": "The document you are trying to access does not exist.",
 	"document_version_not_found_message": "The document version you are trying to access does not exist.",
+	"document_version_doesnt_belong_to_document": "The document version you are trying to access bellongs to a different document ID.",
 	"collection_not_found_message": "The collection you are trying to access does not exist.",
 	"email_not_found_message": "The email you are trying to access does not exist.",
 	"locale_not_found_message": "The locale you are trying to access does not exist.",

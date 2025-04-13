@@ -68,6 +68,7 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 	async selectMultipleByVersionId(
 		props: {
 			versionId: number;
+			documentId?: number;
 			bricksSchema: Array<{
 				name: LucidBrickTableName;
 				columns: Array<CollectionSchemaColumn>;
@@ -79,6 +80,14 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			.selectFrom(dynamicConfig.tableName)
 			.where("id", "=", props.versionId)
 			.selectAll();
+
+		if (props.documentId) {
+			query = query.where(
+				`${dynamicConfig.tableName}.document_id`,
+				"=",
+				props.documentId,
+			);
+		}
 
 		for (const brick of props.bricksSchema) {
 			query = query.select(() =>

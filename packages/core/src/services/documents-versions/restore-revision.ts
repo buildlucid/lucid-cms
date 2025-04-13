@@ -29,16 +29,18 @@ const restoreRevision: ServiceFn<
 		};
 	}
 
-	await context.services.collection.documentVersions.promoteVersion(context, {
-		documentId: data.documentId,
-		collectionKey: data.collectionKey,
-		fromVersionId: data.versionId,
-		toVersionType: collectionRes.data.getData.config.useDrafts
-			? "draft"
-			: "published",
-		userId: data.userId,
-		skipRevisionCheck: true,
-	});
+	const response =
+		await context.services.collection.documentVersions.promoteVersion(context, {
+			documentId: data.documentId,
+			collectionKey: data.collectionKey,
+			fromVersionId: data.versionId,
+			toVersionType: collectionRes.data.getData.config.useDrafts
+				? "draft"
+				: "published",
+			userId: data.userId,
+			skipRevisionCheck: true,
+		});
+	if (response.error) return response;
 
 	return {
 		error: undefined,
