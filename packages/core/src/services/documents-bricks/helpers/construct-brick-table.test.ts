@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach } from "vitest";
+import { expect, test, describe } from "vitest";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import aggregateBrickTables from "./aggregate-brick-tables.js";
@@ -261,8 +261,9 @@ describe("brick table construction", () => {
 			(item) => item.parent_id === secondItemParentRef,
 		);
 
-		expect(nestedItemsUnderFirst).toHaveLength(4); // 2 nested items × 2 locales
-		expect(nestedItemsUnderSecond).toHaveLength(4); // 2 nested items × 2 locales
+		//* parent ids are localised
+		expect(nestedItemsUnderFirst).toHaveLength(2); // 2 nested items × 1 locales
+		expect(nestedItemsUnderSecond).toHaveLength(2); // 2 nested items × 1 locales
 
 		// test nested items under first parent
 		const firstNestedItemEn = nestedItemsUnderFirst.find(

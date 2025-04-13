@@ -131,7 +131,7 @@ const constructBrickTable = (
 
 		//* add repeater specific columns
 		if (params.type === "repeater") {
-			baseRowData.parent_id = params.parentId?.get(locale);
+			baseRowData.parent_id = params.parentId?.get(locale) || null;
 			baseRowData.parent_id_ref = params.parentIdRef?.get(locale);
 
 			//* set brick_id to the corresponding locale's brick reference
