@@ -29,7 +29,7 @@
 		"directory": "packages/admin"
 	},
 	"keywords": ["CMS", "Headless", "SolidJS", "Typescript"],
-	"license": "MIT",
+	"license": "BSL-1.0",
 	"devDependencies": {
 		"@types/classnames": "^2.3.4",
 		"@types/quill": "^2.0.14",

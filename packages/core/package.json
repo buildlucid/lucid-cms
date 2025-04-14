@@ -110,5 +110,5 @@
 	"engines": {
 		"node": ">=22.0.0 <23.0.0"
 	},
-	"license": "MIT"
+	"license": "BSL-1.0"
 }
