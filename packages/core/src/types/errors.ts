@@ -21,6 +21,8 @@ export type ErrorResultValue =
 	| ErrorResultObj
 	| ErrorResultObj[]
 	| FieldErrors[]
+	| GroupError[]
+	| BrickError[]
 	| string
 	| undefined;
 
@@ -34,9 +36,21 @@ export interface ErrorResultObj {
 export type ErrorResult = Record<string, ErrorResultValue>;
 
 export interface FieldErrors {
-	brickId: string | number | undefined;
-	groupId: string | number | undefined;
 	key: string;
 	localeCode?: string;
 	message: string;
+	groupErrors?: Array<GroupError>;
+}
+
+export interface GroupError {
+	id: string | number;
+	order?: number;
+	fields: FieldErrors[];
+}
+
+export interface BrickError {
+	id: number | string;
+	key?: string;
+	order?: number;
+	fields: FieldErrors[];
 }

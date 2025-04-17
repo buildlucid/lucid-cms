@@ -1,7 +1,6 @@
 import T from "../../translations/index.js";
 import constants from "../../constants.js";
 import type {
-	ServiceFn,
 	FieldSchemaType,
 	FieldErrors,
 	ServiceResponse,
@@ -24,8 +23,6 @@ const checkRootSlugWithParent = (data: {
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
 			if (value === "/" && data.fields.parentPage.value) {
 				fieldErrors.push({
-					brickId: constants.collectionFieldBrickId,
-					groupId: undefined,
 					key: constants.fields.slug.key,
 					localeCode: key,
 					message: T("slug_cannot_be_slash_and_parent_page_set_message"),
@@ -57,10 +54,7 @@ const checkRootSlugWithParent = (data: {
 					body: {
 						fields: [
 							{
-								brickId: constants.collectionFieldBrickId,
-								groupId: undefined,
 								key: constants.fields.parentPage.key,
-								localeCode: data.defaultLocale,
 								message: T("slug_cannot_be_slash_and_parent_page_set_message"),
 							},
 						],

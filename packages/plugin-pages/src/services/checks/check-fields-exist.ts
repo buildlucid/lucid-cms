@@ -1,5 +1,9 @@
 import T from "../../translations/index.js";
-import type { FieldSchemaType, ServiceResponse } from "@lucidcms/core/types";
+import type {
+	FieldErrors,
+	FieldSchemaType,
+	ServiceResponse,
+} from "@lucidcms/core/types";
 
 /**
  *  Returns an error if the required fields do not exist
@@ -17,16 +21,38 @@ const checkFieldsExist = (data: {
 		fullSlug: FieldSchemaType;
 	}>
 > => {
-	if (
-		data.fields.parentPage === undefined ||
-		data.fields.slug === undefined ||
-		data.fields.fullSlug === undefined
-	) {
+	const fieldErrors: FieldErrors[] = [];
+
+	if (data.fields.slug === undefined) {
+		fieldErrors.push({
+			key: "slug",
+			message: T("field_required"),
+		});
+	}
+	if (data.fields.parentPage === undefined) {
+		fieldErrors.push({
+			key: "parentPage",
+			message: T("field_required"),
+		});
+	}
+	if (data.fields.fullSlug === undefined) {
+		fieldErrors.push({
+			key: "fullSlug",
+			message: T("field_required"),
+		});
+	}
+
+	if (fieldErrors.length) {
 		return {
 			error: {
 				type: "basic",
+				message: T("cannot_find_required_field_message"),
 				status: 400,
-				message: T("cannot_find_required_fields_message"),
+				errorResponse: {
+					body: {
+						fields: fieldErrors,
+					},
+				},
 			},
 			data: undefined,
 		};
@@ -35,9 +61,9 @@ const checkFieldsExist = (data: {
 	return {
 		error: undefined,
 		data: {
-			slug: data.fields.slug,
-			parentPage: data.fields.parentPage,
-			fullSlug: data.fields.fullSlug,
+			slug: data.fields.slug as FieldSchemaType,
+			parentPage: data.fields.parentPage as FieldSchemaType,
+			fullSlug: data.fields.fullSlug as FieldSchemaType,
 		},
 	};
 };

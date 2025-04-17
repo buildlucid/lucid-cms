@@ -25,8 +25,6 @@ const checkParentIsPageOfSelf = (data: {
 					body: {
 						fields: [
 							{
-								brickId: constants.collectionFieldBrickId,
-								groupId: undefined,
 								key: constants.fields.parentPage.key,
 								localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
 								message: T("cannot_have_self_as_parent_page_message"),

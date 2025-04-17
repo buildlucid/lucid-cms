@@ -1,41 +1,21 @@
 import T from "../../../translations/index.js";
 import logger from "../../../utils/logging/index.js";
-import Repository from "../../../libs/repositories/index.js";
 import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
-// import type { FieldErrors } from "../../../types/errors.js";
 import type { FieldTypes } from "../../../libs/custom-fields/types.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../../types.js";
+import type {
+	BrickError,
+	FieldErrors,
+	FieldSchemaType,
+	GroupError,
+} from "../../../types.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
 
-// TODO: move these into error types once old document storage method/validation is removed
-export interface FieldErrors {
-	key: string;
-	localeCode?: string;
-	message: string;
-	groupErrors?: Array<GroupError>;
-}
-
-interface GroupError {
-	id: string | number;
-	order?: number;
-	fields: FieldErrors[];
-}
-
-interface BrickError {
-	id: number | string;
-	key?: string;
-	order?: number;
-	fields: FieldErrors[];
-}
-
-// TODO: remove once BrickError, GroupError and FieldErrors is added to error response type
-//@ts-expect-error
 const checkValidateBricksFields: ServiceFn<
 	[
 		{

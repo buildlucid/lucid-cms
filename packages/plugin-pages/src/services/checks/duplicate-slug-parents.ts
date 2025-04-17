@@ -123,11 +123,8 @@ const checkDuplicateSlugParents: ServiceFn<
 
 			for (const duplicate of duplicates) {
 				fieldErrors.push({
-					brickId: constants.collectionFieldBrickId,
-					groupId: undefined,
 					key: constants.fields.slug.key,
-					localeCode:
-						duplicate.locale_code || context.config.localisation.defaultLocale,
+					localeCode: duplicate.locale_code || undefined,
 					message:
 						duplicate.document_id === null
 							? T("duplicate_slug_field_found_message")
