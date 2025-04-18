@@ -1,10 +1,8 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { LucidDocumentTableName } from "../../types.js";
 
 const upsertSingle: ServiceFn<
 	[
@@ -22,11 +20,6 @@ const upsertSingle: ServiceFn<
 > = async (context, data) => {
 	const Document = Repository.get("documents", context.db, context.config.db);
 
-	const documentTableRes = buildTableName<LucidDocumentTableName>("document", {
-		collection: data.collectionKey,
-	});
-	if (documentTableRes.error) return documentTableRes;
-
 	// ----------------------------------------------
 	// Checks
 
@@ -39,6 +32,9 @@ const upsertSingle: ServiceFn<
 			},
 		);
 	if (collectionRes.error) return collectionRes;
+
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	//* check collection is locked
 	if (collectionRes.data.getData.config.isLocked) {
@@ -79,7 +75,7 @@ const upsertSingle: ServiceFn<
 				},
 			},
 			{
-				tableName: documentTableRes.data,
+				tableName: tableNameRes.data.document,
 			},
 		);
 		if (existingDocumentRes.error) return existingDocumentRes;
@@ -93,7 +89,7 @@ const upsertSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				collectionMode: collectionRes.data.getData.mode,
 				documentId: data.documentId,
-				documentTable: documentTableRes.data,
+				documentTable: tableNameRes.data.document,
 			},
 		);
 	if (checkDocumentCountRes.error) return checkDocumentCountRes;
@@ -116,7 +112,7 @@ const upsertSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: documentTableRes.data,
+			tableName: tableNameRes.data.document,
 		},
 	);
 	if (upsertDocRes.error) return upsertDocRes;

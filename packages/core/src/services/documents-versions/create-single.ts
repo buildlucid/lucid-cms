@@ -1,12 +1,10 @@
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
-import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import type { BrickSchema } from "../../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../../schemas/collection-fields.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { LucidVersionTableName } from "../../types.js";
 
 const createSingle: ServiceFn<
 	[
@@ -21,11 +19,8 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	// Build document versions table name
-	const versionsTableRes = buildTableName<LucidVersionTableName>("versions", {
-		collection: data.collection.key,
-	});
-	if (versionsTableRes.error) return versionsTableRes;
+	const tableNameRes = data.collection.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	const DocumentVersions = Repository.get(
 		"document-versions",
@@ -57,7 +52,7 @@ const createSingle: ServiceFn<
 				},
 			},
 			{
-				tableName: versionsTableRes.data,
+				tableName: tableNameRes.data.version,
 			},
 		);
 		if (updateRes.error) return updateRes;
@@ -79,7 +74,7 @@ const createSingle: ServiceFn<
 				],
 			},
 			{
-				tableName: versionsTableRes.data,
+				tableName: tableNameRes.data.version,
 			},
 		);
 		if (deleteRes.error) return deleteRes;
@@ -101,7 +96,7 @@ const createSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: versionsTableRes.data,
+			tableName: tableNameRes.data.version,
 		},
 	);
 	if (newVersionRes.error) return newVersionRes;
@@ -118,6 +113,7 @@ const createSingle: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: data.collection,
 				collectionKey: data.collection.key,
 				userId: data.userId,
 			},
@@ -157,6 +153,7 @@ const createSingle: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: data.collection,
 				collectionKey: data.collection.key,
 				userId: data.userId,
 			},

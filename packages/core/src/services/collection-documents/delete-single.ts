@@ -84,6 +84,7 @@ const deleteSingle: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 			},
@@ -143,6 +144,7 @@ const deleteSingle: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 			},

@@ -10,6 +10,7 @@ import type {
 	DocumentFieldFilters as DocumentFieldFiltersResponse,
 	CollectionBrickConfig,
 	FieldFilters,
+	CollectionTableNames,
 } from "./types.js";
 import type {
 	CollectionSchema,
@@ -19,7 +20,9 @@ import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
+	ServiceResponse,
 } from "../../../types.js";
+import T from "../../../translations/index.js";
 
 class CollectionBuilder extends FieldBuilder {
 	key: string;
@@ -265,6 +268,31 @@ class CollectionBuilder extends FieldBuilder {
 		return this.collectionTableSchema?.tables.find(
 			(t) => t.type === "versions",
 		) as CollectionSchemaTable<LucidVersionTableName> | undefined;
+	}
+
+	get tableNames(): Awaited<ServiceResponse<CollectionTableNames>> {
+		const versionTable = this.documentVersionTableSchema?.name;
+		const documentTable = this.documentTableSchema?.name;
+		const documentFields = this.documentFieldsTableSchema?.name;
+
+		if (!versionTable || !documentTable || !documentFields) {
+			return {
+				error: {
+					message: T("error_getting_collection_names"),
+					status: 500,
+				},
+				data: undefined,
+			};
+		}
+
+		return {
+			data: {
+				version: versionTable,
+				document: documentTable,
+				documentFields: documentFields,
+			},
+			error: undefined,
+		};
 	}
 }
 

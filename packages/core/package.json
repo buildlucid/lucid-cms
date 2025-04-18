@@ -22,6 +22,10 @@
 			"types": "./dist/middleware.d.ts",
 			"default": "./dist/middleware.js"
 		},
+		"./helpers": {
+			"types": "./dist/helpers.d.ts",
+			"default": "./dist/helpers.js"
+		},
 		"./types": {
 			"types": "./dist/types.d.ts",
 			"default": "./dist/types.js"

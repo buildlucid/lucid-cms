@@ -38,18 +38,8 @@ const promoteVersion: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const versionTableName = collectionRes.data.documentVersionTableSchema?.name;
-	const documentTableName = collectionRes.data.documentTableSchema?.name;
-
-	if (!versionTableName || !documentTableName) {
-		return {
-			error: {
-				message: T("error_getting_collection_names"),
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	const [versionRes, bricksQueryRes] = await Promise.all([
 		Versions.selectSingle(
@@ -71,7 +61,7 @@ const promoteVersion: ServiceFn<
 				},
 			},
 			{
-				tableName: versionTableName,
+				tableName: tableNameRes.data.version,
 			},
 		),
 		DocumentBricks.selectMultipleByVersionId(
@@ -81,7 +71,7 @@ const promoteVersion: ServiceFn<
 				bricksSchema: collectionRes.data.bricksTableSchema,
 			},
 			{
-				tableName: versionTableName,
+				tableName: tableNameRes.data.version,
 			},
 		),
 	]);
@@ -179,7 +169,7 @@ const promoteVersion: ServiceFn<
 						},
 					},
 					{
-						tableName: versionTableName,
+						tableName: tableNameRes.data.version,
 					},
 				)
 			: Versions.deleteSingle(
@@ -198,7 +188,7 @@ const promoteVersion: ServiceFn<
 						],
 					},
 					{
-						tableName: versionTableName,
+						tableName: tableNameRes.data.version,
 					},
 				),
 		Documents.upsertSingle(
@@ -221,7 +211,7 @@ const promoteVersion: ServiceFn<
 				},
 			},
 			{
-				tableName: documentTableName,
+				tableName: tableNameRes.data.document,
 			},
 		),
 		Versions.createSingle(
@@ -244,7 +234,7 @@ const promoteVersion: ServiceFn<
 				},
 			},
 			{
-				tableName: versionTableName,
+				tableName: tableNameRes.data.version,
 			},
 		),
 	]);
@@ -296,6 +286,7 @@ const promoteVersion: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 			},

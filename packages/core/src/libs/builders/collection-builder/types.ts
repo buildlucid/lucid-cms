@@ -9,6 +9,11 @@ import type {
 	FilterOperator,
 } from "../../../types/query-params.js";
 import type { LocaleValue } from "../../../types/shared.js";
+import type {
+	LucidBrickTableName,
+	LucidDocumentTableName,
+	LucidVersionTableName,
+} from "../../../types.js";
 
 // TODO: rework this slightly, have this flat on the field config and call it listable or something. This will only be used to determine if it shows in rows on the frontend, it no longer does anything server side
 export interface FieldCollectionConfig {
@@ -64,3 +69,9 @@ export interface DocumentFieldFilters {
 	operator: FilterOperator;
 	column: CFColumn<FieldTypes>;
 }
+
+export type CollectionTableNames = {
+	document: LucidDocumentTableName;
+	version: LucidVersionTableName;
+	documentFields: LucidBrickTableName;
+};

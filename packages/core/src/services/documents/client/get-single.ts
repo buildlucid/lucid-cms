@@ -26,18 +26,8 @@ const getSingle: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const versionTable = collectionRes.data.documentVersionTableSchema?.name;
-	const documentTable = collectionRes.data.documentTableSchema?.name;
-
-	if (!versionTable || !documentTable) {
-		return {
-			error: {
-				message: T("error_getting_collection_names"),
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		collectionRes.data.bricksTableSchema,
@@ -54,11 +44,11 @@ const getSingle: ServiceFn<
 			config: context.config,
 			relationVersionType: data.status,
 			tables: {
-				versions: versionTable,
+				versions: tableNameRes.data.version,
 			},
 		},
 		{
-			tableName: documentTable,
+			tableName: tableNameRes.data.document,
 		},
 	);
 	if (documentRes.error) return documentRes;

@@ -214,6 +214,7 @@ const promoteVersion: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 			},

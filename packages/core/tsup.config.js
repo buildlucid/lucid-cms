@@ -7,6 +7,7 @@ export default defineConfig({
         "src/builders.ts",
         "src/api.ts",
         "src/middleware.ts",
+        "src/helpers.ts",
     ],
     dts: true,
     format: "esm",

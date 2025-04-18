@@ -1,3 +1,4 @@
+import type { CollectionBuilder } from "../builders.js";
 import type { DocumentVersionType } from "../libs/db/types.js";
 import type { BrickSchema } from "../schemas/collection-bricks.js";
 import type { FieldSchemaType } from "../schemas/collection-fields.js";
@@ -35,6 +36,7 @@ export type HookServiceHandlers = {
 			[
 				{
 					meta: {
+						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
 					};
@@ -60,6 +62,7 @@ export type HookServiceHandlers = {
 			[
 				{
 					meta: {
+						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
 					};
@@ -78,6 +81,7 @@ export type HookServiceHandlers = {
 			[
 				{
 					meta: {
+						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
 					};
@@ -92,6 +96,7 @@ export type HookServiceHandlers = {
 			[
 				{
 					meta: {
+						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
 					};
@@ -106,6 +111,7 @@ export type HookServiceHandlers = {
 			[
 				{
 					meta: {
+						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
 					};

@@ -91,6 +91,7 @@ const createSingle: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: data.collection,
 				collectionKey: data.collection.key,
 				userId: data.userId,
 			},
@@ -131,6 +132,7 @@ const createSingle: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: data.collection,
 				collectionKey: data.collection.key,
 				userId: data.userId,
 			},

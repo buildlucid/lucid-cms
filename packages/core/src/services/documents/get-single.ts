@@ -1,15 +1,10 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import type z from "zod";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type documentsSchema from "../../schemas/documents.js";
-import type {
-	DocumentVersionType,
-	LucidDocumentTableName,
-	LucidVersionTableName,
-} from "../../libs/db/types.js";
+import type { DocumentVersionType } from "../../libs/db/types.js";
 import type { CollectionDocumentResponse } from "../../types.js";
 
 const getSingle: ServiceFn<
@@ -27,26 +22,19 @@ const getSingle: ServiceFn<
 	const Document = Repository.get("documents", context.db, context.config.db);
 	const DocumentFormatter = Formatter.get("documents");
 
-	const documentTableRes = buildTableName<LucidDocumentTableName>("document", {
-		collection: data.collectionKey,
-	});
-	if (documentTableRes.error) return documentTableRes;
-
-	const versionsTableRes = buildTableName<LucidVersionTableName>("versions", {
-		collection: data.collectionKey,
-	});
-	if (versionsTableRes.error) return versionsTableRes;
-
 	const collectionRes = context.services.collection.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
 
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
+
 	const documentRes = await Document.selectSingleById(
 		{
 			id: data.id,
 			tables: {
-				versions: versionsTableRes.data,
+				versions: tableNameRes.data.version,
 			},
 			status: data.status,
 			versionId: data.versionId,
@@ -59,7 +47,7 @@ const getSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: documentTableRes.data,
+			tableName: tableNameRes.data.document,
 		},
 	);
 	if (documentRes.error) return documentRes;

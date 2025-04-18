@@ -2,15 +2,11 @@ import T from "../../translations/index.js";
 import collectionsServices from "../collections/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 import fetchRelationData from "./helpers/fetch-relation-data.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
-import type {
-	DocumentVersionType,
-	LucidVersionTableName,
-} from "../../libs/db/types.js";
+import type { DocumentVersionType } from "../../libs/db/types.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -38,23 +34,13 @@ const getMultiple: ServiceFn<
 	);
 	const DocumentBricksFormatter = Formatter.get("document-bricks");
 
-	const versionsTableRes = buildTableName<LucidVersionTableName>("versions", {
-		collection: data.collectionKey,
-	});
-	if (versionsTableRes.error) return versionsTableRes;
-
 	const collectionRes = collectionsServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
 
-	console.log(
-		data.documentFieldsOnly,
-		collectionRes.data.bricksTableSchema.filter((t) => {
-			if (data.documentFieldsOnly) return t.type === "document-fields";
-			return true;
-		}),
-	);
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
@@ -65,7 +51,7 @@ const getMultiple: ServiceFn<
 			}),
 		},
 		{
-			tableName: versionsTableRes.data,
+			tableName: tableNameRes.data.version,
 		},
 	);
 	if (bricksQueryRes.error) return bricksQueryRes;

@@ -1,8 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import buildTableName from "../collection-migrator/helpers/build-table-name.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
-import type { LucidDocumentTableName, ServiceFn } from "../../types.js";
+import type { ServiceFn } from "../../types.js";
 
 const deleteMultiple: ServiceFn<
 	[
@@ -44,10 +43,8 @@ const deleteMultiple: ServiceFn<
 
 	const Documents = Repository.get("documents", context.db, context.config.db);
 
-	const documentTableRes = buildTableName<LucidDocumentTableName>("document", {
-		collection: data.collectionKey,
-	});
-	if (documentTableRes.error) return documentTableRes;
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	const documentsRes = await Documents.selectMultiple(
 		{
@@ -69,7 +66,7 @@ const deleteMultiple: ServiceFn<
 			},
 		},
 		{
-			tableName: documentTableRes.data,
+			tableName: tableNameRes.data.document,
 		},
 	);
 	if (documentsRes.error) return documentsRes;
@@ -109,6 +106,7 @@ const deleteMultiple: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 			},
@@ -139,7 +137,7 @@ const deleteMultiple: ServiceFn<
 			},
 		},
 		{
-			tableName: documentTableRes.data,
+			tableName: tableNameRes.data.document,
 		},
 	);
 	if (deleteDocUpdateRes.error) return deleteDocUpdateRes;
@@ -154,6 +152,7 @@ const deleteMultiple: ServiceFn<
 		context,
 		{
 			meta: {
+				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 			},

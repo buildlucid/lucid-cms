@@ -1,4 +1,3 @@
-import T from "../../../translations/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import Formatter from "../../../libs/formatters/index.js";
 import { groupDocumentFilters } from "../../../utils/helpers/index.js";
@@ -36,19 +35,8 @@ const getMultiple: ServiceFn<
 		data.query.filter,
 	);
 
-	const versionTable = collectionRes.data.documentVersionTableSchema?.name;
-	const documentTable = collectionRes.data.documentTableSchema?.name;
-	const documentFieldTable = collectionRes.data.documentFieldsTableSchema?.name;
-
-	if (!versionTable || !documentTable || !documentFieldTable) {
-		return {
-			error: {
-				message: T("error_getting_collection_names"),
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
@@ -60,12 +48,12 @@ const getMultiple: ServiceFn<
 			config: context.config,
 			relationVersionType: data.status,
 			tables: {
-				versions: versionTable,
-				documentFields: documentFieldTable,
+				versions: tableNameRes.data.version,
+				documentFields: tableNameRes.data.documentFields,
 			},
 		},
 		{
-			tableName: documentTable,
+			tableName: tableNameRes.data.document,
 		},
 	);
 	if (documentsRes.error) return documentsRes;

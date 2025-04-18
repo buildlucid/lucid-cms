@@ -43,33 +43,24 @@ const getMultipleRevisions: ServiceFn<
 	);
 	const VersionsFormatter = Formatter.get("document-versions");
 
-	const documentTableName = collectionRes.data.documentTableSchema?.name;
-	const versionsTableName = collectionRes.data.documentVersionTableSchema?.name;
+	const tableNameRes = collectionRes.data.tableNames;
+	if (tableNameRes.error) return tableNameRes;
+
 	const bricksSchema = collectionRes.data.bricksTableSchema.filter(
 		(s) => s.type === "brick",
 	);
-
-	if (!documentTableName || !versionsTableName) {
-		return {
-			error: {
-				message: T("error_getting_collection_names"),
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
 
 	const revisionsRes = await VersionsRepo.selectMultipleRevisions(
 		{
 			documentId: data.documentId,
 			query: data.query,
 			tables: {
-				document: documentTableName,
+				document: tableNameRes.data.document,
 			},
 			bricksSchema: bricksSchema,
 		},
 		{
-			tableName: versionsTableName,
+			tableName: tableNameRes.data.version,
 		},
 	);
 	if (revisionsRes.error) return revisionsRes;
