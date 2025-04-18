@@ -57,7 +57,6 @@ export default class DocumentBricksFormatter {
 				const DocumentFieldsFormatter = Formatter.get("document-fields");
 
 				brickResponses.push({
-					id: -1, // TODO: remove this from type, no longer needed. No such thing as a brick ID as a single brick spans accross multiple rows due to locales
 					key: brickKey,
 					order: firstRow.position,
 					open: Formatter.formatBoolean(firstRow.is_open),
@@ -193,9 +192,6 @@ export default class DocumentBricksFormatter {
 		type: "object",
 		additionalProperties: true,
 		properties: {
-			id: {
-				type: "number",
-			},
 			key: {
 				type: "string",
 			},

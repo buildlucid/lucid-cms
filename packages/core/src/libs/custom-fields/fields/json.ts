@@ -6,16 +6,9 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
-	JsonResValue,
 } from "../types.js";
-import type {
-	FieldProp,
-	FieldFormatMeta,
-} from "../../formatters/collection-document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 
 class JsonCustomField extends CustomField<"json"> {
@@ -63,15 +56,6 @@ class JsonCustomField extends CustomField<"json"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMeta;
-	}) {
-		return {
-			value: props.data.json_value ?? this.config.config.default ?? null,
-			meta: null,
-		} satisfies CFResponse<"json">;
-	}
 	formatResponseValue(value?: Record<string, unknown> | null) {
 		return (value ??
 			this.config.config.default ??
@@ -79,25 +63,6 @@ class JsonCustomField extends CustomField<"json"> {
 	}
 	formatResponseMeta() {
 		return null satisfies CFResponse<"json">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: null,
-			intValue: null,
-			boolValue: null,
-			jsonValue: props.item.value,
-			mediaId: null,
-			userId: null,
-		} satisfies CFInsertItem<"json">;
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.record(z.unknown());

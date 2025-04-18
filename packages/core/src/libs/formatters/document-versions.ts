@@ -7,34 +7,6 @@ import type { RevisionsQueryResponse } from "../repositories/document-versions.j
 import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 
-/**
-  
- export interface CollectionDocumentVersionResponse {
-	id: number;
-	versionType: DocumentVersionType;
-	promotedFrom: number | null;
-	createdAt: string | null;
-	createdBy: number | null;
-	document: {
-		id: number | null;
-		collectionKey: string | null;
-		createdBy: number | null;
-		createdAt: string | null;
-		updatedAt: string | null;
-		updatedBy: number | null;
-	};
-	bricks: Record<
-		Partial<BrickTypes>,
-		Array<{
-			id: number;
-			brickKey: string | null;
-			fields: number;
-		}>
-	>;
-}
-  
- */
-
 export default class DocumentVersions {
 	formatMultiple(props: {
 		versions: RevisionsQueryResponse[];
@@ -54,8 +26,6 @@ export default class DocumentVersions {
 		const formattedBricks: CollectionDocumentVersionResponse["bricks"] = {
 			builder: [],
 			fixed: [],
-			// TODO: remove on collection rework
-			"collection-fields": [],
 		};
 
 		for (const schema of props.bricksSchema) {
@@ -72,9 +42,7 @@ export default class DocumentVersions {
 				}
 				for (const [_, brickType] of brickInstances.entries()) {
 					formattedBricks[brickType].push({
-						id: -1,
 						brickKey: schema.key.brick || null,
-						fields: -1,
 					});
 				}
 			}
@@ -129,15 +97,9 @@ export default class DocumentVersions {
 					items: {
 						type: "object",
 						properties: {
-							id: {
-								type: "number",
-							},
 							brickKey: {
 								type: "string",
 								nullable: true,
-							},
-							fields: {
-								type: "number",
 							},
 						},
 					},

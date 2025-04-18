@@ -2,13 +2,9 @@ import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import z from "zod";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import DatetimeCustomField from "./datetime.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -30,176 +26,164 @@ const DateTimeCollection = new CollectionBuilder("collection", {
 	});
 
 test("successfully validate field - datetime", async () => {
-	// Standard
-	const standardValidate = {
-		string: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_datetime",
-				type: "datetime",
-				value: "2024-06-15T14:14:21.704Z",
-				localeCode: "en",
-			},
-			instance: DateTimeCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		number: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_datetime",
-				type: "datetime",
-				value: 1676103221704,
-				localeCode: "en",
-			},
-			instance: DateTimeCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		date: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_datetime",
-				type: "datetime",
-				value: new Date("2024-06-15T14:14:21.704Z"),
-				localeCode: "en",
-			},
-			instance: DateTimeCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-	};
-	expect(standardValidate).toEqual({
-		date: null,
-		number: null,
-		string: null,
-	});
+	// Standard with string value
+	const standardStringValidate = validateField(
+		{
+			key: "standard_datetime",
+			type: "datetime",
+			value: "2024-06-15T14:14:21.704Z",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("standard_datetime")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(standardStringValidate).length(0);
+
+	// Standard with number value
+	const standardNumberValidate = validateField(
+		{
+			key: "standard_datetime",
+			type: "datetime",
+			value: 1676103221704,
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("standard_datetime")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(standardNumberValidate).length(0);
+
+	// Standard with date value
+	const standardDateValidate = validateField(
+		{
+			key: "standard_datetime",
+			type: "datetime",
+			value: new Date("2024-06-15T14:14:21.704Z"),
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("standard_datetime")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(standardDateValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_datetime",
 			type: "datetime",
 			value: "2024-06-15T14:14:21.704Z",
-			localeCode: "en",
 		},
-		instance: DateTimeCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("required_datetime")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - datetime", async () => {
-	// Standard
-	const standardValidate = {
-		boolean: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_datetime",
-				type: "datetime",
-				value: true,
-				localeCode: "en",
-			},
-			instance: DateTimeCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		string: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_datetime",
-				type: "datetime",
-				value: "string",
-				localeCode: "en",
-			},
-			instance: DateTimeCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		invalid: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_datetime",
-				type: "datetime",
-				value: "20024-06-15T14:14:21.704",
-				localeCode: "en",
-			},
-			instance: DateTimeCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-	};
-	expect(standardValidate).toEqual({
-		boolean: {
+	// Standard with boolean value
+	const standardBooleanValidate = validateField(
+		{
 			key: "standard_datetime",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message:
-				"Expected string, received boolean, or Expected number, received boolean, or Expected date, received boolean", // zod error message
-		},
-		string: {
-			key: "standard_datetime",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: T("field_date_invalid"),
-		},
-		invalid: {
-			key: "standard_datetime",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: T("field_date_invalid"),
-		},
-	});
-
-	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
-			key: "required_datetime",
 			type: "datetime",
-			value: "",
-			localeCode: "en",
+			value: true,
 		},
-		instance: DateTimeCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("standard_datetime")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toEqual({
-		key: "required_datetime",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("generic_field_required"),
-	});
+	);
+	expect(standardBooleanValidate).toEqual([
+		{
+			key: "standard_datetime",
+			message:
+				"Expected string, received boolean, or Expected number, received boolean, or Expected date, received boolean",
+		},
+	]);
+
+	// Standard with invalid string
+	const standardInvalidStringValidate = validateField(
+		{
+			key: "standard_datetime",
+			type: "datetime",
+			value: "string",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("standard_datetime")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(standardInvalidStringValidate).toEqual([
+		{
+			key: "standard_datetime",
+			message: T("field_date_invalid"),
+		},
+	]);
+
+	// Standard with invalid date format
+	const standardInvalidDateValidate = validateField(
+		{
+			key: "standard_datetime",
+			type: "datetime",
+			value: "20024-06-15T14:14:21.704",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("standard_datetime")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(standardInvalidDateValidate).toEqual([
+		{
+			key: "standard_datetime",
+			message: T("field_date_invalid"),
+		},
+	]);
+
+	// Required with empty value
+	const requiredValidate = validateField(
+		{
+			key: "required_datetime",
+			type: "datetime",
+			value: "",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DateTimeCollection.fields.get("required_datetime")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredValidate).toEqual([
+		{
+			key: "required_datetime",
+			message: T("generic_field_required"),
+		},
+	]);
 });
 
 // -----------------------------------------------

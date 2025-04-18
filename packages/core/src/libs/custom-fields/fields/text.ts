@@ -5,16 +5,10 @@ import zodSafeParse from "../utils/zod-safe-parse.js";
 import type {
 	CFConfig,
 	CFProps,
-	CFInsertItem,
 	CFResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type {
-	FieldProp,
-	FieldFormatMeta,
-} from "../../formatters/collection-document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 
 class TextCustomField extends CustomField<"text"> {
@@ -62,15 +56,6 @@ class TextCustomField extends CustomField<"text"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMeta;
-	}) {
-		return {
-			value: props.data.text_value ?? this.config.config.default,
-			meta: null,
-		} satisfies CFResponse<"text">;
-	}
 	formatResponseValue(value?: string | null) {
 		return (value ??
 			this.config.config.default ??
@@ -78,25 +63,6 @@ class TextCustomField extends CustomField<"text"> {
 	}
 	formatResponseMeta() {
 		return null satisfies CFResponse<"text">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: props.item.value,
-			intValue: null,
-			boolValue: null,
-			jsonValue: null,
-			mediaId: null,
-			userId: null,
-		} satisfies CFInsertItem<"text">;
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.string();

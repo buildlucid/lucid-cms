@@ -32,33 +32,40 @@ const getSingle: ServiceFn<
 		};
 	}
 
+	const tablesRes = collection.tableNames;
+	if (tablesRes.error) return tablesRes;
+
 	const CollectionsFormatter = Formatter.get("collections");
 
 	if (
 		data.include?.documentId === true &&
 		collection.getData.mode === "single"
 	) {
-		const CollectionDocumentsRepo = Repository.get(
-			"collection-documents",
+		const Documents = Repository.get(
+			"documents",
 			context.db,
 			context.config.db,
 		);
 
-		const document = await CollectionDocumentsRepo.selectSingle({
-			select: ["id"],
-			where: [
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "false"),
+		const documentRes = await Documents.selectSingle(
+			{
+				select: ["id"],
+				where: [
+					{
+						key: "is_deleted",
+						operator: "=",
+						value: context.config.db.getDefault("boolean", "false"),
+					},
+				],
+				validation: {
+					enabled: true,
 				},
-				{
-					key: "collection_key",
-					operator: "=",
-					value: collection.key,
-				},
-			],
-		});
+			},
+			{
+				tableName: tablesRes.data.document,
+			},
+		);
+		if (documentRes.error) return documentRes;
 
 		return {
 			error: undefined,
@@ -67,7 +74,7 @@ const getSingle: ServiceFn<
 				include: data.include,
 				documents: [
 					{
-						id: document?.id,
+						id: documentRes.data.id,
 						collection_key: collection.key,
 					},
 				],

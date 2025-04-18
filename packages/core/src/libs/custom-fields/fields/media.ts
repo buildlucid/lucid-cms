@@ -11,17 +11,11 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	MediaReferenceData,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type {
-	FieldProp,
-	FieldFormatMeta as FieldFormatMetaOld,
-} from "../../formatters/collection-document-fields.js";
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { MediaPropsT } from "../../formatters/media.js";
 
 class MediaCustomField extends CustomField<"media"> {
@@ -71,37 +65,6 @@ class MediaCustomField extends CustomField<"media"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMetaOld;
-	}) {
-		return {
-			value: props.data?.media_id ?? null,
-			meta: {
-				id: props.data?.media_id ?? null,
-				url: createCdnUrl(props.formatMeta.host, props.data?.media_key ?? ""),
-				key: props.data?.media_key ?? null,
-				mimeType: props.data?.media_mime_type ?? null,
-				extension: props.data?.media_file_extension ?? null,
-				fileSize: props.data?.media_file_size ?? null,
-				width: props.data?.media_width ?? null,
-				height: props.data?.media_height ?? null,
-				blurHash: props.data?.media_blur_hash ?? null,
-				averageColour: props.data?.media_average_colour ?? null,
-				isDark: Formatter.formatBoolean(props.data?.media_is_dark ?? null),
-				isLight: Formatter.formatBoolean(props.data?.media_is_light ?? null),
-				title: objectifyTranslations(
-					props.data?.media_title_translations || [],
-					props.formatMeta.localisation.locales,
-				),
-				alt: objectifyTranslations(
-					props.data?.media_alt_translations || [],
-					props.formatMeta.localisation.locales,
-				),
-				type: (props.data?.media_type as MediaType) ?? null,
-			},
-		} satisfies CFResponse<"media">;
-	}
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"media">["value"];
 	}
@@ -133,25 +96,6 @@ class MediaCustomField extends CustomField<"media"> {
 			),
 			type: (value?.type as MediaType) ?? null,
 		} satisfies CFResponse<"media">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: null,
-			intValue: null,
-			boolValue: null,
-			jsonValue: null,
-			mediaId: props.item.value,
-			userId: null,
-		} satisfies CFInsertItem<"media">;
 	}
 	cfSpecificValidation(value: unknown, relationData?: MediaReferenceData[]) {
 		const valueSchema = z.number();

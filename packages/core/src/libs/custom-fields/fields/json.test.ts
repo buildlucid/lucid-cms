@@ -2,13 +2,9 @@ import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import z from "zod";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import JsonCustomField from "./json.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -39,142 +35,133 @@ const JSONCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - json", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_json",
 			type: "json",
 			value: {
 				key: "value",
 			},
-			localeCode: "en",
 		},
-		instance: JSONCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		JSONCollection.fields.get("standard_json")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_json",
 			type: "json",
 			value: {
 				key: "value",
 			},
-			localeCode: "en",
 		},
-		instance: JSONCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		JSONCollection.fields.get("required_json")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 
 	// Zod
-	const zodValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const zodValidate = validateField(
+		{
 			key: "zod_json",
 			type: "json",
 			value: {
 				key: "value",
 				value: "value",
 			},
-			localeCode: "en",
 		},
-		instance: JSONCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		JSONCollection.fields.get("zod_json")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(zodValidate).toBe(null);
+	);
+	expect(zodValidate).length(0);
 });
 
 test("fail to validate field - json", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_json",
 			type: "json",
 			value: "invalid json",
-			localeCode: "en",
 		},
-		instance: JSONCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		JSONCollection.fields.get("standard_json")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toEqual({
-		key: "standard_json",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: "Expected object, received string", // zod error message
-	});
+	);
+	expect(standardValidate).toEqual([
+		{
+			key: "standard_json",
+			message: "Expected object, received string", // zod error message
+		},
+	]);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_json",
 			type: "json",
 			value: undefined,
-			localeCode: "en",
 		},
-		instance: JSONCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		JSONCollection.fields.get("required_json")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toEqual({
-		key: "required_json",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("generic_field_required"),
-	});
+	);
+	expect(requiredValidate).toEqual([
+		{
+			key: "required_json",
+			message: T("generic_field_required"),
+		},
+	]);
 
 	// Zod
-	const zodValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const zodValidate = validateField(
+		{
 			key: "zod_json",
 			type: "json",
 			value: {
 				key: "value",
 				value: true, // not a string
 			},
-			localeCode: "en",
 		},
-		instance: JSONCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		JSONCollection.fields.get("zod_json")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(zodValidate).toEqual({
-		key: "zod_json",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: 'Expected string, received boolean at "value"', // zod error message
-	});
+	);
+	expect(zodValidate).toEqual([
+		{
+			key: "zod_json",
+			message: 'Expected string, received boolean at "value"', // zod error message
+		},
+	]);
 });
 
 // -----------------------------------------------

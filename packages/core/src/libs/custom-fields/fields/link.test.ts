@@ -2,13 +2,9 @@ import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import LinkCustomField from "./link.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -31,9 +27,8 @@ const LinkCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - link", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_link",
 			type: "link",
 			value: {
@@ -41,21 +36,20 @@ test("successfully validate field - link", async () => {
 				target: "_blank",
 				label: "Link 1",
 			},
-			localeCode: "en",
 		},
-		instance: LinkCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		LinkCollection.fields.get("standard_link")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_link",
 			type: "link",
 			value: {
@@ -63,128 +57,120 @@ test("successfully validate field - link", async () => {
 				target: "_blank",
 				label: "Link 1",
 			},
-			localeCode: "en",
 		},
-		instance: LinkCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		LinkCollection.fields.get("required_link")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - link", async () => {
-	// Standard
-	const standardValidate = {
-		url: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_link",
-				type: "link",
-				value: {
-					url: false, // invalid
-					target: "_blank",
-					label: "Link 1",
-				},
-				localeCode: "en",
-			},
-			instance: LinkCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		target: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_link",
-				type: "link",
-				value: {
-					url: "https://example.com",
-					target: "test", // invalid
-					label: "Link 1",
-				},
-				localeCode: "en",
-			},
-			instance: LinkCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		label: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "standard_link",
-				type: "link",
-				value: {
-					url: "https://example.com",
-					target: "_blank",
-					label: false, // invalid
-				},
-				localeCode: "en",
-			},
-			instance: LinkCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-	};
-	expect(standardValidate).toEqual({
-		url: {
+	// Standard - Invalid URL
+	const invalidUrlValidate = validateField(
+		{
 			key: "standard_link",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "link",
+			value: {
+				url: false, // invalid
+				target: "_blank",
+				label: "Link 1",
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		LinkCollection.fields.get("standard_link")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(invalidUrlValidate).toEqual([
+		{
+			key: "standard_link",
 			message: 'Expected string, received boolean at "url"', // zod error message
 		},
-		target: {
+	]);
+
+	// Standard - Invalid Target
+	const invalidTargetValidate = validateField(
+		{
 			key: "standard_link",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "link",
+			value: {
+				url: "https://example.com",
+				target: "test", // invalid
+				label: "Link 1",
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		LinkCollection.fields.get("standard_link")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(invalidTargetValidate).toEqual([
+		{
+			key: "standard_link",
 			message: T("field_link_target_error_message", {
 				valid: constants.customFields.link.targets.join(", "),
 			}),
 		},
-		label: {
-			key: "standard_link",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: 'Expected string, received boolean at "label"', // zod error message
-		},
-	});
+	]);
 
-	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
-			key: "required_link",
+	// Standard - Invalid Label
+	const invalidLabelValidate = validateField(
+		{
+			key: "standard_link",
 			type: "link",
-			value: undefined,
-			localeCode: "en",
+			value: {
+				url: "https://example.com",
+				target: "_blank",
+				label: false, // invalid
+			},
 		},
-		instance: LinkCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		LinkCollection.fields.get("standard_link")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toEqual({
-		key: "required_link",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("generic_field_required"),
-	});
+	);
+	expect(invalidLabelValidate).toEqual([
+		{
+			key: "standard_link",
+			message: 'Expected string, received boolean at "label"', // zod error message
+		},
+	]);
+
+	// Required - Empty value
+	const requiredValidate = validateField(
+		{
+			key: "required_link",
+			type: "link",
+			value: undefined,
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		LinkCollection.fields.get("required_link")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredValidate).toEqual([
+		{
+			key: "required_link",
+			message: T("generic_field_required"),
+		},
+	]);
 });
 
 // -----------------------------------------------

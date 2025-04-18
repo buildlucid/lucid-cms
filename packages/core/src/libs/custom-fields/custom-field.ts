@@ -5,17 +5,11 @@ import type {
 	CFColumn,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	CustomFieldErrorItem,
 	CustomFieldValidateResponse,
 } from "./types.js";
 import zodSafeParse from "./utils/zod-safe-parse.js";
-import type {
-	FieldProp,
-	FieldFormatMeta as FieldFormatMetaOld,
-} from "../formatters/collection-document-fields.js";
 import type { FieldFormatMeta } from "../formatters/document-fields.js";
-import type { FieldInsertItem } from "../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { SchemaDefinition, GetSchemaDefinitionProps } from "./types.js";
 import type { ServiceResponse } from "../../types.js";
 
@@ -27,11 +21,7 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract key: string;
 	abstract props?: CFProps<T>;
 	abstract config: CFConfig<T>;
-	// TODO: remove with new collection document storage method
-	abstract responseValueFormat(props?: {
-		data?: FieldProp;
-		formatMeta: FieldFormatMetaOld;
-	}): CFResponse<T>;
+
 	abstract formatResponseValue(value: unknown): CFResponse<T>["value"];
 	abstract formatResponseMeta(
 		value: unknown,
@@ -44,11 +34,6 @@ abstract class CustomField<T extends FieldTypes> {
 		valid: boolean;
 		message?: string;
 	};
-	abstract getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}): CFInsertItem<T> | null;
 	/**
 	 * Determins how the field should be defined in the database
 	 *

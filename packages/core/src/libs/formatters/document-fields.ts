@@ -138,7 +138,6 @@ export default class DocumentFieldsFormatter {
 	 * Responsible for building a single FieldResponse object.
 	 *
 	 * Adds in empty locale values, formats the value and constructs either translations or values based on the fields config
-	 * @TODO add group, groupid supports and address TODO comments in block
 	 */
 	private buildField = (
 		data: {
@@ -248,7 +247,6 @@ export default class DocumentFieldsFormatter {
 			const openState = localeRows[0]?.is_open ?? false;
 
 			groupsRes.push({
-				id: -1, // TODO: remove this from type, no longer needed. No such thing as a group ID as a single group spans accross multiple rows due to locales
 				order: key,
 				open: Formatter.formatBoolean(openState),
 				fields: this.buildFieldTree(
@@ -465,9 +463,6 @@ export default class DocumentFieldsFormatter {
 					type: "object",
 					additionalProperties: true,
 					properties: {
-						id: {
-							type: "number",
-						},
 						order: {
 							type: "number",
 						},

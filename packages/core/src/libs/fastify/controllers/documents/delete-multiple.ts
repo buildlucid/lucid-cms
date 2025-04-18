@@ -45,7 +45,7 @@ export default {
 	zodSchema: documentsSchema.deleteMultiple,
 	swaggerSchema: {
 		description: "Delete a multiple collection documents.",
-		tags: ["collection-documents"],
+		tags: ["documents"],
 		summary: "Delete multiple collection documents.",
 		response: {
 			204: swaggerResponse({

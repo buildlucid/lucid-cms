@@ -10,7 +10,7 @@ export default class CollectionsFormatter {
 			document_id?: boolean;
 		};
 		documents?: Array<{
-			id?: number;
+			id: number;
 			collection_key: string;
 		}>;
 	}) => {

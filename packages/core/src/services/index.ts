@@ -1,9 +1,7 @@
 import auth from "./auth/index.js";
 import account from "./account/index.js";
 import cdn from "./cdn/index.js";
-import collectionDocumentBricks from "./collection-document-bricks/index.js";
-import collectionDocuments from "./collection-documents/index.js";
-import collectionDocumentVersions from "./collection-document-versions/index.js";
+
 import documents from "./documents/index.js";
 import documentVersions from "./documents-versions/index.js";
 import documentBricks from "./documents-bricks/index.js";
@@ -33,12 +31,6 @@ const lucidServices = {
 		documentVersions: documentVersions,
 		documentBricks: documentBricks,
 		migrator: collectionMigrator,
-		// TODO: remove bellow object after document rework is complete
-		document: {
-			...collectionDocuments,
-			versions: collectionDocumentVersions,
-			brick: collectionDocumentBricks,
-		},
 	},
 	account: account,
 	user: {

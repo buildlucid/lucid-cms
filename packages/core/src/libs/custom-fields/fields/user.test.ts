@@ -1,13 +1,9 @@
 import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import UserCustomField from "./user.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -30,107 +26,102 @@ const UserCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - user", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_user",
 			type: "user",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: UserCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		UserCollection.fields.get("standard_user")!,
+		{
 			media: [],
 			users: [
 				{
 					id: 1,
-					email: "test@test.com",
-					first_name: "Test",
-					last_name: "User",
-					username: "test-user",
+					// email: "test@test.com",
+					// first_name: "Test",
+					// last_name: "User",
+					// username: "test-user",
 				},
 			],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_user",
 			type: "user",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: UserCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		UserCollection.fields.get("required_user")!,
+		{
 			media: [],
 			users: [
 				{
 					id: 1,
-					email: "test@test.com",
-					first_name: "Test",
-					last_name: "User",
-					username: "test-user",
+					// email: "test@test.com",
+					// first_name: "Test",
+					// last_name: "User",
+					// username: "test-user",
 				},
 			],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - user", async () => {
 	// Required
 	const requiredValidate = {
-		exists: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
+		exists: validateField(
+			{
 				key: "required_user",
 				type: "user",
 				value: 1,
-				localeCode: "en",
 			},
-			instance: UserCollection,
-			data: {
+			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			UserCollection.fields.get("required_user")!,
+			{
 				media: [],
 				users: [],
 				documents: [],
 			},
-		}),
-		null: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
+		),
+		null: validateField(
+			{
 				key: "required_user",
 				type: "user",
 				value: null,
-				localeCode: "en",
 			},
-			instance: UserCollection,
-			data: {
+			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			UserCollection.fields.get("required_user")!,
+			{
 				media: [],
 				users: [],
 				documents: [],
 			},
-		}),
+		),
 	};
+
 	expect(requiredValidate).toEqual({
-		exists: {
-			key: "required_user",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: T("field_user_not_found"),
-		},
-		null: {
-			key: "required_user",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: T("generic_field_required"),
-		},
+		exists: [
+			{
+				key: "required_user",
+				message: T("field_user_not_found"),
+			},
+		],
+		null: [
+			{
+				key: "required_user",
+				message: T("generic_field_required"),
+			},
+		],
 	});
 });
 

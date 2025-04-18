@@ -100,7 +100,6 @@ export default Object.freeze({
 	brickTypes: {
 		builder: "builder",
 		fixed: "fixed",
-		collectionFields: "collection-fields",
 	} as const,
 	db: {
 		prefix: "lucid_",

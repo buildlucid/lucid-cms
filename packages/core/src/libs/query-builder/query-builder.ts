@@ -6,7 +6,6 @@ import type {
 	ReferenceExpression,
 	ComparisonOperatorExpression,
 } from "kysely";
-import type { DocumentFieldFilters } from "../builders/collection-builder/types.js";
 
 const queryBuilder = <DB, Table extends keyof DB, O>(
 	query: {
@@ -21,7 +20,6 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 	},
 	config: {
 		queryParams: Partial<QueryParams>;
-		documentFieldFilters?: DocumentFieldFilters[];
 		meta?: {
 			tableKeys?: {
 				filters?: Record<string, ReferenceExpression<DB, Table>>;
@@ -58,48 +56,6 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 				operator as ComparisonOperatorExpression,
 				f.value,
 			);
-		}
-	}
-
-	// Document filters
-	if (config.documentFieldFilters && config.documentFieldFilters.length > 0) {
-		for (const {
-			key,
-			value,
-			column,
-			operator,
-		} of config.documentFieldFilters) {
-			const o = getFilterOperator(key, {
-				value: value,
-				operator: operator,
-			});
-
-			mainQuery = mainQuery.where(({ eb, and }) =>
-				and([
-					// @ts-expect-error
-					eb("lucid_collection_document_fields.key", "=", key),
-					eb(
-						// @ts-expect-error
-						`lucid_collection_document_fields.${column}`,
-						o,
-						value,
-					),
-				]),
-			);
-			if (countQuery) {
-				countQuery = countQuery.where(({ eb, and }) =>
-					and([
-						// @ts-expect-error
-						eb("lucid_collection_document_fields.key", "=", key),
-						eb(
-							// @ts-expect-error
-							`lucid_collection_document_fields.${column}`,
-							o,
-							value,
-						),
-					]),
-				);
-			}
 		}
 	}
 

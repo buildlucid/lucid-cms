@@ -1,13 +1,9 @@
 import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import ColourCustomField from "./colour.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -30,138 +26,128 @@ const ColourCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - colour", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_colour",
 			type: "colour",
 			value: "#000000",
-			localeCode: "en",
 		},
-		instance: ColourCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		ColourCollection.fields.get("standard_colour")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_colour",
 			type: "colour",
 			value: "#000000",
-			localeCode: "en",
 		},
-		instance: ColourCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		ColourCollection.fields.get("required_colour")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 });
 
 test("fail to validate field - colour", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_colour",
 			type: "colour",
 			value: 0,
-			localeCode: "en",
 		},
-		instance: ColourCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		ColourCollection.fields.get("standard_colour")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toEqual({
-		key: "standard_colour",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: "Expected string, received number", // zod error message
-	});
+	);
+	expect(standardValidate).toEqual([
+		{
+			key: "standard_colour",
+			message: "Expected string, received number", // zod error message
+		},
+	]);
 
-	// Required
-	const requiredValidate = {
-		empty: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "required_colour",
-				type: "colour",
-				value: "",
-				localeCode: "en",
-			},
-			instance: ColourCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		null: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "required_colour",
-				type: "colour",
-				value: null,
-				localeCode: "en",
-			},
-			instance: ColourCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		undefined: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "required_colour",
-				type: "colour",
-				value: undefined,
-				localeCode: "en",
-			},
-			instance: ColourCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-	};
-	expect(requiredValidate).toEqual({
-		empty: {
+	// Required - empty value
+	const requiredEmptyValidate = validateField(
+		{
 			key: "required_colour",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "colour",
+			value: "",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		ColourCollection.fields.get("required_colour")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredEmptyValidate).toEqual([
+		{
+			key: "required_colour",
 			message: T("generic_field_required"),
 		},
-		null: {
+	]);
+
+	// Required - null value
+	const requiredNullValidate = validateField(
+		{
 			key: "required_colour",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "colour",
+			value: null,
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		ColourCollection.fields.get("required_colour")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredNullValidate).toEqual([
+		{
+			key: "required_colour",
 			message: T("generic_field_required"),
 		},
-		undefined: {
+	]);
+
+	// Required - undefined value
+	const requiredUndefinedValidate = validateField(
+		{
 			key: "required_colour",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "colour",
+			value: undefined,
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		ColourCollection.fields.get("required_colour")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredUndefinedValidate).toEqual([
+		{
+			key: "required_colour",
 			message: T("generic_field_required"),
 		},
-	});
+	]);
 });
 
 // -----------------------------------------------

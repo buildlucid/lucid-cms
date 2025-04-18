@@ -297,70 +297,6 @@ export interface LucidCollectionMigrations {
 	created_at: TimestampImmutable;
 }
 
-export interface LucidCollectionDocuments {
-	id: Generated<number>;
-	collection_key: string;
-	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted_at: TimestampMutateable;
-	deleted_by: number | null;
-	created_by: number | null;
-	updated_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidCollectionDocumentVersions {
-	id: Generated<number>;
-	document_id: number;
-	version_type: DocumentVersionType;
-	promoted_from: number | null;
-	created_at: TimestampImmutable;
-	created_by: number | null;
-}
-
-export interface LucidCollectionDocumentBricks {
-	id: Generated<number>;
-	collection_document_version_id: number;
-	brick_type: BrickTypes;
-	brick_key: string | null;
-	brick_order: number | null;
-	brick_open: BooleanInt | null;
-}
-
-export interface LucidCollectionDocumentGroups {
-	group_id: Generated<number>;
-	collection_document_id: number;
-	collection_document_version_id: number;
-	collection_brick_id: number;
-	parent_group_id: number | null;
-	repeater_key: string;
-	group_order: number;
-	group_open: BooleanInt | null;
-	ref: string | null;
-}
-
-export interface LucidCollectionDocumentFields {
-	fields_id: Generated<number>;
-	collection_document_id: number;
-	collection_document_version_id: number;
-	collection_brick_id: number;
-	group_id: number | null;
-	locale_code: string;
-	key: string;
-	type: FieldTypes;
-	text_value: string | null;
-	int_value: number | null;
-	bool_value: BooleanInt | null;
-	json_value: JSONColumnType<
-		Record<string, unknown>,
-		string | null,
-		string | null
-	>;
-	user_id: number | null;
-	media_id: number | null;
-	document_id: number | null;
-}
-
 export interface LucidClientIntegrations {
 	id: Generated<number>;
 	name: string;
@@ -450,10 +386,4 @@ export interface LucidDB {
 	[key: LucidVersionTableName]: LucidVersionTable;
 	// @ts-expect-error
 	[key: LucidBrickTableName]: LucidBricksTable;
-	// TODO: delete bellow
-	lucid_collection_documents: LucidCollectionDocuments;
-	lucid_collection_document_versions: LucidCollectionDocumentVersions;
-	lucid_collection_document_bricks: LucidCollectionDocumentBricks;
-	lucid_collection_document_groups: LucidCollectionDocumentGroups;
-	lucid_collection_document_fields: LucidCollectionDocumentFields;
 }

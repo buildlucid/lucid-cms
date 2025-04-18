@@ -20,27 +20,18 @@ const getAll: ServiceFn<
 			(collection) => collection.getData.mode === "single",
 		);
 
-		const CollectionDocumentsRepo = Repository.get(
-			"collection-documents",
+		const Documents = Repository.get(
+			"documents",
 			context.db,
 			context.config.db,
 		);
 
-		const documents = await CollectionDocumentsRepo.selectMultiple({
-			select: ["collection_key", "id"],
-			where: [
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "false"),
-				},
-				{
-					key: "collection_key",
-					operator: "in",
-					value: singleCollections.map((c) => c.key),
-				},
-			],
+		const documentsRes = await Documents.selectMultipleUnion({
+			tables: singleCollections
+				.map((c) => c.documentTableSchema?.name || null)
+				.filter((n) => n !== null),
 		});
+		if (documentsRes.error) return documentsRes;
 
 		return {
 			error: undefined,
@@ -51,7 +42,7 @@ const getAll: ServiceFn<
 					fields: false,
 					document_id: true,
 				},
-				documents: documents,
+				documents: documentsRes.data,
 			}),
 		};
 	}

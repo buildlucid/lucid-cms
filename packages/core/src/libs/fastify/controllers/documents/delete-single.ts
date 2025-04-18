@@ -45,7 +45,7 @@ export default {
 	zodSchema: documentsSchema.deleteSingle,
 	swaggerSchema: {
 		description: "Delete a single collection document.",
-		tags: ["collection-documents"],
+		tags: ["documents"],
 		summary: "Delete a collection document",
 		response: {
 			204: swaggerResponse({

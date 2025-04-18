@@ -9,7 +9,6 @@ import emailRoutes from "./emails.routes.js";
 import mediaRoutes from "./media.routes.js";
 import settingsRoutes from "./settings.routes.js";
 import collectionRoutes from "./collections.routes.js";
-import collectionDocumentsRoutes from "./collection-documents.routes.js";
 import documentRoutes from "./document.routes.js";
 import userRoutes from "./users.routes.js";
 import clientIntegrationRoutes from "./client-integrations.routes.js";
@@ -30,9 +29,6 @@ const routes = async (fastify: FastifyInstance) => {
 	});
 	fastify.register(collectionRoutes, {
 		prefix: "/collections",
-	});
-	fastify.register(collectionDocumentsRoutes, {
-		prefix: "/collections/documents",
 	});
 	fastify.register(documentRoutes, {
 		prefix: "/documents",

@@ -56,37 +56,31 @@ test("collection config is correct along with field includes and filters", async
 		.addText("text_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addTextarea("textarea_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addNumber("number_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addCheckbox("checkbox_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addSelect("select_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addDateTime("datetime_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addUser("user_test", {
@@ -97,7 +91,6 @@ test("collection config is correct along with field includes and filters", async
 		.addMedia("media_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addWysiwyg("wysiwyg_test")
@@ -126,15 +119,6 @@ test("collection config is correct along with field includes and filters", async
 			useRevisions: false,
 			useTranslations: true,
 			fields: {
-				filter: [
-					{ key: "text_test", type: "text" },
-					{ key: "textarea_test", type: "textarea" },
-					{ key: "number_test", type: "number" },
-					{ key: "checkbox_test", type: "checkbox" },
-					{ key: "select_test", type: "select" },
-					{ key: "datetime_test", type: "datetime" },
-					{ key: "media_test", type: "media" },
-				],
 				include: [
 					"text_test",
 					"textarea_test",
@@ -145,6 +129,7 @@ test("collection config is correct along with field includes and filters", async
 					"user_test",
 					"media_test",
 				],
+				filter: [],
 			},
 		},
 	});

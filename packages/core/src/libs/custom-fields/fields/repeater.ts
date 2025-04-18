@@ -42,20 +42,11 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat() {
-		return {
-			value: null,
-			meta: null,
-		} satisfies CFResponse<"repeater">;
-	}
 	formatResponseValue() {
 		return null satisfies CFResponse<"repeater">["value"];
 	}
 	formatResponseMeta() {
 		return null satisfies CFResponse<"repeater">["meta"];
-	}
-	getInsertField() {
-		return null;
 	}
 	cfSpecificValidation(value: unknown) {
 		if (

@@ -2,23 +2,16 @@ import T from "../../../translations/index.js";
 import z from "zod";
 import CustomField from "../custom-field.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import Formatter from "../../formatters/index.js";
 import constants from "../../../constants/constants.js";
 import type { LinkResValue, ServiceResponse } from "../../../types.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
 import keyToTitle from "../utils/key-to-title.js";
-import type {
-	FieldProp,
-	FieldFormatMeta,
-} from "../../formatters/collection-document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 
 class LinkCustomField extends CustomField<"link"> {
 	type = "link" as const;
@@ -69,20 +62,6 @@ class LinkCustomField extends CustomField<"link"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMeta;
-	}) {
-		const linkVal = props.data.json_value as LinkResValue;
-		return {
-			value: {
-				url: props.data.text_value ?? this.config.config.default.url ?? null,
-				label: linkVal?.label ?? this.config.config.default.label ?? null,
-				target: linkVal?.target ?? this.config.config.default.target ?? null,
-			},
-			meta: null,
-		} satisfies CFResponse<"link">;
-	}
 	formatResponseValue(value?: LinkResValue | null) {
 		return {
 			url: value?.url ?? this.config.config.default.url ?? null,
@@ -92,32 +71,6 @@ class LinkCustomField extends CustomField<"link"> {
 	}
 	formatResponseMeta() {
 		return null satisfies CFResponse<"link">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		const value = props.item.value as LinkResValue | undefined;
-
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: value ? value.url : null,
-			intValue: null,
-			boolValue: null,
-			jsonValue: value
-				? {
-						target: value.target,
-						label: value.label,
-					}
-				: null,
-			mediaId: null,
-			userId: null,
-		} satisfies CFInsertItem<"link">;
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.object({

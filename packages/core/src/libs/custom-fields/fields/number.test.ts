@@ -2,13 +2,9 @@ import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import z from "zod";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import NumberCustomField from "./number.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -36,132 +32,123 @@ const NumberCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - number", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_number",
 			type: "number",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: NumberCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		NumberCollection.fields.get("standard_number")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_number",
 			type: "number",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: NumberCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		NumberCollection.fields.get("required_number")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 
 	// Zod
-	const zodValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const zodValidate = validateField(
+		{
 			key: "min_number",
 			type: "number",
 			value: 5,
-			localeCode: "en",
 		},
-		instance: NumberCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		NumberCollection.fields.get("min_number")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(zodValidate).toBe(null);
+	);
+	expect(zodValidate).length(0);
 });
 
 test("fail to validate field - number", async () => {
-	// Standard;
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	// Standard
+	const standardValidate = validateField(
+		{
 			key: "standard_number",
 			type: "number",
 			value: "1",
-			localeCode: "en",
 		},
-		instance: NumberCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		NumberCollection.fields.get("standard_number")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toEqual({
-		key: "standard_number",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: "Expected number, received string", // zod error message
-	});
+	);
+	expect(standardValidate).toEqual([
+		{
+			key: "standard_number",
+			message: "Expected number, received string", // zod error message
+		},
+	]);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_number",
 			type: "number",
 			value: undefined,
-			localeCode: "en",
 		},
-		instance: NumberCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		NumberCollection.fields.get("required_number")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toEqual({
-		key: "required_number",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("generic_field_required"),
-	});
+	);
+	expect(requiredValidate).toEqual([
+		{
+			key: "required_number",
+			message: T("generic_field_required"),
+		},
+	]);
 
 	// Zod
-	const zodValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const zodValidate = validateField(
+		{
 			key: "min_number",
 			type: "number",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: NumberCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		NumberCollection.fields.get("min_number")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(zodValidate).toEqual({
-		key: "min_number",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: "Number must be greater than or equal to 5", // zod error message
-	});
+	);
+	expect(zodValidate).toEqual([
+		{
+			key: "min_number",
+			message: "Number must be greater than or equal to 5", // zod error message
+		},
+	]);
 });
 
 // -----------------------------------------------

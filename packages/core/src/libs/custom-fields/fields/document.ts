@@ -9,22 +9,14 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	DocumentReferenceData,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
-	DocumentResValue,
 } from "../types.js";
-import type {
-	FieldProp,
-	FieldFormatMeta as FieldFormatMetaOld,
-} from "../../formatters/collection-document-fields.js";
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
 
-const FieldsFormatter = Formatter.get("collection-document-fields");
 const DocumentFieldsFormatter = Formatter.get("document-fields");
 const DocumentBricksFormatter = Formatter.get("document-bricks");
 
@@ -81,48 +73,6 @@ class DocumentCustomField extends CustomField<"document"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMetaOld;
-	}) {
-		const CollectionBuilder = props.formatMeta.collections.find(
-			(c) => c.key === this.props.collection,
-		);
-		if (!CollectionBuilder) {
-			return {
-				value: props.data?.document_id ?? null,
-				meta: {
-					id: props.data.document_id ?? null,
-					fields: null,
-				},
-			};
-		}
-
-		const documentFields = FieldsFormatter.objectifyFields(
-			FieldsFormatter.formatMultiple(
-				{
-					fields: props.data.document_fields || [],
-					groups: props.data.document_groups || [],
-				},
-				{
-					builder: CollectionBuilder,
-					collectionTranslations:
-						CollectionBuilder.getData.config.useTranslations,
-					localisation: props.formatMeta.localisation,
-					collections: props.formatMeta.collections,
-					host: props.formatMeta.host,
-				},
-			),
-		);
-
-		return {
-			value: props.data?.document_id ?? null,
-			meta: {
-				id: props.data.document_id ?? null,
-				fields: Object.keys(documentFields).length > 0 ? documentFields : null,
-			},
-		} satisfies CFResponse<"document">;
-	}
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"document">["value"];
 	}
@@ -158,26 +108,6 @@ class DocumentCustomField extends CustomField<"document"> {
 			collectionKey: value?.collection_key ?? null,
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies CFResponse<"document">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: null,
-			intValue: null,
-			boolValue: null,
-			jsonValue: null,
-			mediaId: null,
-			documentId: props.item.value,
-			userId: null,
-		} satisfies CFInsertItem<"document">;
 	}
 	cfSpecificValidation(value: unknown, relationData?: DocumentReferenceData[]) {
 		const valueSchema = z.number();

@@ -1,12 +1,11 @@
 import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import SelectCustomField from "./select.js";
 
 const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
 	selectOptions: [
 		{
 			label: "Option 1",
@@ -47,115 +46,110 @@ const SelectCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - select", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_select",
 			type: "select",
 			value: "option-1",
-			localeCode: "en",
 		},
-		instance: SelectCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		SelectCollection.fields.get("standard_select")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_select",
 			type: "select",
 			value: "option-1",
-			localeCode: "en",
 		},
-		instance: SelectCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		SelectCollection.fields.get("required_select")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 });
+
 test("fail to validate field - select", async () => {
 	// Standard
 	const standardValidate = {
-		exists: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
+		exists: validateField(
+			{
 				key: "standard_select",
 				type: "select",
 				value: "option-10",
-				localeCode: "en",
 			},
-			instance: SelectCollection,
-			data: {
+			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			SelectCollection.fields.get("standard_select")!,
+			{
 				media: [],
 				users: [],
 				documents: [],
 			},
-		}),
-		number: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
+		),
+		number: validateField(
+			{
 				key: "standard_select",
 				type: "select",
 				value: 1,
-				localeCode: "en",
 			},
-			instance: SelectCollection,
-			data: {
+			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			SelectCollection.fields.get("standard_select")!,
+			{
 				media: [],
 				users: [],
 				documents: [],
 			},
-		}),
+		),
 	};
+
 	expect(standardValidate).toEqual({
-		exists: {
-			key: "standard_select",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: T("please_ensure_a_valid_option_is_selected"),
-		},
-		number: {
-			key: "standard_select",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
-			message: "Expected string, received number", // zod error message
-		},
+		exists: [
+			{
+				key: "standard_select",
+				message: T("please_ensure_a_valid_option_is_selected"),
+			},
+		],
+		number: [
+			{
+				key: "standard_select",
+				message: "Expected string, received number", // zod error message
+			},
+		],
 	});
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_select",
 			type: "select",
 			value: undefined,
-			localeCode: "en",
 		},
-		instance: SelectCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		SelectCollection.fields.get("required_select")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toEqual({
-		key: "required_select",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("select_field_required"),
-	});
+	);
+
+	expect(requiredValidate).toEqual([
+		{
+			key: "required_select",
+			message: T("select_field_required"),
+		},
+	]);
 });
 
 // -----------------------------------------------

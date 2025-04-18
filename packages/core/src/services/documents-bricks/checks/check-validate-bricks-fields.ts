@@ -78,10 +78,6 @@ const validateBricks = (
 		let instance = undefined;
 
 		switch (brick.type) {
-			case "collection-fields": {
-				instance = collection;
-				break;
-			}
 			case "builder": {
 				instance = collection.config.bricks?.builder?.find(
 					(b) => b.key === brick.key,
@@ -248,7 +244,7 @@ const getRelationData = (
 /**
  * Validates a single field, handling both direct values and translations
  */
-const validateField = (
+export const validateField = (
 	field: FieldSchemaType,
 	instance: CustomField<FieldTypes>,
 	validationData: ValidationData,

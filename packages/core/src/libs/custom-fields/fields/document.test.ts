@@ -2,12 +2,8 @@ import T from "../../../translations/index.js";
 import { expect, test } from "vitest";
 import CustomFieldSchema from "../schema.js";
 import DocumentCustomField from "./document.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -39,16 +35,15 @@ const DocumentCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - document", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_doc",
 			type: "document",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: DocumentCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DocumentCollection.fields.get("standard_doc")!,
+		{
 			media: [],
 			users: [],
 			documents: [
@@ -58,20 +53,19 @@ test("successfully validate field - document", async () => {
 				},
 			],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_doc",
 			type: "document",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: DocumentCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DocumentCollection.fields.get("required_doc")!,
+		{
 			media: [],
 			users: [],
 			documents: [
@@ -81,72 +75,65 @@ test("successfully validate field - document", async () => {
 				},
 			],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - document", async () => {
-	// Required
-	const requiredValidate = {
-		exists: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "required_doc",
-				type: "document",
-				value: 1,
-				localeCode: "en",
-			},
-			instance: DocumentCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-		null: validateField({
-			brickId: CONSTANTS.collectionBrickId,
-			field: {
-				key: "required_doc",
-				type: "document",
-				value: null,
-				localeCode: "en",
-			},
-			instance: DocumentCollection,
-			data: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-		}),
-	};
-	expect(requiredValidate).toEqual({
-		exists: {
+	// Required - document not found
+	const requiredExistsValidate = validateField(
+		{
 			key: "required_doc",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "document",
+			value: 1,
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DocumentCollection.fields.get("required_doc")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredExistsValidate).toEqual([
+		{
+			key: "required_doc",
 			message: T("field_document_not_found"),
 		},
-		null: {
+	]);
+
+	// Required - null value
+	const requiredNullValidate = validateField(
+		{
 			key: "required_doc",
-			brickId: CONSTANTS.collectionBrickId,
-			localeCode: "en",
-			groupId: undefined,
+			type: "document",
+			value: null,
+		},
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DocumentCollection.fields.get("required_doc")!,
+		{
+			media: [],
+			users: [],
+			documents: [],
+		},
+	);
+	expect(requiredNullValidate).toEqual([
+		{
+			key: "required_doc",
 			message: T("generic_field_required"),
 		},
-	});
+	]);
 
 	// Wrong collection
-	const wrongCollectionValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const wrongCollectionValidate = validateField(
+		{
 			key: "wrong_collection",
 			type: "document",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: DocumentCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		DocumentCollection.fields.get("wrong_collection")!,
+		{
 			media: [],
 			users: [],
 			documents: [
@@ -156,14 +143,13 @@ test("fail to validate field - document", async () => {
 				},
 			],
 		},
-	});
-	expect(wrongCollectionValidate).toEqual({
-		key: "wrong_collection",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("field_document_not_found"),
-	});
+	);
+	expect(wrongCollectionValidate).toEqual([
+		{
+			key: "wrong_collection",
+			message: T("field_document_not_found"),
+		},
+	]);
 });
 
 // -----------------------------------------------
@@ -188,7 +174,6 @@ test("custom field config passes schema validation", async () => {
 			required: true,
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });

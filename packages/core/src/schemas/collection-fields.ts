@@ -62,10 +62,6 @@ export type FieldRepeaterGroupSchemaType = {
 export type FieldSchemaType = z.infer<typeof FieldBaseSchema> & {
 	groups?: FieldRepeaterGroupSchemaType[];
 };
-// TODO: remove this after collection document DB rework
-export type FieldSchemaSimpleType = z.infer<typeof FieldBaseSchema> & {
-	groups?: FieldSchemaType[][];
-};
 
 export const swaggerFieldObj = {
 	type: "object",

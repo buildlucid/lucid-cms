@@ -197,21 +197,21 @@ test("transaction - one level deep service wrapper success and error", async () 
 	const errorCollectionKey = "transaction_test_error_1";
 
 	// Setup
-	const createDocument: ServiceFn<
+	const createCollection: ServiceFn<
 		[
 			{
 				collectionKey: string;
 				returnError: boolean;
 			},
 		],
-		{ id: number }
+		{ key: string }
 	> = async (service, data) => {
 		const documentRes = await service.db
-			.insertInto("lucid_collection_documents")
+			.insertInto("lucid_collections")
 			.values({
-				collection_key: data.collectionKey,
+				key: data.collectionKey,
 			})
-			.returning("id")
+			.returning("key")
 			.executeTakeFirst();
 
 		if (data.returnError) {
@@ -235,7 +235,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 
 	// Execute
 	const [success, error] = await Promise.all([
-		serviceWrapper(createDocument, {
+		serviceWrapper(createCollection, {
 			transaction: true,
 		})(
 			{
@@ -248,7 +248,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 				returnError: false,
 			},
 		),
-		serviceWrapper(createDocument, {
+		serviceWrapper(createCollection, {
 			transaction: true,
 		})(
 			{
@@ -267,9 +267,9 @@ test("transaction - one level deep service wrapper success and error", async () 
 	expect(error.error).toEqual(CONSTANTS.error.level1);
 	expect(
 		await config.db.client
-			.selectFrom("lucid_collection_documents")
-			.select("id")
-			.where("collection_key", "=", errorCollectionKey)
+			.selectFrom("lucid_collections")
+			.select("key")
+			.where("key", "=", errorCollectionKey)
 			.executeTakeFirst(),
 	).toBeUndefined();
 });
@@ -277,10 +277,12 @@ test("transaction - one level deep service wrapper success and error", async () 
 test("transaction - two level deep service wrapper success and error", async () => {
 	const config = await testConfig.basic();
 	const successCollectionKey = "transaction_test_success_2";
+	const successCollectionKeyLevel2 = "transaction_test_success_2_level2";
 	const errorCollectionKey = "transaction_test_error_2";
+	const errorCollectionKeyLevel2 = "transaction_test_error_2_level2";
 
 	// Setup
-	const createDocumentWithDepth: ServiceFn<
+	const createCollectionWithDepth: ServiceFn<
 		[
 			{
 				collectionKey: string;
@@ -288,17 +290,18 @@ test("transaction - two level deep service wrapper success and error", async () 
 				levelTwo: {
 					call: boolean;
 					returnError: boolean;
+					collectionKey: string;
 				};
 			},
 		],
-		{ id: number }
+		{ key: string }
 	> = async (service, data) => {
 		const documentRes = await service.db
-			.insertInto("lucid_collection_documents")
+			.insertInto("lucid_collections")
 			.values({
-				collection_key: data.collectionKey,
+				key: data.collectionKey,
 			})
-			.returning("id")
+			.returning("key")
 			.executeTakeFirst();
 
 		if (data.returnError) {
@@ -319,8 +322,8 @@ test("transaction - two level deep service wrapper success and error", async () 
 			};
 
 		if (data.levelTwo.call) {
-			return await createDocumentWithDepth(service, {
-				collectionKey: successCollectionKey,
+			return await createCollectionWithDepth(service, {
+				collectionKey: data.levelTwo.collectionKey,
 				returnError: data.levelTwo.returnError,
 				levelTwo: {
 					...data.levelTwo,
@@ -337,7 +340,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 
 	// Execute
 	const [success, error] = await Promise.all([
-		serviceWrapper(createDocumentWithDepth, {
+		serviceWrapper(createCollectionWithDepth, {
 			transaction: true,
 		})(
 			{
@@ -351,10 +354,11 @@ test("transaction - two level deep service wrapper success and error", async () 
 				levelTwo: {
 					call: true,
 					returnError: false,
+					collectionKey: successCollectionKeyLevel2,
 				},
 			},
 		),
-		serviceWrapper(createDocumentWithDepth, {
+		serviceWrapper(createCollectionWithDepth, {
 			transaction: true,
 		})(
 			{
@@ -368,6 +372,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 				levelTwo: {
 					call: true,
 					returnError: true, // toggle to verify transaction rollback is working from level two
+					collectionKey: errorCollectionKeyLevel2,
 				},
 			},
 		),
@@ -378,19 +383,19 @@ test("transaction - two level deep service wrapper success and error", async () 
 
 	const [successDocuments, errorDocuments] = await Promise.all([
 		config.db.client
-			.selectFrom("lucid_collection_documents")
-			.select("id")
-			.where("collection_key", "=", successCollectionKey)
+			.selectFrom("lucid_collections")
+			.select("key")
+			.where("key", "in", [successCollectionKey, successCollectionKeyLevel2])
 			.execute(),
 		config.db.client
-			.selectFrom("lucid_collection_documents")
-			.select("id")
-			.where("collection_key", "=", errorCollectionKey)
-			.executeTakeFirst(),
+			.selectFrom("lucid_collections")
+			.select("key")
+			.where("key", "in", [errorCollectionKey, errorCollectionKeyLevel2])
+			.execute(),
 	]);
 
 	expect(successDocuments.length).toBe(2);
-	expect(errorDocuments).toBeUndefined();
+	expect(errorDocuments.length).toBe(0);
 });
 
 test("service wrapper schema validation", async () => {

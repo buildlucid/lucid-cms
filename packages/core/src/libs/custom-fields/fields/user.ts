@@ -7,17 +7,11 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	UserReferenceData,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type {
-	FieldProp,
-	FieldFormatMeta as FieldFormatMetaOld,
-} from "../../formatters/collection-document-fields.js";
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { UserPropT } from "../../formatters/users.js";
 
@@ -68,20 +62,6 @@ class UserCustomField extends CustomField<"user"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMetaOld;
-	}) {
-		return {
-			value: props.data.user_id ?? null,
-			meta: {
-				email: props.data?.user_email ?? null,
-				username: props.data?.user_username ?? null,
-				firstName: props.data?.user_first_name ?? null,
-				lastName: props.data?.user_last_name ?? null,
-			},
-		} satisfies CFResponse<"user">;
-	}
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"user">["value"];
 	}
@@ -96,25 +76,6 @@ class UserCustomField extends CustomField<"user"> {
 			firstName: value?.first_name ?? null,
 			lastName: value?.last_name ?? null,
 		} satisfies CFResponse<"user">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: null,
-			intValue: null,
-			boolValue: null,
-			jsonValue: null,
-			mediaId: null,
-			userId: props.item.value,
-		} satisfies CFInsertItem<"user">;
 	}
 	cfSpecificValidation(value: unknown, relationData?: UserReferenceData[]) {
 		const valueSchema = z.number();

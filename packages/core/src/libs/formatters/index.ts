@@ -17,11 +17,6 @@ import DocumentBricksFormatter from "./document-bricks.js";
 import DocumentFieldsFormatter from "./document-fields.js";
 import DocumentVErsionsFormatter from "./document-versions.js";
 import DocumentFormatter from "./documents.js";
-// TODO: remove bellow
-import CollectionDocumentFieldsFormatter from "./collection-document-fields.js";
-import CollectionDocumentsFormatter from "./collection-documents.js";
-import CollectionDocumentBricksFormatter from "./collection-document-bricks.js";
-import CollectionDocumentVersions from "./collection-document-versions.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Formatter {
@@ -59,15 +54,6 @@ class Formatter {
 				return new DocumentVErsionsFormatter() as FormatterReturnType<T>;
 			case "documents":
 				return new DocumentFormatter() as FormatterReturnType<T>;
-			case "collection-documents":
-				return new CollectionDocumentsFormatter() as FormatterReturnType<T>;
-			case "collection-document-bricks":
-				return new CollectionDocumentBricksFormatter() as FormatterReturnType<T>;
-			case "collection-document-fields":
-				return new CollectionDocumentFieldsFormatter() as FormatterReturnType<T>;
-			case "collection-document-versions":
-				return new CollectionDocumentVersions() as FormatterReturnType<T>;
-
 			default:
 				throw new LucidError({
 					message: T("cannot_find_formatter", {
@@ -135,11 +121,6 @@ type FormatterClassMap = {
 	"document-fields": DocumentFieldsFormatter;
 	"document-versions": DocumentVErsionsFormatter;
 	documents: DocumentFormatter;
-
-	"collection-documents": CollectionDocumentsFormatter;
-	"collection-document-bricks": CollectionDocumentBricksFormatter;
-	"collection-document-fields": CollectionDocumentFieldsFormatter;
-	"collection-document-versions": CollectionDocumentVersions;
 };
 
 type FormatterReturnType<T extends keyof FormatterClassMap> =

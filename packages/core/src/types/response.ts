@@ -178,7 +178,6 @@ export interface CollectionResponse {
 }
 
 export interface BrickResponse {
-	id: number;
 	key: string;
 	order: number;
 	open: boolean | null;
@@ -186,7 +185,6 @@ export interface BrickResponse {
 	fields: Array<FieldResponse>;
 }
 export interface BrickAltResponse {
-	id: number;
 	key: string;
 	order: number;
 	open: boolean | null;
@@ -213,13 +211,11 @@ export interface FieldAltResponse {
 	groups?: Array<FieldGroupAltResponse>;
 }
 export interface FieldGroupResponse {
-	id: number | string;
 	order: number;
 	open: boolean | null;
 	fields: Array<FieldResponse>;
 }
 export interface FieldGroupAltResponse {
-	id: number | string;
 	order: number;
 	open: boolean | null;
 	fields: Record<string, FieldAltResponse>;
@@ -242,11 +238,7 @@ export interface CollectionDocumentVersionResponse {
 	bricks: Record<
 		Partial<BrickTypes>,
 		Array<{
-			// TODO: remove on collection documents rework
-			id: number;
 			brickKey: string | null;
-			// TODO: remove on collection documents rework
-			fields: number;
 		}>
 	>;
 }

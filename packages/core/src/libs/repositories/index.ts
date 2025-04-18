@@ -22,12 +22,6 @@ import CollectionMigrationsRepository from "./collection-migrations.js";
 import DocumentsRepository from "./documents.js";
 import DocumentVersionsRepository from "./document-versions.js";
 import DocumentBricksRepository from "./document-bricks.js";
-// TODO: delete bellow
-import CollectionDocumentBricksRepo from "./collection-document-bricks.js";
-import CollectionDocumentFieldsRepo from "./collection-document-fields.js";
-import CollectionDocumentGroupsRepo from "./collection-document-groups.js";
-import CollectionDocumentVersionsRepo from "./collection-document-versions.js";
-import CollectionDocumentsRepo from "./collection-documents.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {
@@ -49,31 +43,6 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "collection-migrations":
 				return new CollectionMigrationsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collection-document-bricks":
-				return new CollectionDocumentBricksRepo(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collection-document-fields":
-				return new CollectionDocumentFieldsRepo(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collection-document-groups":
-				return new CollectionDocumentGroupsRepo(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collection-document-versions":
-				return new CollectionDocumentVersionsRepo(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collection-documents":
-				return new CollectionDocumentsRepo(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -169,12 +138,6 @@ type RepositoryClassMap = {
 	documents: DocumentsRepository;
 	"document-versions": DocumentVersionsRepository;
 	"document-bricks": DocumentBricksRepository;
-	// TODO: delete bellow
-	"collection-document-bricks": CollectionDocumentBricksRepo;
-	"collection-document-fields": CollectionDocumentFieldsRepo;
-	"collection-document-groups": CollectionDocumentGroupsRepo;
-	"collection-document-versions": CollectionDocumentVersionsRepo;
-	"collection-documents": CollectionDocumentsRepo;
 };
 
 type RepositoryReturnType<T extends keyof RepositoryClassMap> =

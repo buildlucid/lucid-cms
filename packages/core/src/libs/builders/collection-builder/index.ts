@@ -7,7 +7,6 @@ import type {
 	FieldCollectionConfig,
 	CollectionConfigSchemaType,
 	CollectionData,
-	DocumentFieldFilters as DocumentFieldFiltersResponse,
 	CollectionBrickConfig,
 	FieldFilters,
 	CollectionTableNames,
@@ -57,7 +56,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "text", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addText(key, props);
 		return this;
 	}
@@ -67,7 +66,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "number", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addNumber(key, props);
 		return this;
 	}
@@ -77,7 +76,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "checkbox", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addCheckbox(key, props);
 		return this;
 	}
@@ -87,7 +86,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "select", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addSelect(key, props);
 		return this;
 	}
@@ -97,7 +96,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "textarea", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addTextarea(key, props);
 		return this;
 	}
@@ -107,7 +106,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "datetime", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addDateTime(key, props);
 		return this;
 	}
@@ -117,7 +116,7 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "user", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addUser(key, props);
 		return this;
 	}
@@ -127,48 +126,9 @@ class CollectionBuilder extends FieldBuilder {
 			collection?: FieldCollectionConfig;
 		},
 	) {
-		this.#fieldCollectionHelper(key, "media", props?.collection);
+		this.#fieldCollectionHelper(key, props?.collection);
 		super.addMedia(key, props);
 		return this;
-	}
-	// ------------------------------------
-	// Public Methods
-	// TODO: remove with document rework
-	documentFieldFilters(
-		filters?: QueryParamFilters,
-		allowAll?: boolean,
-	): DocumentFieldFiltersResponse[] {
-		if (!filters) return [];
-		const fields = allowAll ? this.flatFields : this.filterableFieldKeys;
-
-		return fields.reduce<DocumentFieldFiltersResponse[]>((acc, field) => {
-			const filterValue = filters[field.key];
-			if (filterValue === undefined) return acc;
-
-			const fieldInstance = this.fields.get(field.key);
-			if (!fieldInstance) return acc;
-
-			acc.push({
-				key: field.key,
-				value: filterValue.value,
-				operator: filterValue.operator ?? "=",
-				column: fieldInstance.column,
-			});
-
-			return acc;
-		}, []);
-	}
-	// TODO: remove once new collection/document storage method is complete
-	queryIncludeFields(all?: boolean) {
-		if (all)
-			return this.flatFields.filter((f) => f.type !== "tab").map((f) => f.key);
-
-		const fieldKeys = Array.from(this.includeFieldKeys);
-		for (const field of this.filterableFieldKeys) {
-			if (fieldKeys.includes(field.key)) continue;
-			fieldKeys.push(field.key);
-		}
-		return fieldKeys;
 	}
 	// ------------------------------------
 	// Private Methods
@@ -179,17 +139,8 @@ class CollectionBuilder extends FieldBuilder {
 			(brick, index) => bricks.findIndex((b) => b.key === brick.key) === index,
 		);
 	};
-	#fieldCollectionHelper = (
-		key: string,
-		type: FieldTypes,
-		config?: FieldCollectionConfig,
-	) => {
+	#fieldCollectionHelper = (key: string, config?: FieldCollectionConfig) => {
 		if (config?.column) this.includeFieldKeys.push(key);
-		if (config?.filterable)
-			this.filterableFieldKeys.push({
-				key,
-				type,
-			});
 	};
 
 	// ------------------------------------

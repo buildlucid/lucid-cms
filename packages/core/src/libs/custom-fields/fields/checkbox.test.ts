@@ -1,13 +1,9 @@
 import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import { validateField } from "../../../services/collection-document-bricks/checks/check-validate-bricks-fields.js";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import CheckboxCustomField from "./checkbox.js";
-
-const CONSTANTS = {
-	collectionBrickId: "collection-pseudo-brick",
-};
 
 // -----------------------------------------------
 // Validation
@@ -30,91 +26,85 @@ const CheckboxCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - checkbox", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_checkbox",
 			type: "checkbox",
 			value: 0,
-			localeCode: "en",
 		},
-		instance: CheckboxCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		CheckboxCollection.fields.get("standard_checkbox")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toBe(null);
+	);
+	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_chekbox",
 			type: "checkbox",
 			value: 1,
-			localeCode: "en",
 		},
-		instance: CheckboxCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		CheckboxCollection.fields.get("required_chekbox")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toBe(null);
+	);
+	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - checkbox", async () => {
 	// Standard
-	const standardValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const standardValidate = validateField(
+		{
 			key: "standard_checkbox",
 			type: "checkbox",
 			value: "1",
-			localeCode: "en",
 		},
-		instance: CheckboxCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		CheckboxCollection.fields.get("standard_checkbox")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(standardValidate).toEqual({
-		key: "standard_checkbox",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message:
-			"Invalid literal value, expected 1, or Invalid literal value, expected 0, or Expected boolean, received string", // zod error message
-	});
+	);
+	expect(standardValidate).toEqual([
+		{
+			key: "standard_checkbox",
+			message:
+				"Invalid literal value, expected 1, or Invalid literal value, expected 0, or Expected boolean, received string", // zod error message
+		},
+	]);
 
 	// Required
-	const requiredValidate = validateField({
-		brickId: CONSTANTS.collectionBrickId,
-		field: {
+	const requiredValidate = validateField(
+		{
 			key: "required_chekbox",
 			type: "checkbox",
 			value: 0,
-			localeCode: "en",
 		},
-		instance: CheckboxCollection,
-		data: {
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		CheckboxCollection.fields.get("required_chekbox")!,
+		{
 			media: [],
 			users: [],
 			documents: [],
 		},
-	});
-	expect(requiredValidate).toEqual({
-		key: "required_chekbox",
-		brickId: CONSTANTS.collectionBrickId,
-		localeCode: "en",
-		groupId: undefined,
-		message: T("checkbox_field_required"),
-	});
+	);
+	expect(requiredValidate).toEqual([
+		{
+			key: "required_chekbox",
+			message: T("checkbox_field_required"),
+		},
+	]);
 });
 
 // -----------------------------------------------
@@ -131,7 +121,7 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
-			default: 1,
+			default: true,
 			isHidden: false,
 			isDisabled: false,
 		},

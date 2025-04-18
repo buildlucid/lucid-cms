@@ -686,6 +686,62 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
+	async selectMultipleUnion(props: {
+		tables: LucidDocumentTableName[];
+	}) {
+		if (props.tables.length === 0) {
+			return {
+				error: undefined,
+				data: [],
+			};
+		}
+
+		const unionQueries = props.tables.map((table) => {
+			return this.db
+				.selectFrom(table)
+				.select([`${table}.id`, `${table}.collection_key`])
+				.where(
+					`${table}.is_deleted`,
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				);
+		});
+
+		let query = unionQueries[0];
+
+		if (query === undefined) {
+			return {
+				error: undefined,
+				data: [],
+			};
+		}
+
+		for (let i = 1; i < unionQueries.length; i++) {
+			const iQuery = unionQueries[i];
+			if (iQuery === undefined) continue;
+			query = query.unionAll(iQuery);
+		}
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as unknown as Promise<
+					{
+						id: number;
+						collection_key: string;
+					}[]
+				>,
+			{
+				method: "selectMultipleUnion",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: false,
+			mode: "multiple",
+		});
+	}
+
 	// ----------------------------------------
 	// helpers
 	applyBrickFiltersToQuery<DB, Table extends keyof DB, O>(

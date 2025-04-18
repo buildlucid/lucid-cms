@@ -113,8 +113,6 @@ const getBrickInstance = (
 	collection: CollectionBuilder,
 ): CollectionBuilder | BrickBuilder | undefined => {
 	switch (brick.type) {
-		case "collection-fields":
-			return collection;
 		case "builder":
 			return collection.config.bricks?.builder?.find(
 				(b) => b.key === brick.key,

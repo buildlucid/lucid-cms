@@ -20,7 +20,6 @@ const registerFields = (
 			},
 			collection: {
 				column: config.displayFullSlug,
-				filterable: config.displayFullSlug,
 			},
 		})
 		.addText(constants.fields.slug.key, {
@@ -46,7 +45,6 @@ const registerFields = (
 			},
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addDocument(constants.fields.parentPage.key, {

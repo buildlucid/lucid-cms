@@ -6,15 +6,9 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	CFInsertItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type {
-	FieldProp,
-	FieldFormatMeta,
-} from "../../formatters/collection-document-fields.js";
-import type { FieldInsertItem } from "../../../services/collection-document-bricks/helpers/flatten-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 
 class NumberCustomField extends CustomField<"number"> {
@@ -62,15 +56,6 @@ class NumberCustomField extends CustomField<"number"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat(props: {
-		data: FieldProp;
-		formatMeta: FieldFormatMeta;
-	}) {
-		return {
-			value: props.data.int_value ?? this.config.config.default ?? null,
-			meta: null,
-		} satisfies CFResponse<"number">;
-	}
 	formatResponseValue(value?: number | null) {
 		return (value ??
 			this.config.config.default ??
@@ -78,25 +63,6 @@ class NumberCustomField extends CustomField<"number"> {
 	}
 	formatResponseMeta() {
 		return null satisfies CFResponse<"number">["meta"];
-	}
-	getInsertField(props: {
-		item: FieldInsertItem;
-		brickId: number;
-		groupId: number | null;
-	}) {
-		return {
-			key: this.config.key,
-			type: this.config.type,
-			localeCode: props.item.localeCode,
-			collectionBrickId: props.brickId,
-			groupId: props.groupId,
-			textValue: null,
-			intValue: props.item.value,
-			boolValue: null,
-			jsonValue: null,
-			mediaId: null,
-			userId: null,
-		} satisfies CFInsertItem<"number">;
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.number();

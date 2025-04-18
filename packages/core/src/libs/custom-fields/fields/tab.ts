@@ -37,20 +37,11 @@ class TabCustomField extends CustomField<"tab"> {
 			error: undefined,
 		};
 	}
-	responseValueFormat() {
-		return {
-			value: null,
-			meta: null,
-		} satisfies CFResponse<"tab">;
-	}
 	formatResponseValue() {
 		return null satisfies CFResponse<"tab">["value"];
 	}
 	formatResponseMeta() {
 		return null satisfies CFResponse<"tab">["meta"];
-	}
-	getInsertField() {
-		return null;
 	}
 	cfSpecificValidation() {
 		return {
