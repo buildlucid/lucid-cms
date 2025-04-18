@@ -95,32 +95,37 @@ const deleteSingle: ServiceFn<
 	);
 	if (hookBeforeRes.error) return hookBeforeRes;
 
-	const deletePageRes = await Documents.updateSingle(
-		{
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
+	const [deletePageRes, deleteRelationsRes] = await Promise.all([
+		Documents.updateSingle(
+			{
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: data.id,
+					},
+				],
+				data: {
+					is_deleted: true,
+					is_deleted_at: new Date().toISOString(),
+					deleted_by: data.userId,
 				},
-			],
-			data: {
-				is_deleted: true,
-				is_deleted_at: new Date().toISOString(),
-				deleted_by: data.userId,
+				returning: ["id"],
+				validation: {
+					enabled: true,
+				},
 			},
-			returning: ["id"],
-			validation: {
-				enabled: true,
+			{
+				tableName: tableNameRes.data.document,
 			},
-		},
-		{
-			tableName: tableNameRes.data.document,
-		},
-	);
+		),
+		context.services.collection.documents.nullifyDocumentReferences(context, {
+			collectionKey: collectionRes.data.key,
+			documentId: data.id,
+		}),
+	]);
 	if (deletePageRes.error) return deletePageRes;
-
-	// TODO:? remove any reference to this document in field data? more complicated than before due to document table gen, makes more sense to just handle this on get
+	if (deleteRelationsRes.error) return deleteRelationsRes;
 
 	const hookAfterRes = await executeHooks(
 		{

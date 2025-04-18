@@ -94,8 +94,6 @@ const deleteMultiple: ServiceFn<
 		};
 	}
 
-	// TODO:? remove any reference to this document in field data? more complicated than before due to document table gen, makes more sense to just handle this on get
-
 	const hookBeforeRes = await executeHooks(
 		{
 			service: "collection-documents",
@@ -117,30 +115,44 @@ const deleteMultiple: ServiceFn<
 	);
 	if (hookBeforeRes.error) return hookBeforeRes;
 
-	const deleteDocUpdateRes = await Documents.updateSingle(
-		{
-			returning: ["id"],
-			where: [
-				{
-					key: "id",
-					operator: "in",
-					value: data.ids,
-				},
-			],
-			data: {
-				is_deleted: true,
-				is_deleted_at: new Date().toISOString(),
-				deleted_by: data.userId,
-			},
-			validation: {
-				enabled: true,
-			},
-		},
-		{
-			tableName: tableNameRes.data.document,
-		},
+	const nullifyPromises = data.ids.map((id) =>
+		context.services.collection.documents.nullifyDocumentReferences(context, {
+			collectionKey: collectionRes.data.key,
+			documentId: id,
+		}),
 	);
+
+	const [deleteDocUpdateRes, ...nullifyResults] = await Promise.all([
+		Documents.updateSingle(
+			{
+				returning: ["id"],
+				where: [
+					{
+						key: "id",
+						operator: "in",
+						value: data.ids,
+					},
+				],
+				data: {
+					is_deleted: true,
+					is_deleted_at: new Date().toISOString(),
+					deleted_by: data.userId,
+				},
+				validation: {
+					enabled: true,
+				},
+			},
+			{
+				tableName: tableNameRes.data.document,
+			},
+		),
+		...nullifyPromises,
+	]);
+
 	if (deleteDocUpdateRes.error) return deleteDocUpdateRes;
+
+	const nullifyError = nullifyResults.find((result) => result.error);
+	if (nullifyError) return nullifyError;
 
 	const hookAfterRes = await executeHooks(
 		{

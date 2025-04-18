@@ -116,4 +116,51 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			mode: "single",
 		});
 	}
+
+	/**
+	 * Nullifies references to a deleted document in a single brick table
+	 */
+	async nullifyDocumentReferences(
+		props: {
+			columns: Array<keyof LucidBricksTable>;
+			documentId: number;
+		},
+		dynamicConfig: DynamicConfig<LucidBrickTableName>,
+	) {
+		if (props.columns.length === 0) {
+			return {
+				error: undefined,
+				data: undefined,
+			};
+		}
+
+		let query = this.db.updateTable(dynamicConfig.tableName);
+
+		const updateObj: Record<string, null> = {};
+		for (const col of props.columns) {
+			updateObj[col] = null;
+		}
+		query = query.set(updateObj);
+
+		query = query.where((eb) => {
+			const conditions = [];
+
+			for (const column of props.columns) {
+				conditions.push(eb(column as string, "=", props.documentId));
+			}
+			return eb.or(conditions);
+		});
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "nullifyDocumentReferences",
+			tableName: dynamicConfig.tableName,
+		});
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: false,
+			mode: "single",
+		});
+	}
 }
