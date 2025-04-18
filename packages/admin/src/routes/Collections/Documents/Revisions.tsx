@@ -82,7 +82,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		enabled: () => !!collectionKey(),
 		refetchOnWindowFocus: false,
 	});
-	const revisionDoc = api.collections.document.useGetSingleVersion({
+	const revisionDoc = api.documents.useGetSingleVersion({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -96,7 +96,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		enabled: () => canFetchRevisionDocument(),
 		refetchOnWindowFocus: false,
 	});
-	const revisionVersions = api.collections.document.useGetMultipleRevisions({
+	const revisionVersions = api.documents.useGetMultipleRevisions({
 		queryParams: {
 			queryString: revisionsSearchParams.getQueryString,
 			location: {
@@ -124,7 +124,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		return collection.data?.data.config.useDrafts ? "draft" : "published";
 	});
 
-	const fallbackDoc = api.collections.document.useGetSingle({
+	const fallbackDoc = api.documents.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -141,7 +141,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 
 	// ----------------------------------
 	// Mutations
-	const restoreRevision = api.collections.document.useRestoreRevision({
+	const restoreRevision = api.documents.useRestoreRevision({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("documentMutated", false);

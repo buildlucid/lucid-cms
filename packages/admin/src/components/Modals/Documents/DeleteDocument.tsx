@@ -30,7 +30,7 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 	// ----------------------------------------
 	// Mutations
 
-	const deleteDocument = api.collections.document.useDeleteSingle({
+	const deleteDocument = api.documents.useDeleteSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();

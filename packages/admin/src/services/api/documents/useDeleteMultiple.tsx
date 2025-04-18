@@ -12,7 +12,7 @@ interface Params {
 
 export const deleteMultipleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/collections/documents/${params.collectionKey}`,
+		url: `/api/v1/documents/${params.collectionKey}`,
 		csrf: true,
 		config: {
 			method: "DELETE",
@@ -40,7 +40,7 @@ const useDeleteMultiple = (props: UseDeleteMultipleProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["collections.document.getMultiple"],
+		invalidates: ["documents.getMultiple"],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

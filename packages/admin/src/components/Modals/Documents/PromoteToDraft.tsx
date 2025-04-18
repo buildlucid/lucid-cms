@@ -28,7 +28,7 @@ const PromoteToDraft: Component<{
 
 	// ----------------------------------------
 	// Mutations
-	const promoteToDraft = api.collections.document.usePromoteSingle({
+	const promoteToDraft = api.documents.usePromoteSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();

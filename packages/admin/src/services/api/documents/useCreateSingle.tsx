@@ -19,7 +19,7 @@ export const createSingleReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/api/v1/collections/documents/${params.collectionKey}`,
+		url: `/api/v1/documents/${params.collectionKey}`,
 		csrf: true,
 		config: {
 			method: "POST",
@@ -58,10 +58,7 @@ const useCreateSingle = (props: UseCreateSingleProps) => {
 				}),
 			};
 		},
-		invalidates: [
-			"collections.document.getMultiple",
-			"collections.document.getSingle",
-		],
+		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

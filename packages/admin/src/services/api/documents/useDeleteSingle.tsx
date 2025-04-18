@@ -10,7 +10,7 @@ interface Params {
 
 export const deleteSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/collections/documents/${params.collectionKey}/${params.id}`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}`,
 		csrf: true,
 		config: {
 			method: "DELETE",
@@ -37,7 +37,7 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["collections.document.getMultiple"],
+		invalidates: ["documents.getMultiple"],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

@@ -2,24 +2,20 @@ import { createMemo, type Accessor } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type {
-	ResponseBody,
-	DocumentResponse,
-	DocumentVersionType,
-} from "@types";
+import type { ResponseBody, DocumentResponse } from "@types";
 
 interface QueryParams {
 	location: {
 		collectionKey?: Accessor<string | undefined> | string;
 		id?: Accessor<number | undefined> | number;
-		version: Accessor<DocumentVersionType | undefined> | DocumentVersionType;
+		versionId?: Accessor<number | undefined> | number;
 	};
 	include: {
 		bricks: Accessor<boolean | undefined> | boolean;
 	};
 }
 
-const useGetSingle = (params: QueryHook<QueryParams>) => {
+const useGetSingleVersion = (params: QueryHook<QueryParams>) => {
 	const queryParams = createMemo(() => {
 		return serviceHelpers.getQueryParams<QueryParams>(params.queryParams);
 	});
@@ -28,12 +24,12 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return createQuery(() => ({
-		queryKey: ["collections.document.getSingle", queryKey(), params.key?.()],
+		queryKey: ["documents.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<DocumentResponse>>({
-				url: `/api/v1/collections/documents/${
+				url: `/api/v1/documents/${
 					queryParams().location?.collectionKey
-				}/${queryParams().location?.id}/${queryParams().location?.version}`,
+				}/${queryParams().location?.id}/${queryParams().location?.versionId}`,
 				query: queryParams(),
 				config: {
 					method: "GET",
@@ -46,4 +42,4 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	}));
 };
 
-export default useGetSingle;
+export default useGetSingleVersion;

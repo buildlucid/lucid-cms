@@ -86,7 +86,7 @@ export const DocumentsList: Component<{
 
 	// ----------------------------------
 	// Queries
-	const documents = api.collections.document.useGetMultiple({
+	const documents = api.documents.useGetMultiple({
 		queryParams: {
 			queryString: props.state.searchParams.getQueryString,
 			location: {
@@ -99,7 +99,7 @@ export const DocumentsList: Component<{
 
 	// ----------------------------------
 	// Mutations
-	const deleteMultiple = api.collections.document.useDeleteMultiple({
+	const deleteMultiple = api.documents.useDeleteMultiple({
 		getCollectionName: collectionSingularName,
 	});
 
@@ -155,7 +155,7 @@ export const DocumentsList: Component<{
 			}}
 		>
 			<Table
-				key={`collections.document.list.${props.state.collection?.key}`}
+				key={`documents.list.${props.state.collection?.key}`}
 				rows={documents.data?.data.length || 0}
 				searchParams={props.state.searchParams}
 				head={[

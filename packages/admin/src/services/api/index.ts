@@ -8,6 +8,7 @@ import settings from "./settings";
 import email from "./email";
 import locales from "./locales";
 import collections from "./collections";
+import documents from "./documents";
 import clientIntegrations from "./client-integrations";
 
 const exportObject: {
@@ -21,6 +22,7 @@ const exportObject: {
 	email: typeof email;
 	locales: typeof locales;
 	collections: typeof collections;
+	documents: typeof documents;
 	clientIntegrations: typeof clientIntegrations;
 } = {
 	auth,
@@ -33,6 +35,7 @@ const exportObject: {
 	email,
 	locales,
 	collections,
+	documents,
 	clientIntegrations,
 };
 

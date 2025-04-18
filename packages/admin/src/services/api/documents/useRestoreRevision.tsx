@@ -11,7 +11,7 @@ interface Params {
 
 export const restoreRevisionReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/collections/documents/${params.collectionKey}/${params.id}/${params.versionId}/restore-revision`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/restore-revision`,
 		csrf: true,
 		config: {
 			method: "POST",
@@ -38,10 +38,7 @@ const useRestoreRevision = (props: UsePromoteSingleProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: [
-			"collections.document.getMultiple",
-			"collections.document.getSingle",
-		],
+		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

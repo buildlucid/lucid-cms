@@ -20,10 +20,10 @@ export const updateSingleReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/api/v1/collections/documents/${params.collectionKey}/${params.documentId}`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}`,
 		csrf: true,
 		config: {
-			method: "POST",
+			method: "PATCH",
 			body: params.body,
 		},
 	});
@@ -59,10 +59,7 @@ const useUpdateSingle = (props: UseUpdateSingleProps) => {
 				}),
 			};
 		},
-		invalidates: [
-			"collections.document.getMultiple",
-			"collections.document.getSingle",
-		],
+		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

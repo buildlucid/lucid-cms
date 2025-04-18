@@ -30,7 +30,7 @@ const PublishDocument: Component<PublishDocumentProps> = (props) => {
 
 	// ----------------------------------------
 	// Mutations
-	const publishDocument = api.collections.document.usePromoteSingle({
+	const publishDocument = api.documents.usePromoteSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 			if (props.callbacks?.onSuccess) props.callbacks.onSuccess();

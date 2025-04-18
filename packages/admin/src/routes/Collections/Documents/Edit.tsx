@@ -81,7 +81,7 @@ const CollectionsDocumentsEditRoute: Component<
 		enabled: () => !!collectionKey(),
 		refetchOnWindowFocus: false,
 	});
-	const doc = api.collections.document.useGetSingle({
+	const doc = api.documents.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -112,7 +112,7 @@ const CollectionsDocumentsEditRoute: Component<
 
 	// ----------------------------------
 	// Mutations
-	const createDocument = api.collections.document.useCreateSingle({
+	const createDocument = api.documents.useCreateSingle({
 		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
 			navigate(
@@ -135,7 +135,7 @@ const CollectionsDocumentsEditRoute: Component<
 		},
 		getCollectionName: collectionSingularName,
 	});
-	const updateSingle = api.collections.document.useUpdateSingle({
+	const updateSingle = api.documents.useUpdateSingle({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("documentMutated", false);
@@ -149,7 +149,7 @@ const CollectionsDocumentsEditRoute: Component<
 		},
 		getCollectionName: collectionSingularName,
 	});
-	const promoteToPublished = api.collections.document.usePromoteSingle({
+	const promoteToPublished = api.documents.usePromoteSingle({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("documentMutated", false);

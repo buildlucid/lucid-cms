@@ -78,7 +78,7 @@ const DocumentSelectContent: Component = () => {
 		},
 		enabled: () => !!collectionKey(),
 	});
-	const documents = api.collections.document.useGetMultiple({
+	const documents = api.documents.useGetMultiple({
 		queryParams: {
 			queryString: searchParams.getQueryString,
 			location: {
@@ -243,7 +243,7 @@ const DocumentSelectContent: Component = () => {
 					}}
 				>
 					<Table
-						key={`collections.document.list.${collection.data?.data?.key}`}
+						key={`documents.list.${collection.data?.data?.key}`}
 						rows={documents.data?.data.length || 0}
 						searchParams={searchParams}
 						head={[

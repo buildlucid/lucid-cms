@@ -32,10 +32,10 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return createQuery(() => ({
-		queryKey: ["collections.document.getMultiple", queryKey(), params.key?.()],
+		queryKey: ["documents.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<DocumentResponse[]>>({
-				url: `/api/v1/collections/documents/${
+				url: `/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.versionType}`,
 				query: queryParams(),

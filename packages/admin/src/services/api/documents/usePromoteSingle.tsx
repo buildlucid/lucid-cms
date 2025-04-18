@@ -14,7 +14,7 @@ interface Params {
 
 export const promoteSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/collections/documents/${params.collectionKey}/${params.id}/${params.versionId}/promote-version`,
+		url: `/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/promote-version`,
 		csrf: true,
 		config: {
 			method: "POST",
@@ -44,10 +44,7 @@ const usePromoteSingle = (props: UsePromoteSingleProps) => {
 				versionType: props.getVersionType(),
 			}),
 		}),
-		invalidates: [
-			"collections.document.getMultiple",
-			"collections.document.getSingle",
-		],
+		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});
