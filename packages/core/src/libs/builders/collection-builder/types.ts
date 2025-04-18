@@ -2,7 +2,7 @@ import type z from "zod";
 import type BrickBuilder from "../brick-builder/index.js";
 import type { FieldTypes, CFConfig } from "../../custom-fields/types.js";
 import type CollectionConfigSchema from "./schema.js";
-import type { CollectionDocumentBuilderHooks } from "../../../types/hooks.js";
+import type { DocumentBuilderHooks } from "../../../types/hooks.js";
 import type { LocaleValue } from "../../../types/shared.js";
 import type {
 	LucidBrickTableName,
@@ -17,7 +17,7 @@ export interface FieldCollectionConfig {
 
 export interface CollectionConfigSchemaType
 	extends z.infer<typeof CollectionConfigSchema> {
-	hooks?: CollectionDocumentBuilderHooks[];
+	hooks?: DocumentBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;
 		builder?: Array<BrickBuilder>;

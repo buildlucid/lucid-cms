@@ -16,11 +16,11 @@ export interface LucidHook<
 	handler: HookServiceHandlers[S][E];
 }
 
-export interface LucidHookCollection<
-	E extends keyof HookServiceHandlers["collection-documents"],
+export interface LucidHookDocuments<
+	E extends keyof HookServiceHandlers["documents"],
 > {
 	event: E;
-	handler: HookServiceHandlers["collection-documents"][E];
+	handler: HookServiceHandlers["documents"][E];
 }
 
 export type ArgumentsType<T> = T extends (...args: infer U) => unknown
@@ -31,7 +31,7 @@ export type ArgumentsType<T> = T extends (...args: infer U) => unknown
 // service handlers
 
 export type HookServiceHandlers = {
-	"collection-documents": {
+	documents: {
 		beforeUpsert: ServiceFn<
 			[
 				{
@@ -131,18 +131,18 @@ export type HookServiceHandlers = {
 // service config
 
 // used for collection builder hook config
-export type CollectionDocumentBuilderHooks =
-	| LucidHookCollection<"beforeUpsert">
-	| LucidHookCollection<"afterUpsert">
-	| LucidHookCollection<"beforeDelete">
-	| LucidHookCollection<"afterDelete">;
+export type DocumentBuilderHooks =
+	| LucidHookDocuments<"beforeUpsert">
+	| LucidHookDocuments<"afterUpsert">
+	| LucidHookDocuments<"beforeDelete">
+	| LucidHookDocuments<"afterDelete">;
 
-export type CollectionDocumentHooks =
-	| LucidHook<"collection-documents", "beforeUpsert">
-	| LucidHook<"collection-documents", "afterUpsert">
-	| LucidHook<"collection-documents", "beforeDelete">
-	| LucidHook<"collection-documents", "afterDelete">
-	| LucidHook<"collection-documents", "versionPromote">;
+export type DocumentHooks =
+	| LucidHook<"documents", "beforeUpsert">
+	| LucidHook<"documents", "afterUpsert">
+	| LucidHook<"documents", "beforeDelete">
+	| LucidHook<"documents", "afterDelete">
+	| LucidHook<"documents", "versionPromote">;
 
 // add all hooks to this type
-export type AllHooks = CollectionDocumentHooks;
+export type AllHooks = DocumentHooks;

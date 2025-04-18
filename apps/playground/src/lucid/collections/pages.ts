@@ -82,7 +82,6 @@ const PageCollection = new CollectionBuilder("page", {
 		},
 		collection: {
 			column: true,
-			filterable: true,
 		},
 	})
 	.addUser("author", {

@@ -55,13 +55,11 @@ test("collection builder config passes schema validation", async () => {
 		.addText("text_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		})
 		.addTextarea("textarea_test", {
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		});
 

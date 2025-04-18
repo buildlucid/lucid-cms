@@ -33,7 +33,6 @@ const TestCollection = new CollectionBuilder("test", {
 	},
 	collection: {
 		column: true,
-		filterable: true,
 	},
 });
 

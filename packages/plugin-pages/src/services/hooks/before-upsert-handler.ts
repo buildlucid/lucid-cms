@@ -13,13 +13,13 @@ import {
 	setFullSlug,
 } from "../index.js";
 import type { PluginOptionsInternal } from "../../types/index.js";
-import type { LucidHookCollection } from "@lucidcms/core/types";
+import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 
 const beforeUpsertHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHookCollection<"beforeUpsert">["handler"] =>
+	): LucidHookDocuments<"beforeUpsert">["handler"] =>
 	async (context, data) => {
 		// ----------------------------------------------------------------
 		// Validation / Setup

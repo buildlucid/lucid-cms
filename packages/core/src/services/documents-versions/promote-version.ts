@@ -278,7 +278,7 @@ const promoteVersion: ServiceFn<
 	// Execute hook
 	const hookResponse = await executeHooks(
 		{
-			service: "collection-documents",
+			service: "documents",
 			event: "versionPromote",
 			config: context.config,
 			collectionInstance: collectionRes.data,

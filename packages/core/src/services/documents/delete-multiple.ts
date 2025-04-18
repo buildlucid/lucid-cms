@@ -96,7 +96,7 @@ const deleteMultiple: ServiceFn<
 
 	const hookBeforeRes = await executeHooks(
 		{
-			service: "collection-documents",
+			service: "documents",
 			event: "beforeDelete",
 			config: context.config,
 			collectionInstance: collectionRes.data,
@@ -156,7 +156,7 @@ const deleteMultiple: ServiceFn<
 
 	const hookAfterRes = await executeHooks(
 		{
-			service: "collection-documents",
+			service: "documents",
 			event: "afterDelete",
 			config: context.config,
 			collectionInstance: collectionRes.data,

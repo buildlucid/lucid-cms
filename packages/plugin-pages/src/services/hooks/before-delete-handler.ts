@@ -5,12 +5,12 @@ import {
 	updateFullSlugFields,
 } from "../index.js";
 import type { PluginOptionsInternal } from "../../types/index.js";
-import type { LucidHookCollection } from "@lucidcms/core/types";
+import type { LucidHookDocuments } from "@lucidcms/core/types";
 
 const beforeDeleteHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHookCollection<"beforeDelete">["handler"] =>
+	): LucidHookDocuments<"beforeDelete">["handler"] =>
 	async (context, data) => {
 		// ----------------------------------------------------------------
 		// Validation / Setup

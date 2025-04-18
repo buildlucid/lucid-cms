@@ -18,13 +18,11 @@ const BlogCollection = new CollectionBuilder("blog", {
 		},
 		collection: {
 			column: true,
-			filterable: true,
 		},
 	})
 	.addTextarea("page_excerpt", {
 		collection: {
 			column: true,
-			filterable: true,
 		},
 	})
 	.addUser("author", {

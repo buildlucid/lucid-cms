@@ -105,7 +105,7 @@ const createSingle: ServiceFn<
 	// Fire beforeUpsert hook and merge result with data
 	const hookResponse = await executeHooks(
 		{
-			service: "collection-documents",
+			service: "documents",
 			event: "beforeUpsert",
 			config: context.config,
 			collectionInstance: data.collection,
@@ -145,7 +145,7 @@ const createSingle: ServiceFn<
 	// Fire afterUpsert hook
 	const hookAfterRes = await executeHooks(
 		{
-			service: "collection-documents",
+			service: "documents",
 			event: "afterUpsert",
 			config: context.config,
 			collectionInstance: data.collection,

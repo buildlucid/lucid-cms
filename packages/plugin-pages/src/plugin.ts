@@ -36,22 +36,22 @@ const plugin: LucidPluginOptions<PluginOptions> = async (config, plugin) => {
 	}
 
 	config.hooks.push({
-		service: "collection-documents",
+		service: "documents",
 		event: "beforeUpsert",
 		handler: beforeUpsertHandler(options),
 	});
 	config.hooks.push({
-		service: "collection-documents",
+		service: "documents",
 		event: "afterUpsert",
 		handler: afterUpsertHandler(options),
 	});
 	config.hooks.push({
-		service: "collection-documents",
+		service: "documents",
 		event: "beforeDelete",
 		handler: beforeDeleteHandler(options),
 	});
 	config.hooks.push({
-		service: "collection-documents",
+		service: "documents",
 		event: "versionPromote",
 		handler: versionPromoteHandler(options),
 	});

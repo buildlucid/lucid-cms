@@ -31,7 +31,6 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		},
 		collection: {
 			column: true,
-			filterable: true,
 		},
 	})
 	.addUser("user")

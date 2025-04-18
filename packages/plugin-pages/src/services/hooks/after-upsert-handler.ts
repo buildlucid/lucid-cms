@@ -5,13 +5,13 @@ import {
 	updateFullSlugFields,
 } from "../index.js";
 import constants from "../../constants.js";
-import type { LucidHookCollection } from "@lucidcms/core/types";
+import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/index.js";
 
 const afterUpsertHandler =
 	(
 		options: PluginOptionsInternal,
-	): LucidHookCollection<"afterUpsert">["handler"] =>
+	): LucidHookDocuments<"afterUpsert">["handler"] =>
 	async (context, data) => {
 		// ----------------------------------------------------------------
 		// Validation / Setup

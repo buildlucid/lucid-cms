@@ -49,7 +49,6 @@ describe("brick table construction", () => {
 			validation: { required: true },
 			collection: {
 				column: true,
-				filterable: true,
 			},
 		});
 
