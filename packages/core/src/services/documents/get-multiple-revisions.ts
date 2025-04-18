@@ -4,7 +4,7 @@ import Formatter from "../../libs/formatters/index.js";
 import type z from "zod";
 import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CollectionDocumentVersionResponse } from "../../types/response.js";
+import type { DocumentVersionResponse } from "../../types/response.js";
 
 const getMultipleRevisions: ServiceFn<
 	[
@@ -15,7 +15,7 @@ const getMultipleRevisions: ServiceFn<
 		},
 	],
 	{
-		data: CollectionDocumentVersionResponse[];
+		data: DocumentVersionResponse[];
 		count: number;
 	}
 > = async (context, data) => {

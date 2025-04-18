@@ -4,7 +4,7 @@ import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type {
 	ResponseBody,
-	CollectionDocumentResponse,
+	DocumentResponse,
 	DocumentVersionType,
 } from "@types";
 
@@ -34,7 +34,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	return createQuery(() => ({
 		queryKey: ["collections.document.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<CollectionDocumentResponse[]>>({
+			request<ResponseBody<DocumentResponse[]>>({
 				url: `/api/v1/collections/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.versionType}`,

@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Accessor, type Component, For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
-import type { CollectionDocumentVersionResponse, ResponseBody } from "@types";
+import type { DocumentVersionResponse, ResponseBody } from "@types";
 import type useSearchParamsState from "@/hooks/useSearchParamsState";
 import DateText from "@/components/Partials/DateText";
 import Pill from "@/components/Partials/Pill";
@@ -11,7 +11,7 @@ import { Sort, SimplifiedPagination } from "@/components/Groups/Query";
 
 export const RevisionsSidebar: Component<{
 	state: {
-		revisions: CollectionDocumentVersionResponse[];
+		revisions: DocumentVersionResponse[];
 		meta?: ResponseBody<unknown>["meta"];
 		versionId: Accessor<number | undefined>;
 		collectionKey: Accessor<string | undefined>;

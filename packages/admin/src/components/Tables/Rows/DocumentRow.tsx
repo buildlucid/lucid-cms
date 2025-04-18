@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Component, For, Switch, Match, createMemo } from "solid-js";
 import type { TableRowProps } from "@/types/components";
 import type {
-	CollectionDocumentResponse,
+	DocumentResponse,
 	CollectionResponse,
 	CFConfig,
 	UserResMeta,
@@ -18,7 +18,7 @@ import TextCol from "@/components/Tables/Columns/TextCol";
 import PillCol from "../Columns/PillCol";
 
 interface DocumentRowProps extends TableRowProps {
-	document: CollectionDocumentResponse;
+	document: DocumentResponse;
 	collection: CollectionResponse;
 	fieldInclude: CFConfig<FieldTypes>[];
 	include: boolean[];
@@ -85,7 +85,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 
 const DocumentDynamicColumns: Component<{
 	field: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
-	document: CollectionDocumentResponse;
+	document: DocumentResponse;
 	include: boolean[];
 	index: number;
 	collectionTranslations: boolean;

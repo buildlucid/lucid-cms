@@ -5,7 +5,7 @@ import type z from "zod";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type documentsSchema from "../../schemas/documents.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
-import type { CollectionDocumentResponse } from "../../types.js";
+import type { DocumentResponse } from "../../types.js";
 
 const getSingle: ServiceFn<
 	[
@@ -17,7 +17,7 @@ const getSingle: ServiceFn<
 			query: z.infer<typeof documentsSchema.getSingle.query>;
 		},
 	],
-	CollectionDocumentResponse
+	DocumentResponse
 > = async (context, data) => {
 	const Document = Repository.get("documents", context.db, context.config.db);
 	const DocumentFormatter = Formatter.get("documents");

@@ -1,14 +1,14 @@
 import { createStore } from "solid-js/store";
-import type { CollectionDocumentResponse } from "@types";
+import type { DocumentResponse } from "@types";
 
-type SelectCallbackT = (_document: CollectionDocumentResponse) => void;
+type SelectCallbackT = (_document: DocumentResponse) => void;
 
 type DocumentSelectStoreT = {
 	open: boolean;
 	onSelectCallback: SelectCallbackT;
 
 	collectionKey: string | undefined;
-	selected?: CollectionDocumentResponse["id"];
+	selected?: DocumentResponse["id"];
 };
 
 const [get, set] = createStore<DocumentSelectStoreT>({

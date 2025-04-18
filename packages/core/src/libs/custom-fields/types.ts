@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import type {
-	CollectionDocumentResponse,
+	DocumentResponse,
 	FieldAltResponse,
 	MediaResponse,
 	MediaType,

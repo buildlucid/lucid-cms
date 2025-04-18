@@ -4,7 +4,7 @@ import DocumentBricksFormatter from "./document-bricks.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type {
 	Config,
-	CollectionDocumentResponse,
+	DocumentResponse,
 	DocumentVersionType,
 	BrickResponse,
 	FieldResponse,
@@ -63,7 +63,7 @@ export default class DocumentsFormatter {
 		bricks?: BrickResponse[];
 		fields?: FieldResponse[] | null;
 		config: Config;
-	}): CollectionDocumentResponse => {
+	}): DocumentResponse => {
 		return {
 			id: props.document.id,
 			collectionKey: props.document.collection_key,
@@ -94,11 +94,11 @@ export default class DocumentsFormatter {
 				: null,
 			createdAt: Formatter.formatDate(props.document.created_at),
 			updatedAt: Formatter.formatDate(props.document.updated_at),
-		} satisfies CollectionDocumentResponse;
+		} satisfies DocumentResponse;
 	};
 	formatVersion = (props: {
 		document: DocumentQueryResponse;
-	}): CollectionDocumentResponse["version"] => {
+	}): DocumentResponse["version"] => {
 		const draftVersion = props.document.versions?.find(
 			(v) => v.type === "draft",
 		);

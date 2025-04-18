@@ -221,7 +221,7 @@ export interface FieldGroupAltResponse {
 	fields: Record<string, FieldAltResponse>;
 }
 
-export interface CollectionDocumentVersionResponse {
+export interface DocumentVersionResponse {
 	id: number;
 	versionType: DocumentVersionType;
 	promotedFrom: number | null;
@@ -243,7 +243,7 @@ export interface CollectionDocumentVersionResponse {
 	>;
 }
 
-export interface CollectionDocumentResponse {
+export interface DocumentResponse {
 	id: number;
 	collectionKey: string | null;
 	status: DocumentVersionType | null;

@@ -1,6 +1,6 @@
 import Formatter from "./index.js";
 import type {
-	CollectionDocumentVersionResponse,
+	DocumentVersionResponse,
 	LucidBrickTableName,
 } from "../../types.js";
 import type { RevisionsQueryResponse } from "../repositories/document-versions.js";
@@ -11,7 +11,7 @@ export default class DocumentVersions {
 	formatMultiple(props: {
 		versions: RevisionsQueryResponse[];
 		bricksSchema: CollectionSchemaTable<LucidBrickTableName>[];
-	}): CollectionDocumentVersionResponse[] {
+	}): DocumentVersionResponse[] {
 		return props.versions.map((v) =>
 			this.formatSingle({
 				version: v,
@@ -22,8 +22,8 @@ export default class DocumentVersions {
 	formatSingle(props: {
 		version: RevisionsQueryResponse;
 		bricksSchema: CollectionSchemaTable<LucidBrickTableName>[];
-	}): CollectionDocumentVersionResponse {
-		const formattedBricks: CollectionDocumentVersionResponse["bricks"] = {
+	}): DocumentVersionResponse {
+		const formattedBricks: DocumentVersionResponse["bricks"] = {
 			builder: [],
 			fixed: [],
 		};

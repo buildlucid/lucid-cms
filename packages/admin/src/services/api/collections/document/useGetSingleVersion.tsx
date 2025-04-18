@@ -2,7 +2,7 @@ import { createMemo, type Accessor } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, CollectionDocumentResponse } from "@types";
+import type { ResponseBody, DocumentResponse } from "@types";
 
 interface QueryParams {
 	location: {
@@ -26,7 +26,7 @@ const useGetSingleVersion = (params: QueryHook<QueryParams>) => {
 	return createQuery(() => ({
 		queryKey: ["collections.document.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<CollectionDocumentResponse>>({
+			request<ResponseBody<DocumentResponse>>({
 				url: `/api/v1/collections/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.id}/${queryParams().location?.versionId}`,

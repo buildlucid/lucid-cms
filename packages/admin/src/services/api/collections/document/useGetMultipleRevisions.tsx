@@ -2,7 +2,7 @@ import { createMemo, type Accessor } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, CollectionDocumentVersionResponse } from "@types";
+import type { ResponseBody, DocumentVersionResponse } from "@types";
 
 interface QueryParams {
 	queryString?: Accessor<string>;
@@ -28,7 +28,7 @@ const useGetMultipleRevisions = (params: QueryHook<QueryParams>) => {
 	return createQuery(() => ({
 		queryKey: ["collections.document.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<CollectionDocumentVersionResponse[]>>({
+			request<ResponseBody<DocumentVersionResponse[]>>({
 				url: `/api/v1/collections/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.documentId}/revisions`,

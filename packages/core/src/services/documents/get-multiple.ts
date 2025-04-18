@@ -6,7 +6,7 @@ import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.j
 import type z from "zod";
 import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CollectionDocumentResponse } from "../../types/response.js";
+import type { DocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 
 const getMultiple: ServiceFn<
@@ -18,7 +18,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: CollectionDocumentResponse[];
+		data: DocumentResponse[];
 		count: number;
 	}
 > = async (context, data) => {

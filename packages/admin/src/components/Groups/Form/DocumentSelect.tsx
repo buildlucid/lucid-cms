@@ -2,11 +2,7 @@ import T from "@/translations";
 import { type Component, Match, Switch } from "solid-js";
 import classNames from "classnames";
 import { FaSolidXmark, FaSolidPen } from "solid-icons/fa";
-import type {
-	ErrorResult,
-	FieldErrors,
-	CollectionDocumentResponse,
-} from "@types";
+import type { ErrorResult, FieldErrors, DocumentResponse } from "@types";
 import documentSelectStore from "@/store/forms/documentSelectStore";
 import Button from "@/components/Partials/Button";
 import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
@@ -32,7 +28,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	// Functions
 	const openDocuSelectModal = () => {
 		documentSelectStore.set({
-			onSelectCallback: (doc: CollectionDocumentResponse) => {
+			onSelectCallback: (doc: DocumentResponse) => {
 				props.onChange(doc.id);
 			},
 			open: true,

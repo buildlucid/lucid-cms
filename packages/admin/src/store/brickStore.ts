@@ -4,7 +4,7 @@ import brickHelpers from "@/utils/brick-helpers";
 import type {
 	FieldErrors,
 	FieldResponse,
-	CollectionDocumentResponse,
+	DocumentResponse,
 	CollectionResponse,
 	FieldResponseValue,
 	FieldResponseMeta,
@@ -41,7 +41,7 @@ type BrickStoreT = {
 	// functions
 	reset: () => void;
 	setBricks: (
-		document?: CollectionDocumentResponse,
+		document?: DocumentResponse,
 		collection?: CollectionResponse,
 	) => void;
 	addBrick: (props: {
