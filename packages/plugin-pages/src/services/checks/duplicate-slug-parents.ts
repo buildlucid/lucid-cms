@@ -5,10 +5,14 @@ import type {
 	FieldSchemaType,
 	FieldErrors,
 	DocumentVersionType,
+	CollectionTableNames,
 } from "@lucidcms/core/types";
+import { prefixGeneratedColName } from "@lucidcms/core/helpers";
+import { inspect } from "node:util";
 
 /**
  *  Query for document fields that have same slug and parentPage for each slug translation (would cause duplicate fullSlug)
+ * TODO: return to testing once checkCircularParents and getParentFields have been re-implemented
  */
 const checkDuplicateSlugParents: ServiceFn<
 	[
@@ -21,11 +25,18 @@ const checkDuplicateSlugParents: ServiceFn<
 				slug: FieldSchemaType;
 				parentPage: FieldSchemaType;
 			};
+			tables: CollectionTableNames;
 		},
 	],
 	undefined
 > = async (context, data) => {
 	try {
+		const {
+			document: documentTable,
+			version: versionTable,
+			documentFields: fieldsTable,
+		} = data.tables;
+
 		const slugConditions = Object.entries(
 			data.fields.slug.translations || {},
 		).map(([localeCode, slug]) => ({
@@ -40,98 +51,85 @@ const checkDuplicateSlugParents: ServiceFn<
 			});
 		}
 
+		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
+		const parentPageColumn = prefixGeneratedColName(
+			constants.fields.parentPage.key,
+		);
+
 		const duplicates = await context.db
-			.selectFrom("lucid_collection_documents")
+			.selectFrom(documentTable)
 			.leftJoin(
-				"lucid_collection_document_versions",
-				"lucid_collection_document_versions.document_id",
-				"lucid_collection_documents.id",
+				versionTable,
+				// @ts-expect-error
+				`${versionTable}.document_id`,
+				`${documentTable}.id`,
 			)
 			.leftJoin(
-				"lucid_collection_document_fields as slugFields",
-				"slugFields.collection_document_version_id",
-				"lucid_collection_document_versions.id",
+				fieldsTable,
+				// @ts-expect-error
+				`${fieldsTable}.document_version_id`,
+				`${versionTable}.id`,
 			)
-			.leftJoin(
-				"lucid_collection_document_fields as parentPageFields",
-				"parentPageFields.collection_document_version_id",
-				"lucid_collection_document_versions.id",
-			)
+			// @ts-expect-error
 			.select([
-				"lucid_collection_documents.id",
-				"lucid_collection_documents.collection_key",
-				"slugFields.text_value",
-				"slugFields.locale_code",
-				"parentPageFields.document_id",
+				`${documentTable}.id`,
+				`${documentTable}.collection_key`,
+				`${fieldsTable}.${slugColumn}`,
+				`${fieldsTable}.locale`,
+				`${fieldsTable}.${parentPageColumn}`,
 			])
+			// @ts-expect-error
 			.where(({ eb, and, or }) =>
 				and([
-					eb("slugFields.key", "=", constants.fields.slug.key),
 					or(
 						slugConditions.map(({ localeCode, slug }) =>
 							and([
-								eb("slugFields.text_value", "=", slug),
+								eb(`${fieldsTable}.${slugColumn}`, "=", slug),
 								localeCode
-									? eb("slugFields.locale_code", "=", localeCode)
-									: eb("slugFields.locale_code", "is", null),
+									? eb(`${fieldsTable}.locale`, "=", localeCode)
+									: eb(`${fieldsTable}.locale`, "is", null),
 							]),
 						),
 					),
 					data.fields.parentPage.value
-						? and([
-								eb(
-									"parentPageFields.key",
-									"=",
-									constants.fields.parentPage.key,
-								),
-								eb(
-									"parentPageFields.document_id",
-									"=",
-									data.fields.parentPage.value,
-								),
-							])
-						: and([
-								eb(
-									"parentPageFields.key",
-									"=",
-									constants.fields.parentPage.key,
-								),
-								eb("parentPageFields.document_id", "is", null),
-							]),
-					eb(
-						"lucid_collection_document_versions.version_type",
-						"=",
-						data.versionType,
-					),
+						? eb(
+								`${fieldsTable}.${parentPageColumn}`,
+								"=",
+								data.fields.parentPage.value,
+							)
+						: eb(`${fieldsTable}.${parentPageColumn}`, "is", null),
+					eb(`${versionTable}.type`, "=", data.versionType),
 				]),
 			)
-			.where("lucid_collection_documents.id", "!=", data.documentId || null)
+			.where(`${documentTable}.id`, "!=", data.documentId || null)
+			.where(`${documentTable}.collection_key`, "=", data.collectionKey)
 			.where(
-				"lucid_collection_documents.collection_key",
-				"=",
-				data.collectionKey,
-			)
-			.where(
-				"lucid_collection_documents.is_deleted",
+				`${documentTable}.is_deleted`,
 				"=",
 				context.config.db.getDefault("boolean", "false"),
 			)
 			.execute();
 
+		console.log(
+			inspect(duplicates, {
+				depth: Number.POSITIVE_INFINITY,
+				colors: true,
+				numericSeparator: true,
+			}),
+		);
+
 		if (duplicates.length > 0) {
 			const fieldErrors: FieldErrors[] = [];
-
 			for (const duplicate of duplicates) {
 				fieldErrors.push({
 					key: constants.fields.slug.key,
-					localeCode: duplicate.locale_code || undefined,
+					localeCode: duplicate.locale || undefined,
 					message:
-						duplicate.document_id === null
+						duplicate[parentPageColumn] === null
 							? T("duplicate_slug_field_found_message")
 							: T("duplicate_slug_and_parent_page_field_found_message"),
 				});
 			}
-
 			return {
 				error: {
 					type: "basic",
@@ -146,7 +144,6 @@ const checkDuplicateSlugParents: ServiceFn<
 				data: undefined,
 			};
 		}
-
 		return {
 			error: undefined,
 			data: undefined,

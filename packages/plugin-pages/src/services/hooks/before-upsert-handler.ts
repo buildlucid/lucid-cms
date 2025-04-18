@@ -28,12 +28,14 @@ const beforeUpsertHandler =
 			collectionKey: data.meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
-			//* early return as doesnt apply to the current collection
 			return {
 				error: undefined,
 				data: data.data,
 			};
 		}
+
+		const tablesRes = data.meta.collection.tableNames;
+		if (tablesRes.error) return tablesRes;
 
 		const checkFieldsExistRes = checkFieldsExist({
 			fields: {
@@ -83,9 +85,12 @@ const beforeUpsertHandler =
 					slug: slug,
 					parentPage: parentPage,
 				},
+				tables: tablesRes.data,
 			},
 		);
 		if (checkDuplicateSlugParentsRes.error) return checkDuplicateSlugParentsRes;
+
+		// throw new Error("test error for transaction rollback");
 
 		// ----------------------------------------------------------------
 		// Build and set fullSlug
