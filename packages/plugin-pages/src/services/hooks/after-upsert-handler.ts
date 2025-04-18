@@ -27,11 +27,15 @@ const afterUpsertHandler =
 			};
 		}
 
+		const tablesRes = data.meta.collection.tableNames;
+		if (tablesRes.error) return tablesRes;
+
 		// ----------------------------------------------------------------
 		// Build and store fullSlugs
 		const descendantsRes = await getDescendantFields(context, {
 			ids: [data.data.documentId],
 			versionType: data.data.versionType,
+			tables: tablesRes.data,
 		});
 		if (descendantsRes.error) return descendantsRes;
 
@@ -64,6 +68,7 @@ const afterUpsertHandler =
 		await updateFullSlugFields(context, {
 			docFullSlugs: docFullSlugsRes.data,
 			versionType: data.data.versionType,
+			tables: tablesRes.data,
 		});
 
 		return {

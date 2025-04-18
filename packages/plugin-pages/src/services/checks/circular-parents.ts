@@ -1,9 +1,11 @@
 import T from "../../translations/index.js";
 import constants from "../../constants.js";
+import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
 	ServiceFn,
 	FieldSchemaType,
 	DocumentVersionType,
+	CollectionTableNames,
 } from "@lucidcms/core/types";
 
 /**
@@ -18,6 +20,7 @@ const checkCircularParents: ServiceFn<
 			fields: {
 				parentPage: FieldSchemaType;
 			};
+			tables: CollectionTableNames;
 		},
 	],
 	undefined
@@ -30,43 +33,55 @@ const checkCircularParents: ServiceFn<
 			};
 		}
 
+		const { version: versionTable, documentFields: fieldsTable } = data.tables;
+
+		const parentPageField = prefixGeneratedColName(
+			constants.fields.parentPage.key,
+		);
+
 		const result = await context.db
 			.with("ancestors", (db) =>
 				db
-					.selectFrom("lucid_collection_document_fields as fields")
+					.selectFrom(fieldsTable)
 					.innerJoin(
-						"lucid_collection_document_versions as versions",
-						"versions.id",
-						"fields.collection_document_version_id",
+						versionTable,
+						`${versionTable}.id`,
+						`${fieldsTable}.document_version_id`,
 					)
+					// @ts-expect-error
 					.select([
-						"versions.document_id as current_id",
-						"fields.document_id as parent_id",
+						`${versionTable}.document_id as current_id`,
+						`${fieldsTable}.${parentPageField} as parent_id`,
 					])
-					.where("fields.key", "=", "parentPage")
-					.where("versions.version_type", "=", data.versionType)
-					.where("versions.document_id", "=", data.fields.parentPage.value)
+					.where(`${fieldsTable}.locale`, "=", data.defaultLocale)
+					// @ts-expect-error
+					.where(`${versionTable}.type`, "=", data.versionType)
+					.where(
+						`${versionTable}.document_id`,
+						"=",
+						data.fields.parentPage.value,
+					)
 					.unionAll(
 						db
-							.selectFrom("lucid_collection_document_fields as fields")
+							.selectFrom(fieldsTable)
 							.innerJoin(
-								"lucid_collection_document_versions as versions",
-								"versions.id",
-								"fields.collection_document_version_id",
+								versionTable,
+								`${versionTable}.id`,
+								`${fieldsTable}.document_version_id`,
 							)
 							.innerJoin(
 								// @ts-expect-error
 								"ancestors",
 								"ancestors.parent_id",
-								"versions.document_id",
+								`${versionTable}.document_id`,
 							)
 							// @ts-expect-error
 							.select([
-								"versions.document_id as current_id",
-								"fields.document_id as parent_id",
+								`${versionTable}.document_id as current_id`,
+								`${fieldsTable}.${parentPageField} as parent_id`,
 							])
-							.where("fields.key", "=", "parentPage")
-							.where("versions.version_type", "=", data.versionType),
+							.where(`${fieldsTable}.locale`, "=", data.defaultLocale)
+							.where(`${versionTable}.type`, "=", data.versionType),
 					),
 			)
 			.selectFrom("ancestors")
@@ -84,8 +99,6 @@ const checkCircularParents: ServiceFn<
 						body: {
 							fields: [
 								{
-									brickId: constants.collectionFieldBrickId,
-									groupId: undefined,
 									key: constants.fields.parentPage.key,
 									localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
 									message: T("circular_parents_error_message"),

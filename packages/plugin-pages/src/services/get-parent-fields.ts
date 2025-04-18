@@ -4,7 +4,17 @@ import type {
 	ServiceFn,
 	FieldSchemaType,
 	DocumentVersionType,
+	CollectionTableNames,
 } from "@lucidcms/core/types";
+import { prefixGeneratedColName } from "@lucidcms/core/helpers";
+
+export type ParentPageQueryResponse = {
+	_slug: string | null;
+	_fullSlug: string | null;
+	_parentPage: number | null;
+	document_id: number;
+	locale: string;
+};
 
 /**
  *  Get the parent document pages fields
@@ -17,49 +27,40 @@ const getParentFields: ServiceFn<
 			fields: {
 				parentPage: FieldSchemaType;
 			};
+			tables: CollectionTableNames;
 		},
 	],
-	Array<{
-		key: string;
-		collection_document_id: number;
-		collection_brick_id: number;
-		locale_code: string;
-		text_value: string | null;
-		document_id: number | null;
-	}>
+	Array<ParentPageQueryResponse>
 > = async (context, data) => {
 	try {
+		const { version: versionTable, documentFields: fieldsTable } = data.tables;
+
+		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
+		const parentPageColumn = prefixGeneratedColName(
+			constants.fields.parentPage.key,
+		);
+		const fullSlugColumn = prefixGeneratedColName(
+			constants.fields.fullSlug.key,
+		);
+
 		const parentFields = await context.db
-			.selectFrom("lucid_collection_document_fields")
+			.selectFrom(fieldsTable)
 			.innerJoin(
-				"lucid_collection_document_versions",
-				"lucid_collection_document_versions.id",
-				"lucid_collection_document_fields.collection_document_version_id",
+				versionTable,
+				`${versionTable}.id`,
+				`${fieldsTable}.document_version_id`,
 			)
+			// @ts-expect-error
 			.select([
-				"lucid_collection_document_fields.key",
-				"lucid_collection_document_fields.text_value",
-				"lucid_collection_document_fields.document_id",
-				"lucid_collection_document_fields.collection_brick_id",
-				"lucid_collection_document_fields.locale_code",
-				"lucid_collection_document_versions.document_id as collection_document_id",
-				"lucid_collection_document_fields.collection_document_version_id",
+				`${fieldsTable}.${slugColumn}`,
+				`${fieldsTable}.${fullSlugColumn}`,
+				`${fieldsTable}.${parentPageColumn}`,
+				`${versionTable}.document_id`,
+				`${fieldsTable}.locale`,
 			])
-			.where("lucid_collection_document_fields.key", "in", [
-				constants.fields.slug.key,
-				constants.fields.fullSlug.key,
-				constants.fields.parentPage.key,
-			])
-			.where(
-				"lucid_collection_document_versions.document_id",
-				"=",
-				data.fields.parentPage.value,
-			)
-			.where(
-				"lucid_collection_document_versions.version_type",
-				"=",
-				data.versionType,
-			)
+			.where(`${versionTable}.document_id`, "=", data.fields.parentPage.value)
+			// @ts-expect-error
+			.where(`${versionTable}.type`, "=", data.versionType)
 			.execute();
 
 		if (!parentFields || parentFields.length === 0) {
@@ -74,8 +75,6 @@ const getParentFields: ServiceFn<
 						body: {
 							fields: [
 								{
-									brickId: constants.collectionFieldBrickId,
-									groupId: undefined,
 									key: constants.fields.parentPage.key,
 									localeCode: data.defaultLocale,
 									message: T(
@@ -92,7 +91,7 @@ const getParentFields: ServiceFn<
 
 		return {
 			error: undefined,
-			data: parentFields,
+			data: parentFields as unknown as Array<ParentPageQueryResponse>,
 		};
 	} catch (error) {
 		return {

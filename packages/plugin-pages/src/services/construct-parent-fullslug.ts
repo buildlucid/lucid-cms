@@ -5,20 +5,14 @@ import type {
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/index.js";
+import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 
 /**
  *  Constructs the fullSlug from the slug and parentPage fields
  */
 const constructParentFullSlug = (data: {
 	collection: CollectionConfig;
-	parentFields?: Array<{
-		key: string;
-		collection_document_id: number;
-		collection_brick_id: number;
-		locale_code: string;
-		text_value: string | null;
-		document_id: number | null;
-	}>;
+	parentFields: Array<ParentPageQueryResponse>;
 	localisation: Config["localisation"];
 	fields: {
 		slug: FieldSchemaType;

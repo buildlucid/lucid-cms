@@ -32,18 +32,22 @@ const constructChildFullSlug = (data: {
 
 	for (const descendant of data.descendants) {
 		const fullSlug: Record<string, string | null> = {};
+
 		if (data.collection.useTranslations) {
 			if (
 				data.parentFullSlugField !== undefined &&
 				!data.parentFullSlugField.translations
 			)
 				break;
+
 			for (const locale of data.localisation.locales) {
 				const currentFullSlugValue =
 					data.parentFullSlugField?.translations?.[locale.code];
+
 				if (data.parentFullSlugField !== undefined && !currentFullSlugValue) {
 					continue;
 				}
+
 				fullSlug[locale.code] = buildFullSlug({
 					targetLocale: locale.code,
 					currentDescendant: descendant,
@@ -57,6 +61,7 @@ const constructChildFullSlug = (data: {
 				!data.parentFullSlugField.value
 			)
 				break;
+
 			fullSlug[data.localisation.defaultLocale] = buildFullSlug({
 				targetLocale: data.localisation.defaultLocale,
 				currentDescendant: descendant,
@@ -64,9 +69,10 @@ const constructChildFullSlug = (data: {
 				topLevelFullSlug: data.parentFullSlugField?.value,
 			});
 		}
+
 		documentFullSlugs.push({
-			documentId: descendant.collection_document_id,
-			versionId: descendant.collection_document_version_id,
+			documentId: descendant.document_id,
+			versionId: descendant.document_version_id,
 			fullSlugs: fullSlug,
 		});
 	}

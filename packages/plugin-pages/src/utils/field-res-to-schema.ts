@@ -1,52 +1,63 @@
-import type { FieldSchemaType, CustomFieldMap } from "@lucidcms/core/types";
+import type { FieldSchemaType } from "@lucidcms/core/types";
+import type { VersionFieldsQueryResponse } from "../services/get-document-version-fields.js";
 
 const fieldResToSchema = (
 	key: string,
 	useTranslations: boolean,
 	defaultLocale: string,
-	items: Array<{
-		key: string;
-		collection_document_id: number;
-		collection_brick_id: number;
-		locale_code: string;
-		text_value: string | null;
-		document_id: number | null;
-		type: FieldSchemaType["type"] | keyof CustomFieldMap;
-	}>,
+	items: VersionFieldsQueryResponse[],
 ): FieldSchemaType => {
-	const relevantItems = items.filter((item) => item.key === key);
-	const item = relevantItems[0];
+	// Determine field type based on key
+	const fieldType = getFieldTypeFromKey(key);
 
-	if (relevantItems.length === 0 || item === undefined) {
-		throw new Error(`No items found for key: ${key}`);
+	if (!fieldType) {
+		throw new Error(`Unable to determine field type for key: ${key}`);
 	}
 
 	const result: FieldSchemaType = {
 		key: key,
-		type: item.type as FieldSchemaType["type"],
+		type: fieldType,
 	};
 
 	if (useTranslations) {
 		result.translations = {};
-		for (const item of relevantItems) {
-			if (item.type === "text") {
-				result.translations[item.locale_code] = item.text_value;
-			} else if (item.type === "document") {
-				result.translations[item.locale_code] = item.document_id;
+
+		for (const item of items) {
+			if (fieldType === "text") {
+				// @ts-expect-error
+				result.translations[item.locale] = item[`_${key}`] as string | null;
+			} else if (fieldType === "document") {
+				// @ts-expect-error
+				result.translations[item.locale] = item[`_${key}`] as number | null;
 			}
 		}
 	} else {
 		const defaultItem =
-			relevantItems.find((item) => item.locale_code === defaultLocale) || item;
+			items.find((item) => item.locale === defaultLocale) || items[0];
 
-		if (defaultItem?.type === "text") {
-			result.value = defaultItem.text_value;
-		} else if (defaultItem?.type === "document") {
-			result.value = defaultItem.document_id;
+		if (fieldType === "text") {
+			// @ts-expect-error
+			result.value = defaultItem[`_${key}`] as string | null;
+		} else if (fieldType === "document") {
+			// @ts-expect-error
+			result.value = defaultItem[`_${key}`] as number | null;
 		}
 	}
 
 	return result;
 };
+
+// Helper function to determine field type based on key
+function getFieldTypeFromKey(key: string): FieldSchemaType["type"] | undefined {
+	switch (key) {
+		case "slug":
+		case "fullSlug":
+			return "text";
+		case "parentPage":
+			return "document";
+		default:
+			return undefined;
+	}
+}
 
 export default fieldResToSchema;

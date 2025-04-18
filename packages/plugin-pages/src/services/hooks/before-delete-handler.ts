@@ -26,6 +26,9 @@ const beforeDeleteHandler =
 			};
 		}
 
+		const tablesRes = data.meta.collection.tableNames;
+		if (tablesRes.error) return tablesRes;
+
 		// Process both draft and published versions
 		const versionTypes: ("draft" | "published")[] = ["draft", "published"];
 
@@ -33,6 +36,7 @@ const beforeDeleteHandler =
 			const descendantsRes = await getDescendantFields(context, {
 				ids: data.data.ids,
 				versionType,
+				tables: tablesRes.data,
 			});
 			if (descendantsRes.error) return descendantsRes;
 
@@ -51,6 +55,7 @@ const beforeDeleteHandler =
 			await updateFullSlugFields(context, {
 				docFullSlugs: docFullSlugsRes.data,
 				versionType,
+				tables: tablesRes.data,
 			});
 		}
 

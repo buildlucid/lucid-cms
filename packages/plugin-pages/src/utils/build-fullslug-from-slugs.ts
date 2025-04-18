@@ -1,4 +1,3 @@
-import constants from "../constants.js";
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
 
 const buildFullSlugFromSlugs = (data: {
@@ -7,29 +6,23 @@ const buildFullSlugFromSlugs = (data: {
 	descendants: Array<DescendantFieldsResponse>;
 	topLevelFullSlug?: string;
 }): string | null => {
-	const slugField = data.currentDescendant.fields.find(
-		(field) =>
-			field.locale_code === data.targetLocale &&
-			field.key === constants.fields.slug.key,
+	const rowForLocale = data.currentDescendant.rows.find(
+		(row) => row.locale === data.targetLocale,
 	);
 
-	if (!slugField || !slugField.text_value) return null;
+	if (!rowForLocale || !rowForLocale._slug) return null;
 
-	const slugFieldValue = slugField.text_value;
+	const slugFieldValue = rowForLocale._slug;
+	const parentPageValue = rowForLocale._parentPage;
 
-	const parentPageField = data.currentDescendant.fields.find(
-		(field) => field.key === constants.fields.parentPage.key,
-	);
-
-	if (!parentPageField || !parentPageField.document_id) {
+	if (!parentPageValue) {
 		return postSlugFormat(
 			joinSlugs(data.topLevelFullSlug || "", slugFieldValue),
 		);
 	}
 
 	const parentDescendant = data.descendants.find(
-		(descendant) =>
-			descendant.collection_document_id === parentPageField.document_id,
+		(descendant) => descendant.document_id === parentPageValue,
 	);
 
 	if (!parentDescendant) {

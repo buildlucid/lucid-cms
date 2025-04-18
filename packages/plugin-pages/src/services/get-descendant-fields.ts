@@ -1,17 +1,22 @@
 import T from "../translations/index.js";
 import constants from "../constants.js";
-import type { ServiceFn, DocumentVersionType } from "@lucidcms/core/types";
+import { prefixGeneratedColName } from "@lucidcms/core/helpers";
+import type {
+	ServiceFn,
+	DocumentVersionType,
+	LucidVersionTableName,
+	LucidBrickTableName,
+} from "@lucidcms/core/types";
+import { inspect } from "node:util";
 
 export type DescendantFieldsResponse = {
-	collection_document_id: number;
-	collection_document_version_id: number;
-	fields: {
-		key: string;
-		collection_document_id: number;
-		collection_document_version_id: number;
-		locale_code: string;
-		text_value: string | null;
-		document_id: number | null;
+	document_id: number;
+	document_version_id: number;
+	rows: {
+		locale: string;
+		_slug: string | null;
+		_fullSlug: string | null;
+		_parentPage: number | null;
 	}[];
 };
 
@@ -23,88 +28,97 @@ const getDescendantFields: ServiceFn<
 		{
 			ids: number[];
 			versionType: Exclude<DocumentVersionType, "revision">;
+			tables: {
+				documentFields: LucidBrickTableName;
+				version: LucidVersionTableName;
+			};
 		},
 	],
 	Array<DescendantFieldsResponse>
 > = async (context, data) => {
 	try {
+		const { documentFields: fieldsTable, version: versionTable } = data.tables;
+		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
+		const fullSlugColumn = prefixGeneratedColName(
+			constants.fields.fullSlug.key,
+		);
+		const parentPageColumn = prefixGeneratedColName(
+			constants.fields.parentPage.key,
+		);
+
 		const descendants = await context.db
 			.with("recursive_cte", (db) =>
 				db
-					.selectFrom("lucid_collection_document_fields as lcdf")
+					.selectFrom(fieldsTable)
 					.innerJoin(
-						"lucid_collection_document_versions as lcdv",
-						"lcdv.id",
-						"lcdf.collection_document_version_id",
+						versionTable,
+						`${versionTable}.id`,
+						`${fieldsTable}.document_version_id`,
 					)
+					// @ts-expect-error
 					.select([
-						"lcdv.document_id as collection_document_id",
-						"lcdf.document_id",
-						"lcdf.collection_document_version_id",
+						`${versionTable}.document_id as document_id`,
+						`${fieldsTable}.${parentPageColumn} as parent_id`,
+						`${fieldsTable}.document_version_id`,
 					])
-					.where("lcdf.document_id", "in", data.ids)
-					.where("lcdf.key", "=", "parentPage")
-					.where("lcdv.version_type", "=", data.versionType)
+					.where(({ eb }) =>
+						// @ts-expect-error
+						eb(`${fieldsTable}.${parentPageColumn}`, "in", data.ids),
+					)
+					// @ts-expect-error
+					.where(`${versionTable}.type`, "=", data.versionType)
 					.unionAll(
 						db
-							.selectFrom("lucid_collection_document_fields as lcdf")
+							.selectFrom(fieldsTable)
 							.innerJoin(
-								"lucid_collection_document_versions as lcdv",
-								"lcdv.id",
-								"lcdf.collection_document_version_id",
+								versionTable,
+								`${versionTable}.id`,
+								`${fieldsTable}.document_version_id`,
 							)
 							.innerJoin(
 								// @ts-expect-error
 								"recursive_cte as rc",
-								"rc.collection_document_id",
-								"lcdf.document_id",
+								"rc.document_id",
+								`${fieldsTable}.${parentPageColumn}`,
 							)
 							// @ts-expect-error
 							.select([
-								"lcdv.document_id as collection_document_id",
-								"lcdf.document_id",
-								"lcdf.collection_document_version_id",
+								`${versionTable}.document_id as document_id`,
+								`${fieldsTable}.${parentPageColumn} as parent_id`,
+								`${fieldsTable}.document_version_id`,
 							])
-							.where("lcdf.key", "=", "parentPage")
-							.where("lcdv.version_type", "=", data.versionType),
+							.where(`${versionTable}.type`, "=", data.versionType),
 					),
 			)
 			.selectFrom("recursive_cte")
 			.select((eb) => [
-				"collection_document_id",
-				"collection_document_version_id",
+				"document_id",
+				"document_version_id",
 				context.config.db
 					.jsonArrayFrom(
 						eb
-							.selectFrom("lucid_collection_document_fields as lcdf")
+							.selectFrom(fieldsTable)
 							.innerJoin(
-								"lucid_collection_document_versions as lcdv",
-								"lcdv.id",
-								"lcdf.collection_document_version_id",
+								versionTable,
+								`${versionTable}.id`,
+								`${fieldsTable}.document_version_id`,
 							)
 							.select([
-								"lcdf.key",
-								"lcdf.text_value",
-								"lcdf.document_id",
-								"lcdv.document_id as collection_document_id",
-								"lcdf.collection_document_version_id",
-								"lcdf.locale_code",
-							])
-							.where("lcdf.key", "in", [
-								constants.fields.slug.key,
-								constants.fields.fullSlug.key,
-								constants.fields.parentPage.key,
+								`${fieldsTable}.locale`,
+								`${fieldsTable}.${slugColumn} as _slug`,
+								`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+								`${fieldsTable}.${parentPageColumn} as _parentPage`,
 							])
 							.whereRef(
-								"lcdv.document_id",
+								`${versionTable}.document_id`,
 								"=",
-								"recursive_cte.collection_document_id",
+								"recursive_cte.document_id",
 							)
-							.where("lcdv.version_type", "=", data.versionType),
+							.where(`${versionTable}.type`, "=", data.versionType),
 					)
-					.as("fields"),
+					.as("rows"),
 			])
-			.where("collection_document_id", "not in", data.ids)
+			.where(({ eb }) => eb("document_id", "not in", data.ids))
 			.execute();
 
 		return {
@@ -113,14 +127,19 @@ const getDescendantFields: ServiceFn<
 				return (
 					self.findIndex(
 						(e) =>
-							e.collection_document_id === d.collection_document_id &&
-							e.collection_document_version_id ===
-								d.collection_document_version_id,
+							e.document_id === d.document_id &&
+							e.document_version_id === d.document_version_id,
 					) === i
 				);
-			}),
+			}) as DescendantFieldsResponse[],
 		};
 	} catch (error) {
+		console.log(
+			inspect(error, {
+				depth: Number.POSITIVE_INFINITY,
+				colors: true,
+			}),
+		);
 		return {
 			error: {
 				type: "basic",

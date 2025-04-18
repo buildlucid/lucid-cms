@@ -16,6 +16,7 @@ import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import afterUpsertHandler from "./after-upsert-handler.js";
 import type { PluginOptionsInternal } from "../../types/index.js";
 import type { LucidHookCollection } from "@lucidcms/core/types";
+import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 
 const versionPromoteHandler =
 	(
@@ -36,6 +37,9 @@ const versionPromoteHandler =
 			};
 		}
 
+		const tablesRes = data.meta.collection.tableNames;
+		if (tablesRes.error) return tablesRes;
+
 		let createFullSlug = true;
 
 		// fetch the document versions, slug and parent page fields
@@ -43,6 +47,7 @@ const versionPromoteHandler =
 			documentId: data.data.documentId,
 			versionId: data.data.versionId,
 			versionType: data.data.versionType,
+			tables: tablesRes.data,
 		});
 		if (docVersionFieldRes.error) return docVersionFieldRes;
 		if (docVersionFieldRes.data === null) createFullSlug = false;
@@ -87,21 +92,13 @@ const versionPromoteHandler =
 						slug: slug,
 						parentPage: parentPage,
 					},
+					tables: tablesRes.data,
 				},
 			);
 			if (checkDuplicateSlugParentsRes.error)
 				return checkDuplicateSlugParentsRes;
 
-			let parentFieldsData:
-				| Array<{
-						key: string;
-						collection_document_id: number;
-						collection_brick_id: number;
-						locale_code: string;
-						text_value: string | null;
-						document_id: number | null;
-				  }>
-				| undefined = undefined;
+			let parentFieldsData: Array<ParentPageQueryResponse> = [];
 
 			// parent page checks and query
 			if (parentPage.value) {
@@ -112,6 +109,7 @@ const versionPromoteHandler =
 					fields: {
 						parentPage: parentPage,
 					},
+					tables: tablesRes.data,
 				});
 				if (circularParentsRes.error) return circularParentsRes;
 
@@ -121,6 +119,7 @@ const versionPromoteHandler =
 					fields: {
 						parentPage: parentPage,
 					},
+					tables: tablesRes.data,
 				});
 				if (parentFieldsRes.error) return parentFieldsRes;
 
@@ -156,6 +155,7 @@ const versionPromoteHandler =
 					},
 				],
 				versionType: data.data.versionType,
+				tables: tablesRes.data,
 			});
 			if (updateFullSlugRes.error) return updateFullSlugRes;
 		}
@@ -164,6 +164,7 @@ const versionPromoteHandler =
 		// run the afterUpsert hook to update all of the documents versions potential descendants
 		await afterUpsertHandler(options)(context, {
 			meta: {
+				collection: data.meta.collection,
 				collectionKey: data.meta.collectionKey,
 				userId: data.meta.userId,
 			},

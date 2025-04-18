@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import constants from "../../constants.js";
+import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
 	ServiceFn,
 	FieldSchemaType,
@@ -7,12 +8,9 @@ import type {
 	DocumentVersionType,
 	CollectionTableNames,
 } from "@lucidcms/core/types";
-import { prefixGeneratedColName } from "@lucidcms/core/helpers";
-import { inspect } from "node:util";
 
 /**
  *  Query for document fields that have same slug and parentPage for each slug translation (would cause duplicate fullSlug)
- * TODO: return to testing once checkCircularParents and getParentFields have been re-implemented
  */
 const checkDuplicateSlugParents: ServiceFn<
 	[
@@ -109,14 +107,6 @@ const checkDuplicateSlugParents: ServiceFn<
 				context.config.db.getDefault("boolean", "false"),
 			)
 			.execute();
-
-		console.log(
-			inspect(duplicates, {
-				depth: Number.POSITIVE_INFINITY,
-				colors: true,
-				numericSeparator: true,
-			}),
-		);
 
 		if (duplicates.length > 0) {
 			const fieldErrors: FieldErrors[] = [];

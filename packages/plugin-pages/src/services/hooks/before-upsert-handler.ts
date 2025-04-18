@@ -14,6 +14,7 @@ import {
 } from "../index.js";
 import type { PluginOptionsInternal } from "../../types/index.js";
 import type { LucidHookCollection } from "@lucidcms/core/types";
+import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 
 const beforeUpsertHandler =
 	(
@@ -95,16 +96,7 @@ const beforeUpsertHandler =
 		// ----------------------------------------------------------------
 		// Build and set fullSlug
 
-		let parentFieldsData:
-			| Array<{
-					key: string;
-					collection_document_id: number;
-					collection_brick_id: number;
-					locale_code: string;
-					text_value: string | null;
-					document_id: number | null;
-			  }>
-			| undefined = undefined;
+		let parentFieldsData: Array<ParentPageQueryResponse> = [];
 
 		// parent page checks and query
 		if (parentPage.value) {
@@ -115,6 +107,7 @@ const beforeUpsertHandler =
 				fields: {
 					parentPage: parentPage,
 				},
+				tables: tablesRes.data,
 			});
 			if (circularParentsRes.error) return circularParentsRes;
 
@@ -124,6 +117,7 @@ const beforeUpsertHandler =
 				fields: {
 					parentPage: parentPage,
 				},
+				tables: tablesRes.data,
 			});
 			if (parentFieldsRes.error) return parentFieldsRes;
 
