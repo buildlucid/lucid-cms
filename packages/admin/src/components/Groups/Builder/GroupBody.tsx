@@ -14,7 +14,7 @@ interface GroupBodyProps {
 		brickIndex: number;
 		fields: FieldResponse[];
 		fieldConfig: CFConfig<"repeater">;
-		groupId: number | string;
+		ref: string;
 		groupOpen: boolean | null;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
@@ -22,7 +22,7 @@ interface GroupBodyProps {
 		groupIndex: number;
 		repeaterDepth: number;
 		parentRepeaterKey: string | undefined;
-		parentGroupId: string | number | undefined;
+		parentRef: string | undefined;
 	};
 }
 
@@ -33,9 +33,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 
 	// -------------------------------
 	// Memos
-	const groupId = createMemo(() => props.state.groupId);
+	const ref = createMemo(() => props.state.ref);
 	const brickIndex = createMemo(() => props.state.brickIndex);
-	const parentGroupId = createMemo(() => props.state.parentGroupId);
+	const parentRef = createMemo(() => props.state.parentRef);
 	const parentRepeaterKey = createMemo(() => props.state.parentRepeaterKey);
 	const repeaterKey = createMemo(() => props.state.repeaterKey);
 	const configChildrenFields = createMemo(() => props.state.fieldConfig.fields);
@@ -54,8 +54,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		brickStore.get.toggleGroupOpen({
 			brickIndex: brickIndex(),
 			repeaterKey: repeaterKey(),
-			groupId: groupId(),
-			parentGroupId: parentGroupId(),
+			ref: ref(),
+			parentRef: parentRef(),
 			parentRepeaterKey: parentRepeaterKey(),
 		});
 	};
@@ -65,22 +65,22 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	return (
 		<div
 			style={{
-				"view-transition-name": `group-item-${props.state.groupId}`,
+				"view-transition-name": `group-item-${props.state.ref}`,
 			}}
 			data-dragkey={props.state.dragDropKey}
 			class={classNames("w-full mb-2.5 last:mb-0", {
-				"opacity-60": props.state.dragDrop.getDragging()?.index === groupId(),
+				"opacity-60": props.state.dragDrop.getDragging()?.ref === ref(),
 			})}
 			onDragStart={(e) =>
 				props.state.dragDrop.onDragStart(e, {
-					index: groupId(),
+					ref: ref(),
 					key: props.state.dragDropKey,
 				})
 			}
 			onDragEnd={(e) => props.state.dragDrop.onDragEnd(e)}
 			onDragEnter={(e) =>
 				props.state.dragDrop.onDragEnter(e, {
-					index: groupId(),
+					ref: ref(),
 					key: props.state.dragDropKey,
 				})
 			}
@@ -93,7 +93,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					{
 						"border-b-0 rounded-b-none": getGroupOpen(),
 						"ring-1 ring-inset":
-							props.state.dragDrop.getDraggingTarget()?.index === groupId(),
+							props.state.dragDrop.getDraggingTarget()?.ref === ref(),
 					},
 				)}
 				onClick={toggleDropdown}
@@ -102,9 +102,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						toggleDropdown();
 					}
 				}}
-				id={`accordion-header-${groupId()}`}
+				id={`accordion-header-${ref()}`}
 				aria-expanded={getGroupOpen()}
-				aria-controls={`accordion-content-${groupId()}`}
+				aria-controls={`accordion-content-${ref()}`}
 				// biome-ignore lint/a11y/useSemanticElements: <explanation>
 				role="button"
 				tabIndex="0"
@@ -115,14 +115,14 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.state.dragDrop.onDragStart(e, {
-								index: groupId(),
+								ref: ref(),
 								key: props.state.dragDropKey,
 							})
 						}
 						onDragEnd={(e) => props.state.dragDrop.onDragEnd(e)}
 						onDragEnter={(e) =>
 							props.state.dragDrop.onDragEnter(e, {
-								index: groupId(),
+								ref: ref(),
 								key: props.state.dragDropKey,
 							})
 						}
@@ -146,8 +146,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 							brickStore.get.removeRepeaterGroup({
 								brickIndex: brickIndex(),
 								repeaterKey: repeaterKey(),
-								targetGroupId: groupId(),
-								groupId: parentGroupId(),
+								targetRef: ref(),
+								ref: parentRef(),
 								parentRepeaterKey: parentRepeaterKey(),
 							});
 						}}
@@ -177,7 +177,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						"scale-y-0 h-0 opacity-0 invisible": !getGroupOpen(),
 					},
 				)}
-				aria-labelledby={`accordion-header-${groupId()}`}
+				aria-labelledby={`accordion-header-${ref()}`}
 			>
 				<div class="p-15">
 					<For each={configChildrenFields()}>
@@ -187,7 +187,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									brickIndex: brickIndex(),
 									fieldConfig: config,
 									fields: groupFields(),
-									groupId: groupId(),
+									groupRef: ref(),
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
 								}}

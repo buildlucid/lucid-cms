@@ -5,12 +5,7 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type {
-	CFConfig,
-	LinkResValue,
-	FieldResponse,
-	FieldErrors,
-} from "@types";
+import type { CFConfig, LinkResValue, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -21,10 +16,10 @@ interface LinkFieldProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<"link">;
 		fieldData?: FieldResponse;
-		groupId?: number | string;
+		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;
-		fieldError: FieldErrors | undefined;
+		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 	};
 }
@@ -66,7 +61,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
 					brickIndex: props.state.brickIndex,
-					groupId: props.state.groupId,
+					groupRef: props.state.groupRef,
 				})}
 				value={getValue()}
 				onChange={(value) => {
@@ -75,7 +70,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 							brickIndex: props.state.brickIndex,
 							fieldConfig: props.state.fieldConfig,
 							key: props.state.fieldConfig.key,
-							groupId: props.state.groupId,
+							ref: props.state.groupRef,
 							repeaterKey: props.state.repeaterKey,
 							value: value,
 							contentLocale: props.state.contentLocale,

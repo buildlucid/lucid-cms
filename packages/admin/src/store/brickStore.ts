@@ -2,7 +2,7 @@ import { createStore, produce } from "solid-js/store";
 import { nanoid } from "nanoid";
 import brickHelpers from "@/utils/brick-helpers";
 import type {
-	FieldErrors,
+	FieldError,
 	FieldResponse,
 	DocumentResponse,
 	CollectionResponse,
@@ -11,20 +11,22 @@ import type {
 	CFConfig,
 	CollectionBrickConfig,
 	FieldTypes,
+	BrickError,
 } from "@types";
 
 export interface BrickData {
-	id: string | number;
+	ref: string;
 	key: string;
 	order: number;
 	type: "builder" | "fixed" | "collection-fields";
-	open: boolean | null;
+	open: boolean;
 	fields: Array<FieldResponse>;
 }
 
 type BrickStoreT = {
 	bricks: Array<BrickData>;
-	fieldsErrors: Array<FieldErrors>;
+	fieldsErrors: Array<FieldError>;
+	brickErrors: Array<BrickError>;
 	documentMutated: boolean;
 	locked: boolean;
 	imagePreview: {
@@ -50,15 +52,15 @@ type BrickStoreT = {
 	removeBrick: (brickIndex: number) => void;
 	toggleBrickOpen: (brickIndex: number) => void;
 	swapBrickOrder: (props: {
-		brickIndex: number;
-		targetBrickIndex: number;
+		brickRef: string;
+		targetBrickRef: string;
 	}) => void;
 	setFieldValue: (params: {
 		brickIndex: number;
 		key: string;
 		fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
 		repeaterKey?: string;
-		groupId?: number | string;
+		ref?: string;
 		value: FieldResponseValue;
 		meta?: FieldResponseMeta;
 		contentLocale: string;
@@ -66,7 +68,7 @@ type BrickStoreT = {
 	addField: (params: {
 		brickIndex: number;
 		fieldConfig: CFConfig<Exclude<FieldTypes, "tab">>;
-		groupId?: number | string;
+		ref?: string;
 		repeaterKey?: string;
 		locales: string[];
 	}) => FieldResponse;
@@ -74,37 +76,38 @@ type BrickStoreT = {
 		brickIndex: number;
 		fieldConfig: CFConfig<Exclude<FieldTypes, "tab">>[];
 		key: string;
-		groupId?: number | string;
+		ref?: string;
 		parentRepeaterKey?: string;
 		locales: string[];
 	}) => void;
 	removeRepeaterGroup: (params: {
 		brickIndex: number;
 		repeaterKey: string;
-		targetGroupId: number | string;
-		groupId?: number | string;
+		targetRef: string;
+		ref?: string;
 		parentRepeaterKey?: string;
 	}) => void;
 	swapGroupOrder: (_props: {
 		brickIndex: number;
 		repeaterKey: string;
-		selectedGroupId: number | string;
-		targetGroupId: number | string;
-		groupId?: number | string;
+		selectedRef: string;
+		targetRef: string;
+		ref?: string;
 		parentRepeaterKey?: string;
 	}) => void;
 	toggleGroupOpen: (_props: {
 		brickIndex: number;
 		repeaterKey: string;
-		groupId: number | string;
+		ref: string;
 		parentRepeaterKey: string | undefined;
-		parentGroupId: string | number | undefined;
+		parentRef: string | undefined;
 	}) => void;
 };
 
 const [get, set] = createStore<BrickStoreT>({
 	bricks: [],
 	fieldsErrors: [],
+	brickErrors: [],
 	locked: false,
 	documentMutated: false,
 	collectionTranslations: false,
@@ -115,6 +118,7 @@ const [get, set] = createStore<BrickStoreT>({
 	reset() {
 		set("bricks", []);
 		set("fieldsErrors", []);
+		set("brickErrors", []);
 		set("documentMutated", false);
 		set("collectionTranslations", false);
 	},
@@ -125,7 +129,7 @@ const [get, set] = createStore<BrickStoreT>({
 			produce((draft) => {
 				// Set with data from document respponse
 				draft.push({
-					id: "collection-pseudo-brick",
+					ref: "collection-pseudo-brick",
 					key: "collection-pseudo-brick",
 					order: -1,
 					type: "collection-fields",
@@ -145,7 +149,7 @@ const [get, set] = createStore<BrickStoreT>({
 					if (brickIndex !== -1) continue;
 
 					draft.push({
-						id: `ref-${nanoid()}}`,
+						ref: nanoid(),
 						key: brick.key,
 						fields: [],
 						type: "fixed",
@@ -165,7 +169,7 @@ const [get, set] = createStore<BrickStoreT>({
 				});
 
 				draft.push({
-					id: `ref-${nanoid()}`,
+					ref: nanoid(),
 					key: props.brickConfig.key,
 					order: largestOrder ? largestOrder.order + 1 : 0,
 					type: "builder",
@@ -199,8 +203,10 @@ const [get, set] = createStore<BrickStoreT>({
 		set(
 			"bricks",
 			produce((draft) => {
-				const brick = draft[props.brickIndex];
-				const targetBrick = draft[props.targetBrickIndex];
+				const brick = draft.find((b) => b.ref === props.brickRef);
+				const targetBrick = draft.find((b) => b.ref === props.targetBrickRef);
+
+				if (!brick || !targetBrick) return;
 
 				const order = brick.order;
 				brick.order = targetBrick.order;
@@ -219,7 +225,7 @@ const [get, set] = createStore<BrickStoreT>({
 				const field = brickHelpers.findFieldRecursive({
 					fields: draft[params.brickIndex].fields,
 					targetKey: params.key,
-					groupId: params.groupId,
+					groupRef: params.ref,
 					repeaterKey: params.repeaterKey,
 				});
 
@@ -272,7 +278,7 @@ const [get, set] = createStore<BrickStoreT>({
 				if (!brick) return;
 
 				// Field belongs on the brick level
-				if (params.groupId === undefined) {
+				if (params.ref === undefined) {
 					brick.fields.push(newField);
 					return;
 				}
@@ -282,14 +288,12 @@ const [get, set] = createStore<BrickStoreT>({
 				const repeaterField = brickHelpers.findFieldRecursive({
 					fields: brick.fields,
 					targetKey: params.repeaterKey,
-					groupId: params.groupId,
+					groupRef: params.ref,
 				});
 				if (!repeaterField) return;
 				if (repeaterField.type !== "repeater") return;
 
-				const group = repeaterField.groups?.find(
-					(g) => g.id === params.groupId,
-				);
+				const group = repeaterField.groups?.find((g) => g.ref === params.ref);
 				if (!group) return;
 
 				group.fields.push(newField);
@@ -305,7 +309,7 @@ const [get, set] = createStore<BrickStoreT>({
 				const field = brickHelpers.findFieldRecursive({
 					fields: draft[params.brickIndex].fields,
 					targetKey: params.key,
-					groupId: params.groupId,
+					groupRef: params.ref,
 					repeaterKey: params.parentRepeaterKey,
 				});
 
@@ -342,7 +346,7 @@ const [get, set] = createStore<BrickStoreT>({
 				if (field.groups.length === 0) {
 					field.groups = [
 						{
-							id: `ref-${nanoid()}`,
+							ref: nanoid(),
 							order: 0,
 							open: false,
 							fields: groupFields,
@@ -356,7 +360,7 @@ const [get, set] = createStore<BrickStoreT>({
 				});
 
 				field.groups.push({
-					id: `ref-${nanoid()}`,
+					ref: nanoid(),
 					order: largestOrder.order + 1,
 					open: false,
 					fields: groupFields,
@@ -373,7 +377,7 @@ const [get, set] = createStore<BrickStoreT>({
 					fields: draft[params.brickIndex].fields,
 					targetKey: params.repeaterKey,
 
-					groupId: params.groupId,
+					groupRef: params.ref,
 					repeaterKey: params.parentRepeaterKey,
 				});
 
@@ -382,7 +386,7 @@ const [get, set] = createStore<BrickStoreT>({
 				if (field.groups === undefined) return;
 
 				const targetGroupIndex = field.groups.findIndex(
-					(g) => g.id === params.targetGroupId,
+					(g) => g.ref === params.targetRef,
 				);
 				if (targetGroupIndex === -1) return;
 
@@ -398,7 +402,7 @@ const [get, set] = createStore<BrickStoreT>({
 				const field = brickHelpers.findFieldRecursive({
 					fields: draft[params.brickIndex].fields,
 					targetKey: params.repeaterKey,
-					groupId: params.groupId,
+					groupRef: params.ref,
 					repeaterKey: params.parentRepeaterKey,
 				});
 
@@ -407,10 +411,10 @@ const [get, set] = createStore<BrickStoreT>({
 				if (field.groups === undefined) field.groups = [];
 
 				const selectedIndex = field.groups.findIndex(
-					(group) => group.id === params.selectedGroupId,
+					(group) => group.ref === params.selectedRef,
 				);
 				const targetGroupIndex = field.groups.findIndex(
-					(group) => group.id === params.targetGroupId,
+					(group) => group.ref === params.targetRef,
 				);
 
 				if (selectedIndex === -1 || targetGroupIndex === -1) return;
@@ -434,13 +438,13 @@ const [get, set] = createStore<BrickStoreT>({
 					fields: draft[props.brickIndex].fields,
 					targetKey: props.repeaterKey,
 
-					groupId: props.parentGroupId,
+					groupRef: props.parentRef,
 					repeaterKey: props.parentRepeaterKey,
 				});
 
 				if (!field || !field.groups) return;
 
-				const group = field.groups.find((g) => g.id === props.groupId);
+				const group = field.groups.find((g) => g.ref === props.ref);
 				if (!group) return;
 
 				group.open = group.open !== true;

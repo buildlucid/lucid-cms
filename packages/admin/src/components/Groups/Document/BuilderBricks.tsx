@@ -62,10 +62,10 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 				</div>
 				<ol class="w-full">
 					<DragDrop
-						sortOrder={(index, targetindex) => {
+						sortOrder={(ref, targetRef) => {
 							brickStore.get.swapBrickOrder({
-								brickIndex: Number(index),
-								targetBrickIndex: Number(targetindex),
+								brickRef: ref,
+								targetBrickRef: targetRef,
 							});
 						}}
 					>
@@ -117,7 +117,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 	});
 	const brickIndex = createMemo(() => {
 		return brickStore.get.bricks.findIndex(
-			(brick) => brick.id === props.brick.id,
+			(brick) => brick.ref === props.brick.ref,
 		);
 	});
 	const isDisabled = createMemo(() => {
@@ -137,26 +137,26 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 		<li
 			data-dragkey={DRAG_DROP_KEY}
 			style={{
-				"view-transition-name": `brick-item-${props.brick.id}`,
+				"view-transition-name": `brick-item-${props.brick.ref}`,
 			}}
 			class={classNames(
 				"drag-item w-full bg-container-2 border border-border rounded-md mb-15 last:mb-0 focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base",
 				{
-					"opacity-60": props.dragDrop.getDragging()?.index === brickIndex(),
+					"opacity-60": props.dragDrop.getDragging()?.ref === props.brick.ref,
 					"ring-1 ring-inset":
-						props.dragDrop.getDraggingTarget()?.index === brickIndex(),
+						props.dragDrop.getDraggingTarget()?.ref === props.brick.ref,
 				},
 			)}
 			onDragStart={(e) =>
 				props.dragDrop.onDragStart(e, {
-					index: brickIndex(),
+					ref: props.brick.ref,
 					key: DRAG_DROP_KEY,
 				})
 			}
 			onDragEnd={(e) => props.dragDrop.onDragEnd(e)}
 			onDragEnter={(e) =>
 				props.dragDrop.onDragEnter(e, {
-					index: brickIndex(),
+					ref: props.brick.ref,
 					key: DRAG_DROP_KEY,
 				})
 			}
@@ -185,14 +185,14 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
-								index: brickIndex(),
+								ref: props.brick.ref,
 								key: DRAG_DROP_KEY,
 							})
 						}
 						onDragEnd={(e) => props.dragDrop.onDragEnd(e)}
 						onDragEnter={(e) =>
 							props.dragDrop.onDragEnter(e, {
-								index: brickIndex(),
+								ref: props.brick.ref,
 								key: DRAG_DROP_KEY,
 							})
 						}

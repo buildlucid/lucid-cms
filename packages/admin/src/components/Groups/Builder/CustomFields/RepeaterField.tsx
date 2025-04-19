@@ -14,7 +14,7 @@ interface RepeaterFieldProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<"repeater">;
 		fieldData?: FieldResponse;
-		groupId?: number | string;
+		groupRef?: string;
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
 	};
@@ -35,7 +35,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	});
 	const dragDropKey = createMemo(() => {
 		return `${fieldConfig().key}-${props.state.parentRepeaterKey || ""}-${
-			props.state.groupId || ""
+			props.state.groupRef || ""
 		}`;
 	});
 	const isDisabled = createMemo(
@@ -53,7 +53,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			brickIndex: brickIndex(),
 			fieldConfig: fieldConfig().fields || [],
 			key: fieldConfig().key,
-			groupId: props.state.groupId,
+			ref: props.state.groupRef,
 			parentRepeaterKey: props.state.parentRepeaterKey,
 			locales: contentLocales(),
 		});
@@ -78,14 +78,14 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			<Switch>
 				<Match when={groups().length > 0}>
 					<DragDrop
-						sortOrder={(index, targetindex) => {
+						sortOrder={(ref, targetRef) => {
 							brickStore.get.swapGroupOrder({
 								brickIndex: props.state.brickIndex,
 								repeaterKey: fieldConfig().key,
-								selectedGroupId: index,
-								targetGroupId: targetindex,
+								selectedRef: ref,
+								targetRef: targetRef,
 
-								groupId: props.state.groupId,
+								ref: props.state.groupRef,
 								parentRepeaterKey: props.state.parentRepeaterKey,
 							});
 						}}
@@ -99,14 +99,14 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 											fieldConfig: fieldConfig(),
 											dragDropKey: dragDropKey(),
 											fields: g.fields,
-											groupId: g.id,
+											ref: g.ref,
 											groupOpen: g.open,
 											dragDrop: dragDrop,
 											repeaterKey: fieldConfig().key,
 											groupIndex: i(),
 											repeaterDepth: props.state.repeaterDepth,
 											parentRepeaterKey: props.state.parentRepeaterKey,
-											parentGroupId: props.state.groupId,
+											parentRef: props.state.groupRef,
 										}}
 									/>
 								)}

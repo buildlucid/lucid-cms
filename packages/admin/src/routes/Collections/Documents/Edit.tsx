@@ -13,7 +13,7 @@ import {
 import classNames from "classnames";
 import { useQueryClient } from "@tanstack/solid-query";
 import helpers from "@/utils/helpers";
-import type { CollectionResponse, FieldErrors } from "@types";
+import type { BrickError, CollectionResponse, FieldError } from "@types";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -115,6 +115,7 @@ const CollectionsDocumentsEditRoute: Component<
 	const createDocument = api.documents.useCreateSingle({
 		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: collectionKey(),
@@ -130,7 +131,11 @@ const CollectionsDocumentsEditRoute: Component<
 		onError: (errors) => {
 			brickStore.set(
 				"fieldsErrors",
-				getBodyError<FieldErrors[]>("fields", errors) || [],
+				getBodyError<FieldError[]>("fields", errors) || [],
+			);
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
 			);
 		},
 		getCollectionName: collectionSingularName,
@@ -138,12 +143,17 @@ const CollectionsDocumentsEditRoute: Component<
 	const updateSingle = api.documents.useUpdateSingle({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
 			brickStore.set("documentMutated", false);
 		},
 		onError: (errors) => {
 			brickStore.set(
 				"fieldsErrors",
-				getBodyError<FieldErrors[]>("fields", errors) || [],
+				getBodyError<FieldError[]>("fields", errors) || [],
+			);
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
 			);
 			brickStore.set("documentMutated", false);
 		},
@@ -157,7 +167,7 @@ const CollectionsDocumentsEditRoute: Component<
 		onError: (errors) => {
 			brickStore.set(
 				"fieldsErrors",
-				getBodyError<FieldErrors[]>("fields", errors) || [],
+				getBodyError<FieldError[]>("fields", errors) || [],
 			);
 			brickStore.set("documentMutated", false);
 		},
@@ -188,7 +198,7 @@ const CollectionsDocumentsEditRoute: Component<
 		return updateSingle.errors() || createDocument.errors();
 	});
 	const brickTranslationErrors = createMemo(() => {
-		const errors = getBodyError<FieldErrors[]>("fields", mutateErrors());
+		const errors = getBodyError<FieldError[]>("fields", mutateErrors());
 		if (errors === undefined) return false;
 		return errors.some((field) => field.localeCode !== contentLocale());
 	});

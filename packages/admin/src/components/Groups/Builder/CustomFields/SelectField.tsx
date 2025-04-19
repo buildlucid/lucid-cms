@@ -6,7 +6,7 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type { CFConfig, FieldResponse, FieldErrors } from "@types";
+import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -17,10 +17,10 @@ interface SelectFieldProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<"select">;
 		fieldData?: FieldResponse;
-		groupId?: number | string;
+		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;
-		fieldError: FieldErrors | undefined;
+		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 	};
 }
@@ -59,7 +59,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,
-				groupId: props.state.groupId,
+				groupRef: props.state.groupRef,
 			})}
 			value={getValue() || undefined}
 			options={
@@ -81,7 +81,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
 						key: props.state.fieldConfig.key,
-						groupId: props.state.groupId,
+						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: value || null,
 						contentLocale: props.state.contentLocale,

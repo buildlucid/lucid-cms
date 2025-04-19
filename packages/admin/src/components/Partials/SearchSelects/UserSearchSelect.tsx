@@ -1,7 +1,7 @@
 import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
 import type { ValueT, SelectProps } from "@/components/Groups/Form/Select";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import api from "@/services/api";
 import helpers from "@/utils/helpers";
 import { Select } from "@/components/Groups/Form";
@@ -12,7 +12,7 @@ interface UserSearchSelectProps {
 	name: string;
 	id: string;
 	copy?: SelectProps["copy"];
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 	theme: "basic" | "basic-small" | "full";
 	disabled?: boolean;

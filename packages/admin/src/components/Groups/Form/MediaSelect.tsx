@@ -3,7 +3,7 @@ import { type Component, Match, Switch, createMemo } from "solid-js";
 import classNames from "classnames";
 import type {
 	ErrorResult,
-	FieldErrors,
+	FieldError,
 	MediaResponse,
 	MediaResMeta,
 } from "@types";
@@ -32,7 +32,7 @@ interface MediaSelectProps {
 	disabled?: boolean;
 	noMargin?: boolean;
 	required?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 }
 

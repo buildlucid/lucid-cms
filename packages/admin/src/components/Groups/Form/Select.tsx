@@ -10,7 +10,7 @@ import {
 } from "solid-js";
 import classNames from "classnames";
 import { debounce } from "@solid-primitives/scheduled";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
 import { DropdownMenu } from "@kobalte/core";
 import DropdownContent from "@/components/Partials/DropdownContent";
@@ -39,7 +39,7 @@ export interface SelectProps {
 	autoFoucs?: boolean;
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	noClear?: boolean;

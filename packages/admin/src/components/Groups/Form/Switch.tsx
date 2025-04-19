@@ -1,7 +1,7 @@
 import T from "@/translations";
 import { type Component, createSignal, createEffect, onMount } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import {
 	Label,
 	DescribedBy,
@@ -23,7 +23,7 @@ interface SwitchProps {
 	};
 	disabled?: boolean;
 	required?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	options?: {

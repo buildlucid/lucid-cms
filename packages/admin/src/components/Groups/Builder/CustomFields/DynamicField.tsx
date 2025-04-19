@@ -26,7 +26,7 @@ interface DynamicFieldProps {
 		fields: FieldResponse[];
 		activeTab?: string;
 
-		groupId?: number | string;
+		groupRef?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
 	};
@@ -51,35 +51,37 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			return brickStore.get.addField({
 				brickIndex: props.state.brickIndex,
 				fieldConfig: props.state.fieldConfig,
-				groupId: props.state.groupId,
+				ref: props.state.groupRef,
 				repeaterKey: props.state.repeaterKey,
 				locales: locales().map((l) => l.code),
 			});
 		}
 		return field;
 	});
-	const brickId = createMemo(() => {
-		return brickStore.get.bricks[props.state.brickIndex].id;
-	});
+	// const brickRef = createMemo(() => {
+	// 	return brickStore.get.bricks[props.state.brickIndex].ref;
+	// });
 	const fieldError = createMemo(() => {
-		return brickStore.get.fieldsErrors.find((f) => {
-			return (
-				f.brickId === brickId() &&
-				f.key === props.state.fieldConfig.key &&
-				f.localeCode === contentLocale() &&
-				f.groupId === props.state.groupId
-			);
-		});
+		// return brickStore.get.fieldsErrors.find((f) => {
+		// 	return (
+		// 		f.brickId === brickId() &&
+		// 		f.key === props.state.fieldConfig.key &&
+		// 		f.localeCode === contentLocale() &&
+		// 		f.groupId === props.state.groupRef
+		// 	);
+		// });
+		return undefined;
 	});
 	const altLocaleError = createMemo(() => {
-		return brickStore.get.fieldsErrors.some((f) => {
-			return (
-				f.brickId === brickId() &&
-				f.key === props.state.fieldConfig.key &&
-				f.localeCode !== contentLocale() &&
-				f.groupId === props.state.groupId
-			);
-		});
+		// return brickStore.get.fieldsErrors.some((f) => {
+		// 	return (
+		// 		f.brickId === brickId() &&
+		// 		f.key === props.state.fieldConfig.key &&
+		// 		f.localeCode !== contentLocale() &&
+		// 		f.groupId === props.state.groupRef
+		// 	);
+		// });
+		return false;
 	});
 	const activeTab = createMemo(() => {
 		if (fieldConfig().type !== "tab") return true;
@@ -126,7 +128,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											fieldConfig: config,
 											fields: props.state.fields,
 											activeTab: props.state.activeTab,
-											groupId: props.state.groupId,
+											groupRef: props.state.groupRef,
 											repeaterKey: props.state.repeaterKey,
 											repeaterDepth: props.state.repeaterDepth,
 										}}
@@ -141,7 +143,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"repeater">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								parentRepeaterKey: props.state.repeaterKey,
 								repeaterDepth: props.state.repeaterDepth ?? 0,
 							}}
@@ -155,7 +157,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"text">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -169,7 +171,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"user">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -183,7 +185,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"document">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -198,7 +200,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"number">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -213,7 +215,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"datetime">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -227,7 +229,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"checkbox">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -241,7 +243,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"colour">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -255,7 +257,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"json">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -269,7 +271,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"link">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -283,7 +285,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"media">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -297,7 +299,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"select">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -311,7 +313,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"textarea">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
@@ -325,7 +327,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"wysiwyg">,
 								fieldData: fieldData(),
-								groupId: props.state.groupId,
+								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),

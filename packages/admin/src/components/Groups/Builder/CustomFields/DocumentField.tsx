@@ -5,7 +5,7 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type { CFConfig, FieldResponse, FieldErrors } from "@types";
+import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -16,10 +16,10 @@ interface DocumentFieldProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<"document">;
 		fieldData?: FieldResponse;
-		groupId?: number | string;
+		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;
-		fieldError: FieldErrors | undefined;
+		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 	};
 }
@@ -58,7 +58,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,
-				groupId: props.state.groupId,
+				groupRef: props.state.groupRef,
 			})}
 			collection={props.state.fieldConfig.collection}
 			value={getValue()}
@@ -68,7 +68,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
 						key: props.state.fieldConfig.key,
-						groupId: props.state.groupId,
+						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: !value ? null : Number(value),
 						contentLocale: props.state.contentLocale,

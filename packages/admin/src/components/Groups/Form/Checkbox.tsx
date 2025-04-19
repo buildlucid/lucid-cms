@@ -2,7 +2,7 @@ import { type Component, createSignal } from "solid-js";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
 import { Checkbox } from "@kobalte/core";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import { ErrorMessage, DescribedBy, Tooltip } from "@/components/Groups/Form";
 
 interface CheckboxInputProps {
@@ -16,7 +16,7 @@ interface CheckboxInputProps {
 		tooltip?: string;
 	};
 	required?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	noMargin?: boolean;
 	theme: "full" | "basic";
 }

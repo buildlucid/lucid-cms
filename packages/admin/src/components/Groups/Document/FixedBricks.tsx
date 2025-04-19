@@ -52,7 +52,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 	});
 	const brickIndex = createMemo(() => {
 		return brickStore.get.bricks.findIndex(
-			(brick) => brick.id === props.brick.id,
+			(brick) => brick.ref === props.brick.ref,
 		);
 	});
 

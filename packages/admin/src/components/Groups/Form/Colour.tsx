@@ -1,6 +1,6 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 import classnames from "classnames";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import { ErrorMessage, Label, DescribedBy } from "@/components/Groups/Form";
 
 interface ColourProps {
@@ -15,7 +15,7 @@ interface ColourProps {
 	presets?: string[];
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 }
 

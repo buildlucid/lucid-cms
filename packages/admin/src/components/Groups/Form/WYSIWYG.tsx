@@ -2,7 +2,7 @@ import { type Component, createSignal, onMount, onCleanup } from "solid-js";
 import classnames from "classnames";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface WYSIWYGProps {
@@ -16,7 +16,7 @@ interface WYSIWYGProps {
 	};
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 }

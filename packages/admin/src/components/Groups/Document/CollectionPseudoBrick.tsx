@@ -20,7 +20,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	});
 	const brickIndex = createMemo(() => {
 		return brickStore.get.bricks.findIndex(
-			(brick) => brick.id === collectionPseudoBrick()?.id,
+			(brick) => brick.ref === collectionPseudoBrick()?.ref,
 		);
 	});
 

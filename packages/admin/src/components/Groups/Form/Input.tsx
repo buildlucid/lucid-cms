@@ -1,7 +1,7 @@
 import { type Component, Show, createSignal, createMemo } from "solid-js";
 import classnames from "classnames";
 import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
-import type { ErrorResult, FieldErrors } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import {
 	Label,
 	Tooltip,
@@ -27,7 +27,7 @@ interface InputProps {
 	autoComplete?: string;
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 

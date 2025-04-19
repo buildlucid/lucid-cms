@@ -9,7 +9,7 @@ import type {
 const findFieldRecursive = (props: {
 	fields: FieldResponse[];
 	targetKey: string;
-	groupId?: number | string;
+	groupRef?: string;
 	repeaterKey?: string;
 }): FieldResponse | null => {
 	for (const field of props.fields) {
@@ -17,7 +17,7 @@ const findFieldRecursive = (props: {
 		if (
 			!props.repeaterKey &&
 			field.key === props.targetKey &&
-			(!field.groupId || field.groupId === props.groupId)
+			(!field.groupRef || field.groupRef === props.groupRef)
 		) {
 			return field;
 		}
@@ -30,12 +30,12 @@ const findFieldRecursive = (props: {
 			field.groups
 		) {
 			for (const group of field.groups) {
-				if (!props.groupId || group.id === props.groupId) {
+				if (!props.groupRef || group.ref === props.groupRef) {
 					// Group ID check is here if specified
 					for (const subField of group.fields) {
 						if (
 							subField.key === props.targetKey &&
-							(!subField.groupId || subField.groupId === props.groupId)
+							(!subField.groupRef || subField.groupRef === props.groupRef)
 						) {
 							return subField;
 						}
@@ -44,7 +44,7 @@ const findFieldRecursive = (props: {
 							const found = findFieldRecursive({
 								fields: subField.groups?.flatMap((g) => g.fields) || [],
 								targetKey: props.targetKey,
-								groupId: props.groupId,
+								groupRef: props.groupRef,
 								repeaterKey: props.repeaterKey,
 							});
 							if (found) return found;
@@ -57,7 +57,7 @@ const findFieldRecursive = (props: {
 			const found = findFieldRecursive({
 				fields: field.groups.flatMap((g) => g.fields),
 				targetKey: props.targetKey,
-				groupId: props.groupId,
+				groupRef: props.groupRef,
 				repeaterKey: props.repeaterKey,
 			});
 			if (found) return found;
@@ -80,12 +80,12 @@ const getUpsertBricks = () =>
 const customFieldId = (props: {
 	key: string;
 	brickIndex: number;
-	groupId?: number | string;
+	groupRef?: string;
 }): string => {
-	if (props.groupId === undefined) {
+	if (props.groupRef === undefined) {
 		return `field-${props.key}-${props.brickIndex}`;
 	}
-	return `field-${props.key}-${props.brickIndex}-${props.groupId}`;
+	return `field-${props.key}-${props.brickIndex}-${props.groupRef}`;
 };
 
 const getFieldValue = <T>(props: {

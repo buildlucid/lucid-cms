@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Component, Match, Switch } from "solid-js";
 import classNames from "classnames";
 import { FaSolidXmark, FaSolidPen } from "solid-icons/fa";
-import type { ErrorResult, FieldErrors, DocumentResponse } from "@types";
+import type { ErrorResult, FieldError, DocumentResponse } from "@types";
 import documentSelectStore from "@/store/forms/documentSelectStore";
 import Button from "@/components/Partials/Button";
 import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
@@ -19,7 +19,7 @@ interface DocumentSelectProps {
 	disabled?: boolean;
 	noMargin?: boolean;
 	required?: boolean;
-	errors?: ErrorResult | FieldErrors;
+	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
 }
 

@@ -7,7 +7,7 @@ import {
 } from "solid-js";
 
 interface DragItemProps {
-	index: number | string;
+	ref: string;
 	key: string;
 }
 
@@ -23,7 +23,7 @@ export interface DragDropCBT {
 }
 
 interface DragDropProps {
-	sortOrder: (_index: number | string, _targetIndex: number | string) => void;
+	sortOrder: (_ref: string, _targetRef: string) => void;
 	children: (_props: { dragDrop: DragDropCBT }) => JSXElement;
 }
 
@@ -53,10 +53,10 @@ const DragDrop: Component<DragDropProps> = (props) => {
 		const dragTarget = getDraggingTarget();
 
 		if (dragging === undefined || dragTarget === undefined) return;
-		if (dragging.index === dragTarget.index) return;
+		if (dragging.ref === dragTarget.ref) return;
 
 		const updateFn = () => {
-			props.sortOrder(dragging.index, dragTarget.index);
+			props.sortOrder(dragging.ref, dragTarget.ref);
 			if (isDragging) {
 				setDragging(dragTarget);
 			}

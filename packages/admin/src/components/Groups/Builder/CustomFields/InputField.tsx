@@ -5,7 +5,7 @@ import {
 	createMemo,
 	createEffect,
 } from "solid-js";
-import type { CFConfig, FieldResponse, FieldErrors } from "@types";
+import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -17,10 +17,10 @@ interface InputFieldProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<"text" | "number" | "datetime">;
 		fieldData?: FieldResponse;
-		groupId?: number | string;
+		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;
-		fieldError: FieldErrors | undefined;
+		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 	};
 }
@@ -69,7 +69,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,
-				groupId: props.state.groupId,
+				groupRef: props.state.groupRef,
 			})}
 			value={getValue()}
 			onChange={(value) => {
@@ -78,7 +78,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
 						key: props.state.fieldConfig.key,
-						groupId: props.state.groupId,
+						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: props.type === "number" ? Number(value) : value,
 						contentLocale: props.state.contentLocale,
