@@ -6,6 +6,21 @@ import type { FieldSchemaType } from "../../../types.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
 
 describe("testing prepareBricksAndFields", () => {
+	// Mock localisation config to pass to the functions
+	const mockLocalisation = {
+		locales: [
+			{
+				label: "English",
+				code: "en",
+			},
+			{
+				label: "French",
+				code: "fr",
+			},
+		],
+		defaultLocale: "en",
+	};
+
 	const simpleBrick = new BrickBuilder("simple")
 		.addText("heading")
 		.addRepeater("items")
@@ -49,6 +64,7 @@ describe("testing prepareBricksAndFields", () => {
 		const { preparedFields } = prepareBricksAndFields({
 			collection: simpleCollection,
 			fields,
+			localisation: mockLocalisation,
 		});
 
 		expect(preparedFields).toHaveLength(1);
@@ -61,7 +77,7 @@ describe("testing prepareBricksAndFields", () => {
 	test("should process brick fields and nested repeaters correctly", () => {
 		const bricks: Array<BrickSchema> = [
 			{
-				id: "ref-1",
+				ref: "ref-1",
 				key: "simple",
 				order: 0,
 				type: "builder",
@@ -82,7 +98,7 @@ describe("testing prepareBricksAndFields", () => {
 						type: "repeater",
 						groups: [
 							{
-								id: "ref-group1",
+								ref: "ref-group1",
 								open: false,
 								fields: [
 									{
@@ -95,7 +111,7 @@ describe("testing prepareBricksAndFields", () => {
 										type: "repeater",
 										groups: [
 											{
-												id: "ref-nested1",
+												ref: "ref-nested1",
 												open: false,
 												fields: [
 													{
@@ -123,6 +139,7 @@ describe("testing prepareBricksAndFields", () => {
 		const { preparedBricks } = prepareBricksAndFields({
 			collection: simpleCollection,
 			bricks,
+			localisation: mockLocalisation,
 		});
 
 		expect(preparedBricks).toHaveLength(1);
@@ -165,6 +182,7 @@ describe("testing prepareBricksAndFields", () => {
 	test("should handle empty inputs gracefully", () => {
 		const result = prepareBricksAndFields({
 			collection: simpleCollection,
+			localisation: mockLocalisation,
 		});
 
 		expect(result.preparedBricks).toBeUndefined();

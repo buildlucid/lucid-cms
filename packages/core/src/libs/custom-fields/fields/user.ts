@@ -97,6 +97,9 @@ class UserCustomField extends CustomField<"user"> {
 	get translationsEnabled() {
 		return this.config.config.useTranslations;
 	}
+	get defaultValue() {
+		return null;
+	}
 }
 
 export default UserCustomField;

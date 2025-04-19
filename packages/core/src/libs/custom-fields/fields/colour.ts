@@ -78,6 +78,9 @@ class ColourCustomField extends CustomField<"colour"> {
 	get translationsEnabled() {
 		return this.config.config.useTranslations;
 	}
+	get defaultValue() {
+		return this.config.config.default;
+	}
 }
 
 export default ColourCustomField;

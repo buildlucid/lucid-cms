@@ -82,6 +82,9 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 	get translationsEnabled() {
 		return this.config.config.useTranslations;
 	}
+	get defaultValue() {
+		return this.config.config.default;
+	}
 }
 
 export default WysiwygCustomField;

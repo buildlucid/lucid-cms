@@ -77,6 +77,9 @@ class TextareaCustomField extends CustomField<"textarea"> {
 	get translationsEnabled() {
 		return this.config.config.useTranslations;
 	}
+	get defaultValue() {
+		return this.config.config.default;
+	}
 }
 
 export default TextareaCustomField;

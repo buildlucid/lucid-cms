@@ -95,6 +95,9 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	get translationsEnabled() {
 		return this.config.config.useTranslations;
 	}
+	get defaultValue() {
+		return this.config.config.default;
+	}
 }
 
 export default CheckboxCustomField;

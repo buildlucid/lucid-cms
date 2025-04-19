@@ -35,6 +35,8 @@ abstract class CustomField<T extends FieldTypes> {
 		message?: string;
 	};
 	abstract get translationsEnabled(): boolean;
+	abstract get defaultValue(): unknown;
+
 	/**
 	 * Determins how the field should be defined in the database
 	 *

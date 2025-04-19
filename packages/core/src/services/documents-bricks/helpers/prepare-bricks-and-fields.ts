@@ -1,26 +1,68 @@
-import type { CollectionBuilder } from "../../../builders.js";
+import type { BrickBuilder, CollectionBuilder } from "../../../builders.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldSchemaType, FieldTypes } from "../../../types.js";
+import type { Config, FieldSchemaType, FieldTypes } from "../../../types.js";
 
 /**
- * Processes fields to remove any that don't exist in the custom fields.
- * Processes recursively for repeater fields with nested groups.
+ * - Processes fields to remove any that don't exist in the custom fields.
+ * - Processes recursively for repeater fields with nested groups.
+ * - Based on collection and field translation support, sort out the fields translations/value props and fill missing translations with default values
  */
-const processFields = (
-	fields: Array<FieldSchemaType>,
-	customFields: Map<string, CustomField<FieldTypes>>,
-): Array<FieldSchemaType> => {
-	return fields
-		.filter((field) => customFields.has(field.key))
+const processFields = (props: {
+	collection: CollectionBuilder;
+	fields: Array<FieldSchemaType>;
+	customFields: Map<string, CustomField<FieldTypes>>;
+	localisation: Config["localisation"];
+}): Array<FieldSchemaType> => {
+	return props.fields
+		.filter((field) => props.customFields.has(field.key))
 		.map((field) => {
+			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			const cfInstance = props.customFields.get(field.key)!;
 			const processedField = { ...field };
 
 			if (field.type === "repeater" && field.groups) {
 				processedField.groups = field.groups.map((group) => ({
 					...group,
-					fields: processFields(group.fields, customFields),
+					fields: processFields({
+						collection: props.collection,
+						fields: group.fields,
+						customFields: props.customFields,
+						localisation: props.localisation,
+					}),
 				}));
+			}
+
+			// if collection uses translations and the field supports translations
+			if (
+				props.collection.getData.config.useTranslations &&
+				cfInstance?.translationsEnabled
+			) {
+				// if processField.value is given only and no translations key - add the value to the translations object with the locale object key being the default locale
+				if (processedField.value && !processedField.translations) {
+					processedField.translations = {
+						[props.localisation.defaultLocale]: processedField.value,
+					};
+					processedField.value = undefined;
+				}
+			} else {
+				// if processField.translations is given, take the default locale translation value and set it as the processField.value
+				if (processedField.translations && !processedField.value) {
+					processedField.value =
+						processedField.translations[props.localisation.defaultLocale] ||
+						cfInstance.defaultValue;
+					processedField.translations = undefined;
+				}
+			}
+
+			// if processField.translations is set, ensure that each supported locale has a key. Use the cfInstance.defaultValue for missing locales
+			if (processedField.translations) {
+				for (const locale of props.localisation.locales) {
+					const localeCode = locale.code;
+					if (!processedField.translations[localeCode]) {
+						processedField.translations[localeCode] = cfInstance.defaultValue;
+					}
+				}
 			}
 
 			return processedField;
@@ -30,29 +72,37 @@ const processFields = (
 /**
  * Prepares bricks and fields by removing invalid fields that don't exist in custom fields.
  */
-const prepareBricksAndFields = (params: {
+const prepareBricksAndFields = (props: {
 	collection: CollectionBuilder;
 	bricks?: Array<BrickSchema>;
 	fields?: Array<FieldSchemaType>;
+	localisation: Config["localisation"];
 }) => {
 	// Process collection fields
-	const preparedFields = params.fields
-		? processFields(params.fields, params.collection.fields)
+	const preparedFields = props.fields
+		? processFields({
+				collection: props.collection,
+				fields: props.fields,
+				customFields: props.collection.fields,
+				localisation: props.localisation,
+			})
 		: undefined;
 
 	// Process brick fields
-	const preparedBricks = params.bricks
-		? params.bricks.map((brick) => {
-				const brickDefinition = params.collection.brickInstances.find(
+	const preparedBricks = props.bricks
+		? props.bricks.map((brick) => {
+				const brickDefinition = props.collection.brickInstances.find(
 					(b) => b.key === brick.key,
 				);
 				if (!brickDefinition || !brick.fields) return brick;
 
 				// Process fields for this brick
-				const processedFields = processFields(
-					brick.fields,
-					brickDefinition.fields,
-				);
+				const processedFields = processFields({
+					collection: props.collection,
+					fields: brick.fields,
+					customFields: brickDefinition.fields,
+					localisation: props.localisation,
+				});
 
 				return {
 					...brick,

@@ -82,6 +82,9 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	get translationsEnabled() {
 		return false;
 	}
+	get defaultValue() {
+		return null;
+	}
 }
 
 export default RepeaterCustomField;

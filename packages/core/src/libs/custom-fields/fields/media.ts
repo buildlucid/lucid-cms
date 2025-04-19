@@ -218,6 +218,9 @@ class MediaCustomField extends CustomField<"media"> {
 	get translationsEnabled() {
 		return this.config.config.useTranslations;
 	}
+	get defaultValue() {
+		return null;
+	}
 }
 
 export default MediaCustomField;
