@@ -1,10 +1,17 @@
 import Repository from "../../libs/repositories/index.js";
 import type {
+	CFConfig,
+	FieldTypes,
 	LucidBricksTable,
 	LucidBrickTableName,
 	ServiceFn,
+	TabFieldConfig,
 } from "../../types.js";
 import { prefixGeneratedColName } from "../../helpers.js";
+import type {
+	CollectionSchemaTable,
+	TableType,
+} from "../collection-migrator/schema/types.js";
 
 const nullifyDocumentReferences: ServiceFn<
 	[
@@ -20,48 +27,74 @@ const nullifyDocumentReferences: ServiceFn<
 		columns: Array<keyof LucidBricksTable>;
 	}> = [];
 
-	for (const collection of context.config.collections) {
-		const documentFields = collection.flatFields.filter(
-			(df) => df.type === "document",
-		);
-		const docFieldTableName = collection.documentFieldsTableSchema?.name;
+	const searchReferenceTargets = (props: {
+		fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
+		tableType: TableType;
+		schemas: CollectionSchemaTable<LucidBrickTableName>[];
+		brickKey?: string;
+		repeaterKey?: string;
+		depth: number;
+	}) => {
+		const targetSchema = props.schemas.find((schema) => {
+			if (props.tableType === "document-fields") {
+				return schema.type === "document-fields";
+			}
+			if (props.tableType === "brick") {
+				return schema.type === "brick" && schema.key.brick === props.brickKey;
+			}
+			if (props.tableType === "repeater") {
+				return (
+					schema.type === "repeater" &&
+					schema.key.brick === props.brickKey &&
+					schema.key.repeater?.[props.depth - 1] === props.repeaterKey
+				);
+			}
+		});
+		if (!targetSchema) return;
+		const tableName = targetSchema.name;
+		const documentColumns: Array<`_${string}`> = [];
 
-		const docuFieldColumns = documentFields
-			.map((df) =>
-				df.collection === data.collectionKey
-					? prefixGeneratedColName(df.key)
-					: null,
-			)
-			.filter((dfc) => dfc !== null);
-		if (docuFieldColumns.length && docFieldTableName) {
-			referenceTargets.push({
-				table: docFieldTableName,
-				columns: docuFieldColumns,
-			});
+		for (const field of props.fields) {
+			if (field.type === "repeater") {
+				searchReferenceTargets({
+					tableType: "repeater",
+					fields: field.fields,
+					schemas: props.schemas,
+					brickKey: props.brickKey,
+					repeaterKey: field.key,
+					depth: props.depth + 1,
+				});
+			}
+			if (
+				field.type === "document" &&
+				field.collection === data.collectionKey
+			) {
+				documentColumns.push(prefixGeneratedColName(field.key));
+			}
 		}
 
+		if (documentColumns.length > 0) {
+			referenceTargets.push({
+				table: tableName,
+				columns: documentColumns,
+			});
+		}
+	};
+	for (const collection of context.config.collections) {
+		searchReferenceTargets({
+			tableType: "document-fields",
+			fields: collection.fieldTreeNoTab,
+			schemas: collection.bricksTableSchema || [],
+			depth: 0,
+		});
 		for (const brick of collection.brickInstances) {
-			const brickTables = collection.bricksTableSchema.filter(
-				(bts) => bts.key.brick === brick.key,
-			);
-
-			const brickDocumentFields = brick.flatFields.filter(
-				(field) =>
-					field.type === "document" && field.collection === data.collectionKey,
-			);
-
-			for (const brickTable of brickTables) {
-				const brickDocFieldColumns = brickDocumentFields
-					.map((field) => prefixGeneratedColName(field.key))
-					.filter(Boolean);
-
-				if (brickDocFieldColumns.length && brickTable.name) {
-					referenceTargets.push({
-						table: brickTable.name,
-						columns: brickDocFieldColumns,
-					});
-				}
-			}
+			searchReferenceTargets({
+				tableType: "brick",
+				fields: brick.fieldTreeNoTab,
+				schemas: collection.bricksTableSchema || [],
+				brickKey: brick.key,
+				depth: 0,
+			});
 		}
 	}
 
