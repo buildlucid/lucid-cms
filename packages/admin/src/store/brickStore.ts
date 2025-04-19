@@ -261,10 +261,10 @@ const [get, set] = createStore<BrickStoreT>({
 				params.fieldConfig.config.useTranslations === true &&
 				get.collectionTranslations === true
 			) {
+				newField.translations = {};
+
 				for (const locale of params.locales) {
-					newField.translations = {
-						[locale]: params.fieldConfig.config.default,
-					};
+					newField.translations[locale] = params.fieldConfig.config.default;
 				}
 			} else {
 				newField.value = params.fieldConfig.config.default;
@@ -330,10 +330,10 @@ const [get, set] = createStore<BrickStoreT>({
 							field.config.useTranslations === true &&
 							get.collectionTranslations === true
 						) {
+							newField.translations = {};
+
 							for (const locale of params.locales) {
-								newField.translations = {
-									[locale]: field.config.default,
-								};
+								newField.translations[locale] = field.config.default;
 							}
 						} else {
 							newField.value = field.config.default;
