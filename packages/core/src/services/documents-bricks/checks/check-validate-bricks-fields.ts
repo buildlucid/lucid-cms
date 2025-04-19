@@ -281,6 +281,7 @@ export const validateField = (
 			relationData,
 		});
 
+		// TODO: if the field instance is configured to use translations, but only a field.value is passed (hence we're in this block), then add the default locale to the localeCode on the error
 		if (!validationResult.valid) {
 			errors.push({
 				key: field.key,
