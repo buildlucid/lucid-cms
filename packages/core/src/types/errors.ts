@@ -20,7 +20,7 @@ export interface LucidErrorData {
 export type ErrorResultValue =
 	| ErrorResultObj
 	| ErrorResultObj[]
-	| FieldErrors[]
+	| FieldError[]
 	| GroupError[]
 	| BrickError[]
 	| string
@@ -35,23 +35,23 @@ export interface ErrorResultObj {
 
 export type ErrorResult = Record<string, ErrorResultValue>;
 
-export interface FieldErrors {
+export interface FieldError {
 	key: string;
 	/** Set if the error occured on a translation value, or it uses the default locale code when the field supports translations but only a value is given. Otherwise this is undefined. */
-	localeCode?: string;
+	localeCode: string | undefined;
 	message: string;
 	groupErrors?: Array<GroupError>;
 }
 
 export interface GroupError {
-	id: string | number;
-	order?: number;
-	fields: FieldErrors[];
+	ref: string;
+	order: number;
+	fields: FieldError[];
 }
 
 export interface BrickError {
-	id: number | string;
-	key?: string;
-	order?: number;
-	fields: FieldErrors[];
+	ref: string;
+	key: string;
+	order: number;
+	fields: FieldError[];
 }

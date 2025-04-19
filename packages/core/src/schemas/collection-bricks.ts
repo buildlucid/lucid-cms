@@ -4,7 +4,7 @@ import constants from "../constants/constants.js";
 import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 
 export const BrickSchema = z.object({
-	id: z.union([z.string(), z.number()]),
+	ref: z.string(),
 	key: z.string(),
 	order: z.number(),
 	type: z.union([z.literal("builder"), z.literal("fixed")]),
@@ -12,9 +12,9 @@ export const BrickSchema = z.object({
 	fields: z.array(FieldSchema).optional(),
 });
 export interface BrickSchema {
-	id: number | string;
-	key?: string;
-	order?: number;
+	ref: string;
+	key: string;
+	order: number;
 	type: BrickTypes;
 	open?: boolean;
 	fields?: z.infer<typeof FieldSchema>[];
@@ -23,6 +23,9 @@ export interface BrickSchema {
 export const swaggerBodyBricksObj = {
 	type: "object",
 	properties: {
+		ref: {
+			type: "string",
+		},
 		key: {
 			type: "string",
 		},

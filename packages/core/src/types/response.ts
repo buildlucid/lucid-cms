@@ -178,16 +178,18 @@ export interface CollectionResponse {
 }
 
 export interface BrickResponse {
+	ref: string;
 	key: string;
 	order: number;
-	open: boolean | null;
+	open: boolean;
 	type: BrickTypes;
 	fields: Array<FieldResponse>;
 }
 export interface BrickAltResponse {
+	ref: string;
 	key: string;
 	order: number;
-	open: boolean | null;
+	open: boolean;
 	type: BrickTypes;
 	fields: Record<string, FieldAltResponse>;
 }
@@ -211,13 +213,15 @@ export interface FieldAltResponse {
 	groups?: Array<FieldGroupAltResponse>;
 }
 export interface FieldGroupResponse {
+	ref: string;
 	order: number;
-	open: boolean | null;
+	open: boolean;
 	fields: Array<FieldResponse>;
 }
 export interface FieldGroupAltResponse {
+	ref: string;
 	order: number;
-	open: boolean | null;
+	open: boolean;
 	fields: Record<string, FieldAltResponse>;
 }
 

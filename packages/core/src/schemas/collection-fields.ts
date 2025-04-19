@@ -42,7 +42,7 @@ export const FieldSchema: z.ZodType<FieldSchemaType> = FieldBaseSchema.extend({
 		.lazy(() =>
 			z.array(
 				z.object({
-					id: z.union([z.string(), z.number()]),
+					ref: z.string(),
 					order: z.number().optional(),
 					open: z.boolean().optional(),
 					fields: z.array(FieldSchema),
@@ -53,7 +53,7 @@ export const FieldSchema: z.ZodType<FieldSchemaType> = FieldBaseSchema.extend({
 });
 
 export type FieldRepeaterGroupSchemaType = {
-	id: string | number;
+	ref: string;
 	order?: number;
 	open?: boolean;
 	fields: FieldSchemaType[];
@@ -85,18 +85,15 @@ export const swaggerFieldObj = {
 				type: "object",
 				additionalProperties: true,
 				properties: {
-					id: {
-						anyOf: [
-							{
-								type: "string",
-							},
-							{
-								type: "number",
-							},
-						],
+					ref: {
+						type: "string",
 					},
 					order: {
 						type: "number",
+						nullable: true,
+					},
+					open: {
+						type: "boolean",
 						nullable: true,
 					},
 					fields: {

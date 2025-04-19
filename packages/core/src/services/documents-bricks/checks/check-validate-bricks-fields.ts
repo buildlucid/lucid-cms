@@ -10,7 +10,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import type { BrickSchema } from "../../../schemas/collection-bricks.js";
 import type {
 	BrickError,
-	FieldErrors,
+	FieldError,
 	FieldSchemaType,
 	GroupError,
 } from "../../../types.js";
@@ -119,7 +119,7 @@ const validateBricks = (props: {
 		if (fieldErrors.length === 0) continue;
 
 		errors.push({
-			id: brick.id,
+			ref: brick.ref,
 			key: brick.key,
 			order: brick.order,
 			fields: fieldErrors,
@@ -142,7 +142,7 @@ const recursiveFieldValidate = (props: {
 		defaultLocale: string;
 	};
 }) => {
-	const errors: FieldErrors[] = [];
+	const errors: FieldError[] = [];
 
 	//*  validate all provided fields
 	for (const field of props.fields) {
@@ -150,6 +150,7 @@ const recursiveFieldValidate = (props: {
 		if (!fieldInstance) {
 			errors.push({
 				key: field.key,
+				localeCode: undefined,
 				message: T("cannot_find_field_in_collection_or_brick"),
 			});
 			continue;
@@ -167,6 +168,7 @@ const recursiveFieldValidate = (props: {
 			if (!validationResult.valid) {
 				errors.push({
 					key: field.key,
+					localeCode: undefined,
 					message:
 						validationResult.message || T("repeater_field_contains_errors"),
 				});
@@ -186,7 +188,7 @@ const recursiveFieldValidate = (props: {
 
 				if (groupFieldErrors.length > 0) {
 					groupErrors.push({
-						id: group.id,
+						ref: group.ref,
 						order: group.order || i,
 						fields: groupFieldErrors,
 					});
@@ -196,6 +198,7 @@ const recursiveFieldValidate = (props: {
 			if (groupErrors.length > 0) {
 				errors.push({
 					key: field.key,
+					localeCode: undefined,
 					message: T("repeater_field_contains_errors"),
 					groupErrors: groupErrors,
 				});
@@ -234,7 +237,8 @@ const recursiveFieldValidate = (props: {
 		// @ts-expect-error: not all custom fields have validation config
 		if (fieldInstance.config?.validation?.required) {
 			errors.push({
-				key,
+				key: key,
+				localeCode: undefined,
 				message: T("field_is_required"),
 			});
 		}
@@ -273,8 +277,8 @@ export const validateField = (props: {
 		useTranslations: boolean;
 		defaultLocale: string;
 	};
-}): FieldErrors[] => {
-	const errors: FieldErrors[] = [];
+}): FieldError[] => {
+	const errors: FieldError[] = [];
 	const relationData = getRelationData(props.field.type, props.validationData);
 
 	//* handle fields with translations

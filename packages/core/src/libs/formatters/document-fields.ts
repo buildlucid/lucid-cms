@@ -1,5 +1,6 @@
 import Formatter from "./index.js";
 import DocumentBricksFormatter from "./document-bricks.js";
+import crypto from "node:crypto";
 import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
 import type {
 	Config,
@@ -247,6 +248,7 @@ export default class DocumentFieldsFormatter {
 			const openState = localeRows[0]?.is_open ?? false;
 
 			groupsRes.push({
+				ref: crypto.randomUUID(),
 				order: key,
 				open: Formatter.formatBoolean(openState),
 				fields: this.buildFieldTree(
@@ -360,9 +362,6 @@ export default class DocumentFieldsFormatter {
 				type: "number",
 				nullable: true,
 			},
-			collectionDocumentId: {
-				type: "number",
-			},
 			translations: {
 				type: "object",
 				additionalProperties: true,
@@ -463,12 +462,14 @@ export default class DocumentFieldsFormatter {
 					type: "object",
 					additionalProperties: true,
 					properties: {
+						ref: {
+							type: "string",
+						},
 						order: {
 							type: "number",
 						},
 						open: {
 							type: "boolean",
-							nullable: true,
 						},
 						fields: {
 							type: "array",

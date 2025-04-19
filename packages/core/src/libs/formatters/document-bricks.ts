@@ -1,5 +1,6 @@
 import Formatter from "./index.js";
 import DocumentFieldsFormatter from "./document-fields.js";
+import crypto from "node:crypto";
 import type { BrickResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type {
@@ -57,6 +58,7 @@ export default class DocumentBricksFormatter {
 				const DocumentFieldsFormatter = Formatter.get("document-fields");
 
 				brickResponses.push({
+					ref: crypto.randomUUID(),
 					key: brickKey,
 					order: firstRow.position,
 					open: Formatter.formatBoolean(firstRow.is_open),
@@ -192,6 +194,9 @@ export default class DocumentBricksFormatter {
 		type: "object",
 		additionalProperties: true,
 		properties: {
+			ref: {
+				type: "string",
+			},
 			key: {
 				type: "string",
 			},
@@ -200,7 +205,6 @@ export default class DocumentBricksFormatter {
 			},
 			open: {
 				type: "boolean",
-				nullable: true,
 			},
 			type: {
 				type: "string",

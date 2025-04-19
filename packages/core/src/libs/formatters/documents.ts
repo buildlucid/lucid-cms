@@ -5,12 +5,10 @@ import type { CollectionBuilder } from "../../builders.js";
 import type {
 	Config,
 	DocumentResponse,
-	DocumentVersionType,
 	BrickResponse,
 	FieldResponse,
 	ClientDocumentResponse,
 	BrickAltResponse,
-	FieldAltResponse,
 } from "../../types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
