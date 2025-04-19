@@ -128,6 +128,9 @@ class DocumentCustomField extends CustomField<"document"> {
 
 		return { valid: true };
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default DocumentCustomField;

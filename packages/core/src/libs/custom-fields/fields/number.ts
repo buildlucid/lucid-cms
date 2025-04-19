@@ -74,6 +74,9 @@ class NumberCustomField extends CustomField<"number"> {
 			valid: true,
 		};
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default NumberCustomField;

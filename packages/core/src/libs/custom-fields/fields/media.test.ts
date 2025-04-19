@@ -64,15 +64,15 @@ const MediaCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - media", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("standard_media")!,
-		{
+		instance: MediaCollection.fields.get("standard_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -85,19 +85,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("required_media")!,
-		{
+		instance: MediaCollection.fields.get("required_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -110,19 +114,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 
 	// Min width
-	const minWidthValidate = validateField(
-		{
+	const minWidthValidate = validateField({
+		field: {
 			key: "min_width_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("min_width_media")!,
-		{
+		instance: MediaCollection.fields.get("min_width_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -135,19 +143,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minWidthValidate).length(0);
 
 	// Max width
-	const maxWidthValidate = validateField(
-		{
+	const maxWidthValidate = validateField({
+		field: {
 			key: "max_width_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("max_width_media")!,
-		{
+		instance: MediaCollection.fields.get("max_width_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -160,19 +172,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(maxWidthValidate).length(0);
 
 	// Min height
-	const minHeightValidate = validateField(
-		{
+	const minHeightValidate = validateField({
+		field: {
 			key: "min_height_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("min_height_media")!,
-		{
+		instance: MediaCollection.fields.get("min_height_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -185,19 +201,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minHeightValidate).length(0);
 
 	// Max height
-	const maxHeightValidate = validateField(
-		{
+	const maxHeightValidate = validateField({
+		field: {
 			key: "max_height_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("max_height_media")!,
-		{
+		instance: MediaCollection.fields.get("max_height_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -210,19 +230,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(maxHeightValidate).length(0);
 
 	// Type
-	const typeValidate = validateField(
-		{
+	const typeValidate = validateField({
+		field: {
 			key: "type_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("type_media")!,
-		{
+		instance: MediaCollection.fields.get("type_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -235,19 +259,23 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(typeValidate).length(0);
 
 	// Extension
-	const extensionValidate = validateField(
-		{
+	const extensionValidate = validateField({
+		field: {
 			key: "extension_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("extension_media")!,
-		{
+		instance: MediaCollection.fields.get("extension_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -260,26 +288,34 @@ test("successfully validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(extensionValidate).length(0);
 });
 
 test("fail to validate field - media", async () => {
 	// Required - Media not found
-	const requiredExistsValidate = validateField(
-		{
+	const requiredExistsValidate = validateField({
+		field: {
 			key: "required_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("required_media")!,
-		{
+		instance: MediaCollection.fields.get("required_media")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredExistsValidate).toEqual([
 		{
 			key: "required_media",
@@ -288,20 +324,24 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Required - null value
-	const requiredNullValidate = validateField(
-		{
+	const requiredNullValidate = validateField({
+		field: {
 			key: "required_media",
 			type: "media",
 			value: null,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("required_media")!,
-		{
+		instance: MediaCollection.fields.get("required_media")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredNullValidate).toEqual([
 		{
 			key: "required_media",
@@ -310,15 +350,15 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Min width
-	const minWidthValidate = validateField(
-		{
+	const minWidthValidate = validateField({
+		field: {
 			key: "min_width_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("min_width_media")!,
-		{
+		instance: MediaCollection.fields.get("min_width_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -331,7 +371,11 @@ test("fail to validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minWidthValidate).toEqual([
 		{
 			key: "min_width_media",
@@ -342,15 +386,15 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Max width
-	const maxWidthValidate = validateField(
-		{
+	const maxWidthValidate = validateField({
+		field: {
 			key: "max_width_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("max_width_media")!,
-		{
+		instance: MediaCollection.fields.get("max_width_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -363,7 +407,11 @@ test("fail to validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(maxWidthValidate).toEqual([
 		{
 			key: "max_width_media",
@@ -374,15 +422,15 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Min height
-	const minHeightValidate = validateField(
-		{
+	const minHeightValidate = validateField({
+		field: {
 			key: "min_height_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("min_height_media")!,
-		{
+		instance: MediaCollection.fields.get("min_height_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -395,7 +443,11 @@ test("fail to validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minHeightValidate).toEqual([
 		{
 			key: "min_height_media",
@@ -406,15 +458,15 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Max height
-	const maxHeightValidate = validateField(
-		{
+	const maxHeightValidate = validateField({
+		field: {
 			key: "max_height_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("max_height_media")!,
-		{
+		instance: MediaCollection.fields.get("max_height_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -427,7 +479,11 @@ test("fail to validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(maxHeightValidate).toEqual([
 		{
 			key: "max_height_media",
@@ -438,15 +494,15 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Type
-	const typeValidate = validateField(
-		{
+	const typeValidate = validateField({
+		field: {
 			key: "type_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("type_media")!,
-		{
+		instance: MediaCollection.fields.get("type_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -459,7 +515,11 @@ test("fail to validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(typeValidate).toEqual([
 		{
 			key: "type_media",
@@ -470,15 +530,15 @@ test("fail to validate field - media", async () => {
 	]);
 
 	// Extension
-	const extensionValidate = validateField(
-		{
+	const extensionValidate = validateField({
+		field: {
 			key: "extension_media",
 			type: "media",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		MediaCollection.fields.get("extension_media")!,
-		{
+		instance: MediaCollection.fields.get("extension_media")!,
+		validationData: {
 			media: [
 				{
 					id: 1,
@@ -491,7 +551,11 @@ test("fail to validate field - media", async () => {
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(extensionValidate).toEqual([
 		{
 			key: "extension_media",

@@ -100,6 +100,9 @@ class LinkCustomField extends CustomField<"link"> {
 			valid: true,
 		};
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default LinkCustomField;

@@ -48,6 +48,9 @@ class TabCustomField extends CustomField<"tab"> {
 			valid: true,
 		};
 	}
+	get translationsEnabled() {
+		return false;
+	}
 }
 
 export default TabCustomField;

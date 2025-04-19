@@ -32,164 +32,201 @@ const TextCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - text", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_text",
 			type: "text",
 			value: "Standard text",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextCollection.fields.get("standard_text")!,
-		{
+		instance: TextCollection.fields.get("standard_text")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_text",
 			type: "text",
 			value: "Required text",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextCollection.fields.get("required_text")!,
-		{
+		instance: TextCollection.fields.get("required_text")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 
 	// Min length
-	const minLengthValidate = validateField(
-		{
+	const minLengthValidate = validateField({
+		field: {
 			key: "min_length_text",
 			type: "text",
 			value: "Min length text",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextCollection.fields.get("min_length_text")!,
-		{
+		instance: TextCollection.fields.get("min_length_text")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minLengthValidate).length(0);
 });
 
 test("fail to validate field - text", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_text",
 			type: "text",
 			value: 100,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextCollection.fields.get("standard_text")!,
-		{
+		instance: TextCollection.fields.get("standard_text")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_text",
+			localeCode: "en",
 			message: "Expected string, received number",
 		},
 	]);
 
 	// Required
 	const requiredValidate = {
-		undefined: validateField(
-			{
+		undefined: validateField({
+			field: {
 				key: "required_text",
 				type: "text",
 				value: undefined,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			TextCollection.fields.get("required_text")!,
-			{
+			instance: TextCollection.fields.get("required_text")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
-		null: validateField(
-			{
+			meta: {
+				useTranslations: TextCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
+		null: validateField({
+			field: {
 				key: "required_text",
 				type: "text",
 				value: null,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			TextCollection.fields.get("required_text")!,
-			{
+			instance: TextCollection.fields.get("required_text")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
-		empty: validateField(
-			{
+			meta: {
+				useTranslations: TextCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
+		empty: validateField({
+			field: {
 				key: "required_text",
 				type: "text",
 				value: "",
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			TextCollection.fields.get("required_text")!,
-			{
+			instance: TextCollection.fields.get("required_text")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
+			meta: {
+				useTranslations: TextCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
 	};
 	expect(requiredValidate).toEqual({
 		undefined: [
 			{
 				key: "required_text",
+				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 		null: [
 			{
 				key: "required_text",
+				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 		empty: [
 			{
 				key: "required_text",
+				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 	});
 
 	// Min length
-	const minLengthValidate = validateField(
-		{
+	const minLengthValidate = validateField({
+		field: {
 			key: "min_length_text",
 			type: "text",
 			value: "1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextCollection.fields.get("min_length_text")!,
-		{
+		instance: TextCollection.fields.get("min_length_text")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minLengthValidate).toEqual([
 		{
 			key: "min_length_text",
+			localeCode: "en",
 			message: "String must contain at least 5 character(s)", // zod error message
 		},
 	]);

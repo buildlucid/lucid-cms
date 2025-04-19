@@ -35,15 +35,15 @@ const DocumentCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - document", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_doc",
 			type: "document",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		DocumentCollection.fields.get("standard_doc")!,
-		{
+		instance: DocumentCollection.fields.get("standard_doc")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [
@@ -53,19 +53,23 @@ test("successfully validate field - document", async () => {
 				},
 			],
 		},
-	);
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_doc",
 			type: "document",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		DocumentCollection.fields.get("required_doc")!,
-		{
+		instance: DocumentCollection.fields.get("required_doc")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [
@@ -75,26 +79,34 @@ test("successfully validate field - document", async () => {
 				},
 			],
 		},
-	);
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - document", async () => {
 	// Required - document not found
-	const requiredExistsValidate = validateField(
-		{
+	const requiredExistsValidate = validateField({
+		field: {
 			key: "required_doc",
 			type: "document",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		DocumentCollection.fields.get("required_doc")!,
-		{
+		instance: DocumentCollection.fields.get("required_doc")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredExistsValidate).toEqual([
 		{
 			key: "required_doc",
@@ -103,20 +115,24 @@ test("fail to validate field - document", async () => {
 	]);
 
 	// Required - null value
-	const requiredNullValidate = validateField(
-		{
+	const requiredNullValidate = validateField({
+		field: {
 			key: "required_doc",
 			type: "document",
 			value: null,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		DocumentCollection.fields.get("required_doc")!,
-		{
+		instance: DocumentCollection.fields.get("required_doc")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredNullValidate).toEqual([
 		{
 			key: "required_doc",
@@ -125,15 +141,15 @@ test("fail to validate field - document", async () => {
 	]);
 
 	// Wrong collection
-	const wrongCollectionValidate = validateField(
-		{
+	const wrongCollectionValidate = validateField({
+		field: {
 			key: "wrong_collection",
 			type: "document",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		DocumentCollection.fields.get("wrong_collection")!,
-		{
+		instance: DocumentCollection.fields.get("wrong_collection")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [
@@ -143,7 +159,11 @@ test("fail to validate field - document", async () => {
 				},
 			],
 		},
-	);
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(wrongCollectionValidate).toEqual([
 		{
 			key: "wrong_collection",

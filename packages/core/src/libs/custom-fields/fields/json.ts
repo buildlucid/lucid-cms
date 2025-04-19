@@ -74,6 +74,9 @@ class JsonCustomField extends CustomField<"json"> {
 			valid: true,
 		};
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default JsonCustomField;

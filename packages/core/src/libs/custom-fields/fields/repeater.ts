@@ -79,6 +79,9 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 
 		return { valid: true };
 	}
+	get translationsEnabled() {
+		return false;
+	}
 }
 
 export default RepeaterCustomField;

@@ -32,120 +32,147 @@ const TextareaCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - textarea", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_textarea",
 			type: "textarea",
 			value: "Standard textarea",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextareaCollection.fields.get("standard_textarea")!,
-		{
+		instance: TextareaCollection.fields.get("standard_textarea")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextareaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_textarea",
 			type: "textarea",
 			value: "Required textarea",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextareaCollection.fields.get("required_textarea")!,
-		{
+		instance: TextareaCollection.fields.get("required_textarea")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextareaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 
 	// Min length
-	const minLengthValidate = validateField(
-		{
+	const minLengthValidate = validateField({
+		field: {
 			key: "min_length_textarea",
 			type: "textarea",
 			value: "Min length textarea",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextareaCollection.fields.get("min_length_textarea")!,
-		{
+		instance: TextareaCollection.fields.get("min_length_textarea")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextareaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minLengthValidate).length(0);
 });
 
 test("fail to validate field - textarea", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_textarea",
 			type: "textarea",
 			value: 100,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextareaCollection.fields.get("standard_textarea")!,
-		{
+		instance: TextareaCollection.fields.get("standard_textarea")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextareaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_textarea",
+			localeCode: "en",
 			message: "Expected string, received number", // zod error message
 		},
 	]);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_textarea",
 			type: "textarea",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextareaCollection.fields.get("required_textarea")!,
-		{
+		instance: TextareaCollection.fields.get("required_textarea")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextareaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_textarea",
+			localeCode: "en",
 			message: T("generic_field_required"),
 		},
 	]);
 
 	// Min length
-	const minLengthValidate = validateField(
-		{
+	const minLengthValidate = validateField({
+		field: {
 			key: "min_length_textarea",
 			type: "textarea",
 			value: "1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		TextareaCollection.fields.get("min_length_textarea")!,
-		{
+		instance: TextareaCollection.fields.get("min_length_textarea")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: TextareaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minLengthValidate).toEqual([
 		{
 			key: "min_length_textarea",
+			localeCode: "en",
 			message: "String must contain at least 5 character(s)", // zod error message
 		},
 	]);

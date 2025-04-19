@@ -84,6 +84,9 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			valid: true,
 		};
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default DatetimeCustomField;

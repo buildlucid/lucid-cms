@@ -92,6 +92,9 @@ class SelectCustomField extends CustomField<"select"> {
 			},
 		});
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default SelectCustomField;

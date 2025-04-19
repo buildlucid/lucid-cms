@@ -32,73 +32,89 @@ const NumberCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - number", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_number",
 			type: "number",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		NumberCollection.fields.get("standard_number")!,
-		{
+		instance: NumberCollection.fields.get("standard_number")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: NumberCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_number",
 			type: "number",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		NumberCollection.fields.get("required_number")!,
-		{
+		instance: NumberCollection.fields.get("required_number")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: NumberCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 
 	// Zod
-	const zodValidate = validateField(
-		{
+	const zodValidate = validateField({
+		field: {
 			key: "min_number",
 			type: "number",
 			value: 5,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		NumberCollection.fields.get("min_number")!,
-		{
+		instance: NumberCollection.fields.get("min_number")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: NumberCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(zodValidate).length(0);
 });
 
 test("fail to validate field - number", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_number",
 			type: "number",
 			value: "1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		NumberCollection.fields.get("standard_number")!,
-		{
+		instance: NumberCollection.fields.get("standard_number")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: NumberCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_number",
@@ -107,20 +123,24 @@ test("fail to validate field - number", async () => {
 	]);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_number",
 			type: "number",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		NumberCollection.fields.get("required_number")!,
-		{
+		instance: NumberCollection.fields.get("required_number")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: NumberCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_number",
@@ -129,20 +149,24 @@ test("fail to validate field - number", async () => {
 	]);
 
 	// Zod
-	const zodValidate = validateField(
-		{
+	const zodValidate = validateField({
+		field: {
 			key: "min_number",
 			type: "number",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		NumberCollection.fields.get("min_number")!,
-		{
+		instance: NumberCollection.fields.get("min_number")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: NumberCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(zodValidate).toEqual([
 		{
 			key: "min_number",
@@ -177,7 +201,6 @@ test("custom field config passes schema validation", async () => {
 			zod: z.string().min(5),
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });

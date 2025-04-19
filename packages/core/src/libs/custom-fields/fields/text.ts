@@ -74,6 +74,9 @@ class TextCustomField extends CustomField<"text"> {
 			valid: true,
 		};
 	}
+	get translationsEnabled() {
+		return this.config.config.useTranslations;
+	}
 }
 
 export default TextCustomField;

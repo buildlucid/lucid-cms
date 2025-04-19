@@ -27,8 +27,8 @@ const LinkCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - link", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_link",
 			type: "link",
 			value: {
@@ -38,18 +38,22 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		LinkCollection.fields.get("standard_link")!,
-		{
+		instance: LinkCollection.fields.get("standard_link")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: LinkCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_link",
 			type: "link",
 			value: {
@@ -59,20 +63,24 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		LinkCollection.fields.get("required_link")!,
-		{
+		instance: LinkCollection.fields.get("required_link")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: LinkCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - link", async () => {
 	// Standard - Invalid URL
-	const invalidUrlValidate = validateField(
-		{
+	const invalidUrlValidate = validateField({
+		field: {
 			key: "standard_link",
 			type: "link",
 			value: {
@@ -82,13 +90,17 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		LinkCollection.fields.get("standard_link")!,
-		{
+		instance: LinkCollection.fields.get("standard_link")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: LinkCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(invalidUrlValidate).toEqual([
 		{
 			key: "standard_link",
@@ -97,8 +109,8 @@ test("fail to validate field - link", async () => {
 	]);
 
 	// Standard - Invalid Target
-	const invalidTargetValidate = validateField(
-		{
+	const invalidTargetValidate = validateField({
+		field: {
 			key: "standard_link",
 			type: "link",
 			value: {
@@ -108,13 +120,17 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		LinkCollection.fields.get("standard_link")!,
-		{
+		instance: LinkCollection.fields.get("standard_link")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: LinkCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(invalidTargetValidate).toEqual([
 		{
 			key: "standard_link",
@@ -125,8 +141,8 @@ test("fail to validate field - link", async () => {
 	]);
 
 	// Standard - Invalid Label
-	const invalidLabelValidate = validateField(
-		{
+	const invalidLabelValidate = validateField({
+		field: {
 			key: "standard_link",
 			type: "link",
 			value: {
@@ -136,13 +152,17 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		LinkCollection.fields.get("standard_link")!,
-		{
+		instance: LinkCollection.fields.get("standard_link")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: LinkCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(invalidLabelValidate).toEqual([
 		{
 			key: "standard_link",
@@ -151,20 +171,24 @@ test("fail to validate field - link", async () => {
 	]);
 
 	// Required - Empty value
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_link",
 			type: "link",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		LinkCollection.fields.get("required_link")!,
-		{
+		instance: LinkCollection.fields.get("required_link")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: LinkCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_link",

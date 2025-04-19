@@ -32,144 +32,176 @@ const WysiwygCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - wysiwyg", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_wysiwyg",
 			type: "wysiwyg",
 			value: "<h1>Heading</h1><p>Body</p>",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		WysiwygCollection.fields.get("standard_wysiwyg")!,
-		{
+		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_wysiwyg",
 			type: "wysiwyg",
 			value: "<h1>Heading</h1><p>Body</p>",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		WysiwygCollection.fields.get("required_wysiwyg")!,
-		{
+		instance: WysiwygCollection.fields.get("required_wysiwyg")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 
 	// Min length
-	const minLengthValidate = validateField(
-		{
+	const minLengthValidate = validateField({
+		field: {
 			key: "min_length_wysiwyg",
 			type: "wysiwyg",
 			value: "<h1>Heading</h1><p>Body</p>",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		WysiwygCollection.fields.get("min_length_wysiwyg")!,
-		{
+		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minLengthValidate).length(0);
 });
 
 test("fail to validate field - wysiwyg", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_wysiwyg",
 			type: "wysiwyg",
 			value: 100,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		WysiwygCollection.fields.get("standard_wysiwyg")!,
-		{
+		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_wysiwyg",
+			localeCode: "en",
 			message: "Expected string, received number", // zod error message
 		},
 	]);
 
 	// Required
 	const requiredValidate = {
-		exists: validateField(
-			{
+		exists: validateField({
+			field: {
 				key: "required_wysiwyg",
 				type: "wysiwyg",
 				value: undefined,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			WysiwygCollection.fields.get("required_wysiwyg")!,
-			{
+			instance: WysiwygCollection.fields.get("required_wysiwyg")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
-		null: validateField(
-			{
+			meta: {
+				useTranslations: WysiwygCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
+		null: validateField({
+			field: {
 				key: "required_wysiwyg",
 				type: "wysiwyg",
 				value: null,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			WysiwygCollection.fields.get("required_wysiwyg")!,
-			{
+			instance: WysiwygCollection.fields.get("required_wysiwyg")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
+			meta: {
+				useTranslations: WysiwygCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
 	};
 	expect(requiredValidate).toEqual({
 		exists: [
 			{
 				key: "required_wysiwyg",
+				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 		null: [
 			{
 				key: "required_wysiwyg",
+				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 	});
 
 	// Min length
-	const minLengthValidate = validateField(
-		{
+	const minLengthValidate = validateField({
+		field: {
 			key: "min_length_wysiwyg",
 			type: "wysiwyg",
 			value: "Hi",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		WysiwygCollection.fields.get("min_length_wysiwyg")!,
-		{
+		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(minLengthValidate).toEqual([
 		{
 			key: "min_length_wysiwyg",
+			localeCode: "en",
 			message: "String must contain at least 5 character(s)", // zod error message
 		},
 	]);

@@ -26,15 +26,15 @@ const UserCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - user", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_user",
 			type: "user",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		UserCollection.fields.get("standard_user")!,
-		{
+		instance: UserCollection.fields.get("standard_user")!,
+		validationData: {
 			media: [],
 			users: [
 				{
@@ -47,19 +47,23 @@ test("successfully validate field - user", async () => {
 			],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: UserCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_user",
 			type: "user",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		UserCollection.fields.get("required_user")!,
-		{
+		instance: UserCollection.fields.get("required_user")!,
+		validationData: {
 			media: [],
 			users: [
 				{
@@ -72,43 +76,54 @@ test("successfully validate field - user", async () => {
 			],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: UserCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - user", async () => {
 	// Required
 	const requiredValidate = {
-		exists: validateField(
-			{
+		exists: validateField({
+			field: {
 				key: "required_user",
 				type: "user",
 				value: 1,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			UserCollection.fields.get("required_user")!,
-			{
+			instance: UserCollection.fields.get("required_user")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
-		null: validateField(
-			{
+			meta: {
+				useTranslations: UserCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
+		null: validateField({
+			field: {
 				key: "required_user",
 				type: "user",
 				value: null,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			UserCollection.fields.get("required_user")!,
-			{
+			instance: UserCollection.fields.get("required_user")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
+			meta: {
+				useTranslations: UserCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
 	};
-
 	expect(requiredValidate).toEqual({
 		exists: [
 			{
@@ -146,7 +161,6 @@ test("custom field config passes schema validation", async () => {
 			required: true,
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });

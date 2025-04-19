@@ -29,16 +29,21 @@ const checkValidateBricksFields: ServiceFn<
 	const relationDataRes = await fetchValidationData(context, data);
 	if (relationDataRes.error) return relationDataRes;
 
-	const brickErrors = validateBricks(
-		data.bricks,
-		data.collection,
-		relationDataRes.data,
-	);
-	const fieldErrors = recursiveFieldValidate(
-		data.fields,
-		data.collection,
-		relationDataRes.data,
-	);
+	const brickErrors = validateBricks({
+		bricks: data.bricks,
+		collection: data.collection,
+		validationData: relationDataRes.data,
+		defaultLocale: context.config.localisation.defaultLocale,
+	});
+	const fieldErrors = recursiveFieldValidate({
+		fields: data.fields,
+		instance: data.collection,
+		validationData: relationDataRes.data,
+		meta: {
+			useTranslations: data.collection.getData.config.useTranslations,
+			defaultLocale: context.config.localisation.defaultLocale,
+		},
+	});
 
 	if (brickErrors.length > 0 || fieldErrors.length > 0) {
 		return {
@@ -67,25 +72,26 @@ const checkValidateBricksFields: ServiceFn<
 /**
  * Loops over bricks and runs validation against their fields recursively and return errors
  */
-const validateBricks = (
-	bricks: Array<BrickSchema>,
-	collection: CollectionBuilder,
-	validationData: ValidationData,
-): Array<BrickError> => {
+const validateBricks = (props: {
+	bricks: Array<BrickSchema>;
+	collection: CollectionBuilder;
+	validationData: ValidationData;
+	defaultLocale: string;
+}): Array<BrickError> => {
 	const errors: BrickError[] = [];
 
-	for (const brick of bricks) {
+	for (const brick of props.bricks) {
 		let instance = undefined;
 
 		switch (brick.type) {
 			case "builder": {
-				instance = collection.config.bricks?.builder?.find(
+				instance = props.collection.config.bricks?.builder?.find(
 					(b) => b.key === brick.key,
 				);
 				break;
 			}
 			case "fixed": {
-				instance = collection.config.bricks?.fixed?.find(
+				instance = props.collection.config.bricks?.fixed?.find(
 					(b) => b.key === brick.key,
 				);
 				break;
@@ -101,11 +107,15 @@ const validateBricks = (
 			return errors;
 		}
 
-		const fieldErrors = recursiveFieldValidate(
-			brick.fields || [],
-			instance,
-			validationData,
-		);
+		const fieldErrors = recursiveFieldValidate({
+			fields: brick.fields || [],
+			instance: instance,
+			validationData: props.validationData,
+			meta: {
+				useTranslations: props.collection.getData.config.useTranslations,
+				defaultLocale: props.defaultLocale,
+			},
+		});
 		if (fieldErrors.length === 0) continue;
 
 		errors.push({
@@ -122,17 +132,21 @@ const validateBricks = (
 /**
  * Recursively validate fields and return errors
  */
-const recursiveFieldValidate = (
-	fields: Array<FieldSchemaType>,
-	instance: CollectionBuilder | BrickBuilder,
-	validationData: ValidationData,
-	parentRepeaterKey?: string,
-) => {
+const recursiveFieldValidate = (props: {
+	fields: Array<FieldSchemaType>;
+	instance: CollectionBuilder | BrickBuilder;
+	validationData: ValidationData;
+	parentRepeaterKey?: string;
+	meta: {
+		useTranslations: boolean;
+		defaultLocale: string;
+	};
+}) => {
 	const errors: FieldErrors[] = [];
 
 	//*  validate all provided fields
-	for (const field of fields) {
-		const fieldInstance = instance.fields.get(field.key);
+	for (const field of props.fields) {
+		const fieldInstance = props.instance.fields.get(field.key);
 		if (!fieldInstance) {
 			errors.push({
 				key: field.key,
@@ -162,12 +176,13 @@ const recursiveFieldValidate = (
 				const group = field.groups[i];
 				if (!group) continue;
 
-				const groupFieldErrors = recursiveFieldValidate(
-					group.fields,
-					instance,
-					validationData,
-					field.key,
-				);
+				const groupFieldErrors = recursiveFieldValidate({
+					fields: group.fields,
+					instance: props.instance,
+					validationData: props.validationData,
+					parentRepeaterKey: field.key,
+					meta: props.meta,
+				});
 
 				if (groupFieldErrors.length > 0) {
 					groupErrors.push({
@@ -190,22 +205,28 @@ const recursiveFieldValidate = (
 		}
 
 		//* handle regular fields
-		const fieldErrors = validateField(field, fieldInstance, validationData);
+		const fieldErrors = validateField({
+			field: field,
+			instance: fieldInstance,
+			validationData: props.validationData,
+			meta: props.meta,
+		});
 		if (fieldErrors.length > 0) {
 			errors.push(...fieldErrors);
 		}
 	}
 
 	//* check for required fields that are missing
-	const submittedFieldKeys = new Set(fields.map((field) => field.key));
-	instance.fields.forEach((fieldInstance, key) => {
+	const submittedFieldKeys = new Set(props.fields.map((field) => field.key));
+	props.instance.fields.forEach((fieldInstance, key) => {
 		if (submittedFieldKeys.has(key)) return;
 
 		//* skip fields that belong to a different repeater context
 		const fieldRepeaterParent = fieldInstance.repeater;
 		if (
-			(fieldRepeaterParent && fieldRepeaterParent !== parentRepeaterKey) ||
-			(!fieldRepeaterParent && parentRepeaterKey)
+			(fieldRepeaterParent &&
+				fieldRepeaterParent !== props.parentRepeaterKey) ||
+			(!fieldRepeaterParent && props.parentRepeaterKey)
 		) {
 			return;
 		}
@@ -244,27 +265,31 @@ const getRelationData = (
 /**
  * Validates a single field, handling both direct values and translations
  */
-export const validateField = (
-	field: FieldSchemaType,
-	instance: CustomField<FieldTypes>,
-	validationData: ValidationData,
-): FieldErrors[] => {
+export const validateField = (props: {
+	field: FieldSchemaType;
+	instance: CustomField<FieldTypes>;
+	validationData: ValidationData;
+	meta: {
+		useTranslations: boolean;
+		defaultLocale: string;
+	};
+}): FieldErrors[] => {
 	const errors: FieldErrors[] = [];
-	const relationData = getRelationData(field.type, validationData);
+	const relationData = getRelationData(props.field.type, props.validationData);
 
 	//* handle fields with translations
-	if (field.translations) {
-		for (const localeCode in field.translations) {
-			const value = field.translations[localeCode];
-			const validationResult = instance.validate({
-				type: field.type,
+	if (props.field.translations) {
+		for (const localeCode in props.field.translations) {
+			const value = props.field.translations[localeCode];
+			const validationResult = props.instance.validate({
+				type: props.field.type,
 				value,
 				relationData,
 			});
 
 			if (!validationResult.valid) {
 				errors.push({
-					key: field.key,
+					key: props.field.key,
 					localeCode,
 					message:
 						validationResult.message ||
@@ -275,16 +300,19 @@ export const validateField = (
 	}
 	//* handle direct value fields
 	else {
-		const validationResult = instance.validate({
-			type: field.type,
-			value: field.value,
+		const validationResult = props.instance.validate({
+			type: props.field.type,
+			value: props.field.value,
 			relationData,
 		});
 
-		// TODO: if the field instance is configured to use translations, but only a field.value is passed (hence we're in this block), then add the default locale to the localeCode on the error
 		if (!validationResult.valid) {
 			errors.push({
-				key: field.key,
+				key: props.field.key,
+				localeCode:
+					props.meta.useTranslations && props.instance.translationsEnabled
+						? props.meta.defaultLocale
+						: undefined,
 				message:
 					validationResult.message ||
 					T("an_unknown_error_occurred_validating_the_field"),

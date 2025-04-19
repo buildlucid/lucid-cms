@@ -46,73 +46,88 @@ const SelectCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - select", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_select",
 			type: "select",
 			value: "option-1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		SelectCollection.fields.get("standard_select")!,
-		{
+		instance: SelectCollection.fields.get("standard_select")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: SelectCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_select",
 			type: "select",
 			value: "option-1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		SelectCollection.fields.get("required_select")!,
-		{
+		instance: SelectCollection.fields.get("required_select")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: SelectCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - select", async () => {
 	// Standard
 	const standardValidate = {
-		exists: validateField(
-			{
+		exists: validateField({
+			field: {
 				key: "standard_select",
 				type: "select",
 				value: "option-10",
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			SelectCollection.fields.get("standard_select")!,
-			{
+			instance: SelectCollection.fields.get("standard_select")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
-		number: validateField(
-			{
+			meta: {
+				useTranslations: SelectCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
+		number: validateField({
+			field: {
 				key: "standard_select",
 				type: "select",
 				value: 1,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			SelectCollection.fields.get("standard_select")!,
-			{
+			instance: SelectCollection.fields.get("standard_select")!,
+			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
-		),
+			meta: {
+				useTranslations: SelectCollection.getData.config.useTranslations,
+				defaultLocale: "en",
+			},
+		}),
 	};
-
 	expect(standardValidate).toEqual({
 		exists: [
 			{
@@ -129,21 +144,24 @@ test("fail to validate field - select", async () => {
 	});
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_select",
 			type: "select",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		SelectCollection.fields.get("required_select")!,
-		{
+		instance: SelectCollection.fields.get("required_select")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
-
+		meta: {
+			useTranslations: SelectCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_select",
@@ -178,7 +196,6 @@ test("custom field config passes schema validation", async () => {
 			required: true,
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });

@@ -26,56 +26,68 @@ const CheckboxCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - checkbox", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_checkbox",
 			type: "checkbox",
 			value: 0,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		CheckboxCollection.fields.get("standard_checkbox")!,
-		{
+		instance: CheckboxCollection.fields.get("standard_checkbox")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_chekbox",
 			type: "checkbox",
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		CheckboxCollection.fields.get("required_chekbox")!,
-		{
+		instance: CheckboxCollection.fields.get("required_chekbox")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 });
 
 test("fail to validate field - checkbox", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_checkbox",
 			type: "checkbox",
 			value: "1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		CheckboxCollection.fields.get("standard_checkbox")!,
-		{
+		instance: CheckboxCollection.fields.get("standard_checkbox")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_checkbox",
@@ -85,20 +97,24 @@ test("fail to validate field - checkbox", async () => {
 	]);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_chekbox",
 			type: "checkbox",
 			value: 0,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		CheckboxCollection.fields.get("required_chekbox")!,
-		{
+		instance: CheckboxCollection.fields.get("required_chekbox")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_chekbox",
@@ -129,7 +145,6 @@ test("custom field config passes schema validation", async () => {
 			required: true,
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });

@@ -35,8 +35,8 @@ const JSONCollection = new CollectionBuilder("collection", {
 
 test("successfully validate field - json", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_json",
 			type: "json",
 			value: {
@@ -44,18 +44,22 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		JSONCollection.fields.get("standard_json")!,
-		{
+		instance: JSONCollection.fields.get("standard_json")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: JSONCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).length(0);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_json",
 			type: "json",
 			value: {
@@ -63,18 +67,22 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		JSONCollection.fields.get("required_json")!,
-		{
+		instance: JSONCollection.fields.get("required_json")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: JSONCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).length(0);
 
 	// Zod
-	const zodValidate = validateField(
-		{
+	const zodValidate = validateField({
+		field: {
 			key: "zod_json",
 			type: "json",
 			value: {
@@ -83,32 +91,40 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		JSONCollection.fields.get("zod_json")!,
-		{
+		instance: JSONCollection.fields.get("zod_json")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: JSONCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(zodValidate).length(0);
 });
 
 test("fail to validate field - json", async () => {
 	// Standard
-	const standardValidate = validateField(
-		{
+	const standardValidate = validateField({
+		field: {
 			key: "standard_json",
 			type: "json",
 			value: "invalid json",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		JSONCollection.fields.get("standard_json")!,
-		{
+		instance: JSONCollection.fields.get("standard_json")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: JSONCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_json",
@@ -117,20 +133,24 @@ test("fail to validate field - json", async () => {
 	]);
 
 	// Required
-	const requiredValidate = validateField(
-		{
+	const requiredValidate = validateField({
+		field: {
 			key: "required_json",
 			type: "json",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		JSONCollection.fields.get("required_json")!,
-		{
+		instance: JSONCollection.fields.get("required_json")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: JSONCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_json",
@@ -139,8 +159,8 @@ test("fail to validate field - json", async () => {
 	]);
 
 	// Zod
-	const zodValidate = validateField(
-		{
+	const zodValidate = validateField({
+		field: {
 			key: "zod_json",
 			type: "json",
 			value: {
@@ -149,13 +169,17 @@ test("fail to validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		JSONCollection.fields.get("zod_json")!,
-		{
+		instance: JSONCollection.fields.get("zod_json")!,
+		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
-	);
+		meta: {
+			useTranslations: JSONCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
 	expect(zodValidate).toEqual([
 		{
 			key: "zod_json",
@@ -194,7 +218,6 @@ test("custom field config passes schema validation", async () => {
 			}),
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });
