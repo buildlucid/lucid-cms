@@ -197,7 +197,7 @@ export interface BrickAltResponse {
 export interface FieldResponse {
 	key: string;
 	type: FieldTypes;
-	groupId?: number;
+	groupRef?: string;
 	translations?: Record<string, FieldResponseValue>;
 	value?: FieldResponseValue;
 	meta?: Record<string, FieldResponseMeta> | FieldResponseMeta;
@@ -206,7 +206,7 @@ export interface FieldResponse {
 export interface FieldAltResponse {
 	key: string;
 	type: FieldTypes;
-	groupId?: number;
+	groupRef?: string;
 	translations?: Record<string, FieldResponseValue>;
 	value?: FieldResponseValue;
 	meta?: Record<string, FieldResponseMeta> | FieldResponseMeta;

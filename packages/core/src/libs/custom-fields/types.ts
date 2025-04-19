@@ -475,24 +475,6 @@ export type UserFieldProps = Partial<
 >;
 
 // -----------------------------------------------
-// Data
-
-export type CFInsertItem<T extends FieldTypes> = {
-	localeCode: string;
-	collectionBrickId: number;
-	key: string;
-	type: T;
-	groupId?: number | null;
-	textValue?: string | null;
-	intValue?: number | null;
-	boolValue?: boolean | null;
-	jsonValue?: Record<string, unknown> | null;
-	mediaId?: number | null;
-	userId?: number | null;
-	documentId?: number | null;
-};
-
-// -----------------------------------------------
 // Response Values
 
 export type TabResValue = null;

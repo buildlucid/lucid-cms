@@ -79,6 +79,7 @@ export default class DocumentFieldsFormatter {
 		meta: FieldFormatMeta & {
 			fieldConfig: CFConfig<FieldTypes>[];
 			repeaterLevel?: number;
+			groupRef?: string;
 		},
 	): FieldResponse[] => {
 		const fieldsRes: FieldResponse[] = [];
@@ -90,6 +91,7 @@ export default class DocumentFieldsFormatter {
 				fieldsRes.push({
 					key: config.key,
 					type: config.type,
+					groupRef: meta.groupRef,
 					groups: this.buildGroups(data, {
 						builder: meta.builder,
 						repeaterConfig: config,
@@ -127,6 +129,7 @@ export default class DocumentFieldsFormatter {
 					collection: meta.collection,
 					brickKey: meta.brickKey,
 					config: meta.config,
+					groupRef: meta.groupRef,
 				},
 			);
 			if (fieldValue) fieldsRes.push(fieldValue);
@@ -147,6 +150,7 @@ export default class DocumentFieldsFormatter {
 		},
 		meta: FieldFormatMeta & {
 			fieldConfig: CFConfig<FieldTypes>;
+			groupRef?: string;
 		},
 	): FieldResponse | null => {
 		const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
@@ -187,6 +191,7 @@ export default class DocumentFieldsFormatter {
 			return {
 				key: meta.fieldConfig.key,
 				type: meta.fieldConfig.type,
+				groupRef: meta.groupRef,
 				translations: fieldTranslations,
 				meta: fieldMeta,
 			};
@@ -202,6 +207,7 @@ export default class DocumentFieldsFormatter {
 			key: meta.fieldConfig.key,
 			type: meta.fieldConfig.type,
 			value: cfInstance.formatResponseValue(defaultValue.value),
+			groupRef: meta.groupRef,
 			meta: cfInstance.formatResponseMeta(
 				this.fetchRelationData(data.relationMetaData, {
 					type: meta.fieldConfig.type,
@@ -246,9 +252,10 @@ export default class DocumentFieldsFormatter {
 		groups.forEach((localeRows, key) => {
 			//* open state is shared for now - if this is to change in the future, the insert/response format for this needs changing
 			const openState = localeRows[0]?.is_open ?? false;
+			const ref = crypto.randomUUID();
 
 			groupsRes.push({
-				ref: crypto.randomUUID(),
+				ref: ref,
 				order: key,
 				open: Formatter.formatBoolean(openState),
 				fields: this.buildFieldTree(
@@ -267,6 +274,7 @@ export default class DocumentFieldsFormatter {
 						fieldConfig: repeaterFields,
 						repeaterLevel: meta.repeaterLevel + 1,
 						config: meta.config,
+						groupRef: ref,
 					},
 				),
 			});
@@ -358,8 +366,8 @@ export default class DocumentFieldsFormatter {
 					"user",
 				],
 			},
-			groupId: {
-				type: "number",
+			groupRef: {
+				type: "string",
 				nullable: true,
 			},
 			translations: {
