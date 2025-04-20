@@ -18,6 +18,7 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
+	formatFieldFilters,
 } from "@/utils/document-table-helpers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
@@ -94,7 +95,11 @@ const CollectionsDocumentsListRoute: Component = () => {
 			for (const field of getCollectionFieldFilters()) {
 				switch (field.type) {
 					default: {
-						filterConfig[field.key] = {
+						filterConfig[
+							formatFieldFilters({
+								fieldKey: field.key,
+							})
+						] = {
 							type: "text",
 							value: "",
 						};
@@ -150,6 +155,10 @@ const CollectionsDocumentsListRoute: Component = () => {
 								<QueryRow
 									searchParams={searchParams}
 									filters={getCollectionFieldFilters().map((field) => {
+										const fieldKey = formatFieldFilters({
+											fieldKey: field.key,
+										});
+
 										switch (field.type) {
 											case "checkbox": {
 												return {
@@ -157,7 +166,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 														value: field.details.label,
 														fallback: field.key,
 													}),
-													key: field.key,
+													key: fieldKey,
 													type: "boolean",
 												};
 											}
@@ -167,7 +176,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 														value: field.details.label,
 														fallback: field.key,
 													}),
-													key: field.key,
+													key: fieldKey,
 													type: "select",
 													options: field.options?.map((option, i) => ({
 														value: option.value,
@@ -186,7 +195,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 														value: field.details.label,
 														fallback: field.key,
 													}),
-													key: field.key,
+													key: fieldKey,
 													type: "text",
 												};
 											}

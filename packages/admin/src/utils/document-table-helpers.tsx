@@ -29,23 +29,23 @@ export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
 };
 
 export const collectionFieldFilters = (collection?: CollectionResponse) => {
-	const fieldsRes: CFConfig<FieldTypes>[] = [];
+	return (
+		collection?.fields.filter((f) => {
+			return f.type !== "repeater";
+		}) || []
+	);
+};
 
-	const fieldRecursive = (fields?: CFConfig<FieldTypes>[]) => {
-		if (!fields) return;
-		for (const field of fields) {
-			if (field.type === "repeater" && field.fields) {
-				fieldRecursive(field.fields);
-				return;
-			}
-			if (collection?.config.fieldFilters.includes(field.key)) {
-				fieldsRes.push(field);
-			}
-		}
-	};
-	fieldRecursive(collection?.fields);
-
-	return fieldsRes;
+/**
+ * Formats fields ready for filter query params. Fields are all prefixed with an underscore. Brick and repeaters are seperated with a . and must be followed with a field key (_fieldKey).
+ *
+ * _${fieldKey}
+ * ${brickKey}.${repeaterKey}._${fieldKey}
+ */
+export const formatFieldFilters = (props: {
+	fieldKey: string;
+}) => {
+	return `_${props.fieldKey}`;
 };
 
 export const collectionFieldIncludes = (collection?: CollectionResponse) => {
