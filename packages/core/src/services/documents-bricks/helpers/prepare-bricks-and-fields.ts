@@ -39,7 +39,10 @@ const processFields = (props: {
 				cfInstance?.translationsEnabled
 			) {
 				// if processField.value is given only and no translations key - add the value to the translations object with the locale object key being the default locale
-				if (processedField.value && !processedField.translations) {
+				if (
+					processedField.value !== undefined &&
+					!processedField.translations
+				) {
 					processedField.translations = {
 						[props.localisation.defaultLocale]: processedField.value,
 					};
@@ -47,10 +50,13 @@ const processFields = (props: {
 				}
 			} else {
 				// if processField.translations is given, take the default locale translation value and set it as the processField.value
-				if (processedField.translations && !processedField.value) {
+				if (processedField.translations && processedField.value === undefined) {
+					const translationValue =
+						processedField.translations[props.localisation.defaultLocale];
 					processedField.value =
-						processedField.translations[props.localisation.defaultLocale] ||
-						cfInstance.defaultValue;
+						translationValue !== undefined
+							? translationValue
+							: cfInstance.defaultValue;
 					processedField.translations = undefined;
 				}
 			}
@@ -59,7 +65,8 @@ const processFields = (props: {
 			if (processedField.translations) {
 				for (const locale of props.localisation.locales) {
 					const localeCode = locale.code;
-					if (!processedField.translations[localeCode]) {
+					//* if null its intentionally empty - no default should be set
+					if (processedField.translations[localeCode] === undefined) {
 						processedField.translations[localeCode] = cfInstance.defaultValue;
 					}
 				}
