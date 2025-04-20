@@ -2,7 +2,7 @@ import T from "../../translations/index.js";
 import constants from "../../constants.js";
 import type {
 	FieldSchemaType,
-	FieldErrors,
+	FieldError,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../../types/index.js";
@@ -19,7 +19,7 @@ const checkRootSlugWithParent = (data: {
 	};
 }): Awaited<ServiceResponse<undefined>> => {
 	if (data.collection.useTranslations && data.fields.slug.translations) {
-		const fieldErrors: FieldErrors[] = [];
+		const fieldErrors: FieldError[] = [];
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
 			if (value === "/" && data.fields.parentPage.value) {
 				fieldErrors.push({

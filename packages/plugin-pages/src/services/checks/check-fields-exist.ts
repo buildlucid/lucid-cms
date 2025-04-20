@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import type {
-	FieldErrors,
+	FieldError,
 	FieldSchemaType,
 	ServiceResponse,
 } from "@lucidcms/core/types";
@@ -21,23 +21,26 @@ const checkFieldsExist = (data: {
 		fullSlug: FieldSchemaType;
 	}>
 > => {
-	const fieldErrors: FieldErrors[] = [];
+	const fieldErrors: FieldError[] = [];
 
 	if (data.fields.slug === undefined) {
 		fieldErrors.push({
 			key: "slug",
+			localeCode: undefined,
 			message: T("field_required"),
 		});
 	}
 	if (data.fields.parentPage === undefined) {
 		fieldErrors.push({
 			key: "parentPage",
+			localeCode: undefined,
 			message: T("field_required"),
 		});
 	}
 	if (data.fields.fullSlug === undefined) {
 		fieldErrors.push({
 			key: "fullSlug",
+			localeCode: undefined,
 			message: T("field_required"),
 		});
 	}

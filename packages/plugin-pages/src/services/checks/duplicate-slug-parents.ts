@@ -4,7 +4,7 @@ import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
 	ServiceFn,
 	FieldSchemaType,
-	FieldErrors,
+	FieldError,
 	DocumentVersionType,
 	CollectionTableNames,
 } from "@lucidcms/core/types";
@@ -109,7 +109,7 @@ const checkDuplicateSlugParents: ServiceFn<
 			.execute();
 
 		if (duplicates.length > 0) {
-			const fieldErrors: FieldErrors[] = [];
+			const fieldErrors: FieldError[] = [];
 			for (const duplicate of duplicates) {
 				fieldErrors.push({
 					key: constants.fields.slug.key,
