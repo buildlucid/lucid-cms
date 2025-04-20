@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import z, { type ZodTypeAny } from "zod";
+import z, { type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import type { FastifyRequest } from "fastify";
@@ -96,33 +96,32 @@ const addRemainingQuery = (query: unknown) => {
 	return remainingQuery;
 };
 
-const validateQuery =
-	(schema: ZodTypeAny) => async (request: FastifyRequest) => {
-		const querySchema = z.object({
-			query: schema ?? z.object({}),
+const validateQuery = (schema: ZodType) => async (request: FastifyRequest) => {
+	const querySchema = z.object({
+		query: schema ?? z.object({}),
+	});
+
+	const validateResult = await querySchema.safeParseAsync({
+		query: {
+			sort: buildSort(request.query),
+			filter: buildFilter(request.query),
+			include: buildInclude(request.query),
+			exclude: buildExclude(request.query),
+			page: buildPage(request.query),
+			perPage: buildPerPage(request.query),
+			...addRemainingQuery(request.query),
+		},
+	});
+
+	if (!validateResult.success) {
+		throw new LucidAPIError({
+			type: "validation",
+			message: T("validation_query_error_message"),
+			zod: validateResult.error,
 		});
+	}
 
-		const validateResult = await querySchema.safeParseAsync({
-			query: {
-				sort: buildSort(request.query),
-				filter: buildFilter(request.query),
-				include: buildInclude(request.query),
-				exclude: buildExclude(request.query),
-				page: buildPage(request.query),
-				perPage: buildPerPage(request.query),
-				...addRemainingQuery(request.query),
-			},
-		});
-
-		if (!validateResult.success) {
-			throw new LucidAPIError({
-				type: "validation",
-				message: T("validation_query_error_message"),
-				zod: validateResult.error,
-			});
-		}
-
-		request.query = validateResult.data.query as QueryParams;
-	};
+	request.query = validateResult.data.query as QueryParams;
+};
 
 export default validateQuery;

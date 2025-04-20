@@ -37,6 +37,7 @@ export const FieldBaseSchema = z.object({
 	value: FieldValueSchema.optional(),
 });
 
+// TODO: Zod repalce z.lazy with new zod solution for this: https://v4.zod.dev/v4#true-recursive-types
 export const FieldSchema: z.ZodType<FieldSchemaType> = FieldBaseSchema.extend({
 	groups: z
 		.lazy(() =>

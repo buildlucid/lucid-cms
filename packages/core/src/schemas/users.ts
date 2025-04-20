@@ -4,7 +4,7 @@ import z from "zod";
 export default {
 	createSingle: {
 		body: z.object({
-			email: z.string().email(),
+			email: z.email(),
 			username: z.string(),
 			roleIds: z.array(z.number()),
 			firstName: z.string().optional(),

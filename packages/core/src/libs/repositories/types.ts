@@ -1,4 +1,4 @@
-import type { ZodSchema, ZodObject, ZodRawShape } from "zod";
+import type { ZodObject } from "zod";
 import type { LucidErrorData, LucidDB } from "../../types.js";
 import type { ColumnDataType } from "kysely";
 

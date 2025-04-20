@@ -12,7 +12,7 @@ export default {
 			firstName: z.string().optional(),
 			lastName: z.string().optional(),
 			username: z.string().min(3).optional(),
-			email: z.string().email().optional(),
+			email: z.email().optional(),
 			currentPassword: z.string().optional(),
 			newPassword: z.string().min(8).max(128).optional(),
 			passwordConfirmation: z.string().min(8).max(128).optional(),
@@ -22,7 +22,7 @@ export default {
 	},
 	sendResetPassword: {
 		body: z.object({
-			email: z.string().email(),
+			email: z.email(),
 		}),
 		query: undefined,
 		params: undefined,

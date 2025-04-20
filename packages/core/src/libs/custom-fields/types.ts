@@ -1,11 +1,5 @@
 import type { ZodType } from "zod";
-import type {
-	DocumentResponse,
-	FieldAltResponse,
-	MediaResponse,
-	MediaType,
-	UserResponse,
-} from "../../types/response.js";
+import type { FieldAltResponse, MediaType } from "../../types/response.js";
 import type { OnDelete, OnUpdate } from "../db/types.js";
 import type { ColumnDataType } from "kysely";
 import type { LocaleValue } from "../../types/shared.js";

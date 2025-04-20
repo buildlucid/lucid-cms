@@ -1,4 +1,3 @@
-import T from "../../translations/index.js";
 import errorTypeDefaults from "./error-type-defaults.js";
 import type z from "zod";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
@@ -52,6 +51,7 @@ class LucidAPIError extends Error {
 		this.message = errorTypeRes.message ?? constants.errors.message;
 	}
 	// static
+	// TODO: ZOD check out what the replacement is going to be here, or if we leave the depreciated feature for now?
 	static formatZodErrors(error: z.ZodIssue[]) {
 		const result: ErrorResult = {};
 

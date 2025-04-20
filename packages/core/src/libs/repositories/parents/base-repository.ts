@@ -2,6 +2,7 @@ import T from "../../../translations/index.js";
 import crypto from "node:crypto";
 import logger from "../../../utils/logging/index.js";
 import constants from "../../../constants/constants.js";
+// TODO: ZOD find replaceplacement for ZodSchema
 import z, { type ZodSchema, type ZodObject } from "zod";
 import type {
 	ColumnDataType,

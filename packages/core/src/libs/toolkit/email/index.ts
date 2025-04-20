@@ -14,7 +14,7 @@ const emailToolkit = {
 			config: {
 				transaction: true,
 				schema: z.object({
-					to: z.string().email(),
+					to: z.email(),
 					subject: z.string(),
 					template: z.string(),
 					cc: z.string().optional(),
