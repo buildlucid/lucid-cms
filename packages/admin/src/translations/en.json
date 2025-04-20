@@ -385,7 +385,6 @@
 	"available_builder_bricks": "Available Builder Bricks",
 	"fixed_bricks": "Fixed Bricks",
 	"total_bricks": "Total Bricks",
-	"field_errors": "Field Errors",
 	"clear_filters": "Clear Filters",
 
 	"create_toast_title": "{{name}} created",

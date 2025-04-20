@@ -57,9 +57,6 @@ const getSingle: ServiceFn<
 						value: context.config.db.getDefault("boolean", "false"),
 					},
 				],
-				validation: {
-					enabled: true,
-				},
 			},
 			{
 				tableName: tablesRes.data.document,
@@ -72,12 +69,14 @@ const getSingle: ServiceFn<
 			data: CollectionsFormatter.formatSingle({
 				collection: collection,
 				include: data.include,
-				documents: [
-					{
-						id: documentRes.data.id,
-						collection_key: collection.key,
-					},
-				],
+				documents: documentRes.data
+					? [
+							{
+								id: documentRes.data.id,
+								collection_key: collection.key,
+							},
+						]
+					: undefined,
 			}),
 		};
 	}

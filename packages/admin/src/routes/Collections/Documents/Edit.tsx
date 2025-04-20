@@ -37,7 +37,6 @@ import DocumentSelectModal from "@/components/Modals/Documents/DocumentSelect";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import BrickImagePreview from "@/components/Modals/Bricks/ImagePreview";
-import Pill from "@/components/Partials/Pill";
 import Alert from "@/components/Blocks/Alert";
 
 interface CollectionsDocumentsEditRouteProps {
@@ -398,20 +397,6 @@ const CollectionsDocumentsEditRoute: Component<
 											{
 												label: T()("total_bricks"),
 												value: brickStore.get.bricks.length,
-											},
-											{
-												label: T()("field_errors"),
-												value: (
-													<Pill
-														theme={
-															brickStore.get.fieldsErrors?.length > 0
-																? "red"
-																: "grey"
-														}
-													>
-														{`${brickStore.get.fieldsErrors?.length || 0}`}
-													</Pill>
-												),
 											},
 											{
 												label: T()("created_at"),
