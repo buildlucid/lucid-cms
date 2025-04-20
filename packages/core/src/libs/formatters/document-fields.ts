@@ -327,7 +327,7 @@ export default class DocumentFieldsFormatter {
 					return (
 						d.collection_key ===
 							(props.fieldConfig as CFConfig<"document">)?.collection &&
-						d.id === props.value
+						d.document_id === props.value
 					);
 				});
 			}
