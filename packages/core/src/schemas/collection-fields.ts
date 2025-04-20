@@ -33,7 +33,7 @@ export const FieldBaseSchema = z.object({
 		z.literal("user"),
 		z.literal("document"),
 	]),
-	translations: z.record(FieldValueSchema).optional(),
+	translations: z.record(z.string(), FieldValueSchema).optional(),
 	value: FieldValueSchema.optional(),
 });
 

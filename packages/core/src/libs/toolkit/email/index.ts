@@ -20,7 +20,7 @@ const emailToolkit = {
 					cc: z.string().optional(),
 					bcc: z.string().optional(),
 					replyTo: z.string().optional(),
-					data: z.record(z.any()),
+					data: z.record(z.any(), z.any()),
 				}),
 				defaultError: {
 					name: T("send_email_error_name"),

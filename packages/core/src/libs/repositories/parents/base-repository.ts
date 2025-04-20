@@ -169,6 +169,7 @@ abstract class BaseRepository<
 		const validationResult = await schema.safeParseAsync(res.data);
 
 		if (!validationResult.success) {
+			// TODO: ZOD, check this works as intended
 			const validationError = z.prettifyError(validationResult.error);
 			logger("error", {
 				message: validationError,

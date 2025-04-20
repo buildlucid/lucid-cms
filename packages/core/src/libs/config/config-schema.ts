@@ -1,8 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import z from "zod";
 
-const FastifyInstanceSchema = z.custom<FastifyInstance>((data) => true, {
-	message: "Invalid FastifyInstance",
+const FastifyExtensionType = z.custom<
+	(fastify: FastifyInstance) => Promise<void>
+>((data) => typeof data === "function", {
+	message: "Expected a FastifyInstance extension function",
 });
 
 const ConfigSchema = z.object({
@@ -63,11 +65,8 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	fastifyExtensions: z
-		.array(
-			z.function().args(FastifyInstanceSchema).returns(z.promise(z.void())),
-		)
-		.optional(),
+	// TODO: ZOD, check this works as intended
+	fastifyExtensions: z.array(FastifyExtensionType).optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
 	vite: z.unknown().optional(),

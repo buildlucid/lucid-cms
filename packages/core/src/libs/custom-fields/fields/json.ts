@@ -65,7 +65,11 @@ class JsonCustomField extends CustomField<"json"> {
 		return null satisfies CFResponse<"json">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
-		const valueSchema = z.record(z.unknown());
+		// TODO: ZOD, check this works as intended
+		const valueSchema = z.record(
+			z.union([z.string(), z.number(), z.symbol()]),
+			z.unknown(),
+		);
 
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;

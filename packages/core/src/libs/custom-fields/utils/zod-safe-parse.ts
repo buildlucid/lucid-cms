@@ -13,6 +13,7 @@ const zodSafeParse = (
 		};
 	}
 
+	// TODO: ZOD, check this works as intended
 	const errorMessage = z.prettifyError(response.error);
 
 	return {

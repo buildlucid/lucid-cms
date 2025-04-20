@@ -89,16 +89,15 @@ const lucidConfig = async (config: LucidConfig) => {
 
 		return configRes;
 	} catch (err) {
+		// TODO: ZOD, check this works as intended
 		if (err instanceof ZodError) {
-			for (const error of err.errors) {
-				logger("error", {
-					message: error.message,
-					scope: constants.logScopes.config,
-					data: {
-						path: error.path.join("."),
-					},
-				});
-			}
+			logger("error", {
+				message: err.message,
+				scope: constants.logScopes.config,
+				data: {
+					path: err.stack,
+				},
+			});
 		} else if (err instanceof LucidError) {
 		} else if (err instanceof Error) {
 			logger("error", {
