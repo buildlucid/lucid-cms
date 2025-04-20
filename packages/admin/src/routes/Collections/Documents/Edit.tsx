@@ -198,10 +198,11 @@ const CollectionsDocumentsEditRoute: Component<
 		return updateSingle.errors() || createDocument.errors();
 	});
 	const brickTranslationErrors = createMemo(() => {
-		// TODO: this needs to recursively serach fields and brick errors
-		const errors = getBodyError<FieldError[]>("fields", mutateErrors());
-		if (errors === undefined) return false;
-		return errors.some((field) => field.localeCode !== contentLocale());
+		return brickHelpers.hasErrorsOnOtherLocale({
+			fieldErrors: getBodyError<FieldError[]>("fields", mutateErrors()) || [],
+			brickErrors: getBodyError<BrickError[]>("bricks", mutateErrors()) || [],
+			currentLocale: contentLocale() || "",
+		});
 	});
 	const canSaveDocument = createMemo(() => {
 		return !brickStore.get.documentMutated && !isSaving();

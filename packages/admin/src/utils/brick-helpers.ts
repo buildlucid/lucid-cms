@@ -4,6 +4,8 @@ import type {
 	FieldTypes,
 	FieldResponse,
 	FieldResponseMeta,
+	FieldError,
+	BrickError,
 } from "@types";
 
 const findFieldRecursive = (props: {
@@ -128,6 +130,38 @@ const getFieldMeta = <T extends FieldResponseMeta>(props: {
 	return props.fieldData.meta as T;
 };
 
+/**
+ * Recursively checks field and brick errors for any that are of a differetn locale to the current one
+ */
+const hasErrorsOnOtherLocale = (props: {
+	currentLocale: string;
+	fieldErrors: FieldError[];
+	brickErrors: BrickError[];
+}) => {
+	const hasFieldErrors = (field: FieldError): boolean => {
+		if (
+			field.localeCode !== undefined &&
+			field.localeCode !== props.currentLocale
+		) {
+			return true;
+		}
+
+		if (field.groupErrors?.length) {
+			return field.groupErrors.some((groupError) =>
+				groupError.fields.some((nestedField) => hasFieldErrors(nestedField)),
+			);
+		}
+
+		return false;
+	};
+
+	if (props.fieldErrors.some(hasFieldErrors)) {
+		return true;
+	}
+
+	return props.brickErrors.some((brick) => brick.fields.some(hasFieldErrors));
+};
+
 // ---------------------------------------------
 // Exports
 const brickHelpers = {
@@ -137,6 +171,7 @@ const brickHelpers = {
 	customFieldId,
 	getFieldValue,
 	getFieldMeta,
+	hasErrorsOnOtherLocale,
 };
 
 export default brickHelpers;
