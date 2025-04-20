@@ -2,8 +2,8 @@ import T from "../../../translations/index.js";
 import crypto from "node:crypto";
 import logger from "../../../utils/logging/index.js";
 import constants from "../../../constants/constants.js";
-// TODO: ZOD find replaceplacement for ZodSchema
-import z, { type ZodSchema, type ZodObject } from "zod";
+import { tidyZodError } from "../../../utils/errors/index.js";
+import z, { type ZodType, type ZodObject } from "zod";
 import type {
 	ColumnDataType,
 	ComparisonOperatorExpression,
@@ -89,10 +89,10 @@ abstract class BaseRepository<
 	 */
 	protected createValidationSchema<V extends boolean = false>(
 		config: ValidationConfigExtend<V>,
-	): ZodSchema {
+	): ZodType {
 		const baseSchema = config.schema || this.tableSchema;
 
-		let selectSchema: ZodSchema;
+		let selectSchema: ZodType;
 		if (config.selectAll) {
 			selectSchema = baseSchema;
 		} else if (Array.isArray(config.select) && config.select.length > 0) {
@@ -112,9 +112,9 @@ abstract class BaseRepository<
 	 * Responsible for creating schemas based on the mode
 	 */
 	private wrapSchemaForMode(
-		schema: ZodSchema,
+		schema: ZodType,
 		mode: "single" | "multiple" | "multiple-count" | "count",
-	): ZodSchema {
+	): ZodType {
 		switch (mode) {
 			case "count": {
 				return z.object({ count: z.number() }).optional();
@@ -170,8 +170,7 @@ abstract class BaseRepository<
 		const validationResult = await schema.safeParseAsync(res.data);
 
 		if (!validationResult.success) {
-			// TODO: ZOD, check this works as intended
-			const validationError = z.prettifyError(validationResult.error);
+			const validationError = tidyZodError(validationResult.error);
 			logger("error", {
 				message: validationError,
 				scope: constants.logScopes.query,

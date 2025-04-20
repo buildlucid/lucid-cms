@@ -1,7 +1,18 @@
 import T from "../../../translations/index.js";
-import z from "zod";
+import tidyZodError from "../../../utils/errors/tidy-zod-errors.js";
+import type z from "zod";
 import type { CustomFieldValidateResponse } from "../types.js";
 
+/**
+ * Removes new lines, and "   →"
+ */
+export const modifyMessage = (errorMessage: string): string => {
+	return errorMessage.replace(/\n/g, " ").trim().replaceAll("   →", " →");
+};
+
+/**
+ * Parses zod errors for custom fields
+ */
 const zodSafeParse = (
 	value: unknown,
 	schema: z.ZodTypeAny,
@@ -13,13 +24,11 @@ const zodSafeParse = (
 		};
 	}
 
-	// TODO: ZOD, check this works as intended
-	const errorMessage = z.prettifyError(response.error);
-
 	return {
 		valid: false,
 		message:
-			errorMessage ?? T("an_unknown_error_occurred_validating_the_field"),
+			modifyMessage(tidyZodError(response.error)) ??
+			T("an_unknown_error_occurred_validating_the_field"),
 	};
 };
 

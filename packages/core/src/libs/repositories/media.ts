@@ -20,7 +20,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
 		type: z.string(),
-		mine_type: z.string(),
+		mime_type: z.string(),
 		file_extension: z.string(),
 		file_size: z.number(),
 		width: z.number().nullable(),

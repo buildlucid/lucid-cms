@@ -89,15 +89,33 @@ const lucidConfig = async (config: LucidConfig) => {
 
 		return configRes;
 	} catch (err) {
-		// TODO: ZOD, check this works as intended
 		if (err instanceof ZodError) {
-			logger("error", {
-				message: err.message,
-				scope: constants.logScopes.config,
-				data: {
-					path: err.stack,
-				},
-			});
+			try {
+				const parse: Array<{
+					expected: string;
+					code: string;
+					path: Array<string | number>;
+					message: string;
+				}> = JSON.parse(err.message);
+
+				for (const msg of parse) {
+					logger("error", {
+						message: msg.message,
+						scope: constants.logScopes.config,
+						data: {
+							path: msg.path.join("."),
+						},
+					});
+				}
+			} catch (e) {
+				logger("error", {
+					message: err.message,
+					scope: constants.logScopes.config,
+					data: {
+						path: err.stack,
+					},
+				});
+			}
 		} else if (err instanceof LucidError) {
 		} else if (err instanceof Error) {
 			logger("error", {

@@ -91,8 +91,8 @@ test("fail to validate field - checkbox", async () => {
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_checkbox",
-			message:
-				"Invalid literal value, expected 1, or Invalid literal value, expected 0, or Expected boolean, received string", // zod error message
+			localeCode: undefined,
+			message: "Invalid input",
 		},
 	]);
 

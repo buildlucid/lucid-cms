@@ -1,21 +1,6 @@
 import z from "zod";
 
-const FieldValueSchema = z
-	.union([
-		z.string(),
-		z.number(),
-		z.object({
-			url: z.string().nullable(),
-			target: z.string().nullable().optional(),
-			label: z.string().nullable().optional(),
-		}),
-		z.null(),
-		z.any(),
-	])
-	.optional();
-export type FieldValueSchemaType = z.infer<typeof FieldValueSchema>;
-
-export const FieldBaseSchema = z.object({
+export const FieldSchema = z.interface({
 	key: z.string(),
 	type: z.union([
 		z.literal("text"),
@@ -33,36 +18,25 @@ export const FieldBaseSchema = z.object({
 		z.literal("user"),
 		z.literal("document"),
 	]),
-	translations: z.record(z.string(), FieldValueSchema).optional(),
-	value: FieldValueSchema.optional(),
-});
+	"translations?": z.record(z.string(), z.any()),
+	"value?": z.any(),
 
-// TODO: Zod repalce z.lazy with new zod solution for this: https://v4.zod.dev/v4#true-recursive-types
-export const FieldSchema: z.ZodType<FieldSchemaType> = FieldBaseSchema.extend({
-	groups: z
-		.lazy(() =>
-			z.array(
-				z.object({
+	get "groups?"() {
+		return z
+			.array(
+				z.interface({
 					ref: z.string(),
 					order: z.number().optional(),
 					open: z.boolean().optional(),
-					fields: z.array(FieldSchema),
+					get fields() {
+						return z.array(FieldSchema);
+					},
 				}),
-			),
-		)
-		.optional(),
+			)
+			.optional();
+	},
 });
-
-export type FieldRepeaterGroupSchemaType = {
-	ref: string;
-	order?: number;
-	open?: boolean;
-	fields: FieldSchemaType[];
-};
-
-export type FieldSchemaType = z.infer<typeof FieldBaseSchema> & {
-	groups?: FieldRepeaterGroupSchemaType[];
-};
+export type FieldSchemaType = z.infer<typeof FieldSchema>;
 
 export const swaggerFieldObj = {
 	type: "object",

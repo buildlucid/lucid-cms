@@ -104,7 +104,8 @@ test("fail to validate field - link", async () => {
 	expect(invalidUrlValidate).toEqual([
 		{
 			key: "standard_link",
-			message: 'Expected string, received boolean at "url"', // zod error message
+			localeCode: undefined,
+			message: "Invalid input: expected string, received boolean → at url",
 		},
 	]);
 
@@ -166,7 +167,7 @@ test("fail to validate field - link", async () => {
 	expect(invalidLabelValidate).toEqual([
 		{
 			key: "standard_link",
-			message: 'Expected string, received boolean at "label"', // zod error message
+			message: "Invalid input: expected string, received boolean → at label", // zod error message
 		},
 	]);
 

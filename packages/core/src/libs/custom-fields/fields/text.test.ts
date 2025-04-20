@@ -119,7 +119,7 @@ test("fail to validate field - text", async () => {
 		{
 			key: "standard_text",
 			localeCode: "en",
-			message: "Expected string, received number",
+			message: "Invalid input: expected string, received number", // zod error message
 		},
 	]);
 
@@ -227,7 +227,7 @@ test("fail to validate field - text", async () => {
 		{
 			key: "min_length_text",
 			localeCode: "en",
-			message: "String must contain at least 5 character(s)", // zod error message
+			message: "Too small: expected string to have >5 characters", // zod error message
 		},
 	]);
 });

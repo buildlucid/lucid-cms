@@ -119,7 +119,7 @@ test("fail to validate field - wysiwyg", async () => {
 		{
 			key: "standard_wysiwyg",
 			localeCode: "en",
-			message: "Expected string, received number", // zod error message
+			message: "Invalid input: expected string, received number", // zod error message
 		},
 	]);
 
@@ -202,7 +202,7 @@ test("fail to validate field - wysiwyg", async () => {
 		{
 			key: "min_length_wysiwyg",
 			localeCode: "en",
-			message: "String must contain at least 5 character(s)", // zod error message
+			message: "Too small: expected string to have >5 characters", // zod error message
 		},
 	]);
 });

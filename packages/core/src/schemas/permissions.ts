@@ -1,5 +1,3 @@
-// import z from "zod";
-
 export default {
 	getAll: {
 		body: undefined,

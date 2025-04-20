@@ -65,7 +65,6 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	// TODO: ZOD, check this works as intended
 	fastifyExtensions: z.array(FastifyExtensionType).optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),

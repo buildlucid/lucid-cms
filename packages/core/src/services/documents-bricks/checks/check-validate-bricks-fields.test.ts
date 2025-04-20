@@ -62,7 +62,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withTranslationsObject[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: "en",
-		message: "Expected string, received number",
+		message: "Invalid input: expected string, received number", // zod error message
 	});
 
 	// ---------------
@@ -85,7 +85,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValue[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: defaultLocale,
-		message: "Expected string, received number",
+		message: "Invalid input: expected string, received number", // zod error message
 	});
 
 	// ---------------
@@ -108,7 +108,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValueFrench[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: frenchDefaultLocale,
-		message: "Expected string, received number",
+		message: "Invalid input: expected string, received number", // zod error message
 	});
 
 	// ---------------
@@ -131,7 +131,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatedCollection[0]).toMatchObject({
 		key: "text_field",
 		localeCode: undefined,
-		message: "Expected string, received number",
+		message: "Invalid input: expected string, received number", // zod error message
 	});
 
 	// ---------------
@@ -154,6 +154,6 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatableField[0]).toMatchObject({
 		key: "non_translatable_field",
 		localeCode: undefined,
-		message: "Expected string, received number",
+		message: "Invalid input: expected string, received number", // zod error message
 	});
 });

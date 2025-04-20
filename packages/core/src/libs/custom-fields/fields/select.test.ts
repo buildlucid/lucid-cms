@@ -138,7 +138,8 @@ test("fail to validate field - select", async () => {
 		number: [
 			{
 				key: "standard_select",
-				message: "Expected string, received number", // zod error message
+				localeCode: undefined,
+				message: "Invalid input: expected string, received number", // zod error message
 			},
 		],
 	});

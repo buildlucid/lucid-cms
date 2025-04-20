@@ -1,7 +1,7 @@
 import errorTypeDefaults from "./error-type-defaults.js";
+import constants from "../../constants/constants.js";
 import type z from "zod";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
-import constants from "../../constants/constants.js";
 
 /**
  * The LucidAPIError class should be used to throw errors within the API request lifecycle. This will be caught by Fastify's error handler and will return a formatted error response. If the error is a Zod error, it will be formatted into a more readable format.
@@ -51,8 +51,7 @@ class LucidAPIError extends Error {
 		this.message = errorTypeRes.message ?? constants.errors.message;
 	}
 	// static
-	// TODO: ZOD check out what the replacement is going to be here, or if we leave the depreciated feature for now?
-	static formatZodErrors(error: z.ZodIssue[]) {
+	static formatZodErrors(error: z.core.$ZodIssue[]) {
 		const result: ErrorResult = {};
 
 		for (const item of error) {

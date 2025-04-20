@@ -119,7 +119,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "standard_textarea",
 			localeCode: "en",
-			message: "Expected string, received number", // zod error message
+			message: "Invalid input: expected string, received number", // zod error message
 		},
 	]);
 
@@ -173,7 +173,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "min_length_textarea",
 			localeCode: "en",
-			message: "String must contain at least 5 character(s)", // zod error message
+			message: "Too small: expected string to have >5 characters", // zod error message
 		},
 	]);
 });

@@ -91,7 +91,8 @@ test("fail to validate field - colour", async () => {
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_colour",
-			message: "Expected string, received number", // zod error message
+			localeCode: undefined,
+			message: "Invalid input: expected string, received number", // zod error message
 		},
 	]);
 

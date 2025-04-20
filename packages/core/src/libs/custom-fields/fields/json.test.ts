@@ -128,7 +128,8 @@ test("fail to validate field - json", async () => {
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_json",
-			message: "Expected object, received string", // zod error message
+			localeCode: undefined,
+			message: "Invalid input: expected record, received string",
 		},
 	]);
 
@@ -183,7 +184,8 @@ test("fail to validate field - json", async () => {
 	expect(zodValidate).toEqual([
 		{
 			key: "zod_json",
-			message: 'Expected string, received boolean at "value"', // zod error message
+			localeCode: undefined,
+			message: "Invalid input: expected string, received boolean → at value",
 		},
 	]);
 });
