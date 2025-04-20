@@ -55,6 +55,13 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 			(brick) => brick.ref === props.brick.ref,
 		);
 	});
+	const fieldErrors = createMemo(() => {
+		return (
+			brickStore.get.brickErrors.find(
+				(b) => b.key === props.brick.key && b.ref === props.brick.ref,
+			)?.fields || []
+		);
+	});
 
 	// -------------------------------
 	// Functions
@@ -120,6 +127,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					brickIndex: brickIndex(),
 					configFields: config()?.fields || [],
 					labelledby: `fixed-brick-${props.brick.key}`,
+					fieldErrors: fieldErrors(),
 				}}
 				options={{
 					padding: "30",

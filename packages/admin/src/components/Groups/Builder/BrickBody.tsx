@@ -6,7 +6,7 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import type { CFConfig, FieldTypes } from "@types";
+import type { CFConfig, FieldError, FieldTypes } from "@types";
 import type { BrickData } from "@/store/brickStore";
 import classNames from "classnames";
 import {
@@ -21,6 +21,7 @@ interface BrickProps {
 		brickIndex: number;
 		configFields: CFConfig<FieldTypes>[];
 		labelledby?: string;
+		fieldErrors: FieldError[];
 	};
 	options: {
 		padding?: "15" | "30";
@@ -92,6 +93,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 								brickIndex: props.state.brickIndex,
 								fieldConfig: config,
 								activeTab: getActiveTab(),
+								fieldErrors: props.state.fieldErrors,
 							}}
 						/>
 					)}

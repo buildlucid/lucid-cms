@@ -23,6 +23,9 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 			(brick) => brick.ref === collectionPseudoBrick()?.ref,
 		);
 	});
+	const fieldErrors = createMemo(() => {
+		return brickStore.get.fieldsErrors;
+	});
 
 	// ----------------------------------
 	// Render
@@ -35,6 +38,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 						brick: collectionPseudoBrick() as BrickData,
 						brickIndex: brickIndex(),
 						configFields: props.fields,
+						fieldErrors: fieldErrors(),
 					}}
 					options={{}}
 				/>

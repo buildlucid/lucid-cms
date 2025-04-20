@@ -1,7 +1,7 @@
 import T from "@/translations/index";
 import { type Component, For, createMemo, createSignal } from "solid-js";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
-import type { CFConfig, FieldResponse } from "@types";
+import type { CFConfig, FieldResponse, GroupError } from "@types";
 import classNames from "classnames";
 import { FaSolidGripLines, FaSolidCircleChevronUp } from "solid-icons/fa";
 import brickStore from "@/store/brickStore";
@@ -23,6 +23,7 @@ interface GroupBodyProps {
 		repeaterDepth: number;
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
+		groupErrors: GroupError[];
 	};
 }
 
@@ -46,6 +47,14 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
+	const groupError = createMemo(() => {
+		return props.state.groupErrors.find((g) => {
+			return g.ref === props.state.ref;
+		});
+	});
+	const fieldErrors = createMemo(() => {
+		return groupError()?.fields;
+	});
 
 	// -------------------------------
 	// Functions
@@ -190,6 +199,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									groupRef: ref(),
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
+									fieldErrors: fieldErrors() || [],
 								}}
 							/>
 						)}

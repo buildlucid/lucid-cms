@@ -15,7 +15,7 @@ import {
 import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import type { CFConfig, FieldResponse, FieldTypes } from "@types";
+import type { CFConfig, FieldError, FieldResponse, FieldTypes } from "@types";
 import classNames from "classnames";
 import { type Component, For, Match, Show, Switch, createMemo } from "solid-js";
 
@@ -24,6 +24,7 @@ interface DynamicFieldProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<FieldTypes>;
 		fields: FieldResponse[];
+		fieldErrors: FieldError[];
 		activeTab?: string;
 
 		groupRef?: string;
@@ -58,30 +59,26 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		}
 		return field;
 	});
-	// const brickRef = createMemo(() => {
-	// 	return brickStore.get.bricks[props.state.brickIndex].ref;
-	// });
 	const fieldError = createMemo(() => {
-		// return brickStore.get.fieldsErrors.find((f) => {
-		// 	return (
-		// 		f.brickId === brickId() &&
-		// 		f.key === props.state.fieldConfig.key &&
-		// 		f.localeCode === contentLocale() &&
-		// 		f.groupId === props.state.groupRef
-		// 	);
-		// });
-		return undefined;
+		if (props.state.fieldConfig.type === "repeater") {
+			//* repeaters dont incldue a localeCode
+			return props.state.fieldErrors.find(
+				(f) => f.key === props.state.fieldConfig.key,
+			);
+		}
+		return props.state.fieldErrors.find(
+			(f) =>
+				f.key === props.state.fieldConfig.key &&
+				f.localeCode === contentLocale(),
+		);
 	});
 	const altLocaleError = createMemo(() => {
-		// return brickStore.get.fieldsErrors.some((f) => {
-		// 	return (
-		// 		f.brickId === brickId() &&
-		// 		f.key === props.state.fieldConfig.key &&
-		// 		f.localeCode !== contentLocale() &&
-		// 		f.groupId === props.state.groupRef
-		// 	);
-		// });
-		return false;
+		return props.state.fieldErrors.some(
+			(f) =>
+				f.key === props.state.fieldConfig.key &&
+				f.localeCode &&
+				f.localeCode !== contentLocale(),
+		);
 	});
 	const activeTab = createMemo(() => {
 		if (fieldConfig().type !== "tab") return true;
@@ -131,6 +128,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											groupRef: props.state.groupRef,
 											repeaterKey: props.state.repeaterKey,
 											repeaterDepth: props.state.repeaterDepth,
+											fieldErrors: props.state.fieldErrors,
 										}}
 									/>
 								)}
@@ -146,6 +144,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								groupRef: props.state.groupRef,
 								parentRepeaterKey: props.state.repeaterKey,
 								repeaterDepth: props.state.repeaterDepth ?? 0,
+								fieldError: fieldError(),
 							}}
 						/>
 					</Match>

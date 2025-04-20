@@ -17,7 +17,11 @@ const SimpleBrick = new BrickBuilder("simple")
 	.addRepeater("items")
 	.addText("itemTitle")
 	.addRepeater("nestedItems")
-	.addText("nestedItemTitle")
+	.addText("nestedItemTitle", {
+		validation: {
+			required: true,
+		},
+	})
 	.addCheckbox("nestedCheckbox")
 	.endRepeater()
 	.endRepeater();

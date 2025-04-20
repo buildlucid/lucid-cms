@@ -123,6 +123,13 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 	const isDisabled = createMemo(() => {
 		return brickStore.get.locked;
 	});
+	const fieldErrors = createMemo(() => {
+		return (
+			brickStore.get.brickErrors.find(
+				(b) => b.key === props.brick.key && b.ref === props.brick.ref,
+			)?.fields || []
+		);
+	});
 
 	// -------------------------------
 	// Functions
@@ -240,6 +247,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					brickIndex: brickIndex(),
 					configFields: config()?.fields || [],
 					labelledby: `builder-brick-${props.brick.key}`,
+					fieldErrors: fieldErrors(),
 				}}
 				options={{
 					padding: "15",

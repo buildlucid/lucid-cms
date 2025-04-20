@@ -1,7 +1,7 @@
 import T from "@/translations/index";
 import classNames from "classnames";
 import { type Component, For, createMemo, Show, Switch, Match } from "solid-js";
-import type { CFConfig, FieldResponse } from "@types";
+import type { CFConfig, FieldError, FieldResponse } from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
@@ -17,6 +17,7 @@ interface RepeaterFieldProps {
 		groupRef?: string;
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
+		fieldError: FieldError | undefined;
 	};
 }
 
@@ -44,6 +45,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			fieldConfig().config.isDisabled ||
 			brickStore.get.locked,
 	);
+	const groupErrors = createMemo(() => {
+		return props.state.fieldError?.groupErrors || [];
+	});
 
 	// -------------------------------
 	// Functions
@@ -107,6 +111,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 											repeaterDepth: props.state.repeaterDepth,
 											parentRepeaterKey: props.state.parentRepeaterKey,
 											parentRef: props.state.groupRef,
+											groupErrors: groupErrors(),
 										}}
 									/>
 								)}
