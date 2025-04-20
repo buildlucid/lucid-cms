@@ -2,7 +2,6 @@ import T from "../../../translations/index.js";
 import crypto from "node:crypto";
 import logger from "../../../utils/logging/index.js";
 import constants from "../../../constants/constants.js";
-import { fromError } from "zod-validation-error";
 import z, { type ZodSchema, type ZodObject } from "zod";
 import type {
 	ColumnDataType,
@@ -170,9 +169,9 @@ abstract class BaseRepository<
 		const validationResult = await schema.safeParseAsync(res.data);
 
 		if (!validationResult.success) {
-			const validationError = fromError(validationResult.error);
+			const validationError = z.prettifyError(validationResult.error);
 			logger("error", {
-				message: validationError.toString(),
+				message: validationError,
 				scope: constants.logScopes.query,
 				data: {
 					id: executeResponse.meta.id,

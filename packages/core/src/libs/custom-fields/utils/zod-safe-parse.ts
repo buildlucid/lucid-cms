@@ -1,6 +1,5 @@
 import T from "../../../translations/index.js";
-import { fromError } from "zod-validation-error";
-import type z from "zod";
+import z from "zod";
 import type { CustomFieldValidateResponse } from "../types.js";
 
 const zodSafeParse = (
@@ -14,10 +13,7 @@ const zodSafeParse = (
 		};
 	}
 
-	const errorMessage = fromError(response.error).message.replace(
-		"Validation error: ",
-		"",
-	);
+	const errorMessage = z.prettifyError(response.error);
 
 	return {
 		valid: false,
