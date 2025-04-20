@@ -44,27 +44,19 @@ export const PageCollection = new CollectionBuilder("page", {
       isHidden: false,
       isDisabled: false, 
     },
-    collection: {
-      column: true,
-    }
+    displayInListing: true
   })
   .addTextarea("pageExcerpt", {
-    collection: {
-      column: true,
-    }  
+    displayInListing: true
   })
   .addCheckbox("pageFeatured", {
     config: {
       useTranslations: true,
     },
-    collection: {
-      column: true,
-    }
+    displayInListing: true
   })
   .addUser("author", {
-    collection: {
-      column: true,
-    } 
+    displayInListing: true
   });
 
 export const SettingsCollection = new CollectionBuilder("settings", {

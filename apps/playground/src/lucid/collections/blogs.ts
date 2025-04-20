@@ -16,19 +16,13 @@ const BlogCollection = new CollectionBuilder("blog", {
 			isHidden: false,
 			isDisabled: false,
 		},
-		collection: {
-			column: true,
-		},
+		displayInListing: true,
 	})
 	.addTextarea("page_excerpt", {
-		collection: {
-			column: true,
-		},
+		displayInListing: true,
 	})
 	.addUser("author", {
-		collection: {
-			column: true,
-		},
+		displayInListing: true,
 	})
 	.addWysiwyg("content");
 

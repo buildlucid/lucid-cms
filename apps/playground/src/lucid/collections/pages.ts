@@ -80,14 +80,10 @@ const PageCollection = new CollectionBuilder("page", {
 			required: true,
 			zod: z.string().min(2).max(128),
 		},
-		collection: {
-			column: true,
-		},
+		displayInListing: true,
 	})
 	.addUser("author", {
-		collection: {
-			column: true,
-		},
+		displayInListing: true,
 	});
 
 export default PageCollection;

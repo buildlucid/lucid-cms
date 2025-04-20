@@ -58,7 +58,7 @@ export const collectionFieldIncludes = (collection?: CollectionResponse) => {
 				fieldRecursive(field.fields);
 				return;
 			}
-			if (collection?.config.fieldIncludes.includes(field.key)) {
+			if (collection?.config.displayInListing.includes(field.key)) {
 				fieldsRes.push(field);
 			}
 		}

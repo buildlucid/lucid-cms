@@ -169,8 +169,7 @@ export interface CollectionResponse {
 		useDrafts: boolean;
 		useRevisions: boolean;
 		isLocked: boolean;
-		fieldIncludes: string[];
-		fieldFilters: string[];
+		displayInListing: string[];
 	};
 	fixedBricks: Array<CollectionBrickConfig>;
 	builderBricks: Array<CollectionBrickConfig>;

@@ -47,9 +47,7 @@ describe("brick table construction", () => {
 				label: { en: "Heading Default" },
 			},
 			validation: { required: true },
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		});
 
 		const simpleInputData = {
@@ -65,7 +63,7 @@ describe("brick table construction", () => {
 			],
 			bricks: [
 				{
-					id: "ref-1",
+					ref: "ref-1",
 					key: "simple",
 					order: 0,
 					type: "builder",
@@ -81,7 +79,7 @@ describe("brick table construction", () => {
 							type: "repeater",
 							groups: [
 								{
-									id: "ref-group11",
+									ref: "ref-group11",
 									open: false,
 									fields: [
 										{
@@ -94,7 +92,7 @@ describe("brick table construction", () => {
 											type: "repeater",
 											groups: [
 												{
-													id: "ref-11",
+													ref: "ref-11",
 													open: false,
 													fields: [
 														{
@@ -105,7 +103,7 @@ describe("brick table construction", () => {
 													],
 												},
 												{
-													id: "ref-12",
+													ref: "ref-12",
 													open: false,
 													fields: [
 														{
@@ -120,7 +118,7 @@ describe("brick table construction", () => {
 									],
 								},
 								{
-									id: "ref-group12",
+									ref: "ref-group12",
 									open: true,
 									fields: [
 										{
@@ -133,7 +131,7 @@ describe("brick table construction", () => {
 											type: "repeater",
 											groups: [
 												{
-													id: "ref-21",
+													ref: "ref-21",
 													open: false,
 													fields: [
 														{
@@ -144,7 +142,7 @@ describe("brick table construction", () => {
 													],
 												},
 												{
-													id: "ref-22",
+													ref: "ref-22",
 													open: false,
 													fields: [
 														{
@@ -322,7 +320,7 @@ describe("brick table construction", () => {
 		const deepInputData = {
 			bricks: [
 				{
-					id: "brick1",
+					ref: "brick1",
 					key: "deep",
 					order: 0,
 					type: "builder",
@@ -333,7 +331,7 @@ describe("brick table construction", () => {
 							type: "repeater",
 							groups: [
 								{
-									id: "l1-1",
+									ref: "l1-1",
 									open: true,
 									fields: [
 										{
@@ -346,7 +344,7 @@ describe("brick table construction", () => {
 											type: "repeater",
 											groups: [
 												{
-													id: "l2-1",
+													ref: "l2-1",
 													open: true,
 													fields: [
 														{
@@ -359,7 +357,7 @@ describe("brick table construction", () => {
 															type: "repeater",
 															groups: [
 																{
-																	id: "l3-1",
+																	ref: "l3-1",
 																	open: false,
 																	fields: [
 																		{

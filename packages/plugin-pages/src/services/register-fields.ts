@@ -18,9 +18,7 @@ const registerFields = (
 				isHidden: !config.displayFullSlug,
 				isDisabled: true,
 			},
-			collection: {
-				column: config.displayFullSlug,
-			},
+			displayInListing: config.displayFullSlug,
 		})
 		.addText(constants.fields.slug.key, {
 			details: {
@@ -43,9 +41,7 @@ const registerFields = (
 						),
 				]),
 			},
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addDocument(constants.fields.parentPage.key, {
 			collection: collection.key,

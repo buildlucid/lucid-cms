@@ -53,8 +53,7 @@ export default class CollectionsFormatter {
 				useDrafts: collectionData.config.useDrafts,
 				useRevisions: collectionData.config.useRevisions,
 				isLocked: collectionData.config.isLocked,
-				fieldIncludes: props.collection.includeFieldKeys,
-				fieldFilters: props.collection.filterableFieldKeys.map((f) => f.key),
+				displayInListing: props.collection.displayInListing,
 			},
 			fixedBricks: props.include?.bricks
 				? (props.collection.fixedBricks ?? [])
@@ -221,13 +220,7 @@ export default class CollectionsFormatter {
 						type: "boolean",
 						nullable: true,
 					},
-					fieldIncludes: {
-						type: "array",
-						items: {
-							type: "string",
-						},
-					},
-					fieldFilters: {
+					displayInListing: {
 						type: "array",
 						items: {
 							type: "string",

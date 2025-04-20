@@ -31,9 +31,7 @@ const TestCollection = new CollectionBuilder("test", {
 		required: true,
 		zod: z.string().min(2).max(128),
 	},
-	collection: {
-		column: true,
-	},
+	displayInListing: true,
 });
 
 export default TestCollection;

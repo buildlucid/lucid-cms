@@ -34,7 +34,7 @@ export const DocumentsList: Component<{
 	state: {
 		collection?: CollectionResponse;
 		isLoading: boolean;
-		fieldIncludes: Accessor<CFConfig<FieldTypes>[]>;
+		displayInListing: Accessor<CFConfig<FieldTypes>[]>;
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		status: Accessor<Exclude<DocumentVersionType, "revision">>;
@@ -62,7 +62,7 @@ export const DocumentsList: Component<{
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
 	const getTableHeadColumns = createMemo(() =>
-		tableHeadColumns(props.state.fieldIncludes()),
+		tableHeadColumns(props.state.displayInListing()),
 	);
 	const documentQueryEnabled = createMemo(
 		() =>
@@ -201,7 +201,7 @@ export const DocumentsList: Component<{
 							<DocumentRow
 								index={i}
 								document={doc()}
-								fieldInclude={props.state.fieldIncludes()}
+								fieldInclude={props.state.displayInListing()}
 								collection={props.state.collection as CollectionResponse}
 								include={include}
 								contentLocale={contentLocale()}

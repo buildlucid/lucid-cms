@@ -1,15 +1,14 @@
 import constants from "../../../constants/constants.js";
 import FieldBuilder from "../field-builder/index.js";
 import type BrickBuilder from "../brick-builder/index.js";
-import type { FieldTypes, CFProps } from "../../custom-fields/types.js";
-import type { QueryParamFilters } from "../../../types/query-params.js";
+import type { CFProps } from "../../custom-fields/types.js";
 import type {
-	FieldCollectionConfig,
 	CollectionConfigSchemaType,
 	CollectionData,
 	CollectionBrickConfig,
 	FieldFilters,
 	CollectionTableNames,
+	DisplayInListing,
 } from "./types.js";
 import type {
 	CollectionSchema,
@@ -26,8 +25,7 @@ import T from "../../../translations/index.js";
 class CollectionBuilder extends FieldBuilder {
 	key: string;
 	config: CollectionConfigSchemaType;
-	includeFieldKeys: string[] = [];
-	filterableFieldKeys: FieldFilters = [];
+	displayInListing: string[] = [];
 	collectionTableSchema?: CollectionSchema;
 	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
 		super();
@@ -53,80 +51,80 @@ class CollectionBuilder extends FieldBuilder {
 	addText(
 		key: string,
 		props?: CFProps<"text"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addText(key, props);
 		return this;
 	}
 	addNumber(
 		key: string,
 		props?: CFProps<"number"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addNumber(key, props);
 		return this;
 	}
 	addCheckbox(
 		key: string,
 		props?: CFProps<"checkbox"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addCheckbox(key, props);
 		return this;
 	}
 	addSelect(
 		key: string,
 		props?: CFProps<"select"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addSelect(key, props);
 		return this;
 	}
 	addTextarea(
 		key: string,
 		props?: CFProps<"textarea"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addTextarea(key, props);
 		return this;
 	}
 	addDateTime(
 		key: string,
 		props?: CFProps<"datetime"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addDateTime(key, props);
 		return this;
 	}
 	addUser(
 		key: string,
 		props?: CFProps<"user"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addUser(key, props);
 		return this;
 	}
 	addMedia(
 		key: string,
 		props?: CFProps<"media"> & {
-			collection?: FieldCollectionConfig;
+			displayInListing?: DisplayInListing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.collection);
+		this.#fieldCollectionHelper(key, props?.displayInListing);
 		super.addMedia(key, props);
 		return this;
 	}
@@ -139,8 +137,8 @@ class CollectionBuilder extends FieldBuilder {
 			(brick, index) => bricks.findIndex((b) => b.key === brick.key) === index,
 		);
 	};
-	#fieldCollectionHelper = (key: string, config?: FieldCollectionConfig) => {
-		if (config?.column) this.includeFieldKeys.push(key);
+	#fieldCollectionHelper = (key: string, display?: DisplayInListing) => {
+		if (display) this.displayInListing.push(key);
 	};
 
 	// ------------------------------------
@@ -166,10 +164,7 @@ class CollectionBuilder extends FieldBuilder {
 				useTranslations:
 					this.config.config?.useTranslations ??
 					constants.collectionBuilder.useTranslations,
-				fields: {
-					filter: this.filterableFieldKeys,
-					include: this.includeFieldKeys,
-				},
+				displayInListing: this.displayInListing,
 			},
 		};
 	}
@@ -198,13 +193,11 @@ class CollectionBuilder extends FieldBuilder {
 			this.config.bricks?.fixed || [],
 		);
 	}
-
 	get bricksTableSchema(): Array<CollectionSchemaTable<LucidBrickTableName>> {
 		return (this.collectionTableSchema?.tables.filter(
 			(table) => table.type !== "document" && table.type !== "versions",
 		) ?? []) as Array<CollectionSchemaTable<LucidBrickTableName>>;
 	}
-
 	get documentTableSchema() {
 		return this.collectionTableSchema?.tables.find(
 			(t) => t.type === "document",
@@ -220,7 +213,6 @@ class CollectionBuilder extends FieldBuilder {
 			(t) => t.type === "versions",
 		) as CollectionSchemaTable<LucidVersionTableName> | undefined;
 	}
-
 	get tableNames(): Awaited<ServiceResponse<CollectionTableNames>> {
 		const versionTable = this.documentVersionTableSchema?.name;
 		const documentTable = this.documentTableSchema?.name;

@@ -231,7 +231,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 			<DocumentsList
 				state={{
 					collection: collection.data?.data,
-					fieldIncludes: getCollectionFieldIncludes,
+					displayInListing: getCollectionFieldIncludes,
 					searchParams: searchParams,
 					isLoading: collection.isLoading,
 					collectionIsSuccess: collectionIsSuccess,

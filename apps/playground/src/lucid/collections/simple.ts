@@ -29,9 +29,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 			required: true,
 			zod: z.string().min(2).max(128),
 		},
-		collection: {
-			column: true,
-		},
+		displayInListing: true,
 	})
 	.addUser("user")
 	.addMedia("media")

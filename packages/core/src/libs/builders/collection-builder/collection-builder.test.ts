@@ -54,44 +54,28 @@ test("collection config is correct along with field includes and filters", async
 		],
 	})
 		.addText("text_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addTextarea("textarea_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addNumber("number_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addCheckbox("checkbox_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addSelect("select_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addDateTime("datetime_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addUser("user_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addMedia("media_test", {
-			collection: {
-				column: true,
-			},
+			displayInListing: true,
 		})
 		.addWysiwyg("wysiwyg_test")
 		.addLink("link_test")
@@ -118,19 +102,16 @@ test("collection config is correct along with field includes and filters", async
 			useDrafts: false,
 			useRevisions: false,
 			useTranslations: true,
-			fields: {
-				include: [
-					"text_test",
-					"textarea_test",
-					"number_test",
-					"checkbox_test",
-					"select_test",
-					"datetime_test",
-					"user_test",
-					"media_test",
-				],
-				filter: [],
-			},
+			displayInListing: [
+				"text_test",
+				"textarea_test",
+				"number_test",
+				"checkbox_test",
+				"select_test",
+				"datetime_test",
+				"user_test",
+				"media_test",
+			],
 		},
 	});
 });
