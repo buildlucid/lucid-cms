@@ -1,5 +1,11 @@
 import streamSingle from "./stream-single.js";
 
-export default {
+interface CDNRouteControllers {
+	streamSingle: typeof streamSingle;
+}
+
+const controllers: CDNRouteControllers = {
 	streamSingle,
 };
+
+export default controllers;

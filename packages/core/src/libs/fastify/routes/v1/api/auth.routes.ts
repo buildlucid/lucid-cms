@@ -13,6 +13,17 @@ const authRoutes = async (fastify: FastifyInstance) => {
 
 	r(fastify, {
 		method: "post",
+		url: "/login",
+		middleware: {
+			validateCSRF: true,
+		},
+		zodSchema: auth.login.zodSchema,
+		swaggerSchema: auth.login.swaggerSchema,
+		controller: auth.login.controller,
+	});
+
+	r(fastify, {
+		method: "post",
 		url: "/token",
 		middleware: {
 			validateCSRF: true,
@@ -22,17 +33,6 @@ const authRoutes = async (fastify: FastifyInstance) => {
 		zodSchema: auth.token.zodSchema,
 		swaggerSchema: auth.token.swaggerSchema,
 		controller: auth.token.controller,
-	});
-
-	r(fastify, {
-		method: "post",
-		url: "/login",
-		middleware: {
-			validateCSRF: true,
-		},
-		zodSchema: auth.login.zodSchema,
-		swaggerSchema: auth.login.swaggerSchema,
-		controller: auth.login.controller,
 	});
 
 	r(fastify, {

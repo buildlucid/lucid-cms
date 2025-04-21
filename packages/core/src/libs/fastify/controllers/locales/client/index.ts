@@ -1,5 +1,11 @@
 import getAll from "./get-all.js";
 
-export default {
+interface LocaleClientRouteControllers {
+	getAll: typeof getAll;
+}
+
+const controllers: LocaleClientRouteControllers = {
 	getAll,
 };
+
+export default controllers;

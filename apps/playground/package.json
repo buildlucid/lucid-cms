@@ -20,7 +20,6 @@
 		"@lucidcms/sqlite-adapter": "*",
 		"@lucidcms/postgres-adapter": "*",
 		"@lucidcms/libsql-adapter": "*",
-		"@scalar/fastify-api-reference": "^1.28.23",
 		"better-sqlite3": "^11.1.2",
 		"nodemailer": "^6.9.14"
 	},

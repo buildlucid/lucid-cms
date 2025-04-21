@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import authSchema from "../../../../schemas/auth.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -11,7 +9,8 @@ import type { RouteController } from "../../../../types/types.js";
 const loginController: RouteController<
 	typeof authSchema.login.params,
 	typeof authSchema.login.body,
-	typeof authSchema.login.query
+	typeof authSchema.login.query.string,
+	typeof authSchema.login.query.formatted
 > = async (request, reply) => {
 	const userRes = await serviceWrapper(request.server.services.auth.login, {
 		transaction: false,
@@ -59,23 +58,16 @@ export default {
 		description:
 			"Authenticates a user and sets a refresh and access token as httpOnly cookies.",
 		tags: ["auth"],
-		summary: "Authenticates a user and sets httpOnly cookies",
-		body: {
-			type: "object",
-			properties: {
-				usernameOrEmail: { type: "string" },
-				password: { type: "string" },
-			},
-			required: ["usernameOrEmail", "password"],
-		},
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Login",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(authSchema.login.query.string),
+		body: z.toJSONSchema(authSchema.login.body),
+		// params: z.toJSONSchema(authSchema.login.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

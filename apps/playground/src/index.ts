@@ -1,13 +1,5 @@
 import lucid, { toolkit } from "@lucidcms/core";
 import { LucidAPIError, formatAPIResponse } from "@lucidcms/core/api";
-import scalarApiReference from "@scalar/fastify-api-reference";
-
-lucid.fastify.register(scalarApiReference, {
-	routePrefix: "/documentation",
-	configuration: {
-		theme: "deepSpace",
-	},
-});
 
 lucid.fastify.post("/send-email", async (request, reply) => {
 	const res = await toolkit.email.sendEmail({

@@ -1,27 +1,61 @@
 import z from "zod";
+import type { ControllerSchema } from "../types.js";
 
-export default {
+const schema = {
 	getCSRF: {
 		body: undefined,
-		query: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: undefined,
-	},
-	login: {
-		body: z.object({
-			usernameOrEmail: z.string(),
-			password: z.string(),
+		response: z.object({
+			_csrf: z.string().meta({
+				description:
+					"Store this value and use it for the _csrf header on required endpoints.",
+				example:
+					"55b26b90b9715d0e9cc425e8f1ba565cad5157e3d56ae8380d8c832a5fb3fcb7",
+			}),
 		}),
-		query: undefined,
+	} satisfies ControllerSchema,
+	login: {
+		body: z
+			.object({
+				usernameOrEmail: z.string().meta({
+					description: "Username or email address",
+					example: "admin",
+				}),
+				password: z.string().meta({
+					description: "User password",
+					example: "password",
+				}),
+			})
+			.meta({ description: "User credentials for login" }),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: undefined,
-	},
+		response: undefined,
+	} satisfies ControllerSchema,
 	token: {
 		body: undefined,
-		query: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: undefined,
-	},
+		response: undefined,
+	} satisfies ControllerSchema,
 	logout: {
 		body: undefined,
-		query: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: undefined,
-	},
+		response: undefined,
+	} satisfies ControllerSchema,
 };
+
+export default schema;

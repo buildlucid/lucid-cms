@@ -16,6 +16,7 @@ type Route = <
 	ParamsT extends z.ZodType | undefined,
 	BodyT extends z.ZodType | undefined,
 	QueryT extends z.ZodType | undefined,
+	QueryFT extends z.ZodType | undefined,
 >(
 	fastify: FastifyInstance,
 	opts: {
@@ -29,31 +30,9 @@ type Route = <
 			clientAuthentication?: boolean;
 		};
 		zodSchema?: ControllerSchema;
-		swaggerSchema?: {
-			description?: string;
-			tags?: string[];
-			summary?: string;
-			response?: Record<
-				string | number,
-				{
-					description?: string;
-					type?: string;
-					properties?: unknown;
-				}
-			>;
-			body?: {
-				type?: string;
-				properties?: unknown;
-				required?: string[];
-			};
-			headers?: {
-				type: string;
-				properties: unknown;
-				required: string[];
-			};
-		};
+		swaggerSchema?: Record<string, unknown>;
 		bodyLimit?: number;
-		controller: RouteController<ParamsT, BodyT, QueryT, z.ZodType>;
+		controller: RouteController<ParamsT, BodyT, QueryT, QueryFT>;
 	},
 ) => void;
 

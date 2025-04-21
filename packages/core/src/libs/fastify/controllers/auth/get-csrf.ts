@@ -1,5 +1,6 @@
+import z from "zod";
 import authSchema from "../../../../schemas/auth.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -7,7 +8,8 @@ import type { RouteController } from "../../../../types/types.js";
 const getCSRFController: RouteController<
 	typeof authSchema.getCSRF.params,
 	typeof authSchema.getCSRF.body,
-	typeof authSchema.getCSRF.query
+	typeof authSchema.getCSRF.query.string,
+	typeof authSchema.getCSRF.query.formatted
 > = async (request, reply) => {
 	const tokenRes = await request.server.services.auth.csrf.generateToken(
 		request,
@@ -29,19 +31,15 @@ export default {
 	zodSchema: authSchema.getCSRF,
 	swaggerSchema: {
 		description:
-			"This route returns a CSRF token in the response body and also sets a _csrf httpOnly cookie. The client can use this token on required routes by setting a _csrf header. On required routes this header will be checked against the _csrf cookie.",
+			"This endpoint returns a CSRF token in the response body as well as setting a _csrf httpOnly cookie. Some endpoints require this value to be passed via a _csrf header.",
 		tags: ["auth"],
-		summary: "Returns a CSRF token",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "object",
-					properties: {
-						_csrf: { type: "string" },
-					},
-				},
-			}),
-		},
+		summary: "CSRF Token",
+
+		// querystring: z.toJSONSchema(authSchema.getCSRF.query.string),
+		// body: z.toJSONSchema(authSchema.getCSRF.body),
+		// params: z.toJSONSchema(authSchema.getCSRF.params),
+		response: response({
+			schema: z.toJSONSchema(authSchema.getCSRF.response),
+		}),
 	},
 };

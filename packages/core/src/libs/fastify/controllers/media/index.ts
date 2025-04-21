@@ -7,7 +7,18 @@ import clearAllProcessed from "./clear-all-processed.js";
 import getPresignedUrl from "./get-presigned-url.js";
 import createSingle from "./create-single.js";
 
-export default {
+interface MediaRouteControllers {
+	updateSingle: typeof updateSingle;
+	getSingle: typeof getSingle;
+	deleteSingle: typeof deleteSingle;
+	getMultiple: typeof getMultiple;
+	clearSingleProcessed: typeof clearSingleProcessed;
+	clearAllProcessed: typeof clearAllProcessed;
+	getPresignedUrl: typeof getPresignedUrl;
+	createSingle: typeof createSingle;
+}
+
+const controllers: MediaRouteControllers = {
 	updateSingle,
 	getSingle,
 	deleteSingle,
@@ -17,3 +28,5 @@ export default {
 	getPresignedUrl,
 	createSingle,
 };
+
+export default controllers;

@@ -1,7 +1,14 @@
 import getSingle from "./get-single.js";
 import getMultiple from "./get-multiple.js";
 
-export default {
+interface DocumentClientRouteControllers {
+	getSingle: typeof getSingle;
+	getMultiple: typeof getMultiple;
+}
+
+const controllers: DocumentClientRouteControllers = {
 	getSingle,
 	getMultiple,
 };
+
+export default controllers;

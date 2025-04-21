@@ -1,5 +1,11 @@
 import getSettings from "./get-settings.js";
 
-export default {
+interface SettingsRouteControllers {
+	getSettings: typeof getSettings;
+}
+
+const controllers: SettingsRouteControllers = {
 	getSettings,
 };
+
+export default controllers;

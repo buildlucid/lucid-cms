@@ -55,10 +55,10 @@ export default {
 		description: "Get a multiple media items.",
 		tags: ["media"],
 		summary: "Get a multiple media items.",
+
 		headers: headers({
 			contentLocale: true,
 		}),
-
 		querystring: z.toJSONSchema(mediaSchema.getMultiple.query.string),
 		// body: z.toJSONSchema(mediaSchema.getMultiple.body),
 		// params: z.toJSONSchema(mediaSchema.getMultiple.params),

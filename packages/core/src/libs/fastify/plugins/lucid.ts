@@ -18,6 +18,7 @@ import { LucidError, decodeError } from "../../../utils/errors/index.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import logger from "../../../utils/logging/index.js";
 import lucidFrontend from "./frontend.js";
+import scalarApiReference from "@scalar/fastify-api-reference";
 import type { FastifyInstance } from "fastify";
 
 const currentDir = getDirName(import.meta.url);
@@ -38,23 +39,49 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		fastify.decorate("services", lucidServices);
 
 		// Register Swagger for API documentation
+
 		fastify.register(fastifySwagger, {
-			swagger: {
+			openapi: {
+				openapi: "3.0.0",
 				info: {
 					title: "Lucid CMS",
-					description: "Lucid CMS",
+					description:
+						"A modern headless CMS offering a delightful developer experience. Tailor Lucid seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
 					version: packageJson.version,
 				},
-				host: config.host.replace("http://", "").replace("https://", ""),
-				schemes: ["http"],
-				consumes: ["application/json", "multipart/form-data"],
-				produces: ["application/json"],
+				tags: [{ name: "auth", description: "Auth related end-points" }],
+				servers: [
+					{
+						url: config.host.includes("[::1]")
+							? config.host.replace("[::1]", "localhost")
+							: config.host,
+						description: "Development server",
+					},
+				],
+				// schemes: ["http"],
+				// consumes: ["application/json", "multipart/form-data"],
+				// produces: ["application/json"],
+				components: {},
 			},
+			hideUntagged: true,
 		});
 
-		// fastify.setValidatorCompiler(() => {
-		// 	return () => ({ value: false });
-		// });
+		if (!config.disableSwagger) {
+			fastify.register(scalarApiReference, {
+				routePrefix: constants.swaggerRoutePrefix,
+				configuration: {
+					theme: "deepSpace",
+					defaultHttpClient: {
+						targetKey: "node",
+						clientKey: "fetch",
+					},
+				},
+			});
+		}
+
+		fastify.setValidatorCompiler(() => {
+			return () => ({ value: false });
+		});
 
 		// Register server-wide middleware
 		fastify.register(cors, {

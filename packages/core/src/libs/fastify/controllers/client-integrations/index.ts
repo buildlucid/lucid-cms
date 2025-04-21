@@ -5,7 +5,16 @@ import updateSingle from "./update-single.js";
 import regenerateKeys from "./regenerate-keys.js";
 import getSingle from "./get-single.js";
 
-export default {
+interface ClientIntegrationRouteControllers {
+	createSingle: typeof createSingle;
+	getAll: typeof getAll;
+	deleteSingle: typeof deleteSingle;
+	updateSingle: typeof updateSingle;
+	regenerateKeys: typeof regenerateKeys;
+	getSingle: typeof getSingle;
+}
+
+const controllers: ClientIntegrationRouteControllers = {
 	createSingle,
 	getAll,
 	deleteSingle,
@@ -13,3 +22,5 @@ export default {
 	regenerateKeys,
 	getSingle,
 };
+
+export default controllers;

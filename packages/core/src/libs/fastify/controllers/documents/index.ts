@@ -9,7 +9,20 @@ import getMultipleRevisions from "./get-multiple-revisions.js";
 import restoreRevision from "./restore-revision.js";
 import promoteVersion from "./promote-version.js";
 
-export default {
+interface DocumentRouteControllers {
+	client: typeof client;
+	createSingle: typeof createSingle;
+	updateSingle: typeof updateSingle;
+	deleteMultiple: typeof deleteMultiple;
+	deleteSingle: typeof deleteSingle;
+	getSingle: typeof getSingle;
+	getMultiple: typeof getMultiple;
+	getMultipleRevisions: typeof getMultipleRevisions;
+	restoreRevision: typeof restoreRevision;
+	promoteVersion: typeof promoteVersion;
+}
+
+const controllers: DocumentRouteControllers = {
 	client,
 	createSingle,
 	updateSingle,
@@ -21,3 +34,5 @@ export default {
 	restoreRevision,
 	promoteVersion,
 };
+
+export default controllers;

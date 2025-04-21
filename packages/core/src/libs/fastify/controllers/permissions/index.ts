@@ -1,5 +1,11 @@
 import getAll from "./get-all.js";
 
-export default {
+interface PermissionRouteControllers {
+	getAll: typeof getAll;
+}
+
+const controllers: PermissionRouteControllers = {
 	getAll,
 };
+
+export default controllers;

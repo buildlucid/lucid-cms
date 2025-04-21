@@ -117,9 +117,15 @@ const swaggerResponse = (params: SwaggerResponseParams) => {
 
 	return {
 		description: description,
-		type: params.noPropertise === true ? "null" : "object",
-		properties: params.noPropertise === true ? undefined : propertise,
 		headers: headers,
+		...(params.noPropertise === true
+			? {}
+			: {
+					schema: {
+						type: "object",
+						properties: propertise,
+					},
+				}),
 	};
 };
 

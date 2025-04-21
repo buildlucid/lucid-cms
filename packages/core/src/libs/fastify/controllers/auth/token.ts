@@ -1,15 +1,13 @@
 import authSchema from "../../../../schemas/auth.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const tokenController: RouteController<
 	typeof authSchema.token.params,
 	typeof authSchema.token.body,
-	typeof authSchema.token.query
+	typeof authSchema.token.query.string,
+	typeof authSchema.token.query.formatted
 > = async (request, reply) => {
 	const payloadRes =
 		await request.server.services.auth.refreshToken.verifyToken(request, reply);
@@ -40,15 +38,16 @@ export default {
 		description:
 			"Verifies the refresh token and issues a new access and refresh token.",
 		tags: ["auth"],
-		summary: "Issues a new access and refresh token.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Refresh token",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(authSchema.token.query.string),
+		// body: z.toJSONSchema(authSchema.token.body),
+		// params: z.toJSONSchema(authSchema.token.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };
