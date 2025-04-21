@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import accountSchema from "../../../../schemas/account.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -11,7 +9,8 @@ import type { RouteController } from "../../../../types/types.js";
 const resetPasswordController: RouteController<
 	typeof accountSchema.resetPassword.params,
 	typeof accountSchema.resetPassword.body,
-	typeof accountSchema.resetPassword.query
+	typeof accountSchema.resetPassword.query.string,
+	typeof accountSchema.resetPassword.query.formatted
 > = async (request, reply) => {
 	const resetPassword = await serviceWrapper(
 		request.server.services.account.resetPassword,
@@ -43,17 +42,18 @@ export default {
 	controller: resetPasswordController,
 	zodSchema: accountSchema.resetPassword,
 	swaggerSchema: {
-		description: "Resets the password for the user if the token is valid",
+		description: "Resets the password for the authenticated user.",
 		tags: ["account"],
-		summary: "Resets users password",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Reset Password",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(accountSchema.resetPassword.query.string),
+		body: z.toJSONSchema(accountSchema.resetPassword.body),
+		params: z.toJSONSchema(accountSchema.resetPassword.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

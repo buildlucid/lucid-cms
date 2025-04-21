@@ -1,52 +1,145 @@
 import z from "zod";
 import T from "../translations/index.js";
+import UsersFormatter from "../libs/formatters/users.js";
+import type { ControllerSchema } from "../types.js";
 
-export default {
+const schema = {
 	getMe: {
 		body: undefined,
-		query: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: undefined,
-	},
-	updateMe: {
-		body: z.object({
-			firstName: z.string().optional(),
-			lastName: z.string().optional(),
-			username: z.string().min(3).optional(),
-			email: z.email().optional(),
-			currentPassword: z.string().optional(),
-			newPassword: z.string().min(8).max(128).optional(),
-			passwordConfirmation: z.string().min(8).max(128).optional(),
-		}),
-		query: undefined,
-		params: undefined,
-	},
-	sendResetPassword: {
-		body: z.object({
-			email: z.email(),
-		}),
-		query: undefined,
-		params: undefined,
-	},
-	verifyResetPassword: {
-		body: undefined,
-		query: undefined,
-		params: z.object({
-			token: z.string(),
-		}),
-	},
+		response: UsersFormatter.schema,
+	} satisfies ControllerSchema,
 	resetPassword: {
 		body: z
 			.object({
-				password: z.string().min(8).max(128),
-				passwordConfirmation: z.string().min(8).max(128),
+				password: z.string().min(8).max(128).meta({
+					description: "Your new password",
+					example: "password123",
+				}),
+				passwordConfirmation: z.string().min(8).max(128).meta({
+					description: "A repeat of your new password",
+					example: "password123",
+				}),
 			})
 			.refine((data) => data.password === data.passwordConfirmation, {
 				message: T("please_ensure_passwords_match"),
 				path: ["passwordConfirmation"],
 			}),
-		query: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: z.object({
-			token: z.string(),
+			token: z.string().meta({
+				description:
+					"A unique token granted to you when you request a password reset",
+				example: "838ece1033bf7c7468e873e79ba2a3ec",
+			}),
 		}),
-	},
+		response: undefined,
+	} satisfies ControllerSchema,
+	sendResetPassword: {
+		body: z.object({
+			email: z.email().meta({
+				description: "Your email address",
+				example: "admin@lucidcms.io",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.object({
+			message: z.string().meta({
+				description: "A status message",
+				example: T("if_account_exists_with_email_not_found"),
+			}),
+		}),
+	} satisfies ControllerSchema,
+	verifyResetPassword: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			token: z.string().meta({
+				description:
+					"A unique token granted to you when you request a password reset",
+				example: "838ece1033bf7c7468e873e79ba2a3ec",
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	updateMe: {
+		body: z.object({
+			firstName: z
+				.string()
+				.meta({
+					description: "Your new first name",
+					example: "John",
+				})
+				.optional(),
+			lastName: z
+				.string()
+				.meta({
+					description: "Your new last name",
+					example: "Smith",
+				})
+				.optional(),
+			username: z
+				.string()
+				.min(3)
+				.meta({
+					description: "Your new username",
+					example: "admin",
+				})
+				.optional(),
+			email: z
+				.email()
+				.meta({
+					description: "your new email address",
+					example: "admin@lucidcms.io",
+				})
+				.optional(),
+			currentPassword: z
+				.string()
+				.meta({
+					description: "Your current password",
+					example: "password",
+				})
+				.optional(),
+			newPassword: z
+				.string()
+				.min(8)
+				.max(128)
+				.meta({
+					description: "Your new password",
+					example: "password123",
+				})
+				.optional(),
+			passwordConfirmation: z
+				.string()
+				.min(8)
+				.max(128)
+				.meta({
+					description: "A repeat of your new password",
+					example: "password123",
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 };
+
+export default schema;

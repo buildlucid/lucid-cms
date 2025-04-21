@@ -1,3 +1,4 @@
+import z from "zod";
 import type {
 	UserPermissionsResponse,
 	Permission,
@@ -37,6 +38,24 @@ export default class UserPermissionsFormatter {
 			permissions: Array.from(permissionsSet),
 		};
 	};
+
+	static schema = {
+		permissions: z.string().meta({
+			description: "A permission identifier",
+			example: "create_user",
+		}),
+		roles: z.object({
+			id: z.number().meta({
+				description: "The role ID",
+				example: 1,
+			}),
+			name: z.string().meta({
+				description: "The role name",
+				example: "Admin",
+			}),
+		}),
+	};
+
 	static swaggerPermissions = {
 		type: "array",
 		items: {

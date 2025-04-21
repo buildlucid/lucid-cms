@@ -38,7 +38,7 @@ export default {
 		description:
 			"Verifies the refresh token and issues a new access and refresh token.",
 		tags: ["auth"],
-		summary: "Refresh token",
+		summary: "Refresh Token",
 
 		headers: headers({
 			csrf: true,

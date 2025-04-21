@@ -1,6 +1,7 @@
 import z from "zod";
 import { queryString } from "../utils/swagger/index.js";
 import defaultQuery, { filterSchemas } from "./default-query.js";
+import MediaFormatter from "../libs/formatters/media.js";
 import type { ControllerSchema } from "../types.js";
 
 const schema = {
@@ -58,93 +59,7 @@ const schema = {
 		},
 		params: undefined,
 		body: undefined,
-		response: z.object({
-			id: z.number().meta({ description: "Media ID", example: 1 }),
-			key: z.string().meta({
-				description: "Media key",
-				example: "placeholder-1708786317482",
-			}),
-			url: z.string().meta({
-				description: "Media URL",
-				example: "https://example.com/cdn/v1/key",
-			}),
-			title: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().meta({
-							description: "Title value",
-						}),
-					}),
-				)
-				.meta({
-					description: "Translated titles",
-				}),
-			alt: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().meta({
-							description: "Alt text value",
-						}),
-					}),
-				)
-				.meta({
-					description: "Translated alt texts",
-				}),
-			type: z.string().meta({ description: "Media type", example: "image" }),
-			meta: z
-				.object({
-					mimeType: z
-						.string()
-						.meta({ description: "MIME type", example: "image/jpeg" }),
-					extension: z
-						.string()
-						.meta({ description: "File extension", example: "jpeg" }),
-					fileSize: z
-						.number()
-						.meta({ description: "File size in bytes", example: 100 }),
-					width: z
-						.number()
-						.nullable()
-						.meta({ description: "Image width", example: 100 }),
-					height: z
-						.number()
-						.nullable()
-						.meta({ description: "Image height", example: 100 }),
-					blurHash: z.string().nullable().meta({
-						description: "BlurHash for image previews",
-						example: "AQABAAAABAAAAgAA...",
-					}),
-					averageColour: z.string().nullable().meta({
-						description: "Average colour of the image",
-						example: "rgba(255, 255, 255, 1)",
-					}),
-					isDark: z.boolean().nullable().meta({
-						description: "Whether the image is predominantly dark",
-						example: true,
-					}),
-					isLight: z.boolean().nullable().meta({
-						description: "Whether the image is predominantly light",
-						example: true,
-					}),
-				})
-				.meta({
-					description: "Media metadata",
-				}),
-			createdAt: z.string().meta({
-				description: "Creation timestamp",
-				example: "2022-01-01T00:00:00Z",
-			}),
-			updatedAt: z.string().meta({
-				description: "Last update timestamp",
-				example: "2022-01-01T00:00:00Z",
-			}),
-		}),
+		response: MediaFormatter.schema.media,
 	} satisfies ControllerSchema,
 };
 

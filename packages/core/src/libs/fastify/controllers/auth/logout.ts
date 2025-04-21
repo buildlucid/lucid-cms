@@ -26,7 +26,7 @@ export default {
 	zodSchema: authSchema.logout,
 	swaggerSchema: {
 		description:
-			"Logs out a user by clearing the refresh token and access token, it also clears the CSRF token",
+			"Logs out a user by clearing the refresh token and access token, it also clears the CSRF token.",
 		tags: ["auth"],
 		summary: "Logout",
 

@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import accountSchema from "../../../../schemas/account.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -12,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const sendResetPasswordController: RouteController<
 	typeof accountSchema.sendResetPassword.params,
 	typeof accountSchema.sendResetPassword.body,
-	typeof accountSchema.sendResetPassword.query
+	typeof accountSchema.sendResetPassword.query.string,
+	typeof accountSchema.sendResetPassword.query.formatted
 > = async (request, reply) => {
 	const resetPassword = await serviceWrapper(
 		request.server.services.account.sendResetPassword,
@@ -47,22 +46,19 @@ export default {
 	controller: sendResetPasswordController,
 	zodSchema: accountSchema.sendResetPassword,
 	swaggerSchema: {
-		description: "Sends a reset password email to the given users email",
+		description:
+			"Sends an email to the given email address informing them to reset their password.",
 		tags: ["account"],
-		summary: "Send reset password email",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "object",
-					properties: {
-						message: { type: "string" },
-					},
-				},
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Send Password Reset",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(accountSchema.sendResetPassword.query.string),
+		body: z.toJSONSchema(accountSchema.sendResetPassword.body),
+		// params: z.toJSONSchema(accountSchema.sendResetPassword.params),
+		response: response({
+			schema: z.toJSONSchema(accountSchema.sendResetPassword.response),
 		}),
 	},
 };

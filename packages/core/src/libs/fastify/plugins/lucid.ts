@@ -49,7 +49,18 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 						"A modern headless CMS offering a delightful developer experience. Tailor Lucid seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
 					version: packageJson.version,
 				},
-				tags: [{ name: "auth", description: "Auth related end-points" }],
+				tags: [
+					{
+						name: "auth",
+						description:
+							"Authentication endpoints including login, token management, CSRF protection and logout functionality.",
+					},
+					{
+						name: "account",
+						description:
+							"User account management endpoints for user details, password resets and updating personal settings.",
+					},
+				],
 				servers: [
 					{
 						url: config.host.includes("[::1]")
@@ -70,7 +81,7 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 			fastify.register(scalarApiReference, {
 				routePrefix: constants.swaggerRoutePrefix,
 				configuration: {
-					theme: "deepSpace",
+					theme: "saturn",
 					defaultHttpClient: {
 						targetKey: "node",
 						clientKey: "fetch",

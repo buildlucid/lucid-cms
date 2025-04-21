@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import accountSchema from "../../../../schemas/account.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -11,7 +9,8 @@ import type { RouteController } from "../../../../types/types.js";
 const updateMeController: RouteController<
 	typeof accountSchema.updateMe.params,
 	typeof accountSchema.updateMe.body,
-	typeof accountSchema.updateMe.query
+	typeof accountSchema.updateMe.query.string,
+	typeof accountSchema.updateMe.query.formatted
 > = async (request, reply) => {
 	const updateMe = await serviceWrapper(
 		request.server.services.account.updateMe,
@@ -49,40 +48,18 @@ export default {
 	controller: updateMeController,
 	zodSchema: accountSchema.updateMe,
 	swaggerSchema: {
-		description: "Used to update the current authenticated users information",
+		description: "Update the authenticated user's information.",
 		tags: ["account"],
-		summary: "Update the authenticated user",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				firstName: {
-					type: "string",
-				},
-				lastName: {
-					type: "string",
-				},
-				username: {
-					type: "string",
-				},
-				email: {
-					type: "string",
-				},
-				roleIds: {
-					type: "array",
-					items: {
-						type: "number",
-					},
-				},
-			},
-		},
-		headers: swaggerHeaders({
+		summary: "Update Authenticated User",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(accountSchema.updateMe.query.string),
+		body: z.toJSONSchema(accountSchema.updateMe.body),
+		// params: z.toJSONSchema(accountSchema.updateMe.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };
