@@ -83,6 +83,7 @@ const buildExclude = (query: unknown) => {
 
 	return exclude.split(",");
 };
+
 const addRemainingQuery = (query: unknown) => {
 	const queryObject = query as Record<string, string>;
 	const remainingQuery = Object.fromEntries(
@@ -101,16 +102,18 @@ const validateQuery = (schema: ZodType) => async (request: FastifyRequest) => {
 		query: schema ?? z.object({}),
 	});
 
+	const formattedQueryObject = {
+		sort: buildSort(request.query),
+		filter: buildFilter(request.query),
+		include: buildInclude(request.query),
+		exclude: buildExclude(request.query),
+		page: buildPage(request.query),
+		perPage: buildPerPage(request.query),
+		...addRemainingQuery(request.query),
+	};
+
 	const validateResult = await querySchema.safeParseAsync({
-		query: {
-			sort: buildSort(request.query),
-			filter: buildFilter(request.query),
-			include: buildInclude(request.query),
-			exclude: buildExclude(request.query),
-			page: buildPage(request.query),
-			perPage: buildPerPage(request.query),
-			...addRemainingQuery(request.query),
-		},
+		query: formattedQueryObject,
 	});
 
 	if (!validateResult.success) {
@@ -121,7 +124,7 @@ const validateQuery = (schema: ZodType) => async (request: FastifyRequest) => {
 		});
 	}
 
-	request.query = validateResult.data.query as QueryParams;
+	request.formattedQuery = validateResult.data.query as QueryParams;
 };
 
 export default validateQuery;

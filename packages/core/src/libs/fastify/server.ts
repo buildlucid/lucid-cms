@@ -5,7 +5,14 @@ import { serverStarted } from "../../utils/logging/lucid-startup-logs.js";
 import constants from "../../constants/constants.js";
 
 const startTime = process.hrtime();
-const fastify = Fastify();
+const fastify = Fastify({
+	ajv: {
+		customOptions: {
+			allowMatchingProperties: true,
+			strict: false,
+		},
+	},
+});
 
 fastify.register(lucidPlugin);
 

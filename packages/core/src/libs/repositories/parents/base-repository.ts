@@ -175,7 +175,6 @@ abstract class BaseRepository<
 				message: validationError,
 				scope: constants.logScopes.query,
 				data: {
-					id: executeResponse.meta.id,
 					table: executeResponse.meta.tableName,
 					method: executeResponse.meta.method,
 					executionTime: executeResponse.meta.executionTime,
@@ -199,6 +198,7 @@ abstract class BaseRepository<
 	}
 	/**
 	 * Handles executing a query and logging
+	 * @todo add query data to debug log, add a sanitise data method that each repo can extend to mark certain columns to have data redacted, ie passwords, tokens, user data etc.
 	 */
 	protected async executeQuery<QueryData>(
 		executeFn: () => Promise<QueryData>,
@@ -212,7 +212,6 @@ abstract class BaseRepository<
 			| { error: undefined; data: QueryData };
 		meta: ExecuteMeta;
 	}> {
-		const uuid = crypto.randomUUID();
 		const startTime = process.hrtime();
 
 		try {
@@ -227,7 +226,6 @@ abstract class BaseRepository<
 				message: "Query execution completed",
 				scope: constants.logScopes.query,
 				data: {
-					id: uuid,
 					table: config?.tableName ?? this.tableName,
 					method: config.method,
 					executionTime: `${executionTime}ms`,
@@ -240,7 +238,6 @@ abstract class BaseRepository<
 					error: undefined,
 				},
 				meta: {
-					id: uuid,
 					method: config.method,
 					executionTime: `${executionTime}ms`,
 					tableName: config?.tableName ?? this.tableName,
@@ -256,7 +253,6 @@ abstract class BaseRepository<
 				message: "Query execution failed",
 				scope: constants.logScopes.query,
 				data: {
-					id: uuid,
 					table: config?.tableName ?? this.tableName,
 					method: config.method,
 					executionTime: `${executionTime}ms`,
@@ -279,7 +275,6 @@ abstract class BaseRepository<
 					},
 				},
 				meta: {
-					id: uuid,
 					method: config.method,
 					executionTime: `${executionTime}ms`,
 					tableName: config?.tableName ?? this.tableName,

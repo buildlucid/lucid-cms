@@ -15,7 +15,7 @@ export const modifyMessage = (errorMessage: string): string => {
  */
 const zodSafeParse = (
 	value: unknown,
-	schema: z.ZodTypeAny,
+	schema: z.ZodType,
 ): CustomFieldValidateResponse => {
 	const response = schema.safeParse(value);
 	if (response?.success) {

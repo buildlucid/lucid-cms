@@ -20,9 +20,24 @@ type FormatAPIResponse = (
 // --------------------------------------------------
 // Helpers
 
+const constructBaseUrl = (request: FastifyRequest): URL => {
+	if (request.server.config.host) {
+		const originalUrl = request.originalUrl.startsWith("/")
+			? request.originalUrl
+			: `/${request.originalUrl}`;
+		return new URL(originalUrl, request.server.config.host);
+	}
+	return new URL(
+		`${request.protocol}://${request.hostname}${request.originalUrl}`,
+	);
+};
+
 const getPath = (request: FastifyRequest) => {
-	const originalUrl = request.originalUrl;
-	return `${request.server.config.host}${originalUrl}`.split("?")[0] ?? "";
+	try {
+		return constructBaseUrl(request)?.toString().split("?")[0] || "";
+	} catch (error) {
+		return request.originalUrl || "";
+	}
 };
 
 const buildMetaLinks = (
@@ -35,74 +50,83 @@ const buildMetaLinks = (
 	const { page, perPage, count } = params.pagination;
 	const totalPages = Math.ceil(count / Number(perPage));
 
-	const url = new URL(
-		`${request.protocol}://${request.hostname}${request.originalUrl}`,
-	);
+	try {
+		const baseUrl = constructBaseUrl(request);
 
-	for (let i = 0; i < totalPages; i++) {
-		if (i !== 0) url.searchParams.set("page", String(i + 1));
-		else url.searchParams.delete("page");
-		links.push({
-			active: page === i + 1,
-			label: String(i + 1),
-			url: url.toString(),
-			page: i + 1,
-		});
+		for (let i = 0; i < totalPages; i++) {
+			const pageUrl = new URL(baseUrl.toString());
+			if (i !== 0) pageUrl.searchParams.set("page", String(i + 1));
+			else pageUrl.searchParams.delete("page");
+
+			links.push({
+				active: page === i + 1,
+				label: String(i + 1),
+				url: pageUrl.toString(),
+				page: i + 1,
+			});
+		}
+		return links;
+	} catch (error) {
+		console.error("Error in buildMetaLinks:", error);
+		return links;
 	}
-
-	return links;
 };
+
 const buildLinks = (
 	request: FastifyRequest,
 	params: BuildResponseParams,
 ): ResponseBody["links"] => {
 	if (!params.pagination) return undefined;
 
-	const { page, perPage, count } = params.pagination;
-	const totalPages = perPage === -1 ? 1 : Math.ceil(count / Number(perPage));
+	try {
+		const { page, perPage, count } = params.pagination;
+		const totalPages = perPage === -1 ? 1 : Math.ceil(count / Number(perPage));
+		const baseUrl = constructBaseUrl(request);
 
-	const url = new URL(
-		`${request.protocol}://${request.hostname}${request.originalUrl}`,
-	);
+		const links: ResponseBody["links"] = {
+			first: null,
+			last: null,
+			next: null,
+			prev: null,
+		};
 
-	const links: ResponseBody["links"] = {
-		first: null,
-		last: null,
-		next: null,
-		prev: null,
-	};
+		// Set First
+		const firstUrl = new URL(baseUrl.toString());
+		firstUrl.searchParams.delete("page");
+		links.first = firstUrl.toString();
 
-	// Set First
-	url.searchParams.delete("page");
-	links.first = url.toString();
+		// Set Last
+		const lastUrl = new URL(baseUrl.toString());
+		if (page !== totalPages)
+			lastUrl.searchParams.set("page", String(totalPages));
+		links.last = lastUrl.toString();
 
-	// Set Last
-	if (page !== totalPages) url.searchParams.set("page", String(totalPages));
-	links.last = url.toString();
+		// Set Next
+		if (page !== totalPages) {
+			const nextUrl = new URL(baseUrl.toString());
+			nextUrl.searchParams.set("page", String(Number(page) + 1));
+			links.next = nextUrl.toString();
+		}
 
-	// Set Next
-	if (page !== totalPages) {
-		url.searchParams.set("page", String(Number(page) + 1));
-		links.next = url.toString();
-	} else {
-		links.next = null;
+		// Set Prev
+		if (page !== 1) {
+			const prevUrl = new URL(baseUrl.toString());
+			prevUrl.searchParams.set("page", String(Number(page) - 1));
+			links.prev = prevUrl.toString();
+		}
+
+		return links;
+	} catch (error) {
+		console.error("Error in buildLinks:", error);
+		return undefined; // Return undefined on error
 	}
-
-	// Set Prev
-	if (page !== 1) {
-		url.searchParams.set("page", String(Number(page) - 1));
-		links.prev = url.toString();
-	} else {
-		links.prev = null;
-	}
-
-	return links;
 };
 
 // --------------------------------------------------
 // Main
 const formatAPIResponse: FormatAPIResponse = (request, params) => {
 	let lastPage = null;
+
 	if (params.pagination) {
 		if (params.pagination.perPage === -1) {
 			lastPage = 1;
@@ -112,7 +136,7 @@ const formatAPIResponse: FormatAPIResponse = (request, params) => {
 			);
 		}
 	}
-
+	console.log("pre meta");
 	const meta: ResponseBody["meta"] = {
 		path: getPath(request),
 		links: buildMetaLinks(request, params),
@@ -121,6 +145,7 @@ const formatAPIResponse: FormatAPIResponse = (request, params) => {
 		total: Number(params.pagination?.count) || null,
 		lastPage: lastPage,
 	};
+	console.log("post meta");
 	const links = buildLinks(request, params);
 
 	return {

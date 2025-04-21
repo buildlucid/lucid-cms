@@ -127,8 +127,6 @@ export interface LucidConfig {
 	};
 	/** The log level to use. */
 	logLevel?: LogLevel;
-	/** Disables the swagger documentation site. */
-	disableSwagger?: boolean;
 	/** Localisation settings. */
 	localisation?: {
 		/** A list of locales you want to write content in. */
@@ -201,7 +199,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		};
 		strategy: EmailStrategy;
 	};
-	disableSwagger: boolean;
 	localisation: {
 		locales: {
 			label: string;

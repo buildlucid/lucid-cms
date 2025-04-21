@@ -4,6 +4,7 @@ import type { Config } from "./config.js";
 import type lucidServices from "../services/index.js";
 import type { UserPermissionsResponse, LocalesResponse } from "./response.js";
 import type logger from "../utils/logging/index.js";
+import type { QueryParams } from "./query-params.js";
 
 declare module "fastify" {
 	interface FastifyInstance {
@@ -28,13 +29,15 @@ declare module "fastify" {
 			id: number;
 			key: string;
 		};
+		formattedQuery: QueryParams;
 	}
 }
 
 export type RouteController<
-	P extends z.ZodTypeAny | undefined,
-	B extends z.ZodTypeAny | undefined,
-	Q extends z.ZodTypeAny | undefined,
+	P extends z.ZodType | undefined,
+	B extends z.ZodType | undefined,
+	Q extends z.ZodType | undefined,
+	F extends z.ZodType | undefined = undefined,
 > = (
 	request: FastifyRequest<{
 		// @ts-expect-error
@@ -43,6 +46,18 @@ export type RouteController<
 		Body: z.infer<B>;
 		// @ts-expect-error
 		Querystring: z.infer<Q>;
-	}>,
+	}> & {
+		formattedQuery: F extends z.ZodType ? z.infer<F> : z.ZodType;
+	},
 	reply: FastifyReply,
 ) => void;
+
+export type ControllerSchema = {
+	query: {
+		string: z.ZodType | undefined;
+		formatted: z.ZodType | undefined;
+	};
+	params: z.ZodType | undefined;
+	body: z.ZodType | undefined;
+	response: z.ZodType | undefined;
+};

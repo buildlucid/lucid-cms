@@ -49,7 +49,6 @@ export default lucid.config({
 		],
 		defaultLocale: "en",
 	},
-	// disableSwagger: true,
 	media: {
 		// maxSize: 200 * 1024 * 1024,
 		processed: {

@@ -5,7 +5,7 @@ import queryBuilder from "../query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
-import type mediaSchema from "../../schemas/media.js";
+import type { GetMultipleQueryParams } from "../../schemas/media.js";
 
 export default class MediaRepository extends StaticRepository<"lucid_media"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -299,7 +299,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				localeCode: string;
-				queryParams: z.infer<typeof mediaSchema.getMultiple.query>;
+				queryParams: GetMultipleQueryParams;
 			}
 		>,
 	) {

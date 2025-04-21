@@ -43,7 +43,6 @@ export type QueryProps<V extends boolean, P extends object> = P & {
 };
 
 export type ExecuteMeta = {
-	id: string;
 	method: string;
 	executionTime: string;
 	tableName: string;

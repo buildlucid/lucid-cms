@@ -1,147 +1,155 @@
 import z from "zod";
+import { queryString } from "../utils/swagger/index.js";
 import defaultQuery, { filterSchemas } from "./default-query.js";
+import type { ControllerSchema } from "../types.js";
 
-export default {
-	getSingle: {
-		body: undefined,
-		query: undefined,
-		params: z.object({
-			id: z.string(),
-		}),
-	},
-	deleteSingle: {
-		body: undefined,
-		query: undefined,
-		params: z.object({
-			id: z.string(),
-		}),
-	},
+const schema = {
 	getMultiple: {
-		query: z.object({
-			filter: z
+		query: {
+			string: z
 				.object({
-					title: filterSchemas.single.optional(),
-					key: filterSchemas.single.optional(),
-					mimeType: filterSchemas.union.optional(),
-					type: filterSchemas.union.optional(),
-					extension: filterSchemas.union.optional(),
+					"filter[title]": queryString.schema.filter(false, "Thumbnail"),
+					"filter[key]": queryString.schema.filter(false, "thumbnail-2022"),
+					"filter[mimeType]": queryString.schema.filter(
+						true,
+						"image/png,image/jpg",
+					),
+					"filter[type]": queryString.schema.filter(true, "document"),
+					"filter[extension]": queryString.schema.filter(true, "jpg,png"),
+					sort: queryString.schema.sort(
+						"createdAt,updatedAt,title,mimeType,extension",
+					),
+					include: queryString.schema.include("permissions"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
 				})
-				.optional(),
-			sort: z
-				.array(
-					z.object({
-						key: z.enum([
-							"createdAt",
-							"updatedAt",
-							"title",
-							"fileSize",
-							"width",
-							"height",
-							"mimeType",
-							"extension",
-						]),
-						value: z.enum(["asc", "desc"]),
-					}),
-				)
-				.optional(),
-			include: z.array(z.enum(["permissions"])).optional(),
-			exclude: defaultQuery.exclude,
-			page: defaultQuery.page,
-			perPage: defaultQuery.perPage,
-		}),
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						title: filterSchemas.single.optional(),
+						key: filterSchemas.single.optional(),
+						mimeType: filterSchemas.union.optional(),
+						type: filterSchemas.union.optional(),
+						extension: filterSchemas.union.optional(),
+					})
+					.optional(),
+				sort: z
+					.array(
+						z.object({
+							key: z.enum([
+								"createdAt",
+								"updatedAt",
+								"title",
+								"fileSize",
+								"width",
+								"height",
+								"mimeType",
+								"extension",
+							]),
+							value: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				include: z.array(z.enum(["permissions"])).optional(),
+				page: defaultQuery.page,
+				perPage: defaultQuery.perPage,
+			}),
+		},
 		params: undefined,
 		body: undefined,
-	},
-	uploadSingle: {
-		body: z.object({
+		response: z.object({
+			id: z.number().meta({ description: "Media ID", example: 1 }),
+			key: z.string().meta({
+				description: "Media key",
+				example: "placeholder-1708786317482",
+			}),
+			url: z.string().meta({
+				description: "Media URL",
+				example: "https://example.com/cdn/v1/key",
+			}),
 			title: z
 				.array(
 					z.object({
-						localeCode: z.string(),
-						value: z.string().nullable(),
+						localeCode: z
+							.string()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().meta({
+							description: "Title value",
+						}),
 					}),
 				)
-				.optional(),
+				.meta({
+					description: "Translated titles",
+				}),
 			alt: z
 				.array(
 					z.object({
-						localeCode: z.string(),
-						value: z.string().nullable(),
+						localeCode: z
+							.string()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().meta({
+							description: "Alt text value",
+						}),
 					}),
 				)
-				.optional(),
-		}),
-		query: undefined,
-		params: undefined,
-	},
-	updateSingle: {
-		body: z.object({
-			key: z.string().optional(),
-			fileName: z.string().optional(),
-			title: z
-				.array(
-					z.object({
-						localeCode: z.string(),
-						value: z.string().nullable(),
+				.meta({
+					description: "Translated alt texts",
+				}),
+			type: z.string().meta({ description: "Media type", example: "image" }),
+			meta: z
+				.object({
+					mimeType: z
+						.string()
+						.meta({ description: "MIME type", example: "image/jpeg" }),
+					extension: z
+						.string()
+						.meta({ description: "File extension", example: "jpeg" }),
+					fileSize: z
+						.number()
+						.meta({ description: "File size in bytes", example: 100 }),
+					width: z
+						.number()
+						.nullable()
+						.meta({ description: "Image width", example: 100 }),
+					height: z
+						.number()
+						.nullable()
+						.meta({ description: "Image height", example: 100 }),
+					blurHash: z.string().nullable().meta({
+						description: "BlurHash for image previews",
+						example: "AQABAAAABAAAAgAA...",
 					}),
-				)
-				.optional(),
-			alt: z
-				.array(
-					z.object({
-						localeCode: z.string(),
-						value: z.string().nullable(),
+					averageColour: z.string().nullable().meta({
+						description: "Average colour of the image",
+						example: "rgba(255, 255, 255, 1)",
 					}),
-				)
-				.optional(),
-		}),
-		query: undefined,
-		params: z.object({
-			id: z.string(),
-		}),
-	},
-	clearSingleProcessed: {
-		body: undefined,
-		query: undefined,
-		params: z.object({
-			id: z.string(),
-		}),
-	},
-	clearAllProcessed: {
-		body: undefined,
-		query: undefined,
-		params: undefined,
-	},
-	getPresignedUrl: {
-		body: z.object({
-			fileName: z.string(),
-			mimeType: z.string(),
-		}),
-		query: undefined,
-		params: undefined,
-	},
-	createSingle: {
-		body: z.object({
-			key: z.string(),
-			fileName: z.string(),
-			title: z
-				.array(
-					z.object({
-						localeCode: z.string(),
-						value: z.string().nullable(),
+					isDark: z.boolean().nullable().meta({
+						description: "Whether the image is predominantly dark",
+						example: true,
 					}),
-				)
-				.optional(),
-			alt: z
-				.array(
-					z.object({
-						localeCode: z.string(),
-						value: z.string().nullable(),
+					isLight: z.boolean().nullable().meta({
+						description: "Whether the image is predominantly light",
+						example: true,
 					}),
-				)
-				.optional(),
+				})
+				.meta({
+					description: "Media metadata",
+				}),
+			createdAt: z.string().meta({
+				description: "Creation timestamp",
+				example: "2022-01-01T00:00:00Z",
+			}),
+			updatedAt: z.string().meta({
+				description: "Last update timestamp",
+				example: "2022-01-01T00:00:00Z",
+			}),
 		}),
-		query: undefined,
-		params: undefined,
-	},
+	} satisfies ControllerSchema,
 };
+
+export type GetMultipleQueryParams = z.infer<
+	typeof schema.getMultiple.query.formatted
+>;
+
+export default schema;

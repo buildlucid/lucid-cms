@@ -22,6 +22,7 @@
 	"swagger_response_403": "Forbidden response",
 	"swagger_response_404": "Not found response",
 	"swagger_response_500": "Internal server error response",
+	"swagger_response_default": "Catch all error response",
 	"swagger_csrf_header_description": "A token that is used to protect against CSRF attacks. CSRF middleware expects this value to be passed in the header so it can be compared to the httpOnly _csrf cookie.",
 	"swagger_access_header_description": "Stores the access token that is used to authenticate requests.",
 	"swagger_refresh_header_description": "Stores the refresh token that can be used to obtain a new access token when the current one expires.",

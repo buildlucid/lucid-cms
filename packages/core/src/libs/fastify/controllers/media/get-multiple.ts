@@ -1,12 +1,8 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import mediaSchema from "../../../../schemas/media.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-	swaggerQueryString,
-} from "../../../../utils/swagger/index.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import MediaFormatter from "../../../formatters/media.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -14,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const getMultipleController: RouteController<
 	typeof mediaSchema.getMultiple.params,
 	typeof mediaSchema.getMultiple.body,
-	typeof mediaSchema.getMultiple.query
+	typeof mediaSchema.getMultiple.query.string,
+	typeof mediaSchema.getMultiple.query.formatted
 > = async (request, reply) => {
 	const media = await serviceWrapper(
 		request.server.services.media.getMultiple,
@@ -33,7 +30,7 @@ const getMultipleController: RouteController<
 			services: request.server.services,
 		},
 		{
-			query: request.query,
+			query: request.formattedQuery,
 			localeCode: request.locale.code,
 		},
 	);
@@ -44,8 +41,8 @@ const getMultipleController: RouteController<
 			data: media.data.data,
 			pagination: {
 				count: media.data.count,
-				page: request.query.page,
-				perPage: request.query.perPage,
+				page: request.formattedQuery.page,
+				perPage: request.formattedQuery.perPage,
 			},
 		}),
 	);
@@ -58,49 +55,19 @@ export default {
 		description: "Get a multiple media items.",
 		tags: ["media"],
 		summary: "Get a multiple media items.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: MediaFormatter.swagger,
-				},
-				paginated: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		headers: headers({
 			contentLocale: true,
 		}),
-		querystring: swaggerQueryString({
-			filters: [
-				{
-					key: "key",
-				},
-				{
-					key: "mimeType",
-				},
-				{
-					key: "extension",
-				},
-				{
-					key: "type",
-				},
-				{
-					key: "title",
-				},
-			],
-			sorts: [
-				"createdAt",
-				"updatedAt",
-				"title",
-				"fileSize",
-				"width",
-				"height",
-				"mimeType",
-				"extension",
-			],
-			page: true,
-			perPage: true,
+
+		querystring: z.toJSONSchema(mediaSchema.getMultiple.query.string),
+		// body: z.toJSONSchema(mediaSchema.getMultiple.body),
+		// params: z.toJSONSchema(mediaSchema.getMultiple.params),
+		response: response({
+			schema: {
+				type: "array",
+				items: z.toJSONSchema(mediaSchema.getMultiple.response),
+			},
+			paginated: true,
 		}),
 	},
 };

@@ -6,8 +6,6 @@ import fastifyHelmet from "@fastify/helmet";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyStatic from "@fastify/static";
 import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
-import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import packageJson from "../../../../package.json" with { type: "json" };
 import executeStartTasks from "../../../actions/execute-start-tasks.js";
@@ -20,6 +18,7 @@ import { LucidError, decodeError } from "../../../utils/errors/index.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import logger from "../../../utils/logging/index.js";
 import lucidFrontend from "./frontend.js";
+import type { FastifyInstance } from "fastify";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -53,15 +52,9 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 			},
 		});
 
-		if (!config.disableSwagger) {
-			fastify.register(fastifySwaggerUi, {
-				routePrefix: constants.swaggerRoutePrefix,
-			});
-		}
-
-		fastify.setValidatorCompiler(() => {
-			return () => ({ value: false });
-		});
+		// fastify.setValidatorCompiler(() => {
+		// 	return () => ({ value: false });
+		// });
 
 		// Register server-wide middleware
 		fastify.register(cors, {

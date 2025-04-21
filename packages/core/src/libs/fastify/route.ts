@@ -1,7 +1,3 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type z from "zod";
-import type { Permission } from "../../types/response.js";
-import type { RouteController } from "../../types/types.js";
 import logRoute from "./middleware/log-route.js";
 import validateBody from "./middleware/validate-body.js";
 import validateParams from "./middleware/validate-params.js";
@@ -11,11 +7,15 @@ import validateCSRF from "./middleware/validate-csrf.js";
 import permissions from "./middleware/permissions.js";
 import contentLocale from "./middleware/content-locale.js";
 import clientAuthentication from "./middleware/client-authenticate.js";
+import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type z from "zod";
+import type { Permission } from "../../types/response.js";
+import type { RouteController, ControllerSchema } from "../../types/types.js";
 
 type Route = <
-	ParamsT extends z.ZodTypeAny | undefined,
-	BodyT extends z.ZodTypeAny | undefined,
-	QueryT extends z.ZodTypeAny | undefined,
+	ParamsT extends z.ZodType | undefined,
+	BodyT extends z.ZodType | undefined,
+	QueryT extends z.ZodType | undefined,
 >(
 	fastify: FastifyInstance,
 	opts: {
@@ -28,11 +28,7 @@ type Route = <
 			contentLocale?: boolean;
 			clientAuthentication?: boolean;
 		};
-		zodSchema?: {
-			params?: ParamsT;
-			body?: BodyT;
-			query?: QueryT;
-		};
+		zodSchema?: ControllerSchema;
 		swaggerSchema?: {
 			description?: string;
 			tags?: string[];
@@ -57,7 +53,7 @@ type Route = <
 			};
 		};
 		bodyLimit?: number;
-		controller: RouteController<ParamsT, BodyT, QueryT>;
+		controller: RouteController<ParamsT, BodyT, QueryT, z.ZodType>;
 	},
 ) => void;
 
@@ -66,32 +62,31 @@ type PreHookT = Array<
 >;
 
 const route: Route = (fastify, opts) => {
-	const { method, url, controller, swaggerSchema, zodSchema, middleware } =
-		opts;
-
 	const preValidation: PreHookT = [];
 	const preHandler: PreHookT = [logRoute("prehandler")];
 
-	if (middleware?.authenticate) preHandler.push(authenticate);
-	if (middleware?.clientAuthentication) preHandler.push(clientAuthentication);
-	if (middleware?.validateCSRF) preHandler.push(validateCSRF);
-	if (middleware?.contentLocale) preHandler.push(contentLocale);
+	if (opts.middleware?.authenticate) preHandler.push(authenticate);
+	if (opts.middleware?.clientAuthentication)
+		preHandler.push(clientAuthentication);
+	if (opts.middleware?.validateCSRF) preHandler.push(validateCSRF);
+	if (opts.middleware?.contentLocale) preHandler.push(contentLocale);
 
-	if (zodSchema?.body !== undefined)
-		preValidation.push(validateBody(zodSchema.body));
-	if (zodSchema?.params !== undefined)
-		preValidation.push(validateParams(zodSchema.params));
-	if (zodSchema?.query !== undefined)
-		preValidation.push(validateQuery(zodSchema.query));
+	if (opts.zodSchema?.body !== undefined)
+		preValidation.push(validateBody(opts.zodSchema.body));
+	if (opts.zodSchema?.params !== undefined)
+		preValidation.push(validateParams(opts.zodSchema.params));
+	if (opts.zodSchema?.query?.formatted !== undefined)
+		preValidation.push(validateQuery(opts.zodSchema.query.formatted));
 	if (opts.permissions) preHandler.push(permissions(opts.permissions));
 
 	fastify.route({
-		method: method,
-		url: url,
-		handler: controller,
+		method: opts.method,
+		url: opts.url,
+		// @ts-expect-error - comes from "& { formattedQuery }" on the RouteController
+		handler: opts.controller,
 		preValidation: preValidation,
 		preHandler: preHandler,
-		schema: swaggerSchema,
+		schema: opts.swaggerSchema,
 		onResponse: [logRoute("onResponse")],
 		bodyLimit: opts.bodyLimit,
 	});
