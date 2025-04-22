@@ -60,6 +60,16 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 						description:
 							"User account management endpoints for user details, password resets and updating personal settings.",
 					},
+					{
+						name: "cdn",
+						description:
+							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
+					},
+					{
+						name: "client-integrations",
+						description:
+							"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",
+					},
 				],
 				servers: [
 					{

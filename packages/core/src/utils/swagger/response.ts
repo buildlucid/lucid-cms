@@ -61,7 +61,7 @@ const linksObject = {
 };
 
 // Standard error responses
-const defaultErrorResponse = {
+export const defaultErrorResponse = {
 	type: "object",
 	description: T("swagger_response_default"),
 	properties: {

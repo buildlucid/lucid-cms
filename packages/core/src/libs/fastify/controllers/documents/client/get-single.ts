@@ -53,7 +53,7 @@ export default {
 	swaggerSchema: {
 		description:
 			"Get a single collection document by filters via the client integration.",
-		tags: ["client-integrations", "documents"],
+		tags: ["client-documents"],
 		summary: "Get a single collection document entry.",
 		response: {
 			200: swaggerResponse({

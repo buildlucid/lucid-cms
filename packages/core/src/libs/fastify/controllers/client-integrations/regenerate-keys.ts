@@ -1,11 +1,8 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import ClientIntegrationsFormatter from "../../../formatters/client-integrations.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -13,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const regenerateKeysController: RouteController<
 	typeof clientIntegrationsSchema.regenerateKeys.params,
 	typeof clientIntegrationsSchema.regenerateKeys.body,
-	typeof clientIntegrationsSchema.regenerateKeys.query
+	typeof clientIntegrationsSchema.regenerateKeys.query.string,
+	typeof clientIntegrationsSchema.regenerateKeys.query.formatted
 > = async (request, reply) => {
 	const regenerateKeysRes = await serviceWrapper(
 		request.server.services.clientIntegrations.regenerateKeys,
@@ -50,15 +48,16 @@ export default {
 	swaggerSchema: {
 		description: "Regenerates the API key for the given client integration.",
 		tags: ["client-integrations"],
-		summary: "Regenerate a single client integration API key.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: ClientIntegrationsFormatter.swagger,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Regenerate Client Integration API Key",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.query.string),
+		// body: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.body),
+		params: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.params),
+		response: response({
+			schema: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.response),
 		}),
 	},
 };

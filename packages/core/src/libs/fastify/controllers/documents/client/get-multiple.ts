@@ -58,7 +58,7 @@ export default {
 	swaggerSchema: {
 		description:
 			"Get multilple collection documents by filters via the client integration.",
-		tags: ["client-integrations", "documents"],
+		tags: ["client-documents"],
 		summary: "Get multiple collection document entries.",
 		response: {
 			200: swaggerResponse({

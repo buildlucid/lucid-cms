@@ -1,8 +1,8 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import ClientIntegrationsFormatter from "../../../formatters/client-integrations.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -10,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const getSingleController: RouteController<
 	typeof clientIntegrationsSchema.getSingle.params,
 	typeof clientIntegrationsSchema.getSingle.body,
-	typeof clientIntegrationsSchema.getSingle.query
+	typeof clientIntegrationsSchema.getSingle.query.string,
+	typeof clientIntegrationsSchema.getSingle.query.formatted
 > = async (request, reply) => {
 	const getSingleRes = await serviceWrapper(
 		request.server.services.clientIntegrations.getSingle,
@@ -45,14 +46,18 @@ export default {
 	controller: getSingleController,
 	zodSchema: clientIntegrationsSchema.getSingle,
 	swaggerSchema: {
-		description: "Get a single client integration",
+		description: "Get a single client integration by ID.",
 		tags: ["client-integrations"],
-		summary: "Get a single client integration",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: ClientIntegrationsFormatter.swagger,
-			}),
-		},
+		summary: "Get Client Integration",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(clientIntegrationsSchema.getSingle.query.string),
+		// body: z.toJSONSchema(clientIntegrationsSchema.getSingle.body),
+		// params: z.toJSONSchema(clientIntegrationsSchema.getSingle.params),
+		response: response({
+			schema: z.toJSONSchema(clientIntegrationsSchema.getSingle.response),
+		}),
 	},
 };

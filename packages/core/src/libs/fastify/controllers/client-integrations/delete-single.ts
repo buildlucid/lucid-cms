@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -11,7 +9,8 @@ import type { RouteController } from "../../../../types/types.js";
 const deleteSingleController: RouteController<
 	typeof clientIntegrationsSchema.deleteSingle.params,
 	typeof clientIntegrationsSchema.deleteSingle.body,
-	typeof clientIntegrationsSchema.deleteSingle.query
+	typeof clientIntegrationsSchema.deleteSingle.query.string,
+	typeof clientIntegrationsSchema.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingleRes = await serviceWrapper(
 		request.server.services.clientIntegrations.deleteSingle,
@@ -42,17 +41,18 @@ export default {
 	controller: deleteSingleController,
 	zodSchema: clientIntegrationsSchema.deleteSingle,
 	swaggerSchema: {
-		description: "Delete a single client integration.",
+		description: "Delete a single client integration by ID.",
 		tags: ["client-integrations"],
-		summary: "Delete a single client integration",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Delete Client Integration",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(clientIntegrationsSchema.deleteSingle.query.string),
+		// body: z.toJSONSchema(clientIntegrationsSchema.deleteSingle.body),
+		params: z.toJSONSchema(clientIntegrationsSchema.deleteSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

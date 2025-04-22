@@ -3,15 +3,19 @@ import clientIntegrationsSchema from "../../../../schemas/client-integrations.js
 import {
 	swaggerResponse,
 	swaggerHeaders,
+	response,
+	headers,
 } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
+import z from "zod";
 
 const updateSingleController: RouteController<
 	typeof clientIntegrationsSchema.updateSingle.params,
 	typeof clientIntegrationsSchema.updateSingle.body,
-	typeof clientIntegrationsSchema.updateSingle.query
+	typeof clientIntegrationsSchema.updateSingle.query.string,
+	typeof clientIntegrationsSchema.updateSingle.query.formatted
 > = async (request, reply) => {
 	const updateSingleRes = await serviceWrapper(
 		request.server.services.clientIntegrations.updateSingle,
@@ -47,30 +51,16 @@ export default {
 	swaggerSchema: {
 		description: "Update a single client integration.",
 		tags: ["client-integrations"],
-		summary: "Update a single client integration",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				name: {
-					type: "string",
-				},
-				description: {
-					type: "string",
-				},
-				enabled: {
-					type: "number",
-					example: 1,
-				},
-			},
-		},
-		headers: swaggerHeaders({
+		summary: "Update Client Integration",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(clientIntegrationsSchema.updateSingle.query.string),
+		body: z.toJSONSchema(clientIntegrationsSchema.updateSingle.body),
+		params: z.toJSONSchema(clientIntegrationsSchema.updateSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

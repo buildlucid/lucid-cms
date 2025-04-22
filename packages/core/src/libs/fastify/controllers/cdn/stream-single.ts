@@ -2,11 +2,14 @@ import cdnSchema from "../../../../schemas/cdn.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
+import { defaultErrorResponse } from "../../../../utils/swagger/response.js";
+import z from "zod";
 
 const streamSingleController: RouteController<
 	typeof cdnSchema.streamSingle.params,
 	typeof cdnSchema.streamSingle.body,
-	typeof cdnSchema.streamSingle.query
+	typeof cdnSchema.streamSingle.query.string,
+	typeof cdnSchema.streamSingle.query.formatted
 > = async (request, reply) => {
 	const response = await serviceWrapper(
 		request.server.services.cdn.streamMedia,
@@ -68,30 +71,62 @@ export default {
 	zodSchema: cdnSchema.streamSingle,
 	swaggerSchema: {
 		description:
-			"Stream a piece of media. If its an image, you can resize and format it on request. These will count towards the parent images processed image usage. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
+			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
 		tags: ["cdn"],
-		summary: "Steam media",
-		querystring: {
-			type: "object",
-			properties: {
-				width: {
-					type: "string",
+		summary: "Steam Media",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(cdnSchema.streamSingle.query.string),
+		// body: z.toJSONSchema(cdnSchema.streamSingle.body),
+		params: z.toJSONSchema(cdnSchema.streamSingle.params),
+		response: {
+			200: {
+				description: "Successfully streamed media content",
+				content: {
+					"*/*": {
+						schema: {
+							type: "string",
+							format: "binary",
+						},
+					},
 				},
-				height: {
-					type: "string",
-				},
-				format: {
-					type: "string",
-					enum: ["jpeg", "png", "webp", "avif"],
-				},
-				quality: {
-					type: "string",
-				},
-				fallback: {
-					type: "string",
-					enum: ["true", "false"],
+				headers: {
+					"Content-Type": {
+						schema: {
+							type: "string",
+						},
+					},
+					"Content-Length": {
+						schema: {
+							type: "integer",
+						},
+					},
+					"Content-Disposition": {
+						schema: {
+							type: "string",
+						},
+					},
+					"Cache-Control": {
+						schema: {
+							type: "string",
+						},
+					},
 				},
 			},
+			404: {
+				description: "Media not found - returns an error image",
+				content: {
+					"image/*": {
+						schema: {
+							type: "string",
+							format: "binary",
+						},
+					},
+				},
+			},
+			default: defaultErrorResponse,
 		},
 	},
 };

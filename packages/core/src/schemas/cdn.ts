@@ -1,41 +1,70 @@
 import z from "zod";
+import type { ControllerSchema } from "../types.js";
 
-export default {
+const schema = {
 	streamSingle: {
 		body: undefined,
-		query: z.object({
-			width: z
-				.string()
-				.refine((val) => Number(val) > 0, {
-					message: "Width must be greater than 0",
-				})
-				.refine((val) => Number(val) <= 2000, {
-					message: "Width must be less than or equal to 2000",
-				})
-				.optional(),
-			height: z
-				.string()
-				.refine((val) => Number(val) > 0, {
-					message: "Height must be greater than 0",
-				})
-				.refine((val) => Number(val) <= 2000, {
-					message: "Height must be less than or equal to 2000",
-				})
-				.optional(),
-			format: z.enum(["jpeg", "png", "webp", "avif"]).optional(),
-			quality: z
-				.string()
-				.refine((val) => Number(val) > 0, {
-					message: "Quality must be greater than 0",
-				})
-				.refine((val) => Number(val) <= 100, {
-					message: "Quality must be less than or equal to 100",
-				})
-				.optional(),
-			fallback: z.enum(["true", "false"]).optional(),
-		}),
+		query: {
+			string: z.object({
+				width: z.string().optional().meta({
+					description: "If requesting an image, the width to resize it to",
+					example: "600",
+				}),
+				height: z.string().optional().meta({
+					description: "If requesting an image, the height to resize it to",
+					example: "600",
+				}),
+				format: z.enum(["jpeg", "png", "webp", "avif"]).optional().meta({
+					description: "If requesting an image, the format to convert it to",
+					example: "avif",
+				}),
+				quality: z.string().optional().meta({
+					description:
+						"If requesting an image, the quality that it should be optimised to",
+					example: "80",
+				}),
+				fallback: z.enum(["true", "false"]).optional(),
+			}),
+			formatted: z.object({
+				width: z
+					.string()
+					.refine((val) => Number(val) > 0, {
+						message: "Width must be greater than 0",
+					})
+					.refine((val) => Number(val) <= 2000, {
+						message: "Width must be less than or equal to 2000",
+					})
+					.optional(),
+				height: z
+					.string()
+					.refine((val) => Number(val) > 0, {
+						message: "Height must be greater than 0",
+					})
+					.refine((val) => Number(val) <= 2000, {
+						message: "Height must be less than or equal to 2000",
+					})
+					.optional(),
+				format: z.enum(["jpeg", "png", "webp", "avif"]).optional(),
+				quality: z
+					.string()
+					.refine((val) => Number(val) > 0, {
+						message: "Quality must be greater than 0",
+					})
+					.refine((val) => Number(val) <= 100, {
+						message: "Quality must be less than or equal to 100",
+					})
+					.optional(),
+				fallback: z.enum(["true", "false"]).optional(),
+			}),
+		},
 		params: z.object({
-			"*": z.string(),
+			"*": z.string().meta({
+				description: "The media key you wish to stream",
+				example: "2024/09/5ttogd-placeholder-image.png",
+			}),
 		}),
-	},
+		response: undefined,
+	} satisfies ControllerSchema,
 };
+
+export default schema;

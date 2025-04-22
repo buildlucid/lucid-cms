@@ -1,8 +1,8 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import ClientIntegrationsFormatter from "../../../formatters/client-integrations.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -10,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const getAllController: RouteController<
 	typeof clientIntegrationsSchema.getAll.params,
 	typeof clientIntegrationsSchema.getAll.body,
-	typeof clientIntegrationsSchema.getAll.query
+	typeof clientIntegrationsSchema.getAll.query.string,
+	typeof clientIntegrationsSchema.getAll.query.formatted
 > = async (request, reply) => {
 	const getAllRes = await serviceWrapper(
 		request.server.services.clientIntegrations.getAll,
@@ -40,17 +41,18 @@ export default {
 	controller: getAllController,
 	zodSchema: clientIntegrationsSchema.getAll,
 	swaggerSchema: {
-		description: "Get all client integrations.",
+		description: "Returns all client integrations.",
 		tags: ["client-integrations"],
-		summary: "Get all client integrations",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: ClientIntegrationsFormatter.swagger,
-				},
-			}),
-		},
+		summary: "Get All Client Integrations",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(clientIntegrationsSchema.getAll.query.string),
+		// body: z.toJSONSchema(clientIntegrationsSchema.getAll.body),
+		// params: z.toJSONSchema(clientIntegrationsSchema.getAll.params),
+		response: response({
+			schema: z.toJSONSchema(clientIntegrationsSchema.getAll.response),
+		}),
 	},
 };

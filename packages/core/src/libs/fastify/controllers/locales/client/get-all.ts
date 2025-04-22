@@ -41,7 +41,7 @@ export default {
 	zodSchema: localeSchema.client.getAll,
 	swaggerSchema: {
 		description: "Returns all enabled locales via the client integration.",
-		tags: ["client-integrations", "locales"],
+		tags: ["client-locales"],
 		summary: "Get all locales",
 		response: {
 			200: swaggerResponse({
