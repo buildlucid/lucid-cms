@@ -73,12 +73,12 @@ export default {
 		description:
 			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
 		tags: ["cdn"],
-		summary: "Steam Media",
+		summary: "Stream Media",
 
 		// headers: headers({
 		// 	csrf: true,
 		// }),
-		// querystring: z.toJSONSchema(cdnSchema.streamSingle.query.string),
+		querystring: z.toJSONSchema(cdnSchema.streamSingle.query.string),
 		// body: z.toJSONSchema(cdnSchema.streamSingle.body),
 		params: z.toJSONSchema(cdnSchema.streamSingle.params),
 		response: {

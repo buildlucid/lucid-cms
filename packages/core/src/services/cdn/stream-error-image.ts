@@ -31,6 +31,7 @@ const streamErrorImage: ServiceFn<
 		return {
 			error: {
 				type: "basic",
+				name: T("media_not_found_name"),
 				message: T("media_not_found_message"),
 				status: 404,
 			},

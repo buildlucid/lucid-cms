@@ -6,24 +6,43 @@ const schema = {
 		body: undefined,
 		query: {
 			string: z.object({
-				width: z.string().optional().meta({
-					description: "If requesting an image, the width to resize it to",
-					example: "600",
-				}),
-				height: z.string().optional().meta({
-					description: "If requesting an image, the height to resize it to",
-					example: "600",
-				}),
-				format: z.enum(["jpeg", "png", "webp", "avif"]).optional().meta({
-					description: "If requesting an image, the format to convert it to",
-					example: "avif",
-				}),
-				quality: z.string().optional().meta({
-					description:
-						"If requesting an image, the quality that it should be optimised to",
-					example: "80",
-				}),
-				fallback: z.enum(["true", "false"]).optional(),
+				width: z
+					.string()
+					.meta({
+						description: "If requesting an image, the width to resize it to",
+						example: "600",
+					})
+					.optional(),
+				height: z
+					.string()
+					.meta({
+						description: "If requesting an image, the height to resize it to",
+						example: "600",
+					})
+					.optional(),
+				format: z
+					.enum(["jpeg", "png", "webp", "avif"])
+					.meta({
+						description: "If requesting an image, the format to convert it to",
+						example: "avif",
+					})
+					.optional(),
+				quality: z
+					.string()
+					.meta({
+						description:
+							"If requesting an image, the quality that it should be optimised to",
+						example: "80",
+					})
+					.optional(),
+				fallback: z
+					.enum(["true", "false"])
+					.meta({
+						description:
+							"Determines if the fallback image should be returned when the requested one cannot be found",
+						example: true,
+					})
+					.optional(),
 			}),
 			formatted: z.object({
 				width: z

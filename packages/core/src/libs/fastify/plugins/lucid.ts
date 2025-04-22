@@ -61,6 +61,11 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"User account management endpoints for user details, password resets and updating personal settings.",
 					},
 					{
+						name: "collections",
+						description:
+							"Collection endpoints for returning all of the collection configuration, such as their details, config and supported bricks and fields.",
+					},
+					{
 						name: "cdn",
 						description:
 							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
