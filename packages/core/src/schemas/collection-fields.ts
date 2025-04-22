@@ -38,48 +38,48 @@ export const FieldSchema = z.interface({
 });
 export type FieldSchemaType = z.infer<typeof FieldSchema>;
 
-export const swaggerFieldObj = {
-	type: "object",
-	additionalProperties: true,
-	properties: {
-		key: {
-			type: "string",
-		},
-		type: {
-			type: "string",
-		},
-		translations: {
-			type: "object",
-			additionalProperties: true,
-			nullable: true,
-		},
-		value: {},
-		groups: {
-			type: "array",
-			items: {
-				type: "object",
-				additionalProperties: true,
-				properties: {
-					ref: {
-						type: "string",
-					},
-					order: {
-						type: "number",
-						nullable: true,
-					},
-					open: {
-						type: "boolean",
-						nullable: true,
-					},
-					fields: {
-						type: "array",
-						items: {
-							type: "object",
-							additionalProperties: true,
-						},
-					},
-				},
-			},
-		},
-	},
-};
+// export const swaggerFieldObj = {
+// 	type: "object",
+// 	additionalProperties: true,
+// 	properties: {
+// 		key: {
+// 			type: "string",
+// 		},
+// 		type: {
+// 			type: "string",
+// 		},
+// 		translations: {
+// 			type: "object",
+// 			additionalProperties: true,
+// 			nullable: true,
+// 		},
+// 		value: {},
+// 		groups: {
+// 			type: "array",
+// 			items: {
+// 				type: "object",
+// 				additionalProperties: true,
+// 				properties: {
+// 					ref: {
+// 						type: "string",
+// 					},
+// 					order: {
+// 						type: "number",
+// 						nullable: true,
+// 					},
+// 					open: {
+// 						type: "boolean",
+// 						nullable: true,
+// 					},
+// 					fields: {
+// 						type: "array",
+// 						items: {
+// 							type: "object",
+// 							additionalProperties: true,
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	},
+// };

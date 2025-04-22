@@ -1,11 +1,8 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import documentSchema from "../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-} from "../../../../utils/swagger/index.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import DocumentsVersionsFormatter from "../../../formatters/document-versions.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -13,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const getMultipleRevisionsController: RouteController<
 	typeof documentSchema.getMultipleRevisions.params,
 	typeof documentSchema.getMultipleRevisions.body,
-	typeof documentSchema.getMultipleRevisions.query
+	typeof documentSchema.getMultipleRevisions.query.string,
+	typeof documentSchema.getMultipleRevisions.query.formatted
 > = async (request, reply) => {
 	const documentRevisions = await serviceWrapper(
 		request.server.services.collection.documents.getMultipleRevisions,
@@ -34,7 +32,7 @@ const getMultipleRevisionsController: RouteController<
 		{
 			collectionKey: request.params.collectionKey,
 			documentId: Number.parseInt(request.params.id),
-			query: request.query,
+			query: request.formattedQuery,
 		},
 	);
 	if (documentRevisions.error) throw new LucidAPIError(documentRevisions.error);
@@ -44,8 +42,8 @@ const getMultipleRevisionsController: RouteController<
 			data: documentRevisions.data.data,
 			pagination: {
 				count: documentRevisions.data.count,
-				page: request.query.page,
-				perPage: request.query.perPage,
+				page: request.formattedQuery.page,
+				perPage: request.formattedQuery.perPage,
 			},
 		}),
 	);
@@ -55,28 +53,21 @@ export default {
 	controller: getMultipleRevisionsController,
 	zodSchema: documentSchema.getMultipleRevisions,
 	swaggerSchema: {
-		description: "Get multiple revisions entries for a collection document.",
+		description: "Get multiple revisions entries for a document.",
 		tags: ["documents"],
-		summary: "Get multiple revisions for a collection document.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: DocumentsVersionsFormatter.swagger,
-				},
-				paginated: true,
-			}),
-		},
-		querystring: swaggerQueryString({
-			filters: [
-				{
-					key: "createdBy",
-				},
-			],
-			sorts: ["createdAt"],
-			page: true,
-			perPage: true,
+		summary: "Get Multiple Revisions",
+
+		// headers: headers({
+		// csrf: true,
+		// }),
+		querystring: z.toJSONSchema(
+			documentSchema.getMultipleRevisions.query.string,
+		),
+		// body: z.toJSONSchema(documentSchema.getMultipleRevisions.body),
+		params: z.toJSONSchema(documentSchema.getMultipleRevisions.params),
+		response: response({
+			schema: z.toJSONSchema(documentSchema.getMultipleRevisions.response),
+			paginated: true,
 		}),
 	},
 };

@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import documentsSchema from "../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -11,7 +9,8 @@ import type { RouteController } from "../../../../types/types.js";
 const deleteSingleController: RouteController<
 	typeof documentsSchema.deleteSingle.params,
 	typeof documentsSchema.deleteSingle.body,
-	typeof documentsSchema.deleteSingle.query
+	typeof documentsSchema.deleteSingle.query.string,
+	typeof documentsSchema.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingle = await serviceWrapper(
 		request.server.services.collection.documents.deleteSingle,
@@ -44,17 +43,18 @@ export default {
 	controller: deleteSingleController,
 	zodSchema: documentsSchema.deleteSingle,
 	swaggerSchema: {
-		description: "Delete a single collection document.",
+		description: "Delete a single document for a given collection and ID.",
 		tags: ["documents"],
-		summary: "Delete a collection document",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Delete Document",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(documentsSchema.deleteSingle.query.string),
+		// body: z.toJSONSchema(documentsSchema.deleteSingle.body),
+		params: z.toJSONSchema(documentsSchema.deleteSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

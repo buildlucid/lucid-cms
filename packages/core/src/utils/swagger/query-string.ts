@@ -2,13 +2,13 @@ import z from "zod";
 
 const queryString = {
 	schema: {
-		filter: (multiple = false, example?: string) =>
+		filter: (multiple = false, example?: string, description?: string) =>
 			z
 				.string()
 				.meta({
 					description: multiple
-						? "Accepts multiple values separated by commas."
-						: "Accepts a single value only.",
+						? description || "Accepts multiple values separated by commas."
+						: description || "Accepts a single value only.",
 					example: example,
 				})
 				.optional(),

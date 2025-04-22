@@ -35,8 +35,6 @@ const getAllController: RouteController<
 	);
 	if (collections.error) throw new LucidAPIError(collections.error);
 
-	console.log(collections.data);
-
 	reply.status(200).send(
 		formatAPIResponse(request, {
 			data: collections.data,

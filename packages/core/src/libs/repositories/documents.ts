@@ -3,7 +3,10 @@ import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import { sql, type SelectQueryBuilder } from "kysely";
 import queryBuilder from "../query-builder/index.js";
-import type documentsSchema from "../../schemas/documents.js";
+import type {
+	GetMultipleQueryParams,
+	ClientGetSingleQueryParams,
+} from "../../schemas/documents.js";
 import type {
 	LucidDocumentTable,
 	Insert,
@@ -381,7 +384,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
-			query: z.infer<typeof documentsSchema.getMultiple.query>;
+			query: GetMultipleQueryParams;
 			collection: CollectionBuilder;
 			config: Config;
 			tables: {
@@ -566,7 +569,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
-			query: z.infer<typeof documentsSchema.client.getSingle.query>;
+			query: ClientGetSingleQueryParams;
 			collection: CollectionBuilder;
 			config: Config;
 			tables: {

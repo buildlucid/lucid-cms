@@ -1,11 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import documentsSchema from "../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
-import { swaggerBodyBricksObj } from "../../../../schemas/collection-bricks.js";
-import { swaggerFieldObj } from "../../../../schemas/collection-fields.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -15,7 +11,8 @@ import type { RouteController } from "../../../../types/types.js";
 const createSingleController: RouteController<
 	typeof documentsSchema.createSingle.params,
 	typeof documentsSchema.createSingle.body,
-	typeof documentsSchema.createSingle.query
+	typeof documentsSchema.createSingle.query.string,
+	typeof documentsSchema.createSingle.query.formatted
 > = async (request, reply) => {
 	//* manually run permissions middleware based on the publish flag
 	await permissions(
@@ -61,40 +58,18 @@ export default {
 	controller: createSingleController,
 	zodSchema: documentsSchema.createSingle,
 	swaggerSchema: {
-		description: "Create a single document.",
+		description: "Create a single document for a given collection.",
 		tags: ["documents"],
-		summary: "Create a single document.",
-		body: {
-			type: "object",
-			properties: {
-				publish: {
-					type: "boolean",
-				},
-				bricks: {
-					type: "array",
-					items: swaggerBodyBricksObj,
-				},
-				fields: {
-					type: "array",
-					items: swaggerFieldObj,
-				},
-			},
-		},
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "object",
-					properties: {
-						id: {
-							type: "number",
-						},
-					},
-				},
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Create Document",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(documentsSchema.createSingle.query.string),
+		body: z.toJSONSchema(documentsSchema.createSingle.body),
+		params: z.toJSONSchema(documentsSchema.createSingle.params),
+		response: response({
+			schema: z.toJSONSchema(documentsSchema.createSingle.response),
 		}),
 	},
 };

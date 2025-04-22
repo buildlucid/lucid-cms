@@ -3,7 +3,6 @@ import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import { sql } from "kysely";
 import queryBuilder from "../query-builder/index.js";
-import type documentsSchema from "../../schemas/documents.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
@@ -21,6 +20,7 @@ import type {
 } from "../../services/collection-migrator/schema/types.js";
 import type { BrickQueryResponse } from "./document-bricks.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
+import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 
 export interface RevisionsQueryResponse extends Select<LucidVersionTable> {
 	// documents
@@ -188,7 +188,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	async selectMultipleRevisions(
 		props: {
 			documentId: number;
-			query: z.infer<typeof documentsSchema.getMultipleRevisions.query>;
+			query: GetMultipleRevisionsQueryParams;
 			tables: {
 				document: LucidDocumentTableName;
 			};

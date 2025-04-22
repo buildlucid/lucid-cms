@@ -1,17 +1,16 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import type z from "zod";
-import type documentsSchema from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionResponse } from "../../types/response.js";
+import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 
 const getMultipleRevisions: ServiceFn<
 	[
 		{
 			collectionKey: string;
 			documentId: number;
-			query: z.infer<typeof documentsSchema.getMultipleRevisions.query>;
+			query: GetMultipleRevisionsQueryParams;
 		},
 	],
 	{

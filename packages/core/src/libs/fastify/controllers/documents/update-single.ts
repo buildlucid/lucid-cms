@@ -4,8 +4,8 @@ import {
 	swaggerResponse,
 	swaggerHeaders,
 } from "../../../../utils/swagger/index.js";
-import { swaggerBodyBricksObj } from "../../../../schemas/collection-bricks.js";
-import { swaggerFieldObj } from "../../../../schemas/collection-fields.js";
+// import { swaggerBodyBricksObj } from "../../../../schemas/collection-bricks.js";
+// import { swaggerFieldObj } from "../../../../schemas/collection-fields.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -73,11 +73,11 @@ export default {
 				},
 				bricks: {
 					type: "array",
-					items: swaggerBodyBricksObj,
+					// items: swaggerBodyBricksObj,
 				},
 				fields: {
 					type: "array",
-					items: swaggerFieldObj,
+					// items: swaggerFieldObj,
 				},
 			},
 		},
