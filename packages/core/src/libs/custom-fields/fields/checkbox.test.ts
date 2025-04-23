@@ -118,6 +118,7 @@ test("fail to validate field - checkbox", async () => {
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_chekbox",
+			localeCode: null,
 			message: T("checkbox_field_required"),
 		},
 	]);

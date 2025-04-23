@@ -319,6 +319,7 @@ test("fail to validate field - media", async () => {
 	expect(requiredExistsValidate).toEqual([
 		{
 			key: "required_media",
+			localeCode: null,
 			message: T("field_media_not_found"),
 		},
 	]);
@@ -345,6 +346,7 @@ test("fail to validate field - media", async () => {
 	expect(requiredNullValidate).toEqual([
 		{
 			key: "required_media",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
@@ -379,6 +381,7 @@ test("fail to validate field - media", async () => {
 	expect(minWidthValidate).toEqual([
 		{
 			key: "min_width_media",
+			localeCode: null,
 			message: T("field_media_min_width", {
 				min: 100,
 			}),
@@ -415,6 +418,7 @@ test("fail to validate field - media", async () => {
 	expect(maxWidthValidate).toEqual([
 		{
 			key: "max_width_media",
+			localeCode: null,
 			message: T("field_media_max_width", {
 				max: 200,
 			}),
@@ -451,6 +455,7 @@ test("fail to validate field - media", async () => {
 	expect(minHeightValidate).toEqual([
 		{
 			key: "min_height_media",
+			localeCode: null,
 			message: T("field_media_min_height", {
 				min: 100,
 			}),
@@ -487,6 +492,7 @@ test("fail to validate field - media", async () => {
 	expect(maxHeightValidate).toEqual([
 		{
 			key: "max_height_media",
+			localeCode: null,
 			message: T("field_media_max_height", {
 				max: 200,
 			}),
@@ -523,6 +529,7 @@ test("fail to validate field - media", async () => {
 	expect(typeValidate).toEqual([
 		{
 			key: "type_media",
+			localeCode: null,
 			message: T("field_media_type", {
 				type: "image",
 			}),
@@ -559,6 +566,7 @@ test("fail to validate field - media", async () => {
 	expect(extensionValidate).toEqual([
 		{
 			key: "extension_media",
+			localeCode: null,
 			message: T("field_media_extension", {
 				extensions: "png",
 			}),

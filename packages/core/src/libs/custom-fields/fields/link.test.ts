@@ -135,6 +135,7 @@ test("fail to validate field - link", async () => {
 	expect(invalidTargetValidate).toEqual([
 		{
 			key: "standard_link",
+			localeCode: null,
 			message: T("field_link_target_error_message", {
 				valid: constants.customFields.link.targets.join(", "),
 			}),
@@ -167,6 +168,7 @@ test("fail to validate field - link", async () => {
 	expect(invalidLabelValidate).toEqual([
 		{
 			key: "standard_link",
+			localeCode: null,
 			message: "Invalid input: expected string, received boolean → at label", // zod error message
 		},
 	]);
@@ -193,6 +195,7 @@ test("fail to validate field - link", async () => {
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_link",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);

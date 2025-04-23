@@ -118,6 +118,7 @@ test("fail to validate field - colour", async () => {
 	expect(requiredEmptyValidate).toEqual([
 		{
 			key: "required_colour",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
@@ -144,6 +145,7 @@ test("fail to validate field - colour", async () => {
 	expect(requiredNullValidate).toEqual([
 		{
 			key: "required_colour",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
@@ -170,6 +172,7 @@ test("fail to validate field - colour", async () => {
 	expect(requiredUndefinedValidate).toEqual([
 		{
 			key: "required_colour",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);

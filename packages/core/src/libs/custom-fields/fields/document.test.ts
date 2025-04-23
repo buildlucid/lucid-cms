@@ -110,6 +110,7 @@ test("fail to validate field - document", async () => {
 	expect(requiredExistsValidate).toEqual([
 		{
 			key: "required_doc",
+			localeCode: null,
 			message: T("field_document_not_found"),
 		},
 	]);
@@ -136,6 +137,7 @@ test("fail to validate field - document", async () => {
 	expect(requiredNullValidate).toEqual([
 		{
 			key: "required_doc",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
@@ -167,6 +169,7 @@ test("fail to validate field - document", async () => {
 	expect(wrongCollectionValidate).toEqual([
 		{
 			key: "wrong_collection",
+			localeCode: null,
 			message: T("field_document_not_found"),
 		},
 	]);

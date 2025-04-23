@@ -132,6 +132,7 @@ test("fail to validate field - select", async () => {
 		exists: [
 			{
 				key: "standard_select",
+				localeCode: null,
 				message: T("please_ensure_a_valid_option_is_selected"),
 			},
 		],
@@ -166,6 +167,7 @@ test("fail to validate field - select", async () => {
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_select",
+			localeCode: null,
 			message: T("select_field_required"),
 		},
 	]);

@@ -128,12 +128,14 @@ test("fail to validate field - user", async () => {
 		exists: [
 			{
 				key: "required_user",
+				localeCode: null,
 				message: T("field_user_not_found"),
 			},
 		],
 		null: [
 			{
 				key: "required_user",
+				localeCode: null,
 				message: T("generic_field_required"),
 			},
 		],

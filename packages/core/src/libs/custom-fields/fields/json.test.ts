@@ -155,6 +155,7 @@ test("fail to validate field - json", async () => {
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_json",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);

@@ -145,6 +145,7 @@ test("fail to validate field - number", async () => {
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_number",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);

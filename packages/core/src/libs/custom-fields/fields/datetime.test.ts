@@ -161,6 +161,7 @@ test("fail to validate field - datetime", async () => {
 	expect(standardInvalidStringValidate).toEqual([
 		{
 			key: "standard_datetime",
+			localeCode: null,
 			message: T("field_date_invalid"),
 		},
 	]);
@@ -187,6 +188,7 @@ test("fail to validate field - datetime", async () => {
 	expect(standardInvalidDateValidate).toEqual([
 		{
 			key: "standard_datetime",
+			localeCode: null,
 			message: T("field_date_invalid"),
 		},
 	]);
@@ -213,6 +215,7 @@ test("fail to validate field - datetime", async () => {
 	expect(requiredValidate).toEqual([
 		{
 			key: "required_datetime",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
