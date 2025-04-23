@@ -104,7 +104,7 @@ test("fail to validate field - link", async () => {
 	expect(invalidUrlValidate).toEqual([
 		{
 			key: "standard_link",
-			localeCode: undefined,
+			localeCode: null,
 			message: "Invalid input: expected string, received boolean → at url",
 		},
 	]);

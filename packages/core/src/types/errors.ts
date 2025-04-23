@@ -38,7 +38,7 @@ export type ErrorResult = Record<string, ErrorResultValue>;
 export interface FieldError {
 	key: string;
 	/** Set if the error occured on a translation value, or it uses the default locale code when the field supports translations but only a value is given. Otherwise this is undefined. */
-	localeCode: string | undefined;
+	localeCode: string | null;
 	message: string;
 	groupErrors?: Array<GroupError>;
 }

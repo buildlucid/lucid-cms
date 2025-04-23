@@ -91,7 +91,7 @@ test("fail to validate field - checkbox", async () => {
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_checkbox",
-			localeCode: undefined,
+			localeCode: null,
 			message: "Invalid input",
 		},
 	]);

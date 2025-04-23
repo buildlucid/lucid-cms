@@ -15,6 +15,7 @@ import type {
 	GroupError,
 } from "../../../types.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
+import { inspect } from "node:util";
 
 const checkValidateBricksFields: ServiceFn<
 	[
@@ -150,7 +151,7 @@ const recursiveFieldValidate = (props: {
 		if (!fieldInstance) {
 			errors.push({
 				key: field.key,
-				localeCode: undefined,
+				localeCode: null,
 				message: T("cannot_find_field_in_collection_or_brick"),
 			});
 			continue;
@@ -168,7 +169,7 @@ const recursiveFieldValidate = (props: {
 			if (!validationResult.valid) {
 				errors.push({
 					key: field.key,
-					localeCode: undefined,
+					localeCode: null,
 					message:
 						validationResult.message || T("repeater_field_contains_errors"),
 				});
@@ -198,7 +199,7 @@ const recursiveFieldValidate = (props: {
 			if (groupErrors.length > 0) {
 				errors.push({
 					key: field.key,
-					localeCode: undefined,
+					localeCode: null,
 					message: T("repeater_field_contains_errors"),
 					groupErrors: groupErrors,
 				});
@@ -238,7 +239,7 @@ const recursiveFieldValidate = (props: {
 		if (fieldInstance.config?.validation?.required) {
 			errors.push({
 				key: key,
-				localeCode: undefined,
+				localeCode: null,
 				message: T("field_is_required"),
 			});
 		}
@@ -316,7 +317,7 @@ export const validateField = (props: {
 				localeCode:
 					props.meta.useTranslations && props.instance.translationsEnabled
 						? props.meta.defaultLocale
-						: undefined,
+						: null,
 				message:
 					validationResult.message ||
 					T("an_unknown_error_occurred_validating_the_field"),

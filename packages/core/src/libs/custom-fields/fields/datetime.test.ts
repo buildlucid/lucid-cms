@@ -134,7 +134,7 @@ test("fail to validate field - datetime", async () => {
 	expect(standardBooleanValidate).toEqual([
 		{
 			key: "standard_datetime",
-			localeCode: undefined,
+			localeCode: null,
 			message: "Invalid input",
 		},
 	]);

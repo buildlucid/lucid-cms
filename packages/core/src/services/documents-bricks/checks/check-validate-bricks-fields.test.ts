@@ -130,7 +130,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatedCollection).toHaveLength(1);
 	expect(nonTranslatedCollection[0]).toMatchObject({
 		key: "text_field",
-		localeCode: undefined,
+		localeCode: null,
 		message: "Invalid input: expected string, received number", // zod error message
 	});
 
@@ -153,7 +153,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatableField).toHaveLength(1);
 	expect(nonTranslatableField[0]).toMatchObject({
 		key: "non_translatable_field",
-		localeCode: undefined,
+		localeCode: null,
 		message: "Invalid input: expected string, received number", // zod error message
 	});
 });

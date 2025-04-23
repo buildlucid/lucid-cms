@@ -118,7 +118,7 @@ test("fail to validate field - number", async () => {
 	expect(standardValidate).toEqual([
 		{
 			key: "standard_number",
-			localeCode: undefined,
+			localeCode: null,
 			message: "Invalid input: expected number, received string", // zod error message
 		},
 	]);
@@ -171,7 +171,7 @@ test("fail to validate field - number", async () => {
 	expect(zodValidate).toEqual([
 		{
 			key: "min_number",
-			localeCode: undefined,
+			localeCode: null,
 			message: "Too small: expected number to be >=5",
 		},
 	]);
