@@ -60,12 +60,19 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		return field;
 	});
 	const fieldError = createMemo(() => {
-		if (props.state.fieldConfig.type === "repeater") {
-			//* repeaters dont incldue a localeCode
+		//* repeaters dont incldue a localeCode
+		//* if the field or collection doesnt support translations
+		if (
+			props.state.fieldConfig.type === "repeater" ||
+			// @ts-expect-error
+			fieldConfig()?.config?.useTranslations !== true ||
+			brickStore.get.collectionTranslations !== true
+		) {
 			return props.state.fieldErrors.find(
 				(f) => f.key === props.state.fieldConfig.key,
 			);
 		}
+
 		return props.state.fieldErrors.find(
 			(f) =>
 				f.key === props.state.fieldConfig.key &&

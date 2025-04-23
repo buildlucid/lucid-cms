@@ -10,7 +10,11 @@ const IntroBrick = new BrickBuilder("intro", {
 			label: "Content",
 		},
 	})
-	.addText("title")
+	.addText("title", {
+		config: {
+			useTranslations: true,
+		},
+	})
 	.addWysiwyg("intro")
 	.addTab("advanced_tab", {
 		details: {
