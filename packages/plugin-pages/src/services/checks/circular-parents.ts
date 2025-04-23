@@ -3,7 +3,7 @@ import constants from "../../constants.js";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
 	ServiceFn,
-	FieldSchemaType,
+	FieldInputSchema,
 	DocumentVersionType,
 	CollectionTableNames,
 } from "@lucidcms/core/types";
@@ -18,7 +18,7 @@ const checkCircularParents: ServiceFn<
 			documentId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			fields: {
-				parentPage: FieldSchemaType;
+				parentPage: FieldInputSchema;
 			};
 			tables: CollectionTableNames;
 		},

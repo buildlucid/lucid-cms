@@ -1,10 +1,10 @@
-import type { FieldResponse, FieldSchemaType } from "../../../types.js";
+import type { FieldResponse, FieldInputSchema } from "../../../types.js";
 
 /**
  * Process fields and return field values by locale
  */
 const processFieldValues = (
-	field: FieldSchemaType | FieldResponse,
+	field: FieldInputSchema | FieldResponse,
 	locales: string[],
 	defaultLocale: string,
 ): Map<string, unknown> => {

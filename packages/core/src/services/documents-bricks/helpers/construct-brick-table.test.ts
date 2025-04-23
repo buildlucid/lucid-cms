@@ -2,8 +2,8 @@ import { expect, test, describe } from "vitest";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import aggregateBrickTables from "./aggregate-brick-tables.js";
-import type { FieldSchemaType } from "../../../types.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../types.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 const TEST_CONFIG = {
 	localisation: {
@@ -81,6 +81,7 @@ describe("brick table construction", () => {
 								{
 									ref: "ref-group11",
 									open: false,
+									order: 0,
 									fields: [
 										{
 											key: "itemTitle",
@@ -94,6 +95,7 @@ describe("brick table construction", () => {
 												{
 													ref: "ref-11",
 													open: false,
+													order: 0,
 													fields: [
 														{
 															key: "nestedItemTitle",
@@ -105,6 +107,7 @@ describe("brick table construction", () => {
 												{
 													ref: "ref-12",
 													open: false,
+													order: 1,
 													fields: [
 														{
 															key: "nestedItemTitle",
@@ -120,6 +123,7 @@ describe("brick table construction", () => {
 								{
 									ref: "ref-group12",
 									open: true,
+									order: 1,
 									fields: [
 										{
 											key: "itemTitle",
@@ -133,6 +137,7 @@ describe("brick table construction", () => {
 												{
 													ref: "ref-21",
 													open: false,
+													order: 0,
 													fields: [
 														{
 															key: "nestedItemTitle",
@@ -144,6 +149,7 @@ describe("brick table construction", () => {
 												{
 													ref: "ref-22",
 													open: false,
+													order: 1,
 													fields: [
 														{
 															key: "nestedItemTitle",
@@ -162,8 +168,8 @@ describe("brick table construction", () => {
 				},
 			],
 		} satisfies {
-			bricks?: Array<BrickSchema>;
-			fields?: Array<FieldSchemaType>;
+			bricks?: Array<BrickInputSchema>;
+			fields?: Array<FieldInputSchema>;
 		};
 
 		const brickTables = aggregateBrickTables({
@@ -333,6 +339,7 @@ describe("brick table construction", () => {
 								{
 									ref: "l1-1",
 									open: true,
+									order: 0,
 									fields: [
 										{
 											key: "level1Title",
@@ -346,6 +353,7 @@ describe("brick table construction", () => {
 												{
 													ref: "l2-1",
 													open: true,
+													order: 0,
 													fields: [
 														{
 															key: "level2Title",
@@ -359,6 +367,7 @@ describe("brick table construction", () => {
 																{
 																	ref: "l3-1",
 																	open: false,
+																	order: 0,
 																	fields: [
 																		{
 																			key: "level3Title",
@@ -381,7 +390,7 @@ describe("brick table construction", () => {
 				},
 			],
 		} satisfies {
-			bricks: Array<BrickSchema>;
+			bricks: Array<BrickInputSchema>;
 		};
 
 		const brickTables = aggregateBrickTables({

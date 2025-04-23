@@ -6,6 +6,6 @@ export * from "./types/shared.js";
 export * from "./types/types.js";
 export * from "./libs/builders/collection-builder/types.js";
 export * from "./libs/custom-fields/types.js";
-export * from "./types/misc.js";
+export * from "./types/schema.js";
 export * from "./utils/services/types.js";
 export * from "./libs/db/types.js";

@@ -2,16 +2,16 @@ import aggregateBrickTables from "./helpers/aggregate-brick-tables.js";
 import prepareBricksAndFields from "./helpers/prepare-bricks-and-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
-import type { BrickSchema } from "../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../schemas/collection-fields.js";
+import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 
 const createMultiple: ServiceFn<
 	[
 		{
 			versionId: number;
 			documentId: number;
-			bricks?: Array<BrickSchema>;
-			fields?: Array<FieldSchemaType>;
+			bricks?: Array<BrickInputSchema>;
+			fields?: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
 			skipValidation?: boolean;
 		},

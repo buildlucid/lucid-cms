@@ -1,15 +1,14 @@
 import Repository from "../../libs/repositories/index.js";
 import { PassThrough, type Readable } from "node:stream";
-import type z from "zod";
-import type cdnSchema from "../../schemas/cdn.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 
 const processImage: ServiceFn<
 	[
 		{
 			key: string;
 			processKey: string;
-			options: z.infer<typeof cdnSchema.streamSingle.query>;
+			options: StreamSingleQueryParams;
 		},
 	],
 	{

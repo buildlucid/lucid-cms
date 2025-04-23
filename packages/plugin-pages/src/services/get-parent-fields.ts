@@ -2,7 +2,7 @@ import T from "../translations/index.js";
 import constants from "../constants.js";
 import type {
 	ServiceFn,
-	FieldSchemaType,
+	FieldInputSchema,
 	DocumentVersionType,
 	CollectionTableNames,
 } from "@lucidcms/core/types";
@@ -25,7 +25,7 @@ const getParentFields: ServiceFn<
 			defaultLocale: string;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			fields: {
-				parentPage: FieldSchemaType;
+				parentPage: FieldInputSchema;
 			};
 			tables: CollectionTableNames;
 		},
@@ -50,7 +50,6 @@ const getParentFields: ServiceFn<
 				`${versionTable}.id`,
 				`${fieldsTable}.document_version_id`,
 			)
-			// @ts-expect-error
 			.select([
 				`${fieldsTable}.${slugColumn}`,
 				`${fieldsTable}.${fullSlugColumn}`,
@@ -59,7 +58,6 @@ const getParentFields: ServiceFn<
 				`${fieldsTable}.locale`,
 			])
 			.where(`${versionTable}.document_id`, "=", data.fields.parentPage.value)
-			// @ts-expect-error
 			.where(`${versionTable}.type`, "=", data.versionType)
 			.execute();
 

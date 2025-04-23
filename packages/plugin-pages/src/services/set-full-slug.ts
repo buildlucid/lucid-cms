@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "../types/index.js";
-import type { FieldSchemaType, ServiceResponse } from "@lucidcms/core/types";
+import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 
 /**
  *  Update the fullSlug field with the computed value
@@ -9,7 +9,7 @@ const setFullSlug = (data: {
 	collection: CollectionConfig;
 	defaultLocale: string;
 	fields: {
-		fullSlug: FieldSchemaType;
+		fullSlug: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
 	if (data.collection.useTranslations) {

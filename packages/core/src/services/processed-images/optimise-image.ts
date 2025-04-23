@@ -1,15 +1,14 @@
 import sharp from "sharp";
 import mime from "mime-types";
-import type z from "zod";
 import type { Readable } from "node:stream";
-import type cdnSchema from "../../schemas/cdn.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 
 const optimiseImage: ServiceFn<
 	[
 		{
 			stream: Readable;
-			options: z.infer<typeof cdnSchema.streamSingle.query>;
+			options: StreamSingleQueryParams;
 		},
 	],
 	{

@@ -86,4 +86,8 @@ const schema = {
 	} satisfies ControllerSchema,
 };
 
+export type StreamSingleQueryParams = z.infer<
+	typeof schema.streamSingle.query.formatted
+>;
+
 export default schema;

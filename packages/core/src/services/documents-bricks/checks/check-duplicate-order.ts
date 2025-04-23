@@ -1,9 +1,9 @@
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 const checkDuplicateOrder = (
-	bricks: Array<BrickSchema>,
+	bricks: Array<BrickInputSchema>,
 ): Awaited<ServiceResponse<undefined>> => {
 	const builderOrders = bricks
 		.filter((brick) => brick.type === "builder")

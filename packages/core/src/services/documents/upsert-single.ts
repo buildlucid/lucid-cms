@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import type { BrickSchema } from "../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../schemas/collection-fields.js";
+import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const upsertSingle: ServiceFn<
@@ -12,8 +12,8 @@ const upsertSingle: ServiceFn<
 			publish: boolean;
 
 			documentId?: number;
-			bricks?: Array<BrickSchema>;
-			fields?: Array<FieldSchemaType>;
+			bricks?: Array<BrickInputSchema>;
+			fields?: Array<FieldInputSchema>;
 		},
 	],
 	number

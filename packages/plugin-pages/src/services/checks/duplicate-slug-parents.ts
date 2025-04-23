@@ -3,7 +3,7 @@ import constants from "../../constants.js";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
 	ServiceFn,
-	FieldSchemaType,
+	FieldInputSchema,
 	FieldError,
 	DocumentVersionType,
 	CollectionTableNames,
@@ -20,8 +20,8 @@ const checkDuplicateSlugParents: ServiceFn<
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
 			fields: {
-				slug: FieldSchemaType;
-				parentPage: FieldSchemaType;
+				slug: FieldInputSchema;
+				parentPage: FieldInputSchema;
 			};
 			tables: CollectionTableNames;
 		},

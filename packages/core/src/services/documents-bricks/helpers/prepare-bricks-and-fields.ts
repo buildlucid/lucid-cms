@@ -1,7 +1,7 @@
 import type { BrickBuilder, CollectionBuilder } from "../../../builders.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
-import type { Config, FieldSchemaType, FieldTypes } from "../../../types.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 
 /**
  * - Processes fields to remove any that don't exist in the custom fields.
@@ -10,10 +10,10 @@ import type { Config, FieldSchemaType, FieldTypes } from "../../../types.js";
  */
 const processFields = (props: {
 	collection: CollectionBuilder;
-	fields: Array<FieldSchemaType>;
+	fields: Array<FieldInputSchema>;
 	customFields: Map<string, CustomField<FieldTypes>>;
 	localisation: Config["localisation"];
-}): Array<FieldSchemaType> => {
+}): Array<FieldInputSchema> => {
 	return props.fields
 		.filter((field) => props.customFields.has(field.key))
 		.map((field) => {
@@ -81,8 +81,8 @@ const processFields = (props: {
  */
 const prepareBricksAndFields = (props: {
 	collection: CollectionBuilder;
-	bricks?: Array<BrickSchema>;
-	fields?: Array<FieldSchemaType>;
+	bricks?: Array<BrickInputSchema>;
+	fields?: Array<FieldInputSchema>;
 	localisation: Config["localisation"];
 }) => {
 	// Process collection fields

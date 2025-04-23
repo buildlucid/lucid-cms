@@ -1,7 +1,7 @@
 import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";
 import type {
 	Config,
-	FieldSchemaType,
+	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/index.js";
@@ -15,7 +15,7 @@ const constructParentFullSlug = (data: {
 	parentFields: Array<ParentPageQueryResponse>;
 	localisation: Config["localisation"];
 	fields: {
-		slug: FieldSchemaType;
+		slug: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<Record<string, string | null>>> => {
 	// initialise fullSlug with null values for each locale

@@ -1,7 +1,7 @@
 import type { CollectionBuilder } from "../builders.js";
 import type { DocumentVersionType } from "../libs/db/types.js";
-import type { BrickSchema } from "../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../schemas/collection-fields.js";
+import type { BrickInputSchema } from "../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../schemas/collection-fields.js";
 import type { ServiceFn } from "../utils/services/types.js";
 
 // --------------------------------------------------
@@ -44,8 +44,8 @@ export type HookServiceHandlers = {
 						documentId: number;
 						versionId: number;
 						versionType: Exclude<DocumentVersionType, "revision">;
-						bricks?: Array<BrickSchema>;
-						fields?: Array<FieldSchemaType>;
+						bricks?: Array<BrickInputSchema>;
+						fields?: Array<FieldInputSchema>;
 					};
 				},
 			],
@@ -53,8 +53,8 @@ export type HookServiceHandlers = {
 					documentId: number;
 					versionId: number;
 					versionType: Exclude<DocumentVersionType, "revision">;
-					bricks?: Array<BrickSchema>;
-					fields?: Array<FieldSchemaType>;
+					bricks?: Array<BrickInputSchema>;
+					fields?: Array<FieldInputSchema>;
 			  }
 			| undefined
 		>;
@@ -70,8 +70,8 @@ export type HookServiceHandlers = {
 						documentId: number;
 						versionId: number;
 						versionType: Exclude<DocumentVersionType, "revision">;
-						bricks: Array<BrickSchema>;
-						fields: Array<FieldSchemaType>;
+						bricks: Array<BrickInputSchema>;
+						fields: Array<FieldInputSchema>;
 					};
 				},
 			],

@@ -1,7 +1,7 @@
 import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
 import type {
 	Config,
-	FieldSchemaType,
+	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
@@ -13,7 +13,7 @@ import type { CollectionConfig } from "../types/index.js";
 const constructChildFullSlug = (data: {
 	descendants: DescendantFieldsResponse[];
 	localisation: Config["localisation"];
-	parentFullSlugField?: FieldSchemaType;
+	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
 }): Awaited<
 	ServiceResponse<

@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import type {
 	FieldError,
-	FieldSchemaType,
+	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 
@@ -10,15 +10,15 @@ import type {
  */
 const checkFieldsExist = (data: {
 	fields: {
-		slug: FieldSchemaType | undefined;
-		parentPage: FieldSchemaType | undefined;
-		fullSlug: FieldSchemaType | undefined;
+		slug: FieldInputSchema | undefined;
+		parentPage: FieldInputSchema | undefined;
+		fullSlug: FieldInputSchema | undefined;
 	};
 }): Awaited<
 	ServiceResponse<{
-		slug: FieldSchemaType;
-		parentPage: FieldSchemaType;
-		fullSlug: FieldSchemaType;
+		slug: FieldInputSchema;
+		parentPage: FieldInputSchema;
+		fullSlug: FieldInputSchema;
 	}>
 > => {
 	const fieldErrors: FieldError[] = [];
@@ -26,21 +26,21 @@ const checkFieldsExist = (data: {
 	if (data.fields.slug === undefined) {
 		fieldErrors.push({
 			key: "slug",
-			localeCode: undefined,
+			localeCode: null,
 			message: T("field_required"),
 		});
 	}
 	if (data.fields.parentPage === undefined) {
 		fieldErrors.push({
 			key: "parentPage",
-			localeCode: undefined,
+			localeCode: null,
 			message: T("field_required"),
 		});
 	}
 	if (data.fields.fullSlug === undefined) {
 		fieldErrors.push({
 			key: "fullSlug",
-			localeCode: undefined,
+			localeCode: null,
 			message: T("field_required"),
 		});
 	}
@@ -64,9 +64,9 @@ const checkFieldsExist = (data: {
 	return {
 		error: undefined,
 		data: {
-			slug: data.fields.slug as FieldSchemaType,
-			parentPage: data.fields.parentPage as FieldSchemaType,
-			fullSlug: data.fields.fullSlug as FieldSchemaType,
+			slug: data.fields.slug as FieldInputSchema,
+			parentPage: data.fields.parentPage as FieldInputSchema,
+			fullSlug: data.fields.fullSlug as FieldInputSchema,
 		},
 	};
 };

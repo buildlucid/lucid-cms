@@ -3,8 +3,8 @@ import buildTableName from "../../collection-migrator/helpers/build-table-name.j
 import prefixGeneratedColName from "../../collection-migrator/helpers/prefix-generated-column-name.js";
 import processFieldValues from "./process-field-values.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../../schemas/collection-fields.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
 	BrickResponse,
 	FieldResponse,
@@ -40,8 +40,8 @@ const constructBrickTable = (
 	brickTables: Array<InsertBrickTables>,
 	params: {
 		type: Exclude<TableType, "versions" | "document">;
-		brick?: BrickSchema | BrickResponse;
-		targetFields: Array<FieldSchemaType> | Array<FieldResponse>;
+		brick?: BrickInputSchema | BrickResponse;
+		targetFields: Array<FieldInputSchema> | Array<FieldResponse>;
 		repeaterKeys?: Array<string>;
 		parentId?: Map<string, number> | null;
 		parentIdRef?: Map<string, number>;

@@ -1,8 +1,8 @@
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
-import type { BrickSchema } from "../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../schemas/collection-fields.js";
+import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -13,8 +13,8 @@ const createSingle: ServiceFn<
 			collection: CollectionBuilder;
 			userId: number;
 			publish: boolean;
-			bricks?: Array<BrickSchema>;
-			fields?: Array<FieldSchemaType>;
+			bricks?: Array<BrickInputSchema>;
+			fields?: Array<FieldInputSchema>;
 		},
 	],
 	number

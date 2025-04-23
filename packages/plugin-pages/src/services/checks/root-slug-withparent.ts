@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import constants from "../../constants.js";
 import type {
-	FieldSchemaType,
+	FieldInputSchema,
 	FieldError,
 	ServiceResponse,
 } from "@lucidcms/core/types";
@@ -14,8 +14,8 @@ const checkRootSlugWithParent = (data: {
 	collection: CollectionConfig;
 	defaultLocale: string;
 	fields: {
-		slug: FieldSchemaType;
-		parentPage: FieldSchemaType;
+		slug: FieldInputSchema;
+		parentPage: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
 	if (data.collection.useTranslations && data.fields.slug.translations) {

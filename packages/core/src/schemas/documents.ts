@@ -1,7 +1,7 @@
 import z from "zod";
 import DocumentVersionsFormatter from "../libs/formatters/document-versions.js";
-import { BrickSchema } from "./collection-bricks.js";
-import { FieldSchema } from "./collection-fields.js";
+import { BrickInputSchema } from "./collection-bricks.js";
+import { FieldInputSchema } from "./collection-fields.js";
 import defaultQuery, { filterSchemas } from "./default-query.js";
 import type { ControllerSchema } from "../types.js";
 import queryString from "../utils/swagger/query-string.js";
@@ -15,13 +15,13 @@ const schema = {
 				example: false,
 			}),
 			bricks: z
-				.array(BrickSchema)
+				.array(BrickInputSchema)
 				.meta({
 					description: "An array of bricks to be added to the document",
 				})
 				.optional(),
 			fields: z
-				.array(FieldSchema)
+				.array(FieldInputSchema)
 				.meta({
 					description: "Collection field values",
 				})
@@ -51,13 +51,13 @@ const schema = {
 				example: false,
 			}),
 			bricks: z
-				.array(BrickSchema)
+				.array(BrickInputSchema)
 				.meta({
 					description: "An array of bricks to be added to the document",
 				})
 				.optional(),
 			fields: z
-				.array(FieldSchema)
+				.array(FieldInputSchema)
 				.meta({
 					description: "Collection field values",
 				})

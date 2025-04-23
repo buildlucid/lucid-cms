@@ -2,8 +2,8 @@ import constructBrickTable, {
 	type InsertBrickTables,
 } from "./construct-brick-table.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldSchemaType } from "../../../schemas/collection-fields.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
 	BrickResponse,
 	Config,
@@ -17,8 +17,8 @@ import type {
 const aggregateBrickTables = (params: {
 	versionId: number;
 	documentId: number;
-	bricks?: Array<BrickSchema> | Array<BrickResponse>;
-	fields?: Array<FieldSchemaType> | Array<FieldResponse>;
+	bricks?: Array<BrickInputSchema> | Array<BrickResponse>;
+	fields?: Array<FieldInputSchema> | Array<FieldResponse>;
 	collection: CollectionBuilder;
 	localisation: Config["localisation"];
 }) => {

@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import processFieldValues from "./process-field-values.js";
-import type { FieldSchemaType } from "../../../types";
+import type { FieldInputSchema } from "../../../types";
 
 describe("testing processFieldValues", () => {
 	const defaultLocale = "en";
 	const locales = ["en", "fr", "de"];
 
 	it("should process field with translations for all locales", () => {
-		const field: FieldSchemaType = {
+		const field: FieldInputSchema = {
 			key: "title",
 			type: "text",
 			translations: {
@@ -26,7 +26,7 @@ describe("testing processFieldValues", () => {
 	});
 
 	it("should process field with partial translations and set missing locales to null", () => {
-		const field: FieldSchemaType = {
+		const field: FieldInputSchema = {
 			key: "description",
 			type: "textarea",
 			translations: {
@@ -45,7 +45,7 @@ describe("testing processFieldValues", () => {
 	});
 
 	it("should process field with a single value and apply to default locale only", () => {
-		const field: FieldSchemaType = {
+		const field: FieldInputSchema = {
 			key: "published",
 			type: "checkbox",
 			value: true,
@@ -60,7 +60,7 @@ describe("testing processFieldValues", () => {
 	});
 
 	it("should process field with neither value nor translations and set all locales to null", () => {
-		const field: FieldSchemaType = {
+		const field: FieldInputSchema = {
 			key: "image",
 			type: "media",
 		};
@@ -74,7 +74,7 @@ describe("testing processFieldValues", () => {
 	});
 
 	it("should handle complex field values", () => {
-		const field: FieldSchemaType = {
+		const field: FieldInputSchema = {
 			key: "link",
 			type: "link",
 			translations: {
@@ -108,7 +108,7 @@ describe("testing processFieldValues", () => {
 	});
 
 	it("should handle null values in translations", () => {
-		const field: FieldSchemaType = {
+		const field: FieldInputSchema = {
 			key: "optional",
 			type: "text",
 			translations: {

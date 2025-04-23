@@ -2,8 +2,8 @@ import { expect, test, describe } from "vitest";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
-import type { FieldSchemaType } from "../../../types.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../types.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 describe("testing prepareBricksAndFields", () => {
 	// Mock localisation config to pass to the functions
@@ -46,7 +46,7 @@ describe("testing prepareBricksAndFields", () => {
 	});
 
 	test("should filter out fields that don't exist in the collection", () => {
-		const fields: Array<FieldSchemaType> = [
+		const fields: Array<FieldInputSchema> = [
 			{
 				key: "simpleHeading",
 				type: "text",
@@ -75,7 +75,7 @@ describe("testing prepareBricksAndFields", () => {
 	});
 
 	test("should process brick fields and nested repeaters correctly", () => {
-		const bricks: Array<BrickSchema> = [
+		const bricks: Array<BrickInputSchema> = [
 			{
 				ref: "ref-1",
 				key: "simple",
@@ -100,6 +100,7 @@ describe("testing prepareBricksAndFields", () => {
 							{
 								ref: "ref-group1",
 								open: false,
+								order: 0,
 								fields: [
 									{
 										key: "itemTitle",
@@ -113,6 +114,7 @@ describe("testing prepareBricksAndFields", () => {
 											{
 												ref: "ref-nested1",
 												open: false,
+												order: 0,
 												fields: [
 													{
 														key: "nestedItemTitle",

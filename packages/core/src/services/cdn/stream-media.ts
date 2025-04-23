@@ -2,16 +2,15 @@ import {
 	chooseAcceptHeaderFormat,
 	generateProcessKey,
 } from "../../utils/media/index.js";
-import type { z } from "zod";
 import type { Readable } from "node:stream";
-import type cdnSchema from "../../schemas/cdn.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 
 const streamMedia: ServiceFn<
 	[
 		{
 			key: string;
-			query: z.infer<typeof cdnSchema.streamSingle.query>;
+			query: StreamSingleQueryParams;
 			accept: string | undefined;
 		},
 	],

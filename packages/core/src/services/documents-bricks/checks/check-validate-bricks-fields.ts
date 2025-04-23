@@ -7,21 +7,20 @@ import type { FieldTypes } from "../../../libs/custom-fields/types.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type {
 	BrickError,
 	FieldError,
-	FieldSchemaType,
+	FieldInputSchema,
 	GroupError,
 } from "../../../types.js";
 import type CustomField from "../../../libs/custom-fields/custom-field.js";
-import { inspect } from "node:util";
 
 const checkValidateBricksFields: ServiceFn<
 	[
 		{
-			bricks: Array<BrickSchema>;
-			fields: Array<FieldSchemaType>;
+			bricks: Array<BrickInputSchema>;
+			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
 		},
 	],
@@ -74,7 +73,7 @@ const checkValidateBricksFields: ServiceFn<
  * Loops over bricks and runs validation against their fields recursively and return errors
  */
 const validateBricks = (props: {
-	bricks: Array<BrickSchema>;
+	bricks: Array<BrickInputSchema>;
 	collection: CollectionBuilder;
 	validationData: ValidationData;
 	defaultLocale: string;
@@ -134,7 +133,7 @@ const validateBricks = (props: {
  * Recursively validate fields and return errors
  */
 const recursiveFieldValidate = (props: {
-	fields: Array<FieldSchemaType>;
+	fields: Array<FieldInputSchema>;
 	instance: CollectionBuilder | BrickBuilder;
 	validationData: ValidationData;
 	parentRepeaterKey?: string;
@@ -271,7 +270,7 @@ const getRelationData = (
  * Validates a single field, handling both direct values and translations
  */
 export const validateField = (props: {
-	field: FieldSchemaType;
+	field: FieldInputSchema;
 	instance: CustomField<FieldTypes>;
 	validationData: ValidationData;
 	meta: {

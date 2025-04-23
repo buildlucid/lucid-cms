@@ -8,9 +8,9 @@ import type {
 	ServiceContext,
 	ServiceFn,
 } from "../../../utils/services/types.js";
-import type { BrickSchema } from "../../../schemas/collection-bricks.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type {
-	FieldSchemaType,
+	FieldInputSchema,
 	LucidDocumentTableName,
 } from "../../../types.js";
 import type {
@@ -34,8 +34,8 @@ export interface ValidationData {
 const fetchValidationData: ServiceFn<
 	[
 		{
-			bricks: Array<BrickSchema>;
-			fields: Array<FieldSchemaType>;
+			bricks: Array<BrickInputSchema>;
+			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
 		},
 	],
@@ -67,8 +67,8 @@ const fetchValidationData: ServiceFn<
  * Extract all relation IDs from bricks and fields
  */
 const extractRelationIds = (
-	bricks: Array<BrickSchema>,
-	fields: Array<FieldSchemaType>,
+	bricks: Array<BrickInputSchema>,
+	fields: Array<FieldInputSchema>,
 	collection: CollectionBuilder,
 ) => {
 	const mediaIds: number[] = [];
@@ -109,7 +109,7 @@ const extractRelationIds = (
  * Gets the appropriate brick instance based on brick type
  */
 const getBrickInstance = (
-	brick: BrickSchema,
+	brick: BrickInputSchema,
 	collection: CollectionBuilder,
 ): CollectionBuilder | BrickBuilder | undefined => {
 	switch (brick.type) {
@@ -128,7 +128,7 @@ const getBrickInstance = (
  * Recursively extract relation IDs from fields
  */
 const extractRelationIdsFromFields = (
-	fields: Array<FieldSchemaType>,
+	fields: Array<FieldInputSchema>,
 	instance: CollectionBuilder | BrickBuilder,
 	mediaIds: number[],
 	userIds: number[],
@@ -168,7 +168,7 @@ const extractRelationIdsFromFields = (
 /**
  * Extract IDs from a field (general purpose)
  */
-const extractIdsFromField = (field: FieldSchemaType, idsList: number[]) => {
+const extractIdsFromField = (field: FieldInputSchema, idsList: number[]) => {
 	//* check direct value
 	if (field.value !== undefined && field.value !== null) {
 		const id = Number(field.value);
@@ -191,7 +191,7 @@ const extractIdsFromField = (field: FieldSchemaType, idsList: number[]) => {
  * Extract document IDs and group them by collection key
  */
 const extractDocumentIds = (
-	field: FieldSchemaType,
+	field: FieldInputSchema,
 	fieldInstance: CustomField<"document">,
 	documentIdsByCollection: Record<string, number[]>,
 ) => {

@@ -24,7 +24,7 @@ const streamSingleController: RouteController<
 		},
 		{
 			key: request.params["*"],
-			query: request.query,
+			query: request.formattedQuery,
 			accept: request.headers.accept,
 		},
 	);
@@ -41,8 +41,8 @@ const streamSingleController: RouteController<
 				services: request.server.services,
 			},
 			{
-				fallback: request.query?.fallback
-					? Boolean(request.query?.fallback)
+				fallback: request.formattedQuery?.fallback
+					? Boolean(request.formattedQuery?.fallback)
 					: undefined,
 				error: response.error,
 			},

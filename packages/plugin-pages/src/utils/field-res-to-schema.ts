@@ -1,4 +1,4 @@
-import type { FieldSchemaType } from "@lucidcms/core/types";
+import type { FieldInputSchema } from "@lucidcms/core/types";
 import type { VersionFieldsQueryResponse } from "../services/get-document-version-fields.js";
 
 const fieldResToSchema = (
@@ -6,7 +6,7 @@ const fieldResToSchema = (
 	useTranslations: boolean,
 	defaultLocale: string,
 	items: VersionFieldsQueryResponse[],
-): FieldSchemaType => {
+): FieldInputSchema => {
 	// Determine field type based on key
 	const fieldType = getFieldTypeFromKey(key);
 
@@ -14,7 +14,7 @@ const fieldResToSchema = (
 		throw new Error(`Unable to determine field type for key: ${key}`);
 	}
 
-	const result: FieldSchemaType = {
+	const result: FieldInputSchema = {
 		key: key,
 		type: fieldType,
 	};
@@ -48,7 +48,9 @@ const fieldResToSchema = (
 };
 
 // Helper function to determine field type based on key
-function getFieldTypeFromKey(key: string): FieldSchemaType["type"] | undefined {
+function getFieldTypeFromKey(
+	key: string,
+): FieldInputSchema["type"] | undefined {
 	switch (key) {
 		case "slug":
 		case "fullSlug":
