@@ -3,6 +3,7 @@ import documentsSchema from "../../../../schemas/documents.js";
 import {
 	swaggerResponse,
 	swaggerQueryString,
+	response,
 } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import DocumentsFormatter from "../../../formatters/documents.js";
@@ -10,11 +11,13 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 import type { DocumentVersionType } from "../../..//db/types.js";
+import z from "zod";
 
 const getSingleController: RouteController<
 	typeof documentsSchema.getSingle.params,
 	typeof documentsSchema.getSingle.body,
-	typeof documentsSchema.getSingle.query
+	typeof documentsSchema.getSingle.query.string,
+	typeof documentsSchema.getSingle.query.formatted
 > = async (request, reply) => {
 	const hasStatus =
 		request.params.statusOrId === "draft" ||
@@ -45,7 +48,7 @@ const getSingleController: RouteController<
 				? Number.parseInt(request.params.statusOrId)
 				: undefined,
 			collectionKey: request.params.collectionKey,
-			query: request.query,
+			query: request.formattedQuery,
 		},
 	);
 	if (document.error) throw new LucidAPIError(document.error);
@@ -61,17 +64,18 @@ export default {
 	controller: getSingleController,
 	zodSchema: documentsSchema.getSingle,
 	swaggerSchema: {
-		description: "Get a single collection document entry by ID.",
+		description: "Get a single document from the collection key and ID.",
 		tags: ["documents"],
-		summary: "Get a single collection document entry.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: DocumentsFormatter.swagger,
-			}),
-		},
-		querystring: swaggerQueryString({
-			include: ["bricks"],
+		summary: "Get Document",
+
+		// headers: headers({
+		// csrf: true,
+		// }),
+		querystring: z.toJSONSchema(documentsSchema.getSingle.query.string),
+		// body: z.toJSONSchema(documentsSchema.getSingle.body),
+		params: z.toJSONSchema(documentsSchema.getSingle.params),
+		response: response({
+			schema: z.toJSONSchema(documentsSchema.getSingle.response),
 		}),
 	},
 };

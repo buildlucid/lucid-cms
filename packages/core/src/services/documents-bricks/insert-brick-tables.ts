@@ -72,6 +72,10 @@ const insertBrickTables: ServiceFn<
 			},
 			{
 				tableName: table.table,
+				// TODO!: For every table we need to return a a map of custom field column keys and their column data types. This is only needed for custom fields
+				columns: {
+					// _json: "json",
+				},
 			},
 		);
 		if (response.error) return response;

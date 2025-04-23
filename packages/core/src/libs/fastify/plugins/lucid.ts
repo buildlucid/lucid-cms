@@ -66,6 +66,11 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Collection endpoints for returning all of the collection configuration, such as their details, config and supported bricks and fields.",
 					},
 					{
+						name: "documents",
+						description:
+							"Document endpoints for creating, deleting, updating and promoting/restoring versions.",
+					},
+					{
 						name: "cdn",
 						description:
 							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
@@ -105,9 +110,9 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 			});
 		}
 
-		fastify.setValidatorCompiler(() => {
-			return () => ({ value: false });
-		});
+		// fastify.setValidatorCompiler(() => {
+		// 	return () => ({ value: false });
+		// });
 
 		// Register server-wide middleware
 		fastify.register(cors, {

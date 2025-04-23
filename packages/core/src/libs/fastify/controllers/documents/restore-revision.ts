@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import documentsSchema from "../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -11,7 +9,8 @@ import type { RouteController } from "../../../../types/types.js";
 const restoreRevisionController: RouteController<
 	typeof documentsSchema.restoreRevision.params,
 	typeof documentsSchema.restoreRevision.body,
-	typeof documentsSchema.restoreRevision.query
+	typeof documentsSchema.restoreRevision.query.string,
+	typeof documentsSchema.restoreRevision.query.formatted
 > = async (request, reply) => {
 	const restoreRevisionRes = await serviceWrapper(
 		request.server.services.collection.documentVersions.restoreRevision,
@@ -48,15 +47,17 @@ export default {
 	swaggerSchema: {
 		description: "Restore a single document revision.",
 		tags: ["documents"],
-		summary: "Restore a single document revision.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Restore Document Revision",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(documentsSchema.restoreRevision.query.string),
+		// body: z.toJSONSchema(documentsSchema.restoreRevision.body),
+		params: z.toJSONSchema(documentsSchema.restoreRevision.params),
+		response: response({
+			// schema: z.toJSONSchema(documentsSchema.restoreRevision.response),
+			noProperties: true,
 		}),
 	},
 };

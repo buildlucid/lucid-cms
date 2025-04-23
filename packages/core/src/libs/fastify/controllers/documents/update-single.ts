@@ -1,11 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import documentsSchema from "../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
-// import { swaggerBodyBricksObj } from "../../../../schemas/collection-bricks.js";
-// import { swaggerFieldObj } from "../../../../schemas/collection-fields.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -15,7 +11,8 @@ import type { RouteController } from "../../../../types/types.js";
 const updateSingleController: RouteController<
 	typeof documentsSchema.updateSingle.params,
 	typeof documentsSchema.updateSingle.body,
-	typeof documentsSchema.updateSingle.query
+	typeof documentsSchema.updateSingle.query.string,
+	typeof documentsSchema.updateSingle.query.formatted
 > = async (request, reply) => {
 	//* manually run permissions middleware based on the publish flag
 	await permissions(
@@ -62,40 +59,19 @@ export default {
 	controller: updateSingleController,
 	zodSchema: documentsSchema.updateSingle,
 	swaggerSchema: {
-		description: "Update a single document.",
+		description:
+			"Update a single document for a given collection key and document ID.",
 		tags: ["documents"],
-		summary: "Update a single document.",
-		body: {
-			type: "object",
-			properties: {
-				publish: {
-					type: "boolean",
-				},
-				bricks: {
-					type: "array",
-					// items: swaggerBodyBricksObj,
-				},
-				fields: {
-					type: "array",
-					// items: swaggerFieldObj,
-				},
-			},
-		},
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "object",
-					properties: {
-						id: {
-							type: "number",
-						},
-					},
-				},
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Update Document",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(documentsSchema.updateSingle.query.string),
+		body: z.toJSONSchema(documentsSchema.updateSingle.body),
+		params: z.toJSONSchema(documentsSchema.updateSingle.params),
+		response: response({
+			schema: z.toJSONSchema(documentsSchema.updateSingle.response),
 		}),
 	},
 };

@@ -136,7 +136,6 @@ const formatAPIResponse: FormatAPIResponse = (request, params) => {
 			);
 		}
 	}
-	console.log("pre meta");
 	const meta: ResponseBody["meta"] = {
 		path: getPath(request),
 		links: buildMetaLinks(request, params),
@@ -145,7 +144,6 @@ const formatAPIResponse: FormatAPIResponse = (request, params) => {
 		total: Number(params.pagination?.count) || null,
 		lastPage: lastPage,
 	};
-	console.log("post meta");
 	const links = buildLinks(request, params);
 
 	return {

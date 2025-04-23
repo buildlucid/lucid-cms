@@ -321,23 +321,18 @@ export default class CollectionsFormatter {
 				})
 				.optional(),
 			details: z.object({
-				name: z.union([z.string(), z.record(z.string(), z.string())]).meta({
+				name: z.any().meta({
 					description: "Display name for the collection",
 					example: "Pages",
 				}),
-				singularName: z
-					.union([z.string(), z.record(z.string(), z.string())])
-					.meta({
-						description: "Singular display name for items in the collection",
-						example: { en: "Page" },
-					}),
-				summary: z
-					.union([z.string(), z.record(z.string(), z.string())])
-					.nullable()
-					.meta({
-						description: "Description text for the collection",
-						example: "Manage the pages and content on your website.",
-					}),
+				singularName: z.any().meta({
+					description: "Singular display name for items in the collection",
+					example: { en: "Page" },
+				}),
+				summary: z.any().nullable().meta({
+					description: "Description text for the collection",
+					example: "Manage the pages and content on your website.",
+				}),
 			}),
 			config: z.object({
 				useTranslations: z.boolean().meta({

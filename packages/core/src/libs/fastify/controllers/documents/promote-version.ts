@@ -1,9 +1,7 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
 import documentsSchema from "../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import permissions from "../../middleware/permissions.js";
@@ -12,7 +10,8 @@ import type { RouteController } from "../../../../types/types.js";
 const promoteVersionController: RouteController<
 	typeof documentsSchema.promoteVersion.params,
 	typeof documentsSchema.promoteVersion.body,
-	typeof documentsSchema.promoteVersion.query
+	typeof documentsSchema.promoteVersion.query.string,
+	typeof documentsSchema.promoteVersion.query.formatted
 > = async (request, reply) => {
 	// Manually run permissions middleware based on target version type
 	await permissions(
@@ -55,17 +54,19 @@ export default {
 	controller: promoteVersionController,
 	zodSchema: documentsSchema.promoteVersion,
 	swaggerSchema: {
-		description: "Promote a single document version to a new version type.",
+		description: "Promote a document version to a new version type.",
 		tags: ["documents"],
-		summary: "Promote a single document version to a new version type.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Promote Document Version",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(documentsSchema.promoteVersion.query.string),
+		body: z.toJSONSchema(documentsSchema.promoteVersion.body),
+		params: z.toJSONSchema(documentsSchema.promoteVersion.params),
+		response: response({
+			// schema: z.toJSONSchema(documentsSchema.promoteVersion.response),
+			noProperties: true,
 		}),
 	},
 };

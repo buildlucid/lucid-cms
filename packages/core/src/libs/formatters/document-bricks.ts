@@ -14,6 +14,7 @@ import type { CollectionSchemaTable } from "../../services/collection-migrator/s
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import z from "zod";
 
 export default class DocumentBricksFormatter {
 	formatMultiple = (props: {
@@ -190,30 +191,33 @@ export default class DocumentBricksFormatter {
 		return [];
 	};
 
-	static swagger = {
-		type: "object",
-		additionalProperties: true,
-		properties: {
-			ref: {
-				type: "string",
+	static schema = z
+		.interface({
+			key: z.string().meta({
+				description: "The key that identifies the brick",
+				example: "hero",
+			}),
+			ref: z.string().meta({
+				description: "The unique reference identifier for this brick",
+				example: "7645654",
+			}),
+			order: z.number().meta({
+				description: "The position order of this brick in the document",
+				example: 0,
+			}),
+			open: z.boolean().meta({
+				description: "Whether this brick is expanded in the UI",
+				example: true,
+			}),
+			type: z.enum(["builder", "fixed"]).meta({
+				description: "The type of brick",
+				example: "builder",
+			}),
+			get fields() {
+				return z.array(DocumentFieldsFormatter.schema.field);
 			},
-			key: {
-				type: "string",
-			},
-			order: {
-				type: "number",
-			},
-			open: {
-				type: "boolean",
-			},
-			type: {
-				type: "string",
-				enum: ["builder", "fixed"],
-			},
-			fields: {
-				type: "array",
-				items: DocumentFieldsFormatter.swagger,
-			},
-		},
-	};
+		})
+		.meta({
+			additionalProperties: true,
+		});
 }

@@ -1,3 +1,4 @@
+import z from "zod";
 import Formatter from "./index.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import crypto from "node:crypto";
@@ -337,158 +338,53 @@ export default class DocumentFieldsFormatter {
 		}
 	};
 
-	/**
-	 * The swagger response schema
-	 */
-	static swagger = {
-		type: "object",
-		additionalProperties: true,
-		properties: {
-			key: {
-				type: "string",
-			},
-			type: {
-				type: "string",
-				enum: [
-					"tab",
-					"text",
-					"wysiwyg",
-					"media",
-					"number",
-					"checkbox",
-					"select",
-					"textarea",
-					"json",
-					"colour",
-					"datetime",
-					"link",
-					"repeater",
-					"user",
-				],
-			},
-			groupRef: {
-				type: "string",
-				nullable: true,
-			},
-			translations: {
-				type: "object",
-				additionalProperties: true,
-			},
-			value: {},
-			meta: {
-				type: "object",
-				additionalProperties: true,
-				nullable: true,
-				properties: {
-					id: {
-						type: "number",
-						nullable: true,
-					},
-					url: {
-						type: "string",
-						nullable: true,
-					},
-					key: {
-						type: "string",
-						nullable: true,
-					},
-					mimeType: {
-						type: "string",
-						nullable: true,
-					},
-					extension: {
-						type: "string",
-						nullable: true,
-					},
-					fileSize: {
-						type: "number",
-						nullable: true,
-					},
-					width: {
-						type: "number",
-						nullable: true,
-					},
-					height: {
-						type: "number",
-						nullable: true,
-					},
-					blurHash: {
-						type: "string",
-						nullable: true,
-					},
-					averageColour: {
-						type: "string",
-						nullable: true,
-					},
-					isDark: {
-						type: "boolean",
-						nullable: true,
-					},
-					isLight: {
-						type: "boolean",
-						nullable: true,
-					},
-					title: {
-						type: "object",
-						additionalProperties: true,
-					},
-					alt: {
-						type: "object",
-						additionalProperties: true,
-					},
-					type: {
-						type: "string",
-						nullable: true,
-						enum: ["image", "video", "audio", "document"],
-					},
-					email: {
-						type: "string",
-						nullable: true,
-					},
-					username: {
-						type: "string",
-						nullable: true,
-					},
-					firstName: {
-						type: "string",
-						nullable: true,
-					},
-					lastName: {
-						type: "string",
-						nullable: true,
-					},
-					fields: {
-						type: "object",
-						additionalProperties: true,
-						nullable: true,
-					},
+	static schema = {
+		field: z.interface({
+			key: z.string().meta({
+				description: "The fields key",
+				example: "pageTitle",
+			}),
+			type: z.string().meta({
+				description: "The type of field (e.g., text, number, media)",
+				example: "text",
+			}),
+			"groupRef?": z.string().meta({
+				description:
+					"Reference to the group this field belongs to, if applicable",
+				example: "3243243",
+			}),
+			"translations?": z.record(z.string(), z.any()).meta({
+				description: "Translations of the field value for different locales",
+				example: {
+					en: "Welcome to our website",
+					fr: "Bienvenue sur notre site web",
 				},
+			}),
+			"value?": z.any().meta({
+				description: "The value of the field",
+				example: "Welcome to our website",
+			}),
+			"meta?": z.union([z.record(z.string(), z.any()), z.any()]),
+			get "groups?"() {
+				return z.array(z.any());
 			},
-			groups: {
-				type: "array",
-				items: {
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						ref: {
-							type: "string",
-						},
-						order: {
-							type: "number",
-						},
-						open: {
-							type: "boolean",
-						},
-						fields: {
-							type: "array",
-							items: {
-								type: "object",
-								additionalProperties: true,
-							},
-						},
-					},
-				},
+		}),
+		group: z.interface({
+			ref: z.string().meta({
+				description: "Unique reference for this field group",
+				example: "3243243",
+			}),
+			order: z.number().meta({
+				description: "The order/position of this group in its parent",
+				example: 0,
+			}),
+			open: z.boolean().meta({
+				description: "Whether this group is expanded in the UI",
+				example: true,
+			}),
+			get fields() {
+				return z.array(z.any());
 			},
-		},
+		}),
 	};
 }

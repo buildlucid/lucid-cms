@@ -248,7 +248,7 @@ export interface DocumentVersionResponse {
 
 export interface DocumentResponse {
 	id: number;
-	collectionKey: string | null;
+	collectionKey: string;
 	status: DocumentVersionType | null;
 	versionId: number | null;
 	version: {

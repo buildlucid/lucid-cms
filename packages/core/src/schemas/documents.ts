@@ -1,226 +1,11 @@
-// import z from "zod";
-// import { BrickSchema } from "./collection-bricks.js";
-// import { FieldSchema } from "./collection-fields.js";
-// import defaultQuery, { filterSchemas } from "./default-query.js";
-
-// export default {
-// 	createSingle: {
-// 		body: z.object({
-// 			publish: z.boolean(),
-// 			bricks: z.array(BrickSchema).optional(),
-// 			fields: z.array(FieldSchema).optional(),
-// 		}),
-// 		query: undefined,
-// 		params: z.object({
-// 			collectionKey: z.string(),
-// 		}),
-// 	},
-// 	updateSingle: {
-// 		body: z.object({
-// 			publish: z.boolean(),
-// 			bricks: z.array(BrickSchema).optional(),
-// 			fields: z.array(FieldSchema).optional(),
-// 		}),
-// 		query: undefined,
-// 		params: z.object({
-// 			id: z.string(),
-// 			collectionKey: z.string(),
-// 		}),
-// 	},
-// 	deleteSingle: {
-// 		body: undefined,
-// 		query: undefined,
-// 		params: z.object({
-// 			collectionKey: z.string(),
-// 			id: z.string(),
-// 		}),
-// 	},
-// 	deleteMultiple: {
-// 		body: z.object({
-// 			ids: z.array(z.number()),
-// 		}),
-// 		query: undefined,
-// 		params: z.object({
-// 			collectionKey: z.string(),
-// 		}),
-// 	},
-// 	getSingle: {
-// 		query: z.object({
-// 			include: z.array(z.enum(["bricks"])).optional(),
-// 		}),
-// 		params: z.object({
-// 			id: z.string(),
-// 			statusOrId: z.union([
-// 				z.literal("published"),
-// 				z.literal("draft"),
-// 				z.string(), // version id
-// 			]),
-// 			collectionKey: z.string(),
-// 		}),
-// 		body: undefined,
-// 	},
-// 	getMultiple: {
-// 		query: z.object({
-// 			filter: z
-// 				.union([
-// 					z.record(
-// 						z.string(),
-// 						z.union([filterSchemas.single, filterSchemas.union]),
-// 					),
-// 					z.object({
-// 						id: z.union([filterSchemas.single, filterSchemas.union]).optional(),
-// 						createdBy: z
-// 							.union([filterSchemas.single, filterSchemas.union])
-// 							.optional(),
-// 						updatedBy: z
-// 							.union([filterSchemas.single, filterSchemas.union])
-// 							.optional(),
-// 						createdAt: filterSchemas.single.optional(),
-// 						updatedAt: filterSchemas.single.optional(),
-// 					}),
-// 				])
-// 				.optional(),
-// 			sort: z
-// 				.array(
-// 					z.object({
-// 						key: z.enum(["createdAt", "updatedAt"]),
-// 						value: z.enum(["asc", "desc"]),
-// 					}),
-// 				)
-// 				.optional(),
-// 			page: defaultQuery.page,
-// 			perPage: defaultQuery.perPage,
-// 		}),
-// 		params: z.object({
-// 			collectionKey: z.string(),
-// 			status: z.enum(["published", "draft"]),
-// 		}),
-// 		body: undefined,
-// 	},
-// 	getMultipleRevisions: {
-// 		body: undefined,
-// 		query: z.object({
-// 			filter: z
-// 				.object({
-// 					createdBy: z
-// 						.union([filterSchemas.single, filterSchemas.union])
-// 						.optional(),
-// 				})
-// 				.optional(),
-// 			sort: z
-// 				.array(
-// 					z.object({
-// 						key: z.enum(["createdAt"]),
-// 						value: z.enum(["asc", "desc"]),
-// 					}),
-// 				)
-// 				.optional(),
-// 			page: defaultQuery.page,
-// 			perPage: defaultQuery.perPage,
-// 		}),
-// 		params: z.object({
-// 			collectionKey: z.string(),
-// 			id: z.string(),
-// 		}),
-// 	},
-// 	restoreRevision: {
-// 		body: undefined,
-// 		query: undefined,
-// 		params: z.object({
-// 			id: z.string(),
-// 			versionId: z.string(),
-// 			collectionKey: z.string(),
-// 		}),
-// 	},
-// 	promoteVersion: {
-// 		body: z.object({
-// 			versionType: z.enum(["draft", "published"]),
-// 		}),
-// 		query: undefined,
-// 		params: z.object({
-// 			collectionKey: z.string(),
-// 			id: z.string(),
-// 			versionId: z.string(),
-// 		}),
-// 	},
-
-// 	client: {
-// 		getSingle: {
-// 			query: z.object({
-// 				filter: z
-// 					.union([
-// 						z.record(
-// 							z.string(),
-// 							z.union([filterSchemas.single, filterSchemas.union]),
-// 						),
-// 						z.object({
-// 							id: filterSchemas.single.optional(),
-// 							createdBy: filterSchemas.single.optional(),
-// 							updatedBy: filterSchemas.single.optional(),
-// 							createdAt: filterSchemas.single.optional(),
-// 							updatedAt: filterSchemas.single.optional(),
-// 						}),
-// 					])
-// 					.optional(),
-// 				include: z.array(z.enum(["bricks"])).optional(),
-// 			}),
-// 			params: z.object({
-// 				collectionKey: z.string(),
-// 				status: z.enum(["published", "draft"]),
-// 			}),
-// 			body: undefined,
-// 		},
-// 		getMultiple: {
-// 			query: z.object({
-// 				filter: z
-// 					.union([
-// 						z.record(
-// 							z.string(),
-// 							z.union([filterSchemas.single, filterSchemas.union]),
-// 						),
-// 						z.object({
-// 							id: z
-// 								.union([filterSchemas.single, filterSchemas.union])
-// 								.optional(),
-// 							createdBy: z
-// 								.union([filterSchemas.single, filterSchemas.union])
-// 								.optional(),
-// 							updatedBy: z
-// 								.union([filterSchemas.single, filterSchemas.union])
-// 								.optional(),
-// 							createdAt: filterSchemas.single.optional(),
-// 							updatedAt: filterSchemas.single.optional(),
-// 						}),
-// 					])
-// 					.optional(),
-// 				sort: z
-// 					.array(
-// 						z.object({
-// 							key: z.enum(["createdAt", "updatedAt"]),
-// 							value: z.enum(["asc", "desc"]),
-// 						}),
-// 					)
-// 					.optional(),
-// 				page: defaultQuery.page,
-// 				perPage: defaultQuery.perPage,
-// 			}),
-// 			params: z.object({
-// 				collectionKey: z.string(),
-// 				status: z.enum(["published", "draft"]),
-// 			}),
-// 			body: undefined,
-// 		},
-// 	},
-// };
-
 import z from "zod";
-import CollectionsFormatter from "../libs/formatters/collections.js";
 import DocumentVersionsFormatter from "../libs/formatters/document-versions.js";
 import { BrickSchema } from "./collection-bricks.js";
 import { FieldSchema } from "./collection-fields.js";
 import defaultQuery, { filterSchemas } from "./default-query.js";
 import type { ControllerSchema } from "../types.js";
 import queryString from "../utils/swagger/query-string.js";
+import DocumentsFormatter from "../libs/formatters/documents.js";
 
 const schema = {
 	createSingle: {
@@ -255,6 +40,46 @@ const schema = {
 		response: z.object({
 			id: z.number().meta({
 				description: "The new document's ID",
+				example: 1,
+			}),
+		}),
+	} satisfies ControllerSchema,
+	updateSingle: {
+		body: z.object({
+			publish: z.boolean().meta({
+				description: "Whether it should be published or be a draft.",
+				example: false,
+			}),
+			bricks: z
+				.array(BrickSchema)
+				.meta({
+					description: "An array of bricks to be added to the document",
+				})
+				.optional(),
+			fields: z
+				.array(FieldSchema)
+				.meta({
+					description: "Collection field values",
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The document's ID",
+				example: 1,
+			}),
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+		}),
+		response: z.object({
+			id: z.number().meta({
+				description: "The document's ID",
 				example: 1,
 			}),
 		}),
@@ -420,7 +245,88 @@ const schema = {
 			}),
 		}),
 		body: undefined,
-		response: undefined, // TODO: add the schema here
+		response: z.array(DocumentsFormatter.schema.document),
+	} satisfies ControllerSchema,
+	getSingle: {
+		query: {
+			string: z.object({
+				include: queryString.schema.include("bricks"),
+			}),
+			formatted: z.object({
+				include: z.array(z.enum(["bricks"])).optional(),
+			}),
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+			statusOrId: z
+				.union([
+					z.literal("published"),
+					z.literal("draft"),
+					z.string(), // version id
+				])
+				.meta({
+					description: "The status (version type), or a version ID",
+					example: "draft",
+				}),
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+		}),
+		body: undefined,
+		response: DocumentsFormatter.schema.document,
+	} satisfies ControllerSchema,
+	promoteVersion: {
+		body: z.object({
+			versionType: z.enum(["draft", "published"]).meta({
+				description: "The version type you want to promote it to",
+				example: "published",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+			versionId: z.string().meta({
+				description: "The version ID you want to promote",
+				example: 2,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	restoreRevision: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+			versionId: z.string().meta({
+				description: "The version ID you want to promote",
+				example: 2,
+			}),
+		}),
+		response: undefined,
 	} satisfies ControllerSchema,
 
 	// TODO: finish bellow
@@ -495,6 +401,9 @@ const schema = {
 
 export type GetMultipleQueryParams = z.infer<
 	typeof schema.getMultiple.query.formatted
+>;
+export type GetSingleQueryParams = z.infer<
+	typeof schema.getSingle.query.formatted
 >;
 export type ClientGetSingleQueryParams = z.infer<
 	typeof schema.client.getSingle.query

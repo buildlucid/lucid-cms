@@ -1,9 +1,8 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import documentsSchema from "../../../../schemas/documents.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import DocumentsFormatter from "../../../formatters/documents.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -58,16 +57,6 @@ export default {
 			"Get a multiple document entries for a given collection and status (version type).",
 		tags: ["documents"],
 		summary: "Get Multiple Documents",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: DocumentsFormatter.swagger,
-				},
-				paginated: true,
-			}),
-		},
 
 		// headers: headers({
 		// csrf: true,
@@ -75,9 +64,9 @@ export default {
 		querystring: z.toJSONSchema(documentsSchema.getMultiple.query.string),
 		// body: z.toJSONSchema(documentsSchema.getMultiple.body),
 		params: z.toJSONSchema(documentsSchema.getMultiple.params),
-		// response: response({
-		// 	schema: z.toJSONSchema(documentsSchema.getMultiple.response),
-		// 	paginated: true,
-		// }),
+		response: response({
+			schema: z.toJSONSchema(documentsSchema.getMultiple.response),
+			paginated: true,
+		}),
 	},
 };

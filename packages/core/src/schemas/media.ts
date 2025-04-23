@@ -20,7 +20,6 @@ const schema = {
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,title,mimeType,extension",
 					),
-					include: queryString.schema.include("permissions"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
 				})
