@@ -3,18 +3,17 @@ import Formatter from "../../../libs/formatters/index.js";
 import { groupDocumentFilters } from "../../../utils/helpers/index.js";
 import extractRelatedEntityIds from "../../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRelationData from "../../documents-bricks/helpers/fetch-relation-data.js";
-import type z from "zod";
-import type documentsSchema from "../../../schemas/documents.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ClientDocumentResponse } from "../../../types/response.js";
 import type { DocumentVersionType } from "../../../libs/db/types.js";
+import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
 
 const getMultiple: ServiceFn<
 	[
 		{
 			collectionKey: string;
 			status: Exclude<DocumentVersionType, "revision">;
-			query: z.infer<typeof documentsSchema.client.getMultiple.query>;
+			query: ClientGetMultipleQueryParams;
 		},
 	],
 	{

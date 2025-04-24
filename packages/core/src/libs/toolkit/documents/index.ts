@@ -2,7 +2,7 @@ import T from "../../../translations/index.js";
 import z from "zod";
 import toolkitWrapper from "../toolkit-wrapper.js";
 import lucidServices from "../../../services/index.js";
-import documentsSchema from "../../../schemas/documents.js";
+import { controllerSchemas } from "../../../schemas/documents.js";
 import type { ExtractServiceFnArgs } from "../../../utils/services/types.js";
 
 const documentToolkit = {
@@ -18,7 +18,7 @@ const documentToolkit = {
 				transaction: false,
 				schema: z.object({
 					collectionKey: z.string(),
-					query: documentsSchema.client.getSingle.query,
+					query: controllerSchemas.client.getSingle.query.formatted,
 				}),
 				defaultError: {
 					name: T("route_document_fetch_error_name"),
@@ -37,7 +37,7 @@ const documentToolkit = {
 				transaction: false,
 				schema: z.object({
 					collectionKey: z.string(),
-					query: documentsSchema.client.getMultiple.query,
+					query: controllerSchemas.client.getMultiple.query.formatted,
 				}),
 				defaultError: {
 					name: T("route_document_fetch_error_name"),

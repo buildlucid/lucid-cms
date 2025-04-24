@@ -269,6 +269,6 @@ export const groupResponseSchema = z.interface({
 		example: true,
 	}),
 	get fields() {
-		return z.array(z.any());
+		return z.union([z.array(z.any()), z.record(z.string(), z.any())]);
 	},
 });

@@ -80,6 +80,11 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 						description:
 							"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",
 					},
+					{
+						name: "client-documents",
+						description:
+							"Client document endpoints for fetching single and multiple documents via the client integration authentication",
+					},
 				],
 				servers: [
 					{

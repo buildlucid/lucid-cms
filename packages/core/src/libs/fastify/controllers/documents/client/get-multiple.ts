@@ -1,12 +1,8 @@
+import z from "zod";
 import T from "../../../../../translations/index.js";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-	swaggerHeaders,
-} from "../../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../../utils/build-response.js";
-import DocumentsFormatter from "../../../../formatters/documents.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../../types/types.js";
@@ -14,7 +10,8 @@ import type { RouteController } from "../../../../../types/types.js";
 const getMultipleController: RouteController<
 	typeof controllerSchemas.client.getMultiple.params,
 	typeof controllerSchemas.client.getMultiple.body,
-	typeof controllerSchemas.client.getMultiple.query
+	typeof controllerSchemas.client.getMultiple.query.string,
+	typeof controllerSchemas.client.getMultiple.query.formatted
 > = async (request, reply) => {
 	const documents = await serviceWrapper(
 		request.server.services.collection.documents.client.getMultiple,
@@ -35,7 +32,7 @@ const getMultipleController: RouteController<
 		{
 			collectionKey: request.params.collectionKey,
 			status: request.params.status,
-			query: request.query,
+			query: request.formattedQuery,
 		},
 	);
 	if (documents.error) throw new LucidAPIError(documents.error);
@@ -45,8 +42,8 @@ const getMultipleController: RouteController<
 			data: documents.data.data,
 			pagination: {
 				count: documents.data.count,
-				page: request.query.page,
-				perPage: request.query.perPage,
+				page: request.formattedQuery.page,
+				perPage: request.formattedQuery.perPage,
 			},
 		}),
 	);
@@ -57,44 +54,22 @@ export default {
 	zodSchema: controllerSchemas.client.getMultiple,
 	swaggerSchema: {
 		description:
-			"Get multilple collection documents by filters via the client integration.",
+			"Get multilple documents by filters via the client integration.",
 		tags: ["client-documents"],
-		summary: "Get multiple collection document entries.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: DocumentsFormatter.swaggerClient,
-				},
-				paginated: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Get Multiple Documents",
+
+		headers: headers({
 			authorization: true,
 			clientKey: true,
 		}),
-		querystring: swaggerQueryString({
-			filters: [
-				{
-					key: "id",
-				},
-				{
-					key: "createdBy",
-				},
-				{
-					key: "updatedBy",
-				},
-				{
-					key: "createdAt",
-				},
-				{
-					key: "updatedAt",
-				},
-			],
-			sorts: ["createdAt", "updatedAt"],
-			page: true,
-			perPage: true,
+		querystring: z.toJSONSchema(
+			controllerSchemas.client.getMultiple.query.string,
+		),
+		// body: z.toJSONSchema(controllerSchemas.client.getMultiple.body),
+		params: z.toJSONSchema(controllerSchemas.client.getMultiple.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.client.getMultiple.response),
+			paginated: true,
 		}),
 	},
 };

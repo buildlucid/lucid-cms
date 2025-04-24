@@ -270,6 +270,7 @@ const promoteVersion: ServiceFn<
 			context,
 			{
 				tables: sortedTables,
+				collection: collectionRes.data,
 			},
 		);
 	if (insertRes.error) return insertRes;

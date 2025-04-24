@@ -67,6 +67,7 @@ const createMultiple: ServiceFn<
 			context,
 			{
 				tables: sortedTables,
+				collection: data.collection,
 			},
 		);
 	if (insertRes.error) return insertRes;

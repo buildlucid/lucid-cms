@@ -1,12 +1,8 @@
+import z from "zod";
 import T from "../../../../../translations/index.js";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-	swaggerHeaders,
-} from "../../../../../utils/swagger/index.js";
+import { headers, response } from "../../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../../utils/build-response.js";
-import DocumentsFormatter from "../../../../formatters/documents.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../../types/types.js";
@@ -14,7 +10,8 @@ import type { RouteController } from "../../../../../types/types.js";
 const getSingleController: RouteController<
 	typeof controllerSchemas.client.getSingle.params,
 	typeof controllerSchemas.client.getSingle.body,
-	typeof controllerSchemas.client.getSingle.query
+	typeof controllerSchemas.client.getSingle.query.string,
+	typeof controllerSchemas.client.getSingle.query.formatted
 > = async (request, reply) => {
 	const document = await serviceWrapper(
 		request.server.services.collection.documents.client.getSingle,
@@ -35,7 +32,7 @@ const getSingleController: RouteController<
 		{
 			collectionKey: request.params.collectionKey,
 			status: request.params.status,
-			query: request.query,
+			query: request.formattedQuery,
 		},
 	);
 	if (document.error) throw new LucidAPIError(document.error);
@@ -51,39 +48,21 @@ export default {
 	controller: getSingleController,
 	zodSchema: controllerSchemas.client.getSingle,
 	swaggerSchema: {
-		description:
-			"Get a single collection document by filters via the client integration.",
+		description: "Get a single document by filters via the client integration.",
 		tags: ["client-documents"],
-		summary: "Get a single collection document entry.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: DocumentsFormatter.swaggerClient,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Get Document",
+
+		headers: headers({
 			authorization: true,
 			clientKey: true,
 		}),
-		querystring: swaggerQueryString({
-			include: ["bricks"],
-			filters: [
-				{
-					key: "id",
-				},
-				{
-					key: "createdBy",
-				},
-				{
-					key: "updatedBy",
-				},
-				{
-					key: "createdAt",
-				},
-				{
-					key: "updatedAt",
-				},
-			],
+		querystring: z.toJSONSchema(
+			controllerSchemas.client.getSingle.query.string,
+		),
+		// body: z.toJSONSchema(controllerSchemas.client.getSingle.body),
+		params: z.toJSONSchema(controllerSchemas.client.getSingle.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.client.getSingle.response),
 		}),
 	},
 };
