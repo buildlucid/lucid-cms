@@ -1,9 +1,9 @@
 import z from "zod";
-import { BrickConfigSchema } from "./collection-bricks.js";
-import { FieldConfigSchema } from "./collection-fields.js";
+import { brickConfigSchema } from "./collection-bricks.js";
+import { fieldConfigSchema } from "./collection-fields.js";
 import type { ControllerSchema } from "../types.js";
 
-const CollectionSchema = z.interface({
+const collectionResponseSchema = z.interface({
 	key: z.string().meta({
 		description: "The collection key",
 		example: "page",
@@ -60,7 +60,7 @@ const CollectionSchema = z.interface({
 	}),
 	get fixedBricks() {
 		return z
-			.array(BrickConfigSchema)
+			.array(brickConfigSchema)
 			.meta({
 				description:
 					"Fixed (non-movable) bricks for all documents in the collection",
@@ -70,7 +70,7 @@ const CollectionSchema = z.interface({
 	},
 	get builderBricks() {
 		return z
-			.array(BrickConfigSchema)
+			.array(brickConfigSchema)
 			.meta({
 				description:
 					"Builder bricks that can be added to documents in the collection",
@@ -79,14 +79,14 @@ const CollectionSchema = z.interface({
 			.optional();
 	},
 	get fields() {
-		return z.array(FieldConfigSchema).meta({
+		return z.array(fieldConfigSchema).meta({
 			description: "Fields that make up documents in the collection",
 			example: [],
 		});
 	},
 });
 
-const schema = {
+export const controllerSchemas = {
 	getSingle: {
 		body: undefined,
 		query: {
@@ -99,7 +99,7 @@ const schema = {
 				example: "pages",
 			}),
 		}),
-		response: CollectionSchema,
+		response: collectionResponseSchema,
 	} satisfies ControllerSchema,
 	getAll: {
 		body: undefined,
@@ -108,8 +108,6 @@ const schema = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: z.array(CollectionSchema),
+		response: z.array(collectionResponseSchema),
 	} satisfies ControllerSchema,
 };
-
-export default schema;

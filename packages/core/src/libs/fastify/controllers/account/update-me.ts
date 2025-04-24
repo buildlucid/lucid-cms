@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import accountSchema from "../../../../schemas/account.js";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const updateMeController: RouteController<
-	typeof accountSchema.updateMe.params,
-	typeof accountSchema.updateMe.body,
-	typeof accountSchema.updateMe.query.string,
-	typeof accountSchema.updateMe.query.formatted
+	typeof controllerSchemas.updateMe.params,
+	typeof controllerSchemas.updateMe.body,
+	typeof controllerSchemas.updateMe.query.string,
+	typeof controllerSchemas.updateMe.query.formatted
 > = async (request, reply) => {
 	const updateMe = await serviceWrapper(
 		request.server.services.account.updateMe,
@@ -46,7 +46,7 @@ const updateMeController: RouteController<
 
 export default {
 	controller: updateMeController,
-	zodSchema: accountSchema.updateMe,
+	zodSchema: controllerSchemas.updateMe,
 	swaggerSchema: {
 		description: "Update the authenticated user's information.",
 		tags: ["account"],
@@ -55,9 +55,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(accountSchema.updateMe.query.string),
-		body: z.toJSONSchema(accountSchema.updateMe.body),
-		// params: z.toJSONSchema(accountSchema.updateMe.params),
+		// querystring: z.toJSONSchema(controllerSchemas.updateMe.query.string),
+		body: z.toJSONSchema(controllerSchemas.updateMe.body),
+		// params: z.toJSONSchema(controllerSchemas.updateMe.params),
 		response: response({
 			noProperties: true,
 		}),

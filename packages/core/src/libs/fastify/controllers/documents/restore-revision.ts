@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const restoreRevisionController: RouteController<
-	typeof documentsSchema.restoreRevision.params,
-	typeof documentsSchema.restoreRevision.body,
-	typeof documentsSchema.restoreRevision.query.string,
-	typeof documentsSchema.restoreRevision.query.formatted
+	typeof controllerSchemas.restoreRevision.params,
+	typeof controllerSchemas.restoreRevision.body,
+	typeof controllerSchemas.restoreRevision.query.string,
+	typeof controllerSchemas.restoreRevision.query.formatted
 > = async (request, reply) => {
 	const restoreRevisionRes = await serviceWrapper(
 		request.server.services.collection.documentVersions.restoreRevision,
@@ -43,7 +43,7 @@ const restoreRevisionController: RouteController<
 
 export default {
 	controller: restoreRevisionController,
-	zodSchema: documentsSchema.restoreRevision,
+	zodSchema: controllerSchemas.restoreRevision,
 	swaggerSchema: {
 		description: "Restore a single document revision.",
 		tags: ["documents"],
@@ -52,11 +52,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(documentsSchema.restoreRevision.query.string),
-		// body: z.toJSONSchema(documentsSchema.restoreRevision.body),
-		params: z.toJSONSchema(documentsSchema.restoreRevision.params),
+		// querystring: z.toJSONSchema(controllerSchemas.restoreRevision.query.string),
+		// body: z.toJSONSchema(controllerSchemas.restoreRevision.body),
+		params: z.toJSONSchema(controllerSchemas.restoreRevision.params),
 		response: response({
-			// schema: z.toJSONSchema(documentsSchema.restoreRevision.response),
+			// schema: z.toJSONSchema(controllerSchemas.restoreRevision.response),
 			noProperties: true,
 		}),
 	},

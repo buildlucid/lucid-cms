@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const deleteSingleController: RouteController<
-	typeof documentsSchema.deleteSingle.params,
-	typeof documentsSchema.deleteSingle.body,
-	typeof documentsSchema.deleteSingle.query.string,
-	typeof documentsSchema.deleteSingle.query.formatted
+	typeof controllerSchemas.deleteSingle.params,
+	typeof controllerSchemas.deleteSingle.body,
+	typeof controllerSchemas.deleteSingle.query.string,
+	typeof controllerSchemas.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingle = await serviceWrapper(
 		request.server.services.collection.documents.deleteSingle,
@@ -41,7 +41,7 @@ const deleteSingleController: RouteController<
 
 export default {
 	controller: deleteSingleController,
-	zodSchema: documentsSchema.deleteSingle,
+	zodSchema: controllerSchemas.deleteSingle,
 	swaggerSchema: {
 		description: "Delete a single document for a given collection and ID.",
 		tags: ["documents"],
@@ -50,9 +50,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(documentsSchema.deleteSingle.query.string),
-		// body: z.toJSONSchema(documentsSchema.deleteSingle.body),
-		params: z.toJSONSchema(documentsSchema.deleteSingle.params),
+		// querystring: z.toJSONSchema(controllerSchemas.deleteSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.deleteSingle.body),
+		params: z.toJSONSchema(controllerSchemas.deleteSingle.params),
 		response: response({
 			noProperties: true,
 		}),

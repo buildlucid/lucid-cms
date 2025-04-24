@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
+import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getAllController: RouteController<
-	typeof clientIntegrationsSchema.getAll.params,
-	typeof clientIntegrationsSchema.getAll.body,
-	typeof clientIntegrationsSchema.getAll.query.string,
-	typeof clientIntegrationsSchema.getAll.query.formatted
+	typeof controllerSchemas.getAll.params,
+	typeof controllerSchemas.getAll.body,
+	typeof controllerSchemas.getAll.query.string,
+	typeof controllerSchemas.getAll.query.formatted
 > = async (request, reply) => {
 	const getAllRes = await serviceWrapper(
 		request.server.services.clientIntegrations.getAll,
@@ -39,7 +39,7 @@ const getAllController: RouteController<
 
 export default {
 	controller: getAllController,
-	zodSchema: clientIntegrationsSchema.getAll,
+	zodSchema: controllerSchemas.getAll,
 	swaggerSchema: {
 		description: "Returns all client integrations.",
 		tags: ["client-integrations"],
@@ -48,11 +48,11 @@ export default {
 		// headers: headers({
 		// 	csrf: true,
 		// }),
-		// querystring: z.toJSONSchema(clientIntegrationsSchema.getAll.query.string),
-		// body: z.toJSONSchema(clientIntegrationsSchema.getAll.body),
-		// params: z.toJSONSchema(clientIntegrationsSchema.getAll.params),
+		// querystring: z.toJSONSchema(controllerSchemas.getAll.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getAll.body),
+		// params: z.toJSONSchema(controllerSchemas.getAll.params),
 		response: response({
-			schema: z.toJSONSchema(clientIntegrationsSchema.getAll.response),
+			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	},
 };

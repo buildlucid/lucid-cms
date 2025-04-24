@@ -1,7 +1,7 @@
 import z from "zod";
 import { stringTranslations } from "./locales.js";
 
-export const FieldInputSchema = z.interface({
+export const fieldInputSchema = z.interface({
 	key: z.string(),
 	type: z.union([
 		z.literal("text"),
@@ -30,16 +30,16 @@ export const FieldInputSchema = z.interface({
 					order: z.number().optional(),
 					open: z.boolean().optional(),
 					get fields() {
-						return z.array(FieldInputSchema);
+						return z.array(fieldInputSchema);
 					},
 				}),
 			)
 			.optional();
 	},
 });
-export type FieldInputSchema = z.infer<typeof FieldInputSchema>;
+export type FieldInputSchema = z.infer<typeof fieldInputSchema>;
 
-export const FieldConfigSchema = z.interface({
+export const fieldConfigSchema = z.interface({
 	key: z.string().meta({
 		description: "Unique identifier for the field",
 		example: "pageTitle",
@@ -223,4 +223,52 @@ export const FieldConfigSchema = z.interface({
 			description: "Preset values for colour fields",
 			example: ["#ff0000", "#00ff00", "#0000ff"],
 		}),
+});
+
+export const fieldResponseSchema = z.interface({
+	key: z.string().meta({
+		description: "The fields key",
+		example: "pageTitle",
+	}),
+	type: z.string().meta({
+		description: "The type of field (e.g., text, number, media)",
+		example: "text",
+	}),
+	"groupRef?": z.string().meta({
+		description: "Reference to the group this field belongs to, if applicable",
+		example: "3243243",
+	}),
+	"translations?": z.record(z.string(), z.any()).meta({
+		description: "Translations of the field value for different locales",
+		example: {
+			en: "Welcome to our website",
+			fr: "Bienvenue sur notre site web",
+		},
+	}),
+	"value?": z.any().meta({
+		description: "The value of the field",
+		example: "Welcome to our website",
+	}),
+	"meta?": z.union([z.record(z.string(), z.any()), z.any()]),
+	get "groups?"() {
+		return z.array(groupResponseSchema);
+	},
+});
+
+export const groupResponseSchema = z.interface({
+	ref: z.string().meta({
+		description: "Unique reference for this field group",
+		example: "3243243",
+	}),
+	order: z.number().meta({
+		description: "The order/position of this group in its parent",
+		example: 0,
+	}),
+	open: z.boolean().meta({
+		description: "Whether this group is expanded in the UI",
+		example: true,
+	}),
+	get fields() {
+		return z.array(z.any());
+	},
 });

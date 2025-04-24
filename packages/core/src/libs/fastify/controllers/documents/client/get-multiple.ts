@@ -1,5 +1,5 @@
 import T from "../../../../../translations/index.js";
-import documentsSchema from "../../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../../schemas/documents.js";
 import {
 	swaggerResponse,
 	swaggerQueryString,
@@ -12,9 +12,9 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../../types/types.js";
 
 const getMultipleController: RouteController<
-	typeof documentsSchema.client.getMultiple.params,
-	typeof documentsSchema.client.getMultiple.body,
-	typeof documentsSchema.client.getMultiple.query
+	typeof controllerSchemas.client.getMultiple.params,
+	typeof controllerSchemas.client.getMultiple.body,
+	typeof controllerSchemas.client.getMultiple.query
 > = async (request, reply) => {
 	const documents = await serviceWrapper(
 		request.server.services.collection.documents.client.getMultiple,
@@ -54,7 +54,7 @@ const getMultipleController: RouteController<
 
 export default {
 	controller: getMultipleController,
-	zodSchema: documentsSchema.client.getMultiple,
+	zodSchema: controllerSchemas.client.getMultiple,
 	swaggerSchema: {
 		description:
 			"Get multilple collection documents by filters via the client integration.",

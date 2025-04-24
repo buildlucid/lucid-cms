@@ -1,13 +1,13 @@
-import authSchema from "../../../../schemas/auth.js";
+import { controllerSchemas } from "../../../../schemas/auth.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const logoutController: RouteController<
-	typeof authSchema.logout.params,
-	typeof authSchema.logout.body,
-	typeof authSchema.logout.query.string,
-	typeof authSchema.logout.query.formatted
+	typeof controllerSchemas.logout.params,
+	typeof controllerSchemas.logout.body,
+	typeof controllerSchemas.logout.query.string,
+	typeof controllerSchemas.logout.query.formatted
 > = async (request, reply) => {
 	const [clearRefreshRes, clearAccessRes, clearCSRFRes] = await Promise.all([
 		request.server.services.auth.refreshToken.clearToken(request, reply),
@@ -23,7 +23,7 @@ const logoutController: RouteController<
 
 export default {
 	controller: logoutController,
-	zodSchema: authSchema.logout,
+	zodSchema: controllerSchemas.logout,
 	swaggerSchema: {
 		description:
 			"Logs out a user by clearing the refresh token and access token, it also clears the CSRF token.",
@@ -33,9 +33,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(authSchema.logout.query.string),
-		// body: z.toJSONSchema(authSchema.logout.body),
-		// params: z.toJSONSchema(authSchema.logout.params),
+		// querystring: z.toJSONSchema(controllerSchemas.logout.query.string),
+		// body: z.toJSONSchema(controllerSchemas.logout.body),
+		// params: z.toJSONSchema(controllerSchemas.logout.params),
 		response: response({
 			noProperties: true,
 		}),

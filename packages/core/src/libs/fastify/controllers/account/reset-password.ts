@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import accountSchema from "../../../../schemas/account.js";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const resetPasswordController: RouteController<
-	typeof accountSchema.resetPassword.params,
-	typeof accountSchema.resetPassword.body,
-	typeof accountSchema.resetPassword.query.string,
-	typeof accountSchema.resetPassword.query.formatted
+	typeof controllerSchemas.resetPassword.params,
+	typeof controllerSchemas.resetPassword.body,
+	typeof controllerSchemas.resetPassword.query.string,
+	typeof controllerSchemas.resetPassword.query.formatted
 > = async (request, reply) => {
 	const resetPassword = await serviceWrapper(
 		request.server.services.account.resetPassword,
@@ -40,7 +40,7 @@ const resetPasswordController: RouteController<
 
 export default {
 	controller: resetPasswordController,
-	zodSchema: accountSchema.resetPassword,
+	zodSchema: controllerSchemas.resetPassword,
 	swaggerSchema: {
 		description: "Resets the password for the authenticated user.",
 		tags: ["account"],
@@ -49,9 +49,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(accountSchema.resetPassword.query.string),
-		body: z.toJSONSchema(accountSchema.resetPassword.body),
-		params: z.toJSONSchema(accountSchema.resetPassword.params),
+		// querystring: z.toJSONSchema(controllerSchemas.resetPassword.query.string),
+		body: z.toJSONSchema(controllerSchemas.resetPassword.body),
+		params: z.toJSONSchema(controllerSchemas.resetPassword.params),
 		response: response({
 			noProperties: true,
 		}),

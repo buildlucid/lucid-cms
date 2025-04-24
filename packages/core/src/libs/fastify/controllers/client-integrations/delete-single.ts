@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
+import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const deleteSingleController: RouteController<
-	typeof clientIntegrationsSchema.deleteSingle.params,
-	typeof clientIntegrationsSchema.deleteSingle.body,
-	typeof clientIntegrationsSchema.deleteSingle.query.string,
-	typeof clientIntegrationsSchema.deleteSingle.query.formatted
+	typeof controllerSchemas.deleteSingle.params,
+	typeof controllerSchemas.deleteSingle.body,
+	typeof controllerSchemas.deleteSingle.query.string,
+	typeof controllerSchemas.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingleRes = await serviceWrapper(
 		request.server.services.clientIntegrations.deleteSingle,
@@ -39,7 +39,7 @@ const deleteSingleController: RouteController<
 
 export default {
 	controller: deleteSingleController,
-	zodSchema: clientIntegrationsSchema.deleteSingle,
+	zodSchema: controllerSchemas.deleteSingle,
 	swaggerSchema: {
 		description: "Delete a single client integration by ID.",
 		tags: ["client-integrations"],
@@ -48,9 +48,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(clientIntegrationsSchema.deleteSingle.query.string),
-		// body: z.toJSONSchema(clientIntegrationsSchema.deleteSingle.body),
-		params: z.toJSONSchema(clientIntegrationsSchema.deleteSingle.params),
+		// querystring: z.toJSONSchema(controllerSchemas.deleteSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.deleteSingle.body),
+		params: z.toJSONSchema(controllerSchemas.deleteSingle.params),
 		response: response({
 			noProperties: true,
 		}),

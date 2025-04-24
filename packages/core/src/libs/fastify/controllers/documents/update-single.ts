@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -9,10 +9,10 @@ import permissions from "../../middleware/permissions.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const updateSingleController: RouteController<
-	typeof documentsSchema.updateSingle.params,
-	typeof documentsSchema.updateSingle.body,
-	typeof documentsSchema.updateSingle.query.string,
-	typeof documentsSchema.updateSingle.query.formatted
+	typeof controllerSchemas.updateSingle.params,
+	typeof controllerSchemas.updateSingle.body,
+	typeof controllerSchemas.updateSingle.query.string,
+	typeof controllerSchemas.updateSingle.query.formatted
 > = async (request, reply) => {
 	//* manually run permissions middleware based on the publish flag
 	await permissions(
@@ -57,7 +57,7 @@ const updateSingleController: RouteController<
 
 export default {
 	controller: updateSingleController,
-	zodSchema: documentsSchema.updateSingle,
+	zodSchema: controllerSchemas.updateSingle,
 	swaggerSchema: {
 		description:
 			"Update a single document for a given collection key and document ID.",
@@ -67,11 +67,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(documentsSchema.updateSingle.query.string),
-		body: z.toJSONSchema(documentsSchema.updateSingle.body),
-		params: z.toJSONSchema(documentsSchema.updateSingle.params),
+		// querystring: z.toJSONSchema(controllerSchemas.updateSingle.query.string),
+		body: z.toJSONSchema(controllerSchemas.updateSingle.body),
+		params: z.toJSONSchema(controllerSchemas.updateSingle.params),
 		response: response({
-			schema: z.toJSONSchema(documentsSchema.updateSingle.response),
+			schema: z.toJSONSchema(controllerSchemas.updateSingle.response),
 		}),
 	},
 };

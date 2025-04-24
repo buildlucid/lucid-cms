@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import authSchema from "../../../../schemas/auth.js";
+import { controllerSchemas } from "../../../../schemas/auth.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const loginController: RouteController<
-	typeof authSchema.login.params,
-	typeof authSchema.login.body,
-	typeof authSchema.login.query.string,
-	typeof authSchema.login.query.formatted
+	typeof controllerSchemas.login.params,
+	typeof controllerSchemas.login.body,
+	typeof controllerSchemas.login.query.string,
+	typeof controllerSchemas.login.query.formatted
 > = async (request, reply) => {
 	const userRes = await serviceWrapper(request.server.services.auth.login, {
 		transaction: false,
@@ -53,7 +53,7 @@ const loginController: RouteController<
 
 export default {
 	controller: loginController,
-	zodSchema: authSchema.login,
+	zodSchema: controllerSchemas.login,
 	swaggerSchema: {
 		description:
 			"Authenticates a user and sets a refresh and access token as httpOnly cookies.",
@@ -63,9 +63,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(authSchema.login.query.string),
-		body: z.toJSONSchema(authSchema.login.body),
-		// params: z.toJSONSchema(authSchema.login.params),
+		// querystring: z.toJSONSchema(controllerSchemas.login.query.string),
+		body: z.toJSONSchema(controllerSchemas.login.body),
+		// params: z.toJSONSchema(controllerSchemas.login.params),
 		response: response({
 			noProperties: true,
 		}),

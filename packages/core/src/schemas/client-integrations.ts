@@ -1,7 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
 
-export const ClientIntegration = z.object({
+export const clientIntegrationResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The client integration ID",
 		example: "26",
@@ -34,7 +34,7 @@ export const ClientIntegration = z.object({
 	}),
 });
 
-const schema = {
+export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
 			name: z.string().min(2).meta({
@@ -92,7 +92,7 @@ const schema = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: z.array(ClientIntegration),
+		response: z.array(clientIntegrationResponseSchema),
 	} satisfies ControllerSchema,
 	getSingle: {
 		body: undefined,
@@ -106,7 +106,7 @@ const schema = {
 				example: "1",
 			}),
 		}),
-		response: ClientIntegration,
+		response: clientIntegrationResponseSchema,
 	} satisfies ControllerSchema,
 	regenerateKeys: {
 		body: undefined,
@@ -168,5 +168,3 @@ const schema = {
 		response: undefined,
 	} satisfies ControllerSchema,
 };
-
-export default schema;

@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import accountSchema from "../../../../schemas/account.js";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import { response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const verifyResetPasswordController: RouteController<
-	typeof accountSchema.verifyResetPassword.params,
-	typeof accountSchema.verifyResetPassword.body,
-	typeof accountSchema.verifyResetPassword.query.string,
-	typeof accountSchema.verifyResetPassword.query.formatted
+	typeof controllerSchemas.verifyResetPassword.params,
+	typeof controllerSchemas.verifyResetPassword.body,
+	typeof controllerSchemas.verifyResetPassword.query.string,
+	typeof controllerSchemas.verifyResetPassword.query.formatted
 > = async (request, reply) => {
 	const token = await serviceWrapper(
 		request.server.services.user.token.getSingle,
@@ -40,15 +40,15 @@ const verifyResetPasswordController: RouteController<
 
 export default {
 	controller: verifyResetPasswordController,
-	zodSchema: accountSchema.verifyResetPassword,
+	zodSchema: controllerSchemas.verifyResetPassword,
 	swaggerSchema: {
 		description: "Verifies the password reset token is valid.",
 		tags: ["account"],
 		summary: "Verify Reset Token",
 
-		// querystring: z.toJSONSchema(accountSchema.verifyResetPassword.query.string),
-		// body: z.toJSONSchema(accountSchema.verifyResetPassword.body),
-		params: z.toJSONSchema(accountSchema.verifyResetPassword.params),
+		// querystring: z.toJSONSchema(controllerSchemas.verifyResetPassword.query.string),
+		// body: z.toJSONSchema(controllerSchemas.verifyResetPassword.body),
+		params: z.toJSONSchema(controllerSchemas.verifyResetPassword.params),
 		response: response({
 			noProperties: true,
 		}),

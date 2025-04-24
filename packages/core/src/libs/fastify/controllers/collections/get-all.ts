@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import collectionsSchema from "../../../../schemas/collections.js";
+import { controllerSchemas } from "../../../../schemas/collections.js";
 import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getAllController: RouteController<
-	typeof collectionsSchema.getAll.params,
-	typeof collectionsSchema.getAll.body,
-	typeof collectionsSchema.getAll.query.string,
-	typeof collectionsSchema.getAll.query.formatted
+	typeof controllerSchemas.getAll.params,
+	typeof controllerSchemas.getAll.body,
+	typeof controllerSchemas.getAll.query.string,
+	typeof controllerSchemas.getAll.query.formatted
 > = async (request, reply) => {
 	const collections = await serviceWrapper(
 		request.server.services.collection.getAll,
@@ -44,7 +44,7 @@ const getAllController: RouteController<
 
 export default {
 	controller: getAllController,
-	zodSchema: collectionsSchema.getAll,
+	zodSchema: controllerSchemas.getAll,
 	swaggerSchema: {
 		description: "Returns all the config for all collection instances.",
 		tags: ["collections"],
@@ -53,11 +53,11 @@ export default {
 		// headers: headers({
 		// csrf: true,
 		// }),
-		// querystring: z.toJSONSchema(collectionsSchema.getAll.query.string),
-		// body: z.toJSONSchema(collectionsSchema.getAll.body),
-		// params: z.toJSONSchema(collectionsSchema.getAll.params),
+		// querystring: z.toJSONSchema(controllerSchemas.getAll.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getAll.body),
+		// params: z.toJSONSchema(controllerSchemas.getAll.params),
 		response: response({
-			schema: z.toJSONSchema(collectionsSchema.getAll.response),
+			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	},
 };

@@ -3,7 +3,7 @@ import T from "../translations/index.js";
 import UsersFormatter from "../libs/formatters/users.js";
 import type { ControllerSchema } from "../types.js";
 
-const schema = {
+export const controllerSchemas = {
 	getMe: {
 		body: undefined,
 		query: {
@@ -141,5 +141,3 @@ const schema = {
 		response: undefined,
 	} satisfies ControllerSchema,
 };
-
-export default schema;

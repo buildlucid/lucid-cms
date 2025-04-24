@@ -12,7 +12,7 @@ import type {
 } from "../libs/custom-fields/types.js";
 import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 import type { LocaleValue } from "./shared.js";
-import type { ClientIntegration } from "../schemas/client-integrations.js";
+import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
 import type z from "zod";
 
 export interface UserResponse {
@@ -397,4 +397,6 @@ export type PermissionGroupKey =
 	| "content"
 	| "client-integrations";
 
-export type ClientIntegrationResponse = z.infer<typeof ClientIntegration>;
+export type ClientIntegrationResponse = z.infer<
+	typeof clientIntegrationResponseSchema
+>;

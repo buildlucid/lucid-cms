@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import collectionsSchema from "../../../../schemas/collections.js";
+import { controllerSchemas } from "../../../../schemas/collections.js";
 import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getSingleController: RouteController<
-	typeof collectionsSchema.getSingle.params,
-	typeof collectionsSchema.getSingle.body,
-	typeof collectionsSchema.getSingle.query.string,
-	typeof collectionsSchema.getSingle.query.formatted
+	typeof controllerSchemas.getSingle.params,
+	typeof controllerSchemas.getSingle.body,
+	typeof controllerSchemas.getSingle.query.string,
+	typeof controllerSchemas.getSingle.query.formatted
 > = async (request, reply) => {
 	const collection = await serviceWrapper(
 		request.server.services.collection.getSingle,
@@ -49,7 +49,7 @@ const getSingleController: RouteController<
 
 export default {
 	controller: getSingleController,
-	zodSchema: collectionsSchema.getSingle,
+	zodSchema: controllerSchemas.getSingle,
 	swaggerSchema: {
 		description: "Get a single collection instance.",
 		tags: ["collections"],
@@ -58,11 +58,11 @@ export default {
 		// headers: headers({
 		// csrf: true,
 		// }),
-		// querystring: z.toJSONSchema(collectionsSchema.getSingle.query.string),
-		// body: z.toJSONSchema(collectionsSchema.getSingle.body),
-		params: z.toJSONSchema(collectionsSchema.getSingle.params),
+		// querystring: z.toJSONSchema(controllerSchemas.getSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getSingle.body),
+		params: z.toJSONSchema(controllerSchemas.getSingle.params),
 		response: response({
-			schema: z.toJSONSchema(collectionsSchema.getSingle.response),
+			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 	},
 };

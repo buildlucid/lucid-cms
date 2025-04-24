@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -9,10 +9,10 @@ import permissions from "../../middleware/permissions.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const createSingleController: RouteController<
-	typeof documentsSchema.createSingle.params,
-	typeof documentsSchema.createSingle.body,
-	typeof documentsSchema.createSingle.query.string,
-	typeof documentsSchema.createSingle.query.formatted
+	typeof controllerSchemas.createSingle.params,
+	typeof controllerSchemas.createSingle.body,
+	typeof controllerSchemas.createSingle.query.string,
+	typeof controllerSchemas.createSingle.query.formatted
 > = async (request, reply) => {
 	//* manually run permissions middleware based on the publish flag
 	await permissions(
@@ -56,7 +56,7 @@ const createSingleController: RouteController<
 
 export default {
 	controller: createSingleController,
-	zodSchema: documentsSchema.createSingle,
+	zodSchema: controllerSchemas.createSingle,
 	swaggerSchema: {
 		description: "Create a single document for a given collection.",
 		tags: ["documents"],
@@ -65,11 +65,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(documentsSchema.createSingle.query.string),
-		body: z.toJSONSchema(documentsSchema.createSingle.body),
-		params: z.toJSONSchema(documentsSchema.createSingle.params),
+		// querystring: z.toJSONSchema(controllerSchemas.createSingle.query.string),
+		body: z.toJSONSchema(controllerSchemas.createSingle.body),
+		params: z.toJSONSchema(controllerSchemas.createSingle.params),
 		response: response({
-			schema: z.toJSONSchema(documentsSchema.createSingle.response),
+			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 	},
 };

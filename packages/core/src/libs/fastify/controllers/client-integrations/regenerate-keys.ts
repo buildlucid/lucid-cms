@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
+import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -8,10 +8,10 @@ import formatAPIResponse from "../../../../utils/build-response.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const regenerateKeysController: RouteController<
-	typeof clientIntegrationsSchema.regenerateKeys.params,
-	typeof clientIntegrationsSchema.regenerateKeys.body,
-	typeof clientIntegrationsSchema.regenerateKeys.query.string,
-	typeof clientIntegrationsSchema.regenerateKeys.query.formatted
+	typeof controllerSchemas.regenerateKeys.params,
+	typeof controllerSchemas.regenerateKeys.body,
+	typeof controllerSchemas.regenerateKeys.query.string,
+	typeof controllerSchemas.regenerateKeys.query.formatted
 > = async (request, reply) => {
 	const regenerateKeysRes = await serviceWrapper(
 		request.server.services.clientIntegrations.regenerateKeys,
@@ -44,7 +44,7 @@ const regenerateKeysController: RouteController<
 
 export default {
 	controller: regenerateKeysController,
-	zodSchema: clientIntegrationsSchema.regenerateKeys,
+	zodSchema: controllerSchemas.regenerateKeys,
 	swaggerSchema: {
 		description: "Regenerates the API key for the given client integration.",
 		tags: ["client-integrations"],
@@ -53,11 +53,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.query.string),
-		// body: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.body),
-		params: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.params),
+		// querystring: z.toJSONSchema(controllerSchemas.regenerateKeys.query.string),
+		// body: z.toJSONSchema(controllerSchemas.regenerateKeys.body),
+		params: z.toJSONSchema(controllerSchemas.regenerateKeys.params),
 		response: response({
-			schema: z.toJSONSchema(clientIntegrationsSchema.regenerateKeys.response),
+			schema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
 		}),
 	},
 };

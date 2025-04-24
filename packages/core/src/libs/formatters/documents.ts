@@ -1,7 +1,4 @@
-import z from "zod";
 import Formatter from "./index.js";
-import DocumentFieldsFormatter from "./document-fields.js";
-import DocumentBricksFormatter from "./document-bricks.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type {
 	Config,
@@ -195,93 +192,6 @@ export default class DocumentsFormatter {
 				: null,
 			fields: res.fields ? FieldsFormatter.objectifyFields(res.fields) : null,
 		} satisfies ClientDocumentResponse;
-	};
-
-	static schema = {
-		user: z.object({
-			id: z.number().meta({
-				description: "The user ID",
-				example: 42,
-			}),
-			email: z.email().nullable().meta({
-				description: "The email address of the user",
-				example: "admin@lucidcms.io",
-			}),
-			firstName: z.string().nullable().meta({
-				description: "The first name of the user",
-				example: "John",
-			}),
-			lastName: z.string().nullable().meta({
-				description: "The last name of the user",
-				example: "Smith",
-			}),
-			username: z.string().nullable().meta({
-				description: "The username of the user",
-				example: "admin",
-			}),
-		}),
-		version: z.object({
-			id: z.number().nullable().meta({
-				description: "The document version ID",
-				example: 5,
-			}),
-			promotedFrom: z.number().nullable().meta({
-				description:
-					"The ID of the version this was promoted from, if applicable",
-				example: 3,
-			}),
-			createdAt: z.string().nullable().meta({
-				description: "The timestamp when this version was created",
-				example: "2025-04-10T14:30:00Z",
-			}),
-			createdBy: z.number().nullable().meta({
-				description: "The ID of the user who created this version",
-				example: 42,
-			}),
-		}),
-		document: z.interface({
-			id: z.number().meta({
-				description: "The document ID",
-				example: 123,
-			}),
-			collectionKey: z.string().meta({
-				description: "The key of the collection this document belongs to",
-				example: "page",
-			}),
-			status: z.enum(["draft", "published", "revision"]).nullable().meta({
-				description: "The current status of the document",
-				example: "published",
-			}),
-			versionId: z.number().nullable().meta({
-				description: "The current version ID",
-				example: 1,
-			}),
-			get version() {
-				return z.object({
-					draft: DocumentsFormatter.schema.version.nullable(),
-					published: DocumentsFormatter.schema.version.nullable(),
-				});
-			},
-			get createdBy() {
-				return DocumentsFormatter.schema.user.nullable();
-			},
-			get updatedBy() {
-				return DocumentsFormatter.schema.user.nullable();
-			},
-			createdAt: z.string().nullable().meta({
-				description: "The timestamp when this document was created",
-				example: "2025-04-08T09:00:00Z",
-			}),
-			updatedAt: z.string().nullable().meta({
-				description: "The timestamp when this document was last updated",
-				example: "2025-04-10T15:45:00Z",
-			}),
-			"bricks?": z.array(DocumentBricksFormatter.schema).nullable().optional(),
-			"fields?": z
-				.array(DocumentFieldsFormatter.schema.field)
-				.nullable()
-				.optional(),
-		}),
 	};
 
 	static swaggerClient = {

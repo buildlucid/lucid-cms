@@ -1,7 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
 
-const schema = {
+export const controllerResponseSchemas = {
 	streamSingle: {
 		body: undefined,
 		query: {
@@ -87,7 +87,5 @@ const schema = {
 };
 
 export type StreamSingleQueryParams = z.infer<
-	typeof schema.streamSingle.query.formatted
+	typeof controllerResponseSchemas.streamSingle.query.formatted
 >;
-
-export default schema;

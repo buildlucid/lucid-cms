@@ -1,15 +1,15 @@
-import cdnSchema from "../../../../schemas/cdn.js";
+import z from "zod";
+import { controllerResponseSchemas } from "../../../../schemas/cdn.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 import { defaultErrorResponse } from "../../../../utils/swagger/response.js";
-import z from "zod";
 
 const streamSingleController: RouteController<
-	typeof cdnSchema.streamSingle.params,
-	typeof cdnSchema.streamSingle.body,
-	typeof cdnSchema.streamSingle.query.string,
-	typeof cdnSchema.streamSingle.query.formatted
+	typeof controllerResponseSchemas.streamSingle.params,
+	typeof controllerResponseSchemas.streamSingle.body,
+	typeof controllerResponseSchemas.streamSingle.query.string,
+	typeof controllerResponseSchemas.streamSingle.query.formatted
 > = async (request, reply) => {
 	const response = await serviceWrapper(
 		request.server.services.cdn.streamMedia,
@@ -68,7 +68,7 @@ const streamSingleController: RouteController<
 
 export default {
 	controller: streamSingleController,
-	zodSchema: cdnSchema.streamSingle,
+	zodSchema: controllerResponseSchemas.streamSingle,
 	swaggerSchema: {
 		description:
 			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
@@ -78,9 +78,11 @@ export default {
 		// headers: headers({
 		// 	csrf: true,
 		// }),
-		querystring: z.toJSONSchema(cdnSchema.streamSingle.query.string),
-		// body: z.toJSONSchema(cdnSchema.streamSingle.body),
-		params: z.toJSONSchema(cdnSchema.streamSingle.params),
+		querystring: z.toJSONSchema(
+			controllerResponseSchemas.streamSingle.query.string,
+		),
+		// body: z.toJSONSchema(controllerSchemas.streamSingle.body),
+		params: z.toJSONSchema(controllerResponseSchemas.streamSingle.params),
 		response: {
 			200: {
 				description: "Successfully streamed media content",

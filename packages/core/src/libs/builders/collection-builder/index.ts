@@ -6,7 +6,6 @@ import type {
 	CollectionConfigSchemaType,
 	CollectionData,
 	CollectionBrickConfig,
-	FieldFilters,
 	CollectionTableNames,
 	DisplayInListing,
 } from "./types.js";

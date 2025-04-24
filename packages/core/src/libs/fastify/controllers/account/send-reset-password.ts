@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import accountSchema from "../../../../schemas/account.js";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const sendResetPasswordController: RouteController<
-	typeof accountSchema.sendResetPassword.params,
-	typeof accountSchema.sendResetPassword.body,
-	typeof accountSchema.sendResetPassword.query.string,
-	typeof accountSchema.sendResetPassword.query.formatted
+	typeof controllerSchemas.sendResetPassword.params,
+	typeof controllerSchemas.sendResetPassword.body,
+	typeof controllerSchemas.sendResetPassword.query.string,
+	typeof controllerSchemas.sendResetPassword.query.formatted
 > = async (request, reply) => {
 	const resetPassword = await serviceWrapper(
 		request.server.services.account.sendResetPassword,
@@ -44,7 +44,7 @@ const sendResetPasswordController: RouteController<
 
 export default {
 	controller: sendResetPasswordController,
-	zodSchema: accountSchema.sendResetPassword,
+	zodSchema: controllerSchemas.sendResetPassword,
 	swaggerSchema: {
 		description:
 			"Sends an email to the given email address informing them to reset their password.",
@@ -54,11 +54,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(accountSchema.sendResetPassword.query.string),
-		body: z.toJSONSchema(accountSchema.sendResetPassword.body),
-		// params: z.toJSONSchema(accountSchema.sendResetPassword.params),
+		// querystring: z.toJSONSchema(controllerSchemas.sendResetPassword.query.string),
+		body: z.toJSONSchema(controllerSchemas.sendResetPassword.body),
+		// params: z.toJSONSchema(controllerSchemas.sendResetPassword.params),
 		response: response({
-			schema: z.toJSONSchema(accountSchema.sendResetPassword.response),
+			schema: z.toJSONSchema(controllerSchemas.sendResetPassword.response),
 		}),
 	},
 };

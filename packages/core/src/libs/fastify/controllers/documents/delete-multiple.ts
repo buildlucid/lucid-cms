@@ -1,16 +1,16 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const deleteMultipleController: RouteController<
-	typeof documentsSchema.deleteMultiple.params,
-	typeof documentsSchema.deleteMultiple.body,
-	typeof documentsSchema.deleteMultiple.query.string,
-	typeof documentsSchema.deleteMultiple.query.formatted
+	typeof controllerSchemas.deleteMultiple.params,
+	typeof controllerSchemas.deleteMultiple.body,
+	typeof controllerSchemas.deleteMultiple.query.string,
+	typeof controllerSchemas.deleteMultiple.query.formatted
 > = async (request, reply) => {
 	const deleteMultiple = await serviceWrapper(
 		request.server.services.collection.documents.deleteMultiple,
@@ -41,7 +41,7 @@ const deleteMultipleController: RouteController<
 
 export default {
 	controller: deleteMultipleController,
-	zodSchema: documentsSchema.deleteMultiple,
+	zodSchema: controllerSchemas.deleteMultiple,
 	swaggerSchema: {
 		description: "Delete a multiple documents for a given collection.",
 		tags: ["documents"],
@@ -50,9 +50,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(documentsSchema.deleteMultiple.query.string),
-		body: z.toJSONSchema(documentsSchema.deleteMultiple.body),
-		params: z.toJSONSchema(documentsSchema.deleteMultiple.params),
+		// querystring: z.toJSONSchema(controllerSchemas.deleteMultiple.query.string),
+		body: z.toJSONSchema(controllerSchemas.deleteMultiple.body),
+		params: z.toJSONSchema(controllerSchemas.deleteMultiple.params),
 		response: response({
 			noProperties: true,
 		}),

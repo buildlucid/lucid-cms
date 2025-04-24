@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getMultipleRevisionsController: RouteController<
-	typeof documentSchema.getMultipleRevisions.params,
-	typeof documentSchema.getMultipleRevisions.body,
-	typeof documentSchema.getMultipleRevisions.query.string,
-	typeof documentSchema.getMultipleRevisions.query.formatted
+	typeof controllerSchemas.getMultipleRevisions.params,
+	typeof controllerSchemas.getMultipleRevisions.body,
+	typeof controllerSchemas.getMultipleRevisions.query.string,
+	typeof controllerSchemas.getMultipleRevisions.query.formatted
 > = async (request, reply) => {
 	const documentRevisions = await serviceWrapper(
 		request.server.services.collection.documents.getMultipleRevisions,
@@ -51,7 +51,7 @@ const getMultipleRevisionsController: RouteController<
 
 export default {
 	controller: getMultipleRevisionsController,
-	zodSchema: documentSchema.getMultipleRevisions,
+	zodSchema: controllerSchemas.getMultipleRevisions,
 	swaggerSchema: {
 		description: "Get multiple revisions entries for a document.",
 		tags: ["documents"],
@@ -61,12 +61,12 @@ export default {
 		// csrf: true,
 		// }),
 		querystring: z.toJSONSchema(
-			documentSchema.getMultipleRevisions.query.string,
+			controllerSchemas.getMultipleRevisions.query.string,
 		),
-		// body: z.toJSONSchema(documentSchema.getMultipleRevisions.body),
-		params: z.toJSONSchema(documentSchema.getMultipleRevisions.params),
+		// body: z.toJSONSchema(controllerSchemas.getMultipleRevisions.body),
+		params: z.toJSONSchema(controllerSchemas.getMultipleRevisions.params),
 		response: response({
-			schema: z.toJSONSchema(documentSchema.getMultipleRevisions.response),
+			schema: z.toJSONSchema(controllerSchemas.getMultipleRevisions.response),
 			paginated: true,
 		}),
 	},

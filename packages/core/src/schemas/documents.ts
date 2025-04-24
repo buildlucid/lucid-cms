@@ -1,13 +1,95 @@
 import z from "zod";
-import DocumentVersionsFormatter from "../libs/formatters/document-versions.js";
-import { BrickInputSchema } from "./collection-bricks.js";
-import { FieldInputSchema } from "./collection-fields.js";
+import { brickInputSchema, brickResponseSchema } from "./collection-bricks.js";
+import { fieldInputSchema, fieldResponseSchema } from "./collection-fields.js";
+import { documentVersionResponseSchema } from "./document-versions.js";
 import defaultQuery, { filterSchemas } from "./default-query.js";
-import type { ControllerSchema } from "../types.js";
 import queryString from "../utils/swagger/query-string.js";
-import DocumentsFormatter from "../libs/formatters/documents.js";
+import type { ControllerSchema } from "../types.js";
 
-const schema = {
+const documentResponseUserSchema = z.object({
+	id: z.number().meta({
+		description: "The user ID",
+		example: 42,
+	}),
+	email: z.email().nullable().meta({
+		description: "The email address of the user",
+		example: "admin@lucidcms.io",
+	}),
+	firstName: z.string().nullable().meta({
+		description: "The first name of the user",
+		example: "John",
+	}),
+	lastName: z.string().nullable().meta({
+		description: "The last name of the user",
+		example: "Smith",
+	}),
+	username: z.string().nullable().meta({
+		description: "The username of the user",
+		example: "admin",
+	}),
+});
+
+const documentResponseVersionSchema = z.object({
+	id: z.number().nullable().meta({
+		description: "The document version ID",
+		example: 5,
+	}),
+	promotedFrom: z.number().nullable().meta({
+		description: "The ID of the version this was promoted from, if applicable",
+		example: 3,
+	}),
+	createdAt: z.string().nullable().meta({
+		description: "The timestamp when this version was created",
+		example: "2025-04-10T14:30:00Z",
+	}),
+	createdBy: z.number().nullable().meta({
+		description: "The ID of the user who created this version",
+		example: 42,
+	}),
+});
+
+const documentResponseSchema = z.interface({
+	id: z.number().meta({
+		description: "The document ID",
+		example: 123,
+	}),
+	collectionKey: z.string().meta({
+		description: "The key of the collection this document belongs to",
+		example: "page",
+	}),
+	status: z.enum(["draft", "published", "revision"]).nullable().meta({
+		description: "The current status of the document",
+		example: "published",
+	}),
+	versionId: z.number().nullable().meta({
+		description: "The current version ID",
+		example: 1,
+	}),
+	get version() {
+		return z.object({
+			draft: documentResponseUserSchema.nullable(),
+			published: documentResponseUserSchema.nullable(),
+		});
+	},
+	get createdBy() {
+		return documentResponseVersionSchema.nullable();
+	},
+	get updatedBy() {
+		return documentResponseVersionSchema.nullable();
+	},
+	createdAt: z.string().nullable().meta({
+		description: "The timestamp when this document was created",
+		example: "2025-04-08T09:00:00Z",
+	}),
+	updatedAt: z.string().nullable().meta({
+		description: "The timestamp when this document was last updated",
+		example: "2025-04-10T15:45:00Z",
+	}),
+	"bricks?": z.array(brickResponseSchema).nullable().optional(),
+	"fields?": z.array(fieldResponseSchema).nullable().optional(),
+});
+
+export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
 			publish: z.boolean().meta({
@@ -15,13 +97,13 @@ const schema = {
 				example: false,
 			}),
 			bricks: z
-				.array(BrickInputSchema)
+				.array(brickInputSchema)
 				.meta({
 					description: "An array of bricks to be added to the document",
 				})
 				.optional(),
 			fields: z
-				.array(FieldInputSchema)
+				.array(fieldInputSchema)
 				.meta({
 					description: "Collection field values",
 				})
@@ -51,13 +133,13 @@ const schema = {
 				example: false,
 			}),
 			bricks: z
-				.array(BrickInputSchema)
+				.array(brickInputSchema)
 				.meta({
 					description: "An array of bricks to be added to the document",
 				})
 				.optional(),
 			fields: z
-				.array(FieldInputSchema)
+				.array(fieldInputSchema)
 				.meta({
 					description: "Collection field values",
 				})
@@ -162,7 +244,7 @@ const schema = {
 				example: 1,
 			}),
 		}),
-		response: z.array(DocumentVersionsFormatter.schema),
+		response: z.array(documentVersionResponseSchema),
 	} satisfies ControllerSchema,
 	getMultiple: {
 		query: {
@@ -245,7 +327,7 @@ const schema = {
 			}),
 		}),
 		body: undefined,
-		response: z.array(DocumentsFormatter.schema.document),
+		response: z.array(documentResponseSchema),
 	} satisfies ControllerSchema,
 	getSingle: {
 		query: {
@@ -277,7 +359,7 @@ const schema = {
 			}),
 		}),
 		body: undefined,
-		response: DocumentsFormatter.schema.document,
+		response: documentResponseSchema,
 	} satisfies ControllerSchema,
 	promoteVersion: {
 		body: z.object({
@@ -400,16 +482,14 @@ const schema = {
 };
 
 export type GetMultipleQueryParams = z.infer<
-	typeof schema.getMultiple.query.formatted
+	typeof controllerSchemas.getMultiple.query.formatted
 >;
 export type GetSingleQueryParams = z.infer<
-	typeof schema.getSingle.query.formatted
+	typeof controllerSchemas.getSingle.query.formatted
 >;
 export type ClientGetSingleQueryParams = z.infer<
-	typeof schema.client.getSingle.query
+	typeof controllerSchemas.client.getSingle.query
 >;
 export type GetMultipleRevisionsQueryParams = z.infer<
-	typeof schema.getMultipleRevisions.query.formatted
+	typeof controllerSchemas.getMultipleRevisions.query.formatted
 >;
-
-export default schema;

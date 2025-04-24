@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getMultipleController: RouteController<
-	typeof documentsSchema.getMultiple.params,
-	typeof documentsSchema.getMultiple.body,
-	typeof documentsSchema.getMultiple.query.string,
-	typeof documentsSchema.getMultiple.query.formatted
+	typeof controllerSchemas.getMultiple.params,
+	typeof controllerSchemas.getMultiple.body,
+	typeof controllerSchemas.getMultiple.query.string,
+	typeof controllerSchemas.getMultiple.query.formatted
 > = async (request, reply) => {
 	const documents = await serviceWrapper(
 		request.server.services.collection.documents.getMultiple,
@@ -51,7 +51,7 @@ const getMultipleController: RouteController<
 
 export default {
 	controller: getMultipleController,
-	zodSchema: documentsSchema.getMultiple,
+	zodSchema: controllerSchemas.getMultiple,
 	swaggerSchema: {
 		description:
 			"Get a multiple document entries for a given collection and status (version type).",
@@ -61,11 +61,11 @@ export default {
 		// headers: headers({
 		// csrf: true,
 		// }),
-		querystring: z.toJSONSchema(documentsSchema.getMultiple.query.string),
-		// body: z.toJSONSchema(documentsSchema.getMultiple.body),
-		params: z.toJSONSchema(documentsSchema.getMultiple.params),
+		querystring: z.toJSONSchema(controllerSchemas.getMultiple.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getMultiple.body),
+		params: z.toJSONSchema(controllerSchemas.getMultiple.params),
 		response: response({
-			schema: z.toJSONSchema(documentsSchema.getMultiple.response),
+			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 	},

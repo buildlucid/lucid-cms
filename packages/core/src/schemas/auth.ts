@@ -1,7 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
 
-const schema = {
+export const controllerSchemas = {
 	getCSRF: {
 		body: undefined,
 		query: {
@@ -57,5 +57,3 @@ const schema = {
 		response: undefined,
 	} satisfies ControllerSchema,
 };
-
-export default schema;

@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/media.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
 import { response, headers } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getMultipleController: RouteController<
-	typeof mediaSchema.getMultiple.params,
-	typeof mediaSchema.getMultiple.body,
-	typeof mediaSchema.getMultiple.query.string,
-	typeof mediaSchema.getMultiple.query.formatted
+	typeof controllerSchemas.getMultiple.params,
+	typeof controllerSchemas.getMultiple.body,
+	typeof controllerSchemas.getMultiple.query.string,
+	typeof controllerSchemas.getMultiple.query.formatted
 > = async (request, reply) => {
 	const media = await serviceWrapper(
 		request.server.services.media.getMultiple,
@@ -50,7 +50,7 @@ const getMultipleController: RouteController<
 
 export default {
 	controller: getMultipleController,
-	zodSchema: mediaSchema.getMultiple,
+	zodSchema: controllerSchemas.getMultiple,
 	swaggerSchema: {
 		description: "Get a multiple media items.",
 		tags: ["media"],
@@ -59,13 +59,13 @@ export default {
 		headers: headers({
 			contentLocale: true,
 		}),
-		querystring: z.toJSONSchema(mediaSchema.getMultiple.query.string),
-		// body: z.toJSONSchema(mediaSchema.getMultiple.body),
-		// params: z.toJSONSchema(mediaSchema.getMultiple.params),
+		querystring: z.toJSONSchema(controllerSchemas.getMultiple.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getMultiple.body),
+		// params: z.toJSONSchema(controllerSchemas.getMultiple.params),
 		response: response({
 			schema: {
 				type: "array",
-				items: z.toJSONSchema(mediaSchema.getMultiple.response),
+				items: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			},
 			paginated: true,
 		}),

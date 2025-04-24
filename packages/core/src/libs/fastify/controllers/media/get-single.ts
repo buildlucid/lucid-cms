@@ -1,5 +1,5 @@
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/media.js";
+import mediaSchema from "../../../../schemas/backups/media.js";
 import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import MediaFormatter from "../../../formatters/media.js";
@@ -48,7 +48,7 @@ export default {
 		response: {
 			200: swaggerResponse({
 				type: 200,
-				data: MediaFormatter.swagger,
+				// data: MediaFormatter.swagger,
 			}),
 		},
 	},

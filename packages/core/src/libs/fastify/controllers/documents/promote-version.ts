@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import documentsSchema from "../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../schemas/documents.js";
 import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -8,10 +8,10 @@ import permissions from "../../middleware/permissions.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const promoteVersionController: RouteController<
-	typeof documentsSchema.promoteVersion.params,
-	typeof documentsSchema.promoteVersion.body,
-	typeof documentsSchema.promoteVersion.query.string,
-	typeof documentsSchema.promoteVersion.query.formatted
+	typeof controllerSchemas.promoteVersion.params,
+	typeof controllerSchemas.promoteVersion.body,
+	typeof controllerSchemas.promoteVersion.query.string,
+	typeof controllerSchemas.promoteVersion.query.formatted
 > = async (request, reply) => {
 	// Manually run permissions middleware based on target version type
 	await permissions(
@@ -52,7 +52,7 @@ const promoteVersionController: RouteController<
 
 export default {
 	controller: promoteVersionController,
-	zodSchema: documentsSchema.promoteVersion,
+	zodSchema: controllerSchemas.promoteVersion,
 	swaggerSchema: {
 		description: "Promote a document version to a new version type.",
 		tags: ["documents"],
@@ -61,11 +61,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(documentsSchema.promoteVersion.query.string),
-		body: z.toJSONSchema(documentsSchema.promoteVersion.body),
-		params: z.toJSONSchema(documentsSchema.promoteVersion.params),
+		// querystring: z.toJSONSchema(controllerSchemas.promoteVersion.query.string),
+		body: z.toJSONSchema(controllerSchemas.promoteVersion.body),
+		params: z.toJSONSchema(controllerSchemas.promoteVersion.params),
 		response: response({
-			// schema: z.toJSONSchema(documentsSchema.promoteVersion.response),
+			// schema: z.toJSONSchema(controllerSchemas.promoteVersion.response),
 			noProperties: true,
 		}),
 	},

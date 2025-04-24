@@ -1,5 +1,5 @@
 import T from "../../../../../translations/index.js";
-import documentsSchema from "../../../../../schemas/documents.js";
+import { controllerSchemas } from "../../../../../schemas/documents.js";
 import {
 	swaggerResponse,
 	swaggerQueryString,
@@ -12,9 +12,9 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../../types/types.js";
 
 const getSingleController: RouteController<
-	typeof documentsSchema.client.getSingle.params,
-	typeof documentsSchema.client.getSingle.body,
-	typeof documentsSchema.client.getSingle.query
+	typeof controllerSchemas.client.getSingle.params,
+	typeof controllerSchemas.client.getSingle.body,
+	typeof controllerSchemas.client.getSingle.query
 > = async (request, reply) => {
 	const document = await serviceWrapper(
 		request.server.services.collection.documents.client.getSingle,
@@ -49,7 +49,7 @@ const getSingleController: RouteController<
 
 export default {
 	controller: getSingleController,
-	zodSchema: documentsSchema.client.getSingle,
+	zodSchema: controllerSchemas.client.getSingle,
 	swaggerSchema: {
 		description:
 			"Get a single collection document by filters via the client integration.",

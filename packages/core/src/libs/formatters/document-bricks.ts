@@ -1,5 +1,4 @@
 import Formatter from "./index.js";
-import DocumentFieldsFormatter from "./document-fields.js";
 import crypto from "node:crypto";
 import type { BrickResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
@@ -14,7 +13,6 @@ import type { CollectionSchemaTable } from "../../services/collection-migrator/s
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
-import z from "zod";
 
 export default class DocumentBricksFormatter {
 	formatMultiple = (props: {
@@ -190,34 +188,4 @@ export default class DocumentBricksFormatter {
 		}
 		return [];
 	};
-
-	static schema = z
-		.interface({
-			key: z.string().meta({
-				description: "The key that identifies the brick",
-				example: "hero",
-			}),
-			ref: z.string().meta({
-				description: "The unique reference identifier for this brick",
-				example: "7645654",
-			}),
-			order: z.number().meta({
-				description: "The position order of this brick in the document",
-				example: 0,
-			}),
-			open: z.boolean().meta({
-				description: "Whether this brick is expanded in the UI",
-				example: true,
-			}),
-			type: z.enum(["builder", "fixed"]).meta({
-				description: "The type of brick",
-				example: "builder",
-			}),
-			get fields() {
-				return z.array(DocumentFieldsFormatter.schema.field);
-			},
-		})
-		.meta({
-			additionalProperties: true,
-		});
 }

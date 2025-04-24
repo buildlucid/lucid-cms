@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import accountSchema from "../../../../schemas/account.js";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import { response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getMeController: RouteController<
-	typeof accountSchema.getMe.params,
-	typeof accountSchema.getMe.body,
-	typeof accountSchema.getMe.query.string,
-	typeof accountSchema.getMe.query.formatted
+	typeof controllerSchemas.getMe.params,
+	typeof controllerSchemas.getMe.body,
+	typeof controllerSchemas.getMe.query.string,
+	typeof controllerSchemas.getMe.query.formatted
 > = async (request, reply) => {
 	const user = await serviceWrapper(request.server.services.user.getSingle, {
 		transaction: false,
@@ -41,17 +41,17 @@ const getMeController: RouteController<
 
 export default {
 	controller: getMeController,
-	zodSchema: accountSchema.getMe,
+	zodSchema: controllerSchemas.getMe,
 	swaggerSchema: {
 		description: "Returns the authenticated user based on the access token.",
 		tags: ["account"],
 		summary: "Get Authenticated User",
 
-		// querystring: z.toJSONSchema(accountSchema.getMe.query.string),
-		// body: z.toJSONSchema(accountSchema.getMe.body),
-		// params: z.toJSONSchema(accountSchema.getMe.params),
+		// querystring: z.toJSONSchema(controllerSchemas.getMe.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getMe.body),
+		// params: z.toJSONSchema(controllerSchemas.getMe.params),
 		response: response({
-			schema: z.toJSONSchema(accountSchema.getMe.response),
+			schema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
 	},
 };

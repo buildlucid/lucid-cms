@@ -1,10 +1,108 @@
 import z from "zod";
 import { queryString } from "../utils/swagger/index.js";
 import defaultQuery, { filterSchemas } from "./default-query.js";
-import MediaFormatter from "../libs/formatters/media.js";
 import type { ControllerSchema } from "../types.js";
 
-const schema = {
+const mediaResponseSchema = z.object({
+	id: z.number().meta({ description: "Media ID", example: 1 }),
+	key: z.string().meta({
+		description: "Media key",
+		example: "2024/09/5ttogd-placeholder-image.png",
+	}),
+	url: z.string().meta({
+		description: "Media URL",
+		example: "https://example.com/cdn/v1/2024/09/5ttogd-placeholder-image.png",
+	}),
+	title: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().meta({
+					description: "Title value",
+				}),
+			}),
+		)
+		.meta({
+			description: "Translated titles",
+		}),
+	alt: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().meta({
+					description: "Alt text value",
+				}),
+			}),
+		)
+		.meta({
+			description: "Translated alt texts",
+		}),
+	type: z.string().meta({ description: "Media type", example: "image" }),
+	meta: z
+		.object({
+			mimeType: z
+				.string()
+				.meta({ description: "MIME type", example: "image/jpeg" }),
+			extension: z
+				.string()
+				.meta({ description: "File extension", example: "jpeg" }),
+			fileSize: z
+				.number()
+				.meta({ description: "File size in bytes", example: 100 }),
+			width: z
+				.number()
+				.nullable()
+				.meta({ description: "Image width", example: 100 }),
+			height: z
+				.number()
+				.nullable()
+				.meta({ description: "Image height", example: 100 }),
+			blurHash: z.string().nullable().meta({
+				description: "BlurHash for image previews",
+				example: "AQABAAAABAAAAgAA...",
+			}),
+			averageColour: z.string().nullable().meta({
+				description: "Average colour of the image",
+				example: "rgba(255, 255, 255, 1)",
+			}),
+			isDark: z.boolean().nullable().meta({
+				description: "Whether the image is predominantly dark",
+				example: true,
+			}),
+			isLight: z.boolean().nullable().meta({
+				description: "Whether the image is predominantly light",
+				example: true,
+			}),
+		})
+		.meta({
+			description: "Media metadata",
+		}),
+	createdAt: z.string().meta({
+		description: "Creation timestamp",
+		example: "2022-01-01T00:00:00Z",
+	}),
+	updatedAt: z.string().meta({
+		description: "Last update timestamp",
+		example: "2022-01-01T00:00:00Z",
+	}),
+});
+
+const presignedUrlResponseSchema = z.object({
+	url: z.string().meta({
+		description: "The presigned URL to upload media to",
+		example: "https://example.com/cdn/v1/key",
+	}),
+	key: z.string().meta({
+		description: "The media key",
+		example: "2024/09/5ttogd-placeholder-image.png",
+	}),
+});
+
+export const controllerSchemas = {
 	getMultiple: {
 		query: {
 			string: z
@@ -58,12 +156,10 @@ const schema = {
 		},
 		params: undefined,
 		body: undefined,
-		response: MediaFormatter.schema.media,
+		response: mediaResponseSchema,
 	} satisfies ControllerSchema,
 };
 
 export type GetMultipleQueryParams = z.infer<
-	typeof schema.getMultiple.query.formatted
+	typeof controllerSchemas.getMultiple.query.formatted
 >;
-
-export default schema;

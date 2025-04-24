@@ -1,13 +1,13 @@
-import authSchema from "../../../../schemas/auth.js";
+import { controllerSchemas } from "../../../../schemas/auth.js";
 import { headers, response } from "../../../../utils/swagger/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const tokenController: RouteController<
-	typeof authSchema.token.params,
-	typeof authSchema.token.body,
-	typeof authSchema.token.query.string,
-	typeof authSchema.token.query.formatted
+	typeof controllerSchemas.token.params,
+	typeof controllerSchemas.token.body,
+	typeof controllerSchemas.token.query.string,
+	typeof controllerSchemas.token.query.formatted
 > = async (request, reply) => {
 	const payloadRes =
 		await request.server.services.auth.refreshToken.verifyToken(request, reply);
@@ -33,7 +33,7 @@ const tokenController: RouteController<
 
 export default {
 	controller: tokenController,
-	zodSchema: authSchema.token,
+	zodSchema: controllerSchemas.token,
 	swaggerSchema: {
 		description:
 			"Verifies the refresh token and issues a new access and refresh token.",
@@ -43,9 +43,9 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(authSchema.token.query.string),
-		// body: z.toJSONSchema(authSchema.token.body),
-		// params: z.toJSONSchema(authSchema.token.params),
+		// querystring: z.toJSONSchema(controllerSchemas.token.query.string),
+		// body: z.toJSONSchema(controllerSchemas.token.body),
+		// params: z.toJSONSchema(controllerSchemas.token.params),
 		response: response({
 			noProperties: true,
 		}),

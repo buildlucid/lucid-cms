@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
-import clientIntegrationsSchema from "../../../../schemas/client-integrations.js";
+import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { response, headers } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const createSingleController: RouteController<
-	typeof clientIntegrationsSchema.createSingle.params,
-	typeof clientIntegrationsSchema.createSingle.body,
-	typeof clientIntegrationsSchema.createSingle.query.string,
-	typeof clientIntegrationsSchema.createSingle.query.formatted
+	typeof controllerSchemas.createSingle.params,
+	typeof controllerSchemas.createSingle.body,
+	typeof controllerSchemas.createSingle.query.string,
+	typeof controllerSchemas.createSingle.query.formatted
 > = async (request, reply) => {
 	const clientIntegrationRes = await serviceWrapper(
 		request.server.services.clientIntegrations.createSingle,
@@ -47,7 +47,7 @@ const createSingleController: RouteController<
 
 export default {
 	controller: createSingleController,
-	zodSchema: clientIntegrationsSchema.createSingle,
+	zodSchema: controllerSchemas.createSingle,
 	swaggerSchema: {
 		description:
 			"Creates a new client integration that can be used to authenticate client endpoints.",
@@ -57,11 +57,11 @@ export default {
 		headers: headers({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(clientIntegrationsSchema.createSingle.query.string),
-		body: z.toJSONSchema(clientIntegrationsSchema.createSingle.body),
-		// params: z.toJSONSchema(clientIntegrationsSchema.createSingle.params),
+		// querystring: z.toJSONSchema(controllerSchemas.createSingle.query.string),
+		body: z.toJSONSchema(controllerSchemas.createSingle.body),
+		// params: z.toJSONSchema(controllerSchemas.createSingle.params),
 		response: response({
-			schema: z.toJSONSchema(clientIntegrationsSchema.createSingle.response),
+			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 	},
 };
