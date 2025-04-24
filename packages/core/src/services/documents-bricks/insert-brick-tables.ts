@@ -2,11 +2,14 @@ import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidBricksTable } from "../../types.js";
 import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
+import type { CollectionBuilder } from "../../builders.js";
+import type { ColumnDataType } from "kysely";
 
 const insertBrickTables: ServiceFn<
 	[
 		{
 			tables: InsertBrickTables[];
+			collection: CollectionBuilder;
 		},
 	],
 	undefined
@@ -64,6 +67,10 @@ const insertBrickTables: ServiceFn<
 		if (hasParentIdRef) returningColumns.push("parent_id_ref");
 		if (hasBrickIdRef) returningColumns.push("brick_id_ref");
 
+		const schema = data.collection.bricksTableSchema.find(
+			(s) => s.name === table.table,
+		);
+
 		// insert rows for this table
 		const response = await Bricks.createMultiple(
 			{
@@ -72,10 +79,14 @@ const insertBrickTables: ServiceFn<
 			},
 			{
 				tableName: table.table,
-				// TODO!: For every table we need to return a a map of custom field column keys and their column data types. This is only needed for custom fields
-				columns: {
-					// _json: "json",
-				},
+				columns:
+					schema?.columns.reduce<Record<string, ColumnDataType>>(
+						(record, column) => {
+							record[column.name] = column.type;
+							return record;
+						},
+						{},
+					) || {},
 			},
 		);
 		if (response.error) return response;
