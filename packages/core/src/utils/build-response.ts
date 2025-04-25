@@ -27,9 +27,7 @@ const constructBaseUrl = (request: FastifyRequest): URL => {
 			: `/${request.originalUrl}`;
 		return new URL(originalUrl, request.server.config.host);
 	}
-	return new URL(
-		`${request.protocol}://${request.hostname}${request.originalUrl}`,
-	);
+	return new URL(`${request.protocol}://${request.host}${request.originalUrl}`);
 };
 
 const getPath = (request: FastifyRequest) => {
