@@ -71,6 +71,16 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Document endpoints for creating, deleting, updating and promoting/restoring versions.",
 					},
 					{
+						name: "emails",
+						description:
+							"Email endpoints for fetching, deleting and resending emails.",
+					},
+					{
+						name: "locales",
+						description:
+							"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
+					},
+					{
 						name: "cdn",
 						description:
 							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
@@ -83,7 +93,12 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 					{
 						name: "client-documents",
 						description:
-							"Client document endpoints for fetching single and multiple documents via the client integration authentication",
+							"Client document endpoints for fetching single and multiple documents via the client integration authentication.",
+					},
+					{
+						name: "client-locales",
+						description:
+							"Client locale endpoints for fetching locale information.",
 					},
 				],
 				servers: [

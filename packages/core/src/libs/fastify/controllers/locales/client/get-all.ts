@@ -1,19 +1,17 @@
+import z from "zod";
 import T from "../../../../../translations/index.js";
-import localeSchema from "../../../../../schemas/locales.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-} from "../../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../../schemas/locales.js";
+import { response } from "../../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../../utils/build-response.js";
-import LocalesFormatter from "../../../../formatters/locales.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../../types/types.js";
 
 const getAllController: RouteController<
-	typeof localeSchema.client.getAll.params,
-	typeof localeSchema.client.getAll.body,
-	typeof localeSchema.client.getAll.query
+	typeof controllerSchemas.client.getAll.params,
+	typeof controllerSchemas.client.getAll.body,
+	typeof controllerSchemas.client.getAll.query.string,
+	typeof controllerSchemas.client.getAll.query.formatted
 > = async (request, reply) => {
 	const locales = await serviceWrapper(request.server.services.locale.getAll, {
 		transaction: false,
@@ -38,25 +36,21 @@ const getAllController: RouteController<
 
 export default {
 	controller: getAllController,
-	zodSchema: localeSchema.client.getAll,
+	zodSchema: controllerSchemas.client.getAll,
 	swaggerSchema: {
 		description: "Returns all enabled locales via the client integration.",
 		tags: ["client-locales"],
-		summary: "Get all locales",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: LocalesFormatter.swagger,
-				},
-				paginated: true,
-			}),
-		},
-		querystring: swaggerQueryString({
-			sorts: ["code", "createdAt", "updatedAt"],
-			page: true,
-			perPage: true,
+		summary: "Get All Locales",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.client.getAll.query.string),
+		// body: z.toJSONSchema(controllerSchemas.client.getAll.body),
+		// params: z.toJSONSchema(controllerSchemas.client.getAll.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.client.getAll.response),
+			paginated: true,
 		}),
 	},
 };

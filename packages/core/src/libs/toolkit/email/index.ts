@@ -1,7 +1,7 @@
 import T from "../../../translations/index.js";
-import z from "zod";
 import toolkitWrapper from "../toolkit-wrapper.js";
 import lucidServices from "../../../services/index.js";
+import { toolkitSchemas } from "../../../schemas/email.js";
 import type { ExtractServiceFnArgs } from "../../../utils/services/types.js";
 
 const emailToolkit = {
@@ -13,15 +13,7 @@ const emailToolkit = {
 			data: data,
 			config: {
 				transaction: true,
-				schema: z.object({
-					to: z.email(),
-					subject: z.string(),
-					template: z.string(),
-					cc: z.string().optional(),
-					bcc: z.string().optional(),
-					replyTo: z.string().optional(),
-					data: z.record(z.any(), z.any()),
-				}),
+				schema: toolkitSchemas.sendExtenal,
 				defaultError: {
 					name: T("send_email_error_name"),
 				},
