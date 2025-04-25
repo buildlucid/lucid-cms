@@ -1,5 +1,11 @@
 # @lucidcms/plugin-local-storage
 
+## 1.1.2
+
+### Patch Changes
+
+- Schema update on upload route to match core
+
 ## 1.1.1
 
 ### Patch Changes
