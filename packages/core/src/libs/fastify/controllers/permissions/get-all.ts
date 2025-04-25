@@ -32,7 +32,7 @@ export default {
 		summary: "Get All Permissions",
 
 		// headers: headers({
-		// 	contentLocale: true,
+		// 	csrf: true,
 		// }),
 		// querystring: z.toJSONSchema(controllerSchemas.getAll.query.string),
 		// body: z.toJSONSchema(controllerSchemas.getAll.body),

@@ -1,17 +1,16 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import rolesSchema from "../../../../schemas/roles.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/roles.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const updateSingleController: RouteController<
-	typeof rolesSchema.updateSingle.params,
-	typeof rolesSchema.updateSingle.body,
-	typeof rolesSchema.updateSingle.query
+	typeof controllerSchemas.updateSingle.params,
+	typeof controllerSchemas.updateSingle.body,
+	typeof controllerSchemas.updateSingle.query.string,
+	typeof controllerSchemas.updateSingle.query.formatted
 > = async (request, reply) => {
 	const updateSingel = await serviceWrapper(
 		request.server.services.role.updateSingle,
@@ -43,37 +42,21 @@ const updateSingleController: RouteController<
 
 export default {
 	controller: updateSingleController,
-	zodSchema: rolesSchema.updateSingle,
+	zodSchema: controllerSchemas.updateSingle,
 	swaggerSchema: {
 		description:
-			"Update a single role with the given name and permission groups.",
+			"Update a single role with the given name and permission groups by ID.",
 		tags: ["roles"],
-		summary: "Update a single role",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				name: {
-					type: "string",
-				},
-				description: {
-					type: "string",
-				},
-				permissions: {
-					type: "array",
-					items: {
-						type: "string",
-					},
-				},
-			},
-		},
-		headers: swaggerHeaders({
+		summary: "Update Role",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.updateSingle.query.string),
+		body: z.toJSONSchema(controllerSchemas.updateSingle.body),
+		params: z.toJSONSchema(controllerSchemas.updateSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

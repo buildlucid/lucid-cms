@@ -5,7 +5,7 @@ import queryBuilder from "../query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
-import type rolesSchema from "../../schemas/roles.js";
+import type { GetMultipleQueryParams } from "../../schemas/roles.js";
 
 export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -109,7 +109,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		props: QueryProps<
 			V,
 			{
-				queryParams: z.infer<typeof rolesSchema.getMultiple.query>;
+				queryParams: GetMultipleQueryParams;
 			}
 		>,
 	) {

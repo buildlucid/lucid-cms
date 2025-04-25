@@ -1,19 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import rolesSchema from "../../../../schemas/roles.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/roles.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import RolesFormatter from "../../../formatters/roles.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const createSingleController: RouteController<
-	typeof rolesSchema.createSingle.params,
-	typeof rolesSchema.createSingle.body,
-	typeof rolesSchema.createSingle.query
+	typeof controllerSchemas.createSingle.params,
+	typeof controllerSchemas.createSingle.body,
+	typeof controllerSchemas.createSingle.query.string,
+	typeof controllerSchemas.createSingle.query.formatted
 > = async (request, reply) => {
 	const roleId = await serviceWrapper(
 		request.server.services.role.createSingle,
@@ -67,38 +65,21 @@ const createSingleController: RouteController<
 
 export default {
 	controller: createSingleController,
-	zodSchema: rolesSchema.createSingle,
+	zodSchema: controllerSchemas.createSingle,
 	swaggerSchema: {
 		description:
 			"Create a single role with the given name and permission groups.",
 		tags: ["roles"],
-		summary: "Create a single role",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: RolesFormatter.swagger,
-			}),
-		},
-		body: {
-			type: "object",
-			properties: {
-				name: {
-					type: "string",
-				},
-				description: {
-					type: "string",
-				},
-				permissions: {
-					type: "array",
-					items: {
-						type: "string",
-					},
-				},
-			},
-			required: ["name", "permissions"],
-		},
-		headers: swaggerHeaders({
+		summary: "Create Role",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.createSingle.query.string),
+		body: z.toJSONSchema(controllerSchemas.createSingle.body),
+		// params: z.toJSONSchema(controllerSchemas.createSingle.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 	},
 };

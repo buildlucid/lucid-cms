@@ -86,6 +86,11 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
 					},
 					{
+						name: "roles",
+						description:
+							"Role endpoints for fetching, creating, updating and deleting.",
+					},
+					{
 						name: "permissions",
 						description:
 							"Permission endpoints for fetching all available permissions.",

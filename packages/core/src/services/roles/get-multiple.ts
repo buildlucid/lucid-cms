@@ -1,14 +1,13 @@
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import type z from "zod";
-import type rolesSchema from "../../schemas/roles.js";
+import type { GetMultipleQueryParams } from "../../schemas/roles.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { RoleResponse } from "../../types/response.js";
 
 const getMultiple: ServiceFn<
 	[
 		{
-			query: z.infer<typeof rolesSchema.getMultiple.query>;
+			query: GetMultipleQueryParams;
 		},
 	],
 	{

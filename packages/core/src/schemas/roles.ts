@@ -1,63 +1,177 @@
 import z from "zod";
 import defaultQuery, { filterSchemas } from "./default-query.js";
+import type { ControllerSchema } from "../types.js";
+import queryString from "../utils/swagger/query-string.js";
 
-export default {
+const roleResponseSchema = z.interface({
+	id: z.number().meta({
+		description: "The role ID",
+		example: 1,
+	}),
+	name: z.string().meta({
+		description: "The role's name",
+		example: "Editors",
+	}),
+	description: z.string().nullable().meta({
+		description: "The role's description",
+		example: "Editor's can edit documents from any collection",
+	}),
+	"permissions?": z
+		.array(
+			z.object({
+				id: z.number().meta({
+					description: "The permission ID",
+					example: 1,
+				}),
+				permission: z.string().meta({
+					description: "The permission key",
+					example: "create_user",
+				}),
+			}),
+		)
+		.meta({
+			description: "A list of all of the roles permissions",
+		}),
+
+	createdAt: z.string().meta({
+		description: "Creation timestamp",
+		example: "2022-01-01T00:00:00Z",
+	}),
+	updatedAt: z.string().meta({
+		description: "Last update timestamp",
+		example: "2022-01-01T00:00:00Z",
+	}),
+});
+
+export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			name: z.string().min(2),
-			description: z.string().optional(),
-			permissions: z.array(z.string()),
-		}),
-		query: undefined,
-		params: undefined,
-	},
-	updateSingle: {
-		body: z.object({
-			name: z.string().min(2).optional(),
-			description: z.string().optional(),
-			permissions: z.array(z.string()).optional(),
-		}),
-		query: undefined,
-		params: z.object({
-			id: z.string(),
-		}),
-	},
-	deleteSingle: {
-		body: undefined,
-		query: undefined,
-		params: z.object({
-			id: z.string(),
-		}),
-	},
-	getMultiple: {
-		body: undefined,
-		query: z.object({
-			filter: z
-				.object({
-					name: filterSchemas.single.optional(),
-					roleIds: filterSchemas.union.optional(),
+			name: z.string().min(2).meta({
+				description: "The role's name",
+				example: "Editor",
+			}),
+			description: z
+				.string()
+				.meta({
+					description: "A description for the role",
+					example: "Editor's can edit documents from any collection",
 				})
 				.optional(),
-			sort: z
-				.array(
-					z.object({
-						key: z.enum(["createdAt", "name"]),
-						value: z.enum(["asc", "desc"]),
-					}),
-				)
-				.optional(),
-			include: z.array(z.enum(["permissions"])).optional(),
-			exclude: defaultQuery.exclude,
-			page: defaultQuery.page,
-			perPage: defaultQuery.perPage,
+			permissions: z.array(z.string()).meta({
+				description: "A lit of permissions",
+				example: ["create_user", "update_user"],
+			}),
 		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: undefined,
-	},
+		response: roleResponseSchema,
+	} satisfies ControllerSchema,
+	updateSingle: {
+		body: z.object({
+			name: z
+				.string()
+				.min(2)
+				.meta({
+					description: "The role's name",
+					example: "Editor",
+				})
+				.optional(),
+			description: z
+				.string()
+				.meta({
+					description: "A description for the role",
+					example: "Editor's can edit documents from any collection",
+				})
+				.optional(),
+			permissions: z
+				.array(z.string())
+				.meta({
+					description: "A lit of permissions",
+					example: ["create_user", "update_user"],
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The role's ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	deleteSingle: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The role's ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	getMultiple: {
+		body: undefined,
+		query: {
+			string: z
+				.object({
+					"filter[name]": queryString.schema.filter(false, "Editor"),
+					"filter[roleIds]": queryString.schema.filter(true, "1,2"),
+					sort: queryString.schema.sort("createdAt,name"),
+					include: queryString.schema.include("permissions"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				})
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						name: filterSchemas.single.optional(),
+						roleIds: filterSchemas.union.optional(),
+					})
+					.optional(),
+				sort: z
+					.array(
+						z.object({
+							key: z.enum(["createdAt", "name"]),
+							value: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				include: z.array(z.enum(["permissions"])).optional(),
+				page: defaultQuery.page,
+				perPage: defaultQuery.perPage,
+			}),
+		},
+		params: undefined,
+		response: z.array(roleResponseSchema),
+	} satisfies ControllerSchema,
 	getSingle: {
 		body: undefined,
-		query: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
 		params: z.object({
-			id: z.string(),
+			id: z.string().meta({
+				description: "The role's ID",
+				example: 1,
+			}),
 		}),
-	},
+		response: roleResponseSchema,
+	} satisfies ControllerSchema,
 };
+
+export type GetMultipleQueryParams = z.infer<
+	typeof controllerSchemas.getMultiple.query.formatted
+>;

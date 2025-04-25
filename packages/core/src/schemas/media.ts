@@ -149,7 +149,6 @@ export const controllerSchemas = {
 						}),
 					)
 					.optional(),
-				include: z.array(z.enum(["permissions"])).optional(),
 				page: defaultQuery.page,
 				perPage: defaultQuery.perPage,
 			}),

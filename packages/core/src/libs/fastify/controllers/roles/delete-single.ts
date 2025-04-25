@@ -1,17 +1,16 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import rolesSchema from "../../../../schemas/roles.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/roles.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const deleteSingleController: RouteController<
-	typeof rolesSchema.deleteSingle.params,
-	typeof rolesSchema.deleteSingle.body,
-	typeof rolesSchema.deleteSingle.query
+	typeof controllerSchemas.deleteSingle.params,
+	typeof controllerSchemas.deleteSingle.body,
+	typeof controllerSchemas.deleteSingle.query.string,
+	typeof controllerSchemas.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingle = await serviceWrapper(
 		request.server.services.role.deleteSingle,
@@ -40,19 +39,20 @@ const deleteSingleController: RouteController<
 
 export default {
 	controller: deleteSingleController,
-	zodSchema: rolesSchema.deleteSingle,
+	zodSchema: controllerSchemas.deleteSingle,
 	swaggerSchema: {
-		description: "Delete a single role based on the given role id.",
+		description: "Delete a single role based on the given role ID.",
 		tags: ["roles"],
-		summary: "Delete a single role",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Delete Role",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.deleteSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.deleteSingle.body),
+		params: z.toJSONSchema(controllerSchemas.deleteSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };
