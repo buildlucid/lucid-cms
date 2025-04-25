@@ -1,17 +1,16 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/backups/media.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const createSingleController: RouteController<
-	typeof mediaSchema.createSingle.params,
-	typeof mediaSchema.createSingle.body,
-	typeof mediaSchema.createSingle.query
+	typeof controllerSchemas.createSingle.params,
+	typeof controllerSchemas.createSingle.body,
+	typeof controllerSchemas.createSingle.query.string,
+	typeof controllerSchemas.createSingle.query.formatted
 > = async (request, reply) => {
 	const mediaIdRes = await serviceWrapper(
 		request.server.services.media.createSingle,
@@ -44,19 +43,20 @@ const createSingleController: RouteController<
 
 export default {
 	controller: createSingleController,
-	zodSchema: mediaSchema.createSingle,
+	zodSchema: controllerSchemas.createSingle,
 	swaggerSchema: {
-		description: "Create a single media item.",
+		description: "Creates a single media item.",
 		tags: ["media"],
-		summary: "Create a single media item.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Create Media",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.createSingle.query.string),
+		body: z.toJSONSchema(controllerSchemas.createSingle.body),
+		// params: z.toJSONSchema(controllerSchemas.createSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

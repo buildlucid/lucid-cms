@@ -71,6 +71,11 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Document endpoints for creating, deleting, updating and promoting/restoring versions.",
 					},
 					{
+						name: "media",
+						description:
+							"Media endpoints for creating, updating, deleting, getting presigned URLs and clearing processed images.",
+					},
+					{
 						name: "emails",
 						description:
 							"Email endpoints for fetching, deleting and resending emails.",

@@ -1,17 +1,15 @@
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/backups/media.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const clearSingleProcessedController: RouteController<
-	typeof mediaSchema.clearSingleProcessed.params,
-	typeof mediaSchema.clearSingleProcessed.body,
-	typeof mediaSchema.clearSingleProcessed.query
+	typeof controllerSchemas.clearSingleProcessed.params,
+	typeof controllerSchemas.clearSingleProcessed.body,
+	typeof controllerSchemas.clearSingleProcessed.query.string,
+	typeof controllerSchemas.clearSingleProcessed.query.formatted
 > = async (request, reply) => {
 	const clearProcessed = await serviceWrapper(
 		request.server.services.processedImage.clearSingle,
@@ -40,20 +38,21 @@ const clearSingleProcessedController: RouteController<
 
 export default {
 	controller: clearSingleProcessedController,
-	zodSchema: mediaSchema.clearSingleProcessed,
+	zodSchema: controllerSchemas.clearSingleProcessed,
 	swaggerSchema: {
 		description:
 			"Clear all processed images for a single media item based on the given key.",
 		tags: ["media"],
-		summary: "Clear all processed image for a single media item.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Clear Processed Images",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.clearSingleProcessed.query.string),
+		// body: z.toJSONSchema(controllerSchemas.clearSingleProcessed.body),
+		// params: z.toJSONSchema(controllerSchemas.clearSingleProcessed.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

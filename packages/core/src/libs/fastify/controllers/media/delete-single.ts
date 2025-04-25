@@ -1,17 +1,16 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/backups/media.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const deleteSingleController: RouteController<
-	typeof mediaSchema.deleteSingle.params,
-	typeof mediaSchema.deleteSingle.body,
-	typeof mediaSchema.deleteSingle.query
+	typeof controllerSchemas.deleteSingle.params,
+	typeof controllerSchemas.deleteSingle.body,
+	typeof controllerSchemas.deleteSingle.query.string,
+	typeof controllerSchemas.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingel = await serviceWrapper(
 		request.server.services.media.deleteSingle,
@@ -40,20 +39,21 @@ const deleteSingleController: RouteController<
 
 export default {
 	controller: deleteSingleController,
-	zodSchema: mediaSchema.deleteSingle,
+	zodSchema: controllerSchemas.deleteSingle,
 	swaggerSchema: {
 		description:
 			"Delete a single media item by id and clear its processed images if media is an image.",
 		tags: ["media"],
-		summary: "Delete a single media item.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Delete Media",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.deleteSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.deleteSingle.body),
+		params: z.toJSONSchema(controllerSchemas.deleteSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

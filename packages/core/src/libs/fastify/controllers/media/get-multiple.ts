@@ -54,7 +54,7 @@ export default {
 	swaggerSchema: {
 		description: "Get a multiple media items.",
 		tags: ["media"],
-		summary: "Get a multiple media items.",
+		summary: "Get Multiple Media",
 
 		headers: headers({
 			contentLocale: true,
@@ -63,10 +63,7 @@ export default {
 		// body: z.toJSONSchema(controllerSchemas.getMultiple.body),
 		// params: z.toJSONSchema(controllerSchemas.getMultiple.params),
 		response: response({
-			schema: {
-				type: "array",
-				items: z.toJSONSchema(controllerSchemas.getMultiple.response),
-			},
+			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 	},

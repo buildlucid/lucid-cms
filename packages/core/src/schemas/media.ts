@@ -156,7 +156,171 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		body: undefined,
+		response: z.array(mediaResponseSchema),
+	} satisfies ControllerSchema,
+	getSingle: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
 		response: mediaResponseSchema,
+	} satisfies ControllerSchema,
+	deleteSingle: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	updateSingle: {
+		body: z.object({
+			key: z
+				.string()
+				.meta({
+					description: "The media key",
+					example: "2024/09/5ttogd-placeholder-image.png",
+				})
+				.optional(),
+			fileName: z
+				.string()
+				.meta({
+					description: "The filename",
+					example: "funny-cats.jpg",
+				})
+				.optional(),
+			title: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().nullable().meta({
+							description: "Title value",
+						}),
+					}),
+				)
+				.optional(),
+			alt: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().nullable().meta({
+							description: "Alt text value",
+						}),
+					}),
+				)
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	clearSingleProcessed: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	clearAllProcessed: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	getPresignedUrl: {
+		body: z.object({
+			fileName: z.string().meta({
+				description: "The file name",
+				example: "funny-cats.jpg",
+			}),
+			mimeType: z.string().meta({
+				description: "The media's mime type",
+				example: "image/jpeg",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: presignedUrlResponseSchema,
+	} satisfies ControllerSchema,
+	createSingle: {
+		body: z.object({
+			key: z.string().meta({
+				description: "The media key",
+				example: "2024/09/5ttogd-placeholder-image.png",
+			}),
+			fileName: z.string().meta({
+				description: "The filename",
+				example: "funny-cats.jpg",
+			}),
+			title: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().nullable().meta({
+							description: "Title value",
+						}),
+					}),
+				)
+				.optional(),
+			alt: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().nullable().meta({
+							description: "Alt text value",
+						}),
+					}),
+				)
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
 	} satisfies ControllerSchema,
 };
 

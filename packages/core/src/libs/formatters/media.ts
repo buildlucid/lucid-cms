@@ -79,18 +79,4 @@ export default class MediaFormatter {
 			updatedAt: Formatter.formatDate(props.media.updated_at),
 		};
 	};
-
-	static presignedUrlSwagger = {
-		type: "object",
-		properties: {
-			url: {
-				type: "string",
-				example: "https://example.com/cdn/v1/key",
-			},
-			key: {
-				type: "string",
-				example: "2024/09/5ttogd-placeholder-image.png",
-			},
-		},
-	};
 }

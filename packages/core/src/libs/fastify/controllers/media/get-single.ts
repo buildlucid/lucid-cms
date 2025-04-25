@@ -1,16 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/backups/media.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import MediaFormatter from "../../../formatters/media.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getSingleController: RouteController<
-	typeof mediaSchema.getSingle.params,
-	typeof mediaSchema.getSingle.body,
-	typeof mediaSchema.getSingle.query
+	typeof controllerSchemas.getSingle.params,
+	typeof controllerSchemas.getSingle.body,
+	typeof controllerSchemas.getSingle.query.string,
+	typeof controllerSchemas.getSingle.query.formatted
 > = async (request, reply) => {
 	const media = await serviceWrapper(request.server.services.media.getSingle, {
 		transaction: false,
@@ -40,16 +41,20 @@ const getSingleController: RouteController<
 
 export default {
 	controller: getSingleController,
-	zodSchema: mediaSchema.getSingle,
+	zodSchema: controllerSchemas.getSingle,
 	swaggerSchema: {
-		description: "Get a single media item by id.",
+		description: "Get a single media item by ID.",
 		tags: ["media"],
-		summary: "Get a single media item.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				// data: MediaFormatter.swagger,
-			}),
-		},
+		summary: "Get Media",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.getSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getSingle.body),
+		params: z.toJSONSchema(controllerSchemas.getSingle.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+		}),
 	},
 };

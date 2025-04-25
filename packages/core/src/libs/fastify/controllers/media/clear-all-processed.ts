@@ -1,17 +1,15 @@
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/backups/media.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const clearAllProcessedController: RouteController<
-	typeof mediaSchema.clearAllProcessed.params,
-	typeof mediaSchema.clearAllProcessed.body,
-	typeof mediaSchema.clearAllProcessed.query
+	typeof controllerSchemas.clearAllProcessed.params,
+	typeof controllerSchemas.clearAllProcessed.body,
+	typeof controllerSchemas.clearAllProcessed.query.string,
+	typeof controllerSchemas.clearAllProcessed.query.formatted
 > = async (request, reply) => {
 	const clearProcessed = await serviceWrapper(
 		request.server.services.processedImage.clearAll,
@@ -35,19 +33,20 @@ const clearAllProcessedController: RouteController<
 
 export default {
 	controller: clearAllProcessedController,
-	zodSchema: mediaSchema.clearAllProcessed,
+	zodSchema: controllerSchemas.clearAllProcessed,
 	swaggerSchema: {
-		description: "Clear all processed images for a every media item.",
+		description: "Clears all processed images for a every media item.",
 		tags: ["media"],
-		summary: "Clear all processed images.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Clear Every Processed Image",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.clearAllProcessed.query.string),
+		// body: z.toJSONSchema(controllerSchemas.clearAllProcessed.body),
+		// params: z.toJSONSchema(controllerSchemas.clearAllProcessed.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };

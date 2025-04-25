@@ -1,16 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import mediaSchema from "../../../../schemas/backups/media.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import MediaFormatter from "../../../formatters/media.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getPresignedUrlController: RouteController<
-	typeof mediaSchema.getPresignedUrl.params,
-	typeof mediaSchema.getPresignedUrl.body,
-	typeof mediaSchema.getPresignedUrl.query
+	typeof controllerSchemas.getPresignedUrl.params,
+	typeof controllerSchemas.getPresignedUrl.body,
+	typeof controllerSchemas.getPresignedUrl.query.string,
+	typeof controllerSchemas.getPresignedUrl.query.formatted
 > = async (request, reply) => {
 	const presignedUrl = await serviceWrapper(
 		request.server.services.media.getPresignedUrl,
@@ -44,16 +45,20 @@ const getPresignedUrlController: RouteController<
 
 export default {
 	controller: getPresignedUrlController,
-	zodSchema: mediaSchema.getPresignedUrl,
+	zodSchema: controllerSchemas.getPresignedUrl,
 	swaggerSchema: {
 		description: "Get a presigned URL to upload a single media item.",
 		tags: ["media"],
-		summary: "Get a presigned URL to upload a single media item.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: MediaFormatter.presignedUrlSwagger,
-			}),
-		},
+		summary: "Get Presigned URL",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.getPresignedUrl.query.string),
+		body: z.toJSONSchema(controllerSchemas.getPresignedUrl.body),
+		// params: z.toJSONSchema(controllerSchemas.getPresignedUrl.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getPresignedUrl.response),
+		}),
 	},
 };
