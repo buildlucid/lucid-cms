@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { headers, response } from "../../../../utils/swagger/index.js";
+import {
+	swaggerHeaders,
+	swaggerResponse,
+} from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -64,13 +67,12 @@ export default {
 		tags: ["documents"],
 		summary: "Update Document",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.updateSingle.query.string),
 		body: z.toJSONSchema(controllerSchemas.updateSingle.body),
 		params: z.toJSONSchema(controllerSchemas.updateSingle.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.updateSingle.response),
 		}),
 	},

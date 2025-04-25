@@ -1,5 +1,8 @@
 import { controllerSchemas } from "../../../../schemas/auth.js";
-import { headers, response } from "../../../../utils/swagger/index.js";
+import {
+	swaggerHeaders,
+	swaggerResponse,
+} from "../../../../utils/swagger/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
@@ -30,13 +33,10 @@ export default {
 		tags: ["auth"],
 		summary: "Logout",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.logout.query.string),
-		// body: z.toJSONSchema(controllerSchemas.logout.body),
-		// params: z.toJSONSchema(controllerSchemas.logout.params),
-		response: response({
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

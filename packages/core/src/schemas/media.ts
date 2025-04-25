@@ -1,6 +1,5 @@
 import z from "zod";
-import { queryString } from "../utils/swagger/index.js";
-import defaultQuery, { filterSchemas } from "./default-query.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
 
 const mediaResponseSchema = z.object({
@@ -125,11 +124,11 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
-						title: filterSchemas.single.optional(),
-						key: filterSchemas.single.optional(),
-						mimeType: filterSchemas.union.optional(),
-						type: filterSchemas.union.optional(),
-						extension: filterSchemas.union.optional(),
+						title: queryFormatted.schema.filters.single.optional(),
+						key: queryFormatted.schema.filters.single.optional(),
+						mimeType: queryFormatted.schema.filters.union.optional(),
+						type: queryFormatted.schema.filters.union.optional(),
+						extension: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
 				sort: z
@@ -149,8 +148,8 @@ export const controllerSchemas = {
 						}),
 					)
 					.optional(),
-				page: defaultQuery.page,
-				perPage: defaultQuery.perPage,
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
 			}),
 		},
 		params: undefined,

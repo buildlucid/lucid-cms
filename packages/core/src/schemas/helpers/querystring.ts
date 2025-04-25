@@ -1,6 +1,10 @@
 import z from "zod";
 
-const queryString = {
+export const filterOperators = z
+	.enum(["=", "%", "like", "ilike", "in", "not in", "<>", "is not", "is", "!="])
+	.optional();
+
+export const queryString = {
 	schema: {
 		filter: (multiple = false, example?: string, description?: string) =>
 			z
@@ -67,4 +71,42 @@ const queryString = {
 	},
 };
 
-export default queryString;
+/**
+ * @description The entire queryFromatted schema
+ * ```typescript
+ *  filter: z.object({}).optional(),
+ *  sort: z
+ *      .array(
+ *          z.object({
+ *              key: z.string(),
+ *              value: z.enum(["asc", "desc"]),
+ *          }),
+ *      )
+ *      .optional(),
+ *  include: z.array(z.string()).optional(),
+ *  exclude: z.array(z.string()).optional(),
+ *  page: z.number(),
+ *  perPage: z.number(),
+ * ```
+ */
+export const queryFormatted = {
+	schema: {
+		filters: {
+			single: z.object({
+				value: z.union([z.string(), z.number()]),
+				operator: filterOperators,
+			}),
+			union: z.object({
+				value: z.union([
+					z.string(),
+					z.array(z.string()),
+					z.number(),
+					z.array(z.number()),
+				]),
+				operator: filterOperators,
+			}),
+		},
+		page: z.number(),
+		perPage: z.number(),
+	},
+};

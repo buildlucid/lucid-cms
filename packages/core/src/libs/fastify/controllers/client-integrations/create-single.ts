@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
-import { response, headers } from "../../../../utils/swagger/index.js";
+import {
+	swaggerResponse,
+	swaggerHeaders,
+} from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -54,13 +57,11 @@ export default {
 		tags: ["client-integrations"],
 		summary: "Create Client Integration",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.createSingle.query.string),
 		body: z.toJSONSchema(controllerSchemas.createSingle.body),
-		// params: z.toJSONSchema(controllerSchemas.createSingle.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 	},

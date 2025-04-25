@@ -1,7 +1,7 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/settings.js";
-import { response } from "../../../../utils/swagger/index.js";
+import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -45,13 +45,7 @@ export default {
 		tags: ["settings"],
 		summary: "Get Settings",
 
-		// headers: headers({
-		// 	csrf: true,
-		// }),
-		// querystring: z.toJSONSchema(controllerSchemas.getSettings.query.string),
-		// body: z.toJSONSchema(controllerSchemas.getSettings.body),
-		// params: z.toJSONSchema(controllerSchemas.getSettings.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
 	},

@@ -1,6 +1,5 @@
 import z from "zod";
-import defaultQuery, { filterSchemas } from "./default-query.js";
-import queryString from "../utils/swagger/query-string.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 import {
 	brickClientResponseSchema,
 	brickInputSchema,
@@ -229,7 +228,10 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						createdBy: z
-							.union([filterSchemas.single, filterSchemas.union])
+							.union([
+								queryFormatted.schema.filters.single,
+								queryFormatted.schema.filters.union,
+							])
 							.optional(),
 					})
 					.optional(),
@@ -241,8 +243,8 @@ export const controllerSchemas = {
 						}),
 					)
 					.optional(),
-				page: defaultQuery.page,
-				perPage: defaultQuery.perPage,
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
 			}),
 		},
 		params: z.object({
@@ -298,20 +300,32 @@ export const controllerSchemas = {
 					.union([
 						z.record(
 							z.string(),
-							z.union([filterSchemas.single, filterSchemas.union]),
+							z.union([
+								queryFormatted.schema.filters.single,
+								queryFormatted.schema.filters.union,
+							]),
 						),
 						z.object({
 							id: z
-								.union([filterSchemas.single, filterSchemas.union])
+								.union([
+									queryFormatted.schema.filters.single,
+									queryFormatted.schema.filters.union,
+								])
 								.optional(),
 							createdBy: z
-								.union([filterSchemas.single, filterSchemas.union])
+								.union([
+									queryFormatted.schema.filters.single,
+									queryFormatted.schema.filters.union,
+								])
 								.optional(),
 							updatedBy: z
-								.union([filterSchemas.single, filterSchemas.union])
+								.union([
+									queryFormatted.schema.filters.single,
+									queryFormatted.schema.filters.union,
+								])
 								.optional(),
-							createdAt: filterSchemas.single.optional(),
-							updatedAt: filterSchemas.single.optional(),
+							createdAt: queryFormatted.schema.filters.single.optional(),
+							updatedAt: queryFormatted.schema.filters.single.optional(),
 						}),
 					])
 					.optional(),
@@ -323,8 +337,8 @@ export const controllerSchemas = {
 						}),
 					)
 					.optional(),
-				page: defaultQuery.page,
-				perPage: defaultQuery.perPage,
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
 			}),
 		},
 		params: z.object({
@@ -463,14 +477,17 @@ export const controllerSchemas = {
 						.union([
 							z.record(
 								z.string(),
-								z.union([filterSchemas.single, filterSchemas.union]),
+								z.union([
+									queryFormatted.schema.filters.single,
+									queryFormatted.schema.filters.union,
+								]),
 							),
 							z.object({
-								id: filterSchemas.single.optional(),
-								createdBy: filterSchemas.single.optional(),
-								updatedBy: filterSchemas.single.optional(),
-								createdAt: filterSchemas.single.optional(),
-								updatedAt: filterSchemas.single.optional(),
+								id: queryFormatted.schema.filters.single.optional(),
+								createdBy: queryFormatted.schema.filters.single.optional(),
+								updatedBy: queryFormatted.schema.filters.single.optional(),
+								createdAt: queryFormatted.schema.filters.single.optional(),
+								updatedAt: queryFormatted.schema.filters.single.optional(),
 							}),
 						])
 						.optional(),
@@ -531,20 +548,32 @@ export const controllerSchemas = {
 						.union([
 							z.record(
 								z.string(),
-								z.union([filterSchemas.single, filterSchemas.union]),
+								z.union([
+									queryFormatted.schema.filters.single,
+									queryFormatted.schema.filters.union,
+								]),
 							),
 							z.object({
 								id: z
-									.union([filterSchemas.single, filterSchemas.union])
+									.union([
+										queryFormatted.schema.filters.single,
+										queryFormatted.schema.filters.union,
+									])
 									.optional(),
 								createdBy: z
-									.union([filterSchemas.single, filterSchemas.union])
+									.union([
+										queryFormatted.schema.filters.single,
+										queryFormatted.schema.filters.union,
+									])
 									.optional(),
 								updatedBy: z
-									.union([filterSchemas.single, filterSchemas.union])
+									.union([
+										queryFormatted.schema.filters.single,
+										queryFormatted.schema.filters.union,
+									])
 									.optional(),
-								createdAt: filterSchemas.single.optional(),
-								updatedAt: filterSchemas.single.optional(),
+								createdAt: queryFormatted.schema.filters.single.optional(),
+								updatedAt: queryFormatted.schema.filters.single.optional(),
 							}),
 						])
 						.optional(),
@@ -556,8 +585,8 @@ export const controllerSchemas = {
 							}),
 						)
 						.optional(),
-					page: defaultQuery.page,
-					perPage: defaultQuery.perPage,
+					page: queryFormatted.schema.page,
+					perPage: queryFormatted.schema.perPage,
 				}),
 			},
 			params: z.object({

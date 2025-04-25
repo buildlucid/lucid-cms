@@ -2,7 +2,7 @@ import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import { response } from "../../../../utils/swagger/index.js";
+import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -47,10 +47,7 @@ export default {
 		tags: ["account"],
 		summary: "Get Authenticated User",
 
-		// querystring: z.toJSONSchema(controllerSchemas.getMe.query.string),
-		// body: z.toJSONSchema(controllerSchemas.getMe.body),
-		// params: z.toJSONSchema(controllerSchemas.getMe.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
 	},

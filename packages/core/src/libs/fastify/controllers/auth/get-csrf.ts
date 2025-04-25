@@ -1,6 +1,6 @@
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/auth.js";
-import { response } from "../../../../utils/swagger/index.js";
+import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -35,10 +35,7 @@ export default {
 		tags: ["auth"],
 		summary: "CSRF Token",
 
-		// querystring: z.toJSONSchema(controllerSchemas.getCSRF.query.string),
-		// body: z.toJSONSchema(controllerSchemas.getCSRF.body),
-		// params: z.toJSONSchema(controllerSchemas.getCSRF.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.getCSRF.response),
 		}),
 	},

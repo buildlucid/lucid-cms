@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
-import { headers, response } from "../../../../utils/swagger/index.js";
+import {
+	swaggerHeaders,
+	swaggerResponse,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -46,13 +49,12 @@ export default {
 		tags: ["account"],
 		summary: "Reset Password",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.resetPassword.query.string),
 		body: z.toJSONSchema(controllerSchemas.resetPassword.body),
 		params: z.toJSONSchema(controllerSchemas.resetPassword.params),
-		response: response({
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

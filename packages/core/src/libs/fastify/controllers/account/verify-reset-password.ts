@@ -1,7 +1,7 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
-import { response } from "../../../../utils/swagger/index.js";
+import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -46,10 +46,8 @@ export default {
 		tags: ["account"],
 		summary: "Verify Reset Token",
 
-		// querystring: z.toJSONSchema(controllerSchemas.verifyResetPassword.query.string),
-		// body: z.toJSONSchema(controllerSchemas.verifyResetPassword.body),
 		params: z.toJSONSchema(controllerSchemas.verifyResetPassword.params),
-		response: response({
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

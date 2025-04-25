@@ -1,6 +1,6 @@
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
-import { response } from "../../../../utils/swagger/index.js";
+import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import permissionGroups from "../../../../constants/permission-groups.js";
 import Formatter from "../../../formatters/index.js";
@@ -31,13 +31,7 @@ export default {
 		tags: ["permissions"],
 		summary: "Get All Permissions",
 
-		// headers: headers({
-		// 	csrf: true,
-		// }),
-		// querystring: z.toJSONSchema(controllerSchemas.getAll.query.string),
-		// body: z.toJSONSchema(controllerSchemas.getAll.body),
-		// params: z.toJSONSchema(controllerSchemas.getAll.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	},

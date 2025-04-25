@@ -1,7 +1,7 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/collections.js";
-import { response } from "../../../../utils/swagger/index.js";
+import { swaggerResponse } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -55,13 +55,8 @@ export default {
 		tags: ["collections"],
 		summary: "Get Collection",
 
-		// headers: headers({
-		// csrf: true,
-		// }),
-		// querystring: z.toJSONSchema(controllerSchemas.getSingle.query.string),
-		// body: z.toJSONSchema(controllerSchemas.getSingle.body),
 		params: z.toJSONSchema(controllerSchemas.getSingle.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 	},

@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/roles.js";
-import { response, headers } from "../../../../utils/swagger/index.js";
+import {
+	swaggerResponse,
+	swaggerHeaders,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -45,13 +48,11 @@ export default {
 		tags: ["roles"],
 		summary: "Delete Role",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.deleteSingle.query.string),
-		// body: z.toJSONSchema(controllerSchemas.deleteSingle.body),
 		params: z.toJSONSchema(controllerSchemas.deleteSingle.params),
-		response: response({
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

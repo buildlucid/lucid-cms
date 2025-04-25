@@ -1,7 +1,13 @@
+import { z } from "@lucidcms/core";
 import T from "../translations/index.js";
-import uploadSchema from "../schema/upload.js";
+import { controllerSchemas } from "../schema/upload.js";
 import uploadSingle from "../services/upload-single-endpoint.js";
-import { serviceWrapper, LucidAPIError } from "@lucidcms/core/api";
+import {
+	serviceWrapper,
+	LucidAPIError,
+	swaggerResponse,
+} from "@lucidcms/core/api";
+import { DEFAULT_MIME_TYPES } from "../constants.js";
 import type { PluginOptions } from "../types/types.js";
 import type { RouteController } from "@lucidcms/core/types";
 
@@ -9,9 +15,10 @@ const uploadSingleController =
 	(
 		pluginOptions: PluginOptions,
 	): RouteController<
-		typeof uploadSchema.params,
-		typeof uploadSchema.body,
-		typeof uploadSchema.query
+		typeof controllerSchemas.upload.params,
+		typeof controllerSchemas.upload.body,
+		typeof controllerSchemas.upload.query.string,
+		typeof controllerSchemas.upload.query.formatted
 	> =>
 	async (request, reply) => {
 		const uploadMedia = await serviceWrapper(uploadSingle, {
@@ -42,15 +49,20 @@ const uploadSingleController =
 
 export default {
 	controller: uploadSingleController,
-	zodSchema: uploadSchema,
-	swaggerSchema: {
+	zodSchema: controllerSchemas.upload,
+	swaggerSchema: (pluginOptions: PluginOptions) => ({
 		description: "Upload a single media file.",
 		tags: ["localstorage-plugin"],
-		summary: "Upload a single media file.",
-		response: {
-			200: {
-				type: "null",
-			},
-		},
-	},
+		summary: "Upload File",
+
+		consumes:
+			pluginOptions.supportedMimeTypes &&
+			pluginOptions.supportedMimeTypes.length > 0
+				? pluginOptions.supportedMimeTypes
+				: DEFAULT_MIME_TYPES,
+		querystring: z.toJSONSchema(controllerSchemas.upload.query.string),
+		response: swaggerResponse({
+			noProperties: true,
+		}),
+	}),
 };

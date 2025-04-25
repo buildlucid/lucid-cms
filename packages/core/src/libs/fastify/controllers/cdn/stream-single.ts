@@ -1,15 +1,15 @@
 import z from "zod";
-import { controllerResponseSchemas } from "../../../../schemas/cdn.js";
+import { controllerSchemas } from "../../../../schemas/cdn.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
-import { defaultErrorResponse } from "../../../../utils/swagger/response.js";
+import { swaggerRefs } from "../../../../api.js";
 
 const streamSingleController: RouteController<
-	typeof controllerResponseSchemas.streamSingle.params,
-	typeof controllerResponseSchemas.streamSingle.body,
-	typeof controllerResponseSchemas.streamSingle.query.string,
-	typeof controllerResponseSchemas.streamSingle.query.formatted
+	typeof controllerSchemas.streamSingle.params,
+	typeof controllerSchemas.streamSingle.body,
+	typeof controllerSchemas.streamSingle.query.string,
+	typeof controllerSchemas.streamSingle.query.formatted
 > = async (request, reply) => {
 	const response = await serviceWrapper(
 		request.server.services.cdn.streamMedia,
@@ -68,21 +68,15 @@ const streamSingleController: RouteController<
 
 export default {
 	controller: streamSingleController,
-	zodSchema: controllerResponseSchemas.streamSingle,
+	zodSchema: controllerSchemas.streamSingle,
 	swaggerSchema: {
 		description:
 			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
 		tags: ["cdn"],
 		summary: "Stream Media",
 
-		// headers: headers({
-		// 	csrf: true,
-		// }),
-		querystring: z.toJSONSchema(
-			controllerResponseSchemas.streamSingle.query.string,
-		),
-		// body: z.toJSONSchema(controllerSchemas.streamSingle.body),
-		params: z.toJSONSchema(controllerResponseSchemas.streamSingle.params),
+		querystring: z.toJSONSchema(controllerSchemas.streamSingle.query.string),
+		params: z.toJSONSchema(controllerSchemas.streamSingle.params),
 		response: {
 			200: {
 				description: "Successfully streamed media content",
@@ -128,7 +122,9 @@ export default {
 					},
 				},
 			},
-			default: defaultErrorResponse,
+			default: {
+				$ref: swaggerRefs.defaultError,
+			},
 		},
 	},
 };

@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { headers, response } from "../../../../utils/swagger/index.js";
+import {
+	swaggerHeaders,
+	swaggerResponse,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -49,14 +52,11 @@ export default {
 		tags: ["documents"],
 		summary: "Restore Document Revision",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.restoreRevision.query.string),
-		// body: z.toJSONSchema(controllerSchemas.restoreRevision.body),
 		params: z.toJSONSchema(controllerSchemas.restoreRevision.params),
-		response: response({
-			// schema: z.toJSONSchema(controllerSchemas.restoreRevision.response),
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

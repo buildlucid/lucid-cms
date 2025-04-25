@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../../translations/index.js";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
-import { headers, response } from "../../../../../utils/swagger/index.js";
+import {
+	swaggerHeaders,
+	swaggerResponse,
+} from "../../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../../utils/build-response.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
@@ -58,16 +61,15 @@ export default {
 		tags: ["client-documents"],
 		summary: "Get Multiple Documents",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			authorization: true,
 			clientKey: true,
 		}),
 		querystring: z.toJSONSchema(
 			controllerSchemas.client.getMultiple.query.string,
 		),
-		// body: z.toJSONSchema(controllerSchemas.client.getMultiple.body),
 		params: z.toJSONSchema(controllerSchemas.client.getMultiple.params),
-		response: response({
+		response: swaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.client.getMultiple.response),
 			paginated: true,
 		}),

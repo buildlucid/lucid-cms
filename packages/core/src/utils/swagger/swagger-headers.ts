@@ -8,24 +8,31 @@ interface SwaggerHeaders {
 	authorization?: boolean;
 }
 
+/**
+ * Used to construct headers JSON schema for Swagger
+ */
 const swaggerHeaders = (headers: SwaggerHeaders) => {
 	//* see constants.headers
 	const propertise: {
 		_csrf?: {
 			type: string;
 			description: string;
+			example?: string;
 		};
 		"lucid-content-locale"?: {
 			type: string;
 			description: string;
+			example?: string;
 		};
 		"lucid-client-key"?: {
 			type: string;
 			description: string;
+			example?: string;
 		};
 		Authorization?: {
 			type: string;
 			description: string;
+			example?: string;
 		};
 	} = {};
 	const required: string[] = [];
@@ -43,6 +50,7 @@ const swaggerHeaders = (headers: SwaggerHeaders) => {
 		propertise["lucid-content-locale"] = {
 			type: "string",
 			description: T("swagger_content_locale_header_description"),
+			example: "en",
 		};
 	}
 	if (headers.clientKey !== undefined) {

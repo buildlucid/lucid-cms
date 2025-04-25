@@ -13,7 +13,7 @@ const routes =
 			url: "/api/v1/localstorage/upload",
 			bodyLimit: fastify.config.media.maxSize,
 			controller: uploadController.controller(pluginOptions),
-			swaggerSchema: uploadController.swaggerSchema,
+			swaggerSchema: uploadController.swaggerSchema(pluginOptions),
 			zodSchema: uploadController.zodSchema,
 		});
 	};

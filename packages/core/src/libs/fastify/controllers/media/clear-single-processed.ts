@@ -1,6 +1,9 @@
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/media.js";
-import { headers, response } from "../../../../utils/swagger/index.js";
+import {
+	swaggerHeaders,
+	swaggerResponse,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -45,13 +48,10 @@ export default {
 		tags: ["media"],
 		summary: "Clear Processed Images",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.clearSingleProcessed.query.string),
-		// body: z.toJSONSchema(controllerSchemas.clearSingleProcessed.body),
-		// params: z.toJSONSchema(controllerSchemas.clearSingleProcessed.params),
-		response: response({
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

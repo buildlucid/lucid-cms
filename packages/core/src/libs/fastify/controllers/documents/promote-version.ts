@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { response, headers } from "../../../../utils/swagger/index.js";
+import {
+	swaggerResponse,
+	swaggerHeaders,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import permissions from "../../middleware/permissions.js";
@@ -58,14 +61,12 @@ export default {
 		tags: ["documents"],
 		summary: "Promote Document Version",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.promoteVersion.query.string),
 		body: z.toJSONSchema(controllerSchemas.promoteVersion.body),
 		params: z.toJSONSchema(controllerSchemas.promoteVersion.params),
-		response: response({
-			// schema: z.toJSONSchema(controllerSchemas.promoteVersion.response),
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

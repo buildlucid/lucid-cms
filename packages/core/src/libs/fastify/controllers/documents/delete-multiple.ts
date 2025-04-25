@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { response, headers } from "../../../../utils/swagger/index.js";
+import {
+	swaggerResponse,
+	swaggerHeaders,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -47,13 +50,12 @@ export default {
 		tags: ["documents"],
 		summary: "Delete Multiple Documents",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.deleteMultiple.query.string),
 		body: z.toJSONSchema(controllerSchemas.deleteMultiple.body),
 		params: z.toJSONSchema(controllerSchemas.deleteMultiple.params),
-		response: response({
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

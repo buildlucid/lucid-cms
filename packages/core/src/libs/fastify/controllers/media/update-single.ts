@@ -1,7 +1,10 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { controllerSchemas } from "../../../../schemas/media.js";
-import { response, headers } from "../../../../utils/swagger/index.js";
+import {
+	swaggerResponse,
+	swaggerHeaders,
+} from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
@@ -50,14 +53,12 @@ export default {
 		tags: ["media"],
 		summary: "Update Media",
 
-		headers: headers({
+		headers: swaggerHeaders({
 			csrf: true,
 		}),
-		// querystring: z.toJSONSchema(controllerSchemas.updateSingle.query.string),
 		body: z.toJSONSchema(controllerSchemas.updateSingle.body),
 		params: z.toJSONSchema(controllerSchemas.updateSingle.params),
-		response: response({
-			// schema: z.toJSONSchema(controllerSchemas.updateSingle.response),
+		response: swaggerResponse({
 			noProperties: true,
 		}),
 	},

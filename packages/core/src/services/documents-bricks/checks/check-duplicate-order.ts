@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import type { brickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 const checkDuplicateOrder = (
 	bricks: Array<BrickInputSchema>,

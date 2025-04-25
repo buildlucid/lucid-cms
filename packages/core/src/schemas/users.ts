@@ -1,7 +1,6 @@
 import z from "zod";
-import defaultQuery, { filterSchemas } from "./default-query.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
-import queryString from "../utils/swagger/query-string.js";
 
 const userResponsePermissionSchema = z.string().meta({
 	description: "A permission identifier",
@@ -187,12 +186,12 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
-						firstName: filterSchemas.single.optional(),
-						lastName: filterSchemas.single.optional(),
-						email: filterSchemas.single.optional(),
-						username: filterSchemas.single.optional(),
-						roleIds: filterSchemas.union.optional(),
-						id: filterSchemas.union.optional(),
+						firstName: queryFormatted.schema.filters.single.optional(),
+						lastName: queryFormatted.schema.filters.single.optional(),
+						email: queryFormatted.schema.filters.single.optional(),
+						username: queryFormatted.schema.filters.single.optional(),
+						roleIds: queryFormatted.schema.filters.union.optional(),
+						id: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
 				sort: z
@@ -211,8 +210,8 @@ export const controllerSchemas = {
 					)
 					.optional(),
 				include: z.array(z.enum(["permissions"])).optional(),
-				page: defaultQuery.page,
-				perPage: defaultQuery.perPage,
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
 			}),
 		},
 		params: undefined,

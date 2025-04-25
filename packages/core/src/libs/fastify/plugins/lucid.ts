@@ -19,6 +19,7 @@ import { getDirName } from "../../../utils/helpers/index.js";
 import logger from "../../../utils/logging/index.js";
 import lucidFrontend from "./frontend.js";
 import scalarApiReference from "@scalar/fastify-api-reference";
+import { swaggerRegisterRefs } from "../../../utils/swagger/swagger-refs.js";
 import type { FastifyInstance } from "fastify";
 
 const currentDir = getDirName(import.meta.url);
@@ -133,13 +134,10 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 						description: "Development server",
 					},
 				],
-				// schemes: ["http"],
-				// consumes: ["application/json", "multipart/form-data"],
-				// produces: ["application/json"],
-				components: {},
 			},
 			hideUntagged: true,
 		});
+		swaggerRegisterRefs(fastify);
 
 		if (!config.disableSwagger) {
 			fastify.register(scalarApiReference, {
@@ -153,10 +151,6 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 				},
 			});
 		}
-
-		// fastify.setValidatorCompiler(() => {
-		// 	return () => ({ value: false });
-		// });
 
 		// Register server-wide middleware
 		fastify.register(cors, {

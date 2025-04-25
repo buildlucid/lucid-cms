@@ -1,6 +1,5 @@
 import z from "zod";
-import defaultQuery, { filterSchemas } from "./default-query.js";
-import queryString from "../utils/swagger/query-string.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
 
 const emailResponseSchema = z.object({
@@ -127,11 +126,11 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
-						toAddress: filterSchemas.single.optional(),
-						subject: filterSchemas.single.optional(),
-						deliveryStatus: filterSchemas.union.optional(),
-						type: filterSchemas.union.optional(), // internal | external
-						template: filterSchemas.single.optional(),
+						toAddress: queryFormatted.schema.filters.single.optional(),
+						subject: queryFormatted.schema.filters.single.optional(),
+						deliveryStatus: queryFormatted.schema.filters.union.optional(),
+						type: queryFormatted.schema.filters.union.optional(), // internal | external
+						template: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				sort: z
@@ -148,8 +147,8 @@ export const controllerSchemas = {
 						}),
 					)
 					.optional(),
-				page: defaultQuery.page,
-				perPage: defaultQuery.perPage,
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
 			}),
 		},
 		params: undefined,
