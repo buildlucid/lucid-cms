@@ -1,8 +1,16 @@
 import z from "zod";
 import defaultQuery, { filterSchemas } from "./default-query.js";
 import queryString from "../utils/swagger/query-string.js";
-import { brickInputSchema, brickResponseSchema } from "./collection-bricks.js";
-import { fieldInputSchema, fieldResponseSchema } from "./collection-fields.js";
+import {
+	brickClientResponseSchema,
+	brickInputSchema,
+	brickResponseSchema,
+} from "./collection-bricks.js";
+import {
+	fieldClientResponseSchema,
+	fieldInputSchema,
+	fieldResponseSchema,
+} from "./collection-fields.js";
 import { documentVersionResponseSchema } from "./document-versions.js";
 import type { ControllerSchema } from "../types.js";
 
@@ -48,7 +56,7 @@ const documentResponseVersionSchema = z.object({
 	}),
 });
 
-const documentResponseSchema = z.interface({
+const documentResponseBaseSchema = z.interface({
 	id: z.number().meta({
 		description: "The document ID",
 		example: 123,
@@ -79,17 +87,16 @@ const documentResponseSchema = z.interface({
 		description: "The timestamp when this document was last updated",
 		example: "2025-04-10T15:45:00Z",
 	}),
-	"bricks?": z
-		.union([
-			z.array(brickResponseSchema),
-			z.record(z.string(), brickResponseSchema),
-		])
-		.nullable(),
+});
+
+const documentResponseSchema = documentResponseBaseSchema.extend({
+	"bricks?": z.array(brickResponseSchema).nullable(),
+	"fields?": z.array(fieldResponseSchema).nullable(),
+});
+const documentClientResponseSchema = documentResponseBaseSchema.extend({
+	"bricks?": z.array(brickClientResponseSchema).nullable(),
 	"fields?": z
-		.union([
-			z.array(fieldResponseSchema),
-			z.record(z.string(), fieldResponseSchema),
-		])
+		.record(z.string(), z.array(fieldClientResponseSchema))
 		.nullable(),
 });
 
@@ -481,7 +488,7 @@ export const controllerSchemas = {
 				}),
 			}),
 			body: undefined,
-			response: documentResponseSchema,
+			response: documentClientResponseSchema,
 		} satisfies ControllerSchema,
 		getMultiple: {
 			query: {
@@ -564,7 +571,7 @@ export const controllerSchemas = {
 				}),
 			}),
 			body: undefined,
-			response: z.array(documentResponseSchema),
+			response: z.array(documentClientResponseSchema),
 		} satisfies ControllerSchema,
 	},
 };

@@ -96,7 +96,7 @@ export const controllerSchemas = {
 		params: z.object({
 			key: z.string().meta({
 				description: "The collection key",
-				example: "pages",
+				example: "page",
 			}),
 		}),
 		response: collectionResponseSchema,

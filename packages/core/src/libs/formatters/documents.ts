@@ -193,32 +193,4 @@ export default class DocumentsFormatter {
 			fields: res.fields ? FieldsFormatter.objectifyFields(res.fields) : null,
 		} satisfies ClientDocumentResponse;
 	};
-
-	static swaggerClient = {
-		type: "object",
-		additionalProperties: true,
-		// properties: {
-		// 	...DocumentsFormatter.swagger.properties,
-		// 	bricks: {
-		// 		type: "array",
-		// 		nullable: true,
-		// 		items: {
-		// 			type: "object",
-		// 			additionalProperties: true,
-		// 			properties: {
-		// 				...DocumentBricksFormatter.swagger.properties,
-		// 				fields: {
-		// 					type: "object",
-		// 					additionalProperties: true,
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	fields: {
-		// 		type: "object",
-		// 		nullable: true,
-		// 		additionalProperties: true,
-		// 	},
-		// },
-	};
 }

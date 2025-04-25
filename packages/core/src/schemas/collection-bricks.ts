@@ -1,5 +1,6 @@
 import z from "zod";
 import {
+	fieldClientResponseSchema,
 	fieldConfigSchema,
 	fieldInputSchema,
 	fieldResponseSchema,
@@ -49,7 +50,7 @@ export const brickConfigSchema = z.interface({
 	},
 });
 
-export const brickResponseSchema = z
+export const brickResponseBaseSchema = z
 	.interface({
 		key: z.string().meta({
 			description: "The key that identifies the brick",
@@ -71,10 +72,18 @@ export const brickResponseSchema = z
 			description: "The type of brick",
 			example: "builder",
 		}),
-		get fields() {
-			return z.array(fieldResponseSchema);
-		},
 	})
 	.meta({
 		additionalProperties: true,
 	});
+
+export const brickResponseSchema = brickResponseBaseSchema.extend({
+	get fields() {
+		return z.array(fieldResponseSchema);
+	},
+});
+export const brickClientResponseSchema = brickResponseBaseSchema.extend({
+	get fields() {
+		return z.record(z.any(), z.array(fieldClientResponseSchema));
+	},
+});
