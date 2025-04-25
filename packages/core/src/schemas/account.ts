@@ -1,6 +1,6 @@
 import z from "zod";
 import T from "../translations/index.js";
-import UsersFormatter from "../libs/formatters/users.js";
+import { userResponseSchema } from "./users.js";
 import type { ControllerSchema } from "../types.js";
 
 export const controllerSchemas = {
@@ -11,7 +11,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: UsersFormatter.schema,
+		response: userResponseSchema,
 	} satisfies ControllerSchema,
 	resetPassword: {
 		body: z

@@ -81,9 +81,8 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Email endpoints for fetching, deleting and resending emails.",
 					},
 					{
-						name: "locales",
-						description:
-							"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
+						name: "users",
+						description: "User endpoints for inviting, deleting and updating.",
 					},
 					{
 						name: "roles",
@@ -96,9 +95,19 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Permission endpoints for fetching all available permissions.",
 					},
 					{
+						name: "locales",
+						description:
+							"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
+					},
+					{
 						name: "cdn",
 						description:
 							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
+					},
+					{
+						name: "settings",
+						description:
+							"Setting endpoints to recieve current settings and meta data on Lucid.",
 					},
 					{
 						name: "client-integrations",

@@ -1,16 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import usersSchema from "../../../../schemas/users.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/users.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import UsersFormatter from "../../../formatters/users.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getSingleController: RouteController<
-	typeof usersSchema.getSingle.params,
-	typeof usersSchema.getSingle.body,
-	typeof usersSchema.getSingle.query
+	typeof controllerSchemas.getSingle.params,
+	typeof controllerSchemas.getSingle.body,
+	typeof controllerSchemas.getSingle.query.string,
+	typeof controllerSchemas.getSingle.query.formatted
 > = async (request, reply) => {
 	const user = await serviceWrapper(request.server.services.user.getSingle, {
 		transaction: false,
@@ -40,16 +41,20 @@ const getSingleController: RouteController<
 
 export default {
 	controller: getSingleController,
-	zodSchema: usersSchema.getSingle,
+	zodSchema: controllerSchemas.getSingle,
 	swaggerSchema: {
 		description: "Get a single user.",
 		tags: ["users"],
-		summary: "Get a single user.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: UsersFormatter.swagger,
-			}),
-		},
+		summary: "Get User",
+
+		// headers: headers({
+		// csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.getSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getSingle.body),
+		params: z.toJSONSchema(controllerSchemas.getSingle.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+		}),
 	},
 };

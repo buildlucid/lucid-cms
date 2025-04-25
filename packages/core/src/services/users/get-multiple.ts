@@ -1,14 +1,13 @@
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import type z from "zod";
-import type usersSchema from "../../schemas/users.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types/response.js";
+import type { GetMultipleQueryParams } from "../../schemas/users.js";
 
 const getMultiple: ServiceFn<
 	[
 		{
-			query: z.infer<typeof usersSchema.getMultiple.query>;
+			query: GetMultipleQueryParams;
 		},
 	],
 	{

@@ -1,19 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import usersSchema from "../../../../schemas/users.js";
-import {
-	swaggerResponse,
-	swaggerQueryString,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/users.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import UsersFormatter from "../../../formatters/users.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getMultipleController: RouteController<
-	typeof usersSchema.getMultiple.params,
-	typeof usersSchema.getMultiple.body,
-	typeof usersSchema.getMultiple.query
+	typeof controllerSchemas.getMultiple.params,
+	typeof controllerSchemas.getMultiple.body,
+	typeof controllerSchemas.getMultiple.query.string,
+	typeof controllerSchemas.getMultiple.query.formatted
 > = async (request, reply) => {
 	const users = await serviceWrapper(request.server.services.user.getMultiple, {
 		transaction: false,
@@ -29,7 +27,7 @@ const getMultipleController: RouteController<
 			services: request.server.services,
 		},
 		{
-			query: request.query,
+			query: request.formattedQuery,
 		},
 	);
 	if (users.error) throw new LucidAPIError(users.error);
@@ -39,8 +37,8 @@ const getMultipleController: RouteController<
 			data: users.data.data,
 			pagination: {
 				count: users.data.count,
-				page: request.query.page,
-				perPage: request.query.perPage,
+				page: request.formattedQuery.page,
+				perPage: request.formattedQuery.perPage,
 			},
 		}),
 	);
@@ -48,49 +46,21 @@ const getMultipleController: RouteController<
 
 export default {
 	controller: getMultipleController,
-	zodSchema: usersSchema.getMultiple,
+	zodSchema: controllerSchemas.getMultiple,
 	swaggerSchema: {
 		description: "Get multiple users.",
 		tags: ["users"],
-		summary: "Get multiple users.",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: UsersFormatter.swagger,
-				},
-				paginated: true,
-			}),
-		},
-		querystring: swaggerQueryString({
-			filters: [
-				{
-					key: "firstName",
-				},
-				{
-					key: "lastName",
-				},
-				{
-					key: "email",
-				},
-				{
-					key: "username",
-				},
-				{
-					key: "roleIds",
-				},
-			],
-			sorts: [
-				"createdAt",
-				"updatedAt",
-				"firstName",
-				"lastName",
-				"email",
-				"username",
-			],
-			page: true,
-			perPage: true,
+		summary: "Get Multiple Users",
+
+		// headers: headers({
+		// csrf: true,
+		// }),
+		querystring: z.toJSONSchema(controllerSchemas.getMultiple.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getMultiple.body),
+		// params: z.toJSONSchema(controllerSchemas.getMultiple.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			paginated: true,
 		}),
 	},
 };

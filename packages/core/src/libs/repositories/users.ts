@@ -4,9 +4,9 @@ import StaticRepository from "./parents/static-repository.js";
 import queryBuilder from "../query-builder/index.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
-import type usersSchema from "../../schemas/users.js";
 import type { Select, KyselyDB } from "../db/types.js";
 import type { LucidUsers } from "../db/types.js";
+import type { GetMultipleQueryParams } from "../../schemas/users.js";
 
 export default class UsersRepository extends StaticRepository<"lucid_users"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -258,7 +258,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		props: QueryProps<
 			V,
 			{
-				queryParams: z.infer<typeof usersSchema.getMultiple.query>;
+				queryParams: GetMultipleQueryParams;
 			}
 		>,
 	) {

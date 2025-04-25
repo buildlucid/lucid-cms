@@ -1,17 +1,16 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import usersSchema from "../../../../schemas/users.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/users.js";
+import { response, headers } from "../../../../utils/swagger/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const deleteSingleController: RouteController<
-	typeof usersSchema.deleteSingle.params,
-	typeof usersSchema.deleteSingle.body,
-	typeof usersSchema.deleteSingle.query
+	typeof controllerSchemas.deleteSingle.params,
+	typeof controllerSchemas.deleteSingle.body,
+	typeof controllerSchemas.deleteSingle.query.string,
+	typeof controllerSchemas.deleteSingle.query.formatted
 > = async (request, reply) => {
 	const deleteSingle = await serviceWrapper(
 		request.server.services.user.deleteSingle,
@@ -41,20 +40,21 @@ const deleteSingleController: RouteController<
 
 export default {
 	controller: deleteSingleController,
-	zodSchema: usersSchema.deleteSingle,
+	zodSchema: controllerSchemas.deleteSingle,
 	swaggerSchema: {
 		description:
-			"Delete a single user item by id. This is a soft delete so that the user may be restored later if needed.",
+			"Delete a single user by ID. This is a soft delete so that the user may be restored later if needed.",
 		tags: ["users"],
-		summary: "Delete a single user.",
-		response: {
-			204: swaggerResponse({
-				type: 204,
-				noPropertise: true,
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Delete User",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.deleteSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.deleteSingle.body),
+		params: z.toJSONSchema(controllerSchemas.deleteSingle.params),
+		response: response({
+			noProperties: true,
 		}),
 	},
 };
