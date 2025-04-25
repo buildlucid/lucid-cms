@@ -33,7 +33,7 @@ const GeneralSettingsRoute: Component = (props) => {
 	const percentUsed = createMemo(() => {
 		if (settingsData.data?.data?.media.storage.remaining === null) return 0;
 		if (settingsData.data?.data?.media.storage.used === 0) return 0;
-		const total = settingsData.data?.data?.media.storage.limit || 0;
+		const total = settingsData.data?.data?.media.storage.total || 0;
 		const remaining = settingsData.data?.data?.media.storage.remaining || 0;
 
 		return Math.floor(((total - remaining) / total) * 100);
@@ -102,7 +102,7 @@ const GeneralSettingsRoute: Component = (props) => {
 									settingsData.data?.data?.media.storage.used,
 								),
 								end: helpers.bytesToSize(
-									settingsData.data?.data?.media.storage.limit,
+									settingsData.data?.data?.media.storage.total,
 								),
 							}}
 						/>

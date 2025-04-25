@@ -1,16 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import settingsSchema from "../../../../schemas/settings.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/settings.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import SettingsFormatter from "../../../formatters/settings.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getSettingsController: RouteController<
-	typeof settingsSchema.getSettings.params,
-	typeof settingsSchema.getSettings.body,
-	typeof settingsSchema.getSettings.query
+	typeof controllerSchemas.getSettings.params,
+	typeof controllerSchemas.getSettings.body,
+	typeof controllerSchemas.getSettings.query.string,
+	typeof controllerSchemas.getSettings.query.formatted
 > = async (request, reply) => {
 	const settings = await serviceWrapper(
 		request.server.services.setting.getSettings,
@@ -38,16 +39,20 @@ const getSettingsController: RouteController<
 
 export default {
 	controller: getSettingsController,
-	zodSchema: settingsSchema.getSettings,
+	zodSchema: controllerSchemas.getSettings,
 	swaggerSchema: {
-		description: "Returns the settings",
+		description: "Returns the site settings including meta data.",
 		tags: ["settings"],
-		summary: "Get settings",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: SettingsFormatter.swagger,
-			}),
-		},
+		summary: "Get Settings",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.getSettings.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getSettings.body),
+		// params: z.toJSONSchema(controllerSchemas.getSettings.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
+		}),
 	},
 };

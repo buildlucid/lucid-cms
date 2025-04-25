@@ -53,7 +53,6 @@ export interface SettingsResponse {
 			total: number;
 			remaining: number | null;
 			used: number | null;
-			limit: number;
 		};
 		processed: {
 			stored: boolean;

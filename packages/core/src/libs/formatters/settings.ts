@@ -23,7 +23,6 @@ export default class SettingsFormatter {
 					remaining:
 						props.config.media.storage - props.settings.mediaStorageUsed,
 					used: props.settings.mediaStorageUsed,
-					limit: props.config.media.storage,
 				},
 				processed: {
 					stored: props.config.media.processed.store,
@@ -32,47 +31,5 @@ export default class SettingsFormatter {
 				},
 			},
 		};
-	};
-	static swagger = {
-		type: "object",
-		properties: {
-			email: {
-				type: "object",
-				properties: {
-					enabled: { type: "boolean" },
-					from: {
-						type: "object",
-						nullable: true,
-						properties: {
-							email: { type: "string" },
-							name: { type: "string" },
-						},
-					},
-				},
-			},
-			media: {
-				type: "object",
-				properties: {
-					enabled: { type: "boolean" },
-					storage: {
-						type: "object",
-						properties: {
-							total: { type: "number" },
-							remaining: { type: "number", nullable: true },
-							used: { type: "number", nullable: true },
-							limit: { type: "number", nullable: true },
-						},
-					},
-					processed: {
-						type: "object",
-						properties: {
-							stored: { type: "boolean" },
-							imageLimit: { type: "number" },
-							total: { type: "number", nullable: true },
-						},
-					},
-				},
-			},
-		},
 	};
 }
