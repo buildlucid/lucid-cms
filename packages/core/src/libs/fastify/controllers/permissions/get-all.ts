@@ -1,15 +1,16 @@
-import permissionsSchema from "../../../../schemas/permissions.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import z from "zod";
+import { controllerSchemas } from "../../../../schemas/permissions.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import permissionGroups from "../../../../constants/permission-groups.js";
 import Formatter from "../../../formatters/index.js";
-import PermissionsFormatter from "../../../formatters/permissions.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getAllController: RouteController<
-	typeof permissionsSchema.getAll.params,
-	typeof permissionsSchema.getAll.body,
-	typeof permissionsSchema.getAll.query
+	typeof controllerSchemas.getAll.params,
+	typeof controllerSchemas.getAll.body,
+	typeof controllerSchemas.getAll.query.string,
+	typeof controllerSchemas.getAll.query.formatted
 > = async (request, reply) => {
 	const PermissionsFormatter = Formatter.get("permissions");
 
@@ -24,19 +25,20 @@ const getAllController: RouteController<
 
 export default {
 	controller: getAllController,
-	zodSchema: permissionsSchema.getAll,
+	zodSchema: controllerSchemas.getAll,
 	swaggerSchema: {
 		description: "Returns a list of all permissions available for users.",
 		tags: ["permissions"],
-		summary: "Get all permissions",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "array",
-					items: PermissionsFormatter.swagger,
-				},
-			}),
-		},
+		summary: "Get All Permissions",
+
+		// headers: headers({
+		// 	contentLocale: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.getAll.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getAll.body),
+		// params: z.toJSONSchema(controllerSchemas.getAll.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getAll.response),
+		}),
 	},
 };

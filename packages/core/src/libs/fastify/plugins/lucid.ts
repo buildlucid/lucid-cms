@@ -86,6 +86,11 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 							"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
 					},
 					{
+						name: "permissions",
+						description:
+							"Permission endpoints for fetching all available permissions.",
+					},
+					{
 						name: "cdn",
 						description:
 							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
