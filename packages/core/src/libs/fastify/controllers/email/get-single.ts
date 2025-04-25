@@ -1,16 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import emailsSchema from "../../../../schemas/email.js";
-import { swaggerResponse } from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/email.js";
+import { response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
-import EmailsFormatter from "../../../formatters/emails.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const getSingleController: RouteController<
-	typeof emailsSchema.getSingle.params,
-	typeof emailsSchema.getSingle.body,
-	typeof emailsSchema.getSingle.query
+	typeof controllerSchemas.getSingle.params,
+	typeof controllerSchemas.getSingle.body,
+	typeof controllerSchemas.getSingle.query.string,
+	typeof controllerSchemas.getSingle.query.formatted
 > = async (request, reply) => {
 	const email = await serviceWrapper(request.server.services.email.getSingle, {
 		transaction: false,
@@ -41,16 +42,20 @@ const getSingleController: RouteController<
 
 export default {
 	controller: getSingleController,
-	zodSchema: emailsSchema.getSingle,
+	zodSchema: controllerSchemas.getSingle,
 	swaggerSchema: {
-		description: "Returns a single email based on the the id.",
+		description: "Returns a single email based on the the ID.",
 		tags: ["emails"],
-		summary: "Get a single email",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: EmailsFormatter.swagger,
-			}),
-		},
+		summary: "Get Email",
+
+		// headers: headers({
+		// 	csrf: true,
+		// }),
+		// querystring: z.toJSONSchema(controllerSchemas.getSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.getSingle.body),
+		params: z.toJSONSchema(controllerSchemas.getSingle.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+		}),
 	},
 };

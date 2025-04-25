@@ -1,18 +1,17 @@
+import z from "zod";
 import T from "../../../../translations/index.js";
-import emailsSchema from "../../../../schemas/email.js";
-import {
-	swaggerResponse,
-	swaggerHeaders,
-} from "../../../../utils/swagger/index.js";
+import { controllerSchemas } from "../../../../schemas/email.js";
+import { headers, response } from "../../../../utils/swagger/index.js";
 import formatAPIResponse from "../../../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import type { RouteController } from "../../../../types/types.js";
 
 const resendSingleController: RouteController<
-	typeof emailsSchema.resendSingle.params,
-	typeof emailsSchema.resendSingle.body,
-	typeof emailsSchema.resendSingle.query
+	typeof controllerSchemas.resendSingle.params,
+	typeof controllerSchemas.resendSingle.body,
+	typeof controllerSchemas.resendSingle.query.string,
+	typeof controllerSchemas.resendSingle.query.formatted
 > = async (request, reply) => {
 	const emailRes = await serviceWrapper(
 		request.server.services.email.resendSingle,
@@ -45,29 +44,20 @@ const resendSingleController: RouteController<
 
 export default {
 	controller: resendSingleController,
-	zodSchema: emailsSchema.resendSingle,
+	zodSchema: controllerSchemas.resendSingle,
 	swaggerSchema: {
-		description: "Resends the email with the given ID",
+		description: "Resends the email with the given ID.",
 		tags: ["emails"],
-		summary: "Resend email",
-		response: {
-			200: swaggerResponse({
-				type: 200,
-				data: {
-					type: "object",
-					properties: {
-						success: {
-							type: "boolean",
-						},
-						message: {
-							type: "string",
-						},
-					},
-				},
-			}),
-		},
-		headers: swaggerHeaders({
+		summary: "Resend Email",
+
+		headers: headers({
 			csrf: true,
+		}),
+		// querystring: z.toJSONSchema(controllerSchemas.resendSingle.query.string),
+		// body: z.toJSONSchema(controllerSchemas.resendSingle.body),
+		params: z.toJSONSchema(controllerSchemas.resendSingle.params),
+		response: response({
+			schema: z.toJSONSchema(controllerSchemas.resendSingle.response),
 		}),
 	},
 };

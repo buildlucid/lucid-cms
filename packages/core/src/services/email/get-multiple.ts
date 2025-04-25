@@ -1,14 +1,13 @@
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import type z from "zod";
-import type emailSchema from "../../schemas/email.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
+import type { GetMultipleQueryParams } from "../../schemas/email.js";
 
 const getMultiple: ServiceFn<
 	[
 		{
-			query: z.infer<typeof emailSchema.getMultiple.query>;
+			query: GetMultipleQueryParams;
 		},
 	],
 	{
