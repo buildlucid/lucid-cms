@@ -20,7 +20,7 @@ export const Header: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<header class="bg-container-2 w-full -mt-15 pt-5 px-5 pb-0 border-x border-border">
+		<header class="bg-container-2 w-full -mt-15 pt-5 px-5 pb-0 border-x border-border z-31">
 			<Breadcrumbs
 				breadcrumbs={[
 					{

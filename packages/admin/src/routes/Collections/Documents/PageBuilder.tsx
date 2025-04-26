@@ -1,11 +1,15 @@
 import T from "@/translations";
-import { useParams, useNavigate } from "@solidjs/router";
-import { type Component, Switch, Match } from "solid-js";
-import { useQueryClient } from "@tanstack/solid-query";
+import { type Component, Switch, Match, Show } from "solid-js";
 import { Header, ActionBar } from "@/components/Groups/PageBuilder";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
+import Alert from "@/components/Blocks/Alert";
+import {
+	BuilderBricks,
+	CollectionPseudoBrick,
+	FixedBricks,
+} from "@/components/Groups/Document";
 
 interface CollectionsDocumentsEditRouteProps {
 	mode: "create" | "edit";
@@ -67,13 +71,32 @@ const CollectionsDocumentsEditRoute: Component<
 					}}
 				/>
 
-				<div class="mt-15 bg-container-3 rounded-t-xl border border-border p-15 flex-grow">
-					page builder Fugiat consequat magna magna amet sit anim minim. Quis
-					pariatur cillum proident fugiat. Laborum elit Lorem consectetur qui
-					magna exercitation nulla ex do do sit mollit non. Pariatur velit
-					laborum ut veniam dolor sint cupidatat elit cupidatat. Enim anim
-					consectetur ipsum veniam non. Cupidatat nisi cupidatat deserunt ea
-					consectetur in
+				<div class="mt-15 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden">
+					<Show when={uiState.isBuilderLocked()}>
+						<Alert
+							style="layout"
+							alerts={[
+								{
+									type: "warning",
+									message: T()("locked_document_message"),
+									show: uiState.isBuilderLocked(),
+								},
+							]}
+						/>
+					</Show>
+					<div class="w-full flex grow">
+						<div class="w-full flex flex-col">
+							<CollectionPseudoBrick
+								fields={docState.collection.data?.data.fields || []}
+							/>
+							<FixedBricks
+								brickConfig={docState.collection.data?.data.fixedBricks || []}
+							/>
+							<BuilderBricks
+								brickConfig={docState.collection.data?.data.builderBricks || []}
+							/>
+						</div>
+					</div>
 				</div>
 			</Match>
 		</Switch>

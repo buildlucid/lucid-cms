@@ -44,7 +44,7 @@ export const ActionBar: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<div class="sticky top-0 w-full px-5 py-2.5 gap-x-30 gap-y-15 bg-container-3 border border-border rounded-b-xl flex flex-wrap items-center justify-between">
+		<div class="sticky top-0 z-30 w-full px-5 py-2.5 gap-x-30 gap-y-15 bg-container-3 border border-border rounded-b-xl flex flex-wrap items-center justify-between">
 			<div class="flex items-center gap-2.5">
 				<Show when={props.version}>
 					<div>
