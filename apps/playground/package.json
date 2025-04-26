@@ -20,18 +20,18 @@
 		"@lucidcms/sqlite-adapter": "*",
 		"@lucidcms/postgres-adapter": "*",
 		"@lucidcms/libsql-adapter": "*",
-		"better-sqlite3": "^11.1.2",
-		"nodemailer": "^6.9.14"
+		"better-sqlite3": "^11.9.1",
+		"nodemailer": "^6.10.1"
 	},
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
-		"@dotenvx/dotenvx": "^1.8.0",
-		"@types/better-sqlite3": "^7.6.11",
-		"tsx": "^4.16.2",
-		"typescript": "^5.5.4"
+		"@dotenvx/dotenvx": "^1.41.0",
+		"@types/better-sqlite3": "^7.6.13",
+		"tsx": "^4.19.3",
+		"typescript": "^5.8.3"
 	},
 	"volta": {
-		"node": "22.11.0"
+		"node": "22.15.0"
 	}
 }

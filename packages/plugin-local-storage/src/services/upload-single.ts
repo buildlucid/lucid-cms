@@ -18,7 +18,7 @@ export default (pluginOptions: PluginOptions) => {
 			} else {
 				const writeStream = fs.createWriteStream(targetPath);
 				props.data.pipe(writeStream);
-				await new Promise((resolve, reject) => {
+				await new Promise<void>((resolve, reject) => {
 					writeStream.on("finish", resolve);
 					writeStream.on("error", reject);
 				});

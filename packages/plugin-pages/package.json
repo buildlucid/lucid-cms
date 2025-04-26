@@ -36,18 +36,18 @@
 		"Slug"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^1.8.3",
+		"@biomejs/biome": "^1.9.4",
 		"@lucidcms/config": "*",
 		"@lucidcms/core": "*",
-		"@types/node": "^22.1.0",
-		"tsup": "^8.2.4",
-		"typescript": "^5.5.4"
+		"@types/node": "^22.15.2",
+		"tsup": "^8.4.0",
+		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {
 		"@lucidcms/core": "^0.10.2-alpha.0"
 	},
 	"volta": {
-		"node": "22.11.0"
+		"node": "22.15.0"
 	},
 	"engines": {
 		"node": ">=22.0.0 <23.0.0"
