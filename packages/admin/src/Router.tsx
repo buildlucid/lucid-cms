@@ -17,6 +17,7 @@ import AccountRoute from "@/routes/Account";
 import CollectionsListRoute from "@/routes/Collections/List";
 import CollectionsDocumentsListRoute from "./routes/Collections/Documents/List";
 import CollectionsDocumentsEditRoute from "./routes/Collections/Documents/Edit";
+import CollectionDocumentPageBuilderRoute from "./routes/Collections/Documents/PageBuilder";
 import CollectionsDocumentsRevisionsRoute from "./routes/Collections/Documents/Revisions";
 
 const AppRouter: Component = () => {
@@ -32,6 +33,39 @@ const AppRouter: Component = () => {
 					path="/collections/:collectionKey"
 					component={CollectionsDocumentsListRoute}
 				/>
+				{/* Page builder */}
+				<Route
+					path="/collections/new/:collectionKey/draft/create"
+					component={() => (
+						<CollectionDocumentPageBuilderRoute mode="create" version="draft" />
+					)}
+				/>
+				<Route
+					path="/collections/new/:collectionKey/published/create"
+					component={() => (
+						<CollectionDocumentPageBuilderRoute
+							mode="create"
+							version="published"
+						/>
+					)}
+				/>
+				<Route
+					path="/collections/new/:collectionKey/draft/:documentId"
+					component={() => (
+						<CollectionDocumentPageBuilderRoute mode="edit" version="draft" />
+					)}
+				/>
+				<Route
+					path="/collections/new/:collectionKey/published/:documentId"
+					component={() => (
+						<CollectionDocumentPageBuilderRoute
+							mode="edit"
+							version="published"
+						/>
+					)}
+				/>
+
+				{/* TEMP REMOVE */}
 				<Route
 					path="/collections/:collectionKey/draft/create"
 					component={() => (
@@ -60,6 +94,7 @@ const AppRouter: Component = () => {
 					path="/collections/:collectionKey/revisions/:documentId/:versionId"
 					component={() => <CollectionsDocumentsRevisionsRoute />}
 				/>
+				{/* ^^ TEMP REMOVE */}
 				{/* Media */}
 				<Route path="/media" component={MediaListRoute} />
 				{/* Users */}

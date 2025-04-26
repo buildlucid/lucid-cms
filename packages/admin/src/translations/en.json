@@ -474,5 +474,8 @@
 	"media_upload_error": "Media Upload Error",
 	"media_upload_error_description": "An error occurred while uploading the file. Please try again.",
 	"media_no_key_or_presigned_url": "No key or presigned url found",
-	"locked_document_message": "This document is locked and cannot be edited, only viewed."
+	"locked_document_message": "This document is locked and cannot be edited, only viewed.",
+	"created": "Created",
+	"modified": "Modified",
+	"save_draft": "Save Draft"
 }

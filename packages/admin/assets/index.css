@@ -10,8 +10,9 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 
-	button {
-		@apply cursor-pointer;
+	* {
+		scrollbar-color: #4d4d4d #070707;
+		scrollbar-width: thin;
 	}
 
 	/* Typography */
@@ -54,7 +55,7 @@
 	}
 
 	.scrollbar {
-		scrollbar-color: var(--color-container-2) var(--color-container-1);
+		scrollbar-color: #4d4d4d #070707;
 		scrollbar-width: thin;
 	}
 
