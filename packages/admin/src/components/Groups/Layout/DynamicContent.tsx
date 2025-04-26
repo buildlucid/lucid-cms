@@ -40,7 +40,7 @@ export const DynamicContent: Component<{
 		createEntry?: () => void;
 	};
 	options?: {
-		padding?: "15" | "30";
+		padding?: "15" | "20";
 		hideNoEntries?: boolean;
 	};
 	children: JSXElement;
@@ -51,7 +51,7 @@ export const DynamicContent: Component<{
 		<>
 			<div
 				class={classNames("flex flex-col flex-1 h-full", {
-					"p-15 md:p-30": props.options?.padding === "30",
+					"p-15 md:p-5": props.options?.padding === "20",
 					"p-15": props.options?.padding === "15",
 				})}
 			>

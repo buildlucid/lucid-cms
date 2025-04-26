@@ -42,7 +42,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 	// Render
 	return (
 		<Show when={props.brickConfig.length > 0}>
-			<div class="p-15 md:p-30">
+			<div class="p-5">
 				<div class="flex justify-between mb-15">
 					<div class="flex items-center">
 						<FaSolidLayerGroup class="text-white text-xl mr-2.5" />

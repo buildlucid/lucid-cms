@@ -19,7 +19,7 @@ export const Td: Component<TdProps> = (props) => {
 	return (
 		<td
 			class={classNames(
-				"relative first:pl-15 md:first:pl-30 last:pr-15 md:last:pr-30 px-15 w-full after:content-[''] after:border-b after:border-border after:block after:left-0 after:right-0 after:absolute after:bottom-0",
+				"relative first:pl-15 md:first:pl-5 last:pr-15 md:last:pr-5 px-15 w-full after:content-[''] after:border-b after:border-border after:block after:left-0 after:right-0 after:absolute after:bottom-0",
 				{
 					hidden: props.options?.include === false,
 				},

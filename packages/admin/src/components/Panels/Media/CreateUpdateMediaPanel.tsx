@@ -217,7 +217,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				useDefaultcontentLocale: panelMode() === "create",
 			}}
 			options={{
-				padding: "30",
+				padding: "20",
 			}}
 		>
 			{(lang) => (

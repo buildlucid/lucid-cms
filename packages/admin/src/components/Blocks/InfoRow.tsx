@@ -14,7 +14,7 @@ const InfoRow: Component<InfoRowProps> = (props) => {
 	// Render
 	return (
 		<Show when={props.permission !== false}>
-			<div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-15 lg:gap-10 mb-30 last:mb-0">
+			<div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-15 lg:gap-10 mb-5 last:mb-0">
 				<div class="md:col-span-1">
 					<h2 class="text-lg mb-1">{props.title}</h2>
 					<Show when={props.description}>

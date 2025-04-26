@@ -39,7 +39,7 @@ const Alert: Component<AlertProps> = (props) => {
 								class={classNames("flex items-center border-border", {
 									"mb-2 last:mb-0 bg-container-3 border rounded-md p-15":
 										props.style === "block",
-									"border-b md:px-30 px-15 py-15": props.style === "layout",
+									"border-b md:px-5 px-15 py-15": props.style === "layout",
 									"bg-warning-base text-warning-contrast":
 										type === "warning" && props.style === "layout",
 									"bg-error-base text-error-contrast":

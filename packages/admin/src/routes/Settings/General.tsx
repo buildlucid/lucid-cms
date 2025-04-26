@@ -79,7 +79,7 @@ const GeneralSettingsRoute: Component = (props) => {
 					isLoading: settingsData.isLoading,
 				}}
 				options={{
-					padding: "30",
+					padding: "20",
 				}}
 			>
 				{/* Storage */}

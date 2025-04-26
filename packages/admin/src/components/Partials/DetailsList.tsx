@@ -23,7 +23,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<ul class="w-full mb-30 last:mb-0">
+		<ul class="w-full mb-5 last:mb-0">
 			<For each={props.items}>
 				{(item) => (
 					<Show when={item.show !== false}>

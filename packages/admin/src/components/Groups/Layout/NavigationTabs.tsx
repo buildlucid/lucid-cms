@@ -14,7 +14,7 @@ export const NavigationTabs: Component<NavigationTabsProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<nav class="px-15 md:px-30">
+		<nav class="px-15 md:px-5">
 			<ul class="flex flex-row flex-wrap justify-start items-center">
 				<For each={props.tabs}>
 					{(tab) => (

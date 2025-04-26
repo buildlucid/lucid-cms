@@ -77,7 +77,7 @@ export const NavigationSidebar: Component = () => {
 			{/* Primary */}
 			<div class="w-[70px] h-full flex items-center justify-between flex-col overflow-y-auto scrollbar">
 				<div>
-					<div class="flex items-center justify-center mt-30">
+					<div class="flex items-center justify-center mt-5">
 						<img src={LogoIcon} alt="logo" class="size-6" />
 					</div>
 					<ul class="py-15">
@@ -149,7 +149,7 @@ export const NavigationSidebar: Component = () => {
 						/>
 					</ul>
 				</div>
-				<div class="pb-30">
+				<div class="pb-5">
 					<ul class="flex flex-col items-center">
 						<IconLink
 							type="button"

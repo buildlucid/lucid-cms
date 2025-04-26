@@ -106,7 +106,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 				submit: T()("create"),
 			}}
 			options={{
-				padding: "30",
+				padding: "20",
 			}}
 		>
 			{() => (

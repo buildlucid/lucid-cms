@@ -130,7 +130,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				errors={getBodyError("email", updateMe.errors)}
 				theme="full"
 			/>
-			<div class="mt-30">
+			<div class="mt-5">
 				<h3 class="mb-15">{T()("update_password")}</h3>
 				<Input
 					id="currentPassword"

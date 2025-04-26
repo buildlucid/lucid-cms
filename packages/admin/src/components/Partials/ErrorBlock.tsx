@@ -20,11 +20,11 @@ const ErrorBlock: Component<{
 }> = (props) => {
 	return (
 		<div class={"flex items-center justify-center"}>
-			<div class="text-center max-w-xl w-full flex flex-col items-center p-30">
+			<div class="text-center max-w-xl w-full flex flex-col items-center p-5">
 				<Show when={props.content.image}>
 					<img
 						src={props.content.image}
-						class="h-auto mx-auto mb-30 max-w-xs w-full max-h-40 object-contain"
+						class="h-auto mx-auto mb-5 max-w-xs w-full max-h-40 object-contain"
 						alt=""
 					/>
 				</Show>
@@ -42,14 +42,14 @@ const ErrorBlock: Component<{
 					<Link
 						theme={"primary"}
 						size="medium"
-						classes="mt-30"
+						classes="mt-5"
 						href={props.link?.href || ""}
 					>
 						{props.link?.text || ""}
 					</Link>
 				</Show>
 				<Show when={props.children}>
-					<div class="mt-30">{props.children}</div>
+					<div class="mt-5">{props.children}</div>
 				</Show>
 			</div>
 		</div>

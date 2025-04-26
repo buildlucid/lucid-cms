@@ -36,7 +36,7 @@ export const RevisionsSidebar: Component<{
 			}
 		>
 			<div>
-				<div class="flex items-center justify-between border-b border-border gap-2.5 p-15 md:p-30">
+				<div class="flex items-center justify-between border-b border-border gap-2.5 p-15 md:p-5">
 					<h3>{T()("revisions")}</h3>
 					<Sort
 						sorts={[
@@ -69,7 +69,7 @@ export const RevisionsSidebar: Component<{
 						},
 					}}
 					options={{
-						padding: "30",
+						padding: "20",
 						hideNoEntries: props.state.hideNoEntries,
 					}}
 				>
@@ -107,7 +107,7 @@ export const RevisionsSidebar: Component<{
 					</For>
 				</DynamicContent>
 			</div>
-			<div class="p-15 md:p-30 border-t border-border">
+			<div class="p-15 md:p-5 border-t border-border">
 				<SimplifiedPagination
 					state={{
 						meta: props.state.meta,

@@ -39,7 +39,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 				isError: email.isError,
 			}}
 			options={{
-				padding: "30",
+				padding: "20",
 				hideFooter: true,
 			}}
 			copy={{

@@ -61,7 +61,7 @@ export const UserList: Component<{
 							meta: users.data?.meta,
 						}}
 						options={{
-							padding: "30",
+							padding: "20",
 						}}
 					/>
 				),

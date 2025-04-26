@@ -373,7 +373,7 @@ const CollectionsDocumentsEditRoute: Component<
 									},
 								)}
 							>
-								<div class="p-15 md:p-30">
+								<div class="p-15 md:p-5">
 									<h3 class="mb-15">{T()("metadata")}</h3>
 									<DetailsList
 										type="text"

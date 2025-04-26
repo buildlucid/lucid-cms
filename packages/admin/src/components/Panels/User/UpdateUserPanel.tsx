@@ -130,7 +130,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 				submit: T()("update"),
 			}}
 			options={{
-				padding: "30",
+				padding: "20",
 			}}
 		>
 			{() => (

@@ -33,7 +33,7 @@ export const CollectionSubMenu: Component<{
 	// Render
 	return (
 		<Show when={showSubMenu()}>
-			<div class="w-60 py-30 h-full border-l border-border overflow-y-auto">
+			<div class="w-60 py-5 h-full border-l border-border overflow-y-auto">
 				<Switch>
 					<Match when={props.state.isLoading}>
 						<div class="px-15">

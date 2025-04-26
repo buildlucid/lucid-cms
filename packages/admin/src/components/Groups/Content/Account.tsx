@@ -21,7 +21,7 @@ export const Account: Component = () => {
 	return (
 		<DynamicContent
 			options={{
-				padding: "30",
+				padding: "20",
 			}}
 		>
 			{/* Account Details */}

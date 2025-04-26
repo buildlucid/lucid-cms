@@ -14,7 +14,7 @@ interface CardGridProps {
 const CardGrid: Component<CardGridProps> = (props) => {
 	return (
 		<ul
-			class={classNames("grid gap-5 mb-30 last-of-type:mb-0", {
+			class={classNames("grid gap-5 mb-5 last-of-type:mb-0", {
 				"md:grid-cols-2": props.columns === 2,
 				"md:grid-cols-2 lg:grid-cols-3": props.columns === 3,
 				"grid-cols-2 md:grid-cols-3 lg:grid-cols-4": props.columns === 4,

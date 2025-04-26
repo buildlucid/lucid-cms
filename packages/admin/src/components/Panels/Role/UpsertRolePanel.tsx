@@ -183,7 +183,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 				submit: panelSubmit(),
 			}}
 			options={{
-				padding: "30",
+				padding: "20",
 			}}
 		>
 			{() => (
@@ -207,7 +207,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 						/>
 					</InputGrid>
 					{/* Global perms */}
-					<div class="w-full mb-30 last:mb-0">
+					<div class="w-full mb-5 last:mb-0">
 						<SectionHeading title={T()("permissions")} headingType="h3">
 							<div>
 								<Checkbox

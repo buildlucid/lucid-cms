@@ -100,7 +100,7 @@ const SelectMediaContent: Component = () => {
 	return (
 		<div class="min-h-[70vh] flex flex-col">
 			{/* Header */}
-			<div class="p-15 md:p-30 border-b border-border">
+			<div class="p-15 md:p-5 border-b border-border">
 				<h2>{T()("select_media_title")}</h2>
 				<p class="mt-1">{T()("select_media_description")}</p>
 				<div class="w-full mt-15 flex justify-between">
@@ -214,7 +214,7 @@ const SelectMediaContent: Component = () => {
 						searchParams: searchParams,
 					}}
 					options={{
-						padding: "30",
+						padding: "20",
 					}}
 					copy={{
 						noEntries: {
@@ -231,7 +231,7 @@ const SelectMediaContent: Component = () => {
 									meta: media.data?.meta,
 								}}
 								options={{
-									padding: "30",
+									padding: "20",
 								}}
 							/>
 						),

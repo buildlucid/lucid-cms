@@ -188,7 +188,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 						/>
 					</Match>
 					<Match when={showState() === "no-file"}>
-						<div class="w-full h-full flex justify-center items-center flex-col p-15 md:p-30">
+						<div class="w-full h-full flex justify-center items-center flex-col p-15 md:p-5">
 							<FaSolidArrowUpFromBracket class="w-7 h-7 mx-auto text-unfocused mb-5" />
 							<p class="text-center text-base font-medium text-title">
 								{T()("drag_and_drop_file_or")}{" "}
@@ -283,7 +283,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				}
 			>
 				<Match when={props.data.type === "image"}>
-					<div class="w-full h-[calc(100%-60px)] relative z-10 p-15 md:p-30">
+					<div class="w-full h-[calc(100%-60px)] relative z-10 p-15 md:p-5">
 						<img
 							src={props.data.url}
 							alt={props.data.name}

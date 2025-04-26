@@ -31,7 +31,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	// Render
 	return (
 		<Show when={collectionPseudoBrick() !== undefined}>
-			<div class="px-15 md:px-30 py-15 md:py-30  border-b border-border">
+			<div class="p-5  border-b border-border">
 				<BrickBody
 					state={{
 						open: true,

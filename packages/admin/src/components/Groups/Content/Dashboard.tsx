@@ -17,7 +17,7 @@ export const Dashboard: Component = () => {
 	return (
 		<DynamicContent
 			options={{
-				padding: "30",
+				padding: "20",
 			}}
 		>
 			<Alert

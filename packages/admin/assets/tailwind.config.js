@@ -75,7 +75,6 @@ export default {
                 "animate-modal-hide": "animate-modal-hide 0.2s ease",
             },
             spacing: {
-                30: "30px",
                 15: "15px",
             },
         },

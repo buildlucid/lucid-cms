@@ -36,7 +36,7 @@ export const Modal: Component<ModalProps> = (props) => {
 						>
 							<div
 								class={classNames({
-									"p-15 md:p-30": !props.options?.noPadding,
+									"p-15 md:p-5": !props.options?.noPadding,
 								})}
 							>
 								{props.children}

@@ -175,10 +175,10 @@ export const HeaderLayout: Component<{
 				}}
 				ref={headerRef}
 				class={classNames(
-					"before:absolute before:inset-0 overflow-hidden border-x border-b border-border rounded-b-xl before:z-0 px-15 md:px-30 fixed top-0 left-[310px] right-15 z-40 duration-200 ease-in-out transition-all",
+					"before:absolute before:inset-0 overflow-hidden border-x border-b border-border rounded-b-xl before:z-0 px-15 md:px-5 fixed top-0 left-[310px] right-15 z-40 duration-200 ease-in-out transition-all",
 					{
 						"py-15 md:py-15 before:bg-container-1/95": getHasScrolled(),
-						"py-15 md:py-30 before:bg-container-3": !getHasScrolled(),
+						"py-15 md:py-5 before:bg-container-3": !getHasScrolled(),
 					},
 				)}
 			>

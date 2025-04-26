@@ -24,7 +24,7 @@ interface BrickProps {
 		fieldErrors: FieldError[];
 	};
 	options: {
-		padding?: "15" | "30";
+		padding?: "15" | "20";
 		bleedTop?: boolean;
 	};
 }
@@ -66,7 +66,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 			<div
 				class={classNames({
 					"p-15 pt-0": props.options.padding === "15",
-					"p-15 md:p-30": props.options.padding === "30",
+					"p-5": props.options.padding === "20",
 					"pt-15!": props.options.bleedTop,
 				})}
 			>

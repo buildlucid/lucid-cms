@@ -49,7 +49,7 @@ export const Th: Component<ThProps> = (props) => {
 	return (
 		<th
 			class={classNames(
-				"text-left first:pl-15 md:first:pl-30 relative last:pr-15 md:last:pr-30 px-15 bg-container-3 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
+				"text-left first:pl-15 md:first:pl-5 relative last:pr-15 md:last:pr-5 px-15 bg-container-3 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 				{
 					"hover:bg-container-5": props.options?.sortable,
 					hidden: props.options?.include === false,
