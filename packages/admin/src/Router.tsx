@@ -35,13 +35,13 @@ const AppRouter: Component = () => {
 				/>
 				{/* Page builder */}
 				<Route
-					path="/collections/new/:collectionKey/draft/create"
+					path="/collections/:collectionKey/draft/create"
 					component={() => (
 						<CollectionDocumentPageBuilderRoute mode="create" version="draft" />
 					)}
 				/>
 				<Route
-					path="/collections/new/:collectionKey/published/create"
+					path="/collections/:collectionKey/published/create"
 					component={() => (
 						<CollectionDocumentPageBuilderRoute
 							mode="create"
@@ -50,13 +50,13 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
-					path="/collections/new/:collectionKey/draft/:documentId"
+					path="/collections/:collectionKey/draft/:documentId"
 					component={() => (
 						<CollectionDocumentPageBuilderRoute mode="edit" version="draft" />
 					)}
 				/>
 				<Route
-					path="/collections/new/:collectionKey/published/:documentId"
+					path="/collections/:collectionKey/published/:documentId"
 					component={() => (
 						<CollectionDocumentPageBuilderRoute
 							mode="edit"
@@ -67,31 +67,31 @@ const AppRouter: Component = () => {
 
 				{/* TEMP REMOVE */}
 				<Route
-					path="/collections/:collectionKey/draft/create"
+					path="/collections/old/:collectionKey/draft/create"
 					component={() => (
 						<CollectionsDocumentsEditRoute mode="create" version="draft" />
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/published/create"
+					path="/collections/old/:collectionKey/published/create"
 					component={() => (
 						<CollectionsDocumentsEditRoute mode="create" version="published" />
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/draft/:documentId"
+					path="/collections/old/:collectionKey/draft/:documentId"
 					component={() => (
 						<CollectionsDocumentsEditRoute mode="edit" version="draft" />
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/published/:documentId"
+					path="/collections/old/:collectionKey/published/:documentId"
 					component={() => (
 						<CollectionsDocumentsEditRoute mode="edit" version="published" />
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/revisions/:documentId/:versionId"
+					path="/collections/old/:collectionKey/revisions/:documentId/:versionId"
 					component={() => <CollectionsDocumentsRevisionsRoute />}
 				/>
 				{/* ^^ TEMP REMOVE */}
