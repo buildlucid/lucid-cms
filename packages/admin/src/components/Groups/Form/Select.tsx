@@ -45,6 +45,7 @@ export interface SelectProps {
 	noClear?: boolean;
 	hasError?: boolean;
 	theme: "full" | "basic" | "basic-small";
+	shortcut?: string;
 }
 
 export const Select: Component<SelectProps> = (props) => {
@@ -123,7 +124,7 @@ export const Select: Component<SelectProps> = (props) => {
 					{/* Trigger */}
 					<DropdownMenu.Trigger
 						class={classNames(
-							"focus:outline-hidden px-2.5 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
+							"focus:outline-hidden overflow-hidden px-2.5 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
 							{
 								"bg-container-4 border border-border-input flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic" || props.theme === "basic-small",
@@ -143,11 +144,18 @@ export const Select: Component<SelectProps> = (props) => {
 						onBlur={() => setInputFocus(false)}
 						disabled={props.disabled}
 					>
-						{selectedLabel() ? (
-							<span class="truncate">{selectedLabel()}</span>
-						) : (
-							<span class="text-body">{T()("nothing_selected")}</span>
-						)}
+						<div class="flex items-center">
+							<Show when={props.shortcut}>
+								<span class="text-xs bg-container-3 px-2 py-1 rounded-md mr-1 border border-border">
+									{props.shortcut}
+								</span>
+							</Show>
+							{selectedLabel() ? (
+								<span class="truncate">{selectedLabel()}</span>
+							) : (
+								<span class="text-body">{T()("nothing_selected")}</span>
+							)}
+						</div>
 						<div class="flex items-center gap-1">
 							<Show when={props.noClear !== true}>
 								<button

@@ -9,7 +9,7 @@ interface ErrorMessageProps {
 
 export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 	return (
-		<Show when={props.errors?.message !== undefined}>
+		<Show when={props.errors?.message}>
 			<a class="mt-2.5 flex items-start text-sm" href={`#${props.id}`}>
 				<FaSolidTriangleExclamation
 					size={16}

@@ -68,9 +68,10 @@ export const ActionBar: Component<{
 				<Show
 					when={props.hooks.state.collection.data?.data?.config.useTranslations}
 				>
-					<div class="w-52">
+					<div class="w-58">
 						<ContentLocaleSelect
 							hasError={props.hooks.uiState.brickTranslationErrors?.()}
+							showShortcut={true}
 						/>
 					</div>
 				</Show>

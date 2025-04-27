@@ -155,6 +155,7 @@ export const Panel: Component<{
 												value={contentLocale()}
 												setValue={setContentLocale}
 												hasError={props.langauge?.hascontentLocaleError}
+												showShortcut={true}
 											/>
 										</div>
 									</Show>

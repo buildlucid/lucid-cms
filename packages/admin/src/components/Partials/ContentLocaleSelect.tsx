@@ -1,11 +1,20 @@
-import { type Component, Match, Switch, createMemo } from "solid-js";
+import {
+	type Component,
+	Match,
+	Switch,
+	createMemo,
+	onCleanup,
+	onMount,
+} from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import { Select } from "@/components/Groups/Form";
+import isMac from "@/utils/is-mac";
 
 interface ContentLocaleSelectProps {
 	value?: string | undefined;
 	setValue?: (_value: string | undefined) => void;
 	hasError?: boolean;
+	showShortcut?: boolean;
 }
 
 const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
@@ -17,11 +26,54 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 		return (
 			locales().map((l) => ({
 				value: l.code,
-				label: `${
-					l.name ? `${l.name} (${l.code})` : l.code
-				} ${l.isDefault ? "(Default)" : ""}`,
+				label: `${l.name ? `${l.name} (${l.code})` : l.code}`,
 			})) || []
 		);
+	});
+
+	// ----------------------------------
+	// Keyboard shortcut handler
+
+	const modKey = isMac() ? "⌘" : "Ctrl";
+	const shortcutText = `${modKey}+Shift+L`;
+
+	const handleKeydown = (e: KeyboardEvent) => {
+		const isInModal = !!document.querySelector(
+			'[role="dialog"][data-expanded]',
+		);
+
+		const isGlobalSelector = props.value === undefined;
+		const isModalSelector = props.value !== undefined;
+
+		if ((isGlobalSelector && isInModal) || (isModalSelector && !isInModal)) {
+			return;
+		}
+
+		if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "l") {
+			e.preventDefault();
+
+			const currentLocaleCode =
+				props.value !== undefined ? props.value : contentLocale();
+			const availableLocales = locales();
+			const currentIndex = availableLocales.findIndex(
+				(locale) => locale.code === currentLocaleCode,
+			);
+			const nextIndex = (currentIndex + 1) % availableLocales.length;
+			const nextLocale = availableLocales[nextIndex].code;
+
+			if (props.value !== undefined && props.setValue) {
+				props.setValue(nextLocale);
+			} else {
+				contentLocaleStore.get.setContentLocale(nextLocale);
+			}
+		}
+	};
+
+	onMount(() => {
+		document.addEventListener("keydown", handleKeydown);
+	});
+	onCleanup(() => {
+		document.removeEventListener("keydown", handleKeydown);
 	});
 
 	// ----------------------------------------
@@ -42,6 +94,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					noClear={true}
 					hasError={props.hasError}
 					theme="basic-small"
+					shortcut={props.showShortcut ? shortcutText : undefined}
 				/>
 			</Match>
 			<Match when={props.value !== undefined}>
@@ -58,6 +111,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					noClear={true}
 					hasError={props.hasError}
 					theme="basic-small"
+					shortcut={props.showShortcut ? shortcutText : undefined}
 				/>
 			</Match>
 		</Switch>
