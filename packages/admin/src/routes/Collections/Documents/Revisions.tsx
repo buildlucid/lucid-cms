@@ -10,17 +10,18 @@ import {
 import { useRevisionsState } from "@/hooks/document/useRevisionsState";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import brickStore from "@/store/brickStore";
-import {
-	RevisionsSidebar,
-	CollectionPseudoBrick,
-	FixedBricks,
-	BuilderBricks,
-} from "@/components/Groups/Document";
 import Alert from "@/components/Blocks/Alert";
 import Link from "@/components/Partials/Link";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useRevisionMutations } from "@/hooks/document/useRevisionMutations";
-import { ActionBar, Header } from "@/components/Groups/PageBuilder";
+import {
+	ActionBar,
+	Header,
+	RevisionsSidebar,
+	CollectionPseudoBrick,
+	FixedBricks,
+	BuilderBricks,
+} from "@/components/Groups/PageBuilder";
 
 const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 	// ----------------------------------

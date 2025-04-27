@@ -7,16 +7,18 @@ import {
 	createEffect,
 	on,
 } from "solid-js";
-import { Header, ActionBar, Modals } from "@/components/Groups/PageBuilder";
+import {
+	Header,
+	ActionBar,
+	Modals,
+	BuilderBricks,
+	CollectionPseudoBrick,
+	FixedBricks,
+} from "@/components/Groups/PageBuilder";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import Alert from "@/components/Blocks/Alert";
-import {
-	BuilderBricks,
-	CollectionPseudoBrick,
-	FixedBricks,
-} from "@/components/Groups/Document";
 import brickStore from "@/store/brickStore";
 
 interface CollectionsDocumentsEditRouteProps {
