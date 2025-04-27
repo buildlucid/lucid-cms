@@ -2,12 +2,12 @@ import T from "@/translations";
 import { type Accessor, type Component, For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
-import type { DocumentVersionResponse, ResponseBody } from "@types";
-import type useSearchParamsState from "@/hooks/useSearchParamsState";
 import DateText from "@/components/Partials/DateText";
 import Pill from "@/components/Partials/Pill";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Sort, SimplifiedPagination } from "@/components/Groups/Query";
+import type { DocumentVersionResponse, ResponseBody } from "@types";
+import type useSearchParamsState from "@/hooks/useSearchParamsState";
 
 export const RevisionsSidebar: Component<{
 	state: {
@@ -36,7 +36,7 @@ export const RevisionsSidebar: Component<{
 			}
 		>
 			<div>
-				<div class="flex items-center justify-between border-b border-border gap-2.5 p-15 md:p-5">
+				<div class="flex items-center justify-between border-b border-border gap-2.5 px-5 py-15">
 					<h3>{T()("revisions")}</h3>
 					<Sort
 						sorts={[
@@ -46,6 +46,7 @@ export const RevisionsSidebar: Component<{
 							},
 						]}
 						searchParams={props.state.searchParams}
+						size="x-small"
 					/>
 				</div>
 				<DynamicContent
@@ -78,7 +79,7 @@ export const RevisionsSidebar: Component<{
 							<button
 								type="button"
 								class={classNames(
-									"bg-container-2 border-border border rounded-md mb-2.5 last:mb-0 flex flex-col p-15 focus:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
+									"bg-container-2 border-border border text-left rounded-md mb-2.5 last:mb-0 flex flex-col p-15 focus:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
 									{
 										"border-primary-base":
 											revision.id === props.state.versionId(),
@@ -90,15 +91,15 @@ export const RevisionsSidebar: Component<{
 									);
 								}}
 							>
-								<h3 class="mb-1">
+								<h3 class="mb-0.5 text-base">
 									{T()("revision")} #{revision.id}
 								</h3>
 								<DateText date={revision.createdAt} />
-								<div class="mt-15 flex gap-2.5">
-									<Pill theme="secondary">
+								<div class="mt-2.5 flex gap-2.5">
+									<Pill theme="grey">
 										Bricks {revision.bricks?.builder?.length ?? 0}
 									</Pill>
-									<Pill theme="secondary">
+									<Pill theme="grey">
 										Fixed {revision.bricks?.fixed?.length ?? 0}
 									</Pill>
 								</div>

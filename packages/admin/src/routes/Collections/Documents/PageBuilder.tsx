@@ -1,6 +1,13 @@
 import T from "@/translations";
-import { type Component, Switch, Match, Show } from "solid-js";
-import { Header, ActionBar } from "@/components/Groups/PageBuilder";
+import {
+	type Component,
+	Switch,
+	Match,
+	Show,
+	createEffect,
+	on,
+} from "solid-js";
+import { Header, ActionBar, Modals } from "@/components/Groups/PageBuilder";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
@@ -10,6 +17,7 @@ import {
 	CollectionPseudoBrick,
 	FixedBricks,
 } from "@/components/Groups/Document";
+import brickStore from "@/store/brickStore";
 
 interface CollectionsDocumentsEditRouteProps {
 	mode: "create" | "edit";
@@ -41,6 +49,38 @@ const CollectionsDocumentsEditRoute: Component<
 		updateSingle: mutations.updateSingle,
 	});
 
+	// ------------------------------------------
+	// Setup document state
+	const setDocumentState = () => {
+		brickStore.get.reset();
+		brickStore.set(
+			"collectionTranslations",
+			docState.collection.data?.data.config.useTranslations || false,
+		);
+		brickStore.get.setBricks(
+			docState.doc.data?.data,
+			docState.collection.data?.data,
+		);
+		brickStore.set("locked", uiState.isBuilderLocked());
+	};
+
+	createEffect(
+		on(
+			() => docState.doc.data,
+			() => {
+				setDocumentState();
+			},
+		),
+	);
+	createEffect(
+		on(
+			() => docState.collection.isSuccess,
+			() => {
+				setDocumentState();
+			},
+		),
+	);
+
 	// ----------------------------------
 	// Render
 	return (
@@ -55,19 +95,27 @@ const CollectionsDocumentsEditRoute: Component<
 				<Header
 					mode={props.mode}
 					version={props.version}
-					hooks={{
-						mutations: mutations,
-						state: docState,
-						uiState: uiState,
+					state={{
+						collection: docState.collection.data?.data,
+						collectionKey: docState.collectionKey,
+						collectionName: docState.collectionName,
+						collectionSingularName: docState.collectionSingularName,
+						documentID: docState.documentId,
+						canNavigateToPublished: uiState.canNavigateToPublished,
+						showRevisionNavigation: uiState.showRevisionNavigation,
 					}}
 				/>
 				<ActionBar
 					mode={props.mode}
 					version={props.version}
-					hooks={{
-						mutations: mutations,
-						state: docState,
-						uiState: uiState,
+					state={{
+						collection: docState.collection.data?.data,
+						document: docState.doc.data?.data,
+						ui: uiState,
+					}}
+					actions={{
+						upsertDocumentAction: mutations.upsertDocumentAction,
+						publishDocumentAction: mutations.publishDocumentAction,
 					}}
 				/>
 
@@ -98,6 +146,18 @@ const CollectionsDocumentsEditRoute: Component<
 						</div>
 					</div>
 				</div>
+
+				<Modals
+					hooks={{
+						mutations: mutations,
+						state: docState,
+						uiState: uiState,
+					}}
+				/>
+
+				<Show when={uiState.isSaving()}>
+					<div class="fixed inset-0 bg-black/60 animate-pulse z-50" />
+				</Show>
 			</Match>
 		</Switch>
 	);

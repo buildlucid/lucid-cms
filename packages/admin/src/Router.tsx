@@ -16,7 +16,6 @@ import EmailListRoute from "@/routes/Emails/List";
 import AccountRoute from "@/routes/Account";
 import CollectionsListRoute from "@/routes/Collections/List";
 import CollectionsDocumentsListRoute from "./routes/Collections/Documents/List";
-import CollectionsDocumentsEditRoute from "./routes/Collections/Documents/Edit";
 import CollectionDocumentPageBuilderRoute from "./routes/Collections/Documents/PageBuilder";
 import CollectionsDocumentsRevisionsRoute from "./routes/Collections/Documents/Revisions";
 
@@ -64,37 +63,10 @@ const AppRouter: Component = () => {
 						/>
 					)}
 				/>
-
-				{/* TEMP REMOVE */}
 				<Route
-					path="/collections/old/:collectionKey/draft/create"
-					component={() => (
-						<CollectionsDocumentsEditRoute mode="create" version="draft" />
-					)}
-				/>
-				<Route
-					path="/collections/old/:collectionKey/published/create"
-					component={() => (
-						<CollectionsDocumentsEditRoute mode="create" version="published" />
-					)}
-				/>
-				<Route
-					path="/collections/old/:collectionKey/draft/:documentId"
-					component={() => (
-						<CollectionsDocumentsEditRoute mode="edit" version="draft" />
-					)}
-				/>
-				<Route
-					path="/collections/old/:collectionKey/published/:documentId"
-					component={() => (
-						<CollectionsDocumentsEditRoute mode="edit" version="published" />
-					)}
-				/>
-				<Route
-					path="/collections/old/:collectionKey/revisions/:documentId/:versionId"
+					path="/collections/:collectionKey/revisions/:documentId/:versionId"
 					component={() => <CollectionsDocumentsRevisionsRoute />}
 				/>
-				{/* ^^ TEMP REMOVE */}
 				{/* Media */}
 				<Route path="/media" component={MediaListRoute} />
 				{/* Users */}

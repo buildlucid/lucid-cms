@@ -17,6 +17,8 @@ interface SortItemProps {
 export interface SortProps {
 	sorts: Array<SortItemProps["sort"]>;
 	searchParams: SearchParamsResponse;
+
+	size?: "x-small";
 }
 
 const SortItem: Component<SortItemProps> = (props) => {
@@ -92,7 +94,15 @@ export const Sort: Component<SortProps> = (props) => {
 	// Render
 	return (
 		<DropdownMenu.Root>
-			<DropdownMenu.Trigger class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-15 h-10 border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center text-base font-display">
+			<DropdownMenu.Trigger
+				class={classNames(
+					"dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center font-display",
+					{
+						"px-15 h-9 text-sm": props.size === "x-small",
+						"px-15 h-10 text-base": !props.size,
+					},
+				)}
+			>
 				<DropdownMenu.Icon>
 					<FaSolidSort />
 				</DropdownMenu.Icon>

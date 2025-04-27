@@ -1,44 +1,35 @@
 import T from "@/translations";
-import { type Accessor, createMemo, Show, type Component } from "solid-js";
+import { createMemo, Show, type Component } from "solid-js";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Button from "@/components/Partials/Button";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userStore from "@/store/userStore";
+import DateText from "@/components/Partials/DateText";
 import { FaSolidLanguage, FaSolidTrash } from "solid-icons/fa";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
-import type { UseDocumentState } from "@/hooks/document/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
-import DateText from "@/components/Partials/DateText";
+import type { CollectionResponse, DocumentResponse } from "@types";
+import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
+import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
 
 export const ActionBar: Component<{
 	mode: "create" | "edit" | "revisions";
 	version?: "draft" | "published";
-	hooks: {
-		mutations: UseDocumentMutations;
-		state: UseDocumentState;
-		uiState: UseDocumentUIState;
+	state: {
+		collection: CollectionResponse | undefined;
+		document: DocumentResponse | undefined;
+		selectedRevision?: UseRevisionsState["documentId"];
+		ui: UseDocumentUIState;
 	};
-
-	// TODO: move all of bellow to optional revision hook
-	selectedRevision?: Accessor<number | undefined>;
-	restoreRevisionAction?: () => void;
+	actions: {
+		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
+		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
+		restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
+	};
 }> = (props) => {
 	// ----------------------------------
 	// Memos
 	const defaultLocale = createMemo(() => {
 		return contentLocaleStore.get.locales.find((locale) => locale.isDefault);
-	});
-
-	// TODO: move to optional revision hook
-	const showRestoreRevisionButton = createMemo(() => {
-		if (props.mode !== "revisions") return false;
-		if (props.selectedRevision?.() === undefined) return false;
-		if (!props?.restoreRevisionAction) return false;
-		return true;
-	});
-	// TODO: move to optional revision hook
-	const hasRestorePermission = createMemo(() => {
-		return userStore.get.hasPermission(["restore_content"]).all;
 	});
 
 	// ----------------------------------
@@ -52,25 +43,23 @@ export const ActionBar: Component<{
 						<span>{props.version}</span>
 					</div>
 				</Show>
-				<Show when={props.mode === "edit"}>
+				<Show when={props.mode !== "create"}>
 					<div>
 						<span class="font-medium mr-1">{T()("created")}:</span>
-						<DateText date={props.hooks.state.doc.data?.data.createdAt} />
+						<DateText date={props.state.document?.createdAt} />
 					</div>
 					<div>
 						<span class="font-medium mr-1">{T()("modified")}:</span>
-						<DateText date={props.hooks.state.doc.data?.data.updatedAt} />
+						<DateText date={props.state.document?.updatedAt} />
 					</div>
 				</Show>
 			</div>
 			<div class="flex items-center gap-2.5">
 				{/* Locale Select */}
-				<Show
-					when={props.hooks.state.collection.data?.data?.config.useTranslations}
-				>
+				<Show when={props.state.collection?.config.useTranslations}>
 					<div class="w-58">
 						<ContentLocaleSelect
-							hasError={props.hooks.uiState.brickTranslationErrors?.()}
+							hasError={props.state.ui.brickTranslationErrors?.()}
 							showShortcut={true}
 						/>
 					</div>
@@ -78,8 +67,8 @@ export const ActionBar: Component<{
 				{/* Default Locale */}
 				<Show
 					when={
-						props.hooks.state.collection.data?.data?.config.useTranslations !==
-							true && defaultLocale()
+						props.state.collection?.config.useTranslations !== true &&
+						defaultLocale()
 					}
 				>
 					<div class="flex items-center">
@@ -90,56 +79,54 @@ export const ActionBar: Component<{
 					</div>
 				</Show>
 				{/* Upsert doc */}
-				<Show when={props.hooks.uiState.showUpsertButton()}>
+				<Show when={props.state.ui.showUpsertButton?.()}>
 					<Button
 						type="button"
 						theme="secondary"
 						size="x-small"
-						onClick={props.hooks.mutations?.upsertDocumentAction}
-						disabled={props.hooks.uiState.canSaveDocument?.()}
-						permission={props.hooks.uiState.hasSavePermission()}
+						onClick={props.actions?.upsertDocumentAction}
+						disabled={props.state.ui.canSaveDocument?.()}
+						permission={props.state.ui.hasSavePermission?.()}
 					>
 						{T()("save")}
 					</Button>
 				</Show>
 				{/* Publish doc */}
-				<Show when={props.hooks.uiState.showPublishButton()}>
+				<Show when={props.state.ui.showPublishButton?.()}>
 					<Button
 						type="button"
 						theme="secondary"
 						size="x-small"
 						onClick={() =>
-							props.hooks.mutations?.publishDocumentAction(
-								props.hooks.state.doc.data?.data,
-							)
+							props.actions?.publishDocumentAction?.(props.state.document)
 						}
-						disabled={!props.hooks.uiState.canPublishDocument()}
-						permission={props.hooks.uiState.hasPublishPermission()}
+						disabled={!props.state.ui.canPublishDocument?.()}
+						permission={props.state.ui.hasPublishPermission?.()}
 					>
 						{T()("publish")}
 					</Button>
 				</Show>
 				{/* Restore revision */}
-				<Show when={showRestoreRevisionButton()}>
+				<Show when={props.state.ui.showRestoreRevisionButton?.()}>
 					<Button
 						type="button"
-						theme="primary"
+						theme="secondary"
 						size="x-small"
-						onClick={props.restoreRevisionAction}
-						disabled={props.selectedRevision?.() === undefined}
-						permission={hasRestorePermission()}
+						onClick={props.actions.restoreRevisionAction}
+						disabled={props.state.selectedRevision?.() === undefined}
+						permission={props.state.ui.hasRestorePermission?.()}
 					>
 						{T()("restore_revision")}
 					</Button>
 				</Show>
 				{/* Delete doc */}
-				<Show when={props.hooks.uiState.showDeleteButton()}>
+				<Show when={props.state.ui.showDeleteButton?.()}>
 					<Button
 						theme="input-style"
 						size="x-icon"
 						type="button"
-						onClick={() => props.hooks.uiState?.setDeleteOpen?.(true)}
-						permission={props.hooks.uiState.hasDeletePermission()}
+						onClick={() => props.state.ui?.setDeleteOpen?.(true)}
+						permission={props.state.ui.hasDeletePermission?.()}
 					>
 						<span class="sr-only">{T()("delete")}</span>
 						<FaSolidTrash />

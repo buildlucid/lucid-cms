@@ -1,4 +1,4 @@
-import { createMemo, createSignal, createEffect, on } from "solid-js";
+import { createMemo, createSignal, type Accessor } from "solid-js";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
@@ -6,6 +6,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import type api from "@/services/api";
 import type { BrickError, FieldError } from "@types";
+import type { UseRevisionMutations } from "./useRevisionMutations";
 
 export function useDocumentUIState({
 	collection,
@@ -14,24 +15,33 @@ export function useDocumentUIState({
 	version,
 	createDocument,
 	updateSingle,
+	selectedRevision,
+	restoreRevisionAction,
 }: {
 	collection: ReturnType<typeof api.collections.useGetSingle>;
 	doc: ReturnType<typeof api.documents.useGetSingle>;
 	mode: "create" | "edit" | "revisions";
 	version: "draft" | "published";
-	createDocument: ReturnType<typeof api.documents.useCreateSingle>;
-	updateSingle: ReturnType<typeof api.documents.useUpdateSingle>;
+	createDocument?: ReturnType<typeof api.documents.useCreateSingle>;
+	updateSingle?: ReturnType<typeof api.documents.useUpdateSingle>;
+
+	selectedRevision?: Accessor<number | undefined>;
+	restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
 	const [getPanelOpen, setPanelOpen] = createSignal(false);
 
-	// ------------------------------------------
-	// Memos
+	/**
+	 * Checkss if services requests are loading or not
+	 */
 	const isLoading = createMemo(() => {
 		return collection.isLoading || doc.isLoading;
 	});
 
+	/**
+	 * Checks if loading the required resources was successful
+	 */
 	const isSuccess = createMemo(() => {
 		if (mode === "create") {
 			return collection.isSuccess;
@@ -39,19 +49,28 @@ export function useDocumentUIState({
 		return collection.isSuccess && doc.isSuccess;
 	});
 
+	/**
+	 * Checks if the documnet is saving
+	 */
 	const isSaving = createMemo(() => {
 		return (
-			updateSingle.action.isPending ||
-			createDocument.action.isPending ||
+			updateSingle?.action.isPending ||
+			createDocument?.action.isPending ||
 			doc.isRefetching ||
 			doc.isLoading
 		);
 	});
 
+	/**
+	 * Collates mutation errors for the update and create doc services
+	 */
 	const mutateErrors = createMemo(() => {
-		return updateSingle.errors() || createDocument.errors();
+		return updateSingle?.errors() || createDocument?.errors();
 	});
 
+	/**
+	 * Checks for any translations errors
+	 */
 	const brickTranslationErrors = createMemo(() => {
 		return brickHelpers.hasErrorsOnOtherLocale({
 			fieldErrors: getBodyError<FieldError[]>("fields", mutateErrors()) || [],
@@ -60,10 +79,16 @@ export function useDocumentUIState({
 		});
 	});
 
+	/**
+	 * Determines if you can save the document
+	 */
 	const canSaveDocument = createMemo(() => {
 		return !brickStore.get.documentMutated && !isSaving();
 	});
 
+	/**
+	 * Determines if you can publish the document
+	 */
 	const canPublishDocument = createMemo(() => {
 		// If published promotedFrom is equal to the current draft versionId, then its already published
 		if (
@@ -76,7 +101,12 @@ export function useDocumentUIState({
 		return !brickStore.get.documentMutated && !isSaving() && !mutateErrors();
 	});
 
+	/**
+	 * Determines if the builder should be locked
+	 */
 	const isBuilderLocked = createMemo(() => {
+		if (mode === "revisions") return true;
+
 		// lock builder if collection is locked
 		if (collection.data?.data.config.isLocked === true) {
 			return true;
@@ -93,22 +123,15 @@ export function useDocumentUIState({
 		return false;
 	});
 
+	/**
+	 * Checks if there is a published version of the document
+	 */
 	const isPublished = createMemo(() => {
 		return (
 			doc.data?.data.version?.published?.id !== null &&
 			doc.data?.data.version?.published?.id !== undefined
 		);
 	});
-
-	const setDocumentState = () => {
-		brickStore.get.reset();
-		brickStore.set(
-			"collectionTranslations",
-			collection.data?.data.config.useTranslations || false,
-		);
-		brickStore.get.setBricks(doc.data?.data, collection.data?.data);
-		brickStore.set("locked", isBuilderLocked());
-	};
 
 	/**
 	 * Determines if users should be able to navigate to the published version
@@ -185,24 +208,22 @@ export function useDocumentUIState({
 		return userStore.get.hasPermission(["delete_content"]).all;
 	});
 
-	// ------------------------------------------
-	// Effects to setup document state
-	createEffect(
-		on(
-			() => doc.data,
-			() => {
-				setDocumentState();
-			},
-		),
-	);
-	createEffect(
-		on(
-			() => collection.isSuccess,
-			() => {
-				setDocumentState();
-			},
-		),
-	);
+	/**
+	 * Determines if the restore reviision button should be visible
+	 */
+	const showRestoreRevisionButton = createMemo(() => {
+		if (mode !== "revisions") return false;
+		if (selectedRevision?.() === undefined) return false;
+		if (!restoreRevisionAction) return false;
+		return true;
+	});
+
+	/**
+	 * Determines if the user has permission to restore documents
+	 */
+	const hasRestorePermission = createMemo(() => {
+		return userStore.get.hasPermission(["restore_content"]).all;
+	});
 
 	// ------------------------------------------
 	// Return
@@ -227,6 +248,8 @@ export function useDocumentUIState({
 		showPublishButton,
 		showDeleteButton,
 		hasDeletePermission,
+		showRestoreRevisionButton,
+		hasRestorePermission,
 	};
 }
 export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;
