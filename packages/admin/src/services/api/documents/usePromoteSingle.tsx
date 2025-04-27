@@ -3,7 +3,7 @@ import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { DocumentVersionType, ResponseBody, ErrorResponse } from "@types";
 
-interface Params {
+export interface Params {
 	id: number;
 	collectionKey: string;
 	versionId: number;

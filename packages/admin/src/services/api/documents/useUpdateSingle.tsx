@@ -4,7 +4,7 @@ import serviceHelpers from "@/utils/service-helpers";
 import type { BrickData } from "@/store/brickStore";
 import type { ResponseBody, ErrorResponse, FieldResponse } from "@types";
 
-interface Params {
+export interface Params {
 	collectionKey: string;
 	documentId: number;
 	body: {
