@@ -62,18 +62,20 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 			})}
 			value={getValue()}
 			onChange={(value) => {
-				batch(() => {
-					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
-						fieldConfig: props.state.fieldConfig,
-						key: props.state.fieldConfig.key,
-						ref: props.state.groupRef,
-						repeaterKey: props.state.repeaterKey,
-						value: JSON.parse(value),
-						contentLocale: props.state.contentLocale,
+				try {
+					batch(() => {
+						brickStore.get.setFieldValue({
+							brickIndex: props.state.brickIndex,
+							fieldConfig: props.state.fieldConfig,
+							key: props.state.fieldConfig.key,
+							ref: props.state.groupRef,
+							repeaterKey: props.state.repeaterKey,
+							value: JSON.parse(value),
+							contentLocale: props.state.contentLocale,
+						});
+						setValue(value);
 					});
-					setValue(value);
-				});
+				} catch (err) {}
 			}}
 			name={props.state.fieldConfig.key}
 			copy={{

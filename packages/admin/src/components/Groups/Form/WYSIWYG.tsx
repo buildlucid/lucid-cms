@@ -1,9 +1,15 @@
-import { type Component, createSignal, onMount, onCleanup } from "solid-js";
+import {
+	type Component,
+	createSignal,
+	onMount,
+	onCleanup,
+	createEffect,
+} from "solid-js";
 import classnames from "classnames";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import type { ErrorResult, FieldError } from "@types";
 import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
+import type { ErrorResult, FieldError } from "@types";
 
 interface WYSIWYGProps {
 	id: string;
@@ -61,6 +67,15 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 		if (!getQuill()) return;
 		quillElement.remove();
 		setQuill(undefined);
+	});
+
+	createEffect(() => {
+		const quill = getQuill();
+		const currentValue = props.value;
+
+		if (quill && quill.root.innerHTML !== currentValue) {
+			quill.root.innerHTML = currentValue;
+		}
 	});
 
 	// ----------------------------------------
