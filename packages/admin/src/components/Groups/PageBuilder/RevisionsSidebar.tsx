@@ -46,7 +46,6 @@ export const RevisionsSidebar: Component<{
 							},
 						]}
 						searchParams={props.state.searchParams}
-						size="x-small"
 					/>
 				</div>
 				<DynamicContent

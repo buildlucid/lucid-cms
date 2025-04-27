@@ -30,7 +30,7 @@ const Button: Component<ButtonProps> = (props) => {
 	// Memos
 	const classes = createMemo(() => {
 		return classnames(
-			"flex items-center justify-center min-w-max text-center focus:outline-hidden focus:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 font-base",
+			"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 font-base",
 			{
 				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
 					props.theme === "primary",

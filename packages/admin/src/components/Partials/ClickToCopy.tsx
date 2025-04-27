@@ -34,7 +34,9 @@ const ClickToCopy: Component<ClickToCopyProps> = (props) => {
 					class="duration-200 cursor-copy transition-colors flex items-center max-w-full text-title fill-title whitespace-nowrap text-base hover:text-primary-hover hover:fill-primary-hover"
 				>
 					<FaSolidCopy class="mr-2" />
-					<span class="text-ellipsis overflow-hidden">{props.text}</span>
+					<span class="text-ellipsis overflow-hidden text-sm">
+						{props.text}
+					</span>
 				</button>
 			</Match>
 		</Switch>

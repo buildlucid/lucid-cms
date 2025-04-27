@@ -23,7 +23,7 @@
 		@apply text-xl font-bold text-title font-display;
 	}
 	h3 {
-		@apply text-lg font-medium text-title font-display;
+		@apply text-base font-medium text-title font-display;
 	}
 	h4 {
 		@apply text-base font-medium text-title font-body;
@@ -64,7 +64,7 @@
 	}
 
 	.dropdown-trigger {
-		@apply duration-200 transition-colors focus:outline outline-primary-base outline-1;
+		@apply duration-200 transition-colors outline-primary-base focus:outline-1;
 	}
 	.skeleton {
 		@apply bg-container-4 rounded-md animate-pulse;

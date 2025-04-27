@@ -89,7 +89,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 			<button
 				type="button"
 				class={classnames(
-					"bg-container-4 h-10 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border-input focus:ring-1 ring-inset focus:ring-primary-base group",
+					"bg-container-4 h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border-input focus:ring-1 ring-inset focus:ring-primary-base group",
 					{
 						"mt-1": props.options?.queryRow !== true,
 					},
@@ -108,7 +108,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				<span
 					ref={falseSpanRef}
 					class={classnames(
-						"flex-1 py-1 px-15 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-base font-display",
+						"flex-1 py-1 px-2.5 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm font-display",
 						{
 							"text-secondary-contrast": !props.value,
 							"text-title": props.value,
@@ -120,7 +120,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				<span
 					ref={trueSpanRef}
 					class={classnames(
-						"flex-1 px-15 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-base font-display",
+						"flex-1 px-2.5 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm font-display",
 						{
 							"text-secondary-contrast": props.value,
 							"text-title": !props.value,

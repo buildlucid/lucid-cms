@@ -129,7 +129,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 		>
 			<label
 				for={`${props.filter.key}-${props.filter.type}`}
-				class="text-body flex items-center justify-between text-sm mb-2"
+				class="text-body flex items-center justify-between text-sm mb-1"
 			>
 				<span>{props.filter.label}</span>
 				<Show when={showResetButton()}>
@@ -256,7 +256,7 @@ export const Filter: Component<FilterProps> = (props) => {
 	return (
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
-				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-15 h-10 border border-transparent hover:border-primary-base rounded-md flex items-center text-base font-display disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
+				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-2.5 h-9 text-sm border border-transparent hover:border-primary-base rounded-md flex items-center font-display disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
 				disabled={props.disabled}
 			>
 				<DropdownMenu.Icon>

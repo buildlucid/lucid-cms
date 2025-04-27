@@ -72,8 +72,8 @@ export const Standard: Component<{
 								props.actions.contentLocale !== false
 							}
 						>
-							<div class="w-full md:max-w-[220px]">
-								<ContentLocaleSelect />
+							<div class="w-full md:max-w-62">
+								<ContentLocaleSelect showShortcut={true} />
 							</div>
 						</Show>
 						<Show

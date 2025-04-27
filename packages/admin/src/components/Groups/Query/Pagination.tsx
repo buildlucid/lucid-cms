@@ -72,23 +72,23 @@ export const Pagination: Component<{
 					count={lastPage()}
 					itemComponent={(props) => (
 						<KobPagination.Item
-							class="h-10 w-10 flex items-center justify-center data-current:bg-primary-base data-current:text-primary-contrast hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors"
+							class="h-9 w-9 flex items-center justify-center data-current:bg-primary-base data-current:text-primary-contrast hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors"
 							page={props.page}
 						>
 							{props.page}
 						</KobPagination.Item>
 					)}
 					ellipsisComponent={() => (
-						<KobPagination.Ellipsis class="h-10 w-10 flex items-center justify-center">
+						<KobPagination.Ellipsis class="h-9 w-9 flex items-center justify-center">
 							...
 						</KobPagination.Ellipsis>
 					)}
 				>
-					<KobPagination.Previous class="h-10 w-10 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50">
+					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50">
 						<FaSolidChevronLeft />
 					</KobPagination.Previous>
 					<KobPagination.Items />
-					<KobPagination.Next class="h-10 w-10 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50">
+					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50">
 						<FaSolidChevronRight />
 					</KobPagination.Next>
 				</KobPagination.Root>
