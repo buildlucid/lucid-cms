@@ -1,17 +1,24 @@
 import T from "@/translations";
-import { type Component, Match, Switch } from "solid-js";
+import { type Component, For, Match, Switch } from "solid-js";
 import classNames from "classnames";
 import { FaSolidXmark, FaSolidPen } from "solid-icons/fa";
-import type { ErrorResult, FieldError, DocumentResponse } from "@types";
+import type {
+	ErrorResult,
+	FieldError,
+	DocumentResponse,
+	DocumentResMeta,
+} from "@types";
 import documentSelectStore from "@/store/forms/documentSelectStore";
 import Button from "@/components/Partials/Button";
+import helpers from "@/utils/brick-helpers";
 import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface DocumentSelectProps {
 	id: string;
 	collection: string;
 	value: number | undefined;
-	onChange: (_value: number | null) => void;
+	onChange: (value: number | null, meta: DocumentResMeta | null) => void;
+	meta: DocumentResMeta | undefined;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -29,7 +36,11 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const openDocuSelectModal = () => {
 		documentSelectStore.set({
 			onSelectCallback: (doc: DocumentResponse) => {
-				props.onChange(doc.id);
+				props.onChange(doc.id, {
+					id: doc.id,
+					collectionKey: doc.collectionKey,
+					fields: helpers.objectifyFields(doc.fields || []),
+				});
 			},
 			open: true,
 			collectionKey: props.collection,
@@ -68,6 +79,23 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 						</Button>
 					</Match>
 					<Match when={typeof props.value === "number"}>
+						{/* <div class="border border-border rounded-md p-15 bg-container-2 mb-2.5">
+							<For each={Object.values(props.meta?.fields || {})}>
+								{(field, i) => {
+									if (field.type === "tab") return null;
+									if (field.type === "repeater") return null;
+
+									return (
+										<Switch>
+											<Match when={field.type === "text"}>
+												{field.key}
+												{field.value}
+											</Match>
+										</Switch>
+									);
+								}}
+							</For>
+						</div> */}
 						<div class="w-full flex items-center gap-2.5">
 							<Button
 								type="button"
@@ -91,7 +119,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								theme="input-style"
 								size="x-icon"
 								onClick={() => {
-									props.onChange(null);
+									props.onChange(null, null);
 								}}
 								disabled={props.disabled}
 								classes="capitalize"

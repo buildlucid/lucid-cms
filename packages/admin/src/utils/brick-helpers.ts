@@ -6,6 +6,7 @@ import type {
 	FieldResponseMeta,
 	FieldError,
 	BrickError,
+	FieldAltResponse,
 } from "@types";
 
 const findFieldRecursive = (props: {
@@ -162,6 +163,31 @@ const hasErrorsOnOtherLocale = (props: {
 	return props.brickErrors.some((brick) => brick.fields.some(hasFieldErrors));
 };
 
+/**
+ * Converts a FieldResponse array into a FieldAltResponse object
+ */
+const objectifyFields = (
+	fields: FieldResponse[],
+): Record<string, FieldAltResponse> => {
+	return fields.reduce(
+		(acc, field) => {
+			if (!field) return acc;
+
+			acc[field.key] = {
+				...field,
+				groups: field.groups?.map((g) => {
+					return {
+						...g,
+						fields: objectifyFields(g.fields || []),
+					};
+				}),
+			} satisfies FieldAltResponse;
+			return acc;
+		},
+		{} as Record<string, FieldAltResponse>,
+	);
+};
+
 // ---------------------------------------------
 // Exports
 const brickHelpers = {
@@ -172,6 +198,7 @@ const brickHelpers = {
 	getFieldValue,
 	getFieldMeta,
 	hasErrorsOnOtherLocale,
+	objectifyFields,
 };
 
 export default brickHelpers;
