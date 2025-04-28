@@ -66,6 +66,11 @@ export const Header: Component<{
 					{T()("create")} {props.state.collectionSingularName()}
 				</h1>
 			</Show>
+			<Show when={props.mode === "revisions"}>
+				<h1 class="mt-2.5">
+					{props.state.collectionSingularName()} {T()("revisions")}
+				</h1>
+			</Show>
 
 			<nav class="-mb-px bg-container-2 mt-15">
 				<ul class="flex gap-2">
