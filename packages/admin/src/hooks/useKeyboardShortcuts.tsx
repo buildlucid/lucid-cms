@@ -5,6 +5,7 @@ const modKey = isMac() ? "⌘" : "Ctrl";
 
 export const shortcutText = {
 	changeLocale: `${modKey}+Shift+L`,
+	newEntry: "Shift+T",
 };
 
 export const inModal = () =>
@@ -19,14 +20,13 @@ const useKeyboardShortcuts = (options: {
 		permission: () => boolean;
 		callback: () => void;
 	};
-	saveEntry?: {
-		permission: () => boolean;
-		callback: () => void;
-	};
+	// saveEntry?: {
+	// 	permission: () => boolean;
+	// 	callback: () => void;
+	// };
 }) => {
 	const handleKeyDown = (e: KeyboardEvent) => {
 		// change locale: meta/cntrl + shfit + l
-
 		if (options.changeLocale?.permission()) {
 			if (
 				(e.metaKey || e.ctrlKey) &&
@@ -34,17 +34,17 @@ const useKeyboardShortcuts = (options: {
 				e.key.toLowerCase() === "l"
 			) {
 				e.preventDefault();
+				e.stopPropagation();
 				options.changeLocale.callback();
 			}
 		}
 
-		// new entry: meta/cntrl + n
+		// new entry: meta/cntrl + t
 		if (options.newEntry?.permission()) {
 			if (
-				(e.metaKey || e.ctrlKey) &&
-				!e.shiftKey &&
-				!e.altKey &&
-				e.key.toLowerCase() === "n"
+				// (e.metaKey || e.ctrlKey) &&
+				e.shiftKey &&
+				e.key.toLowerCase() === "t"
 			) {
 				e.preventDefault();
 				options.newEntry.callback();
@@ -52,17 +52,16 @@ const useKeyboardShortcuts = (options: {
 		}
 
 		// save entry: meta/cntrl + s
-		if (options.saveEntry?.permission()) {
-			if (
-				(e.metaKey || e.ctrlKey) &&
-				!e.shiftKey &&
-				!e.altKey &&
-				e.key.toLowerCase() === "s"
-			) {
-				e.preventDefault();
-				options.saveEntry.callback();
-			}
-		}
+		// if (options.saveEntry?.permission()) {
+		// 	if (
+		// 		(e.metaKey || e.ctrlKey) &&
+		// 		// e.shiftKey &&
+		// 		e.key.toLowerCase() === "enter"
+		// 	) {
+		// 		e.preventDefault();
+		// 		options.saveEntry.callback();
+		// 	}
+		// }
 	};
 
 	onMount(() => {

@@ -62,6 +62,8 @@ export const Panel: Component<{
 }> = (props) => {
 	// ------------------------------
 	// State
+	const [lastFocusedElement, setLastfocusedElement] =
+		createSignal<Element | null>(null);
 	const [contentLocale, setContentLocale] = createSignal<string | undefined>(
 		undefined,
 	);
@@ -82,6 +84,7 @@ export const Panel: Component<{
 	// Effects
 	createEffect(() => {
 		if (props.state.open) {
+			setLastfocusedElement(document.activeElement);
 			setContentLocale(getDefaultContentLocale());
 		}
 		if (props.state.open === false) {
@@ -113,6 +116,16 @@ export const Panel: Component<{
 								e.stopPropagation();
 								e.preventDefault();
 							}
+						}}
+						onCloseAutoFocus={() => {
+							let element = lastFocusedElement();
+							if (element instanceof HTMLBodyElement || !element) {
+								element = document.querySelector(
+									"button:not([tabindex='-1']), a:not([tabindex='-1'])",
+								);
+							}
+							// @ts-expect-error
+							if (element && "focus" in element) element.focus();
 						}}
 					>
 						<Switch>

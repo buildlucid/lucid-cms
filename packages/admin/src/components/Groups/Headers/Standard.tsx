@@ -1,10 +1,12 @@
 import T from "@/translations";
-import { type Component, type JSXElement, Show } from "solid-js";
+import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import classNames from "classnames";
 import { FaSolidPlus, FaSolidTrash } from "solid-icons/fa";
 import Link from "@/components/Partials/Link";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
+import { useNavigate } from "@solidjs/router";
 
 export const Standard: Component<{
 	copy?: {
@@ -43,6 +45,43 @@ export const Standard: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------------
+	// Hooks & State
+	const navigate = useNavigate();
+
+	// ----------------------------------------
+	// Memos
+	const showCreateAction = createMemo(() => {
+		return (
+			props.actions?.create !== undefined &&
+			props.actions.create.permission !== false
+		);
+	});
+	const showCreateLink = createMemo(() => {
+		return (
+			props.actions?.createLink !== undefined &&
+			props.actions.createLink.permission !== false &&
+			props.actions.createLink.show !== false
+		);
+	});
+
+	// ----------------------------------------
+	// Hooks & State
+	useKeyboardShortcuts({
+		newEntry: {
+			permission: () => showCreateAction() || showCreateLink(),
+			callback: () => {
+				if (showCreateAction()) {
+					props.actions?.create?.setOpen(true);
+				}
+
+				if (showCreateLink() && props.actions?.createLink?.link) {
+					navigate(props.actions?.createLink?.link);
+				}
+			},
+		},
+	});
+
+	// ----------------------------------------
 	// Render
 	return (
 		<div class="bg-container-2 border-b border-border">
@@ -76,12 +115,7 @@ export const Standard: Component<{
 								<ContentLocaleSelect showShortcut={true} />
 							</div>
 						</Show>
-						<Show
-							when={
-								props.actions?.create !== undefined &&
-								props.actions.create.permission !== false
-							}
-						>
+						<Show when={showCreateAction()}>
 							<Button
 								type="submit"
 								theme="primary"
@@ -96,13 +130,7 @@ export const Standard: Component<{
 								</span>
 							</Button>
 						</Show>
-						<Show
-							when={
-								props.actions?.createLink !== undefined &&
-								props.actions.createLink.permission !== false &&
-								props.actions.createLink.show !== false
-							}
-						>
+						<Show when={showCreateLink()}>
 							<Link
 								theme="primary"
 								size="x-icon"
