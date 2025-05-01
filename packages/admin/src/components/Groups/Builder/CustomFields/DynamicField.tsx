@@ -80,9 +80,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		);
 	});
 	const isLocalised = createMemo(() => {
-		// TODO: include check for the collection also supporting translations
-		// @ts-expect-error
-		return props.state.fieldConfig?.config?.useTranslations;
+		return (
+			// @ts-expect-error
+			props.state.fieldConfig?.config?.useTranslations &&
+			brickStore.get.collectionTranslations
+		);
 	});
 	const altLocaleError = createMemo(() => {
 		return props.state.fieldErrors.some(
