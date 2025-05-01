@@ -21,6 +21,7 @@ interface MediaFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -98,6 +99,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 				}),
 			}}
 			altLocaleError={props.state.altLocaleError}
+			localised={props.state.localised}
 			disabled={isDisabled()}
 			extensions={props.state.fieldConfig.validation?.extensions}
 			type={props.state.fieldConfig.validation?.type}

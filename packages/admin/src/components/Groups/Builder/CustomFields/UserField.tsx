@@ -21,6 +21,7 @@ interface UserFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -86,6 +87,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			name={props.state.fieldConfig.key}
 			errors={props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
+			localised={props.state.localised}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			theme={"basic"}

@@ -16,6 +16,7 @@ interface ColourProps {
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
+	localised?: boolean;
 	altLocaleError?: boolean;
 }
 
@@ -37,10 +38,11 @@ export const Colour: Component<ColourProps> = (props) => {
 				required={props.required}
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
+				localised={props.localised}
 			/>
 			<input
 				class={classnames(
-					"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium p-1 bg-container-4 border border-border-input h-10 w-full rounded-md mt-1 focus:border-primary-base duration-200 transition-colors",
+					"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium p-1 bg-container-4 border border-border-input h-12 w-full rounded-md mt-1 focus:border-primary-base duration-200 transition-colors",
 				)}
 				onKeyDown={(e) => {
 					e.stopPropagation();

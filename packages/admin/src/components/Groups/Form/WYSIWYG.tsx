@@ -23,6 +23,7 @@ interface WYSIWYGProps {
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
+	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 }
@@ -94,6 +95,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 				required={props.required}
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
+				localised={props.localised}
 			/>
 			<div
 				class={classnames("mt-1 bg-container-4 rounded-md", {

@@ -45,6 +45,7 @@ export interface SingleFileUploadProps {
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult;
+	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 }
@@ -129,6 +130,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 				required={props.required}
 				noPadding={true}
 				altLocaleError={props.altLocaleError}
+				localised={props.localised}
 				theme="basic"
 			/>
 			<input

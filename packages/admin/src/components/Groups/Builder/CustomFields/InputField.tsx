@@ -22,6 +22,7 @@ interface InputFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -101,6 +102,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			}}
 			errors={props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
+			localised={props.state.localised}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			theme={"basic"}

@@ -79,6 +79,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 				f.localeCode === contentLocale(),
 		);
 	});
+	const isLocalised = createMemo(() => {
+		// TODO: include check for the collection also supporting translations
+		// @ts-expect-error
+		return props.state.fieldConfig?.config?.useTranslations;
+	});
 	const altLocaleError = createMemo(() => {
 		return props.state.fieldErrors.some(
 			(f) =>
@@ -168,6 +173,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -182,6 +188,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -196,6 +203,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -211,6 +219,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -226,6 +235,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -240,6 +250,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -254,6 +265,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -268,6 +280,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -282,6 +295,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -296,6 +310,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -310,6 +325,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -324,6 +340,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>
@@ -338,6 +355,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
+								localised: isLocalised(),
 							}}
 						/>
 					</Match>

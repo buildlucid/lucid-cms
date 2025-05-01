@@ -267,7 +267,6 @@
 	"no_documents_description": "We cannot find any {{collectionMultiple}}. You can create a new {{collectionSingle}} by clicking the button below.",
 	"no_documents_description_doc_select": "We cannot find any {{collectionMultiple}}. You can create new a new {{collectionSingle}} navigating to the collection page.",
 	"create_document": "Create {{collectionSingle}}",
-
 	"delete_environment_modal_title": "Delete Environment",
 	"delete_environment_modal_description": "Are you sure you want to delete this environment?",
 	"delete_role_modal_title": "Delete Role",
@@ -300,7 +299,6 @@
 	"regenerate_api_key_modal_description": "Are you sure you want to regenerate the API key for this client integration?",
 	"promote_to_draft_modal_title": "Promote to Draft",
 	"promote_to_draft_modal_description": "We notice drafts are enabled for this collection, but there is only a published version for this document. To continue editing, a draft version will be created from the published version.",
-
 	"update_role_panel_title": "Edit {{name}} Role",
 	"update_role_panel_description": "Update the permissions for the {{name}} role.",
 	"create_role_panel_title": "Create a New Role",
@@ -322,7 +320,6 @@
 	"create_client_integration_panel_description": "Create a new client integration.",
 	"update_client_integration_panel_title": "Update Client Integration",
 	"update_client_integration_panel_description": "Update your client integration details",
-
 	"restore_revision_toast_title": "{{name}} restored",
 	"restore_revision_toast_message": "The {{name}} has been restored",
 	"password_reset_toast_title": "Password reset email sent",
@@ -386,7 +383,6 @@
 	"fixed_bricks": "Fixed Bricks",
 	"total_bricks": "Total Bricks",
 	"clear_filters": "Clear Filters",
-
 	"create_toast_title": "{{name}} created",
 	"create_toast_message": "The {{name}} has been created",
 	"deleted_toast_title": "{{name}} deleted",
@@ -395,7 +391,6 @@
 	"update_toast_message": "The {{name}} has been updated",
 	"publish_toast_title": "{{name}} published",
 	"publish_toast_message": "The {{name}} has been published",
-
 	"account_route_title": "Account",
 	"account_route_description": "Manage your account details and settings.",
 	"roles_route_title": "Roles",
@@ -477,5 +472,6 @@
 	"locked_document_message": "This document is locked and cannot be edited, only viewed.",
 	"created": "Created",
 	"modified": "Modified",
-	"save_draft": "Save Draft"
+	"save_draft": "Save Draft",
+	"optional": "Optional"
 }

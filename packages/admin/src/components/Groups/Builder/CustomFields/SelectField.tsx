@@ -22,6 +22,7 @@ interface SelectFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -99,6 +100,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 				}),
 			}}
 			altLocaleError={props.state.altLocaleError}
+			localised={props.state.localised}
 			noClear={props.state.fieldConfig.validation?.required || false}
 			disabled={isDisabled()}
 			errors={props.state.fieldError}

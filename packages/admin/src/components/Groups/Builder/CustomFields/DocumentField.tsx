@@ -26,6 +26,7 @@ interface DocumentFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -105,6 +106,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			}}
 			errors={props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
+			localised={props.state.localised}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 		/>

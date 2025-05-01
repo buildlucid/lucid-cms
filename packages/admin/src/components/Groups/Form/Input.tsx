@@ -28,6 +28,7 @@ interface InputProps {
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
+	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 
@@ -74,6 +75,7 @@ export const Input: Component<InputProps> = (props) => {
 					required={props.required}
 					theme={props.theme}
 					altLocaleError={props.altLocaleError}
+					localised={props.localised}
 				/>
 				<input
 					class={classnames(
@@ -81,7 +83,7 @@ export const Input: Component<InputProps> = (props) => {
 						{
 							"pr-[38px]": props.type === "password",
 							"pt-2": props.copy?.label === undefined,
-							"bg-container-4 border border-border-input h-10 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
+							"bg-container-4 border border-border-input h-12 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
 								props.theme === "basic",
 							"bg-transparent pb-2 pt-1 rounded-b-md": props.theme === "full",
 						},

@@ -10,6 +10,8 @@ interface LabelProps {
 	required?: boolean;
 	noPadding?: boolean;
 	theme: "full" | "basic" | "basic-small";
+
+	localised?: boolean;
 	altLocaleError?: boolean;
 }
 
@@ -27,20 +29,25 @@ export const Label: Component<LabelProps> = (props) => {
 					},
 				)}
 			>
-				<span>
+				<span class="flex items-center">
+					<Show when={props.localised}>
+						<span
+							class={classnames("mr-1 inline", {
+								"text-error-base": props.altLocaleError,
+							})}
+							title={T()("this_filed_has_errors_in_other_locales")}
+						>
+							<FaSolidGlobe size={12} />
+						</span>
+					</Show>
 					{props?.label}
 					<Show when={props.required}>
 						<span class="text-error-base ml-1 inline">*</span>
 					</Show>
 				</span>
 
-				<Show when={props.altLocaleError}>
-					<span
-						class="text-error-base ml-1 inline"
-						title={T()("this_filed_has_errors_in_other_locales")}
-					>
-						<FaSolidGlobe size={12} />
-					</span>
+				<Show when={!props.required}>
+					<span class="text-unfocused">{T()("optional")}</span>
 				</Show>
 			</label>
 		</Show>

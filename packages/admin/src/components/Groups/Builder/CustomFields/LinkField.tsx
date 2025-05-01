@@ -21,6 +21,7 @@ interface LinkFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -87,6 +88,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 					}),
 				}}
 				altLocaleError={props.state.altLocaleError}
+				localised={props.state.localised}
 				disabled={isDisabled()}
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}

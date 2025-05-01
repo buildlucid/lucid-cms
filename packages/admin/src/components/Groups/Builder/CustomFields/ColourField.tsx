@@ -21,6 +21,7 @@ interface ColourFieldProps {
 		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
+		localised: boolean;
 	};
 }
 
@@ -86,6 +87,7 @@ export const ColourField: Component<ColourFieldProps> = (props) => {
 					}),
 				}}
 				altLocaleError={props.state.altLocaleError}
+				localised={props.state.localised}
 				presets={props.state.fieldConfig.presets}
 				disabled={isDisabled()}
 				errors={props.state.fieldError}

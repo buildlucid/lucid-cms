@@ -19,6 +19,7 @@ interface TextareaProps {
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
+	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	theme: "full" | "basic";
@@ -56,6 +57,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 					required={props.required}
 					theme={props.theme}
 					altLocaleError={props.altLocaleError}
+					localised={props.localised}
 				/>
 				<textarea
 					class={classnames(

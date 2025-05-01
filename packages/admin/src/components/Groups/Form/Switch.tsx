@@ -24,6 +24,7 @@ interface SwitchProps {
 	disabled?: boolean;
 	required?: boolean;
 	errors?: ErrorResult | FieldError;
+	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	options?: {
@@ -73,6 +74,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				required={props.required}
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
+				localised={props.localised}
 			/>
 			<input
 				ref={checkboxRef}

@@ -14,6 +14,7 @@ interface UserSearchSelectProps {
 	copy?: SelectProps["copy"];
 	errors?: ErrorResult | FieldError;
 	altLocaleError?: boolean;
+	localised?: boolean;
 	theme: "basic" | "basic-small" | "full";
 	disabled?: boolean;
 	required?: boolean;
@@ -57,6 +58,7 @@ const UserSearchSelect: Component<UserSearchSelectProps> = (props) => {
 			}
 			errors={props.errors}
 			altLocaleError={props.altLocaleError}
+			localised={props.localised}
 			theme={props.theme}
 			disabled={props.disabled}
 			required={props.required}

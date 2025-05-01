@@ -33,6 +33,7 @@ interface SelectMultipleProps {
 	required?: boolean;
 	disabled?: boolean;
 	errors?: ErrorResult;
+	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	theme: "full" | "basic";
@@ -93,6 +94,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						required={props.required}
 						theme={props.theme}
 						altLocaleError={props.altLocaleError}
+						localised={props.localised}
 					/>
 					{/* Select */}
 					<div
