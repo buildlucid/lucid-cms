@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/plugin-s3",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"private": false,
 	"description": "The official S3 plugin for Lucid",
 	"type": "module",
@@ -37,7 +37,7 @@
 		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.10.2-alpha.0"
+		"@lucidcms/core": "^0.11.0-alpha.0"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.797.0",

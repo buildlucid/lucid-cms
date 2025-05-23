@@ -1,10 +1,16 @@
 # @lucidcms/plugin-pages
 
+## 0.3.0
+
+### Patch Changes
+
+- Updated to support new generate document tables and bumped core peer dependency version.
+
 ## 0.2.1
 
 ### Patch Changes
 
-- Bumped core peer dependency version
+- Bumped core peer dependency version.
 
 ## 0.2.0
 
@@ -22,16 +28,16 @@
 
 ### Patch Changes
 
-- Updated Lucid imports to match new export structure and bumped core peer dependency version
+- Updated Lucid imports to match new export structure and bumped core peer dependency version.
 
 ## 0.1.1
 
 ### Patch Changes
 
-- Fixed bug where the current documents fullSlug was being added each level of recursion when generating it's descendant fullSlugs within the afterUpsert hook
+- Fixed bug where the current documents fullSlug was being added each level of recursion when generating it's descendant fullSlugs within the afterUpsert hook.
 
 ## 0.1.0
 
 ### Minor Changes
 
-- Released the first version of the plugin
+- Released the first version of the plugin.

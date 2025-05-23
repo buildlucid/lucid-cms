@@ -1,5 +1,29 @@
 # @lucidcms/core
 
+## v0.11.0-alpha.0
+
+### Features:
+- Repeaters have a new minGroups validation option along with actual validation on min/max groups on the create/update document endpoint. ([4d27e99](https://github.com/ProtoDigitalUK/lucid_cms/commit/4d27e9937738b112607da4ca07a94cdf48841ba1%5D))
+- Jiti is now used for loading the lucid.config.ts/js file. ([2683e8c](https://github.com/ProtoDigitalUK/lucid_cms/commit/2683e8c4ab25175a95a4e7b55be3ea4e8f0542fa))
+- UUID dependency removed from core. ([b88aaa2](https://github.com/ProtoDigitalUK/lucid_cms/commit/b88aaa2d1345dd9c6e2ddf11257ce909bcbad2d8))
+- FS Extra dependency removed from core. ([fed3864](https://github.com/ProtoDigitalUK/lucid_cms/commit/fed38648b3ca87bbee6383066ae2e88ce3be5c4a))
+- The short-uuid dependency has been replaced with nanoid in @‌lucidcms/admin. ([089fd9a](https://github.com/ProtoDigitalUK/lucid_cms/commit/089fd9a8cf61619e88c1d42289f520ee6b4df140))
+- New config option added to set the log level. ([2f3b348](https://github.com/ProtoDigitalUK/lucid_cms/commit/2f3b348acbc2447a595a50497e2c57a0a2398671#diff-5bd1a6f5633cbd42061a55abf33c3eecc411d3943405af4892038fc02fe14d69R19))
+- Updated to Fastify V5 and Zod V4 for improved validation on query params, params, body, response, headers etc.
+- Replaced @‌fastify/swagger-ui with @‌scalar/fastify-api-reference and improved documentation a lot.
+- Improved @‌lucidcms/admin UI and UX by simplifying and adding keyboard shortcuts for common actions along with a number of bug fixes.
+
+### Breaking changes:
+- Supported Node version has been increased to the latest LTS 22 and package engines have been defined to be stricter on this. ([71333db](https://github.com/ProtoDigitalUK/lucid_cms/commit/71333dbcb37075d07a7b479b8ff8677372f1d3fb))
+- SQLite, LibSQL and PostgreSQL DB adapters have been moved out of core and are now independently publish packages. ([ff2daf2](https://github.com/ProtoDigitalUK/lucid_cms/commit/ff2daf2bec04fbaa5b6c3c291fa91d3ef6575aed))
+- Complete rework on how collections store their documents, versions, fields and bricks.
+- Removed the collection.column option on collection custom fields in favour of a displayInListing prop since it is the only remaining option. ([703f39e](https://github.com/ProtoDigitalUK/lucid_cms/commit/703f39e0b9038bb630146105f41a3fb7a5c42f48))
+
+### Bug Fixes:
+- Fixed issue with locale sync where deleted locales had their deleted at timestamp refreshed on start. ([0bafcd1](https://github.com/ProtoDigitalUK/lucid_cms/commit/0bafcd1fbe6ed833f4ef2d5a2d370f30494d0c01))
+- Fixed bug on SPA brick store where fields had their translation values overridden on creation on each locale iteration. ([59ecab2](https://github.com/ProtoDigitalUK/lucid_cms/commit/59ecab2d35b302611345933ab732d40a5a98e3c5))
+- WYSIWYG field bug where values weren't reactive both ways. ([6d25490](https://github.com/ProtoDigitalUK/lucid_cms/commit/6d254901c6672c9e59466ed65cf4a21c31990b7b))
+
 ## v0.10.2-alpha.0
 
 ### Bug Fixes:
