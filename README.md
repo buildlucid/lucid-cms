@@ -8,7 +8,7 @@
 <hr/>
 
 > [!CAUTION]
-> Lucid is still in Alpha and under heavy development, so please for the time being avoid using in any production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalised.
+> Lucid is still in Alpha and under heavy development and hasnt implemented licensing yet and so cannot be used in a production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalised.
 
 <hr/>
 
@@ -48,6 +48,12 @@ Effortlessly configure Lucid to meet your content needs with our flexible config
 - **Menus:** Coming soon!
 - **Resend:** Coming soon!
 - **Form Builder:** Coming soon!
+
+## 💾 DB Adapters
+
+- [PostgreSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/postgres-adapter)
+- [LibSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/libsql-adapter)
+- [SQLite](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/sqlite-adapter)
 
 ## 🏁 Getting Started
 
