@@ -2,8 +2,8 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import type { RouteController } from "../../../../types/types.js";
 import { swaggerRefs } from "../../../../api.js";
+import type { RouteController } from "../../../../types/types.js";
 
 const streamSingleController: RouteController<
 	typeof controllerSchemas.streamSingle.params,
@@ -24,8 +24,6 @@ const streamSingleController: RouteController<
 		},
 		{
 			key: request.params["*"],
-			query: request.formattedQuery,
-			accept: request.headers.accept,
 		},
 	);
 	if (response.error) {

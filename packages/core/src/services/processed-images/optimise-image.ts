@@ -2,13 +2,13 @@ import sharp from "sharp";
 import mime from "mime-types";
 import type { Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
+import type { ProcessMediaBody } from "../../schemas/media.js";
 
 const optimiseImage: ServiceFn<
 	[
 		{
 			stream: Readable;
-			options: StreamSingleQueryParams;
+			options: ProcessMediaBody;
 		},
 	],
 	{

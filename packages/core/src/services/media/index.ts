@@ -8,6 +8,7 @@ import updateSingle from "./update-single.js";
 import getPresignedUrl from "./get-presigned-url.js";
 import createSingle from "./create-single.js";
 import getMultipleFieldMeta from "./get-multiple-field-meta.js";
+import processMedia from "./process-media.js";
 
 export default {
 	checks,
@@ -20,4 +21,5 @@ export default {
 	getPresignedUrl,
 	createSingle,
 	getMultipleFieldMeta,
+	processMedia,
 };

@@ -1,3 +1,4 @@
+import client from "./client/index.js";
 import getSingle from "./get-single.js";
 import updateSingle from "./update-single.js";
 import deleteSingle from "./delete-single.js";
@@ -8,6 +9,7 @@ import getPresignedUrl from "./get-presigned-url.js";
 import createSingle from "./create-single.js";
 
 interface MediaRouteControllers {
+	client: typeof client;
 	updateSingle: typeof updateSingle;
 	getSingle: typeof getSingle;
 	deleteSingle: typeof deleteSingle;
@@ -19,6 +21,7 @@ interface MediaRouteControllers {
 }
 
 const controllers: MediaRouteControllers = {
+	client,
 	updateSingle,
 	getSingle,
 	deleteSingle,

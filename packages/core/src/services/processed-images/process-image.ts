@@ -1,5 +1,4 @@
 import Repository from "../../libs/repositories/index.js";
-import { PassThrough, type Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 
@@ -11,12 +10,7 @@ const processImage: ServiceFn<
 			options: StreamSingleQueryParams;
 		},
 	],
-	{
-		key: string;
-		contentLength: number | undefined;
-		contentType: string | undefined;
-		body: Readable;
-	}
+	undefined
 > = async (context, data) => {
 	const mediaStrategyRes =
 		context.services.media.checks.checkHasMediaStrategy(context);
@@ -30,12 +24,7 @@ const processImage: ServiceFn<
 	if (!mediaRes.data?.contentType?.startsWith("image/")) {
 		return {
 			error: undefined,
-			data: {
-				key: data.key,
-				contentLength: mediaRes.data.contentLength,
-				contentType: mediaRes.data.contentType,
-				body: mediaRes.data.body,
-			},
+			data: undefined,
 		};
 	}
 
@@ -53,28 +42,15 @@ const processImage: ServiceFn<
 	if (imageRes.error || processedCountRes.error || !imageRes.data) {
 		return {
 			error: undefined,
-			data: {
-				key: data.key,
-				contentLength: mediaRes.data.contentLength,
-				contentType: mediaRes.data.contentType,
-				body: mediaRes.data.body,
-			},
+			data: undefined,
 		};
 	}
-
-	const stream = new PassThrough();
-	stream.end(imageRes.data.buffer);
 
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
 	if (processedCountRes.data >= context.config.media.processed.limit) {
 		return {
 			error: undefined,
-			data: {
-				key: data.processKey,
-				contentLength: imageRes.data.size,
-				contentType: imageRes.data.mimeType,
-				body: stream,
-			},
+			data: undefined,
 		};
 	}
 
@@ -86,12 +62,7 @@ const processImage: ServiceFn<
 	if (canStoreRes.error) {
 		return {
 			error: undefined,
-			data: {
-				key: data.processKey,
-				contentLength: imageRes.data.size,
-				contentType: imageRes.data.mimeType,
-				body: stream,
-			},
+			data: undefined,
 		};
 	}
 
@@ -131,12 +102,7 @@ const processImage: ServiceFn<
 
 	return {
 		error: undefined,
-		data: {
-			key: data.processKey,
-			contentLength: imageRes.data.size,
-			contentType: imageRes.data.mimeType,
-			body: stream,
-		},
+		data: undefined,
 	};
 };
 

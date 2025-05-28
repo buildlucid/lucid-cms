@@ -121,6 +121,10 @@ export interface MediaResponse {
 	updatedAt: string | null;
 }
 
+export interface MediaUrlResponse {
+	url: string;
+}
+
 export interface LocalesResponse {
 	code: string;
 	name: string | null;
