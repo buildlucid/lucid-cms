@@ -29,7 +29,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 					classes={
 						"rounded-t-md group-hover:scale-110 transition duration-100 backface-hidden"
 					}
-					src={`${props.media.url}?width=400`}
+					src={`${props.media.url}?preset=thumbnail&format=webp`}
 					alt={props.alt || ""}
 					loading="lazy"
 				/>

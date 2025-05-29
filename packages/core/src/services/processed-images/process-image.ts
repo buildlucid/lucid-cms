@@ -1,16 +1,22 @@
 import Repository from "../../libs/repositories/index.js";
+import { PassThrough, type Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
+import type { ProcessMediaBody } from "../../schemas/media.js";
 
 const processImage: ServiceFn<
 	[
 		{
 			key: string;
 			processKey: string;
-			options: StreamSingleQueryParams;
+			options: ProcessMediaBody;
 		},
 	],
-	undefined
+	{
+		key: string;
+		contentLength: number | undefined;
+		contentType: string | undefined;
+		body: Readable;
+	}
 > = async (context, data) => {
 	const mediaStrategyRes =
 		context.services.media.checks.checkHasMediaStrategy(context);
@@ -24,7 +30,12 @@ const processImage: ServiceFn<
 	if (!mediaRes.data?.contentType?.startsWith("image/")) {
 		return {
 			error: undefined,
-			data: undefined,
+			data: {
+				key: data.key,
+				contentLength: mediaRes.data.contentLength,
+				contentType: mediaRes.data.contentType,
+				body: mediaRes.data.body,
+			},
 		};
 	}
 
@@ -42,15 +53,28 @@ const processImage: ServiceFn<
 	if (imageRes.error || processedCountRes.error || !imageRes.data) {
 		return {
 			error: undefined,
-			data: undefined,
+			data: {
+				key: data.key,
+				contentLength: mediaRes.data.contentLength,
+				contentType: mediaRes.data.contentType,
+				body: mediaRes.data.body,
+			},
 		};
 	}
 
+	const stream = new PassThrough();
+	stream.end(imageRes.data.buffer);
+
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
-	if (processedCountRes.data >= context.config.media.processed.limit) {
+	if (processedCountRes.data >= context.config.media.processedImageLimit) {
 		return {
 			error: undefined,
-			data: undefined,
+			data: {
+				key: data.processKey,
+				contentLength: imageRes.data.size,
+				contentType: imageRes.data.mimeType,
+				body: stream,
+			},
 		};
 	}
 
@@ -62,7 +86,12 @@ const processImage: ServiceFn<
 	if (canStoreRes.error) {
 		return {
 			error: undefined,
-			data: undefined,
+			data: {
+				key: data.processKey,
+				contentLength: imageRes.data.size,
+				contentType: imageRes.data.mimeType,
+				body: stream,
+			},
 		};
 	}
 
@@ -72,7 +101,7 @@ const processImage: ServiceFn<
 		context.config.db,
 	);
 
-	if (context.config.media.processed.store === true) {
+	if (context.config.media.storeProcessedImages === true) {
 		await Promise.all([
 			ProcessedImages.createSingle({
 				data: {
@@ -102,7 +131,12 @@ const processImage: ServiceFn<
 
 	return {
 		error: undefined,
-		data: undefined,
+		data: {
+			key: data.processKey,
+			contentLength: imageRes.data.size,
+			contentType: imageRes.data.mimeType,
+			body: stream,
+		},
 	};
 };
 

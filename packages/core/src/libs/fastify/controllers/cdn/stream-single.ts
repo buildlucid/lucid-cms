@@ -24,6 +24,8 @@ const streamSingleController: RouteController<
 		},
 		{
 			key: request.params["*"],
+			query: request.formattedQuery,
+			accept: request.headers.accept,
 		},
 	);
 	if (response.error) {

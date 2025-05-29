@@ -49,14 +49,29 @@ const ConfigSchema = z.object({
 		})
 		.optional(),
 	media: z.object({
-		storage: z.number(),
-		maxSize: z.number(),
-		processed: z.object({
-			limit: z.number(),
-			store: z.boolean(),
-		}),
+		storageLimit: z.number(),
+		maxFileSize: z.number(),
 		fallbackImage: z.union([z.string(), z.boolean()]).optional(),
 		strategy: z.unknown().optional(),
+		processedImageLimit: z.number(),
+		storeProcessedImages: z.boolean(),
+		onDemandFormats: z.boolean(),
+		imagePresets: z.record(
+			z.string(),
+			z.object({
+				width: z.number().optional(),
+				height: z.number().optional(),
+				format: z
+					.union([
+						z.literal("webp"),
+						z.literal("avif"),
+						z.literal("jpeg"),
+						z.literal("png"),
+					])
+					.optional(),
+				quality: z.number().optional(),
+			}),
+		),
 	}),
 	hooks: z.array(
 		z.object({

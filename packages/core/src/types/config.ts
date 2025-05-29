@@ -161,16 +161,9 @@ export interface LucidConfig {
 	/** Media settings. */
 	media?: {
 		/** The storage limit in bytes. */
-		storage?: number;
+		storageLimit?: number;
 		/** The maximum file size in bytes. */
-		maxSize?: number;
-		/** The processed image settings. */
-		processed?: {
-			/** The total amount of processed images allow for a single image media item. */
-			limit?: number;
-			/** If the processed images should be stored using the uploadSingle media strategy. If false, processed images are generated on request. */
-			store?: boolean;
-		};
+		maxFileSize?: number;
 		/** The fallback image to use if an image cannot be found.
 		 *  - If false or underfined, images will return a 404 status code.
 		 *  - If a string is passed, it will attempt to stream the url as the response.
@@ -179,6 +172,22 @@ export interface LucidConfig {
 		fallbackImage?: string | boolean | undefined;
 		/** The media strategy services to use. These determine how media is stored, retrieved and deleted. */
 		strategy?: MediaStrategy;
+		/** The processed image limit. */
+		processedImageLimit?: number;
+		/** If true, the processed images will be stored. */
+		storeProcessedImages?: boolean;
+		/** If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse. */
+		onDemandFormats?: boolean;
+		/** The image presets to use. These are used to generate the processed images. */
+		imagePresets?: Record<
+			string,
+			{
+				width?: number;
+				height?: number;
+				format?: "webp" | "avif" | "jpeg" | "png";
+				quality?: number;
+			}
+		>;
 	};
 	/** Fastify extensions to register. Allows you to register custom routes, middleware, and more. */
 	fastifyExtensions?: Array<(fastify: FastifyInstance) => Promise<void>>;
@@ -210,14 +219,22 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		defaultLocale: string;
 	};
 	media: {
-		storage: number;
-		maxSize: number;
-		processed: {
-			limit: number;
-			store: boolean;
-		};
+		storageLimit: number;
+		maxFileSize: number;
+		processedImageLimit: number;
+		storeProcessedImages: boolean;
 		fallbackImage: string | boolean | undefined;
 		strategy?: MediaStrategy;
+		onDemandFormats: boolean;
+		imagePresets: Record<
+			string,
+			{
+				width?: number;
+				height?: number;
+				format?: "webp" | "avif" | "jpeg" | "png";
+				quality?: number;
+			}
+		>;
 	};
 	fastifyExtensions: Array<(fastify: FastifyInstance) => Promise<void>>;
 	hooks: Array<AllHooks>;

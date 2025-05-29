@@ -19,14 +19,14 @@ export default class SettingsFormatter {
 			media: {
 				enabled: props.config.media?.strategy !== undefined,
 				storage: {
-					total: props.config.media.storage,
+					total: props.config.media.storageLimit,
 					remaining:
-						props.config.media.storage - props.settings.mediaStorageUsed,
+						props.config.media.storageLimit - props.settings.mediaStorageUsed,
 					used: props.settings.mediaStorageUsed,
 				},
 				processed: {
-					stored: props.config.media.processed.store,
-					imageLimit: props.config.media.processed.limit,
+					stored: props.config.media.storeProcessedImages,
+					imageLimit: props.config.media.processedImageLimit,
 					total: props.settings.processedImageCount,
 				},
 			},

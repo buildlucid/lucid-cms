@@ -6,6 +6,20 @@ export const controllerSchemas = {
 		body: undefined,
 		query: {
 			string: z.object({
+				preset: z
+					.string()
+					.meta({
+						description: "The preset to use for the image",
+						example: "thumbnail",
+					})
+					.optional(),
+				format: z
+					.enum(["jpeg", "png", "webp", "avif"])
+					.meta({
+						description: "If requesting an image, the format to convert it to",
+						example: "webp",
+					})
+					.optional(),
 				fallback: z
 					.enum(["true", "false"])
 					.meta({
@@ -16,6 +30,8 @@ export const controllerSchemas = {
 					.optional(),
 			}),
 			formatted: z.object({
+				preset: z.string().optional(),
+				format: z.enum(["jpeg", "png", "webp", "avif"]).optional(),
 				fallback: z.enum(["true", "false"]).optional(),
 			}),
 		},

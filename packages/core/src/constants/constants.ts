@@ -130,4 +130,7 @@ export default Object.freeze({
 	fastify: {
 		version: "5.x",
 	},
+	media: {
+		imagePresetQuality: 80,
+	},
 });

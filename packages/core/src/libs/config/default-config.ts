@@ -17,14 +17,20 @@ export const defaultConfig: Partial<LucidConfig> = {
 		defaultLocale: "en",
 	},
 	media: {
-		storage: 5368709120,
-		maxSize: 16777216,
-		processed: {
-			limit: 10,
-			store: false,
-		},
+		storageLimit: 5368709120,
+		maxFileSize: 16777216,
 		fallbackImage: undefined,
 		strategy: undefined,
+		processedImageLimit: 10,
+		storeProcessedImages: true,
+		onDemandFormats: false,
+		imagePresets: {
+			thumbnail: {
+				height: 200,
+				format: "webp",
+				quality: 80,
+			},
+		},
 	},
 	fastifyExtensions: [],
 	hooks: [],

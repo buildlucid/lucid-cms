@@ -51,10 +51,10 @@ export default lucid.config({
 	},
 	// disableSwagger: true,
 	media: {
-		// maxSize: 200 * 1024 * 1024,
-		processed: {
-			store: true,
-		},
+		// maxFileSize: 200 * 1024 * 1024,
+		processedImageLimit: 10,
+		storeProcessedImages: true,
+		onDemandFormats: true,
 		fallbackImage: "https://placehold.co/600x400",
 	},
 	// hooks: [

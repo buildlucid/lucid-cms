@@ -11,8 +11,8 @@ const checkCanStore: ServiceFn<
 		proposedSize: number;
 	}
 > = async (context, data) => {
-	const maxFileSize = context.config.media.maxSize;
-	const storageLimit = context.config.media.storage;
+	const maxFileSize = context.config.media.maxFileSize;
+	const storageLimit = context.config.media.storageLimit;
 
 	if (data.size > maxFileSize) {
 		return {

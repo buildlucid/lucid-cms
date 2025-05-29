@@ -181,7 +181,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			MediaFile.setCurrentFile({
 				name: media.data.data.key,
 				url: media.data?.data.url
-					? `${media.data.data.url}?width=400`
+					? `${media.data.data.url}?preset=thumbnail&format=webp`
 					: undefined,
 				type: media.data?.data.type || undefined,
 			});
