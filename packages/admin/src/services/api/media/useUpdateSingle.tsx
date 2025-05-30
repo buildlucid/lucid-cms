@@ -16,6 +16,12 @@ interface Params {
 			localeCode: string | null;
 			value: string | null;
 		}>;
+		width?: number | null;
+		height?: number | null;
+		blurHash?: string | null;
+		averageColour?: string | null;
+		isDark?: boolean | null;
+		isLight?: boolean | null;
 	};
 }
 

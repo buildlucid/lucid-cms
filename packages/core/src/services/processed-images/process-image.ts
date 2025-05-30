@@ -117,8 +117,6 @@ const processImage: ServiceFn<
 					mimeType: imageRes.data.mimeType,
 					extension: imageRes.data.extension,
 					size: imageRes.data.size,
-					width: imageRes.data.width,
-					height: imageRes.data.height,
 					type: "image",
 				},
 			}),

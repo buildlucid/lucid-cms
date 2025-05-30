@@ -77,17 +77,7 @@ export type MediaStrategyStream = (key: string) => ServiceResponse<{
 export type MediaStrategyUploadSingle = (props: {
 	key: string;
 	data: Readable | Buffer;
-	meta: Omit<
-		MediaKitMeta,
-		| "blurHash"
-		| "averageColour"
-		| "isDark"
-		| "isLight"
-		| "tempPath"
-		| "name"
-		| "key"
-		| "etag"
-	>;
+	meta: Omit<MediaKitMeta, "tempPath" | "name" | "key" | "etag">;
 }) => ServiceResponse<{
 	etag?: string;
 }>;

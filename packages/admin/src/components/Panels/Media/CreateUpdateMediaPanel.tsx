@@ -158,13 +158,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		return undefined;
 	};
 	const onSubmit = async () => {
+		const imageMeta = await MediaFile.getImageMeta();
+
 		const mutation =
 			panelMode() === "create"
 				? createMedia.createMedia
 				: updateMedia?.updateMedia;
 		if (!mutation) return;
 
-		const success = await mutation(MediaFile.getFile());
+		const success = await mutation(MediaFile.getFile(), imageMeta);
 
 		if (!success) return;
 

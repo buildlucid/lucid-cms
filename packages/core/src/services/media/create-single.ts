@@ -10,6 +10,12 @@ const createSingle: ServiceFn<
 		{
 			key: string;
 			fileName: string;
+			width?: number;
+			height?: number;
+			blurHash?: string;
+			averageColour?: string;
+			isDark?: boolean;
+			isLight?: boolean;
 			title?: {
 				localeCode: string;
 				value: string | null;
@@ -76,14 +82,14 @@ const createSingle: ServiceFn<
 				mime_type: syncMediaRes.data.mimeType,
 				file_extension: syncMediaRes.data.extension,
 				file_size: syncMediaRes.data.size,
-				width: syncMediaRes.data.width,
-				height: syncMediaRes.data.height,
+				width: data.width ?? null,
+				height: data.height ?? null,
 				title_translation_key_id: translationKeyIdsRes.data.title,
 				alt_translation_key_id: translationKeyIdsRes.data.alt,
-				blur_hash: syncMediaRes.data.blurHash,
-				average_colour: syncMediaRes.data.averageColour,
-				is_dark: syncMediaRes.data.isDark,
-				is_light: syncMediaRes.data.isLight,
+				blur_hash: data.blurHash ?? null,
+				average_colour: data.averageColour ?? null,
+				is_dark: data.isDark ?? null,
+				is_light: data.isLight ?? null,
 			},
 			returning: ["id"],
 		}),

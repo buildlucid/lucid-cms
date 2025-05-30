@@ -11,7 +11,7 @@ const routes =
 		route(fastify, {
 			method: "put",
 			url: "/api/v1/localstorage/upload",
-			bodyLimit: fastify.config.media.maxSize,
+			bodyLimit: fastify.config.media.maxFileSize,
 			controller: uploadController.controller(pluginOptions),
 			swaggerSchema: uploadController.swaggerSchema(pluginOptions),
 			zodSchema: uploadController.zodSchema,

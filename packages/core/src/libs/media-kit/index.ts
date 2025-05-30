@@ -1,9 +1,6 @@
 import T from "../../translations/index.js";
 import mime from "mime-types";
-import sharp from "sharp";
 import slug from "slug";
-import { encode } from "blurhash";
-import { getAverageColor } from "fast-average-color-node";
 import { getMonth, getYear } from "date-fns";
 import type { Readable } from "node:stream";
 import type { Config, MediaType } from "../../types.js";
@@ -17,13 +14,6 @@ export interface MediaKitMeta {
 	size: number;
 	key: string;
 	etag: string | null;
-	// image meta
-	width: number | null;
-	height: number | null;
-	blurHash: string | null;
-	averageColour: string | null;
-	isDark: boolean | null;
-	isLight: boolean | null;
 }
 
 class MediaKit {
@@ -36,13 +26,6 @@ class MediaKit {
 	size: number | null = null;
 	key: string | null = null;
 	etag: string | null = null;
-	// image meta
-	blurHash: string | null = null;
-	width: number | null = null;
-	height: number | null = null;
-	averageColour: string | null = null;
-	isDark: boolean | null = null;
-	isLight: boolean | null = null;
 
 	constructor(config: Config["media"]) {
 		this.config = config;
@@ -86,9 +69,6 @@ class MediaKit {
 			};
 		}
 
-		const metaRes = await this.typeSpecificMeta(props.streamFile);
-		if (metaRes.error) return metaRes;
-
 		return {
 			error: undefined,
 			data: {
@@ -99,12 +79,6 @@ class MediaKit {
 				size: this.size,
 				key: this.key,
 				etag: this.etag,
-				width: this.width,
-				height: this.height,
-				blurHash: this.blurHash,
-				averageColour: this.averageColour,
-				isDark: this.isDark === null ? null : this.isDark,
-				isLight: this.isLight === null ? null : this.isLight,
 			},
 		};
 	}
@@ -154,78 +128,6 @@ class MediaKit {
 			error: undefined,
 			data: `${getYear(date)}/${monthF}/${uuid}-${filename}.${ext}`,
 		};
-	}
-
-	// ----------------------------------------
-	// Private
-	private async typeSpecificMeta(
-		streamFile: () => ServiceResponse<{
-			contentLength: number | undefined;
-			contentType: string | undefined;
-			body: Readable;
-		}>,
-	): ServiceResponse<undefined> {
-		try {
-			switch (this.type) {
-				case "image": {
-					const fileStreamRes = await streamFile();
-					if (fileStreamRes.error) return fileStreamRes;
-
-					const transform = sharp();
-					fileStreamRes.data.body?.pipe(transform);
-					const meta = await transform.metadata();
-
-					this.width = meta.width || null;
-					this.height = meta.height || null;
-
-					const [hashBuffer, acBuffer] = await Promise.all([
-						transform
-							.raw()
-							.resize({
-								width: 100,
-							})
-							.ensureAlpha()
-							.toBuffer({ resolveWithObject: true }),
-						transform
-							.webp({ quality: 80 })
-							.resize({
-								width: 100,
-							})
-							.toBuffer({ resolveWithObject: true }),
-					]);
-
-					this.blurHash = encode(
-						new Uint8ClampedArray(hashBuffer.data),
-						hashBuffer.info.width,
-						hashBuffer.info.height,
-						4,
-						4,
-					);
-
-					const averageRes = await getAverageColor(acBuffer.data);
-					this.averageColour = averageRes.rgba;
-					this.isDark = averageRes.isDark;
-					this.isLight = averageRes.isLight;
-				}
-			}
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		} catch (error) {
-			return {
-				error: {
-					type: "basic",
-					name: T("media_error_getting_metadata"),
-					message:
-						// @ts-expect-error
-						error?.message || T("media_error_getting_metadata"),
-					status: 500,
-				},
-				data: undefined,
-			};
-		}
 	}
 }
 

@@ -40,7 +40,12 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --apply ./src"
 	},
-	"files": ["dist", "cms", "templates", "assets"],
+	"files": [
+		"dist",
+		"cms",
+		"templates",
+		"assets"
+	],
 	"author": "Proto Digital",
 	"repository": {
 		"type": "git",
@@ -83,9 +88,7 @@
 		"@scalar/fastify-api-reference": "^1.28.26",
 		"@tailwindcss/vite": "^4.1.4",
 		"argon2": "^0.43.0",
-		"blurhash": "^2.0.5",
 		"date-fns": "^4.1.0",
-		"fast-average-color-node": "^3.1.0",
 		"fastify": "^5.3.2",
 		"fastify-plugin": "^5.0.1",
 		"handlebars": "^4.7.8",

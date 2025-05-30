@@ -16,6 +16,12 @@ const updateSingle: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
+			width?: number | null;
+			height?: number | null;
+			blurHash?: string | null;
+			averageColour?: string | null;
+			isDark?: boolean | null;
+			isLight?: boolean | null;
 		},
 	],
 	number | undefined
@@ -134,13 +140,13 @@ const updateSingle: ServiceFn<
 				mime_type: updateObjectRes.data.mimeType,
 				file_extension: updateObjectRes.data.extension,
 				file_size: updateObjectRes.data.size,
-				width: updateObjectRes.data.width,
-				height: updateObjectRes.data.height,
+				width: data.width,
+				height: data.height,
 				updated_at: new Date().toISOString(),
-				blur_hash: updateObjectRes.data.blurHash,
-				average_colour: updateObjectRes.data.averageColour,
-				is_dark: updateObjectRes.data.isDark,
-				is_light: updateObjectRes.data.isLight,
+				blur_hash: data.blurHash,
+				average_colour: data.averageColour,
+				is_dark: data.isDark,
+				is_light: data.isLight,
 			},
 			returning: ["id"],
 			validation: {

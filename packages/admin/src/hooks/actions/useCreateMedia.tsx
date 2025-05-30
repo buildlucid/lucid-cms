@@ -1,7 +1,8 @@
 import T from "@/translations";
-import { createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
+import { createMemo, createSignal } from "solid-js";
 import type { ErrorResponse, MediaResponse } from "@types";
+import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useCreateMedia = () => {
 	const [getTitle, setTitle] = createSignal<MediaResponse["title"]>([]);
@@ -87,7 +88,10 @@ export const useCreateMedia = () => {
 			setUploadLoading(false);
 		}
 	};
-	const createMedia = async (file: File | null): Promise<boolean> => {
+	const createMedia = async (
+		file: File | null,
+		imageMeta: ImageMeta | null,
+	): Promise<boolean> => {
 		let fileKey = getKey();
 
 		if (file) {
@@ -102,6 +106,12 @@ export const useCreateMedia = () => {
 			fileName: file?.name,
 			title: getTitle(),
 			alt: getAlt(),
+			width: imageMeta?.width,
+			height: imageMeta?.height,
+			blurHash: imageMeta?.blurHash,
+			averageColour: imageMeta?.averageColour,
+			isDark: imageMeta?.isDark,
+			isLight: imageMeta?.isLight,
 		});
 
 		return true;

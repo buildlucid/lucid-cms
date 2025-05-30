@@ -1,7 +1,8 @@
 import T from "@/translations";
-import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
+import { type Accessor, createMemo, createSignal } from "solid-js";
 import type { ErrorResponse, MediaResponse } from "@types";
+import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getTitle, setTitle] = createSignal<MediaResponse["title"]>([]);
@@ -87,7 +88,10 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			setUploadLoading(false);
 		}
 	};
-	const updateMedia = async (file: File | null): Promise<boolean> => {
+	const updateMedia = async (
+		file: File | null,
+		imageMeta: ImageMeta | null,
+	): Promise<boolean> => {
 		if (!id()) return false;
 
 		let fileKey = getKey();
@@ -105,6 +109,12 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				fileName: file?.name,
 				title: getTitle(),
 				alt: getAlt(),
+				width: imageMeta?.width,
+				height: imageMeta?.height,
+				blurHash: imageMeta?.blurHash,
+				averageColour: imageMeta?.averageColour,
+				isDark: imageMeta?.isDark,
+				isLight: imageMeta?.isLight,
 			},
 		});
 

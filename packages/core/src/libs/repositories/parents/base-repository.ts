@@ -1,5 +1,4 @@
 import T from "../../../translations/index.js";
-import crypto from "node:crypto";
 import logger from "../../../utils/logging/index.js";
 import constants from "../../../constants/constants.js";
 import { tidyZodError } from "../../../utils/errors/index.js";

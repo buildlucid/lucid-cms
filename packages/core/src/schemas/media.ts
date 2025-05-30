@@ -224,6 +224,54 @@ export const controllerSchemas = {
 					}),
 				)
 				.optional(),
+			width: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The image width",
+					example: 100,
+				})
+				.optional(),
+			height: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The image height",
+					example: 100,
+				})
+				.optional(),
+			blurHash: z
+				.string()
+				.nullable()
+				.meta({
+					description: "The blur hash",
+					example: "AQABAAAABAAAAgAA...",
+				})
+				.optional(),
+			averageColour: z
+				.string()
+				.nullable()
+				.meta({
+					description: "The average colour",
+					example: "rgba(255, 255, 255, 1)",
+				})
+				.optional(),
+			isDark: z
+				.boolean()
+				.nullable()
+				.meta({
+					description: "Whether the image is dark",
+					example: true,
+				})
+				.optional(),
+			isLight: z
+				.boolean()
+				.nullable()
+				.meta({
+					description: "Whether the image is light",
+					example: true,
+				})
+				.optional(),
 		}),
 		query: {
 			string: undefined,
@@ -311,6 +359,48 @@ export const controllerSchemas = {
 						}),
 					}),
 				)
+				.optional(),
+			width: z
+				.number()
+				.meta({
+					description: "The image width",
+					example: 100,
+				})
+				.optional(),
+			height: z
+				.number()
+				.meta({
+					description: "The image height",
+					example: 100,
+				})
+				.optional(),
+			blurHash: z
+				.string()
+				.meta({
+					description: "The blur hash",
+					example: "AQABAAAABAAAAgAA...",
+				})
+				.optional(),
+			averageColour: z
+				.string()
+				.meta({
+					description: "The average colour",
+					example: "rgba(255, 255, 255, 1)",
+				})
+				.optional(),
+			isDark: z
+				.boolean()
+				.meta({
+					description: "Whether the image is dark",
+					example: true,
+				})
+				.optional(),
+			isLight: z
+				.boolean()
+				.meta({
+					description: "Whether the image is light",
+					example: true,
+				})
 				.optional(),
 		}),
 		query: {

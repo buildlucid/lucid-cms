@@ -37,6 +37,12 @@ const createSingleController: RouteController<
 			title: request.body.title,
 			alt: request.body.alt,
 			visible: true,
+			width: request.body.width,
+			height: request.body.height,
+			blurHash: request.body.blurHash,
+			averageColour: request.body.averageColour,
+			isDark: request.body.isDark,
+			isLight: request.body.isLight,
 		},
 	);
 	if (mediaIdRes.error) throw new LucidAPIError(mediaIdRes.error);

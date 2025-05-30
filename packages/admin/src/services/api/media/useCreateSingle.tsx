@@ -13,6 +13,12 @@ interface Params {
 		localeCode: string | null;
 		value: string | null;
 	}>;
+	width?: number;
+	height?: number;
+	blurHash?: string;
+	averageColour?: string;
+	isDark?: boolean;
+	isLight?: boolean;
 }
 interface Response {
 	id: MediaResponse["id"];
