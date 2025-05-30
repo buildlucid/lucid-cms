@@ -1,4 +1,4 @@
-import lucid from "@lucidcms/core";
+import lucid, { passthroughImageProcessor } from "@lucidcms/core";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
@@ -56,6 +56,7 @@ export default lucid.config({
 		storeProcessedImages: true,
 		onDemandFormats: true,
 		fallbackImage: "https://placehold.co/600x400",
+		// imageProcessor: passthroughImageProcessor,
 	},
 	// hooks: [
 	// 	{

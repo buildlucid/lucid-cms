@@ -1,11 +1,8 @@
+import type { ImageProcessorOptions } from "../../types/config.js";
+
 const generateProcessKey = (data: {
 	key: string;
-	options: {
-		format?: string;
-		quality?: string;
-		width?: string;
-		height?: string;
-	};
+	options: ImageProcessorOptions;
 }) => {
 	const [targetK, ext] = data.key.split(".");
 	let key = `processed/${targetK}`;

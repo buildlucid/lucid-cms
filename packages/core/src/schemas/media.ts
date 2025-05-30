@@ -466,6 +466,3 @@ export const controllerSchemas = {
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
 >;
-export type ProcessMediaBody = z.infer<
-	typeof controllerSchemas.client.processMedia.body
->;

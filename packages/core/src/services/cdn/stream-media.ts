@@ -61,19 +61,10 @@ const streamMedia: ServiceFn<
 		key: data.key,
 		options: {
 			format,
-			quality: quality.toString(),
-			width: selectedPreset?.width?.toString(),
-			height: selectedPreset?.height?.toString(),
+			quality: quality,
+			width: selectedPreset?.width,
+			height: selectedPreset?.height,
 		},
-	});
-
-	console.log(selectedPreset);
-
-	console.log({
-		format,
-		quality: quality.toString(),
-		width: selectedPreset?.width?.toString(),
-		height: selectedPreset?.height?.toString(),
 	});
 
 	const res = await mediaStrategyRes.data.stream(processKey);
@@ -95,9 +86,9 @@ const streamMedia: ServiceFn<
 		processKey: processKey,
 		options: {
 			format,
-			quality: quality.toString(),
-			width: selectedPreset?.width?.toString(),
-			height: selectedPreset?.height?.toString(),
+			quality: quality,
+			width: selectedPreset?.width,
+			height: selectedPreset?.height,
 		},
 	});
 };

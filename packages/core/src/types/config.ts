@@ -98,6 +98,24 @@ export type MediaStrategy = {
 	deleteMultiple: MediaStrategyDeleteMultiple;
 };
 
+export type ImageProcessorOptions = {
+	width?: number;
+	height?: number;
+	format?: "webp" | "avif" | "jpeg" | "png";
+	quality?: number;
+};
+export type ImageProcessorResult = {
+	buffer: Buffer;
+	mimeType: string;
+	size: number;
+	extension: string;
+	shouldStore: boolean;
+};
+export type ImageProcessor = (
+	stream: Readable,
+	options: ImageProcessorOptions,
+) => ServiceResponse<ImageProcessorResult>;
+
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
@@ -162,6 +180,8 @@ export interface LucidConfig {
 		fallbackImage?: string | boolean | undefined;
 		/** The media strategy services to use. These determine how media is stored, retrieved and deleted. */
 		strategy?: MediaStrategy;
+		/** The image processor to use. */
+		imageProcessor?: ImageProcessor;
 		/** The processed image limit. */
 		processedImageLimit?: number;
 		/** If true, the processed images will be stored. */
@@ -215,6 +235,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		storeProcessedImages: boolean;
 		fallbackImage: string | boolean | undefined;
 		strategy?: MediaStrategy;
+		imageProcessor?: ImageProcessor;
 		onDemandFormats: boolean;
 		imagePresets: Record<
 			string,

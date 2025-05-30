@@ -96,7 +96,6 @@
 		"node-cron": "^3.0.3",
 		"sanitize-html": "^2.16.0",
 		"semver": "^7.7.1",
-		"sharp": "^0.33.5",
 		"slug": "^10.0.0",
 		"solid-js": "^1.9.5",
 		"tailwindcss": "^4.1.4",
@@ -104,6 +103,9 @@
 		"vite-plugin-solid": "^2.11.6",
 		"winston": "^3.17.0",
 		"zod": "^4.0.0-beta"
+	},
+	"optionalDependencies": {
+		"sharp": "^0.34.2"
 	},
 	"volta": {
 		"node": "22.15.0"

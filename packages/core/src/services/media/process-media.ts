@@ -1,14 +1,14 @@
 import Repository from "../../libs/repositories/index.js";
 import { generateProcessKey, createCdnUrl } from "../../utils/media/index.js";
-import type { ProcessMediaBody } from "../../schemas/media.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MediaUrlResponse } from "../../types/response.js";
+import type { ImageProcessorOptions } from "../../types/config.js";
 
 const processMedia: ServiceFn<
 	[
 		{
 			key: string;
-			body: ProcessMediaBody;
+			body: ImageProcessorOptions;
 		},
 	],
 	MediaUrlResponse

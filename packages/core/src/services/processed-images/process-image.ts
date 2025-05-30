@@ -1,14 +1,14 @@
 import Repository from "../../libs/repositories/index.js";
 import { PassThrough, type Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { ProcessMediaBody } from "../../schemas/media.js";
+import type { ImageProcessorOptions } from "../../types/config.js";
 
 const processImage: ServiceFn<
 	[
 		{
 			key: string;
 			processKey: string;
-			options: ProcessMediaBody;
+			options: ImageProcessorOptions;
 		},
 	],
 	{
@@ -64,6 +64,19 @@ const processImage: ServiceFn<
 
 	const stream = new PassThrough();
 	stream.end(imageRes.data.buffer);
+
+	// If the image should not be stored, return the stream
+	if (!imageRes.data.shouldStore) {
+		return {
+			error: undefined,
+			data: {
+				key: data.processKey,
+				contentLength: imageRes.data.size,
+				contentType: imageRes.data.mimeType,
+				body: stream,
+			},
+		};
+	}
 
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
 	if (processedCountRes.data >= context.config.media.processedImageLimit) {
