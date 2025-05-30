@@ -49,7 +49,6 @@ const updateFullSlugFields: ServiceFn<
 									.selectAll()
 									.where(`${versionTable}.id`, "=", doc.versionId)
 									.where(`${versionTable}.document_id`, "=", doc.documentId)
-									// @ts-expect-error
 									.where(`${versionTable}.type`, "=", data.versionType),
 							),
 						)

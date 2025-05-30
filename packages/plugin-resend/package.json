@@ -12,8 +12,8 @@
 		}
 	},
 	"scripts": {
-		"build": "tsc && tsup",
-		"dev": "tsup --watch",
+		"build": "tsc && tsdown",
+		"dev": "tsdown --watch",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
@@ -27,7 +27,7 @@
 		"@lucidcms/core": "*",
 		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^22.15.2",
-		"tsup": "^8.4.0",
+		"tsdown": "^0.12.5",
 		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {

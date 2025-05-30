@@ -55,17 +55,14 @@ const getDescendantFields: ServiceFn<
 						`${versionTable}.id`,
 						`${fieldsTable}.document_version_id`,
 					)
-					// @ts-expect-error
 					.select([
 						`${versionTable}.document_id as document_id`,
 						`${fieldsTable}.${parentPageColumn} as parent_id`,
 						`${fieldsTable}.document_version_id`,
 					])
 					.where(({ eb }) =>
-						// @ts-expect-error
 						eb(`${fieldsTable}.${parentPageColumn}`, "in", data.ids),
 					)
-					// @ts-expect-error
 					.where(`${versionTable}.type`, "=", data.versionType)
 					.unionAll(
 						db

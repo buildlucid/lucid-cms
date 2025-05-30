@@ -48,13 +48,11 @@ const checkCircularParents: ServiceFn<
 						`${versionTable}.id`,
 						`${fieldsTable}.document_version_id`,
 					)
-					// @ts-expect-error
 					.select([
 						`${versionTable}.document_id as current_id`,
 						`${fieldsTable}.${parentPageField} as parent_id`,
 					])
 					.where(`${fieldsTable}.locale`, "=", data.defaultLocale)
-					// @ts-expect-error
 					.where(`${versionTable}.type`, "=", data.versionType)
 					.where(
 						`${versionTable}.document_id`,

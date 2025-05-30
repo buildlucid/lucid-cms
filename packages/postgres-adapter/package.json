@@ -13,8 +13,8 @@
 		}
 	},
 	"scripts": {
-		"build": "tsc && tsup",
-		"dev": "tsup --watch",
+		"build": "tsc && tsdown",
+		"dev": "tsdown --watch",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
@@ -40,7 +40,7 @@
 		"@lucidcms/config": "*",
 		"@lucidcms/core": "*",
 		"@types/node": "^22.15.2",
-		"tsup": "^8.4.0",
+		"tsdown": "^0.12.5",
 		"typescript": "^5.8.3",
 		"@types/pg": "^8.11.14"
 	},

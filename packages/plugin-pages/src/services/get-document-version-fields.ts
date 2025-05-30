@@ -52,7 +52,6 @@ const getDocumentVersionFields: ServiceFn<
 				`${versionTable}.id`,
 				`${fieldsTable}.document_version_id`,
 			)
-			// @ts-expect-error
 			.select([
 				`${fieldsTable}.locale`,
 				`${versionTable}.document_id`,
@@ -62,7 +61,6 @@ const getDocumentVersionFields: ServiceFn<
 			])
 			.where(`${versionTable}.document_id`, "=", data.documentId)
 			.where(`${versionTable}.id`, "=", data.versionId)
-			// @ts-expect-error
 			.where(`${versionTable}.type`, "=", data.versionType)
 			.execute();
 
