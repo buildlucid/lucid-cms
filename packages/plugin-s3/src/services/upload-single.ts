@@ -11,8 +11,6 @@ export default (client: S3Client, pluginOptions: PluginOptions) => {
 				Body: props.data,
 				ContentType: props.meta.mimeType,
 				Metadata: {
-					width: props.meta.width?.toString() || "",
-					height: props.meta.height?.toString() || "",
 					extension: props.meta.extension || "",
 				},
 			});
