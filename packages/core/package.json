@@ -34,7 +34,7 @@
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
-		"dev": "tsdown --watch",
+		"dev": "tsdown --watch --no-clean",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",

@@ -31,14 +31,7 @@ const processMediaClientController: RouteController<
 		},
 		{
 			key: request.params["*"],
-			body: {
-				format: request.body.format,
-				quality: request.body.quality
-					? Number(request.body.quality)
-					: undefined,
-				width: request.body.width ? Number(request.body.width) : undefined,
-				height: request.body.height ? Number(request.body.height) : undefined,
-			},
+			body: request.body,
 		},
 	);
 	if (media.error) throw new LucidAPIError(media.error);

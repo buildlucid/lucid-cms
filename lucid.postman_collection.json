@@ -2223,6 +2223,53 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Media",
+					"item": [
+						{
+							"name": "Process Single",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "lucid-client-key",
+										"value": "{{CLIENT_KEY}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{CLIENT_API_KEY}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"width\": 100,\n    \"height\": 100,\n    \"format\": \"webp\",\n    \"quality\": 80\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/v1/client/media/process/key",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"client",
+										"media",
+										"process",
+										"key"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
