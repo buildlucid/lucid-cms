@@ -2,7 +2,7 @@ import T from "../../../translations/index.js";
 import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
-import { createCdnUrl } from "../../../utils/media/index.js";
+import { createMediaUrl } from "../../../utils/media/index.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import { objectifyTranslations } from "../../../utils/translations/index.js";
 import Formatter from "../../formatters/index.js";
@@ -75,7 +75,11 @@ class MediaCustomField extends CustomField<"media"> {
 		if (value === null || value === undefined) return null;
 		return {
 			id: value?.id ?? null,
-			url: createCdnUrl(meta.host, value?.key ?? ""),
+			url: createMediaUrl({
+				key: value?.key ?? "",
+				host: meta.host,
+				urlStrategy: meta.config.media?.urlStrategy,
+			}),
 			key: value?.key ?? null,
 			mimeType: value?.mime_type ?? null,
 			extension: value?.file_extension ?? null,

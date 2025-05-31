@@ -9,6 +9,7 @@ import type { ServiceResponse } from "../utils/services/types.js";
 import type { FastifyInstance } from "fastify";
 import type { InlineConfig } from "vite";
 import type { LogLevel } from "../utils/logging/index.js";
+import type { MediaResponse } from "../types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -116,6 +117,10 @@ export type ImageProcessor = (
 	options: ImageProcessorOptions,
 ) => ServiceResponse<ImageProcessorResult>;
 
+export type UrlStrategy = (media: {
+	key: string;
+}) => string;
+
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
@@ -198,6 +203,11 @@ export interface LucidConfig {
 				quality?: number;
 			}
 		>;
+		/**
+		 * The url strategy to use. This is used to generate the url for the media.
+		 * This is useful when you want to overide using the cdn endpoint and stream media directly from your bucket for instance.
+		 */
+		urlStrategy?: UrlStrategy;
 	};
 	/** Fastify extensions to register. Allows you to register custom routes, middleware, and more. */
 	fastifyExtensions?: Array<(fastify: FastifyInstance) => Promise<void>>;
@@ -246,6 +256,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 				quality?: number;
 			}
 		>;
+		urlStrategy?: UrlStrategy;
 	};
 	fastifyExtensions: Array<(fastify: FastifyInstance) => Promise<void>>;
 	hooks: Array<AllHooks>;

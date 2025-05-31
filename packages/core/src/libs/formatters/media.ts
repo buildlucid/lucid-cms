@@ -1,7 +1,8 @@
 import Formatter from "./index.js";
-import { createCdnUrl } from "../../utils/media/index.js";
+import { createMediaUrl } from "../../utils/media/index.js";
 import type { BooleanInt } from "../../libs/db/types.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
+import type { Config, UrlStrategy } from "../../types/config.js";
 
 export interface MediaPropsT {
 	id: number;
@@ -37,22 +38,29 @@ export default class MediaFormatter {
 	formatMultiple = (props: {
 		media: MediaPropsT[];
 		host: string;
+		urlStrategy: UrlStrategy | undefined;
 	}) => {
 		return props.media.map((m) =>
 			this.formatSingle({
 				media: m,
 				host: props.host,
+				urlStrategy: props.urlStrategy,
 			}),
 		);
 	};
 	formatSingle = (props: {
 		media: MediaPropsT;
 		host: string;
+		urlStrategy: UrlStrategy | undefined;
 	}): MediaResponse => {
 		return {
 			id: props.media.id,
 			key: props.media.key,
-			url: createCdnUrl(props.host, props.media.key),
+			url: createMediaUrl({
+				key: props.media.key,
+				host: props.host,
+				urlStrategy: props.urlStrategy,
+			}),
 			title:
 				props.media.title_translations?.map((t) => ({
 					value: t.value,

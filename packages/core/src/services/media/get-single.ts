@@ -32,6 +32,7 @@ const getSingle: ServiceFn<
 		data: MediaFormatter.formatSingle({
 			media: mediaRes.data,
 			host: context.config.host,
+			urlStrategy: context.config.media.urlStrategy,
 		}),
 	};
 };

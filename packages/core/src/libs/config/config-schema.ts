@@ -1,6 +1,6 @@
-import type { FastifyInstance } from "fastify";
 import z from "zod";
-import type { ImageProcessor } from "../../types/config.js";
+import type { FastifyInstance } from "fastify";
+import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
 
 const FastifyExtensionType = z.custom<
 	(fastify: FastifyInstance) => Promise<void>
@@ -12,6 +12,13 @@ const ImageProcessorType = z.custom<ImageProcessor>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected an ImageProcessor function",
+	},
+);
+
+const UrlStrategyType = z.custom<UrlStrategy>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected a UrlStrategy function",
 	},
 );
 
@@ -81,6 +88,7 @@ const ConfigSchema = z.object({
 				quality: z.number().optional(),
 			}),
 		),
+		urlStrategy: UrlStrategyType.optional(),
 	}),
 	hooks: z.array(
 		z.object({

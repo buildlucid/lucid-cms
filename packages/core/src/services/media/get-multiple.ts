@@ -34,6 +34,7 @@ const getMultiple: ServiceFn<
 			data: MediaFormatter.formatMultiple({
 				media: mediaRes.data[0],
 				host: context.config.host,
+				urlStrategy: context.config.media.urlStrategy,
 			}),
 			count: Formatter.parseCount(mediaRes.data[1]?.count),
 		},

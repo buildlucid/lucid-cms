@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import { generateProcessKey, createCdnUrl } from "../../utils/media/index.js";
+import { generateProcessKey, createMediaUrl } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MediaUrlResponse } from "../../types/response.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
@@ -40,7 +40,11 @@ const processMedia: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				url: createCdnUrl(context.config.host, data.key),
+				url: createMediaUrl({
+					key: data.key,
+					host: context.config.host,
+					urlStrategy: context.config.media?.urlStrategy,
+				}),
 			},
 		};
 	}
@@ -55,7 +59,11 @@ const processMedia: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				url: createCdnUrl(context.config.host, data.key),
+				url: createMediaUrl({
+					key: data.key,
+					host: context.config.host,
+					urlStrategy: context.config.media?.urlStrategy,
+				}),
 			},
 		};
 	}
@@ -87,7 +95,11 @@ const processMedia: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				url: createCdnUrl(context.config.host, processKey),
+				url: createMediaUrl({
+					key: processKey,
+					host: context.config.host,
+					urlStrategy: context.config.media?.urlStrategy,
+				}),
 			},
 		};
 	}
@@ -111,7 +123,11 @@ const processMedia: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			url: createCdnUrl(context.config.host, processKey),
+			url: createMediaUrl({
+				key: processKey,
+				host: context.config.host,
+				urlStrategy: context.config.media?.urlStrategy,
+			}),
 		},
 	};
 };
