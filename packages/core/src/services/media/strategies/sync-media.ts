@@ -1,6 +1,6 @@
-import MediaKit from "../../../libs/media-kit/index.js";
+import { getFileMetadata } from "../../../utils/media/index.js";
+import type { MediaType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { MediaKitMeta } from "../../../libs/media-kit/index.js";
 
 const syncMedia: ServiceFn<
 	[
@@ -9,7 +9,15 @@ const syncMedia: ServiceFn<
 			fileName: string;
 		},
 	],
-	MediaKitMeta
+	{
+		mimeType: string;
+		name: string;
+		type: MediaType;
+		extension: string;
+		size: number;
+		key: string;
+		etag: string | null;
+	}
 > = async (context, data) => {
 	const mediaStrategyRes =
 		context.services.media.checks.checkHasMediaStrategy(context);
@@ -27,17 +35,11 @@ const syncMedia: ServiceFn<
 		});
 	if (proposedSizeRes.error) return proposedSizeRes;
 
-	const mediaKit = new MediaKit(context.config.media);
-
-	const injectMediaRes = await mediaKit.injectFile({
-		streamFile: () => mediaStrategyRes.data.stream(data.key),
-		key: data.key,
+	const fileMetaData = await getFileMetadata({
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
-		size: mediaMetaRes.data.size,
-		etag: mediaMetaRes.data.etag,
 	});
-	if (injectMediaRes.error) return injectMediaRes;
+	if (fileMetaData.error) return fileMetaData;
 
 	const updateStorageRes = await context.services.option.updateSingle(context, {
 		name: "media_storage_used",
@@ -47,7 +49,15 @@ const syncMedia: ServiceFn<
 
 	return {
 		error: undefined,
-		data: injectMediaRes.data,
+		data: {
+			mimeType: fileMetaData.data.mimeType,
+			type: fileMetaData.data.type,
+			extension: fileMetaData.data.extension,
+			size: mediaMetaRes.data.size,
+			name: data.fileName,
+			key: data.key,
+			etag: mediaMetaRes.data.etag,
+		},
 	};
 };
 

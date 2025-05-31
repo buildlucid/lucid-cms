@@ -3,13 +3,12 @@ import type CollectionBuilder from "../libs/builders/collection-builder/index.js
 import type DatabaseAdapter from "../libs/db/adapter.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type { Readable } from "node:stream";
-import type { MediaKitMeta } from "../libs/media-kit/index.js";
 import type { AllHooks } from "./hooks.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { FastifyInstance } from "fastify";
 import type { InlineConfig } from "vite";
 import type { LogLevel } from "../utils/logging/index.js";
-import type { MediaResponse } from "../types.js";
+import type { MediaType } from "../types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -92,7 +91,12 @@ export type MediaStrategyStream = (
 export type MediaStrategyUploadSingle = (props: {
 	key: string;
 	data: Readable | Buffer;
-	meta: Omit<MediaKitMeta, "tempPath" | "name" | "key" | "etag">;
+	meta: {
+		mimeType: string;
+		extension: string;
+		size: number;
+		type: MediaType;
+	};
 }) => ServiceResponse<{
 	etag?: string;
 }>;

@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
-import MediaKit from "../../libs/media-kit/index.js";
 import mime from "mime-types";
 import Repository from "../../libs/repositories/index.js";
+import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getPresignedUrl: ServiceFn<
@@ -25,7 +25,7 @@ const getPresignedUrl: ServiceFn<
 
 	const extension = mime.extension(data.mimeType);
 
-	const keyRes = MediaKit.generateKey({
+	const keyRes = generateKey({
 		name: data.fileName,
 		extension: extension || null,
 	});

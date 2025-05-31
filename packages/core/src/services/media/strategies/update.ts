@@ -1,4 +1,5 @@
-import MediaKit, { type MediaKitMeta } from "../../../libs/media-kit/index.js";
+import { getFileMetadata } from "../../../utils/media/index.js";
+import type { MediaType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const update: ServiceFn<
@@ -11,7 +12,14 @@ const update: ServiceFn<
 			updatedKey: string;
 		},
 	],
-	MediaKitMeta
+	{
+		mimeType: string;
+		type: MediaType;
+		extension: string;
+		size: number;
+		key: string;
+		etag: string | null;
+	}
 > = async (context, data) => {
 	const mediaStrategyRes =
 		context.services.media.checks.checkHasMediaStrategy(context);
@@ -29,17 +37,11 @@ const update: ServiceFn<
 		});
 	if (proposedSizeRes.error) return proposedSizeRes;
 
-	const mediaKit = new MediaKit(context.config.media);
-
-	const injectMediaRes = await mediaKit.injectFile({
-		streamFile: () => mediaStrategyRes.data.stream(data.updatedKey),
-		key: data.updatedKey,
+	const fileMetaData = await getFileMetadata({
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
-		size: mediaMetaRes.data.size,
-		etag: mediaMetaRes.data.etag,
 	});
-	if (injectMediaRes.error) return injectMediaRes;
+	if (fileMetaData.error) return fileMetaData;
 
 	// Delete old file
 	const deleteOldRes = await mediaStrategyRes.data.deleteSingle(
@@ -79,7 +81,14 @@ const update: ServiceFn<
 
 	return {
 		error: undefined,
-		data: injectMediaRes.data,
+		data: {
+			mimeType: fileMetaData.data.mimeType,
+			type: fileMetaData.data.type,
+			extension: fileMetaData.data.extension,
+			size: mediaMetaRes.data.size,
+			key: data.updatedKey,
+			etag: mediaMetaRes.data.etag,
+		},
 	};
 };
 
