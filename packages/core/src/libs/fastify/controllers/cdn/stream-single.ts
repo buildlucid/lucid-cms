@@ -11,6 +11,18 @@ const streamSingleController: RouteController<
 	typeof controllerSchemas.streamSingle.query.string,
 	typeof controllerSchemas.streamSingle.query.formatted
 > = async (request, reply) => {
+	//*  parse Range header for video streaming support
+	let range: { start: number; end?: number } | undefined;
+	const rangeHeader = request.headers.range;
+	if (rangeHeader) {
+		const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+		if (match?.[1]) {
+			const start = Number.parseInt(match[1], 10);
+			const end = match[2] ? Number.parseInt(match[2], 10) : undefined;
+			range = { start, end };
+		}
+	}
+
 	const response = await serviceWrapper(
 		request.server.services.cdn.streamMedia,
 		{
@@ -26,6 +38,7 @@ const streamSingleController: RouteController<
 			key: request.params["*"],
 			query: request.formattedQuery,
 			accept: request.headers.accept,
+			range,
 		},
 	);
 	if (response.error) {
@@ -53,7 +66,23 @@ const streamSingleController: RouteController<
 		return reply.send(streamErrorImage.data.body);
 	}
 
-	reply.header("Cache-Control", "public, max-age=31536000, immutable");
+	reply.header("Accept-Ranges", "bytes");
+
+	//* for partial content (range requests), set 206 status and Content-Range header
+	if (
+		response.data.isPartialContent &&
+		response.data.range &&
+		response.data.totalSize
+	) {
+		reply.code(206);
+		reply.header(
+			"Content-Range",
+			`bytes ${response.data.range.start}-${response.data.range.end}/${response.data.totalSize}`,
+		);
+	} else {
+		reply.header("Cache-Control", "public, max-age=31536000, immutable");
+	}
+
 	reply.header(
 		"Content-Disposition",
 		`inline; filename="${response.data.key}"`,
@@ -109,6 +138,44 @@ export default {
 							type: "string",
 						},
 					},
+					"Accept-Ranges": {
+						schema: {
+							type: "string",
+						},
+					},
+				},
+			},
+			206: {
+				description: "Partial content - range request response",
+				content: {
+					"*/*": {
+						schema: {
+							type: "string",
+							format: "binary",
+						},
+					},
+				},
+				headers: {
+					"Content-Type": {
+						schema: {
+							type: "string",
+						},
+					},
+					"Content-Length": {
+						schema: {
+							type: "integer",
+						},
+					},
+					"Content-Range": {
+						schema: {
+							type: "string",
+						},
+					},
+					"Accept-Ranges": {
+						schema: {
+							type: "string",
+						},
+					},
 				},
 			},
 			404: {
@@ -118,6 +185,16 @@ export default {
 						schema: {
 							type: "string",
 							format: "binary",
+						},
+					},
+				},
+			},
+			416: {
+				description: "Range Not Satisfiable",
+				content: {
+					"application/json": {
+						schema: {
+							$ref: swaggerRefs.defaultError,
 						},
 					},
 				},

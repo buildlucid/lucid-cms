@@ -57,9 +57,9 @@ export default lucid.config({
 		onDemandFormats: true,
 		fallbackImage: "https://placehold.co/600x400",
 		// imageProcessor: passthroughImageProcessor,
-		urlStrategy: (media) => {
-			return `https://media.protodigital.co.uk/${media.key}`;
-		},
+		// urlStrategy: (media) => {
+		// 	return `https://media.protodigital.co.uk/${media.key}`;
+		// },
 	},
 	// hooks: [
 	// 	{

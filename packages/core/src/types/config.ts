@@ -69,10 +69,24 @@ export type MediaStrategyGetMeta = (key: string) => ServiceResponse<{
 	etag: string | null;
 }>;
 
-export type MediaStrategyStream = (key: string) => ServiceResponse<{
+export type MediaStrategyStream = (
+	key: string,
+	options?: {
+		range?: {
+			start: number;
+			end?: number;
+		};
+	},
+) => ServiceResponse<{
 	contentLength: number | undefined;
 	contentType: string | undefined;
 	body: Readable;
+	isPartialContent?: boolean;
+	totalSize?: number;
+	range?: {
+		start: number;
+		end: number;
+	};
 }>;
 
 export type MediaStrategyUploadSingle = (props: {

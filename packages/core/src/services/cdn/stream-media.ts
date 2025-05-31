@@ -18,6 +18,10 @@ const streamMedia: ServiceFn<
 			key: string;
 			query: StreamSingleQueryParams;
 			accept: string | undefined;
+			range?: {
+				start: number;
+				end?: number;
+			};
 		},
 	],
 	{
@@ -25,6 +29,12 @@ const streamMedia: ServiceFn<
 		contentLength: number | undefined;
 		contentType: string | undefined;
 		body: Readable;
+		isPartialContent?: boolean;
+		totalSize?: number;
+		range?: {
+			start: number;
+			end: number;
+		};
 	}
 > = async (context, data) => {
 	const selectedPreset =
@@ -41,7 +51,9 @@ const streamMedia: ServiceFn<
 	// ------------------------------
 	// OG Image
 	if (!selectedPreset && !format) {
-		const res = await mediaStrategyRes.data.stream(data.key);
+		const res = await mediaStrategyRes.data.stream(data.key, {
+			range: data.range,
+		});
 		if (res.error) return res;
 
 		return {
@@ -51,6 +63,9 @@ const streamMedia: ServiceFn<
 				contentLength: res.data.contentLength,
 				contentType: res.data.contentType,
 				body: res.data.body,
+				isPartialContent: res.data.isPartialContent,
+				totalSize: res.data.totalSize,
+				range: res.data.range,
 			},
 		};
 	}
@@ -67,7 +82,9 @@ const streamMedia: ServiceFn<
 		},
 	});
 
-	const res = await mediaStrategyRes.data.stream(processKey);
+	const res = await mediaStrategyRes.data.stream(processKey, {
+		range: data.range,
+	});
 	if (res.data) {
 		return {
 			error: undefined,
@@ -76,6 +93,9 @@ const streamMedia: ServiceFn<
 				contentLength: res.data.contentLength,
 				contentType: res.data.contentType,
 				body: res.data.body,
+				isPartialContent: res.data.isPartialContent,
+				totalSize: res.data.totalSize,
+				range: res.data.range,
 			},
 		};
 	}

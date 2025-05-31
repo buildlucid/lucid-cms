@@ -1,5 +1,12 @@
 # @lucidcms/plugin-local-storage
 
+## 1.2.0
+
+### Minor Changes
+
+- Mimetypes now correctly infered from the file instead of relying on the extension to work it out.
+- Range support on streams. 
+
 ## 1.1.3
 
 ### Patch Changes

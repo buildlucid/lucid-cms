@@ -1,5 +1,11 @@
 # @lucidcms/plugin-s3
 
+## 1.2.0
+
+### Minor Changes
+
+- Range support on streams. 
+
 ## 1.1.2
 
 ### Patch Changes
