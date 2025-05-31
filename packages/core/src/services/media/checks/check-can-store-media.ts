@@ -16,6 +16,9 @@ const checkCanStoreMedia: ServiceFn<
 	const storageLimit = context.config.media.storageLimit;
 
 	if (data.size > maxFileSize) {
+		if (data.onError) {
+			await data.onError();
+		}
 		return {
 			error: {
 				type: "basic",
