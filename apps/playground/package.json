@@ -9,7 +9,10 @@
 		"dev": "dotenvx run -- tsx watch ./src/index.ts",
 		"dotenvx:encrypt": "dotenvx encrypt",
 		"build:js": "tsc",
-		"start:js": "dotenvx run -- node dist/index.js"
+		"start:js": "dotenvx run -- node dist/index.js",
+		"cli:dev": "lucid dev",
+		"cli:build": "lucid build",
+		"cli:migrate": "lucid migrate"
 	},
 	"dependencies": {
 		"@lucidcms/core": "*",

@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+import { Command } from "commander";
+import packageJson from "../../../package.json" with { type: "json" };
+import buildCommand from "./commands/build.js";
+import devCommand from "./commands/dev.js";
+import migrateCommand from "./commands/migrate.js";
+
+const program = new Command();
+
+program.name("lucid").description("Lucid CMS CLI").version(packageJson.version);
+
+program
+	.command("dev")
+	.description("Start development server")
+	.action(devCommand);
+
+program
+	.command("build")
+	.description("Build for production")
+	.action(buildCommand);
+
+program
+	.command("migrate")
+	.description("Run database migrations")
+	.option("--seed", "Run seeds after migration")
+	.action(migrateCommand);
+
+program.parse();

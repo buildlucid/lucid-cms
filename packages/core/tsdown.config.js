@@ -8,6 +8,7 @@ export default defineConfig({
         "src/api.ts",
         "src/middleware.ts",
         "src/helpers.ts",
+        "src/libs/cli/index.ts",
     ],
     dts: true,
     format: "esm",

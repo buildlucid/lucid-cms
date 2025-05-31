@@ -10,6 +10,10 @@
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
 		},
+		"./cli": {
+			"types": "./dist/libs/cli/index.d.ts",
+			"default": "./dist/libs/cli/index.js"
+		},
 		"./api": {
 			"types": "./dist/api.d.ts",
 			"default": "./dist/api.js"
@@ -112,6 +116,9 @@
 	},
 	"engines": {
 		"node": ">=22.0.0 <23.0.0"
+	},
+	"bin": {
+		"lucid": "./dist/libs/cli/index.js"
 	},
 	"license": "BSL-1.0"
 }
