@@ -1,5 +1,6 @@
-import { start } from "./libs/fastify/server.js";
+// import { start } from "./libs/fastify/server.js";
 import config from "./libs/config/lucid-config.js";
+import createApp from "./libs/http/app.js";
 
 export { default as lucidPlugin } from "./libs/fastify/plugins/lucid.js";
 export { LucidError } from "./utils/errors/index.js";
@@ -10,6 +11,7 @@ export { default as sharpImageProcessor } from "./libs/image-processor/sharp-pro
 export { default as passthroughImageProcessor } from "./libs/image-processor/passthrough-processor.js";
 
 export default {
-	start,
+	// start,
+	createApp,
 	config,
 };

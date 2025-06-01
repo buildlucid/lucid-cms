@@ -85,12 +85,37 @@ const buildCommand = async () => {
 
 	// TODO: once adapters are supported, this will live in the adapter
 	const entry = `
-    import config from "./lucid.config.js";
-    import lucid from "@lucidcms/core";
+import config from "./lucid.config.js";
+import lucid from "@lucidcms/core";
+import { serve } from '@hono/node-server';
 
-    await lucid.start({
-        lucidConfig: await config,
-    });`;
+const app = await lucid.createApp({
+    config: await config,
+});
+
+serve({
+    fetch: app.fetch,
+    port: 8080,
+});
+
+server.on("listening", () => {
+    console.log("Server is running at http://localhost:8080");
+});
+
+process.on("SIGINT", () => {
+  server.close()
+  process.exit(0)
+})
+process.on("SIGTERM", () => {
+  server.close((err) => {
+    if (err) {
+      console.error(err)
+      process.exit(1)
+    }
+    process.exit(0)
+  })
+})
+    `;
 
 	await writeFile("dist/server.js", entry);
 

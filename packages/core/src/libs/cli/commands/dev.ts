@@ -1,28 +1,30 @@
 import chokidar, { type FSWatcher } from "chokidar";
-import type { FastifyInstance } from "fastify";
+import { serve, type HttpBindings } from "@hono/node-server";
 import getConfig from "../../config/get-config.js";
 import vite from "../../vite/index.js";
-import { start } from "../../fastify/server.js";
 import getConfigPath from "../../config/get-config-path.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
+import createApp from "../../http/app.js";
 
 type DevOptions = {
 	watch?: string | boolean;
 };
 
+/**
+ * @todo integrate with runtime adapters instead of relying on node server.
+ */
 const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
-
 	const configPath = getConfigPath(process.cwd());
 	let config = await getConfig({ path: configPath });
-	let fastifyInstance: FastifyInstance | null = null;
+	let server: ReturnType<typeof serve> | null = null;
 	let rebuilding = false;
 
 	const buildAndStart = async (newConfig = config) => {
-		if (fastifyInstance) {
+		if (server) {
 			//* restart when server already running
-			await fastifyInstance.close();
-			fastifyInstance = null;
+			server.close();
+			server = null;
 		}
 
 		const buildResponse = await vite.buildApp(newConfig);
@@ -31,14 +33,22 @@ const devCommand = async (options: DevOptions) => {
 			return false;
 		}
 
-		fastifyInstance = await start({ lucidConfig: newConfig });
+		const app = await createApp({ config: newConfig });
+		server = serve({
+			fetch: app.fetch,
+			port: 8080,
+		});
+
+		server.on("listening", () => {
+			console.log("Server is running at http://localhost:8080");
+		});
+
 		return true;
 	};
 
 	const handleFileChange = async (changedPath: string) => {
 		if (rebuilding) return;
 		rebuilding = true;
-
 		console.clear();
 
 		//* restart when config file changes
@@ -59,7 +69,9 @@ const devCommand = async (options: DevOptions) => {
 		const shutdown = async () => {
 			try {
 				await watcher?.close();
-				await fastifyInstance?.close();
+				if (server) {
+					server.close();
+				}
 			} catch (error) {
 				console.error("Error during shutdown:", error);
 			}
@@ -77,7 +89,6 @@ const devCommand = async (options: DevOptions) => {
 	if (options.watch !== undefined) {
 		const watchPath =
 			typeof options.watch === "string" ? options.watch : process.cwd();
-
 		const watcher = chokidar.watch(watchPath, {
 			ignored: [
 				"**/node_modules/**",
