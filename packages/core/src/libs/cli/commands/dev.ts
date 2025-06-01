@@ -4,12 +4,15 @@ import getConfig from "../../config/get-config.js";
 import vite from "../../vite/index.js";
 import { start } from "../../fastify/server.js";
 import getConfigPath from "../../config/get-config-path.js";
+import installOptionalDeps from "../utils/install-optional-deps.js";
 
 type DevOptions = {
 	watch?: string | boolean;
 };
 
 const devCommand = async (options: DevOptions) => {
+	await installOptionalDeps();
+
 	const configPath = getConfigPath(process.cwd());
 	let config = await getConfig({ path: configPath });
 	let fastifyInstance: FastifyInstance | null = null;

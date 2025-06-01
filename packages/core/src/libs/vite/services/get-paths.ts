@@ -14,37 +14,33 @@ const getPaths = (cwd = process.cwd()) => {
 	return {
 		clientMount: join(
 			cwd,
-			constants.runtimeStore.dist,
+			constants.buildDir,
 			constants.vite.outputDir,
 			constants.vite.mount,
 		),
 		clientHtml: join(
 			cwd,
-			constants.runtimeStore.dist,
+			constants.buildDir,
 			constants.vite.outputDir,
 			constants.vite.html,
 		),
-		clientDirectory: join(
-			cwd,
-			constants.runtimeStore.dist,
-			constants.vite.outputDir,
-		),
+		clientDirectory: join(cwd, constants.buildDir, constants.vite.outputDir),
 		clientDist: join(
 			cwd,
-			constants.runtimeStore.dist,
+			constants.buildDir,
 			constants.vite.outputDir,
 			constants.vite.dist,
 		),
 		clientDistHtml: join(
 			cwd,
-			constants.runtimeStore.dist,
+			constants.buildDir,
 			constants.vite.outputDir,
 			constants.vite.dist,
 			constants.vite.html,
 		),
 		buildMetadata: join(
 			cwd,
-			constants.runtimeStore.dist,
+			constants.buildDir,
 			constants.vite.outputDir,
 			constants.vite.buildMetadata,
 		),

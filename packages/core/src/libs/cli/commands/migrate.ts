@@ -1,9 +1,12 @@
 import executeStartTasks from "../../../actions/execute-start-tasks.js";
 import lucidServices from "../../../services/index.js";
 import getConfig from "../../config/get-config.js";
+import installOptionalDeps from "../utils/install-optional-deps.js";
 
 // TODO: split this up into a seed and migrate command down the line
 const migrateCommand = async () => {
+	await installOptionalDeps();
+
 	const config = await getConfig();
 
 	await executeStartTasks({

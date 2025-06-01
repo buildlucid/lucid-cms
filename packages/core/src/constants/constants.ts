@@ -82,9 +82,7 @@ export default Object.freeze({
 		max: 100,
 		timeWindow: "1 minute", // ms format - https://github.com/vercel/ms
 	},
-	runtimeStore: {
-		dist: ".lucid",
-	},
+	buildDir: "dist",
 	vite: {
 		outputDir: "client",
 		dist: "dist",

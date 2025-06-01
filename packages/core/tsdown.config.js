@@ -10,6 +10,7 @@ export default defineConfig({
         "src/helpers.ts",
         "src/libs/cli/index.ts",
     ],
+    external: ['lightningcss', 'vite', "@tailwindcss/oxide"],
     dts: true,
     format: "esm",
     shims: false,

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import fp from "fastify-plugin";
 import constants from "../../../constants/constants.js";
 import fastifyStatic from "@fastify/static";
-import vite from "../../vite/index.js";
+import getPaths from "../../vite/services/get-paths.js";
 import LucidError from "../../../utils/errors/lucid-error.js";
 import type { FastifyInstance } from "fastify";
 
@@ -16,7 +16,7 @@ import type { FastifyInstance } from "fastify";
  */
 const lucidFrontend = async (fastify: FastifyInstance) => {
 	try {
-		const paths = vite.getPaths();
+		const paths = getPaths();
 
 		//* proxy fastify /admin to it instead of serving built version
 		// if (process.env.NODE_ENV === "development") {

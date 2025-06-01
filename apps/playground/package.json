@@ -7,8 +7,8 @@
 	"scripts": {
 		"dotenvx:encrypt": "dotenvx encrypt",
 		"dev": "dotenvx run -- lucid dev --watch",
-		"build": "lucid build",
-		"start": "dotenvx run -- lucid build && dotenvx run -- node dist/index.js",
+		"build": "dotenvx run -- lucid build",
+		"start": "dotenvx run -- lucid build && dotenvx run -- node dist/server.js",
 		"migrate": "dotenvx run -- lucid migrate"
 	},
 	"dependencies": {
