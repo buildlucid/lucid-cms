@@ -6,7 +6,7 @@ import vite from "../../vite/index.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 
 /**
- * @todo currently prettier and a few other packages are being bundled that we dont want. This is due to MJML it seems.
+ * @todo currently prettier, the typescript compiler and a few other packages are being bundled that we dont want. This is due to MJML it seems.
  *       MJML will likley need precompilling here instead anyway as it isnt supported in certain runtimes.
  * @todo remove the argon2 external dependency after this has been replaced with something else. Argon2 is not supported in
  *       certain runtimes like Cloudflare and potentially Deno?
@@ -32,11 +32,55 @@ const buildCommand = async () => {
 		output: {
 			file: "dist/lucid.config.js",
 			format: "esm",
-			// minify: true,
+			minify: true,
 			inlineDynamicImports: true,
 		},
+		// plugins: [
+		// 	{
+		// 		name: "bundle-analyzer",
+		// 		generateBundle(options, bundle) {
+		// 			for (const [fileName, chunk] of Object.entries(bundle)) {
+		// 				if (chunk.type === "chunk") {
+		// 					console.log(`\n📦 Bundle: ${fileName}`);
+		// 					console.log(
+		// 						`📏 Size: ${(chunk.code.length / 1024 / 1024).toFixed(2)}MB`,
+		// 					);
+
+		// 					const modules = chunk.modules || {};
+		// 					const sortedModules = Object.entries(modules)
+		// 						.map(([id, module]) => ({
+		// 							id,
+		// 							size: module.code?.length || 0,
+		// 						}))
+		// 						.sort((a, b) => b.size - a.size)
+		// 						.slice(0, 20);
+		// 					console.log("\n📋 Largest bundled modules:");
+		// 					for (const { id, size } of sortedModules) {
+		// 						console.log(`  ${(size / 1024).toFixed(1)}KB - ${id}`);
+		// 					}
+		// 				}
+		// 			}
+		// 		},
+		// 	},
+		// 	{
+		// 		name: "import-tracer",
+		// 		buildStart() {
+		// 			this.addWatchFile = () => {}; // Prevent watch issues
+		// 		},
+		// 		resolveId(id, importer) {
+		// 			if (id.includes("typescript") || id.includes("prettier")) {
+		// 				console.log(`🔍 ${id}`);
+		// 				console.log(`   ← imported by: ${importer || "entry"}`);
+		// 				console.log("");
+		// 			}
+		// 			return null;
+		// 		},
+		// 	},
+		// ],
+		treeshake: true,
 		platform: "node",
-		external: ["argon2"],
+		// TODO: temp to get the bundle down, these will both be replace/have workarounds
+		external: ["argon2", "mjml"],
 	});
 
 	// TODO: once adapters are supported, this will live in the adapter
