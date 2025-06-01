@@ -1,7 +1,9 @@
+import T from "../../translations/index.js";
 import { Hono } from "hono";
+import constants from "../../constants/constants.js";
 import routes from "./routes/v1/index.js";
-import { decodeError } from "../../utils/errors/index.js";
-import type { Config } from "../../types.js";
+import { LucidAPIError } from "../../utils/errors/index.js";
+import type { Config, LucidErrorData } from "../../types.js";
 import type { LucidHonoContext } from "../../types/hono.js";
 
 /**
@@ -17,16 +19,32 @@ const createApp = async (props: {
 		})
 		.route("/", routes)
 		.onError(async (err, c) => {
-			const { name, message, status, errorResponse, code } = decodeError(err);
+			if (err instanceof LucidAPIError) {
+				return c.json({
+					name: err.error.name,
+					message: err.error.message,
+					status: err.error.status,
+					errorResponse: err.error.errorResponse,
+					code: err.error.code,
+				} satisfies Exclude<LucidErrorData, "zod">);
+			}
 
-			// Todo: add logging
+			// @ts-expect-error
+			if (err?.statusCode === 429) {
+				return c.json({
+					code: "rate_limit",
+					name: T("rate_limit_error_name"),
+					message: err.message || constants.errors.message,
+					status: 429,
+				});
+			}
 
 			return c.json({
-				status,
-				code,
-				name,
-				message,
-				errors: errorResponse,
+				name: constants.errors.name,
+				message: err.message || constants.errors.message,
+				status: constants.errors.status,
+				errorResponse: constants.errors.errorResponse,
+				code: constants.errors.code,
 			});
 		});
 
