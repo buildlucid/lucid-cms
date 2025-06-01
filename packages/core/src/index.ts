@@ -1,8 +1,7 @@
-import { start, fastify } from "./libs/fastify/server.js";
+import { start } from "./libs/fastify/server.js";
 import config from "./libs/config/lucid-config.js";
 
 export { default as lucidPlugin } from "./libs/fastify/plugins/lucid.js";
-export { default as toolkit } from "./libs/toolkit/toolkit.js";
 export { LucidError } from "./utils/errors/index.js";
 export { default as logger } from "./utils/logging/index.js";
 export { default as z } from "zod";
@@ -13,5 +12,4 @@ export { default as passthroughImageProcessor } from "./libs/image-processor/pas
 export default {
 	start,
 	config,
-	fastify,
 };

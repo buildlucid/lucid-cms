@@ -1,7 +1,8 @@
+import { createRequire } from "node:module";
 import projectPackage from "../../../package.json" with { type: "json" };
-import adminPackage from "@lucidcms/admin/package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import type { AddressInfo } from "node:net";
+import { readFileSync } from "node:fs";
 
 const colors = {
 	bgBlue: "\x1b[44m",
@@ -32,6 +33,10 @@ const formatDuration = (milliseconds: number): string => {
 export const startAdminBuild = (viteSilent: boolean) => {
 	if (!viteSilent) return;
 	const startTime = process.hrtime();
+
+	const require = createRequire(import.meta.url);
+	const adminPackagePath = require.resolve("@lucidcms/admin/package.json");
+	const adminPackage = JSON.parse(readFileSync(adminPackagePath, "utf8"));
 
 	console.log(
 		`\n${formatBadge("BUILD", colors.bgBlue, colors.textBlue)} 🏗️  Building Admin SPA ${colors.textGray}v${adminPackage.version}${colors.reset}`,

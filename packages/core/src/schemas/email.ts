@@ -210,15 +210,3 @@ export const controllerSchemas = {
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
 >;
-
-export const toolkitSchemas = {
-	sendExtenal: z.object({
-		to: z.email(),
-		subject: z.string(),
-		template: z.string(),
-		cc: z.string().optional(),
-		bcc: z.string().optional(),
-		replyTo: z.string().optional(),
-		data: z.record(z.any(), z.any()),
-	}),
-};

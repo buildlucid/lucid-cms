@@ -8,9 +8,7 @@ import fastifyStatic from "@fastify/static";
 import fastifySwagger from "@fastify/swagger";
 import fp from "fastify-plugin";
 import packageJson from "../../../../package.json" with { type: "json" };
-import executeStartTasks from "../../../actions/execute-start-tasks.js";
 import constants from "../../../constants/constants.js";
-import getConfig from "../../../libs/config/get-config.js";
 import routes from "../routes/index.js";
 import lucidServices from "../../../services/index.js";
 import T from "../../../translations/index.js";
@@ -20,22 +18,22 @@ import logger from "../../../utils/logging/index.js";
 import lucidFrontend from "./frontend.js";
 import scalarApiReference from "@scalar/fastify-api-reference";
 import { swaggerRegisterRefs } from "../../../utils/swagger/swagger-refs.js";
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyPluginOptions } from "fastify";
+import type { Config } from "../../../types.js";
 
 const currentDir = getDirName(import.meta.url);
 
-const lucidPlugin = async (fastify: FastifyInstance) => {
+interface LucidPluginOptions extends FastifyPluginOptions {
+	config: Config;
+}
+
+const lucidPlugin = async (
+	fastify: FastifyInstance,
+	options: LucidPluginOptions,
+) => {
 	try {
-		const config = await getConfig();
-
-		await executeStartTasks({
-			db: config.db.client,
-			config: config,
-			services: lucidServices,
-		});
-
 		// Decorate Fastify instance with config, logger, and services
-		fastify.decorate("config", config);
+		fastify.decorate("config", options.config);
 		fastify.decorate("logger", logger);
 		fastify.decorate("services", lucidServices);
 
@@ -128,9 +126,9 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 				],
 				servers: [
 					{
-						url: config.host.includes("[::1]")
-							? config.host.replace("[::1]", "localhost")
-							: config.host,
+						url: options.config.host.includes("[::1]")
+							? options.config.host.replace("[::1]", "localhost")
+							: options.config.host,
 						description: "Development server",
 					},
 				],
@@ -139,7 +137,7 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		});
 		swaggerRegisterRefs(fastify);
 
-		if (!config.disableSwagger) {
+		if (!options.config.disableSwagger) {
 			fastify.register(scalarApiReference, {
 				routePrefix: constants.swaggerRoutePrefix,
 				configuration: {
@@ -154,7 +152,7 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 
 		// Register server-wide middleware
 		fastify.register(cors, {
-			origin: [config.host, "http://localhost:3000"],
+			origin: [options.config.host, "http://localhost:3000"],
 			methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 			allowedHeaders: [
 				"Content-Type",
@@ -165,7 +163,9 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 			credentials: true,
 		});
 
-		fastify.register(fastifyCookie, { secret: config.keys.cookieSecret });
+		fastify.register(fastifyCookie, {
+			secret: options.config.keys.cookieSecret,
+		});
 
 		fastify.register(fastifyHelmet, {
 			contentSecurityPolicy: false,
@@ -180,7 +180,7 @@ const lucidPlugin = async (fastify: FastifyInstance) => {
 		// Register routes
 		fastify.register(routes);
 
-		for (const fastifyExt of config.fastifyExtensions || []) {
+		for (const fastifyExt of options.config.fastifyExtensions || []) {
 			fastify.register(fastifyExt);
 		}
 

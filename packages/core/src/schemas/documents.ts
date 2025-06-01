@@ -620,14 +620,3 @@ export type ClientGetMultipleQueryParams = z.infer<
 export type GetMultipleRevisionsQueryParams = z.infer<
 	typeof controllerSchemas.getMultipleRevisions.query.formatted
 >;
-
-export const toolkitSchemas = {
-	getSingle: z.object({
-		collectionKey: z.string(),
-		query: controllerSchemas.client.getSingle.query.formatted,
-	}),
-	getMultiple: z.object({
-		collectionKey: z.string(),
-		query: controllerSchemas.client.getMultiple.query.formatted,
-	}),
-};

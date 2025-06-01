@@ -31,7 +31,3 @@ export type ServiceFn<T extends unknown[], R> = (
 	service: ServiceContext,
 	...args: T
 ) => ServiceResponse<R>;
-
-export type ExtractServiceFnArgs<T> = T extends ServiceFn<infer Args, unknown>
-	? Args
-	: never;

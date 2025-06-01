@@ -12,6 +12,10 @@ program.name("lucid").description("Lucid CMS CLI").version(packageJson.version);
 program
 	.command("dev")
 	.description("Start development server")
+	.option(
+		"-w, --watch [path]",
+		"Watch for file changes (optionally specify path to watch)",
+	)
 	.action(devCommand);
 
 program

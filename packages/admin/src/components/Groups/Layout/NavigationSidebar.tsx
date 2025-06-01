@@ -2,7 +2,9 @@ import T from "@/translations";
 import { type Component, createMemo, Show } from "solid-js";
 import api from "@/services/api";
 import { useLocation } from "@solidjs/router";
-import packageJson from "../../../../../../packages/core/package.json";
+import packageJson from "../../../../../../packages/core/package.json" with {
+	type: "json",
+};
 import { A } from "@solidjs/router";
 import LogoIcon from "@assets/svgs/logo-icon.svg";
 import userStore from "@/store/userStore";

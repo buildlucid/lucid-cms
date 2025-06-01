@@ -1,5 +1,5 @@
 import T from "../translations/index.js";
-import registerCronJobs from "./register-cron-jobs.js";
+// import registerCronJobs from "./register-cron-jobs.js";
 import serviceWrapper from "../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../utils/services/types.js";
 
@@ -44,7 +44,8 @@ const executeStartTasks = async (service: ServiceContext) => {
 		},
 	)(service);
 
-	registerCronJobs(service);
+	// TODO: runtime adapters will handle the implementation of cron jobs
+	// registerCronJobs(service);
 };
 
 export default executeStartTasks;

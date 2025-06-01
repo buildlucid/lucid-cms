@@ -1,5 +1,16 @@
-const migrateCommand = () => {
-	console.log("Migrating...");
+import executeStartTasks from "../../../actions/execute-start-tasks.js";
+import lucidServices from "../../../services/index.js";
+import getConfig from "../../config/get-config.js";
+
+// TODO: split this up into a seed and migrate command down the line
+const migrateCommand = async () => {
+	const config = await getConfig();
+
+	await executeStartTasks({
+		db: config.db.client,
+		config: config,
+		services: lucidServices,
+	});
 };
 
 export default migrateCommand;

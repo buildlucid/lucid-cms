@@ -15,11 +15,14 @@ import {
  * Programatically build the admin SPA with Vite.
  * @todo Allow users to extend the vite config within the lucid.config.ts/js
  */
-const buildApp = async (config: Config): ServiceResponse<undefined> => {
+const buildApp = async (
+	config: Config,
+	force?: boolean,
+): ServiceResponse<undefined> => {
 	try {
 		const buildAdmin = await shouldBuild();
 		if (buildAdmin.error) return buildAdmin;
-		if (buildAdmin.data === false) {
+		if (buildAdmin.data === false && force !== true) {
 			skipAdminBuild();
 			return {
 				data: undefined,

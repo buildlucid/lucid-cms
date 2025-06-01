@@ -10,12 +10,12 @@ import LucidS3 from "@lucidcms/plugin-s3";
 import LucidPages from "@lucidcms/plugin-pages";
 import LucidLocalStorage from "@lucidcms/plugin-local-storage";
 // Collections
-import PageCollection from "./src/lucid/collections/pages.js";
-import BlogCollection from "./src/lucid/collections/blogs.js";
-import MainMenuCollection from "./src/lucid/collections/main-menu.js";
-import SettingsCollection from "./src/lucid/collections/settings.js";
-import TestCollection from "./src/lucid/collections/test.js";
-import SimpleCollection from "./src/lucid/collections/simple.js";
+import PageCollection from "./src/collections/pages.js";
+import BlogCollection from "./src/collections/blogs.js";
+import MainMenuCollection from "./src/collections/main-menu.js";
+import SettingsCollection from "./src/collections/settings.js";
+import TestCollection from "./src/collections/test.js";
+import SimpleCollection from "./src/collections/simple.js";
 
 export default lucid.config({
 	host: "http://[::1]:8080",

@@ -1,11 +1,12 @@
 import T from "../../../translations/index.js";
 import fs from "node:fs";
-import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import constants from "../../../constants/constants.js";
 import fastifyStatic from "@fastify/static";
 import vite from "../../vite/index.js";
 import LucidError from "../../../utils/errors/lucid-error.js";
+import type { FastifyInstance } from "fastify";
+
 // import fastifyHttpProxy from "@fastify/http-proxy";
 
 /**
@@ -29,8 +30,8 @@ const lucidFrontend = async (fastify: FastifyInstance) => {
 		// }
 		// else {
 		//* build the vite frontend.
-		const buildResponse = await vite.buildApp(fastify.config);
-		if (buildResponse.error) throw new Error(buildResponse.error.message);
+		// const buildResponse = await vite.buildApp(fastify.config);
+		// if (buildResponse.error) throw new Error(buildResponse.error.message);
 
 		fastify.register(fastifyStatic, {
 			root: paths.clientDist,

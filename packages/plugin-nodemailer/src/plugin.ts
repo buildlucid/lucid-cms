@@ -8,12 +8,12 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
 	pluginOptions,
 ) => {
-	await verifyTransporter(pluginOptions.transporter);
-
 	config.email = {
 		from: pluginOptions.from,
 		strategy: async (email, meta) => {
 			try {
+				await verifyTransporter(pluginOptions.transporter);
+
 				await pluginOptions.transporter.sendMail({
 					from: `${email.from.name} <${email.from.email}>`,
 					to: email.to,

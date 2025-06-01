@@ -5,14 +5,11 @@
 	"main": "src/index.ts",
 	"type": "module",
 	"scripts": {
-		"start": "dotenvx run -- tsx ./src/index.ts",
-		"dev": "dotenvx run -- tsx watch ./src/index.ts",
 		"dotenvx:encrypt": "dotenvx encrypt",
-		"build:js": "tsc",
-		"start:js": "dotenvx run -- node dist/index.js",
-		"cli:dev": "lucid dev",
-		"cli:build": "lucid build",
-		"cli:migrate": "lucid migrate"
+		"dev": "dotenvx run -- lucid dev --watch",
+		"build": "lucid build",
+		"start": "dotenvx run -- lucid build && dotenvx run -- node dist/index.js",
+		"migrate": "dotenvx run -- lucid migrate"
 	},
 	"dependencies": {
 		"@lucidcms/core": "*",
@@ -31,7 +28,6 @@
 	"devDependencies": {
 		"@dotenvx/dotenvx": "^1.41.0",
 		"@types/better-sqlite3": "^7.6.13",
-		"tsx": "^4.19.3",
 		"typescript": "^5.8.3"
 	},
 	"volta": {
