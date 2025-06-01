@@ -121,7 +121,7 @@
 		"node": ">=22.0.0 <23.0.0"
 	},
 	"bin": {
-		"lucid": "./dist/libs/cli/index.js"
+		"lucidcms": "./dist/libs/cli/index.js"
 	},
 	"license": "BSL-1.0"
 }

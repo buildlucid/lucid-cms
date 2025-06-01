@@ -6,10 +6,10 @@
 	"type": "module",
 	"scripts": {
 		"dotenvx:encrypt": "dotenvx encrypt",
-		"dev": "dotenvx run -- lucid dev --watch",
-		"build": "dotenvx run -- lucid build",
-		"start": "dotenvx run -- lucid build && dotenvx run -- node dist/server.js",
-		"migrate": "dotenvx run -- lucid migrate"
+		"dev": "dotenvx run -- lucidcms dev --watch",
+		"build": "dotenvx run -- lucidcms build",
+		"start": "dotenvx run -- lucidcms build && dotenvx run -- node dist/server.js",
+		"migrate": "dotenvx run -- lucidcms migrate"
 	},
 	"dependencies": {
 		"@lucidcms/core": "*",

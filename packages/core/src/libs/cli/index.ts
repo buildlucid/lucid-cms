@@ -5,9 +5,13 @@ import buildCommand from "./commands/build.js";
 import devCommand from "./commands/dev.js";
 import migrateCommand from "./commands/migrate.js";
 
+// TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();
 
-program.name("lucid").description("Lucid CMS CLI").version(packageJson.version);
+program
+	.name("lucidcms")
+	.description("Lucid CMS CLI")
+	.version(packageJson.version);
 
 program
 	.command("dev")
