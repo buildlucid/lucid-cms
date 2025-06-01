@@ -1,18 +1,16 @@
 import crypto from "node:crypto";
 import constants from "../../../constants/constants.js";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import { setCookie } from "hono/cookie";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import type { LucidHonoContext } from "../../../types/hono.js";
 
-const generateToken = async (
-	request: FastifyRequest,
-	reply: FastifyReply,
-): ServiceResponse<string> => {
+const generateToken = async (c: LucidHonoContext): ServiceResponse<string> => {
 	const token = crypto.randomBytes(32).toString("hex");
 
-	reply.setCookie(constants.headers.csrf, token, {
+	setCookie(c, constants.headers.csrf, token, {
 		maxAge: constants.csrfExpiration,
 		httpOnly: true,
-		secure: request.protocol === "https",
+		secure: c.req.url.startsWith("https://"),
 		sameSite: "strict",
 		path: "/",
 	});

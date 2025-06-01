@@ -11,18 +11,18 @@ const getCSRFController: RouteController<
 	typeof controllerSchemas.getCSRF.query.string,
 	typeof controllerSchemas.getCSRF.query.formatted
 > = async (request, reply) => {
-	const tokenRes = await request.server.services.auth.csrf.generateToken(
-		request,
-		reply,
-	);
-	if (tokenRes.error) throw new LucidAPIError(tokenRes.error);
+	// const tokenRes = await request.server.services.auth.csrf.generateToken(
+	// 	request,
+	// 	reply,
+	// );
+	// if (tokenRes.error) throw new LucidAPIError(tokenRes.error);
 
 	reply.status(200).send(
-		formatAPIResponse(request, {
-			data: {
-				_csrf: tokenRes.data,
-			},
-		}),
+		// formatAPIResponse(request, {
+		// 	data: {
+		// 		_csrf: tokenRes.data,
+		// 	},
+		// }),
 	);
 };
 

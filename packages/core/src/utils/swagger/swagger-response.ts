@@ -1,7 +1,6 @@
 import T from "../../translations/index.js";
 import constants from "../../constants/constants.js";
 import swaggerRefs from "./swagger-refs.js";
-import type { FastifySchema } from "fastify";
 
 // Response metadata structures
 const metaObject = {
@@ -65,7 +64,7 @@ const swaggerResponse = (config: {
 	schema?: unknown;
 	paginated?: boolean;
 	noProperties?: boolean;
-}): FastifySchema["response"] => {
+}) => {
 	const response: Record<string, unknown> = {};
 
 	if (config.schema) {

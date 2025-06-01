@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import type { LucidHonoContext } from "../../../../../types/hono.js";
+import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
-const routes = new Hono<LucidHonoContext>();
+const routes = new Hono<LucidHonoGeneric>();
 
 export default routes;

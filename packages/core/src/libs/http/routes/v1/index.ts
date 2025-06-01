@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import type { LucidHonoContext } from "../../../../types/hono.js";
 import apiRoutes from "./api/index.js";
 import cdnRoutes from "./cdn/index.js";
+import type { LucidHonoGeneric } from "../../../../types/hono.js";
 
-const routes = new Hono<LucidHonoContext>()
+const routes = new Hono<LucidHonoGeneric>()
 	.route("/api/v1", apiRoutes)
 	.route("/cdn/v1", cdnRoutes);
 
