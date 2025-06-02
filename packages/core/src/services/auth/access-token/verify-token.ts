@@ -1,14 +1,14 @@
 import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
-import jwt from "jsonwebtoken";
-import type { FastifyRequest } from "fastify";
+import { verify } from "hono/jwt";
+import { getCookie } from "hono/cookie";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
 
-const verifyToken = (
-	request: FastifyRequest,
-): Awaited<ServiceResponse<FastifyRequest["auth"]>> => {
+const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 	try {
-		const _access = request.cookies[constants.headers.accessToken];
+		const config = c.get("config");
+		const _access = getCookie(c, constants.cookies.accessToken);
 
 		if (!_access) {
 			return {
@@ -21,10 +21,10 @@ const verifyToken = (
 			};
 		}
 
-		const decode = jwt.verify(
+		const decode = (await verify(
 			_access,
-			request.server.config.keys.accessTokenSecret,
-		) as FastifyRequest["auth"];
+			config.keys.accessTokenSecret,
+		)) as LucidAuth;
 
 		return {
 			error: undefined,

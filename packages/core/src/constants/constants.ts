@@ -6,11 +6,14 @@ export default Object.freeze({
 	tempDir: "./tmp",
 	swaggerRoutePrefix: "/documentation",
 	headers: {
-		accessToken: "_access",
 		csrf: "_csrf",
-		refreshToken: "_refresh",
 		clientIntegrationKey: "lucid-client-key",
 		contentLocale: "lucid-content-locale",
+	},
+	cookies: {
+		csrf: "_csrf",
+		refreshToken: "_refresh",
+		accessToken: "_access",
 	},
 	seedDefaults: {
 		user: {

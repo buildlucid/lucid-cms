@@ -1,18 +1,19 @@
 import T from "../../../translations/index.js";
-import jwt from "jsonwebtoken";
+import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import Repository from "../../../libs/repositories/index.js";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import services from "../../index.js";
+import { getCookie } from "hono/cookie";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import type { LucidHonoContext } from "../../../types/hono.js";
 
 const verifyToken = async (
-	request: FastifyRequest,
-	reply: FastifyReply,
+	c: LucidHonoContext,
 ): ServiceResponse<{
 	user_id: number;
 }> => {
 	try {
-		const _refresh = request.cookies[constants.headers.refreshToken];
+		const _refresh = getCookie(c, constants.cookies.refreshToken);
 
 		if (!_refresh) {
 			return {
@@ -25,16 +26,15 @@ const verifyToken = async (
 			};
 		}
 
+		const config = c.get("config");
+
 		const UserTokens = Repository.get(
 			"user-tokens",
-			request.server.config.db.client,
-			request.server.config.db,
+			config.db.client,
+			config.db,
 		);
 
-		const decode = jwt.verify(
-			_refresh,
-			request.server.config.keys.refreshTokenSecret,
-		) as {
+		const decode = (await verify(_refresh, config.keys.refreshTokenSecret)) as {
 			id: number;
 		};
 
@@ -81,8 +81,8 @@ const verifyToken = async (
 		};
 	} catch (err) {
 		const [refreshRes, accessRes] = await Promise.all([
-			request.server.services.auth.refreshToken.clearToken(request, reply),
-			request.server.services.auth.accessToken.clearToken(reply),
+			services.auth.refreshToken.clearToken(c),
+			services.auth.accessToken.clearToken(c),
 		]);
 		if (refreshRes.error) return refreshRes;
 		if (accessRes.error) return accessRes;

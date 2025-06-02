@@ -1,0 +1,16 @@
+import z, { type ZodType } from "zod";
+import type { OpenAPIV3 } from "openapi-types";
+
+const honoSwaggerRequestBody = (
+	schema: ZodType,
+): OpenAPIV3.RequestBodyObject => {
+	return {
+		content: {
+			"application/json": {
+				schema: z.toJSONSchema(schema) as OpenAPIV3.SchemaObject,
+			},
+		},
+	};
+};
+
+export default honoSwaggerRequestBody;

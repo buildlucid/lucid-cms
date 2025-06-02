@@ -8,6 +8,7 @@ import packageJson from "../../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
 import type { Config, LucidErrorData } from "../../types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
+import type { StatusCode } from "hono/utils/http-status";
 
 /**
  * The entry point for creating the Hono app.
@@ -24,6 +25,7 @@ const createApp = async (props: {
 		.route("/", routes)
 		.onError(async (err, c) => {
 			if (err instanceof LucidAPIError) {
+				c.status(err.error.status as StatusCode);
 				return c.json({
 					name: err.error.name,
 					message: err.error.message,
@@ -35,6 +37,7 @@ const createApp = async (props: {
 
 			// @ts-expect-error
 			if (err?.statusCode === 429) {
+				c.status(429);
 				return c.json({
 					code: "rate_limit",
 					name: T("rate_limit_error_name"),
@@ -43,6 +46,7 @@ const createApp = async (props: {
 				});
 			}
 
+			c.status(500);
 			return c.json({
 				name: constants.errors.name,
 				message: err.message || constants.errors.message,

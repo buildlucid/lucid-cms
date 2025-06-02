@@ -1,19 +1,23 @@
 import constants from "../../../constants/constants.js";
-import jwt from "jsonwebtoken";
+import { sign } from "hono/jwt";
+import services from "../../../services/index.js";
+import { setCookie } from "hono/cookie";
+import { randomBytes } from "node:crypto";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
 
 const generateToken = async (
-	reply: FastifyReply,
-	request: FastifyRequest,
+	c: LucidHonoContext,
 	userId: number,
 ): ServiceResponse<undefined> => {
 	try {
-		const userRes = await request.server.services.user.getSingle(
+		const config = c.get("config");
+
+		const userRes = await services.user.getSingle(
 			{
-				db: request.server.config.db.client,
-				config: request.server.config,
-				services: request.server.services,
+				db: config.db.client,
+				config: config,
+				services: services,
 			},
 			{
 				userId: userId,
@@ -21,24 +25,27 @@ const generateToken = async (
 		);
 		if (userRes.error) return userRes;
 
-		const token = jwt.sign(
+		const now = Date.now();
+		const nonce = randomBytes(8).toString("hex");
+
+		const token = await sign(
 			{
 				id: userRes.data.id,
 				username: userRes.data.username,
 				email: userRes.data.email,
 				permissions: userRes.data.permissions,
 				superAdmin: userRes.data.superAdmin ?? false,
-			} satisfies FastifyRequest["auth"],
-			request.server.config.keys.accessTokenSecret,
-			{
-				expiresIn: constants.accessTokenExpiration,
-			},
+				exp: Math.floor(now / 1000) + constants.accessTokenExpiration,
+				iat: Math.floor(now / 1000),
+				nonce: nonce,
+			} satisfies LucidAuth,
+			config.keys.accessTokenSecret,
 		);
 
-		reply.setCookie(constants.headers.accessToken, token, {
+		setCookie(c, constants.cookies.accessToken, token, {
 			maxAge: constants.accessTokenExpiration,
 			httpOnly: true,
-			secure: request.protocol === "https",
+			secure: c.req.url.startsWith("https://"),
 			sameSite: "strict",
 			path: "/",
 		});

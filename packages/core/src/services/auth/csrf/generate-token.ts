@@ -7,7 +7,7 @@ import type { LucidHonoContext } from "../../../types/hono.js";
 const generateToken = async (c: LucidHonoContext): ServiceResponse<string> => {
 	const token = crypto.randomBytes(32).toString("hex");
 
-	setCookie(c, constants.headers.csrf, token, {
+	setCookie(c, constants.cookies.csrf, token, {
 		maxAge: constants.csrfExpiration,
 		httpOnly: true,
 		secure: c.req.url.startsWith("https://"),

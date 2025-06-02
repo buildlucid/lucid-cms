@@ -1,11 +1,12 @@
 import constants from "../../../constants/constants.js";
+import { deleteCookie } from "hono/cookie";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import type { FastifyReply } from "fastify";
+import type { LucidHonoContext } from "../../../types/hono.js";
 
 const clearToken = (
-	reply: FastifyReply,
+	c: LucidHonoContext,
 ): Awaited<ServiceResponse<undefined>> => {
-	reply.clearCookie(constants.headers.accessToken, { path: "/" });
+	deleteCookie(c, constants.cookies.accessToken, { path: "/" });
 	return {
 		error: undefined,
 		data: undefined,

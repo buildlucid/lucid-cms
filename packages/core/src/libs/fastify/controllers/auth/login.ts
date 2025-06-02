@@ -36,20 +36,20 @@ const loginController: RouteController<
 	);
 	if (userRes.error) throw new LucidAPIError(userRes.error);
 
-	const [refreshRes, accessRes] = await Promise.all([
-		request.server.services.auth.refreshToken.generateToken(
-			reply,
-			request,
-			userRes.data.id,
-		),
-		request.server.services.auth.accessToken.generateToken(
-			reply,
-			request,
-			userRes.data.id,
-		),
-	]);
-	if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-	if (accessRes.error) throw new LucidAPIError(accessRes.error);
+	// const [refreshRes, accessRes] = await Promise.all([
+	// 	request.server.services.auth.refreshToken.generateToken(
+	// 		reply,
+	// 		request,
+	// 		userRes.data.id,
+	// 	),
+	// 	request.server.services.auth.accessToken.generateToken(
+	// 		reply,
+	// 		request,
+	// 		userRes.data.id,
+	// 	),
+	// ]);
+	// if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
+	// if (accessRes.error) throw new LucidAPIError(accessRes.error);
 
 	reply.status(204).send();
 };

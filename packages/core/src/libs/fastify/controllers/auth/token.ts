@@ -12,24 +12,24 @@ const tokenController: RouteController<
 	typeof controllerSchemas.token.query.string,
 	typeof controllerSchemas.token.query.formatted
 > = async (request, reply) => {
-	const payloadRes =
-		await request.server.services.auth.refreshToken.verifyToken(request, reply);
-	if (payloadRes.error) throw new LucidAPIError(payloadRes.error);
+	// const payloadRes =
+	// 	await request.server.services.auth.refreshToken.verifyToken(request, reply);
+	// if (payloadRes.error) throw new LucidAPIError(payloadRes.error);
 
-	const [refreshRes, accessRes] = await Promise.all([
-		request.server.services.auth.refreshToken.generateToken(
-			reply,
-			request,
-			payloadRes.data.user_id,
-		),
-		request.server.services.auth.accessToken.generateToken(
-			reply,
-			request,
-			payloadRes.data.user_id,
-		),
-	]);
-	if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-	if (accessRes.error) throw new LucidAPIError(accessRes.error);
+	// const [refreshRes, accessRes] = await Promise.all([
+	// 	request.server.services.auth.refreshToken.generateToken(
+	// 		reply,
+	// 		request,
+	// 		payloadRes.data.user_id,
+	// 	),
+	// 	request.server.services.auth.accessToken.generateToken(
+	// 		reply,
+	// 		request,
+	// 		payloadRes.data.user_id,
+	// 	),
+	// ]);
+	// if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
+	// if (accessRes.error) throw new LucidAPIError(accessRes.error);
 
 	reply.status(204).send();
 };

@@ -16,10 +16,13 @@ import type {
 	output,
 	infer as zInfer,
 } from "zod";
+import type { LucidHonoVariables } from "../../../types/hono.js";
 
 export type Hook<
 	T,
-	E extends Env,
+	E extends Env & {
+		Variables: LucidHonoVariables;
+	},
 	P extends string,
 	Target extends keyof ValidationTargets = keyof ValidationTargets,
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
@@ -46,7 +49,9 @@ type HasUndefined<T> = undefined extends T ? true : false;
 export const zValidator = <
 	T extends ZodType,
 	Target extends keyof ValidationTargets,
-	E extends Env,
+	E extends Env & {
+		Variables: LucidHonoVariables;
+	},
 	P extends string,
 	In = input<T>,
 	Out = output<T>,

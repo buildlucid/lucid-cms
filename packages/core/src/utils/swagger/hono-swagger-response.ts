@@ -2,14 +2,6 @@ import T from "../../translations/index.js";
 import constants from "../../constants/constants.js";
 import type { OpenAPIV3 } from "openapi-types";
 
-interface SwaggerHeaders {
-	// undefine means dont include in the schema, boolean means required or not
-	csrf?: boolean;
-	contentLocale?: boolean;
-	clientKey?: boolean;
-	authorization?: boolean;
-}
-
 const metaObject: OpenAPIV3.SchemaObject = {
 	type: "object",
 	properties: {
@@ -68,71 +60,19 @@ const linksObject: OpenAPIV3.SchemaObject = {
 };
 
 /**
- * Used to construct headers JSON schema for Swagger
- */
-const swaggerHeaders = (headers: SwaggerHeaders) => {
-	const headerObjects: {
-		[header: string]: OpenAPIV3.HeaderObject;
-	} = {};
-
-	if (headers.csrf !== undefined) {
-		headerObjects._csrf = {
-			description: T("swagger_csrf_header_description"),
-			required: headers.csrf,
-			schema: {
-				type: "string",
-			},
-		};
-	}
-	if (headers.contentLocale !== undefined) {
-		headerObjects["lucid-content-locale"] = {
-			description: T("swagger_content_locale_header_description"),
-			required: headers.contentLocale,
-			schema: {
-				type: "string",
-			},
-			example: "en",
-		};
-	}
-	if (headers.clientKey !== undefined) {
-		headerObjects["lucid-client-key"] = {
-			description: T("swagger_client_key_header_description"),
-			required: headers.clientKey,
-			schema: {
-				type: "string",
-			},
-		};
-	}
-	if (headers.authorization !== undefined) {
-		headerObjects.Authorization = {
-			description: T("swagger_authorization_header_description"),
-			required: headers.authorization,
-			schema: {
-				type: "string",
-			},
-		};
-	}
-
-	return headerObjects;
-};
-
-/**
  * Used to construct a response object for Swagger
  */
-const honoSwaggerResponse = (config: {
+const honoSwaggerResponse = (config?: {
 	schema?: unknown;
 	paginated?: boolean;
 	noProperties?: boolean;
-	headers?: SwaggerHeaders;
 }) => {
 	const response: Record<
 		string,
 		OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject
 	> = {};
 
-	const headers = config.headers ? swaggerHeaders(config.headers) : undefined;
-
-	if (config.schema) {
+	if (config?.schema) {
 		response[200] = {
 			description: T("swagger_response_200"),
 			content: {
@@ -150,7 +90,6 @@ const honoSwaggerResponse = (config: {
 								},
 				},
 			},
-			headers,
 		};
 	} else {
 		response[204] = {
@@ -163,7 +102,6 @@ const honoSwaggerResponse = (config: {
 					},
 				},
 			},
-			headers,
 		};
 	}
 
@@ -201,7 +139,6 @@ const honoSwaggerResponse = (config: {
 				},
 			},
 		},
-		headers,
 	};
 
 	return response;

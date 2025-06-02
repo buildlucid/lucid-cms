@@ -1,35 +1,27 @@
-import jwt from "jsonwebtoken";
+import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import Repository from "../../../libs/repositories/index.js";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import { deleteCookie, getCookie } from "hono/cookie";
+import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
-const clearToken = async (
-	request: FastifyRequest,
-	reply: FastifyReply,
-): ServiceResponse<undefined> => {
-	const _refresh = request.cookies[constants.headers.refreshToken];
+const clearToken = async (c: LucidHonoContext): ServiceResponse<undefined> => {
+	const _refresh = getCookie(c, constants.cookies.refreshToken);
 	if (!_refresh) {
 		return {
 			error: undefined,
 			data: undefined,
 		};
 	}
+	const config = c.get("config");
 
-	const UserTokens = Repository.get(
-		"user-tokens",
-		request.server.config.db.client,
-		request.server.config.db,
-	);
+	const UserTokens = Repository.get("user-tokens", config.db.client, config.db);
 
-	const decode = jwt.verify(
-		_refresh,
-		request.server.config.keys.refreshTokenSecret,
-	) as {
+	const decode = (await verify(_refresh, config.keys.refreshTokenSecret)) as {
 		id: number;
 	};
 
-	reply.clearCookie(constants.headers.refreshToken, { path: "/" });
+	deleteCookie(c, constants.cookies.refreshToken, { path: "/" });
 
 	const deleteMultipleTokenRes = await UserTokens.deleteMultiple({
 		where: [
