@@ -49,7 +49,7 @@ export default lucid.config({
 		],
 		defaultLocale: "en",
 	},
-	// disableSwagger: true,
+	disableSwagger: false,
 	media: {
 		maxFileSize: 200 * 1024 * 1024, // 200MB
 		processedImageLimit: 10,
