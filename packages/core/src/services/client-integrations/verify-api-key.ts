@@ -4,6 +4,7 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { LucidClientIntegrationAuth } from "../../types/hono.js";
 
 const verifyApiKey: ServiceFn<
 	[
@@ -12,10 +13,7 @@ const verifyApiKey: ServiceFn<
 			apiKey: string;
 		},
 	],
-	{
-		id: number;
-		key: string;
-	}
+	LucidClientIntegrationAuth
 > = async (context, data) => {
 	const ClientIntegrations = Repository.get(
 		"client-integrations",
