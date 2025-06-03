@@ -1,0 +1,57 @@
+import z from "zod";
+import T from "../../../../translations/index.js";
+import { createFactory } from "hono/factory";
+import { controllerSchemas } from "../../../../schemas/account.js";
+import { describeRoute } from "hono-openapi";
+import services from "../../../../services/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { honoSwaggerResponse } from "../../../../utils/swagger/index.js";
+import authenticate from "../../middleware/authenticate.js";
+import type { LucidHonoContext } from "../../../../types/hono.js";
+
+const factory = createFactory();
+
+const getMeController = factory.createHandlers(
+	describeRoute({
+		description: "Returns the authenticated user based on the access token.",
+		tags: ["account"],
+		summary: "Get Authenticated User",
+		responses: honoSwaggerResponse({
+			schema: z.toJSONSchema(controllerSchemas.getMe.response),
+		}),
+		validateResponse: true,
+	}),
+	authenticate,
+	async (c: LucidHonoContext) => {
+		const user = await serviceWrapper(services.user.getSingle, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: T("route_user_fetch_error_name"),
+				message: T("route_user_fetch_error_message"),
+			},
+		})(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				services: services,
+			},
+			{
+				userId: c.get("auth").id,
+			},
+		);
+
+		if (user.error) throw new LucidAPIError(user.error);
+
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: user.data,
+			}),
+		);
+	},
+);
+
+export default getMeController;

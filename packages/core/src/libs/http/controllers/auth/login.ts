@@ -8,7 +8,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoSwaggerResponse,
-	honoSwaggerHeaders,
+	honoSwaggerParamaters,
 	honoSwaggerRequestBody,
 } from "../../../../utils/swagger/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
@@ -23,8 +23,10 @@ const loginController = factory.createHandlers(
 		summary: "Login",
 
 		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerHeaders({
-			csrf: true,
+		parameters: honoSwaggerParamaters({
+			headers: {
+				csrf: true,
+			},
 		}),
 		requestBody: honoSwaggerRequestBody(controllerSchemas.login.body),
 		validateResponse: true,
