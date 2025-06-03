@@ -15,6 +15,7 @@ const honoSwaggerParamaters = (props: {
 		authorization?: boolean;
 	};
 	params?: ZodType;
+	query?: ZodType;
 }) => {
 	const paramaters: DescribeRouteOptions["parameters"] = [];
 
@@ -65,11 +66,41 @@ const honoSwaggerParamaters = (props: {
 	}
 
 	if (props.params) {
-		paramaters.push({
-			schema: z.toJSONSchema(props.params) as OpenAPIV3.SchemaObject,
-			name: "token",
-			in: "path",
-		});
+		const paramsSchema = z.toJSONSchema(props.params) as OpenAPIV3.SchemaObject;
+		if (paramsSchema.properties) {
+			for (const [paramName, paramSchema] of Object.entries(
+				paramsSchema.properties,
+			)) {
+				const schema = paramSchema as OpenAPIV3.SchemaObject;
+
+				paramaters.push({
+					name: paramName,
+					in: "path",
+					required: true,
+					description: schema.description,
+					example: schema.example,
+				});
+			}
+		}
+	}
+
+	if (props.query) {
+		const querySchema = z.toJSONSchema(props.query) as OpenAPIV3.SchemaObject;
+		if (querySchema.properties) {
+			for (const [paramName, paramSchema] of Object.entries(
+				querySchema.properties,
+			)) {
+				const schema = paramSchema as OpenAPIV3.SchemaObject;
+				console.log(schema);
+				paramaters.push({
+					name: paramName,
+					in: "query",
+					required: querySchema.required?.includes(paramName),
+					description: schema.description,
+					example: schema.example,
+				});
+			}
+		}
 	}
 
 	return paramaters;

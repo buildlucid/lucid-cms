@@ -36,7 +36,7 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			"*": z.string().meta({
+			key: z.string().meta({
 				description: "The media key you wish to stream",
 				example: "2024/09/5ttogd-placeholder-image.png",
 			}),
