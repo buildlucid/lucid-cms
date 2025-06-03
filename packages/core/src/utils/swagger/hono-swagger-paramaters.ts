@@ -72,7 +72,6 @@ const honoSwaggerParamaters = (props: {
 				paramsSchema.properties,
 			)) {
 				const schema = paramSchema as OpenAPIV3.SchemaObject;
-
 				paramaters.push({
 					name: paramName,
 					in: "path",
@@ -91,7 +90,6 @@ const honoSwaggerParamaters = (props: {
 				querySchema.properties,
 			)) {
 				const schema = paramSchema as OpenAPIV3.SchemaObject;
-				console.log(schema);
 				paramaters.push({
 					name: paramName,
 					in: "query",

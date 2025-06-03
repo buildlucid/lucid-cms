@@ -1,0 +1,72 @@
+import z from "zod";
+import T from "../../../../translations/index.js";
+import { createFactory } from "hono/factory";
+import { controllerSchemas } from "../../../../schemas/client-integrations.js";
+import { describeRoute } from "hono-openapi";
+import services from "../../../../services/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../utils/errors/index.js";
+import {
+	honoSwaggerResponse,
+	honoSwaggerRequestBody,
+} from "../../../../utils/swagger/index.js";
+import authenticate from "../../middleware/authenticate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
+import validate from "../../middleware/validate.js";
+
+const factory = createFactory();
+
+const createSingleController = factory.createHandlers(
+	describeRoute({
+		description:
+			"Creates a new client integration that can be used to authenticate client endpoints.",
+		tags: ["client-integrations"],
+		summary: "Create Client Integration",
+		responses: honoSwaggerResponse({
+			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
+		}),
+		requestBody: honoSwaggerRequestBody(controllerSchemas.createSingle.body),
+		validateResponse: true,
+	}),
+	validateCSRF,
+	authenticate,
+	validate("json", controllerSchemas.createSingle.body),
+	async (c) => {
+		const { name, description, enabled } = c.req.valid("json");
+
+		const clientIntegrationRes = await serviceWrapper(
+			services.clientIntegrations.createSingle,
+			{
+				transaction: true,
+				defaultError: {
+					type: "basic",
+					name: T("route_client_integrations_create_error_name"),
+					message: T("route_client_integrations_create_error_message"),
+				},
+			},
+		)(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				services: services,
+			},
+			{
+				name,
+				description,
+				enabled,
+			},
+		);
+		if (clientIntegrationRes.error)
+			throw new LucidAPIError(clientIntegrationRes.error);
+
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: clientIntegrationRes.data,
+			}),
+		);
+	},
+);
+
+export default createSingleController;
