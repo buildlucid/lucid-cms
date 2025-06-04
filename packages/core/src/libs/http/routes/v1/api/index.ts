@@ -6,6 +6,9 @@ import collectionRoutes from "./collections.routes.js";
 import documentRoutes from "./document.routes.js";
 import emailRoutes from "./email.routes.js";
 import localeRoutes from "./locales.routes.js";
+import permissionRoutes from "./permissions.routes.js";
+import settingsRoutes from "./settings.routes.js";
+import roleRoutes from "./roles.routes.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const routes = new Hono<LucidHonoGeneric>()
@@ -15,6 +18,9 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/collections", collectionRoutes)
 	.route("/documents", documentRoutes)
 	.route("/emails", emailRoutes)
-	.route("/locales", localeRoutes);
+	.route("/locales", localeRoutes)
+	.route("/permissions", permissionRoutes)
+	.route("/settings", settingsRoutes)
+	.route("/roles", roleRoutes);
 
 export default routes;
