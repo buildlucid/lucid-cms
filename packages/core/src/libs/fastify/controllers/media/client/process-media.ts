@@ -30,7 +30,7 @@ const processMediaClientController: RouteController<
 			services: request.server.services,
 		},
 		{
-			key: request.params["*"],
+			key: request.params.key,
 			body: request.body,
 		},
 	);

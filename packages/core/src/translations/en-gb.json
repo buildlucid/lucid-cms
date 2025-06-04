@@ -181,6 +181,8 @@
 	"route_media_delete_error_message": "An error occurred while deleting the media.",
 	"route_media_fetch_error_name": "Media(s) Fetch Error",
 	"route_media_fetch_error_message": "An error occurred while fetching the media(s).",
+	"route_media_presigned_url_error_name": "Presigned URL Error",
+	"route_media_presigned_url_error_message": "An error occurred while getting the presigned URL.",
 	"route_media_update_error_name": "Media Update Error",
 	"route_media_update_error_message": "An error occurred while updating the media.",
 	"route_media_upload_error_name": "Media Upload Error",

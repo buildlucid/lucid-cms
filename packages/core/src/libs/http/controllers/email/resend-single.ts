@@ -1,0 +1,72 @@
+import z from "zod";
+import T from "../../../../translations/index.js";
+import { createFactory } from "hono/factory";
+import { controllerSchemas } from "../../../../schemas/email.js";
+import { describeRoute } from "hono-openapi";
+import services from "../../../../services/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../utils/errors/index.js";
+import {
+	honoSwaggerResponse,
+	honoSwaggerParamaters,
+} from "../../../../utils/swagger/index.js";
+import authenticate from "../../middleware/authenticate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
+import validate from "../../middleware/validate.js";
+import permissions from "../../middleware/permissions.js";
+
+const factory = createFactory();
+
+const resendSingleController = factory.createHandlers(
+	describeRoute({
+		description: "Resends the email with the given ID.",
+		tags: ["emails"],
+		summary: "Resend Email",
+		responses: honoSwaggerResponse({
+			schema: z.toJSONSchema(controllerSchemas.resendSingle.response),
+		}),
+		parameters: honoSwaggerParamaters({
+			params: controllerSchemas.resendSingle.params,
+			headers: {
+				csrf: true,
+			},
+		}),
+		validateResponse: true,
+	}),
+	validateCSRF,
+	authenticate,
+	permissions(["send_email"]),
+	validate("param", controllerSchemas.resendSingle.params),
+	async (c) => {
+		const { id } = c.req.valid("param");
+
+		const emailRes = await serviceWrapper(services.email.resendSingle, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: T("route_email_resend_error_name"),
+				message: T("route_email_resend_error_message"),
+			},
+		})(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				services: services,
+			},
+			{
+				id: Number.parseInt(id, 10),
+			},
+		);
+		if (emailRes.error) throw new LucidAPIError(emailRes.error);
+
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: emailRes.data,
+			}),
+		);
+	},
+);
+
+export default resendSingleController;
