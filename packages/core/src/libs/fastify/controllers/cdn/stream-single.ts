@@ -35,7 +35,7 @@ const streamSingleController: RouteController<
 			services: request.server.services,
 		},
 		{
-			key: request.params["*"],
+			key: request.params.key,
 			query: request.formattedQuery,
 			accept: request.headers.accept,
 			range,
