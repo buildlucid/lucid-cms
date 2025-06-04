@@ -1,9 +1,7 @@
-export { default as authenticate } from "./libs/fastify/middleware/authenticate.js";
-export { default as clientAuthentication } from "./libs/fastify/middleware/client-authenticate.js";
-export { default as contentLocale } from "./libs/fastify/middleware/content-locale.js";
-export { default as logRoute } from "./libs/fastify/middleware/log-route.js";
-export { default as validateCSRF } from "./libs/fastify/middleware/validate-csrf.js";
-export { default as validateBody } from "./libs/fastify/middleware/validate-body.js";
-export { default as validateParams } from "./libs/fastify/middleware/validate-params.js";
-export { default as validateQuery } from "./libs/fastify/middleware/validate-query.js";
-export { default as permissions } from "./libs/fastify/middleware/permissions.js";
+export { default as authenticate } from "./libs/http/middleware/authenticate.js";
+export { default as clientAuthentication } from "./libs/http/middleware/client-authenticate.js";
+export { default as contentLocale } from "./libs/http/middleware/content-locale.js";
+export { default as logRoute } from "./libs/http/middleware/log-route.js";
+export { default as validateCSRF } from "./libs/http/middleware/validate-csrf.js";
+export { default as validate } from "./libs/http/middleware/validate.js";
+export { default as permissions } from "./libs/http/middleware/permissions.js";

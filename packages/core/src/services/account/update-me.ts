@@ -1,13 +1,13 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
-import type { FastifyRequest } from "fastify";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { LucidAuth } from "../../types/hono.js";
 
 const updateMe: ServiceFn<
 	[
 		{
-			auth: FastifyRequest["auth"];
+			auth: LucidAuth;
 			firstName?: string;
 			lastName?: string;
 			username?: string;

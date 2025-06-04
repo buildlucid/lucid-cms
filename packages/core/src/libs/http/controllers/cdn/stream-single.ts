@@ -7,7 +7,7 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoSwaggerParamaters } from "../../../../utils/swagger/index.js";
-import { swaggerRefs } from "../../../../api.js";
+import { defaultErrorResponse } from "../../../../utils/swagger/hono-swagger-response.js";
 
 const factory = createFactory();
 
@@ -112,15 +112,11 @@ const streamSingleController = factory.createHandlers(
 				description: "Range Not Satisfiable",
 				content: {
 					"application/json": {
-						schema: {
-							$ref: swaggerRefs.defaultError,
-						},
+						schema: defaultErrorResponse,
 					},
 				},
 			},
-			default: {
-				$ref: swaggerRefs.defaultError,
-			},
+			default: defaultErrorResponse,
 		},
 		validateResponse: true,
 	}),

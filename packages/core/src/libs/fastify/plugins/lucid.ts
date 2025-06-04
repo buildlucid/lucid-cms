@@ -5,19 +5,13 @@ import cors from "@fastify/cors";
 import fastifyHelmet from "@fastify/helmet";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyStatic from "@fastify/static";
-import fastifySwagger from "@fastify/swagger";
 import fp from "fastify-plugin";
-import packageJson from "../../../../package.json" with { type: "json" };
 import constants from "../../../constants/constants.js";
-import routes from "../routes/index.js";
-import lucidServices from "../../../services/index.js";
 import T from "../../../translations/index.js";
 import { LucidError, decodeError } from "../../../utils/errors/index.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import logger from "../../../utils/logging/index.js";
 import lucidFrontend from "./frontend.js";
-import scalarApiReference from "@scalar/fastify-api-reference";
-import { swaggerRegisterRefs } from "../../../utils/swagger/swagger-refs.js";
 import type { FastifyInstance, FastifyPluginOptions } from "fastify";
 import type { Config } from "../../../types.js";
 
@@ -32,124 +26,6 @@ const lucidPlugin = async (
 	options: LucidPluginOptions,
 ) => {
 	try {
-		// Decorate Fastify instance with config, logger, and services
-		fastify.decorate("config", options.config);
-		fastify.decorate("logger", logger);
-		fastify.decorate("services", lucidServices);
-
-		// Register Swagger for API documentation
-
-		fastify.register(fastifySwagger, {
-			openapi: {
-				openapi: "3.0.0",
-				info: {
-					title: "Lucid CMS",
-					description:
-						"A modern headless CMS offering a delightful developer experience. Tailor Lucid seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
-					version: packageJson.version,
-				},
-				tags: [
-					{
-						name: "auth",
-						description:
-							"Authentication endpoints including login, token management, CSRF protection and logout functionality.",
-					},
-					{
-						name: "account",
-						description:
-							"User account management endpoints for user details, password resets and updating personal settings.",
-					},
-					{
-						name: "collections",
-						description:
-							"Collection endpoints for returning all of the collection configuration, such as their details, config and supported bricks and fields.",
-					},
-					{
-						name: "documents",
-						description:
-							"Document endpoints for creating, deleting, updating and promoting/restoring versions.",
-					},
-					{
-						name: "media",
-						description:
-							"Media endpoints for creating, updating, deleting, getting presigned URLs and clearing processed images.",
-					},
-					{
-						name: "emails",
-						description:
-							"Email endpoints for fetching, deleting and resending emails.",
-					},
-					{
-						name: "users",
-						description: "User endpoints for inviting, deleting and updating.",
-					},
-					{
-						name: "roles",
-						description:
-							"Role endpoints for fetching, creating, updating and deleting.",
-					},
-					{
-						name: "permissions",
-						description:
-							"Permission endpoints for fetching all available permissions.",
-					},
-					{
-						name: "locales",
-						description:
-							"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
-					},
-					{
-						name: "cdn",
-						description:
-							"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
-					},
-					{
-						name: "settings",
-						description:
-							"Setting endpoints to recieve current settings and meta data on Lucid.",
-					},
-					{
-						name: "client-integrations",
-						description:
-							"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",
-					},
-					{
-						name: "client-documents",
-						description:
-							"Client document endpoints for fetching single and multiple documents via the client integration authentication.",
-					},
-					{
-						name: "client-locales",
-						description:
-							"Client locale endpoints for fetching locale information.",
-					},
-				],
-				servers: [
-					{
-						url: options.config.host.includes("[::1]")
-							? options.config.host.replace("[::1]", "localhost")
-							: options.config.host,
-						description: "Development server",
-					},
-				],
-			},
-			hideUntagged: true,
-		});
-		swaggerRegisterRefs(fastify);
-
-		if (!options.config.disableSwagger) {
-			fastify.register(scalarApiReference, {
-				routePrefix: constants.swaggerRoutePrefix,
-				configuration: {
-					theme: "saturn",
-					defaultHttpClient: {
-						targetKey: "node",
-						clientKey: "fetch",
-					},
-				},
-			});
-		}
-
 		// Register server-wide middleware
 		fastify.register(cors, {
 			origin: [options.config.host, "http://localhost:3000"],
@@ -176,9 +52,6 @@ const lucidPlugin = async (
 			max: constants.rateLimit.max,
 			timeWindow: constants.rateLimit.timeWindow,
 		});
-
-		// Register routes
-		fastify.register(routes);
 
 		for (const fastifyExt of options.config.fastifyExtensions || []) {
 			fastify.register(fastifyExt);

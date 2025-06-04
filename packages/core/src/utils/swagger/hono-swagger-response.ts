@@ -59,6 +59,35 @@ const linksObject: OpenAPIV3.SchemaObject = {
 	},
 };
 
+export const defaultErrorResponse = {
+	type: "object",
+	description: T("swagger_response_default"),
+	properties: {
+		status: {
+			type: "number",
+			nullable: true,
+		},
+		code: {
+			type: "string",
+			nullable: true,
+		},
+		name: {
+			type: "string",
+			nullable: true,
+		},
+		message: {
+			type: "string",
+			nullable: true,
+		},
+		errors: {
+			type: "object",
+			nullable: true,
+			additionalProperties: true,
+		},
+	},
+	additionalProperties: true,
+} as const;
+
 /**
  * Used to construct a response object for Swagger
  */
@@ -109,34 +138,7 @@ const honoSwaggerResponse = (config?: {
 		description: T("swagger_response_default"),
 		content: {
 			"application/json": {
-				schema: {
-					type: "object",
-					description: T("swagger_response_default"),
-					properties: {
-						status: {
-							type: "number",
-							nullable: true,
-						},
-						code: {
-							type: "string",
-							nullable: true,
-						},
-						name: {
-							type: "string",
-							nullable: true,
-						},
-						message: {
-							type: "string",
-							nullable: true,
-						},
-						errors: {
-							type: "object",
-							nullable: true,
-							additionalProperties: true,
-						},
-					},
-					additionalProperties: true,
-				},
+				schema: defaultErrorResponse,
 			},
 		},
 	};
