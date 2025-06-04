@@ -9,6 +9,8 @@ import localeRoutes from "./locales.routes.js";
 import permissionRoutes from "./permissions.routes.js";
 import settingsRoutes from "./settings.routes.js";
 import roleRoutes from "./roles.routes.js";
+import userRoutes from "./users.routes.js";
+import clientRoutes from "./client/index.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const routes = new Hono<LucidHonoGeneric>()
@@ -21,6 +23,8 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/locales", localeRoutes)
 	.route("/permissions", permissionRoutes)
 	.route("/settings", settingsRoutes)
-	.route("/roles", roleRoutes);
+	.route("/roles", roleRoutes)
+	.route("/users", userRoutes)
+	.route("/client", clientRoutes);
 
 export default routes;

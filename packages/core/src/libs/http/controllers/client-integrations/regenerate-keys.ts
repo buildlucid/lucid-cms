@@ -26,6 +26,9 @@ const regenerateKeysController = factory.createHandlers(
 			schema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
 		}),
 		parameters: honoSwaggerParamaters({
+			headers: {
+				csrf: true,
+			},
 			params: controllerSchemas.regenerateKeys.params,
 		}),
 		validateResponse: true,

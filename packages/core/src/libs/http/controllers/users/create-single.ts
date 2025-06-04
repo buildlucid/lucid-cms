@@ -1,7 +1,7 @@
 import z from "zod";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../schemas/client-integrations.js";
+import { controllerSchemas } from "../../../../schemas/users.js";
 import { describeRoute } from "hono-openapi";
 import services from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -9,21 +9,21 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoSwaggerResponse,
-	honoSwaggerRequestBody,
 	honoSwaggerParamaters,
+	honoSwaggerRequestBody,
 } from "../../../../utils/swagger/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
+import permissions from "../../middleware/permissions.js";
 
 const factory = createFactory();
 
 const createSingleController = factory.createHandlers(
 	describeRoute({
-		description:
-			"Creates a new client integration that can be used to authenticate client endpoints.",
-		tags: ["client-integrations"],
-		summary: "Create Client Integration",
+		description: "Create a single user.",
+		tags: ["users"],
+		summary: "Create User",
 		responses: honoSwaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
@@ -37,39 +37,60 @@ const createSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions(["create_user"]),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
-		const { name, description, enabled } = c.req.valid("json");
+		const body = c.req.valid("json");
+		const auth = c.get("auth");
 
-		const clientIntegrationRes = await serviceWrapper(
-			services.clientIntegrations.createSingle,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: T("route_client_integrations_create_error_name"),
-					message: T("route_client_integrations_create_error_message"),
-				},
+		const userId = await serviceWrapper(services.user.createSingle, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: T("route_user_create_error_name"),
+				message: T("route_user_create_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),
 				services: services,
 			},
 			{
-				name,
-				description,
-				enabled,
+				email: body.email,
+				username: body.username,
+				roleIds: body.roleIds,
+				firstName: body.firstName,
+				lastName: body.lastName,
+				superAdmin: body.superAdmin,
+				authSuperAdmin: auth.superAdmin,
 			},
 		);
-		if (clientIntegrationRes.error)
-			throw new LucidAPIError(clientIntegrationRes.error);
+		if (userId.error) throw new LucidAPIError(userId.error);
+
+		const user = await serviceWrapper(services.user.getSingle, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: T("route_user_fetch_error_name"),
+				message: T("route_user_fetch_error_message"),
+			},
+		})(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				services: services,
+			},
+			{
+				userId: userId.data,
+			},
+		);
+		if (user.error) throw new LucidAPIError(user.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: clientIntegrationRes.data,
+				data: user.data,
 			}),
 		);
 	},
