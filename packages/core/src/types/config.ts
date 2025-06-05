@@ -5,10 +5,11 @@ import type ConfigSchema from "../libs/config/config-schema.js";
 import type { Readable } from "node:stream";
 import type { AllHooks } from "./hooks.js";
 import type { ServiceResponse } from "../utils/services/types.js";
-import type { FastifyInstance } from "fastify";
 import type { InlineConfig } from "vite";
 import type { LogLevel } from "../utils/logging/index.js";
 import type { MediaType } from "../types.js";
+import type { LucidHonoGeneric } from "./hono.js";
+import type { Hono } from "hono";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -228,7 +229,7 @@ export interface LucidConfig {
 		urlStrategy?: UrlStrategy;
 	};
 	/** Fastify extensions to register. Allows you to register custom routes, middleware, and more. */
-	fastifyExtensions?: Array<(fastify: FastifyInstance) => Promise<void>>;
+	honoExtensions?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
 	/** A list of collections instances to register. These can be imported from `@lucidcms/core/builders`. */
@@ -276,7 +277,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		>;
 		urlStrategy?: UrlStrategy;
 	};
-	fastifyExtensions: Array<(fastify: FastifyInstance) => Promise<void>>;
+	honoExtensions: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPlugin>;

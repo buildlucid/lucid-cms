@@ -128,9 +128,6 @@ export default Object.freeze({
 	documentation: "https://lucidcms.io/getting-started",
 	lucidUi: "https://lucidui.io/",
 	mediaAwaitingSyncInterval: 3600000, // 1 hour in ms
-	fastify: {
-		version: "5.x",
-	},
 	media: {
 		imagePresetQuality: 80,
 	},

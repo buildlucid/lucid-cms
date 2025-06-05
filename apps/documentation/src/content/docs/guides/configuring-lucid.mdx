@@ -105,7 +105,7 @@ export interface LucidConfig {
     strategy?: MediaStrategy;
   };
   hooks?: Array<AllHooks>;
-  fastifyExtensions?: Array<(fastify: FastifyInstance) => Promise<void>>;
+  honoExtensions?: Array<(app: Context) => Promise<void>>;
   collections?: CollectionBuilder[];
   plugins?: LucidPlugin[];
 }

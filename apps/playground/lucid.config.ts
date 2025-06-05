@@ -70,10 +70,13 @@ export default lucid.config({
 	// 		},
 	// 	},
 	// ],
-	fastifyExtensions: [
-		async (fastify) => {
-			fastify.get("/config-test", (req, reply) => {
-				reply.send("Hello World");
+	honoExtensions: [
+		async (app) => {
+			app.get("/config-test", (c) => {
+				return c.json({
+					host: "http://[::1]:8080",
+					logLevel: "debug",
+				});
 			});
 		},
 	],
@@ -118,9 +121,10 @@ export default lucid.config({
 		// 	},
 		// 	bucket: "headless-cms",
 		// }),
-		LucidLocalStorage({
-			uploadDir: "uploads",
-			secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
-		}),
+		// TODO: migrate to hono
+		// LucidLocalStorage({
+		// 	uploadDir: "uploads",
+		// 	secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		// }),
 	],
 });

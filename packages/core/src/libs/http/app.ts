@@ -1,5 +1,7 @@
 import T from "../../translations/index.js";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { openAPISpecs } from "hono-openapi";
 import constants from "../../constants/constants.js";
 import routes from "./routes/v1/index.js";
@@ -17,11 +19,33 @@ const createApp = async (props: {
 	config: Config;
 }) => {
 	const app = new Hono<LucidHonoGeneric>()
+		.use(
+			cors({
+				origin: [props.config.host, "http://localhost:3000"],
+				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+				allowHeaders: [
+					"Content-Type",
+					"Authorization",
+					"Content-Length",
+					...Object.values(constants.headers),
+				],
+				credentials: true,
+			}),
+		)
+		.use(
+			secureHeaders({
+				contentSecurityPolicy: {
+					scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+					styleSrc: ["'self'", "'unsafe-inline'"],
+				},
+				crossOriginResourcePolicy: false,
+			}),
+		)
+		// TODO: add rate limiting. Might be adapter specific, due to some being stateless
 		.use(async (c, next) => {
 			c.set("config", props.config);
 			await next();
 		})
-
 		.route("/", routes)
 		.onError(async (err, c) => {
 			if (err instanceof LucidAPIError) {
@@ -32,7 +56,7 @@ const createApp = async (props: {
 					status: err.error.status,
 					errorResponse: err.error.errorResponse,
 					code: err.error.code,
-				} satisfies Exclude<LucidErrorData, "zod">);
+				} satisfies LucidErrorData);
 			}
 
 			// @ts-expect-error
@@ -43,7 +67,7 @@ const createApp = async (props: {
 					name: T("rate_limit_error_name"),
 					message: err.message || constants.errors.message,
 					status: 429,
-				});
+				} satisfies LucidErrorData);
 			}
 
 			c.status(500);
@@ -53,8 +77,58 @@ const createApp = async (props: {
 				status: constants.errors.status,
 				errorResponse: constants.errors.errorResponse,
 				code: constants.errors.code,
-			});
+			} satisfies LucidErrorData);
+		})
+		.notFound((c) => {
+			if (c.req.url.startsWith("/api")) {
+				return c.json({
+					status: 404,
+					code: "not_found",
+					name: T("route_not_found"),
+					message: T("route_not_found_message"),
+				} satisfies LucidErrorData);
+			}
+			return c.text(T("page_not_found"));
 		});
+
+	//* Hono Lucid Config Extensions
+	for (const ext of props.config.honoExtensions || []) {
+		await ext(app);
+	}
+
+	// TODO: have these implemented within the runtime adapters.
+	// fastify.register(fastifyStatic, {
+	//     root: path.resolve("public"),
+	//     wildcard: false,
+	// });
+	// const paths = getPaths();
+
+	// fastify.register(fastifyStatic, {
+	//     root: paths.clientDist,
+	//     prefix: "/admin",
+	//     wildcard: false,
+	//     decorateReply: false,
+	// });
+
+	// fastify.get("/admin", (_, reply) => {
+	//     const stream = fs.createReadStream(paths.clientDistHtml);
+	//     reply.type("text/html");
+	//     return reply.send(stream);
+	// });
+	// fastify.get("/admin/*", (_, reply) => {
+	//     const stream = fs.createReadStream(paths.clientDistHtml);
+	//     reply.type("text/html");
+	//     return reply.send(stream);
+	// });
+
+	// TODO: do we want to serve a landing page anymore?
+	// fastify.get("/", async (_, reply) => {
+	// 	const indexPath = path.resolve(currentDir, "../assets/landing.html");
+	// 	const stream = fs.createReadStream(indexPath);
+
+	// 	reply.type("text/html");
+	// 	return reply.send(stream);
+	// });
 
 	if (!props.config.disableSwagger) {
 		app.get(

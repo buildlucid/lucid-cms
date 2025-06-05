@@ -1,11 +1,12 @@
 import z from "zod";
-import type { FastifyInstance } from "fastify";
+import type { Hono } from "hono";
 import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
+import type { LucidHonoGeneric } from "../../types/hono.js";
 
-const FastifyExtensionType = z.custom<
-	(fastify: FastifyInstance) => Promise<void>
+const HonoExtensionType = z.custom<
+	(app: Hono<LucidHonoGeneric>) => Promise<void>
 >((data) => typeof data === "function", {
-	message: "Expected a FastifyInstance extension function",
+	message: "Expected a Hono extension function",
 });
 
 const ImageProcessorType = z.custom<ImageProcessor>(
@@ -97,7 +98,7 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	fastifyExtensions: z.array(FastifyExtensionType).optional(),
+	honoExtensions: z.array(HonoExtensionType).optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
 	vite: z.unknown().optional(),

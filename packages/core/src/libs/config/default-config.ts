@@ -32,7 +32,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 			},
 		},
 	},
-	fastifyExtensions: [],
+	honoExtensions: [],
 	hooks: [],
 	collections: [],
 	plugins: [],
