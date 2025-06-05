@@ -121,7 +121,6 @@ export default lucid.config({
 		// 	},
 		// 	bucket: "headless-cms",
 		// }),
-		// TODO: migrate to hono
 		// LucidLocalStorage({
 		// 	uploadDir: "uploads",
 		// 	secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,

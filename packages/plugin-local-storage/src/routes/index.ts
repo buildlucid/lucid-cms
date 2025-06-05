@@ -1,21 +1,16 @@
-import { route } from "@lucidcms/core/api";
+import { Hono } from "hono";
 import uploadController from "../controllers/upload.js";
-import registerContentTypeParser from "../utils/register-content-type-parser.js";
-import type { FastifyInstance } from "fastify";
+import type { LucidHonoGeneric } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types/types.js";
 
 const routes =
-	(pluginOptions: PluginOptions) => async (fastify: FastifyInstance) => {
-		registerContentTypeParser(fastify, pluginOptions.supportedMimeTypes);
+	(pluginOptions: PluginOptions) => async (app: Hono<LucidHonoGeneric>) => {
+		const localStorageRoutes = new Hono<LucidHonoGeneric>().put(
+			"/api/v1/localstorage/upload",
+			...uploadController(pluginOptions),
+		);
 
-		route(fastify, {
-			method: "put",
-			url: "/api/v1/localstorage/upload",
-			bodyLimit: fastify.config.media.maxFileSize,
-			controller: uploadController.controller(pluginOptions),
-			swaggerSchema: uploadController.swaggerSchema(pluginOptions),
-			zodSchema: uploadController.zodSchema,
-		});
+		app.route("/", localStorageRoutes);
 	};
 
 export default routes;

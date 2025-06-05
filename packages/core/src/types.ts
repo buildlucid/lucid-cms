@@ -8,3 +8,4 @@ export * from "./libs/custom-fields/types.js";
 export * from "./types/schema.js";
 export * from "./utils/services/types.js";
 export * from "./libs/db/types.js";
+export * from "./types/hono.js";

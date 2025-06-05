@@ -11,6 +11,7 @@ import settingsRoutes from "./settings.routes.js";
 import roleRoutes from "./roles.routes.js";
 import userRoutes from "./users.routes.js";
 import clientRoutes from "./client/index.js";
+import mediaRoutes from "./media.routes.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const routes = new Hono<LucidHonoGeneric>()
@@ -25,6 +26,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/settings", settingsRoutes)
 	.route("/roles", roleRoutes)
 	.route("/users", userRoutes)
+	.route("/media", mediaRoutes)
 	.route("/client", clientRoutes);
 
 export default routes;
