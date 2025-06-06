@@ -34,10 +34,10 @@ const createApp = async (props: {
 		)
 		.use(
 			secureHeaders({
-				contentSecurityPolicy: {
-					scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-					styleSrc: ["'self'", "'unsafe-inline'"],
-				},
+				// contentSecurityPolicy: {
+				// 	scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+				// 	styleSrc: ["'self'", "'unsafe-inline'"],
+				// },
 				crossOriginResourcePolicy: false,
 			}),
 		)
