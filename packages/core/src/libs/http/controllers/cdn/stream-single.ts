@@ -8,6 +8,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoSwaggerParamaters } from "../../../../utils/swagger/index.js";
 import { defaultErrorResponse } from "../../../../utils/swagger/hono-swagger-response.js";
+import { Readable } from "node:stream";
 
 const factory = createFactory();
 
@@ -212,6 +213,10 @@ const streamSingleController = factory.createHandlers(
 				await stream.pipe(response.data.body);
 			} else if (response.data.body instanceof Uint8Array) {
 				await stream.write(response.data.body);
+			} else if (response.data.body instanceof Readable) {
+				for await (const chunk of response.data.body) {
+					await stream.write(chunk);
+				}
 			}
 		});
 	},
