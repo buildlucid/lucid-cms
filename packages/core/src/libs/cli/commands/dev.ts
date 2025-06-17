@@ -1,77 +1,61 @@
 import chokidar, { type FSWatcher } from "chokidar";
-import { serve, type HttpBindings } from "@hono/node-server";
 import getConfig from "../../config/get-config.js";
-import vite from "../../vite/index.js";
 import getConfigPath from "../../config/get-config-path.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
-import createApp from "../../http/app.js";
+import type { Config } from "../../../types.js";
 
-type DevOptions = {
+export type DevOptions = {
 	watch?: string | boolean;
 };
 
 /**
- * @todo integrate with runtime adapters instead of relying on node server.
+ * The CLI dev command. Responsible for calling the adatpers dev handler, and watching for file changes.
  */
 const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
-	let config = await getConfig({ path: configPath });
-	let server: ReturnType<typeof serve> | null = null;
+
+	let config: Config | undefined = undefined;
 	let rebuilding = false;
+	let destroy: (() => Promise<void>) | undefined = undefined;
 
-	const buildAndStart = async (newConfig = config) => {
-		if (server) {
-			//* restart when server already running
-			server.close();
-			server = null;
-		}
-
-		const buildResponse = await vite.buildApp(newConfig);
-		if (buildResponse.error) {
-			console.error(buildResponse.error.message);
-			return false;
-		}
-
-		const app = await createApp({ config: newConfig });
-		server = serve({
-			fetch: app.fetch,
-			port: 8080,
-		});
-
-		server.on("listening", () => {
-			console.log("Server is running at http://localhost:8080");
-		});
-
-		return true;
-	};
-
-	const handleFileChange = async (changedPath: string) => {
+	/**
+	 * Runs the adapter dev command.
+	 * - Loads the conifg if changed
+	 * - Destroys the previous dev command
+	 * - Runs the new dev command
+	 */
+	const runAdapterDev = async (changedPath: string) => {
 		if (rebuilding) return;
 		rebuilding = true;
 		console.clear();
 
-		//* restart when config file changes
 		if (changedPath === configPath) {
 			config = await getConfig({ path: configPath });
 		}
 
 		try {
-			await buildAndStart(config);
+			await destroy?.();
+			destroy = await config?.adapter.handlers.serve(config);
 		} catch (error) {
 			console.error("❌ Restart failed:", error);
 		} finally {
 			rebuilding = false;
 		}
 	};
+	runAdapterDev(configPath);
 
+	/**
+	 * Sets up the shutdown handlers.
+	 * - Closes the watcher
+	 * - Destroys the previous dev command
+	 * - Exits the process
+	 */
 	const setupShutdownHandlers = (watcher?: FSWatcher) => {
 		const shutdown = async () => {
 			try {
 				await watcher?.close();
-				if (server) {
-					server.close();
-				}
+				await destroy?.();
 			} catch (error) {
 				console.error("Error during shutdown:", error);
 			}
@@ -82,10 +66,7 @@ const devCommand = async (options: DevOptions) => {
 		process.on("SIGTERM", shutdown);
 	};
 
-	//* restart when initial build fails
-	const success = await buildAndStart();
-	if (!success) process.exit(1);
-
+	//* Watch for file changes
 	if (options.watch !== undefined) {
 		const watchPath =
 			typeof options.watch === "string" ? options.watch : process.cwd();
@@ -102,7 +83,7 @@ const devCommand = async (options: DevOptions) => {
 			persistent: true,
 		});
 
-		watcher.on("change", handleFileChange);
+		watcher.on("change", runAdapterDev);
 		setupShutdownHandlers(watcher);
 	} else {
 		setupShutdownHandlers();

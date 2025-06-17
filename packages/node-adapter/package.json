@@ -45,7 +45,9 @@
         "tsdown": "^0.12.5",
         "typescript": "^5.8.3"
     },
-    "dependencies": {},
+    "dependencies": {
+        "@hono/node-server": "^1.14.4"
+    },
     "peerDependencies": {
         "@lucidcms/core": "^0.11.0-alpha.0"
     },
