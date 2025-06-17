@@ -1,5 +1,5 @@
 {
-    "name": "@lucidcms/node-adapter",
+    "name": "@lucidcms/cloudflare-adapter",
     "version": "0.1.0",
     "private": false,
     "description": "The official Node adapter for Lucid CMS",

@@ -5,16 +5,16 @@
 ## Installation
 
 ```bash
-npm install @lucidcms/node-adapter
+npm install @lucidcms/cloudflare-adapter
 ```
 
 ## lucid.config.ts/js
 
 ```typescript
-import NodeAdapter from "@lucidcms/node-adapter"
+import CloudflareAdapter from "@lucidcms/cloudflare-adapter"
 
 export default lucid.config({
-	adapter: NodeAdapter(),
+	adapter: CloudflareAdapter(),
     // ...other config
 });
 ```

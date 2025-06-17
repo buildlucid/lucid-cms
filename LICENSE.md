@@ -39,6 +39,8 @@ Also MIT-licensed:
 - `@lucidcms/sqlite-adapter`
 - `@lucidcms/postgres-adapter`
 - `@lucidcms/libsql-adapter`
+- `@lucidcms/node-adapter`
+- `@lucidcms/cloudflare-adapter`
 
 ---
 
