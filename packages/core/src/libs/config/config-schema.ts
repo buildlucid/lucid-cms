@@ -2,28 +2,37 @@ import z from "zod";
 import type { Hono } from "hono";
 import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
+import type { LucidAdapter } from "../adapter/types.js";
 
-const HonoExtensionType = z.custom<
+const HonoExtensionSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>) => Promise<void>
 >((data) => typeof data === "function", {
 	message: "Expected a Hono extension function",
 });
 
-const ImageProcessorType = z.custom<ImageProcessor>(
+const ImageProcessorSchema = z.custom<ImageProcessor>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected an ImageProcessor function",
 	},
 );
 
-const UrlStrategyType = z.custom<UrlStrategy>(
+const UrlStrategySchema = z.custom<UrlStrategy>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a UrlStrategy function",
 	},
 );
 
+const LucidAdapterSchema = z.custom<LucidAdapter>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected a LucidAdapter function",
+	},
+);
+
 const ConfigSchema = z.object({
+	adapter: LucidAdapterSchema,
 	db: z.unknown(),
 	host: z.string(),
 	keys: z.object({
@@ -72,7 +81,7 @@ const ConfigSchema = z.object({
 		processedImageLimit: z.number(),
 		storeProcessedImages: z.boolean(),
 		onDemandFormats: z.boolean(),
-		imageProcessor: ImageProcessorType.optional(),
+		imageProcessor: ImageProcessorSchema.optional(),
 		imagePresets: z.record(
 			z.string(),
 			z.object({
@@ -89,7 +98,7 @@ const ConfigSchema = z.object({
 				quality: z.number().optional(),
 			}),
 		),
-		urlStrategy: UrlStrategyType.optional(),
+		urlStrategy: UrlStrategySchema.optional(),
 	}),
 	hooks: z.array(
 		z.object({
@@ -98,7 +107,7 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	honoExtensions: z.array(HonoExtensionType).optional(),
+	honoExtensions: z.array(HonoExtensionSchema).optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
 	vite: z.unknown().optional(),

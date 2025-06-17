@@ -25,6 +25,9 @@
             "@lucidcms/sqlite-adapter": [
                 "../sqlite-adapter/src"
             ],
+            "@lucidcms/node-adapter": [
+                "../node-adapter/src"
+            ]
         }
     },
 }
