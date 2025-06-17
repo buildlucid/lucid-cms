@@ -4,6 +4,7 @@ import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import Database from "better-sqlite3";
 import transporter from "./src/services/email-transporter.js";
+import NodeAdapter from "@lucidcms/node-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
 import LucidS3 from "@lucidcms/plugin-s3";
@@ -20,6 +21,7 @@ import SimpleCollection from "./src/collections/simple.js";
 export default lucid.config({
 	host: "http://[::1]:8080",
 	logLevel: "debug",
+	adapter: NodeAdapter(),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),

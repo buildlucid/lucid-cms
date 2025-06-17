@@ -1,11 +1,10 @@
 import { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
-import type { LucidAdapter } from "@lucidcms/core/types";
+import type { LucidAdapterResponse } from "@lucidcms/core/types";
 
-const nodeAdapter: LucidAdapter = (config) => {
+const nodeAdapter = (): LucidAdapterResponse => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		config: config,
 	};
 };
 

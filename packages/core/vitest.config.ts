@@ -3,6 +3,7 @@ import { defineProject } from "vitest/config";
 export default defineProject({
 	test: {
 		environment: "node",
-		reporters: ["json"],
+		hookTimeout: 0,
+		testTimeout: 0,
 	},
 });

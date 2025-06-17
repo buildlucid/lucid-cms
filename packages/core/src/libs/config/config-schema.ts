@@ -1,8 +1,8 @@
 import z from "zod";
+import LucidAdapterSchema from "../adapter/schema.js";
 import type { Hono } from "hono";
 import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { LucidAdapter } from "../adapter/types.js";
 
 const HonoExtensionSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>) => Promise<void>
@@ -21,13 +21,6 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a UrlStrategy function",
-	},
-);
-
-const LucidAdapterSchema = z.custom<LucidAdapter>(
-	(data) => typeof data === "function",
-	{
-		message: "Expected a LucidAdapter function",
 	},
 );
 
