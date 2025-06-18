@@ -23,12 +23,12 @@ import { describeRoute } from "hono-openapi";
 export default lucid.config({
 	host: "http://[::1]:8080",
 	logLevel: "debug",
-	// adapter: NodeAdapter(),
-	adapter: CloudflareAdapter({
-		platformProxy: {
-			enabled: true,
-		},
-	}),
+	adapter: NodeAdapter(),
+	// adapter: CloudflareAdapter({
+	// 	platformProxy: {
+	// 		enabled: true,
+	// 	},
+	// }),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
@@ -84,9 +84,9 @@ export default lucid.config({
 			app.get(
 				"/config-test",
 				describeRoute({
-					description: "Testing",
-					tags: ["testing"],
-					summary: "Testing",
+					description: "Lucid Hono Extensions",
+					tags: ["lucid-hono-extensions"],
+					summary: "Testing the lucid hono extensions config",
 					validateResponse: true,
 				}),
 				(c) => {

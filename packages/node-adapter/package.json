@@ -50,7 +50,9 @@
         "rolldown": "^1.0.0-beta.10-commit.87188ed"
     },
     "peerDependencies": {
-        "@lucidcms/core": "^0.11.0-alpha.0"
+        "@lucidcms/core": "^0.11.0-alpha.0",
+        "hono-openapi": "^0.4.8",
+        "hono": "^4.7.11"
     },
     "volta": {
         "node": "22.15.0"

@@ -17,11 +17,14 @@ import type { StatusCode } from "hono/utils/http-status";
  */
 const createApp = async (props: {
 	config: Config;
-	beforeMiddleware?: (app: Hono<LucidHonoGeneric>) => void | Promise<void>;
+	app?: Hono<LucidHonoGeneric>;
 }) => {
-	const app = new Hono<LucidHonoGeneric>();
+	const app = props.app || new Hono<LucidHonoGeneric>();
 
-	if (props.beforeMiddleware) await props.beforeMiddleware(app);
+	for (const middleware of props.config.adapter.middleware?.beforeMiddleware ||
+		[]) {
+		await middleware(app);
+	}
 
 	app
 		.use(
@@ -126,14 +129,10 @@ const createApp = async (props: {
 	//     return reply.send(stream);
 	// });
 
-	// TODO: do we want to serve a landing page anymore?
-	// fastify.get("/", async (_, reply) => {
-	// 	const indexPath = path.resolve(currentDir, "../assets/landing.html");
-	// 	const stream = fs.createReadStream(indexPath);
-
-	// 	reply.type("text/html");
-	// 	return reply.send(stream);
-	// });
+	for (const middleware of props.config.adapter.middleware?.afterMiddleware ||
+		[]) {
+		await middleware(app);
+	}
 
 	if (!props.config.disableSwagger) {
 		app.get(

@@ -18,34 +18,30 @@ const cloudflareAdapter = (options: {
 		lucid: LUCID_VERSION,
 		handlers: {
 			serve: async (config) => {
-				const app = await lucid.createApp({
-					config,
-					beforeMiddleware: async (app) => {
-						if (options?.platformProxy?.enabled !== false) {
-							const platformProxy = await getPlatformProxy(
-								options?.platformProxy,
-							);
+				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
-							app.use("*", async (c, next) => {
-								// @ts-expect-error
-								c.env = Object.assign(c.env, platformProxy.env);
+				if (options?.platformProxy?.enabled !== false) {
+					const platformProxy = await getPlatformProxy(options?.platformProxy);
 
-								// TODO: get these typed
-								// @ts-expect-error
-								c.set("cf", platformProxy.cf);
-								// @ts-expect-error
-								c.set("caches", platformProxy.caches);
-								// @ts-expect-error
-								c.set("ctx", {
-									waitUntil: platformProxy.ctx.waitUntil,
-									passThroughOnException:
-										platformProxy.ctx.passThroughOnException,
-								});
-								await next();
-							});
-						}
-					},
-				});
+					cloudflareApp.use("*", async (c, next) => {
+						// @ts-expect-error
+						c.env = Object.assign(c.env, platformProxy.env);
+
+						// TODO: get these typed
+						// @ts-expect-error
+						c.set("cf", platformProxy.cf);
+						// @ts-expect-error
+						c.set("caches", platformProxy.caches);
+						// @ts-expect-error
+						c.set("ctx", {
+							waitUntil: platformProxy.ctx.waitUntil,
+							passThroughOnException: platformProxy.ctx.passThroughOnException,
+						});
+						await next();
+					});
+				}
+
+				const app = await lucid.createApp({ config, app: cloudflareApp });
 
 				const server = serve({
 					fetch: app.fetch,
