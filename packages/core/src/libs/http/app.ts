@@ -109,25 +109,6 @@ const createApp = async (props: {
 	//     root: path.resolve("public"),
 	//     wildcard: false,
 	// });
-	// const paths = getPaths();
-
-	// fastify.register(fastifyStatic, {
-	//     root: paths.clientDist,
-	//     prefix: "/admin",
-	//     wildcard: false,
-	//     decorateReply: false,
-	// });
-
-	// fastify.get("/admin", (_, reply) => {
-	//     const stream = fs.createReadStream(paths.clientDistHtml);
-	//     reply.type("text/html");
-	//     return reply.send(stream);
-	// });
-	// fastify.get("/admin/*", (_, reply) => {
-	//     const stream = fs.createReadStream(paths.clientDistHtml);
-	//     reply.type("text/html");
-	//     return reply.send(stream);
-	// });
 
 	for (const middleware of props.config.adapter.middleware?.afterMiddleware ||
 		[]) {

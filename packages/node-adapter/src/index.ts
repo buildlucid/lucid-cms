@@ -3,8 +3,16 @@ import { serve } from "@hono/node-server";
 import lucid from "@lucidcms/core";
 import { build } from "rolldown";
 import { stat, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
+import { serveStatic } from "@hono/node-server/serve-static";
 import type { LucidAdapterResponse } from "@lucidcms/core/types";
-import { describeRoute } from "hono-openapi";
+
+// TODO: use eported paths from core instead of setting them here
+const getPaths = () => ({
+	clientDist: resolve("dist/client/dist"),
+	clientDistHtml: resolve("dist/client/dist/index.html"),
+});
 
 const nodeAdapter = (): LucidAdapterResponse => {
 	return {
@@ -13,19 +21,28 @@ const nodeAdapter = (): LucidAdapterResponse => {
 		middleware: {
 			afterMiddleware: [
 				async (app) => {
-					app.get(
-						"/health",
-						describeRoute({
-							description: "Health check",
-							tags: ["health"],
-							summary: "Health check",
-							validateResponse: true,
+					const paths = getPaths();
+					app.use(
+						"/admin/*",
+						serveStatic({
+							rewriteRequestPath: (path) => {
+								const relativePath = path.replace(/^\/admin/, "");
+								const relativeClientDist = relative(
+									process.cwd(),
+									paths.clientDist,
+								);
+								return `${relativeClientDist}${relativePath}`;
+							},
 						}),
-						(c) => {
-							console.log("health check");
-							return c.json({ status: "ok" });
-						},
 					);
+					app.get("/admin", (c) => {
+						const html = readFileSync(paths.clientDistHtml, "utf-8");
+						return c.html(html);
+					});
+					app.get("/admin/*", (c) => {
+						const html = readFileSync(paths.clientDistHtml, "utf-8");
+						return c.html(html);
+					});
 				},
 			],
 		},

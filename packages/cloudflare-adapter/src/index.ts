@@ -17,6 +17,7 @@ const cloudflareAdapter = (options: {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		handlers: {
+			// TODO: configure dev serve handler to serve the SPA via hono node serveStatic. Unlike the node adapter, this is only registered on the dev command hence not being in the middleware array.
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
