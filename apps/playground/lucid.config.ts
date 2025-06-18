@@ -23,7 +23,11 @@ export default lucid.config({
 	host: "http://[::1]:8080",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
-	adapter: CloudflareAdapter(),
+	adapter: CloudflareAdapter({
+		platformProxy: {
+			enabled: true,
+		},
+	}),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),

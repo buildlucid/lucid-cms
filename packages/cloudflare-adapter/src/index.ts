@@ -1,17 +1,47 @@
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 import lucid from "@lucidcms/core";
 import { build } from "rolldown";
 import { stat, writeFile, unlink } from "node:fs/promises";
+import { getPlatformProxy, type GetPlatformProxyOptions } from "wrangler";
 import type { LucidAdapterResponse } from "@lucidcms/core/types";
 
-const nodeAdapter = (): LucidAdapterResponse => {
+const nodeAdapter = (options: {
+	platformProxy?: GetPlatformProxyOptions & { enabled?: boolean };
+}): LucidAdapterResponse => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		handlers: {
 			serve: async (config) => {
 				const app = await lucid.createApp({ config });
+
+				if (options?.platformProxy?.enabled !== false) {
+					const platformProxy = await getPlatformProxy(options?.platformProxy);
+
+					app.use("*", async (c, next) => {
+						// TODO: not working?
+						c.env = {
+							...(c.env || {}),
+							...platformProxy.env,
+						};
+
+						// TODO: get these typed
+						// @ts-expect-error
+						c.set("cf", platformProxy.cf);
+						// @ts-expect-error
+						c.set("caches", platformProxy.caches);
+						// @ts-expect-error
+						c.set("ctx", {
+							waitUntil: platformProxy.ctx.waitUntil,
+							passThroughOnException: platformProxy.ctx.passThroughOnException,
+						});
+
+						await next();
+					});
+				}
+
 				const server = serve({
 					fetch: app.fetch,
 					port: 8080,

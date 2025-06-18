@@ -1,0 +1,18 @@
+{
+    "$schema": "../../node_modules/wrangler/config-schema.json",
+    "name": "lucid-cms",
+    "main": "dist/server.js",
+    "compatibility_date": "2025-05-02",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "vars": {
+        "TEST_ENV_VAR": "TEST_ENV_VAR",
+    },
+    // "hyperdrive": [
+    //     {
+    //         "binding": "HYPERDRIVE",
+    //         "id": ""
+    //     }
+    // ],
+}
