@@ -17,8 +17,13 @@ import type { StatusCode } from "hono/utils/http-status";
  */
 const createApp = async (props: {
 	config: Config;
+	beforeMiddleware?: (app: Hono<LucidHonoGeneric>) => void | Promise<void>;
 }) => {
-	const app = new Hono<LucidHonoGeneric>()
+	const app = new Hono<LucidHonoGeneric>();
+
+	if (props.beforeMiddleware) await props.beforeMiddleware(app);
+
+	app
 		.use(
 			cors({
 				origin: [props.config.host, "http://localhost:3000"],

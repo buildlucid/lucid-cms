@@ -18,6 +18,7 @@ import MainMenuCollection from "./src/collections/main-menu.js";
 import SettingsCollection from "./src/collections/settings.js";
 import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
+import { describeRoute } from "hono-openapi";
 
 export default lucid.config({
 	host: "http://[::1]:8080",
@@ -80,12 +81,23 @@ export default lucid.config({
 	// ],
 	honoExtensions: [
 		async (app) => {
-			app.get("/config-test", (c) => {
-				return c.json({
-					host: "http://[::1]:8080",
-					logLevel: "debug",
-				});
-			});
+			app.get(
+				"/config-test",
+				describeRoute({
+					description: "Testing",
+					tags: ["testing"],
+					summary: "Testing",
+					validateResponse: true,
+				}),
+				(c) => {
+					// @ts-expect-error
+					console.log(c.env?.TEST_ENV_VAR);
+					return c.json({
+						host: "http://[::1]:8080",
+						logLevel: "debug",
+					});
+				},
+			);
 		},
 	],
 	collections: [
