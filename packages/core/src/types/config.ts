@@ -231,7 +231,7 @@ export interface LucidConfig {
 		 */
 		urlStrategy?: UrlStrategy;
 	};
-	/** Fastify extensions to register. Allows you to register custom routes, middleware, and more. */
+	/** Hono extensions to register. Allows you to register custom routes, middleware, and more. */
 	honoExtensions?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;

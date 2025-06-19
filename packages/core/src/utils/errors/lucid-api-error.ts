@@ -4,7 +4,7 @@ import type z from "zod";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
 
 /**
- * The LucidAPIError class should be used to throw errors within the API request lifecycle. This will be caught by Fastify's error handler and will return a formatted error response. If the error is a Zod error, it will be formatted into a more readable format.
+ * The LucidAPIError class should be used to throw errors within the API request lifecycle. This will be caught by Hono's error handler and will return a formatted error response. If the error is a Zod error, it will be formatted into a more readable format.
  * @class
  * @extends Error
  * @param {LucidErrorData} error
