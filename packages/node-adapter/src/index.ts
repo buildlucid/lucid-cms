@@ -5,7 +5,7 @@ import { getVitePaths } from "@lucidcms/core/helpers";
 import { build } from "rolldown";
 import { stat, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
-import { relative, resolve } from "node:path";
+import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import type { LucidAdapterResponse } from "@lucidcms/core/types";
 
