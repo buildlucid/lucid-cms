@@ -9,15 +9,23 @@ import type {
 	LucidAdapterResponse,
 	LucidHonoGeneric,
 } from "@lucidcms/core/types";
+import { relative, resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { serveStatic } from "@hono/node-server/serve-static";
 
-const cloudflareAdapter = (options: {
+// TODO: use eported paths from core instead of setting them here
+const getPaths = () => ({
+	clientDist: resolve("dist/client/dist"),
+	clientDistHtml: resolve("dist/client/dist/index.html"),
+});
+
+const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions & { enabled?: boolean };
 }): LucidAdapterResponse => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		handlers: {
-			// TODO: configure dev serve handler to serve the SPA via hono node serveStatic. Unlike the node adapter, this is only registered on the dev command hence not being in the middleware array.
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
@@ -42,7 +50,39 @@ const cloudflareAdapter = (options: {
 					});
 				}
 
-				const app = await lucid.createApp({ config, app: cloudflareApp });
+				const app = await lucid.createApp({
+					config,
+					app: cloudflareApp,
+					middleware: {
+						afterMiddleware: [
+							//* this is registered on the create app instead of the adapter level as unlike the node adapter, only the dev command should serve this
+							async (app) => {
+								const paths = getPaths();
+								app.use(
+									"/admin/*",
+									serveStatic({
+										rewriteRequestPath: (path) => {
+											const relativePath = path.replace(/^\/admin/, "");
+											const relativeClientDist = relative(
+												process.cwd(),
+												paths.clientDist,
+											);
+											return `${relativeClientDist}${relativePath}`;
+										},
+									}),
+								);
+								app.get("/admin", (c) => {
+									const html = readFileSync(paths.clientDistHtml, "utf-8");
+									return c.html(html);
+								});
+								app.get("/admin/*", (c) => {
+									const html = readFileSync(paths.clientDistHtml, "utf-8");
+									return c.html(html);
+								});
+							},
+						],
+					},
+				});
 
 				const server = serve({
 					fetch: app.fetch,

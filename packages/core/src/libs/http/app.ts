@@ -18,11 +18,19 @@ import type { StatusCode } from "hono/utils/http-status";
 const createApp = async (props: {
 	config: Config;
 	app?: Hono<LucidHonoGeneric>;
+	middleware?: {
+		beforeMiddleware?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
+		afterMiddleware?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
+	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 
+	//* Before Middleware
 	for (const middleware of props.config.adapter.middleware?.beforeMiddleware ||
 		[]) {
+		await middleware(app);
+	}
+	for (const middleware of props.middleware?.beforeMiddleware || []) {
 		await middleware(app);
 	}
 
@@ -104,14 +112,12 @@ const createApp = async (props: {
 		await ext(app);
 	}
 
-	// TODO: have these implemented within the runtime adapters.
-	// fastify.register(fastifyStatic, {
-	//     root: path.resolve("public"),
-	//     wildcard: false,
-	// });
-
+	//* After Middleware
 	for (const middleware of props.config.adapter.middleware?.afterMiddleware ||
 		[]) {
+		await middleware(app);
+	}
+	for (const middleware of props.middleware?.afterMiddleware || []) {
 		await middleware(app);
 	}
 

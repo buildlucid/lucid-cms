@@ -6,3 +6,4 @@ db.sqlite-wal
 /.lucid
 /.dev.vars
 /dist
+/.wrangler
