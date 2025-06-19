@@ -173,7 +173,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "min_length_textarea",
 			localeCode: "en",
-			message: "Too small: expected string to have >5 characters", // zod error message
+			message: "Too small: expected string to have >=5 characters", // zod error message
 		},
 	]);
 });

@@ -227,7 +227,7 @@ test("fail to validate field - text", async () => {
 		{
 			key: "min_length_text",
 			localeCode: "en",
-			message: "Too small: expected string to have >5 characters", // zod error message
+			message: "Too small: expected string to have >=5 characters", // zod error message
 		},
 	]);
 });

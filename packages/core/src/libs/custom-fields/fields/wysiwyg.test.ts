@@ -202,7 +202,7 @@ test("fail to validate field - wysiwyg", async () => {
 		{
 			key: "min_length_wysiwyg",
 			localeCode: "en",
-			message: "Too small: expected string to have >5 characters", // zod error message
+			message: "Too small: expected string to have >=5 characters", // zod error message
 		},
 	]);
 });
