@@ -15,9 +15,9 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/:collectionKey/:id", ...updateSingle)
 	.delete("/:collectionKey", ...deleteMultiple)
 	.delete("/:collectionKey/:id", ...deleteSingle)
-	.get("/:collectionKey/:id/:statusOrId", ...getSingle)
 	.get("/:collectionKey/:status", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
+	.get("/:collectionKey/:id/:statusOrId", ...getSingle)
 	.post("/:collectionKey/:id/:versionId/restore-revision", ...restoreRevision)
 	.post("/:collectionKey/:id/:versionId/promote-version", ...promoteVersion);
 
