@@ -93,9 +93,7 @@ const buildFormattedQuery = async <T extends ZodType>(
 	c: LucidHonoContext,
 	schema: T,
 ): Promise<z.infer<T>> => {
-	const querySchema = z.object({
-		query: schema ?? z.object({}),
-	});
+	const querySchema = schema ?? z.object({});
 
 	const queryParams = c.req.query();
 
@@ -109,9 +107,7 @@ const buildFormattedQuery = async <T extends ZodType>(
 		...addRemainingQuery(queryParams),
 	};
 
-	const validateResult = await querySchema.safeParseAsync({
-		query: formattedQueryObject,
-	});
+	const validateResult = await querySchema.safeParseAsync(formattedQueryObject);
 
 	if (!validateResult.success) {
 		throw new LucidAPIError({
