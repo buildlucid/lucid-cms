@@ -6,8 +6,8 @@ import resendSingle from "../../../controllers/email/resend-single.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const emailsRoutes = new Hono<LucidHonoGeneric>()
-	.get("/:id", ...getSingle)
 	.get("/", ...getMultiple)
+	.get("/:id", ...getSingle)
 	.delete("/:id", ...deleteSingle)
 	.post("/:id/resend", ...resendSingle);
 

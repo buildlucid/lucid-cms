@@ -8,8 +8,8 @@ import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const roleRoutes = new Hono<LucidHonoGeneric>()
 	.post("/", ...createSingle)
-	.get("/:id", ...getSingle)
 	.get("/", ...getMultiple)
+	.get("/:id", ...getSingle)
 	.delete("/:id", ...deleteSingle)
 	.patch("/:id", ...updateSingle);
 

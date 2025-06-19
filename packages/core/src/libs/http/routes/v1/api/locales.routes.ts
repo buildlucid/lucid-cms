@@ -4,7 +4,7 @@ import getAll from "../../../controllers/locales/get-all.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const localeRoutes = new Hono<LucidHonoGeneric>()
-	.get("/:code", ...getSingle)
-	.get("/", ...getAll);
+	.get("/", ...getAll)
+	.get("/:code", ...getSingle);
 
 export default localeRoutes;

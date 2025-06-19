@@ -10,13 +10,13 @@ import clearAllProcessed from "../../../controllers/media/clear-all-processed.js
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const mediaRoutes = new Hono<LucidHonoGeneric>()
-	.get("/:id", ...getSingle)
 	.get("/", ...getMultiple)
+	.get("/:id", ...getSingle)
 	.post("/presigned-url", ...getPresignedUrl)
 	.post("/", ...createSingle)
 	.patch("/:id", ...updateSingle)
-	.delete("/:id", ...deleteSingle)
+	.delete("/processed", ...clearAllProcessed)
 	.delete("/:id/processed", ...clearSingleProcessed)
-	.delete("/processed", ...clearAllProcessed);
+	.delete("/:id", ...deleteSingle);
 
 export default mediaRoutes;

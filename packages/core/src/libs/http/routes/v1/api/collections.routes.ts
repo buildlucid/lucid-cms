@@ -4,7 +4,7 @@ import getAll from "../../../controllers/collections/get-all.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const collectionRoutes = new Hono<LucidHonoGeneric>()
-	.get("/:key", ...getSingle)
-	.get("/", ...getAll);
+	.get("/", ...getAll)
+	.get("/:key", ...getSingle);
 
 export default collectionRoutes;
