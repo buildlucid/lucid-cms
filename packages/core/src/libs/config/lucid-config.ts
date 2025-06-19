@@ -12,6 +12,8 @@ import CustomFieldSchema from "../custom-fields/schema.js";
 import logger from "../../utils/logging/index.js";
 import winstonLogger from "../../utils/logging/logger.js";
 import constants from "../../constants/constants.js";
+import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
+import type { Config, LucidConfig } from "../../types/config.js";
 
 const lucidConfig = async (config: LucidConfig) => {
 	let configRes = mergeConfig(config, defaultConfig);
@@ -82,6 +84,11 @@ const lucidConfig = async (config: LucidConfig) => {
 				);
 				checks.checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
 			}
+
+			//* generate schema for collection
+			const res = inferSchema(collection, configRes.db);
+			if (res.error) return res;
+			collection.collectionTableSchema = res.data;
 		}
 
 		// misc

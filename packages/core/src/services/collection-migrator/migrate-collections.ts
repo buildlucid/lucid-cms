@@ -1,11 +1,10 @@
-import inferSchema from "./schema/infer-schema.js";
 import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import buildMigrations from "./migration/build-migrations.js";
 import buildTableName from "./helpers/build-table-name.js";
+import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import type { CollectionSchema } from "./schema/types.js";
 import type { MigrationPlan } from "./migration/types.js";
-import Repository from "../../libs/repositories/index.js";
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data
@@ -26,10 +25,8 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 	//* infer schema for each collection
 	const inferedSchemas: Array<CollectionSchema> = [];
 	for (const [_, collection] of context.config.collections.entries()) {
-		const res = inferSchema(collection, context.config.db);
-		if (res.error) return res;
-		collection.collectionTableSchema = res.data;
-		inferedSchemas.push(res.data);
+		if (!collection.collectionTableSchema) continue;
+		inferedSchemas.push(collection.collectionTableSchema);
 	}
 
 	//* generate migration plan

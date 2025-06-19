@@ -8,7 +8,6 @@ import routes from "./routes/v1/index.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
-import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
 import type { Config, LucidErrorData } from "../../types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { StatusCode } from "hono/utils/http-status";
@@ -25,13 +24,6 @@ const createApp = async (props: {
 	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
-
-	// TODO: WIP collection support - as we no longer run migrations on startup, this schema is not being inferred. Find a better place + more DRY.
-	for (const [_, collection] of props.config.collections.entries()) {
-		const res = inferSchema(collection, props.config.db);
-		if (res.error) return res;
-		collection.collectionTableSchema = res.data;
-	}
 
 	//* Before Middleware
 	for (const middleware of props.config.adapter.middleware?.beforeMiddleware ||
