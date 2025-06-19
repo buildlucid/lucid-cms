@@ -1,18 +1,13 @@
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import { serve } from "@hono/node-server";
 import lucid from "@lucidcms/core";
+import { getVitePaths } from "@lucidcms/core/helpers";
 import { build } from "rolldown";
 import { stat, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import type { LucidAdapterResponse } from "@lucidcms/core/types";
-
-// TODO: use eported paths from core instead of setting them here
-const getPaths = () => ({
-	clientDist: resolve("dist/client/dist"),
-	clientDistHtml: resolve("dist/client/dist/index.html"),
-});
 
 const nodeAdapter = (): LucidAdapterResponse => {
 	return {
@@ -21,7 +16,7 @@ const nodeAdapter = (): LucidAdapterResponse => {
 		middleware: {
 			afterMiddleware: [
 				async (app) => {
-					const paths = getPaths();
+					const paths = getVitePaths();
 					app.use(
 						"/admin/*",
 						serveStatic({

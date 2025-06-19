@@ -3,21 +3,16 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { build } from "rolldown";
 import lucid from "@lucidcms/core";
+import { getVitePaths } from "@lucidcms/core/helpers";
 import { stat, writeFile, unlink } from "node:fs/promises";
 import { getPlatformProxy, type GetPlatformProxyOptions } from "wrangler";
 import type {
 	LucidAdapterResponse,
 	LucidHonoGeneric,
 } from "@lucidcms/core/types";
-import { relative, resolve } from "node:path";
+import { relative } from "node:path";
 import { readFileSync } from "node:fs";
 import { serveStatic } from "@hono/node-server/serve-static";
-
-// TODO: use eported paths from core instead of setting them here
-const getPaths = () => ({
-	clientDist: resolve("dist/client/dist"),
-	clientDistHtml: resolve("dist/client/dist/index.html"),
-});
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions & { enabled?: boolean };
@@ -57,7 +52,7 @@ const cloudflareAdapter = (options?: {
 						afterMiddleware: [
 							//* this is registered on the create app instead of the adapter level as unlike the node adapter, only the dev command should serve this
 							async (app) => {
-								const paths = getPaths();
+								const paths = getVitePaths();
 								app.use(
 									"/admin/*",
 									serveStatic({
