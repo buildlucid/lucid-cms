@@ -1,4 +1,4 @@
-import type z from "zod";
+import type z from "zod/v4";
 
 export interface LucidErrorData {
 	type?: "validation" | "basic" | "forbidden" | "authorisation" | "cron";

@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import { sql, type SelectQueryBuilder } from "kysely";

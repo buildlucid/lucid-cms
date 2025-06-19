@@ -1,7 +1,7 @@
-import z from "zod";
+import z from "zod/v4";
 import { stringTranslations } from "./locales.js";
 
-export const fieldInputSchema = z.interface({
+export const fieldInputSchema = z.object({
 	key: z.string(),
 	type: z.union([
 		z.literal("text"),
@@ -19,13 +19,13 @@ export const fieldInputSchema = z.interface({
 		z.literal("user"),
 		z.literal("document"),
 	]),
-	"translations?": z.record(z.string(), z.any()),
-	"value?": z.any(),
+	translations: z.record(z.string(), z.any()).optional(),
+	value: z.any().optional(),
 
-	get "groups?"() {
+	get groups() {
 		return z
 			.array(
-				z.interface({
+				z.object({
 					ref: z.string(),
 					order: z.number().optional(),
 					open: z.boolean().optional(),
@@ -39,7 +39,7 @@ export const fieldInputSchema = z.interface({
 });
 export type FieldInputSchema = z.infer<typeof fieldInputSchema>;
 
-export const fieldConfigSchema = z.interface({
+export const fieldConfigSchema = z.object({
 	key: z.string().meta({
 		description: "Unique identifier for the field",
 		example: "pageTitle",
@@ -48,10 +48,14 @@ export const fieldConfigSchema = z.interface({
 		description: "Type of the field (text, checkbox, media, etc.)",
 		example: "text",
 	}),
-	"collection?": z.string().nullable().meta({
-		description: "Collection key for document reference fields",
-		example: "page",
-	}),
+	collection: z
+		.string()
+		.nullable()
+		.meta({
+			description: "Collection key for document reference fields",
+			example: "page",
+		})
+		.optional(),
 	details: z.object({
 		label: stringTranslations
 			.meta({
@@ -84,121 +88,128 @@ export const fieldConfigSchema = z.interface({
 			})
 			.optional(),
 	}),
-	"config?": z.object({
-		useTranslations: z
-			.boolean()
-			.meta({
-				description: "Whether the field supports translations",
-				example: true,
-			})
-			.nullable()
-			.optional(),
-		isHidden: z
-			.boolean()
-			.meta({
-				description: "Whether the field is hidden in the UI",
-				example: false,
-			})
-			.nullable()
-			.optional(),
-		isDisabled: z
-			.boolean()
-			.meta({
-				description: "Whether the field is disabled for editing",
-				example: false,
-			})
-			.nullable()
-			.optional(),
-		default: z
-			.any()
-			.meta({
-				description: "Default value for the field",
-				example: "Welcome to our website",
-			})
-			.nullable()
-			.optional(),
-	}),
-	"validation?": z.object({
-		required: z
-			.boolean()
-			.nullable()
-			.meta({
-				description: "Whether the field is required",
-				example: true,
-			})
-			.optional(),
-		zod: z
-			.any()
-			.nullable()
-			.meta({
-				description: "Custom Zod validation schema for the field",
-				example: "z.string().min(2).max(128)",
-			})
-			.optional(),
-		type: z
-			.string()
-			.nullable()
-			.meta({
-				description: "Media type constraint for media fields",
-				example: "image",
-			})
-			.optional(),
-		maxGroups: z
-			.number()
-			.nullable()
-			.meta({
-				description: "Maximum groups allowed in a repeater",
-				example: 3,
-			})
-			.optional(),
-		minGroups: z
-			.number()
-			.nullable()
-			.meta({
-				description: "Minimum groups required in a repeater",
-				example: 1,
-			})
-			.optional(),
-		extensions: z
-			.array(z.string())
-			.nullable()
-			.meta({
-				description: "Allowed file extensions for media fields",
-				example: ["jpg", "png", "webp"],
-			})
-			.optional(),
-		width: z
-			.object({
-				min: z.number().nullable().meta({
-					description: "Minimum width for media",
-					example: 800,
-				}),
-				max: z.number().nullable().meta({
-					description: "Maximum width for media",
-					example: 1920,
-				}),
-			})
-			.optional()
-			.nullable(),
-		height: z
-			.object({
-				min: z.number().nullable().meta({
-					description: "Minimum height for media",
-					example: 600,
-				}),
-				max: z.number().nullable().meta({
-					description: "Maximum height for media",
-					example: 1080,
-				}),
-			})
-			.optional()
-			.nullable(),
-	}),
-	"fields?": z.any().meta({
-		description: "Nested fields for repeater or tab field types",
-		example: [],
-	}),
-	"options?": z
+	config: z
+		.object({
+			useTranslations: z
+				.boolean()
+				.meta({
+					description: "Whether the field supports translations",
+					example: true,
+				})
+				.nullable()
+				.optional(),
+			isHidden: z
+				.boolean()
+				.meta({
+					description: "Whether the field is hidden in the UI",
+					example: false,
+				})
+				.nullable()
+				.optional(),
+			isDisabled: z
+				.boolean()
+				.meta({
+					description: "Whether the field is disabled for editing",
+					example: false,
+				})
+				.nullable()
+				.optional(),
+			default: z
+				.any()
+				.meta({
+					description: "Default value for the field",
+					example: "Welcome to our website",
+				})
+				.nullable()
+				.optional(),
+		})
+		.optional(),
+	validation: z
+		.object({
+			required: z
+				.boolean()
+				.nullable()
+				.meta({
+					description: "Whether the field is required",
+					example: true,
+				})
+				.optional(),
+			zod: z
+				.any()
+				.nullable()
+				.meta({
+					description: "Custom Zod validation schema for the field",
+					example: "z.string().min(2).max(128)",
+				})
+				.optional(),
+			type: z
+				.string()
+				.nullable()
+				.meta({
+					description: "Media type constraint for media fields",
+					example: "image",
+				})
+				.optional(),
+			maxGroups: z
+				.number()
+				.nullable()
+				.meta({
+					description: "Maximum groups allowed in a repeater",
+					example: 3,
+				})
+				.optional(),
+			minGroups: z
+				.number()
+				.nullable()
+				.meta({
+					description: "Minimum groups required in a repeater",
+					example: 1,
+				})
+				.optional(),
+			extensions: z
+				.array(z.string())
+				.nullable()
+				.meta({
+					description: "Allowed file extensions for media fields",
+					example: ["jpg", "png", "webp"],
+				})
+				.optional(),
+			width: z
+				.object({
+					min: z.number().nullable().meta({
+						description: "Minimum width for media",
+						example: 800,
+					}),
+					max: z.number().nullable().meta({
+						description: "Maximum width for media",
+						example: 1920,
+					}),
+				})
+				.optional()
+				.nullable(),
+			height: z
+				.object({
+					min: z.number().nullable().meta({
+						description: "Minimum height for media",
+						example: 600,
+					}),
+					max: z.number().nullable().meta({
+						description: "Maximum height for media",
+						example: 1080,
+					}),
+				})
+				.optional()
+				.nullable(),
+		})
+		.optional(),
+	fields: z
+		.any()
+		.meta({
+			description: "Nested fields for repeater or tab field types",
+			example: [],
+		})
+		.optional(),
+	options: z
 		.array(
 			z.object({
 				label: stringTranslations.meta({
@@ -215,17 +226,19 @@ export const fieldConfigSchema = z.interface({
 		.meta({
 			description: "Options for select field types",
 			example: [{ label: { en: "Option A" }, value: "option_a" }],
-		}),
-	"presets?": z
+		})
+		.optional(),
+	presets: z
 		.array(z.string())
 		.nullable()
 		.meta({
 			description: "Preset values for colour fields",
 			example: ["#ff0000", "#00ff00", "#0000ff"],
-		}),
+		})
+		.optional(),
 });
 
-export const groupResponseBaseSchema = z.interface({
+export const groupResponseBaseSchema = z.object({
 	ref: z.string().meta({
 		description: "Unique reference for this field group",
 		example: "3243243",
@@ -250,7 +263,7 @@ export const groupClientResponseSchema = groupResponseBaseSchema.extend({
 	},
 });
 
-export const fieldResponseBaseSchema = z.interface({
+export const fieldResponseBaseSchema = z.object({
 	key: z.string().meta({
 		description: "The fields key",
 		example: "pageTitle",
@@ -259,30 +272,40 @@ export const fieldResponseBaseSchema = z.interface({
 		description: "The type of field (e.g., text, number, media)",
 		example: "text",
 	}),
-	"groupRef?": z.string().meta({
-		description: "Reference to the group this field belongs to, if applicable",
-		example: "3243243",
-	}),
-	"translations?": z.record(z.any(), z.any()).meta({
-		description: "Translations of the field value for different locales",
-		example: {
-			en: "Welcome to our website",
-			fr: "Bienvenue sur notre site web",
-		},
-	}),
-	"value?": z.any().meta({
-		description: "The value of the field",
-		example: "Welcome to our website",
-	}),
-	"meta?": z.union([z.record(z.any(), z.any()), z.any()]),
+	groupRef: z
+		.string()
+		.meta({
+			description:
+				"Reference to the group this field belongs to, if applicable",
+			example: "3243243",
+		})
+		.optional(),
+	translations: z
+		.record(z.any(), z.any())
+		.meta({
+			description: "Translations of the field value for different locales",
+			example: {
+				en: "Welcome to our website",
+				fr: "Bienvenue sur notre site web",
+			},
+		})
+		.optional(),
+	value: z
+		.any()
+		.meta({
+			description: "The value of the field",
+			example: "Welcome to our website",
+		})
+		.optional(),
+	meta: z.union([z.record(z.any(), z.any()), z.any()]).optional(),
 });
 export const fieldResponseSchema = fieldResponseBaseSchema.extend({
-	get "groups?"() {
+	get groups() {
 		return z.array(groupResponseSchema);
 	},
 });
 export const fieldClientResponseSchema = fieldResponseBaseSchema.extend({
-	get "groups?"() {
+	get groups() {
 		return z.array(groupClientResponseSchema);
 	},
 });

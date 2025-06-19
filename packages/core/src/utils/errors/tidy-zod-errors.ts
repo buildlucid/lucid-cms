@@ -1,4 +1,4 @@
-import z, { type ZodError } from "zod";
+import z, { type ZodError } from "zod/v4";
 
 /**
  * Removes the "Invalid input: " prefix that zod adds to messages.

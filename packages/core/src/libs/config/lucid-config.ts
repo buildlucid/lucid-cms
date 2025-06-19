@@ -1,7 +1,6 @@
 import T from "../../translations/index.js";
-import type { Config, LucidConfig } from "../../types/config.js";
 import checks from "./checks/index.js";
-import { ZodError } from "zod";
+import { ZodError } from "zod/v4";
 import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
 import defaultConfig from "./default-config.js";

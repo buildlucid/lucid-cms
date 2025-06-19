@@ -1,6 +1,6 @@
 import errorTypeDefaults from "./error-type-defaults.js";
 import constants from "../../constants/constants.js";
-import type z from "zod";
+import type z from "zod/v4";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
 
 /**

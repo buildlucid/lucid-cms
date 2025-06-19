@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import { stringTranslations } from "../../../schemas/locales.js";
 import constants from "../../../constants/constants.js";
 import { collectionTableParts } from "../../../services/collection-migrator/helpers/build-table-name.js";

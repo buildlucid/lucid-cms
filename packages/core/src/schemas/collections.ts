@@ -1,9 +1,9 @@
-import z from "zod";
+import z from "zod/v4";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
 import type { ControllerSchema } from "../types.js";
 
-const collectionResponseSchema = z.interface({
+const collectionResponseSchema = z.object({
 	key: z.string().meta({
 		description: "The collection key",
 		example: "page",
@@ -13,7 +13,7 @@ const collectionResponseSchema = z.interface({
 			"Whether the collection has one document or multiple documents",
 		example: "multiple",
 	}),
-	"documentId?": z
+	documentId: z
 		.number()
 		.nullable()
 		.meta({

@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
 import { describeRoute } from "hono-openapi";

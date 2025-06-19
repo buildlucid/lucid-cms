@@ -97,7 +97,7 @@
         "semver": "^7.7.1",
         "slug": "^10.0.0",
         "winston": "^3.17.0",
-        "zod": "^4.0.0-beta"
+        "zod": "^3.25.67"
     },
     "optionalDependencies": {
         "@lucidcms/admin": "0.11.0-alpha.0",

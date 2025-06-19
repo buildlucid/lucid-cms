@@ -1,4 +1,4 @@
-import type z from "zod";
+import type z from "zod/v4";
 import type CollectionBuilder from "../libs/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../libs/db/adapter.js";
 import type ConfigSchema from "../libs/config/config-schema.js";

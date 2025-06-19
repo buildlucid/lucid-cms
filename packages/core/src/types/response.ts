@@ -13,7 +13,7 @@ import type {
 import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 import type { LocaleValue } from "./shared.js";
 import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
-import type z from "zod";
+import type z from "zod/v4";
 
 export interface UserResponse {
 	id: number;

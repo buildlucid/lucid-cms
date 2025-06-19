@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import type { BuildHandler, MiddlewareHandler, ServeHandler } from "./types.js";
 
 const ServeHandlerSchema = z.custom<ServeHandler>(

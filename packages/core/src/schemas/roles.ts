@@ -1,8 +1,8 @@
-import z from "zod";
+import z from "zod/v4";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
 
-const roleResponseSchema = z.interface({
+const roleResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The role ID",
 		example: 1,
@@ -15,7 +15,7 @@ const roleResponseSchema = z.interface({
 		description: "The role's description",
 		example: "Editor's can edit documents from any collection",
 	}),
-	"permissions?": z
+	permissions: z
 		.array(
 			z.object({
 				id: z.number().meta({
@@ -30,7 +30,8 @@ const roleResponseSchema = z.interface({
 		)
 		.meta({
 			description: "A list of all of the roles permissions",
-		}),
+		})
+		.optional(),
 
 	createdAt: z.string().meta({
 		description: "Creation timestamp",

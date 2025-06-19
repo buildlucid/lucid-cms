@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type {
 	DocumentVersionType,

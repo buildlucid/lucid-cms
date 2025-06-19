@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";

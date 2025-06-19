@@ -21,7 +21,7 @@ import SimpleCollection from "./src/collections/simple.js";
 import { describeRoute } from "hono-openapi";
 
 export default lucid.config({
-	host: "http://[::1]:8080",
+	host: "http://localhost:8080",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
 	adapter: CloudflareAdapter({

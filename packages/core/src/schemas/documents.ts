@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import {
 	brickClientResponseSchema,
@@ -55,7 +55,7 @@ const documentResponseVersionSchema = z.object({
 	}),
 });
 
-const documentResponseBaseSchema = z.interface({
+const documentResponseBaseSchema = z.object({
 	id: z.number().meta({
 		description: "The document ID",
 		example: 123,
@@ -89,14 +89,15 @@ const documentResponseBaseSchema = z.interface({
 });
 
 const documentResponseSchema = documentResponseBaseSchema.extend({
-	"bricks?": z.array(brickResponseSchema).nullable(),
-	"fields?": z.array(fieldResponseSchema).nullable(),
+	bricks: z.array(brickResponseSchema).nullable().optional(),
+	fields: z.array(fieldResponseSchema).nullable().optional(),
 });
 const documentClientResponseSchema = documentResponseBaseSchema.extend({
-	"bricks?": z.array(brickClientResponseSchema).nullable(),
-	"fields?": z
+	bricks: z.array(brickClientResponseSchema).nullable().optional(),
+	fields: z
 		.record(z.string(), z.array(fieldClientResponseSchema))
-		.nullable(),
+		.nullable()
+		.optional(),
 });
 
 export const controllerSchemas = {

@@ -1,4 +1,4 @@
-import type { ZodType } from "zod";
+import type { ZodType } from "zod/v4";
 import type { Config } from "../../types/config.js";
 import type { KyselyDB } from "../../libs/db/types.js";
 import type { LucidErrorData } from "../../types/errors.js";

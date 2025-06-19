@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import {
 	fieldClientResponseSchema,
 	fieldConfigSchema,
@@ -7,17 +7,17 @@ import {
 } from "./collection-fields.js";
 import { stringTranslations } from "./locales.js";
 
-export const brickInputSchema = z.interface({
+export const brickInputSchema = z.object({
 	ref: z.string(),
 	key: z.string(),
 	order: z.number(),
 	type: z.union([z.literal("builder"), z.literal("fixed")]),
-	"open?": z.boolean(),
-	"fields?": z.array(fieldInputSchema).optional(),
+	open: z.boolean().optional(),
+	fields: z.array(fieldInputSchema).optional(),
 });
 export type BrickInputSchema = z.infer<typeof brickInputSchema>;
 
-export const brickConfigSchema = z.interface({
+export const brickConfigSchema = z.object({
 	key: z.string().min(1).meta({
 		description: "Unique identifier for the brick",
 		example: "banner",
@@ -51,7 +51,7 @@ export const brickConfigSchema = z.interface({
 });
 
 export const brickResponseBaseSchema = z
-	.interface({
+	.object({
 		key: z.string().meta({
 			description: "The key that identifies the brick",
 			example: "hero",

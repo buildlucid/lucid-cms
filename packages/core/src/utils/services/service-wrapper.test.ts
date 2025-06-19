@@ -1,5 +1,5 @@
 import { expect, test, beforeAll, afterAll } from "vitest";
-import z from "zod";
+import z from "zod/v4";
 import testConfig from "../test-helpers/test-config.js";
 import testDatabase from "../test-helpers/test-database.js";
 import serviceWrapper from "./service-wrapper.js";

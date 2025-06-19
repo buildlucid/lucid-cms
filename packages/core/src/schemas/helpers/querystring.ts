@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 
 export const filterOperators = z
 	.enum(["=", "%", "like", "ilike", "in", "not in", "<>", "is not", "is", "!="])

@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import LucidAdapterSchema from "../adapter/schema.js";
 import type { Hono } from "hono";
 import type { ImageProcessor, UrlStrategy } from "../../types/config.js";

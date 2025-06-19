@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
 

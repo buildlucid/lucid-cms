@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/auth.js";

@@ -1,4 +1,4 @@
-import type z from "zod";
+import type z from "zod/v4";
 import type LucidAdapterSchema from "./schema.js";
 import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";

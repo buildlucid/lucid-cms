@@ -1,4 +1,4 @@
-import type { ZodType } from "zod";
+import type { ZodType } from "zod/v4";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
 import type { OnDelete, OnUpdate } from "../db/types.js";
 import type { ColumnDataType } from "kysely";

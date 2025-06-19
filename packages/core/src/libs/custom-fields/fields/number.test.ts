@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
-import z from "zod";
+import z from "zod/v4";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";

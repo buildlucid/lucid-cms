@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod/v4";
 import { sql } from "kysely";
 import StaticRepository from "./parents/static-repository.js";
 import queryBuilder from "../query-builder/index.js";
