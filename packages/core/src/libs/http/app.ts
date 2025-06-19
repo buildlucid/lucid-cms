@@ -26,8 +26,8 @@ const createApp = async (props: {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 
 	//* Before Middleware
-	for (const middleware of props.config.adapter.middleware?.beforeMiddleware ||
-		[]) {
+	for (const middleware of props.config.adapter.runtime?.middleware
+		?.beforeMiddleware || []) {
 		await middleware(app);
 	}
 	for (const middleware of props.middleware?.beforeMiddleware || []) {
@@ -113,8 +113,8 @@ const createApp = async (props: {
 	}
 
 	//* After Middleware
-	for (const middleware of props.config.adapter.middleware?.afterMiddleware ||
-		[]) {
+	for (const middleware of props.config.adapter.runtime?.middleware
+		?.afterMiddleware || []) {
 		await middleware(app);
 	}
 	for (const middleware of props.middleware?.afterMiddleware || []) {

@@ -1,7 +1,7 @@
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import { serve } from "@hono/node-server";
 import lucid from "@lucidcms/core";
-import { getVitePaths } from "@lucidcms/core/helpers";
+import { getVitePaths, stripAdapterCLIPlugin } from "@lucidcms/core/helpers";
 import { build } from "rolldown";
 import { stat, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
@@ -13,35 +13,37 @@ const nodeAdapter = (): LucidAdapterResponse => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		middleware: {
-			afterMiddleware: [
-				async (app) => {
-					const paths = getVitePaths();
-					app.use(
-						"/admin/*",
-						serveStatic({
-							rewriteRequestPath: (path) => {
-								const relativePath = path.replace(/^\/admin/, "");
-								const relativeClientDist = relative(
-									process.cwd(),
-									paths.clientDist,
-								);
-								return `${relativeClientDist}${relativePath}`;
-							},
-						}),
-					);
-					app.get("/admin", (c) => {
-						const html = readFileSync(paths.clientDistHtml, "utf-8");
-						return c.html(html);
-					});
-					app.get("/admin/*", (c) => {
-						const html = readFileSync(paths.clientDistHtml, "utf-8");
-						return c.html(html);
-					});
-				},
-			],
+		runtime: {
+			middleware: {
+				afterMiddleware: [
+					async (app) => {
+						const paths = getVitePaths();
+						app.use(
+							"/admin/*",
+							serveStatic({
+								rewriteRequestPath: (path) => {
+									const relativePath = path.replace(/^\/admin/, "");
+									const relativeClientDist = relative(
+										process.cwd(),
+										paths.clientDist,
+									);
+									return `${relativeClientDist}${relativePath}`;
+								},
+							}),
+						);
+						app.get("/admin", (c) => {
+							const html = readFileSync(paths.clientDistHtml, "utf-8");
+							return c.html(html);
+						});
+						app.get("/admin/*", (c) => {
+							const html = readFileSync(paths.clientDistHtml, "utf-8");
+							return c.html(html);
+						});
+					},
+				],
+			},
 		},
-		handlers: {
+		cli: {
 			serve: async (config) => {
 				const app = await lucid.createApp({ config });
 				const server = serve({
@@ -70,48 +72,49 @@ const nodeAdapter = (): LucidAdapterResponse => {
 						minify: true,
 						inlineDynamicImports: true,
 					},
-					// plugins: [
-					// 	{
-					// 		name: "bundle-analyzer",
-					// 		generateBundle(options, bundle) {
-					// 			for (const [fileName, chunk] of Object.entries(bundle)) {
-					// 				if (chunk.type === "chunk") {
-					// 					console.log(`\n📦 Bundle: ${fileName}`);
-					// 					console.log(
-					// 						`📏 Size: ${(chunk.code.length / 1024 / 1024).toFixed(2)}MB`,
-					// 					);
+					plugins: [
+						stripAdapterCLIPlugin("node-adapter", ["rolldown"]),
+						// 	{
+						// 		name: "bundle-analyzer",
+						// 		generateBundle(options, bundle) {
+						// 			for (const [fileName, chunk] of Object.entries(bundle)) {
+						// 				if (chunk.type === "chunk") {
+						// 					console.log(`\n📦 Bundle: ${fileName}`);
+						// 					console.log(
+						// 						`📏 Size: ${(chunk.code.length / 1024 / 1024).toFixed(2)}MB`,
+						// 					);
 
-					// 					const modules = chunk.modules || {};
-					// 					const sortedModules = Object.entries(modules)
-					// 						.map(([id, module]) => ({
-					// 							id,
-					// 							size: module.code?.length || 0,
-					// 						}))
-					// 						.sort((a, b) => b.size - a.size)
-					// 						.slice(0, 20);
-					// 					console.log("\n📋 Largest bundled modules:");
-					// 					for (const { id, size } of sortedModules) {
-					// 						console.log(`  ${(size / 1024).toFixed(1)}KB - ${id}`);
-					// 					}
-					// 				}
-					// 			}
-					// 		},
-					// 	},
-					// 	{
-					// 		name: "import-tracer",
-					// 		buildStart() {
-					// 			this.addWatchFile = () => {}; // Prevent watch issues
-					// 		},
-					// 		resolveId(id, importer) {
-					// 			if (id.includes("typescript") || id.includes("prettier")) {
-					// 				console.log(`🔍 ${id}`);
-					// 				console.log(`   ← imported by: ${importer || "entry"}`);
-					// 				console.log("");
-					// 			}
-					// 			return null;
-					// 		},
-					// 	},
-					// ],
+						// 					const modules = chunk.modules || {};
+						// 					const sortedModules = Object.entries(modules)
+						// 						.map(([id, module]) => ({
+						// 							id,
+						// 							size: module.code?.length || 0,
+						// 						}))
+						// 						.sort((a, b) => b.size - a.size)
+						// 						.slice(0, 20);
+						// 					console.log("\n📋 Largest bundled modules:");
+						// 					for (const { id, size } of sortedModules) {
+						// 						console.log(`  ${(size / 1024).toFixed(1)}KB - ${id}`);
+						// 					}
+						// 				}
+						// 			}
+						// 		},
+						// 	},
+						// 	{
+						// 		name: "import-tracer",
+						// 		buildStart() {
+						// 			this.addWatchFile = () => {}; // Prevent watch issues
+						// 		},
+						// 		resolveId(id, importer) {
+						// 			if (id.includes("typescript") || id.includes("prettier")) {
+						// 				console.log(`🔍 ${id}`);
+						// 				console.log(`   ← imported by: ${importer || "entry"}`);
+						// 				console.log("");
+						// 			}
+						// 			return null;
+						// 		},
+						// 	},
+					],
 					treeshake: true,
 					platform: "node",
 					// TODO: temp to get the bundle down, these will both be replace/have workarounds
@@ -127,7 +130,7 @@ const app = await lucid.createApp({
     config: await config,
 });
 
-serve({
+const server = serve({
     fetch: app.fetch,
     port: 8080,
 });

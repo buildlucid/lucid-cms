@@ -24,16 +24,23 @@ const MiddlewareHandlerSchema = z.custom<MiddlewareHandler>(
 const LucidAdapterSchema = z.object({
 	key: z.string(),
 	lucid: z.string(),
-	middleware: z
+	runtime: z
 		.object({
-			beforeMiddleware: z.array(MiddlewareHandlerSchema).optional(),
-			afterMiddleware: z.array(MiddlewareHandlerSchema).optional(),
+			middleware: z
+				.object({
+					beforeMiddleware: z.array(MiddlewareHandlerSchema).optional(),
+					afterMiddleware: z.array(MiddlewareHandlerSchema).optional(),
+				})
+				.optional(),
 		})
 		.optional(),
-	handlers: z.object({
-		serve: ServeHandlerSchema,
-		build: BuildHandlerSchema,
-	}),
+	//* depending on the runtime, this can be stripped out on build (see the cloudflare adapter)
+	cli: z
+		.object({
+			serve: ServeHandlerSchema,
+			build: BuildHandlerSchema,
+		})
+		.optional(),
 });
 
 export default LucidAdapterSchema;

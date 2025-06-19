@@ -36,7 +36,7 @@ const devCommand = async (options: DevOptions) => {
 
 		try {
 			await destroy?.();
-			destroy = await config?.adapter.handlers.serve(config);
+			destroy = await config?.adapter.cli?.serve(config);
 		} catch (error) {
 			console.error("❌ Restart failed:", error);
 		} finally {

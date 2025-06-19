@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { build } from "rolldown";
 import lucid from "@lucidcms/core";
-import { getVitePaths } from "@lucidcms/core/helpers";
+import { getVitePaths, stripAdapterCLIPlugin } from "@lucidcms/core/helpers";
 import { stat, writeFile, unlink } from "node:fs/promises";
 import { getPlatformProxy, type GetPlatformProxyOptions } from "wrangler";
 import type {
@@ -20,7 +20,7 @@ const cloudflareAdapter = (options?: {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		handlers: {
+		cli: {
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
@@ -94,27 +94,13 @@ const cloudflareAdapter = (options?: {
 				};
 			},
 			build: async (_, options) => {
-				const configOutput = `${options.outputPath}/${constants.CONFIG_FILE}`;
 				const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
 
-				await build({
-					input: options.configPath,
-					output: {
-						file: configOutput,
-						format: "esm",
-						minify: true,
-						inlineDynamicImports: true,
-					},
-					treeshake: true,
-					platform: "node",
-					// TODO: temp to get the bundle down, these will both be replace/have workarounds
-					external: ["argon2", "mjml"],
-				});
-
 				//* create the temp entry file
-				const tempEntryFile = `${options.outputPath}/temp-entry.js`;
+				const configIsTs = options.configPath.endsWith(".ts");
+				const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
 				const entry = `
-import config from "./${constants.CONFIG_FILE}";
+import config from "${options.configPath}";
 import lucid from "@lucidcms/core";
 
 const app = await lucid.createApp({
@@ -136,11 +122,20 @@ export default app;`;
 					},
 					treeshake: true,
 					platform: "node",
+					plugins: [
+						stripAdapterCLIPlugin("cloudflare-adapter", [
+							"wrangler",
+							"@hono/node-server",
+							"@hono/node-server/serve-static",
+							"rolldown",
+						]),
+					],
 					// TODO: temp to get the bundle down, these will both be replace/have workarounds
 					external: ["argon2", "mjml"],
 				});
+
 				//* clean up temporary files
-				await Promise.all([unlink(configOutput), unlink(tempEntryFile)]);
+				await unlink(tempEntryFile);
 
 				const outputSize = await stat(entryOutput);
 				console.log(

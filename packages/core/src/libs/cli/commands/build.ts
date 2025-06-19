@@ -5,8 +5,6 @@ import vite from "../../vite/index.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 
 /**
- * @todo currently prettier, the typescript compiler and a few other packages are being bundled that we dont want. This is due to MJML it seems.
- *       MJML will likley need precompilling here instead anyway as it isnt supported in certain runtimes.
  * @todo remove the argon2 external dependency after this has been replaced with something else. Argon2 is not supported in
  *       certain runtimes like Cloudflare and potentially Deno?
  */
@@ -26,7 +24,7 @@ const buildCommand = async () => {
 		process.exit(1);
 	}
 
-	await config.adapter.handlers.build(config, {
+	await config.adapter.cli?.build(config, {
 		configPath,
 		outputPath: "dist",
 	});

@@ -1,4 +1,6 @@
 import { defineConfig } from "tsdown";
+import packageJson from "./package.json" with { type: "json" };
+
 
 export default defineConfig({
     entry: [
@@ -10,21 +12,9 @@ export default defineConfig({
         "src/helpers.ts",
         "src/libs/cli/index.ts",
     ],
-    //* these are optional dependencies that are only required for the CLI and not when running on a server. The CLI will prompt the user to install them if they are not present.
     external: [
-        "lightningcss",
-        "@tailwindcss/oxide",
-        "sharp",
-        "chokidar",
-        "commander",
-        "jiti",
-        "vite-plugin-solid",
-        "rolldown",
-        "@lucidcms/admin",
-        "solid-js",
-        "@tailwindcss/vite",
-        "tailwindcss",
-        "vite"
+        //* tsdown bundles optionalDependencies by default, so we need to exclude them
+        ...Object.keys(packageJson.optionalDependencies)
     ],
     dts: true,
     format: "esm",
@@ -32,4 +22,6 @@ export default defineConfig({
     sourcemap: true,
     clean: true,
     metafile: true,
+    minify: true,
+    platform: "node"
 });
