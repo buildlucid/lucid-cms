@@ -9,7 +9,7 @@ import BrickConfigSchema from "../builders/brick-builder/schema.js";
 import { LucidError } from "../../utils/errors/index.js";
 import CustomFieldSchema from "../custom-fields/schema.js";
 import logger from "../../utils/logging/index.js";
-import winstonLogger from "../../utils/logging/logger.js";
+import { initialiseLogger } from "../../utils/logging/logger.js";
 import constants from "../../constants/constants.js";
 import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
@@ -90,8 +90,7 @@ const lucidConfig = async (config: LucidConfig) => {
 			collection.collectionTableSchema = res.data;
 		}
 
-		// misc
-		winstonLogger.level = configRes.logLevel;
+		initialiseLogger(configRes.logTransport, configRes.logLevel);
 
 		return configRes;
 	} catch (err) {

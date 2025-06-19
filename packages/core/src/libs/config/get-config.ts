@@ -10,7 +10,7 @@ let config: Config | undefined = undefined;
 export const getConfig = async (props?: {
 	config?: Config;
 	path?: string;
-	/** Required when tests need to spyOn winstonLogger  */
+	/** Required when tests need to spyOn logger  */
 	dynamicImport?: boolean;
 }) => {
 	if (props?.config) {

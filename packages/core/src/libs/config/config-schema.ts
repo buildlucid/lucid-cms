@@ -3,6 +3,7 @@ import LucidAdapterSchema from "../adapter/schema.js";
 import type { Hono } from "hono";
 import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
+import type { DestinationStream } from "pino";
 
 const HonoExtensionSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>) => Promise<void>
@@ -24,6 +25,13 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	},
 );
 
+const LogTransportSchema = z.custom<DestinationStream>(
+	(data) => typeof data === "object" && data !== null,
+	{
+		message: "Expected a DestinationStream object",
+	},
+);
+
 const ConfigSchema = z.object({
 	adapter: LucidAdapterSchema,
 	db: z.unknown(),
@@ -40,6 +48,7 @@ const ConfigSchema = z.object({
 		z.literal("info"),
 		z.literal("debug"),
 	]),
+	logTransport: LogTransportSchema.optional(),
 	paths: z
 		.object({
 			emailTemplates: z.string().optional(),

@@ -114,6 +114,7 @@ export default Object.freeze({
 		config: "config",
 		sync: "sync",
 		query: "query",
+		http: "http",
 	} as const,
 	retention: {
 		deletedCollections: 30, // days

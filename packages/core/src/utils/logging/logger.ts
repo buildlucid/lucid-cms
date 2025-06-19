@@ -1,18 +1,34 @@
-import { format, createLogger } from "winston";
-import transports from "winston/lib/winston/transports/index.js";
+import { pino } from "pino";
+import type { DestinationStream } from "pino";
 
-// TODO: write logs to file
-const winstonLogger = createLogger({
+let activePinoLogger = pino({
 	level: "info",
-	format: format.json(),
 });
 
-if (process.env.NODE_ENV !== "production") {
-	winstonLogger.add(
-		new transports.Console({
-			format: format.combine(format.colorize(), format.simple()),
-		}),
-	);
-}
+/**
+ * Initialise the pino logger with optional custom transport
+ */
+export const initialiseLogger = (
+	transport?: DestinationStream,
+	level?: "info" | "debug" | "warn" | "error",
+) => {
+	if (transport) {
+		activePinoLogger = pino(
+			{
+				level: level || "info",
+			},
+			transport,
+		);
+	} else {
+		if (level) {
+			activePinoLogger.level = level;
+		}
+	}
+};
 
-export default winstonLogger;
+/**
+ * Get the current active pino logger instance
+ */
+const getLogger = () => activePinoLogger;
+
+export default getLogger;

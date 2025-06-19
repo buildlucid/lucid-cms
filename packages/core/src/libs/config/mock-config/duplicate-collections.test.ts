@@ -2,15 +2,13 @@ import { expect, test, vi } from "vitest";
 import T from "../../../translations/index.js";
 import path from "node:path";
 import getConfig from "../get-config.js";
-import winstonLogger from "../../../utils/logging/logger.js";
 import { messageFormat } from "../../../utils/logging/index.js";
 import constants from "../../../constants/constants.js";
+import getLogger from "../../../utils/logging/logger.js";
 
 test("should throw duplicate collection key error", async () => {
-	const consoleLogSpy = vi
-		.spyOn(winstonLogger, "error")
-		// @ts-expect-error
-		.mockImplementation(() => {});
+	const logger = getLogger();
+	const consoleLogSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
 	const processExitSpy = vi
 		.spyOn(process, "exit")
@@ -23,11 +21,13 @@ test("should throw duplicate collection key error", async () => {
 	});
 
 	expect(consoleLogSpy).toHaveBeenCalledWith(
+		{},
 		messageFormat("error", {
 			scope: constants.logScopes.config,
-			message: T("config_duplicate_keys", { builder: "collections" }),
+			message: T("config_duplicate_keys", {
+				builder: "collections",
+			}),
 		}),
-		undefined,
 	);
 	expect(processExitSpy).toHaveBeenCalledWith(1);
 	processExitSpy.mockRestore();

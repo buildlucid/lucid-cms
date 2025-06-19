@@ -93,10 +93,10 @@
         "mime-types": "^3.0.1",
         "mjml": "^5.0.0-alpha.6",
         "node-cron": "^3.0.3",
+        "pino": "^9.7.0",
         "sanitize-html": "^2.16.0",
         "semver": "^7.7.1",
         "slug": "^10.0.0",
-        "winston": "^3.17.0",
         "zod": "^3.25.67"
     },
     "optionalDependencies": {

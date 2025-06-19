@@ -1,4 +1,4 @@
-import winstonLogger from "./logger.js";
+import getLogger from "./logger.js";
 import type constants from "../../constants/constants.js";
 
 export type LogLevel = "error" | "warn" | "info" | "debug";
@@ -14,27 +14,27 @@ const logger = (
 		data?: Record<string, unknown>;
 	},
 ) => {
-	let logFn = winstonLogger.error;
+	const message = messageFormat(level, data);
+	const logData = data.data || {};
+	const pinoLogger = getLogger();
 
 	switch (level) {
 		case "error":
-			logFn = winstonLogger.error;
+			pinoLogger.error(logData, message);
 			break;
 		case "warn":
-			logFn = winstonLogger.warn;
+			pinoLogger.warn(logData, message);
 			break;
 		case "info":
-			logFn = winstonLogger.info;
+			pinoLogger.info(logData, message);
 			break;
 		case "debug":
-			logFn = winstonLogger.debug;
+			pinoLogger.debug(logData, message);
 			break;
 		default:
-			logFn = winstonLogger.error;
+			pinoLogger.error(logData, message);
 			break;
 	}
-
-	logFn(messageFormat(level, data), data.data);
 };
 
 export const messageFormat = (

@@ -11,6 +11,7 @@ import type { MediaType } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
 import type { LucidAdapterResponse } from "../libs/adapter/types.js";
+import type { DestinationStream } from "pino";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -162,6 +163,8 @@ export interface LucidConfig {
 	};
 	/** The log level to use. */
 	logLevel?: LogLevel;
+	/** Custom log transport stream. If not provided, logs will default to console output. */
+	logTransport?: DestinationStream;
 	/** Disables the swagger documentation site. */
 	disableSwagger?: boolean;
 	/** Localisation settings. */
@@ -246,6 +249,7 @@ export interface LucidConfig {
 export interface Config extends z.infer<typeof ConfigSchema> {
 	adapter: LucidAdapterResponse;
 	db: DatabaseAdapter;
+	logTransport?: DestinationStream;
 	email?: {
 		from: {
 			email: string;

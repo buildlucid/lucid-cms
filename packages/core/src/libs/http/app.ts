@@ -8,6 +8,7 @@ import routes from "./routes/v1/index.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
+import logRoute from "./middleware/log-route.js";
 import type { Config, LucidErrorData } from "../../types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { StatusCode } from "hono/utils/http-status";
@@ -35,6 +36,7 @@ const createApp = async (props: {
 	}
 
 	app
+		.use(logRoute)
 		.use(
 			cors({
 				origin: [props.config.host, "http://localhost:3000"],
