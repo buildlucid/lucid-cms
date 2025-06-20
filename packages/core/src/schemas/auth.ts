@@ -56,4 +56,18 @@ export const controllerSchemas = {
 		params: undefined,
 		response: undefined,
 	} satisfies ControllerSchema,
+	setupRequired: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.object({
+			setupRequired: z.boolean().meta({
+				description: "Whether initial user setup is required",
+				example: true,
+			}),
+		}),
+	} satisfies ControllerSchema,
 };

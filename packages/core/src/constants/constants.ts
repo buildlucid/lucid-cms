@@ -21,14 +21,6 @@ export default Object.freeze({
 		dkLen: 32,
 	},
 	seedDefaults: {
-		user: {
-			firstName: "Lucid",
-			lastName: "CMS",
-			email: "admin@lucidcms.io",
-			username: "admin",
-			password: "password",
-			superAdmin: true,
-		},
 		roles: [
 			{
 				name: "Admin",
