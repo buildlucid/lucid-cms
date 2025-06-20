@@ -1,4 +1,5 @@
 import lucid, { passthroughImageProcessor } from "@lucidcms/core";
+import { describeRoute } from "hono-openapi";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
@@ -8,6 +9,7 @@ import NodeAdapter from "@lucidcms/node-adapter";
 import CloudflareAdapter from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
+import LucidResend from "@lucidcms/plugin-resend";
 import LucidS3 from "@lucidcms/plugin-s3";
 import LucidPages from "@lucidcms/plugin-pages";
 import LucidLocalStorage from "@lucidcms/plugin-local-storage";
@@ -18,7 +20,6 @@ import MainMenuCollection from "./src/collections/main-menu.js";
 import SettingsCollection from "./src/collections/settings.js";
 import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
-import { describeRoute } from "hono-openapi";
 
 export default lucid.config({
 	host: "http://localhost:8080",
@@ -123,12 +124,19 @@ export default lucid.config({
 				},
 			],
 		}),
-		LucidNodemailer({
+		// LucidNodemailer({
+		// 	from: {
+		// 		email: "admin@lucidcms.io",
+		// 		name: "Lucid",
+		// 	},
+		// 	transporter: transporter,
+		// }),
+		LucidResend({
 			from: {
-				email: "admin@lucidcms.io",
+				email: "admin@ui.protodigital.co.uk",
 				name: "Lucid",
 			},
-			transporter: transporter,
+			apiKey: process.env.RESEND_API_KEY as string,
 		}),
 		// LucidS3({
 		// 	clientConfig: {
