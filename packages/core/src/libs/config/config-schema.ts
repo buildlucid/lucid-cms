@@ -49,11 +49,6 @@ const ConfigSchema = z.object({
 		z.literal("debug"),
 	]),
 	logTransport: LogTransportSchema.optional(),
-	paths: z
-		.object({
-			emailTemplates: z.string().optional(),
-		})
-		.optional(),
 	disableSwagger: z.boolean(),
 	localisation: z
 		.object({
@@ -112,7 +107,13 @@ const ConfigSchema = z.object({
 	honoExtensions: z.array(HonoExtensionSchema).optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
-	vite: z.unknown().optional(),
+	compilerOptions: z
+		.object({
+			outDir: z.string().optional(),
+			emailTemplates: z.string().optional(),
+			vite: z.unknown().optional(),
+		})
+		.optional(),
 });
 
 export default ConfigSchema;

@@ -1,11 +1,12 @@
 import { join } from "node:path";
 import constants from "../../../constants/constants.js";
 import { createRequire } from "node:module";
+import type { Config } from "../../../types/config.js";
 
 /**
  * Resolve all the required paths for the Vite build
  */
-const getPaths = (cwd = process.cwd()) => {
+const getPaths = (config: Config, cwd = process.cwd()) => {
 	const require = createRequire(import.meta.url);
 
 	const adminPackagePath = require.resolve("@lucidcms/admin/package.json");
@@ -14,33 +15,37 @@ const getPaths = (cwd = process.cwd()) => {
 	return {
 		clientMount: join(
 			cwd,
-			constants.buildDir,
+			config.compilerOptions?.outDir,
 			constants.vite.outputDir,
 			constants.vite.mount,
 		),
 		clientHtml: join(
 			cwd,
-			constants.buildDir,
+			config.compilerOptions?.outDir,
 			constants.vite.outputDir,
 			constants.vite.html,
 		),
-		clientDirectory: join(cwd, constants.buildDir, constants.vite.outputDir),
+		clientDirectory: join(
+			cwd,
+			config.compilerOptions?.outDir,
+			constants.vite.outputDir,
+		),
 		clientDist: join(
 			cwd,
-			constants.buildDir,
+			config.compilerOptions?.outDir,
 			constants.vite.outputDir,
 			constants.vite.dist,
 		),
 		clientDistHtml: join(
 			cwd,
-			constants.buildDir,
+			config.compilerOptions?.outDir,
 			constants.vite.outputDir,
 			constants.vite.dist,
 			constants.vite.html,
 		),
 		buildMetadata: join(
 			cwd,
-			constants.buildDir,
+			config.compilerOptions?.outDir,
 			constants.vite.outputDir,
 			constants.vite.buildMetadata,
 		),

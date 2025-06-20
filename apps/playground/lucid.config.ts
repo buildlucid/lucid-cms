@@ -23,12 +23,12 @@ import { describeRoute } from "hono-openapi";
 export default lucid.config({
 	host: "http://localhost:8080",
 	logLevel: "debug",
-	adapter: NodeAdapter(),
-	// adapter: CloudflareAdapter({
-	// 	platformProxy: {
-	// 		enabled: true,
-	// 	},
-	// }),
+	// adapter: NodeAdapter(),
+	adapter: CloudflareAdapter({
+		platformProxy: {
+			enabled: true,
+		},
+	}),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
@@ -146,4 +146,7 @@ export default lucid.config({
 			secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
 		}),
 	],
+	// compilerOptions: {
+	// 	outDir: "out",
+	// },
 });

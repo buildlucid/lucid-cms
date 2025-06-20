@@ -20,7 +20,7 @@ const buildApp = async (
 	force?: boolean,
 ): ServiceResponse<undefined> => {
 	try {
-		const buildAdmin = await shouldBuild();
+		const buildAdmin = await shouldBuild(config);
 		if (buildAdmin.error) return buildAdmin;
 		if (buildAdmin.data === false && force !== true) {
 			skipAdminBuild();
@@ -33,15 +33,15 @@ const buildApp = async (
 		const endLog = startAdminBuild(inlineConfig.logLevel === "silent");
 
 		const [clientMountRes, clientHtmlRes] = await Promise.all([
-			generateClientMount(),
-			generateHTML(),
+			generateClientMount(config),
+			generateHTML(config),
 		]);
 		if (clientHtmlRes.error) return clientHtmlRes;
 		if (clientMountRes.error) return clientMountRes;
 
 		await build(inlineConfig);
 
-		const copyAssetRes = await copyAdminAssets(["favicon.ico"]);
+		const copyAssetRes = await copyAdminAssets(["favicon.ico"], config);
 		if (copyAssetRes.error) return copyAssetRes;
 
 		endLog?.();

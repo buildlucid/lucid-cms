@@ -1,16 +1,18 @@
 import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
-import type { ServiceResponse } from "../../../types.js";
-import type { BuildMetadata } from "../generators/build-metadata.js";
 import getPaths from "./get-paths.js";
+import type { Config, ServiceResponse } from "../../../types.js";
+import type { BuildMetadata } from "../generators/build-metadata.js";
 
 /**
  * Fetches the .lucid/client/build-metadata.json file if it exists, else returns null.
  * @todo Add validation to determine if the returned data is correct, if its not return null instead of throwing / returning an error.
  */
-const getBuildMetadata = async (): ServiceResponse<BuildMetadata | null> => {
+const getBuildMetadata = async (
+	config: Config,
+): ServiceResponse<BuildMetadata | null> => {
 	try {
-		const paths = getPaths();
+		const paths = getPaths(config);
 
 		try {
 			await fs.access(paths.buildMetadata);

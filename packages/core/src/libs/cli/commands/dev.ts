@@ -15,7 +15,7 @@ const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 
-	let config: Config | undefined = undefined;
+	let config = await getConfig({ path: configPath });
 	let rebuilding = false;
 	let destroy: (() => Promise<void>) | undefined = undefined;
 
@@ -25,7 +25,7 @@ const devCommand = async (options: DevOptions) => {
 	 * - Destroys the previous dev command
 	 * - Runs the new dev command
 	 */
-	const runAdapterDev = async (changedPath: string) => {
+	const runAdapterDev = async (changedPath?: string) => {
 		if (rebuilding) return;
 		rebuilding = true;
 		console.clear();
@@ -43,7 +43,7 @@ const devCommand = async (options: DevOptions) => {
 			rebuilding = false;
 		}
 	};
-	runAdapterDev(configPath);
+	runAdapterDev();
 
 	/**
 	 * Sets up the shutdown handlers.
@@ -74,7 +74,7 @@ const devCommand = async (options: DevOptions) => {
 			ignored: [
 				"**/node_modules/**",
 				"**/.git/**",
-				"**/dist/**",
+				`**/${config.compilerOptions?.outDir}/**`,
 				"**/build/**",
 				"**/.lucid/**",
 				"**/uploads/**",

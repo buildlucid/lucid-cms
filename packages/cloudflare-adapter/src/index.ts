@@ -52,7 +52,7 @@ const cloudflareAdapter = (options?: {
 						afterMiddleware: [
 							//* this is registered on the create app instead of the adapter level as unlike the node adapter, only the dev command should serve this
 							async (app) => {
-								const paths = getVitePaths();
+								const paths = getVitePaths(config);
 								app.use(
 									"/admin/*",
 									serveStatic({

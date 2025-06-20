@@ -4,12 +4,14 @@ import constants from "../../../constants/constants.js";
 import { join } from "node:path";
 import { copyFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import type { Config } from "../../../types/config.js";
 
 /**
  * Copies the given assets from the @lucidcms/admin/assets export to the CWD vite builds asset directory.
  */
 const copyAdminAssets = async (
 	assets: string[],
+	config: Config,
 ): ServiceResponse<undefined> => {
 	try {
 		const cwd = process.cwd();
@@ -20,7 +22,7 @@ const copyAdminAssets = async (
 			const source = require.resolve(`@lucidcms/admin/assets/${asset}`);
 			const destination = join(
 				cwd,
-				constants.buildDir,
+				config.compilerOptions?.outDir,
 				constants.vite.outputDir,
 				constants.vite.dist,
 				"assets",

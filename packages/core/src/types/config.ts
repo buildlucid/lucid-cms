@@ -179,11 +179,6 @@ export interface LucidConfig {
 		/** The default locale code. Eg. `en`. */
 		defaultLocale: string;
 	};
-	/** Paths to static assets. */
-	paths?: {
-		/** The path to the email templates directory. This can be used to override or extend the default templates. */
-		emailTemplates?: string;
-	};
 	/** Email settings. */
 	email?: {
 		/** The email from settings. */
@@ -242,8 +237,15 @@ export interface LucidConfig {
 	collections?: CollectionBuilder[];
 	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
 	plugins?: LucidPlugin[];
-	/** Extend Vites config */
-	vite?: InlineConfig;
+	/** Compiler options. */
+	compilerOptions?: {
+		/** The output directory. */
+		outDir?: string;
+		/** The path to the email templates directory. This can be used to override or extend the default templates. */
+		emailTemplates?: string;
+		/** Extend Vites config, this is used to build the SPA. */
+		vite?: InlineConfig;
+	};
 }
 
 export interface Config extends z.infer<typeof ConfigSchema> {
@@ -289,5 +291,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPlugin>;
-	vite?: InlineConfig;
+	compilerOptions: {
+		outDir: string;
+		emailTemplates: string;
+		vite?: InlineConfig;
+	};
 }

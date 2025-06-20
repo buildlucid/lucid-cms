@@ -2,15 +2,15 @@ import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
 import constants from "../../../constants/constants.js";
 import getPaths from "../services/get-paths.js";
-import type { ServiceResponse } from "../../../types.js";
+import type { Config, ServiceResponse } from "../../../types.js";
 
 /**
  * Generates the vite index.html entry point
  ** This needs to be kept in sync with the @lucidcms/admin/index.html file
  */
-const generateHTML = async (): ServiceResponse<undefined> => {
+const generateHTML = async (config: Config): ServiceResponse<undefined> => {
 	try {
-		const paths = getPaths();
+		const paths = getPaths(config);
 
 		const content = `<!doctype html>
         <html lang="en" class="h-full">

@@ -12,6 +12,9 @@ export type BuildHandler = (
 		outputPath: string;
 	},
 ) => Promise<void>;
-export type MiddlewareHandler = (app: Hono<LucidHonoGeneric>) => Promise<void>;
+export type MiddlewareHandler = (
+	app: Hono<LucidHonoGeneric>,
+	config: Config,
+) => Promise<void>;
 
 export type LucidAdapterResponse = z.infer<typeof LucidAdapterSchema>;

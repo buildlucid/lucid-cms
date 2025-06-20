@@ -16,8 +16,8 @@ const nodeAdapter = (): LucidAdapterResponse => {
 		runtime: {
 			middleware: {
 				afterMiddleware: [
-					async (app) => {
-						const paths = getVitePaths();
+					async (app, config) => {
+						const paths = getVitePaths(config);
 						app.use(
 							"/admin/*",
 							serveStatic({

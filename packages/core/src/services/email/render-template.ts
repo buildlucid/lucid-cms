@@ -24,8 +24,8 @@ const getTemplateData = async (
 ): ServiceResponse<string> => {
 	try {
 		// if user given template exists, return the file
-		const projectTemplatePath = config.paths?.emailTemplates
-			? `${config.paths?.emailTemplates}/${template}.mjml`
+		const projectTemplatePath = config.compilerOptions?.emailTemplates
+			? `${config.compilerOptions?.emailTemplates}/${template}.mjml`
 			: path.resolve("./templates", `${template}.mjml`);
 
 		if (await pathExists(projectTemplatePath)) {

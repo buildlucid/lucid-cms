@@ -13,10 +13,10 @@ const buildCommand = async () => {
 
 	const startTime = process.hrtime();
 
-	await rm("dist", { recursive: true, force: true });
-
 	const configPath = getConfigPath(process.cwd());
 	const config = await getConfig({ path: configPath });
+
+	await rm(config.compilerOptions?.outDir, { recursive: true, force: true });
 
 	const buildResponse = await vite.buildApp(config);
 	if (buildResponse.error) {
@@ -26,7 +26,7 @@ const buildCommand = async () => {
 
 	await config.adapter.cli?.build(config, {
 		configPath,
-		outputPath: "dist",
+		outputPath: config.compilerOptions?.outDir,
 	});
 
 	console.log(`Build completed in ${process.hrtime(startTime)[1] / 1000000}ms`);

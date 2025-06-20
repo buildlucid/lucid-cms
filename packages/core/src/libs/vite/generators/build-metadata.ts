@@ -1,7 +1,7 @@
 import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
 import getPaths from "../services/get-paths.js";
-import type { ServiceResponse } from "../../../types.js";
+import type { Config, ServiceResponse } from "../../../types.js";
 
 export type BuildMetadata = {
 	buildTrigger:
@@ -24,6 +24,7 @@ export type BuildMetadata = {
 const generateBuildMetadata = async (
 	trigger: BuildMetadata["buildTrigger"],
 	configPath: string,
+	config: Config,
 	hashes?: {
 		config?: number;
 		cwdPackage?: number;
@@ -32,7 +33,7 @@ const generateBuildMetadata = async (
 	},
 ): ServiceResponse<undefined> => {
 	try {
-		const paths = getPaths();
+		const paths = getPaths(config);
 
 		const [configStat, cwdStat, adminStat, coreStat] = await Promise.all([
 			hashes?.config ? null : fs.stat(configPath),

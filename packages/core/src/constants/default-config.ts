@@ -1,10 +1,7 @@
-import type { LucidConfig } from "../../types/config.js";
+import type { LucidConfig } from "../types/config.js";
 
 export const defaultConfig: Partial<LucidConfig> = {
 	logLevel: "info",
-	paths: {
-		emailTemplates: "./templates",
-	},
 	email: undefined,
 	disableSwagger: false,
 	localisation: {
@@ -36,6 +33,10 @@ export const defaultConfig: Partial<LucidConfig> = {
 	hooks: [],
 	collections: [],
 	plugins: [],
+	compilerOptions: {
+		outDir: "dist",
+		emailTemplates: "./templates",
+	},
 };
 
 export default defaultConfig;

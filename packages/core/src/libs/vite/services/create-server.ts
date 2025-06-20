@@ -6,16 +6,18 @@ import tailwindcss from "@tailwindcss/vite";
 import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
 import getPaths from "./get-paths.js";
-import type { ServiceResponse } from "../../../types.js";
+import type { Config, ServiceResponse } from "../../../types.js";
 
 //* while plugins dont support registering custom components this is not used. This will need proper error handling, logging and config etc.
-const createDevServer = async (): ServiceResponse<ViteDevServer> => {
+const createDevServer = async (
+	config: Config,
+): ServiceResponse<ViteDevServer> => {
 	try {
-		const paths = getPaths();
+		const paths = getPaths(config);
 
 		const [clientMountRes, clientHtmlRes] = await Promise.all([
-			generateClientMount(),
-			generateHTML(),
+			generateClientMount(config),
+			generateHTML(config),
 		]);
 		if (clientHtmlRes.error) return clientHtmlRes;
 		if (clientMountRes.error) return clientMountRes;

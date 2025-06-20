@@ -6,7 +6,7 @@ import type { InlineConfig } from "vite";
 import type { Config } from "../../../types.js";
 
 const mergeViteConfig = (config: Config) => {
-	const paths = getPaths();
+	const paths = getPaths(config);
 	return merge(
 		{
 			plugins: [tailwindcss(), solidPlugin()],
@@ -21,7 +21,7 @@ const mergeViteConfig = (config: Config) => {
 			base: "/admin",
 			logLevel: "silent",
 		},
-		config.vite,
+		config.compilerOptions?.vite,
 	) as InlineConfig;
 };
 
