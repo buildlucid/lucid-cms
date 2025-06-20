@@ -89,6 +89,8 @@ const sendEmail: ServiceFn<
 				sent_count: emailExistsRes.data.sent_count + (result.success ? 1 : 0),
 				error_count: emailExistsRes.data.error_count + (result.success ? 0 : 1),
 				last_attempt_at: new Date().toISOString(),
+				strategy_identifier: emailConfigRes.data.identifier,
+				strategy_data: result.data,
 			},
 			returnAll: true,
 			validation: {
@@ -120,6 +122,8 @@ const sendEmail: ServiceFn<
 			cc: data.cc,
 			bcc: data.bcc,
 			data: data.data,
+			strategy_identifier: emailConfigRes.data.identifier,
+			strategy_data: result.data,
 			type: data.type,
 			sent_count: result.success ? 1 : 0,
 			error_count: result.success ? 0 : 1,

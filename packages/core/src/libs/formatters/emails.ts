@@ -12,6 +12,8 @@ interface EmailPropT {
 	bcc: string | null;
 	delivery_status: string;
 	template: string;
+	strategy_identifier: string;
+	strategy_data: Record<string, unknown> | null;
 	type: string;
 	sent_count: number;
 	error_count: number;
@@ -60,6 +62,8 @@ export default class EmailsFormatter {
 			errorCount: props.email.error_count || 0,
 			errorMessage: props.email.last_error_message,
 			html: props.html ?? null,
+			strategyIdentifier: props.email.strategy_identifier,
+			strategyData: props.email.strategy_data,
 			lastSuccessAt: Formatter.formatDate(props.email.last_success_at),
 			lastAttemptAt: Formatter.formatDate(props.email.last_attempt_at),
 			createdAt: Formatter.formatDate(props.email.created_at),

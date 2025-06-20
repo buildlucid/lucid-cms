@@ -52,6 +52,7 @@ export type EmailStrategy = (
 ) => Promise<{
 	success: boolean;
 	message: string;
+	data?: Record<string, unknown> | null;
 }>;
 
 export type MediaStrategyGetPresignedUrl = (
@@ -181,6 +182,8 @@ export interface LucidConfig {
 	};
 	/** Email settings. */
 	email?: {
+		/** The email strategy identifier. */
+		identifier: string;
 		/** The email from settings. */
 		from: {
 			/** The email address to send emails from. */
@@ -252,6 +255,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	logTransport?: DestinationStream;
 	email?: {
+		identifier: string;
 		from: {
 			email: string;
 			name: string;

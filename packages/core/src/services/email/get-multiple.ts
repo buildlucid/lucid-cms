@@ -30,6 +30,8 @@ const getMultiple: ServiceFn<
 			"bcc",
 			"delivery_status",
 			"template",
+			"strategy_identifier",
+			"strategy_data",
 			"type",
 			"sent_count",
 			"error_count",

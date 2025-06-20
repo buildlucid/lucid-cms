@@ -43,10 +43,10 @@ Effortlessly configure Lucid to meet your content needs with our flexible config
 
 - **[Pages](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-pages):** Adds nested document support to your collections along with slugs and computed fullSlugs based parent relationships.
 - **[Nodemailer](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-nodemailer):** Extend the email strategy to support Nodemailer by passing down a custom transport.
+- **[Resend](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-resend):** Extend the email strategy to use [Resend](https://resend.com/home).
 - **[S3](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-s3):** Extend the media strategy to support using any S3 compatible storage solution.
 - **[Local Storage](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-local-storage):** Extends the media strategy to support uploading media to your file system.
 - **Menus:** Coming soon!
-- **Resend:** Coming soon!
 - **Form Builder:** Coming soon!
 
 ## 💾 DB Adapters

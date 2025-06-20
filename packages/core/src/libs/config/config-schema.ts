@@ -63,6 +63,7 @@ const ConfigSchema = z.object({
 		.optional(),
 	email: z
 		.object({
+			identifier: z.string(),
 			from: z.object({
 				email: z.string(),
 				name: z.string(),

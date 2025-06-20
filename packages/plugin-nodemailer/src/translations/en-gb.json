@@ -1,4 +1,5 @@
 {
 	"email_successfully_sent": "The email was successfully sent.",
-	"email_transporter_not_ready": "The email transporter is not ready."
+	"email_transporter_not_ready": "The email transporter is not ready.",
+	"email_failed_to_send": "The email failed to send."
 }

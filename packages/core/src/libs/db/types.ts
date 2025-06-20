@@ -234,7 +234,14 @@ export interface LucidEmails {
 		Record<string, unknown>,
 		//* __insert__ includes a Record as the base repository handles formatting via formatData method
 		Record<string, unknown> | null,
-		string | null
+		Record<string, unknown> | null
+	>;
+	strategy_identifier: string;
+	strategy_data: JSONColumnType<
+		Record<string, unknown>,
+		//* __insert__ includes a Record as the base repository handles formatting via formatData method
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
 	>;
 	type: "internal" | "external";
 	sent_count: number;

@@ -30,6 +30,8 @@ const getSingle: ServiceFn<
 			"delivery_status",
 			"template",
 			"data",
+			"strategy_identifier",
+			"strategy_data",
 			"type",
 			"sent_count",
 			"error_count",

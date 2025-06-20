@@ -33,6 +33,8 @@ const resendSingle: ServiceFn<
 			"delivery_status",
 			"template",
 			"data",
+			"strategy_identifier",
+			"strategy_data",
 			"type",
 			"sent_count",
 			"error_count",
@@ -70,10 +72,12 @@ const resendSingle: ServiceFn<
 		{
 			to: emailRes.data.to_address,
 			subject: emailRes.data.subject ?? "",
-			from: {
-				name: emailRes.data.from_name,
-				email: emailRes.data.from_address,
-			},
+			// from: {
+			// 	name: emailRes.data.from_name,
+			// 	email: emailRes.data.from_address,
+			// },
+			//* send with the current from config
+			from: emailConfigRes.data.from,
 			html: html.data,
 			cc: emailRes.data.cc ?? undefined,
 			bcc: emailRes.data.bcc ?? undefined,
@@ -100,6 +104,8 @@ const resendSingle: ServiceFn<
 			sent_count: emailRes.data.sent_count + (result.success ? 1 : 0),
 			error_count: emailRes.data.error_count + (result.success ? 0 : 1),
 			last_attempt_at: new Date().toISOString(),
+			strategy_identifier: emailConfigRes.data.identifier,
+			strategy_data: result.data,
 		},
 	});
 	if (updateRes.error) return updateRes;
