@@ -198,11 +198,10 @@ export interface LucidConfig {
 		/** The maximum file size in bytes. */
 		maxFileSize?: number;
 		/** The fallback image to use if an image cannot be found.
-		 *  - If false or underfined, images will return a 404 status code.
+		 *  - If undefined, images will return a 404 status code.
 		 *  - If a string is passed, it will attempt to stream the url as the response.
-		 *  - If true, the default fallback image will be used.
 		 **/
-		fallbackImage?: string | boolean | undefined;
+		fallbackImage?: string;
 		/** The media strategy services to use. These determine how media is stored, retrieved and deleted. */
 		strategy?: MediaStrategy;
 		/** The image processor to use. */
@@ -272,7 +271,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		maxFileSize: number;
 		processedImageLimit: number;
 		storeProcessedImages: boolean;
-		fallbackImage: string | boolean | undefined;
+		fallbackImage: string | undefined;
 		strategy?: MediaStrategy;
 		imageProcessor?: ImageProcessor;
 		onDemandFormats: boolean;

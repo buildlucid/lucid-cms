@@ -73,7 +73,7 @@ const ConfigSchema = z.object({
 	media: z.object({
 		storageLimit: z.number(),
 		maxFileSize: z.number(),
-		fallbackImage: z.union([z.string(), z.boolean()]).optional(),
+		fallbackImage: z.string().optional(),
 		strategy: z.unknown().optional(),
 		processedImageLimit: z.number(),
 		storeProcessedImages: z.boolean(),

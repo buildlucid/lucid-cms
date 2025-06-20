@@ -1,12 +1,8 @@
 import T from "../../translations/index.js";
-import path from "node:path";
-import { createReadStream, type ReadStream } from "node:fs";
 import pipeRemoteUrl from "./helpers/pipe-remote-url.js";
-import { getDirName } from "../../utils/helpers/index.js";
+import type { ReadStream } from "node:fs";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidErrorData } from "../../types/errors.js";
-
-const currentDir = getDirName(import.meta.url);
 
 const streamErrorImage: ServiceFn<
 	[
@@ -16,39 +12,32 @@ const streamErrorImage: ServiceFn<
 		},
 	],
 	{
-		body: ReadStream | Buffer;
+		body: Buffer;
 		contentType: string;
 	}
 > = async (context, data) => {
-	if (data.error.status !== 404) {
-		return {
-			error: data.error,
-			data: undefined,
-		};
-	}
-
-	if (context.config.media?.fallbackImage === false || !data.fallback) {
-		return {
-			error: {
-				type: "basic",
-				name: T("media_not_found_name"),
-				message: T("media_not_found_message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-
-	if (context.config.media?.fallbackImage === undefined) {
-		return {
-			error: undefined,
-			data: pipeLocalImage(),
-		};
-	}
-
 	try {
+		if (data.error.status !== 404) {
+			return {
+				error: data.error,
+				data: undefined,
+			};
+		}
+
+		if (!data.fallback || !context.config.media.fallbackImage) {
+			return {
+				error: {
+					type: "basic",
+					name: T("media_not_found_name"),
+					message: T("media_not_found_message"),
+					status: 404,
+				},
+				data: undefined,
+			};
+		}
+
 		const { buffer, contentType } = await pipeRemoteUrl({
-			url: context.config.media?.fallbackImage as string,
+			url: context.config.media?.fallbackImage,
 		});
 
 		return {
@@ -60,20 +49,15 @@ const streamErrorImage: ServiceFn<
 		};
 	} catch (err) {
 		return {
-			error: undefined,
-			data: pipeLocalImage(),
+			error: {
+				type: "basic",
+				name: T("media_not_found_name"),
+				message: T("media_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
 		};
 	}
-};
-
-const pipeLocalImage = () => {
-	const pathVal = path.join(currentDir, "../assets/404.jpg");
-	const contentType = "image/jpeg";
-	const steam = createReadStream(pathVal);
-	return {
-		body: steam,
-		contentType: contentType,
-	};
 };
 
 export default streamErrorImage;

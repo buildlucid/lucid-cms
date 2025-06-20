@@ -44,13 +44,7 @@ export const messageFormat = (
 		scope?: LoggerScopes | string;
 	},
 ) => {
-	// const timestamp = new Date().toISOString();
 	const msgParts = [data.message];
-
-	// TODO: get this implemented - tests need a solution for this as at the time of console log spy the times differ
-	// if (level === "debug" || level === "error") {
-	// 	msgParts.unshift(`[${timestamp}]`);
-	// }
 
 	if (data.scope) {
 		msgParts.unshift(`[${data.scope}]`);
