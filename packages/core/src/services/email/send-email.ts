@@ -1,6 +1,7 @@
 import { genEmailHash } from "../../utils/helpers/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import renderHandlebarsTemplate from "../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
 
@@ -26,7 +27,7 @@ const sendEmail: ServiceFn<
 		await context.services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
-	const html = await context.services.email.renderTemplate(context, {
+	const html = await renderHandlebarsTemplate(context, {
 		template: data.template,
 		data: data.data,
 	});

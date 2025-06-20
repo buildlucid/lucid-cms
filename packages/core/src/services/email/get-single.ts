@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import renderHandlebarsTemplate from "../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
 
@@ -63,7 +64,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const html = await context.services.email.renderTemplate(context, {
+	const html = await renderHandlebarsTemplate(context, {
 		template: emailRes.data.template,
 		data: emailRes.data.data,
 	});

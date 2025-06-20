@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
+import renderHandlebarsTemplate from "../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const resendSingle: ServiceFn<
@@ -59,7 +60,7 @@ const resendSingle: ServiceFn<
 
 	const templateData = (emailRes.data.data ?? {}) as Record<string, unknown>;
 
-	const html = await context.services.email.renderTemplate(context, {
+	const html = await renderHandlebarsTemplate(context, {
 		template: emailRes.data.template,
 		data: templateData,
 	});

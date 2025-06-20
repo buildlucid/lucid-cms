@@ -3,7 +3,6 @@ import permissionGroups from "./permission-groups.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,
-	tempDir: "./tmp",
 	swaggerRoutePrefix: "/documentation",
 	headers: {
 		csrf: "_csrf",
@@ -81,6 +80,7 @@ export default Object.freeze({
 		passwordResetSuccess: "password-reset-success",
 		emailChanged: "email-changed",
 	},
+	emailRenderedOutput: "email-templates.json",
 	rateLimit: {
 		max: 100,
 		timeWindow: "1 minute", // ms format - https://github.com/vercel/ms

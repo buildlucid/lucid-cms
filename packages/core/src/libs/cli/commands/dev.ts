@@ -2,7 +2,7 @@ import chokidar, { type FSWatcher } from "chokidar";
 import getConfig from "../../config/get-config.js";
 import getConfigPath from "../../config/get-config-path.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
-import type { Config } from "../../../types.js";
+import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 
 export type DevOptions = {
 	watch?: string | boolean;
@@ -18,6 +18,8 @@ const devCommand = async (options: DevOptions) => {
 	let config = await getConfig({ path: configPath });
 	let rebuilding = false;
 	let destroy: (() => Promise<void>) | undefined = undefined;
+
+	await prerenderMjmlTemplates(config);
 
 	/**
 	 * Runs the adapter dev command.

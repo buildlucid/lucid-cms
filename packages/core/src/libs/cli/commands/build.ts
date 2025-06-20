@@ -3,6 +3,7 @@ import getConfigPath from "../../config/get-config-path.js";
 import getConfig from "../../config/get-config.js";
 import vite from "../../vite/index.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
+import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 
 /**
  * @todo remove the argon2 external dependency after this has been replaced with something else. Argon2 is not supported in
@@ -17,6 +18,8 @@ const buildCommand = async () => {
 	const config = await getConfig({ path: configPath });
 
 	await rm(config.compilerOptions?.outDir, { recursive: true, force: true });
+
+	await prerenderMjmlTemplates(config);
 
 	const buildResponse = await vite.buildApp(config);
 	if (buildResponse.error) {

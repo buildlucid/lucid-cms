@@ -4,7 +4,6 @@ import { PLUGIN_KEY } from "../constants.js";
 import type { Transporter } from "nodemailer";
 
 const verifyTransporter = async (transporter: Transporter) => {
-	console.log("transporter", transporter);
 	try {
 		await transporter.verify();
 	} catch (error) {
