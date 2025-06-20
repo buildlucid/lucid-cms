@@ -130,8 +130,6 @@ export default app;`;
 							"rolldown",
 						]),
 					],
-					// TODO: temp to get the bundle down, these will both be replace/have workarounds
-					external: ["argon2"],
 				});
 
 				//* clean up temporary files

@@ -1,6 +1,7 @@
-import crypto from "node:crypto";
-import argon2 from "argon2";
+import { randomBytes } from "@noble/hashes/utils.js";
+import { scrypt } from "@noble/hashes/scrypt.js";
 import { generateSecret } from "../helpers/index.js";
+import constants from "../../constants/constants.js";
 
 const generateKeys = async (
 	encryptionKey: string,
@@ -10,14 +11,15 @@ const generateKeys = async (
 	apiKeyHash: string;
 	secret: string;
 }> => {
-	const apiKey = crypto.randomBytes(32).toString("hex");
+	const apiKey = Buffer.from(randomBytes(32)).toString("hex");
 	const { secret, encryptSecret } = generateSecret(encryptionKey);
-	const apiKeyHash = await argon2.hash(apiKey, {
-		secret: Buffer.from(secret),
-	});
+
+	const apiKeyHash = Buffer.from(
+		scrypt(apiKey, secret, constants.scrypt),
+	).toString("base64");
 
 	return {
-		key: crypto.randomBytes(3).toString("hex"),
+		key: Buffer.from(randomBytes(3)).toString("hex"),
 		apiKey: apiKey,
 		apiKeyHash: apiKeyHash,
 		secret: encryptSecret,

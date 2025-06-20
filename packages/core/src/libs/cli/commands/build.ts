@@ -5,10 +5,6 @@ import vite from "../../vite/index.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 
-/**
- * @todo remove the argon2 external dependency after this has been replaced with something else. Argon2 is not supported in
- *       certain runtimes like Cloudflare and potentially Deno?
- */
 const buildCommand = async () => {
 	await installOptionalDeps();
 

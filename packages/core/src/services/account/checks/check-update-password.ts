@@ -1,7 +1,8 @@
 import T from "../../../translations/index.js";
-import argon2 from "argon2";
+import { scrypt } from "@noble/hashes/scrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
+import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkPassed = (value: string | undefined) => {
@@ -105,14 +106,12 @@ const checkUpdatePassword: ServiceFn<
 		};
 	}
 
-	// set new password if it is given
-	const passwordValid = await argon2.verify(
-		data.password,
-		data.currentPassword as string,
-		{
-			secret: Buffer.from(decrypt(data.encryptedSecret, data.encryptionKey)),
-		},
-	);
+	const decryptedSecret = decrypt(data.encryptedSecret, data.encryptionKey);
+	const currentPasswordHash = Buffer.from(
+		scrypt(data.currentPassword as string, decryptedSecret, constants.scrypt),
+	).toString("base64");
+
+	const passwordValid = currentPasswordHash === data.password;
 
 	if (!passwordValid) {
 		return {
@@ -135,9 +134,10 @@ const checkUpdatePassword: ServiceFn<
 
 	const { secret, encryptSecret } = generateSecret(data.encryptionKey);
 
-	newPassword = await argon2.hash(data.newPassword as string, {
-		secret: Buffer.from(secret),
-	});
+	newPassword = Buffer.from(
+		scrypt(data.newPassword as string, secret, constants.scrypt),
+	).toString("base64");
+
 	triggerPasswordReset = false as const;
 
 	return {

@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import argon2 from "argon2";
+import { scrypt } from "@noble/hashes/scrypt.js";
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
@@ -131,9 +131,10 @@ const updateSingle: ServiceFn<
 	let encryptSecret = undefined;
 	if (data.password) {
 		const genSecret = generateSecret(context.config.keys.encryptionKey);
-		hashedPassword = await argon2.hash(data.password, {
-			secret: Buffer.from(genSecret.secret),
-		});
+		// Hash password using scrypt
+		hashedPassword = Buffer.from(
+			scrypt(data.password, genSecret.secret, constants.scrypt),
+		).toString("base64");
 		encryptSecret = genSecret.encryptSecret;
 	}
 

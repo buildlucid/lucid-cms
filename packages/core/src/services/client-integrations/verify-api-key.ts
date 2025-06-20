@@ -1,8 +1,9 @@
 import T from "../../translations/index.js";
-import argon2 from "argon2";
+import { scrypt } from "@noble/hashes/scrypt.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import constants from "../../constants/constants.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidClientIntegrationAuth } from "../../types/hono.js";
 
@@ -53,13 +54,12 @@ const verifyApiKey: ServiceFn<
 		context.config.keys.encryptionKey,
 	);
 
-	const verifyApiKey = await argon2.verify(
-		clientIntegrationRes.data.api_key,
-		data.apiKey,
-		{
-			secret: Buffer.from(secret),
-		},
-	);
+	const inputApiKeyHash = Buffer.from(
+		scrypt(data.apiKey, secret, constants.scrypt),
+	).toString("base64");
+
+	const verifyApiKey = inputApiKeyHash === clientIntegrationRes.data.api_key;
+
 	if (verifyApiKey === false) {
 		return {
 			error: {

@@ -117,8 +117,6 @@ const nodeAdapter = (): LucidAdapterResponse => {
 					],
 					treeshake: true,
 					platform: "node",
-					// TODO: temp to get the bundle down, these will both be replace/have workarounds
-					external: ["argon2"],
 				});
 
 				const entry = `

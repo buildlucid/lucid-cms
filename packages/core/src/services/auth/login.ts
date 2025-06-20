@@ -1,8 +1,9 @@
 import T from "../../translations/index.js";
-import argon2 from "argon2";
+import { scrypt } from "@noble/hashes/scrypt.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import constants from "../../constants/constants.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const login: ServiceFn<
@@ -46,11 +47,16 @@ const login: ServiceFn<
 		};
 	}
 
-	const valid = await argon2.verify(userRes.data.password, data.password, {
-		secret: Buffer.from(
-			decrypt(userRes.data.secret, context.config.keys.encryptionKey),
-		),
-	});
+	const decryptedSecret = decrypt(
+		userRes.data.secret,
+		context.config.keys.encryptionKey,
+	);
+	const inputPasswordHash = Buffer.from(
+		scrypt(data.password, decryptedSecret, constants.scrypt),
+	).toString("base64");
+
+	const valid = inputPasswordHash === userRes.data.password;
+
 	if (!valid)
 		return {
 			error: {

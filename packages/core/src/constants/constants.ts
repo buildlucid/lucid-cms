@@ -14,6 +14,12 @@ export default Object.freeze({
 		refreshToken: "_refresh",
 		accessToken: "_access",
 	},
+	scrypt: {
+		N: 2 ** 16, // 65536 iterations
+		r: 8,
+		p: 1,
+		dkLen: 32,
+	},
 	seedDefaults: {
 		user: {
 			firstName: "Lucid",
