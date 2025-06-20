@@ -70,4 +70,42 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
+	setup: {
+		body: z
+			.object({
+				email: z.email().meta({
+					description: "Admin user email address",
+					example: "admin@example.com",
+				}),
+				username: z.string().meta({
+					description: "Admin username",
+					example: "admin",
+				}),
+				firstName: z
+					.string()
+					.meta({
+						description: "Admin first name",
+						example: "John",
+					})
+					.optional(),
+				lastName: z
+					.string()
+					.meta({
+						description: "Admin last name",
+						example: "Doe",
+					})
+					.optional(),
+				password: z.string().meta({
+					description: "Admin password",
+					example: "securepassword123",
+				}),
+			})
+			.meta({ description: "Initial admin user setup data" }),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 };

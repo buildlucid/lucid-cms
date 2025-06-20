@@ -1,5 +1,6 @@
 import checks from "./checks/index.js";
-import createSingle from "./create-single.js";
+import inviteSingle from "./invite-single.js";
+import createInitialAdmin from "./create-initial-admin.js";
 import getSingle from "./get-single.js";
 import getMultiple from "./get-multiple.js";
 import deleteSingle from "./delete-single.js";
@@ -9,7 +10,8 @@ import getMultipleFieldMeta from "./get-multiple-field-meta.js";
 
 export default {
 	checks,
-	createSingle,
+	inviteSingle,
+	createInitialAdmin,
 	getSingle,
 	getMultiple,
 	deleteSingle,

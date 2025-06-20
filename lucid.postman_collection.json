@@ -56,6 +56,87 @@
 					"response": []
 				},
 				{
+					"name": "Setup Required",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"var CSRFToken = jsonData.data._csrf;\r",
+									"pm.collectionVariables.set(\"CSRF\", CSRFToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/auth/setup-required",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"setup-required"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Setup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin@lucidui.io\",\r\n\t\"username\": \"admin\",\r\n\t\"firstName\": \"William\",\r\n\t\"lastName\": \"Yallop\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/auth/setup",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"setup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Login",
 					"request": {
 						"method": "POST",
@@ -1093,7 +1174,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"password\": \"password\",\r\n    \"password_confirmation\": \"password\"\r\n}",
+							"raw": "{\r\n    \"password\": \"password\",\r\n    \"passwordConfirmation\": \"password\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1408,11 +1489,11 @@
 								"body": {
 									"mode": "file",
 									"file": {
-										"src": "/Users/williamyallop/Downloads/2024_09_1vgv3l-27-05-24-final-bb-video.qt"
+										"src": "/Users/williamyallop/Desktop/Screenshot 2025-05-01 at 19.10.49.png"
 									}
 								},
 								"url": {
-									"raw": "https://headless-cms.b321862a451976d9f183559235d9cec1.r2.cloudflarestorage.com/2024/09/ypvyba-27-05-24-final-bb-video.qt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ba2ab73b293ea91e6db7b2fe508e8c2a%2F20240921%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20240921T130814Z&X-Amz-Expires=3600&X-Amz-Signature=608bb26d27388f2d0db42196d742b259577b9c87aecc4b699d55a7bb99f6699a&X-Amz-SignedHeaders=host&x-amz-meta-extension=qt&x-id=PutObject",
+									"raw": "https://headless-cms.b321862a451976d9f183559235d9cec1.r2.cloudflarestorage.com/2025/05/kf1m2l-screenshot-2025-05-01-at-19.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=%2F20250531%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20250531T104447Z&X-Amz-Expires=3600&X-Amz-Signature=d4b0583f2d5f136c6d9c7ae583fef517046beae2591e0f464eed686a290fea9e&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-meta-extension=png&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject",
 									"protocol": "https",
 									"host": [
 										"headless-cms",
@@ -1422,9 +1503,9 @@
 										"com"
 									],
 									"path": [
-										"2024",
-										"09",
-										"ypvyba-27-05-24-final-bb-video.qt"
+										"2025",
+										"05",
+										"kf1m2l-screenshot-2025-05-01-at-19.png"
 									],
 									"query": [
 										{
@@ -1437,11 +1518,11 @@
 										},
 										{
 											"key": "X-Amz-Credential",
-											"value": "ba2ab73b293ea91e6db7b2fe508e8c2a%2F20240921%2Fauto%2Fs3%2Faws4_request"
+											"value": "%2F20250531%2Fauto%2Fs3%2Faws4_request"
 										},
 										{
 											"key": "X-Amz-Date",
-											"value": "20240921T130814Z"
+											"value": "20250531T104447Z"
 										},
 										{
 											"key": "X-Amz-Expires",
@@ -1449,15 +1530,23 @@
 										},
 										{
 											"key": "X-Amz-Signature",
-											"value": "608bb26d27388f2d0db42196d742b259577b9c87aecc4b699d55a7bb99f6699a"
+											"value": "d4b0583f2d5f136c6d9c7ae583fef517046beae2591e0f464eed686a290fea9e"
 										},
 										{
 											"key": "X-Amz-SignedHeaders",
 											"value": "host"
 										},
 										{
+											"key": "x-amz-checksum-crc32",
+											"value": "AAAAAA%3D%3D"
+										},
+										{
 											"key": "x-amz-meta-extension",
-											"value": "qt"
+											"value": "png"
+										},
+										{
+											"key": "x-amz-sdk-checksum-algorithm",
+											"value": "CRC32"
 										},
 										{
 											"key": "x-id",
@@ -1476,14 +1565,14 @@
 								"body": {
 									"mode": "file",
 									"file": {
-										"src": "/Users/williamyallop/Documents/protodigital/lucid/videos/27-05-24-final-bb-video.mov"
+										"src": "/Users/williamyallop/Documents/pension-chats-screenshot-1.png"
 									}
 								},
 								"url": {
-									"raw": "http://localhost:8080/api/v1/localstorage/upload?key=2024/09/rxmhsg-27-05-24-final-bb-video.qt&token=a64825f15c2acd40f8865933a26b7334d2c3dec3aba483cfab17396da0be8abe&timestamp=1726922680267",
+									"raw": "http://[::1]:8080/api/v1/localstorage/upload?key=2025/06/q6ko0u-pension-chats-screenshot-2.png&token=db702155abfec1625d0acd2527c27b4aa36e7ef3872a26968709839de324a7cb&timestamp=1749802676569",
 									"protocol": "http",
 									"host": [
-										"localhost"
+										"[::1]"
 									],
 									"port": "8080",
 									"path": [
@@ -1495,15 +1584,15 @@
 									"query": [
 										{
 											"key": "key",
-											"value": "2024/09/rxmhsg-27-05-24-final-bb-video.qt"
+											"value": "2025/06/q6ko0u-pension-chats-screenshot-2.png"
 										},
 										{
 											"key": "token",
-											"value": "a64825f15c2acd40f8865933a26b7334d2c3dec3aba483cfab17396da0be8abe"
+											"value": "db702155abfec1625d0acd2527c27b4aa36e7ef3872a26968709839de324a7cb"
 										},
 										{
 											"key": "timestamp",
-											"value": "1726922680267"
+											"value": "1749802676569"
 										}
 									]
 								}
@@ -1524,7 +1613,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"fileName\": \"27-05-24-final-bb-video.mov\",\n\t\"mimeType\": \"video/quicktime\"\n}",
+							"raw": "{\n\t\"fileName\": \"pension-chats-screenshot-2.png\",\n\t\"mimeType\": \"image/png\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1558,7 +1647,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"key\": \"2024/09/ypvyba-27-05-24-final-bb-video.qt\",\n\t\"fileName\": \"27-05-24-final-bb-video.mov\",\n\t\"title\": [\n\t\t{ \n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"title value\"\n\t\t}\n\t],\n\t\"alt\": [\n\t\t{\n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"alt value\"\n\t\t}\n\t],\n    \"width\": 400,\n    \"height\": 100,\n    // \"blurHash\": \"fdsf\",\n    // \"averageColour\": \"#000\",\n    \"isDark\": true,\n    \"isLight\": false\n}",
+							"raw": "{\n\t\"key\": \"2025/06/v4l4a9-pension-chats-screenshot-2.png\",\n\t\"fileName\": \"pension-chats-screenshot-2.png\",\n\t\"title\": [\n\t\t{ \n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"title value\"\n\t\t}\n\t],\n\t\"alt\": [\n\t\t{\n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"alt value\"\n\t\t}\n\t],\n    \"width\": 400,\n    \"height\": 100,\n    // \"blurHash\": \"fdsf\",\n    // \"averageColour\": \"#000\",\n    \"isDark\": true,\n    \"isLight\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2309,16 +2398,16 @@
 							}
 						],
 						"url": {
-							"raw": "{{BASE_URL}}/cdn/v1/2024/04/fh2bug-banner.png",
+							"raw": "{{BASE_URL}}/cdn/v1/2025/06/q6ko0u-pension-chats-screenshot-2.png",
 							"host": [
 								"{{BASE_URL}}"
 							],
 							"path": [
 								"cdn",
 								"v1",
-								"2024",
-								"04",
-								"fh2bug-banner.png"
+								"2025",
+								"06",
+								"q6ko0u-pension-chats-screenshot-2.png"
 							],
 							"query": [
 								{

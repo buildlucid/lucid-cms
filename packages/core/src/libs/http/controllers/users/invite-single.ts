@@ -19,11 +19,11 @@ import permissions from "../../middleware/permissions.js";
 
 const factory = createFactory();
 
-const createSingleController = factory.createHandlers(
+const inviteSingleController = factory.createHandlers(
 	describeRoute({
-		description: "Create a single user.",
+		description: "Invite a single user.",
 		tags: ["users"],
-		summary: "Create User",
+		summary: "Invite User",
 		responses: honoSwaggerResponse({
 			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
@@ -43,7 +43,7 @@ const createSingleController = factory.createHandlers(
 		const body = c.req.valid("json");
 		const auth = c.get("auth");
 
-		const userId = await serviceWrapper(services.user.createSingle, {
+		const userId = await serviceWrapper(services.user.inviteSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -96,4 +96,4 @@ const createSingleController = factory.createHandlers(
 	},
 );
 
-export default createSingleController;
+export default inviteSingleController;

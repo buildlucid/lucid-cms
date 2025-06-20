@@ -5,7 +5,7 @@ import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-const createSingle: ServiceFn<
+const inviteSingle: ServiceFn<
 	[
 		{
 			email: string;
@@ -136,4 +136,4 @@ const createSingle: ServiceFn<
 	};
 };
 
-export default createSingle;
+export default inviteSingle;

@@ -285,5 +285,6 @@
 	"field_is_required": "This field is required and not being supplied.",
 	"error_fetching_media_for_document": "An error occured while fetching media relation data on the document get endpoint.",
 	"error_getting_collection_names": "An error occured getting the document table names.",
-	"failed_to_prerender_mjml_templates": "Failed to prerender MJML templates"
+	"failed_to_prerender_mjml_templates": "Failed to prerender MJML templates",
+	"setup_already_completed": "Setup has already been completed. Please login to continue."
 }
