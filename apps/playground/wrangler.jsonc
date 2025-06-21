@@ -2,7 +2,7 @@
     "$schema": "../../node_modules/wrangler/config-schema.json",
     "name": "lucid-cms",
     "main": "dist/server.js",
-    "compatibility_date": "2025-05-02",
+    "compatibility_date": "2025-06-21",
     "compatibility_flags": [
         "nodejs_compat"
     ],
