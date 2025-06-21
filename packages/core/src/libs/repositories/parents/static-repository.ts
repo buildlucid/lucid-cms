@@ -44,7 +44,10 @@ abstract class StaticRepository<
 		}
 
 		const exec = await this.executeQuery(
-			() => query.executeTakeFirst() as Promise<{ count: string } | undefined>,
+			() =>
+				query.executeTakeFirst() as Promise<
+					{ count: string | number } | undefined
+				>,
 			{
 				method: "count",
 			},

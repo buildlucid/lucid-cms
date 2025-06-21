@@ -90,7 +90,8 @@ class Formatter {
 			return null;
 		}
 	};
-	static parseCount = (count: string | undefined) => {
+	static parseCount = (count: string | number | undefined) => {
+		if (typeof count === "number") return count;
 		return Number.parseInt(count || "0") || 0;
 	};
 	/**

@@ -116,12 +116,14 @@ abstract class BaseRepository<
 	): ZodType {
 		switch (mode) {
 			case "count": {
-				return z.object({ count: z.number() }).optional();
+				return z
+					.object({ count: z.union([z.number(), z.string()]) })
+					.optional();
 			}
 			case "multiple-count":
 				return z.tuple([
 					z.array(schema),
-					z.object({ count: z.number() }).optional(),
+					z.object({ count: z.union([z.number(), z.string()]) }).optional(),
 				]);
 			case "multiple":
 				return z.array(schema);
