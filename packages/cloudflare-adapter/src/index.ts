@@ -10,9 +10,8 @@ import type {
 	LucidAdapterResponse,
 	LucidHonoGeneric,
 } from "@lucidcms/core/types";
-import { relative } from "node:path";
-import { readFileSync } from "node:fs";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { relative } from "node:path";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions & { enabled?: boolean };
@@ -20,6 +19,37 @@ const cloudflareAdapter = (options?: {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		runtime: {
+			middleware: {
+				// afterMiddleware: [
+				// 	async (app) => {
+				// 		app.get("/admin", async (c) => {
+				// 			const url = new URL(c.req.url);
+				// 			const indexRequest = new Request(
+				// 				`${url.origin}/admin/index.html`,
+				// 			);
+				// 			// @ts-expect-error
+				// 			return c.env.ASSETS.fetch(indexRequest);
+				// 		});
+				// 		app.get("/admin/*", async (c) => {
+				// 			// Try to serve the exact asset first
+				// 			// @ts-expect-error
+				// 			const asset = await c.env.ASSETS.fetch(c.req.raw);
+				// 			if (asset.status < 400) {
+				// 				return asset;
+				// 			}
+				// 			// If asset not found, serve index.html for SPA routing
+				// 			const url = new URL(c.req.url);
+				// 			const indexRequest = new Request(
+				// 				`${url.origin}/admin/index.html`,
+				// 			);
+				// 			// @ts-expect-error
+				// 			return c.env.ASSETS.fetch(indexRequest);
+				// 		});
+				// 	},
+				// ],
+			},
+		},
 		cli: {
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
@@ -50,7 +80,7 @@ const cloudflareAdapter = (options?: {
 					app: cloudflareApp,
 					middleware: {
 						afterMiddleware: [
-							//* this is registered on the create app instead of the adapter level as unlike the node adapter, only the dev command should serve this
+							// Add static file serving for dev mode only
 							async (app) => {
 								const paths = getVitePaths(config);
 								app.use(
@@ -66,14 +96,6 @@ const cloudflareAdapter = (options?: {
 										},
 									}),
 								);
-								app.get("/admin", (c) => {
-									const html = readFileSync(paths.clientDistHtml, "utf-8");
-									return c.html(html);
-								});
-								app.get("/admin/*", (c) => {
-									const html = readFileSync(paths.clientDistHtml, "utf-8");
-									return c.html(html);
-								});
 							},
 						],
 					},
@@ -102,9 +124,35 @@ const cloudflareAdapter = (options?: {
 				const entry = `
 import config from "${options.configPath}";
 import lucid from "@lucidcms/core";
+import { url } from "node:inspector";
 
 const app = await lucid.createApp({
     config: await config,
+    middleware: {
+        afterMiddleware: [
+            async (app) => {
+                app.get("/admin", async (c) => {
+                    const url = new URL(c.req.url);
+                    const requestUrl = url.origin + '/admin/index.html';
+                    const indexRequest = new Request(requestUrl);
+                    return c.env.ASSETS.fetch(indexRequest);
+                });
+
+                app.get("/admin/*", async (c) => {
+                    const asset = await c.env.ASSETS.fetch(c.req.raw);
+
+                    if (asset.status < 400) {
+                        return asset;
+                    }
+
+                    const url = new URL(c.req.url);
+                    const requestUrl = url.origin + '/admin/index.html';
+                    const indexRequest = new Request(requestUrl);
+                    return c.env.ASSETS.fetch(indexRequest);
+                });
+            },
+        ],
+    }
 });
 
 export default app;`;

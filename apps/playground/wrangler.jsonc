@@ -9,6 +9,14 @@
     "vars": {
         "TEST_ENV_VAR": "TEST_ENV_VAR",
     },
+    "assets": {
+        "directory": "dist/client/dist/",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": [
+            "/api/*"
+        ]
+    }
     // "hyperdrive": [
     //     {
     //         "binding": "HYPERDRIVE",
