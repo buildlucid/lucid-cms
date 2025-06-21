@@ -7,27 +7,21 @@ import type {
 	OnDelete,
 	InferredColumn,
 } from "@lucidcms/core/types";
-import pg from "pg";
-import {
-	PostgresDialect,
-	sql,
-	ParseJSONResultsPlugin,
-	type ColumnDataType,
-} from "kysely";
+import { sql, ParseJSONResultsPlugin, type ColumnDataType } from "kysely";
+import { PostgresJSDialect } from "kysely-postgres-js";
+import postgres from "postgres";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
 
-const { Pool } = pg;
-
 class PostgresAdapter extends DatabaseAdapter {
-	constructor(config: pg.PoolConfig) {
+	constructor(url: string, options?: Parameters<typeof postgres>[1]) {
 		super({
 			adapter: "postgres",
-			dialect: new PostgresDialect({
-				pool: new Pool(config),
+			dialect: new PostgresJSDialect({
+				postgres: postgres(url, options),
 			}),
 			plugins: [new ParseJSONResultsPlugin()],
 		});
