@@ -29,9 +29,9 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		sent_count: z.number(),
 		error_count: z.number(),
 		last_error_message: z.string().nullable(),
-		last_attempt_at: z.string().nullable(),
-		last_success_at: z.string().nullable(),
-		created_at: z.string().nullable(),
+		last_attempt_at: z.union([z.string(), z.date()]).nullable(),
+		last_success_at: z.union([z.string(), z.date()]).nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

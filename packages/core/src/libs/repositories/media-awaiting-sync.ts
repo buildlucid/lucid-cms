@@ -9,7 +9,7 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 	}
 	tableSchema = z.object({
 		key: z.string(),
-		timestamp: z.string(),
+		timestamp: z.union([z.string(), z.date()]),
 	});
 	columnFormats = {
 		key: this.dbAdapter.getDataType("text"),

@@ -58,8 +58,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			)
 			.optional(),
 		custom_meta: z.string().nullable(),
-		created_at: z.string().nullable(),
-		updated_at: z.string().nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

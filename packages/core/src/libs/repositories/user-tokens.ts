@@ -12,8 +12,8 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 		user_id: z.number(),
 		token_type: z.union([z.literal("password_reset"), z.literal("refresh")]),
 		token: z.string(),
-		created_at: z.string().nullable(),
-		expiry_date: z.string(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		expiry_date: z.union([z.string(), z.date()]),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

@@ -18,8 +18,8 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 		key: z.string(),
 		api_key: z.string(),
 		secret: z.string(),
-		created_at: z.string().nullable(),
-		updated_at: z.string().nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

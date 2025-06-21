@@ -32,7 +32,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
-		is_deleted_at: z.string().nullable(),
+		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
 		deleted_by: z.number().nullable(),
 		roles: z
 			.array(
@@ -50,8 +50,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				}),
 			)
 			.optional(),
-		created_at: z.string().nullable(),
-		updated_at: z.string().nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

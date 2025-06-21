@@ -13,9 +13,9 @@ export default class LocalesRepository extends StaticRepository<"lucid_locales">
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
-		is_deleted_at: z.string().nullable(),
-		created_at: z.string().nullable(),
-		updated_at: z.string().nullable(),
+		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		code: this.dbAdapter.getDataType("text"),

@@ -13,8 +13,8 @@ export default class CollectionsRepository extends StaticRepository<"lucid_colle
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
-		is_deleted_at: z.string().nullable(),
-		created_at: z.string().nullable(),
+		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		key: this.dbAdapter.getDataType("text"),

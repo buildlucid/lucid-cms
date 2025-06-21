@@ -9,7 +9,7 @@ export default class TranslationKeysRepository extends StaticRepository<"lucid_t
 	}
 	tableSchema = z.object({
 		id: z.number(),
-		created_at: z.string(),
+		created_at: z.union([z.string(), z.date()]),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

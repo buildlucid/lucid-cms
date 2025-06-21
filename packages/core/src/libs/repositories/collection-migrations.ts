@@ -11,7 +11,7 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 		id: z.number(),
 		collection_key: z.string(),
 		migration_plans: z.unknown(),
-		created_at: z.string().nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

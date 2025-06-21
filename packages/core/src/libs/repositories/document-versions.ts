@@ -49,8 +49,8 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		promoted_from: z.number().nullable(),
 		created_by: z.number(),
 		updated_by: z.number(),
-		updated_at: z.string().nullable(),
-		created_at: z.string().nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),

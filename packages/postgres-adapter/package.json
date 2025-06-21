@@ -40,13 +40,13 @@
 		"@lucidcms/config": "*",
 		"@lucidcms/core": "*",
 		"@types/node": "^22.15.2",
+		"@types/pg": "^8.11.14",
 		"tsdown": "^0.12.5",
-		"typescript": "^5.8.3",
-		"@types/pg": "^8.11.14"
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"pg": "^8.15.6",
-		"kysely": "0.27.4"
+		"kysely": "0.27.4",
+		"pg": "^8.16.2"
 	},
 	"peerDependencies": {
 		"@lucidcms/core": "^0.11.0-alpha.0"

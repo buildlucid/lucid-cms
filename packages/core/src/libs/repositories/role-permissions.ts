@@ -11,8 +11,8 @@ export default class RolePermissionsRepository extends StaticRepository<"lucid_r
 		id: z.number(),
 		role_id: z.number(),
 		permission: z.string(),
-		created_at: z.string().nullable(),
-		updated_at: z.string().nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
