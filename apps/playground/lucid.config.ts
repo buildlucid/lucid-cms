@@ -135,21 +135,21 @@ export default lucid.config({
 			},
 			apiKey: process.env.RESEND_API_KEY as string,
 		}),
-		// LucidS3({
-		// 	clientConfig: {
-		// 		endpoint: `https://${process.env.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-		// 		region: "auto",
-		// 		credentials: {
-		// 			accessKeyId: process.env.LUCID_S3_ACCESS_KEY as string,
-		// 			secretAccessKey: process.env.LUCID_S3_SECRET_KEY as string,
-		// 		},
-		// 	},
-		// 	bucket: "headless-cms",
-		// }),
-		LucidLocalStorage({
-			uploadDir: "uploads",
-			secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		LucidS3({
+			clientConfig: {
+				endpoint: `https://${process.env.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+				region: "auto",
+				credentials: {
+					accessKeyId: process.env.LUCID_S3_ACCESS_KEY as string,
+					secretAccessKey: process.env.LUCID_S3_SECRET_KEY as string,
+				},
+			},
+			bucket: "headless-cms",
 		}),
+		// LucidLocalStorage({
+		// 	uploadDir: "uploads",
+		// 	secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		// }),
 	],
 	// compilerOptions: {
 	// 	outDir: "out",
