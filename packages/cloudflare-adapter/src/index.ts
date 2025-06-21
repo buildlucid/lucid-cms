@@ -155,7 +155,7 @@ export default app;`;
 					output: {
 						file: entryOutput,
 						format: "esm",
-						minify: true,
+						// minify: true,
 						inlineDynamicImports: true,
 					},
 					treeshake: true,
