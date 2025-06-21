@@ -12,6 +12,7 @@ import type {
 } from "@lucidcms/core/types";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { relative } from "node:path";
+import { readFileSync } from "node:fs";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions & { enabled?: boolean };
@@ -19,37 +20,6 @@ const cloudflareAdapter = (options?: {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		runtime: {
-			middleware: {
-				// afterMiddleware: [
-				// 	async (app) => {
-				// 		app.get("/admin", async (c) => {
-				// 			const url = new URL(c.req.url);
-				// 			const indexRequest = new Request(
-				// 				`${url.origin}/admin/index.html`,
-				// 			);
-				// 			// @ts-expect-error
-				// 			return c.env.ASSETS.fetch(indexRequest);
-				// 		});
-				// 		app.get("/admin/*", async (c) => {
-				// 			// Try to serve the exact asset first
-				// 			// @ts-expect-error
-				// 			const asset = await c.env.ASSETS.fetch(c.req.raw);
-				// 			if (asset.status < 400) {
-				// 				return asset;
-				// 			}
-				// 			// If asset not found, serve index.html for SPA routing
-				// 			const url = new URL(c.req.url);
-				// 			const indexRequest = new Request(
-				// 				`${url.origin}/admin/index.html`,
-				// 			);
-				// 			// @ts-expect-error
-				// 			return c.env.ASSETS.fetch(indexRequest);
-				// 		});
-				// 	},
-				// ],
-			},
-		},
 		cli: {
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
@@ -80,11 +50,10 @@ const cloudflareAdapter = (options?: {
 					app: cloudflareApp,
 					middleware: {
 						afterMiddleware: [
-							// Add static file serving for dev mode only
 							async (app) => {
 								const paths = getVitePaths(config);
 								app.use(
-									"/admin/*",
+									"/admin/assets/*",
 									serveStatic({
 										rewriteRequestPath: (path) => {
 											const relativePath = path.replace(/^\/admin/, "");
@@ -96,6 +65,14 @@ const cloudflareAdapter = (options?: {
 										},
 									}),
 								);
+								app.get("/admin", (c) => {
+									const html = readFileSync(paths.clientDistHtml, "utf-8");
+									return c.html(html);
+								});
+								app.get("/admin/*", (c) => {
+									const html = readFileSync(paths.clientDistHtml, "utf-8");
+									return c.html(html);
+								});
 							},
 						],
 					},
@@ -124,7 +101,6 @@ const cloudflareAdapter = (options?: {
 				const entry = `
 import config from "${options.configPath}";
 import lucid from "@lucidcms/core";
-import { url } from "node:inspector";
 
 const app = await lucid.createApp({
     config: await config,
@@ -133,22 +109,36 @@ const app = await lucid.createApp({
             async (app) => {
                 app.get("/admin", async (c) => {
                     const url = new URL(c.req.url);
-                    const requestUrl = url.origin + '/admin/index.html';
+                    const requestUrl = url.origin + "/admin/index.html";
                     const indexRequest = new Request(requestUrl);
-                    return c.env.ASSETS.fetch(indexRequest);
+                    const asset = await c.env.ASSETS.fetch(indexRequest);
+                    return new Response(asset.body, {
+                        status: asset.status,
+                        headers: asset.headers,
+                    });
                 });
 
                 app.get("/admin/*", async (c) => {
-                    const asset = await c.env.ASSETS.fetch(c.req.raw);
+                    const url = new URL(c.req.url);
+                    const assetPath = url.pathname.replace("/admin", "");
+                    const requestUrl = url.origin + assetPath;
+                    const assetRequest = new Request(requestUrl);
 
+                    const asset = await c.env.ASSETS.fetch(assetRequest);
                     if (asset.status < 400) {
-                        return asset;
+                        return new Response(asset.body, {
+                            status: asset.status,
+                            headers: asset.headers,
+                        });
                     }
 
-                    const url = new URL(c.req.url);
-                    const requestUrl = url.origin + '/admin/index.html';
-                    const indexRequest = new Request(requestUrl);
-                    return c.env.ASSETS.fetch(indexRequest);
+                    const indexRequestUrl = url.origin + "/index.html";
+                    const indexRequest = new Request(indexRequestUrl);
+                    const indexAsset = await c.env.ASSETS.fetch(indexRequest);
+                    return new Response(indexAsset.body, {
+                        status: indexAsset.status,
+                        headers: indexAsset.headers,
+                    });
                 });
             },
         ],
@@ -165,12 +155,21 @@ export default app;`;
 					output: {
 						file: entryOutput,
 						format: "esm",
-						minify: true,
+						// minify: true,
 						inlineDynamicImports: true,
 					},
 					treeshake: true,
 					platform: "node",
 					plugins: [
+						{
+							name: "import-meta-polyfill",
+							renderChunk(code: string) {
+								return code.replace(
+									/import\.meta\.url/g,
+									'"file:///server.js"',
+								);
+							},
+						},
 						stripAdapterCLIPlugin("cloudflare-adapter", [
 							"wrangler",
 							"@hono/node-server",
@@ -178,6 +177,7 @@ export default app;`;
 							"rolldown",
 						]),
 					],
+					external: ["sharp"],
 				});
 
 				//* clean up temporary files

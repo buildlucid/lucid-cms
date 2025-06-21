@@ -22,21 +22,19 @@ import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
 
 export default lucid.config({
-	host: "http://localhost:8080",
+	host: "http://localhost:8787",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
 	adapter: CloudflareAdapter(),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
-	// db: new PostgresAdapter({
-	// 	connectionString: process.env.DATABASE_URL as string,
+	db: new PostgresAdapter(process.env.DATABASE_URL as string),
+	// db: new LibSQLAdapter({
+	// 	// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
+	// 	url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+	// 	authToken: process.env.TURSO_AUTH_TOKEN as string,
 	// }),
-	db: new LibSQLAdapter({
-		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		authToken: process.env.TURSO_AUTH_TOKEN as string,
-	}),
 	keys: {
 		encryptionKey: process.env.LUCID_ENCRYPTION_KEY as string,
 		cookieSecret: process.env.LUCID_COOKIE_SECRET as string,
@@ -63,7 +61,7 @@ export default lucid.config({
 		storeProcessedImages: true,
 		onDemandFormats: true,
 		fallbackImage: "https://placehold.co/600x400",
-		// imageProcessor: passthroughImageProcessor,
+		imageProcessor: passthroughImageProcessor,
 		// urlStrategy: (media) => {
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },
@@ -107,20 +105,20 @@ export default lucid.config({
 		SimpleCollection,
 	],
 	plugins: [
-		LucidPages({
-			collections: [
-				{
-					collectionKey: "page",
-					useTranslations: true,
-					displayFullSlug: true,
-				},
-				{
-					collectionKey: "test",
-					useTranslations: true,
-					displayFullSlug: true,
-				},
-			],
-		}),
+		// LucidPages({
+		// 	collections: [
+		// 		{
+		// 			collectionKey: "page",
+		// 			useTranslations: true,
+		// 			displayFullSlug: true,
+		// 		},
+		// 		{
+		// 			collectionKey: "test",
+		// 			useTranslations: true,
+		// 			displayFullSlug: true,
+		// 		},
+		// 	],
+		// }),
 		// LucidNodemailer({
 		// 	from: {
 		// 		email: "admin@lucidcms.io",
@@ -128,24 +126,24 @@ export default lucid.config({
 		// 	},
 		// 	transporter: transporter,
 		// }),
-		LucidResend({
-			from: {
-				email: "admin@ui.protodigital.co.uk",
-				name: "Lucid",
-			},
-			apiKey: process.env.RESEND_API_KEY as string,
-		}),
-		LucidS3({
-			clientConfig: {
-				endpoint: `https://${process.env.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-				region: "auto",
-				credentials: {
-					accessKeyId: process.env.LUCID_S3_ACCESS_KEY as string,
-					secretAccessKey: process.env.LUCID_S3_SECRET_KEY as string,
-				},
-			},
-			bucket: "headless-cms",
-		}),
+		// LucidResend({
+		// 	from: {
+		// 		email: "admin@ui.protodigital.co.uk",
+		// 		name: "Lucid",
+		// 	},
+		// 	apiKey: process.env.RESEND_API_KEY as string,
+		// }),
+		// LucidS3({
+		// 	clientConfig: {
+		// 		endpoint: `https://${process.env.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+		// 		region: "auto",
+		// 		credentials: {
+		// 			accessKeyId: process.env.LUCID_S3_ACCESS_KEY as string,
+		// 			secretAccessKey: process.env.LUCID_S3_SECRET_KEY as string,
+		// 		},
+		// 	},
+		// 	bucket: "headless-cms",
+		// }),
 		// LucidLocalStorage({
 		// 	uploadDir: "uploads",
 		// 	secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
