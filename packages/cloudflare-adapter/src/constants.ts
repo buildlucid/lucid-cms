@@ -1,4 +1,4 @@
-export const ADAPTER_KEY = "node";
+export const ADAPTER_KEY = "cloudflare";
 export const LUCID_VERSION = "0.x.x";
 
 export default {

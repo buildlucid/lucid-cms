@@ -22,15 +22,11 @@ import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
 // import postgres from "postgres";
 
-const adapter = CloudflareAdapter();
-console.log("CloudflareAdapter result:", adapter);
-console.log("Adapter has runtime?", !!adapter?.runtime);
-
 export default lucid.config({
 	host: "http://localhost:8787",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
-	adapter: adapter,
+	adapter: CloudflareAdapter(),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
