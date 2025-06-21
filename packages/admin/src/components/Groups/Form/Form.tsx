@@ -48,7 +48,7 @@ export const Form: Component<{
 					}}
 				>
 					{props.children}
-					<div class="mt-15 w-full">
+					<div class="mt-8 w-full">
 						<Show when={props.state.errors?.message}>
 							<ErrorMessage
 								theme="basic"

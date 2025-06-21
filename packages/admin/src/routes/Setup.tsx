@@ -2,12 +2,12 @@ import T from "@/translations";
 import { type Component, createEffect, Switch, Match } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import api from "@/services/api";
-import LoginForm from "@/components/Forms/Auth/LoginForm";
+import SetupForm from "@/components/Forms/Auth/SetupForm";
 import Loading from "@/components/Partials/Loading";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import notifyIllustration from "@assets/illustrations/notify.svg";
 
-const LoginRoute: Component = () => {
+const SetupRoute: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
@@ -21,8 +21,8 @@ const LoginRoute: Component = () => {
 	// ----------------------------------------
 	// Effects
 	createEffect(() => {
-		if (setupRequired.isSuccess && setupRequired.data.data.setupRequired) {
-			navigate("/admin/setup");
+		if (setupRequired.isSuccess && !setupRequired.data.data.setupRequired) {
+			navigate("/admin/login");
 		}
 	});
 
@@ -40,21 +40,25 @@ const LoginRoute: Component = () => {
 						title: T()("error_title"),
 						description: T()("error_message"),
 					}}
+					link={{
+						text: T()("back_to_login"),
+						href: "/admin/login",
+					}}
 				/>
 			</Match>
 			<Match
-				when={setupRequired.isSuccess && !setupRequired.data.data.setupRequired}
+				when={setupRequired.isSuccess && setupRequired.data.data.setupRequired}
 			>
 				<>
-					<h1 class="mb-2 text-center">{T()("login_route_title")}</h1>
-					<p class="mb-10 text-center">{T()("login_route_description")}</p>
-					<div class="mb-10">
-						<LoginForm showForgotPassword={true} />
+					<div class="mb-10 text-center">
+						<h1 class="mb-2">{T()("setup_route_title")}</h1>
+						<p>{T()("setup_route_description")}</p>
 					</div>
+					<SetupForm />
 				</>
 			</Match>
 		</Switch>
 	);
 };
 
-export default LoginRoute;
+export default SetupRoute;

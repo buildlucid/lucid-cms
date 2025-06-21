@@ -4,6 +4,7 @@ import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
 // Routes
 import LoginRoute from "@/routes/Login";
+import SetupRoute from "@/routes/Setup";
 import ForgotPasswordRoute from "@/routes/ForgotPassword";
 import ResetPasswordRoute from "@/routes/ResetPassword";
 import DashboardRoute from "@/routes/Dashboard";
@@ -85,6 +86,7 @@ const AppRouter: Component = () => {
 			{/* Non authenticated */}
 			<Route path="/admin" component={AuthRoutes}>
 				<Route path="/login" component={LoginRoute} />
+				<Route path="/setup" component={SetupRoute} />
 				<Route path="/forgot-password" component={ForgotPasswordRoute} />
 				<Route path="/reset-password" component={ResetPasswordRoute} />
 			</Route>
