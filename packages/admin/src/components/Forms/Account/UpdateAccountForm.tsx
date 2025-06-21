@@ -143,6 +143,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					}}
 					errors={getBodyError("currentPassword", updateMe.errors)}
 					theme="full"
+					hideOptionalText={true}
 				/>
 				<Input
 					id="newPassword"
@@ -155,6 +156,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					}}
 					errors={getBodyError("newPassword", updateMe.errors)}
 					theme="full"
+					hideOptionalText={true}
 				/>
 				<Show when={newPassword() !== ""}>
 					<Input
@@ -168,6 +170,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 						}}
 						errors={getBodyError("passwordConfirmation", updateMe.errors)}
 						theme="full"
+						hideOptionalText={true}
 					/>
 				</Show>
 			</div>

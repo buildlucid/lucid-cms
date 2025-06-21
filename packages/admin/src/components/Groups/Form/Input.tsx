@@ -31,6 +31,7 @@ interface InputProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
+	hideOptionalText?: boolean;
 
 	theme: "basic" | "full";
 }
@@ -76,6 +77,7 @@ export const Input: Component<InputProps> = (props) => {
 					theme={props.theme}
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
+					hideOptionalText={props.hideOptionalText}
 				/>
 				<input
 					class={classnames(

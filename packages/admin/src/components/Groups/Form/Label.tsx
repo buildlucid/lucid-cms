@@ -10,6 +10,7 @@ interface LabelProps {
 	required?: boolean;
 	noPadding?: boolean;
 	theme: "full" | "basic" | "basic-small";
+	hideOptionalText?: boolean;
 
 	localised?: boolean;
 	altLocaleError?: boolean;
@@ -46,7 +47,7 @@ export const Label: Component<LabelProps> = (props) => {
 					</Show>
 				</span>
 
-				<Show when={!props.required}>
+				<Show when={!props.required && !props.hideOptionalText}>
 					<span class="text-unfocused">{T()("optional")}</span>
 				</Show>
 			</label>
