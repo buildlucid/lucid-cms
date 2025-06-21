@@ -44,7 +44,12 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --apply ./src"
 	},
-	"files": ["dist", "cms", "templates", "assets"],
+	"files": [
+		"dist",
+		"cms",
+		"templates",
+		"assets"
+	],
 	"author": "Proto Digital",
 	"repository": {
 		"type": "git",
@@ -89,7 +94,6 @@
 		"mjml": "^5.0.0-alpha.6",
 		"node-cron": "^3.0.3",
 		"pino": "^9.7.0",
-		"sanitize-html": "^2.16.0",
 		"semver": "^7.7.1",
 		"slug": "^10.0.0",
 		"zod": "^3.25.67"

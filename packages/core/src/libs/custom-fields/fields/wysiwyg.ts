@@ -1,6 +1,5 @@
 import z from "zod/v4";
 import CustomField from "../custom-field.js";
-import sanitizeHtml from "sanitize-html";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import keyToTitle from "../utils/key-to-title.js";
 import type {
@@ -71,10 +70,8 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		const sanitizedValue = sanitizeHtml(value);
-
 		if (this.config.validation?.zod) {
-			return zodSafeParse(sanitizedValue, this.config.validation?.zod);
+			return zodSafeParse(value, this.config.validation?.zod);
 		}
 
 		return { valid: true };
