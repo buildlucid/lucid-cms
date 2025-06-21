@@ -155,7 +155,7 @@ export default app;`;
 					output: {
 						file: entryOutput,
 						format: "esm",
-						// minify: true,
+						minify: true,
 						inlineDynamicImports: true,
 					},
 					treeshake: true,
@@ -177,7 +177,7 @@ export default app;`;
 							"rolldown",
 						]),
 					],
-					external: ["sharp"],
+					external: ["sharp", "ws"],
 				});
 
 				//* clean up temporary files

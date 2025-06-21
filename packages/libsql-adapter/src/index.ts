@@ -7,7 +7,10 @@ import type {
 	OnUpdate,
 	InferredColumn,
 } from "@lucidcms/core/types";
-import { LibsqlDialect, type LibsqlDialectConfig } from "@libsql/kysely-libsql";
+import {
+	LibsqlDialect,
+	type LibsqlDialectConfig,
+} from "./lib/kysely-libsql.js";
 import { ParseJSONResultsPlugin, type ColumnDataType, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import formatDefaultValue from "./utils/format-default-value.js";

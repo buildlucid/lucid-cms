@@ -20,6 +20,7 @@ import MainMenuCollection from "./src/collections/main-menu.js";
 import SettingsCollection from "./src/collections/settings.js";
 import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
+// import postgres from "postgres";
 
 export default lucid.config({
 	host: "http://localhost:8787",
@@ -29,12 +30,16 @@ export default lucid.config({
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
-	db: new PostgresAdapter(process.env.DATABASE_URL as string),
-	// db: new LibSQLAdapter({
-	// 	// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-	// 	url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-	// 	authToken: process.env.TURSO_AUTH_TOKEN as string,
+	// db: new PostgresAdapter(process.env.DATABASE_URL as string, {
+	// 	max: 5,
+	// 	// fetch_types: false,
+	// 	debug: true,
 	// }),
+	db: new LibSQLAdapter({
+		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
+		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+		authToken: process.env.TURSO_AUTH_TOKEN as string,
+	}),
 	keys: {
 		encryptionKey: process.env.LUCID_ENCRYPTION_KEY as string,
 		cookieSecret: process.env.LUCID_COOKIE_SECRET as string,
@@ -94,6 +99,39 @@ export default lucid.config({
 					});
 				},
 			);
+			// app.get(
+			// 	"/db-test",
+			// 	describeRoute({
+			// 		description: "Lucid Hono Extensions",
+			// 		tags: ["lucid-hono-extensions"],
+			// 		summary: "Testing the lucid hono extensions config",
+			// 		validateResponse: true,
+			// 	}),
+			// 	async (c) => {
+			// 		console.log("Starting raw postgres test");
+
+			// 		// @ts-expect-error
+			// 		const sql = postgres(c.env?.HYPERDRIVE?.connectionString as string, {
+			// 			max: 5,
+			// 			fetch_types: false,
+			// 		});
+
+			// 		try {
+			// 			console.log("About to execute query");
+			// 			const result = await sql`SELECT 1 as test`;
+			// 			console.log("Query completed:", result);
+
+			// 			await sql.end();
+			// 			console.log("Connection closed");
+
+			// 			return c.json({ success: true, result });
+			// 		} catch (error) {
+			// 			console.log("Error:", error);
+			// 			await sql.end();
+			// 			throw error;
+			// 		}
+			// 	},
+			// );
 		},
 	],
 	collections: [
