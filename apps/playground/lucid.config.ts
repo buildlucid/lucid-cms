@@ -32,8 +32,6 @@ export default lucid.config((env) => ({
 	// }),
 	// db: new PostgresAdapter(process.env.DATABASE_URL as string, {
 	// 	max: 5,
-	// 	// fetch_types: false,
-	// 	debug: true,
 	// }),
 	db: new LibSQLAdapter({
 		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
@@ -143,20 +141,20 @@ export default lucid.config((env) => ({
 		SimpleCollection,
 	],
 	plugins: [
-		// LucidPages({
-		// 	collections: [
-		// 		{
-		// 			collectionKey: "page",
-		// 			useTranslations: true,
-		// 			displayFullSlug: true,
-		// 		},
-		// 		{
-		// 			collectionKey: "test",
-		// 			useTranslations: true,
-		// 			displayFullSlug: true,
-		// 		},
-		// 	],
-		// }),
+		LucidPages({
+			collections: [
+				{
+					collectionKey: "page",
+					useTranslations: true,
+					displayFullSlug: true,
+				},
+				{
+					collectionKey: "test",
+					useTranslations: true,
+					displayFullSlug: true,
+				},
+			],
+		}),
 		// LucidNodemailer({
 		// 	from: {
 		// 		email: "admin@lucidcms.io",

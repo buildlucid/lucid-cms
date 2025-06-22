@@ -14,6 +14,8 @@ import constants from "../../constants/constants.js";
 import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 
+let cachedConfig: Config;
+
 /**
  * Responsible for:
  * - merging the default config with the config
@@ -21,6 +23,8 @@ import type { Config, LucidConfig } from "../../types/config.js";
  * - validation & checks
  */
 const processConfig = async (config: LucidConfig): Promise<Config> => {
+	if (cachedConfig !== undefined) return cachedConfig;
+
 	let configRes = mergeConfig(config, defaultConfig);
 	try {
 		// merge plugin config
@@ -103,6 +107,8 @@ const processConfig = async (config: LucidConfig): Promise<Config> => {
 
 		// TODO: add back support
 		// initialiseLogger(configRes.logTransport, configRes.logLevel);
+
+		cachedConfig = configRes;
 
 		return configRes;
 	} catch (err) {

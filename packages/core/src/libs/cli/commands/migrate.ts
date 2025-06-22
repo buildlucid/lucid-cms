@@ -14,6 +14,8 @@ const migrateCommand = async () => {
 		config: config,
 		services: lucidServices,
 	});
+
+	process.exit(0);
 };
 
 export default migrateCommand;

@@ -36,7 +36,6 @@ const devCommand = async (options: DevOptions) => {
 			config = await getConfig({
 				path: configPath,
 				env: process.env,
-				cache: false,
 			});
 		}
 
