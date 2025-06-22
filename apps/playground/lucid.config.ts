@@ -5,8 +5,8 @@ import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import Database from "better-sqlite3";
 import transporter from "./src/services/email-transporter.js";
-import NodeAdapter from "@lucidcms/node-adapter";
-import CloudflareAdapter from "@lucidcms/cloudflare-adapter";
+import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
+// import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
 import LucidResend from "@lucidcms/plugin-resend";
@@ -22,11 +22,12 @@ import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
 // import postgres from "postgres";
 
-export default lucid.config((env) => ({
+export const adapter = nodeAdapter();
+
+export default defineConfig((env) => ({
 	host: "http://localhost:8787",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
-	adapter: CloudflareAdapter(),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),

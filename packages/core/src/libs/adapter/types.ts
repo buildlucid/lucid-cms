@@ -1,6 +1,6 @@
 import type z from "zod/v4";
 import type LucidAdapterSchema from "./schema.js";
-import type { Config } from "../../types/config.js";
+import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Hono } from "hono";
 
@@ -17,4 +17,7 @@ export type MiddlewareHandler = (
 	config: Config,
 ) => Promise<void>;
 
-export type LucidAdapterResponse = z.infer<typeof LucidAdapterSchema>;
+export type LucidAdapter = z.infer<typeof LucidAdapterSchema>;
+export type LucidAdapterDefineConfig = (
+	env?: Record<string, string>,
+) => LucidConfig;

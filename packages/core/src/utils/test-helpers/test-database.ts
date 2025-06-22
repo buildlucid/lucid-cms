@@ -1,13 +1,13 @@
 import testConfig from "./test-config.js";
 
 const migrateDatabase = async () => {
-	const config = await testConfig.basic();
-	await config.db.migrateToLatest();
+	const res = await testConfig.basic();
+	await res.db.migrateToLatest();
 };
 
 const destroyDatabase = async () => {
-	const config = await testConfig.basic();
-	await config.db.client.destroy();
+	const res = await testConfig.basic();
+	await res.db.client.destroy();
 };
 
 const testDatabase = {

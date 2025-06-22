@@ -1,13 +1,13 @@
-import lucid from "../../../index.js";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import NodeAdapter from "@lucidcms/node-adapter";
 import { CollectionBuilder } from "../../../builders.js";
 import Database from "better-sqlite3";
 import testingConstants from "../../../constants/testing-constants.js";
+import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
 
-export default lucid.config((env) => ({
+export const adapter = nodeAdapter();
+
+export default defineConfig((env) => ({
 	host: "http://localhost:8080",
-	adapter: NodeAdapter(),
 	db: new SQLiteAdapter({
 		database: async () => new Database(":memory:"),
 	}),

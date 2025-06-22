@@ -1,5 +1,4 @@
 import z from "zod/v4";
-import LucidAdapterSchema from "../adapter/schema.js";
 import type { Hono } from "hono";
 import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
@@ -33,7 +32,6 @@ const LogTransportSchema = z.custom<DestinationStream>(
 );
 
 const ConfigSchema = z.object({
-	adapter: LucidAdapterSchema,
 	db: z.unknown(),
 	host: z.string(),
 	keys: z.object({

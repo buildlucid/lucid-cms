@@ -1,12 +1,13 @@
 import T from "../../translations/index.js";
+import constants from "../../constants/constants.js";
 import path from "node:path";
 import fs from "node:fs";
 
 const getConfigPath = (cwd: string, filename?: string): string => {
 	let configPath: string | undefined = undefined;
 	const root = path.parse(cwd).root;
-	const configFileName = filename ?? "lucid.config";
-	const configExtensions = [".ts", ".js", ".mjs", ".mts"];
+	const configFileName = filename ?? constants.config.filename;
+	const configExtensions = constants.config.extensions;
 
 	const search = (cwd: string): void => {
 		const files = fs.readdirSync(cwd);

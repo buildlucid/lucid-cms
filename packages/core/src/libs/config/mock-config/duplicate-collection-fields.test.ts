@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
 import T from "../../../translations/index.js";
 import path from "node:path";
-import getConfig from "../get-config.js";
+import loadConfigFile from "../load-config-file.js";
 
 test("should throw duplicate collection field key error", async () => {
 	await expect(
-		getConfig({
+		loadConfigFile({
 			path: path.resolve(__dirname, "./duplicate-collection-fields.ts"),
 		}),
 	).rejects.toThrow(

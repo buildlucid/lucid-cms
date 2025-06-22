@@ -1,6 +1,6 @@
 import { rm } from "node:fs/promises";
 import getConfigPath from "../../config/get-config-path.js";
-import getConfig from "../../config/get-config.js";
+import loadConfigFile from "../../config/load-config-file.js";
 import vite from "../../vite/index.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
@@ -11,21 +11,24 @@ const buildCommand = async () => {
 	const startTime = process.hrtime();
 
 	const configPath = getConfigPath(process.cwd());
-	const config = await getConfig({ path: configPath, env: process.env });
+	const res = await loadConfigFile({ path: configPath });
 
-	await rm(config.compilerOptions?.outDir, { recursive: true, force: true });
+	await rm(res.config.compilerOptions?.outDir, {
+		recursive: true,
+		force: true,
+	});
 
-	await prerenderMjmlTemplates(config);
+	await prerenderMjmlTemplates(res.config);
 
-	const buildResponse = await vite.buildApp(config);
+	const buildResponse = await vite.buildApp(res.config);
 	if (buildResponse.error) {
 		console.error(buildResponse.error.message);
 		process.exit(1);
 	}
 
-	await config.adapter.cli?.build(config, {
+	await res.adapter?.cli?.build(res.config, {
 		configPath,
-		outputPath: config.compilerOptions?.outDir,
+		outputPath: res.config.compilerOptions?.outDir,
 	});
 
 	console.log(`Build completed in ${process.hrtime(startTime)[1] / 1000000}ms`);

@@ -129,4 +129,8 @@ export default Object.freeze({
 	media: {
 		imagePresetQuality: 80,
 	},
+	config: {
+		filename: "lucid.config",
+		extensions: [".ts", ".js", ".mjs", ".mts"],
+	},
 });

@@ -1,5 +1,4 @@
 import createApp from "./libs/http/app.js";
-import configFactory from "./libs/config/config-factory.js";
 
 export { default as z } from "zod/v4";
 export { LucidError } from "./utils/errors/index.js";
@@ -10,5 +9,4 @@ export { default as passthroughImageProcessor } from "./libs/image-processor/pas
 
 export default {
 	createApp,
-	config: configFactory,
 };

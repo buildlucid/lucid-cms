@@ -10,7 +10,6 @@ import type { LogLevel } from "../utils/logging/index.js";
 import type { MediaType } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
-import type { LucidAdapterResponse } from "../libs/adapter/types.js";
 import type { DestinationStream } from "pino";
 
 export type LucidPlugin = (config: Config) => Promise<{
@@ -145,8 +144,6 @@ export type UrlStrategy = (media: {
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
-	/** The runtime/deployment target adapter to use. */
-	adapter: LucidAdapterResponse;
 	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
 	db: DatabaseAdapter;
 	/** The host of the Lucid instance. */
@@ -251,7 +248,6 @@ export interface LucidConfig {
 }
 
 export interface Config extends z.infer<typeof ConfigSchema> {
-	adapter: LucidAdapterResponse;
 	db: DatabaseAdapter;
 	logTransport?: DestinationStream;
 	email?: {

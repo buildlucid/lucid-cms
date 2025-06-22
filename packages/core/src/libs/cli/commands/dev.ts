@@ -1,5 +1,5 @@
 import chokidar, { type FSWatcher } from "chokidar";
-import getConfig from "../../config/get-config.js";
+import loadConfigFile from "../../config/load-config-file.js";
 import getConfigPath from "../../config/get-config-path.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
@@ -15,11 +15,11 @@ const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 
-	let config = await getConfig({ path: configPath, env: process.env });
+	let res = await loadConfigFile({ path: configPath });
 	let rebuilding = false;
 	let destroy: (() => Promise<void>) | undefined = undefined;
 
-	await prerenderMjmlTemplates(config);
+	await prerenderMjmlTemplates(res.config);
 
 	/**
 	 * Runs the adapter dev command.
@@ -30,18 +30,17 @@ const devCommand = async (options: DevOptions) => {
 	const runAdapterDev = async (changedPath?: string) => {
 		if (rebuilding) return;
 		rebuilding = true;
-		console.clear();
+		// console.clear();
 
 		if (changedPath === configPath) {
-			config = await getConfig({
+			res = await loadConfigFile({
 				path: configPath,
-				env: process.env,
 			});
 		}
 
 		try {
 			await destroy?.();
-			destroy = await config?.adapter.cli?.serve(config);
+			destroy = await res.adapter?.cli?.serve(res.config);
 		} catch (error) {
 			console.error("❌ Restart failed:", error);
 		} finally {
@@ -79,7 +78,7 @@ const devCommand = async (options: DevOptions) => {
 			ignored: [
 				"**/node_modules/**",
 				"**/.git/**",
-				`**/${config.compilerOptions?.outDir}/**`,
+				`**/${res.config.compilerOptions?.outDir}/**`,
 				"**/build/**",
 				"**/.lucid/**",
 				"**/uploads/**",

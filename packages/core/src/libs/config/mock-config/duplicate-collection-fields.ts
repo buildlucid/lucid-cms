@@ -1,9 +1,10 @@
-import lucid from "../../../index.js";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import NodeAdapter from "@lucidcms/node-adapter";
 import { CollectionBuilder } from "../../../builders.js";
 import Database from "better-sqlite3";
 import testingConstants from "../../../constants/testing-constants.js";
+import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
+
+export const adapter = nodeAdapter();
 
 const collection = new CollectionBuilder("page", {
 	mode: "multiple",
@@ -14,10 +15,9 @@ const collection = new CollectionBuilder("page", {
 })
 	.addText("title")
 	.addText("title");
-
-export default lucid.config((env) => ({
+// TODO: migrate to new adapter structure
+export default defineConfig((env) => ({
 	host: "http://localhost:8080",
-	adapter: NodeAdapter(),
 	db: new SQLiteAdapter({
 		database: async () => new Database(":memory:"),
 	}),
