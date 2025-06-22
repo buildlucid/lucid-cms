@@ -22,7 +22,7 @@ import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
 // import postgres from "postgres";
 
-export default lucid.config({
+export default lucid.config((env) => ({
 	host: "http://localhost:8787",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
@@ -38,13 +38,13 @@ export default lucid.config({
 	db: new LibSQLAdapter({
 		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
 		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		authToken: process.env.TURSO_AUTH_TOKEN as string,
+		authToken: env?.TURSO_AUTH_TOKEN as string,
 	}),
 	keys: {
-		encryptionKey: process.env.LUCID_ENCRYPTION_KEY as string,
-		cookieSecret: process.env.LUCID_COOKIE_SECRET as string,
-		refreshTokenSecret: process.env.LUCID_REFRESH_TOKEN_SECRET as string,
-		accessTokenSecret: process.env.LUCID_ACCESS_TOKEN_SECRET as string,
+		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
+		cookieSecret: env?.LUCID_COOKIE_SECRET as string,
+		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET as string,
+		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET as string,
 	},
 	localisation: {
 		locales: [
@@ -190,4 +190,4 @@ export default lucid.config({
 	// compilerOptions: {
 	// 	outDir: "out",
 	// },
-});
+}));

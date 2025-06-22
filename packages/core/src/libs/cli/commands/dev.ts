@@ -15,7 +15,7 @@ const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 
-	let config = await getConfig({ path: configPath });
+	let config = await getConfig({ path: configPath, env: process.env });
 	let rebuilding = false;
 	let destroy: (() => Promise<void>) | undefined = undefined;
 
@@ -33,7 +33,11 @@ const devCommand = async (options: DevOptions) => {
 		console.clear();
 
 		if (changedPath === configPath) {
-			config = await getConfig({ path: configPath });
+			config = await getConfig({
+				path: configPath,
+				env: process.env,
+				cache: false,
+			});
 		}
 
 		try {

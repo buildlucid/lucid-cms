@@ -11,7 +11,7 @@ const buildCommand = async () => {
 	const startTime = process.hrtime();
 
 	const configPath = getConfigPath(process.cwd());
-	const config = await getConfig({ path: configPath });
+	const config = await getConfig({ path: configPath, env: process.env });
 
 	await rm(config.compilerOptions?.outDir, { recursive: true, force: true });
 

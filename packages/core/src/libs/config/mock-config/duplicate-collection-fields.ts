@@ -15,7 +15,7 @@ const collection = new CollectionBuilder("page", {
 	.addText("title")
 	.addText("title");
 
-export default lucid.config({
+export default lucid.config((env) => ({
 	host: "http://localhost:8080",
 	adapter: NodeAdapter(),
 	db: new SQLiteAdapter({
@@ -29,4 +29,4 @@ export default lucid.config({
 	},
 	collections: [collection],
 	plugins: [],
-});
+}));

@@ -7,7 +7,7 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 const migrateCommand = async () => {
 	await installOptionalDeps();
 
-	const config = await getConfig();
+	const config = await getConfig({ env: process.env });
 
 	await executeStartTasks({
 		db: config.db.client,

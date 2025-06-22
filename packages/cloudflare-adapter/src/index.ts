@@ -21,6 +21,7 @@ const cloudflareAdapter = (options?: {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		cli: {
+			// TODO: maybe serve should have config passed to it? As depending on the platformProxy being enabled, we'd want to pass down the cloudflare env to it.
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
@@ -95,57 +96,78 @@ const cloudflareAdapter = (options?: {
 			build: async (_, options) => {
 				const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
 
-				//* create the temp entry file
+				const relativePath = relative(options.outputPath, options.configPath);
+				const importPath = relativePath.replace(/\.ts$/, ".js");
+
 				const configIsTs = options.configPath.endsWith(".ts");
 				const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
-				const entry = `
-import config from "${options.configPath}";
+
+				const entry = /* ts */ `
+import config from "./${importPath}";
 import lucid from "@lucidcms/core";
+import { processConfig } from "@lucidcms/core/helpers";
 
-const app = await lucid.createApp({
-    config: await config,
-    middleware: {
-        afterMiddleware: [
-            async (app) => {
-                app.get("/admin", async (c) => {
-                    const url = new URL(c.req.url);
-                    const requestUrl = url.origin + "/admin/index.html";
-                    const indexRequest = new Request(requestUrl);
-                    const asset = await c.env.ASSETS.fetch(indexRequest);
-                    return new Response(asset.body, {
-                        status: asset.status,
-                        headers: asset.headers,
-                    });
-                });
+export default {
+    async fetch(request, env, ctx) {
+        const resolved = await processConfig(config(env));
 
-                app.get("/admin/*", async (c) => {
-                    const url = new URL(c.req.url);
-                    const assetPath = url.pathname.replace("/admin", "");
-                    const requestUrl = url.origin + assetPath;
-                    const assetRequest = new Request(requestUrl);
-
-                    const asset = await c.env.ASSETS.fetch(assetRequest);
-                    if (asset.status < 400) {
-                        return new Response(asset.body, {
-                            status: asset.status,
-                            headers: asset.headers,
-                        });
+        const app = await lucid.createApp({
+            config: resolved,
+            middleware: {
+                beforeMiddleware: [
+                    async (app) => {
+                        app.use("*", async (c, next) => {
+                            c.env = Object.assign(c.env, env);
+                            c.set("cf", env.cf);
+                            c.set("caches", env.caches);
+                            c.set("ctx", {
+                                waitUntil: ctx.waitUntil,
+                                passThroughOnException: ctx.passThroughOnException,
+                            });
+                            await next();
+                        })
                     }
+                ],
+                afterMiddleware: [
+                    async (app) => {
+                        app.get("/admin", async (c) => {
+                            const url = new URL(c.req.url);
+                            const requestUrl = url.origin + "/index.html";
+                            const indexRequest = new Request(requestUrl);
+                            const asset = await c.env.ASSETS.fetch(indexRequest);
+                            return new Response(asset.body, {
+                                status: asset.status,
+                                headers: asset.headers,
+                            });
+                        });
+                        app.get("/admin/*", async (c) => {
+                            const url = new URL(c.req.url);
+                            const assetPath = url.pathname.replace("/admin", "");
+                            const requestUrl = url.origin + assetPath;
+                            const assetRequest = new Request(requestUrl);
+                            const asset = await c.env.ASSETS.fetch(assetRequest);
+                            if (asset.status < 400) {
+                                return new Response(asset.body, {
+                                    status: asset.status,
+                                    headers: asset.headers,
+                                });
+                            }
+                            const indexRequestUrl = url.origin + "/index.html";
+                            const indexRequest = new Request(indexRequestUrl);
+                            const indexAsset = await c.env.ASSETS.fetch(indexRequest);
+                            return new Response(indexAsset.body, {
+                                status: indexAsset.status,
+                                headers: indexAsset.headers,
+                            });
+                        });
+                    },
+                ],
+            }
+        });
 
-                    const indexRequestUrl = url.origin + "/index.html";
-                    const indexRequest = new Request(indexRequestUrl);
-                    const indexAsset = await c.env.ASSETS.fetch(indexRequest);
-                    return new Response(indexAsset.body, {
-                        status: indexAsset.status,
-                        headers: indexAsset.headers,
-                    });
-                });
-            },
-        ],
+        return app.fetch(request, env, ctx);
     }
-});
-
-export default app;`;
+};`;
 
 				await writeFile(tempEntryFile, entry);
 
@@ -155,7 +177,7 @@ export default app;`;
 					output: {
 						file: entryOutput,
 						format: "esm",
-						// minify: true,
+						minify: true,
 						inlineDynamicImports: true,
 					},
 					treeshake: true,

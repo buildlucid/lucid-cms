@@ -14,7 +14,13 @@ import constants from "../../constants/constants.js";
 import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 
-const lucidConfig = async (config: LucidConfig) => {
+/**
+ * Responsible for:
+ * - merging the default config with the config
+ * - initialising the plugins
+ * - validation & checks
+ */
+const processConfig = async (config: LucidConfig): Promise<Config> => {
 	let configRes = mergeConfig(config, defaultConfig);
 	try {
 		// merge plugin config
@@ -86,7 +92,12 @@ const lucidConfig = async (config: LucidConfig) => {
 
 			//* generate schema for collection
 			const res = inferSchema(collection, configRes.db);
-			if (res.error) return res;
+			if (res.error) {
+				throw new LucidError({
+					message: res.error.message || "Unknown error",
+					scope: constants.logScopes.config,
+				});
+			}
 			collection.collectionTableSchema = res.data;
 		}
 
@@ -135,9 +146,11 @@ const lucidConfig = async (config: LucidConfig) => {
 			});
 		}
 
-		if (err instanceof LucidError && err.kill === false) return configRes;
-		process.exit(1);
+		if (err instanceof LucidError && err.kill === false) {
+			return configRes;
+		}
+		throw err;
 	}
 };
 
-export default lucidConfig;
+export default processConfig;
