@@ -29,7 +29,7 @@ const cloudflareAdapter = (options?: {
 		lucid: LUCID_VERSION,
 		getEnvVars: async () => {
 			platformProxy = await getPlatformProxy(options?.platformProxy);
-			return platformProxy.env as Record<string, string>;
+			return platformProxy.env;
 		},
 		cli: {
 			serve: async (config) => {
@@ -183,7 +183,7 @@ export default {
 					output: {
 						file: entryOutput,
 						format: "esm",
-						// minify: true,
+						minify: true,
 						inlineDynamicImports: true,
 					},
 					treeshake: true,

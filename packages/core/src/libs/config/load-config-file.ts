@@ -25,7 +25,7 @@ export const loadConfigFile = async (props?: {
 		adapter?: LucidAdapter;
 	}>(importPath);
 
-	let env: Record<string, string> | undefined;
+	let env: Record<string, unknown> | undefined;
 	if (configModule.adapter?.getEnvVars) {
 		env = await configModule.adapter?.getEnvVars();
 	}

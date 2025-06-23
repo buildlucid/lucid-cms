@@ -19,8 +19,7 @@ const nodeAdapter = (): LucidAdapter => {
 				config();
 			} catch {}
 
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			return process.env as Record<string, any>;
+			return process.env as Record<string, unknown>;
 		},
 		cli: {
 			serve: async (config) => {

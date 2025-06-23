@@ -1,5 +1,5 @@
 import z from "zod/v4";
-import type { BuildHandler, MiddlewareHandler, ServeHandler } from "./types.js";
+import type { BuildHandler, ServeHandler } from "./types.js";
 
 const ServeHandlerSchema = z.custom<ServeHandler>(
 	(data) => typeof data === "function",
@@ -18,8 +18,7 @@ const BuildHandlerSchema = z.custom<BuildHandler>(
 const LucidAdapterSchema = z.object({
 	key: z.string(),
 	lucid: z.string(),
-
-	getEnvVars: z.custom<() => Promise<Record<string, string>>>(
+	getEnvVars: z.custom<() => Promise<Record<string, unknown>>>(
 		(data) => typeof data === "function",
 		{
 			message: "Expected a getEnvVars function",
