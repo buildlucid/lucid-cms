@@ -32,7 +32,14 @@ const cloudflareAdapter = (options?: {
 				platformProxy = await getPlatformProxy(options?.platformProxy);
 				return platformProxy.env as Record<string, string>;
 			}
-			return process.env as Record<string, string>;
+
+			try {
+				const { config } = await import("dotenv");
+				config();
+			} catch {}
+
+			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			return process.env as Record<string, any>;
 		},
 		cli: {
 			serve: async (config) => {
@@ -209,9 +216,10 @@ export default {
 							"@hono/node-server",
 							"@hono/node-server/serve-static",
 							"rolldown",
+							"dotenv",
 						]),
 					],
-					external: ["sharp", "ws"],
+					external: ["sharp", "ws", "dotenv"],
 				});
 
 				//* clean up temporary files

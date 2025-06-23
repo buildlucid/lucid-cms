@@ -14,7 +14,13 @@ const nodeAdapter = (): LucidAdapter => {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		getEnvVars: async () => {
-			return process.env as Record<string, string>;
+			try {
+				const { config } = await import("dotenv");
+				config();
+			} catch {}
+
+			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			return process.env as Record<string, any>;
 		},
 		cli: {
 			serve: async (config) => {
@@ -91,15 +97,20 @@ const nodeAdapter = (): LucidAdapter => {
 					],
 					treeshake: true,
 					platform: "node",
+					external: ["dotenv"],
 				});
 
 				const entry = /* ts */ `
+import 'dotenv/config'
 import config from "./${constants.CONFIG_FILE}";
 import lucid from "@lucidcms/core";
+import { processConfig } from "@lucidcms/core/helpers";
 import { serve } from '@hono/node-server';
 
+const resolved = await processConfig(config(process.env));
+
 const app = await lucid.createApp({
-    config: await config,
+    config: resolved,
 });
 
 const server = serve({
