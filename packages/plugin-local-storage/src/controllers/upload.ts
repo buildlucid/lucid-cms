@@ -27,12 +27,6 @@ const uploadController = (pluginOptions: PluginOptions) =>
 				noProperties: true,
 			}),
 			validateResponse: true,
-
-			// consumes:
-			//     pluginOptions.supportedMimeTypes &&
-			//     pluginOptions.supportedMimeTypes.length > 0
-			//         ? pluginOptions.supportedMimeTypes
-			//         : DEFAULT_MIME_TYPES,
 		}),
 		validate("query", controllerSchemas.upload.query.string),
 		async (c) => {

@@ -5,8 +5,8 @@ import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import Database from "better-sqlite3";
 import transporter from "./src/services/email-transporter.js";
-// import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
+import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
+// import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
 import LucidResend from "@lucidcms/plugin-resend";
@@ -22,11 +22,11 @@ import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
 // import postgres from "postgres";
 
-// export const adapter = nodeAdapter();
-export const adapter = cloudflareAdapter();
+export const adapter = nodeAdapter();
+// export const adapter = cloudflareAdapter();
 
 export default defineConfig((env) => ({
-	host: "http://localhost:8787",
+	host: "http://localhost:8080",
 	logLevel: "debug",
 	// adapter: NodeAdapter(),
 	// db: new SQLiteAdapter({
@@ -184,10 +184,10 @@ export default defineConfig((env) => ({
 		// 	},
 		// 	bucket: "headless-cms",
 		// }),
-		// LucidLocalStorage({
-		// 	uploadDir: "uploads",
-		// 	secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
-		// }),
+		LucidLocalStorage({
+			uploadDir: "uploads",
+			secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		}),
 	],
 	// compilerOptions: {
 	// 	outDir: "out",

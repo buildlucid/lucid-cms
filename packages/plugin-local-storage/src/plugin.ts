@@ -13,7 +13,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
 	pluginOptions,
 ) => {
-	config.honoExtensions?.push(routes(pluginOptions));
+	config.hono.extensions?.push(routes(pluginOptions));
 
 	config.media = {
 		...config.media,
