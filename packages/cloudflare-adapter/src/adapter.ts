@@ -60,10 +60,10 @@ const cloudflareAdapter = (options?: {
 				const app = await lucid.createApp({
 					config,
 					app: cloudflareApp,
-					middleware: {
-						afterMiddleware: [
-							async (app) => {
-								const paths = getVitePaths(config);
+					hono: {
+						extensions: [
+							async (app, con) => {
+								const paths = getVitePaths(con);
 								app.use(
 									"/admin/assets/*",
 									serveStatic({
@@ -124,9 +124,9 @@ export default {
 
         const app = await lucid.createApp({
             config: resolved,
-            middleware: {
-                beforeMiddleware: [
-                    async (app) => {
+            hono: {
+                middleware: [
+                    async (app, config) => {
                         app.use("*", async (c, next) => {
                             c.env = Object.assign(c.env, env);
                             c.set("cf", env.cf);
@@ -139,8 +139,8 @@ export default {
                         })
                     }
                 ],
-                afterMiddleware: [
-                    async (app) => {
+                extensions: [
+                    async (app, config) => {
                         app.get("/admin", async (c) => {
                             const url = new URL(c.req.url);
                             const requestUrl = url.origin + "/index.html";

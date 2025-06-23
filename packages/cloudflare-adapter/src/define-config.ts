@@ -3,10 +3,13 @@ import type { LucidAdapterDefineConfig } from "@lucidcms/core/types";
 const defineConfig = (
 	factory: LucidAdapterDefineConfig,
 ): LucidAdapterDefineConfig => {
-	return (env) => factory(env);
+	return factory;
 	// ({
 	// 	...factory(env),
-	// 	honoExtensions: [],
+	// 	hono: {
+	// 		middleware: [],
+	// 		extensions: [],
+	// 	},
 	// }) satisfies LucidConfig;
 };
 

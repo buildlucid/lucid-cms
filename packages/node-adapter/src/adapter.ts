@@ -2,52 +2,17 @@ import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import { serve } from "@hono/node-server";
 import lucid from "@lucidcms/core";
 import {
-	getVitePaths,
 	stripImportsPlugin,
 	stripAdapterExportPlugin,
 } from "@lucidcms/core/helpers";
 import { build } from "rolldown";
 import { stat, writeFile } from "node:fs/promises";
-import { readFileSync } from "node:fs";
-import { relative } from "node:path";
-import { serveStatic } from "@hono/node-server/serve-static";
 import type { LucidAdapter } from "@lucidcms/core/types";
 
 const nodeAdapter = (): LucidAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		runtime: {
-			// TODO: move these to the adapter defineConfig hono extensions
-			middleware: {
-				afterMiddleware: [
-					async (app, config) => {
-						const paths = getVitePaths(config);
-						app.use(
-							"/admin/*",
-							serveStatic({
-								rewriteRequestPath: (path) => {
-									const relativePath = path.replace(/^\/admin/, "");
-									const relativeClientDist = relative(
-										process.cwd(),
-										paths.clientDist,
-									);
-									return `${relativeClientDist}${relativePath}`;
-								},
-							}),
-						);
-						app.get("/admin", (c) => {
-							const html = readFileSync(paths.clientDistHtml, "utf-8");
-							return c.html(html);
-						});
-						app.get("/admin/*", (c) => {
-							const html = readFileSync(paths.clientDistHtml, "utf-8");
-							return c.html(html);
-						});
-					},
-				],
-			},
-		},
 		getEnvVars: async () => {
 			return process.env as Record<string, string>;
 		},

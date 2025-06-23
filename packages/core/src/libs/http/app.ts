@@ -19,20 +19,23 @@ import type { StatusCode } from "hono/utils/http-status";
 const createApp = async (props: {
 	config: Config;
 	app?: Hono<LucidHonoGeneric>;
-	middleware?: {
-		beforeMiddleware?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
-		afterMiddleware?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
+	hono?: {
+		middleware?: Array<
+			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
+		>;
+		extensions?: Array<
+			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
+		>;
 	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 
-	//* Before Middleware
-	// for (const middleware of props.config.adapter?.runtime?.middleware
-	// 	?.beforeMiddleware || []) {
-	// 	await middleware(app, props.config);
-	// }
-	for (const middleware of props.middleware?.beforeMiddleware || []) {
-		await middleware(app);
+	//* Hono Middleware
+	for (const middleware of props.config.hono?.middleware || []) {
+		await middleware(app, props.config);
+	}
+	for (const middleware of props.hono?.middleware || []) {
+		await middleware(app, props.config);
 	}
 
 	app
@@ -109,18 +112,12 @@ const createApp = async (props: {
 			return c.text(T("page_not_found"));
 		});
 
-	//* Hono Lucid Config Extensions
-	for (const ext of props.config.honoExtensions || []) {
-		await ext(app);
+	//* Hono Extensions
+	for (const ext of props.config.hono?.extensions || []) {
+		await ext(app, props.config);
 	}
-
-	//* After Middleware
-	// for (const middleware of props.config.adapter?.runtime?.middleware
-	// 	?.afterMiddleware || []) {
-	// 	await middleware(app, props.config);
-	// }
-	for (const middleware of props.middleware?.afterMiddleware || []) {
-		await middleware(app);
+	for (const ext of props.hono?.extensions || []) {
+		await ext(app, props.config);
 	}
 
 	if (!props.config.disableSwagger) {

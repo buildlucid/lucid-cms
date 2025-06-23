@@ -29,7 +29,10 @@ export const defaultConfig: Partial<LucidConfig> = {
 			},
 		},
 	},
-	honoExtensions: [],
+	hono: {
+		middleware: [],
+		extensions: [],
+	},
 	hooks: [],
 	collections: [],
 	plugins: [],

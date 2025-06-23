@@ -228,8 +228,15 @@ export interface LucidConfig {
 		 */
 		urlStrategy?: UrlStrategy;
 	};
-	/** Hono extensions to register. Allows you to register custom routes, middleware, and more. */
-	honoExtensions?: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
+	/** Hono middleware and extensions to register. Allows you to register custom routes, middleware, and more. */
+	hono?: {
+		middleware?: Array<
+			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
+		>;
+		extensions?: Array<
+			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
+		>;
+	};
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
 	/** A list of collections instances to register. These can be imported from `@lucidcms/core/builders`. */
@@ -286,7 +293,14 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		>;
 		urlStrategy?: UrlStrategy;
 	};
-	honoExtensions: Array<(app: Hono<LucidHonoGeneric>) => Promise<void>>;
+	hono: {
+		middleware?: Array<
+			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
+		>;
+		extensions?: Array<
+			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
+		>;
+	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPlugin>;

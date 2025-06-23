@@ -37,13 +37,13 @@ export default defineConfig((env) => ({
 	db: new LibSQLAdapter({
 		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
 		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		authToken: env?.TURSO_AUTH_TOKEN as string,
+		authToken: env?.TURSO_AUTH_TOKEN,
 	}),
 	keys: {
-		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
-		cookieSecret: env?.LUCID_COOKIE_SECRET as string,
-		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET as string,
-		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET as string,
+		encryptionKey: env?.LUCID_ENCRYPTION_KEY,
+		cookieSecret: env?.LUCID_COOKIE_SECRET,
+		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET,
+		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET,
 	},
 	localisation: {
 		locales: [
@@ -79,60 +79,62 @@ export default defineConfig((env) => ({
 	// 		},
 	// 	},
 	// ],
-	honoExtensions: [
-		async (app) => {
-			app.get(
-				"/config-test",
-				describeRoute({
-					description: "Lucid Hono Extensions",
-					tags: ["lucid-hono-extensions"],
-					summary: "Testing the lucid hono extensions config",
-					validateResponse: true,
-				}),
-				(c) => {
-					// @ts-expect-error
-					console.log(c.env?.TEST_ENV_VAR);
-					return c.json({
-						host: "http://[::1]:8080",
-						logLevel: "debug",
-					});
-				},
-			);
-			// app.get(
-			// 	"/db-test",
-			// 	describeRoute({
-			// 		description: "Lucid Hono Extensions",
-			// 		tags: ["lucid-hono-extensions"],
-			// 		summary: "Testing the lucid hono extensions config",
-			// 		validateResponse: true,
-			// 	}),
-			// 	async (c) => {
-			// 		console.log("Starting raw postgres test");
+	hono: {
+		extensions: [
+			async (app) => {
+				app.get(
+					"/config-test",
+					describeRoute({
+						description: "Lucid Hono Extensions",
+						tags: ["lucid-hono-extensions"],
+						summary: "Testing the lucid hono extensions config",
+						validateResponse: true,
+					}),
+					(c) => {
+						// @ts-expect-error
+						console.log(c.env?.TEST_ENV_VAR);
+						return c.json({
+							host: "http://[::1]:8080",
+							logLevel: "debug",
+						});
+					},
+				);
+				// app.get(
+				// 	"/db-test",
+				// 	describeRoute({
+				// 		description: "Lucid Hono Extensions",
+				// 		tags: ["lucid-hono-extensions"],
+				// 		summary: "Testing the lucid hono extensions config",
+				// 		validateResponse: true,
+				// 	}),
+				// 	async (c) => {
+				// 		console.log("Starting raw postgres test");
 
-			// 		// @ts-expect-error
-			// 		const sql = postgres(c.env?.HYPERDRIVE?.connectionString as string, {
-			// 			max: 5,
-			// 			fetch_types: false,
-			// 		});
+				// 		// @ts-expect-error
+				// 		const sql = postgres(c.env?.HYPERDRIVE?.connectionString as string, {
+				// 			max: 5,
+				// 			fetch_types: false,
+				// 		});
 
-			// 		try {
-			// 			console.log("About to execute query");
-			// 			const result = await sql`SELECT 1 as test`;
-			// 			console.log("Query completed:", result);
+				// 		try {
+				// 			console.log("About to execute query");
+				// 			const result = await sql`SELECT 1 as test`;
+				// 			console.log("Query completed:", result);
 
-			// 			await sql.end();
-			// 			console.log("Connection closed");
+				// 			await sql.end();
+				// 			console.log("Connection closed");
 
-			// 			return c.json({ success: true, result });
-			// 		} catch (error) {
-			// 			console.log("Error:", error);
-			// 			await sql.end();
-			// 			throw error;
-			// 		}
-			// 	},
-			// );
-		},
-	],
+				// 			return c.json({ success: true, result });
+				// 		} catch (error) {
+				// 			console.log("Error:", error);
+				// 			await sql.end();
+				// 			throw error;
+				// 		}
+				// 	},
+				// );
+			},
+		],
+	},
 	collections: [
 		PageCollection,
 		BlogCollection,

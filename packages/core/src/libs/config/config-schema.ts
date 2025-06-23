@@ -1,13 +1,17 @@
 import z from "zod/v4";
 import type { Hono } from "hono";
-import type { ImageProcessor, UrlStrategy } from "../../types/config.js";
+import type {
+	Config,
+	ImageProcessor,
+	UrlStrategy,
+} from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { DestinationStream } from "pino";
 
-const HonoExtensionSchema = z.custom<
-	(app: Hono<LucidHonoGeneric>) => Promise<void>
+const HonoAppSchema = z.custom<
+	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 >((data) => typeof data === "function", {
-	message: "Expected a Hono extension function",
+	message: "Expected a Hono app function",
 });
 
 const ImageProcessorSchema = z.custom<ImageProcessor>(
@@ -103,7 +107,10 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	honoExtensions: z.array(HonoExtensionSchema).optional(),
+	hono: z.object({
+		middleware: z.array(HonoAppSchema).optional(),
+		extensions: z.array(HonoAppSchema).optional(),
+	}),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
 	compilerOptions: z

@@ -19,5 +19,6 @@ export type MiddlewareHandler = (
 
 export type LucidAdapter = z.infer<typeof LucidAdapterSchema>;
 export type LucidAdapterDefineConfig = (
-	env?: Record<string, string>,
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	env?: Record<string, any>,
 ) => LucidConfig;
