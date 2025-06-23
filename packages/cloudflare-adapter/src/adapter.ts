@@ -14,13 +14,13 @@ import {
 	type GetPlatformProxyOptions,
 	type PlatformProxy,
 } from "wrangler";
-import type { LucidAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { relative } from "node:path";
 import { readFileSync } from "node:fs";
+import type { LucidAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
 
 const cloudflareAdapter = (options?: {
-	platformProxy?: GetPlatformProxyOptions & { enabled?: boolean };
+	platformProxy?: GetPlatformProxyOptions;
 }): LucidAdapter => {
 	let platformProxy: PlatformProxy | undefined;
 
@@ -28,41 +28,29 @@ const cloudflareAdapter = (options?: {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		getEnvVars: async () => {
-			if (options?.platformProxy?.enabled) {
-				platformProxy = await getPlatformProxy(options?.platformProxy);
-				return platformProxy.env as Record<string, string>;
-			}
-
-			try {
-				const { config } = await import("dotenv");
-				config();
-			} catch {}
-
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			return process.env as Record<string, any>;
+			platformProxy = await getPlatformProxy(options?.platformProxy);
+			return platformProxy.env as Record<string, string>;
 		},
 		cli: {
 			serve: async (config) => {
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
-				if (options?.platformProxy?.enabled !== false) {
-					cloudflareApp.use("*", async (c, next) => {
-						// @ts-expect-error
-						c.env = Object.assign(c.env, platformProxy.env);
+				cloudflareApp.use("*", async (c, next) => {
+					// @ts-expect-error
+					c.env = Object.assign(c.env, platformProxy.env);
 
-						// TODO: get these typed
-						// @ts-expect-error
-						c.set("cf", platformProxy.cf);
-						// @ts-expect-error
-						c.set("caches", platformProxy.caches);
-						// @ts-expect-error
-						c.set("ctx", {
-							waitUntil: platformProxy?.ctx.waitUntil,
-							passThroughOnException: platformProxy?.ctx.passThroughOnException,
-						});
-						await next();
+					// TODO: get these typed
+					// @ts-expect-error
+					c.set("cf", platformProxy.cf);
+					// @ts-expect-error
+					c.set("caches", platformProxy.caches);
+					// @ts-expect-error
+					c.set("ctx", {
+						waitUntil: platformProxy?.ctx.waitUntil,
+						passThroughOnException: platformProxy?.ctx.passThroughOnException,
 					});
-				}
+					await next();
+				});
 
 				const app = await lucid.createApp({
 					config,
@@ -216,10 +204,9 @@ export default {
 							"@hono/node-server",
 							"@hono/node-server/serve-static",
 							"rolldown",
-							"dotenv",
 						]),
 					],
-					external: ["sharp", "ws", "dotenv"],
+					external: ["sharp", "ws"],
 				});
 
 				//* clean up temporary files
