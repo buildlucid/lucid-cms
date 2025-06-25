@@ -21,8 +21,11 @@ let cachedConfig: Config;
  * - initialising the plugins
  * - validation & checks
  */
-const processConfig = async (config: LucidConfig): Promise<Config> => {
-	if (cachedConfig !== undefined) return cachedConfig;
+const processConfig = async (
+	config: LucidConfig,
+	bypassCache?: boolean,
+): Promise<Config> => {
+	if (cachedConfig !== undefined && !bypassCache) return cachedConfig;
 
 	let configRes = mergeConfig(config, defaultConfig);
 	try {

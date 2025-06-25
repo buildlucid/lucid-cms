@@ -30,6 +30,7 @@ const devCommand = async (options: DevOptions) => {
 		if (changedPath === configPath || !res) {
 			res = await loadConfigFile({
 				path: configPath,
+				bypassCache: true,
 			});
 			await prerenderMjmlTemplates(res.config);
 		}

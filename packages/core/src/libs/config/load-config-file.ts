@@ -9,16 +9,20 @@ import type {
 	LucidAdapter,
 } from "../adapter/types.js";
 
-const jiti = createJiti(import.meta.url);
-
 export const loadConfigFile = async (props?: {
 	path?: string;
+	bypassCache?: boolean;
 }): Promise<{
 	config: Config;
 	adapter?: LucidAdapter;
 }> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
+
+	const jiti = createJiti(import.meta.url, {
+		fsCache: false,
+		moduleCache: false,
+	});
 
 	const configModule = await jiti.import<{
 		default: LucidAdapterDefineConfig;
@@ -30,7 +34,9 @@ export const loadConfigFile = async (props?: {
 		env = await configModule.adapter?.getEnvVars();
 	}
 
-	const config = await processConfig(configModule.default(env));
+	const configdefault = configModule.default(env);
+	const config = await processConfig(configdefault, props?.bypassCache);
+
 	const adapter = configModule.adapter;
 
 	return {
