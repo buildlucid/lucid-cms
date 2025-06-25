@@ -8,8 +8,7 @@ import CollectionConfigSchema from "../builders/collection-builder/schema.js";
 import BrickConfigSchema from "../builders/brick-builder/schema.js";
 import { LucidError } from "../../utils/errors/index.js";
 import CustomFieldSchema from "../custom-fields/schema.js";
-import logger from "../../utils/logging/index.js";
-// import { initialiseLogger } from "../../utils/logging/logger.js";
+import logger, { initialiseLogger } from "../logger/index.js";
 import constants from "../../constants/constants.js";
 import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
@@ -105,8 +104,11 @@ const processConfig = async (config: LucidConfig): Promise<Config> => {
 			collection.collectionTableSchema = res.data;
 		}
 
-		// TODO: add back support
-		// initialiseLogger(configRes.logTransport, configRes.logLevel);
+		initialiseLogger({
+			transport: configRes.logger.transport,
+			level: configRes.logger.level,
+			force: true,
+		});
 
 		cachedConfig = configRes;
 
@@ -122,7 +124,7 @@ const processConfig = async (config: LucidConfig): Promise<Config> => {
 				}> = JSON.parse(err.message);
 
 				for (const msg of parse) {
-					logger("error", {
+					logger.error({
 						message: msg.message,
 						scope: constants.logScopes.config,
 						data: {
@@ -131,30 +133,30 @@ const processConfig = async (config: LucidConfig): Promise<Config> => {
 					});
 				}
 			} catch (e) {
-				logger("error", {
+				logger.error({
 					message: err.message,
 					scope: constants.logScopes.config,
 					data: {
-						path: err.stack,
+						stack: err.stack,
 					},
 				});
 			}
-		} else if (err instanceof LucidError) {
+			// } else if (err instanceof LucidError) {
 		} else if (err instanceof Error) {
-			logger("error", {
+			logger.error({
 				scope: constants.logScopes.config,
 				message: err.message,
+				data: {
+					stack: err.stack,
+				},
 			});
 		} else {
-			logger("error", {
+			logger.error({
 				scope: constants.logScopes.config,
 				message: T("an_unknown_error_occurred"),
 			});
 		}
 
-		if (err instanceof LucidError && err.kill === false) {
-			return configRes;
-		}
 		throw err;
 	}
 };

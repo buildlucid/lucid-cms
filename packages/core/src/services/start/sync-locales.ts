@@ -1,7 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import Formatter from "../../libs/formatters/index.js";
-import logger from "../../utils/logging/index.js";
+import logger from "../../libs/logger/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 const syncLocales: ServiceFn<[], undefined> = async (
@@ -27,7 +27,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 		(locale) => !localeCodesFromDB.includes(locale),
 	);
 	if (missingLocales.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Syncing new locales to the DB: ${missingLocales.join(", ")}`,
 			scope: constants.logScopes.sync,
 		});
@@ -41,7 +41,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	);
 	const localesToDeleteCodes = localesToDelete.map((locale) => locale.code);
 	if (localesToDeleteCodes.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Marking the following locales as deleted: ${localesToDeleteCodes.join(", ")}`,
 			scope: constants.logScopes.sync,
 		});
@@ -55,7 +55,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	);
 	const unDeletedLocalesCodes = unDeletedLocales.map((locale) => locale.code);
 	if (unDeletedLocalesCodes.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Restoring previously deleted locales: ${unDeletedLocalesCodes.join(", ")}`,
 			scope: constants.logScopes.sync,
 		});

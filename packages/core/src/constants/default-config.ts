@@ -1,7 +1,9 @@
 import type { LucidConfig } from "../types/config.js";
 
 export const defaultConfig: Partial<LucidConfig> = {
-	logLevel: "info",
+	logger: {
+		level: "info",
+	},
 	email: undefined,
 	disableSwagger: false,
 	localisation: {

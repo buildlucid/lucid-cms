@@ -27,7 +27,9 @@ export const adapter = nodeAdapter();
 
 export default defineConfig((env) => ({
 	host: "http://localhost:8080",
-	logLevel: "debug",
+	logger: {
+		level: "debug",
+	},
 	// adapter: NodeAdapter(),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
@@ -38,13 +40,13 @@ export default defineConfig((env) => ({
 	db: new LibSQLAdapter({
 		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
 		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		authToken: env?.TURSO_AUTH_TOKEN,
+		authToken: env?.TURSO_AUTH_TOKEN as string,
 	}),
 	keys: {
-		encryptionKey: env?.LUCID_ENCRYPTION_KEY,
-		cookieSecret: env?.LUCID_COOKIE_SECRET,
-		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET,
-		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET,
+		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
+		cookieSecret: env?.LUCID_COOKIE_SECRET as string,
+		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET as string,
+		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET as string,
 	},
 	localisation: {
 		locales: [

@@ -1,6 +1,7 @@
 import T from "../../../translations/index.js";
+import constants from "../../../constants/constants.js";
 import Repository from "../../../libs/repositories/index.js";
-import logger from "../../../utils/logging/index.js";
+import logger from "../../../libs/logger/index.js";
 import buildTableName from "../../collection-migrator/helpers/build-table-name.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
@@ -251,7 +252,8 @@ const fetchMediaData = async (
 
 		return mediaRes.error ? [] : mediaRes.data;
 	} catch (err) {
-		logger("error", {
+		logger.error({
+			scope: constants.logScopes.validation,
 			message: T("error_fetching_media_for_validation"),
 		});
 		return [];
@@ -286,7 +288,8 @@ const fetchUserData = async (
 
 		return usersRes.error ? [] : usersRes.data;
 	} catch (err) {
-		logger("error", {
+		logger.error({
+			scope: constants.logScopes.validation,
 			message: T("error_fetching_users_for_validation"),
 		});
 		return [];
@@ -316,7 +319,8 @@ const fetchDocumentData = async (
 		for (const documents of results) allDocuments.push(...documents);
 		return allDocuments;
 	} catch (err) {
-		logger("error", {
+		logger.error({
+			scope: constants.logScopes.validation,
 			message: T("error_fetching_documents_for_validation"),
 		});
 		return [];
@@ -338,7 +342,8 @@ const fetchDocumentsFromCollection = async (
 			collection: collectionKey,
 		});
 		if (tableNameRes.error) {
-			logger("error", {
+			logger.error({
+				scope: constants.logScopes.validation,
 				message: T("error_fetching_documents_from_collection", {
 					collection: collectionKey,
 				}),
@@ -367,7 +372,8 @@ const fetchDocumentsFromCollection = async (
 			},
 		);
 		if (documentIdRes.error) {
-			logger("error", {
+			logger.error({
+				scope: constants.logScopes.validation,
 				message: T("error_fetching_documents_from_collection", {
 					collection: collectionKey,
 				}),
@@ -380,7 +386,8 @@ const fetchDocumentsFromCollection = async (
 			collection_key: collectionKey,
 		}));
 	} catch (err) {
-		logger("error", {
+		logger.error({
+			scope: constants.logScopes.validation,
 			message: T("error_fetching_documents_from_collection", {
 				collection: collectionKey,
 			}),

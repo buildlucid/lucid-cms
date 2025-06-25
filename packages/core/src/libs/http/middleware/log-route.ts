@@ -1,6 +1,21 @@
 import { createMiddleware } from "hono/factory";
-import logger from "../../../utils/logging/index.js";
+import logger from "../../logger/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+
+const humanize = (times: string[]) => {
+	const [delimiter, separator] = [",", "."];
+	const orderTimes = times.map((v) =>
+		v.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, `$1${delimiter}`),
+	);
+	return orderTimes.join(separator);
+};
+
+const time = (start: number) => {
+	const delta = Date.now() - start;
+	return humanize([
+		delta < 1000 ? `${delta}ms` : `${Math.round(delta / 1000)}s`,
+	]);
+};
 
 const logRoute = createMiddleware(async (c: LucidHonoContext, next) => {
 	const start = Date.now();
@@ -8,7 +23,7 @@ const logRoute = createMiddleware(async (c: LucidHonoContext, next) => {
 	const path = c.req.path;
 	const userAgent = c.req.header("user-agent");
 
-	logger("info", {
+	logger.info({
 		message: `→ ${method} ${path}`,
 		scope: "http",
 		data: {
@@ -22,17 +37,15 @@ const logRoute = createMiddleware(async (c: LucidHonoContext, next) => {
 
 	await next();
 
-	const duration = Date.now() - start;
 	const status = c.res.status;
 
-	logger("info", {
-		message: `← ${method} ${path} ${status} - ${duration}ms`,
+	logger.info({
+		message: `← ${method} ${path} ${status} - ${time(start)}`,
 		scope: "http",
 		data: {
 			method,
 			path,
 			status,
-			duration,
 			userAgent,
 			type: "response",
 		},

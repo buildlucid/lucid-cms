@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import logger from "../../utils/logging/index.js";
+import logger from "../../libs/logger/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -34,7 +34,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 		(key) => !collectionsFromDB.includes(key),
 	);
 	if (missingCollections.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Syncing new collections to the DB: ${missingCollections.join(", ")}`,
 			scope: constants.logScopes.sync,
 		});
@@ -50,7 +50,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 		(collection) => collection.key,
 	);
 	if (collectionsToDeleteKeys.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Marking the following collections as deleted: ${collectionsToDeleteKeys.join(", ")}`,
 			scope: constants.logScopes.sync,
 		});
@@ -66,7 +66,7 @@ const syncCollections: ServiceFn<[], undefined> = async (
 		(collection) => collection.key,
 	);
 	if (unDeletedCollectionKeys.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Restoring previously deleted collections: ${unDeletedCollectionKeys.join(", ")}`,
 			scope: constants.logScopes.sync,
 		});

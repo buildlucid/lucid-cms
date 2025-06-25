@@ -1,4 +1,5 @@
 import z from "zod/v4";
+import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { Hono } from "hono";
 import type {
 	Config,
@@ -6,7 +7,6 @@ import type {
 	UrlStrategy,
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { DestinationStream } from "pino";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
@@ -28,13 +28,6 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	},
 );
 
-const LogTransportSchema = z.custom<DestinationStream>(
-	(data) => typeof data === "object" && data !== null,
-	{
-		message: "Expected a DestinationStream object",
-	},
-);
-
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	host: z.string(),
@@ -44,13 +37,10 @@ const ConfigSchema = z.object({
 		accessTokenSecret: z.string().length(64),
 		refreshTokenSecret: z.string().length(64),
 	}),
-	logLevel: z.union([
-		z.literal("error"),
-		z.literal("warn"),
-		z.literal("info"),
-		z.literal("debug"),
-	]),
-	logTransport: LogTransportSchema.optional(),
+	logger: z.object({
+		level: LogLevelSchema,
+		transport: LogTransportSchema.optional(),
+	}),
 	disableSwagger: z.boolean(),
 	localisation: z
 		.object({

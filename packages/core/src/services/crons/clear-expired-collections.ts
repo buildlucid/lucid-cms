@@ -1,5 +1,5 @@
 import { subDays } from "date-fns";
-import logger from "../../utils/logging/index.js";
+import logger from "../../libs/logger/index.js";
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -39,7 +39,7 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 	});
 	if (deleteRes.error) return deleteRes;
 
-	logger("debug", {
+	logger.debug({
 		message: `The following ${deleteRes.data.length} collections have been deleted: ${deleteRes.data.map((c) => c.key).join(", ")}`,
 		scope: constants.logScopes.cron,
 	});

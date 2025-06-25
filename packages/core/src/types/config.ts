@@ -6,11 +6,10 @@ import type { Readable } from "node:stream";
 import type { AllHooks } from "./hooks.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { InlineConfig } from "vite";
-import type { LogLevel } from "../utils/logging/index.js";
 import type { MediaType } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
-import type { DestinationStream } from "pino";
+import type { LogTransport, LogLevel } from "../libs/logger/types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -159,10 +158,13 @@ export interface LucidConfig {
 		/** Used to sign the refresh token JWT. Must be `64 characters` long. */
 		refreshTokenSecret: string;
 	};
-	/** The log level to use. */
-	logLevel?: LogLevel;
-	/** Custom log transport stream. If not provided, logs will default to console output. */
-	logTransport?: DestinationStream;
+	/** The logger configuration */
+	logger?: {
+		/** The log level to use. */
+		level?: LogLevel;
+		/** Custom log transport stream. If not provided, logs will default to console output. */
+		transport?: LogTransport;
+	};
 	/** Disables the swagger documentation site. */
 	disableSwagger?: boolean;
 	/** Localisation settings. */
@@ -256,7 +258,6 @@ export interface LucidConfig {
 
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
-	logTransport?: DestinationStream;
 	email?: {
 		identifier: string;
 		from: {

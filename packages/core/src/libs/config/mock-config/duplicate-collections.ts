@@ -11,6 +11,9 @@ export default defineConfig((env) => ({
 	db: new SQLiteAdapter({
 		database: async () => new Database(":memory:"),
 	}),
+	logger: {
+		level: "silent",
+	},
 	keys: {
 		encryptionKey: testingConstants.key,
 		cookieSecret: testingConstants.key,

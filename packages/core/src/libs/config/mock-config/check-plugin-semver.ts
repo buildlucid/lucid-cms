@@ -7,6 +7,9 @@ export const adapter = nodeAdapter();
 
 export default defineConfig((env) => ({
 	host: "http://localhost:8080",
+	logger: {
+		level: "silent",
+	},
 	db: new SQLiteAdapter({
 		database: async () => new Database(":memory:"),
 	}),

@@ -1,5 +1,6 @@
 import T from "../../../translations/index.js";
-import logger from "../../../utils/logging/index.js";
+import logger from "../../../libs/logger/index.js";
+import constants from "../../../constants/constants.js";
 import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
@@ -99,7 +100,8 @@ const validateBricks = (props: {
 		}
 
 		if (!instance) {
-			logger("error", {
+			logger.error({
+				scope: constants.logScopes.validation,
 				message: T("error_saving_page_brick_couldnt_find_brick_config", {
 					key: brick.key || "",
 				}),

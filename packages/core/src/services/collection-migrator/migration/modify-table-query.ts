@@ -1,5 +1,5 @@
 import { addColumn, modifyColumn, dropColumn } from "./column-builder.js";
-import logger from "../../../utils/logging/index.js";
+import logger from "../../../libs/logger/index.js";
 import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../types.js";
 import type { TableMigration } from "./types.js";
@@ -32,7 +32,7 @@ const modifyTableQuery: ServiceFn<
 					case "add":
 						query = addColumn(query, operation, context.config.db);
 						altered = true;
-						logger("debug", {
+						logger.debug({
 							message: `Operation of type 'add' ran on column '${operation.column.name}' for table '${data.migration.tableName}'`,
 							scope: constants.logScopes.migrations,
 						});
@@ -40,7 +40,7 @@ const modifyTableQuery: ServiceFn<
 					case "modify":
 						query = modifyColumn(query, operation, context.config.db);
 						altered = true;
-						logger("debug", {
+						logger.debug({
 							message: `Operation of type 'modify' ran on column '${operation.column.name}' for table '${data.migration.tableName}'`,
 							scope: constants.logScopes.migrations,
 						});
@@ -48,7 +48,7 @@ const modifyTableQuery: ServiceFn<
 					case "remove":
 						query = dropColumn(query, operation, context.config.db);
 						altered = true;
-						logger("debug", {
+						logger.debug({
 							message: `Operation of type 'remove' ran on column '${operation.columnName}' for table '${data.migration.tableName}'`,
 							scope: constants.logScopes.migrations,
 						});
@@ -77,7 +77,7 @@ const modifyTableQuery: ServiceFn<
 				case "add":
 					query = addColumn(query, operation, context.config.db);
 					altered = true;
-					logger("debug", {
+					logger.debug({
 						message: `Operation of type 'add' ran on column '${operation.column.name}' for table '${data.migration.tableName}'`,
 						scope: constants.logScopes.migrations,
 					});
@@ -85,7 +85,7 @@ const modifyTableQuery: ServiceFn<
 				case "modify":
 					query = modifyColumn(query, operation, context.config.db);
 					altered = true;
-					logger("debug", {
+					logger.debug({
 						message: `Operation of type 'modify' ran on column '${operation.column.name}' for table '${data.migration.tableName}'`,
 						scope: constants.logScopes.migrations,
 					});
@@ -93,7 +93,7 @@ const modifyTableQuery: ServiceFn<
 				case "remove":
 					query = dropColumn(query, operation, context.config.db);
 					altered = true;
-					logger("debug", {
+					logger.debug({
 						message: `Operation of type 'remove' ran on column '${operation.columnName}' for table '${data.migration.tableName}'`,
 						scope: constants.logScopes.migrations,
 					});

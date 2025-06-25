@@ -8,14 +8,14 @@ const verifyTransporter = async (transporter: Transporter) => {
 		await transporter.verify();
 	} catch (error) {
 		if (error instanceof Error) {
-			logger("warn", {
+			logger.warn({
 				message: error.message,
 				scope: PLUGIN_KEY,
 			});
 			return;
 		}
 
-		logger("warn", {
+		logger.warn({
 			message: T("email_transporter_not_ready"),
 			scope: PLUGIN_KEY,
 		});

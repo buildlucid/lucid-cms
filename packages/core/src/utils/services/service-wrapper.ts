@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import TransactionError from "./utils/transaction-error.js";
 import mergeServiceError from "./utils/merge-errors.js";
-import logger from "../logging/index.js";
+import logger from "../../libs/logger/index.js";
 import type {
 	ServiceContext,
 	ServiceWrapperConfig,
@@ -65,7 +65,7 @@ const serviceWrapper =
 			});
 		} catch (error) {
 			if (wrapperConfig.logError) {
-				logger("error", {
+				logger.error({
 					message:
 						error instanceof Error
 							? error?.message

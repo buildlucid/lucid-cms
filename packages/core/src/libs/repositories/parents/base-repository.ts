@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import logger from "../../../utils/logging/index.js";
+import logger from "../../logger/index.js";
 import constants from "../../../constants/constants.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
 import z, { type ZodType, type ZodObject } from "zod/v4";
@@ -172,7 +172,7 @@ abstract class BaseRepository<
 
 		if (!validationResult.success) {
 			const validationError = tidyZodError(validationResult.error);
-			logger("error", {
+			logger.error({
 				message: validationError,
 				scope: constants.logScopes.query,
 				data: {
@@ -223,7 +223,7 @@ abstract class BaseRepository<
 				2,
 			);
 
-			logger("debug", {
+			logger.debug({
 				message: "Query execution completed",
 				scope: constants.logScopes.query,
 				data: {
@@ -250,7 +250,7 @@ abstract class BaseRepository<
 				2,
 			);
 
-			logger("error", {
+			logger.error({
 				message: "Query execution failed",
 				scope: constants.logScopes.query,
 				data: {

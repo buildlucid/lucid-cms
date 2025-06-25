@@ -10,3 +10,4 @@ export * from "./utils/services/types.js";
 export * from "./libs/db/types.js";
 export * from "./types/hono.js";
 export * from "./libs/adapter/types.js";
+export * from "./libs/logger/types.js";

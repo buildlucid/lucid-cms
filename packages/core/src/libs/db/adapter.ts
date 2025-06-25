@@ -10,13 +10,12 @@ import {
 import constants from "../../constants/constants.js";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { LucidError } from "../../utils/errors/index.js";
-import logger from "../../utils/logging/index.js";
+import logger from "../logger/index.js";
 import type {
 	LucidDB,
 	DatabaseConfig,
 	InferredTable,
 	KyselyDB,
-	DefaultValueType,
 } from "./types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
@@ -162,12 +161,12 @@ export default abstract class DatabaseAdapter {
 		if (results) {
 			for (const it of results) {
 				if (it.status === "Success") {
-					logger("debug", {
+					logger.debug({
 						message: `"${it.migrationName}" was executed successfully`,
 						scope: constants.logScopes.migrations,
 					});
 				} else if (it.status === "Error") {
-					logger("error", {
+					logger.error({
 						message: `failed to execute migration "${it.migrationName}"`,
 						scope: constants.logScopes.migrations,
 					});

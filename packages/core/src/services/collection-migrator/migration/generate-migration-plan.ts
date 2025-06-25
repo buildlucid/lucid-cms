@@ -1,7 +1,7 @@
 import determineColumnMods from "./determine-column-mods.js";
 import determineColumnModType from "../helpers/column-mod-type.js";
 import normaliseColumn from "../helpers/normalise-column.js";
-import logger from "../../../utils/logging/index.js";
+import logger from "../../../libs/logger/index.js";
 import getTablePriority from "../helpers/get-table-priority.js";
 import constants from "../../../constants/constants.js";
 import type { ServiceResponse, InferredTable } from "../../../types.js";
@@ -47,7 +47,7 @@ const generateMigrationPlan = (props: {
 			})
 			.filter((t) => t !== null);
 
-		logger("debug", {
+		logger.debug({
 			message: `Generated a full migration plan for collection "${props.schemas.current.key}"`,
 			scope: constants.logScopes.migrations,
 		});
@@ -158,7 +158,7 @@ const generateMigrationPlan = (props: {
 	}
 
 	if (plan.tables.length > 0) {
-		logger("debug", {
+		logger.debug({
 			message: `Generated a partial migration plan for collection "${props.schemas.current.key}"`,
 			scope: constants.logScopes.migrations,
 		});

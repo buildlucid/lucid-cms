@@ -19,7 +19,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (config, plugin) => {
 			(c) => c.key === collectionConfig.collectionKey,
 		);
 		if (!collectionInstance) {
-			logger("warn", {
+			logger.warn({
 				message: T("cannot_find_collection", {
 					collection: collectionConfig.collectionKey,
 				}),

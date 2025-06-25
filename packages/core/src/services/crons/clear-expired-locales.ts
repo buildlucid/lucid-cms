@@ -1,6 +1,6 @@
 import { subDays } from "date-fns";
-import logger from "../../utils/logging/index.js";
 import constants from "../../constants/constants.js";
+import logger from "../../libs/logger/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -35,7 +35,7 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	});
 	if (deleteRes.error) return deleteRes;
 
-	logger("debug", {
+	logger.debug({
 		message: `The following ${deleteRes.data.length} locales have been deleted: ${deleteRes.data.map((l) => l.code).join(", ")}`,
 		scope: constants.logScopes.cron,
 	});

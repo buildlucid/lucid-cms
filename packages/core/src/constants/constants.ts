@@ -112,6 +112,7 @@ export default Object.freeze({
 		sync: "sync",
 		query: "query",
 		http: "http",
+		validation: "validation",
 	} as const,
 	retention: {
 		deletedCollections: 30, // days
