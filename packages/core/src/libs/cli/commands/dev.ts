@@ -3,51 +3,50 @@ import loadConfigFile from "../../config/load-config-file.js";
 import getConfigPath from "../../config/get-config-path.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
+import createDevLogger from "../logger/dev-logger.js";
 
 export type DevOptions = {
 	watch?: string | boolean;
 };
 
 /**
- * The CLI dev command. Responsible for calling the adatpers dev handler, and watching for file changes.
+ * The CLI dev command. Responsible for calling the adapters dev handler, and watching for file changes.
  */
 const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 
-	let res = await loadConfigFile({ path: configPath });
+	let res: Awaited<ReturnType<typeof loadConfigFile>> | undefined = undefined;
 	let rebuilding = false;
 	let destroy: (() => Promise<void>) | undefined = undefined;
+	const logger = createDevLogger();
 
-	await prerenderMjmlTemplates(res.config);
-
-	/**
-	 * Runs the adapter dev command.
-	 * - Loads the conifg if changed
-	 * - Destroys the previous dev command
-	 * - Runs the new dev command
-	 */
-	const runAdapterDev = async (changedPath?: string) => {
+	const runAdapterDev = async (changedPath: string) => {
 		if (rebuilding) return;
 		rebuilding = true;
-		// console.clear();
 
-		if (changedPath === configPath) {
+		console.clear();
+
+		if (changedPath === configPath || !res) {
 			res = await loadConfigFile({
 				path: configPath,
 			});
+			await prerenderMjmlTemplates(res.config);
 		}
 
 		try {
-			await destroy?.();
-			destroy = await res.adapter?.cli?.serve(res.config);
+			if (destroy) {
+				await destroy();
+			}
+			destroy = await res.adapter?.cli?.serve(res.config, logger);
 		} catch (error) {
-			console.error("❌ Restart failed:", error);
+			logger.error("Restart failed", error);
 		} finally {
 			rebuilding = false;
 		}
 	};
-	runAdapterDev();
+
+	runAdapterDev(configPath);
 
 	/**
 	 * Sets up the shutdown handlers.
@@ -61,7 +60,7 @@ const devCommand = async (options: DevOptions) => {
 				await watcher?.close();
 				await destroy?.();
 			} catch (error) {
-				console.error("Error during shutdown:", error);
+				logger.error("Error during shutdown", error);
 			}
 			process.exit(0);
 		};
@@ -78,7 +77,7 @@ const devCommand = async (options: DevOptions) => {
 			ignored: [
 				"**/node_modules/**",
 				"**/.git/**",
-				`**/${res.config.compilerOptions?.outDir}/**`,
+				// `**/${res?.config.compilerOptions?.outDir}/**`,
 				"**/build/**",
 				"**/.lucid/**",
 				"**/uploads/**",

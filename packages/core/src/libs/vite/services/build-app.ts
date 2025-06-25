@@ -9,7 +9,7 @@ import shouldBuild from "./should-build.js";
 import {
 	skipAdminBuild,
 	startAdminBuild,
-} from "../../../utils/logging/lucid-startup-logs.js";
+} from "../../cli/logger/build-spa-logger.js";
 
 /**
  * Programatically build the admin SPA with Vite.

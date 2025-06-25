@@ -55,10 +55,9 @@ const createConsoleTransport = (
 		}
 
 		try {
-			consoleLogger(
-				`${prefix} ${log.message}`,
-				log.data ? JSON.stringify(log.data) : undefined,
-			);
+			const data = log.data ? JSON.stringify(log.data) : undefined;
+
+			consoleLogger(`${prefix} ${log.message}`, data ? data : "");
 		} catch (_e) {
 			consoleLogger(`${prefix} ${log.message}`);
 		}
