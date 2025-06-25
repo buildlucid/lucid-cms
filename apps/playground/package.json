@@ -5,7 +5,8 @@
 	"main": "src/index.ts",
 	"type": "module",
 	"scripts": {
-		"dev": "lucidcms dev --watch",
+		"dev": "lucidcms dev",
+		"serve": "lucidcms serve",
 		"build": "lucidcms build",
 		"start": "lucidcms build && node dist/server.js",
 		"migrate": "lucidcms migrate",
