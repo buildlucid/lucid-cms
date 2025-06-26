@@ -88,8 +88,10 @@ const createMigrationLogger = (): MigrationLogger => ({
 	},
 	migrationFailed: (error: unknown, step?: string) => {
 		const stepMessage = step ? ` during ${step}` : "";
-		console.error(`\n❌ Migration failed${stepMessage}:`, error);
-		console.log(`\n${divider}\n`);
+		console.error(
+			`\n${colours.textRed}Migration failed${stepMessage}:${colours.reset}`,
+			error,
+		);
 	},
 	...sharedLogger(),
 });

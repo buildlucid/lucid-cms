@@ -33,6 +33,6 @@ export const startAdminBuild = (viteSilent: boolean) => {
  */
 export const skipAdminBuild = () => {
 	console.log(
-		`⏭️  Admin SPA build skipped ${colours.textGray}(no changes detected)${colours.reset}`,
+		`┃ ⏭️  Admin SPA build skipped ${colours.textGray}(no changes detected)${colours.reset}`,
 	);
 };

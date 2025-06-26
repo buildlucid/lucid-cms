@@ -1,3 +1,5 @@
+import { colours } from "./helpers.js";
+
 export type SharedLogger = {
 	error: (message: string, error?: unknown) => void;
 	info: (message: string) => void;
@@ -6,16 +8,16 @@ export type SharedLogger = {
 
 const sharedLogger = (): SharedLogger => ({
 	error: (message: string, error?: unknown) => {
-		console.error(`❌ ${message}`);
+		console.error(`${colours.textRed}${message}${colours.reset}`);
 		if (error) {
 			console.error(error);
 		}
 	},
 	info: (message: string) => {
-		console.log(`ℹ️  ${message}`);
+		console.log(`${colours.textBlue}${message}${colours.reset}`);
 	},
 	warn: (message: string) => {
-		console.warn(`⚠️  ${message}`);
+		console.warn(`${colours.textYellow}${message}${colours.reset}`);
 	},
 });
 

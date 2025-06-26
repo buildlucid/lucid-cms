@@ -24,7 +24,7 @@ const createBuildLogger = (): BuildLogger => ({
 	},
 
 	buildFailed: (error: unknown) => {
-		console.error("❌ Build failed");
+		console.error(`${colours.textRed}Build failed${colours.reset}`);
 		console.error(error);
 	},
 	buildStart: () => {

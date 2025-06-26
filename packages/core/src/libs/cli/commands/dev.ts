@@ -9,8 +9,7 @@ export type DevOptions = {
 };
 
 /**
- * The CLI dev command. Watches for file changes and spawns child processes
- * running the serve command for hot-reloading.
+ * The CLI dev command. Watches for file changes and spawns child processes running the serve command for hot-reloading.
  */
 const devCommand = async (options: DevOptions) => {
 	await installOptionalDeps();
@@ -20,7 +19,7 @@ const devCommand = async (options: DevOptions) => {
 	let startupTimer: NodeJS.Timeout | undefined = undefined;
 
 	/**
-	 * Kills the child process with improved cleanup
+	 * Kills the child process
 	 */
 	const killChildProcess = async (): Promise<void> => {
 		if (!childProcess) return;
@@ -55,11 +54,8 @@ const devCommand = async (options: DevOptions) => {
 
 		if (startupTimer) clearTimeout(startupTimer);
 
-		console.log("🔄 Restarting server...");
-
 		await killChildProcess();
 
-		// Add a small delay to ensure clean process termination
 		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		try {
