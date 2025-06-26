@@ -10,7 +10,7 @@
 		"build": "lucidcms build",
 		"start": "lucidcms build && node dist/server.js",
 		"migrate": "lucidcms migrate",
-		"wrangler:dev": "wrangler --env dev dev",
+		"wrangler:dev": "wrangler --env dev dev --test-scheduled",
 		"wrangler:deploy": "npm run build && wrangler --env prod deploy"
 	},
 	"dependencies": {

@@ -28,7 +28,7 @@ export const adapter = cloudflareAdapter();
 export default defineConfig((env) => ({
 	host: "http://localhost:8080",
 	logger: {
-		level: "debug",
+		level: "silent",
 	},
 	// adapter: NodeAdapter(),
 	// db: new SQLiteAdapter({
@@ -38,9 +38,9 @@ export default defineConfig((env) => ({
 	// 	max: 5,
 	// }),
 	db: new LibSQLAdapter({
-		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		authToken: env?.TURSO_AUTH_TOKEN as string,
+		url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
+		// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+		// authToken: env?.TURSO_AUTH_TOKEN as string,
 	}),
 	keys: {
 		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,

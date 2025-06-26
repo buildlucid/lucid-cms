@@ -179,7 +179,16 @@ export default {
         });
 
         return app.fetch(request, env, ctx);
-    }
+    },
+    schedule(event, env, ctx) {
+        const runCronService = async () => {
+            const resolved = await processConfig(config(env));
+            console.log("Running cron service", resolved);
+            return true;
+        }
+
+        ctx.waitUntil(runCronService())
+    },
 };`;
 
 					await writeFile(tempEntryFile, entry);
