@@ -88,12 +88,19 @@ const migrateCommand = async () => {
 
 		//* migrations are needed - prompt the user
 		console.log("");
-		const shouldProceed = await confirm({
-			message:
-				"Migrations are needed to continue. Do you want to run them now?",
-			default: true,
-		});
-
+		let shouldProceed: boolean;
+		try {
+			shouldProceed = await confirm({
+				message:
+					"Migrations are needed to continue. Do you want to run them now?",
+				default: true,
+			});
+		} catch (error) {
+			if (error instanceof Error && error.name === "ExitPromptError") {
+				process.exit(0);
+			}
+			throw error;
+		}
 		if (!shouldProceed) {
 			logger.migrationSkipped();
 			process.exit(0);

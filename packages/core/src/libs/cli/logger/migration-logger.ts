@@ -43,9 +43,8 @@ const createMigrationLogger = (): MigrationLogger => ({
 	},
 	migrationSkipped: () => {
 		console.log(
-			"\n👋 Exiting without running migrations. Run this command again when you're ready.",
+			"\n👋 Exiting without running migrations. Run this command again when you're ready.\n",
 		);
-		console.log(`\n${divider}\n`);
 	},
 	logsStart: () => {
 		console.log("\n✏️ Migration logs:");
