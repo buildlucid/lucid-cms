@@ -44,12 +44,7 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --apply ./src"
 	},
-	"files": [
-		"dist",
-		"cms",
-		"templates",
-		"assets"
-	],
+	"files": ["dist", "cms", "templates", "assets"],
 	"author": "Proto Digital",
 	"repository": {
 		"type": "git",
@@ -102,6 +97,7 @@
 		"@tailwindcss/vite": "^4.1.4",
 		"chokidar": "^4.0.3",
 		"commander": "^14.0.0",
+		"@inquirer/prompts": "^7.5.3",
 		"jiti": "^2.4.2",
 		"sharp": "^0.34.2",
 		"solid-js": "^1.9.5",

@@ -19,7 +19,7 @@ import userTokens from "./user-tokens/index.js";
 import permissions from "./permissions/index.js";
 import crons from "./crons/index.js";
 import seed from "./seed/index.js";
-import start from "./start/index.js";
+import sync from "./sync/index.js";
 import clientIntegrations from "./client-integrations/index.js";
 import collectionMigrator from "./collection-migrator/index.js";
 
@@ -49,7 +49,7 @@ const lucidServices = {
 	crons: crons,
 	permission: permissions,
 	seed: seed,
-	start: start,
+	sync: sync,
 	clientIntegrations: clientIntegrations,
 };
 

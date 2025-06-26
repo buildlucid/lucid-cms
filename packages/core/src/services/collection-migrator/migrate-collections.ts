@@ -14,7 +14,14 @@ import type { MigrationPlan } from "./migration/types.js";
  * - lucid_document__{key}__{brick-key} * all potential bricks
  * - lucid_document__{key}__{brick-key}__{repeater-field-key} * for each repeater for a single brick
  */
-const migrateCollections: ServiceFn<[], undefined> = async (context) => {
+const migrateCollections: ServiceFn<
+	[
+		{
+			dryRun?: boolean;
+		},
+	],
+	MigrationPlan[]
+> = async (context, data) => {
 	const CollectionMigrations = Repository.get(
 		"collection-migrations",
 		context.db,
@@ -53,6 +60,13 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		migrationPlans.push(migraitonPlanRes.data);
 	}
 
+	if (data.dryRun) {
+		return {
+			data: migrationPlans,
+			error: undefined,
+		};
+	}
+
 	//* build and run migrations
 	const migrationRes = await buildMigrations(context, {
 		migrationPlan: migrationPlans,
@@ -74,11 +88,11 @@ const migrateCollections: ServiceFn<[], undefined> = async (context) => {
 		const migrationsRes = await CollectionMigrations.createMultiple({
 			data: migrationPlanEntries,
 		});
-		if (migrationsRes.error) return migrationRes;
+		if (migrationsRes.error) return migrationsRes;
 	}
 
 	return {
-		data: undefined,
+		data: migrationPlans,
 		error: undefined,
 	};
 };

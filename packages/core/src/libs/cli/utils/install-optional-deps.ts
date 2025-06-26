@@ -13,6 +13,7 @@ const installOptionalDeps = async () => {
 		"jiti",
 		"chokidar",
 		"commander",
+		"@inquirer/prompts",
 		"vite-plugin-solid",
 		"rolldown",
 		// "@lucidcms/admin",

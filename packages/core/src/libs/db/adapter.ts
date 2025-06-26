@@ -6,6 +6,7 @@ import {
 	type KyselyPlugin,
 	type ColumnDataType,
 	type ColumnDefinitionBuilder,
+	sql,
 } from "kysely";
 import constants from "../../constants/constants.js";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
@@ -130,21 +131,13 @@ export default abstract class DatabaseAdapter {
 			? DatabaseConfig["defaults"][T][K]
 			: DatabaseConfig["defaults"][T];
 	}
+
 	/**
 	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections
 	 * @todo expose migrations so they can be extended?
 	 */
 	async migrateToLatest() {
-		const migrations = {
-			"00000001-locales": Migration00000001(this),
-			"00000002-translations": Migration00000002(this),
-			"00000003-options": Migration00000003(this),
-			"00000004-users-and-permissions": Migration00000004(this),
-			"00000005-emails": Migration00000005(this),
-			"00000006-media": Migration00000006(this),
-			"00000007-collections": Migration00000007(this),
-			"00000008-integrations": Migration00000008(this),
-		};
+		const migrations = this.migrations;
 
 		const migrator = new Migrator({
 			db: this.client,
@@ -184,6 +177,29 @@ export default abstract class DatabaseAdapter {
 			});
 		}
 	}
+
+	/**
+	 * Checks if there are any pending migrations that need to be executed
+	 */
+	async needsMigration(db: KyselyDB): Promise<boolean> {
+		try {
+			const availableMigrations = Object.keys(this.migrations);
+
+			const executedMigrations = await sql<{ name: string }>`
+				SELECT name FROM kysely_migration
+			`.execute(db);
+
+			const executedMigrationNames = executedMigrations.rows.map(
+				(row) => row.name,
+			);
+
+			return availableMigrations.some(
+				(migrationName) => !executedMigrationNames.includes(migrationName),
+			);
+		} catch (error) {
+			return true;
+		}
+	}
 	/**
 	 * Returns the database client instance
 	 */
@@ -194,5 +210,20 @@ export default abstract class DatabaseAdapter {
 			});
 		}
 		return this.db;
+	}
+	/**
+	 * Returns the migrations for the database
+	 */
+	get migrations() {
+		return {
+			"00000001-locales": Migration00000001(this),
+			"00000002-translations": Migration00000002(this),
+			"00000003-options": Migration00000003(this),
+			"00000004-users-and-permissions": Migration00000004(this),
+			"00000005-emails": Migration00000005(this),
+			"00000006-media": Migration00000006(this),
+			"00000007-collections": Migration00000007(this),
+			"00000008-integrations": Migration00000008(this),
+		};
 	}
 }

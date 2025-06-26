@@ -36,7 +36,6 @@ program
 program
 	.command("migrate")
 	.description("Run database migrations")
-	.option("--seed", "Run seeds after migration")
 	.action(migrateCommand);
 
 program.parse();

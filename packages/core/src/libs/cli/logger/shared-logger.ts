@@ -1,6 +1,7 @@
 export type SharedLogger = {
 	error: (message: string, error?: unknown) => void;
 	info: (message: string) => void;
+	warn: (message: string) => void;
 };
 
 const sharedLogger = (): SharedLogger => ({
@@ -12,6 +13,9 @@ const sharedLogger = (): SharedLogger => ({
 	},
 	info: (message: string) => {
 		console.log(`ℹ️  ${message}`);
+	},
+	warn: (message: string) => {
+		console.warn(`⚠️  ${message}`);
 	},
 });
 

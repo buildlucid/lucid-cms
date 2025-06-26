@@ -17,6 +17,16 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 		const userCount = Formatter.parseCount(totalUserCountRes.data?.count);
 		const setupRequired = userCount === 0;
 
+		if (setupRequired) {
+			const initialSeedRes = await Promise.all([
+				context.services.seed.defaultOptions(context),
+				context.services.seed.defaultRoles(context),
+			]);
+			for (const res of initialSeedRes) {
+				if (res.error) return res;
+			}
+		}
+
 		return {
 			error: undefined,
 			data: {
