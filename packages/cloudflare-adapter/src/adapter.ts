@@ -180,14 +180,17 @@ export default {
 
         return app.fetch(request, env, ctx);
     },
-    schedule(event, env, ctx) {
+    async scheduled(controller, env, ctx) {
         const runCronService = async () => {
             const resolved = await processConfig(config(env));
-            console.log("Running cron service", resolved);
-            return true;
-        }
+            
+            const cronJobs = lucid.setupCronJobs({
+                config: resolved,
+            });
+            await cronJobs.register();
+        };
 
-        ctx.waitUntil(runCronService())
+        ctx.waitUntil(runCronService());
     },
 };`;
 

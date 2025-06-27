@@ -1,4 +1,5 @@
 import createApp from "./libs/http/app.js";
+import setupCronJobs from "./libs/crons/index.js";
 
 export { default as z } from "zod/v4";
 export { LucidError } from "./utils/errors/index.js";
@@ -9,4 +10,5 @@ export { default as passthroughImageProcessor } from "./libs/image-processor/pas
 
 export default {
 	createApp,
+	setupCronJobs,
 };
