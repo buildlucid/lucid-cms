@@ -112,16 +112,24 @@ import config from "./${constants.CONFIG_FILE}";
 import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import { serve } from '@hono/node-server';
+import cron from 'node-cron';
 
 const resolved = await processConfig(config(process.env));
 
 const app = await lucid.createApp({
     config: resolved,
 });
+const cronJobs = lucid.setupCronJobs({
+    config: resolved,
+});
 
 const server = serve({
     fetch: app.fetch,
     port: 8080,
+});
+
+cron.schedule(cronJobs.schedule, async () => {
+    await cronJobs.register();
 });
 
 server.on("listening", () => {

@@ -48,7 +48,8 @@
     "dependencies": {
         "@hono/node-server": "^1.14.4",
         "dotenv": "^16.5.0",
-        "rolldown": "^1.0.0-beta.10-commit.87188ed"
+        "rolldown": "^1.0.0-beta.10-commit.87188ed",
+        "@types/node-cron": "^3.0.11"
     },
     "peerDependencies": {
         "@lucidcms/core": "^0.11.0-alpha.0",
