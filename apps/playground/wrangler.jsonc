@@ -39,7 +39,12 @@
         "crons": [
             "0 0 * * *"
         ]
-    }
+    },
+    // "build": {
+    //     "watch_dir": "./src",
+    //     "command": "npm run build",
+    //     "cwd": "./"
+    // }
     // "hyperdrive": [
     //     {
     //         "binding": "HYPERDRIVE",
