@@ -3,6 +3,7 @@ import getConfigPath from "../../config/get-config-path.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 import createDevLogger from "../logger/dev-logger.js";
+import migrateCommand from "./migrate.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
@@ -14,13 +15,18 @@ const serveCommand = async () => {
 	let destroy: (() => Promise<void>) | undefined = undefined;
 
 	try {
-		const res = await loadConfigFile({
+		const configRes = await loadConfigFile({
 			path: configPath,
 		});
+		const migrateResult = await migrateCommand({
+			config: configRes.config,
+			mode: "return",
+		})();
+		if (!migrateResult) process.exit(2);
 
-		await prerenderMjmlTemplates(res.config);
+		await prerenderMjmlTemplates(configRes.config);
 
-		destroy = await res.adapter?.cli?.serve(res.config, logger);
+		destroy = await configRes.adapter?.cli?.serve(configRes.config, logger);
 	} catch (error) {
 		logger.error("Failed to start server", error);
 		process.exit(1);

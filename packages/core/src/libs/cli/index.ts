@@ -36,6 +36,9 @@ program
 program
 	.command("migrate")
 	.description("Run database migrations")
-	.action(migrateCommand);
+	.action(
+		// @ts-expect-error
+		migrateCommand({ mode: "process" }),
+	);
 
 program.parse();

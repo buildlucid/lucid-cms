@@ -8,7 +8,8 @@ import type { Config } from "../../../types.js";
 const runSyncTasks = async (
 	config: Config,
 	logger: ReturnType<typeof createMigrationLogger>,
-) => {
+	mode: "process" | "return" = "process",
+): Promise<boolean> => {
 	logger.syncTasksStart();
 
 	const [localesResult, collectionsResult] = await Promise.all([
@@ -26,135 +27,169 @@ const runSyncTasks = async (
 
 	if (localesResult.error) {
 		logger.migrationFailed(localesResult.error, "locale sync");
-		process.exit(1);
+		if (mode === "process") process.exit(1);
+		else return false;
 	}
 	if (collectionsResult.error) {
 		logger.migrationFailed(collectionsResult.error, "collections sync");
-		process.exit(1);
+		if (mode === "process") process.exit(1);
+		else return false;
 	}
 
 	logger.syncTasksComplete();
+	return true;
 };
 
-const migrateCommand = async () => {
-	try {
-		const overallStartTime = process.hrtime();
-		const logger = createMigrationLogger();
-
-		await installOptionalDeps();
-		const res = await loadConfigFile();
-
-		logger.migrationStart();
-
-		//* check if collections need migrating
-		const collectionMigrationResult =
-			await lucidServices.collection.migrator.migrateCollections(
-				{
-					db: res.config.db.client,
-					config: res.config,
-					services: lucidServices,
-				},
-				{
-					dryRun: true,
-				},
-			);
-
-		let needsCollectionMigrations = false;
-		if (collectionMigrationResult.error) {
-			logger.warn(
-				`Could not check collection migration status: ${collectionMigrationResult.error.message}`,
-			);
-			needsCollectionMigrations = true;
-		} else {
-			needsCollectionMigrations = collectionMigrationResult.data.some(
-				(plan) => plan.tables.length > 0,
-			);
-		}
-
-		//* check if the database needs migrating
-		const needsDbMigrations = await res.config.db.needsMigration(
-			res.config.db.client,
-		);
-
-		logger.migrationCheckStatus(needsDbMigrations, needsCollectionMigrations);
-
-		//* if no migrations are needed, just run seeds and exit
-		if (!needsCollectionMigrations && !needsDbMigrations) {
-			logger.logsStart();
-			await runSyncTasks(res.config, logger);
-			logger.migrationComplete(overallStartTime);
-			process.exit(0);
-		}
-
-		//* migrations are needed - prompt the user
-		console.log("");
-		let shouldProceed: boolean;
+const migrateCommand = (props?: {
+	config?: Config;
+	mode: "process" | "return";
+}) => {
+	return async () => {
 		try {
-			shouldProceed = await confirm({
-				message:
-					"Migrations are needed to continue. Do you want to run them now?",
-				default: true,
-			});
-		} catch (error) {
-			if (error instanceof Error && error.name === "ExitPromptError") {
-				process.exit(0);
+			const overallStartTime = process.hrtime();
+			const logger = createMigrationLogger();
+			const mode = props?.mode ?? "process";
+
+			await installOptionalDeps();
+			let config: Config;
+			if (props?.config) {
+				config = props.config;
+			} else {
+				const res = await loadConfigFile();
+				config = res.config;
 			}
-			throw error;
-		}
-		if (!shouldProceed) {
-			logger.migrationSkipped();
-			process.exit(0);
-		}
 
-		logger.logsStart();
+			logger.migrationStart();
 
-		//* run database migrations if needed
-		if (needsDbMigrations) {
-			logger.dbMigrationStart();
-			try {
-				await res.config.db.migrateToLatest();
-				logger.dbMigrationComplete();
-			} catch (error) {
-				logger.migrationFailed(error, "database migration");
-				process.exit(1);
+			//* check if collections need migrating
+			const collectionMigrationResult =
+				await lucidServices.collection.migrator.migrateCollections(
+					{
+						db: config.db.client,
+						config: config,
+						services: lucidServices,
+					},
+					{
+						dryRun: true,
+					},
+				);
+
+			let needsCollectionMigrations = false;
+			if (collectionMigrationResult.error) {
+				logger.warn(
+					`Could not check collection migration status: ${collectionMigrationResult.error.message}`,
+				);
+				needsCollectionMigrations = true;
+			} else {
+				needsCollectionMigrations = collectionMigrationResult.data.some(
+					(plan) => plan.tables.length > 0,
+				);
 			}
-		}
 
-		//* run sync tasks (locales, collections)
-		await runSyncTasks(res.config, logger);
+			//* check if the database needs migrating
+			const needsDbMigrations = await config.db.needsMigration(
+				config.db.client,
+			);
 
-		//* run collection migrations if needed
-		if (needsCollectionMigrations) {
-			logger.collectionMigrationStart();
-			try {
-				const result =
-					await lucidServices.collection.migrator.migrateCollections(
-						{
-							db: res.config.db.client,
-							config: res.config,
-							services: lucidServices,
-						},
-						{ dryRun: false },
-					);
+			logger.migrationCheckStatus(needsDbMigrations, needsCollectionMigrations);
 
-				if (result.error) {
-					logger.migrationFailed(result.error.message, "collection migrations");
-					process.exit(1);
+			//* if no migrations are needed, just run seeds and exit
+			if (!needsCollectionMigrations && !needsDbMigrations) {
+				logger.logsStart();
+				const syncResult = await runSyncTasks(config, logger, mode);
+				if (!syncResult && mode === "return") {
+					return false;
 				}
-				logger.collectionMigrationComplete();
-			} catch (error) {
-				logger.migrationFailed(error, "collection migrations");
-				process.exit(1);
+				logger.migrationComplete(overallStartTime);
+				if (mode === "process") process.exit(0);
+				else return true;
 			}
-		}
 
-		logger.migrationComplete(overallStartTime);
-		process.exit(0);
-	} catch (error) {
-		const logger = createMigrationLogger();
-		logger.migrationFailed(error, "migration tasks");
-		process.exit(1);
-	}
+			//* migrations are needed - prompt the user
+			console.log("");
+			let shouldProceed: boolean;
+			try {
+				shouldProceed = await confirm({
+					message:
+						"Migrations are needed to continue. Do you want to run them now?",
+					default: true,
+				});
+			} catch (error) {
+				if (error instanceof Error && error.name === "ExitPromptError") {
+					if (mode === "process") process.exit(0);
+					//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
+					else return false;
+				}
+				throw error;
+			}
+			if (!shouldProceed) {
+				logger.migrationSkipped();
+				if (mode === "process") process.exit(0);
+				//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
+				else return false;
+			}
+
+			logger.logsStart();
+
+			//* run database migrations if needed
+			if (needsDbMigrations) {
+				logger.dbMigrationStart();
+				try {
+					await config.db.migrateToLatest();
+					logger.dbMigrationComplete();
+				} catch (error) {
+					logger.migrationFailed(error, "database migration");
+					if (mode === "process") process.exit(1);
+					else return false;
+				}
+			}
+
+			//* run sync tasks (locales, collections)
+			const syncResult = await runSyncTasks(config, logger, mode);
+			if (!syncResult && mode === "return") {
+				return false;
+			}
+
+			//* run collection migrations if needed
+			if (needsCollectionMigrations) {
+				logger.collectionMigrationStart();
+				try {
+					const result =
+						await lucidServices.collection.migrator.migrateCollections(
+							{
+								db: config.db.client,
+								config: config,
+								services: lucidServices,
+							},
+							{ dryRun: false },
+						);
+
+					if (result.error) {
+						logger.migrationFailed(
+							result.error.message,
+							"collection migrations",
+						);
+						if (mode === "process") process.exit(1);
+						else return false;
+					}
+					logger.collectionMigrationComplete();
+				} catch (error) {
+					logger.migrationFailed(error, "collection migrations");
+					if (mode === "process") process.exit(1);
+					else return false;
+				}
+			}
+
+			logger.migrationComplete(overallStartTime);
+			if (mode === "process") process.exit(0);
+			else return true;
+		} catch (error) {
+			const logger = createMigrationLogger();
+			logger.migrationFailed(error, "migration tasks");
+			if (props?.mode === "process" || !props?.mode) process.exit(1);
+			else return false;
+		}
+	};
 };
 
 export default migrateCommand;

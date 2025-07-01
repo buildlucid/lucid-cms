@@ -79,6 +79,10 @@ const devCommand = async (options: DevOptions) => {
 			});
 
 			childProcess.on("exit", (code, signal) => {
+				rebuilding = false;
+				//* exit code 2 = migration cancelled, exit dev process
+				if (code === 2) process.exit(0);
+
 				if (signal !== "SIGTERM" && signal !== "SIGKILL" && code !== 0) {
 					logger.error(`Server exited with code ${code} and signal ${signal}`);
 				}
