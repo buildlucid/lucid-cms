@@ -18,9 +18,9 @@ import LucidLocalStorage from "@lucidcms/plugin-local-storage";
 import { PageCollection, SettingsCollection } from "./collections.js";
 
 export default lucid.config({
-  host: "http://localhost:8080",
+  host: "http://localhost:5432",
   db: new LibSQLAdapter({
-    url: "libsql://localhost:8080?tls=0",
+    url: "libsql://localhost:5432?tls=0",
   }),
   keys: {
     encryptionKey: process.env.LUCID_ENCRYPTION_KEY as string,
