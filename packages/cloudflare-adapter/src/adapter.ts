@@ -104,7 +104,15 @@ const cloudflareAdapter = (options?: {
 				});
 
 				return async () => {
-					server.close();
+					return new Promise<void>((resolve, reject) => {
+						server.close((error) => {
+							if (error) {
+								reject(error);
+							} else {
+								resolve();
+							}
+						});
+					});
 				};
 			},
 			build: async (_, options, logger) => {

@@ -45,7 +45,15 @@ const nodeAdapter = (options?: {
 				});
 
 				return async () => {
-					server.close();
+					return new Promise<void>((resolve, reject) => {
+						server.close((error) => {
+							if (error) {
+								reject(error);
+							} else {
+								resolve();
+							}
+						});
+					});
 				};
 			},
 			build: async (_, options, logger) => {
@@ -111,7 +119,7 @@ const nodeAdapter = (options?: {
 						platform: "node",
 						external: ["dotenv"],
 					});
-					// TODO: add support so the port and server options are configurable
+
 					const entry = /* ts */ `
 import 'dotenv/config'
 import config from "./${constants.CONFIG_FILE}";
@@ -120,45 +128,63 @@ import { processConfig } from "@lucidcms/core/helpers";
 import { serve } from '@hono/node-server';
 import cron from 'node-cron';
 
-const resolved = await processConfig(config(process.env));
+const startServer = async () => {
+    try {
+        const resolved = await processConfig(config(process.env));
 
-const app = await lucid.createApp({
-    config: resolved,
-});
-const cronJobs = lucid.setupCronJobs({
-    config: resolved,
-});
+        const app = await lucid.createApp({
+            config: resolved,
+        });
+        
+        const cronJobs = lucid.setupCronJobs({
+            config: resolved,
+        });
 
-const port = Number.parseInt(process.env.PORT || '5432', 10);
-const hostname = process.env.HOST || process.env.HOSTNAME;
+        const port = Number.parseInt(process.env.PORT || '5432', 10);
+        const hostname = process.env.HOST || process.env.HOSTNAME;
 
-const server = serve({
-    fetch: app.fetch,
-    port,
-    hostname,
-});
+        const server = serve({
+            fetch: app.fetch,
+            port,
+            hostname,
+        });
 
-cron.schedule(cronJobs.schedule, async () => {
-    await cronJobs.register();
-});
+        if (cronJobs.schedule) {
+            cron.schedule(cronJobs.schedule, async () => {
+                await cronJobs.register();
+            });
+        }
 
-server.on("listening", () => {
-    console.log("Server is running at http://localhost:5432");
-});
+        server.on("listening", () => {
+            const address = server.address();
+            if(typeof address === 'string') console.log(address);
+            else {
+                if(address.address === '::') console.log('http://localhost:' + address.port); 
+                else console.log('http://' + address.address + ':' + address.port);
+            }
+        });
 
-process.on("SIGINT", () => {
-    server.close()
-    process.exit(0)
-})
-process.on("SIGTERM", () => {
-    server.close((err) => {
-    if (err) {
-        console.error(err)
-        process.exit(1)
+        const gracefulShutdown = (signal) => {
+            server.close((error) => {
+                if (error) {
+                    console.error(error);
+                    process.exit(1);
+                } else {
+                    process.exit(0);
+                }
+            });
+        };
+
+        process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+        process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+
+    } catch (error) {
+        console.error(error);
+        process.exit(1);
     }
-    process.exit(0)
-    })
-})`;
+};
+
+startServer();`;
 
 					await writeFile(entryOutput, entry);
 
