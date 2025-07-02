@@ -9,12 +9,16 @@ export interface BuildLogger extends SharedLogger {
 	buildStart: () => void;
 }
 
-const createBuildLogger = (): BuildLogger => ({
+const createBuildLogger = (silent?: boolean): BuildLogger => ({
 	appBuildStart: (adapterName: string): [number, number] => {
+		if (silent) return process.hrtime();
+
 		console.log(`┃ 🏗️  Building for production with ${adapterName} adapter...`);
 		return process.hrtime();
 	},
 	appBuildComplete: (startTime: [number, number]) => {
+		if (silent) return;
+
 		const diff = process.hrtime(startTime);
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 
@@ -24,13 +28,19 @@ const createBuildLogger = (): BuildLogger => ({
 	},
 
 	buildFailed: (error: unknown) => {
+		if (silent) return;
+
 		console.error(`${colours.textRed}Build failed${colours.reset}`);
 		console.error(error);
 	},
 	buildStart: () => {
+		if (silent) return;
+
 		console.log(`\n${divider}\n`);
 	},
 	buildComplete: (startTime: [number, number]) => {
+		if (silent) return;
+
 		const diff = process.hrtime(startTime);
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 		console.log(

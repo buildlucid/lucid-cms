@@ -32,6 +32,11 @@ program
 program
 	.command("build")
 	.description("Build for production")
+	.option(
+		"--cache-spa",
+		"Skip clearing SPA build output during clean. The SPA will only be rebuilt when changes are detected.",
+	)
+	.option("--silent", "Suppress all logging output")
 	.action(buildCommand);
 
 program

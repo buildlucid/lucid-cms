@@ -5,8 +5,8 @@ import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import Database from "better-sqlite3";
 import transporter from "./src/services/email-transporter.js";
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-// import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
+// import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
+import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
 import LucidResend from "@lucidcms/plugin-resend";
@@ -22,8 +22,8 @@ import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
 // import postgres from "postgres";
 
-export const adapter = nodeAdapter();
-// export const adapter = cloudflareAdapter();
+// export const adapter = nodeAdapter();
+export const adapter = cloudflareAdapter();
 
 export default defineConfig((env) => ({
 	host: "http://localhost:5432",

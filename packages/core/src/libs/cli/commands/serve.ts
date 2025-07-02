@@ -8,17 +8,15 @@ import migrateCommand from "./migrate.js";
 /**
  * The CLI serve command. Directly starts the dev server
  */
-const serveCommand = async (
-	options: {
-		initial?: boolean;
-	} = {},
-) => {
+const serveCommand = async (options?: {
+	initial?: boolean;
+}) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 	const logger = createDevLogger();
 	let destroy: (() => Promise<void>) | undefined = undefined;
 
-	const isInitialRun = options.initial ?? false;
+	const isInitialRun = options?.initial ?? false;
 
 	try {
 		const configRes = await loadConfigFile({

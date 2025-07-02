@@ -13,24 +13,26 @@ import {
 
 /**
  * Programatically build the admin SPA with Vite.
- * @todo Allow users to extend the vite config within the lucid.config.ts/js
  */
 const buildApp = async (
 	config: Config,
 	force?: boolean,
+	silent?: boolean,
 ): ServiceResponse<undefined> => {
 	try {
 		const buildAdmin = await shouldBuild(config);
 		if (buildAdmin.error) return buildAdmin;
 		if (buildAdmin.data === false && force !== true) {
-			skipAdminBuild();
+			skipAdminBuild(silent);
 			return {
 				data: undefined,
 				error: undefined,
 			};
 		}
 		const inlineConfig = mergeViteConfig(config);
-		const endLog = startAdminBuild(inlineConfig.logLevel === "silent");
+		const endLog = startAdminBuild(
+			silent ?? inlineConfig.logLevel === "silent",
+		);
 
 		const [clientMountRes, clientHtmlRes] = await Promise.all([
 			generateClientMount(config),

@@ -21,15 +21,6 @@ const shouldBuild = async (config: Config): ServiceResponse<boolean> => {
 		const paths = getPaths(config);
 		const configPath = getConfigPath(process.cwd()); // can throw
 
-		//* always rebuild if --no-cache argument is present
-		if (process.argv.includes(constants.arguments.noCache)) {
-			await generateBuildMetadata("no-cache", configPath, config);
-			return {
-				data: true,
-				error: undefined,
-			};
-		}
-
 		//* always build if one doesnt exist
 		if (!existsSync(paths.clientDist)) {
 			await generateBuildMetadata("missing", configPath, config);

@@ -5,8 +5,8 @@ import { colours, formatDuration } from "./helpers.js";
 /**
  * To log when the SPA build starts and ends
  */
-export const startAdminBuild = (viteSilent: boolean) => {
-	if (!viteSilent) return;
+export const startAdminBuild = (silent: boolean) => {
+	if (!silent) return;
 	const startTime = process.hrtime();
 
 	const require = createRequire(import.meta.url);
@@ -18,7 +18,7 @@ export const startAdminBuild = (viteSilent: boolean) => {
 	);
 
 	return () => {
-		if (!viteSilent) return;
+		if (!silent) return;
 		const diff = process.hrtime(startTime);
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 
@@ -31,7 +31,9 @@ export const startAdminBuild = (viteSilent: boolean) => {
 /**
  * To log if the admin SPA vite build is skipped
  */
-export const skipAdminBuild = () => {
+export const skipAdminBuild = (silent?: boolean) => {
+	if (silent) return;
+
 	console.log(
 		`┃ ⏭️  Admin SPA build skipped ${colours.textGray}(no changes detected)${colours.reset}`,
 	);

@@ -4,14 +4,12 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import createDevLogger from "../logger/dev-logger.js";
 import path from "node:path";
 
-export type DevOptions = {
-	watch?: string | boolean;
-};
-
 /**
  * The CLI dev command. Watches for file changes and spawns child processes running the serve command for hot-reloading.
  */
-const devCommand = async (options: DevOptions) => {
+const devCommand = async (options?: {
+	watch?: string | boolean;
+}) => {
 	await installOptionalDeps();
 	const logger = createDevLogger();
 	let childProcess: ReturnType<typeof spawn> | undefined = undefined;
@@ -140,7 +138,7 @@ const devCommand = async (options: DevOptions) => {
 	};
 
 	const watchPath =
-		typeof options.watch === "string" ? options.watch : process.cwd();
+		typeof options?.watch === "string" ? options?.watch : process.cwd();
 	// TODO: this needs to be configurable, ideally grab from lucid.config
 	const distPath = path.join(process.cwd(), "dist");
 

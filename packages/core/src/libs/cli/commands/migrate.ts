@@ -44,16 +44,14 @@ const migrateCommand = (props?: {
 	config?: Config;
 	mode: "process" | "return";
 }) => {
-	return async (
-		options: {
-			skipSyncSteps?: boolean;
-		} = {},
-	) => {
+	return async (options?: {
+		skipSyncSteps?: boolean;
+	}) => {
 		try {
 			const overallStartTime = process.hrtime();
 			const logger = createMigrationLogger();
 			const mode = props?.mode ?? "process";
-			const skipSyncSteps = options.skipSyncSteps ?? false;
+			const skipSyncSteps = options?.skipSyncSteps ?? false;
 
 			await installOptionalDeps();
 			let config: Config;
