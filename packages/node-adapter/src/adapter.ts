@@ -9,7 +9,12 @@ import { build } from "rolldown";
 import { writeFile } from "node:fs/promises";
 import type { LucidAdapter } from "@lucidcms/core/types";
 
-const nodeAdapter = (): LucidAdapter => {
+const nodeAdapter = (options?: {
+	server?: {
+		port?: number;
+		hostname?: string;
+	};
+}): LucidAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
@@ -27,10 +32,11 @@ const nodeAdapter = (): LucidAdapter => {
 				logger.serverStarting("Node");
 
 				const app = await lucid.createApp({ config });
-				// TODO: add support so the port and server options are configurable
+
 				const server = serve({
 					fetch: app.fetch,
-					port: 8080,
+					port: options?.server?.port ?? 5432,
+					hostname: options?.server?.hostname,
 				});
 
 				server.on("listening", () => {
@@ -123,9 +129,13 @@ const cronJobs = lucid.setupCronJobs({
     config: resolved,
 });
 
+const port = Number.parseInt(process.env.PORT || '5432', 10);
+const hostname = process.env.HOST || process.env.HOSTNAME;
+
 const server = serve({
     fetch: app.fetch,
-    port: 8080,
+    port,
+    hostname,
 });
 
 cron.schedule(cronJobs.schedule, async () => {
@@ -133,7 +143,7 @@ cron.schedule(cronJobs.schedule, async () => {
 });
 
 server.on("listening", () => {
-    console.log("Server is running at http://localhost:8080");
+    console.log("Server is running at http://localhost:5432");
 });
 
 process.on("SIGINT", () => {

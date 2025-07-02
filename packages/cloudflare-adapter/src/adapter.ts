@@ -21,6 +21,10 @@ import type { LucidAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
+	server?: {
+		port?: number;
+		hostname?: string;
+	};
 }): LucidAdapter => {
 	let platformProxy: PlatformProxy | undefined;
 
@@ -88,10 +92,10 @@ const cloudflareAdapter = (options?: {
 					},
 				});
 
-				// TODO: add support so the port and server options are configurable
 				const server = serve({
 					fetch: app.fetch,
-					port: 8080,
+					port: options?.server?.port ?? 5432,
+					hostname: options?.server?.hostname,
 				});
 
 				server.on("listening", () => {

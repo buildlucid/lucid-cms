@@ -6,7 +6,7 @@ import testingConstants from "../../../constants/testing-constants.js";
 export const adapter = nodeAdapter();
 
 export default defineConfig((env) => ({
-	host: "http://localhost:8080",
+	host: "http://localhost:5432",
 	logger: {
 		level: "silent",
 	},
