@@ -8,11 +8,17 @@ import migrateCommand from "./migrate.js";
 /**
  * The CLI serve command. Directly starts the dev server
  */
-const serveCommand = async () => {
+const serveCommand = async (
+	options: {
+		initial?: boolean;
+	} = {},
+) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 	const logger = createDevLogger();
 	let destroy: (() => Promise<void>) | undefined = undefined;
+
+	const isInitialRun = options.initial ?? false;
 
 	try {
 		const configRes = await loadConfigFile({
@@ -21,7 +27,9 @@ const serveCommand = async () => {
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
 			mode: "return",
-		})();
+		})({
+			skipSyncSteps: !isInitialRun,
+		});
 		if (!migrateResult) process.exit(2);
 
 		await prerenderMjmlTemplates(configRes.config);

@@ -44,11 +44,16 @@ const migrateCommand = (props?: {
 	config?: Config;
 	mode: "process" | "return";
 }) => {
-	return async () => {
+	return async (
+		options: {
+			skipSyncSteps?: boolean;
+		} = {},
+	) => {
 		try {
 			const overallStartTime = process.hrtime();
 			const logger = createMigrationLogger();
 			const mode = props?.mode ?? "process";
+			const skipSyncSteps = options.skipSyncSteps ?? false;
 
 			await installOptionalDeps();
 			let config: Config;
@@ -96,9 +101,11 @@ const migrateCommand = (props?: {
 			//* if no migrations are needed, just run seeds and exit
 			if (!needsCollectionMigrations && !needsDbMigrations) {
 				logger.logsStart();
-				const syncResult = await runSyncTasks(config, logger, mode);
-				if (!syncResult && mode === "return") {
-					return false;
+				if (!skipSyncSteps) {
+					const syncResult = await runSyncTasks(config, logger, mode);
+					if (!syncResult && mode === "return") {
+						return false;
+					}
 				}
 				logger.migrationComplete(overallStartTime);
 				if (mode === "process") process.exit(0);
@@ -145,9 +152,11 @@ const migrateCommand = (props?: {
 			}
 
 			//* run sync tasks (locales, collections)
-			const syncResult = await runSyncTasks(config, logger, mode);
-			if (!syncResult && mode === "return") {
-				return false;
+			if (!skipSyncSteps) {
+				const syncResult = await runSyncTasks(config, logger, mode);
+				if (!syncResult && mode === "return") {
+					return false;
+				}
 			}
 
 			//* run collection migrations if needed

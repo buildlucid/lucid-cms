@@ -26,6 +26,7 @@ program
 program
 	.command("serve")
 	.description("Serve the application")
+	.option("--initial", "Initial run flag (used internally by dev command)")
 	.action(serveCommand);
 
 program
@@ -36,6 +37,7 @@ program
 program
 	.command("migrate")
 	.description("Run database migrations")
+	.option("--skip-sync-steps", "Skip sync tasks (locales and collections sync)")
 	.action(
 		// @ts-expect-error
 		migrateCommand({ mode: "process" }),

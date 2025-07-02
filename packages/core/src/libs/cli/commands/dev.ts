@@ -17,6 +17,7 @@ const devCommand = async (options: DevOptions) => {
 	let childProcess: ReturnType<typeof spawn> | undefined = undefined;
 	let rebuilding = false;
 	let startupTimer: NodeJS.Timeout | undefined = undefined;
+	let isInitialRun = true;
 
 	/**
 	 * Kills the child process
@@ -59,15 +60,17 @@ const devCommand = async (options: DevOptions) => {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		try {
-			childProcess = spawn(
-				process.execPath,
-				[process.argv[1] as string, "serve"],
-				{
-					stdio: ["inherit", "inherit", "inherit"],
-					// env: { ...process.env },
-					detached: false,
-				},
-			);
+			const args = [process.argv[1] as string, "serve"];
+			if (isInitialRun) {
+				args.push("--initial");
+				isInitialRun = false;
+			}
+
+			childProcess = spawn(process.execPath, args, {
+				stdio: ["inherit", "inherit", "inherit"],
+				// env: { ...process.env },
+				detached: false,
+			});
 
 			childProcess.on("error", (error) => {
 				logger.error("Failed to start server", error);
