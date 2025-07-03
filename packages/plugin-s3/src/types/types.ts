@@ -1,6 +1,14 @@
-export interface PluginOptions {
+export type PluginOptions = {
 	endpoint: string;
-	accessKeyId: string;
-	secretAccessKey: string;
 	bucket: string;
-}
+	clientOptions: {
+		accessKeyId: string;
+		secretAccessKey: string;
+		sessionToken?: string;
+		service?: string;
+		region?: string;
+		cache?: Map<string, ArrayBuffer>;
+		retries?: number;
+		initRetryMs?: number;
+	};
+};

@@ -177,12 +177,12 @@ export default defineConfig((env) => ({
 		// }),
 		LucidS3({
 			endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-			// region: "auto",
-			// credentials: {
-			accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
-			secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
-			// },
 			bucket: "headless-cms",
+			clientOptions: {
+				region: "auto",
+				accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
+				secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+			},
 		}),
 		// LucidLocalStorage({
 		// 	uploadDir: "uploads",

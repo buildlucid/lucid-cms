@@ -5,10 +5,7 @@ let awsClient: AwsClient | null = null;
 
 const getS3Client = (pluginOptions: PluginOptions) => {
 	if (!awsClient) {
-		awsClient = new AwsClient({
-			accessKeyId: pluginOptions.accessKeyId,
-			secretAccessKey: pluginOptions.secretAccessKey,
-		});
+		awsClient = new AwsClient(pluginOptions.clientOptions);
 	}
 
 	return awsClient;
