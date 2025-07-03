@@ -1,6 +1,5 @@
 import T from "../translations/index.js";
 import type { AwsClient } from "aws4fetch";
-import { Readable } from "node:stream";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyStream } from "@lucidcms/core/types";
 

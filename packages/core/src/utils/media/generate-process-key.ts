@@ -1,5 +1,6 @@
 import type { ImageProcessorOptions } from "../../types/config.js";
 
+// TODO: check if the media type supports formatting etc. Otherwise we shouldnt concat any of the options to the key
 const generateProcessKey = (data: {
 	key: string;
 	options: ImageProcessorOptions;
