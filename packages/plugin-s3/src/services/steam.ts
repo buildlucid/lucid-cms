@@ -1,10 +1,11 @@
 import T from "../translations/index.js";
-import { type S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import type { Readable } from "node:stream";
+import type { AwsClient } from "aws4fetch";
+import { Readable } from "node:stream";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyStream } from "@lucidcms/core/types";
 
-export default (client: S3Client, pluginOptions: PluginOptions) => {
+export default (client: AwsClient, pluginOptions: PluginOptions) => {
+	// @ts-expect-error
 	const stream: MediaStrategyStream = async (
 		key: string,
 		options?: {
@@ -15,27 +16,32 @@ export default (client: S3Client, pluginOptions: PluginOptions) => {
 		},
 	) => {
 		try {
-			const commandParams: {
-				Bucket: string;
-				Key: string;
-				Range?: string;
-			} = {
-				Bucket: pluginOptions.bucket,
-				Key: key,
-			};
+			const headers: Record<string, string> = {};
 
-			//* add Range header if range is specified
 			if (options?.range) {
 				const start = options.range.start;
 				const end = options.range.end;
-				commandParams.Range =
+				headers.Range =
 					end !== undefined ? `bytes=${start}-${end}` : `bytes=${start}-`;
 			}
 
-			const command = new GetObjectCommand(commandParams);
-			const response = await client.send(command);
+			const response = await client.sign(
+				new Request(
+					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,
+					{
+						method: "GET",
+						headers,
+					},
+				),
+			);
 
-			if (response.Body === undefined) {
+			const result = await fetch(response);
+
+			if (!result.ok) {
+				throw new Error(`Stream failed: ${result.statusText}`);
+			}
+
+			if (!result.body) {
 				return {
 					error: {
 						message: T("object_body_undefined"),
@@ -44,15 +50,14 @@ export default (client: S3Client, pluginOptions: PluginOptions) => {
 				};
 			}
 
-			//* parse range information from response
 			let isPartialContent = false;
 			let totalSize: number | undefined;
 			let range: { start: number; end: number } | undefined;
 
-			if (response.ContentRange) {
+			const contentRange = result.headers.get("content-range");
+			if (contentRange) {
 				isPartialContent = true;
-				//* Content-Range format: "bytes start-end/total"
-				const match = response.ContentRange.match(/bytes (\d+)-(\d+)\/(\d+)/);
+				const match = contentRange.match(/bytes (\d+)-(\d+)\/(\d+)/);
 				if (match?.[1] && match[2] && match[3]) {
 					range = {
 						start: Number.parseInt(match[1], 10),
@@ -62,14 +67,21 @@ export default (client: S3Client, pluginOptions: PluginOptions) => {
 				}
 			}
 
+			const contentLength = result.headers.get("content-length");
+			const contentType = result.headers.get("content-type");
+
 			return {
 				error: undefined,
 				data: {
-					contentLength: response.ContentLength,
-					contentType: response.ContentType,
-					body: response.Body as Readable,
+					contentLength: contentLength
+						? Number.parseInt(contentLength, 10)
+						: undefined,
+					contentType: contentType || undefined,
+					body: result.body,
 					isPartialContent,
-					totalSize: totalSize || response.ContentLength,
+					totalSize:
+						totalSize ||
+						(contentLength ? Number.parseInt(contentLength, 10) : undefined),
 					range,
 				},
 			};

@@ -1,19 +1,29 @@
 import T from "../translations/index.js";
-import { type S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
+import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyGetMeta } from "@lucidcms/core/types";
 
-export default (client: S3Client, pluginOptions: PluginOptions) => {
+export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const getMetadata: MediaStrategyGetMeta = async (key) => {
 		try {
-			const command = new HeadObjectCommand({
-				Bucket: pluginOptions.bucket,
-				Key: key,
-			});
+			const response = await client.sign(
+				new Request(
+					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,
+					{
+						method: "HEAD",
+					},
+				),
+			);
 
-			const response = await client.send(command);
+			const result = await fetch(response);
 
-			if (response.ContentLength === undefined) {
+			if (!result.ok) {
+				throw new Error(`Get metadata failed: ${result.statusText}`);
+			}
+
+			const contentLength = result.headers.get("content-length");
+
+			if (!contentLength) {
 				return {
 					error: {
 						message: T("object_missing_metadata"),
@@ -22,12 +32,15 @@ export default (client: S3Client, pluginOptions: PluginOptions) => {
 				};
 			}
 
+			const contentType = result.headers.get("content-type");
+			const etag = result.headers.get("etag");
+
 			return {
 				error: undefined,
 				data: {
-					size: response.ContentLength,
-					mimeType: response.ContentType || null,
-					etag: response.ETag || null,
+					size: Number.parseInt(contentLength, 10),
+					mimeType: contentType || null,
+					etag: etag || null,
 				},
 			};
 		} catch (e) {

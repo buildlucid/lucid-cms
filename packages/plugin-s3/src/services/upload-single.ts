@@ -1,26 +1,36 @@
-import { type S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyUploadSingle } from "@lucidcms/core/types";
 
-export default (client: S3Client, pluginOptions: PluginOptions) => {
+export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const uploadSingle: MediaStrategyUploadSingle = async (props) => {
 		try {
-			const command = new PutObjectCommand({
-				Bucket: pluginOptions.bucket,
-				Key: props.key,
-				Body: props.data,
-				ContentType: props.meta.mimeType,
-				Metadata: {
-					extension: props.meta.extension || "",
-				},
-			});
+			const response = await client.sign(
+				new Request(
+					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${props.key}`,
+					{
+						method: "PUT",
+						body: props.data as unknown as BodyInit,
+						headers: {
+							"Content-Type": props.meta.mimeType,
+							"x-amz-meta-extension": props.meta.extension || "",
+						},
+					},
+				),
+			);
 
-			const response = await client.send(command);
+			const result = await fetch(response);
+
+			if (!result.ok) {
+				throw new Error(`Upload failed: ${result.statusText}`);
+			}
+
+			const etag = result.headers.get("etag")?.replace(/"/g, "");
 
 			return {
 				error: undefined,
 				data: {
-					etag: response.ETag?.replace(/"/g, ""),
+					etag,
 				},
 			};
 		} catch (e) {

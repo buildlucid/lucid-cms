@@ -1,20 +1,33 @@
-import { type S3Client, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyDeleteMultiple } from "@lucidcms/core/types";
 
-export default (client: S3Client, pluginOptions: PluginOptions) => {
+export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const deleteMultiple: MediaStrategyDeleteMultiple = async (keys) => {
 		try {
-			const command = new DeleteObjectsCommand({
-				Bucket: pluginOptions.bucket,
-				Delete: {
-					Objects: keys.map((k) => ({
-						Key: k,
-					})),
-				},
-			});
+			const deleteXml = `<?xml version="1.0" encoding="UTF-8"?>
+<Delete>
+${keys.map((key) => `<Object><Key>${key}</Key></Object>`).join("")}
+</Delete>`;
 
-			await client.send(command);
+			const response = await client.sign(
+				new Request(
+					`${pluginOptions.endpoint}/${pluginOptions.bucket}?delete`,
+					{
+						method: "POST",
+						body: deleteXml,
+						headers: {
+							"Content-Type": "application/xml",
+						},
+					},
+				),
+			);
+
+			const result = await fetch(response);
+
+			if (!result.ok) {
+				throw new Error(`Delete multiple failed: ${result.statusText}`);
+			}
 
 			return {
 				error: undefined,

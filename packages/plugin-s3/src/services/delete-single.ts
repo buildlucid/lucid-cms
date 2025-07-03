@@ -1,16 +1,24 @@
-import { type S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyDeleteSingle } from "@lucidcms/core/types";
 
-export default (client: S3Client, pluginOptions: PluginOptions) => {
+export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const deletSingle: MediaStrategyDeleteSingle = async (key) => {
 		try {
-			const command = new DeleteObjectCommand({
-				Bucket: pluginOptions.bucket,
-				Key: key,
-			});
+			const response = await client.sign(
+				new Request(
+					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,
+					{
+						method: "DELETE",
+					},
+				),
+			);
 
-			await client.send(command);
+			const result = await fetch(response);
+
+			if (!result.ok) {
+				throw new Error(`Delete failed: ${result.statusText}`);
+			}
 
 			return {
 				error: undefined,

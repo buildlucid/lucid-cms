@@ -1,4 +1,4 @@
-import getS3Client from "./clients/s3-client.js";
+import getAwsClient from "./clients/aws-client.js";
 import stream from "./services/steam.js";
 import deletSingle from "./services/delete-single.js";
 import deleteMultiple from "./services/delete-multiple.js";
@@ -13,7 +13,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
 	pluginOptions,
 ) => {
-	const client = getS3Client(pluginOptions);
+	const client = getAwsClient(pluginOptions);
 
 	config.media = {
 		...config.media,

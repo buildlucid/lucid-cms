@@ -26,7 +26,7 @@ import SimpleCollection from "./src/collections/simple.js";
 export const adapter = cloudflareAdapter();
 
 export default defineConfig((env) => ({
-	host: "http://localhost:5432",
+	host: "http://localhost:8787",
 	logger: {
 		level: "silent",
 	},
@@ -34,7 +34,7 @@ export default defineConfig((env) => ({
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
-	// db: new PostgresAdapter(process.env.DATABASE_URL as string, {
+	// db: new PostgresAdapter(env?.DATABASE_URL as string, {
 	// 	max: 5,
 	// }),
 	db: new LibSQLAdapter({
@@ -173,22 +173,20 @@ export default defineConfig((env) => ({
 		// 		email: "admin@ui.protodigital.co.uk",
 		// 		name: "Lucid",
 		// 	},
-		// 	apiKey: process.env.RESEND_API_KEY as string,
+		// 	apiKey: env?.RESEND_API_KEY as string,
 		// }),
-		// LucidS3({
-		// 	clientConfig: {
-		// 		endpoint: `https://${process.env.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-		// 		region: "auto",
-		// 		credentials: {
-		// 			accessKeyId: process.env.LUCID_S3_ACCESS_KEY as string,
-		// 			secretAccessKey: process.env.LUCID_S3_SECRET_KEY as string,
-		// 		},
-		// 	},
-		// 	bucket: "headless-cms",
-		// }),
+		LucidS3({
+			endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+			// region: "auto",
+			// credentials: {
+			accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
+			secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+			// },
+			bucket: "headless-cms",
+		}),
 		// LucidLocalStorage({
 		// 	uploadDir: "uploads",
-		// 	secretKey: process.env.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		// 	secretKey: env?.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
 		// }),
 	],
 	// compilerOptions: {
