@@ -46,9 +46,8 @@
     },
     "files": [
         "dist",
-        "cms",
         "templates",
-        "assets"
+        "static"
     ],
     "author": "Proto Digital",
     "repository": {

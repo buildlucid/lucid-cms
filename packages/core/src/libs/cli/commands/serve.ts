@@ -4,6 +4,7 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 import createDevLogger from "../logger/dev-logger.js";
 import migrateCommand from "./migrate.js";
+import copyStaticAssets from "../utils/copy-static-assets.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
@@ -31,6 +32,7 @@ const serveCommand = async (options?: {
 		if (!migrateResult) process.exit(2);
 
 		await prerenderMjmlTemplates(configRes.config);
+		await copyStaticAssets(configRes.config);
 
 		destroy = await configRes.adapter?.cli?.serve(configRes.config, logger);
 	} catch (error) {

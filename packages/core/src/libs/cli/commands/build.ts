@@ -8,7 +8,7 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 import createBuildLogger from "../logger/build-logger.js";
 import constants from "../../../constants/constants.js";
-import migrateCommand from "./migrate.js";
+import copyStaticAssets from "../utils/copy-static-assets.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -37,6 +37,7 @@ const buildCommand = async (options?: {
 		}
 
 		await prerenderMjmlTemplates(configRes.config);
+		await copyStaticAssets(configRes.config);
 
 		if (!configRes.adapter?.cli?.build) {
 			logger.info("No build handler found in adapter");
