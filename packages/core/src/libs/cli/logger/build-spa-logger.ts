@@ -6,7 +6,7 @@ import { colours, formatDuration } from "./helpers.js";
  * To log when the SPA build starts and ends
  */
 export const startAdminBuild = (silent: boolean) => {
-	if (!silent) return;
+	if (silent) return;
 	const startTime = process.hrtime();
 
 	const require = createRequire(import.meta.url);
@@ -18,7 +18,7 @@ export const startAdminBuild = (silent: boolean) => {
 	);
 
 	return () => {
-		if (!silent) return;
+		if (silent) return;
 		const diff = process.hrtime(startTime);
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 
