@@ -29,6 +29,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				error: undefined,
 				data: {
 					url: response.url.toString(),
+					headers: Object.fromEntries(response.headers.entries()),
 				},
 			};
 		} catch (e) {

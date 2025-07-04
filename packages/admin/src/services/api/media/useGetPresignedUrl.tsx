@@ -14,6 +14,7 @@ export const getPresignedUrlReq = (params: Params) => {
 		ResponseBody<{
 			url: string;
 			key: string;
+			headers?: Record<string, string>;
 		}>
 	>({
 		url: "/api/v1/media/presigned-url",
@@ -30,12 +31,13 @@ interface UseUpdateSingleProps {
 		_data: ResponseBody<{
 			url: string;
 			key: string;
+			headers?: Record<string, string>;
 		}>,
 	) => void;
 	onError?: () => void;
 }
 
-const useGetPresgnedUrl = (props?: UseUpdateSingleProps) => {
+const useGetPresignedUrl = (props?: UseUpdateSingleProps) => {
 	// -----------------------------
 	// Mutation
 	return serviceHelpers.useMutationWrapper<
@@ -43,6 +45,7 @@ const useGetPresgnedUrl = (props?: UseUpdateSingleProps) => {
 		ResponseBody<{
 			url: string;
 			key: string;
+			headers?: Record<string, string>;
 		}>
 	>({
 		mutationFn: getPresignedUrlReq,
@@ -51,4 +54,4 @@ const useGetPresgnedUrl = (props?: UseUpdateSingleProps) => {
 	});
 };
 
-export default useGetPresgnedUrl;
+export default useGetPresignedUrl;

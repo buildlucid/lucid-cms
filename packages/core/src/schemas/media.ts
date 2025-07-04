@@ -90,17 +90,6 @@ const mediaResponseSchema = z.object({
 	}),
 });
 
-const presignedUrlResponseSchema = z.object({
-	url: z.string().meta({
-		description: "The presigned URL to upload media to",
-		example: "https://example.com/cdn/v1/key",
-	}),
-	key: z.string().meta({
-		description: "The media key",
-		example: "2024/09/5ttogd-placeholder-image.png",
-	}),
-});
-
 export const controllerSchemas = {
 	getMultiple: {
 		query: {
@@ -324,7 +313,25 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: presignedUrlResponseSchema,
+		response: z.object({
+			url: z.string().meta({
+				description: "The presigned URL to upload media to",
+				example: "https://example.com/cdn/v1/key",
+			}),
+			key: z.string().meta({
+				description: "The media key",
+				example: "2024/09/5ttogd-placeholder-image.png",
+			}),
+			headers: z
+				.record(z.string(), z.string())
+				.meta({
+					description: "The headers to use when uploading media",
+					example: {
+						"x-amz-meta-extension": "jpg",
+					},
+				})
+				.optional(),
+		}),
 	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({

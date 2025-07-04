@@ -10,6 +10,7 @@ const getPresignedUrl: ServiceFn<
 	],
 	{
 		url: string;
+		headers?: Record<string, string>;
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =

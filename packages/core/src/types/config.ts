@@ -62,6 +62,7 @@ export type MediaStrategyGetPresignedUrl = (
 	},
 ) => ServiceResponse<{
 	url: string;
+	headers?: Record<string, string>;
 }>;
 
 export type MediaStrategyGetMeta = (key: string) => ServiceResponse<{

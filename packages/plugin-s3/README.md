@@ -17,19 +17,17 @@ import LucidS3 from "@lucidcms/plugin-s3";
 
 export default lucid.config({
   // ...other config
-  plugins: [
-    LucidS3({
-      clientConfig: {
-        endpoint: `https://${process.env.HEADLESS_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-        region: "auto",
-        credentials: {
-          accessKeyId: process.env.HEADLESS_S3_ACCESS_KEY as string,
-          secretAccessKey: process.env.HEADLESS_S3_SECRET_KEY as string,
-        },
-      },
-      bucket: "headless-cms",
-    }),
-  ],
+    plugins: [
+        LucidS3({
+            endpoint: `https://${process.env.HEADLESS_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+            bucket: "headless-cms",
+            clientConfig: {
+                region: "auto",
+                accessKeyId: process.env.HEADLESS_S3_ACCESS_KEY as string,
+                secretAccessKey: process.env.HEADLESS_S3_SECRET_KEY as string,
+            },
+        }),
+    ],
 });
 ```
 ## Bucket Configuration
@@ -42,7 +40,8 @@ As Lucid uses presigned URLs to upload media from the client, you will need to c
 [
   {
     "AllowedOrigins": [
-      "http://localhost:3000"
+      "http://localhost:8787",
+      "http://localhost:5432",
     ],
     "AllowedMethods": [
       "GET",
@@ -50,7 +49,8 @@ As Lucid uses presigned URLs to upload media from the client, you will need to c
     ],
     "AllowedHeaders": [
       "Origin",
-      "Content-Type"
+      "Content-Type",
+      "x-amz-meta-*"
     ]
   }
 ]

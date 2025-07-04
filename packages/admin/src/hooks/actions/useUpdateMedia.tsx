@@ -9,6 +9,8 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getAlt, setAlt] = createSignal<MediaResponse["alt"]>([]);
 	const [getKey, setKey] = createSignal<string>();
 	const [getPresignedUrlValue, setPresignedUrlValue] = createSignal<string>();
+	const [getPresignedUrlHeaders, setPresignedUrlHeaders] =
+		createSignal<Record<string, string>>();
 	const [getUploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const [getUploadLoading, setUploadLoading] = createSignal<boolean>(false);
 
@@ -19,6 +21,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		onSuccess: (data) => {
 			setKey(data.data.key);
 			setPresignedUrlValue(data.data.url);
+			setPresignedUrlHeaders(data.data.headers);
 		},
 	});
 
@@ -47,7 +50,8 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				method: "PUT",
 				body: file,
 				headers: {
-					"Content-Type": file.type,
+					"content-type": file.type,
+					...getPresignedUrlHeaders(),
 				},
 			});
 

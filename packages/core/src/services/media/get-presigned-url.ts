@@ -14,6 +14,7 @@ const getPresignedUrl: ServiceFn<
 	{
 		url: string;
 		key: string;
+		headers?: Record<string, string>;
 	}
 > = async (context, data) => {
 	const Media = Repository.get("media", context.db, context.config.db);
@@ -81,6 +82,7 @@ const getPresignedUrl: ServiceFn<
 		data: {
 			url: getPresignedUrlRes.data.url,
 			key: keyRes.data,
+			headers: getPresignedUrlRes.data.headers,
 		},
 	};
 };
