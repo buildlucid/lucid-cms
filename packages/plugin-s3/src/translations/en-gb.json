@@ -1,4 +1,10 @@
 {
 	"object_body_undefined": "The object get request Body is undefined.",
-	"object_missing_metadata": "An error occurred while fetching the object metadata."
+	"object_missing_metadata": "An error occurred while fetching the object metadata.",
+	"get_metadata_failed": "Get metadata failed with status {{status}} and message {{statusText}}.",
+	"an_unknown_error_occurred": "An unknown error occurred",
+	"delete_multiple_failed": "Delete multiple failed with status {{status}} and message {{statusText}}.",
+	"delete_single_failed": "Delete single failed with status {{status}} and message {{statusText}}.",
+	"stream_failed": "Stream failed with status {{status}} and message {{statusText}}.",
+	"upload_failed": "Upload failed with status {{status}} and message {{statusText}}."
 }

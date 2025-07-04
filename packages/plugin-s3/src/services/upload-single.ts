@@ -1,3 +1,4 @@
+import T from "../translations/index.js";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyUploadSingle } from "@lucidcms/core/types";
@@ -5,16 +6,19 @@ import type { MediaStrategyUploadSingle } from "@lucidcms/core/types";
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const uploadSingle: MediaStrategyUploadSingle = async (props) => {
 		try {
+			const headers = new Headers();
+
+			if (props.meta.mimeType) headers.set("Content-Type", props.meta.mimeType);
+			if (props.meta.extension)
+				headers.set("x-amz-meta-extension", props.meta.extension);
+
 			const response = await client.sign(
 				new Request(
 					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${props.key}`,
 					{
 						method: "PUT",
 						body: props.data as unknown as BodyInit,
-						headers: {
-							"Content-Type": props.meta.mimeType,
-							"x-amz-meta-extension": props.meta.extension || "",
-						},
+						headers: headers,
 					},
 				),
 			);
@@ -22,7 +26,16 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				throw new Error(`Upload failed: ${result.statusText}`);
+				return {
+					error: {
+						type: "plugin",
+						message: T("upload_failed", {
+							status: result.status,
+							statusText: result.statusText,
+						}),
+					},
+					data: undefined,
+				};
 			}
 
 			const etag = result.headers.get("etag")?.replace(/"/g, "");
@@ -34,10 +47,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				},
 			};
 		} catch (e) {
-			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					type: "plugin",
+					message:
+						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
 				},
 				data: undefined,
 			};

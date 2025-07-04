@@ -1,3 +1,4 @@
+import T from "../translations/index.js";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyDeleteMultiple } from "@lucidcms/core/types";
@@ -26,7 +27,16 @@ ${keys.map((key) => `<Object><Key>${key}</Key></Object>`).join("")}
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				throw new Error(`Delete multiple failed: ${result.statusText}`);
+				return {
+					error: {
+						type: "plugin",
+						message: T("delete_multiple_failed", {
+							status: result.status,
+							statusText: result.statusText,
+						}),
+					},
+					data: undefined,
+				};
 			}
 
 			return {
@@ -34,10 +44,11 @@ ${keys.map((key) => `<Object><Key>${key}</Key></Object>`).join("")}
 				data: undefined,
 			};
 		} catch (e) {
-			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					type: "plugin",
+					message:
+						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
 				},
 				data: undefined,
 			};

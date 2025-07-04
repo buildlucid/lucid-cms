@@ -18,7 +18,16 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				throw new Error(`Get metadata failed: ${result.statusText}`);
+				return {
+					error: {
+						type: "plugin",
+						message: T("get_metadata_failed", {
+							status: result.status,
+							statusText: result.statusText,
+						}),
+					},
+					data: undefined,
+				};
 			}
 
 			const contentLength = result.headers.get("content-length");
@@ -44,10 +53,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				},
 			};
 		} catch (e) {
-			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					type: "plugin",
+					message:
+						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
 				},
 				data: undefined,
 			};

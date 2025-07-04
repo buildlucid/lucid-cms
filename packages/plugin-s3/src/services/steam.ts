@@ -2,9 +2,9 @@ import T from "../translations/index.js";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 import type { MediaStrategyStream } from "@lucidcms/core/types";
+import type { Readable } from "node:stream";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	// @ts-expect-error
 	const stream: MediaStrategyStream = async (
 		key: string,
 		options?: {
@@ -37,7 +37,15 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const result = await fetch(response);
 
 			if (!result.ok) {
-				throw new Error(`Stream failed: ${result.statusText}`);
+				return {
+					error: {
+						message: T("stream_failed", {
+							status: result.status,
+							statusText: result.statusText,
+						}),
+					},
+					data: undefined,
+				};
 			}
 
 			if (!result.body) {
@@ -76,7 +84,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 						? Number.parseInt(contentLength, 10)
 						: undefined,
 					contentType: contentType || undefined,
-					body: result.body,
+					body: result.body as unknown as Readable,
 					isPartialContent,
 					totalSize:
 						totalSize ||
@@ -85,10 +93,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				},
 			};
 		} catch (e) {
-			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					type: "plugin",
+					message:
+						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
 				},
 				data: undefined,
 			};

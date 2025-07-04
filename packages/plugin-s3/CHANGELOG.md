@@ -1,5 +1,11 @@
 # @lucidcms/plugin-s3
 
+## 2.0.0
+
+### Major Changes
+
+- Migrated off `@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner` to `aws4fetch` allow us to support Cloudflare Workers.
+
 ## 1.2.0
 
 ### Minor Changes
