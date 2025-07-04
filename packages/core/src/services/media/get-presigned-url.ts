@@ -28,6 +28,7 @@ const getPresignedUrl: ServiceFn<
 	const keyRes = generateKey({
 		name: data.fileName,
 		extension: extension || null,
+		public: true,
 	});
 	if (keyRes.error) return keyRes;
 

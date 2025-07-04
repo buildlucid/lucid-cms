@@ -77,6 +77,7 @@ const processMedia: ServiceFn<
 			width: data.body.width,
 			height: data.body.height,
 		},
+		public: true,
 	});
 
 	//* check if the processed media already exists

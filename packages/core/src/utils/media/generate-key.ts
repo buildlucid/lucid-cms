@@ -9,6 +9,7 @@ import type { ServiceResponse } from "../services/types.js";
 const generateKey = (props: {
 	name: string;
 	extension: string | null;
+	public: boolean;
 }): Awaited<ServiceResponse<string>> => {
 	const [name, extension] = props.name.split(".");
 	const ext = props.extension || extension;
@@ -34,9 +35,11 @@ const generateKey = (props: {
 	const month = getMonth(date);
 	const monthF = month + 1 >= 10 ? `${month + 1}` : `0${month + 1}`;
 
+	const key = `${getYear(date)}/${monthF}/${uuid}-${filename}.${ext}`;
+
 	return {
 		error: undefined,
-		data: `${getYear(date)}/${monthF}/${uuid}-${filename}.${ext}`,
+		data: props.public ? `public/${key}` : `private/${key}`,
 	};
 };
 

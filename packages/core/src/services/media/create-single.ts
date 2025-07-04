@@ -24,7 +24,7 @@ const createSingle: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
-			visible?: boolean;
+			public?: boolean;
 		},
 	],
 	number
@@ -77,7 +77,7 @@ const createSingle: ServiceFn<
 			data: {
 				key: syncMediaRes.data.key,
 				e_tag: syncMediaRes.data.etag ?? undefined,
-				visible: data.visible ?? true,
+				public: data.public ?? true,
 				type: syncMediaRes.data.type,
 				mime_type: syncMediaRes.data.mimeType,
 				file_extension: syncMediaRes.data.extension,

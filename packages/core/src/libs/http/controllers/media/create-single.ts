@@ -59,7 +59,7 @@ const createSingleController = factory.createHandlers(
 				fileName: body.fileName,
 				title: body.title,
 				alt: body.alt,
-				visible: true,
+				public: true,
 				width: body.width,
 				height: body.height,
 				blurHash: body.blurHash,

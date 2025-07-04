@@ -14,7 +14,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.unique().notNull(),
 				)
 				.addColumn("e_tag", adapter.getDataType("text"))
-				.addColumn("visible", adapter.getDataType("boolean"), (col) =>
+				.addColumn("public", adapter.getDataType("boolean"), (col) =>
 					col
 						.notNull()
 						.defaultTo(

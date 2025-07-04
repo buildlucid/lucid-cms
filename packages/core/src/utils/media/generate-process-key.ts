@@ -1,9 +1,9 @@
 import type { ImageProcessorOptions } from "../../types/config.js";
 
-// TODO: check if the media type supports formatting etc. Otherwise we shouldnt concat any of the options to the key
 const generateProcessKey = (data: {
 	key: string;
 	options: ImageProcessorOptions;
+	public: boolean;
 }) => {
 	const [targetK, ext] = data.key.split(".");
 	let key = `processed/${targetK}`;
@@ -15,7 +15,7 @@ const generateProcessKey = (data: {
 	if (data.options.format) key = key.concat(`.${data.options.format}`);
 	else key = key.concat(`.${ext}`);
 
-	return key;
+	return data.public ? `public/${key}` : `private/${key}`;
 };
 
 export default generateProcessKey;

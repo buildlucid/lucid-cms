@@ -15,7 +15,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		id: z.number(),
 		key: z.string(),
 		e_tag: z.string().nullable(),
-		visible: z.union([
+		public: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
@@ -65,7 +65,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		id: this.dbAdapter.getDataType("primary"),
 		key: this.dbAdapter.getDataType("text"),
 		e_tag: this.dbAdapter.getDataType("text"),
-		visible: this.dbAdapter.getDataType("boolean"),
+		public: this.dbAdapter.getDataType("boolean"),
 		type: this.dbAdapter.getDataType("text"),
 		mime_type: this.dbAdapter.getDataType("text"),
 		file_extension: this.dbAdapter.getDataType("text"),
@@ -165,7 +165,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("alt_translations"),
 			])
-			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"))
+			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
@@ -260,7 +260,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("alt_translations"),
 			])
-			.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"))
+			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "in", props.ids);
 
 		const exec = await this.executeQuery(() => query.execute(), {
@@ -385,7 +385,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"title_translations.value",
 						"alt_translations.value",
 					])
-					.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
+					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 				const countQuery = this.db
 					.selectFrom("lucid_media")
@@ -412,7 +412,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"title_translations.value as title_translation_value",
 						"alt_translations.value as alt_translation_value",
 					])
-					.where("visible", "=", this.dbAdapter.getDefault("boolean", "true"));
+					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 				const { main, count } = queryBuilder.main(
 					{

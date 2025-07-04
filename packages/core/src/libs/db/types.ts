@@ -256,7 +256,7 @@ export interface LucidMedia {
 	id: Generated<number>;
 	key: string;
 	e_tag: string | null;
-	visible: BooleanInt;
+	public: BooleanInt;
 	type: string;
 	mime_type: string;
 	file_extension: string;
