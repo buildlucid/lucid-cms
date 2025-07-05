@@ -336,8 +336,8 @@ export interface LucidVersionTable {
 	document_id: number;
 	type: DocumentVersionType;
 	promoted_from: number | null;
-	created_by: number;
-	updated_by: number;
+	created_by: number | null;
+	updated_by: number | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
