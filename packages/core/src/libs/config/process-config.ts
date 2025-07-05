@@ -104,7 +104,7 @@ const processConfig = async (
 					scope: constants.logScopes.config,
 				});
 			}
-			collection.collectionTableSchema = res.data;
+			collection.runtimeTableSchema = res.data;
 		}
 
 		initialiseLogger({

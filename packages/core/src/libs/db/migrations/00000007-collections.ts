@@ -11,6 +11,9 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.primaryKey(),
 				)
+				.addColumn("schema", adapter.getDataType("json"), (col) =>
+					col.notNull(),
+				)
 				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -28,6 +31,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_collections_key_schema")
+				.on("lucid_collections")
+				.columns(["key", "schema"])
 				.execute();
 
 			// Migrations

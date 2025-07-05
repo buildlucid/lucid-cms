@@ -1,10 +1,10 @@
 import type { Kysely, JSONColumnType, Transaction } from "kysely";
 import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
-import type { FieldTypes } from "../custom-fields/types.js";
 import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type DatabaseAdapter from "./adapter.js";
 import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
+import type { CollectionSchema } from "../../services/collection-migrator/schema/types.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -287,6 +287,12 @@ export interface HeadlessProcessedImages {
 
 export interface LucidCollections {
 	key: string;
+	schema: JSONColumnType<
+		CollectionSchema,
+		//* __insert__ includes a Record as the base repository handles formatting via formatData method
+		CollectionSchema,
+		CollectionSchema
+	>;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
 	created_at: TimestampImmutable;

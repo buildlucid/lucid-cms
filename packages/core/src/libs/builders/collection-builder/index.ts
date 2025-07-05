@@ -20,12 +20,14 @@ import type {
 	ServiceResponse,
 } from "../../../types.js";
 import T from "../../../translations/index.js";
+import logger from "../../logger/index.js";
 
 class CollectionBuilder extends FieldBuilder {
 	key: string;
 	config: CollectionConfigSchemaType;
 	displayInListing: string[] = [];
-	collectionTableSchema?: CollectionSchema;
+	runtimeTableSchema?: CollectionSchema;
+	dbTableSchema?: CollectionSchema;
 	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
 		super();
 		this.key = key;
@@ -192,30 +194,55 @@ class CollectionBuilder extends FieldBuilder {
 			this.config.bricks?.fixed || [],
 		);
 	}
-	get bricksTableSchema(): Array<CollectionSchemaTable<LucidBrickTableName>> {
-		return (this.collectionTableSchema?.tables.filter(
+
+	getSchema(type: "runtime" | "db") {
+		const schema =
+			type === "runtime" ? this.runtimeTableSchema : this.dbTableSchema;
+		if (!schema) {
+			logger.error({
+				scope: "collection-builder",
+				message: `Collection ${this.key} has no ${type} table schema`,
+			});
+			return {
+				key: this.key,
+				tables: [],
+			} satisfies CollectionSchema;
+		}
+		return schema;
+	}
+	bricksTableSchema(
+		type: "runtime" | "db",
+	): Array<CollectionSchemaTable<LucidBrickTableName>> {
+		const schema = this.getSchema(type);
+
+		return (schema.tables.filter(
 			(table) => table.type !== "document" && table.type !== "versions",
 		) ?? []) as Array<CollectionSchemaTable<LucidBrickTableName>>;
 	}
-	get documentTableSchema() {
-		return this.collectionTableSchema?.tables.find(
-			(t) => t.type === "document",
-		) as CollectionSchemaTable<LucidDocumentTableName> | undefined;
+	documentTableSchema(type: "runtime" | "db") {
+		const schema = this.getSchema(type);
+		return schema.tables.find((t) => t.type === "document") as
+			| CollectionSchemaTable<LucidDocumentTableName>
+			| undefined;
 	}
-	get documentFieldsTableSchema() {
-		return this.collectionTableSchema?.tables.find(
-			(t) => t.type === "document-fields",
-		) as CollectionSchemaTable<LucidBrickTableName> | undefined;
+	documentFieldsTableSchema(type: "runtime" | "db") {
+		const schema = this.getSchema(type);
+		return schema.tables.find((t) => t.type === "document-fields") as
+			| CollectionSchemaTable<LucidBrickTableName>
+			| undefined;
 	}
-	get documentVersionTableSchema() {
-		return this.collectionTableSchema?.tables.find(
-			(t) => t.type === "versions",
-		) as CollectionSchemaTable<LucidVersionTableName> | undefined;
+	documentVersionTableSchema(type: "runtime" | "db") {
+		const schema = this.getSchema(type);
+		return schema.tables.find((t) => t.type === "versions") as
+			| CollectionSchemaTable<LucidVersionTableName>
+			| undefined;
 	}
-	get tableNames(): Awaited<ServiceResponse<CollectionTableNames>> {
-		const versionTable = this.documentVersionTableSchema?.name;
-		const documentTable = this.documentTableSchema?.name;
-		const documentFields = this.documentFieldsTableSchema?.name;
+	tableNames(
+		type: "runtime" | "db",
+	): Awaited<ServiceResponse<CollectionTableNames>> {
+		const versionTable = this.documentVersionTableSchema(type)?.name;
+		const documentTable = this.documentTableSchema(type)?.name;
+		const documentFields = this.documentFieldsTableSchema(type)?.name;
 
 		if (!versionTable || !documentTable || !documentFields) {
 			return {

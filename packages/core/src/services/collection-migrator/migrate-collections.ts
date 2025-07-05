@@ -32,8 +32,8 @@ const migrateCollections: ServiceFn<
 	//* infer schema for each collection
 	const inferedSchemas: Array<CollectionSchema> = [];
 	for (const [_, collection] of context.config.collections.entries()) {
-		if (!collection.collectionTableSchema) continue;
-		inferedSchemas.push(collection.collectionTableSchema);
+		if (!collection.runtimeTableSchema) continue;
+		inferedSchemas.push(collection.runtimeTableSchema);
 	}
 
 	//* generate migration plan

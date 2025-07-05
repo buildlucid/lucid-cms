@@ -72,47 +72,96 @@ const syncCollections: ServiceFn<[], undefined> = async (
 		});
 	}
 
-	const [createMultipleRes, updateDeletedRes, updateRestoredRes] =
-		await Promise.all([
-			missingCollections.length > 0 &&
-				Collections.createMultiple({
-					data: missingCollections.map((key) => ({ key })),
-				}),
-			collectionsToDeleteKeys.length > 0 &&
-				Collections.updateSingle({
-					data: {
-						is_deleted: true,
-						is_deleted_at: new Date().toISOString(),
+	//* existing collections that need schema updates
+	const existingCollections = activeCollections.filter(
+		(key) =>
+			collectionsFromDB.includes(key) && !unDeletedCollectionKeys.includes(key),
+	);
+
+	const [
+		createMultipleRes,
+		updateDeletedRes,
+		updateRestoredRes,
+		updateSchemasRes,
+	] = await Promise.all([
+		missingCollections.length > 0 &&
+			Collections.createMultiple({
+				data: missingCollections
+					.map((key) => {
+						const collection = context.config.collections.find(
+							(c) => c.key === key,
+						);
+						if (!collection?.runtimeTableSchema) return null;
+
+						return {
+							key,
+							schema: collection.runtimeTableSchema,
+						};
+					})
+					.filter((c) => c !== null),
+			}),
+		collectionsToDeleteKeys.length > 0 &&
+			Collections.updateSingle({
+				data: {
+					is_deleted: true,
+					is_deleted_at: new Date().toISOString(),
+				},
+				where: [
+					{
+						key: "key",
+						operator: "in",
+						value: collectionsToDeleteKeys,
 					},
-					where: [
-						{
-							key: "key",
-							operator: "in",
-							value: collectionsToDeleteKeys,
-						},
-					],
-				}),
-			unDeletedCollectionKeys.length > 0 &&
-				Collections.updateSingle({
-					data: {
-						is_deleted: false,
-						is_deleted_at: null,
+				],
+			}),
+		unDeletedCollectionKeys.length > 0 &&
+			Collections.updateSingle({
+				data: {
+					is_deleted: false,
+					is_deleted_at: null,
+				},
+				where: [
+					{
+						key: "key",
+						operator: "in",
+						value: unDeletedCollectionKeys,
 					},
-					where: [
-						{
-							key: "key",
-							operator: "in",
-							value: unDeletedCollectionKeys,
+				],
+			}),
+		existingCollections.length > 0 &&
+			Promise.all(
+				existingCollections.map((key) => {
+					const collection = context.config.collections.find(
+						(c) => c.key === key,
+					);
+					if (!collection?.runtimeTableSchema) return Promise.resolve(true);
+
+					return Collections.updateSingle({
+						data: {
+							schema: collection.runtimeTableSchema,
 						},
-					],
+						where: [
+							{
+								key: "key",
+								operator: "=",
+								value: key,
+							},
+						],
+					});
 				}),
-		]);
+			),
+	]);
 	if (typeof createMultipleRes !== "boolean" && createMultipleRes.error)
 		return createMultipleRes;
 	if (typeof updateDeletedRes !== "boolean" && updateDeletedRes.error)
 		return updateDeletedRes;
 	if (typeof updateRestoredRes !== "boolean" && updateRestoredRes.error)
 		return updateRestoredRes;
+	if (Array.isArray(updateSchemasRes)) {
+		for (const res of updateSchemasRes) {
+			if (typeof res !== "boolean" && res.error) return res;
+		}
+	}
 
 	return {
 		error: undefined,

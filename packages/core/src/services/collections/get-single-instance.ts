@@ -9,11 +9,12 @@ const getSingleInstance = (
 	context: ServiceContext,
 	data: {
 		key: string;
+		instance?: CollectionBuilder;
 	},
 ): Awaited<ServiceResponse<CollectionBuilder>> => {
-	const collection = context.config.collections?.find(
-		(c) => c.key === data.key,
-	);
+	const collection =
+		data.instance ??
+		context.config.collections?.find((c) => c.key === data.key);
 
 	if (collection === undefined) {
 		return {
