@@ -11,10 +11,11 @@ npm install @lucidcms/node-adapter
 ## lucid.config.ts/js
 
 ```typescript
-import NodeAdapter from "@lucidcms/node-adapter"
+import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
 
-export default lucid.config({
-	adapter: NodeAdapter(),
-    // ...other config
+export const adapter = nodeAdapter();
+
+export default defineConfig((env) => ({
+    // ...config,
 });
 ```

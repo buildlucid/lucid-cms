@@ -1,6 +1,6 @@
-# Lucid - Node Adapter 
+# Lucid - Cloudflare Worker Adapter 
 
-> The official Node adapter for Lucid CMS
+> The official Cloudflare Worker adapter for Lucid CMS
 
 ## Installation
 
@@ -11,10 +11,11 @@ npm install @lucidcms/cloudflare-adapter
 ## lucid.config.ts/js
 
 ```typescript
-import CloudflareAdapter from "@lucidcms/cloudflare-adapter"
+import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 
-export default lucid.config({
-	adapter: CloudflareAdapter(),
-    // ...other config
+export const adapter = cloudflareAdapter();
+
+export default defineConfig((env) => ({
+    // ...config
 });
 ```
