@@ -1,6 +1,6 @@
-import { rm } from "node:fs/promises";
+import { mkdir, rm, stat } from "node:fs/promises";
 import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+import path, { join } from "node:path";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import vite from "../../vite/index.js";
@@ -8,7 +8,7 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 import createBuildLogger from "../logger/build-logger.js";
 import constants from "../../../constants/constants.js";
-import copyStaticAssets from "../utils/copy-static-assets.js";
+import copyPublicAssets from "../utils/copy-public-assets.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -28,16 +28,14 @@ const buildCommand = async (options?: {
 
 	try {
 		if (options?.cacheSpa) {
-			await clearOutputDirExceptSpa(configRes.config.compilerOptions?.outDir);
+			await partialBuildDirClear(configRes.config.compilerOptions?.outDir);
 		} else {
 			await rm(configRes.config.compilerOptions?.outDir, {
 				recursive: true,
 				force: true,
 			});
+			await mkdir(configRes.config.compilerOptions?.outDir);
 		}
-
-		await prerenderMjmlTemplates(configRes.config);
-		await copyStaticAssets(configRes.config);
 
 		if (!configRes.adapter?.cli?.build) {
 			logger.info("No build handler found in adapter");
@@ -60,6 +58,11 @@ const buildCommand = async (options?: {
 			process.exit(1);
 		}
 
+		await Promise.all([
+			prerenderMjmlTemplates(configRes.config),
+			copyPublicAssets(configRes.config),
+		]);
+
 		logger.buildComplete(overallStartTime);
 
 		process.exit(0);
@@ -70,18 +73,38 @@ const buildCommand = async (options?: {
 };
 
 /**
- * Clear output directory while preserving SPA build output
+ * Partially clear the build directory while preserving the SPA build output
  */
-const clearOutputDirExceptSpa = async (outDir: string | undefined) => {
+const partialBuildDirClear = async (outDir: string | undefined) => {
 	if (!outDir) return;
 
-	const items = await readdir(outDir);
-	const spaDir = constants.vite.outputDir;
+	const items = await readdir(outDir, { recursive: true });
+
+	const preservePaths = [
+		path.join(constants.directories.public, constants.vite.dist),
+		path.join(constants.directories.temp, constants.vite.buildMetadata),
+	];
 
 	for (const item of items) {
-		if (item !== spaDir) {
-			const itemPath = join(outDir, item);
-			await rm(itemPath, { recursive: true, force: true });
+		const itemPath = join(outDir, item);
+
+		try {
+			const stats = await stat(itemPath);
+			if (!stats.isFile()) continue;
+		} catch {
+			continue;
+		}
+
+		const shouldPreserve = preservePaths.some(
+			(preservePath) =>
+				item.includes(preservePath) ||
+				item === preservePath ||
+				itemPath.includes(preservePath) ||
+				itemPath === join(outDir, preservePath),
+		);
+
+		if (!shouldPreserve) {
+			await rm(itemPath, { force: true });
 		}
 	}
 };

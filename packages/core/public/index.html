@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Lucid CMS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-[#131313] text-white min-h-screen">
+        <main class="h-screen w-full flex items-center justify-center">
+            <div class="flex flex-col items-center justify-center max-w-2xl mx-auto p-10 m-auto">
+                <div class="flex flex-col items-center mb-16">
+                    <svg width="60" height="66" viewBox="0 0 30 33" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        class="mb-10">
+                        <rect x="8.00879" width="8.26731" height="30.9433" rx="4.13365" transform="rotate(15 8.00879 0)"
+                            fill="#C1FE77" />
+                        <rect x="22.0146" y="0.206909" width="8.26731" height="30.9433" rx="4.13365"
+                            transform="rotate(15 22.0146 0.206909)" fill="#C1FE77" />
+                    </svg>
+
+                    <h1 class="text-5xl font-bold mb-6 text-white text-center">
+                        Lucid CMS
+                    </h1>
+
+                    <p class="text-xl text-gray-300 text-center leading-relaxed max-w-xl">
+                        Welcome to your content management system.
+                        <span class="text-white font-medium">Access your admin panel</span> to start creating and managing
+                        your content.
+                    </p>
+                </div>
+
+                <div class="bg-[#242424] border border-[#343434] rounded-2xl p-8 w-full max-w-md">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-semibold mb-2">Ready to get started?</h2>
+                        <p class="text-gray-400">Sign in to your admin dashboard</p>
+                    </div>
+
+                    <a href="/admin/login"
+                        class="w-full text-lg font-semibold text-black px-8 py-4 rounded-xl flex items-center justify-center group bg-[#c1fe77] hover:bg-[#d0ff96] transition-colors duration-200">
+                        <span>Go to Admin Panel</span>
+                        <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+
+                    <div class="mt-6 pt-6 border-t border-[#343434]">
+                        <div class="flex flex-col space-y-3 text-sm text-center">
+                            <a href="https://lucidcms.io/getting-started/"
+                                class="text-gray-400 hover:text-white underline underline-offset-4 decoration-gray-500 hover:decoration-white transition-colors duration-200"
+                                target="_blank" rel="noreferrer">
+                                Getting Started Guide
+                            </a>
+                            <a href="https://lucidcms.io/guides/configuring-lucid/"
+                                class="text-gray-400 hover:text-white underline underline-offset-4 decoration-gray-500 hover:decoration-white transition-colors duration-200"
+                                target="_blank" rel="noreferrer">
+                                Configuration Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <p class="text-gray-400 text-sm">
+                        Made with ❤️ by <a href="https://protodigital.co.uk" class="hover:text-gray-300" target="_blank"
+                            rel="noreferrer">Proto Digital</a></a>
+                    </p>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>

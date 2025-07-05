@@ -16,15 +16,15 @@ const createDevServer = async (
 		const paths = getPaths(config);
 
 		const [clientMountRes, clientHtmlRes] = await Promise.all([
-			generateClientMount(config),
-			generateHTML(config),
+			generateClientMount(paths),
+			generateHTML(paths),
 		]);
 		if (clientHtmlRes.error) return clientHtmlRes;
 		if (clientMountRes.error) return clientMountRes;
 
 		const server = await createServer({
 			plugins: [tailwindcss(), solidPlugin()],
-			root: paths.clientDirectory,
+			root: paths.publicDist,
 			server: {
 				port: constants.vite.port,
 			},

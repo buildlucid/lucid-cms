@@ -5,7 +5,7 @@ import { colours, formatDuration } from "./helpers.js";
 /**
  * To log when the SPA build starts and ends
  */
-export const startAdminBuild = (silent: boolean) => {
+export const startAdminBuild = (silent?: boolean) => {
 	if (silent) return;
 	const startTime = process.hrtime();
 

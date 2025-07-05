@@ -67,15 +67,14 @@ const cloudflareAdapter = (options?: {
 							async (app, con) => {
 								const paths = getVitePaths(con);
 								app.use(
-									"/admin/assets/*",
+									"/*",
 									serveStatic({
 										rewriteRequestPath: (path) => {
-											const relativePath = path.replace(/^\/admin/, "");
 											const relativeClientDist = relative(
 												process.cwd(),
-												paths.clientDist,
+												paths.publicDist,
 											);
-											return `${relativeClientDist}${relativePath}`;
+											return `${relativeClientDist}${path}`;
 										},
 									}),
 								);

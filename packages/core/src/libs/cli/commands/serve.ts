@@ -4,7 +4,8 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 import createDevLogger from "../logger/dev-logger.js";
 import migrateCommand from "./migrate.js";
-import copyStaticAssets from "../utils/copy-static-assets.js";
+import copyPublicAssets from "../utils/copy-public-assets.js";
+import vite from "../../vite/index.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
@@ -31,8 +32,19 @@ const serveCommand = async (options?: {
 		});
 		if (!migrateResult) process.exit(2);
 
-		await prerenderMjmlTemplates(configRes.config);
-		await copyStaticAssets(configRes.config);
+		const viteBuildRes = await vite.buildApp(configRes.config, undefined, true);
+		if (viteBuildRes.error) {
+			logger.error(
+				viteBuildRes.error.message ?? "Failed to build app",
+				viteBuildRes.error,
+			);
+			process.exit(1);
+		}
+
+		await Promise.all([
+			prerenderMjmlTemplates(configRes.config),
+			copyPublicAssets(configRes.config),
+		]);
 
 		destroy = await configRes.adapter?.cli?.serve(configRes.config, logger);
 	} catch (error) {

@@ -32,7 +32,7 @@
         }
     },
     "assets": {
-        "directory": "./dist/static/",
+        "directory": "./dist/public/",
         "binding": "ASSETS",
     },
     "triggers": {

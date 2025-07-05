@@ -23,7 +23,7 @@ const shouldBuild = async (config: Config): ServiceResponse<boolean> => {
 
 		//* always build if one doesnt exist
 		if (!existsSync(paths.clientDist)) {
-			await generateBuildMetadata("missing", configPath, config);
+			await generateBuildMetadata("missing", configPath, paths);
 			return {
 				data: true,
 				error: undefined,
@@ -35,7 +35,7 @@ const shouldBuild = async (config: Config): ServiceResponse<boolean> => {
 		if (buildMetadataRes.error) return buildMetadataRes;
 
 		if (buildMetadataRes.data === null) {
-			await generateBuildMetadata("missing", configPath, config);
+			await generateBuildMetadata("missing", configPath, paths);
 			return {
 				data: true,
 				error: undefined,
@@ -43,21 +43,22 @@ const shouldBuild = async (config: Config): ServiceResponse<boolean> => {
 		}
 
 		//* check lucid config file for changes
-		const configStat = await fs.stat(configPath);
-		if (configStat.mtimeMs !== buildMetadataRes.data.configHash) {
-			await generateBuildMetadata("config-hash", configPath, config, {
-				config: configStat.mtimeMs,
-			});
-			return {
-				data: true,
-				error: undefined,
-			};
-		}
+		// TODO: this is disabled until plugins or the config can impact the result of the SPA build. Currently cannot.
+		// const configStat = await fs.stat(configPath);
+		// if (configStat.mtimeMs !== buildMetadataRes.data.configHash) {
+		// 	await generateBuildMetadata("config-hash", configPath, paths, {
+		// 		config: configStat.mtimeMs,
+		// 	});
+		// 	return {
+		// 		data: true,
+		// 		error: undefined,
+		// 	};
+		// }
 
 		//* check cwd package.json for changes
 		const usersPackage = await fs.stat(paths.cwdPackageJson);
 		if (usersPackage.mtimeMs !== buildMetadataRes.data.cwdPackageHash) {
-			await generateBuildMetadata("cwd-package-hash", configPath, config, {
+			await generateBuildMetadata("cwd-package-hash", configPath, paths, {
 				cwdPackage: usersPackage.mtimeMs,
 			});
 			return {
@@ -69,7 +70,7 @@ const shouldBuild = async (config: Config): ServiceResponse<boolean> => {
 		//* check @lucidcms/admin/packages.json for changes
 		const adminPackage = await fs.stat(paths.adminPackageJson);
 		if (adminPackage.mtimeMs !== buildMetadataRes.data.adminPackageHash) {
-			await generateBuildMetadata("admin-package-hash", configPath, config, {
+			await generateBuildMetadata("admin-package-hash", configPath, paths, {
 				cwdPackage: adminPackage.mtimeMs,
 			});
 			return {
@@ -81,7 +82,7 @@ const shouldBuild = async (config: Config): ServiceResponse<boolean> => {
 		//* check @lucidcms/core/package.json for changes
 		const corePackage = await fs.stat(paths.corePackageJson);
 		if (corePackage.mtimeMs !== buildMetadataRes.data.corePackageHash) {
-			await generateBuildMetadata("core-package-hash", configPath, config, {
+			await generateBuildMetadata("core-package-hash", configPath, paths, {
 				cwdPackage: corePackage.mtimeMs,
 			});
 			return {

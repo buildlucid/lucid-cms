@@ -23,7 +23,7 @@ const copyAdminAssets = async (
 			const destination = join(
 				cwd,
 				config.compilerOptions?.outDir,
-				constants.vite.outputDir,
+				constants.directories.public,
 				constants.vite.dist,
 				"assets",
 				asset,

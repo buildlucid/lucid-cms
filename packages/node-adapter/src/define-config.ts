@@ -20,15 +20,14 @@ const defineConfig = (
 					async (app, config) => {
 						const paths = getVitePaths(config);
 						app.use(
-							"/admin/*",
+							"/*",
 							serveStatic({
 								rewriteRequestPath: (path) => {
-									const relativePath = path.replace(/^\/admin/, "");
 									const relativeClientDist = relative(
 										process.cwd(),
-										paths.clientDist,
+										paths.publicDist,
 									);
-									return `${relativeClientDist}${relativePath}`;
+									return `${relativeClientDist}${path}`;
 								},
 							}),
 						);

@@ -4,12 +4,16 @@ import generateClientMount from "../generators/client-mount.js";
 import generateHTML from "../generators/html.js";
 import copyAdminAssets from "./copy-assets.js";
 import mergeViteConfig from "./merge-vite-config.js";
-import type { Config, ServiceResponse } from "../../../types.js";
 import shouldBuild from "./should-build.js";
 import {
 	skipAdminBuild,
 	startAdminBuild,
 } from "../../cli/logger/build-spa-logger.js";
+import fs from "node:fs/promises";
+import { join } from "node:path";
+import constants from "../../../constants/constants.js";
+import getPaths from "./get-paths.js";
+import type { Config, ServiceResponse } from "../../../types.js";
 
 /**
  * Programatically build the admin SPA with Vite.
@@ -22,6 +26,7 @@ const buildApp = async (
 	try {
 		const buildAdmin = await shouldBuild(config);
 		if (buildAdmin.error) return buildAdmin;
+
 		if (buildAdmin.data === false && force !== true) {
 			skipAdminBuild(silent);
 			return {
@@ -29,14 +34,14 @@ const buildApp = async (
 				error: undefined,
 			};
 		}
-		const inlineConfig = mergeViteConfig(config);
-		const endLog = startAdminBuild(
-			silent ?? inlineConfig.logLevel === "silent",
-		);
+
+		const paths = getPaths(config);
+		const inlineConfig = mergeViteConfig(config, paths);
+		const endLog = startAdminBuild(silent);
 
 		const [clientMountRes, clientHtmlRes] = await Promise.all([
-			generateClientMount(config),
-			generateHTML(config),
+			generateClientMount(paths),
+			generateHTML(paths),
 		]);
 		if (clientHtmlRes.error) return clientHtmlRes;
 		if (clientMountRes.error) return clientMountRes;
@@ -45,6 +50,23 @@ const buildApp = async (
 
 		const copyAssetRes = await copyAdminAssets(["favicon.ico"], config);
 		if (copyAssetRes.error) return copyAssetRes;
+
+		await fs.rm(
+			join(
+				config.compilerOptions?.outDir,
+				constants.directories.public,
+				constants.vite.mount,
+			),
+			{ force: true },
+		);
+		await fs.rm(
+			join(
+				config.compilerOptions?.outDir,
+				constants.directories.public,
+				constants.vite.html,
+			),
+			{ force: true },
+		);
 
 		endLog?.();
 

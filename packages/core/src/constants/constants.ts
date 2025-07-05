@@ -83,8 +83,11 @@ export default Object.freeze({
 		max: 100,
 		timeWindow: "1 minute", // ms format - https://github.com/vercel/ms
 	},
+	directories: {
+		public: "public",
+		temp: ".lucid",
+	},
 	vite: {
-		outputDir: "static",
 		dist: "admin",
 		mount: "mount.jsx",
 		html: "index.html",

@@ -1,8 +1,8 @@
 import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
 import constants from "../../../constants/constants.js";
-import getPaths from "../services/get-paths.js";
-import type { Config, ServiceResponse } from "../../../types.js";
+import type { VitePaths } from "../services/get-paths.js";
+import type { ServiceResponse } from "../../../types.js";
 
 /**
  * Generate the client mount js for the admin SPA. This is placed in the CWD .lucid directory and used by the Vite build that happens on startup
@@ -10,11 +10,9 @@ import type { Config, ServiceResponse } from "../../../types.js";
  * @todo When we have plugin custom component support: this will need to read config for user specified css entry files and use that instead of @lucidcms/admin/assets/index.css.
  */
 const generateClientMount = async (
-	config: Config,
+	paths: VitePaths,
 ): ServiceResponse<undefined> => {
 	try {
-		const paths = getPaths(config);
-
 		const content = `
         import { render } from 'solid-js/web';
         import LucidAdmin from '@lucidcms/admin';
@@ -26,7 +24,7 @@ const generateClientMount = async (
             document.getElementById('${constants.vite.rootSelector}')
         );`;
 
-		await fs.mkdir(paths.clientDirectory, { recursive: true });
+		await fs.mkdir(paths.publicDist, { recursive: true });
 		await fs.writeFile(paths.clientMount, content, "utf-8");
 
 		return {

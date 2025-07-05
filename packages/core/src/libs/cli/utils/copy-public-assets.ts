@@ -1,14 +1,18 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getDirName } from "../../../utils/helpers/index.js";
+import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
 
 const currentDir = getDirName(import.meta.url);
 
-const copyStaticAssets = async (config: Config) => {
-	const assetsPath = path.join(currentDir, "../../../static");
+const copyPublicAssets = async (config: Config) => {
+	const assetsPath = path.join(currentDir, "../../../public");
 
-	const outDir = path.join(config.compilerOptions.outDir);
+	const outDir = path.join(
+		config.compilerOptions.outDir,
+		constants.directories.public,
+	);
 
 	await fs.mkdir(outDir, { recursive: true });
 
@@ -26,4 +30,4 @@ const copyStaticAssets = async (config: Config) => {
 	};
 };
 
-export default copyStaticAssets;
+export default copyPublicAssets;

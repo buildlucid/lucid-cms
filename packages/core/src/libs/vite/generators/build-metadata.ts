@@ -1,7 +1,7 @@
 import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
-import getPaths from "../services/get-paths.js";
-import type { Config, ServiceResponse } from "../../../types.js";
+import type { VitePaths } from "../services/get-paths.js";
+import type { ServiceResponse } from "../../../types.js";
 
 export type BuildMetadata = {
 	buildTrigger:
@@ -24,7 +24,7 @@ export type BuildMetadata = {
 const generateBuildMetadata = async (
 	trigger: BuildMetadata["buildTrigger"],
 	configPath: string,
-	config: Config,
+	paths: VitePaths,
 	hashes?: {
 		config?: number;
 		cwdPackage?: number;
@@ -33,8 +33,6 @@ const generateBuildMetadata = async (
 	},
 ): ServiceResponse<undefined> => {
 	try {
-		const paths = getPaths(config);
-
 		const [configStat, cwdStat, adminStat, coreStat] = await Promise.all([
 			hashes?.config ? null : fs.stat(configPath),
 			hashes?.cwdPackage ? null : fs.stat(paths.cwdPackageJson),
@@ -51,7 +49,7 @@ const generateBuildMetadata = async (
 			corePackageHash: hashes?.corePackage ?? coreStat?.mtimeMs ?? -1,
 		} satisfies BuildMetadata);
 
-		await fs.mkdir(paths.clientDirectory, { recursive: true });
+		await fs.mkdir(paths.tempDist, { recursive: true });
 		await fs.writeFile(paths.buildMetadata, content, "utf-8");
 
 		return {
