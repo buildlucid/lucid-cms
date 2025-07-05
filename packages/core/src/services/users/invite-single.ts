@@ -41,7 +41,7 @@ const inviteSingle: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						email:
 							userExistsRes.data.email === data.email

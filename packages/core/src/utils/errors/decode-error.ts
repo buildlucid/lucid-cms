@@ -9,7 +9,7 @@ const decodeError = (error: Error): Exclude<LucidErrorData, "zod"> => {
 			name: error.error.name,
 			message: error.error.message,
 			status: error.error.status,
-			errorResponse: error.error.errorResponse,
+			errors: error.error.errors,
 			code: error.error.code,
 		};
 	}
@@ -28,7 +28,7 @@ const decodeError = (error: Error): Exclude<LucidErrorData, "zod"> => {
 		name: constants.errors.name,
 		message: error.message || constants.errors.message,
 		status: constants.errors.status,
-		errorResponse: constants.errors.errorResponse,
+		errors: constants.errors.errors,
 		code: constants.errors.code,
 	};
 };

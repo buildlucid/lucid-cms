@@ -46,7 +46,7 @@ const checkLocalesExist: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						translations: {
 							code: "invalid",

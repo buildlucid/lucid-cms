@@ -19,7 +19,7 @@ export type ServiceWrapperConfig = {
 	transaction: boolean; //* Decides whether the db queries should be within a transaction or not
 	schema?: ZodType<unknown>;
 	schemaArgIndex?: number; //* The index of the argument to parse the schema against
-	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errorResponse">;
+	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 	logError?: boolean;
 };
 

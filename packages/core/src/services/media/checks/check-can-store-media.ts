@@ -26,7 +26,7 @@ const checkCanStoreMedia: ServiceFn<
 					size: maxFileSize,
 				}),
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "storage",
@@ -58,7 +58,7 @@ const checkCanStoreMedia: ServiceFn<
 					size: storageLimit,
 				}),
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "storage",

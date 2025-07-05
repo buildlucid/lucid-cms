@@ -38,7 +38,7 @@ const createSingle: ServiceFn<
 				type: "basic",
 				message: T("not_unique_error_message"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						name: {
 							code: "invalid",

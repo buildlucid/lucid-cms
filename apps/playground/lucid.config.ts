@@ -26,7 +26,7 @@ import SimpleCollection from "./src/collections/simple.js";
 export const adapter = cloudflareAdapter();
 
 export default defineConfig((env) => ({
-	host: "http://localhost:8787",
+	host: "http://localhost:5432",
 	logger: {
 		level: "silent",
 	},

@@ -61,7 +61,7 @@ const validatePermissions: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						permissions: permErrors.reduce<ErrorResult>((acc, e) => {
 							acc[e.key] = e.error;

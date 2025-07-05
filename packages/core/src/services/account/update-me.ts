@@ -93,7 +93,7 @@ const updateMe: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						email: {
 							code: "invalid",
@@ -110,7 +110,7 @@ const updateMe: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						username: {
 							code: "invalid",

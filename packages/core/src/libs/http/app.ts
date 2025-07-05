@@ -75,7 +75,7 @@ const createApp = async (props: {
 					name: err.error.name,
 					message: err.error.message,
 					status: err.error.status,
-					errorResponse: err.error.errorResponse,
+					errors: err.error.errors,
 					code: err.error.code,
 				} satisfies LucidErrorData);
 			}
@@ -96,7 +96,7 @@ const createApp = async (props: {
 				name: constants.errors.name,
 				message: err.message || constants.errors.message,
 				status: constants.errors.status,
-				errorResponse: constants.errors.errorResponse,
+				errors: constants.errors.errors,
 				code: constants.errors.code,
 			} satisfies LucidErrorData);
 		})

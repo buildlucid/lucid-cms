@@ -32,7 +32,7 @@ const getPresignedUrl: ServiceFn<
 				type: "basic",
 				message: presignedUrlRes.error.message,
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "media_error",

@@ -39,7 +39,7 @@ const checkUpdatePassword: ServiceFn<
 				type: "basic",
 				message: T("please_provide_current_password"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						currentPassword: {
 							code: "required",
@@ -62,7 +62,7 @@ const checkUpdatePassword: ServiceFn<
 				type: "basic",
 				message: T("please_provide_new_password"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						newPassword: {
 							code: "required",
@@ -93,7 +93,7 @@ const checkUpdatePassword: ServiceFn<
 				type: "basic",
 				message: T("please_ensure_passwords_match"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						passwordConfirmation: {
 							code: "invalid",
@@ -119,7 +119,7 @@ const checkUpdatePassword: ServiceFn<
 				type: "basic",
 				message: T("please_ensure_password_is_correct"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						currentPassword: {
 							code: "invalid",

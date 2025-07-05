@@ -54,7 +54,7 @@ const checkValidateBricksFields: ServiceFn<
 				name: T("field_validation_error_name"),
 				message: T("field_validation_error_message"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						bricks: brickErrors,
 						fields: fieldErrors,

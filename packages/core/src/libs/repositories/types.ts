@@ -28,7 +28,7 @@ export type ValidationConfig<V extends boolean = false> = {
 	enabled?: V;
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	schema?: ZodObject<any>;
-	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errorResponse">;
+	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 };
 
 export interface ValidationConfigExtend<V extends boolean = false>

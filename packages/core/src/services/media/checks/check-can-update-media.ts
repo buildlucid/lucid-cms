@@ -23,7 +23,7 @@ const checkCanUpdateMedia: ServiceFn<
 					size: maxFileSize,
 				}),
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "storage",
@@ -53,7 +53,7 @@ const checkCanUpdateMedia: ServiceFn<
 					size: storageLimit,
 				}),
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "storage",

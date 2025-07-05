@@ -4,7 +4,7 @@ import type { LucidErrorData } from "../../../types/errors.js";
 
 const mergeServiceError = (
 	error: LucidErrorData,
-	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errorResponse">,
+	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">,
 ): LucidErrorData => {
 	const errorTypeRes = errorTypeDefaults(error);
 	error.status = errorTypeRes.status;
@@ -21,7 +21,7 @@ const mergeServiceError = (
 		status: error.status ?? defaultError?.status ?? 500,
 		code: error.code ?? defaultError?.code ?? undefined,
 		zod: error.zod ?? undefined,
-		errorResponse: error.errorResponse ?? undefined,
+		errors: error.errors ?? undefined,
 	};
 };
 

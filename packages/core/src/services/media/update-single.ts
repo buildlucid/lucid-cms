@@ -83,7 +83,7 @@ const updateSingle: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "media_error",

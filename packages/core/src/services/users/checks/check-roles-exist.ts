@@ -38,7 +38,7 @@ const checkRolesExist: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						roleIds: {
 							code: "invalid",

@@ -76,7 +76,7 @@ const deleteMultiple: ServiceFn<
 			error: {
 				type: "basic",
 				message: T("document_not_found_message"),
-				errorResponse: {
+				errors: {
 					body: {
 						ids: {
 							message:

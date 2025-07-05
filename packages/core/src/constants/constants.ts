@@ -70,7 +70,7 @@ export default Object.freeze({
 		message: T("default_error_message"),
 		status: 500,
 		code: undefined,
-		errorResponse: undefined,
+		errors: undefined,
 	},
 	emailTemplates: {
 		resetPassword: "reset-password",

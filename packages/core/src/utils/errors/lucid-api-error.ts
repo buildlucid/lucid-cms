@@ -22,7 +22,7 @@ import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
  *    name: "Validation Error",
  *    message: "Validation error occurred",
  *    status: 400,
- *    errorResponse: {
+ *    errors: {
  *        body: {
  *            email: {
  *                code: "invalid_email",
@@ -39,7 +39,7 @@ class LucidAPIError extends Error {
 		this.error = error;
 
 		if (error.zod !== undefined) {
-			this.error.errorResponse = LucidAPIError.formatZodErrors(
+			this.error.errors = LucidAPIError.formatZodErrors(
 				error.zod?.issues || [],
 			);
 		}

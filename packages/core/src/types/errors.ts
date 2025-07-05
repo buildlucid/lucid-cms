@@ -14,7 +14,7 @@ export interface LucidErrorData {
 	status?: number;
 	code?: "csrf" | "login" | "authorisation" | "rate_limit" | "not_found";
 	zod?: z.ZodError;
-	errorResponse?: ErrorResult;
+	errors?: ErrorResult;
 }
 
 export type ErrorResultValue =

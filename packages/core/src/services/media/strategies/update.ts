@@ -53,7 +53,7 @@ const update: ServiceFn<
 				type: "basic",
 				message: deleteOldRes.error.message,
 				status: 500,
-				errorResponse: {
+				errors: {
 					body: {
 						file: {
 							code: "media_error",
