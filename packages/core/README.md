@@ -22,7 +22,7 @@ A modern, TypeScript-first headless CMS designed for ultimate flexibility. Power
 - 📝 Content Modelling:
     - Collection Builder: Create flexible collections for single or multiple documents
     - Brick Builder: Build reusable content blocks that can be mixed and matched across your collections
-    - 15+ Customs Field: Tailor your content with a wide range of field types
+    - 15+ Custom Fields: Tailor your content with a wide range of field types
 - 🎛️ Content Management:
     - Revisions & Drafts: Complete version history with rollback support
     - Media Library: Centralised asset management
