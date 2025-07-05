@@ -8,36 +8,43 @@
 <hr/>
 
 > [!CAUTION]
-> Lucid is still in Alpha and under heavy development and hasnt implemented licensing yet and so cannot be used in a production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalised.
+> Lucid CMS is still in Alpha and under heavy development and hasnt implemented licensing yet and so cannot be used in a production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalised.
 
 <hr/>
 
-A TypeScript-first, fully extensible headless CMS. Constructed using Hono and SolidJS, it features sophisticated collection and brick builders, a wide range of plugins, and database adapters for PostgreSQL, LibSQL, and SQLite. It achieves the perfect balance of developer experience and an intuitive, easy-to-use interface for creators and end-users alike, without compromising on performance and flexibility.
-
-Effortlessly configure Lucid to meet your content needs with our flexible configuration options, and an array of first-party plugins including LocalStorage, Resend, Nodemailer, S3, and more.
+A modern, TypeScript-first headless CMS designed for ultimate flexibility. Powered by sophisticated collection and brick builders, Lucid CMS gives you the freedom to craft content structures that match your exact needs. Whether you're deploying to traditional servers or the edge, connecting to your preferred database, or integrating through our extensive plugin ecosystem, Lucid CMS adapts to your workflow whilst delivering an exceptional experience for developers and content creators alike.
 
 ## ✨ Features
 
-- 📝 Flexible Content Modelling:
-    - Collection Builder: Create single or multiple document collections with customisable fields and translation support.
-    - Brick Builder: Define reusable field groups for structured content creation.
-    - 15+ Custom Fields: Tailor your content structure with a wide range of field types.
-- 🎛️ Powerful Content Management:
-    - Revisions & Drafts: Full content history with easy version restoration.
-    - Media Library: Centralised management for images, videos, audio, and documents.
-    - Localisation: Built-in support for multilingual content.
-- 🛠️ Developer-Friendly:
-    - TypeScript-First: Ensures type safety and improved developer experience.
-    - Multiple Database Support: Choose from PostgreSQL, LibSQL, or SQLite.
-    - Extensible Architecture: Plugins and hooks for custom feature development.
-- 🔧 Capabilities:
-    - Image Processing: On-demand resizing and reformatting, including next-gen formats (AVIF, WebP).
-    - Email Integration: Customisable email strategies with template management.
-    - User Management: Invite users and assign roles with granular permissions.
-- 🔌 Integration & Scalability:
-    - Client Integrations: Manage connections for headless front-ends.
-    - API Toolkit: Programmatically interact with Lucid's services.
-    - Plugin Ecosystem: Extend functionality with first-party and third-party plugins.
+- 🚀 Deploy Anywhere:
+    - Runtime Adapters: Deploy seamlessly to Node.js or Cloudflare Workers
+    - Database Adapters: Full support for PostgreSQL, LibSQL, and SQLite
+- 📝 Content Modelling:
+    - Collection Builder: Create flexible collections for single or multiple documents
+    - Brick Builder: Build reusable content blocks that can be mixed and matched across your collections
+    - 15+ Customs Field: Tailor your content with a wide range of field types
+- 🎛️ Content Management:
+    - Revisions & Drafts: Complete version history with rollback support
+    - Media Library: Centralised asset management
+    - Localisation: Built-in multilingual content support
+- 🔧 Built-in Capabilities:
+    - Image Processing: On-demand resizing with next-gen formats and custom preset support
+    - Email Integration: Flexible email strategies with customisable templates
+    - User Management: Invite users and assign roles with granular permissions
+- 🔌 Extensibility:
+    - Plugin Ecosystem: Extend functionality with first-party and third-party plugins
+    - Client Integrations: API access for fetching content in your websites and applications
+
+## ⚙️ Runtime Adapters
+
+- [Node](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/node-adapter)
+- [Cloudflare Workers](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/cloudflare-adapter)
+
+## 💾 DB Adapters
+
+- [PostgreSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/postgres-adapter)
+- [LibSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/libsql-adapter)
+- [SQLite](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/sqlite-adapter)
 
 ## 🛠️ First Party Plugins
 
@@ -49,16 +56,10 @@ Effortlessly configure Lucid to meet your content needs with our flexible config
 - **Menus:** Coming soon!
 - **Form Builder:** Coming soon!
 
-## 💾 DB Adapters
-
-- [PostgreSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/postgres-adapter)
-- [LibSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/libsql-adapter)
-- [SQLite](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/sqlite-adapter)
-
 ## 🏁 Getting Started
 
-To get started you can follow the [Getting Started](https://lucidcms.io/getting-started/) guide from our documentation. Lucid is super easy to get up and running and with the SQLite DB adapter along with the [Local Storage](https://lucidcms.io/plugins/local-storage/) plugin, you can get set up without needing any third party services.
+To get started you can follow the [Getting Started](https://lucidcms.io/getting-started/) guide from our documentation. Lucid CMS is super easy to get up and running and with the SQLite DB adapter along with the [Local Storage](https://lucidcms.io/plugins/local-storage/) plugin, you can get set up without needing any third party services.
 
 ## 🖥️ Lucid UI
 
-Still under development, Lucid UI is an Astro and TailwindCSS based UI library that is built to be used with Lucid. It's not quite ready for prime time yet, but you can expect to see it launch along side the Lucid beta in the coming months.
+Still under development, Lucid UI is an Astro and TailwindCSS based UI library that is built to be used with Lucid CMS. It's not quite ready for prime time yet, but you can expect to see it launch down the line.
