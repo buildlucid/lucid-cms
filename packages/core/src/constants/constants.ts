@@ -84,8 +84,8 @@ export default Object.freeze({
 		timeWindow: "1 minute", // ms format - https://github.com/vercel/ms
 	},
 	vite: {
-		outputDir: "client",
-		dist: "dist",
+		outputDir: "static",
+		dist: "admin",
 		mount: "mount.jsx",
 		html: "index.html",
 		rootSelector: "root",

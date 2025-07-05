@@ -155,29 +155,10 @@ export default {
                 ],
                 extensions: [
                     async (app, config) => {
-                        app.get("/admin", async (c) => {
-                            const url = new URL(c.req.url);
-                            const requestUrl = url.origin + "/index.html";
-                            const indexRequest = new Request(requestUrl);
-                            const asset = await c.env.ASSETS.fetch(indexRequest);
-                            return new Response(asset.body, {
-                                status: asset.status,
-                                headers: asset.headers,
-                            });
-                        });
                         app.get("/admin/*", async (c) => {
                             const url = new URL(c.req.url);
-                            const assetPath = url.pathname.replace("/admin", "");
-                            const requestUrl = url.origin + assetPath;
-                            const assetRequest = new Request(requestUrl);
-                            const asset = await c.env.ASSETS.fetch(assetRequest);
-                            if (asset.status < 400) {
-                                return new Response(asset.body, {
-                                    status: asset.status,
-                                    headers: asset.headers,
-                                });
-                            }
-                            const indexRequestUrl = url.origin + "/index.html";
+                    
+                            const indexRequestUrl = url.origin + "/admin/index.html";
                             const indexRequest = new Request(indexRequestUrl);
                             const indexAsset = await c.env.ASSETS.fetch(indexRequest);
                             return new Response(indexAsset.body, {
