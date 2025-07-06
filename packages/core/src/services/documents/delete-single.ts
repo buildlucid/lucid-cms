@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
+import { getTableNames } from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../types.js";
 
 const deleteSingle: ServiceFn<
@@ -36,8 +37,8 @@ const deleteSingle: ServiceFn<
 
 	const Documents = Repository.get("documents", context.db, context.config.db);
 
-	const tableNameRes = collectionRes.data.tableNames;
-	if (tableNameRes.error) return tableNameRes;
+	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	if (tableNamesRes.error) return tableNamesRes;
 
 	const getDocumentRes = await Documents.selectSingle(
 		{
@@ -69,7 +70,7 @@ const deleteSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: tableNameRes.data.document,
+			tableName: tableNamesRes.data.document,
 		},
 	);
 	if (getDocumentRes.error) return getDocumentRes;
@@ -87,6 +88,7 @@ const deleteSingle: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
 			},
 			data: {
 				ids: [data.id],
@@ -116,7 +118,7 @@ const deleteSingle: ServiceFn<
 				},
 			},
 			{
-				tableName: tableNameRes.data.document,
+				tableName: tableNamesRes.data.document,
 			},
 		),
 		context.services.collection.documents.nullifyDocumentReferences(context, {
@@ -140,6 +142,7 @@ const deleteSingle: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
 			},
 			data: {
 				ids: [data.id],

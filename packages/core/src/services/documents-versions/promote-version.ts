@@ -3,6 +3,10 @@ import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import Formatter from "../../libs/formatters/index.js";
+import {
+	getBricksTableSchema,
+	getTableNames,
+} from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const promoteVersion: ServiceFn<
@@ -38,7 +42,13 @@ const promoteVersion: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const tableNameRes = collectionRes.data.tableNames;
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+
+	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
 	const [versionRes, bricksQueryRes] = await Promise.all([
@@ -68,7 +78,7 @@ const promoteVersion: ServiceFn<
 			{
 				versionId: data.fromVersionId,
 				documentId: data.documentId,
-				bricksSchema: collectionRes.data.bricksTableSchema,
+				bricksSchema: bricksTableSchemaRes.data,
 			},
 			{
 				tableName: tableNameRes.data.version,
@@ -250,14 +260,14 @@ const promoteVersion: ServiceFn<
 		localisation: context.config.localisation,
 		bricks: DocumentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
-			bricksSchema: collectionRes.data.bricksTableSchema,
+			bricksSchema: bricksTableSchemaRes.data,
 			relationMetaData: {},
 			collection: collectionRes.data,
 			config: context.config,
 		}),
 		fields: DocumentBricksFormatter.formatDocumentFields({
 			bricksQuery: bricksQueryRes.data,
-			bricksSchema: collectionRes.data.bricksTableSchema,
+			bricksSchema: bricksTableSchemaRes.data,
 			relationMetaData: {},
 			collection: collectionRes.data,
 			config: context.config,
@@ -290,6 +300,7 @@ const promoteVersion: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
+				collectionTableNames: tableNameRes.data,
 			},
 			data: {
 				documentId: data.documentId,

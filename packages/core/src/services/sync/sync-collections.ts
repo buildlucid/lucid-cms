@@ -3,14 +3,20 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import type { CollectionSchema } from "../collection-migrator/schema/types.js";
 
 /**
  * Responsible for syncing active collections to the DB.
  * - In the case a collection exists in the DB, but not in the config: it is marked as deleted.
  */
-const syncCollections: ServiceFn<[], undefined> = async (
-	context: ServiceContext,
-) => {
+const syncCollections: ServiceFn<
+	[
+		{
+			collectionSchemas: CollectionSchema[];
+		},
+	],
+	undefined
+> = async (context, data) => {
 	const Collections = Repository.get(
 		"collections",
 		context.db,
@@ -88,14 +94,12 @@ const syncCollections: ServiceFn<[], undefined> = async (
 			Collections.createMultiple({
 				data: missingCollections
 					.map((key) => {
-						const collection = context.config.collections.find(
-							(c) => c.key === key,
-						);
-						if (!collection?.runtimeTableSchema) return null;
+						const schema = data.collectionSchemas.find((c) => c.key === key);
+						if (!schema) return null;
 
 						return {
 							key,
-							schema: collection.runtimeTableSchema,
+							schema: schema,
 						};
 					})
 					.filter((c) => c !== null),
@@ -131,14 +135,12 @@ const syncCollections: ServiceFn<[], undefined> = async (
 		existingCollections.length > 0 &&
 			Promise.all(
 				existingCollections.map((key) => {
-					const collection = context.config.collections.find(
-						(c) => c.key === key,
-					);
-					if (!collection?.runtimeTableSchema) return Promise.resolve(true);
+					const schema = data.collectionSchemas.find((c) => c.key === key);
+					if (!schema) return Promise.resolve(true);
 
 					return Collections.updateSingle({
 						data: {
-							schema: collection.runtimeTableSchema,
+							schema: schema,
 						},
 						where: [
 							{

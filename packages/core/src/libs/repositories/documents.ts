@@ -27,6 +27,7 @@ import type {
 } from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
+import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join
@@ -386,6 +387,9 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			brickFilters: BrickFilters[];
 			query: GetMultipleQueryParams;
 			collection: CollectionBuilder;
+			documentFieldsTableSchema:
+				| CollectionSchemaTable<LucidBrickTableName>
+				| undefined;
 			config: Config;
 			tables: {
 				versions: LucidVersionTableName;
@@ -460,7 +464,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								)
 								.where(`${props.tables.versions}.type`, "=", props.status)
 								.select(
-									props.collection.documentFieldsTableSchema?.columns.map(
+									props.documentFieldsTableSchema?.columns.map(
 										(c) => `${props.tables.documentFields}.${c.name}`,
 									) || [],
 								),

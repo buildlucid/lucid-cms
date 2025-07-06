@@ -4,11 +4,15 @@ import createMigrationLogger from "../logger/migration-logger.js";
 import lucidServices from "../../../services/index.js";
 import { confirm } from "@inquirer/prompts";
 import type { Config } from "../../../types.js";
+import type { CollectionSchema } from "../../../services/collection-migrator/schema/types.js";
 
 const runSyncTasks = async (
 	config: Config,
 	logger: ReturnType<typeof createMigrationLogger>,
-	mode: "process" | "return" = "process",
+	mode: "process" | "return",
+	data: {
+		collectionSchemas: CollectionSchema[];
+	},
 ): Promise<boolean> => {
 	logger.syncTasksStart();
 
@@ -18,11 +22,16 @@ const runSyncTasks = async (
 			config: config,
 			services: lucidServices,
 		}),
-		lucidServices.sync.syncCollections({
-			db: config.db.client,
-			config: config,
-			services: lucidServices,
-		}),
+		lucidServices.sync.syncCollections(
+			{
+				db: config.db.client,
+				config: config,
+				services: lucidServices,
+			},
+			{
+				collectionSchemas: data.collectionSchemas,
+			},
+		),
 	]);
 
 	if (localesResult.error) {
@@ -84,9 +93,10 @@ const migrateCommand = (props?: {
 				);
 				needsCollectionMigrations = true;
 			} else {
-				needsCollectionMigrations = collectionMigrationResult.data.some(
-					(plan) => plan.tables.length > 0,
-				);
+				needsCollectionMigrations =
+					collectionMigrationResult.data.migrationPlans.some(
+						(plan) => plan.tables.length > 0,
+					);
 			}
 
 			//* check if the database needs migrating
@@ -100,7 +110,10 @@ const migrateCommand = (props?: {
 			if (!needsCollectionMigrations && !needsDbMigrations) {
 				logger.logsStart();
 				if (!skipSyncSteps) {
-					const syncResult = await runSyncTasks(config, logger, mode);
+					const syncResult = await runSyncTasks(config, logger, mode, {
+						collectionSchemas:
+							collectionMigrationResult.data?.inferedSchemas ?? [],
+					});
 					if (!syncResult && mode === "return") {
 						return false;
 					}
@@ -149,12 +162,12 @@ const migrateCommand = (props?: {
 				}
 			}
 
-			//* run sync tasks (locales, collections)
-			if (!skipSyncSteps) {
-				const syncResult = await runSyncTasks(config, logger, mode);
-				if (!syncResult && mode === "return") {
-					return false;
-				}
+			//* run sync tasks (locales, collections). We dont skip these as migrations are being ran also.
+			const syncResult = await runSyncTasks(config, logger, mode, {
+				collectionSchemas: collectionMigrationResult.data?.inferedSchemas ?? [],
+			});
+			if (!syncResult && mode === "return") {
+				return false;
 			}
 
 			//* run collection migrations if needed

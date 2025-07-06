@@ -7,9 +7,11 @@ import type {
 	FieldResponse,
 	ClientDocumentResponse,
 	BrickAltResponse,
+	LucidBrickTableName,
 } from "../../types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
 
 export default class DocumentsFormatter {
 	formatMultiple = (props: {
@@ -19,6 +21,7 @@ export default class DocumentsFormatter {
 		hasFields: boolean;
 		hasBricks: boolean;
 		relationData?: FieldRelationResponse;
+		bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	}) => {
 		const DocumentBricksFormatter = Formatter.get("document-bricks");
 
@@ -28,7 +31,7 @@ export default class DocumentsFormatter {
 			if (props.hasFields) {
 				fields = DocumentBricksFormatter.formatDocumentFields({
 					bricksQuery: d,
-					bricksSchema: props.collection.bricksTableSchema,
+					bricksSchema: props.bricksTableSchema,
 					relationMetaData: props.relationData || {},
 					collection: props.collection,
 					config: props.config,
@@ -37,7 +40,7 @@ export default class DocumentsFormatter {
 			if (props.hasBricks) {
 				bricks = DocumentBricksFormatter.formatMultiple({
 					bricksQuery: d,
-					bricksSchema: props.collection.bricksTableSchema,
+					bricksSchema: props.bricksTableSchema,
 					relationMetaData: props.relationData || {},
 					collection: props.collection,
 					config: props.config,
@@ -129,6 +132,7 @@ export default class DocumentsFormatter {
 		hasFields: boolean;
 		hasBricks: boolean;
 		relationData?: FieldRelationResponse;
+		bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	}): ClientDocumentResponse[] => {
 		const DocumentBricksFormatter = Formatter.get("document-bricks");
 
@@ -138,7 +142,7 @@ export default class DocumentsFormatter {
 			if (props.hasFields) {
 				fields = DocumentBricksFormatter.formatDocumentFields({
 					bricksQuery: d,
-					bricksSchema: props.collection.bricksTableSchema,
+					bricksSchema: props.bricksTableSchema,
 					relationMetaData: props.relationData || {},
 					collection: props.collection,
 					config: props.config,
@@ -147,7 +151,7 @@ export default class DocumentsFormatter {
 			if (props.hasBricks) {
 				bricks = DocumentBricksFormatter.formatMultiple({
 					bricksQuery: d,
-					bricksSchema: props.collection.bricksTableSchema,
+					bricksSchema: props.bricksTableSchema,
 					relationMetaData: props.relationData || {},
 					collection: props.collection,
 					config: props.config,

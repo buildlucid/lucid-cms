@@ -2,6 +2,10 @@ import T from "../../../translations/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import Formatter from "../../../libs/formatters/index.js";
 import { groupDocumentFilters } from "../../../utils/helpers/index.js";
+import {
+	getBricksTableSchema,
+	getTableNames,
+} from "../../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ClientDocumentResponse } from "../../../types/response.js";
 import type { DocumentVersionType } from "../../../libs/db/types.js";
@@ -25,11 +29,17 @@ const getSingle: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const tableNameRes = collectionRes.data.tableNames;
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+
+	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
 	const { documentFilters, brickFilters } = groupDocumentFilters(
-		collectionRes.data.bricksTableSchema,
+		bricksTableSchemaRes.data,
 		data.query.filter,
 	);
 

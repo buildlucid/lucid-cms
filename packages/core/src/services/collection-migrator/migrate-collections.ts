@@ -2,6 +2,7 @@ import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import buildMigrations from "./migration/build-migrations.js";
 import buildTableName from "./helpers/build-table-name.js";
 import Repository from "../../libs/repositories/index.js";
+import inferSchema from "./schema/infer-schema.js";
 import type { ServiceFn } from "../../types.js";
 import type { CollectionSchema } from "./schema/types.js";
 import type { MigrationPlan } from "./migration/types.js";
@@ -20,7 +21,10 @@ const migrateCollections: ServiceFn<
 			dryRun?: boolean;
 		},
 	],
-	MigrationPlan[]
+	{
+		migrationPlans: MigrationPlan[];
+		inferedSchemas: CollectionSchema[];
+	}
 > = async (context, data) => {
 	const CollectionMigrations = Repository.get(
 		"collection-migrations",
@@ -32,8 +36,9 @@ const migrateCollections: ServiceFn<
 	//* infer schema for each collection
 	const inferedSchemas: Array<CollectionSchema> = [];
 	for (const [_, collection] of context.config.collections.entries()) {
-		if (!collection.runtimeTableSchema) continue;
-		inferedSchemas.push(collection.runtimeTableSchema);
+		const schemaRes = inferSchema(collection, context.config.db);
+		if (schemaRes.error) return schemaRes;
+		inferedSchemas.push(schemaRes.data);
 	}
 
 	//* generate migration plan
@@ -62,7 +67,10 @@ const migrateCollections: ServiceFn<
 
 	if (data.dryRun) {
 		return {
-			data: migrationPlans,
+			data: {
+				migrationPlans,
+				inferedSchemas,
+			},
 			error: undefined,
 		};
 	}
@@ -92,7 +100,10 @@ const migrateCollections: ServiceFn<
 	}
 
 	return {
-		data: migrationPlans,
+		data: {
+			migrationPlans,
+			inferedSchemas,
+		},
 		error: undefined,
 	};
 };

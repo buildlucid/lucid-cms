@@ -12,6 +12,7 @@ import type {
 	CollectionSchemaTable,
 	TableType,
 } from "../collection-migrator/schema/types.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/index.js";
 
 const nullifyDocumentReferences: ServiceFn<
 	[
@@ -26,6 +27,12 @@ const nullifyDocumentReferences: ServiceFn<
 		table: LucidBrickTableName;
 		columns: Array<keyof LucidBricksTable>;
 	}> = [];
+
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
 
 	const searchReferenceTargets = (props: {
 		fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
@@ -84,14 +91,14 @@ const nullifyDocumentReferences: ServiceFn<
 		searchReferenceTargets({
 			tableType: "document-fields",
 			fields: collection.fieldTreeNoTab,
-			schemas: collection.bricksTableSchema || [],
+			schemas: bricksTableSchemaRes.data || [],
 			depth: 0,
 		});
 		for (const brick of collection.brickInstances) {
 			searchReferenceTargets({
 				tableType: "brick",
 				fields: brick.fieldTreeNoTab,
-				schemas: collection.bricksTableSchema || [],
+				schemas: bricksTableSchemaRes.data || [],
 				brickKey: brick.key,
 				depth: 0,
 			});

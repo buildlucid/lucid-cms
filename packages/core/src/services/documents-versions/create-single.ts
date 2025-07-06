@@ -1,6 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
+import { getTableNames } from "../../libs/collection/schema/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { CollectionBuilder } from "../../builders.js";
@@ -19,8 +20,8 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const tableNameRes = data.collection.tableNames;
-	if (tableNameRes.error) return tableNameRes;
+	const tableNamesRes = await getTableNames(context, data.collection.key);
+	if (tableNamesRes.error) return tableNamesRes;
 
 	const DocumentVersions = Repository.get(
 		"document-versions",
@@ -52,7 +53,7 @@ const createSingle: ServiceFn<
 				},
 			},
 			{
-				tableName: tableNameRes.data.version,
+				tableName: tableNamesRes.data.version,
 			},
 		);
 		if (updateRes.error) return updateRes;
@@ -74,7 +75,7 @@ const createSingle: ServiceFn<
 				],
 			},
 			{
-				tableName: tableNameRes.data.version,
+				tableName: tableNamesRes.data.version,
 			},
 		);
 		if (deleteRes.error) return deleteRes;
@@ -96,7 +97,7 @@ const createSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: tableNameRes.data.version,
+			tableName: tableNamesRes.data.version,
 		},
 	);
 	if (newVersionRes.error) return newVersionRes;
@@ -116,6 +117,7 @@ const createSingle: ServiceFn<
 				collection: data.collection,
 				collectionKey: data.collection.key,
 				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
 			},
 			data: {
 				documentId: data.documentId,
@@ -156,6 +158,7 @@ const createSingle: ServiceFn<
 				collection: data.collection,
 				collectionKey: data.collection.key,
 				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
 			},
 			data: {
 				documentId: data.documentId,

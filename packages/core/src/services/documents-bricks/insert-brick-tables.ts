@@ -1,4 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidBricksTable } from "../../types.js";
 import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
@@ -21,6 +22,12 @@ const insertBrickTables: ServiceFn<
 	);
 
 	const idMapping: Record<number, number> = {};
+
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collection.key,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
 
 	for (const table of data.tables) {
 		// update parent and brick IDs using the mappings before inserting
@@ -67,7 +74,7 @@ const insertBrickTables: ServiceFn<
 		if (hasParentIdRef) returningColumns.push("parent_id_ref");
 		if (hasBrickIdRef) returningColumns.push("brick_id_ref");
 
-		const schema = data.collection.bricksTableSchema.find(
+		const schema = bricksTableSchemaRes.data.find(
 			(s) => s.name === table.table,
 		);
 

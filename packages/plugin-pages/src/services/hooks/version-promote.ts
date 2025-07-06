@@ -37,9 +37,6 @@ const versionPromoteHandler =
 			};
 		}
 
-		const tablesRes = data.meta.collection.tableNames;
-		if (tablesRes.error) return tablesRes;
-
 		let createFullSlug = true;
 
 		// fetch the document versions, slug and parent page fields
@@ -47,7 +44,7 @@ const versionPromoteHandler =
 			documentId: data.data.documentId,
 			versionId: data.data.versionId,
 			versionType: data.data.versionType,
-			tables: tablesRes.data,
+			tables: data.meta.collectionTableNames,
 		});
 		if (docVersionFieldRes.error) return docVersionFieldRes;
 		if (docVersionFieldRes.data === null) createFullSlug = false;
@@ -92,7 +89,7 @@ const versionPromoteHandler =
 						slug: slug,
 						parentPage: parentPage,
 					},
-					tables: tablesRes.data,
+					tables: data.meta.collectionTableNames,
 				},
 			);
 			if (checkDuplicateSlugParentsRes.error)
@@ -109,7 +106,7 @@ const versionPromoteHandler =
 					fields: {
 						parentPage: parentPage,
 					},
-					tables: tablesRes.data,
+					tables: data.meta.collectionTableNames,
 				});
 				if (circularParentsRes.error) return circularParentsRes;
 
@@ -119,7 +116,7 @@ const versionPromoteHandler =
 					fields: {
 						parentPage: parentPage,
 					},
-					tables: tablesRes.data,
+					tables: data.meta.collectionTableNames,
 				});
 				if (parentFieldsRes.error) return parentFieldsRes;
 
@@ -155,7 +152,7 @@ const versionPromoteHandler =
 					},
 				],
 				versionType: data.data.versionType,
-				tables: tablesRes.data,
+				tables: data.meta.collectionTableNames,
 			});
 			if (updateFullSlugRes.error) return updateFullSlugRes;
 		}
@@ -167,6 +164,7 @@ const versionPromoteHandler =
 				collection: data.meta.collection,
 				collectionKey: data.meta.collectionKey,
 				userId: data.meta.userId,
+				collectionTableNames: data.meta.collectionTableNames,
 			},
 			data: {
 				documentId: data.data.documentId,

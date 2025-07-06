@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
+import { getTableNames } from "../../libs/collection/schema/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -33,8 +34,8 @@ const upsertSingle: ServiceFn<
 		);
 	if (collectionRes.error) return collectionRes;
 
-	const tableNameRes = collectionRes.data.tableNames;
-	if (tableNameRes.error) return tableNameRes;
+	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	if (tableNamesRes.error) return tableNamesRes;
 
 	//* check collection is locked
 	if (collectionRes.data.getData.config.isLocked) {
@@ -75,7 +76,7 @@ const upsertSingle: ServiceFn<
 				},
 			},
 			{
-				tableName: tableNameRes.data.document,
+				tableName: tableNamesRes.data.document,
 			},
 		);
 		if (existingDocumentRes.error) return existingDocumentRes;
@@ -89,7 +90,7 @@ const upsertSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				collectionMode: collectionRes.data.getData.mode,
 				documentId: data.documentId,
-				documentTable: tableNameRes.data.document,
+				documentTable: tableNamesRes.data.document,
 			},
 		);
 	if (checkDocumentCountRes.error) return checkDocumentCountRes;
@@ -112,7 +113,7 @@ const upsertSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: tableNameRes.data.document,
+			tableName: tableNamesRes.data.document,
 		},
 	);
 	if (upsertDocRes.error) return upsertDocRes;

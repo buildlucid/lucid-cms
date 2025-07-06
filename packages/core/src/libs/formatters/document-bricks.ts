@@ -79,6 +79,7 @@ export default class DocumentBricksFormatter {
 							},
 							brickKey: brickKey,
 							config: props.config,
+							bricksTableSchema: props.bricksSchema,
 						},
 					),
 				});
@@ -127,6 +128,7 @@ export default class DocumentBricksFormatter {
 				},
 				brickKey: undefined,
 				config: props.config,
+				bricksTableSchema: props.bricksSchema,
 			},
 		);
 	};

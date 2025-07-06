@@ -21,7 +21,7 @@ const checkParentIsPageOfSelf = (data: {
 				type: "basic",
 				status: 400,
 				message: T("cannot_have_self_as_parent_page_message"),
-				errorResponse: {
+				errors: {
 					body: {
 						fields: [
 							{

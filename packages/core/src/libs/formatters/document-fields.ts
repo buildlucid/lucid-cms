@@ -32,6 +32,7 @@ export interface FieldFormatMeta {
 	/** Used to help workout the target brick schema item and the table name. Set to `undefined` if the brick table you're creating fields for is the `document-fields` one */
 	brickKey: string | undefined;
 	config: Config;
+	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 }
 
 interface FieldFormatData {
@@ -68,6 +69,7 @@ export default class DocumentFieldsFormatter {
 			collection: meta.collection,
 			brickKey: meta.brickKey,
 			config: meta.config,
+			bricksTableSchema: meta.bricksTableSchema,
 		});
 	};
 
@@ -101,6 +103,7 @@ export default class DocumentFieldsFormatter {
 						brickKey: meta.brickKey,
 						repeaterLevel: meta.repeaterLevel || 0,
 						config: meta.config,
+						bricksTableSchema: meta.bricksTableSchema,
 					}),
 				});
 				continue;
@@ -130,6 +133,7 @@ export default class DocumentFieldsFormatter {
 					brickKey: meta.brickKey,
 					config: meta.config,
 					groupRef: meta.groupRef,
+					bricksTableSchema: meta.bricksTableSchema,
 				},
 			);
 			if (fieldValue) fieldsRes.push(fieldValue);
@@ -275,6 +279,7 @@ export default class DocumentFieldsFormatter {
 						repeaterLevel: meta.repeaterLevel + 1,
 						config: meta.config,
 						groupRef: ref,
+						bricksTableSchema: meta.bricksTableSchema,
 					},
 				),
 			});

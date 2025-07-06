@@ -96,7 +96,7 @@ class DocumentCustomField extends CustomField<"document"> {
 		const documentFields = DocumentFieldsFormatter.objectifyFields(
 			DocumentBricksFormatter.formatDocumentFields({
 				bricksQuery: value,
-				bricksSchema: collection.bricksTableSchema,
+				bricksSchema: meta.bricksTableSchema,
 				relationMetaData: {},
 				collection: collection,
 				config: meta.config,

@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import { getTableNames } from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import type { DocumentResponse } from "../../types.js";
@@ -26,14 +27,14 @@ const getSingle: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const tableNameRes = collectionRes.data.tableNames;
-	if (tableNameRes.error) return tableNameRes;
+	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	if (tableNamesRes.error) return tableNamesRes;
 
 	const documentRes = await Document.selectSingleById(
 		{
 			id: data.id,
 			tables: {
-				versions: tableNameRes.data.version,
+				versions: tableNamesRes.data.version,
 			},
 			status: data.status,
 			versionId: data.versionId,
@@ -46,7 +47,7 @@ const getSingle: ServiceFn<
 			},
 		},
 		{
-			tableName: tableNameRes.data.document,
+			tableName: tableNamesRes.data.document,
 		},
 	);
 	if (documentRes.error) return documentRes;

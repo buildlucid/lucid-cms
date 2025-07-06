@@ -35,9 +35,6 @@ const beforeUpsertHandler =
 			};
 		}
 
-		const tablesRes = data.meta.collection.tableNames;
-		if (tablesRes.error) return tablesRes;
-
 		const checkFieldsExistRes = checkFieldsExist({
 			fields: {
 				slug: data.data.fields?.find(
@@ -86,7 +83,7 @@ const beforeUpsertHandler =
 					slug: slug,
 					parentPage: parentPage,
 				},
-				tables: tablesRes.data,
+				tables: data.meta.collectionTableNames,
 			},
 		);
 		if (checkDuplicateSlugParentsRes.error) return checkDuplicateSlugParentsRes;
@@ -107,7 +104,7 @@ const beforeUpsertHandler =
 				fields: {
 					parentPage: parentPage,
 				},
-				tables: tablesRes.data,
+				tables: data.meta.collectionTableNames,
 			});
 			if (circularParentsRes.error) return circularParentsRes;
 
@@ -117,7 +114,7 @@ const beforeUpsertHandler =
 				fields: {
 					parentPage: parentPage,
 				},
-				tables: tablesRes.data,
+				tables: data.meta.collectionTableNames,
 			});
 			if (parentFieldsRes.error) return parentFieldsRes;
 

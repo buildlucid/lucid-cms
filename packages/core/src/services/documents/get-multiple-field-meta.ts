@@ -1,5 +1,10 @@
 import Repository from "../../libs/repositories/index.js";
 import extractCollectionKey from "../collection-migrator/helpers/extract-collection-key.js";
+import {
+	getDocumentVersionTableSchema,
+	getDocumentFieldsTableSchema,
+	syncAllDbSchemas,
+} from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type {
 	DocumentVersionType,
@@ -31,40 +36,50 @@ const getMultipleFieldMeta: ServiceFn<
 		};
 	}
 
-	const unionData = data.values
-		.map((v) => {
-			const collectionKey = extractCollectionKey(v.table);
-			if (!collectionKey) return null;
+	const collectinosKeys = data.values
+		.map((v) => extractCollectionKey(v.table))
+		.filter((c) => c !== undefined);
 
-			const collectionRes = context.services.collection.getSingleInstance(
-				context,
-				{
-					key: collectionKey,
-				},
-			);
-			if (collectionRes.error) return null;
+	const syncRes = await syncAllDbSchemas(context, collectinosKeys);
+	if (syncRes.error) return syncRes;
 
-			const versionTable = collectionRes.data.documentVersionTableSchema;
-			if (!versionTable) return null;
+	const unionData = data.values.map(async (v) => {
+		const collectionKey = extractCollectionKey(v.table);
+		if (!collectionKey) return null;
 
-			const documentFieldsTable = collectionRes.data.documentFieldsTableSchema;
-			if (!documentFieldsTable) return null;
+		const collectionRes = context.services.collection.getSingleInstance(
+			context,
+			{
+				key: collectionKey,
+			},
+		);
+		if (collectionRes.error) return null;
 
-			return {
-				collectionKey: collectionKey,
-				tables: {
-					document: v.table,
-					version: versionTable.name,
-					documentFields: documentFieldsTable.name,
-				},
-				documentFieldSchema: documentFieldsTable,
-				ids: v.ids,
-			};
-		})
-		.filter((u) => u !== null);
+		const [versionTableRes, documentFieldsTableRes] = await Promise.all([
+			getDocumentVersionTableSchema(context, collectionKey),
+			getDocumentFieldsTableSchema(context, collectionKey),
+		]);
+		if (versionTableRes.error || !versionTableRes.data) return null;
+		if (documentFieldsTableRes.error || !documentFieldsTableRes.data)
+			return null;
+
+		return {
+			collectionKey: collectionKey,
+			tables: {
+				document: v.table,
+				version: versionTableRes.data.name,
+				documentFields: documentFieldsTableRes.data.name,
+			},
+			documentFieldSchema: documentFieldsTableRes.data,
+			ids: v.ids,
+		};
+	});
+	const unionDataRes = await Promise.all(unionData).then((u) =>
+		u.filter((u) => u !== null),
+	);
 
 	const documentsRes = await DocumentVersions.selectMultipleUnion({
-		unions: unionData,
+		unions: unionDataRes,
 		versionType: data.versionType,
 		validation: {
 			enabled: true,

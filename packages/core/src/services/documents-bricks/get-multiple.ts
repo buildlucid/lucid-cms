@@ -4,6 +4,10 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 import fetchRelationData from "./helpers/fetch-relation-data.js";
+import {
+	getBricksTableSchema,
+	getTableNames,
+} from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
@@ -39,13 +43,19 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const tableNameRes = collectionRes.data.tableNames;
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+
+	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionId: data.versionId,
-			bricksSchema: collectionRes.data.bricksTableSchema.filter((t) => {
+			bricksSchema: bricksTableSchemaRes.data.filter((t) => {
 				if (data.documentFieldsOnly) return t.type === "document-fields";
 				return true;
 			}),
@@ -67,7 +77,7 @@ const getMultiple: ServiceFn<
 	}
 
 	const relationIdRes = await extractRelatedEntityIds(context, {
-		brickSchema: collectionRes.data.bricksTableSchema,
+		brickSchema: bricksTableSchemaRes.data,
 		responses: [bricksQueryRes.data],
 	});
 	if (relationIdRes.error) return relationIdRes;
@@ -83,14 +93,14 @@ const getMultiple: ServiceFn<
 		data: {
 			bricks: DocumentBricksFormatter.formatMultiple({
 				bricksQuery: bricksQueryRes.data,
-				bricksSchema: collectionRes.data.bricksTableSchema,
+				bricksSchema: bricksTableSchemaRes.data,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
 			}),
 			fields: DocumentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
-				bricksSchema: collectionRes.data.bricksTableSchema,
+				bricksSchema: bricksTableSchemaRes.data,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,

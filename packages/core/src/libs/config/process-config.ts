@@ -6,11 +6,9 @@ import mergeConfig from "./merge-config.js";
 import defaultConfig from "../../constants/default-config.js";
 import CollectionConfigSchema from "../builders/collection-builder/schema.js";
 import BrickConfigSchema from "../builders/brick-builder/schema.js";
-import { LucidError } from "../../utils/errors/index.js";
 import CustomFieldSchema from "../custom-fields/schema.js";
 import logger, { initialiseLogger } from "../logger/index.js";
 import constants from "../../constants/constants.js";
-import inferSchema from "../../services/collection-migrator/schema/infer-schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 
 let cachedConfig: Config;
@@ -95,16 +93,6 @@ const processConfig = async (
 				);
 				checks.checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
 			}
-
-			//* generate schema for collection
-			const res = inferSchema(collection, configRes.db);
-			if (res.error) {
-				throw new LucidError({
-					message: res.error.message || "Unknown error",
-					scope: constants.logScopes.config,
-				});
-			}
-			collection.runtimeTableSchema = res.data;
 		}
 
 		initialiseLogger({

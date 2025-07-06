@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
+import { getTableNames } from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../types.js";
 
 const deleteMultiple: ServiceFn<
@@ -43,8 +44,8 @@ const deleteMultiple: ServiceFn<
 
 	const Documents = Repository.get("documents", context.db, context.config.db);
 
-	const tableNameRes = collectionRes.data.tableNames;
-	if (tableNameRes.error) return tableNameRes;
+	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	if (tableNamesRes.error) return tableNamesRes;
 
 	const documentsRes = await Documents.selectMultiple(
 		{
@@ -66,7 +67,7 @@ const deleteMultiple: ServiceFn<
 			},
 		},
 		{
-			tableName: tableNameRes.data.document,
+			tableName: tableNamesRes.data.document,
 		},
 	);
 	if (documentsRes.error) return documentsRes;
@@ -107,6 +108,7 @@ const deleteMultiple: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
 			},
 			data: {
 				ids: data.ids,
@@ -143,7 +145,7 @@ const deleteMultiple: ServiceFn<
 				},
 			},
 			{
-				tableName: tableNameRes.data.document,
+				tableName: tableNamesRes.data.document,
 			},
 		),
 		...nullifyPromises,
@@ -167,6 +169,7 @@ const deleteMultiple: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
 			},
 			data: {
 				ids: data.ids,

@@ -2,6 +2,7 @@ import type { CollectionBuilder } from "../builders.js";
 import type { DocumentVersionType } from "../libs/db/types.js";
 import type { BrickInputSchema } from "../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../schemas/collection-fields.js";
+import type { CollectionTableNames } from "../types.js";
 import type { ServiceFn } from "../utils/services/types.js";
 
 // --------------------------------------------------
@@ -39,6 +40,7 @@ export type HookServiceHandlers = {
 						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
+						collectionTableNames: CollectionTableNames;
 					};
 					data: {
 						documentId: number;
@@ -65,6 +67,7 @@ export type HookServiceHandlers = {
 						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
+						collectionTableNames: CollectionTableNames;
 					};
 					data: {
 						documentId: number;
@@ -84,6 +87,7 @@ export type HookServiceHandlers = {
 						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
+						collectionTableNames: CollectionTableNames;
 					};
 					data: {
 						ids: number[];
@@ -99,6 +103,7 @@ export type HookServiceHandlers = {
 						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
+						collectionTableNames: CollectionTableNames;
 					};
 					data: {
 						ids: number[];
@@ -114,6 +119,7 @@ export type HookServiceHandlers = {
 						collection: CollectionBuilder;
 						collectionKey: string;
 						userId: number;
+						collectionTableNames: CollectionTableNames;
 					};
 					data: {
 						documentId: number;

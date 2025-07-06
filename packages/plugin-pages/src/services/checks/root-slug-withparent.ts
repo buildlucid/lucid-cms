@@ -35,7 +35,7 @@ const checkRootSlugWithParent = (data: {
 					type: "basic",
 					status: 400,
 					message: T("slug_cannot_be_slash_and_parent_page_set_message"),
-					errorResponse: {
+					errors: {
 						body: {
 							fields: fieldErrors,
 						},
@@ -50,7 +50,7 @@ const checkRootSlugWithParent = (data: {
 				type: "basic",
 				status: 400,
 				message: T("slug_cannot_be_slash_and_parent_page_set_message"),
-				errorResponse: {
+				errors: {
 					body: {
 						fields: [
 							{

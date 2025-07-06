@@ -17,46 +17,71 @@ import { getSchema as getCachedSchema, setSchema } from "./cache.js";
 export const getSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
-	type: "runtime" | "db",
 ): ServiceResponse<CollectionSchema> => {
-	const cachedSchema = getCachedSchema(collectionKey, type);
+	const cachedSchema = getCachedSchema(collectionKey);
 	if (cachedSchema)
 		return {
 			data: cachedSchema,
 			error: undefined,
 		};
 
-	let schema: CollectionSchema | undefined;
+	const Collections = Repository.get(
+		"collections",
+		context.db,
+		context.config.db,
+	);
 
-	if (type === "runtime") {
-		const collection = context.config.collections.find(
-			(c) => c.key === collectionKey,
-		);
-		schema = collection?.runtimeTableSchema;
+	const result = await Collections.selectSingle({
+		select: ["schema"],
+		where: [{ key: "key", operator: "=", value: collectionKey }],
+		validation: { enabled: true },
+	});
+	if (result.error) return result;
 
-		if (schema) setSchema(collectionKey, schema, type);
-	} else {
-		const Collections = Repository.get(
-			"collections",
-			context.db,
-			context.config.db,
-		);
+	return {
+		data: result.data.schema,
+		error: undefined,
+	};
+};
 
-		const result = await Collections.selectSingle({
-			select: ["schema"],
-			where: [{ key: "key", operator: "=", value: collectionKey }],
-			validation: { enabled: true },
-		});
-		if (result.error) return result;
+export const syncAllDbSchemas = async (
+	context: ServiceContext,
+	collectionKeys?: string[],
+): ServiceResponse<undefined> => {
+	const keys = collectionKeys ?? context.config.collections.map((c) => c.key);
 
-		schema = result.data.schema;
+	const Collections = Repository.get(
+		"collections",
+		context.db,
+		context.config.db,
+	);
+
+	const collectionsRes = await Collections.selectMultiple({
+		select: ["key", "schema"],
+		where: [
+			{
+				key: "key",
+				operator: "in",
+				value: keys,
+			},
+			{
+				key: "is_deleted",
+				operator: "=",
+				value: context.config.db.getDefault("boolean", "false"),
+			},
+		],
+		validation: { enabled: true },
+	});
+	if (collectionsRes.error) return collectionsRes;
+
+	for (const collection of collectionsRes.data) {
+		if (collection.schema) {
+			setSchema(collection.key, collection.schema, "db");
+		}
 	}
 
 	return {
-		data: schema || {
-			key: collectionKey,
-			tables: [],
-		},
+		data: undefined,
 		error: undefined,
 	};
 };
@@ -64,9 +89,8 @@ export const getSchema = async (
 export const getBricksTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
-	type: "runtime" | "db",
 ): ServiceResponse<Array<CollectionSchemaTable<LucidBrickTableName>>> => {
-	const schemaRes = await getSchema(context, collectionKey, type);
+	const schemaRes = await getSchema(context, collectionKey);
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -80,11 +104,10 @@ export const getBricksTableSchema = async (
 export const getDocumentTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
-	type: "runtime" | "db",
 ): ServiceResponse<
 	CollectionSchemaTable<LucidDocumentTableName> | undefined
 > => {
-	const schema = await getSchema(context, collectionKey, type);
+	const schema = await getSchema(context, collectionKey);
 	if (schema.error) return schema;
 
 	return {
@@ -98,9 +121,8 @@ export const getDocumentTableSchema = async (
 export const getDocumentFieldsTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
-	type: "runtime" | "db",
 ): ServiceResponse<CollectionSchemaTable<LucidBrickTableName> | undefined> => {
-	const schemaRes = await getSchema(context, collectionKey, type);
+	const schemaRes = await getSchema(context, collectionKey);
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -114,11 +136,10 @@ export const getDocumentFieldsTableSchema = async (
 export const getDocumentVersionTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
-	type: "runtime" | "db",
 ): ServiceResponse<
 	CollectionSchemaTable<LucidVersionTableName> | undefined
 > => {
-	const schemaRes = await getSchema(context, collectionKey, type);
+	const schemaRes = await getSchema(context, collectionKey);
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -132,13 +153,12 @@ export const getDocumentVersionTableSchema = async (
 export const getTableNames = async (
 	context: ServiceContext,
 	collectionKey: string,
-	type: "runtime" | "db",
 ): ServiceResponse<CollectionTableNames> => {
 	const [versionTableRes, documentTableRes, documentFieldsRes] =
 		await Promise.all([
-			getDocumentVersionTableSchema(context, collectionKey, type),
-			getDocumentTableSchema(context, collectionKey, type),
-			getDocumentFieldsTableSchema(context, collectionKey, type),
+			getDocumentVersionTableSchema(context, collectionKey),
+			getDocumentTableSchema(context, collectionKey),
+			getDocumentFieldsTableSchema(context, collectionKey),
 		]);
 	if (versionTableRes.error) return versionTableRes;
 	if (documentTableRes.error) return documentTableRes;

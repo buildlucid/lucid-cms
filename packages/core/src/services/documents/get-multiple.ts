@@ -3,6 +3,11 @@ import Formatter from "../../libs/formatters/index.js";
 import { groupDocumentFilters } from "../../utils/helpers/index.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
+import {
+	getBricksTableSchema,
+	getDocumentFieldsTableSchema,
+	getTableNames,
+} from "../../libs/collection/schema/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentResponse } from "../../types/response.js";
@@ -29,12 +34,24 @@ const getMultiple: ServiceFn<
 	const Document = Repository.get("documents", context.db, context.config.db);
 	const DocumentFormatter = Formatter.get("documents");
 
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+
+	const documentFieldsTableSchemaRes = await getDocumentFieldsTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
+
 	const { documentFilters, brickFilters } = groupDocumentFilters(
-		collectionRes.data.bricksTableSchema,
+		bricksTableSchemaRes.data,
 		data.query.filter,
 	);
 
-	const tableNameRes = collectionRes.data.tableNames;
+	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
 	const documentsRes = await Document.selectMultipleFiltered(
@@ -50,6 +67,7 @@ const getMultiple: ServiceFn<
 				versions: tableNameRes.data.version,
 				documentFields: tableNameRes.data.documentFields,
 			},
+			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
 		},
 		{
 			tableName: tableNameRes.data.document,
@@ -58,7 +76,7 @@ const getMultiple: ServiceFn<
 	if (documentsRes.error) return documentsRes;
 
 	const relationIdRes = await extractRelatedEntityIds(context, {
-		brickSchema: collectionRes.data.bricksTableSchema,
+		brickSchema: bricksTableSchemaRes.data,
 		responses: documentsRes.data?.[0] ?? [],
 		excludeTypes: ["document"],
 	});
@@ -80,6 +98,7 @@ const getMultiple: ServiceFn<
 				relationData: relationDataRes.data,
 				hasFields: true,
 				hasBricks: false,
+				bricksTableSchema: bricksTableSchemaRes.data,
 			}),
 			count: Formatter.parseCount(documentsRes.data?.[1]?.count),
 		},

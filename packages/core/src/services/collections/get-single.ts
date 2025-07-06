@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import { getTableNames } from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionResponse } from "../../types/response.js";
 
@@ -32,7 +33,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const tablesRes = collection.tableNames;
+	const tablesRes = await getTableNames(context, collection.key);
 	if (tablesRes.error) return tablesRes;
 
 	const CollectionsFormatter = Formatter.get("collections");

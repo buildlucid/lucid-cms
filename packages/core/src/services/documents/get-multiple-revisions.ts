@@ -1,6 +1,10 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import {
+	getBricksTableSchema,
+	getTableNames,
+} from "../../libs/collection/schema/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionResponse } from "../../types/response.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
@@ -42,10 +46,16 @@ const getMultipleRevisions: ServiceFn<
 	);
 	const VersionsFormatter = Formatter.get("document-versions");
 
-	const tableNameRes = collectionRes.data.tableNames;
+	const bricksTableSchemaRes = await getBricksTableSchema(
+		context,
+		data.collectionKey,
+	);
+	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+
+	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
-	const bricksSchema = collectionRes.data.bricksTableSchema.filter(
+	const bricksSchema = bricksTableSchemaRes.data.filter(
 		(s) => s.type === "brick",
 	);
 

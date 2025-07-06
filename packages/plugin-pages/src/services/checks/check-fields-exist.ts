@@ -51,7 +51,7 @@ const checkFieldsExist = (data: {
 				type: "basic",
 				message: T("cannot_find_required_field_message"),
 				status: 400,
-				errorResponse: {
+				errors: {
 					body: {
 						fields: fieldErrors,
 					},
