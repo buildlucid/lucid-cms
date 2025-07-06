@@ -2,7 +2,7 @@ import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
 import Repository from "../../../libs/repositories/index.js";
 import logger from "../../../libs/logger/index.js";
-import buildTableName from "../../collection-migrator/helpers/build-table-name.js";
+import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type {

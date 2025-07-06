@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/index.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/database/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidBricksTable } from "../../types.js";
 import type { InsertBrickTables } from "./helpers/construct-brick-table.js";

@@ -11,7 +11,7 @@ import type {
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { DynamicConfig } from "./types.js";
-import type { CollectionSchemaColumn } from "../../services/collection-migrator/schema/types.js";
+import type { CollectionSchemaColumn } from "../collection/schema/types.js";
 
 export interface BrickQueryResponse extends Select<LucidVersionTable> {
 	[key: LucidBrickTableName]: Select<LucidBricksTable>[];

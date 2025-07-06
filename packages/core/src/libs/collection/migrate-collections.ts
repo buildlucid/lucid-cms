@@ -2,9 +2,9 @@ import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import buildMigrations from "./migration/build-migrations.js";
 import buildTableName from "./helpers/build-table-name.js";
 import Repository from "../../libs/repositories/index.js";
-import inferSchema from "./schema/infer-schema.js";
+import inferSchema from "../../libs/collection/schema/infer-schema.js";
 import type { ServiceFn } from "../../types.js";
-import type { CollectionSchema } from "./schema/types.js";
+import type { CollectionSchema } from "../../libs/collection/schema/types.js";
 import type { MigrationPlan } from "./migration/types.js";
 
 /**

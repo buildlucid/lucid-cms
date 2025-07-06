@@ -6,7 +6,7 @@ import type {
 	LucidBrickTableName,
 	ServiceFn,
 } from "../../../types.js";
-import type { CollectionSchemaColumn } from "../../collection-migrator/schema/types.js";
+import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
 
 export type FieldRelationValues = Partial<
 	Record<

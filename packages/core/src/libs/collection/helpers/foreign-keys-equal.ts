@@ -1,5 +1,5 @@
 import type { InferredColumn } from "../../../types.js";
-import type { CollectionSchemaColumn } from "../schema/types.js";
+import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
 
 /**
  * Determines if two foreign keys are equal between the collection/brick columns FK and the DB Adapters inferred column FK

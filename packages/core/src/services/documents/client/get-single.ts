@@ -5,7 +5,7 @@ import { groupDocumentFilters } from "../../../utils/helpers/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
-} from "../../../libs/collection/schema/index.js";
+} from "../../../libs/collection/schema/database/schema-filters.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ClientDocumentResponse } from "../../../types/response.js";
 import type { DocumentVersionType } from "../../../libs/db/types.js";

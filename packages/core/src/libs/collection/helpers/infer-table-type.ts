@@ -1,7 +1,7 @@
 import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
 import { collectionTableParts } from "./build-table-name.js";
-import type { TableType } from "../schema/types.js";
+import type { TableType } from "../../../libs/collection/schema/types.js";
 import type { ServiceResponse } from "../../../types.js";
 
 const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {

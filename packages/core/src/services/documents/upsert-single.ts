@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import { getTableNames } from "../../libs/collection/schema/index.js";
+import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";

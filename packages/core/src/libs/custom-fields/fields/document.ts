@@ -4,7 +4,7 @@ import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import Formatter from "../../formatters/index.js";
-import buildTableName from "../../../services/collection-migrator/helpers/build-table-name.js";
+import buildTableName from "../../collection/helpers/build-table-name.js";
 import type {
 	CFConfig,
 	CFProps,

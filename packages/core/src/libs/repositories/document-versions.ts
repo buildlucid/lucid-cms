@@ -17,7 +17,7 @@ import type { DynamicConfig, QueryProps } from "./types.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,
-} from "../../services/collection-migrator/schema/types.js";
+} from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "./document-bricks.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";

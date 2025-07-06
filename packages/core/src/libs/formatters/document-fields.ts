@@ -1,7 +1,7 @@
 import Formatter from "./index.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import crypto from "node:crypto";
-import prefixGeneratedColName from "../../services/collection-migrator/helpers/prefix-generated-column-name.js";
+import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type {
 	Config,
 	CFConfig,
@@ -17,7 +17,7 @@ import type {
 } from "../../types.js";
 import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
-import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 

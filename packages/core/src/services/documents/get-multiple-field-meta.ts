@@ -1,10 +1,10 @@
 import Repository from "../../libs/repositories/index.js";
-import extractCollectionKey from "../collection-migrator/helpers/extract-collection-key.js";
+import extractCollectionKey from "../../libs/collection/helpers/extract-collection-key.js";
 import {
 	getDocumentVersionTableSchema,
 	getDocumentFieldsTableSchema,
-	syncAllDbSchemas,
-} from "../../libs/collection/schema/index.js";
+} from "../../libs/collection/schema/database/schema-filters.js";
+import cacheAllSchemas from "../../libs/collection/schema/database/cache-all-schemas.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type {
 	DocumentVersionType,
@@ -36,12 +36,14 @@ const getMultipleFieldMeta: ServiceFn<
 		};
 	}
 
-	const collectinosKeys = data.values
+	const collectionKeys = data.values
 		.map((v) => extractCollectionKey(v.table))
 		.filter((c) => c !== undefined);
 
-	const syncRes = await syncAllDbSchemas(context, collectinosKeys);
-	if (syncRes.error) return syncRes;
+	const cacheSchemaRes = await cacheAllSchemas(context, {
+		collectionKeys: collectionKeys,
+	});
+	if (cacheSchemaRes.error) return cacheSchemaRes;
 
 	const unionData = data.values.map(async (v) => {
 		const collectionKey = extractCollectionKey(v.table);

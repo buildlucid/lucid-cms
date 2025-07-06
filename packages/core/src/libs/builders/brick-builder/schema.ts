@@ -1,7 +1,7 @@
 import z from "zod/v4";
 import { stringTranslations } from "../../../schemas/locales.js";
 import constants from "../../../constants/constants.js";
-import { collectionTableParts } from "../../../services/collection-migrator/helpers/build-table-name.js";
+import { collectionTableParts } from "../../collection/helpers/build-table-name.js";
 
 // TODO: merge with brickConfigSchema from schemas/collection-bricks
 const BrickConfigSchema = z.object({

@@ -1,4 +1,4 @@
-import type { OnDelete, OnUpdate } from "../../../libs/db/types.js";
+import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { ColumnDataType } from "kysely";
 import type { FieldTypes } from "../../../types.js";
 

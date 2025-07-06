@@ -3,8 +3,9 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import createMigrationLogger from "../logger/migration-logger.js";
 import lucidServices from "../../../services/index.js";
 import { confirm } from "@inquirer/prompts";
+import migrateCollections from "../../collection/migrate-collections.js";
 import type { Config } from "../../../types.js";
-import type { CollectionSchema } from "../../../services/collection-migrator/schema/types.js";
+import type { CollectionSchema } from "../../collection/schema/types.js";
 
 const runSyncTasks = async (
 	config: Config,
@@ -74,17 +75,16 @@ const migrateCommand = (props?: {
 			logger.migrationStart();
 
 			//* check if collections need migrating
-			const collectionMigrationResult =
-				await lucidServices.collection.migrator.migrateCollections(
-					{
-						db: config.db.client,
-						config: config,
-						services: lucidServices,
-					},
-					{
-						dryRun: true,
-					},
-				);
+			const collectionMigrationResult = await migrateCollections(
+				{
+					db: config.db.client,
+					config: config,
+					services: lucidServices,
+				},
+				{
+					dryRun: true,
+				},
+			);
 
 			let needsCollectionMigrations = false;
 			if (collectionMigrationResult.error) {
@@ -174,15 +174,14 @@ const migrateCommand = (props?: {
 			if (needsCollectionMigrations) {
 				logger.collectionMigrationStart();
 				try {
-					const result =
-						await lucidServices.collection.migrator.migrateCollections(
-							{
-								db: config.db.client,
-								config: config,
-								services: lucidServices,
-							},
-							{ dryRun: false },
-						);
+					const result = await migrateCollections(
+						{
+							db: config.db.client,
+							config: config,
+							services: lucidServices,
+						},
+						{ dryRun: false },
+					);
 
 					if (result.error) {
 						logger.migrationFailed(

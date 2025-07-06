@@ -3,7 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
-import type { CollectionSchema } from "../collection-migrator/schema/types.js";
+import type { CollectionSchema } from "../../libs/collection/schema/types.js";
 
 /**
  * Responsible for syncing active collections to the DB.

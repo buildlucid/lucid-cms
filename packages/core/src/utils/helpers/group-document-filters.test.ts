@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import groupDocumentFilters from "./group-document-filters.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
 import type { LucidBrickTableName } from "../../types.js";
-import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 
 // Mock the prefixGeneratedColName function
 vi.mock(

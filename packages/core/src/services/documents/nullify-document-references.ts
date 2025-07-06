@@ -11,8 +11,8 @@ import { prefixGeneratedColName } from "../../helpers.js";
 import type {
 	CollectionSchemaTable,
 	TableType,
-} from "../collection-migrator/schema/types.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/index.js";
+} from "../../libs/collection/schema/types.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/database/schema-filters.js";
 
 const nullifyDocumentReferences: ServiceFn<
 	[

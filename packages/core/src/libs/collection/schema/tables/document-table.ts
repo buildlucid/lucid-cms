@@ -1,13 +1,13 @@
-import buildTableName from "../helpers/build-table-name.js";
-import type { CollectionSchemaTable } from "./types.js";
-import type { ServiceResponse } from "../../../types.js";
-import type { CollectionBuilder } from "../../../builders.js";
-import type DatabaseAdapter from "../../../libs/db/adapter.js";
+import buildTableName from "../../helpers/build-table-name.js";
+import type { CollectionSchemaTable } from "../types.js";
+import type { ServiceResponse } from "../../../../types.js";
+import type { CollectionBuilder } from "../../../../builders.js";
+import type DatabaseAdapter from "../../../../libs/db/adapter.js";
 
 /**
- * Returns the versions table
+ * Returns the document table
  */
-const createVersionsTable = (props: {
+const createDocumentTable = (props: {
 	collection: CollectionBuilder;
 	db: DatabaseAdapter;
 }): Awaited<
@@ -15,21 +15,16 @@ const createVersionsTable = (props: {
 		schema: CollectionSchemaTable;
 	}>
 > => {
-	const tableNameRes = buildTableName("versions", {
+	const tableNameRes = buildTableName("document", {
 		collection: props.collection.key,
 	});
-	const documentTableRes = buildTableName("document", {
-		collection: props.collection.key,
-	});
-
 	if (tableNameRes.error) return tableNameRes;
-	if (documentTableRes.error) return documentTableRes;
 
 	return {
 		data: {
 			schema: {
 				name: tableNameRes.data,
-				type: "versions",
+				type: "document",
 				key: {
 					collection: props.collection.key,
 				},
@@ -53,36 +48,20 @@ const createVersionsTable = (props: {
 						},
 					},
 					{
-						name: "document_id",
+						name: "is_deleted",
 						source: "core",
-						type: props.db.getDataType("integer"),
-						nullable: false,
-						foreignKey: {
-							table: documentTableRes.data,
-							column: "id",
-							onDelete: "cascade",
-						},
-					},
-					{
-						name: "type",
-						source: "core",
-						type: props.db.getDataType("text"),
-						default: "draft",
+						type: props.db.getDataType("boolean"),
+						default: props.db.getDefault("boolean", "false"),
 						nullable: false,
 					},
 					{
-						name: "promoted_from",
+						name: "is_deleted_at",
 						source: "core",
-						type: props.db.getDataType("integer"),
+						type: props.db.getDataType("timestamp"),
 						nullable: true,
-						foreignKey: {
-							table: tableNameRes.data,
-							column: "id",
-							onDelete: "set null",
-						},
 					},
 					{
-						name: "created_by",
+						name: "deleted_by",
 						source: "core",
 						type: props.db.getDataType("integer"),
 						nullable: true,
@@ -93,7 +72,7 @@ const createVersionsTable = (props: {
 						},
 					},
 					{
-						name: "updated_by",
+						name: "created_by",
 						source: "core",
 						type: props.db.getDataType("integer"),
 						nullable: true,
@@ -111,6 +90,17 @@ const createVersionsTable = (props: {
 						default: props.db.getDefault("timestamp", "now"),
 					},
 					{
+						name: "updated_by",
+						source: "core",
+						type: props.db.getDataType("integer"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_users",
+							column: "id",
+							onDelete: "set null",
+						},
+					},
+					{
 						name: "updated_at",
 						source: "core",
 						type: props.db.getDataType("timestamp"),
@@ -124,4 +114,4 @@ const createVersionsTable = (props: {
 	};
 };
 
-export default createVersionsTable;
+export default createDocumentTable;

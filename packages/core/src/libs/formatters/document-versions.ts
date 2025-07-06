@@ -4,7 +4,7 @@ import type {
 	LucidBrickTableName,
 } from "../../types.js";
 import type { RevisionsQueryResponse } from "../repositories/document-versions.js";
-import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 
 export default class DocumentVersions {

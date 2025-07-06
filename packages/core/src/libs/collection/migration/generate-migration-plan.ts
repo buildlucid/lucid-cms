@@ -5,7 +5,7 @@ import logger from "../../../libs/logger/index.js";
 import getTablePriority from "../helpers/get-table-priority.js";
 import constants from "../../../constants/constants.js";
 import type { ServiceResponse, InferredTable } from "../../../types.js";
-import type { CollectionSchema } from "../schema/types.js";
+import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
 import type {
 	MigrationPlan,
 	ColumnOperation,

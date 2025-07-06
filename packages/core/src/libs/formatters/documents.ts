@@ -11,7 +11,7 @@ import type {
 } from "../../types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
-import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { CollectionSchemaTable } from "../collection/schema/types.js";
 
 export default class DocumentsFormatter {
 	formatMultiple = (props: {

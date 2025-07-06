@@ -4,7 +4,7 @@ import Formatter from "../../libs/formatters/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
-} from "../../libs/collection/schema/index.js";
+} from "../../libs/collection/schema/database/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionResponse } from "../../types/response.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";

@@ -3,8 +3,8 @@ import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
 import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type DatabaseAdapter from "./adapter.js";
-import type { MigrationPlan } from "../../services/collection-migrator/migration/types.js";
-import type { CollectionSchema } from "../../services/collection-migrator/schema/types.js";
+import type { MigrationPlan } from "../collection/migration/types.js";
+import type { CollectionSchema } from "../collection/schema/types.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 

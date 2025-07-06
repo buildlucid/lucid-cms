@@ -1,96 +1,26 @@
-import T from "../../../translations/index.js";
-import Repository from "../../repositories/index.js";
-import type { ServiceContext } from "../../../utils/services/types.js";
-import type {
-	CollectionSchema,
-	CollectionSchemaTable,
-} from "../../../services/collection-migrator/schema/types.js";
+import T from "../../../../translations/index.js";
+import getSchema from "./get-schema.js";
+import type { ServiceContext } from "../../../../utils/services/types.js";
+import type { CollectionSchemaTable } from "../types.js";
 import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
 	ServiceResponse,
 	CollectionTableNames,
-} from "../../../types.js";
-import { getSchema as getCachedSchema, setSchema } from "./cache.js";
+} from "../../../../types.js";
 
-export const getSchema = async (
-	context: ServiceContext,
-	collectionKey: string,
-): ServiceResponse<CollectionSchema> => {
-	const cachedSchema = getCachedSchema(collectionKey);
-	if (cachedSchema)
-		return {
-			data: cachedSchema,
-			error: undefined,
-		};
-
-	const Collections = Repository.get(
-		"collections",
-		context.db,
-		context.config.db,
-	);
-
-	const result = await Collections.selectSingle({
-		select: ["schema"],
-		where: [{ key: "key", operator: "=", value: collectionKey }],
-		validation: { enabled: true },
-	});
-	if (result.error) return result;
-
-	return {
-		data: result.data.schema,
-		error: undefined,
-	};
-};
-
-export const syncAllDbSchemas = async (
-	context: ServiceContext,
-	collectionKeys?: string[],
-): ServiceResponse<undefined> => {
-	const keys = collectionKeys ?? context.config.collections.map((c) => c.key);
-
-	const Collections = Repository.get(
-		"collections",
-		context.db,
-		context.config.db,
-	);
-
-	const collectionsRes = await Collections.selectMultiple({
-		select: ["key", "schema"],
-		where: [
-			{
-				key: "key",
-				operator: "in",
-				value: keys,
-			},
-			{
-				key: "is_deleted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-		],
-		validation: { enabled: true },
-	});
-	if (collectionsRes.error) return collectionsRes;
-
-	for (const collection of collectionsRes.data) {
-		if (collection.schema) {
-			setSchema(collection.key, collection.schema, "db");
-		}
-	}
-
-	return {
-		data: undefined,
-		error: undefined,
-	};
-};
-
+/**
+ * Returns the schema for the bricks table for a given collection.
+ * - document-fields
+ * - repeater
+ * - brick
+ */
 export const getBricksTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): ServiceResponse<Array<CollectionSchemaTable<LucidBrickTableName>>> => {
-	const schemaRes = await getSchema(context, collectionKey);
+	const schemaRes = await getSchema(context, { collectionKey });
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -101,13 +31,17 @@ export const getBricksTableSchema = async (
 	};
 };
 
+/**
+ * Returns the schema for the document table for a given collection.
+ * - document
+ */
 export const getDocumentTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): ServiceResponse<
 	CollectionSchemaTable<LucidDocumentTableName> | undefined
 > => {
-	const schema = await getSchema(context, collectionKey);
+	const schema = await getSchema(context, { collectionKey });
 	if (schema.error) return schema;
 
 	return {
@@ -118,11 +52,15 @@ export const getDocumentTableSchema = async (
 	};
 };
 
+/**
+ * Returns the schema for the document fields table for a given collection.
+ * - document-fields
+ */
 export const getDocumentFieldsTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): ServiceResponse<CollectionSchemaTable<LucidBrickTableName> | undefined> => {
-	const schemaRes = await getSchema(context, collectionKey);
+	const schemaRes = await getSchema(context, { collectionKey });
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -133,13 +71,17 @@ export const getDocumentFieldsTableSchema = async (
 	};
 };
 
+/**
+ * Returns the schema for the document version table for a given collection.
+ * - versions
+ */
 export const getDocumentVersionTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): ServiceResponse<
 	CollectionSchemaTable<LucidVersionTableName> | undefined
 > => {
-	const schemaRes = await getSchema(context, collectionKey);
+	const schemaRes = await getSchema(context, { collectionKey });
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -150,6 +92,12 @@ export const getDocumentVersionTableSchema = async (
 	};
 };
 
+/**
+ * Returns the names of the tables for a given collection.
+ * - version
+ * - document
+ * - document-fields
+ */
 export const getTableNames = async (
 	context: ServiceContext,
 	collectionKey: string,

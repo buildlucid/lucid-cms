@@ -27,7 +27,7 @@ import type {
 } from "../../types.js";
 import type { CollectionBuilder } from "../../builders.js";
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
-import type { CollectionSchemaTable } from "../../services/collection-migrator/schema/types.js";
+import type { CollectionSchemaTable } from "../collection/schema/types.js";
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join
