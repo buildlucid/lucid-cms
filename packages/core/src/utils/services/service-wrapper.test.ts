@@ -210,6 +210,10 @@ test("transaction - one level deep service wrapper success and error", async () 
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
+				schema: service.config.db.formatInsertValue("json", {
+					key: data.collectionKey,
+					tables: [],
+				}),
 			})
 			.returning("key")
 			.executeTakeFirst();
@@ -300,6 +304,10 @@ test("transaction - two level deep service wrapper success and error", async () 
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
+				schema: service.config.db.formatInsertValue("json", {
+					key: data.collectionKey,
+					tables: [],
+				}),
 			})
 			.returning("key")
 			.executeTakeFirst();
