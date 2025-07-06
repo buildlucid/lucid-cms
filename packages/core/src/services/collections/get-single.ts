@@ -1,19 +1,19 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
+import getSchemaStatus from "../../libs/collection/schema/database/get-schema-status.js";
 import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionResponse } from "../../types/response.js";
 
+/**
+ * Gets a single collection
+ * @todo integrate the schema status into the response so that the SPA can alert the user
+ */
 const getSingle: ServiceFn<
 	[
 		{
 			key: string;
-			include?: {
-				bricks?: boolean;
-				fields?: boolean;
-				documentId?: boolean;
-			};
 		},
 	],
 	CollectionResponse
@@ -36,12 +36,14 @@ const getSingle: ServiceFn<
 	const tablesRes = await getTableNames(context, collection.key);
 	if (tablesRes.error) return tablesRes;
 
+	const schemaStatusRes = await getSchemaStatus(context, {
+		collection: collection,
+	});
+	if (schemaStatusRes.error) return schemaStatusRes;
+
 	const CollectionsFormatter = Formatter.get("collections");
 
-	if (
-		data.include?.documentId === true &&
-		collection.getData.mode === "single"
-	) {
+	if (collection.getData.mode === "single") {
 		const Documents = Repository.get(
 			"documents",
 			context.db,
@@ -69,7 +71,11 @@ const getSingle: ServiceFn<
 			error: undefined,
 			data: CollectionsFormatter.formatSingle({
 				collection: collection,
-				include: data.include,
+				include: {
+					bricks: true,
+					fields: true,
+					documentId: true,
+				},
 				documents: documentRes.data
 					? [
 							{
@@ -86,7 +92,11 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: CollectionsFormatter.formatSingle({
 			collection: collection,
-			include: data.include,
+			include: {
+				bricks: true,
+				fields: true,
+				documentId: true,
+			},
 		}),
 	};
 };

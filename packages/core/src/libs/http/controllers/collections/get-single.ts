@@ -49,11 +49,6 @@ const getSingleController = factory.createHandlers(
 			},
 			{
 				key,
-				include: {
-					bricks: true,
-					fields: true,
-					documentId: true,
-				},
 			},
 		);
 		if (collection.error) throw new LucidAPIError(collection.error);

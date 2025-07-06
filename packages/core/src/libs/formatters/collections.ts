@@ -7,7 +7,7 @@ export default class CollectionsFormatter {
 		include?: {
 			bricks?: boolean;
 			fields?: boolean;
-			document_id?: boolean;
+			documentId?: boolean;
 		};
 		documents?: Array<{
 			id: number;
@@ -27,7 +27,7 @@ export default class CollectionsFormatter {
 		include?: {
 			bricks?: boolean;
 			fields?: boolean;
-			document_id?: boolean;
+			documentId?: boolean;
 		};
 		documents?: Array<{
 			id?: number;
@@ -40,7 +40,7 @@ export default class CollectionsFormatter {
 		return {
 			key: key,
 			mode: collectionData.mode,
-			documentId: props.include?.document_id
+			documentId: props.include?.documentId
 				? this.getDocumentId(key, props.documents)
 				: undefined,
 			details: {

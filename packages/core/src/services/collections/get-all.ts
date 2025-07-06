@@ -73,7 +73,7 @@ const getAll: ServiceFn<
 				include: {
 					bricks: false,
 					fields: false,
-					document_id: true,
+					documentId: true,
 				},
 				documents: documentsRes.data,
 			}),
@@ -87,7 +87,7 @@ const getAll: ServiceFn<
 			include: {
 				bricks: false,
 				fields: false,
-				document_id: false,
+				documentId: false,
 			},
 		}),
 	};
