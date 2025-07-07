@@ -26,6 +26,7 @@ interface DynamicFieldProps {
 		fields: FieldResponse[];
 		fieldErrors: FieldError[];
 		activeTab?: string;
+		missingFieldColumns: string[];
 
 		groupRef?: string;
 		repeaterKey?: string;
@@ -101,6 +102,9 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			props.state.activeTab === fieldConfig().key
 		);
 	});
+	const fieldColumnIsMissing = createMemo(() => {
+		return props.state.missingFieldColumns.includes(fieldConfig().key);
+	});
 
 	// -------------------------------
 	// Render
@@ -143,6 +147,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											repeaterKey: props.state.repeaterKey,
 											repeaterDepth: props.state.repeaterDepth,
 											fieldErrors: props.state.fieldErrors,
+											missingFieldColumns: props.state.missingFieldColumns,
 										}}
 									/>
 								)}
@@ -159,6 +164,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								parentRepeaterKey: props.state.repeaterKey,
 								repeaterDepth: props.state.repeaterDepth ?? 0,
 								fieldError: fieldError(),
+								missingFieldColumns: props.state.missingFieldColumns,
 							}}
 						/>
 					</Match>
@@ -176,6 +182,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -191,6 +198,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -206,6 +214,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -222,6 +231,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -238,6 +248,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -253,6 +264,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -268,6 +280,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -283,6 +296,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -298,6 +312,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -313,6 +328,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -328,6 +344,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -343,6 +360,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>
@@ -358,6 +376,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
+								fieldColumnIsMissing: fieldColumnIsMissing(),
 							}}
 						/>
 					</Match>

@@ -35,6 +35,7 @@ interface MediaSelectProps {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const MediaSelect: Component<MediaSelectProps> = (props) => {
@@ -104,6 +105,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<div class="mt-2.5 w-full">
 				<Switch>

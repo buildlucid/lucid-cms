@@ -18,6 +18,7 @@ interface RepeaterFieldProps {
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
 		fieldError: FieldError | undefined;
+		missingFieldColumns: string[];
 	};
 }
 
@@ -48,6 +49,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const groupErrors = createMemo(() => {
 		return props.state.fieldError?.groupErrors || [];
 	});
+	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 
 	// -------------------------------
 	// Functions
@@ -112,6 +114,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 											parentRepeaterKey: props.state.parentRepeaterKey,
 											parentRef: props.state.groupRef,
 											groupErrors: groupErrors(),
+											missingFieldColumns: missingFieldColumns(),
 										}}
 									/>
 								)}

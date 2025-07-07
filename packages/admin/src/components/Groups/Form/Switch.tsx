@@ -30,6 +30,7 @@ interface SwitchProps {
 	options?: {
 		queryRow?: boolean;
 	};
+	fieldColumnIsMissing?: boolean;
 }
 
 export const Switch: Component<SwitchProps> = (props) => {
@@ -75,6 +76,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<input
 				ref={checkboxRef}

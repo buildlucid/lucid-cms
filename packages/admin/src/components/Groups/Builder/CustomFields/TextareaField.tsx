@@ -22,6 +22,7 @@ interface TextareaFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -90,6 +91,7 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 			}}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			disabled={isDisabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}

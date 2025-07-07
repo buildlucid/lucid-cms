@@ -34,6 +34,7 @@ interface InputProps {
 	hideOptionalText?: boolean;
 
 	theme: "basic" | "full";
+	fieldColumnIsMissing?: boolean;
 }
 
 export const Input: Component<InputProps> = (props) => {
@@ -78,6 +79,7 @@ export const Input: Component<InputProps> = (props) => {
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
 					hideOptionalText={props.hideOptionalText}
+					fieldColumnIsMissing={props.fieldColumnIsMissing}
 				/>
 				<input
 					class={classnames(

@@ -1,7 +1,7 @@
 import T from "@/translations";
 import { type Component, Show } from "solid-js";
 import classnames from "classnames";
-import { FaSolidGlobe } from "solid-icons/fa";
+import { FaSolidGlobe, FaSolidDatabase } from "solid-icons/fa";
 
 interface LabelProps {
 	id: string;
@@ -14,6 +14,7 @@ interface LabelProps {
 
 	localised?: boolean;
 	altLocaleError?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const Label: Component<LabelProps> = (props) => {
@@ -31,12 +32,24 @@ export const Label: Component<LabelProps> = (props) => {
 				)}
 			>
 				<span class="flex items-center">
+					<Show when={props.fieldColumnIsMissing}>
+						<span
+							class="text-error-base mr-1 inline"
+							title={T()("this_field_is_missing_from_the_database")}
+						>
+							<FaSolidDatabase size={12} />
+						</span>
+					</Show>
 					<Show when={props.localised}>
 						<span
 							class={classnames("mr-1 inline", {
 								"text-error-base": props.altLocaleError,
 							})}
-							title={T()("this_filed_has_errors_in_other_locales")}
+							title={
+								props.altLocaleError
+									? T()("this_filed_has_errors_in_other_locales")
+									: T()("this_field_supports_translations")
+							}
 						>
 							<FaSolidGlobe size={12} />
 						</span>

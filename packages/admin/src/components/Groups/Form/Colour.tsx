@@ -18,6 +18,7 @@ interface ColourProps {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const Colour: Component<ColourProps> = (props) => {
@@ -39,6 +40,7 @@ export const Colour: Component<ColourProps> = (props) => {
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<input
 				class={classnames(

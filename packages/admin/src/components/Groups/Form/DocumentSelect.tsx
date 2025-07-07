@@ -29,6 +29,7 @@ interface DocumentSelectProps {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
@@ -65,6 +66,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<div class="mt-2.5 w-full">
 				<Switch>

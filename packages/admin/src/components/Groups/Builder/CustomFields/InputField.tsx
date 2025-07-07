@@ -23,6 +23,7 @@ interface InputFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -105,6 +106,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			localised={props.state.localised}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			theme={"basic"}
 		/>
 	);

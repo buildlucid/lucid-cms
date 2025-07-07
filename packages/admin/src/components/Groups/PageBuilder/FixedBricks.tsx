@@ -1,5 +1,5 @@
 import { type Component, createMemo, For, createSignal } from "solid-js";
-import type { CollectionBrickConfig } from "@types";
+import type { CollectionBrickConfig, CollectionResponse } from "@types";
 import classNames from "classnames";
 import { FaSolidCircleChevronUp, FaSolidShield } from "solid-icons/fa";
 import brickStore, { type BrickData } from "@/store/brickStore";
@@ -11,6 +11,7 @@ import helpers from "@/utils/helpers";
 
 interface FixedBricksProps {
 	brickConfig: CollectionBrickConfig[];
+	collectionSchemaStatus: CollectionResponse["schemaStatus"];
 }
 
 export const FixedBricks: Component<FixedBricksProps> = (props) => {
@@ -28,7 +29,11 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 		<ul>
 			<For each={fixedBricks()}>
 				{(brick) => (
-					<FixedBrickRow brick={brick} brickConfig={props.brickConfig} />
+					<FixedBrickRow
+						brick={brick}
+						brickConfig={props.brickConfig}
+						collectionSchemaStatus={props.collectionSchemaStatus}
+					/>
 				)}
 			</For>
 		</ul>
@@ -38,6 +43,7 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 interface FixedBrickRowProps {
 	brick: BrickData;
 	brickConfig: CollectionBrickConfig[];
+	collectionSchemaStatus: CollectionResponse["schemaStatus"];
 }
 
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
@@ -61,6 +67,9 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				(b) => b.key === props.brick.key && b.ref === props.brick.ref,
 			)?.fields || []
 		);
+	});
+	const missingFieldColumns = createMemo(() => {
+		return props.collectionSchemaStatus?.missingColumns[props.brick.key] || [];
 	});
 
 	// -------------------------------
@@ -128,6 +137,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					configFields: config()?.fields || [],
 					labelledby: `fixed-brick-${props.brick.key}`,
 					fieldErrors: fieldErrors(),
+					missingFieldColumns: missingFieldColumns(),
 				}}
 				options={{
 					padding: "20",

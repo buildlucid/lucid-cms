@@ -478,5 +478,8 @@
 	"created": "Created",
 	"modified": "Modified",
 	"save_draft": "Save Draft",
-	"optional": "Optional"
+	"optional": "Optional",
+	"collection_needs_migrating_message": "Collection schema changes detected. Please contact your administrator to run a migration.",
+	"this_field_is_missing_from_the_database": "This field is missing from the database.",
+	"this_field_supports_translations": "This field supports translations."
 }

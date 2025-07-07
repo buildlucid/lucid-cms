@@ -27,6 +27,7 @@ interface DocumentFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -109,6 +110,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			localised={props.state.localised}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 		/>
 	);
 };

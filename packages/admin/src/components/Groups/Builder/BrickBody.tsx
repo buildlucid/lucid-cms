@@ -22,6 +22,7 @@ interface BrickProps {
 		configFields: CFConfig<FieldTypes>[];
 		labelledby?: string;
 		fieldErrors: FieldError[];
+		missingFieldColumns: string[];
 	};
 	options: {
 		padding?: "15" | "20";
@@ -94,6 +95,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 								fieldConfig: config,
 								activeTab: getActiveTab(),
 								fieldErrors: props.state.fieldErrors,
+								missingFieldColumns: props.state.missingFieldColumns,
 							}}
 						/>
 					)}

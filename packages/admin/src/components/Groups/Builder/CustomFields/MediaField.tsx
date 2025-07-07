@@ -22,6 +22,7 @@ interface MediaFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -105,6 +106,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			type={props.state.fieldConfig.validation?.type}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 		/>
 	);
 };

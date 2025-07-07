@@ -23,6 +23,7 @@ interface SelectFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -105,6 +106,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 			disabled={isDisabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			theme={"basic"}
 		/>
 	);

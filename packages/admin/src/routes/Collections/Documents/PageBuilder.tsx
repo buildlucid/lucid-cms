@@ -122,28 +122,40 @@ const CollectionsDocumentsEditRoute: Component<
 				/>
 
 				<div class="mt-15 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden">
-					<Show when={uiState.isBuilderLocked()}>
-						<Alert
-							style="layout"
-							alerts={[
-								{
-									type: "warning",
-									message: T()("locked_document_message"),
-									show: uiState.isBuilderLocked(),
-								},
-							]}
-						/>
-					</Show>
+					<Alert
+						style="layout"
+						alerts={[
+							{
+								type: "warning",
+								message: T()("locked_document_message"),
+								show: uiState.isBuilderLocked(),
+							},
+							{
+								type: "warning",
+								message: T()("collection_needs_migrating_message"),
+								show: uiState.collectionNeedsMigrating(),
+							},
+						]}
+					/>
 					<div class="w-full flex grow">
 						<div class="w-full flex flex-col">
 							<CollectionPseudoBrick
 								fields={docState.collection.data?.data.fields || []}
+								collectionSchemaStatus={
+									docState.collection.data?.data.schemaStatus
+								}
 							/>
 							<FixedBricks
 								brickConfig={docState.collection.data?.data.fixedBricks || []}
+								collectionSchemaStatus={
+									docState.collection.data?.data.schemaStatus
+								}
 							/>
 							<BuilderBricks
 								brickConfig={docState.collection.data?.data.builderBricks || []}
+								collectionSchemaStatus={
+									docState.collection.data?.data.schemaStatus
+								}
 							/>
 						</div>
 					</div>

@@ -26,6 +26,7 @@ interface WYSIWYGProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
@@ -96,6 +97,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<div
 				class={classnames("mt-1 bg-container-4 rounded-md", {

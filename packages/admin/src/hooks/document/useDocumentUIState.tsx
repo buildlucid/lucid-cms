@@ -80,6 +80,13 @@ export function useDocumentUIState({
 	});
 
 	/**
+	 * Determines if the collection needs migrating
+	 */
+	const collectionNeedsMigrating = createMemo(() => {
+		return collection.data?.data.schemaStatus?.requiresMigration === true;
+	});
+
+	/**
 	 * Determines if you can save the document
 	 */
 	const canSaveDocument = createMemo(() => {
@@ -250,6 +257,7 @@ export function useDocumentUIState({
 		hasDeletePermission,
 		showRestoreRevisionButton,
 		hasRestorePermission,
+		collectionNeedsMigrating,
 	};
 }
 export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;

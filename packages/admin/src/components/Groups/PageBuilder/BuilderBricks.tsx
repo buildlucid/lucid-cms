@@ -1,6 +1,6 @@
 import T from "@/translations";
 import { type Component, createMemo, For, Show, createSignal } from "solid-js";
-import type { CollectionBrickConfig } from "@types";
+import type { CollectionBrickConfig, CollectionResponse } from "@types";
 import {
 	FaSolidCircleChevronUp,
 	FaSolidGripLines,
@@ -20,6 +20,7 @@ import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
+	collectionSchemaStatus: CollectionResponse["schemaStatus"];
 }
 
 export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
@@ -75,6 +76,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 									<BuilderBrickRow
 										brick={brick}
 										brickConfig={props.brickConfig}
+										collectionSchemaStatus={props.collectionSchemaStatus}
 										dragDrop={dragDrop}
 									/>
 								)}
@@ -100,6 +102,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 interface BuilderBrickRowProps {
 	brick: BrickData;
 	brickConfig: CollectionBrickConfig[];
+	collectionSchemaStatus: CollectionResponse["schemaStatus"];
 	dragDrop: DragDropCBT;
 }
 
@@ -129,6 +132,9 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				(b) => b.key === props.brick.key && b.ref === props.brick.ref,
 			)?.fields || []
 		);
+	});
+	const missingFieldColumns = createMemo(() => {
+		return props.collectionSchemaStatus?.missingColumns[props.brick.key] || [];
 	});
 
 	// -------------------------------
@@ -248,6 +254,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					configFields: config()?.fields || [],
 					labelledby: `builder-brick-${props.brick.key}`,
 					fieldErrors: fieldErrors(),
+					missingFieldColumns: missingFieldColumns(),
 				}}
 				options={{
 					padding: "15",

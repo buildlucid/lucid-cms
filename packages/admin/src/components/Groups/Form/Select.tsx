@@ -47,6 +47,7 @@ export interface SelectProps {
 	hasError?: boolean;
 	theme: "full" | "basic" | "basic-small";
 	shortcut?: string;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const Select: Component<SelectProps> = (props) => {
@@ -122,6 +123,7 @@ export const Select: Component<SelectProps> = (props) => {
 						theme={props.theme}
 						altLocaleError={props.altLocaleError}
 						localised={props.localised}
+						fieldColumnIsMissing={props.fieldColumnIsMissing}
 					/>
 					{/* Trigger */}
 					<DropdownMenu.Trigger

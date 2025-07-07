@@ -22,6 +22,7 @@ interface LinkFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -92,6 +93,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 				disabled={isDisabled()}
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
+				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			/>
 		</>
 	);

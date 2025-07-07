@@ -21,6 +21,7 @@ interface LinkSelectProps {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 export const LinkSelect: Component<LinkSelectProps> = (props) => {
@@ -59,6 +60,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<div class="mt-2.5 w-full flex flex-wrap gap-2.5">
 				<Switch>

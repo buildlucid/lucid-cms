@@ -24,6 +24,7 @@ interface GroupBodyProps {
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 		groupErrors: GroupError[];
+		missingFieldColumns: string[];
 	};
 }
 
@@ -55,6 +56,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const fieldErrors = createMemo(() => {
 		return groupError()?.fields;
 	});
+	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 
 	// -------------------------------
 	// Functions
@@ -200,6 +202,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
 									fieldErrors: fieldErrors() || [],
+									missingFieldColumns: missingFieldColumns(),
 								}}
 							/>
 						)}

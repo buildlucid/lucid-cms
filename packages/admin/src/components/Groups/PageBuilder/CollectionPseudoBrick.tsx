@@ -1,10 +1,11 @@
 import { type Component, createMemo, Show } from "solid-js";
-import type { CFConfig, FieldTypes } from "@types";
+import type { CFConfig, FieldTypes, CollectionResponse } from "@types";
 import brickStore, { type BrickData } from "@/store/brickStore";
 import { BrickBody } from "@/components/Groups/Builder";
 
 interface CollectionPseudoBrickProps {
 	fields: CFConfig<FieldTypes>[];
+	collectionSchemaStatus: CollectionResponse["schemaStatus"];
 }
 
 export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
@@ -26,6 +27,11 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	const fieldErrors = createMemo(() => {
 		return brickStore.get.fieldsErrors;
 	});
+	const missingFieldColumns = createMemo(() => {
+		return (
+			props.collectionSchemaStatus?.missingColumns["document-fields"] || []
+		);
+	});
 
 	// ----------------------------------
 	// Render
@@ -39,6 +45,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 						brickIndex: brickIndex(),
 						configFields: props.fields,
 						fieldErrors: fieldErrors(),
+						missingFieldColumns: missingFieldColumns(),
 					}}
 					options={{}}
 				/>

@@ -146,21 +146,35 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 									message: T()("locked_document_message"),
 									show: true,
 								},
+								{
+									type: "warning",
+									message: T()("collection_needs_migrating_message"),
+									show: uiState.collectionNeedsMigrating(),
+								},
 							]}
 						/>
 						<div class="w-full flex grow h-full">
 							<div class="w-full flex flex-col">
 								<CollectionPseudoBrick
 									fields={revisionState.collection.data?.data.fields || []}
+									collectionSchemaStatus={
+										revisionState.collection.data?.data.schemaStatus
+									}
 								/>
 								<FixedBricks
 									brickConfig={
 										revisionState.collection.data?.data.fixedBricks || []
 									}
+									collectionSchemaStatus={
+										revisionState.collection.data?.data.schemaStatus
+									}
 								/>
 								<BuilderBricks
 									brickConfig={
 										revisionState.collection.data?.data.builderBricks || []
+									}
+									collectionSchemaStatus={
+										revisionState.collection.data?.data.schemaStatus
 									}
 								/>
 							</div>

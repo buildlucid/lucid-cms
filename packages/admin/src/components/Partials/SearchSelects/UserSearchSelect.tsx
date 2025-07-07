@@ -18,6 +18,7 @@ interface UserSearchSelectProps {
 	theme: "basic" | "basic-small" | "full";
 	disabled?: boolean;
 	required?: boolean;
+	fieldColumnIsMissing?: boolean;
 }
 
 const UserSearchSelect: Component<UserSearchSelectProps> = (props) => {
@@ -63,6 +64,7 @@ const UserSearchSelect: Component<UserSearchSelectProps> = (props) => {
 			disabled={props.disabled}
 			required={props.required}
 			noClear={false}
+			fieldColumnIsMissing={props.fieldColumnIsMissing}
 		/>
 	);
 };

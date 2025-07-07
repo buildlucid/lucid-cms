@@ -22,6 +22,7 @@ interface UserFieldProps {
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
+		fieldColumnIsMissing: boolean;
 	};
 }
 
@@ -88,6 +89,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			errors={props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			theme={"basic"}
