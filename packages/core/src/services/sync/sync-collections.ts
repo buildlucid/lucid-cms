@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
-import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionSchema } from "../../libs/collection/schema/types.js";
 
 /**

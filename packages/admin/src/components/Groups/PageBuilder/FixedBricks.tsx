@@ -11,7 +11,7 @@ import helpers from "@/utils/helpers";
 
 interface FixedBricksProps {
 	brickConfig: CollectionBrickConfig[];
-	collectionSchemaStatus: CollectionResponse["schemaStatus"];
+	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 }
 
 export const FixedBricks: Component<FixedBricksProps> = (props) => {
@@ -32,7 +32,7 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 					<FixedBrickRow
 						brick={brick}
 						brickConfig={props.brickConfig}
-						collectionSchemaStatus={props.collectionSchemaStatus}
+						collectionMigrationStatus={props.collectionMigrationStatus}
 					/>
 				)}
 			</For>
@@ -43,7 +43,7 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 interface FixedBrickRowProps {
 	brick: BrickData;
 	brickConfig: CollectionBrickConfig[];
-	collectionSchemaStatus: CollectionResponse["schemaStatus"];
+	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 }
 
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
@@ -69,7 +69,9 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 		);
 	});
 	const missingFieldColumns = createMemo(() => {
-		return props.collectionSchemaStatus?.missingColumns[props.brick.key] || [];
+		return (
+			props.collectionMigrationStatus?.missingColumns[props.brick.key] || []
+		);
 	});
 
 	// -------------------------------

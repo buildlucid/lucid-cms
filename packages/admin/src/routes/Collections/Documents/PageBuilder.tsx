@@ -141,20 +141,20 @@ const CollectionsDocumentsEditRoute: Component<
 						<div class="w-full flex flex-col">
 							<CollectionPseudoBrick
 								fields={docState.collection.data?.data.fields || []}
-								collectionSchemaStatus={
-									docState.collection.data?.data.schemaStatus
+								collectionMigrationStatus={
+									docState.collection.data?.data.migrationStatus
 								}
 							/>
 							<FixedBricks
 								brickConfig={docState.collection.data?.data.fixedBricks || []}
-								collectionSchemaStatus={
-									docState.collection.data?.data.schemaStatus
+								collectionMigrationStatus={
+									docState.collection.data?.data.migrationStatus
 								}
 							/>
 							<BuilderBricks
 								brickConfig={docState.collection.data?.data.builderBricks || []}
-								collectionSchemaStatus={
-									docState.collection.data?.data.schemaStatus
+								collectionMigrationStatus={
+									docState.collection.data?.data.migrationStatus
 								}
 							/>
 						</div>

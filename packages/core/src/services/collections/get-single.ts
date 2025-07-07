@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import getSchemaStatus from "../../libs/collection/schema/database/get-schema-status.js";
+import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionResponse } from "../../types/response.js";
@@ -36,10 +36,10 @@ const getSingle: ServiceFn<
 	const tablesRes = await getTableNames(context, collection.key);
 	if (tablesRes.error) return tablesRes;
 
-	const schemaStatusRes = await getSchemaStatus(context, {
+	const migrationStatus = await getMigrationStatus(context, {
 		collection: collection,
 	});
-	if (schemaStatusRes.error) return schemaStatusRes;
+	if (migrationStatus.error) return migrationStatus;
 
 	const CollectionsFormatter = Formatter.get("collections");
 
@@ -92,7 +92,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: CollectionsFormatter.formatSingle({
 			collection: collection,
-			schemaStatus: schemaStatusRes.data,
+			migrationStatus: migrationStatus.data,
 			include: {
 				bricks: true,
 				fields: true,

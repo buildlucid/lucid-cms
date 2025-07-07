@@ -1,4 +1,7 @@
-import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
+import type {
+	CollectionSchemaColumn,
+	TableType,
+} from "../../../libs/collection/schema/types.js";
 import type { ColumnDataType } from "kysely";
 
 export type ModifyColumnOperation = {
@@ -47,6 +50,12 @@ export type TableMigration = {
 	type: "create" | "modify" | "remove";
 	priority: number;
 	tableName: string;
+	tableType?: TableType;
+	key?: {
+		collection: string;
+		brick?: string;
+		repeater?: Array<string>;
+	};
 	columnOperations: ColumnOperation[];
 };
 

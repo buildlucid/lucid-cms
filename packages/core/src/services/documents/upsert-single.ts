@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
-import getSchemaStatus from "../../libs/collection/schema/database/get-schema-status.js";
+import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -52,12 +52,12 @@ const upsertSingle: ServiceFn<
 	}
 
 	//* check the schema status and if a migration is required
-	const schemaStatusRes = await getSchemaStatus(context, {
+	const migrationStatusRes = await getMigrationStatus(context, {
 		collection: collectionRes.data,
 	});
-	if (schemaStatusRes.error) return schemaStatusRes;
+	if (migrationStatusRes.error) return migrationStatusRes;
 
-	if (schemaStatusRes.data.requiresMigration) {
+	if (migrationStatusRes.data.requiresMigration) {
 		return {
 			error: {
 				type: "basic",

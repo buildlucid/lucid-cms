@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import getSchemaStatus from "../../libs/collection/schema/database/get-schema-status.js";
+import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import Formatter from "../../libs/formatters/index.js";
@@ -44,12 +44,12 @@ const promoteVersion: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	//* check the schema status and if a migration is required
-	const schemaStatusRes = await getSchemaStatus(context, {
+	const migrationStatusRes = await migrationStatus(context, {
 		collection: collectionRes.data,
 	});
-	if (schemaStatusRes.error) return schemaStatusRes;
+	if (migrationStatusRes.error) return migrationStatusRes;
 
-	if (schemaStatusRes.data.requiresMigration) {
+	if (migrationStatusRes.data.requiresMigration) {
 		return {
 			error: {
 				type: "basic",

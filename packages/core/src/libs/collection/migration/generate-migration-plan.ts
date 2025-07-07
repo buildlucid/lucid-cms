@@ -13,6 +13,9 @@ import type {
 } from "./types.js";
 import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
+const DISABLE_REMOVE_TABLES = true;
+const DISABLE_REMOVE_COLUMNS = true;
+
 /**
  * Generates a migration plan for a collection
  */
@@ -38,6 +41,8 @@ const generateMigrationPlan = (props: {
 				return {
 					type: "create",
 					tableName: table.name,
+					tableType: table.type,
+					key: table.key,
 					priority: tablePrioRes.data,
 					columnOperations: table.columns.map((column) => ({
 						type: "add",
@@ -71,6 +76,8 @@ const generateMigrationPlan = (props: {
 				type: "create",
 				tableName: table.name,
 				priority: tablePrioRes.data,
+				tableType: table.type,
+				key: table.key,
 				columnOperations: table.columns.map((column) => ({
 					type: "add",
 					column: normaliseColumn(column, column.source),
@@ -115,15 +122,17 @@ const generateMigrationPlan = (props: {
 			}
 		}
 
-		for (const column of targetTable.columns) {
-			const columnStillExists = table.columns.some(
-				(c) => c.name === column.name,
-			);
-			if (!columnStillExists) {
-				columnOperations.push({
-					type: "remove",
-					columnName: column.name,
-				});
+		if (!DISABLE_REMOVE_COLUMNS) {
+			for (const column of targetTable.columns) {
+				const columnStillExists = table.columns.some(
+					(c) => c.name === column.name,
+				);
+				if (!columnStillExists) {
+					columnOperations.push({
+						type: "remove",
+						columnName: column.name,
+					});
+				}
 			}
 		}
 
@@ -135,25 +144,31 @@ const generateMigrationPlan = (props: {
 				type: "modify",
 				tableName: table.name,
 				priority: tablePrioRes.data,
+				tableType: table.type,
+				key: table.key,
 				columnOperations,
 			});
 		}
 	}
 
-	for (const table of props.schemas.existing) {
-		const tableStillExists = props.schemas.current.tables.some(
-			(t) => t.name === table.name,
-		);
-		if (!tableStillExists) {
-			const tablePrioRes = getTablePriority("db-inferred", table);
-			if (tablePrioRes.error) return tablePrioRes;
+	if (!DISABLE_REMOVE_TABLES) {
+		for (const table of props.schemas.existing) {
+			const tableStillExists = props.schemas.current.tables.some(
+				(t) => t.name === table.name,
+			);
+			if (!tableStillExists) {
+				const tablePrioRes = getTablePriority("db-inferred", table);
+				if (tablePrioRes.error) return tablePrioRes;
 
-			plan.tables.push({
-				type: "remove",
-				tableName: table.name,
-				priority: tablePrioRes.data,
-				columnOperations: [],
-			});
+				plan.tables.push({
+					type: "remove",
+					tableName: table.name,
+					priority: tablePrioRes.data,
+					// tableType: table.type,
+					// key: table.key,
+					columnOperations: [],
+				});
+			}
 		}
 	}
 

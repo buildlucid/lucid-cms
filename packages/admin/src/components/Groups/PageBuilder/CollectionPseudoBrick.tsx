@@ -5,7 +5,7 @@ import { BrickBody } from "@/components/Groups/Builder";
 
 interface CollectionPseudoBrickProps {
 	fields: CFConfig<FieldTypes>[];
-	collectionSchemaStatus: CollectionResponse["schemaStatus"];
+	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 }
 
 export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
@@ -29,7 +29,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	});
 	const missingFieldColumns = createMemo(() => {
 		return (
-			props.collectionSchemaStatus?.missingColumns["document-fields"] || []
+			props.collectionMigrationStatus?.missingColumns["document-fields"] || []
 		);
 	});
 

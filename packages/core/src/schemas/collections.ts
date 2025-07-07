@@ -3,7 +3,7 @@ import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
 import type { ControllerSchema } from "../types.js";
 
-const schemaStatusSchema = z.object({
+const migrationStatusSchema = z.object({
 	requiresMigration: z.boolean().meta({
 		description: "Whether the collection requires a database migration",
 		example: false,
@@ -14,9 +14,8 @@ const schemaStatusSchema = z.object({
 			"document-fields": ["title"],
 		},
 	}),
-	orphanedColumns: z.record(z.string(), z.array(z.string())).meta({
-		description:
-			"Columns that are present in the database but not in the collection",
+	hiddenFields: z.record(z.string(), z.array(z.string())).meta({
+		description: "Fields that are hidden from the collection",
 		example: {
 			banner: ["heading"],
 		},
@@ -78,7 +77,7 @@ const collectionResponseSchema = z.object({
 			example: ["pageTitle", "author", "fullSlug", "slug"],
 		}),
 	}),
-	schemaStatus: schemaStatusSchema.nullable(),
+	migrationStatus: migrationStatusSchema.nullable(),
 	get fixedBricks() {
 		return z
 			.array(brickConfigSchema)

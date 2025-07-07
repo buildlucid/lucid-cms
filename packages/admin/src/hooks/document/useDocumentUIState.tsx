@@ -83,7 +83,7 @@ export function useDocumentUIState({
 	 * Determines if the collection needs migrating
 	 */
 	const collectionNeedsMigrating = createMemo(() => {
-		return collection.data?.data.schemaStatus?.requiresMigration === true;
+		return collection.data?.data.migrationStatus?.requiresMigration === true;
 	});
 
 	/**

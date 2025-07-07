@@ -157,24 +157,24 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 							<div class="w-full flex flex-col">
 								<CollectionPseudoBrick
 									fields={revisionState.collection.data?.data.fields || []}
-									collectionSchemaStatus={
-										revisionState.collection.data?.data.schemaStatus
+									collectionMigrationStatus={
+										revisionState.collection.data?.data.migrationStatus
 									}
 								/>
 								<FixedBricks
 									brickConfig={
 										revisionState.collection.data?.data.fixedBricks || []
 									}
-									collectionSchemaStatus={
-										revisionState.collection.data?.data.schemaStatus
+									collectionMigrationStatus={
+										revisionState.collection.data?.data.migrationStatus
 									}
 								/>
 								<BuilderBricks
 									brickConfig={
 										revisionState.collection.data?.data.builderBricks || []
 									}
-									collectionSchemaStatus={
-										revisionState.collection.data?.data.schemaStatus
+									collectionMigrationStatus={
+										revisionState.collection.data?.data.migrationStatus
 									}
 								/>
 							</div>

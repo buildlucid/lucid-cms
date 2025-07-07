@@ -20,7 +20,7 @@ import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
-	collectionSchemaStatus: CollectionResponse["schemaStatus"];
+	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 }
 
 export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
@@ -76,7 +76,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 									<BuilderBrickRow
 										brick={brick}
 										brickConfig={props.brickConfig}
-										collectionSchemaStatus={props.collectionSchemaStatus}
+										collectionMigrationStatus={props.collectionMigrationStatus}
 										dragDrop={dragDrop}
 									/>
 								)}
@@ -102,7 +102,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 interface BuilderBrickRowProps {
 	brick: BrickData;
 	brickConfig: CollectionBrickConfig[];
-	collectionSchemaStatus: CollectionResponse["schemaStatus"];
+	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 	dragDrop: DragDropCBT;
 }
 
@@ -134,7 +134,9 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 		);
 	});
 	const missingFieldColumns = createMemo(() => {
-		return props.collectionSchemaStatus?.missingColumns[props.brick.key] || [];
+		return (
+			props.collectionMigrationStatus?.missingColumns[props.brick.key] || []
+		);
 	});
 
 	// -------------------------------

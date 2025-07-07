@@ -287,6 +287,9 @@ export interface HeadlessProcessedImages {
 
 export interface LucidCollections {
 	key: string;
+	/**
+	 * We store a version of the schema on migration so that document queries know what custom field columns they can safely query.
+	 */
 	schema: JSONColumnType<
 		CollectionSchema,
 		//* __insert__ includes a Record as the base repository handles formatting via formatData method
