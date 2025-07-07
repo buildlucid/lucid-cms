@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
+import getSchemaStatus from "../../libs/collection/schema/database/get-schema-status.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -44,6 +45,24 @@ const upsertSingle: ServiceFn<
 				type: "basic",
 				name: T("error_locked_collection_name"),
 				message: T("error_locked_collection_message"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	//* check the schema status and if a migration is required
+	const schemaStatusRes = await getSchemaStatus(context, {
+		collection: collectionRes.data,
+	});
+	if (schemaStatusRes.error) return schemaStatusRes;
+
+	if (schemaStatusRes.data.requiresMigration) {
+		return {
+			error: {
+				type: "basic",
+				name: T("error_schema_migration_required_name"),
+				message: T("error_schema_migration_required_message"),
 				status: 400,
 			},
 			data: undefined,

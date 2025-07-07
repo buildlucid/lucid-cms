@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
+import getSchemaStatus from "../../libs/collection/schema/database/get-schema-status.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import Formatter from "../../libs/formatters/index.js";
@@ -41,6 +42,24 @@ const promoteVersion: ServiceFn<
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
+
+	//* check the schema status and if a migration is required
+	const schemaStatusRes = await getSchemaStatus(context, {
+		collection: collectionRes.data,
+	});
+	if (schemaStatusRes.error) return schemaStatusRes;
+
+	if (schemaStatusRes.data.requiresMigration) {
+		return {
+			error: {
+				type: "basic",
+				name: T("error_schema_migration_required_name"),
+				message: T("error_schema_migration_required_message"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,
