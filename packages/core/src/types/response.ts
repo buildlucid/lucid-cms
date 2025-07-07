@@ -14,6 +14,7 @@ import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 import type { LocaleValue } from "./shared.js";
 import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
 import type z from "zod/v4";
+import type { SchemaStatus } from "../libs/collection/schema/database/get-schema-status.js";
 
 export interface UserResponse {
 	id: number;
@@ -177,6 +178,7 @@ export interface CollectionResponse {
 		isLocked: boolean;
 		displayInListing: string[];
 	};
+	schemaStatus?: SchemaStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;
 	builderBricks: Array<CollectionBrickConfig>;
 	fields: CFConfig<FieldTypes>[];

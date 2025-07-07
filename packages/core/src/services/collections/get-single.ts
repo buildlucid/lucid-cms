@@ -92,6 +92,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: CollectionsFormatter.formatSingle({
 			collection: collection,
+			schemaStatus: schemaStatusRes.data,
 			include: {
 				bricks: true,
 				fields: true,

@@ -1,5 +1,6 @@
 import type { CollectionResponse } from "../../types/response.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type { SchemaStatus } from "../collection/schema/database/get-schema-status.js";
 
 export default class CollectionsFormatter {
 	formatMultiple = (props: {
@@ -24,6 +25,7 @@ export default class CollectionsFormatter {
 	};
 	formatSingle = (props: {
 		collection: CollectionBuilder;
+		schemaStatus?: SchemaStatus;
 		include?: {
 			bricks?: boolean;
 			fields?: boolean;
@@ -55,6 +57,7 @@ export default class CollectionsFormatter {
 				isLocked: collectionData.config.isLocked,
 				displayInListing: props.collection.displayInListing,
 			},
+			schemaStatus: props.schemaStatus ?? null,
 			fixedBricks: props.include?.bricks
 				? (props.collection.fixedBricks ?? [])
 				: [],
