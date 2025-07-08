@@ -3,9 +3,9 @@ import z from "zod/v4";
 import testConfig from "../test-helpers/test-config.js";
 import testDatabase from "../test-helpers/test-database.js";
 import serviceWrapper from "./service-wrapper.js";
-import type { ServiceResponse, ServiceFn } from "./types.js";
 import mergeServiceError from "./utils/merge-errors.js";
 import lucidServices from "../../services/index.js";
+import type { ServiceResponse, ServiceFn } from "./types.js";
 
 const CONSTANTS = {
 	error: {
@@ -210,10 +210,6 @@ test("transaction - one level deep service wrapper success and error", async () 
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
-				schema: service.config.db.formatInsertValue("json", {
-					key: data.collectionKey,
-					tables: [],
-				}),
 			})
 			.returning("key")
 			.executeTakeFirst();
@@ -304,10 +300,6 @@ test("transaction - two level deep service wrapper success and error", async () 
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
-				schema: service.config.db.formatInsertValue("json", {
-					key: data.collectionKey,
-					tables: [],
-				}),
 			})
 			.returning("key")
 			.executeTakeFirst();

@@ -23,16 +23,11 @@ const runSyncTasks = async (
 			config: config,
 			services: lucidServices,
 		}),
-		lucidServices.sync.syncCollections(
-			{
-				db: config.db.client,
-				config: config,
-				services: lucidServices,
-			},
-			{
-				collectionSchemas: data.collectionSchemas,
-			},
-		),
+		lucidServices.sync.syncCollections({
+			db: config.db.client,
+			config: config,
+			services: lucidServices,
+		}),
 	]);
 
 	if (localesResult.error) {
