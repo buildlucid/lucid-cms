@@ -7,7 +7,7 @@ import Formatter from "../../libs/formatters/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
-} from "../../libs/collection/schema/database/schema-filters.js";
+} from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const promoteVersion: ServiceFn<

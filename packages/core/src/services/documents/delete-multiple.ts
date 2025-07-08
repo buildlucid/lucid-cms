@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
-import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
+import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../types.js";
 
 const deleteMultiple: ServiceFn<

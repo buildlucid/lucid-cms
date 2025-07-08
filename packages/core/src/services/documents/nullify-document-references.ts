@@ -12,7 +12,7 @@ import type {
 	CollectionSchemaTable,
 	TableType,
 } from "../../libs/collection/schema/types.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/database/schema-filters.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 
 const nullifyDocumentReferences: ServiceFn<
 	[

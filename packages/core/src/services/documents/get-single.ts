@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
+import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import type { DocumentResponse } from "../../types.js";

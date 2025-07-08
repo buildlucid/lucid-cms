@@ -9,7 +9,6 @@ export default class CollectionsRepository extends StaticRepository<"lucid_colle
 	}
 	tableSchema = z.object({
 		key: z.string(),
-		schema: z.any(),
 		is_deleted: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
@@ -19,7 +18,6 @@ export default class CollectionsRepository extends StaticRepository<"lucid_colle
 	});
 	columnFormats = {
 		key: this.dbAdapter.getDataType("text"),
-		schema: this.dbAdapter.getDataType("json"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		created_at: this.dbAdapter.getDataType("timestamp"),

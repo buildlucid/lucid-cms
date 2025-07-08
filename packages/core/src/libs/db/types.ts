@@ -4,7 +4,6 @@ import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type DatabaseAdapter from "./adapter.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
-import type { CollectionSchema } from "../collection/schema/types.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -287,15 +286,6 @@ export interface HeadlessProcessedImages {
 
 export interface LucidCollections {
 	key: string;
-	/**
-	 * We store a version of the schema on migration so that document queries know what custom field columns they can safely query.
-	 */
-	schema: JSONColumnType<
-		CollectionSchema,
-		//* __insert__ includes a Record as the base repository handles formatting via formatData method
-		CollectionSchema,
-		CollectionSchema
-	>;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
 	created_at: TimestampImmutable;

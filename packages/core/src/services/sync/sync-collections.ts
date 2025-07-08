@@ -3,20 +3,13 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CollectionSchema } from "../../libs/collection/schema/types.js";
 
 /**
  * Responsible for syncing active collections to the DB.
  * - In the case a collection exists in the DB, but not in the config: it is marked as deleted.
  */
-const syncCollections: ServiceFn<
-	[
-		{
-			collectionSchemas: CollectionSchema[];
-		},
-	],
-	undefined
-> = async (context, data) => {
+
+const syncCollections: ServiceFn<[], undefined> = async (context) => {
 	const Collections = Repository.get(
 		"collections",
 		context.db,
@@ -78,92 +71,53 @@ const syncCollections: ServiceFn<
 		});
 	}
 
-	//* existing collections that need schema updates
-	const existingCollections = activeCollections.filter(
-		(key) =>
-			collectionsFromDB.includes(key) && !unDeletedCollectionKeys.includes(key),
-	);
-
-	const [
-		createMultipleRes,
-		updateDeletedRes,
-		updateRestoredRes,
-		updateSchemasRes,
-	] = await Promise.all([
-		missingCollections.length > 0 &&
-			Collections.createMultiple({
-				data: missingCollections
-					.map((key) => {
-						const schema = data.collectionSchemas.find((c) => c.key === key);
-						if (!schema) return null;
-
-						return {
-							key,
-							schema: schema,
-						};
-					})
-					.filter((c) => c !== null),
-			}),
-		collectionsToDeleteKeys.length > 0 &&
-			Collections.updateSingle({
-				data: {
-					is_deleted: true,
-					is_deleted_at: new Date().toISOString(),
-				},
-				where: [
-					{
-						key: "key",
-						operator: "in",
-						value: collectionsToDeleteKeys,
-					},
-				],
-			}),
-		unDeletedCollectionKeys.length > 0 &&
-			Collections.updateSingle({
-				data: {
-					is_deleted: false,
-					is_deleted_at: null,
-				},
-				where: [
-					{
-						key: "key",
-						operator: "in",
-						value: unDeletedCollectionKeys,
-					},
-				],
-			}),
-		existingCollections.length > 0 &&
-			Promise.all(
-				existingCollections.map((key) => {
-					const schema = data.collectionSchemas.find((c) => c.key === key);
-					if (!schema) return Promise.resolve(true);
-
-					return Collections.updateSingle({
-						data: {
-							schema: schema,
-						},
-						where: [
-							{
-								key: "key",
-								operator: "=",
-								value: key,
-							},
-						],
-					});
+	const [createMultipleRes, updateDeletedRes, updateRestoredRes] =
+		await Promise.all([
+			missingCollections.length > 0 &&
+				Collections.createMultiple({
+					data: missingCollections
+						.map((key) => {
+							return {
+								key,
+							};
+						})
+						.filter((c) => c !== null),
 				}),
-			),
-	]);
+			collectionsToDeleteKeys.length > 0 &&
+				Collections.updateSingle({
+					data: {
+						is_deleted: true,
+						is_deleted_at: new Date().toISOString(),
+					},
+					where: [
+						{
+							key: "key",
+							operator: "in",
+							value: collectionsToDeleteKeys,
+						},
+					],
+				}),
+			unDeletedCollectionKeys.length > 0 &&
+				Collections.updateSingle({
+					data: {
+						is_deleted: false,
+						is_deleted_at: null,
+					},
+					where: [
+						{
+							key: "key",
+							operator: "in",
+							value: unDeletedCollectionKeys,
+						},
+					],
+				}),
+		]);
 	if (typeof createMultipleRes !== "boolean" && createMultipleRes.error)
 		return createMultipleRes;
 	if (typeof updateDeletedRes !== "boolean" && updateDeletedRes.error)
 		return updateDeletedRes;
 	if (typeof updateRestoredRes !== "boolean" && updateRestoredRes.error)
 		return updateRestoredRes;
-	if (Array.isArray(updateSchemasRes)) {
-		for (const res of updateSchemasRes) {
-			if (typeof res !== "boolean" && res.error) return res;
-		}
-	}
 
 	return {
 		error: undefined,

@@ -3,8 +3,8 @@ import extractCollectionKey from "../../libs/collection/helpers/extract-collecti
 import {
 	getDocumentVersionTableSchema,
 	getDocumentFieldsTableSchema,
-} from "../../libs/collection/schema/database/schema-filters.js";
-import cacheAllSchemas from "../../libs/collection/schema/database/cache-all-schemas.js";
+} from "../../libs/collection/schema/live/schema-filters.js";
+import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type {
 	DocumentVersionType,

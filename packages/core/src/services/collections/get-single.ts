@@ -2,13 +2,12 @@ import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
-import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
+import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionResponse } from "../../types/response.js";
 
 /**
  * Gets a single collection
- * @todo integrate the schema status into the response so that the SPA can alert the user
  */
 const getSingle: ServiceFn<
 	[

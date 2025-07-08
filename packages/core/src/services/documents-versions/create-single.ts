@@ -1,7 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
-import { getTableNames } from "../../libs/collection/schema/database/schema-filters.js";
+import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { CollectionBuilder } from "../../builders.js";

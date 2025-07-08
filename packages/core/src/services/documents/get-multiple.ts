@@ -7,7 +7,7 @@ import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
 	getTableNames,
-} from "../../libs/collection/schema/database/schema-filters.js";
+} from "../../libs/collection/schema/live/schema-filters.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentResponse } from "../../types/response.js";
