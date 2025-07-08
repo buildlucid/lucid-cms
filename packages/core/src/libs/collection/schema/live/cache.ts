@@ -1,5 +1,7 @@
 import type { CollectionSchema } from "../types.js";
 
+// TODO: replace with KV solution
+
 export const schemaCache = new Map<string, CollectionSchema>();
 
 export const getSchema = (

@@ -1,6 +1,8 @@
 import type { MigrationPlan } from "../migration/types.js";
 import type { CollectionSchema } from "../schema/types.js";
 
+// TODO: replace with KV solution
+
 let migrationCache:
 	| {
 			migrationPlans: MigrationPlan[];
