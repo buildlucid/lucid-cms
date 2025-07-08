@@ -30,12 +30,6 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.execute();
 
-			await db.schema
-				.createIndex("idx_lucid_collections_key_schema")
-				.on("lucid_collections")
-				.columns(["key", "schema"])
-				.execute();
-
 			// Migrations
 			await db.schema
 				.createTable("lucid_collection_migrations")
