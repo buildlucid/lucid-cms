@@ -84,8 +84,6 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addUser("author", {
 		displayInListing: true,
-	})
-	.addColour("colour")
-	.addTextarea("testing");
+	});
 
 export default PageCollection;
