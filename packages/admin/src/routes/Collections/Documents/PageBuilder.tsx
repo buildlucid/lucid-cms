@@ -76,7 +76,7 @@ const CollectionsDocumentsEditRoute: Component<
 	);
 	createEffect(
 		on(
-			() => docState.collection.isSuccess,
+			() => docState.collection.isFetchedAfterMount,
 			() => {
 				setDocumentState();
 			},

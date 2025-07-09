@@ -147,20 +147,20 @@ export default defineConfig((env) => ({
 		SimpleCollection,
 	],
 	plugins: [
-		// LucidPages({
-		// 	collections: [
-		// 		{
-		// 			collectionKey: "page",
-		// 			useTranslations: true,
-		// 			displayFullSlug: true,
-		// 		},
-		// 		{
-		// 			collectionKey: "test",
-		// 			useTranslations: true,
-		// 			displayFullSlug: true,
-		// 		},
-		// 	],
-		// }),
+		LucidPages({
+			collections: [
+				{
+					collectionKey: "page",
+					useTranslations: true,
+					displayFullSlug: true,
+				},
+				{
+					collectionKey: "test",
+					useTranslations: true,
+					displayFullSlug: true,
+				},
+			],
+		}),
 		// LucidNodemailer({
 		// 	from: {
 		// 		email: "admin@lucidcms.io",
