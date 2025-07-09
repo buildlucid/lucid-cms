@@ -39,6 +39,7 @@ export function useDocumentMutations({
 					collectionKey: collectionKey(),
 					useDrafts: collection?.config.useDrafts,
 					documentId: data.data.id,
+					statusOverride: version,
 				}),
 			);
 			queryClient.invalidateQueries({
