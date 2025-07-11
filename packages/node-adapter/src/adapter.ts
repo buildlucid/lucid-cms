@@ -7,6 +7,7 @@ import {
 } from "@lucidcms/core/helpers";
 import { build } from "rolldown";
 import { writeFile } from "node:fs/promises";
+import nodeExternals from "rollup-plugin-node-externals";
 import type { LucidAdapter } from "@lucidcms/core/types";
 
 const nodeAdapter = (options?: {
@@ -72,6 +73,7 @@ const nodeAdapter = (options?: {
 							inlineDynamicImports: true,
 						},
 						plugins: [
+							nodeExternals(),
 							stripAdapterExportPlugin("nodeAdapter"),
 							stripImportsPlugin("node-adapter", ["rolldown"]),
 							// 	{
@@ -117,7 +119,6 @@ const nodeAdapter = (options?: {
 						],
 						treeshake: true,
 						platform: "node",
-						external: ["dotenv"],
 					});
 
 					const entry = /* ts */ `
