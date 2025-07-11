@@ -47,7 +47,7 @@ const getDescendantFields: ServiceFn<
 		);
 
 		const descendants = await context.db
-			.with("recursive_cte", (db) =>
+			.withRecursive("recursive_cte", (db) =>
 				db
 					.selectFrom(fieldsTable)
 					.innerJoin(
@@ -73,12 +73,10 @@ const getDescendantFields: ServiceFn<
 								`${fieldsTable}.document_version_id`,
 							)
 							.innerJoin(
-								// @ts-expect-error
 								"recursive_cte as rc",
 								"rc.document_id",
 								`${fieldsTable}.${parentPageColumn}`,
 							)
-							// @ts-expect-error
 							.select([
 								`${versionTable}.document_id as document_id`,
 								`${fieldsTable}.${parentPageColumn} as parent_id`,

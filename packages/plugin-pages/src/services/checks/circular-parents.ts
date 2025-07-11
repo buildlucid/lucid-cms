@@ -40,7 +40,7 @@ const checkCircularParents: ServiceFn<
 		);
 
 		const result = await context.db
-			.with("ancestors", (db) =>
+			.withRecursive("ancestors", (db) =>
 				db
 					.selectFrom(fieldsTable)
 					.innerJoin(
@@ -68,12 +68,10 @@ const checkCircularParents: ServiceFn<
 								`${fieldsTable}.document_version_id`,
 							)
 							.innerJoin(
-								// @ts-expect-error
 								"ancestors",
 								"ancestors.parent_id",
 								`${versionTable}.document_id`,
 							)
-							// @ts-expect-error
 							.select([
 								`${versionTable}.document_id as current_id`,
 								`${fieldsTable}.${parentPageField} as parent_id`,

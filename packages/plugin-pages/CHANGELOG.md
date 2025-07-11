@@ -1,8 +1,14 @@
 # @lucidcms/plugin-pages
 
+## 0.3.1
+
+## Patch Changes
+
+- Updated to use `WITH RECURSIVE` instead of `WITH` so that the plugin works with the PostgreSQL adapter as well.
+
 ## 0.3.0
 
-### Patch Changes
+### Minor Changes
 
 - Updated to support new generate document tables and bumped core peer dependency version.
 
