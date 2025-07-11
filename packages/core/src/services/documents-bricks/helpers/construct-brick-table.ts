@@ -123,7 +123,7 @@ const constructBrickTable = (
 		//* generate brick_id_ref for each brick by locale
 		if (params.type === "brick" || params.type === "document-fields") {
 			const localeSpecificBrickRef = -Math.abs(
-				Number.parseInt(crypto.randomBytes(10).toString("hex"), 16),
+				Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) % 2147483647,
 			);
 			baseRowData.brick_id_ref = localeSpecificBrickRef;
 			brickIdRefByLocale.set(locale, localeSpecificBrickRef);
@@ -189,7 +189,8 @@ const constructBrickTable = (
 				localeGroupRef.set(
 					locale,
 					-Math.abs(
-						Number.parseInt(crypto.randomBytes(10).toString("hex"), 16),
+						Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) %
+							2147483647,
 					),
 				);
 			}
