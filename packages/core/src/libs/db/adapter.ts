@@ -67,6 +67,10 @@ export default abstract class DatabaseAdapter {
 	formatInsertValue<T>(type: ColumnDataType, value: unknown): T {
 		if (value === null || value === undefined) return value as T;
 
+		if (type === "integer" && typeof value === "boolean") {
+			if (this.supports("boolean")) return value as T;
+			return (value ? 1 : 0) as T;
+		}
 		if (type === "boolean" && typeof value === "boolean") {
 			if (this.supports("boolean")) return value as T;
 			return (value ? 1 : 0) as T;
