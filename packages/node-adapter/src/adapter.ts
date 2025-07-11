@@ -36,7 +36,7 @@ const nodeAdapter = (options?: {
 
 				const server = serve({
 					fetch: app.fetch,
-					port: options?.server?.port ?? 5432,
+					port: options?.server?.port ?? 6543,
 					hostname: options?.server?.hostname,
 				});
 
@@ -141,7 +141,7 @@ const startServer = async () => {
             config: resolved,
         });
 
-        const port = Number.parseInt(process.env.PORT || '5432', 10);
+        const port = Number.parseInt(process.env.PORT || '6543', 10);
         const hostname = process.env.HOST || process.env.HOSTNAME;
 
         const server = serve({

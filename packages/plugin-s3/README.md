@@ -41,7 +41,7 @@ As Lucid uses presigned URLs to upload media from the client, you will need to c
   {
     "AllowedOrigins": [
       "http://localhost:8787",
-      "http://localhost:5432",
+      "http://localhost:6543",
     ],
     "AllowedMethods": [
       "GET",

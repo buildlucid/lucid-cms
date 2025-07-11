@@ -93,7 +93,7 @@ const cloudflareAdapter = (options?: {
 
 				const server = serve({
 					fetch: app.fetch,
-					port: options?.server?.port ?? 5432,
+					port: options?.server?.port ?? 6543,
 					hostname: options?.server?.hostname,
 				});
 

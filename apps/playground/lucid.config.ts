@@ -26,22 +26,21 @@ export const adapter = nodeAdapter();
 // export const adapter = cloudflareAdapter();
 
 export default defineConfig((env) => ({
-	host: "http://localhost:5432",
+	host: "http://localhost:6543",
 	logger: {
 		level: "silent",
 	},
-	// adapter: NodeAdapter(),
 	// db: new SQLiteAdapter({
 	// 	database: async () => new Database("db.sqlite"),
 	// }),
-	// db: new PostgresAdapter(env?.DATABASE_URL as string, {
-	// 	max: 5,
-	// }),
-	db: new LibSQLAdapter({
-		url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-		// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		// authToken: env?.TURSO_AUTH_TOKEN as string,
+	db: new PostgresAdapter(env?.DATABASE_URL as string, {
+		max: 5,
 	}),
+	// db: new LibSQLAdapter({
+	// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
+	// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+	// authToken: env?.TURSO_AUTH_TOKEN as string,
+	// }),
 	keys: {
 		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
 		cookieSecret: env?.LUCID_COOKIE_SECRET as string,
@@ -97,7 +96,7 @@ export default defineConfig((env) => ({
 						// @ts-expect-error
 						console.log(c.env?.TEST_ENV_VAR);
 						return c.json({
-							host: "http://[::1]:5432",
+							host: "http://[::1]:6543",
 							logLevel: "debug",
 						});
 					},
@@ -161,13 +160,13 @@ export default defineConfig((env) => ({
 				},
 			],
 		}),
-		// LucidNodemailer({
-		// 	from: {
-		// 		email: "admin@lucidcms.io",
-		// 		name: "Lucid",
-		// 	},
-		// 	transporter: transporter,
-		// }),
+		LucidNodemailer({
+			from: {
+				email: "admin@lucidcms.io",
+				name: "Lucid",
+			},
+			transporter: transporter,
+		}),
 		// LucidResend({
 		// 	from: {
 		// 		email: "admin@ui.protodigital.co.uk",

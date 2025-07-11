@@ -6,7 +6,7 @@ import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
 export const adapter = nodeAdapter();
 
 export default defineConfig((env) => ({
-	host: "http://localhost:5432",
+	host: "http://localhost:6543",
 	db: new SQLiteAdapter({
 		database: async () => new Database(":memory:"),
 	}),
