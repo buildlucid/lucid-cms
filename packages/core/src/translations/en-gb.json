@@ -288,5 +288,8 @@
 	"failed_to_prerender_mjml_templates": "Failed to prerender MJML templates",
 	"setup_already_completed": "Setup has already been completed. Please login to continue.",
 	"error_schema_migration_required_name": "Schema Migration Required",
-	"error_schema_migration_required_message": "The collection requires a schema migration. Please run the migration command to update the database."
+	"error_schema_migration_required_message": "The collection requires a schema migration. Please run the migration command to update the database.",
+	"error_auto_save_disabled_name": "Auto Save Disabled",
+	"error_auto_save_disabled_message": "Auto save is disabled for this collection.",
+	"version_not_found_message": "The version you are trying to access does not exist."
 }

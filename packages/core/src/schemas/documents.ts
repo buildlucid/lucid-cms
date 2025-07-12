@@ -181,6 +181,50 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
+	partialUpdateSingle: {
+		body: z.object({
+			documentFieldsId: z.number().meta({
+				description: "The ID of the document fields pseudo brick row",
+				example: 1,
+			}),
+			bricks: z
+				.array(brickInputSchema)
+				.meta({
+					description: "An array of bricks to be added to the document",
+				})
+				.optional(),
+			fields: z
+				.array(fieldInputSchema)
+				.meta({
+					description: "Collection field values",
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The document's ID",
+				example: 1,
+			}),
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			versionId: z.string().meta({
+				description: "The version ID",
+				example: 1,
+			}),
+		}),
+		response: z.object({
+			id: z.number().meta({
+				description: "The document's ID",
+				example: 1,
+			}),
+		}),
+	} satisfies ControllerSchema,
 	deleteMultiple: {
 		body: z.object({
 			ids: z.array(z.number()).meta({

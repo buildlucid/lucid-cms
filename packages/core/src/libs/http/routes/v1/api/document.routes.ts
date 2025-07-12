@@ -8,6 +8,7 @@ import getMultiple from "../../../controllers/documents/get-multiple.js";
 import getMultipleRevisions from "../../../controllers/documents/get-multiple-revisions.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
 import promoteVersion from "../../../controllers/documents/promote-version.js";
+import partialUpdateSingle from "../../../controllers/documents/partial-update.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const documentRoutes = new Hono<LucidHonoGeneric>()
@@ -19,6 +20,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:statusOrId", ...getSingle)
 	.post("/:collectionKey/:id/:versionId/restore-revision", ...restoreRevision)
-	.post("/:collectionKey/:id/:versionId/promote-version", ...promoteVersion);
+	.post("/:collectionKey/:id/:versionId/promote-version", ...promoteVersion)
+	.patch("/:collectionKey/:id/:versionId/partial", ...partialUpdateSingle);
 
 export default documentRoutes;
