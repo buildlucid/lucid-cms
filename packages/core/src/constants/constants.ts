@@ -51,6 +51,7 @@ export default Object.freeze({
 		useDrafts: false,
 		useRevisions: false,
 		useTranslations: false,
+		useAutoSave: false,
 	},
 	customFields: {
 		link: {

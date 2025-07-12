@@ -150,6 +150,9 @@ class CollectionBuilder extends FieldBuilder {
 				useTranslations:
 					this.config.config?.useTranslations ??
 					constants.collectionBuilder.useTranslations,
+				useAutoSave:
+					this.config.config?.useAutoSave ??
+					constants.collectionBuilder.useAutoSave,
 				displayInListing: this.displayInListing,
 			},
 		};

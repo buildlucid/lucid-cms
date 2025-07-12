@@ -32,6 +32,10 @@ const CollectionConfigSchema = z.object({
 				.boolean()
 				.default(constants.collectionBuilder.useRevisions)
 				.optional(),
+			useAutoSave: z
+				.boolean()
+				.default(constants.collectionBuilder.useAutoSave)
+				.optional(),
 		})
 		.optional(),
 	hooks: z

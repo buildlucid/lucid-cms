@@ -34,6 +34,7 @@ export type CollectionData = {
 		useDrafts: boolean;
 		useRevisions: boolean;
 		useTranslations: boolean;
+		useAutoSave: boolean;
 		displayInListing: string[];
 	};
 };

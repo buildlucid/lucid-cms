@@ -17,6 +17,7 @@ const PageCollection = new CollectionBuilder("page", {
 		useTranslations: true,
 		useDrafts: true,
 		useRevisions: true,
+		useAutoSave: true,
 	},
 	hooks: [
 		{
