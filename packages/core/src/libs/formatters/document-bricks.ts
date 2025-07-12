@@ -62,6 +62,7 @@ export default class DocumentBricksFormatter {
 					order: firstRow.position,
 					open: Formatter.formatBoolean(firstRow.is_open),
 					type: firstRow.brick_type,
+					id: firstRow.id,
 					fields: DocumentFieldsFormatter.formatMultiple(
 						{
 							brickRows: rows,

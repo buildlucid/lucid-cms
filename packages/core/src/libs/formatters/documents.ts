@@ -61,6 +61,7 @@ export default class DocumentsFormatter {
 		collection: CollectionBuilder;
 		bricks?: BrickResponse[];
 		fields?: FieldResponse[] | null;
+		documentFieldsId?: number;
 		config: Config;
 	}): DocumentResponse => {
 		return {
@@ -68,6 +69,7 @@ export default class DocumentsFormatter {
 			collectionKey: props.document.collection_key,
 			status: props.document.version_type ?? null,
 			versionId: props.document.version_id ?? null,
+			documentFieldsId: props.documentFieldsId ?? null,
 			version: this.formatVersion({
 				document: props.document,
 			}),

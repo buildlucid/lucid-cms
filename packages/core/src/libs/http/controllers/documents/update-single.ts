@@ -54,8 +54,8 @@ const updateSingleController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_document_create_error_name"),
-					message: T("route_document_create_error_message"),
+					name: T("route_document_update_error_name"),
+					message: T("route_document_update_error_message"),
 				},
 			},
 		)(

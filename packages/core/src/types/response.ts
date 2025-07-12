@@ -191,6 +191,7 @@ export interface BrickResponse {
 	open: boolean;
 	type: BrickTypes;
 	fields: Array<FieldResponse>;
+	id: number;
 }
 export interface BrickAltResponse {
 	ref: string;
@@ -199,6 +200,7 @@ export interface BrickAltResponse {
 	open: boolean;
 	type: BrickTypes;
 	fields: Record<string, FieldAltResponse>;
+	id: number;
 }
 
 export interface FieldResponse {
@@ -259,6 +261,7 @@ export interface DocumentResponse {
 	collectionKey: string;
 	status: DocumentVersionType | null;
 	versionId: number | null;
+	documentFieldsId: number | null;
 	version: {
 		draft: {
 			id: number | null;

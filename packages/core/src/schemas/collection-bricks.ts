@@ -8,6 +8,7 @@ import {
 import { stringTranslations } from "./locales.js";
 
 export const brickInputSchema = z.object({
+	id: z.number().nullable().optional(),
 	ref: z.string(),
 	key: z.string(),
 	order: z.number(),
@@ -52,6 +53,10 @@ export const brickConfigSchema = z.object({
 
 export const brickResponseBaseSchema = z
 	.object({
+		id: z.number().meta({
+			description: "The ID of the brick row",
+			example: 1,
+		}),
 		key: z.string().meta({
 			description: "The key that identifies the brick",
 			example: "hero",

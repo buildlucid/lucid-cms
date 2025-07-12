@@ -29,6 +29,7 @@ const getMultiple: ServiceFn<
 	{
 		bricks: Array<BrickResponse>;
 		fields: Array<FieldResponse>;
+		documentFieldsId?: number;
 	}
 > = async (context, data) => {
 	const DocumentBricks = Repository.get(
@@ -88,6 +89,22 @@ const getMultiple: ServiceFn<
 	});
 	if (relationDataRes.error) return relationDataRes;
 
+	//* extract document fields ID from the pseudo brick that stores document fields
+	const documentFieldsSchema = bricksTableSchemaRes.data.find(
+		(bs) => bs.type === "document-fields",
+	);
+	let documentFieldsId: number | undefined;
+	if (documentFieldsSchema) {
+		const documentFieldsData = bricksQueryRes.data[documentFieldsSchema.name];
+		if (documentFieldsData && documentFieldsData.length > 0) {
+			//* get the ID from the first row (position 0) as document fields should only have one pseudo brick
+			const firstRow = documentFieldsData.find((row) => row.position === 0);
+			if (firstRow) {
+				documentFieldsId = firstRow.id;
+			}
+		}
+	}
+
 	return {
 		error: undefined,
 		data: {
@@ -105,6 +122,7 @@ const getMultiple: ServiceFn<
 				collection: collectionRes.data,
 				config: context.config,
 			}),
+			documentFieldsId,
 		},
 	};
 };
