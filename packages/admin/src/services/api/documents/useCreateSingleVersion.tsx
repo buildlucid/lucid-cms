@@ -14,7 +14,7 @@ export interface Params {
 	};
 }
 
-export const updateSingleReq = (params: Params) => {
+export const createSingleVersionReq = (params: Params) => {
 	return request<
 		ResponseBody<{
 			id: number;
@@ -23,13 +23,13 @@ export const updateSingleReq = (params: Params) => {
 		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}`,
 		csrf: true,
 		config: {
-			method: "PATCH",
+			method: "POST",
 			body: params.body,
 		},
 	});
 };
 
-interface UseUpdateSingleProps {
+interface UseCreateSingleVersionProps {
 	onSuccess?: (
 		_data: ResponseBody<{
 			id: number;
@@ -39,7 +39,7 @@ interface UseUpdateSingleProps {
 	getCollectionName: () => string;
 }
 
-const useUpdateSingle = (props: UseUpdateSingleProps) => {
+const useCreateSingleVersion = (props: UseCreateSingleVersionProps) => {
 	// -----------------------------
 	// Mutation
 	return serviceHelpers.useMutationWrapper<
@@ -48,7 +48,7 @@ const useUpdateSingle = (props: UseUpdateSingleProps) => {
 			id: number;
 		}>
 	>({
-		mutationFn: updateSingleReq,
+		mutationFn: createSingleVersionReq,
 		getSuccessToast: () => {
 			return {
 				title: T()("update_toast_title", {
@@ -65,4 +65,4 @@ const useUpdateSingle = (props: UseUpdateSingleProps) => {
 	});
 };
 
-export default useUpdateSingle;
+export default useCreateSingleVersion;

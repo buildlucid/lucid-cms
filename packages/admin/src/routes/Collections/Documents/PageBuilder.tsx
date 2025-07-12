@@ -48,7 +48,7 @@ const CollectionsDocumentsEditRoute: Component<
 		mode: props.mode,
 		version: props.version,
 		createDocument: mutations.createDocument,
-		updateSingle: mutations.updateSingle,
+		createSingleVersion: mutations.createSingleVersion,
 	});
 
 	// ------------------------------------------

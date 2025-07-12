@@ -177,6 +177,7 @@ export interface CollectionResponse {
 		useRevisions: boolean;
 		isLocked: boolean;
 		displayInListing: string[];
+		useAutoSave: boolean;
 	};
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;

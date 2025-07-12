@@ -481,5 +481,8 @@
 	"optional": "Optional",
 	"collection_needs_migrating_message": "Collection schema changes detected. Please contact your administrator to run a migration.",
 	"this_field_is_missing_from_the_database": "This field is missing from the database.",
-	"this_field_supports_translations": "This field supports translations."
+	"this_field_supports_translations": "This field supports translations.",
+	"auto_save": "Auto Save",
+	"auto_save_message": "Your changes are automatically saved every 10 seconds.",
+	"disabled": "Disabled"
 }

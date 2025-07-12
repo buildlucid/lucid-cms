@@ -60,7 +60,7 @@ export function useDocumentMutations({
 		getCollectionName: collectionSingularName,
 	});
 
-	const updateSingle = api.documents.useUpdateSingle({
+	const createSingleVersion = api.documents.useCreateSingleVersion({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
@@ -74,6 +74,22 @@ export function useDocumentMutations({
 			brickStore.set(
 				"brickErrors",
 				getBodyError<BrickError[]>("bricks", errors) || [],
+			);
+			brickStore.set("documentMutated", false);
+		},
+		getCollectionName: collectionSingularName,
+	});
+
+	const updateSingleVersion = api.documents.useUpdateSingleVersion({
+		onSuccess: () => {
+			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
+			brickStore.set("documentMutated", false);
+		},
+		onError: (errors) => {
+			brickStore.set(
+				"fieldsErrors",
+				getBodyError<FieldError[]>("fields", errors) || [],
 			);
 			brickStore.set("documentMutated", false);
 		},
@@ -96,6 +112,18 @@ export function useDocumentMutations({
 		getVersionType: () => "published",
 	});
 
+	const autoSaveDocument = async (versionId: number) => {
+		updateSingleVersion.action.mutate({
+			collectionKey: collectionKey(),
+			documentId: documentId() as number,
+			versionId: versionId,
+			body: {
+				bricks: brickHelpers.getUpsertBricks(),
+				fields: brickHelpers.getCollectionPseudoBrickFields(),
+			},
+		});
+	};
+
 	const upsertDocumentAction = async () => {
 		if (mode === "create") {
 			createDocument.action.mutate({
@@ -107,7 +135,7 @@ export function useDocumentMutations({
 				},
 			});
 		} else {
-			updateSingle.action.mutate({
+			createSingleVersion.action.mutate({
 				collectionKey: collectionKey(),
 				documentId: documentId() as number,
 				body: {
@@ -139,10 +167,11 @@ export function useDocumentMutations({
 
 	return {
 		createDocument,
-		updateSingle,
+		createSingleVersion,
 		promoteToPublished,
 		upsertDocumentAction,
 		publishDocumentAction,
+		autoSaveDocument,
 	};
 }
 

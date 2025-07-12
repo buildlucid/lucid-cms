@@ -14,7 +14,7 @@ export function useDocumentUIState({
 	mode,
 	version,
 	createDocument,
-	updateSingle,
+	createSingleVersion,
 	selectedRevision,
 	restoreRevisionAction,
 }: {
@@ -23,7 +23,7 @@ export function useDocumentUIState({
 	mode: "create" | "edit" | "revisions";
 	version: "draft" | "published";
 	createDocument?: ReturnType<typeof api.documents.useCreateSingle>;
-	updateSingle?: ReturnType<typeof api.documents.useUpdateSingle>;
+	createSingleVersion?: ReturnType<typeof api.documents.useCreateSingleVersion>;
 
 	selectedRevision?: Accessor<number | undefined>;
 	restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
@@ -54,7 +54,7 @@ export function useDocumentUIState({
 	 */
 	const isSaving = createMemo(() => {
 		return (
-			updateSingle?.action.isPending ||
+			createSingleVersion?.action.isPending ||
 			createDocument?.action.isPending ||
 			doc.isRefetching ||
 			doc.isLoading
@@ -65,7 +65,7 @@ export function useDocumentUIState({
 	 * Collates mutation errors for the update and create doc services
 	 */
 	const mutateErrors = createMemo(() => {
-		return updateSingle?.errors() || createDocument?.errors();
+		return createSingleVersion?.errors() || createDocument?.errors();
 	});
 
 	/**
@@ -160,6 +160,13 @@ export function useDocumentUIState({
 	});
 
 	/**
+	 * Determines if the auto save is enabled
+	 */
+	const useAutoSave = createMemo(() => {
+		return collection.data?.data.config.useAutoSave;
+	});
+
+	/**
 	 * Determines when the upsert button should be visible
 	 */
 	const showUpsertButton = createMemo(() => {
@@ -199,6 +206,18 @@ export function useDocumentUIState({
 			return userStore.get.hasPermission(["create_content"]).all;
 		}
 		return userStore.get.hasPermission(["update_content"]).all;
+	});
+
+	/**
+	 * Determines if the auto save should be enabled
+	 */
+	const hasAutoSavePermission = createMemo(() => {
+		if (mode === "create") return false;
+
+		return (
+			userStore.get.hasPermission(["update_content"]).all &&
+			collection.data?.data.config.useAutoSave
+		);
 	});
 
 	/**
@@ -258,6 +277,8 @@ export function useDocumentUIState({
 		showRestoreRevisionButton,
 		hasRestorePermission,
 		collectionNeedsMigrating,
+		useAutoSave,
+		hasAutoSavePermission,
 	};
 }
 export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;

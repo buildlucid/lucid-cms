@@ -56,6 +56,7 @@ export default class CollectionsFormatter {
 				useRevisions: collectionData.config.useRevisions,
 				isLocked: collectionData.config.isLocked,
 				displayInListing: props.collection.displayInListing,
+				useAutoSave: collectionData.config.useAutoSave,
 			},
 			migrationStatus: props.migrationStatus ?? null,
 			fixedBricks: props.include?.bricks

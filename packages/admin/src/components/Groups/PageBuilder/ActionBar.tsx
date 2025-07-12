@@ -35,103 +35,117 @@ export const ActionBar: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<div class="sticky top-0 z-30 w-full px-5 py-2.5 gap-x-5 gap-y-15 bg-container-3 border border-border rounded-b-xl flex flex-wrap items-center justify-between">
-			<div class="flex items-center gap-2.5">
+		<div class="sticky top-0 z-30 w-full px-5 py-4 gap-x-5 gap-y-2.5 bg-container-3 border border-border rounded-b-xl flex flex-col flex-wrap">
+			<div class="flex items-center gap-2.5 w-full text-sm overflow-x-auto">
 				<Show when={props.version}>
-					<div>
+					<div class="">
 						<span class="font-medium mr-1">{T()("status")}:</span>
 						<span>{props.version}</span>
 					</div>
 				</Show>
+				<Show when={props.state.ui.useAutoSave?.()}>
+					<div class="">
+						<span class="font-medium mr-1">{T()("auto_save")}:</span>
+						<span class="lowercase">
+							{props.state.ui.hasAutoSavePermission?.()
+								? T()("enabled")
+								: T()("disabled")}
+						</span>
+					</div>
+				</Show>
 				<Show when={props.mode !== "create"}>
-					<div>
+					<div class="">
 						<span class="font-medium mr-1">{T()("created")}:</span>
 						<DateText date={props.state.document?.createdAt} />
 					</div>
-					<div>
+					<div class="">
 						<span class="font-medium mr-1">{T()("modified")}:</span>
 						<DateText date={props.state.document?.updatedAt} />
 					</div>
 				</Show>
 			</div>
-			<div class="flex items-center gap-2.5">
-				{/* Locale Select */}
-				<Show when={props.state.collection?.config.useTranslations}>
-					<div class="w-58">
-						<ContentLocaleSelect
-							hasError={props.state.ui.brickTranslationErrors?.()}
-							showShortcut={true}
-						/>
-					</div>
-				</Show>
-				{/* Default Locale */}
-				<Show
-					when={
-						props.state.collection?.config.useTranslations !== true &&
-						defaultLocale()
-					}
-				>
-					<div class="flex items-center">
-						<FaSolidLanguage size={20} />
-						<span class="ml-2.5 text-base font-medium text-title">
-							{defaultLocale()?.name} ({defaultLocale()?.code})
-						</span>
-					</div>
-				</Show>
-				{/* Upsert doc */}
-				<Show when={props.state.ui.showUpsertButton?.()}>
-					<Button
-						type="button"
-						theme="secondary"
-						size="x-small"
-						onClick={props.actions?.upsertDocumentAction}
-						disabled={props.state.ui.canSaveDocument?.()}
-						permission={props.state.ui.hasSavePermission?.()}
-					>
-						{T()("save")}
-					</Button>
-				</Show>
-				{/* Publish doc */}
-				<Show when={props.state.ui.showPublishButton?.()}>
-					<Button
-						type="button"
-						theme="secondary"
-						size="x-small"
-						onClick={() =>
-							props.actions?.publishDocumentAction?.(props.state.document)
+			<div class="flex items-center gap-2.5 w-full">
+				<div class="flex items-center gap-2.5 w-full justify-between">
+					{/* Locale Select */}
+					<Show when={props.state.collection?.config.useTranslations}>
+						<div class="w-full">
+							<ContentLocaleSelect
+								hasError={props.state.ui.brickTranslationErrors?.()}
+								showShortcut={true}
+							/>
+						</div>
+					</Show>
+					{/* Default Locale */}
+					<Show
+						when={
+							props.state.collection?.config.useTranslations !== true &&
+							defaultLocale()
 						}
-						disabled={!props.state.ui.canPublishDocument?.()}
-						permission={props.state.ui.hasPublishPermission?.()}
 					>
-						{T()("publish")}
-					</Button>
-				</Show>
-				{/* Restore revision */}
-				<Show when={props.state.ui.showRestoreRevisionButton?.()}>
-					<Button
-						type="button"
-						theme="secondary"
-						size="x-small"
-						onClick={props.actions.restoreRevisionAction}
-						disabled={props.state.selectedRevision?.() === undefined}
-						permission={props.state.ui.hasRestorePermission?.()}
-					>
-						{T()("restore_revision")}
-					</Button>
-				</Show>
-				{/* Delete doc */}
-				<Show when={props.state.ui.showDeleteButton?.()}>
-					<Button
-						theme="input-style"
-						size="x-icon"
-						type="button"
-						onClick={() => props.state.ui?.setDeleteOpen?.(true)}
-						permission={props.state.ui.hasDeletePermission?.()}
-					>
-						<span class="sr-only">{T()("delete")}</span>
-						<FaSolidTrash />
-					</Button>
-				</Show>
+						<div class="flex items-center">
+							<FaSolidLanguage size={20} />
+							<span class="ml-2.5 text-base font-medium text-title">
+								{defaultLocale()?.name} ({defaultLocale()?.code})
+							</span>
+						</div>
+					</Show>
+				</div>
+				<div class="flex items-center gap-2.5">
+					{/* Upsert doc */}
+					<Show when={props.state.ui.showUpsertButton?.()}>
+						<Button
+							type="button"
+							theme="secondary"
+							size="x-small"
+							onClick={props.actions?.upsertDocumentAction}
+							disabled={props.state.ui.canSaveDocument?.()}
+							permission={props.state.ui.hasSavePermission?.()}
+						>
+							{T()("save")}
+						</Button>
+					</Show>
+					{/* Publish doc */}
+					<Show when={props.state.ui.showPublishButton?.()}>
+						<Button
+							type="button"
+							theme="secondary"
+							size="x-small"
+							onClick={() =>
+								props.actions?.publishDocumentAction?.(props.state.document)
+							}
+							disabled={!props.state.ui.canPublishDocument?.()}
+							permission={props.state.ui.hasPublishPermission?.()}
+						>
+							{T()("publish")}
+						</Button>
+					</Show>
+					{/* Restore revision */}
+					<Show when={props.state.ui.showRestoreRevisionButton?.()}>
+						<Button
+							type="button"
+							theme="secondary"
+							size="x-small"
+							onClick={props.actions.restoreRevisionAction}
+							disabled={props.state.selectedRevision?.() === undefined}
+							permission={props.state.ui.hasRestorePermission?.()}
+						>
+							{T()("restore_revision")}
+						</Button>
+					</Show>
+					{/* Delete doc */}
+					<Show when={props.state.ui.showDeleteButton?.()}>
+						<Button
+							theme="input-style"
+							size="x-icon"
+							type="button"
+							onClick={() => props.state.ui?.setDeleteOpen?.(true)}
+							permission={props.state.ui.hasDeletePermission?.()}
+						>
+							<span class="sr-only">{T()("delete")}</span>
+							<FaSolidTrash />
+						</Button>
+					</Show>
+				</div>
 			</div>
 		</div>
 	);
