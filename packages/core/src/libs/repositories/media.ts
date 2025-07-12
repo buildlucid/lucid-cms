@@ -408,10 +408,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							)
 							.on("alt_translations.locale_code", "=", props.localeCode),
 					)
-					.select([
-						"title_translations.value as title_translation_value",
-						"alt_translations.value as alt_translation_value",
-					])
 					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 				const { main, count } = queryBuilder.main(
