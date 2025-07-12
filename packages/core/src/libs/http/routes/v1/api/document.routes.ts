@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import createSingle from "../../../controllers/documents/create-single.js";
-import updateSingle from "../../../controllers/documents/update-single.js";
+import createVersion from "../../../controllers/documents/create-version.js";
 import deleteMultiple from "../../../controllers/documents/delete-multiple.js";
 import deleteSingle from "../../../controllers/documents/delete-single.js";
 import getSingle from "../../../controllers/documents/get-single.js";
@@ -8,12 +8,12 @@ import getMultiple from "../../../controllers/documents/get-multiple.js";
 import getMultipleRevisions from "../../../controllers/documents/get-multiple-revisions.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
 import promoteVersion from "../../../controllers/documents/promote-version.js";
-import partialUpdateSingle from "../../../controllers/documents/partial-update.js";
+import updateVersion from "../../../controllers/documents/update-version.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
-	.patch("/:collectionKey/:id", ...updateSingle)
+	.post("/:collectionKey/:id", ...createVersion)
 	.delete("/:collectionKey", ...deleteMultiple)
 	.delete("/:collectionKey/:id", ...deleteSingle)
 	.get("/:collectionKey/:status", ...getMultiple)
@@ -21,6 +21,6 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:collectionKey/:id/:statusOrId", ...getSingle)
 	.post("/:collectionKey/:id/:versionId/restore-revision", ...restoreRevision)
 	.post("/:collectionKey/:id/:versionId/promote-version", ...promoteVersion)
-	.patch("/:collectionKey/:id/:versionId/partial", ...partialUpdateSingle);
+	.patch("/:collectionKey/:id/:versionId", ...updateVersion);
 
 export default documentRoutes;

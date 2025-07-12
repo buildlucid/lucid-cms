@@ -8,7 +8,6 @@ import getMultipleFieldMeta from "./get-multiple-field-meta.js";
 import getMultiple from "./get-multiple.js";
 import getMultipleRevisions from "./get-multiple-revisions.js";
 import nullifyDocumentReferences from "./nullify-document-references.js";
-import partialUpdateSingle from "./partial-update-single.js";
 
 export default {
 	checks,
@@ -21,5 +20,4 @@ export default {
 	getMultipleFieldMeta,
 	getMultipleRevisions,
 	nullifyDocumentReferences,
-	partialUpdateSingle,
 };

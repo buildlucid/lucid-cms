@@ -76,10 +76,6 @@ const documentResponseBaseSchema = z.object({
 		draft: documentResponseVersionSchema.nullable(),
 		published: documentResponseVersionSchema.nullable(),
 	}),
-	documentFieldsId: z.number().nullable().meta({
-		description: "The ID of the document fields pseudo brick row",
-		example: 1,
-	}),
 	createdBy: documentResponseUserSchema.nullable(),
 	updatedBy: documentResponseUserSchema.nullable(),
 	createdAt: z.string().nullable().meta({
@@ -141,7 +137,7 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
-	updateSingle: {
+	createVersion: {
 		body: z.object({
 			publish: z.boolean().meta({
 				description: "Whether it should be published or be a draft.",
@@ -181,12 +177,8 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
-	partialUpdateSingle: {
+	updateVersion: {
 		body: z.object({
-			documentFieldsId: z.number().meta({
-				description: "The ID of the document fields pseudo brick row",
-				example: 1,
-			}),
 			bricks: z
 				.array(brickInputSchema)
 				.meta({

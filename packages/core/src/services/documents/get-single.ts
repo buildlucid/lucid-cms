@@ -85,7 +85,6 @@ const getSingle: ServiceFn<
 				collection: collectionRes.data,
 				bricks: bricksRes.data.bricks,
 				fields: bricksRes.data.fields,
-				documentFieldsId: bricksRes.data.documentFieldsId,
 				config: context.config,
 			}),
 		};
@@ -98,7 +97,6 @@ const getSingle: ServiceFn<
 			collection: collectionRes.data,
 			bricks: [],
 			fields: [],
-			documentFieldsId: undefined,
 			config: context.config,
 		}),
 	};

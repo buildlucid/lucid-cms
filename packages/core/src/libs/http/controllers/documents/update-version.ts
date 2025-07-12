@@ -19,20 +19,18 @@ import { permissionCheck } from "../../middleware/permissions.js";
 
 const factory = createFactory();
 
-const partialUpdateSingleController = factory.createHandlers(
+const updateVersionController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Partially update a single document for a given collection key and document ID.",
+			"Update a single document version for a given collection key and document ID.",
 		tags: ["documents"],
-		summary: "Partially Update Document",
+		summary: "Update Document Version",
 		responses: honoSwaggerResponse({
-			schema: z.toJSONSchema(controllerSchemas.partialUpdateSingle.response),
+			schema: z.toJSONSchema(controllerSchemas.updateVersion.response),
 		}),
-		requestBody: honoSwaggerRequestBody(
-			controllerSchemas.partialUpdateSingle.body,
-		),
+		requestBody: honoSwaggerRequestBody(controllerSchemas.updateVersion.body),
 		parameters: honoSwaggerParamaters({
-			params: controllerSchemas.partialUpdateSingle.params,
+			params: controllerSchemas.updateVersion.params,
 			headers: {
 				csrf: true,
 			},
@@ -41,17 +39,17 @@ const partialUpdateSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	validate("json", controllerSchemas.partialUpdateSingle.body),
-	validate("param", controllerSchemas.partialUpdateSingle.params),
+	validate("json", controllerSchemas.updateVersion.body),
+	validate("param", controllerSchemas.updateVersion.params),
 	async (c) => {
-		const { documentFieldsId, bricks, fields } = c.req.valid("json");
+		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
 
 		//* manually run permissions middleware based on the publish flag
 		permissionCheck(c, ["create_content"]);
 
 		const documentId = await serviceWrapper(
-			services.collection.documents.partialUpdateSingle,
+			services.collection.documentVersions.updateSingle,
 			{
 				transaction: true,
 				defaultError: {
@@ -71,7 +69,6 @@ const partialUpdateSingleController = factory.createHandlers(
 				userId: c.get("auth").id,
 				documentId: Number.parseInt(id),
 				versionId: Number.parseInt(versionId),
-				documentFieldsId: documentFieldsId,
 				bricks,
 				fields,
 			},
@@ -89,4 +86,4 @@ const partialUpdateSingleController = factory.createHandlers(
 	},
 );
 
-export default partialUpdateSingleController;
+export default updateVersionController;

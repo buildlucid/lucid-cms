@@ -19,18 +19,18 @@ import { permissionCheck } from "../../middleware/permissions.js";
 
 const factory = createFactory();
 
-const updateSingleController = factory.createHandlers(
+const createVersionController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Update a single document for a given collection key and document ID.",
+			"Create a new version for a single document for a given collection key and document ID.",
 		tags: ["documents"],
-		summary: "Update Document",
+		summary: "Create Document Version",
 		responses: honoSwaggerResponse({
-			schema: z.toJSONSchema(controllerSchemas.updateSingle.response),
+			schema: z.toJSONSchema(controllerSchemas.createVersion.response),
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.updateSingle.body),
+		requestBody: honoSwaggerRequestBody(controllerSchemas.createVersion.body),
 		parameters: honoSwaggerParamaters({
-			params: controllerSchemas.updateSingle.params,
+			params: controllerSchemas.createVersion.params,
 			headers: {
 				csrf: true,
 			},
@@ -39,8 +39,8 @@ const updateSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	validate("json", controllerSchemas.updateSingle.body),
-	validate("param", controllerSchemas.updateSingle.params),
+	validate("json", controllerSchemas.createVersion.body),
+	validate("param", controllerSchemas.createVersion.params),
 	async (c) => {
 		const { publish, bricks, fields } = c.req.valid("json");
 		const { collectionKey, id } = c.req.valid("param");
@@ -54,8 +54,8 @@ const updateSingleController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_document_update_error_name"),
-					message: T("route_document_update_error_message"),
+					name: T("route_document_create_error_name"),
+					message: T("route_document_create_error_message"),
 				},
 			},
 		)(
@@ -86,4 +86,4 @@ const updateSingleController = factory.createHandlers(
 	},
 );
 
-export default updateSingleController;
+export default createVersionController;

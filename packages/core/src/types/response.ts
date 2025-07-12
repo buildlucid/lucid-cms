@@ -261,7 +261,6 @@ export interface DocumentResponse {
 	collectionKey: string;
 	status: DocumentVersionType | null;
 	versionId: number | null;
-	documentFieldsId: number | null;
 	version: {
 		draft: {
 			id: number | null;

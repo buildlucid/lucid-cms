@@ -149,7 +149,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"usernameOrEmail\": \"admin\",\r\n    \"password\": \"password\"\r\n}",
+							"raw": "{\r\n    \"usernameOrEmail\": \"admin\",\r\n    \"password\": \"wja0fjh5fkj2MTH!vhb\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -668,7 +668,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/collections/settings",
+							"raw": "{{BASE_URL}}/api/v1/collections/page",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -676,7 +676,7 @@
 								"api",
 								"v1",
 								"collections",
-								"settings"
+								"page"
 							]
 						}
 					},
@@ -816,9 +816,9 @@
 					"response": []
 				},
 				{
-					"name": "Update Single",
+					"name": "Create Version",
 					"request": {
-						"method": "PATCH",
+						"method": "POST",
 						"header": [
 							{
 								"key": "_csrf",
@@ -845,6 +845,42 @@
 								"documents",
 								"test",
 								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Version",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fields\": [\n        {\n            \"key\": \"title\",\n            \"type\": \"text\",\n            \"translations\": {\n                \"en\": \"Homepage\"\n            } \n        },\n        {\n            \"key\": \"slug\",\n            \"type\": \"text\",\n            \"translations\": {\n                \"en\": \"testing-3\",\n                \"fr\": \"testing\"\n            }\n        },\n        {\n\t\t\t\"key\": \"parentPage\",\n\t\t\t\"type\": \"document\",\n\t\t\t\"value\": 2\n\t\t},\n\t\t{\n\t\t\t\"key\": \"fullSlug\",\n\t\t\t\"type\": \"text\",\n\t\t\t\"value\": \"\"\n\t\t}\n    ]\n    // \"bricks\": [\n    //     {\n\t// \t\t\"ref\": \"ref-1\",\n    //         \"key\": \"simple\",\n    //         \"order\": 2,\n    //         \"type\": \"builder\",\n    //         \"open\": true,\n    //         \"fields\": [\n    //             {\n    //                 \"key\": \"heading\",\n    //                 \"type\": \"text\",\n    //                 \"value\": \"I am the heading\"\n    //             },\n\t// \t\t\t{\n\t// \t\t\t\t\"key\": \"image\",\n\t// \t\t\t\t\"type\": \"media\",\n\t// \t\t\t\t\"value\": 1\n\t// \t\t\t},\n    //             {\n    //                 \"key\": \"document\",\n    //                 \"type\": \"document\",\n    //                 \"value\": 1\n    //             },\n    //             {\n    //                 \"key\": \"items\",\n    //                 \"type\": \"repeater\",\n    //                 \"groups\": [\n    //                     {\n    //                         \"ref\": \"ref-group11\",\n    //                         \"open\": false,\n    //                         \"fields\": [\n    //                             {\n    //                                 \"key\": \"itemTitle\",\n    //                                 \"type\": \"text\",\n    //                                 \"translations\": {\n    //                                     \"en\": \"Title One\"\n    //                                 }\n    //                             },\n    //                             {\n    //                                 \"key\": \"nestedItems\",\n    //                                 \"type\": \"repeater\",\n    //                                 \"groups\": [\n    //                                     {\n    //                                       \"ref\": \"ref-11\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"Nested Title One One\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": true\n    //                                         }\n    //                                       ]\n    //                                     },\n    //                                     {\n    //                                       \"ref\": \"ref-12\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"Nested Title One Two\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": false\n    //                                         }\n    //                                       ]\n    //                                     }\n    //                                 ]\n    //                             }\n    //                         ]\n    //                     },\n    //                     {\n    //                         \"ref\": \"ref-group12\",\n    //                         \"open\": true,\n    //                         \"fields\": [\n    //                             {\n    //                                 \"key\": \"itemTitle\",\n    //                                 \"type\": \"text\",\n    //                                 \"translations\": {\n    //                                     \"en\": \"Title Two\"\n    //                                 }\n    //                             },\n    //                             {\n    //                                 \"key\": \"nestedItems\",\n    //                                 \"type\": \"repeater\",\n    //                                 \"groups\": [\n    //                                     {\n    //                                       \"ref\": \"ref-21\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"Nested Title Two One\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": true\n    //                                         }\n    //                                       ]\n    //                                     },\n    //                                     {\n    //                                       \"ref\": \"ref-22\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"Nested Title Two Two\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": true\n    //                                         }\n    //                                       ]\n    //                                     }\n    //                                 ]\n    //                             }\n    //                         ]\n    //                     }\n    //                 ]\n    //             }\n    //         ]\n    //     },\n    //     {\n\t// \t\t\"ref\": \"ref-99\",\n    //         \"key\": \"simple\",\n    //         \"order\": 1,\n    //         \"type\": \"builder\",\n    //         \"open\": true,\n    //         \"fields\": [\n    //             {\n    //                 \"key\": \"heading\",\n    //                 \"type\": \"text\",\n    //                 \"value\": \"I am the heading\"\n    //             },\n\t// \t\t\t{\n\t// \t\t\t\t\"key\": \"image\",\n\t// \t\t\t\t\"type\": \"media\",\n\t// \t\t\t\t\"value\": 1\n\t// \t\t\t},\n    //             {\n    //                 \"key\": \"document\",\n    //                 \"type\": \"document\",\n    //                 \"value\": 1\n    //             },\n    //             {\n    //                 \"key\": \"items\",\n    //                 \"type\": \"repeater\",\n    //                 \"groups\": [\n    //                     {\n    //                         \"ref\": \"ref-group11\",\n    //                         \"open\": false,\n    //                         \"fields\": [\n    //                             {\n    //                                 \"key\": \"itemTitle\",\n    //                                 \"type\": \"text\",\n    //                                 \"translations\": {\n    //                                     \"en\": \"BRICK 2 - Title One\"\n    //                                 }\n    //                             },\n    //                             {\n    //                                 \"key\": \"nestedItems\",\n    //                                 \"type\": \"repeater\",\n    //                                 \"groups\": [\n    //                                     {\n    //                                       \"ref\": \"ref-11\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"BRICK 2 - Nested Title One One\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": true\n    //                                         }\n    //                                       ]\n    //                                     },\n    //                                     {\n    //                                       \"ref\": \"ref-12\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"BRICK 2 - Nested Title One Two\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": false\n    //                                         }\n    //                                       ]\n    //                                     }\n    //                                 ]\n    //                             }\n    //                         ]\n    //                     },\n    //                     {\n    //                         \"ref\": \"ref-group12\",\n    //                         \"open\": true,\n    //                         \"fields\": [\n    //                             {\n    //                                 \"key\": \"itemTitle\",\n    //                                 \"type\": \"text\",\n    //                                 \"translations\": {\n    //                                     \"en\": \"BRICK 2 - Title Two\"\n    //                                 }\n    //                             },\n    //                             {\n    //                                 \"key\": \"nestedItems\",\n    //                                 \"type\": \"repeater\",\n    //                                 \"groups\": [\n    //                                     {\n    //                                       \"ref\": \"ref-21\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"BRICK 2 - Nested Title Two One\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": true\n    //                                         }\n    //                                       ]\n    //                                     },\n    //                                     {\n    //                                       \"ref\": \"ref-22\",\n    //                                       \"open\": false,\n    //                                       \"fields\": [\n    //                                         {\n    //                                             \"key\": \"nestedItemTitle\",\n    //                                             \"type\": \"text\",\n    //                                             \"translations\": {\n    //                                                 \"en\": \"BRICK 2 - Nested Title Two Two\"\n    //                                             }\n    //                                         },\n    //                                         {\n    //                                             \"key\": \"nestedCheckbox\",\n    //                                             \"type\": \"checkbox\",\n    //                                             \"value\": true\n    //                                         }\n    //                                       ]\n    //                                     }\n    //                                 ]\n    //                             }\n    //                         ]\n    //                     }\n    //                 ]\n    //             }\n    //         ]\n    //     },\n    //     {\n    //         \"ref\": \"ref-2\",\n    //         \"key\": \"simple-fixed\",\n    //         \"order\": 0,\n    //         \"type\": \"fixed\",\n    //         \"open\": true,\n    //         \"fields\": [\n    //             {\n    //                 \"key\": \"heading\",\n    //                 \"type\": \"text\",\n    //                 \"value\": \"I am the fixed brick heading\"\n    //             }\n    //         ]\n    //     },\n    //     {\n    //         \"ref\": \"ref-253\",\n    //         \"key\": \"simple-fixed\",\n    //         \"order\": 0,\n    //         \"type\": \"builder\",\n    //         \"open\": true,\n    //         \"fields\": [\n    //             {\n    //                 \"key\": \"heading\",\n    //                 \"type\": \"text\",\n    //                 \"value\": \"I am the 'fixed' build brick heading\"\n    //             }\n    //         ]\n    //     }\n    // ],\n    // \"fields\": [\n    //     {\n    //         \"key\": \"simpleHeading\",\n    //         \"type\": \"text\",\n    //         \"translations\": {\n    //             \"en\": \"Homepage 4\",\n\t// \t\t\t\"fr\": \"Homepage FR 4\"\n    //         }\n    //     },\n    //     {\n    //         \"key\": \"media\",\n    //         \"type\": \"media\",\n    //         \"value\": 1\n    //     },\n    //     {\n    //         \"key\": \"user\",\n    //         \"type\": \"user\",\n    //         \"value\": 1\n    //     },\n    //     {\n    //         \"key\": \"people\",\n    //         \"type\": \"repeater\",\n    //         \"groups\": [\n    //             {\n    //                 \"ref\": \"ref-group3\",\n    //                 \"open\": false,\n    //                 \"fields\": [\n    //                     {\n    //                         \"key\": \"firstName\",\n    //                         \"type\": \"text\",\n    //                         \"value\": \"John\"\n    //                     }\n    //                 ]\n    //             },\n    //             {\n    //                 \"ref\": \"ref-group4\",\n    //                 \"open\": false,\n    //                 \"fields\": [\n    //                     {\n    //                         \"key\": \"firstName\",\n    //                         \"type\": \"text\",\n    //                         \"value\": \"William\"\n    //                     }\n    //                 ]\n    //             }\n    //         ]\n    //     }\n    // ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/documents/test/3/1",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"test",
+								"3",
+								"1"
 							]
 						}
 					},
@@ -927,7 +963,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/documents/simple/1/draft?include=bricks",
+							"raw": "{{BASE_URL}}/api/v1/documents/page/1/draft?include=bricks",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -935,7 +971,7 @@
 								"api",
 								"v1",
 								"documents",
-								"simple",
+								"page",
 								"1",
 								"draft"
 							],
@@ -2146,18 +2182,13 @@
 								"method": "GET",
 								"header": [
 									{
-										"key": "lucid-client-key",
-										"value": "{{CLIENT_KEY}}",
-										"type": "text"
-									},
-									{
 										"key": "Authorization",
 										"value": "{{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/document/simple/draft",
+									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft",
 									"host": [
 										"{{BASE_URL}}"
 									],
@@ -2166,7 +2197,7 @@
 										"v1",
 										"client",
 										"document",
-										"simple",
+										"page",
 										"draft"
 									],
 									"query": [
@@ -2215,11 +2246,6 @@
 							"request": {
 								"method": "GET",
 								"header": [
-									{
-										"key": "lucid-client-key",
-										"value": "{{CLIENT_KEY}}",
-										"type": "text"
-									},
 									{
 										"key": "Authorization",
 										"value": "{{CLIENT_API_KEY}}",
@@ -2286,11 +2312,6 @@
 								"method": "GET",
 								"header": [
 									{
-										"key": "lucid-client-key",
-										"value": "{{CLIENT_KEY}}",
-										"type": "text"
-									},
-									{
 										"key": "Authorization",
 										"value": "{{CLIENT_API_KEY}}",
 										"type": "text"
@@ -2321,11 +2342,6 @@
 							"request": {
 								"method": "POST",
 								"header": [
-									{
-										"key": "lucid-client-key",
-										"value": "{{CLIENT_KEY}}",
-										"type": "text"
-									},
 									{
 										"key": "Authorization",
 										"value": "{{CLIENT_API_KEY}}",
@@ -2613,6 +2629,30 @@
 							],
 							"path": [
 								"config-test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Extension Testing",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/test-lucid-creation",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"test-lucid-creation"
 							]
 						}
 					},
