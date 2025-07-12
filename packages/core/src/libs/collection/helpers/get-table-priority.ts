@@ -13,6 +13,7 @@ const TABLE_PRIORITY: Record<TableType, number> = {
 	repeater: 600,
 };
 const EXTERNAL_REFERENCE_PRIORITY = 100;
+const REPEATER_DEPTH_PRIORITY = 10;
 
 /**
  * Works out the table priority based on its type and foreign keys
@@ -36,6 +37,13 @@ const getTablePriority = (
 	});
 	if (hasExternalReferences) {
 		basePriority -= EXTERNAL_REFERENCE_PRIORITY;
+	}
+
+	if (type === "collection-inferred") {
+		const repeaterDepth = (table as CollectionSchemaTable).key.repeater?.length;
+		if (repeaterDepth) {
+			basePriority -= repeaterDepth * REPEATER_DEPTH_PRIORITY;
+		}
 	}
 
 	return {
