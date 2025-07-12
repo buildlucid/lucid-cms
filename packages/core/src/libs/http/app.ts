@@ -42,13 +42,18 @@ const createApp = async (props: {
 		.use(logRoute)
 		.use(
 			cors({
-				origin: [props.config.host, "http://localhost:3000"],
+				origin: [
+					props.config.host,
+					"http://localhost:3000",
+					...(props.config.cors?.origin || []),
+				],
 				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 				allowHeaders: [
 					"Content-Type",
 					"Authorization",
 					"Content-Length",
 					...Object.values(constants.headers),
+					...(props.config.cors?.allowHeaders || []),
 				],
 				credentials: true,
 			}),

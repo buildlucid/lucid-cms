@@ -146,6 +146,13 @@ export type UrlStrategy = (media: {
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
 	db: DatabaseAdapter;
+	/** The cors configuration. */
+	cors?: {
+		/** The origin of the Lucid instance. Your configured host is already added by default. */
+		origin?: string[];
+		/** The headers to allow. */
+		allowHeaders?: string[];
+	};
 	/** The host of the Lucid instance. */
 	host: string;
 	/** `64 character` length keys to encrypt and sign data. */

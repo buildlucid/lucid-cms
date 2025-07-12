@@ -27,6 +27,9 @@ export const adapter = nodeAdapter();
 
 export default defineConfig((env) => ({
 	host: "http://localhost:6543",
+	// cors: {
+	// 	origin: [],
+	// },
 	logger: {
 		level: "silent",
 	},

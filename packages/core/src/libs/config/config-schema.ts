@@ -31,6 +31,12 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	host: z.string(),
+	cors: z
+		.object({
+			origin: z.array(z.string()).optional(),
+			allowHeaders: z.array(z.string()).optional(),
+		})
+		.optional(),
 	keys: z.object({
 		encryptionKey: z.string().length(64),
 		cookieSecret: z.string().length(64),
