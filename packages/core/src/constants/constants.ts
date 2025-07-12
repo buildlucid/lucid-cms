@@ -6,7 +6,6 @@ export default Object.freeze({
 	swaggerRoutePrefix: "/documentation",
 	headers: {
 		csrf: "_csrf",
-		clientIntegrationKey: "lucid-client-key",
 		contentLocale: "lucid-content-locale",
 	},
 	cookies: {

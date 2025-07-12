@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
+import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createSingle: ServiceFn<
@@ -69,7 +70,7 @@ const createSingle: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			apiKey: apiKey,
+			apiKey: encodeApiKey(key, apiKey),
 		},
 	};
 };

@@ -9,13 +9,12 @@ Creating a new client integration will given you an API key along with a unique 
 
 ## Authenticating Requests
 
-To authenticate a request to a client endpoint you need to pass the API key to the `Authorization` header, and the client integration key to the `lucid-client-key` header. The `lucid-client-key` header is a unique key that is generated for each client integration and is used to identify the integration.
+To authenticate a request to a client endpoint you need to pass the API key to the `Authorization` header.
 
 ```ts title="index.ts"
 fetch('/api/v1/client/locales', {
   method: 'GET',
   headers: {
-    'lucid-client-key': '<CLIENT_KEY>',
     'Authorization': '<API_KEY>',
   } 
 })

@@ -42,17 +42,6 @@ const honoSwaggerParamaters = (props: {
 			},
 		});
 	}
-	if (props.headers?.clientKey !== undefined) {
-		paramaters.push({
-			in: "header",
-			name: "lucid-client-key",
-			required: props.headers.clientKey,
-			description: T("swagger_client_key_header_description"),
-			schema: {
-				type: "string",
-			},
-		});
-	}
 	if (props.headers?.authorization !== undefined) {
 		paramaters.push({
 			in: "header",

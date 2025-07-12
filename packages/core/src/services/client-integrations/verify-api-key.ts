@@ -4,13 +4,13 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import constants from "../../constants/constants.js";
+import { decodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidClientIntegrationAuth } from "../../types/hono.js";
 
 const verifyApiKey: ServiceFn<
 	[
 		{
-			key: string;
 			apiKey: string;
 		},
 	],
@@ -22,12 +22,30 @@ const verifyApiKey: ServiceFn<
 		context.config.db,
 	);
 
+	const { key: decodedKey, apiKey: decodedApiKey } = decodeApiKey(data.apiKey);
+	if (!decodedApiKey) {
+		return {
+			error: {
+				message: T("client_integration_api_key_missing"),
+			},
+			data: undefined,
+		};
+	}
+	if (!decodedKey) {
+		return {
+			error: {
+				message: T("client_integration_key_missing"),
+			},
+			data: undefined,
+		};
+	}
+
 	const clientIntegrationRes = await ClientIntegrations.selectSingle({
 		where: [
 			{
 				key: "key",
 				operator: "=",
-				value: data.key,
+				value: decodedKey,
 			},
 		],
 		select: ["id", "api_key", "secret", "enabled", "key"],
@@ -55,7 +73,7 @@ const verifyApiKey: ServiceFn<
 	);
 
 	const inputApiKeyHash = Buffer.from(
-		scrypt(data.apiKey, secret, constants.scrypt),
+		scrypt(decodedApiKey, secret, constants.scrypt),
 	).toString("base64");
 
 	const verifyApiKey = inputApiKeyHash === clientIntegrationRes.data.api_key;

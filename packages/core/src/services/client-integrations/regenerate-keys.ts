@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
+import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const regenerateKeys: ServiceFn<
@@ -20,7 +21,7 @@ const regenerateKeys: ServiceFn<
 	);
 
 	const checkExistsRes = await ClientIntegrations.selectSingle({
-		select: ["id"],
+		select: ["id", "key"],
 		where: [
 			{
 				key: "id",
@@ -65,7 +66,7 @@ const regenerateKeys: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			apiKey: apiKey,
+			apiKey: encodeApiKey(checkExistsRes.data.key, apiKey),
 		},
 	};
 };
