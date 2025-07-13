@@ -12,6 +12,8 @@ import helpers from "@/utils/helpers";
 interface FixedBricksProps {
 	brickConfig: CollectionBrickConfig[];
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionKey?: string;
+	documentId?: number;
 }
 
 export const FixedBricks: Component<FixedBricksProps> = (props) => {
@@ -33,6 +35,8 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 						brick={brick}
 						brickConfig={props.brickConfig}
 						collectionMigrationStatus={props.collectionMigrationStatus}
+						collectionKey={props.collectionKey}
+						documentId={props.documentId}
 					/>
 				)}
 			</For>
@@ -44,6 +48,8 @@ interface FixedBrickRowProps {
 	brick: BrickData;
 	brickConfig: CollectionBrickConfig[];
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionKey?: string;
+	documentId?: number;
 }
 
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
@@ -140,6 +146,8 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					labelledby: `fixed-brick-${props.brick.key}`,
 					fieldErrors: fieldErrors(),
 					missingFieldColumns: missingFieldColumns(),
+					collectionKey: props.collectionKey,
+					documentId: props.documentId,
 				}}
 				options={{
 					padding: "20",

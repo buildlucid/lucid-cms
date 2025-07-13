@@ -152,18 +152,24 @@ const CollectionsDocumentsEditRoute: Component<
 								collectionMigrationStatus={
 									docState.collection()?.migrationStatus
 								}
+								collectionKey={docState.collectionKey()}
+								documentId={docState.documentId()}
 							/>
 							<FixedBricks
 								brickConfig={docState.collection()?.fixedBricks || []}
 								collectionMigrationStatus={
 									docState.collection()?.migrationStatus
 								}
+								collectionKey={docState.collectionKey()}
+								documentId={docState.documentId()}
 							/>
 							<BuilderBricks
 								brickConfig={docState.collection()?.builderBricks || []}
 								collectionMigrationStatus={
 									docState.collection()?.migrationStatus
 								}
+								collectionKey={docState.collectionKey()}
+								documentId={docState.documentId()}
 							/>
 						</div>
 					</div>

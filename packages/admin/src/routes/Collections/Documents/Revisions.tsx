@@ -160,18 +160,24 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 									collectionMigrationStatus={
 										revisionState.collection()?.migrationStatus
 									}
+									collectionKey={revisionState.collectionKey()}
+									documentId={revisionState.documentId()}
 								/>
 								<FixedBricks
 									brickConfig={revisionState.collection()?.fixedBricks || []}
 									collectionMigrationStatus={
 										revisionState.collection()?.migrationStatus
 									}
+									collectionKey={revisionState.collectionKey()}
+									documentId={revisionState.documentId()}
 								/>
 								<BuilderBricks
 									brickConfig={revisionState.collection()?.builderBricks || []}
 									collectionMigrationStatus={
 										revisionState.collection()?.migrationStatus
 									}
+									collectionKey={revisionState.collectionKey()}
+									documentId={revisionState.documentId()}
 								/>
 							</div>
 							<RevisionsSidebar

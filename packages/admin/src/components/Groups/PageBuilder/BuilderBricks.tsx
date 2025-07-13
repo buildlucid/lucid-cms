@@ -17,10 +17,13 @@ import AddBrick from "@/components/Modals/Bricks/AddBrick";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import helpers from "@/utils/helpers";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
+import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionKey?: string;
+	documentId?: number;
 }
 
 export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
@@ -68,6 +71,18 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 								brickRef: ref,
 								targetBrickRef: targetRef,
 							});
+
+							if (props.collectionKey && props.documentId) {
+								tabStateHelpers.updateBrickOrders(
+									props.collectionKey,
+									props.documentId,
+									builderBricks().map((b) => {
+										return {
+											[b.key]: b.order,
+										};
+									}),
+								);
+							}
 						}}
 					>
 						{({ dragDrop }) => (
@@ -78,6 +93,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 										brickConfig={props.brickConfig}
 										collectionMigrationStatus={props.collectionMigrationStatus}
 										dragDrop={dragDrop}
+										collectionKey={props.collectionKey}
+										documentId={props.documentId}
 									/>
 								)}
 							</For>
@@ -104,6 +121,8 @@ interface BuilderBrickRowProps {
 	brickConfig: CollectionBrickConfig[];
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 	dragDrop: DragDropCBT;
+	collectionKey?: string;
+	documentId?: number;
 }
 
 const DRAG_DROP_KEY = "builder-bricks-zone";
@@ -257,6 +276,8 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					labelledby: `builder-brick-${props.brick.key}`,
 					fieldErrors: fieldErrors(),
 					missingFieldColumns: missingFieldColumns(),
+					collectionKey: props.collectionKey,
+					documentId: props.documentId,
 				}}
 				options={{
 					padding: "15",

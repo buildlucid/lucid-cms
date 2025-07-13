@@ -5,6 +5,7 @@ import {
 	createSignal,
 	onMount,
 	Show,
+	createEffect,
 } from "solid-js";
 import type { CFConfig, FieldError, FieldTypes } from "@types";
 import type { BrickData } from "@/store/brickStore";
@@ -13,6 +14,7 @@ import {
 	TabField,
 	DynamicField,
 } from "@/components/Groups/Builder/CustomFields";
+import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BrickProps {
 	state: {
@@ -23,6 +25,8 @@ interface BrickProps {
 		labelledby?: string;
 		fieldErrors: FieldError[];
 		missingFieldColumns: string[];
+		collectionKey?: string;
+		documentId?: number;
 	};
 	options: {
 		padding?: "15" | "20";
@@ -42,11 +46,46 @@ export const BrickBody: Component<BrickProps> = (props) => {
 			props.state.configFields?.filter((field) => field.type === "tab") || [],
 	);
 
-	// -------------------------------
+	// ----------------------------------
 	// Effects
 	onMount(() => {
-		if (getActiveTab() === undefined) {
-			setActiveTab(allTabs()[0]?.key);
+		tabStateHelpers.cleanupOldEntries();
+
+		if (
+			props.state.collectionKey &&
+			props.state.documentId &&
+			allTabs().length > 0
+		) {
+			const savedTab = tabStateHelpers.getTabState(
+				props.state.collectionKey,
+				props.state.documentId,
+				props.state.brick.key,
+				props.state.brick.order,
+			);
+			const tabExists = allTabs().some((tab) => tab.key === savedTab);
+
+			if (savedTab && tabExists) {
+				setActiveTab(savedTab);
+			} else {
+				const firstTab = allTabs()[0]?.key;
+				if (firstTab) setActiveTab(firstTab);
+			}
+		} else if (getActiveTab() === undefined) {
+			const firstTab = allTabs()[0]?.key;
+			if (firstTab) setActiveTab(firstTab);
+		}
+	});
+
+	createEffect(() => {
+		const activeTab = getActiveTab();
+		if (activeTab && props.state.collectionKey && props.state.documentId) {
+			tabStateHelpers.setTabState(
+				props.state.collectionKey,
+				props.state.documentId,
+				props.state.brick.key,
+				props.state.brick.order,
+				activeTab,
+			);
 		}
 	});
 

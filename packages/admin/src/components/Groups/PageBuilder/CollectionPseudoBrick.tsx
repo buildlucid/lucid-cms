@@ -6,6 +6,8 @@ import { BrickBody } from "@/components/Groups/Builder";
 interface CollectionPseudoBrickProps {
 	fields: CFConfig<FieldTypes>[];
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionKey?: string;
+	documentId?: number;
 }
 
 export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
@@ -46,6 +48,8 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 						configFields: props.fields,
 						fieldErrors: fieldErrors(),
 						missingFieldColumns: missingFieldColumns(),
+						collectionKey: props.collectionKey,
+						documentId: props.documentId,
 					}}
 					options={{}}
 				/>

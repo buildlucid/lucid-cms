@@ -8,8 +8,10 @@ type ContentLangStoreT = {
 	setContentLocale: (_contentLocale?: string) => void;
 };
 
+const CONTENT_LOCALE_KEY = "lucid_content_locale";
+
 const getInitialContentLocale = () => {
-	const contentLang = localStorage.getItem("lucid_content_locale");
+	const contentLang = localStorage.getItem(CONTENT_LOCALE_KEY);
 	if (contentLang) {
 		return contentLang;
 	}
@@ -26,7 +28,7 @@ const [get, set] = createStore<ContentLangStoreT>({
 			return;
 		}
 
-		const contentLocal = localStorage.getItem("lucid_content_locale");
+		const contentLocal = localStorage.getItem(CONTENT_LOCALE_KEY);
 		if (contentLocal) {
 			const localeExists = locales.find((l) => l.code === contentLocal);
 			if (localeExists !== undefined) {
@@ -38,8 +40,8 @@ const [get, set] = createStore<ContentLangStoreT>({
 	},
 	setContentLocale(contentLocale?: string) {
 		if (contentLocale === undefined)
-			localStorage.removeItem("lucid_content_locale");
-		else localStorage.setItem("lucid_content_locale", String(contentLocale));
+			localStorage.removeItem(CONTENT_LOCALE_KEY);
+		else localStorage.setItem(CONTENT_LOCALE_KEY, String(contentLocale));
 		set("contentLocale", contentLocale);
 	},
 });
