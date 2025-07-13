@@ -36,7 +36,6 @@ const SettingsCollection = new CollectionBuilder("settings", {
 			label: "Name",
 		},
 		validation: {
-			zod: z.string(),
 			required: true,
 		},
 	})
@@ -45,7 +44,7 @@ const SettingsCollection = new CollectionBuilder("settings", {
 			label: "URL",
 		},
 		validation: {
-			zod: z.string().url(),
+			zod: z.url(),
 			required: true,
 		},
 	})
