@@ -1,0 +1,30 @@
+{
+	"name": "@lucidcms/cloudflare-example",
+	"private": true,
+	"description": "This is the Lucid Cloudflare example app used for internal testing.",
+	"main": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"dev": "lucidcms dev",
+		"build": "lucidcms build",
+		"migrate": "lucidcms migrate",
+		"wrangler:dev": "lucidcms build && wrangler --env dev dev --test-scheduled",
+		"wrangler:deploy": "npm run build && wrangler --env prod deploy"
+	},
+	"dependencies": {
+		"@lucidcms/cloudflare-adapter": "*",
+		"@lucidcms/core": "*",
+		"@lucidcms/libsql-adapter": "*",
+		"@lucidcms/plugin-pages": "*",
+		"@lucidcms/plugin-resend": "*",
+		"@lucidcms/plugin-s3": "*"
+	},
+	"author": "Proto Digital",
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^5.8.3"
+	},
+	"volta": {
+		"node": "22.15.0"
+	}
+}
