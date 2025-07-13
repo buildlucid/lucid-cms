@@ -5,6 +5,7 @@ import { getBodyError } from "@/utils/error-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
+import { useFocusPreservation } from "@/hooks/useFocusPreservation";
 import type { Accessor } from "solid-js";
 import type {
 	BrickError,
@@ -24,6 +25,7 @@ export function useDocumentMutations(props: {
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { captureFocus, restoreFocus } = useFocusPreservation();
 
 	const createDocumentMutation = api.documents.useCreateSingle({
 		onSuccess: (data) => {
@@ -76,10 +78,17 @@ export function useDocumentMutations(props: {
 	});
 
 	const updateSingleVersionMutation = api.documents.useUpdateSingleVersion({
+		onMutate: () => {
+			const focusState = captureFocus();
+			brickStore.set("focusState", focusState);
+		},
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
 			brickStore.set("documentMutated", false);
+
+			restoreFocus(brickStore.get.focusState);
+			brickStore.set("focusState", null);
 		},
 		onError: (errors) => {
 			brickStore.set(
@@ -87,6 +96,9 @@ export function useDocumentMutations(props: {
 				getBodyError<FieldError[]>("fields", errors) || [],
 			);
 			brickStore.set("documentMutated", false);
+
+			restoreFocus(brickStore.get.focusState);
+			brickStore.set("focusState", null);
 		},
 		getCollectionName: props.collectionSingularName,
 	});

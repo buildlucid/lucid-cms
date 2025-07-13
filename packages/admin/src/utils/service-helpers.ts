@@ -26,6 +26,7 @@ interface MutationWrapperProps<Params, Response> {
 	invalidates?: string[];
 	onSuccess?: (_data: Response) => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
+	onMutate?: (_params: Params) => void;
 }
 
 // -------------------------------------------------
@@ -76,6 +77,7 @@ const useMutationWrapper = <Params, Response>({
 	invalidates = [],
 	onSuccess,
 	onError,
+	onMutate,
 }: MutationWrapperProps<Params, Response>) => {
 	const [errors, setErrors] = createSignal<ErrorResponse>();
 	const queryClient = useQueryClient();
@@ -113,6 +115,7 @@ const useMutationWrapper = <Params, Response>({
 				onError?.(errors);
 			}
 		},
+		onMutate: onMutate,
 	}));
 
 	onCleanup(() => {

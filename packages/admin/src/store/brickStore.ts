@@ -13,6 +13,7 @@ import type {
 	FieldTypes,
 	BrickError,
 } from "@types";
+import type { FocusState } from "@/hooks/useFocusPreservation";
 
 export interface BrickData {
 	ref: string;
@@ -41,6 +42,7 @@ type BrickStoreT = {
 			| undefined;
 	};
 	collectionTranslations: boolean;
+	focusState: FocusState | null;
 	// functions
 	reset: () => void;
 	setBricks: (
@@ -117,6 +119,7 @@ const [get, set] = createStore<BrickStoreT>({
 		open: false,
 		data: undefined,
 	},
+	focusState: null,
 	reset() {
 		set("bricks", []);
 		set("fieldsErrors", []);
@@ -124,6 +127,7 @@ const [get, set] = createStore<BrickStoreT>({
 		set("documentMutated", false);
 		set("autoSaveCounter", 0);
 		set("collectionTranslations", false);
+		set("focusState", null);
 	},
 	// Bricks
 	setBricks(document, collection) {

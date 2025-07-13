@@ -36,6 +36,7 @@ interface UseUpdateSingleVersionProps {
 		}>,
 	) => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
+	onMutate?: (_params: Params) => void;
 	getCollectionName: () => string;
 }
 
@@ -62,6 +63,7 @@ const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
 		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
+		onMutate: props?.onMutate,
 	});
 };
 
