@@ -21,6 +21,7 @@ const installOptionalDeps = async () => {
 		"@tailwindcss/vite",
 		"tailwindcss",
 		"vite",
+		"mjml",
 	];
 
 	//* due to core having @lucidcms/admin as a devDependency set to *, we dont want to run this check in our workspace environment

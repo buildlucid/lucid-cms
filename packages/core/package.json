@@ -75,8 +75,7 @@
 		"@types/semver": "^7.7.0",
 		"@types/slug": "^5.0.9",
 		"tsdown": "^0.12.5",
-		"typescript": "^5.8.3",
-		"mjml": "^5.0.0-alpha.6"
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
 		"@noble/hashes": "^1.8.0",
@@ -102,7 +101,8 @@
 		"solid-js": "^1.9.5",
 		"tailwindcss": "^4.1.4",
 		"vite": "^6.3.5",
-		"vite-plugin-solid": "^2.11.6"
+		"vite-plugin-solid": "^2.11.6",
+		"mjml": "^5.0.0-alpha.6"
 	},
 	"volta": {
 		"node": "22.15.0"
