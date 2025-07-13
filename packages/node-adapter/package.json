@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/node-adapter",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"private": false,
 	"description": "The official Node adapter for Lucid CMS",
 	"type": "module",
@@ -51,7 +51,7 @@
 		"rollup-plugin-node-externals": "^8.0.1"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.12.0-alpha.0",
+		"@lucidcms/core": "^0.12.0-alpha.1",
 		"hono": "^4.7.11",
 		"hono-openapi": "^0.4.8"
 	},

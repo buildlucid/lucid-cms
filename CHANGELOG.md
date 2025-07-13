@@ -1,13 +1,20 @@
 # @lucidcms/core
 
+## v0.12.0-alpha.1
+
+### Features:
+
+- Dropped handlebars and replaced it with a basic fn to replace variables instead. This allows the email rendering to work in Cloudflare workers. ([64b3eef](https://github.com/ProtoDigitalUK/lucid_cms/commit/64b3eefee342b84c0acfac0b6e6accf757c6b037))
+- Added a new `preRenderedEmailTemplates` config option which take priority over the `email-templates.json` dynamic import. ([64b3eef](https://github.com/ProtoDigitalUK/lucid_cms/commit/64b3eefee342b84c0acfac0b6e6accf757c6b037))
+
 ## v0.12.0-alpha.0
 
 ### Features:
 
-- Migrated from Fastify to Hono to facilitate multi-runtime support. ()
-- A new NodeJS adapter package has been created and deployed to NPM. This allows Lucid to be deployed to any NodeJS environment. ()
-- A new Cloudflare adapter package has been created and deployed to NPM. This allows Lucid to be deployed to Cloudflare workers. ()
-- Core now ships a CLI for running the dev server, building for deployment, migrating and running seeds. ()
+- Migrated from Fastify to Hono to facilitate multi-runtime support.
+- A new NodeJS adapter package has been created and deployed to NPM. This allows Lucid to be deployed to any NodeJS environment.
+- A new Cloudflare adapter package has been created and deployed to NPM. This allows Lucid to be deployed to Cloudflare workers.
+- Core now ships a CLI for running the dev server, building for deployment, migrating and running seeds.
 - Implemented a new auto save feature for collections. ([5448b30](https://github.com/ProtoDigitalUK/lucid_cms/commit/5448b30dae8d1ba5878ef856d6bb3ec0b0e9d287))
 - A new initial admin user flow has been added so you can set the admin user up how you like instead of being prompted after logging in. ([189ab48](https://github.com/ProtoDigitalUK/lucid_cms/commit/189ab4898f2d6581dc7504d7cb0298390c06a09c))
 - A new first-party Resend plugin has been published, along with some new email table columns for storing metadata on the strategy and the any response data. ([54bb98f](https://github.com/ProtoDigitalUK/lucid_cms/commit/54bb98f3e2cd4937d5e06bc9045d323dfe79a2ac))

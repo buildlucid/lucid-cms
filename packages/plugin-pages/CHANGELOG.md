@@ -1,5 +1,11 @@
 # @lucidcms/plugin-pages
 
+## 0.3.3
+
+### Patch Changes
+
+- Bumped core peer dependency version to `0.12.0-alpha.1`.
+
 ## 0.3.2
 
 ## Patch Changes

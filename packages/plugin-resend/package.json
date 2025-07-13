@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/plugin-resend",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "The official Resend plugin for Lucid",
 	"type": "module",
 	"types": "./dist/index.d.ts",
@@ -30,7 +30,7 @@
 		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.12.0-alpha.0"
+		"@lucidcms/core": "^0.12.0-alpha.1"
 	},
 	"dependencies": {},
 	"volta": {

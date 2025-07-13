@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/admin",
-	"version": "0.12.0-alpha.0",
+	"version": "0.12.0-alpha.1",
 	"description": "The admin SolidJS SPA for Lucid CMS.",
 	"private": false,
 	"type": "module",

@@ -1,5 +1,11 @@
 # @lucidcms/plugin-s3
 
+## 2.0.1
+
+### Patch Changes
+
+- Bumped core peer dependency version to `0.12.0-alpha.1`.
+
 ## 2.0.0
 
 ### Major Changes

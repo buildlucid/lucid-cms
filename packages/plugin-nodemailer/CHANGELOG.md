@@ -1,5 +1,12 @@
 # @lucidcms/plugin-nodemailer
 
+## 1.1.1
+
+### Patch Changes
+
+- Bumped core peer dependency version to `0.12.0-alpha.1`.
+
+
 ## 1.1.0
 
 ### Minor Changes

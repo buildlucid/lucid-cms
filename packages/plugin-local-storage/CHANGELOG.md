@@ -1,5 +1,11 @@
 # @lucidcms/plugin-local-storage
 
+## 1.2.1
+
+### Patch Changes
+
+- Bumped core peer dependency version to `0.12.0-alpha.1`.
+
 ## 1.2.0
 
 ### Minor Changes
