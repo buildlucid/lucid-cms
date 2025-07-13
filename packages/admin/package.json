@@ -28,7 +28,15 @@
 		"url": "git+https://github.com/ProtoDigitalUK/lucid_cms.git",
 		"directory": "packages/admin"
 	},
-	"keywords": ["CMS", "Headless", "SolidJS", "Typescript"],
+	"keywords": [
+		"CMS",
+		"Headless",
+		"SolidJS",
+		"Typescript",
+		"Lucid CMS",
+		"Lucid",
+		"Proto Digital"
+	],
 	"license": "BSL-1.0",
 	"devDependencies": {
 		"@types/classnames": "^2.3.4",
