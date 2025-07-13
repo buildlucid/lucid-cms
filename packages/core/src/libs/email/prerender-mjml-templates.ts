@@ -6,13 +6,7 @@ import constants from "../../constants/constants.js";
 import { getDirName } from "../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type { Config } from "../../types.js";
-
-export type RenderedTemplates = {
-	[templateName: string]: {
-		html: string;
-		lastModified: string;
-	};
-};
+import type { RenderedTemplates } from "./types.js";
 
 const currentDir = getDirName(import.meta.url);
 

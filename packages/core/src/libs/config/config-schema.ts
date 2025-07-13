@@ -61,14 +61,17 @@ const ConfigSchema = z.object({
 		.optional(),
 	email: z
 		.object({
-			identifier: z.string(),
-			from: z.object({
-				email: z.string(),
-				name: z.string(),
-			}),
-			strategy: z.unknown(),
+			identifier: z.string().optional(),
+			from: z
+				.object({
+					email: z.string(),
+					name: z.string(),
+				})
+				.optional(),
+			strategy: z.unknown().optional(),
 		})
 		.optional(),
+	preRenderedEmailTemplates: z.record(z.string(), z.string()).optional(),
 	media: z.object({
 		storageLimit: z.number(),
 		maxFileSize: z.number(),

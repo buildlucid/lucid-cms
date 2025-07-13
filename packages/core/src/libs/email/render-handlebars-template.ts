@@ -1,10 +1,10 @@
 import T from "../../translations/index.js";
-import Handlebars from "handlebars";
 import constants from "../../constants/constants.js";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
+import replaceTemplateVariables from "./replace-template-vars.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { RenderedTemplates } from "./prerender-mjml-templates.js";
+import type { RenderedTemplates } from "./types.js";
 
 /**
  * Dynamically renders a handlebars template with the given data.
@@ -18,6 +18,18 @@ const renderHandlebarsTemplate: ServiceFn<
 	],
 	string
 > = async (context, data) => {
+	//* use pre-rendered templates if available
+	if (context.config.preRenderedEmailTemplates) {
+		const preRenderedTemplate =
+			context.config.preRenderedEmailTemplates[data.template];
+		if (preRenderedTemplate) {
+			return {
+				error: undefined,
+				data: replaceTemplateVariables(preRenderedTemplate, data.data),
+			};
+		}
+	}
+
 	try {
 		const templatesPath = path.resolve(
 			process.cwd(),
@@ -44,12 +56,9 @@ const renderHandlebarsTemplate: ServiceFn<
 			};
 		}
 
-		const htmlTemplate = Handlebars.compile(templateData.html);
-		const finalHtml = htmlTemplate(data.data);
-
 		return {
 			error: undefined,
-			data: finalHtml,
+			data: replaceTemplateVariables(templateData.html, data.data),
 		};
 	} catch (error) {
 		return {

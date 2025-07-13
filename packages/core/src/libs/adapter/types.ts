@@ -23,3 +23,8 @@ export type LucidAdapter = z.infer<typeof LucidAdapterSchema>;
 export type LucidAdapterDefineConfig = (
 	env?: Record<string, unknown>,
 ) => LucidConfig;
+
+export type LucidExtendAdapterDefineConfig<T extends unknown[] = []> = (
+	env?: Record<string, unknown>,
+	...args: T
+) => LucidConfig;

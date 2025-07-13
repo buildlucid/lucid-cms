@@ -42,6 +42,8 @@ const buildCommand = async (options?: {
 			return;
 		}
 
+		await Promise.all([prerenderMjmlTemplates(configRes.config)]);
+
 		const [viteBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config, undefined, options?.silent),
 			configRes.adapter.cli.build(
@@ -58,10 +60,7 @@ const buildCommand = async (options?: {
 			process.exit(1);
 		}
 
-		await Promise.all([
-			prerenderMjmlTemplates(configRes.config),
-			copyPublicAssets(configRes.config),
-		]);
+		await Promise.all([copyPublicAssets(configRes.config)]);
 
 		logger.buildComplete(overallStartTime);
 

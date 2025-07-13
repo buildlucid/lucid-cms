@@ -201,6 +201,8 @@ export interface LucidConfig {
 		/** The email strategy services to use. These determine how emails are sent. */
 		strategy: EmailStrategy;
 	};
+	/** The pre-rendered MJML templates to use. These are used to render the email templates via handlebars. */
+	preRenderedEmailTemplates?: Record<string, string>;
 	/** Media settings. */
 	media?: {
 		/** The storage limit in bytes. */
