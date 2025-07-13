@@ -53,9 +53,10 @@ const CollectionsDocumentsEditRoute: Component<
 		version: props.version,
 		createDocumentMutation: mutations.createDocumentMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
+		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 	});
 
-	useDocumentAutoSave({
+	const autoSave = useDocumentAutoSave({
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		document: docState.document,
 		collection: docState.collection,
@@ -64,6 +65,8 @@ const CollectionsDocumentsEditRoute: Component<
 
 	// ------------------------------------------
 	// Setup document state
+
+	// TODO: attempt to merge brick state in when the document ID and collection key are the same. Hopefully cut down on re-renders from nuking the brick store
 	const setDocumentState = () => {
 		brickStore.get.reset();
 		brickStore.set(
@@ -122,6 +125,7 @@ const CollectionsDocumentsEditRoute: Component<
 						collection: docState.collection,
 						document: docState.document,
 						ui: uiState,
+						autoSave: autoSave,
 					}}
 					actions={{
 						upsertDocumentAction: mutations.upsertDocumentAction,

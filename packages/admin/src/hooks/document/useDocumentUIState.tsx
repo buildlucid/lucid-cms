@@ -25,10 +25,12 @@ export function useDocumentUIState(props: {
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
 	>;
+	updateSingleVersionMutation?: ReturnType<
+		typeof api.documents.useUpdateSingleVersion
+	>;
 
 	selectedRevision?: Accessor<number | undefined>;
 	restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
-	mutations?: UseDocumentMutations;
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
@@ -67,9 +69,7 @@ export function useDocumentUIState(props: {
 	 * Checks if auto save is currently running
 	 */
 	const isAutoSaving = createMemo(() => {
-		return (
-			props.mutations?.updateSingleVersionMutation.action.isPending || false
-		);
+		return props.updateSingleVersionMutation?.action.isPending || false;
 	});
 
 	/**
@@ -227,6 +227,12 @@ export function useDocumentUIState(props: {
 	 */
 	const hasAutoSavePermission = createMemo(() => {
 		if (props.mode === "create") return false;
+		if (props.mode === "revisions") return false;
+		if (
+			props.version === "published" &&
+			props.collection()?.config.useDrafts === true
+		)
+			return false;
 
 		return (
 			userStore.get.hasPermission(["update_content"]).all &&

@@ -4,13 +4,22 @@ import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Button from "@/components/Partials/Button";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import DateText from "@/components/Partials/DateText";
-import { FaSolidLanguage, FaSolidTrash } from "solid-icons/fa";
+import {
+	FaSolidLanguage,
+	FaSolidTrash,
+	FaSolidFloppyDisk,
+	FaSolidClock,
+	FaSolidCalendarPlus,
+	FaSolidCircle,
+} from "solid-icons/fa";
+import Spinner from "@/components/Partials/Spinner";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { CollectionResponse, DocumentResponse } from "@types";
 import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
 import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
-import Spinner from "@/components/Partials/Spinner";
+import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
+import classNames from "classnames";
 
 export const ActionBar: Component<{
 	mode: "create" | "edit" | "revisions";
@@ -20,6 +29,7 @@ export const ActionBar: Component<{
 		document: Accessor<DocumentResponse | undefined>;
 		selectedRevision?: UseRevisionsState["documentId"];
 		ui: UseDocumentUIState;
+		autoSave?: UseDocumentAutoSave;
 	};
 	actions: {
 		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
@@ -37,37 +47,61 @@ export const ActionBar: Component<{
 	// Render
 	return (
 		<div class="sticky top-0 z-30 w-full px-5 py-4 gap-x-5 gap-y-2.5 bg-container-3 border border-border rounded-b-xl flex flex-col flex-wrap">
-			<div class="flex items-center gap-2.5 w-full text-sm overflow-x-auto">
-				<Show when={props.version}>
-					<div class="">
-						<span class="font-medium mr-1">{T()("status")}:</span>
-						<span>{props.version}</span>
-					</div>
-				</Show>
-				<Show when={props.state.ui.useAutoSave?.()}>
-					<div class="flex items-center gap-2">
-						<span class="font-medium mr-1">{T()("auto_save")}:</span>
-						<span class="lowercase">
-							{props.state.ui.hasAutoSavePermission?.()
-								? T()("enabled")
-								: T()("disabled")}
-						</span>
-						<Show when={props.state.ui.isAutoSaving?.()}>
-							<Spinner size="sm" />
-						</Show>
-					</div>
-				</Show>
+			{/* Status Information Row */}
+			<div class="flex items-center gap-3 w-full text-sm overflow-x-auto">
+				<div class="flex items-center gap-1">
+					<Show when={props.mode === "edit" || props.mode === "revisions"}>
+						<div class="flex items-center gap-1.5 px-2.5 py-1 bg-container-1 rounded-md border border-border/50">
+							<FaSolidCircle
+								size={12}
+								class={classNames({
+									"text-green-600": props.version === "published",
+									"text-amber-600": props.version === "draft",
+									"text-yellow-400": props.mode === "revisions",
+								})}
+							/>
+							<span class="font-medium text-title lowercase">
+								{props.version ?? T()("revision")}
+							</span>
+						</div>
+					</Show>
+					<Show when={props.version && props.mode === "create"}>
+						<div class="flex items-center gap-1.5 px-2.5 py-1 bg-container-1 rounded-md border border-border/50">
+							<FaSolidCircle size={12} class={"text-red-600"} />
+							<span class="font-medium text-title">{T()("unsaved")}</span>
+						</div>
+					</Show>
+					<Show when={props.state.ui.useAutoSave?.()}>
+						<div class="flex relative items-center gap-1.5 px-2.5 py-1 bg-container-1 rounded-md border border-border/50">
+							<FaSolidFloppyDisk size={12} class="text-body" />
+							<span class="text-body">
+								{props.state.ui.hasAutoSavePermission?.()
+									? T()("enabled")
+									: T()("disabled")}
+							</span>
+							<Show when={props.state.ui.isAutoSaving?.()}>
+								<div class="absolute inset-0 flex items-center justify-center bg-container-1 rounded-md">
+									<Spinner size="sm" />
+								</div>
+							</Show>
+						</div>
+					</Show>
+				</div>
 				<Show when={props.mode !== "create"}>
-					<div class="">
-						<span class="font-medium mr-1">{T()("created")}:</span>
+					<div class="flex items-center gap-1.5 text-body">
+						<FaSolidCalendarPlus size={12} />
+						<span class="text-sm">{T()("created")}:</span>
 						<DateText date={props.state.document()?.createdAt} />
 					</div>
-					<div class="">
-						<span class="font-medium mr-1">{T()("modified")}:</span>
+					<div class="flex items-center gap-1.5 text-body">
+						<FaSolidClock size={12} />
+						<span class="text-sm">{T()("modified")}:</span>
 						<DateText date={props.state.document()?.updatedAt} />
 					</div>
 				</Show>
 			</div>
+
+			{/* Actions Row */}
 			<div class="flex items-center gap-2.5 w-full">
 				<div class="flex items-center gap-2.5 w-full justify-between">
 					{/* Locale Select */}
@@ -101,7 +135,10 @@ export const ActionBar: Component<{
 							type="button"
 							theme="secondary"
 							size="x-small"
-							onClick={props.actions?.upsertDocumentAction}
+							onClick={() => {
+								props.state.autoSave?.debouncedAutoSave.clear();
+								props.actions?.upsertDocumentAction?.();
+							}}
 							disabled={props.state.ui.canSaveDocument?.()}
 							permission={props.state.ui.hasSavePermission?.()}
 						>
@@ -114,9 +151,10 @@ export const ActionBar: Component<{
 							type="button"
 							theme="secondary"
 							size="x-small"
-							onClick={() =>
-								props.actions?.publishDocumentAction?.(props.state.document())
-							}
+							onClick={() => {
+								props.state.autoSave?.debouncedAutoSave.clear();
+								props.actions?.publishDocumentAction?.(props.state.document());
+							}}
 							disabled={!props.state.ui.canPublishDocument?.()}
 							permission={props.state.ui.hasPublishPermission?.()}
 						>

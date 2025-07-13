@@ -18,6 +18,7 @@
 	"delivered": "Delivered",
 	"translations": "Translations",
 	"enabled": "Enabled",
+	"unsaved": "Unsaved",
 	"confirm_delete": "Confirm Delete",
 	"standard": "Standard",
 	"restore_revision": "Restore Revision",
