@@ -12,7 +12,6 @@ import type {
 	FieldError,
 } from "@types";
 import type { UseRevisionMutations } from "./useRevisionMutations";
-import type { UseDocumentMutations } from "./useDocumentMutations";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
@@ -61,7 +60,8 @@ export function useDocumentUIState(props: {
 			props.createSingleVersionMutation?.action.isPending ||
 			props.createDocumentMutation?.action.isPending ||
 			props.documentQuery.isRefetching ||
-			props.documentQuery.isLoading
+			props.documentQuery.isLoading ||
+			props.updateSingleVersionMutation?.action.isPending
 		);
 	});
 
@@ -101,9 +101,19 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
+	 * Determines if the auto save is enabled
+	 */
+	const useAutoSave = createMemo(() => {
+		return props.collection()?.config.useAutoSave;
+	});
+
+	/**
 	 * Determines if you can save the document
+	 * - dont disabled the save button when auto-save is enabled. This allows users to create revisions.
 	 */
 	const canSaveDocument = createMemo(() => {
+		if (useAutoSave()) return false;
+
 		return !brickStore.get.documentMutated && !isSaving();
 	});
 
@@ -171,13 +181,6 @@ export function useDocumentUIState(props: {
 	const showRevisionNavigation = createMemo(() => {
 		if (props.mode === "create") return false;
 		return props.collection()?.config.useRevisions ?? false;
-	});
-
-	/**
-	 * Determines if the auto save is enabled
-	 */
-	const useAutoSave = createMemo(() => {
-		return props.collection()?.config.useAutoSave;
 	});
 
 	/**

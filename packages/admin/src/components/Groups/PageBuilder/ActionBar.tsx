@@ -47,7 +47,6 @@ export const ActionBar: Component<{
 	// Render
 	return (
 		<div class="sticky top-0 z-30 w-full px-5 py-4 gap-x-5 gap-y-2.5 bg-container-3 border border-border rounded-b-xl flex flex-col flex-wrap">
-			{/* Status Information Row */}
 			<div class="flex items-center gap-3 w-full text-sm overflow-x-auto">
 				<div class="flex items-center gap-1">
 					<Show when={props.mode === "edit" || props.mode === "revisions"}>
