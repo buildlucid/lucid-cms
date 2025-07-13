@@ -58,10 +58,8 @@ export function useDocumentUIState(props: {
 	const isSaving = createMemo(() => {
 		return (
 			props.createSingleVersionMutation?.action.isPending ||
-			props.createDocumentMutation?.action.isPending ||
-			props.documentQuery.isRefetching ||
-			props.documentQuery.isLoading ||
-			props.updateSingleVersionMutation?.action.isPending
+			props.createDocumentMutation?.action.isPending
+			// props.updateSingleVersionMutation?.action.isPending
 		);
 	});
 

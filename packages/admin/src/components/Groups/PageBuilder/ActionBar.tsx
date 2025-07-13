@@ -99,8 +99,6 @@ export const ActionBar: Component<{
 					</div>
 				</Show>
 			</div>
-
-			{/* Actions Row */}
 			<div class="flex items-center gap-2.5 w-full">
 				<div class="flex items-center gap-2.5 w-full justify-between">
 					{/* Locale Select */}
@@ -188,6 +186,12 @@ export const ActionBar: Component<{
 					</Show>
 				</div>
 			</div>
+			<Show when={props.state.ui.isSaving()}>
+				<div class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center rounded-b-xl gap-2.5">
+					<Spinner size="sm" />
+					<span class="text-body">{T()("saving")}</span>
+				</div>
+			</Show>
 		</div>
 	);
 };

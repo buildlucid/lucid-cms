@@ -186,10 +186,6 @@ const CollectionsDocumentsEditRoute: Component<
 						uiState: uiState,
 					}}
 				/>
-
-				<Show when={uiState.isSaving()}>
-					<div class="fixed inset-0 bg-black/60 animate-pulse z-50" />
-				</Show>
 			</Match>
 		</Switch>
 	);
