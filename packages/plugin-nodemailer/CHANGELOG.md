@@ -1,13 +1,13 @@
 # @lucidcms/plugin-nodemailer
 
-## 1.0.9
+## 1.1.0
 
 ### Minor Changes
 
 - Update to the error messaging.
 - Updated to set new identifier key and return the sendMail response.
 - Updated to Nodemailer v7.
-- Bumped core peer dependency version.
+- Bumped core peer dependency version to `0.12.0-alpha.0`.
 
 ## 1.0.8
 

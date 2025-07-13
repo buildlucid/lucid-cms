@@ -1,4 +1,4 @@
-# @lucidcms/plugin-nodemailer
+# @lucidcms/plugin-resend
 
 ## 1.0.0
 

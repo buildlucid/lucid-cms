@@ -1,5 +1,45 @@
 # @lucidcms/core
 
+## v0.12.0-alpha.0
+
+### Features:
+
+- Migrated from Fastify to Hono to facilitate multi-runtime support. ()
+- A new NodeJS adapter package has been created and deployed to NPM. This allows Lucid to be deployed to any NodeJS environment. ()
+- A new Cloudflare adapter package has been created and deployed to NPM. This allows Lucid to be deployed to Cloudflare workers. ()
+- Core now ships a CLI for running the dev server, building for deployment, migrating and running seeds. ()
+- Implemented a new auto save feature for collections. ([5448b30](https://github.com/ProtoDigitalUK/lucid_cms/commit/5448b30dae8d1ba5878ef856d6bb3ec0b0e9d287))
+- A new initial admin user flow has been added so you can set the admin user up how you like instead of being prompted after logging in. ([189ab48](https://github.com/ProtoDigitalUK/lucid_cms/commit/189ab4898f2d6581dc7504d7cb0298390c06a09c))
+- A new first-party Resend plugin has been published, along with some new email table columns for storing metadata on the strategy and the any response data. ([54bb98f](https://github.com/ProtoDigitalUK/lucid_cms/commit/54bb98f3e2cd4937d5e06bc9045d323dfe79a2ac))
+- New client only endpoint for getting the media src which supports converting and resizing images. ([045c6d0](https://github.com/ProtoDigitalUK/lucid_cms/commit/045c6d0e8e199a81c6b4d19a64b3100a0f2edb02))
+- Implemented image presets in the media config. This allows you to define custom image sizes and formats. You can then pass the key to the CDN endpoint to process an image based on that preset. ([690fbfc](https://github.com/ProtoDigitalUK/lucid_cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
+- The media config now supports a new urlStrategy callback so if you don't want to stream media via our CDN route you can set a strategy that used to generate media URLs within the CMS. ([185b118](https://github.com/ProtoDigitalUK/lucid_cms/commit/185b118f36937ab7fbd3c15ea40f19ebe7264300))
+- Removed the fast-average-colour-node and blurhash dependencies from core. Instead image metadata is worked out and supplied via the SPA. ([a1fcec9](https://github.com/ProtoDigitalUK/lucid_cms/commit/a1fcec9))
+- Implemented a new media config option for supplying your own image processor along with making the Sharp dependency optional. This is in preparation for supporting other runtimes where Sharp may not be supported. In this case you can pass an exported passthroughImageProcessor fn or supply your own custom one. ([04b7f20](https://github.com/ProtoDigitalUK/lucid_cms/commit/04b7f20))
+- Email MJML templates are now prerendered on dev/build CLI commands meaning we don't have to bundle MJML. ([04b42b5](https://github.com/ProtoDigitalUK/lucid_cms/commit/04b42b50ca7e4acdda884c8fd7c4801e137592e6))
+- Collections columns are no longer removed from the DB via the collection migration. ()
+- The page builder and revisions pages now include an alert when a migration is needed, fields also display an icon indicating that they haven't been migrated yet. ([febbdf5](https://github.com/ProtoDigitalUK/lucid_cms/commit/febbdf5258a1e79c27102627e463683757a6a74d))
+- Added config options to configure CORS origins and headers. ([9ecec69](https://github.com/ProtoDigitalUK/lucid_cms/commit/9ecec69bb1657db61a6d7ef27ec2adb5b87e93d8))
+- Selected brick tabs are now persisted in local storage. ([a21d947](https://github.com/ProtoDigitalUK/lucid_cms/commit/a21d9479caa0435f994046ee674d3805fe05c462))
+
+### Breaking changes:
+
+- The CDN endpoint no longer supports width, height or quality params for image resizing/processing. The format query param is now locked behind a disabled by default onDemandFormats media option. ([690fbfc](https://github.com/ProtoDigitalUK/lucid_cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
+- Storage and processed media config options have been renamed to be more descriptive. storage is storageLimit, maxSize is maxFileSize, process.limit is processedImageLimit and process.store is storeProcessedImages. ([690fbfc](https://github.com/ProtoDigitalUK/lucid_cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
+- Fallback image config no longer accepts a boolean to denote it should stream the local 404 image. Instead we just support remote URLs now or the standard 404 response. ([0893f27](https://github.com/ProtoDigitalUK/lucid_cms/commit/0893f27d79c8535bde5397edc4aa7bb53c4762a5))
+- The argon2 package has been replaced with @‌noble/hashes scrypt due to not being supported in some serverless environments. ([8191b1b](https://github.com/ProtoDigitalUK/lucid_cms/commit/8191b1be7735cca97fed37b91290fec4483af720))
+- Dropped the need for the lucid-client-key for authenticating with the client integrations. This is now encoded in the API key you receive on creating/regenerating a client integration. ([0528f28](https://github.com/ProtoDigitalUK/lucid_cms/commit/0528f28e8cf79a44b08cee6edbef4b2b39c199c7))
+
+### Bug Fixes:
+
+- Video streaming is now correctly setup with range headers so you can scrub the timeline on video playback correctly. ([dfe1b64](https://github.com/ProtoDigitalUK/lucid_cms/commit/dfe1b64e49e647639a8582d1c03e353264e3c6bb))
+- @lucidcms/plugin-local-storage now correctly infers the mimetype based on the file, instead of doing a lookup based on the extension. This means video/mp4 is now correctly inferred instead of it being returned as application/mp4 which subsequently sets the wrong media type. ([dfe1b64](https://github.com/ProtoDigitalUK/lucid_cms/commit/dfe1b64e49e647639a8582d1c03e353264e3c6bb))
+- Fixed bug where onError callback wasn't being fired when uploading a piece of media that exceeds the allowed file size. This meant it wasn't being removed from storage. ([d467abc](https://github.com/ProtoDigitalUK/lucid_cms/commit/d467abcf6d2f24b5a8992c96a7d7fc69a6b15466))
+- Fixed issue with nested repeater priority not being dropped. This meant for the PostreSQL adapter collection migrations partially failed. ([3058bf9](https://github.com/ProtoDigitalUK/lucid_cms/commit/3058bf9fbd252e27dad940f4d799e08f0a2e7320))
+- Fixed bug where on document create the redirect didn't take into account the version type. Creating a draft would take you to a published version that didn't exist. ([bab1523](https://github.com/ProtoDigitalUK/lucid_cms/commit/bab152305c691358e563c6b1b4b33906671754bb))
+- Fixed bug with UI not refreshing correctly when swapping between collections when on both are on create mode. ([a12f4db](https://github.com/ProtoDigitalUK/lucid_cms/commit/a12f4dbfcde959a0dc64e058cd5862a228f30577))
+- Fixed bug where the created and updated by user details where expected to never be null. When the user who created a document was deleted, any subsequent query to that document would fail validation. ([ee7e63c](https://github.com/ProtoDigitalUK/lucid_cms/commit/ee7e63c4df55e52101a611dedbb99666500dee28))
+
 ## v0.11.0-alpha.0
 
 ### Features:

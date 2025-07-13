@@ -4,6 +4,7 @@
 
 ### Major Changes
 
+- Bumped core peer dependency version to `0.12.0-alpha.0`.
 - Migrated off `@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner` to `aws4fetch` allow us to support Cloudflare Workers.
 
 ## 1.2.0

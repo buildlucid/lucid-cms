@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/core",
-	"version": "0.11.0-alpha.0",
+	"version": "0.12.0-alpha.0",
 	"description": "The core of the Lucid CMS. It's responsible for spinning up the API and serving the CMS.",
 	"type": "module",
 	"types": "./dist/index.d.ts",
@@ -92,7 +92,7 @@
 		"zod": "^3.25.67"
 	},
 	"optionalDependencies": {
-		"@lucidcms/admin": "0.11.0-alpha.0",
+		"@lucidcms/admin": "0.12.0-alpha.0",
 		"@tailwindcss/vite": "^4.1.4",
 		"chokidar": "^4.0.3",
 		"commander": "^14.0.0",

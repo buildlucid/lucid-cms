@@ -4,6 +4,7 @@
 
 ## Patch Changes
 
+- Bumped core peer dependency version to `0.12.0-alpha.0`.
 - Fixed error response format.
 
 ## 0.3.1

@@ -6,6 +6,7 @@
 
 - Mimetypes now correctly infered from the file instead of relying on the extension to work it out.
 - Range support on streams. 
+- Bumped core peer dependency version to `0.12.0-alpha.0`.
 
 ## 1.1.3
 

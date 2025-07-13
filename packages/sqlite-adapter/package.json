@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/sqlite-adapter",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"private": false,
 	"description": "The official SQLite adapter for Lucid CMS",
 	"type": "module",
@@ -48,7 +48,7 @@
 		"kysely": "0.27.4"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.11.0-alpha.0"
+		"@lucidcms/core": "^0.12.0-alpha.0"
 	},
 	"volta": {
 		"node": "22.15.0"
