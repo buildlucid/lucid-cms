@@ -130,10 +130,13 @@ const cloudflareAdapter = (options?: {
 import config from "./${importPath}";
 import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
+import emailTemplates from './email-templates.json' with { type: 'json' };
 
 export default {
     async fetch(request, env, ctx) {
-        const resolved = await processConfig(config(env));
+        const resolved = await processConfig(config(env, {
+            emailTemplates: emailTemplates,
+        }));
 
         const app = await lucid.createApp({
             config: resolved,
