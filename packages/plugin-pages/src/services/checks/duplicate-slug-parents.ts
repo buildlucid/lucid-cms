@@ -125,7 +125,7 @@ const checkDuplicateSlugParents: ServiceFn<
 					type: "basic",
 					status: 400,
 					message: T("duplicate_slug_field_found_message"),
-					errorResponse: {
+					errors: {
 						body: {
 							fields: fieldErrors,
 						},

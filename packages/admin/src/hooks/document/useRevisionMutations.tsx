@@ -2,19 +2,15 @@ import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import { useNavigate } from "@solidjs/router";
 import { getDocumentRoute } from "@/utils/route-helpers";
+import type { CollectionResponse } from "@types";
+import type { Accessor } from "solid-js";
 
-export function useRevisionMutations({
-	collectionKey,
-	documentId,
-	collectionSingularName,
-	versionId,
-	collection,
-}: {
+export function useRevisionMutations(props: {
 	collectionKey: () => string;
 	documentId: () => number | undefined;
 	collectionSingularName: () => string;
 	versionId: () => number | undefined;
-	collection: ReturnType<typeof api.collections.useGetSingle>;
+	collection: Accessor<CollectionResponse | undefined>;
 }) {
 	const navigate = useNavigate();
 
@@ -25,9 +21,9 @@ export function useRevisionMutations({
 
 			navigate(
 				getDocumentRoute("edit", {
-					collectionKey: collectionKey(),
-					useDrafts: collection.data?.data.config.useDrafts,
-					documentId: documentId(),
+					collectionKey: props.collectionKey(),
+					useDrafts: props.collection()?.config.useDrafts,
+					documentId: props.documentId(),
 				}),
 			);
 		},
@@ -35,19 +31,19 @@ export function useRevisionMutations({
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("documentMutated", false);
 		},
-		getCollectionName: collectionSingularName,
+		getCollectionName: props.collectionSingularName,
 	});
 
 	const restoreRevisionAction = () => {
-		const vId = versionId();
+		const vId = props.versionId();
 		if (vId === undefined) {
 			console.error("No version ID found.");
 			return;
 		}
 
 		restoreRevision.action.mutate({
-			collectionKey: collectionKey(),
-			id: documentId() as number,
+			collectionKey: props.collectionKey(),
+			id: props.documentId() as number,
 			versionId: vId,
 		});
 	};

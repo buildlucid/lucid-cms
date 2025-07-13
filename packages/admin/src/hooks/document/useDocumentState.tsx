@@ -27,7 +27,7 @@ export function useDocumentState(props: {
 
 	// ------------------------------------------
 	// Queries
-	const collection = api.collections.useGetSingle({
+	const collectionQuery = api.collections.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -36,7 +36,7 @@ export function useDocumentState(props: {
 		enabled: () => !!collectionKey(),
 		refetchOnWindowFocus: false,
 	});
-	const doc = api.documents.useGetSingle({
+	const documentQuery = api.documents.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -52,24 +52,26 @@ export function useDocumentState(props: {
 	});
 
 	// ------------------------------------------
-	// Collection translations
+	// Memos
+	const collection = createMemo(() => collectionQuery.data?.data);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection.data?.data.details.name,
+			value: collection()?.details.name,
 		}),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: collection.data?.data.details.singularName,
+				value: collection()?.details.singularName,
 			}) || T()("collection"),
 	);
+	const document = createMemo(() => documentQuery.data?.data);
 
 	// ------------------------------------------
 	// Return
 	return {
-		collection,
-		doc,
+		collectionQuery,
+		documentQuery,
 		collectionKey,
 		documentId,
 		collectionName,
@@ -77,6 +79,8 @@ export function useDocumentState(props: {
 		contentLocale,
 		navigate,
 		queryClient,
+		collection,
+		document,
 	};
 }
 

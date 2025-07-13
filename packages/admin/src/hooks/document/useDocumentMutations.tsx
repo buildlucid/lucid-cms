@@ -1,9 +1,3 @@
-import type {
-	BrickError,
-	CollectionResponse,
-	DocumentResponse,
-	FieldError,
-} from "@types";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -11,35 +5,36 @@ import { getBodyError } from "@/utils/error-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
+import type { Accessor } from "solid-js";
+import type {
+	BrickError,
+	CollectionResponse,
+	DocumentResponse,
+	FieldError,
+} from "@types";
 
-export function useDocumentMutations({
-	collection,
-	collectionKey,
-	documentId,
-	collectionSingularName,
-	version,
-	mode,
-}: {
-	collection: CollectionResponse | undefined;
+export function useDocumentMutations(props: {
+	collection: Accessor<CollectionResponse | undefined>;
 	collectionKey: () => string;
 	documentId: () => number | undefined;
 	collectionSingularName: () => string;
 	version: "draft" | "published";
 	mode: "create" | "edit" | "revisions";
+	document?: () => DocumentResponse | undefined;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 
-	const createDocument = api.documents.useCreateSingle({
+	const createDocumentMutation = api.documents.useCreateSingle({
 		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
 			navigate(
 				getDocumentRoute("edit", {
-					collectionKey: collectionKey(),
-					useDrafts: collection?.config.useDrafts,
+					collectionKey: props.collectionKey(),
+					useDrafts: props.collection()?.config.useDrafts,
 					documentId: data.data.id,
-					statusOverride: version,
+					statusOverride: props.version,
 				}),
 			);
 			queryClient.invalidateQueries({
@@ -57,10 +52,10 @@ export function useDocumentMutations({
 				getBodyError<BrickError[]>("bricks", errors) || [],
 			);
 		},
-		getCollectionName: collectionSingularName,
+		getCollectionName: props.collectionSingularName,
 	});
 
-	const createSingleVersion = api.documents.useCreateSingleVersion({
+	const createSingleVersionMutation = api.documents.useCreateSingleVersion({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
@@ -77,10 +72,10 @@ export function useDocumentMutations({
 			);
 			brickStore.set("documentMutated", false);
 		},
-		getCollectionName: collectionSingularName,
+		getCollectionName: props.collectionSingularName,
 	});
 
-	const updateSingleVersion = api.documents.useUpdateSingleVersion({
+	const updateSingleVersionMutation = api.documents.useUpdateSingleVersion({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
@@ -93,10 +88,10 @@ export function useDocumentMutations({
 			);
 			brickStore.set("documentMutated", false);
 		},
-		getCollectionName: collectionSingularName,
+		getCollectionName: props.collectionSingularName,
 	});
 
-	const promoteToPublished = api.documents.usePromoteSingle({
+	const promoteToPublishedMutation = api.documents.usePromoteSingle({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("documentMutated", false);
@@ -108,14 +103,14 @@ export function useDocumentMutations({
 			);
 			brickStore.set("documentMutated", false);
 		},
-		getCollectionName: collectionSingularName,
+		getCollectionName: props.collectionSingularName,
 		getVersionType: () => "published",
 	});
 
 	const autoSaveDocument = async (versionId: number) => {
-		updateSingleVersion.action.mutate({
-			collectionKey: collectionKey(),
-			documentId: documentId() as number,
+		updateSingleVersionMutation.action.mutate({
+			collectionKey: props.collectionKey(),
+			documentId: props.documentId() as number,
 			versionId: versionId,
 			body: {
 				bricks: brickHelpers.getUpsertBricks(),
@@ -125,21 +120,21 @@ export function useDocumentMutations({
 	};
 
 	const upsertDocumentAction = async () => {
-		if (mode === "create") {
-			createDocument.action.mutate({
-				collectionKey: collectionKey(),
+		if (props.mode === "create") {
+			createDocumentMutation.action.mutate({
+				collectionKey: props.collectionKey(),
 				body: {
-					publish: version === "published",
+					publish: props.version === "published",
 					bricks: brickHelpers.getUpsertBricks(),
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
 				},
 			});
 		} else {
-			createSingleVersion.action.mutate({
-				collectionKey: collectionKey(),
-				documentId: documentId() as number,
+			createSingleVersionMutation.action.mutate({
+				collectionKey: props.collectionKey(),
+				documentId: props.documentId() as number,
 				body: {
-					publish: version === "published",
+					publish: props.version === "published",
 					bricks: brickHelpers.getUpsertBricks(),
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
 				},
@@ -155,9 +150,9 @@ export function useDocumentMutations({
 			return;
 		}
 
-		promoteToPublished.action.mutate({
-			collectionKey: collectionKey(),
-			id: documentId() as number,
+		promoteToPublishedMutation.action.mutate({
+			collectionKey: props.collectionKey(),
+			id: props.documentId() as number,
 			versionId: docData.version.draft.id,
 			body: {
 				versionType: "published",
@@ -166,9 +161,10 @@ export function useDocumentMutations({
 	};
 
 	return {
-		createDocument,
-		createSingleVersion,
-		promoteToPublished,
+		createDocumentMutation,
+		createSingleVersionMutation,
+		updateSingleVersionMutation,
+		promoteToPublishedMutation,
 		upsertDocumentAction,
 		publishDocumentAction,
 		autoSaveDocument,

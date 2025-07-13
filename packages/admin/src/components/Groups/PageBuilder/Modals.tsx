@@ -37,18 +37,18 @@ export const Modals: Component<{
 			<LinkSelectModal />
 			<BrickImagePreview />
 			<DeleteDocument
-				id={props.hooks.state.doc?.data?.data.id}
+				id={props.hooks.state.documentQuery?.data?.data.id}
 				state={{
 					open: props.hooks.uiState.getDeleteOpen(),
 					setOpen: props.hooks.uiState.setDeleteOpen,
 				}}
 				collection={
-					props.hooks.state.collection?.data?.data as CollectionResponse
+					props.hooks.state.collectionQuery?.data?.data as CollectionResponse
 				}
 				callbacks={{
 					onSuccess: () => {
 						navigate(
-							`/admin/collections/${props.hooks.state.collection.data?.data.key}`,
+							`/admin/collections/${props.hooks.state.collectionQuery.data?.data.key}`,
 						);
 					},
 				}}

@@ -18,6 +18,7 @@ import {
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
+import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import Alert from "@/components/Blocks/Alert";
 import brickStore from "@/store/brickStore";
 
@@ -34,21 +35,31 @@ const CollectionsDocumentsEditRoute: Component<
 	const docState = useDocumentState(props);
 
 	const mutations = useDocumentMutations({
-		collection: docState.collection.data?.data,
+		collection: docState.collection,
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		collectionSingularName: docState.collectionSingularName,
 		version: props.version,
 		mode: props.mode,
+		document: docState.document,
 	});
 
 	const uiState = useDocumentUIState({
+		collectionQuery: docState.collectionQuery,
 		collection: docState.collection,
-		doc: docState.doc,
+		document: docState.document,
+		documentQuery: docState.documentQuery,
 		mode: props.mode,
 		version: props.version,
-		createDocument: mutations.createDocument,
-		createSingleVersion: mutations.createSingleVersion,
+		createDocumentMutation: mutations.createDocumentMutation,
+		createSingleVersionMutation: mutations.createSingleVersionMutation,
+	});
+
+	useDocumentAutoSave({
+		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
+		document: docState.document,
+		collection: docState.collection,
+		hasAutoSavePermission: uiState.hasAutoSavePermission,
 	});
 
 	// ------------------------------------------
@@ -57,18 +68,15 @@ const CollectionsDocumentsEditRoute: Component<
 		brickStore.get.reset();
 		brickStore.set(
 			"collectionTranslations",
-			docState.collection.data?.data.config.useTranslations || false,
+			docState.collection()?.config.useTranslations || false,
 		);
-		brickStore.get.setBricks(
-			docState.doc.data?.data,
-			docState.collection.data?.data,
-		);
+		brickStore.get.setBricks(docState.document(), docState.collection());
 		brickStore.set("locked", uiState.isBuilderLocked());
 	};
 
 	createEffect(
 		on(
-			() => docState.doc.data,
+			() => docState.document(),
 			() => {
 				setDocumentState();
 			},
@@ -76,7 +84,7 @@ const CollectionsDocumentsEditRoute: Component<
 	);
 	createEffect(
 		on(
-			() => docState.collection.isFetchedAfterMount,
+			() => docState.collectionQuery.isFetchedAfterMount,
 			() => {
 				setDocumentState();
 			},
@@ -98,7 +106,7 @@ const CollectionsDocumentsEditRoute: Component<
 					mode={props.mode}
 					version={props.version}
 					state={{
-						collection: docState.collection.data?.data,
+						collection: docState.collection,
 						collectionKey: docState.collectionKey,
 						collectionName: docState.collectionName,
 						collectionSingularName: docState.collectionSingularName,
@@ -111,8 +119,8 @@ const CollectionsDocumentsEditRoute: Component<
 					mode={props.mode}
 					version={props.version}
 					state={{
-						collection: docState.collection.data?.data,
-						document: docState.doc.data?.data,
+						collection: docState.collection,
+						document: docState.document,
 						ui: uiState,
 					}}
 					actions={{
@@ -140,21 +148,21 @@ const CollectionsDocumentsEditRoute: Component<
 					<div class="w-full flex grow">
 						<div class="w-full flex flex-col">
 							<CollectionPseudoBrick
-								fields={docState.collection.data?.data.fields || []}
+								fields={docState.collection()?.fields || []}
 								collectionMigrationStatus={
-									docState.collection.data?.data.migrationStatus
+									docState.collection()?.migrationStatus
 								}
 							/>
 							<FixedBricks
-								brickConfig={docState.collection.data?.data.fixedBricks || []}
+								brickConfig={docState.collection()?.fixedBricks || []}
 								collectionMigrationStatus={
-									docState.collection.data?.data.migrationStatus
+									docState.collection()?.migrationStatus
 								}
 							/>
 							<BuilderBricks
-								brickConfig={docState.collection.data?.data.builderBricks || []}
+								brickConfig={docState.collection()?.builderBricks || []}
 								collectionMigrationStatus={
-									docState.collection.data?.data.migrationStatus
+									docState.collection()?.migrationStatus
 								}
 							/>
 						</div>

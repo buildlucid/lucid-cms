@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { createMemo, Show, type Component } from "solid-js";
+import { createMemo, Show, type Component, type Accessor } from "solid-js";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Button from "@/components/Partials/Button";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -10,13 +10,14 @@ import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { CollectionResponse, DocumentResponse } from "@types";
 import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
 import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
+import Spinner from "@/components/Partials/Spinner";
 
 export const ActionBar: Component<{
 	mode: "create" | "edit" | "revisions";
 	version?: "draft" | "published";
 	state: {
-		collection: CollectionResponse | undefined;
-		document: DocumentResponse | undefined;
+		collection: Accessor<CollectionResponse | undefined>;
+		document: Accessor<DocumentResponse | undefined>;
 		selectedRevision?: UseRevisionsState["documentId"];
 		ui: UseDocumentUIState;
 	};
@@ -44,30 +45,33 @@ export const ActionBar: Component<{
 					</div>
 				</Show>
 				<Show when={props.state.ui.useAutoSave?.()}>
-					<div class="">
+					<div class="flex items-center gap-2">
 						<span class="font-medium mr-1">{T()("auto_save")}:</span>
 						<span class="lowercase">
 							{props.state.ui.hasAutoSavePermission?.()
 								? T()("enabled")
 								: T()("disabled")}
 						</span>
+						<Show when={props.state.ui.isAutoSaving?.()}>
+							<Spinner size="sm" />
+						</Show>
 					</div>
 				</Show>
 				<Show when={props.mode !== "create"}>
 					<div class="">
 						<span class="font-medium mr-1">{T()("created")}:</span>
-						<DateText date={props.state.document?.createdAt} />
+						<DateText date={props.state.document()?.createdAt} />
 					</div>
 					<div class="">
 						<span class="font-medium mr-1">{T()("modified")}:</span>
-						<DateText date={props.state.document?.updatedAt} />
+						<DateText date={props.state.document()?.updatedAt} />
 					</div>
 				</Show>
 			</div>
 			<div class="flex items-center gap-2.5 w-full">
 				<div class="flex items-center gap-2.5 w-full justify-between">
 					{/* Locale Select */}
-					<Show when={props.state.collection?.config.useTranslations}>
+					<Show when={props.state.collection()?.config.useTranslations}>
 						<div class="w-full">
 							<ContentLocaleSelect
 								hasError={props.state.ui.brickTranslationErrors?.()}
@@ -78,7 +82,7 @@ export const ActionBar: Component<{
 					{/* Default Locale */}
 					<Show
 						when={
-							props.state.collection?.config.useTranslations !== true &&
+							props.state.collection()?.config.useTranslations !== true &&
 							defaultLocale()
 						}
 					>
@@ -111,7 +115,7 @@ export const ActionBar: Component<{
 							theme="secondary"
 							size="x-small"
 							onClick={() =>
-								props.actions?.publishDocumentAction?.(props.state.document)
+								props.actions?.publishDocumentAction?.(props.state.document())
 							}
 							disabled={!props.state.ui.canPublishDocument?.()}
 							permission={props.state.ui.hasPublishPermission?.()}

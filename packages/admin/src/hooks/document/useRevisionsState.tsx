@@ -57,7 +57,7 @@ export function useRevisionsState() {
 	});
 
 	// Collection query
-	const collection = api.collections.useGetSingle({
+	const collectionQuery = api.collections.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -68,7 +68,7 @@ export function useRevisionsState() {
 	});
 
 	// Revision document query
-	const revisionDoc = api.documents.useGetSingleVersion({
+	const revisionDocumentQuery = api.documents.useGetSingleVersion({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -84,7 +84,7 @@ export function useRevisionsState() {
 	});
 
 	// Revisions list query
-	const revisionVersions = api.documents.useGetMultipleRevisions({
+	const revisionVersionsQuery = api.documents.useGetMultipleRevisions({
 		queryParams: {
 			queryString: revisionsSearchParams.getQueryString,
 			location: {
@@ -96,23 +96,25 @@ export function useRevisionsState() {
 		refetchOnWindowFocus: false,
 	});
 
+	const collection = createMemo(() => collectionQuery.data?.data);
+
 	// Fallback document logic
 	const canFetchFallbackDocument = createMemo(() => {
 		if (versionId() !== undefined) return false;
-		if (collection.isFetched === false) return false;
+		if (collectionQuery.isFetched === false) return false;
 
 		return (
 			contentLocale() !== undefined &&
 			documentId() !== undefined &&
-			collection.data?.data.config.useDrafts !== undefined
+			collection()?.config.useDrafts !== undefined
 		);
 	});
 
 	const fallbackVersionType = createMemo(() => {
-		return collection.data?.data.config.useDrafts ? "draft" : "published";
+		return collection()?.config.useDrafts ? "draft" : "published";
 	});
 
-	const fallbackDoc = api.documents.useGetSingle({
+	const fallbackDocumentQuery = api.documents.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
@@ -128,48 +130,57 @@ export function useRevisionsState() {
 	});
 
 	// Derive which document to use
-	const doc = createMemo(() => {
-		return canFetchRevisionDocument() ? revisionDoc : fallbackDoc;
+	const documentQuery = createMemo(() => {
+		return canFetchRevisionDocument()
+			? revisionDocumentQuery
+			: fallbackDocumentQuery;
 	});
+	const document = createMemo(() => documentQuery().data?.data);
+	const revisionDocument = createMemo(() => revisionDocumentQuery.data?.data);
+	const fallbackDocument = createMemo(() => fallbackDocumentQuery.data?.data);
 
 	// Loading and success states
 	const documentIsLoading = createMemo(() => {
 		if (versionIdParam() === "latest") {
-			return collection.isLoading || revisionVersions.isLoading;
+			return collectionQuery.isLoading || revisionVersionsQuery.isLoading;
 		}
-		return collection.isLoading || doc().isLoading;
+		return collectionQuery.isLoading || documentQuery().isLoading;
 	});
 
 	const documentIsSuccess = createMemo(() => {
 		if (versionIdParam() === "latest") {
-			return collection.isSuccess && revisionVersions.isSuccess;
+			return collectionQuery.isSuccess && revisionVersionsQuery.isSuccess;
 		}
-		return collection.isSuccess && doc().isSuccess;
+		return collectionQuery.isSuccess && documentQuery().isSuccess;
 	});
 
 	const revisionsIsLoading = createMemo(() => {
-		return revisionVersions.isLoading;
+		return revisionVersionsQuery.isLoading;
 	});
 
 	const revisionsIsSuccess = createMemo(() => {
-		return revisionVersions.isSuccess;
+		return revisionVersionsQuery.isSuccess;
 	});
 
 	const anyIsError = createMemo(() => {
-		return revisionVersions.isError || collection.isError || doc().isError;
+		return (
+			revisionVersionsQuery.isError ||
+			collectionQuery.isError ||
+			documentQuery().isError
+		);
 	});
 
 	const isPublished = createMemo(() => {
 		return (
-			doc().data?.data.version?.published?.id !== null &&
-			doc().data?.data.version?.published?.id !== undefined
+			document()?.version?.published?.id !== null &&
+			document()?.version?.published?.id !== undefined
 		);
 	});
 
 	// Navigate to latest revision if needed
 	createEffect(() => {
 		if (versionIdParam() === "latest") {
-			const latestVersion = revisionVersions.data?.data[0];
+			const latestVersion = revisionVersionsQuery.data?.data[0];
 			if (latestVersion) {
 				navigate(
 					`/admin/collections/${collectionKey()}/revisions/${documentId()}/${latestVersion.id}`,
@@ -182,24 +193,28 @@ export function useRevisionsState() {
 	// Collection translations
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection.data?.data.details.name,
+			value: collection()?.details.name,
 		}),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: collection.data?.data.details.singularName,
+				value: collection()?.details.singularName,
 			}) || T()("collection"),
 	);
 
 	// ------------------------------------------
 	// Return
 	return {
+		collectionQuery,
+		documentQuery,
+		document,
+		revisionDocument,
+		fallbackDocument,
 		collection,
-		doc,
-		revisionDoc,
-		fallbackDoc,
-		revisionVersions,
+		revisionDocumentQuery,
+		fallbackDocumentQuery,
+		revisionVersionsQuery,
 		collectionKey,
 		documentId,
 		versionId,

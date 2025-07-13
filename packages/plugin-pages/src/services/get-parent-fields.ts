@@ -69,7 +69,7 @@ const getParentFields: ServiceFn<
 					message: T(
 						"parent_page_not_found_or_doesnt_have_a_published_version",
 					),
-					errorResponse: {
+					errors: {
 						body: {
 							fields: [
 								{

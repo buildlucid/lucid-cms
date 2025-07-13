@@ -37,11 +37,12 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 	});
 
 	const uiState = useDocumentUIState({
+		collectionQuery: revisionState.collectionQuery,
+		documentQuery: revisionState.documentQuery(),
+		document: revisionState.document,
 		collection: revisionState.collection,
-		doc: revisionState.doc(),
 		mode: "revisions",
 		version: "draft",
-
 		selectedRevision: revisionState.documentId,
 		restoreRevisionAction: mutations.restoreRevisionAction,
 	});
@@ -52,18 +53,18 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		brickStore.get.reset();
 		brickStore.set(
 			"collectionTranslations",
-			revisionState.collection.data?.data.config.useTranslations || false,
+			revisionState.collection()?.config.useTranslations || false,
 		);
 		brickStore.get.setBricks(
-			revisionState.doc().data?.data,
-			revisionState.collection.data?.data,
+			revisionState.document(),
+			revisionState.collection(),
 		);
 		brickStore.set("locked", true);
 	};
 
 	createEffect(
 		on(
-			() => revisionState.doc().data,
+			() => revisionState.document(),
 			() => {
 				setDocumentState();
 			},
@@ -71,7 +72,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 	);
 	createEffect(
 		on(
-			() => revisionState.collection.isSuccess,
+			() => revisionState.collectionQuery.isSuccess,
 			() => {
 				setDocumentState();
 			},
@@ -92,7 +93,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				<Header
 					mode={"revisions"}
 					state={{
-						collection: revisionState.collection.data?.data,
+						collection: revisionState.collection,
 						collectionKey: revisionState.collectionKey,
 						collectionName: revisionState.collectionName,
 						collectionSingularName: revisionState.collectionSingularName,
@@ -106,8 +107,8 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				<ActionBar
 					mode="revisions"
 					state={{
-						collection: revisionState.collection.data?.data,
-						document: revisionState.doc().data?.data,
+						collection: revisionState.collection,
+						document: revisionState.document,
 						selectedRevision: revisionState.documentId,
 						ui: uiState,
 					}}
@@ -117,7 +118,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				/>
 
 				<div class="mt-15 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden relative">
-					<Show when={!revisionState.revisionDoc.data}>
+					<Show when={!revisionState.revisionDocument()}>
 						<div class="absolute inset-0 flex items-center justify-center bg-black/60 flex-col z-20">
 							<div class="w-full max-w-xl px-15 py-15 text-center flex flex-col items-center">
 								<h2 class="mb-2.5">{T()("no_revisions_found")}</h2>
@@ -125,8 +126,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 								<Link
 									href={getDocumentRoute("edit", {
 										collectionKey: revisionState.collectionKey(),
-										useDrafts:
-											revisionState.collection.data?.data.config.useDrafts,
+										useDrafts: revisionState.collection()?.config.useDrafts,
 										documentId: revisionState.documentId(),
 									})}
 									theme="primary"
@@ -156,32 +156,29 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 						<div class="w-full flex grow h-full">
 							<div class="w-full flex flex-col">
 								<CollectionPseudoBrick
-									fields={revisionState.collection.data?.data.fields || []}
+									fields={revisionState.collection()?.fields || []}
 									collectionMigrationStatus={
-										revisionState.collection.data?.data.migrationStatus
+										revisionState.collection()?.migrationStatus
 									}
 								/>
 								<FixedBricks
-									brickConfig={
-										revisionState.collection.data?.data.fixedBricks || []
-									}
+									brickConfig={revisionState.collection()?.fixedBricks || []}
 									collectionMigrationStatus={
-										revisionState.collection.data?.data.migrationStatus
+										revisionState.collection()?.migrationStatus
 									}
 								/>
 								<BuilderBricks
-									brickConfig={
-										revisionState.collection.data?.data.builderBricks || []
-									}
+									brickConfig={revisionState.collection()?.builderBricks || []}
 									collectionMigrationStatus={
-										revisionState.collection.data?.data.migrationStatus
+										revisionState.collection()?.migrationStatus
 									}
 								/>
 							</div>
 							<RevisionsSidebar
 								state={{
-									revisions: revisionState.revisionVersions.data?.data || [],
-									meta: revisionState.revisionVersions.data?.meta,
+									revisions:
+										revisionState.revisionVersionsQuery.data?.data || [],
+									meta: revisionState.revisionVersionsQuery.data?.meta,
 									versionId: revisionState.versionId,
 									collectionKey: revisionState.collectionKey,
 									documentId: revisionState.documentId,

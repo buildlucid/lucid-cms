@@ -28,6 +28,7 @@ type BrickStoreT = {
 	fieldsErrors: Array<FieldError>;
 	brickErrors: Array<BrickError>;
 	documentMutated: boolean;
+	autoSaveCounter: number;
 	locked: boolean;
 	imagePreview: {
 		open: boolean;
@@ -110,6 +111,7 @@ const [get, set] = createStore<BrickStoreT>({
 	brickErrors: [],
 	locked: false,
 	documentMutated: false,
+	autoSaveCounter: 0,
 	collectionTranslations: false,
 	imagePreview: {
 		open: false,
@@ -120,6 +122,7 @@ const [get, set] = createStore<BrickStoreT>({
 		set("fieldsErrors", []);
 		set("brickErrors", []);
 		set("documentMutated", false);
+		set("autoSaveCounter", 0);
 		set("collectionTranslations", false);
 	},
 	// Bricks
@@ -249,6 +252,7 @@ const [get, set] = createStore<BrickStoreT>({
 			}),
 		);
 		set("documentMutated", true);
+		set("autoSaveCounter", (prev) => prev + 1);
 	},
 	addField(params) {
 		const newField: FieldResponse = {

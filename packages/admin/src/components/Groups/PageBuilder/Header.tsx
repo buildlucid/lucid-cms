@@ -12,7 +12,7 @@ export const Header: Component<{
 	version?: "draft" | "published";
 
 	state: {
-		collection: CollectionResponse | undefined;
+		collection: Accessor<CollectionResponse | undefined>;
 		collectionKey: Accessor<string>;
 		collectionName: Accessor<string>;
 		collectionSingularName: Accessor<string>;
@@ -30,18 +30,18 @@ export const Header: Component<{
 					{
 						link: `/admin/collections/${props.state.collectionKey()}`,
 						label: props.state.collectionName() || "",
-						include: props.state.collection?.mode === "multiple",
+						include: props.state.collection()?.mode === "multiple",
 					},
 					{
 						link:
 							props.mode === "create"
 								? getDocumentRoute("create", {
 										collectionKey: props.state.collectionKey(),
-										useDrafts: props.state.collection?.config.useDrafts,
+										useDrafts: props.state.collection()?.config.useDrafts,
 									})
 								: getDocumentRoute("edit", {
 										collectionKey: props.state.collectionKey(),
-										useDrafts: props.state.collection?.config.useDrafts,
+										useDrafts: props.state.collection()?.config.useDrafts,
 										documentId: props.state.documentID(),
 									}),
 						label:
@@ -75,14 +75,14 @@ export const Header: Component<{
 			<nav class="-mb-px bg-container-2 mt-15">
 				<ul class="flex gap-2">
 					{/* Draft edit */}
-					<Show when={props.state.collection?.config.useDrafts}>
+					<Show when={props.state.collection()?.config.useDrafts}>
 						<li class="relative">
 							<A
 								href={
 									props.mode !== "create"
 										? getDocumentRoute("edit", {
 												collectionKey: props.state.collectionKey(),
-												useDrafts: props.state.collection?.config.useDrafts,
+												useDrafts: props.state.collection()?.config.useDrafts,
 												documentId: props.state.documentID(),
 											})
 										: "#"

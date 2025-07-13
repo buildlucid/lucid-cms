@@ -91,7 +91,7 @@ const checkCircularParents: ServiceFn<
 					type: "basic",
 					status: 400,
 					message: T("circular_parents_error_message"),
-					errorResponse: {
+					errors: {
 						body: {
 							fields: [
 								{

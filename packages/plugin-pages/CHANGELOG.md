@@ -1,5 +1,11 @@
 # @lucidcms/plugin-pages
 
+## 0.3.2
+
+## Patch Changes
+
+- Fixed error response format.
+
 ## 0.3.1
 
 ## Patch Changes
