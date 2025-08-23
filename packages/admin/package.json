@@ -1,75 +1,77 @@
 {
-	"name": "@lucidcms/admin",
-	"version": "0.12.0-alpha.1",
-	"description": "The admin SolidJS SPA for Lucid CMS.",
-	"private": false,
-	"type": "module",
-	"files": ["dist", "assets"],
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		},
-		"./assets/*": "./assets/*",
-		"./package.json": "./package.json"
-	},
-	"scripts": {
-		"build": "tsup",
-		"dev": "vite",
-		"build:vite": "vite build --emptyOutDir",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --apply ./src"
-	},
-	"author": "Proto Digital",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/ProtoDigitalUK/lucid_cms.git",
-		"directory": "packages/admin"
-	},
-	"keywords": [
-		"CMS",
-		"Headless",
-		"SolidJS",
-		"Typescript",
-		"Lucid CMS",
-		"Lucid",
-		"Proto Digital"
-	],
-	"license": "BSL-1.0",
-	"devDependencies": {
-		"@types/classnames": "^2.3.4",
-		"@types/quill": "^2.0.14",
-		"esbuild-plugin-solid": "^0.6.0",
-		"tsup": "^8.4.0",
-		"typescript": "^5.8.3"
-	},
-	"dependencies": {
-		"@kobalte/core": "^0.13.9",
-		"@solid-primitives/scheduled": "^1.5.0",
-		"@solidjs/router": "^0.15.3",
-		"@tailwindcss/vite": "^4.1.4",
-		"@tanstack/solid-query": "^5.74.4",
-		"blurhash": "^2.0.5",
-		"classnames": "^2.5.1",
-		"fast-average-color": "^9.5.0",
-		"fast-deep-equal": "^3.1.3",
-		"i18next": "^25.0.1",
-		"nanoid": "^5.1.5",
-		"quill": "^2.0.3",
-		"solid-devtools": "^0.34.0",
-		"solid-icons": "^1.1.0",
-		"solid-js": "^1.9.5",
-		"solid-toast": "^0.5.0",
-		"tailwindcss": "^4.1.4",
-		"vite": "^6.3.5",
-		"vite-plugin-solid": "^2.11.6"
-	},
-	"volta": {
-		"node": "22.15.0"
-	},
-	"engines": {
-		"node": ">=22.0.0 <23.0.0"
-	}
+    "name": "@lucidcms/admin",
+    "version": "0.12.0-alpha.1",
+    "description": "The admin SolidJS SPA for Lucid CMS.",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist",
+        "assets"
+    ],
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./assets/*": "./assets/*",
+        "./package.json": "./package.json"
+    },
+    "scripts": {
+        "build": "tsup",
+        "dev": "vite",
+        "build:vite": "vite build --emptyOutDir",
+        "format": "biome format ./src",
+        "format:fix": "biome format --write ./src",
+        "lint": "biome lint ./src",
+        "lint:fix": "biome lint --apply ./src"
+    },
+    "author": "Lucid",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/buildlucid/lucid-cms.git",
+        "directory": "packages/admin"
+    },
+    "keywords": [
+        "CMS",
+        "Headless",
+        "SolidJS",
+        "Typescript",
+        "Lucid CMS",
+        "Lucid"
+    ],
+    "license": "BSL-1.0",
+    "devDependencies": {
+        "@types/classnames": "^2.3.4",
+        "@types/quill": "^2.0.14",
+        "esbuild-plugin-solid": "^0.6.0",
+        "tsup": "^8.4.0",
+        "typescript": "^5.8.3"
+    },
+    "dependencies": {
+        "@kobalte/core": "^0.13.9",
+        "@solid-primitives/scheduled": "^1.5.0",
+        "@solidjs/router": "^0.15.3",
+        "@tailwindcss/vite": "^4.1.4",
+        "@tanstack/solid-query": "^5.74.4",
+        "blurhash": "^2.0.5",
+        "classnames": "^2.5.1",
+        "fast-average-color": "^9.5.0",
+        "fast-deep-equal": "^3.1.3",
+        "i18next": "^25.0.1",
+        "nanoid": "^5.1.5",
+        "quill": "^2.0.3",
+        "solid-devtools": "^0.34.0",
+        "solid-icons": "^1.1.0",
+        "solid-js": "^1.9.5",
+        "solid-toast": "^0.5.0",
+        "tailwindcss": "^4.1.4",
+        "vite": "^6.3.5",
+        "vite-plugin-solid": "^2.11.6"
+    },
+    "volta": {
+        "node": "22.15.0"
+    },
+    "engines": {
+        "node": ">=22.0.0 <23.0.0"
+    }
 }

@@ -1,6 +1,6 @@
-![Lucid CMS](https://github.com/ProtoDigitalUK/lucid_cms/blob/master/banner.png?raw=true)
+![Lucid CMS](https://github.com/buildlucid/lucid-cms/blob/master/banner.png?raw=true)
 
-[![Tests](https://github.com/ProtoDigitalUK/lucid_cms/actions/workflows/tests.yml/badge.svg)](https://github.com/ProtoDigitalUK/lucid_cms/actions/workflows/tests.yml)
+[![Tests](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml)
 [![NPM Version](https://img.shields.io/npm/v/@lucidcms/core/latest.svg)](https://www.npmjs.com/package/@lucidcms/core)
 ![NPM Downloads](https://img.shields.io/npm/dw/@lucidcms/core)
 ![NPM License](https://img.shields.io/npm/l/@lucidcms/core)
@@ -37,22 +37,22 @@ A modern, TypeScript-first headless CMS designed for ultimate flexibility. Power
 
 ## ⚙️ Runtime Adapters
 
-- [Node](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/node-adapter)
-- [Cloudflare Workers](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/cloudflare-adapter)
+- [Node](https://github.com/buildlucid/lucid-cms/tree/master/packages/node-adapter)
+- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/cloudflare-adapter)
 
 ## 💾 DB Adapters
 
-- [PostgreSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/postgres-adapter)
-- [LibSQL](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/libsql-adapter)
-- [SQLite](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/sqlite-adapter)
+- [PostgreSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/postgres-adapter)
+- [LibSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/libsql-adapter)
+- [SQLite](https://github.com/buildlucid/lucid-cms/tree/master/packages/sqlite-adapter)
 
 ## 🛠️ First Party Plugins
 
-- **[Pages](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-pages):** Adds nested document support to your collections along with slugs and computed fullSlugs based parent relationships.
-- **[Nodemailer](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-nodemailer):** Extend the email strategy to support Nodemailer by passing down a custom transport.
-- **[Resend](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-resend):** Extend the email strategy to use [Resend](https://resend.com/home).
-- **[S3](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-s3):** Extend the media strategy to support using any S3 compatible storage solution.
-- **[Local Storage](https://github.com/ProtoDigitalUK/lucid_cms/tree/master/packages/plugin-local-storage):** Extends the media strategy to support uploading media to your file system.
+- **[Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages):** Adds nested document support to your collections along with slugs and computed fullSlugs based parent relationships.
+- **[Nodemailer](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-nodemailer):** Extend the email strategy to support Nodemailer by passing down a custom transport.
+- **[Resend](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-resend):** Extend the email strategy to use [Resend](https://resend.com/home).
+- **[S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3):** Extend the media strategy to support using any S3 compatible storage solution.
+- **[Local Storage](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-local-storage):** Extends the media strategy to support uploading media to your file system.
 - **Menus:** Coming soon!
 - **Form Builder:** Coming soon!
 

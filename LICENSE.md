@@ -62,5 +62,5 @@ This licensing structure is designed to:
 - Protect the long-term sustainability of Lucid CMS core development.
 - Allow businesses to adopt the system with a clear path to compliance and openness over time.
 
-For more information or to discuss commercial licensing options for BSL packages, please see the [Lucid CMS GitHub page](https://github.com/ProtoDigitalUK/lucid_cms).
+For more information or to discuss commercial licensing options for BSL packages, please see the [Lucid CMS GitHub page](https://github.com/buildlucid/lucid-cms).
 
