@@ -17,7 +17,7 @@ export type LucidPlugin = (config: Config) => Promise<{
 	config: Config;
 }>;
 
-export type LucidPluginOptions<T> = (
+export type LucidPluginOptions<T = undefined> = (
 	config: Config,
 	pluginOptions: T,
 ) => Promise<{
@@ -148,9 +148,9 @@ export interface LucidConfig {
 	db: DatabaseAdapter;
 	/** The cors configuration. */
 	cors?: {
-		/** The origin of the Lucid instance. Your configured host is already added by default. */
+		/** Allowed origins. Your configured host is already added by default. */
 		origin?: string[];
-		/** The headers to allow. */
+		/** Allowed headers. */
 		allowHeaders?: string[];
 	};
 	/** The host of the Lucid instance. */
@@ -170,7 +170,7 @@ export interface LucidConfig {
 	logger?: {
 		/** The log level to use. */
 		level?: LogLevel;
-		/** Custom log transport stream. If not provided, logs will default to console output. */
+		/** Custom log transport. If not provided, logs will default to console output. */
 		transport?: LogTransport;
 	};
 	/** Disables the swagger documentation site. */
@@ -201,7 +201,7 @@ export interface LucidConfig {
 		/** The email strategy services to use. These determine how emails are sent. */
 		strategy: EmailStrategy;
 	};
-	/** The pre-rendered MJML templates to use. These are used to render the email templates via handlebars. */
+	/** The pre-rendered MJML templates to use. */
 	preRenderedEmailTemplates?: Record<string, string>;
 	/** Media settings. */
 	media?: {
