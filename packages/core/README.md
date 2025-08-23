@@ -8,7 +8,7 @@
 <hr/>
 
 > [!CAUTION]
-> Lucid CMS is still in Alpha and under heavy development and hasnt implemented licensing yet and so cannot be used in a production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalised.
+> Lucid CMS is still in Alpha and under heavy development and hasnt implemented licensing yet and so cannot be used in a production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalized.
 
 <hr/>
 
@@ -19,17 +19,17 @@ A modern, TypeScript-first headless CMS designed for ultimate flexibility. Power
 - 🚀 Deploy Anywhere:
     - Runtime Adapters: Deploy seamlessly to Node.js or Cloudflare Workers
     - Database Adapters: Full support for PostgreSQL, LibSQL, and SQLite
-- 📝 Content Modelling:
+- 📝 Content Modeling:
     - Collection Builder: Create flexible collections for single or multiple documents
     - Brick Builder: Build reusable content blocks that can be mixed and matched across your collections
     - 15+ Custom Fields: Tailor your content with a wide range of field types
 - 🎛️ Content Management:
     - Revisions & Drafts: Complete version history with rollback support
-    - Media Library: Centralised asset management
-    - Localisation: Built-in multilingual content support
+    - Media Library: Centralized asset management
+    - Localization: Built-in multilingual content support
 - 🔧 Built-in Capabilities:
     - Image Processing: On-demand resizing with next-gen formats and custom preset support
-    - Email Integration: Flexible email strategies with customisable templates
+    - Email Integration: Flexible email strategies with customizable templates
     - User Management: Invite users and assign roles with granular permissions
 - 🔌 Extensibility:
     - Plugin Ecosystem: Extend functionality with first-party and third-party plugins

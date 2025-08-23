@@ -2,7 +2,7 @@
 
 > The official SQLite adapter for Lucid CMS
 
-The Lucid CMS SQLite adapter allows you to use SQLite as your database. This is ideal for local development. This registers a [SQLite dialect](https://kysely-org.github.io/kysely-apidoc/classes/SqliteDialect.html) for [Kysely](https://kysely.dev/) under the hood and utilises the [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) library.
+The Lucid CMS SQLite adapter allows you to use SQLite as your database. This is ideal for local development. This registers a [SQLite dialect](https://kysely-org.github.io/kysely-apidoc/classes/SqliteDialect.html) for [Kysely](https://kysely.dev/) under the hood and utilizes the [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) library.
 
 ## Installation
 

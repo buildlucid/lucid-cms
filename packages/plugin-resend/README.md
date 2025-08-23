@@ -36,7 +36,7 @@ export default defineConfig((env) => ({
 
 ## Configuration
 
-This plugin offers the following configuration options to control email sending behaviour.
+This plugin offers the following configuration options to control email sending behavior.
 
 | Property | Type | Description |
 |----------|------|-------------|

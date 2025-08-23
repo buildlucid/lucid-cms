@@ -33,7 +33,7 @@ export default defineConfig((env) => ({
 
 ## Configuration
 
-This plugin offers the following configuration options to control local storage behaviour.
+This plugin offers the following configuration options to control local storage behavior.
 
 | Property | Type | Description |
 |----------|------|-------------|

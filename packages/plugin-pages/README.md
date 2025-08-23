@@ -46,7 +46,7 @@ export default defineConfig((env) => ({
 
 ## Configuration
 
-This plugin offers several configuration options to control its behaviour. Aside from the `collectionKey`, all of these options are optional and have default values.
+This plugin offers several configuration options to control its behavior. Aside from the `collectionKey`, all of these options are optional and have default values.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|

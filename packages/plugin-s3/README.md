@@ -38,7 +38,7 @@ export default defineConfig((env) => ({
 
 ## Configuration
 
-This plugin offers the following configuration options to control S3 storage behaviour.
+This plugin offers the following configuration options to control S3 storage behavior.
 
 | Property | Type | Description |
 |----------|------|-------------|

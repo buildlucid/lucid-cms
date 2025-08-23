@@ -102,7 +102,7 @@ export default defineConfig((env) => ({
 }));
 ```
 
-If you request an image via the CDN endpoint now and try to pass a preset, it will stream the original image instead of trying to optimise it via Sharp.
+If you request an image via the CDN endpoint now and try to pass a preset, it will stream the original image instead of trying to optimize it via Sharp.
 
 ## Image Processing with Cloudflare Images
 
@@ -125,7 +125,7 @@ export default defineConfig((env) => ({
 }));
 ```
 
-To use the original image, you'd use the URL that the media object returns (what the `urlStrategy` creates). To optimise the image via Cloudflare Images on your frontend, you'd use the media `key` to construct the URL:
+To use the original image, you'd use the URL that the media object returns (what the `urlStrategy` creates). To optimize the image via Cloudflare Images on your frontend, you'd use the media `key` to construct the URL:
 
 ```text
 https://media.example.co.uk/cdn-cgi/image/width=800,quality=75,format=auto/${mediaKey}
