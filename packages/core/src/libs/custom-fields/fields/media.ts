@@ -135,7 +135,7 @@ class MediaCustomField extends CustomField<"media"> {
 			if (!type) {
 				return {
 					valid: false,
-					message: T("field_media_doenst_have_type"),
+					message: T("field_media_doesnt_have_type"),
 				};
 			}
 
@@ -155,7 +155,7 @@ class MediaCustomField extends CustomField<"media"> {
 			if (!width) {
 				return {
 					valid: false,
-					message: T("field_media_doenst_have_width"),
+					message: T("field_media_doesnt_have_width"),
 				};
 			}
 
@@ -189,7 +189,7 @@ class MediaCustomField extends CustomField<"media"> {
 			if (!height) {
 				return {
 					valid: false,
-					message: T("field_media_doenst_have_height"),
+					message: T("field_media_doesnt_have_height"),
 				};
 			}
 

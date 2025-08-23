@@ -3,7 +3,7 @@ import clearSingle from "./clear-single.js";
 import clearAll from "./clear-all.js";
 import processImage from "./process-image.js";
 import getSingleCount from "./get-single-count.js";
-import optimiseImage from "./optimise-image.js";
+import optimizeImage from "./optimize-image.js";
 import checks from "./checks/index.js";
 
 export default {
@@ -13,5 +13,5 @@ export default {
 	clearAll,
 	processImage,
 	getSingleCount,
-	optimiseImage,
+	optimizeImage,
 };

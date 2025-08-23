@@ -39,9 +39,9 @@ const processImage: ServiceFn<
 		};
 	}
 
-	// Optimise image
+	// Optimize image
 	const [imageRes, processedCountRes] = await Promise.all([
-		context.services.processedImage.optimiseImage(context, {
+		context.services.processedImage.optimizeImage(context, {
 			stream: mediaRes.data.body,
 			options: data.options,
 		}),

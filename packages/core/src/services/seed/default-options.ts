@@ -42,7 +42,7 @@ const defaultOptions: ServiceFn<[], undefined> = async (
 		return {
 			error: {
 				type: "basic",
-				message: T("option_error_occured_saving_default"),
+				message: T("option_error_occurred_saving_default"),
 			},
 			data: undefined,
 		};

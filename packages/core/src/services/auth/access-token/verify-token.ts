@@ -15,7 +15,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 				error: {
 					type: "authorisation",
 					code: "authorisation",
-					message: T("not_authorised_to_perform_action"),
+					message: T("not_authorized_to_perform_action"),
 				},
 				data: undefined,
 			};
@@ -35,7 +35,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 			error: {
 				type: "authorisation",
 				code: "authorisation",
-				message: T("not_authorised_to_perform_action"),
+				message: T("not_authorized_to_perform_action"),
 			},
 			data: undefined,
 		};

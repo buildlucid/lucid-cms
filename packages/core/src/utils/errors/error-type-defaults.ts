@@ -13,8 +13,8 @@ const errorTypeDefaults = (error: LucidErrorData) => {
 		case "authorisation": {
 			return {
 				status: 401,
-				name: error.name ?? T("authorisation_error"),
-				message: error.message ?? T("authorisation_error_message"),
+				name: error.name ?? T("authorization_error"),
+				message: error.message ?? T("authorization_error_message"),
 			};
 		}
 		case "forbidden": {

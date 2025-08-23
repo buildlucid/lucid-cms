@@ -6,7 +6,7 @@ import type {
 	ImageProcessorResult,
 } from "../../types/config.js";
 
-const optimiseImage: ServiceFn<
+const optimizeImage: ServiceFn<
 	[
 		{
 			stream: Readable;
@@ -29,4 +29,4 @@ const optimiseImage: ServiceFn<
 	}
 };
 
-export default optimiseImage;
+export default optimizeImage;

@@ -2,7 +2,7 @@ import mime from "mime-types";
 import type { ImageProcessor } from "../../types.js";
 
 /**
- * A Sharp-based image processor that can resize, convert formats, and optimise images.
+ * A Sharp-based image processor that can resize, convert formats, and optimize images.
  *
  * This processor dynamically imports Sharp to avoid dependency issues.
  */
