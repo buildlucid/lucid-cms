@@ -107,13 +107,13 @@ export type CustomFieldMap = {
 			meta: JsonResMeta;
 		};
 	};
-	colour: {
-		props: ColourFieldProps;
-		config: ColourFieldConfig;
+	color: {
+		props: ColorFieldProps;
+		config: ColorFieldConfig;
 		column: "text_value";
 		response: {
-			value: ColourResValue;
-			meta: ColourResMeta;
+			value: ColorResValue;
+			meta: ColorResMeta;
 		};
 	};
 	datetime: {
@@ -364,8 +364,8 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 		zod?: ZodType<unknown>;
 	};
 }
-export interface ColourFieldConfig extends SharedFieldConfig {
-	type: "colour";
+export interface ColorFieldConfig extends SharedFieldConfig {
+	type: "color";
 	details: {
 		label?: LocaleValue;
 		summary?: LocaleValue;
@@ -461,7 +461,7 @@ export type CheckboxFieldProps = Partial<Omit<CheckboxFieldConfig, "type">>;
 export type SelectFieldProps = Partial<Omit<SelectFieldConfig, "type">>;
 export type TextareaFieldProps = Partial<Omit<TextareaFieldConfig, "type">>;
 export type JsonFieldProps = Partial<Omit<JsonFieldConfig, "type">>;
-export type ColourFieldProps = Partial<Omit<ColourFieldConfig, "type">>;
+export type ColorFieldProps = Partial<Omit<ColorFieldConfig, "type">>;
 export type DatetimeFieldProps = Partial<Omit<DatetimeFieldConfig, "type">>;
 export type LinkFieldProps = Partial<Omit<LinkFieldConfig, "type">>;
 export type UserFieldProps = Partial<
@@ -481,7 +481,7 @@ export type CheckboxResValue = boolean | null;
 export type SelectReValue = string | null;
 export type TextareaResValue = string | null;
 export type JsonResValue = Record<string, unknown> | null;
-export type ColourResValue = string | null;
+export type ColorResValue = string | null;
 export type DatetimeResValue = string | null;
 export type DocumentResValue = number | null;
 export type LinkResValue = {
@@ -502,7 +502,7 @@ export type FieldResponseValue =
 	| SelectReValue
 	| TextareaResValue
 	| JsonResValue
-	| ColourResValue
+	| ColorResValue
 	| DatetimeResValue
 	| LinkResValue
 	| UserResValue
@@ -524,7 +524,7 @@ export type MediaResMeta = {
 	width: number | null;
 	height: number | null;
 	blurHash: string | null;
-	averageColour: string | null;
+	averageColor: string | null;
 	isDark: boolean | null;
 	isLight: boolean | null;
 	title: Record<string, string>;
@@ -542,7 +542,7 @@ export type CheckboxResMeta = null;
 export type SelectResMeta = null;
 export type TextareaResMeta = null;
 export type JsonResMeta = null;
-export type ColourResMeta = null;
+export type ColorResMeta = null;
 export type DatetimeResMeta = null;
 export type LinkResMeta = null;
 export type UserResMeta = {
@@ -563,7 +563,7 @@ export type FieldResponseMeta =
 	| SelectResMeta
 	| TextareaResMeta
 	| JsonResMeta
-	| ColourResMeta
+	| ColorResMeta
 	| DatetimeResMeta
 	| LinkResMeta
 	| UserResMeta

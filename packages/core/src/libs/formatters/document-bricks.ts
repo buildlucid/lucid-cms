@@ -74,9 +74,9 @@ export default class DocumentBricksFormatter {
 							host: props.config.host,
 							builder: brickBuilder,
 							collection: props.collection,
-							localisation: {
-								locales: props.config.localisation.locales.map((l) => l.code),
-								default: props.config.localisation.defaultLocale,
+							localization: {
+								locales: props.config.localization.locales.map((l) => l.code),
+								default: props.config.localization.defaultLocale,
 							},
 							brickKey: brickKey,
 							config: props.config,
@@ -123,9 +123,9 @@ export default class DocumentBricksFormatter {
 				host: props.config.host,
 				builder: props.collection,
 				collection: props.collection,
-				localisation: {
-					locales: props.config.localisation.locales.map((l) => l.code),
-					default: props.config.localisation.defaultLocale,
+				localization: {
+					locales: props.config.localization.locales.map((l) => l.code),
+					default: props.config.localization.defaultLocale,
 				},
 				brickKey: undefined,
 				config: props.config,

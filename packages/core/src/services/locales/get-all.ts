@@ -26,7 +26,7 @@ const getAll: ServiceFn<[], LocalesResponse[]> = async (context) => {
 		error: undefined,
 		data: LocalesFormatter.formatMultiple({
 			locales: localesRes.data,
-			localisation: context.config.localisation,
+			localization: context.config.localization,
 		}),
 	};
 };

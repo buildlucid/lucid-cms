@@ -34,7 +34,7 @@ const checkValidateBricksFields: ServiceFn<
 		bricks: data.bricks,
 		collection: data.collection,
 		validationData: relationDataRes.data,
-		defaultLocale: context.config.localisation.defaultLocale,
+		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
@@ -42,7 +42,7 @@ const checkValidateBricksFields: ServiceFn<
 		validationData: relationDataRes.data,
 		meta: {
 			useTranslations: data.collection.getData.config.useTranslations,
-			defaultLocale: context.config.localisation.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 		},
 	});
 

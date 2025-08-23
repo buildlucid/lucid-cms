@@ -8,7 +8,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	const Locales = Repository.get("locales", context.db, context.config.db);
-	const localeCodes = context.config.localisation.locales.map(
+	const localeCodes = context.config.localization.locales.map(
 		(locale) => locale.code,
 	);
 

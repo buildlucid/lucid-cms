@@ -48,7 +48,7 @@ const ConfigSchema = z.object({
 		transport: LogTransportSchema.optional(),
 	}),
 	disableSwagger: z.boolean(),
-	localisation: z
+	localization: z
 		.object({
 			locales: z.array(
 				z.object({

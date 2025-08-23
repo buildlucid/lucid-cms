@@ -10,7 +10,7 @@ test("all fields should be added", async () => {
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
 		.addJSON("json_test")
-		.addColour("colour_test")
+		.addColor("color_test")
 		.addMedia("media_test")
 		.addDateTime("datetime_test")
 		.addLink("link_test")
@@ -28,7 +28,7 @@ test("all fields should be added", async () => {
 	expect(instance.fields.get("checkbox_test")).toBeDefined();
 	expect(instance.fields.get("select_test")).toBeDefined();
 	expect(instance.fields.get("json_test")).toBeDefined();
-	expect(instance.fields.get("colour_test")).toBeDefined();
+	expect(instance.fields.get("color_test")).toBeDefined();
 	expect(instance.fields.get("media_test")).toBeDefined();
 	expect(instance.fields.get("datetime_test")).toBeDefined();
 	expect(instance.fields.get("link_test")).toBeDefined();
@@ -97,7 +97,7 @@ test("flat fields should return correct config", async () => {
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
 		.addJSON("json_test")
-		.addColour("colour_test")
+		.addColor("color_test")
 		.addMedia("media_test")
 		.addDateTime("datetime_test")
 		.addLink("link_test")
@@ -219,9 +219,9 @@ test("flat fields should return correct config", async () => {
 			validation: undefined,
 		},
 		{
-			key: "colour_test",
-			type: "colour",
-			details: { label: "Colour Test", summary: undefined },
+			key: "color_test",
+			type: "color",
+			details: { label: "Color Test", summary: undefined },
 			presets: [],
 			config: {
 				useTranslations: false,

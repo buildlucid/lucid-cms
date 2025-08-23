@@ -9,12 +9,12 @@ import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { Colour } from "@/components/Groups/Form";
+import { Color } from "@/components/Groups/Form";
 
-interface ColourFieldProps {
+interface ColorFieldProps {
 	state: {
 		brickIndex: number;
-		fieldConfig: CFConfig<"colour">;
+		fieldConfig: CFConfig<"color">;
 		fieldData?: FieldResponse;
 		groupRef?: string;
 		repeaterKey?: string;
@@ -26,7 +26,7 @@ interface ColourFieldProps {
 	};
 }
 
-export const ColourField: Component<ColourFieldProps> = (props) => {
+export const ColorField: Component<ColorFieldProps> = (props) => {
 	// -------------------------------
 	// State
 	const [getValue, setValue] = createSignal("");
@@ -57,7 +57,7 @@ export const ColourField: Component<ColourFieldProps> = (props) => {
 	// Render
 	return (
 		<div>
-			<Colour
+			<Color
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
 					brickIndex: props.state.brickIndex,

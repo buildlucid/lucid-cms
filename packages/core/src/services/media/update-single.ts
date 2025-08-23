@@ -19,7 +19,7 @@ const updateSingle: ServiceFn<
 			width?: number | null;
 			height?: number | null;
 			blurHash?: string | null;
-			averageColour?: string | null;
+			averageColor?: string | null;
 			isDark?: boolean | null;
 			isLight?: boolean | null;
 		},
@@ -144,7 +144,7 @@ const updateSingle: ServiceFn<
 				height: data.height,
 				updated_at: new Date().toISOString(),
 				blur_hash: data.blurHash,
-				average_colour: data.averageColour,
+				average_color: data.averageColor,
 				is_dark: data.isDark,
 				is_light: data.isLight,
 			},

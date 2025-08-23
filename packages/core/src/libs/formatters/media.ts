@@ -19,7 +19,7 @@ export interface MediaPropsT {
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 	blur_hash: string | null;
-	average_colour: string | null;
+	average_color: string | null;
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	title_translations?: Array<{
@@ -79,7 +79,7 @@ export default class MediaFormatter {
 				width: props.media.width,
 				height: props.media.height,
 				blurHash: props.media.blur_hash,
-				averageColour: props.media.average_colour,
+				averageColor: props.media.average_color,
 				isDark: Formatter.formatBoolean(props.media.is_dark),
 				isLight: Formatter.formatBoolean(props.media.is_light),
 			},

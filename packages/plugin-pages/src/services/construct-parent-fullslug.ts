@@ -13,14 +13,14 @@ import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 const constructParentFullSlug = (data: {
 	collection: CollectionConfig;
 	parentFields: Array<ParentPageQueryResponse>;
-	localisation: Config["localisation"];
+	localization: Config["localization"];
 	fields: {
 		slug: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<Record<string, string | null>>> => {
 	// initialise fullSlug with null values for each locale
 	const fullSlug: Record<string, string | null> =
-		data.localisation.locales.reduce<Record<string, string | null>>(
+		data.localization.locales.reduce<Record<string, string | null>>(
 			(acc, locale) => {
 				acc[locale.code] = null;
 				return acc;
@@ -30,8 +30,8 @@ const constructParentFullSlug = (data: {
 
 	// if translations are enabled/set
 	if (data.collection.useTranslations && data.fields.slug.translations) {
-		for (let i = 0; i < data.localisation.locales.length; i++) {
-			const locale = data.localisation.locales[i];
+		for (let i = 0; i < data.localization.locales.length; i++) {
+			const locale = data.localization.locales[i];
 			if (!locale) continue;
 
 			fullSlug[locale.code] = buildFullSlug({
@@ -41,9 +41,9 @@ const constructParentFullSlug = (data: {
 			});
 		}
 	} else {
-		fullSlug[data.localisation.defaultLocale] = buildFullSlug({
+		fullSlug[data.localization.defaultLocale] = buildFullSlug({
 			parentFields: data.parentFields || [],
-			targetLocale: data.localisation.defaultLocale,
+			targetLocale: data.localization.defaultLocale,
 			slug: data.fields.slug.value,
 		});
 	}

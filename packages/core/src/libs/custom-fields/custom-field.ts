@@ -107,7 +107,7 @@ abstract class CustomField<T extends FieldTypes> {
 		if (this.config.type === "media") return { valid: true };
 		if (this.config.type === "checkbox") return { valid: true };
 		if (this.config.type === "select") return { valid: true };
-		if (this.config.type === "colour") return { valid: true };
+		if (this.config.type === "color") return { valid: true };
 		if (this.config.type === "link") return { valid: true };
 		if (this.config.type === "user") return { valid: true };
 		if (this.config.type === "wysiwyg") return { valid: true };

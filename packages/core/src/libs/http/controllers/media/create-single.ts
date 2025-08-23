@@ -63,7 +63,7 @@ const createSingleController = factory.createHandlers(
 				width: body.width,
 				height: body.height,
 				blurHash: body.blurHash,
-				averageColour: body.averageColour,
+				averageColor: body.averageColor,
 				isDark: body.isDark,
 				isLight: body.isLight,
 			},

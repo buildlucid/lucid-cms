@@ -113,7 +113,7 @@ export const useCreateMedia = () => {
 			width: imageMeta?.width,
 			height: imageMeta?.height,
 			blurHash: imageMeta?.blurHash,
-			averageColour: imageMeta?.averageColour,
+			averageColor: imageMeta?.averageColor,
 			isDark: imageMeta?.isDark,
 			isLight: imageMeta?.isLight,
 		});

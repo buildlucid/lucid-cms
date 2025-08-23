@@ -21,7 +21,7 @@
 - New client only endpoint for getting the media src which supports converting and resizing images. ([045c6d0](https://github.com/buildlucid/lucid-cms/commit/045c6d0e8e199a81c6b4d19a64b3100a0f2edb02))
 - Implemented image presets in the media config. This allows you to define custom image sizes and formats. You can then pass the key to the CDN endpoint to process an image based on that preset. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
 - The media config now supports a new urlStrategy callback so if you don't want to stream media via our CDN route you can set a strategy that used to generate media URLs within the CMS. ([185b118](https://github.com/buildlucid/lucid-cms/commit/185b118f36937ab7fbd3c15ea40f19ebe7264300))
-- Removed the fast-average-colour-node and blurhash dependencies from core. Instead image metadata is worked out and supplied via the SPA. ([a1fcec9](https://github.com/buildlucid/lucid-cms/commit/a1fcec9))
+- Removed the fast-average-color-node and blurhash dependencies from core. Instead image metadata is worked out and supplied via the SPA. ([a1fcec9](https://github.com/buildlucid/lucid-cms/commit/a1fcec9))
 - Implemented a new media config option for supplying your own image processor along with making the Sharp dependency optional. This is in preparation for supporting other runtimes where Sharp may not be supported. In this case you can pass an exported passthroughImageProcessor fn or supply your own custom one. ([04b7f20](https://github.com/buildlucid/lucid-cms/commit/04b7f20))
 - Email MJML templates are now prerendered on dev/build CLI commands meaning we don't have to bundle MJML. ([04b42b5](https://github.com/buildlucid/lucid-cms/commit/04b42b50ca7e4acdda884c8fd7c4801e137592e6))
 - Collections columns are no longer removed from the DB via the collection migration. ()
@@ -107,7 +107,7 @@
 ## v0.9.0-alpha.0
 
 ### Features:
-- CMS UI rework. Looks better, no longer requires JS to work out content height in main layout and panels, better loading, error, no data state handling and colour changes.
+- CMS UI rework. Looks better, no longer requires JS to work out content height in main layout and panels, better loading, error, no data state handling and color changes.
 - Lucid start function now has optional config for the port and host. ([b1bf97e](https://github.com/buildlucid/lucid-cms/commit/b1bf97e86121d3e11070440bcc8edbde45ef0fce#diff-0b810c38f3c138a3d5e44854edefd5eb966617ca84e62f06511f60acc40546c7L94))
 - @‌lucidcms/core/api import now has export for serviceWrapper and route helper, giving more options to plugin developers and extending your instance. ([16c0c58](https://github.com/buildlucid/lucid-cms/commit/16c0c58e44b93abcb617a17915b659cd7de04683))
 - Fastify plugins can now be registered via the lucid.config.ts/js giving plugins the ability to register endpoints etc. ([0a1d542](https://github.com/buildlucid/lucid-cms/commit/0a1d5427fe588079289733ff8fe3d109af32da33))
@@ -156,13 +156,13 @@
 - Error message revamp for SPA document page builder with support for tabs highlighting if an error resides within it. ([c283824](https://github.com/buildlucid/lucid-cms/commit/c283824cf80d185666cd53d7641fbd92005d52ec))
 - Added support for returning nested repeater fields on client/toolkit document single and multiple fetches. ([befb65a](https://github.com/buildlucid/lucid-cms/commit/befb65af1c1ef3a032a0b247a2b08235f12e8138))
 - Image media now includes a blur hash that is generated on upload. ([7ee6461](https://github.com/buildlucid/lucid-cms/commit/7ee6461736f838bc858824d259770f7b6cc2351e))
-- Image media no includes average colour RGBA value and is light/dark information. ([be2a254](https://github.com/buildlucid/lucid-cms/commit/be2a2546a67f0901a33644bc9919f5cc88cda9c4))
+- Image media no includes average color RGBA value and is light/dark information. ([be2a254](https://github.com/buildlucid/lucid-cms/commit/be2a2546a67f0901a33644bc9919f5cc88cda9c4))
 - Holding page styled and content added. ([b8ab6d0](https://github.com/buildlucid/lucid-cms/commit/b8ab6d08b0429b9352657187173b2019f234eea8))
 
 ### Breaking changes:
 
 - Response format of client document endpoints is updated to return a field object instead of array to make consuming data easier. ([11aa7ce](https://github.com/buildlucid/lucid-cms/commit/11aa7ceee37c25bd71cbe0b741b594f6b849f684))
-- Existing migration file edit for media blur hash, average colour columns meaning db will need to be re-created. ([be2a254](https://github.com/buildlucid/lucid-cms/commit/be2a2546a67f0901a33644bc9919f5cc88cda9c4))
+- Existing migration file edit for media blur hash, average color columns meaning db will need to be re-created. ([be2a254](https://github.com/buildlucid/lucid-cms/commit/be2a2546a67f0901a33644bc9919f5cc88cda9c4))
 - Response type of media strategies update to use ServiceResponse type to fall inline with how internal services work. ([af95561](https://github.com/buildlucid/lucid-cms/commit/af955617357e26ae6476a3a4873e8d68dbe29e3e))
 - Clear single processed image route fix to use media ID instead of key due to key containing slashes now. ([f340b2f](https://github.com/buildlucid/lucid-cms/commit/f340b2f033cee073b6a394b76d9b8880ca16772f))
 

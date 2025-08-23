@@ -6,7 +6,7 @@ import type { FieldInputSchema } from "../../../types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 const TEST_CONFIG = {
-	localisation: {
+	localization: {
 		locales: [
 			{ label: "English", code: "en" },
 			{ label: "French", code: "fr" },
@@ -176,7 +176,7 @@ describe("brick table construction", () => {
 			collection: simpleCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localisation: TEST_CONFIG.localisation,
+			localization: TEST_CONFIG.localization,
 			bricks: simpleInputData.bricks,
 			fields: simpleInputData.fields,
 		});
@@ -397,7 +397,7 @@ describe("brick table construction", () => {
 			collection: deepCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localisation: TEST_CONFIG.localisation,
+			localization: TEST_CONFIG.localization,
 			bricks: deepInputData.bricks,
 			fields: [],
 		});

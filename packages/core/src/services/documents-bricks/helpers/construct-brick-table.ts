@@ -49,7 +49,7 @@ const constructBrickTable = (
 		collection: CollectionBuilder;
 		documentId: number;
 		versionId: number;
-		localisation: {
+		localization: {
 			locales: string[];
 			defaultLocale: string;
 		};
@@ -105,7 +105,7 @@ const constructBrickTable = (
 	const brickIdRefByLocale = new Map<string, number>();
 
 	//* initialise rows for each locale
-	for (const locale of params.localisation.locales) {
+	for (const locale of params.localization.locales) {
 		const baseRowData: Partial<Insert<LucidBricksTable>> = {
 			collection_key: params.collection.key,
 			document_id: params.documentId,
@@ -149,11 +149,11 @@ const constructBrickTable = (
 
 		const valuesByLocale = processFieldValues(
 			field,
-			params.localisation.locales,
-			params.localisation.defaultLocale,
+			params.localization.locales,
+			params.localization.defaultLocale,
 		);
 
-		for (const locale of params.localisation.locales) {
+		for (const locale of params.localization.locales) {
 			const value = valuesByLocale.get(locale);
 			const row = rowsByLocale.get(locale);
 
@@ -185,7 +185,7 @@ const constructBrickTable = (
 		repeaterField.groups?.forEach((group, groupIndex) => {
 			//* generate a temp ID for parent/child relation. This will be replaced before being inserted into the DB with its parents actual ID.
 			const localeGroupRef = new Map<string, number>();
-			for (const locale of params.localisation.locales) {
+			for (const locale of params.localization.locales) {
 				localeGroupRef.set(
 					locale,
 					-Math.abs(
@@ -210,7 +210,7 @@ const constructBrickTable = (
 						params.type === "brick" || params.type === "document-fields"
 							? brickIdRefByLocale
 							: params.brickIdByLocale,
-					localisation: params.localisation,
+					localization: params.localization,
 					brickKeyTableNameMap: params.brickKeyTableNameMap,
 					brick: params.brick,
 					order: group.order !== undefined ? group.order : groupIndex,

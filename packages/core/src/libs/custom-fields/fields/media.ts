@@ -87,16 +87,16 @@ class MediaCustomField extends CustomField<"media"> {
 			width: value?.width ?? null,
 			height: value?.height ?? null,
 			blurHash: value?.blur_hash ?? null,
-			averageColour: value?.average_colour ?? null,
+			averageColor: value?.average_color ?? null,
 			isDark: Formatter.formatBoolean(value?.is_dark ?? null),
 			isLight: Formatter.formatBoolean(value?.is_light ?? null),
 			title: objectifyTranslations(
 				value?.title_translations || [],
-				meta.localisation.locales,
+				meta.localization.locales,
 			),
 			alt: objectifyTranslations(
 				value?.alt_translations || [],
-				meta.localisation.locales,
+				meta.localization.locales,
 			),
 			type: (value?.type as MediaType) ?? null,
 		} satisfies CFResponse<"media">["meta"];

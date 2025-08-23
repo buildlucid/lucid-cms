@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
-import { colours, formatDuration } from "./helpers.js";
+import { colors, formatDuration } from "./helpers.js";
 
 /**
  * To log when the SPA build starts and ends
@@ -14,7 +14,7 @@ export const startAdminBuild = (silent?: boolean) => {
 	const adminPackage = JSON.parse(readFileSync(adminPackagePath, "utf8"));
 
 	console.log(
-		`┃ 🏗️  Building Admin SPA ${colours.textGray}v${adminPackage.version}${colours.reset}`,
+		`┃ 🏗️  Building Admin SPA ${colors.textGray}v${adminPackage.version}${colors.reset}`,
 	);
 
 	return () => {
@@ -23,7 +23,7 @@ export const startAdminBuild = (silent?: boolean) => {
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 
 		console.log(
-			`┃ ✨ Admin SPA built ${colours.textGreen}successfully${colours.reset} in ${formatDuration(milliseconds)}`,
+			`┃ ✨ Admin SPA built ${colors.textGreen}successfully${colors.reset} in ${formatDuration(milliseconds)}`,
 		);
 	};
 };
@@ -35,6 +35,6 @@ export const skipAdminBuild = (silent?: boolean) => {
 	if (silent) return;
 
 	console.log(
-		`┃ ⏭️  Admin SPA build skipped ${colours.textGray}(no changes detected)${colours.reset}`,
+		`┃ ⏭️  Admin SPA build skipped ${colors.textGray}(no changes detected)${colors.reset}`,
 	);
 };

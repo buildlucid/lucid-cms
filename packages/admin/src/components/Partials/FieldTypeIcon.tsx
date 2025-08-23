@@ -27,7 +27,7 @@ const FieldTypeIcon: Component<FieldTypeIconProps> = (props) => {
 					"bg-[#f080ea] border-[#dd72d8]": props.type === "link",
 					"bg-[#f88bbc] border-[#e17ba9]": props.type === "json",
 					"bg-[#9693f8] border-[#8481e0]": props.type === "media",
-					"bg-[#84f0dc] border-[#78dbc9]": props.type === "colour",
+					"bg-[#84f0dc] border-[#78dbc9]": props.type === "color",
 					"bg-[#dae095] border-[#ccd289]": props.type === "user",
 					"bg-[#f2f2f2] border-[#d8d8d8]": props.type === "document",
 				},
@@ -46,7 +46,7 @@ const FieldTypeIcon: Component<FieldTypeIconProps> = (props) => {
 				<Match when={props.type === "link"}>L</Match>
 				<Match when={props.type === "json"}>J</Match>
 				<Match when={props.type === "media"}>M</Match>
-				<Match when={props.type === "colour"}>C</Match>
+				<Match when={props.type === "color"}>C</Match>
 				<Match when={props.type === "document"}>Do</Match>
 			</Switch>
 		</div>

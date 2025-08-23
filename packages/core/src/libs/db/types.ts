@@ -263,7 +263,7 @@ export interface LucidMedia {
 	width: number | null;
 	height: number | null;
 	blur_hash: string | null;
-	average_colour: string | null;
+	average_color: string | null;
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	custom_meta: string | null;

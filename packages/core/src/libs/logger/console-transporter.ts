@@ -1,16 +1,16 @@
 import type { LogData, LogLevel, LogTransport } from "./types.js";
 
 export type ConsoleTransportOptions = {
-	colours?: boolean;
+	colors?: boolean;
 	timestamps?: boolean;
 };
 
 const createConsoleTransport = (
 	options: ConsoleTransportOptions = {},
 ): LogTransport => {
-	const { colours = true, timestamps = true } = options;
+	const { colors = true, timestamps = true } = options;
 
-	const colourMap: Record<LogLevel, string> = {
+	const colorMap: Record<LogLevel, string> = {
 		error: "\x1b[31m", // red
 		warn: "\x1b[33m", // yellow
 		info: "\x1b[36m", // cyan
@@ -24,10 +24,10 @@ const createConsoleTransport = (
 		if (level === "silent") return;
 
 		const timestamp = timestamps ? `${new Date().toISOString()} ` : "";
-		const colour = colours ? colourMap[level] : "";
-		const resetColour = colours ? reset : "";
+		const color = colors ? colorMap[level] : "";
+		const resetColor = colors ? reset : "";
 
-		const prefix = `${timestamp}${colour}[${level.toUpperCase()}${log.scope ? `:${log.scope.toUpperCase()}` : ""}]${resetColour}`;
+		const prefix = `${timestamp}${color}[${level.toUpperCase()}${log.scope ? `:${log.scope.toUpperCase()}` : ""}]${resetColor}`;
 
 		let consoleLogger:
 			| Console["log"]

@@ -6,8 +6,8 @@ import type { FieldInputSchema } from "../../../types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 
 describe("testing prepareBricksAndFields", () => {
-	// Mock localisation config to pass to the functions
-	const mockLocalisation = {
+	// Mock localization config to pass to the functions
+	const mockLocalization = {
 		locales: [
 			{
 				label: "English",
@@ -64,7 +64,7 @@ describe("testing prepareBricksAndFields", () => {
 		const { preparedFields } = prepareBricksAndFields({
 			collection: simpleCollection,
 			fields,
-			localisation: mockLocalisation,
+			localization: mockLocalization,
 		});
 
 		expect(preparedFields).toHaveLength(1);
@@ -141,7 +141,7 @@ describe("testing prepareBricksAndFields", () => {
 		const { preparedBricks } = prepareBricksAndFields({
 			collection: simpleCollection,
 			bricks,
-			localisation: mockLocalisation,
+			localization: mockLocalization,
 		});
 
 		expect(preparedBricks).toHaveLength(1);
@@ -184,7 +184,7 @@ describe("testing prepareBricksAndFields", () => {
 	test("should handle empty inputs gracefully", () => {
 		const result = prepareBricksAndFields({
 			collection: simpleCollection,
-			localisation: mockLocalisation,
+			localization: mockLocalization,
 		});
 
 		expect(result.preparedBricks).toBeUndefined();

@@ -37,7 +37,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("width", adapter.getDataType("integer"))
 				.addColumn("height", adapter.getDataType("integer"))
 				.addColumn("blur_hash", adapter.getDataType("text"))
-				.addColumn("average_colour", adapter.getDataType("text"))
+				.addColumn("average_color", adapter.getDataType("text"))
 				.addColumn("is_dark", adapter.getDataType("boolean"))
 				.addColumn("is_light", adapter.getDataType("boolean"))
 				.addColumn(

@@ -13,7 +13,7 @@ const createSingle: ServiceFn<
 			width?: number;
 			height?: number;
 			blurHash?: string;
-			averageColour?: string;
+			averageColor?: string;
 			isDark?: boolean;
 			isLight?: boolean;
 			title?: {
@@ -87,7 +87,7 @@ const createSingle: ServiceFn<
 				title_translation_key_id: translationKeyIdsRes.data.title,
 				alt_translation_key_id: translationKeyIdsRes.data.alt,
 				blur_hash: data.blurHash ?? null,
-				average_colour: data.averageColour ?? null,
+				average_color: data.averageColor ?? null,
 				is_dark: data.isDark ?? null,
 				is_light: data.isLight ?? null,
 			},

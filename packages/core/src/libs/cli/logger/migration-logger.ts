@@ -1,4 +1,4 @@
-import { colours, divider, formatBadge, formatDuration } from "./helpers.js";
+import { colors, divider, formatBadge, formatDuration } from "./helpers.js";
 import sharedLogger, { type SharedLogger } from "./shared-logger.js";
 
 export interface MigrationLogger extends SharedLogger {
@@ -23,7 +23,7 @@ const createMigrationLogger = (): MigrationLogger => ({
 	migrationStart: () => {
 		console.log(`\n${divider}\n`);
 		console.log(
-			`${formatBadge("MIGRATE", colours.bgBlue, colours.textBlue)} Checking migration status...`,
+			`${formatBadge("MIGRATE", colors.bgBlue, colors.textBlue)} Checking migration status...`,
 		);
 	},
 	migrationCheckStatus: (
@@ -51,45 +51,45 @@ const createMigrationLogger = (): MigrationLogger => ({
 	},
 	dbMigrationStart: () => {
 		console.log(
-			`${colours.textGray}  - Running database schema migrations...${colours.reset}`,
+			`${colors.textGray}  - Running database schema migrations...${colors.reset}`,
 		);
 	},
 	dbMigrationComplete: () => {
 		console.log(
-			`${colours.textGray}  - Database schema migrations completed ${colours.bold}successfully${colours.reset}`,
+			`${colors.textGray}  - Database schema migrations completed ${colors.bold}successfully${colors.reset}`,
 		);
 	},
 	syncTasksStart: () => {
 		console.log(
-			`${colours.textGray}  - Running sync tasks (locales, collections)...${colours.reset}`,
+			`${colors.textGray}  - Running sync tasks (locales, collections)...${colors.reset}`,
 		);
 	},
 	syncTasksComplete: () => {
 		console.log(
-			`${colours.textGray}  - Sync tasks completed ${colours.bold}successfully${colours.reset}`,
+			`${colors.textGray}  - Sync tasks completed ${colors.bold}successfully${colors.reset}`,
 		);
 	},
 	collectionMigrationStart: () => {
 		console.log(
-			`${colours.textGray}  - Running collection migrations...${colours.reset}`,
+			`${colors.textGray}  - Running collection migrations...${colors.reset}`,
 		);
 	},
 	collectionMigrationComplete: () => {
 		console.log(
-			`${colours.textGray}  - Collection migrations completed ${colours.bold}successfully${colours.reset}`,
+			`${colors.textGray}  - Collection migrations completed ${colors.bold}successfully${colors.reset}`,
 		);
 	},
 	migrationComplete: (startTime: [number, number]) => {
 		const diff = process.hrtime(startTime);
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 		console.log(
-			`\n${formatBadge("READY", colours.bgLimeGreen, colours.textGreen)} Migration completed ${colours.textGreen}successfully${colours.reset} in ${formatDuration(milliseconds)}\n`,
+			`\n${formatBadge("READY", colors.bgLimeGreen, colors.textGreen)} Migration completed ${colors.textGreen}successfully${colors.reset} in ${formatDuration(milliseconds)}\n`,
 		);
 	},
 	migrationFailed: (error: unknown, step?: string) => {
 		const stepMessage = step ? ` during ${step}` : "";
 		console.error(
-			`\n${colours.textRed}Migration failed${stepMessage}:${colours.reset}`,
+			`\n${colors.textRed}Migration failed${stepMessage}:${colors.reset}`,
 			error,
 		);
 	},

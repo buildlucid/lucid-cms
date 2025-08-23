@@ -12,7 +12,7 @@ export const fieldInputSchema = z.object({
 		z.literal("select"),
 		z.literal("textarea"),
 		z.literal("json"),
-		z.literal("colour"),
+		z.literal("color"),
 		z.literal("datetime"),
 		z.literal("link"),
 		z.literal("repeater"),
@@ -232,7 +232,7 @@ export const fieldConfigSchema = z.object({
 		.array(z.string())
 		.nullable()
 		.meta({
-			description: "Preset values for colour fields",
+			description: "Preset values for color fields",
 			example: ["#ff0000", "#00ff00", "#0000ff"],
 		})
 		.optional(),

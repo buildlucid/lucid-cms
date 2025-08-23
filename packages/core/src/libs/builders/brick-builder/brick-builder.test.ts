@@ -15,7 +15,7 @@ test("all brick fields are added", async () => {
 		.addWysiwyg("wysiwyg_test")
 		.addLink("link_test")
 		.addJSON("json_test")
-		.addColour("colour_test")
+		.addColor("color_test")
 		.addRepeater("repeater_test")
 		.addText("repeater_text_test")
 		.endRepeater();

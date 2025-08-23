@@ -63,7 +63,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					width: media.meta.width ?? null,
 					height: media.meta.height ?? null,
 					blurHash: media.meta.blurHash ?? null,
-					averageColour: media.meta.averageColour ?? null,
+					averageColor: media.meta.averageColor ?? null,
 					isDark: media.meta.isDark ?? null,
 					isLight: media.meta.isLight ?? null,
 					title: media.title.reduce<Record<string, string>>((acc, t) => {

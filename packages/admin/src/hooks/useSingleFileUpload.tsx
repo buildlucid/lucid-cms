@@ -23,7 +23,7 @@ export interface ImageMeta {
 	width: number;
 	height: number;
 	blurHash: string;
-	averageColour: string;
+	averageColor: string;
 	isDark: boolean;
 	isLight: boolean;
 }
@@ -124,7 +124,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 				width: img.width,
 				height: img.height,
 				blurHash,
-				averageColour: colorResult.rgba,
+				averageColor: colorResult.rgba,
 				isDark: colorResult.isDark,
 				isLight: colorResult.isLight,
 			};

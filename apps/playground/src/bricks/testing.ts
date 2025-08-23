@@ -71,7 +71,7 @@ const TestingBrick = new BrickBuilder("testing", {
 		},
 	})
 	.addJSON("json-key")
-	.addColour("colour-key", {
+	.addColor("color-key", {
 		presets: ["#000000", "#ffffff"],
 	})
 	.addDateTime("datetime-key")

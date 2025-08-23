@@ -54,7 +54,7 @@ const beforeUpsertHandler =
 		const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
-			defaultLocale: context.config.localisation.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 			documentId: data.data.documentId,
 			fields: {
 				parentPage: parentPage,
@@ -64,7 +64,7 @@ const beforeUpsertHandler =
 
 		const checkRootSlugWithParentRes = checkRootSlugWithParent({
 			collection: targetCollectionRes.data,
-			defaultLocale: context.config.localisation.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 			fields: {
 				slug: slug,
 				parentPage: parentPage,
@@ -100,7 +100,7 @@ const beforeUpsertHandler =
 			const circularParentsRes = await checkCircularParents(context, {
 				documentId: data.data.documentId,
 				versionType: data.data.versionType,
-				defaultLocale: context.config.localisation.defaultLocale,
+				defaultLocale: context.config.localization.defaultLocale,
 				fields: {
 					parentPage: parentPage,
 				},
@@ -109,7 +109,7 @@ const beforeUpsertHandler =
 			if (circularParentsRes.error) return circularParentsRes;
 
 			const parentFieldsRes = await getParentFields(context, {
-				defaultLocale: context.config.localisation.defaultLocale,
+				defaultLocale: context.config.localization.defaultLocale,
 				versionType: data.data.versionType,
 				fields: {
 					parentPage: parentPage,
@@ -124,7 +124,7 @@ const beforeUpsertHandler =
 		// fullSlug construction
 		const fullSlugRes = constructParentFullSlug({
 			parentFields: parentFieldsData,
-			localisation: context.config.localisation,
+			localization: context.config.localization,
 			collection: targetCollectionRes.data,
 			fields: {
 				slug: slug,
@@ -134,7 +134,7 @@ const beforeUpsertHandler =
 
 		setFullSlug({
 			fullSlug: fullSlugRes.data,
-			defaultLocale: context.config.localisation.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 			collection: targetCollectionRes.data,
 			fields: {
 				fullSlug: fullSlug,

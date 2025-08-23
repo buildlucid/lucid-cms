@@ -28,7 +28,7 @@ export default lucid.config({
     refreshTokenSecret: process.env.LUCID_REFRESH_TOKEN_SECRET as string,
     accessTokenSecret: process.env.LUCID_ACCESS_TOKEN_SECRET as string,
   },
-  localisation: {
+  localization: {
     locales: [
       {
         label: "English",
@@ -77,7 +77,7 @@ export interface LucidConfig {
     refreshTokenSecret: string;
   };
   disableSwagger?: boolean;
-  localisation?: {
+  localization?: {
     locales: {
       label: string;
       code: string;

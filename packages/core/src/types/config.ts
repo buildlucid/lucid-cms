@@ -175,8 +175,8 @@ export interface LucidConfig {
 	};
 	/** Disables the swagger documentation site. */
 	disableSwagger?: boolean;
-	/** Localisation settings. */
-	localisation?: {
+	/** Localization settings. */
+	localization?: {
 		/** A list of locales you want to write content in. */
 		locales: {
 			/** The label of the locale. Eg. `English`, `French`, `German` etc. */
@@ -277,7 +277,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		strategy: EmailStrategy;
 	};
 	disableSwagger: boolean;
-	localisation: {
+	localization: {
 		locales: {
 			label: string;
 			code: string;

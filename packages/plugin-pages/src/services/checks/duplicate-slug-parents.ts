@@ -44,7 +44,7 @@ const checkDuplicateSlugParents: ServiceFn<
 
 		if (data.fields.slug.value) {
 			slugConditions.push({
-				localeCode: context.config.localisation.defaultLocale,
+				localeCode: context.config.localization.defaultLocale,
 				slug: data.fields.slug.value,
 			});
 		}

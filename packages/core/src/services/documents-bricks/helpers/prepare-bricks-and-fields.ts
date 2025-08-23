@@ -12,7 +12,7 @@ const processFields = (props: {
 	collection: CollectionBuilder;
 	fields: Array<FieldInputSchema>;
 	customFields: Map<string, CustomField<FieldTypes>>;
-	localisation: Config["localisation"];
+	localization: Config["localization"];
 }): Array<FieldInputSchema> => {
 	return props.fields
 		.filter((field) => props.customFields.has(field.key))
@@ -28,7 +28,7 @@ const processFields = (props: {
 						collection: props.collection,
 						fields: group.fields,
 						customFields: props.customFields,
-						localisation: props.localisation,
+						localization: props.localization,
 					}),
 				}));
 			}
@@ -44,7 +44,7 @@ const processFields = (props: {
 					!processedField.translations
 				) {
 					processedField.translations = {
-						[props.localisation.defaultLocale]: processedField.value,
+						[props.localization.defaultLocale]: processedField.value,
 					};
 					processedField.value = undefined;
 				}
@@ -52,7 +52,7 @@ const processFields = (props: {
 				// if processField.translations is given, take the default locale translation value and set it as the processField.value
 				if (processedField.translations && processedField.value === undefined) {
 					const translationValue =
-						processedField.translations[props.localisation.defaultLocale];
+						processedField.translations[props.localization.defaultLocale];
 					processedField.value =
 						translationValue !== undefined
 							? translationValue
@@ -63,7 +63,7 @@ const processFields = (props: {
 
 			// if processField.translations is set, ensure that each supported locale has a key. Use the cfInstance.defaultValue for missing locales
 			if (processedField.translations) {
-				for (const locale of props.localisation.locales) {
+				for (const locale of props.localization.locales) {
 					const localeCode = locale.code;
 					//* if null its intentionally empty - no default should be set
 					if (processedField.translations[localeCode] === undefined) {
@@ -83,7 +83,7 @@ const prepareBricksAndFields = (props: {
 	collection: CollectionBuilder;
 	bricks?: Array<BrickInputSchema>;
 	fields?: Array<FieldInputSchema>;
-	localisation: Config["localisation"];
+	localization: Config["localization"];
 }) => {
 	// Process collection fields
 	const preparedFields = props.fields
@@ -91,7 +91,7 @@ const prepareBricksAndFields = (props: {
 				collection: props.collection,
 				fields: props.fields,
 				customFields: props.collection.fields,
-				localisation: props.localisation,
+				localization: props.localization,
 			})
 		: undefined;
 
@@ -108,7 +108,7 @@ const prepareBricksAndFields = (props: {
 					collection: props.collection,
 					fields: brick.fields,
 					customFields: brickDefinition.fields,
-					localisation: props.localisation,
+					localization: props.localization,
 				});
 
 				return {

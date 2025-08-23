@@ -64,8 +64,8 @@ const mediaResponseSchema = z.object({
 				description: "BlurHash for image previews",
 				example: "AQABAAAABAAAAgAA...",
 			}),
-			averageColour: z.string().nullable().meta({
-				description: "Average colour of the image",
+			averageColor: z.string().nullable().meta({
+				description: "Average color of the image",
 				example: "rgba(255, 255, 255, 1)",
 			}),
 			isDark: z.boolean().nullable().meta({
@@ -237,11 +237,11 @@ export const controllerSchemas = {
 					example: "AQABAAAABAAAAgAA...",
 				})
 				.optional(),
-			averageColour: z
+			averageColor: z
 				.string()
 				.nullable()
 				.meta({
-					description: "The average colour",
+					description: "The average color",
 					example: "rgba(255, 255, 255, 1)",
 				})
 				.optional(),
@@ -388,10 +388,10 @@ export const controllerSchemas = {
 					example: "AQABAAAABAAAAgAA...",
 				})
 				.optional(),
-			averageColour: z
+			averageColor: z
 				.string()
 				.meta({
-					description: "The average colour",
+					description: "The average color",
 					example: "rgba(255, 255, 255, 1)",
 				})
 				.optional(),

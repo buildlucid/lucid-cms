@@ -2,7 +2,7 @@ export { DynamicField } from "./DynamicField";
 export { RepeaterField } from "./RepeaterField";
 export { InputField } from "./InputField";
 export { CheckboxField } from "./CheckboxField";
-export { ColourField } from "./ColourField";
+export { ColorField } from "./ColorField";
 export { JSONField } from "./JSONField";
 export { LinkField } from "./LinkField";
 export { MediaField } from "./MediaField";

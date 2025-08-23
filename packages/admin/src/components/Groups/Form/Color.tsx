@@ -3,7 +3,7 @@ import classnames from "classnames";
 import type { ErrorResult, FieldError } from "@types";
 import { ErrorMessage, Label, DescribedBy } from "@/components/Groups/Form";
 
-interface ColourProps {
+interface ColorProps {
 	id: string;
 	value: string;
 	onChange: (_value: string) => void;
@@ -21,7 +21,7 @@ interface ColourProps {
 	fieldColumnIsMissing?: boolean;
 }
 
-export const Colour: Component<ColourProps> = (props) => {
+export const Color: Component<ColorProps> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
 
 	// ----------------------------------------

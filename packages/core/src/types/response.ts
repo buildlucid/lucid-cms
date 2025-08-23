@@ -114,7 +114,7 @@ export interface MediaResponse {
 		width: number | null;
 		height: number | null;
 		blurHash: string | null;
-		averageColour: string | null;
+		averageColor: string | null;
 		isDark: boolean | null;
 		isLight: boolean | null;
 	};

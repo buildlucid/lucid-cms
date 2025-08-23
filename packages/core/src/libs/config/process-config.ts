@@ -45,8 +45,8 @@ const processConfig = async (
 		// validate config
 		configRes = ConfigSchema.parse(configRes) as Config;
 
-		// localisation checks
-		checks.checkLocales(configRes.localisation);
+		// localization checks
+		checks.checkLocales(configRes.localization);
 
 		// collection checks
 		checks.checkDuplicateBuilderKeys(

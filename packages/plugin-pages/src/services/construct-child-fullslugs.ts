@@ -12,7 +12,7 @@ import type { CollectionConfig } from "../types/index.js";
  */
 const constructChildFullSlug = (data: {
 	descendants: DescendantFieldsResponse[];
-	localisation: Config["localisation"];
+	localization: Config["localization"];
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
 }): Awaited<
@@ -40,7 +40,7 @@ const constructChildFullSlug = (data: {
 			)
 				break;
 
-			for (const locale of data.localisation.locales) {
+			for (const locale of data.localization.locales) {
 				const currentFullSlugValue =
 					data.parentFullSlugField?.translations?.[locale.code];
 
@@ -62,8 +62,8 @@ const constructChildFullSlug = (data: {
 			)
 				break;
 
-			fullSlug[data.localisation.defaultLocale] = buildFullSlug({
-				targetLocale: data.localisation.defaultLocale,
+			fullSlug[data.localization.defaultLocale] = buildFullSlug({
+				targetLocale: data.localization.defaultLocale,
 				currentDescendant: descendant,
 				descendants: data.descendants,
 				topLevelFullSlug: data.parentFullSlugField?.value,

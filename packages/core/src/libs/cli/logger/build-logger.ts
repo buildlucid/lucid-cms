@@ -1,4 +1,4 @@
-import { colours, divider, formatBadge, formatDuration } from "./helpers.js";
+import { colors, divider, formatBadge, formatDuration } from "./helpers.js";
 import sharedLogger, { type SharedLogger } from "./shared-logger.js";
 
 export interface BuildLogger extends SharedLogger {
@@ -23,14 +23,14 @@ const createBuildLogger = (silent?: boolean): BuildLogger => ({
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 
 		console.log(
-			`┃ ✨ Build completed ${colours.textGreen}successfully${colours.reset} in ${formatDuration(milliseconds)}`,
+			`┃ ✨ Build completed ${colors.textGreen}successfully${colors.reset} in ${formatDuration(milliseconds)}`,
 		);
 	},
 
 	buildFailed: (error: unknown) => {
 		if (silent) return;
 
-		console.error(`${colours.textRed}Build failed${colours.reset}`);
+		console.error(`${colors.textRed}Build failed${colors.reset}`);
 		console.error(error);
 	},
 	buildStart: () => {
@@ -44,7 +44,7 @@ const createBuildLogger = (silent?: boolean): BuildLogger => ({
 		const diff = process.hrtime(startTime);
 		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
 		console.log(
-			`\n${formatBadge("READY", colours.bgLimeGreen, colours.textGreen)} Build completed ${colours.textGreen}successfully${colours.reset} in ${formatDuration(milliseconds)}\n`,
+			`\n${formatBadge("READY", colors.bgLimeGreen, colors.textGreen)} Build completed ${colors.textGreen}successfully${colors.reset} in ${formatDuration(milliseconds)}\n`,
 		);
 	},
 

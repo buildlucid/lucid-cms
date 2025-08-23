@@ -1,6 +1,6 @@
 import type CustomField from "../../custom-fields/custom-field.js";
 import CheckboxCustomField from "../../custom-fields/fields/checkbox.js";
-import ColourCustomField from "../../custom-fields/fields/colour.js";
+import ColorCustomField from "../../custom-fields/fields/color.js";
 import DateTimeCF from "../../custom-fields/fields/datetime.js";
 import JSONCF from "../../custom-fields/fields/json.js";
 import LinkCustomField from "../../custom-fields/fields/link.js";
@@ -80,8 +80,8 @@ class FieldBuilder {
 		this.meta.fieldKeys.push(key);
 		return this;
 	}
-	public addColour(key: string, props?: CFProps<"colour">) {
-		this.fields.set(key, new ColourCustomField(key, props));
+	public addColor(key: string, props?: CFProps<"color">) {
+		this.fields.set(key, new ColorCustomField(key, props));
 		this.meta.fieldKeys.push(key);
 		return this;
 	}

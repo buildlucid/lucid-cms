@@ -276,7 +276,7 @@ const promoteVersion: ServiceFn<
 		collection: collectionRes.data,
 		documentId: data.documentId,
 		versionId: createVersionRes.data.id,
-		localisation: context.config.localisation,
+		localization: context.config.localization,
 		bricks: DocumentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,

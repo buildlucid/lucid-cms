@@ -55,19 +55,19 @@ const versionPromoteHandler =
 				slug: fieldResToSchema(
 					constants.fields.slug.key,
 					targetCollectionRes.data.useTranslations,
-					context.config.localisation.defaultLocale,
+					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
 				),
 				parentPage: fieldResToSchema(
 					constants.fields.parentPage.key,
 					false,
-					context.config.localisation.defaultLocale,
+					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
 				),
 				fullSlug: fieldResToSchema(
 					constants.fields.fullSlug.key,
 					targetCollectionRes.data.useTranslations,
-					context.config.localisation.defaultLocale,
+					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
 				),
 			},
@@ -102,7 +102,7 @@ const versionPromoteHandler =
 				const circularParentsRes = await checkCircularParents(context, {
 					documentId: data.data.documentId,
 					versionType: data.data.versionType,
-					defaultLocale: context.config.localisation.defaultLocale,
+					defaultLocale: context.config.localization.defaultLocale,
 					fields: {
 						parentPage: parentPage,
 					},
@@ -111,7 +111,7 @@ const versionPromoteHandler =
 				if (circularParentsRes.error) return circularParentsRes;
 
 				const parentFieldsRes = await getParentFields(context, {
-					defaultLocale: context.config.localisation.defaultLocale,
+					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.versionType,
 					fields: {
 						parentPage: parentPage,
@@ -126,7 +126,7 @@ const versionPromoteHandler =
 			// fullSlug construction
 			const fullSlugRes = constructParentFullSlug({
 				parentFields: parentFieldsData,
-				localisation: context.config.localisation,
+				localization: context.config.localization,
 				collection: targetCollectionRes.data,
 				fields: {
 					slug: slug,
@@ -136,7 +136,7 @@ const versionPromoteHandler =
 
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
-				defaultLocale: context.config.localisation.defaultLocale,
+				defaultLocale: context.config.localization.defaultLocale,
 				collection: targetCollectionRes.data,
 				fields: {
 					fullSlug: fullSlug,

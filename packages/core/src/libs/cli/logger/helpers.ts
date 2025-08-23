@@ -1,4 +1,4 @@
-export const colours = {
+export const colors = {
 	bgBlue: "\x1b[44m",
 	bgYellow: "\x1b[43m",
 	bgGreen: "\x1b[42m",
@@ -14,8 +14,8 @@ export const colours = {
 	bold: "\x1b[1m",
 } as const;
 
-export const formatBadge = (text: string, bg: string, textColour: string) =>
-	`${bg}${textColour}${colours.bold} ${text} ${colours.reset}`;
+export const formatBadge = (text: string, bg: string, textColor: string) =>
+	`${bg}${textColor}${colors.bold} ${text} ${colors.reset}`;
 
 export const formatDuration = (milliseconds: number): string => {
 	if (milliseconds < 1000) {
@@ -29,4 +29,4 @@ export const formatFileSize = (bytes: number): string => {
 	return `${mb.toFixed(2)}MB`;
 };
 
-export const divider = `${colours.textGray}${"─".repeat(70)}${colours.reset}`;
+export const divider = `${colors.textGray}${"─".repeat(70)}${colors.reset}`;

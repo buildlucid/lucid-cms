@@ -1,4 +1,4 @@
-import { colours } from "./helpers.js";
+import { colors } from "./helpers.js";
 
 export type SharedLogger = {
 	error: (message: string, error?: unknown) => void;
@@ -10,7 +10,7 @@ const sharedLogger = (silent?: boolean): SharedLogger => ({
 	error: (message: string, error?: unknown) => {
 		if (silent) return;
 
-		console.error(`${colours.textRed}${message}${colours.reset}`);
+		console.error(`${colors.textRed}${message}${colors.reset}`);
 		if (error) {
 			console.error(error);
 		}
@@ -18,12 +18,12 @@ const sharedLogger = (silent?: boolean): SharedLogger => ({
 	info: (message: string) => {
 		if (silent) return;
 
-		console.log(`${colours.textBlue}${message}${colours.reset}`);
+		console.log(`${colors.textBlue}${message}${colors.reset}`);
 	},
 	warn: (message: string) => {
 		if (silent) return;
 
-		console.warn(`${colours.textYellow}${message}${colours.reset}`);
+		console.warn(`${colors.textYellow}${message}${colors.reset}`);
 	},
 });
 

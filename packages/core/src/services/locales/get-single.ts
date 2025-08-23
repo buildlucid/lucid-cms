@@ -15,7 +15,7 @@ const getSingle: ServiceFn<
 	const Locales = Repository.get("locales", context.db, context.config.db);
 	const LocalesFormatter = Formatter.get("locales");
 
-	const configLocale = context.config.localisation.locales.find(
+	const configLocale = context.config.localization.locales.find(
 		(locale) => locale.code === data.code,
 	);
 
@@ -59,7 +59,7 @@ const getSingle: ServiceFn<
 		data: LocalesFormatter.formatSingle({
 			locale: localeRes.data,
 			configLocale: configLocale,
-			defaultLocale: context.config.localisation.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 		}),
 	};
 };

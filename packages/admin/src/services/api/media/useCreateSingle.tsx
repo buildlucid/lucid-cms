@@ -16,7 +16,7 @@ interface Params {
 	width?: number;
 	height?: number;
 	blurHash?: string;
-	averageColour?: string;
+	averageColor?: string;
 	isDark?: boolean;
 	isLight?: boolean;
 }

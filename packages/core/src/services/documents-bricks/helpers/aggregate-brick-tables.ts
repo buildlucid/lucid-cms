@@ -20,12 +20,12 @@ const aggregateBrickTables = (params: {
 	bricks?: Array<BrickInputSchema> | Array<BrickResponse>;
 	fields?: Array<FieldInputSchema> | Array<FieldResponse>;
 	collection: CollectionBuilder;
-	localisation: Config["localisation"];
+	localization: Config["localization"];
 }) => {
 	const brickTables: Array<InsertBrickTables> = [];
 	const brickKeyTableNameMap: Map<string, LucidBrickTableName> = new Map();
 
-	const locales = params.localisation.locales.map((locale) => locale.code);
+	const locales = params.localization.locales.map((locale) => locale.code);
 
 	if (params.fields !== undefined && params.fields.length > 0) {
 		constructBrickTable(brickTables, {
@@ -34,9 +34,9 @@ const aggregateBrickTables = (params: {
 			documentId: params.documentId,
 			versionId: params.versionId,
 			targetFields: params.fields,
-			localisation: {
+			localization: {
 				locales: locales,
-				defaultLocale: params.localisation.defaultLocale,
+				defaultLocale: params.localization.defaultLocale,
 			},
 			brickKeyTableNameMap: brickKeyTableNameMap,
 			order: 0,
@@ -55,9 +55,9 @@ const aggregateBrickTables = (params: {
 				documentId: params.documentId,
 				versionId: params.versionId,
 				targetFields: brick.fields || [],
-				localisation: {
+				localization: {
 					locales: locales,
-					defaultLocale: params.localisation.defaultLocale,
+					defaultLocale: params.localization.defaultLocale,
 				},
 				brick: brick,
 				brickKeyTableNameMap: brickKeyTableNameMap,

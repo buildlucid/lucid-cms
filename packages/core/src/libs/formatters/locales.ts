@@ -6,11 +6,11 @@ import type { Config } from "../../types.js";
 export default class LocalesFormatter {
 	formatMultiple = (props: {
 		locales: Select<LucidLocales>[];
-		localisation: Config["localisation"];
+		localization: Config["localization"];
 	}): LocalesResponse[] => {
 		return props.locales
 			.map((l) => {
-				const configLocale = props.localisation.locales.find(
+				const configLocale = props.localization.locales.find(
 					(locale) => locale.code === l.code,
 				);
 				if (!configLocale) {
@@ -19,15 +19,15 @@ export default class LocalesFormatter {
 				return this.formatSingle({
 					locale: l,
 					configLocale: configLocale,
-					defaultLocale: props.localisation.defaultLocale,
+					defaultLocale: props.localization.defaultLocale,
 				});
 			})
 			.filter((l) => l !== null);
 	};
 	formatSingle = (props: {
 		locale: Select<LucidLocales>;
-		configLocale: Config["localisation"]["locales"][0];
-		defaultLocale: Config["localisation"]["defaultLocale"];
+		configLocale: Config["localization"]["locales"][0];
+		defaultLocale: Config["localization"]["defaultLocale"];
 	}): LocalesResponse => {
 		return {
 			code: props.locale.code,

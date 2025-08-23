@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import { colours, divider, formatBadge, formatDuration } from "./helpers.js";
+import { colors, divider, formatBadge, formatDuration } from "./helpers.js";
 import sharedLogger, { type SharedLogger } from "./shared-logger.js";
 import type { AddressInfo } from "node:net";
 
@@ -34,17 +34,17 @@ const createDevLogger = (): DevLogger => ({
 
 		console.log(`\n${divider}\n`);
 		console.log(
-			`${formatBadge("READY", colours.bgLimeGreen, colours.textGreen)} ${colours.textLimeGreen}Development server ready${colours.reset} in ${formatDuration(milliseconds)}\n`,
+			`${formatBadge("READY", colors.bgLimeGreen, colors.textGreen)} ${colors.textLimeGreen}Development server ready${colors.reset} in ${formatDuration(milliseconds)}\n`,
 		);
 
 		console.log(
-			`┃ 🔐 Admin panel       ${colours.textBlue}${serverUrl}/admin${colours.reset}`,
+			`┃ 🔐 Admin panel       ${colors.textBlue}${serverUrl}/admin${colors.reset}`,
 		);
 		console.log(
-			`┃ 📖 Documentation     ${colours.textBlue}${constants.documentation}${colours.reset}`,
+			`┃ 📖 Documentation     ${colors.textBlue}${constants.documentation}${colors.reset}`,
 		);
 		console.log(
-			`\n${colours.textGray}Press CTRL-C to stop the server${colours.reset}`,
+			`\n${colors.textGray}Press CTRL-C to stop the server${colors.reset}`,
 		);
 	},
 	...sharedLogger(),

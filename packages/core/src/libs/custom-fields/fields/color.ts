@@ -11,13 +11,13 @@ import type {
 } from "../types.js";
 import type { ServiceResponse } from "../../../types.js";
 
-class ColourCustomField extends CustomField<"colour"> {
-	type = "colour" as const;
+class ColorCustomField extends CustomField<"color"> {
+	type = "color" as const;
 	column = "text_value" as const;
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"colour">) {
+	constructor(key: string, props?: CFProps<"color">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -36,7 +36,7 @@ class ColourCustomField extends CustomField<"colour"> {
 				isDisabled: this.props?.config?.isDisabled,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"colour">;
+		} satisfies CFConfig<"color">;
 	}
 	// Methods
 	getSchemaDefinition(
@@ -59,13 +59,13 @@ class ColourCustomField extends CustomField<"colour"> {
 	formatResponseValue(value?: string | null) {
 		return (value ??
 			this.config.config.default ??
-			null) satisfies CFResponse<"colour">["value"];
+			null) satisfies CFResponse<"color">["value"];
 	}
 	formatResponseMeta() {
-		return null satisfies CFResponse<"colour">["meta"];
+		return null satisfies CFResponse<"color">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
-		// TODO: down the line, add validation for different colour formats - currently accepts any value
+		// TODO: down the line, add validation for different color formats - currently accepts any value
 		const valueSchema = z.string();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -83,4 +83,4 @@ class ColourCustomField extends CustomField<"colour"> {
 	}
 }
 
-export default ColourCustomField;
+export default ColorCustomField;

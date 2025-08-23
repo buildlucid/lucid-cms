@@ -50,7 +50,7 @@ export default defineConfig((env) => ({
 		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET as string,
 		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET as string,
 	},
-	localisation: {
+	localization: {
 		locales: [
 			{
 				label: "English",

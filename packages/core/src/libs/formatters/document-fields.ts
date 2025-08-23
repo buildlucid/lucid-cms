@@ -25,7 +25,7 @@ export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;
 	host: string;
 	collection: CollectionBuilder;
-	localisation: {
+	localization: {
 		locales: string[];
 		default: string;
 	};
@@ -65,7 +65,7 @@ export default class DocumentFieldsFormatter {
 			builder: meta.builder,
 			fieldConfig: meta.builder.fieldTreeNoTab,
 			host: meta.host,
-			localisation: meta.localisation,
+			localization: meta.localization,
 			collection: meta.collection,
 			brickKey: meta.brickKey,
 			config: meta.config,
@@ -98,7 +98,7 @@ export default class DocumentFieldsFormatter {
 						builder: meta.builder,
 						repeaterConfig: config,
 						host: meta.host,
-						localisation: meta.localisation,
+						localization: meta.localization,
 						collection: meta.collection,
 						brickKey: meta.brickKey,
 						repeaterLevel: meta.repeaterLevel || 0,
@@ -128,7 +128,7 @@ export default class DocumentFieldsFormatter {
 					builder: meta.builder,
 					fieldConfig: config,
 					host: meta.host,
-					localisation: meta.localisation,
+					localization: meta.localization,
 					collection: meta.collection,
 					brickKey: meta.brickKey,
 					config: meta.config,
@@ -171,7 +171,7 @@ export default class DocumentFieldsFormatter {
 			const fieldMeta: Record<string, FieldResponseMeta> = {};
 
 			//* populate the translations/meta
-			for (const locale of meta.localisation.locales) {
+			for (const locale of meta.localization.locales) {
 				const localeValue = data.values.find((v) => v.locale === locale);
 
 				if (localeValue) {
@@ -203,7 +203,7 @@ export default class DocumentFieldsFormatter {
 
 		//* otherwise use the value key to just store the default locales value
 		const defaultValue = data.values.find(
-			(f) => f.locale === meta.localisation.default,
+			(f) => f.locale === meta.localization.default,
 		);
 		if (!defaultValue) return null;
 
@@ -272,7 +272,7 @@ export default class DocumentFieldsFormatter {
 					{
 						builder: meta.builder,
 						host: meta.host,
-						localisation: meta.localisation,
+						localization: meta.localization,
 						collection: meta.collection,
 						brickKey: meta.brickKey,
 						fieldConfig: repeaterFields,

@@ -5,7 +5,7 @@ import {
 	UserField,
 	DocumentField,
 	CheckboxField,
-	ColourField,
+	ColorField,
 	JSONField,
 	LinkField,
 	MediaField,
@@ -268,11 +268,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							}}
 						/>
 					</Match>
-					<Match when={fieldConfig().type === "colour"}>
-						<ColourField
+					<Match when={fieldConfig().type === "color"}>
+						<ColorField
 							state={{
 								brickIndex: props.state.brickIndex,
-								fieldConfig: fieldConfig() as CFConfig<"colour">,
+								fieldConfig: fieldConfig() as CFConfig<"color">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
