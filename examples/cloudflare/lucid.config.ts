@@ -14,9 +14,8 @@ export const adapter = cloudflareAdapter();
 export default defineConfig((env) => ({
 	host: env?.LUCID_HOST as string,
 	db: new LibSQLAdapter({
-		// url: "http://127.0.0.1:8081", ,
-		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		authToken: env?.TURSO_AUTH_TOKEN as string,
+		url: env?.LUCID_TURSO_URL as string,
+		authToken: env?.LUCID_TURSO_AUTH_TOKEN as string,
 	}),
 	keys: {
 		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
@@ -39,13 +38,9 @@ export default defineConfig((env) => ({
 	},
 	disableSwagger: true,
 	media: {
-		maxFileSize: 20 * 1024 * 1024, // 20MB
-		processedImageLimit: 10,
-		storeProcessedImages: true,
-		onDemandFormats: true,
 		imageProcessor: passthroughImageProcessor,
 		urlStrategy: (media) => {
-			return `https://media.protodigital.co.uk/${media.key}`;
+			return `${env?.LUCID_MEDIA_URL}/${media.key}`;
 		},
 	},
 	collections: [PageCollection, NewsCollection, SettingsCollection],
@@ -61,14 +56,14 @@ export default defineConfig((env) => ({
 		}),
 		LucidResend({
 			from: {
-				email: "admin@ui.protodigital.co.uk",
-				name: "Lucid",
+				email: env?.LUCID_RESEND_FROM_EMAIL as string,
+				name: env?.LUCID_RESEND_FROM_NAME as string,
 			},
-			apiKey: env?.RESEND_API_KEY as string,
+			apiKey: env?.LUCID_RESEND_API_KEY as string,
 		}),
 		LucidS3({
-			endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-			bucket: "headless-cms",
+			endpoint: env?.LUCID_S3_ENDPOINT as string,
+			bucket: env?.LUCID_S3_BUCKET as string,
 			clientOptions: {
 				region: "auto",
 				accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
