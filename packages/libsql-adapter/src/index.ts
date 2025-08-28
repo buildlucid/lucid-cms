@@ -26,7 +26,7 @@ class LibSQLAdapter extends DatabaseAdapter {
 			plugins: [new ParseJSONResultsPlugin()],
 		});
 	}
-	async initialise() {
+	async initialize() {
 		await sql`PRAGMA foreign_keys = ON`.execute(this.client);
 	}
 	get jsonArrayFrom() {

@@ -28,7 +28,7 @@ class SQLiteAdapter extends DatabaseAdapter {
 			plugins: [new ParseJSONResultsPlugin()],
 		});
 	}
-	async initialise() {
+	async initialize() {
 		await sql`PRAGMA journal_mode = WAL`.execute(this.client);
 		await sql`PRAGMA foreign_keys = ON`.execute(this.client);
 		await sql`PRAGMA synchronous = NORMAL`.execute(this.client);

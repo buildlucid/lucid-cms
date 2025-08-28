@@ -7,7 +7,7 @@ import defaultConfig from "../../constants/default-config.js";
 import CollectionConfigSchema from "../builders/collection-builder/schema.js";
 import BrickConfigSchema from "../builders/brick-builder/schema.js";
 import CustomFieldSchema from "../custom-fields/schema.js";
-import logger, { initialiseLogger } from "../logger/index.js";
+import logger, { initializeLogger } from "../logger/index.js";
 import constants from "../../constants/constants.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 
@@ -16,7 +16,7 @@ let cachedConfig: Config;
 /**
  * Responsible for:
  * - merging the default config with the config
- * - initialising the plugins
+ * - initializing the plugins
  * - validation & checks
  */
 const processConfig = async (
@@ -95,7 +95,7 @@ const processConfig = async (
 			}
 		}
 
-		initialiseLogger({
+		initializeLogger({
 			transport: configRes.logger.transport,
 			level: configRes.logger.level,
 			force: true,

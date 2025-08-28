@@ -104,7 +104,7 @@ const constructBrickTable = (
 	const rowsByLocale = new Map<string, Partial<Insert<LucidBricksTable>>>();
 	const brickIdRefByLocale = new Map<string, number>();
 
-	//* initialise rows for each locale
+	//* initialize rows for each locale
 	for (const locale of params.localization.locales) {
 		const baseRowData: Partial<Insert<LucidBricksTable>> = {
 			collection_key: params.collection.key,

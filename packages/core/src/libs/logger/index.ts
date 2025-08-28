@@ -15,7 +15,7 @@ const shouldLog = (currentLevel: LogLevel, messageLevel: LogLevel): boolean => {
 	return LOG_LEVELS[messageLevel] <= LOG_LEVELS[currentLevel];
 };
 
-export const initialiseLogger = (props?: {
+export const initializeLogger = (props?: {
 	transport?: LogTransport;
 	level?: LogLevel;
 	force?: boolean;
@@ -53,12 +53,12 @@ export const initialiseLogger = (props?: {
 		},
 	} satisfies LucidLogger;
 };
-if (!logger) initialiseLogger();
+if (!logger) initializeLogger();
 
 export const getLogger = (): LucidLogger => {
 	if (!logger) {
 		throw new Error(
-			"Logger has not been initialised. Call initialiseLogger() first.",
+			"Logger has not been initialized. Call initializeLogger() first.",
 		);
 	}
 	return logger;

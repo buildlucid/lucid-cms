@@ -1,6 +1,6 @@
-import enGb from "./en-gb.json" with { type: "json" };
+import en from "./en.json" with { type: "json" };
 
-const selectedLang = enGb;
+const selectedLang = en;
 
 const T = (
 	key: keyof typeof selectedLang,
