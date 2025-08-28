@@ -12,6 +12,7 @@ const installOptionalDeps = async () => {
 	const optionalDeps = [
 		"jiti",
 		"chokidar",
+		"minimatch",
 		"commander",
 		"@inquirer/prompts",
 		"vite-plugin-solid",

@@ -33,12 +33,12 @@ export default defineConfig((env) => ({
 	logger: {
 		level: "silent",
 	},
-	// db: new SQLiteAdapter({
-	// 	database: async () => new Database("db.sqlite"),
-	// }),
-	db: new PostgresAdapter(env?.DATABASE_URL as string, {
-		max: 5,
+	db: new SQLiteAdapter({
+		database: async () => new Database("db.sqlite"),
 	}),
+	// db: new PostgresAdapter(env?.DATABASE_URL as string, {
+	// 	max: 5,
+	// }),
 	// db: new LibSQLAdapter({
 	// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
 	// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
@@ -104,39 +104,6 @@ export default defineConfig((env) => ({
 						});
 					},
 				);
-				// app.get(
-				// 	"/db-test",
-				// 	describeRoute({
-				// 		description: "Lucid Hono Extensions",
-				// 		tags: ["lucid-hono-extensions"],
-				// 		summary: "Testing the lucid hono extensions config",
-				// 		validateResponse: true,
-				// 	}),
-				// 	async (c) => {
-				// 		console.log("Starting raw postgres test");
-
-				// 		// @ts-expect-error
-				// 		const sql = postgres(c.env?.HYPERDRIVE?.connectionString as string, {
-				// 			max: 5,
-				// 			fetch_types: false,
-				// 		});
-
-				// 		try {
-				// 			console.log("About to execute query");
-				// 			const result = await sql`SELECT 1 as test`;
-				// 			console.log("Query completed:", result);
-
-				// 			await sql.end();
-				// 			console.log("Connection closed");
-
-				// 			return c.json({ success: true, result });
-				// 		} catch (error) {
-				// 			console.log("Error:", error);
-				// 			await sql.end();
-				// 			throw error;
-				// 		}
-				// 	},
-				// );
 			},
 		],
 	},
@@ -165,8 +132,8 @@ export default defineConfig((env) => ({
 		}),
 		LucidNodemailer({
 			from: {
-				email: "admin@lucidcms.io",
-				name: "Lucid",
+				email: "team@lucidjs.build",
+				name: "Lucid CMS",
 			},
 			transporter: transporter,
 		}),
@@ -177,19 +144,19 @@ export default defineConfig((env) => ({
 		// 	},
 		// 	apiKey: env?.RESEND_API_KEY as string,
 		// }),
-		LucidS3({
-			endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-			bucket: "headless-cms",
-			clientOptions: {
-				region: "auto",
-				accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
-				secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
-			},
-		}),
-		// LucidLocalStorage({
-		// 	uploadDir: "uploads",
-		// 	secretKey: env?.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		// LucidS3({
+		// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+		// 	bucket: "headless-cms",
+		// 	clientOptions: {
+		// 		region: "auto",
+		// 		accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
+		// 		secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+		// 	},
 		// }),
+		LucidLocalStorage({
+			uploadDir: "uploads",
+			secretKey: env?.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+		}),
 	],
 	// compilerOptions: {
 	// 	outDir: "out",

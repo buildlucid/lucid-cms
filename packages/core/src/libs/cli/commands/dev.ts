@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import createDevLogger from "../logger/dev-logger.js";
 import path from "node:path";
+import { minimatch } from "minimatch";
 
 /**
  * The CLI dev command. Watches for file changes and spawns child processes running the serve command for hot-reloading.
@@ -142,30 +143,51 @@ const devCommand = async (options?: {
 	// TODO: this needs to be configurable, ideally grab from lucid.config
 	const distPath = path.join(process.cwd(), "dist");
 
-	const watcher = chokidar.watch(watchPath, {
-		ignored: [
-			"**/node_modules/**",
-			"**/.git/**",
-			"**/build/**",
-			"**/.lucid/**",
-			"**/uploads/**",
-			distPath,
-			"**/*.log",
-			"**/.DS_Store",
-			"**/Thumbs.db",
-		],
-		ignoreInitial: true,
-		persistent: true,
-		usePolling: false,
-		awaitWriteFinish: {
-			stabilityThreshold: 100,
-			pollInterval: 50,
-		},
-	});
+	const ignorePatterns = [
+		"**/node_modules/**",
+		"**/.git/**",
+		"**/build/**",
+		"**/.lucid/**",
+		"**/uploads/**",
+		distPath,
+		"**/*.log",
+		"**/.DS_Store",
+		"**/Thumbs.db",
+		"*.sqlite",
+		"*.sqlite-shm",
+		"*.sqlite-wal",
+		"**/*.sqlite",
+		"**/*.sqlite-shm",
+		"**/*.sqlite-wal",
+	];
 
-	watcher.on("change", debouncedRestart);
-	watcher.on("add", debouncedRestart);
-	watcher.on("unlink", debouncedRestart);
+	const isIgnoredFile = (filePath: string) => {
+		const relativePath = path.relative(watchPath, filePath);
+		return ignorePatterns.some((pattern) => minimatch(relativePath, pattern));
+	};
+
+	const watcher = chokidar
+		.watch(watchPath, {
+			ignored: ignorePatterns,
+			ignoreInitial: true,
+			persistent: true,
+			usePolling: false,
+			awaitWriteFinish: {
+				stabilityThreshold: 100,
+			},
+		})
+		.on("change", (e) => {
+			if (isIgnoredFile(e)) return;
+			debouncedRestart();
+		})
+		.on("add", (e) => {
+			if (isIgnoredFile(e)) return;
+			debouncedRestart();
+		})
+		.on("unlink", (e) => {
+			if (isIgnoredFile(e)) return;
+			debouncedRestart();
+		});
 
 	setupShutdownHandlers(watcher);
 };

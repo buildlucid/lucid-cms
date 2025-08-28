@@ -94,18 +94,19 @@
         "zod": "^3.25.67"
     },
     "optionalDependencies": {
+        "@inquirer/prompts": "^7.5.3",
         "@lucidcms/admin": "0.12.0-alpha.1",
         "@tailwindcss/vite": "^4.1.4",
         "chokidar": "^4.0.3",
         "commander": "^14.0.0",
-        "@inquirer/prompts": "^7.5.3",
         "jiti": "^2.4.2",
+        "mjml": "^5.0.0-alpha.6",
         "sharp": "^0.34.2",
         "solid-js": "^1.9.5",
         "tailwindcss": "^4.1.4",
+        "minimatch": "^10.0.3",
         "vite": "^6.3.5",
-        "vite-plugin-solid": "^2.11.6",
-        "mjml": "^5.0.0-alpha.6"
+        "vite-plugin-solid": "^2.11.6"
     },
     "volta": {
         "node": "22.15.0"
