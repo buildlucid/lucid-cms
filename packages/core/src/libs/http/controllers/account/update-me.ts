@@ -7,10 +7,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import authenticate from "../../middleware/authenticate.js";
 
@@ -21,13 +21,13 @@ const updateMeController = factory.createHandlers(
 		description: "Update the authenticated user's information.",
 		tags: ["account"],
 		summary: "Update Authenticated User",
-		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerParamaters({
+		responses: honoOpenAPIResponse(),
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.updateMe.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateMe.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

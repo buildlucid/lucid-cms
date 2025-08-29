@@ -7,10 +7,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -24,16 +24,16 @@ const updateSingleController = factory.createHandlers(
 			"Update a single media entry with translations and new upload.",
 		tags: ["media"],
 		summary: "Update Media",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.updateSingle.params,
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.updateSingle.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

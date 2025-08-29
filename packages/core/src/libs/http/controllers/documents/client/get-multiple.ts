@@ -8,9 +8,9 @@ import formatAPIResponse from "../../../utils/build-response.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../../utils/open-api/index.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
@@ -23,11 +23,11 @@ const getMultipleController = factory.createHandlers(
 			"Get multiple documents by filters via the client integration.",
 		tags: ["client-documents"],
 		summary: "Get Multiple Documents",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.client.getMultiple.response),
 			paginated: true,
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.client.getMultiple.params,
 			query: controllerSchemas.client.getMultiple.query.string,
 			headers: {

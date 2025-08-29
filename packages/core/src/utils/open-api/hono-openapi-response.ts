@@ -61,7 +61,7 @@ const linksObject: OpenAPIV3.SchemaObject = {
 
 export const defaultErrorResponse = {
 	type: "object",
-	description: T("swagger_response_default"),
+	description: T("open_api_response_default"),
 	properties: {
 		status: {
 			type: "number",
@@ -89,9 +89,9 @@ export const defaultErrorResponse = {
 } as const;
 
 /**
- * Used to construct a response object for Swagger
+ * Used to construct a response object for OpenAPI
  */
-const honoSwaggerResponse = (config?: {
+const honoOpenAPIResponse = (config?: {
 	schema?: unknown;
 	paginated?: boolean;
 	noProperties?: boolean;
@@ -103,7 +103,7 @@ const honoSwaggerResponse = (config?: {
 
 	if (config?.schema) {
 		response[200] = {
-			description: T("swagger_response_200"),
+			description: T("open_api_response_200"),
 			content: {
 				"application/json": {
 					schema:
@@ -122,7 +122,7 @@ const honoSwaggerResponse = (config?: {
 		};
 	} else {
 		response[204] = {
-			description: T("swagger_response_204"),
+			description: T("open_api_response_204"),
 			content: {
 				"application/json": {
 					schema: {
@@ -135,7 +135,7 @@ const honoSwaggerResponse = (config?: {
 	}
 
 	response.default = {
-		description: T("swagger_response_default"),
+		description: T("open_api_response_default"),
 		content: {
 			"application/json": {
 				schema: defaultErrorResponse,
@@ -146,4 +146,4 @@ const honoSwaggerResponse = (config?: {
 	return response;
 };
 
-export default honoSwaggerResponse;
+export default honoOpenAPIResponse;

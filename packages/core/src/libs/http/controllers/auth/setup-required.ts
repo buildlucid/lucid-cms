@@ -6,7 +6,7 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import { honoSwaggerResponse } from "../../../../utils/swagger/index.js";
+import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import T from "../../../../translations/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
 
@@ -18,7 +18,7 @@ const setupRequiredController = factory.createHandlers(
 			"Checks if initial user setup is required. Returns true if no users exist in the system.",
 		tags: ["auth"],
 		summary: "Check Setup Required",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.setupRequired.response),
 		}),
 		validateResponse: true,

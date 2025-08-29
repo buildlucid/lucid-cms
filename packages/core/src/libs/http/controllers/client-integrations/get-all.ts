@@ -7,7 +7,7 @@ import services from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoSwaggerResponse } from "../../../../utils/swagger/index.js";
+import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 
 const factory = createFactory();
@@ -17,7 +17,7 @@ const getAllController = factory.createHandlers(
 		description: "Returns all client integrations.",
 		tags: ["client-integrations"],
 		summary: "Get All Client Integrations",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 		validateResponse: true,

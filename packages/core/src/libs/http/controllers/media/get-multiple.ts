@@ -8,9 +8,9 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import contentLocale from "../../middleware/content-locale.js";
@@ -23,11 +23,11 @@ const getMultipleController = factory.createHandlers(
 		description: "Get a multiple media items.",
 		tags: ["media"],
 		summary: "Get Multiple Media",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			query: controllerSchemas.getMultiple.query.string,
 			headers: {
 				contentLocale: true,

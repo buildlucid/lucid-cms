@@ -8,9 +8,9 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -23,10 +23,10 @@ const resendSingleController = factory.createHandlers(
 		description: "Resends the email with the given ID.",
 		tags: ["emails"],
 		summary: "Resend Email",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.resendSingle.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.resendSingle.params,
 			headers: {
 				csrf: true,

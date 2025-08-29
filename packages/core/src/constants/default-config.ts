@@ -5,7 +5,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 		level: "info",
 	},
 	email: undefined,
-	disableSwagger: false,
+	disableOpenAPI: false,
 	localization: {
 		locales: [
 			{

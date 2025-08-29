@@ -8,10 +8,10 @@ import formatAPIResponse from "../../../utils/build-response.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../../utils/open-api/index.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import validate from "../../../middleware/validate.js";
 
@@ -23,13 +23,13 @@ const processMediaController = factory.createHandlers(
 			"Get a single media item by key and return the URL. This supports processing and fallback images.",
 		tags: ["client-media"],
 		summary: "Get Media URL",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.client.processMedia.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.client.processMedia.params,
 		}),
-		requestBody: honoSwaggerRequestBody(
+		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.client.processMedia.body,
 		),
 		validateResponse: true,

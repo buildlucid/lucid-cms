@@ -36,7 +36,7 @@ export default defineConfig((env) => ({
 		],
 		defaultLocale: "en",
 	},
-	disableSwagger: true,
+	disableOpenAPI: true,
 	media: {
 		imageProcessor: passthroughImageProcessor,
 		urlStrategy: (media) => {

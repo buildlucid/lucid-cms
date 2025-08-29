@@ -8,9 +8,9 @@ import formatAPIResponse from "../../../utils/build-response.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../../utils/open-api/index.js";
 import validate from "../../../middleware/validate.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
@@ -22,10 +22,10 @@ const getSingleController = factory.createHandlers(
 		description: "Get a single document by filters via the client integration.",
 		tags: ["client-documents"],
 		summary: "Get Document",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.client.getSingle.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.client.getSingle.params,
 			query: controllerSchemas.client.getSingle.query.string,
 			headers: {

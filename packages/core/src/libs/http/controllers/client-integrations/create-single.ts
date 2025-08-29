@@ -8,10 +8,10 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerRequestBody,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIRequestBody,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -24,15 +24,15 @@ const createSingleController = factory.createHandlers(
 			"Creates a new client integration that can be used to authenticate client endpoints.",
 		tags: ["client-integrations"],
 		summary: "Create Client Integration",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.createSingle.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

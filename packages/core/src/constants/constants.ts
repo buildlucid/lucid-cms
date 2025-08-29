@@ -3,7 +3,7 @@ import permissionGroups from "./permission-groups.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,
-	swaggerRoutePrefix: "/documentation",
+	openAPIDocsRoute: "/documentation",
 	headers: {
 		csrf: "_csrf",
 		contentLocale: "lucid-content-locale",

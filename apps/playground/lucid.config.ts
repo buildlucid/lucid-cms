@@ -63,7 +63,7 @@ export default defineConfig((env) => ({
 		],
 		defaultLocale: "en",
 	},
-	disableSwagger: false,
+	disableOpenAPI: false,
 	media: {
 		maxFileSize: 200 * 1024 * 1024, // 200MB
 		processedImageLimit: 10,

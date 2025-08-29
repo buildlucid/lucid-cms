@@ -8,10 +8,10 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerRequestBody,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIRequestBody,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -25,11 +25,11 @@ const createVersionController = factory.createHandlers(
 			"Create a new version for a single document for a given collection key and document ID.",
 		tags: ["documents"],
 		summary: "Create Document Version",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.createVersion.response),
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.createVersion.body),
-		parameters: honoSwaggerParamaters({
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.createVersion.body),
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.createVersion.params,
 			headers: {
 				csrf: true,

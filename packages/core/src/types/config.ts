@@ -173,8 +173,8 @@ export interface LucidConfig {
 		/** Custom log transport. If not provided, logs will default to console output. */
 		transport?: LogTransport;
 	};
-	/** Disables the swagger documentation site. */
-	disableSwagger?: boolean;
+	/** Disables the OpenAPI documentation site. */
+	disableOpenAPI?: boolean;
 	/** Localization settings. */
 	localization?: {
 		/** A list of locales you want to write content in. */
@@ -276,7 +276,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		};
 		strategy: EmailStrategy;
 	};
-	disableSwagger: boolean;
+	disableOpenAPI: boolean;
 	localization: {
 		locales: {
 			label: string;

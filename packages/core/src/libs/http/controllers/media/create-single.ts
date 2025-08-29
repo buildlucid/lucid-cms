@@ -7,10 +7,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -23,15 +23,15 @@ const createSingleController = factory.createHandlers(
 		description: "Creates a single media item.",
 		tags: ["media"],
 		summary: "Create Media",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.createSingle.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

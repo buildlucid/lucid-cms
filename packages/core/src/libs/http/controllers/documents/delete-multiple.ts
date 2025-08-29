@@ -6,10 +6,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerRequestBody,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIRequestBody,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -22,11 +22,11 @@ const deleteMultipleController = factory.createHandlers(
 		description: "Delete a multiple documents for a given collection.",
 		tags: ["documents"],
 		summary: "Delete Multiple Documents",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.deleteMultiple.body),
-		parameters: honoSwaggerParamaters({
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.deleteMultiple.body),
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.deleteMultiple.params,
 			headers: {
 				csrf: true,

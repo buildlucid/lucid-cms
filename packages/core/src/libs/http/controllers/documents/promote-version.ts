@@ -7,10 +7,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerRequestBody,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIRequestBody,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -23,11 +23,11 @@ const promoteVersionController = factory.createHandlers(
 		description: "Promote a document version to a new version type.",
 		tags: ["documents"],
 		summary: "Promote Document Version",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.promoteVersion.body),
-		parameters: honoSwaggerParamaters({
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.promoteVersion.body),
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.promoteVersion.params,
 			headers: {
 				csrf: true,

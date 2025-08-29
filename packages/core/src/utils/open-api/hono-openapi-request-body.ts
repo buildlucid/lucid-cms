@@ -1,7 +1,7 @@
 import z, { type ZodType } from "zod/v4";
 import type { OpenAPIV3 } from "openapi-types";
 
-const honoSwaggerRequestBody = (
+const honoOpenAPIRequestBody = (
 	schema: ZodType,
 ): OpenAPIV3.RequestBodyObject => {
 	return {
@@ -13,4 +13,4 @@ const honoSwaggerRequestBody = (
 	};
 };
 
-export default honoSwaggerRequestBody;
+export default honoOpenAPIRequestBody;

@@ -6,9 +6,9 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -22,10 +22,10 @@ const clearSingleProcessedController = factory.createHandlers(
 			"Clear all processed images for a single media item based on the given key.",
 		tags: ["media"],
 		summary: "Clear Processed Images",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.clearSingleProcessed.params,
 			headers: {
 				csrf: true,

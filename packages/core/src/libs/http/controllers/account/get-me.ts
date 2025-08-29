@@ -7,7 +7,7 @@ import services from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoSwaggerResponse } from "../../../../utils/swagger/index.js";
+import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
 
@@ -18,7 +18,7 @@ const getMeController = factory.createHandlers(
 		description: "Returns the authenticated user based on the access token.",
 		tags: ["account"],
 		summary: "Get Authenticated User",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
 		validateResponse: true,

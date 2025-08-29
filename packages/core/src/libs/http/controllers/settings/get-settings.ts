@@ -7,7 +7,7 @@ import services from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoSwaggerResponse } from "../../../../utils/swagger/index.js";
+import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 
 const factory = createFactory();
@@ -17,7 +17,7 @@ const getSettingsController = factory.createHandlers(
 		description: "Returns the site settings including meta data.",
 		tags: ["settings"],
 		summary: "Get Settings",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
 		validateResponse: true,

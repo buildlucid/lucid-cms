@@ -5,9 +5,9 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerParamaters,
-	honoSwaggerResponse,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -20,10 +20,10 @@ const deleteSingleController = factory.createHandlers(
 		description: "Delete a single client integration by ID.",
 		tags: ["client-integrations"],
 		summary: "Delete Client Integration",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},

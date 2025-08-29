@@ -125,7 +125,7 @@ const createApp = async (props: {
 		await ext(app, props.config);
 	}
 
-	if (!props.config.disableSwagger) {
+	if (!props.config.disableOpenAPI) {
 		app.get(
 			"/openapi",
 			openAPISpecs(app, {
@@ -226,7 +226,7 @@ const createApp = async (props: {
 			}),
 		);
 		app.get(
-			constants.swaggerRoutePrefix,
+			constants.openAPIDocsRoute,
 			Scalar({
 				url: "/openapi",
 				theme: "saturn",

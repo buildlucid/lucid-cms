@@ -7,9 +7,9 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 
 const factory = createFactory();
 
@@ -18,8 +18,8 @@ const verifyResetPasswordController = factory.createHandlers(
 		description: "Verifies the password reset token is valid.",
 		tags: ["account"],
 		summary: "Verify Reset Token",
-		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerParamaters({
+		responses: honoOpenAPIResponse(),
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.verifyResetPassword.params,
 		}),
 		validateResponse: true,

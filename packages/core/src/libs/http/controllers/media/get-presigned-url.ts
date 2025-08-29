@@ -8,10 +8,10 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -24,15 +24,15 @@ const getPresignedUrlController = factory.createHandlers(
 		description: "Get a presigned URL to upload a single media item.",
 		tags: ["media"],
 		summary: "Get Presigned URL",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getPresignedUrl.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.getPresignedUrl.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.getPresignedUrl.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

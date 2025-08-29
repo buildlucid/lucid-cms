@@ -9,10 +9,10 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
@@ -23,15 +23,15 @@ const sendResetPasswordController = factory.createHandlers(
 			"Sends an email to the given email address informing them to reset their password.",
 		tags: ["account"],
 		summary: "Send Password Reset",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.sendResetPassword.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(
+		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.sendResetPassword.body,
 		),
 		validateResponse: true,

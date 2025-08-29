@@ -7,10 +7,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
@@ -22,13 +22,13 @@ const loginController = factory.createHandlers(
 		tags: ["auth"],
 		summary: "Login",
 
-		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerParamaters({
+		responses: honoOpenAPIResponse(),
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.login.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.login.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

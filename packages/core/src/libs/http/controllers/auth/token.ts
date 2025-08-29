@@ -3,9 +3,9 @@ import { describeRoute } from "hono-openapi";
 import services from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+} from "../../../../utils/open-api/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
@@ -16,8 +16,8 @@ const tokenController = factory.createHandlers(
 			"Verifies the refresh token and issues a new access and refresh token.",
 		tags: ["auth"],
 		summary: "Refresh Token",
-		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerParamaters({
+		responses: honoOpenAPIResponse(),
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},

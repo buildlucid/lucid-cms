@@ -9,10 +9,10 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
@@ -23,13 +23,13 @@ const setupController = factory.createHandlers(
 			"Creates the initial admin user. This endpoint can only be used when no users exist in the system.",
 		tags: ["auth"],
 		summary: "Initial Admin Setup",
-		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerParamaters({
+		responses: honoOpenAPIResponse(),
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.setup.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.setup.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

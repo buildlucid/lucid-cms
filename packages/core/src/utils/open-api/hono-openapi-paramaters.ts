@@ -4,9 +4,9 @@ import type { DescribeRouteOptions } from "hono-openapi";
 import type { OpenAPIV3 } from "openapi-types";
 
 /**
- * Used to construct paramaters JSON schema for Swagger
+ * Used to construct paramaters JSON schema for OpenAPI
  */
-const honoSwaggerParamaters = (props: {
+const honoOpenAPIParamaters = (props: {
 	headers?: {
 		// undefine means dont include in the schema, boolean means required or not
 		csrf?: boolean;
@@ -24,7 +24,7 @@ const honoSwaggerParamaters = (props: {
 			in: "header",
 			name: "_csrf",
 			required: props.headers.csrf,
-			description: T("swagger_csrf_header_description"),
+			description: T("open_api_csrf_header_description"),
 			schema: {
 				type: "string",
 			},
@@ -35,7 +35,7 @@ const honoSwaggerParamaters = (props: {
 			in: "header",
 			name: "lucid-content-locale",
 			required: props.headers.contentLocale,
-			description: T("swagger_content_locale_header_description"),
+			description: T("open_api_content_locale_header_description"),
 			example: "en",
 			schema: {
 				type: "string",
@@ -47,7 +47,7 @@ const honoSwaggerParamaters = (props: {
 			in: "header",
 			name: "Authorization",
 			required: props.headers.authorization,
-			description: T("swagger_authorization_header_description"),
+			description: T("open_api_authorization_header_description"),
 			schema: {
 				type: "string",
 			},
@@ -93,4 +93,4 @@ const honoSwaggerParamaters = (props: {
 	return paramaters;
 };
 
-export default honoSwaggerParamaters;
+export default honoOpenAPIParamaters;

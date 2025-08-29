@@ -7,10 +7,10 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
-	honoSwaggerRequestBody,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
+} from "../../../../utils/open-api/index.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
@@ -20,14 +20,14 @@ const resetPasswordController = factory.createHandlers(
 		description: "Resets the password for the authenticated user.",
 		tags: ["account"],
 		summary: "Reset Password",
-		responses: honoSwaggerResponse(),
-		parameters: honoSwaggerParamaters({
+		responses: honoOpenAPIResponse(),
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},
 			params: controllerSchemas.resetPassword.params,
 		}),
-		requestBody: honoSwaggerRequestBody(controllerSchemas.resetPassword.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.resetPassword.body),
 		validateResponse: true,
 	}),
 	validateCSRF,

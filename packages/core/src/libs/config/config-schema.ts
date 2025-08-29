@@ -47,7 +47,7 @@ const ConfigSchema = z.object({
 		level: LogLevelSchema,
 		transport: LogTransportSchema.optional(),
 	}),
-	disableSwagger: z.boolean(),
+	disableOpenAPI: z.boolean(),
 	localization: z
 		.object({
 			locales: z.array(

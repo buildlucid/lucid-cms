@@ -8,9 +8,9 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerParamaters,
-	honoSwaggerResponse,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 
@@ -21,10 +21,10 @@ const getSingleController = factory.createHandlers(
 		description: "Get a single collection instance.",
 		tags: ["collections"],
 		summary: "Get Collection",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.getSingle.params,
 		}),
 		validateResponse: true,

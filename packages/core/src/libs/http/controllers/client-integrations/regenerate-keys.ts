@@ -8,9 +8,9 @@ import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoSwaggerParamaters,
-	honoSwaggerResponse,
-} from "../../../../utils/swagger/index.js";
+	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
+} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
@@ -22,10 +22,10 @@ const regenerateKeysController = factory.createHandlers(
 		description: "Regenerates the API key for the given client integration.",
 		tags: ["client-integrations"],
 		summary: "Regenerate Client Integration API Key",
-		responses: honoSwaggerResponse({
+		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
 		}),
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
 			},

@@ -4,8 +4,8 @@ import uploadSingle from "../services/upload-single-endpoint.js";
 import {
 	serviceWrapper,
 	LucidAPIError,
-	honoSwaggerResponse,
-	honoSwaggerParamaters,
+	honoOpenAPIResponse,
+	honoOpenAPIParamaters,
 } from "@lucidcms/core/api";
 import type { PluginOptions } from "../types/types.js";
 import { createFactory } from "hono/factory";
@@ -20,10 +20,10 @@ const uploadController = (pluginOptions: PluginOptions) =>
 			description: "Upload a single media file.",
 			tags: ["localstorage-plugin"],
 			summary: "Upload File",
-			parameters: honoSwaggerParamaters({
+			parameters: honoOpenAPIParamaters({
 				query: controllerSchemas.upload.query.string,
 			}),
-			responses: honoSwaggerResponse({
+			responses: honoOpenAPIResponse({
 				noProperties: true,
 			}),
 			validateResponse: true,

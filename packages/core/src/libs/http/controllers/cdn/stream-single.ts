@@ -6,8 +6,8 @@ import { describeRoute } from "hono-openapi";
 import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoSwaggerParamaters } from "../../../../utils/swagger/index.js";
-import { defaultErrorResponse } from "../../../../utils/swagger/hono-swagger-response.js";
+import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
+import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-response.js";
 import { Readable } from "node:stream";
 
 const factory = createFactory();
@@ -22,7 +22,7 @@ const streamSingleController = factory.createHandlers(
 			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
 		tags: ["cdn"],
 		summary: "Stream Media",
-		parameters: honoSwaggerParamaters({
+		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.streamSingle.params,
 			query: controllerSchemas.streamSingle.query.string,
 		}),
