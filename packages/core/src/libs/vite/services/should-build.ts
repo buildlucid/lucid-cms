@@ -1,7 +1,6 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import getBuildMetadata from "./get-build-metadata.js";
-import constants from "../../../constants/constants.js";
 import getPaths from "./get-paths.js";
 import generateBuildMetadata from "../generators/build-metadata.js";
 import getConfigPath from "../../config/get-config-path.js";

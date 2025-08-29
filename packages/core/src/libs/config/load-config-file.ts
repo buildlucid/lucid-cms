@@ -8,6 +8,7 @@ import type {
 	LucidAdapterDefineConfig,
 	LucidAdapter,
 } from "../adapter/types.js";
+import type { ZodType } from "zod/v4";
 
 export const loadConfigFile = async (props?: {
 	path?: string;
@@ -15,6 +16,8 @@ export const loadConfigFile = async (props?: {
 }): Promise<{
 	config: Config;
 	adapter?: LucidAdapter;
+	envSchema?: ZodType;
+	env: Record<string, unknown> | undefined;
 }> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
@@ -27,6 +30,7 @@ export const loadConfigFile = async (props?: {
 	const configModule = await jiti.import<{
 		default: LucidAdapterDefineConfig;
 		adapter?: LucidAdapter;
+		envSchema?: ZodType;
 	}>(importPath);
 
 	let env: Record<string, unknown> | undefined;
@@ -38,10 +42,13 @@ export const loadConfigFile = async (props?: {
 	const config = await processConfig(configdefault, props?.bypassCache);
 
 	const adapter = configModule.adapter;
+	const envSchema = configModule.envSchema;
 
 	return {
 		config,
 		adapter,
+		envSchema,
+		env,
 	};
 };
 

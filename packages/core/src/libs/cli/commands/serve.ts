@@ -6,6 +6,8 @@ import createDevLogger from "../logger/dev-logger.js";
 import migrateCommand from "./migrate.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
 import vite from "../../vite/index.js";
+import generateTypes from "../../type-generation/index.js";
+import validateEnvVars from "../utils/validate-env-vars.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
@@ -24,11 +26,29 @@ const serveCommand = async (options?: {
 		const configRes = await loadConfigFile({
 			path: configPath,
 		});
+
+		const [envValid] = await Promise.all([
+			validateEnvVars({
+				envSchema: configRes.envSchema,
+				env: configRes.env,
+			}),
+			generateTypes({
+				envSchema: configRes.envSchema,
+				configPath: configPath,
+			}),
+		]);
+
+		if (!envValid.success) {
+			logger.envValidationFailed(envValid.message);
+			process.exit(1);
+		}
+
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
 			mode: "return",
 		})({
 			skipSyncSteps: !isInitialRun,
+			skipEnvValidation: true,
 		});
 		if (!migrateResult) process.exit(2);
 

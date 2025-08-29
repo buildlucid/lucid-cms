@@ -100,11 +100,11 @@
         "chokidar": "^4.0.3",
         "commander": "^14.0.0",
         "jiti": "^2.4.2",
+        "minimatch": "^10.0.3",
         "mjml": "^5.0.0-alpha.6",
         "sharp": "^0.34.2",
         "solid-js": "^1.9.5",
         "tailwindcss": "^4.1.4",
-        "minimatch": "^10.0.3",
         "vite": "^6.3.5",
         "vite-plugin-solid": "^2.11.6"
     },

@@ -6,6 +6,7 @@
     "type": "module",
     "scripts": {
         "dev": "lucidcms dev",
+        "serve": "lucidcms serve",
         "build": "lucidcms build",
         "migrate": "lucidcms migrate",
         "wrangler:dev": "lucidcms build && wrangler --env dev dev --test-scheduled",

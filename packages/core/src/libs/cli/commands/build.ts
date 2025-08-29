@@ -9,6 +9,7 @@ import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
 import createBuildLogger from "../logger/build-logger.js";
 import constants from "../../../constants/constants.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
+import generateTypes from "../../type-generation/index.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -42,7 +43,13 @@ const buildCommand = async (options?: {
 			return;
 		}
 
-		await Promise.all([prerenderMjmlTemplates(configRes.config)]);
+		await Promise.all([
+			generateTypes({
+				envSchema: configRes.envSchema,
+				configPath: configPath,
+			}),
+			prerenderMjmlTemplates(configRes.config),
+		]);
 
 		const [viteBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config, undefined, options?.silent),
@@ -81,7 +88,7 @@ const partialBuildDirClear = async (outDir: string | undefined) => {
 
 	const preservePaths = [
 		path.join(constants.directories.public, constants.vite.dist),
-		path.join(constants.directories.temp, constants.vite.buildMetadata),
+		// path.join(constants.directories.temp, constants.vite.buildMetadata),
 	];
 
 	for (const item of items) {

@@ -7,7 +7,7 @@ export type VitePaths = {
 	clientMount: string;
 	clientHtml: string;
 	publicDist: string;
-	tempDist: string;
+	lucidDirectory: string;
 	clientDist: string;
 	clientDistHtml: string;
 	buildMetadata: string;
@@ -43,11 +43,7 @@ const getPaths = (config: Config, cwd = process.cwd()): VitePaths => {
 			config.compilerOptions?.outDir,
 			constants.directories.public,
 		),
-		tempDist: join(
-			cwd,
-			config.compilerOptions?.outDir,
-			constants.directories.temp,
-		),
+		lucidDirectory: join(cwd, constants.directories.lucid),
 		clientDist: join(
 			cwd,
 			config.compilerOptions?.outDir,
@@ -63,8 +59,7 @@ const getPaths = (config: Config, cwd = process.cwd()): VitePaths => {
 		),
 		buildMetadata: join(
 			cwd,
-			config.compilerOptions?.outDir,
-			constants.directories.temp,
+			constants.directories.lucid,
 			constants.vite.buildMetadata,
 		),
 		adminPackageJson: adminPackagePath,

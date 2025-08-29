@@ -1,4 +1,4 @@
-import { passthroughImageProcessor } from "@lucidcms/core";
+import { passthroughImageProcessor, z } from "@lucidcms/core";
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import LucidResend from "@lucidcms/plugin-resend";
@@ -11,17 +11,35 @@ import SettingsCollection from "./src/collections/settings.js";
 
 export const adapter = cloudflareAdapter();
 
+export const envSchema = z.object({
+	LUCID_HOST: z.string(),
+	LUCID_TURSO_URL: z.string(),
+	LUCID_TURSO_AUTH_TOKEN: z.string(),
+	LUCID_ENCRYPTION_KEY: z.string(),
+	LUCID_COOKIE_SECRET: z.string(),
+	LUCID_REFRESH_TOKEN_SECRET: z.string(),
+	LUCID_ACCESS_TOKEN_SECRET: z.string(),
+	LUCID_RESEND_FROM_EMAIL: z.string(),
+	LUCID_RESEND_FROM_NAME: z.string(),
+	LUCID_RESEND_API_KEY: z.string(),
+	LUCID_S3_ENDPOINT: z.string(),
+	LUCID_S3_BUCKET: z.string(),
+	LUCID_S3_ACCESS_KEY: z.string(),
+	LUCID_S3_SECRET_KEY: z.string(),
+	LUCID_MEDIA_URL: z.string(),
+});
+
 export default defineConfig((env) => ({
-	host: env?.LUCID_HOST as string,
+	host: env.LUCID_HOST,
 	db: new LibSQLAdapter({
-		url: env?.LUCID_TURSO_URL as string,
-		authToken: env?.LUCID_TURSO_AUTH_TOKEN as string,
+		url: env.LUCID_TURSO_URL,
+		authToken: env.LUCID_TURSO_AUTH_TOKEN,
 	}),
 	keys: {
-		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
-		cookieSecret: env?.LUCID_COOKIE_SECRET as string,
-		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET as string,
-		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET as string,
+		encryptionKey: env.LUCID_ENCRYPTION_KEY,
+		cookieSecret: env.LUCID_COOKIE_SECRET,
+		refreshTokenSecret: env.LUCID_REFRESH_TOKEN_SECRET,
+		accessTokenSecret: env.LUCID_ACCESS_TOKEN_SECRET,
 	},
 	localization: {
 		locales: [
@@ -40,7 +58,7 @@ export default defineConfig((env) => ({
 	media: {
 		imageProcessor: passthroughImageProcessor,
 		urlStrategy: (media) => {
-			return `${env?.LUCID_MEDIA_URL}/${media.key}`;
+			return `${env.LUCID_MEDIA_URL}/${media.key}`;
 		},
 	},
 	collections: [PageCollection, NewsCollection, SettingsCollection],
@@ -56,18 +74,18 @@ export default defineConfig((env) => ({
 		}),
 		LucidResend({
 			from: {
-				email: env?.LUCID_RESEND_FROM_EMAIL as string,
-				name: env?.LUCID_RESEND_FROM_NAME as string,
+				email: env.LUCID_RESEND_FROM_EMAIL,
+				name: env.LUCID_RESEND_FROM_NAME,
 			},
-			apiKey: env?.LUCID_RESEND_API_KEY as string,
+			apiKey: env.LUCID_RESEND_API_KEY,
 		}),
 		LucidS3({
-			endpoint: env?.LUCID_S3_ENDPOINT as string,
-			bucket: env?.LUCID_S3_BUCKET as string,
+			endpoint: env.LUCID_S3_ENDPOINT,
+			bucket: env.LUCID_S3_BUCKET,
 			clientOptions: {
 				region: "auto",
-				accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
-				secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+				accessKeyId: env.LUCID_S3_ACCESS_KEY,
+				secretAccessKey: env.LUCID_S3_SECRET_KEY,
 			},
 		}),
 	],

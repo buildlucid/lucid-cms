@@ -2,6 +2,7 @@ import T from "../../../translations/index.js";
 import fs from "node:fs/promises";
 import type { VitePaths } from "../services/get-paths.js";
 import type { ServiceResponse } from "../../../types.js";
+import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
 
 export type BuildMetadata = {
 	buildTrigger:
@@ -19,7 +20,7 @@ export type BuildMetadata = {
 };
 
 /**
- * Generates the .lucid/client/build-metadata.json file
+ * Generates the .lucid/spa-build-metadata.json file
  */
 const generateBuildMetadata = async (
 	trigger: BuildMetadata["buildTrigger"],
@@ -49,7 +50,7 @@ const generateBuildMetadata = async (
 			corePackageHash: hashes?.corePackage ?? coreStat?.mtimeMs ?? -1,
 		} satisfies BuildMetadata);
 
-		await fs.mkdir(paths.tempDist, { recursive: true });
+		await ensureLucidDirectoryExists();
 		await fs.writeFile(paths.buildMetadata, content, "utf-8");
 
 		return {

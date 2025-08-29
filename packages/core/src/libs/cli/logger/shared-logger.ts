@@ -4,6 +4,7 @@ export type SharedLogger = {
 	error: (message: string, error?: unknown) => void;
 	info: (message: string) => void;
 	warn: (message: string) => void;
+	envValidationFailed: (message?: string) => void;
 };
 
 const sharedLogger = (silent?: boolean): SharedLogger => ({
@@ -24,6 +25,15 @@ const sharedLogger = (silent?: boolean): SharedLogger => ({
 		if (silent) return;
 
 		console.warn(`${colors.textYellow}${message}${colors.reset}`);
+	},
+	envValidationFailed: (message?: string) => {
+		if (silent || !message) return;
+		console.error(
+			`${colors.textRed}❌ Environment validation failed${colors.reset}`,
+		);
+		console.log("");
+		console.log(message);
+		console.log("");
 	},
 });
 

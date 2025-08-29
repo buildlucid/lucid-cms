@@ -21,10 +21,12 @@ export type BuildHandler = (
 export type LucidAdapter = z.infer<typeof LucidAdapterSchema>;
 
 export type LucidAdapterDefineConfig = (
-	env?: Record<string, unknown>,
+	// @ts-expect-error
+	env: LucidCMS.Env,
 ) => LucidConfig;
 
 export type LucidExtendAdapterDefineConfig<T extends unknown[] = []> = (
-	env?: Record<string, unknown>,
+	// @ts-expect-error
+	env: LucidCMS.Env,
 	...args: T
 ) => LucidConfig;

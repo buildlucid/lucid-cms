@@ -5,15 +5,12 @@ import lucidServices from "../../../services/index.js";
 import { confirm } from "@inquirer/prompts";
 import migrateCollections from "../../collection/migrate-collections.js";
 import type { Config } from "../../../types.js";
-import type { CollectionSchema } from "../../collection/schema/types.js";
+import validateEnvVars from "../utils/validate-env-vars.js";
 
 const runSyncTasks = async (
 	config: Config,
 	logger: ReturnType<typeof createMigrationLogger>,
 	mode: "process" | "return",
-	data: {
-		collectionSchemas: CollectionSchema[];
-	},
 ): Promise<boolean> => {
 	logger.syncTasksStart();
 
@@ -51,6 +48,7 @@ const migrateCommand = (props?: {
 }) => {
 	return async (options?: {
 		skipSyncSteps?: boolean;
+		skipEnvValidation?: boolean;
 	}) => {
 		try {
 			const overallStartTime = process.hrtime();
@@ -65,6 +63,18 @@ const migrateCommand = (props?: {
 			} else {
 				const res = await loadConfigFile();
 				config = res.config;
+
+				if (options?.skipEnvValidation !== true) {
+					const envValid = await validateEnvVars({
+						envSchema: res.envSchema,
+						env: res.env,
+					});
+
+					if (!envValid.success) {
+						logger.envValidationFailed(envValid.message);
+						process.exit(1);
+					}
+				}
 			}
 
 			logger.migrationStart();
@@ -105,10 +115,7 @@ const migrateCommand = (props?: {
 			if (!needsCollectionMigrations && !needsDbMigrations) {
 				logger.logsStart();
 				if (!skipSyncSteps) {
-					const syncResult = await runSyncTasks(config, logger, mode, {
-						collectionSchemas:
-							collectionMigrationResult.data?.inferedSchemas ?? [],
-					});
+					const syncResult = await runSyncTasks(config, logger, mode);
 					if (!syncResult && mode === "return") {
 						return false;
 					}
@@ -158,9 +165,7 @@ const migrateCommand = (props?: {
 			}
 
 			//* run sync tasks (locales, collections). We dont skip these as migrations are being ran also.
-			const syncResult = await runSyncTasks(config, logger, mode, {
-				collectionSchemas: collectionMigrationResult.data?.inferedSchemas ?? [],
-			});
+			const syncResult = await runSyncTasks(config, logger, mode);
 			if (!syncResult && mode === "return") {
 				return false;
 			}

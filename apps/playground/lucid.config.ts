@@ -1,4 +1,4 @@
-import lucid, { passthroughImageProcessor } from "@lucidcms/core";
+import { passthroughImageProcessor, z } from "@lucidcms/core";
 import { describeRoute } from "hono-openapi";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
@@ -25,6 +25,15 @@ import SimpleCollection from "./src/collections/simple.js";
 export const adapter = nodeAdapter();
 // export const adapter = cloudflareAdapter();
 
+export const envSchema = z.object({
+	DATABASE_URL: z.string(),
+	LUCID_ENCRYPTION_KEY: z.string(),
+	LUCID_COOKIE_SECRET: z.string(),
+	LUCID_REFRESH_TOKEN_SECRET: z.string(),
+	LUCID_ACCESS_TOKEN_SECRET: z.string(),
+	LUCID_LOCAL_STORAGE_SECRET_KEY: z.email(),
+});
+
 export default defineConfig((env) => ({
 	host: "http://localhost:6543",
 	// cors: {
@@ -45,10 +54,10 @@ export default defineConfig((env) => ({
 	// authToken: env?.TURSO_AUTH_TOKEN as string,
 	// }),
 	keys: {
-		encryptionKey: env?.LUCID_ENCRYPTION_KEY as string,
-		cookieSecret: env?.LUCID_COOKIE_SECRET as string,
-		refreshTokenSecret: env?.LUCID_REFRESH_TOKEN_SECRET as string,
-		accessTokenSecret: env?.LUCID_ACCESS_TOKEN_SECRET as string,
+		encryptionKey: env.LUCID_ENCRYPTION_KEY,
+		cookieSecret: env.LUCID_COOKIE_SECRET,
+		refreshTokenSecret: env.LUCID_REFRESH_TOKEN_SECRET,
+		accessTokenSecret: env.LUCID_ACCESS_TOKEN_SECRET,
 	},
 	localization: {
 		locales: [
@@ -155,7 +164,7 @@ export default defineConfig((env) => ({
 		// }),
 		LucidLocalStorage({
 			uploadDir: "uploads",
-			secretKey: env?.LUCID_LOCAL_STORAGE_SECRET_KEY as string,
+			secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
 		}),
 	],
 	// compilerOptions: {
