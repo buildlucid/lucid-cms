@@ -248,6 +248,7 @@ export interface LucidEmails {
 	last_error_message: string | null;
 	last_attempt_at: TimestampMutateable;
 	last_success_at: TimestampMutateable;
+	simulate: BooleanInt;
 	created_at: TimestampImmutable;
 }
 

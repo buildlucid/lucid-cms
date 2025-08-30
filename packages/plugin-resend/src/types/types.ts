@@ -3,5 +3,8 @@ export type PluginOptions = {
 		email: string;
 		name: string;
 	};
+	/** Your Resend API key */
 	apiKey: string;
+	/** When set to true, the plugin will not send emails but will still return as a success */
+	simulate?: boolean;
 };

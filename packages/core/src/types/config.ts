@@ -190,16 +190,18 @@ export interface LucidConfig {
 	/** Email settings. */
 	email?: {
 		/** The email strategy identifier. */
-		identifier: string;
+		identifier?: string;
 		/** The email from settings. */
-		from: {
+		from?: {
 			/** The email address to send emails from. */
 			email: string;
 			/** The name to send emails from. */
 			name: string;
 		};
 		/** The email strategy services to use. These determine how emails are sent. */
-		strategy: EmailStrategy;
+		strategy?: EmailStrategy;
+		/** When set to true, the plugin will not send emails but will still return as a success */
+		simulate?: boolean;
 	};
 	/** The pre-rendered MJML templates to use. */
 	preRenderedEmailTemplates?: Record<string, string>;
@@ -269,12 +271,13 @@ export interface LucidConfig {
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	email?: {
-		identifier: string;
-		from: {
+		identifier?: string;
+		from?: {
 			email: string;
 			name: string;
 		};
-		strategy: EmailStrategy;
+		strategy?: EmailStrategy;
+		simulate?: boolean;
 	};
 	disableOpenAPI: boolean;
 	localization: {

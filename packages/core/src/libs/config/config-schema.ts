@@ -68,6 +68,7 @@ const ConfigSchema = z.object({
 					name: z.string(),
 				})
 				.optional(),
+			simulate: z.boolean().optional(),
 			strategy: z.unknown().optional(),
 		})
 		.optional(),

@@ -12,8 +12,17 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config.email = {
 		identifier: "nodemailer",
 		from: pluginOptions.from,
+		simulate: pluginOptions.simulate,
 		strategy: async (email, meta) => {
 			try {
+				if (pluginOptions.simulate) {
+					return {
+						success: true,
+						message: T("email_successfully_sent"),
+						data: null,
+					};
+				}
+
 				await verifyTransporter(pluginOptions.transporter);
 
 				const data = await pluginOptions.transporter.sendMail({

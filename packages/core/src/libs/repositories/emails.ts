@@ -31,6 +31,10 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		last_error_message: z.string().nullable(),
 		last_attempt_at: z.union([z.string(), z.date()]).nullable(),
 		last_success_at: z.union([z.string(), z.date()]).nullable(),
+		simulate: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
@@ -53,6 +57,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		last_error_message: this.dbAdapter.getDataType("text"),
 		last_attempt_at: this.dbAdapter.getDataType("timestamp"),
 		last_success_at: this.dbAdapter.getDataType("timestamp"),
+		simulate: this.dbAdapter.getDataType("boolean"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
 	queryConfig = {
@@ -63,6 +68,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				deliveryStatus: "delivery_status",
 				type: "type",
 				template: "template",
+				simulate: "simulate",
 			},
 			sorts: {
 				lastAttemptAt: "last_attempt_at",

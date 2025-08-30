@@ -41,6 +41,7 @@ const resendSingle: ServiceFn<
 			"last_error_message",
 			"last_attempt_at",
 			"last_success_at",
+			"simulate",
 			"created_at",
 		],
 		where: [
@@ -106,6 +107,7 @@ const resendSingle: ServiceFn<
 			last_attempt_at: new Date().toISOString(),
 			strategy_identifier: emailConfigRes.data.identifier,
 			strategy_data: result.data,
+			simulate: emailConfigRes.data.simulate ?? false,
 		},
 	});
 	if (updateRes.error) return updateRes;

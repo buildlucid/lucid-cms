@@ -145,6 +145,7 @@ export default defineConfig((env) => ({
 				name: "Lucid CMS",
 			},
 			transporter: transporter,
+			simulate: true,
 		}),
 		// LucidResend({
 		// 	from: {

@@ -84,6 +84,10 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 								label: T()("type"),
 								value: email.data?.data.type ?? undefined,
 							},
+							{
+								label: T()("simulate"),
+								value: email.data?.data.simulate ? T()("yes") : T()("no"),
+							},
 						]}
 					/>
 					<SectionHeading title={T()("preview")} />

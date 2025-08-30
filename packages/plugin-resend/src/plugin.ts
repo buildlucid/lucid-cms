@@ -4,6 +4,10 @@ import isValidData from "./utils/is-valid-data.js";
 import type { LucidPluginOptions } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types/types.js";
 
+type ResendEmailResponse = {
+	id: string;
+};
+
 /**
  * @todo implement webhooks to better track delivery status
  */
@@ -14,8 +18,17 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config.email = {
 		identifier: "resend",
 		from: pluginOptions.from,
+		simulate: pluginOptions.simulate,
 		strategy: async (email, meta) => {
 			try {
+				if (pluginOptions.simulate) {
+					return {
+						success: true,
+						message: T("email_successfully_sent"),
+						data: null,
+					};
+				}
+
 				const emailPayload = {
 					from: `${email.from.name} <${email.from.email}>`,
 					to: email.to,
@@ -36,12 +49,13 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 					body: JSON.stringify(emailPayload),
 				});
 
-				const data = await response.json();
+				const data = (await response.json()) as ResendEmailResponse;
 
 				if (!response.ok) {
-					throw new Error(
-						data.message || `HTTP ${response.status}: ${response.statusText}`,
-					);
+					return {
+						success: false,
+						message: T("email_failed_to_send"),
+					};
 				}
 
 				return {

@@ -462,5 +462,6 @@
 	"auto_save": "Auto Save",
 	"auto_save_message": "Your changes are automatically saved every 10 seconds.",
 	"disabled": "Disabled",
-	"saving": "Saving Document"
+	"saving": "Saving Document",
+	"simulate": "Simulated"
 }

@@ -136,6 +136,7 @@ export interface LocalesResponse {
 
 export interface EmailResponse {
 	id: number;
+	simulate: boolean;
 	mailDetails: {
 		from: {
 			address: string;

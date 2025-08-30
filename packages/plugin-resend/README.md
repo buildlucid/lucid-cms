@@ -42,6 +42,7 @@ This plugin offers the following configuration options to control email sending 
 |----------|------|-------------|
 | `from` | `object` | The default sender information for emails |
 | `apiKey` | `string` | Your Resend API key |
+| `simulate` | `boolean` | If true, the email will not send, but still register as a success |
 
 ### from
 

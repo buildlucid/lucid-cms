@@ -54,8 +54,8 @@ const sendEmail: ServiceFn<
 
 	const emailRecord = {
 		deliveryStatus: result.success
-			? "delivered"
-			: ("failed" as "delivered" | "failed"),
+			? ("delivered" as const)
+			: ("failed" as const),
 		lastErrorMessage: result.success ? undefined : result.message,
 		lastSuccessAt: result.success ? new Date().toISOString() : undefined,
 	};
@@ -91,6 +91,7 @@ const sendEmail: ServiceFn<
 				last_attempt_at: new Date().toISOString(),
 				strategy_identifier: emailConfigRes.data.identifier,
 				strategy_data: result.data,
+				simulate: emailConfigRes.data.simulate ?? false,
 			},
 			returnAll: true,
 			validation: {
@@ -130,6 +131,7 @@ const sendEmail: ServiceFn<
 			delivery_status: emailRecord.deliveryStatus,
 			last_error_message: emailRecord.lastErrorMessage,
 			last_success_at: emailRecord.lastSuccessAt,
+			simulate: emailConfigRes.data.simulate ?? false,
 		},
 		returnAll: true,
 		validation: {

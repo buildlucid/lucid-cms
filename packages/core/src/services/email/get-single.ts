@@ -38,6 +38,7 @@ const getSingle: ServiceFn<
 			"last_error_message",
 			"last_attempt_at",
 			"last_success_at",
+			"simulate",
 			"created_at",
 		],
 		where: [

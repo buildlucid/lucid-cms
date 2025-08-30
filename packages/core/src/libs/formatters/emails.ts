@@ -1,5 +1,6 @@
 import Formatter from "./index.js";
 import type { EmailResponse } from "../../types/response.js";
+import type { BooleanInt } from "../../types.js";
 
 interface EmailPropT {
 	id: number;
@@ -20,6 +21,7 @@ interface EmailPropT {
 	last_error_message: string | null;
 	last_attempt_at: Date | string | null;
 	last_success_at: Date | string | null;
+	simulate: BooleanInt;
 	created_at: Date | string | null;
 	data?: Record<string, unknown> | null;
 }
@@ -66,6 +68,7 @@ export default class EmailsFormatter {
 			strategyData: props.email.strategy_data,
 			lastSuccessAt: Formatter.formatDate(props.email.last_success_at),
 			lastAttemptAt: Formatter.formatDate(props.email.last_attempt_at),
+			simulate: Formatter.formatBoolean(props.email.simulate),
 			createdAt: Formatter.formatDate(props.email.created_at),
 		};
 	};

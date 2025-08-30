@@ -78,6 +78,10 @@ const emailResponseSchema = z.object({
 	html: z.string().nullable().meta({
 		description: "The rendered HTML content of the email template",
 	}),
+	simulate: z.boolean().meta({
+		description: "Whether the email was simulated and not actually sent",
+		example: true,
+	}),
 	errorMessage: z.string().nullable().meta({
 		description: "The most recent error message if email delivery failed",
 		example: "SMTP connection timed out",

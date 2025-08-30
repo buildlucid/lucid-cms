@@ -55,6 +55,16 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 					),
 				)
 				.addColumn("last_success_at", adapter.getDataType("timestamp"))
+				.addColumn("simulate", adapter.getDataType("boolean"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "false"),
+							),
+						),
+				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(

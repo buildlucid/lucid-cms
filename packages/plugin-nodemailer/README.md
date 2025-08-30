@@ -42,6 +42,7 @@ This plugin offers the following configuration options to control email sending 
 |----------|------|-------------|
 | `from` | `object` | The default sender information for emails |
 | `transporter` | `Transporter` | A configured Nodemailer transporter instance |
+| `simulate` | `boolean` | If true, the email will not send, but still register as a success |
 
 ### from
 
