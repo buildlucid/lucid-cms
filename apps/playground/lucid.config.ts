@@ -31,7 +31,7 @@ export const envSchema = z.object({
 	LUCID_COOKIE_SECRET: z.string(),
 	LUCID_REFRESH_TOKEN_SECRET: z.string(),
 	LUCID_ACCESS_TOKEN_SECRET: z.string(),
-	LUCID_LOCAL_STORAGE_SECRET_KEY: z.email(),
+	LUCID_LOCAL_STORAGE_SECRET_KEY: z.string(),
 });
 
 export default defineConfig((env) => ({

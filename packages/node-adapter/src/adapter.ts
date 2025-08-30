@@ -8,14 +8,14 @@ import {
 import { build } from "rolldown";
 import { writeFile } from "node:fs/promises";
 import nodeExternals from "rollup-plugin-node-externals";
-import type { LucidAdapter } from "@lucidcms/core/types";
+import type { RuntimeAdapter } from "@lucidcms/core/types";
 
 const nodeAdapter = (options?: {
 	server?: {
 		port?: number;
 		hostname?: string;
 	};
-}): LucidAdapter => {
+}): RuntimeAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,

@@ -2,14 +2,9 @@ import { getVitePaths } from "@lucidcms/core/helpers";
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
-import type {
-	LucidAdapterDefineConfig,
-	LucidConfig,
-} from "@lucidcms/core/types";
+import type { AdapterDefineConfig, LucidConfig } from "@lucidcms/core/types";
 
-const defineConfig = (
-	factory: LucidAdapterDefineConfig,
-): LucidAdapterDefineConfig => {
+const defineConfig = (factory: AdapterDefineConfig): AdapterDefineConfig => {
 	return (env) => {
 		const lucidConfig = factory(env);
 		return {

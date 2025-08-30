@@ -17,7 +17,7 @@ import {
 import { serveStatic } from "@hono/node-server/serve-static";
 import { relative } from "node:path";
 import { readFileSync } from "node:fs";
-import type { LucidAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
+import type { RuntimeAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
@@ -25,7 +25,7 @@ const cloudflareAdapter = (options?: {
 		port?: number;
 		hostname?: string;
 	};
-}): LucidAdapter => {
+}): RuntimeAdapter => {
 	let platformProxy: PlatformProxy | undefined;
 
 	return {

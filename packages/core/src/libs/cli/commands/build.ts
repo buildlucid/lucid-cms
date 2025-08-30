@@ -43,13 +43,12 @@ const buildCommand = async (options?: {
 			return;
 		}
 
-		await Promise.all([
-			generateTypes({
-				envSchema: configRes.envSchema,
-				configPath: configPath,
-			}),
-			prerenderMjmlTemplates(configRes.config),
-		]);
+		generateTypes({
+			envSchema: configRes.envSchema,
+			configPath: configPath,
+		});
+
+		await Promise.all([prerenderMjmlTemplates(configRes.config)]);
 
 		const [viteBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config, undefined, options?.silent),

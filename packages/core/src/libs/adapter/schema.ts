@@ -15,7 +15,7 @@ const BuildHandlerSchema = z.custom<BuildHandler>(
 	},
 );
 
-const LucidAdapterSchema = z.object({
+const RuntimeAdapterSchema = z.object({
 	key: z.string(),
 	lucid: z.string(),
 	getEnvVars: z.custom<() => Promise<Record<string, unknown>>>(
@@ -32,4 +32,4 @@ const LucidAdapterSchema = z.object({
 		.optional(),
 });
 
-export default LucidAdapterSchema;
+export default RuntimeAdapterSchema;

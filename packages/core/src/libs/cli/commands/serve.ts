@@ -32,11 +32,12 @@ const serveCommand = async (options?: {
 				envSchema: configRes.envSchema,
 				env: configRes.env,
 			}),
-			generateTypes({
-				envSchema: configRes.envSchema,
-				configPath: configPath,
-			}),
 		]);
+
+		generateTypes({
+			envSchema: configRes.envSchema,
+			configPath: configPath,
+		});
 
 		if (!envValid.success) {
 			logger.envValidationFailed(envValid.message);

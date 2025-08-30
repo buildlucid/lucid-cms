@@ -4,10 +4,7 @@ import { pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
 import processConfig from "./process-config.js";
 import type { Config } from "../../types/config.js";
-import type {
-	LucidAdapterDefineConfig,
-	LucidAdapter,
-} from "../adapter/types.js";
+import type { AdapterDefineConfig, RuntimeAdapter } from "../adapter/types.js";
 import type { ZodType } from "zod/v4";
 
 export const loadConfigFile = async (props?: {
@@ -15,7 +12,7 @@ export const loadConfigFile = async (props?: {
 	bypassCache?: boolean;
 }): Promise<{
 	config: Config;
-	adapter?: LucidAdapter;
+	adapter?: RuntimeAdapter;
 	envSchema?: ZodType;
 	env: Record<string, unknown> | undefined;
 }> => {
@@ -28,8 +25,8 @@ export const loadConfigFile = async (props?: {
 	});
 
 	const configModule = await jiti.import<{
-		default: LucidAdapterDefineConfig;
-		adapter?: LucidAdapter;
+		default: AdapterDefineConfig;
+		adapter?: RuntimeAdapter;
 		envSchema?: ZodType;
 	}>(importPath);
 
@@ -38,7 +35,7 @@ export const loadConfigFile = async (props?: {
 		env = await configModule.adapter?.getEnvVars();
 	}
 
-	const configdefault = configModule.default(env);
+	const configdefault = configModule.default(env || {});
 	const config = await processConfig(configdefault, props?.bypassCache);
 
 	const adapter = configModule.adapter;

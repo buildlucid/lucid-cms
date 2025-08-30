@@ -1,5 +1,5 @@
 import type z from "zod/v4";
-import type LucidAdapterSchema from "./schema.js";
+import type RuntimeAdapterSchema from "./schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { DevLogger } from "../cli/logger/dev-logger.js";
 import type { BuildLogger } from "../cli/logger/build-logger.js";
@@ -18,15 +18,13 @@ export type BuildHandler = (
 	logger: BuildLogger,
 ) => Promise<void>;
 
-export type LucidAdapter = z.infer<typeof LucidAdapterSchema>;
+export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema>;
 
-export type LucidAdapterDefineConfig = (
-	// @ts-expect-error
-	env: LucidCMS.Env,
-) => LucidConfig;
+export interface EnvironmentVariables extends Record<string, unknown> {}
 
-export type LucidExtendAdapterDefineConfig<T extends unknown[] = []> = (
-	// @ts-expect-error
-	env: LucidCMS.Env,
+export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
+
+export type ExtendedAdapterDefineConfig<T extends unknown[] = []> = (
+	env: EnvironmentVariables,
 	...args: T
 ) => LucidConfig;

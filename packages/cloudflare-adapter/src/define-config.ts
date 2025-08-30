@@ -1,10 +1,10 @@
 import type {
-	LucidExtendAdapterDefineConfig,
+	ExtendedAdapterDefineConfig,
 	LucidConfig,
 	RenderedTemplates,
 } from "@lucidcms/core/types";
 
-type CloudfalreConfigFactory = LucidExtendAdapterDefineConfig<
+type CloudfalreConfigFactory = ExtendedAdapterDefineConfig<
 	[
 		meta?: {
 			emailTemplates?: RenderedTemplates;
