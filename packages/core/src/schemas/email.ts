@@ -51,12 +51,6 @@ const emailResponseSchema = z.object({
 				verificationUrl: "https://example.com/verify/token123",
 			},
 		}),
-	deliveryStatus: z
-		.union([z.literal("sent"), z.literal("failed"), z.literal("pending")])
-		.meta({
-			description: "The current delivery status of the email",
-			example: "sent",
-		}),
 	type: z.union([z.literal("external"), z.literal("internal")]).meta({
 		description:
 			"Whether the email was triggered internally from Lucid, or externally via an endpoint",
@@ -66,35 +60,51 @@ const emailResponseSchema = z.object({
 		description: "A unique hash identifier for the email",
 		example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
 	}),
-	sentCount: z.number().meta({
-		description:
-			"Number of times the system has attempted to send this email successfully",
-		example: 1,
-	}),
-	errorCount: z.number().meta({
-		description: "Number of failed delivery attempts",
-		example: 0,
-	}),
 	html: z.string().nullable().meta({
 		description: "The rendered HTML content of the email template",
 	}),
-	simulate: z.boolean().meta({
-		description: "Whether the email was simulated and not actually sent",
-		example: true,
-	}),
-	errorMessage: z.string().nullable().meta({
-		description: "The most recent error message if email delivery failed",
-		example: "SMTP connection timed out",
-	}),
+	transactions: z.array(
+		z.object({
+			deliveryStatus: z
+				.union([z.literal("sent"), z.literal("failed"), z.literal("pending")])
+				.meta({
+					description: "The current delivery status of the email",
+					example: "sent",
+				}),
+			message: z.string().nullable().meta({
+				description: "The message associated with the email delivery",
+				example: "Email sent successfully",
+			}),
+			strategyIdentifier: z.string().meta({
+				description: "The identifier of the strategy used to send the email",
+				example: "smtp",
+			}),
+			strategyData: z
+				.record(z.string(), z.any())
+				.nullable()
+				.meta({
+					description: "The data associated with the email delivery",
+					example: {
+						username: "JohnDoe",
+						accountType: "premium",
+						verificationUrl: "https://example.com/verify/token123",
+					},
+				}),
+			simulate: z.boolean().meta({
+				description: "Whether the email was simulated and not actually sent",
+				example: true,
+			}),
+			createdAt: z.string().nullable().meta({
+				description: "Timestamp when the email was created",
+				example: "2024-04-25T14:30:00.000Z",
+			}),
+		}),
+	),
 	createdAt: z.string().nullable().meta({
 		description: "Timestamp when the email was created",
 		example: "2024-04-25T14:30:00.000Z",
 	}),
-	lastSuccessAt: z.string().nullable().meta({
-		description: "Timestamp when the email was last successfully sent",
-		example: "2024-04-25T14:31:10.000Z",
-	}),
-	lastAttemptAt: z.string().nullable().meta({
+	updatedAt: z.string().nullable().meta({
 		description: "Timestamp of the most recent delivery attempt",
 		example: "2024-04-25T14:31:10.000Z",
 	}),

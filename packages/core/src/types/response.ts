@@ -136,7 +136,6 @@ export interface LocalesResponse {
 
 export interface EmailResponse {
 	id: number;
-	simulate: boolean;
 	mailDetails: {
 		from: {
 			address: string;
@@ -149,18 +148,19 @@ export interface EmailResponse {
 		template: string;
 	};
 	data: Record<string, unknown> | null;
-	deliveryStatus: "sent" | "failed" | "pending";
 	type: "external" | "internal";
 	emailHash: string;
-	sentCount: number;
-	errorCount: number;
 	html: string | null;
-	errorMessage: string | null;
-	strategyData: Record<string, unknown> | null;
+	transactions: {
+		deliveryStatus: "pending" | "delivered" | "failed";
+		message: string | null;
+		strategyIdentifier: string;
+		strategyData: Record<string, unknown> | null;
+		simulate: boolean;
+		createdAt: Date | string | null;
+	}[];
 	createdAt: string | null;
 	updatedAt?: string | null;
-	lastSuccessAt: string | null;
-	lastAttemptAt: string | null;
 }
 
 export interface CollectionResponse {
