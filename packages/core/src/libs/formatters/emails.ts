@@ -1,6 +1,5 @@
 import Formatter from "./index.js";
 import type { EmailResponse } from "../../types/response.js";
-import type { BooleanInt } from "../../types.js";
 
 interface EmailPropT {
 	id: number;
@@ -11,18 +10,10 @@ interface EmailPropT {
 	subject: string;
 	cc: string | null;
 	bcc: string | null;
-	delivery_status: string;
 	template: string;
-	strategy_identifier: string;
-	strategy_data: Record<string, unknown> | null;
 	type: string;
-	sent_count: number;
-	error_count: number;
-	last_error_message: string | null;
-	last_attempt_at: Date | string | null;
-	last_success_at: Date | string | null;
-	simulate: BooleanInt;
 	created_at: Date | string | null;
+	updated_at: Date | string | null;
 	data?: Record<string, unknown> | null;
 }
 
@@ -44,10 +35,7 @@ export default class EmailsFormatter {
 			id: props.email.id,
 			emailHash: props.email.email_hash,
 			type: props.email.type as "external" | "internal",
-			deliveryStatus: props.email.delivery_status as
-				| "sent"
-				| "failed"
-				| "pending",
+			deliveryStatus: "pending",
 			mailDetails: {
 				from: {
 					address: props.email.from_address,
@@ -60,16 +48,16 @@ export default class EmailsFormatter {
 				template: props.email.template,
 			},
 			data: props.email.data ?? null,
-			sentCount: props.email.sent_count || 0,
-			errorCount: props.email.error_count || 0,
-			errorMessage: props.email.last_error_message,
+			sentCount: 0,
+			errorCount: 0,
+			errorMessage: null,
 			html: props.html ?? null,
-			strategyIdentifier: props.email.strategy_identifier,
-			strategyData: props.email.strategy_data,
-			lastSuccessAt: Formatter.formatDate(props.email.last_success_at),
-			lastAttemptAt: Formatter.formatDate(props.email.last_attempt_at),
-			simulate: Formatter.formatBoolean(props.email.simulate),
+			strategyData: null,
+			lastSuccessAt: null,
+			lastAttemptAt: null,
+			simulate: false,
 			createdAt: Formatter.formatDate(props.email.created_at),
+			updatedAt: Formatter.formatDate(props.email.updated_at),
 		};
 	};
 }

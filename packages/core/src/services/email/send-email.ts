@@ -21,6 +21,11 @@ const sendEmail: ServiceFn<
 	EmailResponse
 > = async (context, data) => {
 	const Emails = Repository.get("emails", context.db, context.config.db);
+	const EmailTransactions = Repository.get(
+		"email-transactions",
+		context.db,
+		context.config.db,
+	);
 	const EmailsFormatter = Formatter.get("emails");
 
 	const emailConfigRes =
@@ -61,7 +66,7 @@ const sendEmail: ServiceFn<
 	};
 
 	const emailExistsRes = await Emails.selectSingle({
-		select: ["id", "email_hash", "sent_count", "error_count"],
+		select: ["id", "email_hash"],
 		where: [
 			{
 				key: "email_hash",
@@ -83,15 +88,7 @@ const sendEmail: ServiceFn<
 				},
 			],
 			data: {
-				delivery_status: emailRecord.deliveryStatus,
-				last_error_message: emailRecord.lastErrorMessage,
-				last_success_at: emailRecord.lastSuccessAt,
-				sent_count: emailExistsRes.data.sent_count + (result.success ? 1 : 0),
-				error_count: emailExistsRes.data.error_count + (result.success ? 0 : 1),
-				last_attempt_at: new Date().toISOString(),
-				strategy_identifier: emailConfigRes.data.identifier,
-				strategy_data: result.data,
-				simulate: emailConfigRes.data.simulate ?? false,
+				updated_at: new Date().toISOString(),
 			},
 			returnAll: true,
 			validation: {
@@ -102,6 +99,18 @@ const sendEmail: ServiceFn<
 			},
 		});
 		if (updateRes.error) return updateRes;
+
+		const emailTransactionRes = await EmailTransactions.createSingle({
+			data: {
+				email_id: emailExistsRes.data.id,
+				delivery_status: emailRecord.deliveryStatus,
+				message: result.success ? null : result.message,
+				strategy_identifier: emailConfigRes.data.identifier,
+				strategy_data: result.data,
+				simulate: emailConfigRes.data.simulate ?? false,
+			},
+		});
+		if (emailTransactionRes.error) return emailTransactionRes;
 
 		return {
 			error: undefined,
@@ -123,15 +132,7 @@ const sendEmail: ServiceFn<
 			cc: data.cc,
 			bcc: data.bcc,
 			data: data.data,
-			strategy_identifier: emailConfigRes.data.identifier,
-			strategy_data: result.data,
 			type: data.type,
-			sent_count: result.success ? 1 : 0,
-			error_count: result.success ? 0 : 1,
-			delivery_status: emailRecord.deliveryStatus,
-			last_error_message: emailRecord.lastErrorMessage,
-			last_success_at: emailRecord.lastSuccessAt,
-			simulate: emailConfigRes.data.simulate ?? false,
 		},
 		returnAll: true,
 		validation: {
@@ -142,6 +143,18 @@ const sendEmail: ServiceFn<
 		},
 	});
 	if (newEmailRes.error) return newEmailRes;
+
+	const emailTransactionRes = await EmailTransactions.createSingle({
+		data: {
+			email_id: newEmailRes.data.id,
+			delivery_status: emailRecord.deliveryStatus,
+			message: result.success ? null : result.message,
+			strategy_identifier: emailConfigRes.data.identifier,
+			strategy_data: result.data,
+			simulate: emailConfigRes.data.simulate ?? false,
+		},
+	});
+	if (emailTransactionRes.error) return emailTransactionRes;
 
 	return {
 		error: undefined,

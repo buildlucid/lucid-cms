@@ -17,6 +17,7 @@ import TranslationsRepository from "./translations.js";
 import UserRolesRepository from "./user-roles.js";
 import UsersRepository from "./users.js";
 import ClientIntegrationsRepository from "./client-integrations.js";
+import EmailTransactionsRepository from "./email-transactions.js";
 import CollectionsRepository from "./collections.js";
 import CollectionMigrationsRepository from "./collection-migrations.js";
 import DocumentsRepository from "./documents.js";
@@ -63,6 +64,11 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "emails":
 				return new EmailsRepository(db, dbAdapter) as RepositoryReturnType<T>;
+			case "email-transactions":
+				return new EmailTransactionsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "locales":
 				return new LocalesRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "media":
@@ -123,6 +129,7 @@ type RepositoryClassMap = {
 	collections: CollectionsRepository;
 	"collection-migrations": CollectionMigrationsRepository;
 	emails: EmailsRepository;
+	"email-transactions": EmailTransactionsRepository;
 	locales: LocalesRepository;
 	media: MediaRepository;
 	"media-awaiting-sync": MediaAwaitingSyncRepository;

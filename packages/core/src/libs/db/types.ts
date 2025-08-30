@@ -227,7 +227,6 @@ export interface LucidEmails {
 	subject: string;
 	cc: string | null;
 	bcc: string | null;
-	delivery_status: "pending" | "delivered" | "failed";
 	template: string;
 	data: JSONColumnType<
 		Record<string, unknown>,
@@ -235,19 +234,22 @@ export interface LucidEmails {
 		Record<string, unknown> | null,
 		Record<string, unknown> | null
 	>;
+	type: "internal" | "external";
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidEmailTransactions {
+	id: Generated<number>;
+	email_id: number;
+	delivery_status: "pending" | "delivered" | "failed";
+	message: string | null;
 	strategy_identifier: string;
 	strategy_data: JSONColumnType<
 		Record<string, unknown>,
-		//* __insert__ includes a Record as the base repository handles formatting via formatData method
 		Record<string, unknown> | null,
 		Record<string, unknown> | null
 	>;
-	type: "internal" | "external";
-	sent_count: number;
-	error_count: number;
-	last_error_message: string | null;
-	last_attempt_at: TimestampMutateable;
-	last_success_at: TimestampMutateable;
 	simulate: BooleanInt;
 	created_at: TimestampImmutable;
 }
@@ -382,6 +384,7 @@ export interface LucidDB {
 	lucid_user_roles: LucidUserRoles;
 	lucid_user_tokens: LucidUserTokens;
 	lucid_emails: LucidEmails;
+	lucid_email_transactions: LucidEmailTransactions;
 	lucid_media: LucidMedia;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_processed_images: HeadlessProcessedImages;

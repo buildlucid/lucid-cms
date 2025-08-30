@@ -156,9 +156,9 @@ export interface EmailResponse {
 	errorCount: number;
 	html: string | null;
 	errorMessage: string | null;
-	strategyIdentifier: string;
 	strategyData: Record<string, unknown> | null;
 	createdAt: string | null;
+	updatedAt?: string | null;
 	lastSuccessAt: string | null;
 	lastAttemptAt: string | null;
 }

@@ -27,26 +27,12 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("cc", adapter.getDataType("text"))
 				.addColumn("bcc", adapter.getDataType("text"))
-				.addColumn("delivery_status", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				) // 'pending', 'delivered', 'failed'
 				.addColumn("template", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
 				.addColumn("data", adapter.getDataType("json"))
-				.addColumn("strategy_identifier", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("strategy_data", adapter.getDataType("json"))
 				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull()) // 'internal' or 'external'
-				.addColumn("sent_count", adapter.getDataType("integer"), (col) =>
-					col.notNull().defaultTo(0),
-				)
-				.addColumn("error_count", adapter.getDataType("integer"), (col) =>
-					col.notNull().defaultTo(0),
-				)
-				.addColumn("last_error_message", adapter.getDataType("text"))
-				.addColumn("last_attempt_at", adapter.getDataType("timestamp"), (col) =>
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
 							"timestamp",
@@ -54,7 +40,32 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
-				.addColumn("last_success_at", adapter.getDataType("timestamp"))
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createTable("lucid_email_transactions")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("email_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_emails.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("delivery_status", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				) // 'pending', 'delivered', 'failed'
+				.addColumn("message", adapter.getDataType("text"))
+				.addColumn("strategy_identifier", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("strategy_data", adapter.getDataType("json"))
 				.addColumn("simulate", adapter.getDataType("boolean"), (col) =>
 					col
 						.notNull()

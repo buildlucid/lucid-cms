@@ -19,6 +19,11 @@ const resendSingle: ServiceFn<
 	if (emailConfigRes.error) return emailConfigRes;
 
 	const Emails = Repository.get("emails", context.db, context.config.db);
+	const EmailTransactions = Repository.get(
+		"email-transactions",
+		context.db,
+		context.config.db,
+	);
 
 	const emailRes = await Emails.selectSingle({
 		select: [
@@ -30,19 +35,11 @@ const resendSingle: ServiceFn<
 			"subject",
 			"cc",
 			"bcc",
-			"delivery_status",
 			"template",
 			"data",
-			"strategy_identifier",
-			"strategy_data",
 			"type",
-			"sent_count",
-			"error_count",
-			"last_error_message",
-			"last_attempt_at",
-			"last_success_at",
-			"simulate",
 			"created_at",
+			"updated_at",
 		],
 		where: [
 			{
@@ -90,27 +87,32 @@ const resendSingle: ServiceFn<
 		},
 	);
 
-	const updateRes = await Emails.updateSingle({
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: emailRes.data.id,
+	const [updateRes, emailTransactionRes] = await Promise.all([
+		Emails.updateSingle({
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: emailRes.data.id,
+				},
+			],
+			data: {
+				updated_at: new Date().toISOString(),
 			},
-		],
-		data: {
-			delivery_status: result.success ? "delivered" : "failed",
-			last_error_message: result.success ? undefined : result.message,
-			last_success_at: result.success ? new Date().toISOString() : undefined,
-			sent_count: emailRes.data.sent_count + (result.success ? 1 : 0),
-			error_count: emailRes.data.error_count + (result.success ? 0 : 1),
-			last_attempt_at: new Date().toISOString(),
-			strategy_identifier: emailConfigRes.data.identifier,
-			strategy_data: result.data,
-			simulate: emailConfigRes.data.simulate ?? false,
-		},
-	});
+		}),
+		EmailTransactions.createSingle({
+			data: {
+				email_id: emailRes.data.id,
+				delivery_status: result.success ? "delivered" : "failed",
+				message: result.success ? null : result.message,
+				strategy_identifier: emailConfigRes.data.identifier,
+				strategy_data: result.data,
+				simulate: emailConfigRes.data.simulate ?? false,
+			},
+		}),
+	]);
 	if (updateRes.error) return updateRes;
+	if (emailTransactionRes.error) return emailTransactionRes;
 
 	return {
 		error: undefined,
