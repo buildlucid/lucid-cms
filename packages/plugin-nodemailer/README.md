@@ -56,3 +56,7 @@ The `from` object contains the default sender information that will be used for 
 ### transporter
 
 This should be a configured Nodemailer transporter instance. You can create this using any of the transport methods supported by Nodemailer, such as SMTP, Gmail, or other email service providers.
+
+### simulate
+
+When this is set to true, no emails will be sent out, however the strategy will still return as if it was a success.

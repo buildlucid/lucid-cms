@@ -21,7 +21,6 @@ const getMultiple: ServiceFn<
 	const emailsRes = await Emails.selectMultipleFiltered({
 		select: [
 			"id",
-			"email_hash",
 			"from_address",
 			"from_name",
 			"to_address",

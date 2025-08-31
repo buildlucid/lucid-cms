@@ -2,6 +2,8 @@
 
 ## 1.1.2 (UNRELEASED)
 
+### Patch Changes
+
 - Added new `simulate` config option so you can stop emails been sent out in a dev environment but have them still registered as a success.
 
 ## 1.1.1

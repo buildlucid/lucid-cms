@@ -4,6 +4,7 @@ import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type DatabaseAdapter from "./adapter.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
+import type { EmailType, EmailDeliveryStatus } from "../../schemas/email.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -220,7 +221,6 @@ export interface LucidUserTokens {
 
 export interface LucidEmails {
 	id: Generated<number>;
-	email_hash: string;
 	from_address: string;
 	from_name: string;
 	to_address: string;
@@ -234,7 +234,10 @@ export interface LucidEmails {
 		Record<string, unknown> | null,
 		Record<string, unknown> | null
 	>;
-	type: "internal" | "external";
+	type: EmailType;
+	current_status: EmailDeliveryStatus;
+	attempt_count: number;
+	last_attempted_at: TimestampMutateable;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
@@ -242,8 +245,9 @@ export interface LucidEmails {
 export interface LucidEmailTransactions {
 	id: Generated<number>;
 	email_id: number;
-	delivery_status: "pending" | "delivered" | "failed";
+	delivery_status: EmailDeliveryStatus;
 	message: string | null;
+	external_message_id: string | null;
 	strategy_identifier: string;
 	strategy_data: JSONColumnType<
 		Record<string, unknown>,
@@ -252,6 +256,7 @@ export interface LucidEmailTransactions {
 	>;
 	simulate: BooleanInt;
 	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
 }
 
 export interface LucidMedia {

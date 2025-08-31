@@ -1,7 +1,7 @@
 {
     "name": "@lucidcms/plugin-forms",
     "private": true,
-    "description": "The official Forms plugin for Lucid",
+    "description": "The official Forms plugin for Lucid CMS",
     "type": "module",
     "types": "./dist/index.d.ts",
     "module": "dist/index.js",

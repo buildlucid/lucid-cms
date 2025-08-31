@@ -10,6 +10,7 @@ import type { MediaType } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
 import type { LogTransport, LogLevel } from "../libs/logger/types.js";
+import type { EmailDeliveryStatus } from "../schemas/email.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -45,13 +46,16 @@ export type EmailStrategy = (
 			[key: string]: unknown;
 		};
 		template: string;
-		hash: string;
 	},
-) => Promise<{
+) => Promise<EmailStrategyResponse>;
+
+export type EmailStrategyResponse = {
 	success: boolean;
+	delivery_status: EmailDeliveryStatus;
 	message: string;
+	external_message_id?: string | null;
 	data?: Record<string, unknown> | null;
-}>;
+};
 
 export type MediaStrategyGetPresignedUrl = (
 	key: string,

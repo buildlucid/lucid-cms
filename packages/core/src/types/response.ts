@@ -15,6 +15,7 @@ import type { LocaleValue } from "./shared.js";
 import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
 import type z from "zod/v4";
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
+import type { EmailType, EmailDeliveryStatus } from "../schemas/email.js";
 
 export interface UserResponse {
 	id: number;
@@ -148,11 +149,10 @@ export interface EmailResponse {
 		template: string;
 	};
 	data: Record<string, unknown> | null;
-	type: "external" | "internal";
-	emailHash: string;
+	type: EmailType;
 	html: string | null;
 	transactions: {
-		deliveryStatus: "pending" | "delivered" | "failed";
+		deliveryStatus: EmailDeliveryStatus;
 		message: string | null;
 		strategyIdentifier: string;
 		strategyData: Record<string, unknown> | null;

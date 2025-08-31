@@ -1,10 +1,10 @@
 import Formatter from "./index.js";
 import type { EmailResponse } from "../../types/response.js";
 import type { BooleanInt } from "../../types.js";
+import type { EmailType, EmailDeliveryStatus } from "../../schemas/email.js";
 
 interface EmailPropT {
 	id: number;
-	email_hash: string;
 	from_address: string;
 	from_name: string;
 	to_address: string;
@@ -12,12 +12,12 @@ interface EmailPropT {
 	cc: string | null;
 	bcc: string | null;
 	template: string;
-	type: string;
+	type: EmailType;
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 	data?: Record<string, unknown> | null;
 	transactions?: {
-		delivery_status: "pending" | "delivered" | "failed";
+		delivery_status: EmailDeliveryStatus;
 		message: string | null;
 		strategy_identifier: string;
 		strategy_data: Record<string, unknown> | null;
@@ -42,8 +42,7 @@ export default class EmailsFormatter {
 	}): EmailResponse => {
 		return {
 			id: props.email.id,
-			emailHash: props.email.email_hash,
-			type: props.email.type as "external" | "internal",
+			type: props.email.type,
 			mailDetails: {
 				from: {
 					address: props.email.from_address,

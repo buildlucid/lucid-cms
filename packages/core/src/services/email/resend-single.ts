@@ -2,6 +2,7 @@ import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import renderHandlebarsTemplate from "../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { EmailStrategyResponse } from "../../types/config.js";
 
 const resendSingle: ServiceFn<
 	[
@@ -28,7 +29,6 @@ const resendSingle: ServiceFn<
 	const emailRes = await Emails.selectSingle({
 		select: [
 			"id",
-			"email_hash",
 			"from_address",
 			"from_name",
 			"to_address",
@@ -38,6 +38,7 @@ const resendSingle: ServiceFn<
 			"template",
 			"data",
 			"type",
+			"attempt_count",
 			"created_at",
 			"updated_at",
 		],
@@ -66,26 +67,32 @@ const resendSingle: ServiceFn<
 	});
 	if (html.error) return html;
 
-	const result = await emailConfigRes.data.strategy(
-		{
-			to: emailRes.data.to_address,
-			subject: emailRes.data.subject ?? "",
-			// from: {
-			// 	name: emailRes.data.from_name,
-			// 	email: emailRes.data.from_address,
-			// },
-			//* send with the current from config
-			from: emailConfigRes.data.from,
-			html: html.data,
-			cc: emailRes.data.cc ?? undefined,
-			bcc: emailRes.data.bcc ?? undefined,
-		},
-		{
-			data: templateData,
-			template: emailRes.data.template,
-			hash: emailRes.data.email_hash,
-		},
-	);
+	let result: EmailStrategyResponse | undefined;
+	try {
+		result = await emailConfigRes.data.strategy(
+			{
+				to: emailRes.data.to_address,
+				subject: emailRes.data.subject ?? "",
+				//* use current config
+				from: emailConfigRes.data.from,
+				html: html.data,
+				cc: emailRes.data.cc ?? undefined,
+				bcc: emailRes.data.bcc ?? undefined,
+			},
+			{
+				data: templateData,
+				template: emailRes.data.template,
+			},
+		);
+	} catch (error) {
+		result = {
+			success: false,
+			delivery_status: "failed",
+			message:
+				error instanceof Error ? error.message : T("email_failed_to_send"),
+			external_message_id: null,
+		};
+	}
 
 	const [updateRes, emailTransactionRes] = await Promise.all([
 		Emails.updateSingle({
@@ -97,20 +104,25 @@ const resendSingle: ServiceFn<
 				},
 			],
 			data: {
+				current_status: result.delivery_status,
+				attempt_count: (emailRes.data.attempt_count ?? 0) + 1,
+				last_attempted_at: new Date().toISOString(),
 				updated_at: new Date().toISOString(),
 			},
 		}),
 		EmailTransactions.createSingle({
 			data: {
 				email_id: emailRes.data.id,
-				delivery_status: result.success ? "delivered" : "failed",
+				delivery_status: result.delivery_status,
 				message: result.success ? null : result.message,
 				strategy_identifier: emailConfigRes.data.identifier,
 				strategy_data: result.data,
 				simulate: emailConfigRes.data.simulate ?? false,
+				external_message_id: result.external_message_id,
 			},
 		}),
 	]);
+
 	if (updateRes.error) return updateRes;
 	if (emailTransactionRes.error) return emailTransactionRes;
 
@@ -118,7 +130,11 @@ const resendSingle: ServiceFn<
 		error: undefined,
 		data: {
 			success: result.success,
-			message: result.message,
+			message:
+				result.message ??
+				(result.success
+					? T("email_resent_successfully")
+					: T("email_failed_to_resend")),
 		},
 	};
 };

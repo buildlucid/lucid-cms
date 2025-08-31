@@ -2,6 +2,25 @@ import z from "zod/v4";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
 
+export const emailDeliveryStatusSchema = z.union([
+	z.literal("sent"),
+	z.literal("delivered"),
+	z.literal("delayed"),
+	z.literal("complained"),
+	z.literal("bounced"),
+	z.literal("clicked"),
+	z.literal("failed"),
+	z.literal("opened"),
+	z.literal("scheduled"),
+]);
+export type EmailDeliveryStatus = z.infer<typeof emailDeliveryStatusSchema>;
+
+export const emailTypeSchema = z.union([
+	z.literal("external"),
+	z.literal("internal"),
+]);
+export type EmailType = z.infer<typeof emailTypeSchema>;
+
 const emailResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The email ID",
@@ -51,26 +70,20 @@ const emailResponseSchema = z.object({
 				verificationUrl: "https://example.com/verify/token123",
 			},
 		}),
-	type: z.union([z.literal("external"), z.literal("internal")]).meta({
+	type: emailTypeSchema.meta({
 		description:
 			"Whether the email was triggered internally from Lucid, or externally via an endpoint",
 		example: "internal",
-	}),
-	emailHash: z.string().meta({
-		description: "A unique hash identifier for the email",
-		example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
 	}),
 	html: z.string().nullable().meta({
 		description: "The rendered HTML content of the email template",
 	}),
 	transactions: z.array(
 		z.object({
-			deliveryStatus: z
-				.union([z.literal("sent"), z.literal("failed"), z.literal("pending")])
-				.meta({
-					description: "The current delivery status of the email",
-					example: "sent",
-				}),
+			deliveryStatus: emailDeliveryStatusSchema.meta({
+				description: "The current delivery status of the email",
+				example: "sent",
+			}),
 			message: z.string().nullable().meta({
 				description: "The message associated with the email delivery",
 				example: "Email sent successfully",

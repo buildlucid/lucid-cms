@@ -32,6 +32,8 @@ export const envSchema = z.object({
 	LUCID_REFRESH_TOKEN_SECRET: z.string(),
 	LUCID_ACCESS_TOKEN_SECRET: z.string(),
 	LUCID_LOCAL_STORAGE_SECRET_KEY: z.string(),
+	LUCID_RESEND_API_KEY: z.string(),
+	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
 });
 
 export default defineConfig((env) => ({
@@ -139,21 +141,25 @@ export default defineConfig((env) => ({
 				},
 			],
 		}),
-		LucidNodemailer({
+		// LucidNodemailer({
+		// 	from: {
+		// 		email: "team@lucidjs.build",
+		// 		name: "Lucid CMS",
+		// 	},
+		// 	transporter: transporter,
+		// 	simulate: true,
+		// }),
+		LucidResend({
 			from: {
 				email: "team@lucidjs.build",
 				name: "Lucid CMS",
 			},
-			transporter: transporter,
-			simulate: true,
+			apiKey: env.LUCID_RESEND_API_KEY,
+			webhook: {
+				enabled: true,
+				secret: env.LUCID_RESEND_WEBHOOK_SECRET,
+			},
 		}),
-		// LucidResend({
-		// 	from: {
-		// 		email: "admin@ui.protodigital.co.uk",
-		// 		name: "Lucid",
-		// 	},
-		// 	apiKey: env?.RESEND_API_KEY as string,
-		// }),
 		// LucidS3({
 		// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 		// 	bucket: "headless-cms",

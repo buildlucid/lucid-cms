@@ -18,6 +18,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 				if (pluginOptions.simulate) {
 					return {
 						success: true,
+						delivery_status: "sent",
 						message: T("email_successfully_sent"),
 						data: null,
 					};
@@ -38,12 +39,14 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 
 				return {
 					success: true,
+					delivery_status: "sent",
 					message: T("email_successfully_sent"),
 					data: isValidData(data) ? data : null,
 				};
 			} catch (error) {
 				return {
 					success: false,
+					delivery_status: "failed",
 					message:
 						error instanceof Error ? error.message : T("email_failed_to_send"),
 				};

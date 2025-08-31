@@ -277,5 +277,8 @@
 	"error_schema_migration_required_message": "The collection requires a schema migration. Please run the migration command to update the database.",
 	"version_not_found_message": "The version you are trying to access does not exist.",
 	"error_update_revision_version_name": "Update Revision Error",
-	"error_update_revision_version_message": "You cannot update a revision version. The revision must be restored first."
+	"error_update_revision_version_message": "You cannot update a revision version. The revision must be restored first.",
+	"email_failed_to_send": "An error occurred while sending the email.",
+	"email_resent_successfully": "Email resent successfully.",
+	"email_failed_to_resend": "Failed to resend email."
 }

@@ -10,9 +10,6 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("email_hash", adapter.getDataType("char", 64), (col) =>
-					col.unique().notNull(),
-				)
 				.addColumn("from_address", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
@@ -32,6 +29,13 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("data", adapter.getDataType("json"))
 				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull()) // 'internal' or 'external'
+				.addColumn("current_status", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				) // 'pending', 'delivered', 'failed'
+				.addColumn("attempt_count", adapter.getDataType("integer"), (col) =>
+					col.notNull().defaultTo(0),
+				)
+				.addColumn("last_attempted_at", adapter.getDataType("timestamp"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -62,6 +66,7 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				) // 'pending', 'delivered', 'failed'
 				.addColumn("message", adapter.getDataType("text"))
+				.addColumn("external_message_id", adapter.getDataType("text"))
 				.addColumn("strategy_identifier", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
@@ -84,6 +89,20 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_transactions_external_message_id")
+				.on("lucid_email_transactions")
+				.column("external_message_id")
 				.execute();
 		},
 		async down(db: Kysely<unknown>) {},

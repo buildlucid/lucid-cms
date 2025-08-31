@@ -3,13 +3,13 @@ import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
+import { emailDeliveryStatusSchema } from "../../schemas/email.js";
 export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_emails");
 	}
 	tableSchema = z.object({
 		id: z.number(),
-		email_hash: z.string(),
 		from_address: z.string(),
 		from_name: z.string(),
 		to_address: z.string(),
@@ -19,16 +19,15 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		template: z.string(),
 		data: z.record(z.string(), z.unknown()).nullable(),
 		type: z.string(),
+		current_status: emailDeliveryStatusSchema,
+		attempt_count: z.number(),
+		last_attempted_at: z.union([z.string(), z.date()]).nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 		transactions: z
 			.array(
 				z.object({
-					delivery_status: z.union([
-						z.literal("pending"),
-						z.literal("delivered"),
-						z.literal("failed"),
-					]),
+					delivery_status: emailDeliveryStatusSchema,
 					message: z.string().nullable(),
 					strategy_identifier: z.string(),
 					strategy_data: z.record(z.string(), z.unknown()).nullable(),
@@ -37,13 +36,14 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 						z.literal(this.dbAdapter.config.defaults.boolean.false),
 					]),
 					created_at: z.union([z.string(), z.date()]).nullable(),
+					external_message_id: z.string().nullable(),
+					updated_at: z.union([z.string(), z.date()]).nullable(),
 				}),
 			)
 			.optional(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
-		email_hash: this.dbAdapter.getDataType("char", 64),
 		from_address: this.dbAdapter.getDataType("text"),
 		from_name: this.dbAdapter.getDataType("text"),
 		to_address: this.dbAdapter.getDataType("text"),
@@ -53,6 +53,9 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		template: this.dbAdapter.getDataType("text"),
 		data: this.dbAdapter.getDataType("json"),
 		type: this.dbAdapter.getDataType("text"),
+		current_status: this.dbAdapter.getDataType("text"),
+		attempt_count: this.dbAdapter.getDataType("integer"),
+		last_attempted_at: this.dbAdapter.getDataType("timestamp"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
@@ -89,7 +92,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 			.selectFrom("lucid_emails")
 			.select((eb) => [
 				"id",
-				"email_hash",
 				"from_address",
 				"from_name",
 				"to_address",
@@ -99,6 +101,9 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"template",
 				"data",
 				"type",
+				"current_status",
+				"attempt_count",
+				"last_attempted_at",
 				"created_at",
 				"updated_at",
 				this.dbAdapter
@@ -111,7 +116,9 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 								"lucid_email_transactions.strategy_identifier",
 								"lucid_email_transactions.strategy_data",
 								"lucid_email_transactions.simulate",
+								"lucid_email_transactions.external_message_id",
 								"lucid_email_transactions.created_at",
+								"lucid_email_transactions.updated_at",
 							])
 							.whereRef(
 								"lucid_email_transactions.email_id",
@@ -133,7 +140,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 			mode: "single",
 			select: [
 				"id",
-				"email_hash",
 				"from_address",
 				"from_name",
 				"to_address",
@@ -143,6 +149,9 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"template",
 				"data",
 				"type",
+				"current_status",
+				"attempt_count",
+				"last_attempted_at",
 				"created_at",
 				"updated_at",
 				"transactions",

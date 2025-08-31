@@ -1,7 +1,7 @@
 {
     "name": "@lucidcms/plugin-cookie-consent",
     "private": true,
-    "description": "The official Cookie Consent plugin for Lucid",
+    "description": "The official Cookie Consent plugin for Lucid CMS",
     "type": "module",
     "types": "./dist/index.d.ts",
     "module": "dist/index.js",

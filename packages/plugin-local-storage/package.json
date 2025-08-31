@@ -1,7 +1,7 @@
 {
     "name": "@lucidcms/plugin-local-storage",
     "version": "1.2.1",
-    "description": "The official Local Storage plugin for Lucid",
+    "description": "The official Local Storage plugin for Lucid CMS",
     "type": "module",
     "types": "./dist/index.d.ts",
     "module": "./dist/index.js",
