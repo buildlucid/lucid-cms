@@ -1,8 +1,11 @@
 # @lucidcms/plugin-resend
 
-## 1.0.2 (UNRELEASED)
+## 1.1.0 (UNRELEASED)
+
+## Minor Changes
 
 - Added new `simulate` config option so you can stop emails been sent out in a dev environment but have them still registered as a success.
+- Implemented optional webhook support so you can track deliverability. 
 
 ## 1.0.1
 

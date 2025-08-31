@@ -1,20 +1,22 @@
 import T from "./translations/index.js";
-import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
+import { PLUGIN_KEY, LUCID_VERSION, WEBHOOK_ENABLED } from "./constants.js";
 import isValidData from "./utils/is-valid-data.js";
 import type { LucidPluginOptions } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types/types.js";
+import routes from "./routes/index.js";
 
 type ResendEmailResponse = {
 	id: string;
 };
 
-/**
- * @todo implement webhooks to better track delivery status
- */
 const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
 	pluginOptions,
 ) => {
+	if (pluginOptions.webhook?.enabled) {
+		config.hono.extensions?.push(routes(pluginOptions));
+	}
+
 	config.email = {
 		identifier: "resend",
 		from: pluginOptions.from,
@@ -24,10 +26,14 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 				if (pluginOptions.simulate) {
 					return {
 						success: true,
+						delivery_status: "sent",
 						message: T("email_successfully_sent"),
 						data: null,
 					};
 				}
+
+				const webhookEnabled =
+					pluginOptions.webhook?.enabled ?? WEBHOOK_ENABLED;
 
 				const emailPayload = {
 					from: `${email.from.name} <${email.from.email}>`,
@@ -54,18 +60,23 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 				if (!response.ok) {
 					return {
 						success: false,
+						delivery_status: "failed",
 						message: T("email_failed_to_send"),
 					};
 				}
 
 				return {
 					success: true,
+					//* if the webhook is enabled, we only mark the email as sent. the status will be updated via the webhook
+					delivery_status: webhookEnabled ? "sent" : "delivered",
 					message: T("email_successfully_sent"),
 					data: isValidData(data) ? data : null,
+					external_message_id: data.id,
 				};
 			} catch (error) {
 				return {
 					success: false,
+					delivery_status: "failed",
 					message:
 						error instanceof Error ? error.message : T("email_failed_to_send"),
 				};

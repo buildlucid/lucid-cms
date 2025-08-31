@@ -1,0 +1,12 @@
+{
+	"email_successfully_sent": "The email was successfully sent.",
+	"email_failed_to_send": "The email failed to send.",
+	"route_resend_webhook_error_name": "Resend Webhook Error",
+	"route_resend_webhook_error_message": "An error occurred while processing the Resend webhook.",
+	"invalid_webhook_signature": "Invalid webhook signature.",
+	"invalid_webhook_body": "Invalid webhook body.",
+	"transaction_not_found": "Transaction not found.",
+	"invalid_event_type": "Invalid event type.",
+	"webhook_secret_not_configured": "Webhook secret not configured.",
+	"webhook_not_enabled": "Webhook not enabled."
+}

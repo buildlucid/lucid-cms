@@ -43,6 +43,7 @@ This plugin offers the following configuration options to control email sending 
 | `from` | `object` | The default sender information for emails |
 | `apiKey` | `string` | Your Resend API key |
 | `simulate` | `boolean` | If true, the email will not send, but still register as a success |
+| `webhook` | `object` | Configure the Resend webhook |
 
 ### from
 
@@ -56,3 +57,30 @@ The `from` object contains the default sender information that will be used for 
 ### apiKey
 
 Your Resend API key, which you can obtain from your Resend dashboard. It's recommended to store this as an environment variable for security.
+
+### simulate
+
+When this is set to true, no emails will be sent out, however the strategy will still return as if it was a success.
+
+### webhook
+
+The `webhook` object contains the options needed to enable the webhook endpoint. This is used so that Resend can send delivery status updates back to Lucid CMS allowing you to see it on the emails page instead of having to navigate to Resends own dashboard.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `enabled` | `boolean` | Determines if the webhook route should be registered or not |
+| `secret` | `string` | Your webhooks signing secret |
+
+This listens to the following event types:
+
+- email.bounced
+- email.clicked
+- email.complained
+- email.delivered
+- email.delivery_delayed
+- email.failed
+- email.opened
+- email.scheduled
+- email.sent
+
+The webhook route is registered at `/api/v1/resend/webhook`.
