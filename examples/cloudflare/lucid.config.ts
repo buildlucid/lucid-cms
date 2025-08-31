@@ -22,6 +22,7 @@ export const envSchema = z.object({
 	LUCID_RESEND_FROM_EMAIL: z.string(),
 	LUCID_RESEND_FROM_NAME: z.string(),
 	LUCID_RESEND_API_KEY: z.string(),
+	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
 	LUCID_S3_ENDPOINT: z.string(),
 	LUCID_S3_BUCKET: z.string(),
 	LUCID_S3_ACCESS_KEY: z.string(),
@@ -58,7 +59,7 @@ export default defineConfig((env) => ({
 	media: {
 		imageProcessor: passthroughImageProcessor,
 		urlStrategy: (media) => {
-			return `${env.LUCID_MEDIA_URL}/${media.key}`;
+			return `${env.LUCID_MEDIA_URL}/${env.LUCID_S3_BUCKET}/${media.key}`;
 		},
 	},
 	collections: [PageCollection, NewsCollection, SettingsCollection],
@@ -78,6 +79,11 @@ export default defineConfig((env) => ({
 				name: env.LUCID_RESEND_FROM_NAME,
 			},
 			apiKey: env.LUCID_RESEND_API_KEY,
+			simulate: true,
+			webhook: {
+				enabled: false,
+				secret: env.LUCID_RESEND_WEBHOOK_SECRET,
+			},
 		}),
 		LucidS3({
 			endpoint: env.LUCID_S3_ENDPOINT,
