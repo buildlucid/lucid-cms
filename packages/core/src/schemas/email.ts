@@ -163,7 +163,7 @@ export const controllerSchemas = {
 						"password-reset",
 					),
 					sort: queryString.schema.sort(
-						"lastAttemptAt,lastSuccessAt,createdAt,sentCount,errorCount",
+						"lastAttemptedAt,attemptCount,createdAt,updatedAt",
 					),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
