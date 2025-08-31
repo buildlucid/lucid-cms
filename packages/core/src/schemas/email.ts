@@ -13,13 +13,11 @@ export const emailDeliveryStatusSchema = z.union([
 	z.literal("opened"),
 	z.literal("scheduled"),
 ]);
-export type EmailDeliveryStatus = z.infer<typeof emailDeliveryStatusSchema>;
 
 export const emailTypeSchema = z.union([
 	z.literal("external"),
 	z.literal("internal"),
 ]);
-export type EmailType = z.infer<typeof emailTypeSchema>;
 
 const emailResponseSchema = z.object({
 	id: z.number().meta({
@@ -75,6 +73,14 @@ const emailResponseSchema = z.object({
 			"Whether the email was triggered internally from Lucid, or externally via an endpoint",
 		example: "internal",
 	}),
+	currentStatus: emailDeliveryStatusSchema.meta({
+		description: "The current delivery status of the email",
+		example: "sent",
+	}),
+	attemptCount: z.number().meta({
+		description: "The number of attempts to send the email",
+		example: 1,
+	}),
 	html: z.string().nullable().meta({
 		description: "The rendered HTML content of the email template",
 	}),
@@ -103,6 +109,11 @@ const emailResponseSchema = z.object({
 						verificationUrl: "https://example.com/verify/token123",
 					},
 				}),
+			externalMessageId: z.string().nullable().meta({
+				description:
+					"The external message ID of the email. Used for tracking the email in the provider's system.",
+				example: "1234567890",
+			}),
 			simulate: z.boolean().meta({
 				description: "Whether the email was simulated and not actually sent",
 				example: true,
@@ -111,8 +122,16 @@ const emailResponseSchema = z.object({
 				description: "Timestamp when the email was created",
 				example: "2024-04-25T14:30:00.000Z",
 			}),
+			updatedAt: z.string().nullable().meta({
+				description: "Timestamp of the most recent delivery attempt",
+				example: "2024-04-25T14:31:10.000Z",
+			}),
 		}),
 	),
+	lastAttemptedAt: z.string().nullable().meta({
+		description: "The timestamp of the last attempt to send the email",
+		example: "2024-04-25T14:30:00.000Z",
+	}),
 	createdAt: z.string().nullable().meta({
 		description: "Timestamp when the email was created",
 		example: "2024-04-25T14:30:00.000Z",
@@ -137,7 +156,7 @@ export const controllerSchemas = {
 						false,
 						"Welcome To Lucid",
 					),
-					"filter[deliveryStatus]": queryString.schema.filter(true, "sent"),
+					"filter[currentStatus]": queryString.schema.filter(true, "sent"),
 					"filter[type]": queryString.schema.filter(true, "internal"),
 					"filter[template]": queryString.schema.filter(
 						false,
@@ -155,7 +174,7 @@ export const controllerSchemas = {
 					.object({
 						toAddress: queryFormatted.schema.filters.single.optional(),
 						subject: queryFormatted.schema.filters.single.optional(),
-						deliveryStatus: queryFormatted.schema.filters.union.optional(),
+						currentStatus: queryFormatted.schema.filters.union.optional(),
 						type: queryFormatted.schema.filters.union.optional(), // internal | external
 						template: queryFormatted.schema.filters.single.optional(),
 					})
@@ -164,11 +183,10 @@ export const controllerSchemas = {
 					.array(
 						z.object({
 							key: z.enum([
-								"lastAttemptAt",
-								"lastSuccessAt",
+								"lastAttemptedAt",
+								"attemptCount",
 								"createdAt",
-								"sentCount",
-								"errorCount",
+								"updatedAt",
 							]),
 							value: z.enum(["asc", "desc"]),
 						}),

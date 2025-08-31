@@ -4,7 +4,7 @@ import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type DatabaseAdapter from "./adapter.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
-import type { EmailType, EmailDeliveryStatus } from "../../schemas/email.js";
+import type { EmailType, EmailDeliveryStatus } from "../email/types.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 

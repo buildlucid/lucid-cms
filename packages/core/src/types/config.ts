@@ -6,11 +6,10 @@ import type { Readable } from "node:stream";
 import type { AllHooks } from "./hooks.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { InlineConfig } from "vite";
-import type { MediaType } from "../types.js";
+import type { MediaType, EmailDeliveryStatus } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
 import type { LogTransport, LogLevel } from "../libs/logger/types.js";
-import type { EmailDeliveryStatus } from "../schemas/email.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;

@@ -15,7 +15,7 @@ import type { LocaleValue } from "./shared.js";
 import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
 import type z from "zod/v4";
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
-import type { EmailType, EmailDeliveryStatus } from "../schemas/email.js";
+import type { EmailType, EmailDeliveryStatus } from "../types.js";
 
 export interface UserResponse {
 	id: number;
@@ -150,6 +150,9 @@ export interface EmailResponse {
 	};
 	data: Record<string, unknown> | null;
 	type: EmailType;
+	currentStatus: EmailDeliveryStatus;
+	attemptCount: number;
+	lastAttemptedAt: string | null;
 	html: string | null;
 	transactions: {
 		deliveryStatus: EmailDeliveryStatus;
@@ -157,7 +160,9 @@ export interface EmailResponse {
 		strategyIdentifier: string;
 		strategyData: Record<string, unknown> | null;
 		simulate: boolean;
+		externalMessageId: string | null;
 		createdAt: Date | string | null;
+		updatedAt: Date | string | null;
 	}[];
 	createdAt: string | null;
 	updatedAt?: string | null;

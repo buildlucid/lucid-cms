@@ -35,8 +35,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 						z.literal(this.dbAdapter.config.defaults.boolean.true),
 						z.literal(this.dbAdapter.config.defaults.boolean.false),
 					]),
-					created_at: z.union([z.string(), z.date()]).nullable(),
 					external_message_id: z.string().nullable(),
+					created_at: z.union([z.string(), z.date()]).nullable(),
 					updated_at: z.union([z.string(), z.date()]).nullable(),
 				}),
 			)
@@ -66,8 +66,11 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				subject: "subject",
 				type: "type",
 				template: "template",
+				currentStatus: "current_status",
 			},
 			sorts: {
+				attemptCount: "attempt_count",
+				lastAttemptedAt: "last_attempted_at",
 				createdAt: "created_at",
 				updatedAt: "updated_at",
 			},
