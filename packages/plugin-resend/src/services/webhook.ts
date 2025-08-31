@@ -89,7 +89,7 @@ const webhook: ServiceFn<
 
 	const transaction = await context.db
 		.selectFrom("lucid_email_transactions")
-		.select(["id", "email_id"])
+		.select(["id", "email_id", "updated_at"])
 		.where("external_message_id", "=", body.data.data.email_id)
 		.executeTakeFirst();
 	if (!transaction) {
@@ -99,6 +99,17 @@ const webhook: ServiceFn<
 				status: 404,
 				message: T("transaction_not_found"),
 			},
+		};
+	}
+
+	const webhookTimestamp = new Date(body.data.created_at);
+	const lastUpdateTimestamp = new Date(transaction.updated_at ?? "");
+
+	if (webhookTimestamp <= lastUpdateTimestamp) {
+		//* ignore the old webhook
+		return {
+			error: undefined,
+			data: true,
 		};
 	}
 
@@ -141,7 +152,7 @@ const webhook: ServiceFn<
 			.updateTable("lucid_email_transactions")
 			.set({
 				delivery_status: newDeliveryStatus,
-				updated_at: new Date().toISOString(),
+				updated_at: webhookTimestamp.toISOString(),
 			})
 			.where("id", "=", transaction.id)
 			.execute(),
