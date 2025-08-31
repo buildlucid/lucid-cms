@@ -57,11 +57,12 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 			]}
 		>
 			<PillCol
-				text={props.email.deliveryStatus}
+				text={props.email.currentStatus}
 				theme={
-					props.email.deliveryStatus === "sent"
+					props.email.currentStatus === "sent" ||
+					props.email.currentStatus === "delivered"
 						? "primary"
-						: props.email.deliveryStatus === "failed"
+						: props.email.currentStatus === "failed"
 							? "red"
 							: "grey"
 				}
@@ -84,31 +85,22 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				options={{ include: props?.include[4], maxLines: 1 }}
 			/>
 			<PillCol
-				text={props.email.sentCount || 0}
-				theme={"primary"}
+				text={props.email.attemptCount || 0}
+				theme={"grey"}
 				options={{ include: props?.include[5] }}
-			/>
-			<PillCol
-				text={props.email.errorCount || 0}
-				theme={"red"}
-				options={{ include: props?.include[6] }}
 			/>
 			<PillCol
 				text={props.email.type}
 				theme={"grey"}
-				options={{ include: props?.include[7] }}
+				options={{ include: props?.include[6] }}
 			/>
 			<DateCol
 				date={props.email.createdAt}
+				options={{ include: props?.include[7] }}
+			/>
+			<DateCol
+				date={props.email.lastAttemptedAt}
 				options={{ include: props?.include[8] }}
-			/>
-			<DateCol
-				date={props.email.lastAttemptAt}
-				options={{ include: props?.include[9] }}
-			/>
-			<DateCol
-				date={props.email.lastSuccessAt}
-				options={{ include: props?.include[10] }}
 			/>
 		</Tr>
 	);

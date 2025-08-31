@@ -299,6 +299,7 @@
 	"create_media_panel_title": "Create Media",
 	"create_media_panel_description": "Create a new media entry.",
 	"preview_email_panel_title": "Preview Email",
+	"preview_email_panel_description": "Preview the email, its details and all of the transactions.",
 	"create_page_panel_title": "Create {{name}}",
 	"create_page_panel_description": "Create a new page for the {{collection}} collection.",
 	"update_page_panel_title": "Update {{name}}",
@@ -463,5 +464,15 @@
 	"auto_save_message": "Your changes are automatically saved every 10 seconds.",
 	"disabled": "Disabled",
 	"saving": "Saving Document",
-	"simulate": "Simulated"
+	"simulate": "Simulated",
+	"delayed": "Delayed",
+	"complained": "Complained",
+	"bounced": "Bounced",
+	"clicked": "Clicked",
+	"opened": "Opened",
+	"scheduled": "Scheduled",
+	"attempt_count": "Attempt Count",
+	"transactions": "Transactions",
+	"transaction": "Transaction",
+	"identifier": "Identifier"
 }

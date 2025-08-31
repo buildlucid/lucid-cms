@@ -26,7 +26,7 @@ const EmailListRoute: Component = () => {
 					value: "",
 					type: "text",
 				},
-				deliveryStatus: {
+				currentStatus: {
 					value: "",
 					type: "array",
 				},
@@ -36,11 +36,9 @@ const EmailListRoute: Component = () => {
 				},
 			},
 			sorts: {
-				sentCount: undefined,
-				errorCount: undefined,
-				createdAt: "desc",
-				lastAttemptAt: undefined,
-				lastSuccessAt: undefined,
+				createdAt: undefined,
+				lastAttemptedAt: "desc",
+				attemptCount: undefined,
 			},
 		},
 		{
@@ -100,9 +98,13 @@ const EmailListRoute: Component = () => {
 										},
 										{
 											label: T()("status"),
-											key: "deliveryStatus",
+											key: "currentStatus",
 											type: "multi-select",
 											options: [
+												{
+													label: T()("sent"),
+													value: "sent",
+												},
 												{
 													label: T()("delivered"),
 													value: "delivered",
@@ -112,8 +114,28 @@ const EmailListRoute: Component = () => {
 													value: "failed",
 												},
 												{
-													label: T()("pending"),
-													value: "pending",
+													label: T()("delayed"),
+													value: "delayed",
+												},
+												{
+													label: T()("complained"),
+													value: "complained",
+												},
+												{
+													label: T()("bounced"),
+													value: "bounced",
+												},
+												{
+													label: T()("clicked"),
+													value: "clicked",
+												},
+												{
+													label: T()("opened"),
+													value: "opened",
+												},
+												{
+													label: T()("scheduled"),
+													value: "scheduled",
 												},
 											],
 										},
@@ -135,20 +157,12 @@ const EmailListRoute: Component = () => {
 									]}
 									sorts={[
 										{
-											label: T()("sent_count"),
-											key: "sentCount",
-										},
-										{
-											label: T()("failed_count"),
-											key: "errorCount",
+											label: T()("attempt_count"),
+											key: "attemptCount",
 										},
 										{
 											label: T()("last_attempt_at"),
-											key: "lastAttemptAt",
-										},
-										{
-											label: T()("last_success_at"),
-											key: "lastSuccessAt",
+											key: "lastAttemptedAt",
 										},
 										{
 											label: T()("created_at"),

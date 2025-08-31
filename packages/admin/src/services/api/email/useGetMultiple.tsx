@@ -9,7 +9,7 @@ interface QueryParams {
 	filters?: {
 		toAddress?: Accessor<number>;
 		subject?: Accessor<string>;
-		deliveryStatus?: Accessor<string[]>;
+		currentStatus?: Accessor<string[]>;
 		type?: Accessor<string[]>;
 		template?: Accessor<string>;
 	};

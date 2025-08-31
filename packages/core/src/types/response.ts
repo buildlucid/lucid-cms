@@ -161,8 +161,8 @@ export interface EmailResponse {
 		strategyData: Record<string, unknown> | null;
 		simulate: boolean;
 		externalMessageId: string | null;
-		createdAt: Date | string | null;
-		updatedAt: Date | string | null;
+		createdAt: string | null;
+		updatedAt: string | null;
 	}[];
 	createdAt: string | null;
 	updatedAt?: string | null;

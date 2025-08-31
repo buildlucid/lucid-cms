@@ -103,13 +103,7 @@ export const EmailsList: Component<{
 					},
 					{
 						label: T()("sent_count"),
-						key: "sentCount",
-						icon: <FaSolidPaperPlane />,
-						sortable: true,
-					},
-					{
-						label: T()("failed_count"),
-						key: "errorCount",
+						key: "attemptCount",
 						icon: <FaSolidPaperPlane />,
 						sortable: true,
 					},
@@ -126,13 +120,7 @@ export const EmailsList: Component<{
 					},
 					{
 						label: T()("last_attempt"),
-						key: "lastAttemptAt",
-						icon: <FaSolidCalendar />,
-						sortable: true,
-					},
-					{
-						label: T()("last_success_at"),
-						key: "lastSuccessAt",
+						key: "lastAttemptedAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
 					},
