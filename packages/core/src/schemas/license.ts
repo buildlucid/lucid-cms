@@ -7,7 +7,8 @@ export const controllerSchemas = {
 			.object({
 				licenseKey: z.string().min(1).nullable().meta({
 					description: "The license key to save",
-					example: "LIC-XXXX-YYYY-ZZZZ",
+					example:
+						"******-************-***************-****************-********",
 				}),
 			})
 			.strict(),
@@ -29,7 +30,8 @@ export const controllerSchemas = {
 			.object({
 				key: z.string().nullable().meta({
 					description: "The obfuscated license key (last 4 visible)",
-					example: "************-1A2B",
+					example:
+						"******-************-***************-****************-****1A2B",
 				}),
 				valid: z.boolean().meta({
 					description: "Whether the license is currently valid",

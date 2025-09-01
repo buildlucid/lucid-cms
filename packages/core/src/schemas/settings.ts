@@ -61,7 +61,7 @@ const settingsResponseSchema = z.object({
 	license: z.object({
 		key: z.string().nullable().meta({
 			description: "The obfuscated license key (last 4 visible)",
-			example: "************-1A2B",
+			example: "******-************-***************-****************-****1A2B",
 		}),
 	}),
 });

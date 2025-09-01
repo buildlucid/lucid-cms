@@ -5,7 +5,7 @@ import LicenseFormatter from "./license.js";
 interface SettingsPropsT {
 	mediaStorageUsed: number;
 	processedImageCount: number;
-	licenseKey: string | null;
+	licenseKeyLast4: string | null;
 }
 
 export default class SettingsFormatter {
@@ -33,7 +33,9 @@ export default class SettingsFormatter {
 				},
 			},
 			license: {
-				key: LicenseFormatter.obfuscateLicenseKey(props.settings.licenseKey),
+				key: LicenseFormatter.createLicenseKeyFromLast4(
+					props.settings.licenseKeyLast4,
+				),
 			},
 		};
 	};

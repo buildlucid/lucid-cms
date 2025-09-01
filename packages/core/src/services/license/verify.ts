@@ -2,6 +2,8 @@ import constants from "../../constants/constants.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import packageJson from "../../../package.json" with { type: "json" };
+import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import Repository from "../../libs/repositories/index.js";
 
 type VerifyAPIError = {
 	status: number;
@@ -25,25 +27,36 @@ type VerifyAPISuccess = {
 };
 
 const verifyLicense: ServiceFn<[], undefined> = async (context) => {
+	const Options = Repository.get("options", context.db, context.config.db);
+
 	const licenseOptionRes = await context.services.option.getSingle(context, {
 		name: "license_key",
 	});
 	if (licenseOptionRes.error) return licenseOptionRes;
 
-	const key = licenseOptionRes.data.valueText;
+	const encryptedKey = licenseOptionRes.data.valueText;
+	const key = encryptedKey
+		? decrypt(encryptedKey, context.config.keys.encryptionKey)
+		: undefined;
 	if (!key?.trim()) {
 		await Promise.all([
-			context.services.option.upsertSingle(context, {
-				name: "license_valid",
-				valueBool: false,
+			Options.upsertSingle({
+				data: {
+					name: "license_valid",
+					value_bool: false,
+				},
 			}),
-			context.services.option.upsertSingle(context, {
-				name: "license_last_checked",
-				valueInt: Math.trunc(Date.now() / 1000),
+			Options.upsertSingle({
+				data: {
+					name: "license_last_checked",
+					value_int: Math.trunc(Date.now() / 1000),
+				},
 			}),
-			context.services.option.upsertSingle(context, {
-				name: "license_error_message",
-				valueText: T("license_is_not_set"),
+			Options.upsertSingle({
+				data: {
+					name: "license_error_message",
+					value_text: T("license_is_not_set"),
+				},
 			}),
 		]);
 
@@ -79,8 +92,7 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 			const ok = json as VerifyAPISuccess;
 			valid = !!ok.data?.valid;
 			errorMessage =
-				ok.data.message ||
-				(valid ? T("license_verified_successfully") : T("license_is_invalid"));
+				ok.data.message || (valid ? null : T("license_is_invalid"));
 		}
 	} catch (e) {
 		valid = false;
@@ -89,17 +101,23 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 	}
 
 	const [validRes, lastCheckedRes, errorMsgRes] = await Promise.all([
-		context.services.option.upsertSingle(context, {
-			name: "license_valid",
-			valueBool: valid,
+		Options.upsertSingle({
+			data: {
+				name: "license_valid",
+				value_bool: valid,
+			},
 		}),
-		context.services.option.upsertSingle(context, {
-			name: "license_last_checked",
-			valueInt: Math.trunc(Date.now() / 1000),
+		Options.upsertSingle({
+			data: {
+				name: "license_last_checked",
+				value_int: Math.trunc(Date.now() / 1000),
+			},
 		}),
-		context.services.option.upsertSingle(context, {
-			name: "license_error_message",
-			valueText: errorMessage,
+		Options.upsertSingle({
+			data: {
+				name: "license_error_message",
+				value_text: errorMessage,
+			},
 		}),
 	]);
 	if (validRes.error) return validRes;

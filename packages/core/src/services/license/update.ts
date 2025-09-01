@@ -1,4 +1,6 @@
 import type { ServiceFn } from "../../utils/services/types.js";
+import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import Repository from "../../libs/repositories/index.js";
 
 const updateLicense: ServiceFn<
 	[
@@ -8,11 +10,30 @@ const updateLicense: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const res = await context.services.option.upsertSingle(context, {
-		name: "license_key",
-		valueText: data.licenseKey,
-	});
-	if (res.error) return res;
+	const Options = Repository.get("options", context.db, context.config.db);
+
+	const plain = data.licenseKey?.trim() || null;
+	const last4 = plain ? plain.slice(-4) : null;
+	const encrypted = plain
+		? encrypt(plain, context.config.keys.encryptionKey)
+		: null;
+
+	const [keyRes, last4Res] = await Promise.all([
+		Options.upsertSingle({
+			data: {
+				name: "license_key",
+				value_text: encrypted,
+			},
+		}),
+		Options.upsertSingle({
+			data: {
+				name: "license_key_last4",
+				value_text: last4,
+			},
+		}),
+	]);
+	if (keyRes.error) return keyRes;
+	if (last4Res.error) return last4Res;
 
 	const verifyRes = await context.services.license.verifyLicense(context);
 	if (verifyRes.error) return verifyRes;

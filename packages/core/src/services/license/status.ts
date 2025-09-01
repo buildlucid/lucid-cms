@@ -10,7 +10,7 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 			"license_valid",
 			"license_last_checked",
 			"license_error_message",
-			"license_key",
+			"license_key_last4",
 		],
 	});
 	if (res.error) return res;
@@ -20,13 +20,15 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 		(o) => o.name === "license_last_checked",
 	);
 	const errorMsgOpt = res.data.find((o) => o.name === "license_error_message");
-	const licenseKeyOpt = res.data.find((o) => o.name === "license_key");
+	const licenseKeyLast4Opt = res.data.find(
+		(o) => o.name === "license_key_last4",
+	);
 
 	return {
 		error: undefined,
 		data: LicenseFormatter.formatSingle({
 			license: {
-				key: licenseKeyOpt?.valueText ?? null,
+				last4: licenseKeyLast4Opt?.valueText ?? null,
 				valid: validOpt?.valueBool ?? false,
 				lastChecked: lastCheckedOpt?.valueInt ?? null,
 				errorMessage: errorMsgOpt?.valueText ?? null,

@@ -3,7 +3,7 @@ import type { LicenseResponse } from "../../types/response.js";
 import Formatter from "./index.js";
 
 interface LicensePropsT {
-	key: string | null;
+	last4: string | null;
 	valid: BooleanInt;
 	lastChecked: number | null;
 	errorMessage: string | null;
@@ -14,16 +14,15 @@ export default class LicenseFormatter {
 		license: LicensePropsT;
 	}): LicenseResponse => {
 		return {
-			key: LicenseFormatter.obfuscateLicenseKey(props.license.key),
+			key: LicenseFormatter.createLicenseKeyFromLast4(props.license.last4),
 			valid: Formatter.formatBoolean(props.license.valid),
 			lastChecked: props.license.lastChecked,
 			errorMessage: props.license.errorMessage,
 		};
 	};
-	static obfuscateLicenseKey = (key: string | null | undefined) => {
+	static createLicenseKeyFromLast4 = (key: string | null | undefined) => {
 		if (!key) return null;
-		if (key.length <= 4) return key;
-		const visible = key.slice(-4);
-		return "*".repeat(key.length - 4) + visible;
+
+		return `******-************-***************-****************-****${key}`;
 	};
 }

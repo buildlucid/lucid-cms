@@ -7,7 +7,7 @@ import T from "../../translations/index.js";
 const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
 	const [optionsRes, processedImageCountRes] = await Promise.all([
 		optionsServices.getMultiple(context, {
-			names: ["media_storage_used", "license_key"],
+			names: ["media_storage_used", "license_key_last4"],
 		}),
 		context.services.processedImage.getCount(context),
 	]);
@@ -17,7 +17,9 @@ const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
 	const mediaStorageUsedRes = optionsRes.data.find(
 		(o) => o.name === "media_storage_used",
 	);
-	const licenseKeyRes = optionsRes.data.find((o) => o.name === "license_key");
+	const licenseKeyLast4Res = optionsRes.data.find(
+		(o) => o.name === "license_key_last4",
+	);
 
 	const SettingsFormatter = Formatter.get("settings");
 
@@ -27,7 +29,7 @@ const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
 			settings: {
 				mediaStorageUsed: mediaStorageUsedRes?.valueInt || 0,
 				processedImageCount: processedImageCountRes.data,
-				licenseKey: licenseKeyRes?.valueText ?? null,
+				licenseKeyLast4: licenseKeyLast4Res?.valueText ?? null,
 			},
 			config: context.config,
 		}),
