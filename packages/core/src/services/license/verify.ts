@@ -74,6 +74,7 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 			method: "POST",
 			headers: {
 				"User-Agent": `LucidCMS/${packageJson.version}`,
+				"Content-Type": "application/json",
 				Origin: context.config.host.startsWith("http")
 					? context.config.host
 					: `https://${context.config.host}`,
