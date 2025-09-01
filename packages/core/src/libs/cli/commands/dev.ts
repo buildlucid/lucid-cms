@@ -4,6 +4,8 @@ import installOptionalDeps from "../utils/install-optional-deps.js";
 import createDevLogger from "../logger/dev-logger.js";
 import path from "node:path";
 import { minimatch } from "minimatch";
+import getConfigPath from "../../config/get-config-path.js";
+import loadConfigFile from "../../config/load-config-file.js";
 
 /**
  * The CLI dev command. Watches for file changes and spawns child processes running the serve command for hot-reloading.
@@ -17,6 +19,13 @@ const devCommand = async (options?: {
 	let rebuilding = false;
 	let startupTimer: NodeJS.Timeout | undefined = undefined;
 	let isInitialRun = true;
+
+	const configPath = getConfigPath(process.cwd());
+	//* this will get cached so will mostly affect startup time only, it does mean the compilerOptions will not get updated if the config changes
+	const configRes = await loadConfigFile({
+		path: configPath,
+	});
+	console.log(configRes.config.compilerOptions);
 
 	/**
 	 * Kills the child process
@@ -140,15 +149,16 @@ const devCommand = async (options?: {
 
 	const watchPath =
 		typeof options?.watch === "string" ? options?.watch : process.cwd();
-	// TODO: this needs to be configurable, ideally grab from lucid.config
-	const distPath = path.join(process.cwd(), "dist");
+
+	const distPath = path.join(
+		process.cwd(),
+		configRes.config.compilerOptions.paths.outDir,
+	);
 
 	const ignorePatterns = [
 		"**/node_modules/**",
 		"**/.git/**",
-		"**/build/**",
 		"**/.lucid/**",
-		"**/uploads/**",
 		distPath,
 		"**/*.log",
 		"**/.DS_Store",
@@ -159,6 +169,7 @@ const devCommand = async (options?: {
 		"**/*.sqlite",
 		"**/*.sqlite-shm",
 		"**/*.sqlite-wal",
+		...(configRes.config.compilerOptions.watch?.ignore ?? []),
 	];
 
 	const isIgnoredFile = (filePath: string) => {

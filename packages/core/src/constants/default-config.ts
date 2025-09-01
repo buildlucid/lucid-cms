@@ -41,8 +41,13 @@ export const defaultConfig: Partial<LucidConfig> = {
 	collections: [],
 	plugins: [],
 	compilerOptions: {
-		outDir: "dist",
-		emailTemplates: "./templates",
+		paths: {
+			outDir: "dist",
+			emailTemplates: "./templates",
+		},
+		watch: {
+			ignore: [],
+		},
 	},
 };
 

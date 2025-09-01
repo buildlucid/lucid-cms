@@ -33,7 +33,7 @@ const renderHandlebarsTemplate: ServiceFn<
 	try {
 		const templatesPath = path.resolve(
 			process.cwd(),
-			context.config.compilerOptions.outDir,
+			context.config.compilerOptions.paths.outDir,
 			constants.emailRenderedOutput,
 		);
 		const importUrl = pathToFileURL(templatesPath).href;

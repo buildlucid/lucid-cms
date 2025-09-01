@@ -1,5 +1,11 @@
 # @lucidcms/plugin-local-storage
 
+## 1.2.2 (UNRELEASED)
+
+### Patch Changes
+
+- Adds the upload directory to the compiler options watch ignore array so uploading media doesnt cause the dev server to restart.
+
 ## 1.2.1
 
 ### Patch Changes

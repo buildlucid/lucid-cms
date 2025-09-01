@@ -53,7 +53,7 @@ const buildApp = async (
 
 		await fs.rm(
 			join(
-				config.compilerOptions?.outDir,
+				config.compilerOptions.paths.outDir,
 				constants.directories.public,
 				constants.vite.mount,
 			),
@@ -61,7 +61,7 @@ const buildApp = async (
 		);
 		await fs.rm(
 			join(
-				config.compilerOptions?.outDir,
+				config.compilerOptions.paths.outDir,
 				constants.directories.public,
 				constants.vite.html,
 			),

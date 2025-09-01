@@ -262,12 +262,18 @@ export interface LucidConfig {
 	plugins?: LucidPlugin[];
 	/** Compiler options. */
 	compilerOptions?: {
-		/** The output directory. */
-		outDir?: string;
-		/** The path to the email templates directory. This can be used to override or extend the default templates. */
-		emailTemplates?: string;
+		paths?: {
+			/** The output directory. */
+			outDir?: string;
+			/** The path to the email templates directory. This can be used to override or extend the default templates. */
+			emailTemplates?: string;
+		};
 		/** Extend Vites config, this is used to build the SPA. */
 		vite?: InlineConfig;
+		watch?: {
+			/** The files to ignore. */
+			ignore?: string[];
+		};
 	};
 }
 
@@ -311,10 +317,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		urlStrategy?: UrlStrategy;
 	};
 	hono: {
-		middleware?: Array<
+		middleware: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
-		extensions?: Array<
+		extensions: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
@@ -322,8 +328,13 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPlugin>;
 	compilerOptions: {
-		outDir: string;
-		emailTemplates: string;
+		paths: {
+			outDir: string;
+			emailTemplates: string;
+		};
 		vite?: InlineConfig;
+		watch: {
+			ignore: string[];
+		};
 	};
 }

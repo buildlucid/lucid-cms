@@ -13,7 +13,9 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
 	pluginOptions,
 ) => {
-	config.hono.extensions?.push(routes(pluginOptions));
+	if (config.hono.extensions && Array.isArray(config.hono.extensions)) {
+		config.hono.extensions.push(routes(pluginOptions));
+	}
 
 	config.media = {
 		...config.media,
@@ -26,6 +28,15 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 			deleteMultiple: deleteMultiple(pluginOptions),
 		},
 	};
+
+	if (
+		config.compilerOptions.watch.ignore &&
+		Array.isArray(config.compilerOptions.watch.ignore)
+	) {
+		config.compilerOptions.watch.ignore.push(
+			`**/${pluginOptions.uploadDir}/**`,
+		);
+	}
 
 	return {
 		key: PLUGIN_KEY,

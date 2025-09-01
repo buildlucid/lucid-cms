@@ -10,7 +10,7 @@ const copyPublicAssets = async (config: Config) => {
 	const assetsPath = path.join(currentDir, "../../../public");
 
 	const outDir = path.join(
-		config.compilerOptions.outDir,
+		config.compilerOptions.paths.outDir,
 		constants.directories.public,
 	);
 

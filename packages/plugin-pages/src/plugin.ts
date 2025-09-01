@@ -35,26 +35,28 @@ const plugin: LucidPluginOptions<PluginOptions> = async (config, plugin) => {
 		}
 	}
 
-	config.hooks.push({
-		service: "documents",
-		event: "beforeUpsert",
-		handler: beforeUpsertHandler(options),
-	});
-	config.hooks.push({
-		service: "documents",
-		event: "afterUpsert",
-		handler: afterUpsertHandler(options),
-	});
-	config.hooks.push({
-		service: "documents",
-		event: "beforeDelete",
-		handler: beforeDeleteHandler(options),
-	});
-	config.hooks.push({
-		service: "documents",
-		event: "versionPromote",
-		handler: versionPromoteHandler(options),
-	});
+	if (config.hooks && Array.isArray(config.hooks)) {
+		config.hooks.push({
+			service: "documents",
+			event: "beforeUpsert",
+			handler: beforeUpsertHandler(options),
+		});
+		config.hooks.push({
+			service: "documents",
+			event: "afterUpsert",
+			handler: afterUpsertHandler(options),
+		});
+		config.hooks.push({
+			service: "documents",
+			event: "beforeDelete",
+			handler: beforeDeleteHandler(options),
+		});
+		config.hooks.push({
+			service: "documents",
+			event: "versionPromote",
+			handler: versionPromoteHandler(options),
+		});
+	}
 
 	return {
 		key: PLUGIN_KEY,

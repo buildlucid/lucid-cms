@@ -28,31 +28,31 @@ const getPaths = (config: Config, cwd = process.cwd()): VitePaths => {
 	return {
 		clientMount: join(
 			cwd,
-			config.compilerOptions?.outDir,
+			config.compilerOptions.paths.outDir,
 			constants.directories.public,
 			constants.vite.mount,
 		),
 		clientHtml: join(
 			cwd,
-			config.compilerOptions?.outDir,
+			config.compilerOptions.paths.outDir,
 			constants.directories.public,
 			constants.vite.html,
 		),
 		publicDist: join(
 			cwd,
-			config.compilerOptions?.outDir,
+			config.compilerOptions.paths.outDir,
 			constants.directories.public,
 		),
 		lucidDirectory: join(cwd, constants.directories.lucid),
 		clientDist: join(
 			cwd,
-			config.compilerOptions?.outDir,
+			config.compilerOptions.paths.outDir,
 			constants.directories.public,
 			constants.vite.dist,
 		),
 		clientDistHtml: join(
 			cwd,
-			config.compilerOptions?.outDir,
+			config.compilerOptions.paths.outDir,
 			constants.directories.public,
 			constants.vite.dist,
 			constants.vite.html,

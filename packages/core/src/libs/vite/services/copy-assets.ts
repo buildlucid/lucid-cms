@@ -22,7 +22,7 @@ const copyAdminAssets = async (
 			const source = require.resolve(`@lucidcms/admin/assets/${asset}`);
 			const destination = join(
 				cwd,
-				config.compilerOptions?.outDir,
+				config.compilerOptions.paths.outDir,
 				constants.directories.public,
 				constants.vite.dist,
 				"assets",

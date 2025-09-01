@@ -29,13 +29,13 @@ const buildCommand = async (options?: {
 
 	try {
 		if (options?.cacheSpa) {
-			await partialBuildDirClear(configRes.config.compilerOptions?.outDir);
+			await partialBuildDirClear(configRes.config.compilerOptions.paths.outDir);
 		} else {
-			await rm(configRes.config.compilerOptions?.outDir, {
+			await rm(configRes.config.compilerOptions.paths.outDir, {
 				recursive: true,
 				force: true,
 			});
-			await mkdir(configRes.config.compilerOptions?.outDir);
+			await mkdir(configRes.config.compilerOptions.paths.outDir);
 		}
 
 		if (!configRes.adapter?.cli?.build) {
@@ -56,7 +56,7 @@ const buildCommand = async (options?: {
 				configRes.config,
 				{
 					configPath,
-					outputPath: configRes.config.compilerOptions?.outDir,
+					outputPath: configRes.config.compilerOptions.paths.outDir,
 				},
 				logger,
 			),

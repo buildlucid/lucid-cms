@@ -115,9 +115,18 @@ const ConfigSchema = z.object({
 	plugins: z.array(z.unknown()),
 	compilerOptions: z
 		.object({
-			outDir: z.string().optional(),
-			emailTemplates: z.string().optional(),
+			paths: z
+				.object({
+					outDir: z.string().optional(),
+					emailTemplates: z.string().optional(),
+				})
+				.optional(),
 			vite: z.unknown().optional(),
+			watch: z
+				.object({
+					ignore: z.array(z.string()).optional(),
+				})
+				.optional(),
 		})
 		.optional(),
 });

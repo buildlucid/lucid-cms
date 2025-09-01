@@ -1,7 +1,7 @@
 import T from "./translations/index.js";
 import verifyTransporter from "./utils/verify-transporter.js";
 import isValidData from "./utils/is-valid-data.js";
-import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
+import { PLUGIN_KEY, LUCID_VERSION, PLUGIN_IDENTIFIER } from "./constants.js";
 import type { LucidPluginOptions } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types/types.js";
 
@@ -10,7 +10,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	pluginOptions,
 ) => {
 	config.email = {
-		identifier: "nodemailer",
+		identifier: PLUGIN_IDENTIFIER,
 		from: pluginOptions.from,
 		simulate: pluginOptions.simulate,
 		strategy: async (email, meta) => {

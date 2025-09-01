@@ -61,10 +61,11 @@ const prerenderMjmlTemplates = async (
 	try {
 		const renderedTemplates: RenderedTemplates = {};
 
-		await mkdir(config.compilerOptions.outDir, { recursive: true });
+		await mkdir(config.compilerOptions.paths.outDir, { recursive: true });
 
 		const projectTemplatePath =
-			config.compilerOptions?.emailTemplates ?? path.resolve("./templates");
+			config.compilerOptions.paths.emailTemplates ??
+			path.resolve("./templates");
 		const packageTemplatePath = path.join(currentDir, "../../../templates");
 
 		await processTemplatesInDirectory(
@@ -79,7 +80,7 @@ const prerenderMjmlTemplates = async (
 		);
 
 		const outputPath = path.join(
-			config.compilerOptions.outDir,
+			config.compilerOptions.paths.outDir,
 			constants.emailRenderedOutput,
 		);
 		await writeFile(outputPath, JSON.stringify(renderedTemplates, null, 2));

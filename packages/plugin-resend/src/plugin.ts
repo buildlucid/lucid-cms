@@ -1,5 +1,10 @@
 import T from "./translations/index.js";
-import { PLUGIN_KEY, LUCID_VERSION, WEBHOOK_ENABLED } from "./constants.js";
+import {
+	PLUGIN_KEY,
+	LUCID_VERSION,
+	WEBHOOK_ENABLED,
+	PLUGIN_IDENTIFIER,
+} from "./constants.js";
 import isValidData from "./utils/is-valid-data.js";
 import type { LucidPluginOptions } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types/types.js";
@@ -13,12 +18,16 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
 	pluginOptions,
 ) => {
-	if (pluginOptions.webhook?.enabled) {
-		config.hono.extensions?.push(routes(pluginOptions));
+	if (
+		pluginOptions.webhook?.enabled &&
+		config.hono.extensions &&
+		Array.isArray(config.hono.extensions)
+	) {
+		config.hono.extensions.push(routes(pluginOptions));
 	}
 
 	config.email = {
-		identifier: "resend",
+		identifier: PLUGIN_IDENTIFIER,
 		from: pluginOptions.from,
 		simulate: pluginOptions.simulate,
 		strategy: async (email, meta) => {
