@@ -70,18 +70,18 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 	let errorMessage: string | null = null;
 
 	try {
-		const res = await fetch(
-			`${constants.endpoints.licenseVerifyTemplate}/${encodeURIComponent(key)}`,
-			{
-				method: "GET",
-				headers: {
-					"User-Agent": `LucidCMS/${packageJson.version}`,
-					Origin: context.config.host.startsWith("http")
-						? context.config.host
-						: `https://${context.config.host}`,
-				},
+		const res = await fetch(constants.endpoints.licenseVerifyTemplate, {
+			method: "POST",
+			headers: {
+				"User-Agent": `LucidCMS/${packageJson.version}`,
+				Origin: context.config.host.startsWith("http")
+					? context.config.host
+					: `https://${context.config.host}`,
 			},
-		);
+			body: JSON.stringify({
+				licenseKey: key,
+			}),
+		});
 		const json = (await res.json()) as VerifyAPISuccess | VerifyAPIError;
 
 		if (!res.ok || (json as VerifyAPIError).code) {
