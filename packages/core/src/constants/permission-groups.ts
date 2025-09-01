@@ -37,6 +37,10 @@ const permissionGroups: Record<PermissionGroupKey, PermissionGroup> =
 				"regenerate_client_integration",
 			],
 		},
+		settings: {
+			key: "settings_permissions",
+			permissions: ["update_license"],
+		},
 	});
 
 export default permissionGroups;

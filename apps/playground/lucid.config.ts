@@ -38,11 +38,12 @@ export const envSchema = z.object({
 
 export default defineConfig((env) => ({
 	host: "http://localhost:6543",
+	// host: "https://cms.lucidjs.build",
 	// cors: {
 	// 	origin: [],
 	// },
 	logger: {
-		level: "silent",
+		level: "debug",
 	},
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),

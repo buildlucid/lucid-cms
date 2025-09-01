@@ -16,6 +16,7 @@ import type { clientIntegrationResponseSchema } from "../schemas/client-integrat
 import type z from "zod/v4";
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type { EmailType, EmailDeliveryStatus } from "../types.js";
+import type { OptionsName } from "../schemas/options.js";
 
 export interface UserResponse {
 	id: number;
@@ -62,6 +63,9 @@ export interface SettingsResponse {
 			total: number | null;
 		};
 	};
+	license: {
+		key: string | null;
+	};
 }
 
 export interface RoleResponse {
@@ -78,13 +82,18 @@ export interface RoleResponse {
 	updatedAt: string | null;
 }
 
-export type OptionName = "media_storage_used";
-
 export interface OptionsResponse {
-	name: OptionName;
+	name: OptionsName;
 	valueText: string | null;
 	valueInt: number | null;
 	valueBool: boolean | null;
+}
+
+export interface LicenseResponse {
+	key: string | null;
+	valid: boolean;
+	lastChecked: number | null;
+	errorMessage: string | null;
 }
 
 export type MediaType =
@@ -397,7 +406,8 @@ export type Permission =
 	| "create_client_integration"
 	| "update_client_integration"
 	| "delete_client_integration"
-	| "regenerate_client_integration";
+	| "regenerate_client_integration"
+	| "update_license";
 
 export type PermissionGroup = {
 	key: string;
@@ -410,7 +420,8 @@ export type PermissionGroupKey =
 	| "media"
 	| "emails"
 	| "content"
-	| "client-integrations";
+	| "client-integrations"
+	| "settings";
 
 export type ClientIntegrationResponse = z.infer<
 	typeof clientIntegrationResponseSchema

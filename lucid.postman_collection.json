@@ -149,7 +149,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"usernameOrEmail\": \"admin\",\r\n    \"password\": \"wja0fjh5fkj2MTH!vhb\"\r\n}",
+							"raw": "{\r\n    \"usernameOrEmail\": \"admin\",\r\n    \"password\": \"password\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2188,7 +2188,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft",
+									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft?filter[_slug]=en",
 									"host": [
 										"{{BASE_URL}}"
 									],
@@ -2208,7 +2208,7 @@
 										},
 										{
 											"key": "filter[id]",
-											"value": "1",
+											"value": "6",
 											"disabled": true
 										},
 										{
@@ -2232,9 +2232,8 @@
 											"disabled": true
 										},
 										{
-											"key": "filter[_simpleHeading]",
-											"value": "Homepage",
-											"disabled": true
+											"key": "filter[_slug]",
+											"value": "en"
 										}
 									]
 								}
@@ -2253,7 +2252,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/documents/simple/draft",
+									"raw": "{{BASE_URL}}/api/v1/client/documents/page/draft",
 									"host": [
 										"{{BASE_URL}}"
 									],
@@ -2262,7 +2261,7 @@
 										"v1",
 										"client",
 										"documents",
-										"simple",
+										"page",
 										"draft"
 									],
 									"query": [
@@ -2659,6 +2658,10 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "License",
+			"item": []
 		},
 		{
 			"name": "Public",

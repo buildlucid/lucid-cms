@@ -1,10 +1,10 @@
 import type { Kysely, JSONColumnType, Transaction } from "kysely";
 import type { Migration, Generated, ColumnType, ColumnDataType } from "kysely";
-import type { OptionName } from "../../types/response.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type DatabaseAdapter from "./adapter.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { EmailType, EmailDeliveryStatus } from "../email/types.js";
+import type { OptionsName } from "../../schemas/options.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -159,7 +159,7 @@ export interface LucidTranslations {
 }
 
 export interface LucidOptions {
-	name: OptionName;
+	name: OptionsName;
 	value_int: number | null;
 	value_text: string | null;
 	value_bool: BooleanInt | null;

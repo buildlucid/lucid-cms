@@ -31,6 +31,7 @@ export default Object.freeze({
 					...permissionGroups.emails.permissions,
 					...permissionGroups.content.permissions,
 					...permissionGroups["client-integrations"].permissions,
+					...permissionGroups.settings.permissions,
 				],
 			},
 			{
@@ -138,6 +139,10 @@ export default Object.freeze({
 	mediaAwaitingSyncInterval: 3600000, // 1 hour in ms
 	media: {
 		imagePresetQuality: 80,
+	},
+	endpoints: {
+		licenseVerifyTemplate:
+			"https://api.staging.lucidjs.build/v1/cms-license/verify",
 	},
 	config: {
 		filename: "lucid.config",

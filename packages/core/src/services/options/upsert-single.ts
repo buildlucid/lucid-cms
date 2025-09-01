@@ -2,7 +2,7 @@ import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { OptionsName } from "../../schemas/options.js";
 
-const updateSingle: ServiceFn<
+const upsertSingle: ServiceFn<
 	[
 		{
 			name: OptionsName;
@@ -15,30 +15,21 @@ const updateSingle: ServiceFn<
 > = async (context, data) => {
 	const Options = Repository.get("options", context.db, context.config.db);
 
-	const updateOptionRes = await Options.updateSingle({
-		where: [
-			{
-				key: "name",
-				operator: "=",
-				value: data.name,
-			},
-		],
+	const upsertRes = await Options.upsertSingle({
 		data: {
-			value_bool: data.valueBool,
-			value_int: data.valueInt,
-			value_text: data.valueText,
+			name: data.name,
+			value_text: data.valueText ?? null,
+			value_int: data.valueInt ?? null,
+			value_bool: data.valueBool ?? null,
 		},
 		returning: ["name"],
 		validation: {
 			enabled: true,
 		},
 	});
-	if (updateOptionRes.error) return updateOptionRes;
+	if (upsertRes.error) return upsertRes;
 
-	return {
-		error: undefined,
-		data: undefined,
-	};
+	return { error: undefined, data: undefined };
 };
 
-export default updateSingle;
+export default upsertSingle;

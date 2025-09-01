@@ -17,6 +17,7 @@ import DocumentBricksFormatter from "./document-bricks.js";
 import DocumentFieldsFormatter from "./document-fields.js";
 import DocumentVErsionsFormatter from "./document-versions.js";
 import DocumentFormatter from "./documents.js";
+import LicenseFormatter from "./license.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Formatter {
@@ -54,6 +55,8 @@ class Formatter {
 				return new DocumentVErsionsFormatter() as FormatterReturnType<T>;
 			case "documents":
 				return new DocumentFormatter() as FormatterReturnType<T>;
+			case "license":
+				return new LicenseFormatter() as FormatterReturnType<T>;
 			default:
 				throw new LucidError({
 					message: T("cannot_find_formatter", {
@@ -122,6 +125,7 @@ type FormatterClassMap = {
 	"document-fields": DocumentFieldsFormatter;
 	"document-versions": DocumentVErsionsFormatter;
 	documents: DocumentFormatter;
+	license: LicenseFormatter;
 };
 
 type FormatterReturnType<T extends keyof FormatterClassMap> =

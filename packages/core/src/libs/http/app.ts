@@ -134,7 +134,7 @@ const createApp = async (props: {
 					info: {
 						title: "Lucid CMS",
 						description:
-							"A modern headless CMS offering a delightful developer experience. Tailor Lucid seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
+							"A modern headless CMS offering a delightful developer experience. Tailor Lucid CMS seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
 						version: packageJson.version,
 					},
 					tags: [
@@ -197,6 +197,11 @@ const createApp = async (props: {
 							name: "settings",
 							description:
 								"Setting endpoints to recieve current settings and meta data on Lucid.",
+						},
+						{
+							name: "license",
+							description:
+								"License endpoints for managing the license key and verifying its validity.",
 						},
 						{
 							name: "client-integrations",

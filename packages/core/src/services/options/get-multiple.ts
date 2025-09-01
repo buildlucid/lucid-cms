@@ -5,24 +5,24 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import type { OptionsResponse } from "../../types/response.js";
 import type { OptionsName } from "../../schemas/options.js";
 
-const getSingle: ServiceFn<
+const getMultiple: ServiceFn<
 	[
 		{
-			name: OptionsName;
+			names: OptionsName[];
 		},
 	],
-	OptionsResponse
+	OptionsResponse[]
 > = async (context, data) => {
 	const Options = Repository.get("options", context.db, context.config.db);
 	const OptionsFormatter = Formatter.get("options");
 
-	const optionRes = await Options.selectSingle({
+	const optionRes = await Options.selectMultiple({
 		select: ["name", "value_bool", "value_int", "value_text"],
 		where: [
 			{
 				key: "name",
-				operator: "=",
-				value: data.name,
+				operator: "in",
+				value: data.names,
 			},
 		],
 		validation: {
@@ -37,10 +37,10 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: OptionsFormatter.formatSingle({
-			option: optionRes.data,
+		data: OptionsFormatter.formatMultiple({
+			options: optionRes.data,
 		}),
 	};
 };
 
-export default getSingle;
+export default getMultiple;

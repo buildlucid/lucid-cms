@@ -203,6 +203,7 @@
 	"email_not_found_message": "The email you are trying to access does not exist.",
 	"locale_not_found_message": "The locale you are trying to access does not exist.",
 	"option_not_found_message": "The option you are trying to access does not exist.",
+	"options_not_found_message": "The options you are trying to access do not exist.",
 	"role_not_found_message": "The role you are trying to access does not exist.",
 	"token_not_found_message": "The token you are trying to access does not exist.",
 	"user_not_found_message": "The user you are trying to access does not exist.",
@@ -280,5 +281,10 @@
 	"error_update_revision_version_message": "You cannot update a revision version. The revision must be restored first.",
 	"email_failed_to_send": "An error occurred while sending the email.",
 	"email_resent_successfully": "Email resent successfully.",
-	"email_failed_to_resend": "Failed to resend email."
+	"email_failed_to_resend": "Failed to resend email.",
+	"license_verification_failed": "License verification failed.",
+	"license_verified_successfully": "License verified successfully.",
+	"license_is_invalid": "License is invalid.",
+	"unknown_verification_error": "Unknown verification error.",
+	"license_is_not_set": "License is not set."
 }

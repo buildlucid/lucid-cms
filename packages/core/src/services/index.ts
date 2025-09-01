@@ -13,6 +13,7 @@ import options from "./options/index.js";
 import processedImage from "./processed-images/index.js";
 import roles from "./roles/index.js";
 import settings from "./settings/index.js";
+import license from "./license/index.js";
 import translations from "./translations/index.js";
 import users from "./users/index.js";
 import userTokens from "./user-tokens/index.js";
@@ -38,6 +39,7 @@ const lucidServices = {
 	email: emails,
 	role: roles,
 	setting: settings,
+	license: license,
 	option: options,
 	media: media,
 	processedImage: processedImage,

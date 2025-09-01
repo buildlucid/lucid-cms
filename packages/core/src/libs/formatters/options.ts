@@ -3,6 +3,11 @@ import type { LucidOptions, Select } from "../db/types.js";
 import type { OptionsResponse } from "../../types/response.js";
 
 export default class OptionsFormatter {
+	formatMultiple = (props: {
+		options: Select<LucidOptions>[];
+	}): OptionsResponse[] => {
+		return props.options.map((o) => this.formatSingle({ option: o }));
+	};
 	formatSingle = (props: {
 		option: Select<LucidOptions>;
 	}): OptionsResponse => {

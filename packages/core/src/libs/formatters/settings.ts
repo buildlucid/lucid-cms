@@ -1,9 +1,11 @@
 import type { SettingsResponse } from "../../types/response.js";
 import type { Config } from "../../types/config.js";
+import LicenseFormatter from "./license.js";
 
 interface SettingsPropsT {
 	mediaStorageUsed: number;
 	processedImageCount: number;
+	licenseKey: string | null;
 }
 
 export default class SettingsFormatter {
@@ -29,6 +31,9 @@ export default class SettingsFormatter {
 					imageLimit: props.config.media.processedImageLimit,
 					total: props.settings.processedImageCount,
 				},
+			},
+			license: {
+				key: LicenseFormatter.obfuscateLicenseKey(props.settings.licenseKey),
 			},
 		};
 	};

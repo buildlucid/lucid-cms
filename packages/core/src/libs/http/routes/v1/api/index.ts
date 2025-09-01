@@ -8,6 +8,7 @@ import emailRoutes from "./email.routes.js";
 import localeRoutes from "./locales.routes.js";
 import permissionRoutes from "./permissions.routes.js";
 import settingsRoutes from "./settings.routes.js";
+import licenseRoutes from "./license.routes.js";
 import roleRoutes from "./roles.routes.js";
 import userRoutes from "./users.routes.js";
 import clientRoutes from "./client/index.js";
@@ -24,6 +25,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/locales", localeRoutes)
 	.route("/permissions", permissionRoutes)
 	.route("/settings", settingsRoutes)
+	.route("/license", licenseRoutes)
 	.route("/roles", roleRoutes)
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)
