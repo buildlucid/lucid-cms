@@ -106,7 +106,7 @@ const verifyLicense: ServiceFn<
 	let errorMessage: string | null = null;
 
 	try {
-		const res = await fetch(constants.endpoints.licenseVerifyTemplate, {
+		const res = await fetch(constants.endpoints.licenseVerify, {
 			method: "POST",
 			headers: {
 				"User-Agent": `LucidCMS/${packageJson.version}`,

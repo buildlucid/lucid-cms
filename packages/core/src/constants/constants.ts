@@ -134,8 +134,8 @@ export default Object.freeze({
 	accessTokenExpiration: 300, // 5 minutes in seconds
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
-	documentation: "https://lucidcms.io/getting-started",
-	lucidUi: "https://lucidui.io/",
+	documentation:
+		"https://lucidjs.build/en/cms/docs/getting-started/what-is-lucid-cms/",
 	mediaAwaitingSyncInterval: 3600000, // 1 hour in ms
 	media: {
 		imagePresetQuality: 80,
@@ -144,8 +144,7 @@ export default Object.freeze({
 		statusRecheckIntervalSeconds: 21600, //  6 hours
 	},
 	endpoints: {
-		licenseVerifyTemplate:
-			"https://api.staging.lucidjs.build/v1/cms-license/verify",
+		licenseVerify: "https://api.lucidjs.build/v1/cms-license/verify",
 	},
 	config: {
 		filename: "lucid.config",
