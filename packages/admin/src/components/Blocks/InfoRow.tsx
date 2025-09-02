@@ -6,6 +6,7 @@ interface InfoRowProps {
 	description?: string;
 	permission?: boolean;
 
+	left?: JSXElement;
 	children?: JSXElement;
 }
 
@@ -19,6 +20,9 @@ const InfoRow: Component<InfoRowProps> = (props) => {
 					<h2 class="text-lg mb-1">{props.title}</h2>
 					<Show when={props.description}>
 						<p class="text-sm">{props.description}</p>
+					</Show>
+					<Show when={props.left}>
+						<div class="mt-15">{props.left}</div>
 					</Show>
 				</div>
 				<div class="md:col-span-2 lg:col-span-3">{props.children}</div>

@@ -12,6 +12,7 @@ import LogoIcon from "@assets/svgs/logo-icon.svg";
 import api from "@/services/api";
 import { NavigationSidebar } from "@/components/Groups/Layout";
 import spawnToast from "@/utils/spawn-toast";
+import Alert from "@/components/Blocks/Alert";
 
 interface MainLayoutProps {
 	children?: JSXElement;
@@ -31,14 +32,31 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 	const locales = api.locales.useGetMultiple({
 		queryParams: {},
 	});
+	const license = api.license.useGetStatus({
+		queryParams: {},
+	});
 
 	// ----------------------------------
 	// Memos
 	const isLoading = createMemo(() => {
-		return authenticatedUser.isLoading || locales.isLoading;
+		return (
+			authenticatedUser.isLoading || locales.isLoading || license.isLoading
+		);
 	});
 	const isSuccess = createMemo(() => {
-		return authenticatedUser.isSuccess && locales.isSuccess;
+		return (
+			authenticatedUser.isSuccess && locales.isSuccess && license.isSuccess
+		);
+	});
+
+	const showLicenseAlert = createMemo(() => {
+		return license.data?.data.valid === false;
+	});
+	const isCollectionBuilderRoute = createMemo(() => {
+		return (
+			location.pathname.startsWith("/admin/collections/") &&
+			location.pathname.split("/").length > 4
+		);
 	});
 
 	// ------------------------------------------------------
@@ -65,7 +83,21 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 			<NavigationSidebar />
 			<main class="flex flex-col mt-15 pr-15 w-full min-w-[calc(100vw-325px)]">
 				<Switch>
-					<Match when={isSuccess()}>{props.children}</Match>
+					<Match when={isSuccess()}>
+						<Alert
+							style="layout"
+							class="pb-15 -mt-15"
+							roundedBottom={!isCollectionBuilderRoute()}
+							alerts={[
+								{
+									type: "warning",
+									message: T()("license_invalid_message"),
+									show: showLicenseAlert(),
+								},
+							]}
+						/>
+						{props.children}
+					</Match>
 					<Match when={isLoading()}>
 						<div class="fixed inset-0 z-50 bg-container-1 flex items-center justify-center">
 							<div class="absolute inset-0 z-20 flex-col flex items-center justify-center">

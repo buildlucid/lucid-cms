@@ -9,6 +9,8 @@ import {
 
 interface AlertProps {
 	style: "layout" | "block";
+	class?: string;
+	roundedBottom?: boolean;
 	alerts: Array<{
 		type: "warning" | "success" | "info" | "error";
 		message: string;
@@ -28,9 +30,13 @@ const Alert: Component<AlertProps> = (props) => {
 	return (
 		<Show when={showAlerts()}>
 			<div
-				class={classNames("w-full", {
-					"mb-15 last:mb-0": props.style === "block",
-				})}
+				class={classNames(
+					"w-full",
+					{
+						"mb-15 last:mb-0": props.style === "block",
+					},
+					props.class,
+				)}
 			>
 				<For each={props.alerts}>
 					{({ type, message, show }) => (
@@ -47,6 +53,7 @@ const Alert: Component<AlertProps> = (props) => {
 									"bg-primary-base text-primary-contrast":
 										(type === "success" || type === "info") &&
 										props.style === "layout",
+									"rounded-b-md": props.roundedBottom,
 								})}
 							>
 								<span

@@ -77,7 +77,6 @@ const UpdateLicenseForm: Component<{
 				</Button>
 			}
 		>
-			<h3 class="mb-15">{T()("update_license")}</h3>
 			<Input
 				id="licenseKey"
 				name="licenseKey"
