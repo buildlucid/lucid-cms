@@ -25,7 +25,6 @@ const devCommand = async (options?: {
 	const configRes = await loadConfigFile({
 		path: configPath,
 	});
-	console.log(configRes.config.compilerOptions);
 
 	/**
 	 * Kills the child process

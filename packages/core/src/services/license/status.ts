@@ -1,4 +1,6 @@
 import Formatter from "../../libs/formatters/index.js";
+import constants from "../../constants/constants.js";
+import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { LicenseResponse } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -24,14 +26,39 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 		(o) => o.name === "license_key_last4",
 	);
 
+	//* if last check older than 6 hours, trigger verify
+	const nowSeconds = getUnixTimeSeconds();
+	const lastCheckedSeconds = lastCheckedOpt?.valueInt ?? 0;
+	const recheckIntervalSeconds = constants.license.statusRecheckIntervalSeconds;
+
+	if (
+		lastCheckedSeconds &&
+		nowSeconds - lastCheckedSeconds < recheckIntervalSeconds
+	) {
+		return {
+			error: undefined,
+			data: LicenseFormatter.formatSingle({
+				license: {
+					last4: licenseKeyLast4Opt?.valueText ?? null,
+					valid: validOpt?.valueBool ?? false,
+					lastChecked: lastCheckedOpt?.valueInt ?? null,
+					errorMessage: errorMsgOpt?.valueText ?? null,
+				},
+			}),
+		};
+	}
+
+	const verifyRes = await context.services.license.verifyLicense(context);
+	if (verifyRes.error) return verifyRes;
+
 	return {
 		error: undefined,
 		data: LicenseFormatter.formatSingle({
 			license: {
-				last4: licenseKeyLast4Opt?.valueText ?? null,
-				valid: validOpt?.valueBool ?? false,
-				lastChecked: lastCheckedOpt?.valueInt ?? null,
-				errorMessage: errorMsgOpt?.valueText ?? null,
+				last4: verifyRes.data.last4,
+				valid: verifyRes.data.valid,
+				lastChecked: verifyRes.data.lastChecked,
+				errorMessage: verifyRes.data.errorMessage,
 			},
 		}),
 	};

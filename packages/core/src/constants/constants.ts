@@ -140,6 +140,9 @@ export default Object.freeze({
 	media: {
 		imagePresetQuality: 80,
 	},
+	license: {
+		statusRecheckIntervalSeconds: 21600, //  6 hours
+	},
 	endpoints: {
 		licenseVerifyTemplate:
 			"https://api.staging.lucidjs.build/v1/cms-license/verify",

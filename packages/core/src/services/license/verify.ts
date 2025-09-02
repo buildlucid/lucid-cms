@@ -3,6 +3,7 @@ import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import Repository from "../../libs/repositories/index.js";
 
 type VerifyAPIError = {
@@ -26,7 +27,15 @@ type VerifyAPISuccess = {
 	};
 };
 
-const verifyLicense: ServiceFn<[], undefined> = async (context) => {
+const verifyLicense: ServiceFn<
+	[],
+	{
+		last4: string | null;
+		valid: boolean;
+		lastChecked: number;
+		errorMessage: string | null;
+	}
+> = async (context) => {
 	const Options = Repository.get("options", context.db, context.config.db);
 
 	const licenseOptionRes = await context.services.option.getSingle(context, {
@@ -38,7 +47,11 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 	const key = encryptedKey
 		? decrypt(encryptedKey, context.config.keys.encryptionKey)
 		: undefined;
+	const last4 = key?.trim() ? key.trim().slice(-4) : null;
+
 	if (!key?.trim()) {
+		const now = getUnixTimeSeconds();
+
 		await Promise.all([
 			Options.upsertSingle({
 				data: {
@@ -49,7 +62,7 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 			Options.upsertSingle({
 				data: {
 					name: "license_last_checked",
-					value_int: Math.trunc(Date.now() / 1000),
+					value_int: now,
 				},
 			}),
 			Options.upsertSingle({
@@ -62,7 +75,12 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 
 		return {
 			error: undefined,
-			data: undefined,
+			data: {
+				last4: null,
+				valid: false,
+				lastChecked: now,
+				errorMessage: T("license_is_not_set"),
+			},
 		};
 	}
 
@@ -101,6 +119,8 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 			e instanceof Error ? e.message : T("unknown_verification_error");
 	}
 
+	const now = getUnixTimeSeconds();
+
 	const [validRes, lastCheckedRes, errorMsgRes] = await Promise.all([
 		Options.upsertSingle({
 			data: {
@@ -111,7 +131,7 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 		Options.upsertSingle({
 			data: {
 				name: "license_last_checked",
-				value_int: Math.trunc(Date.now() / 1000),
+				value_int: now,
 			},
 		}),
 		Options.upsertSingle({
@@ -127,7 +147,12 @@ const verifyLicense: ServiceFn<[], undefined> = async (context) => {
 
 	return {
 		error: undefined,
-		data: undefined,
+		data: {
+			last4,
+			valid: !!valid,
+			lastChecked: now,
+			errorMessage,
+		},
 	};
 };
 
