@@ -3,32 +3,45 @@ import constants from "../../constants/constants.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { LicenseResponse } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import Repository from "../../libs/repositories/index.js";
 
 const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 	const LicenseFormatter = Formatter.get("license");
+	const Options = Repository.get("options", context.db, context.config.db);
 
-	const res = await context.services.option.getMultiple(context, {
-		names: [
-			"license_valid",
-			"license_last_checked",
-			"license_error_message",
-			"license_key_last4",
+	const licenseOptionsRes = await Options.selectMultiple({
+		select: ["name", "value_bool", "value_int", "value_text"],
+		where: [
+			{
+				key: "name",
+				operator: "in",
+				value: [
+					"license_valid",
+					"license_last_checked",
+					"license_error_message",
+					"license_key_last4",
+				],
+			},
 		],
 	});
-	if (res.error) return res;
+	if (licenseOptionsRes.error) return licenseOptionsRes;
 
-	const validOpt = res.data.find((o) => o.name === "license_valid");
-	const lastCheckedOpt = res.data.find(
+	const validOpt = licenseOptionsRes.data?.find(
+		(o) => o.name === "license_valid",
+	);
+	const lastCheckedOpt = licenseOptionsRes.data?.find(
 		(o) => o.name === "license_last_checked",
 	);
-	const errorMsgOpt = res.data.find((o) => o.name === "license_error_message");
-	const licenseKeyLast4Opt = res.data.find(
+	const errorMsgOpt = licenseOptionsRes.data?.find(
+		(o) => o.name === "license_error_message",
+	);
+	const licenseKeyLast4Opt = licenseOptionsRes.data?.find(
 		(o) => o.name === "license_key_last4",
 	);
 
 	//* if last check older than 6 hours, trigger verify
 	const nowSeconds = getUnixTimeSeconds();
-	const lastCheckedSeconds = lastCheckedOpt?.valueInt ?? 0;
+	const lastCheckedSeconds = lastCheckedOpt?.value_int ?? 0;
 	const recheckIntervalSeconds = constants.license.statusRecheckIntervalSeconds;
 
 	if (
@@ -39,10 +52,10 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 			error: undefined,
 			data: LicenseFormatter.formatSingle({
 				license: {
-					last4: licenseKeyLast4Opt?.valueText ?? null,
-					valid: validOpt?.valueBool ?? false,
-					lastChecked: lastCheckedOpt?.valueInt ?? null,
-					errorMessage: errorMsgOpt?.valueText ?? null,
+					last4: licenseKeyLast4Opt?.value_text ?? null,
+					valid: Formatter.formatBoolean(validOpt?.value_bool) ?? false,
+					lastChecked: lastCheckedOpt?.value_int ?? null,
+					errorMessage: errorMsgOpt?.value_text ?? null,
 				},
 			}),
 		};

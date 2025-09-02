@@ -37,21 +37,39 @@ const verifyLicense: ServiceFn<
 	}
 > = async (context) => {
 	const Options = Repository.get("options", context.db, context.config.db);
+	const now = getUnixTimeSeconds();
 
-	const licenseOptionRes = await context.services.option.getSingle(context, {
-		name: "license_key",
+	const licenseKeyRes = await Options.selectSingle({
+		select: ["name", "value_text"],
+		where: [
+			{
+				key: "name",
+				operator: "=",
+				value: "license_key",
+			},
+		],
 	});
-	if (licenseOptionRes.error) return licenseOptionRes;
+	if (licenseKeyRes.error) return licenseKeyRes;
 
-	const encryptedKey = licenseOptionRes.data.valueText;
+	if (!licenseKeyRes.data) {
+		return {
+			error: undefined,
+			data: {
+				last4: null,
+				valid: false,
+				lastChecked: now,
+				errorMessage: T("license_is_not_set"),
+			},
+		};
+	}
+
+	const encryptedKey = licenseKeyRes.data?.value_text;
 	const key = encryptedKey
 		? decrypt(encryptedKey, context.config.keys.encryptionKey)
 		: undefined;
 	const last4 = key?.trim() ? key.trim().slice(-4) : null;
 
 	if (!key?.trim()) {
-		const now = getUnixTimeSeconds();
-
 		await Promise.all([
 			Options.upsertSingle({
 				data: {
@@ -118,8 +136,6 @@ const verifyLicense: ServiceFn<
 		errorMessage =
 			e instanceof Error ? e.message : T("unknown_verification_error");
 	}
-
-	const now = getUnixTimeSeconds();
 
 	const [validRes, lastCheckedRes, errorMsgRes] = await Promise.all([
 		Options.upsertSingle({

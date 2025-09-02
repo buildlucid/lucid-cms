@@ -1,10 +1,6 @@
 import T from "@/translations";
 import type { Component } from "solid-js";
-import {
-	Wrapper,
-	NavigationTabs,
-	DynamicContent,
-} from "@/components/Groups/Layout";
+import { Wrapper, NavigationTabs } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { License as LicenseContent } from "@/components/Groups/Content";
 
@@ -44,13 +40,7 @@ const LicenseSettingsRoute: Component = () => {
 				),
 			}}
 		>
-			<DynamicContent
-				options={{
-					padding: "20",
-				}}
-			>
-				<LicenseContent />
-			</DynamicContent>
+			<LicenseContent />
 		</Wrapper>
 	);
 };
