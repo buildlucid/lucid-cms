@@ -64,6 +64,10 @@ const GeneralSettingsRoute: Component = (props) => {
 											label: T()("client_integrations"),
 											href: "/admin/settings/client-integrations",
 										},
+										{
+											label: T()("license"),
+											href: "/admin/settings/license",
+										},
 									]}
 								/>
 							),

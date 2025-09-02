@@ -13,6 +13,7 @@ import UsersListRoute from "@/routes/Users/List";
 import RolesListRoute from "@/routes/Roles/List";
 import SettingsGeneralRoute from "@/routes/Settings/General";
 import SettingsClientIntegrationRoute from "@/routes/Settings/ClientIntegration";
+import SettingsLicenseRoute from "@/routes/Settings/License";
 import EmailListRoute from "@/routes/Emails/List";
 import AccountRoute from "@/routes/Account";
 import CollectionsListRoute from "@/routes/Collections/List";
@@ -82,6 +83,7 @@ const AppRouter: Component = () => {
 					path="/settings/client-integrations"
 					component={SettingsClientIntegrationRoute}
 				/>
+				<Route path="/settings/license" component={SettingsLicenseRoute} />
 			</Route>
 			{/* Non authenticated */}
 			<Route path="/admin" component={AuthRoutes}>

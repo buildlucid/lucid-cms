@@ -6,3 +6,4 @@ export { RolesList } from "./RolesList";
 export { EmailsList } from "./EmailsList";
 export { CollectionsList } from "./CollectionsList";
 export { DocumentsList } from "./DocumentsList";
+export { License } from "./License";

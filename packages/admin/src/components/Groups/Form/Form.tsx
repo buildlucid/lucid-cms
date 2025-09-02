@@ -25,6 +25,7 @@ export const Form: Component<{
 	permission?: boolean;
 	onSubmit?: () => void;
 	children: JSXElement;
+	submitRow?: JSXElement;
 }> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -48,7 +49,7 @@ export const Form: Component<{
 					}}
 				>
 					{props.children}
-					<div class="mt-8 w-full">
+					<div class="mt-5 w-full">
 						<Show when={props.state.errors?.message}>
 							<ErrorMessage
 								theme="basic"
@@ -57,19 +58,22 @@ export const Form: Component<{
 							/>
 						</Show>
 
-						<Button
-							size="medium"
-							classes={classNames({
-								"w-full": props.options?.buttonFullWidth,
-							})}
-							type="submit"
-							theme="primary"
-							loading={props.state.isLoading}
-							disabled={props.state.isDisabled}
-							permission={props.permission}
-						>
-							{props.content.submit}
-						</Button>
+						<div class="flex items-center gap-2.5">
+							<Button
+								size="medium"
+								classes={classNames({
+									"w-full": props.options?.buttonFullWidth,
+								})}
+								type="submit"
+								theme="primary"
+								loading={props.state.isLoading}
+								disabled={props.state.isDisabled}
+								permission={props.permission}
+							>
+								{props.content.submit}
+							</Button>
+							<Show when={props.submitRow}>{props.submitRow}</Show>
+						</div>
 					</div>
 				</form>
 			</Match>

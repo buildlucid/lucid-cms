@@ -12,7 +12,8 @@ interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 		| "danger"
 		| "basic"
 		| "secondary-toggle"
-		| "input-style";
+		| "input-style"
+		| "danger-outline";
 	size: "x-small" | "small" | "medium" | "large" | "x-icon" | "icon" | "auto";
 	children: JSX.Element;
 
@@ -44,6 +45,8 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "danger",
 				"bg-container-4 hover:bg-container-5 text-title ring-primary-base fill-title border border-border-input":
 					props.theme === "input-style",
+				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":
+					props.theme === "danger-outline",
 
 				// Toggles
 				"ring-primary-base": props.theme === "secondary-toggle",

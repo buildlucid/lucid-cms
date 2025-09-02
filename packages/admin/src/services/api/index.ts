@@ -10,6 +10,7 @@ import locales from "./locales";
 import collections from "./collections";
 import documents from "./documents";
 import clientIntegrations from "./client-integrations";
+import license from "./license";
 
 const exportObject: {
 	auth: typeof auth;
@@ -24,6 +25,7 @@ const exportObject: {
 	collections: typeof collections;
 	documents: typeof documents;
 	clientIntegrations: typeof clientIntegrations;
+	license: typeof license;
 } = {
 	auth,
 	account,
@@ -37,6 +39,7 @@ const exportObject: {
 	collections,
 	documents,
 	clientIntegrations,
+	license,
 };
 
 export default exportObject;
