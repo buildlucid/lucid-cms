@@ -17,13 +17,13 @@
 
 	/* Typography */
 	h1 {
-		@apply text-lg tracking-wider font-bold text-title font-display;
+		@apply text-lg tracking-wider font-bold text-title;
 	}
 	h2 {
-		@apply text-base font-bold text-title font-display;
+		@apply text-base font-bold text-title;
 	}
 	h3 {
-		@apply text-base font-medium text-title font-display;
+		@apply text-base font-medium text-title;
 	}
 	h4 {
 		@apply text-base font-medium text-title font-body;
@@ -48,7 +48,7 @@
 
 	/* Other */
 	body {
-		@apply bg-container-3 text-body font-body;
+		@apply bg-background-base text-body font-body;
 	}
 	::-moz-selection {
 		@apply bg-primary-base text-primary-contrast;
@@ -70,7 +70,7 @@
 		@apply duration-200 transition-colors outline-primary-base focus:outline-1;
 	}
 	.skeleton {
-		@apply bg-container-4 rounded-md animate-pulse;
+		@apply bg-input-base rounded-md animate-pulse;
 	}
 
 	.hide-scrollbar::-webkit-scrollbar {
@@ -119,10 +119,10 @@
 		@apply fill-primary-base!;
 	}
 	.ql-tooltip {
-		@apply left-1/2! -translate-x-1/2! shadow-none! bg-container-1! rounded-md border-border! border! text-body!;
+		@apply left-1/2! -translate-x-1/2! shadow-none! bg-background-base! rounded-md border-border! border! text-body!;
 	}
 	.ql-tooltip input {
-		@apply bg-container-1! rounded-md border-border! border! text-body! focus:outline-hidden focus:ring-1 ring-primary-base;
+		@apply bg-background-base! rounded-md border-border! border! text-body! focus:outline-hidden focus:ring-1 ring-primary-base;
 	}
 	.ql-tooltip .ql-action,
 	.ql-tooltip .ql-remove {
@@ -144,7 +144,7 @@
 	}
 
 	.ql-picker-options {
-		@apply bg-container-1! rounded-md border-border! border! text-body!;
+		@apply bg-background-base! rounded-md border-border! border! text-body!;
 	}
 	.ql-picker-item:hover {
 		@apply text-primary-hover!;

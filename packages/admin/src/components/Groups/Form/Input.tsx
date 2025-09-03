@@ -62,10 +62,9 @@ export const Input: Component<InputProps> = (props) => {
 				class={classnames(
 					"flex flex-col transition-colors duration-200 ease-in-out relative",
 					{
-						"border-primary-base bg-container-3":
-							inputFocus() && props.theme === "full",
+						"border-primary-base": inputFocus() && props.theme === "full",
 						"border-error-base": props.errors?.message !== undefined,
-						"bg-container-4 rounded-md border border-border":
+						"bg-input-base rounded-md border border-border":
 							props.theme === "full",
 					},
 				)}
@@ -83,11 +82,11 @@ export const Input: Component<InputProps> = (props) => {
 				/>
 				<input
 					class={classnames(
-						"focus:outline-hidden px-2.5 text-sm text-title font-medium disabled:cursor-not-allowed disabled:opacity-80",
+						"focus:outline-hidden px-2 text-sm text-title disabled:cursor-not-allowed disabled:opacity-80",
 						{
-							"pr-[38px]": props.type === "password",
+							"pr-[32px]": props.type === "password",
 							"pt-2": props.copy?.label === undefined,
-							"bg-container-4 border border-border h-12 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
+							"bg-input-base border border-border h-10 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
 								props.theme === "basic",
 							"bg-transparent pb-2 pt-1 rounded-b-md": props.theme === "full",
 						},

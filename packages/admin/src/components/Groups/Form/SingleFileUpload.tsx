@@ -197,7 +197,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								<button
 									type="button"
 									onClick={openFileBrowser}
-									class="text-primary-base font-medium font-display"
+									class="text-primary-base font-medium"
 								>
 									{T()("upload_here")}
 								</button>
@@ -213,7 +213,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 									<button
 										type="button"
 										onClick={undoToCurrentFile}
-										class="text-unfocused fill-unfocused font-medium text-sm font-display flex items-center mt-2"
+										class="text-unfocused fill-unfocused font-medium text-sm flex items-center mt-2"
 									>
 										<FaSolidArrowRotateLeft class="mr-2 text-sm" />
 										<Switch fallback={"keep current file"}>
@@ -274,7 +274,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 		<div class="relative w-full h-full flex justify-center items-center flex-col">
 			<Switch
 				fallback={
-					<div class="w-full h-[calc(100%-60px)] relative z-10 bg-container-4 flex flex-col justify-center items-center">
+					<div class="w-full h-[calc(100%-60px)] relative z-10 bg-input-base flex flex-col justify-center items-center">
 						<FaSolidFile class="w-10 h-10 mx-auto text-unfocused mb-5" />
 						<Show when={props.data.name}>
 							<p class="text-center text-sm font-medium text-title">
@@ -285,7 +285,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				}
 			>
 				<Match when={props.data.type === "image"}>
-					<div class="w-full h-[calc(100%-60px)] relative z-10 p-4 md:p-5">
+					<div class="w-full h-[calc(100%-60px)] relative z-10 p-4 md:p-6">
 						<img
 							src={props.data.url}
 							alt={props.data.name}
@@ -301,7 +301,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					/>
 				</Match>
 				<Match when={props.data.type === "video"}>
-					<div class="w-full h-[calc(100%-60px)] relative z-10 bg-container-4">
+					<div class="w-full h-[calc(100%-60px)] relative z-10 bg-input-base">
 						{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 						<video
 							src={props.data.url}
@@ -312,7 +312,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					</div>
 				</Match>
 				<Match when={props.data.type === "audio"}>
-					<div class="w-full h-[calc(100%-60px)] relative z-10 bg-container-4 flex justify-center items-center">
+					<div class="w-full h-[calc(100%-60px)] relative z-10 bg-input-base flex justify-center items-center">
 						{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 						<audio src={props.data.url} class="w-2/3" controls />
 					</div>
@@ -320,7 +320,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			</Switch>
 			<div
 				class={classNames(
-					"h-9 w-full z-10 relative grid gap-2 p-2 bg-container-3 border-t border-border",
+					"h-9 w-full z-10 relative grid gap-2 p-2 bg-background-base border-t border-border",
 					{
 						"grid-cols-2":
 							props.actions.downloadFile === undefined ||

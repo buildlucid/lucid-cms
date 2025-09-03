@@ -32,7 +32,7 @@ export const RevisionsSidebar: Component<{
 	return (
 		<aside
 			class={
-				"w-full lg:max-w-[300px] flex flex-col justify-between bg-container-5 border-b lg:border-b-0 lg:border-l border-border"
+				"w-full lg:max-w-[300px] flex flex-col justify-between bg-card-base border-b lg:border-b-0 lg:border-l border-border"
 			}
 		>
 			<div>
@@ -78,7 +78,7 @@ export const RevisionsSidebar: Component<{
 							<button
 								type="button"
 								class={classNames(
-									"bg-container-2 border-border border text-left rounded-md mb-2.5 last:mb-0 flex flex-col p-4 focus:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
+									"bg-card-base border-border border text-left rounded-md mb-2.5 last:mb-0 flex flex-col p-4 focus:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
 									{
 										"border-primary-base":
 											revision.id === props.state.versionId(),

@@ -35,14 +35,14 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 				/>
 			</Match>
 			<Match when={props.media.type === "archive"}>
-				<div class="w-full h-full bg-container-4 flex justify-center items-center group-hover:scale-110 transition duration-100">
+				<div class="w-full h-full bg-input-base flex justify-center items-center group-hover:scale-110 transition duration-100">
 					<FaSolidFileZipper size={40} class="text-icon-base opacity-40" />
 				</div>
 			</Match>
 			<Match when={props.media.type === "audio"}>
 				<div
 					class={classNames(
-						"w-full h-full bg-container-4 flex justify-center items-center",
+						"w-full h-full bg-input-base flex justify-center items-center",
 						{
 							"group-hover:scale-110 transition duration-100":
 								!props.richPreview,
@@ -63,7 +63,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 			<Match when={props.media.type === "video"}>
 				<div
 					class={classNames(
-						"w-full h-full bg-container-4 flex justify-center items-center",
+						"w-full h-full bg-input-base flex justify-center items-center",
 						{
 							"group-hover:scale-110 transition duration-100":
 								!props.richPreview,
@@ -87,12 +87,12 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 				</div>
 			</Match>
 			<Match when={props.media.type === "document"}>
-				<div class="w-full h-full bg-container-4 flex justify-center items-center group-hover:scale-110 transition duration-100">
+				<div class="w-full h-full bg-input-base flex justify-center items-center group-hover:scale-110 transition duration-100">
 					<FaSolidFileLines size={40} class="text-icon-base opacity-40" />
 				</div>
 			</Match>
 			<Match when={props.media.type === "unknown"}>
-				<div class="w-full h-full bg-container-4 flex justify-center items-center group-hover:scale-110 transition duration-100">
+				<div class="w-full h-full bg-input-base flex justify-center items-center group-hover:scale-110 transition duration-100">
 					<FaSolidFile size={40} class="text-icon-base opacity-40" />
 				</div>
 			</Match>

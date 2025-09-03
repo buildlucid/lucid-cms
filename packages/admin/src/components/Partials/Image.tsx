@@ -22,7 +22,7 @@ const Image: Component<ImageProps> = (props) => {
 				decoding="async"
 			/>
 			<KImage.Fallback
-				class={classNames("bg-container-4 w-full h-full block", props.classes)}
+				class={classNames("bg-input-base w-full h-full block", props.classes)}
 			/>
 		</KImage.Root>
 	);

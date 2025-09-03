@@ -9,7 +9,7 @@ export const CollectionCardLoading: Component = () => {
 	// ----------------------------------
 	// Return
 	return (
-		<li class={"bg-card-base border-border border rounded-md p-4"}>
+		<li class={"bg-background-base border-border border rounded-md p-4"}>
 			<span class="skeleton block h-5 w-1/2 mb-2" />
 			<span class="skeleton block h-5 w-full" />
 		</li>

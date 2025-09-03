@@ -117,7 +117,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 					}}
 				/>
 
-				<div class="mt-4 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden relative">
+				<div class="mt-4 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden relative">
 					<Show when={!revisionState.revisionDocument()}>
 						<div class="absolute inset-0 flex items-center justify-center bg-black/60 flex-col z-20">
 							<div class="w-full max-w-xl px-4 py-4 text-center flex flex-col items-center">

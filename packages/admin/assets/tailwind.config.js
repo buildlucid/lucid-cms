@@ -27,16 +27,14 @@ export default {
                     base: "#171717",
                     hover: "#242424",
                 },
+                dropdown: {
+                    base: "#171717",
+                    hover: "#0A0A0A",
+                    contrast: "#E3E3E3",
+                },
                 input: {
                     base: "#212121",
                     contrast: "#E3E3E3",
-                },
-                container: {
-                    1: "#070707", // navbar / header
-                    2: "#1D1D1D", // banner / primary container
-                    3: "#131313", // background
-                    4: "#242424", // inputs / secondary container
-                    5: "#111111", // table hover
                 },
                 icon: {
                     base: "#E3E3E3",
@@ -60,7 +58,6 @@ export default {
                 unfocused: "#A0A0A0",
             },
             fontFamily: {
-                display: ["Archivo", "sans-serif"],
                 body: ["Inter", "sans-serif"],
             },
             screens: {

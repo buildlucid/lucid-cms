@@ -24,7 +24,7 @@ export const Header: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<header class="bg-container-2 w-full -mt-4 pt-6 px-6 pb-0 border-x border-border z-31">
+		<header class="bg-card-base w-full -mt-4 pt-6 px-6 pb-0 border-x border-border z-31">
 			<Breadcrumbs
 				breadcrumbs={[
 					{
@@ -72,7 +72,7 @@ export const Header: Component<{
 				</h1>
 			</Show>
 
-			<nav class="-mb-px bg-container-2 mt-4">
+			<nav class="-mb-px bg-card-base mt-4">
 				<ul class="flex gap-2">
 					{/* Draft edit */}
 					<Show when={props.state.collection()?.config.useDrafts}>
@@ -90,7 +90,7 @@ export const Header: Component<{
 								class={classNames(
 									"flex px-4 py-2 font-medium relative z-10 border-transparent border-x border-t rounded-t-xl",
 									{
-										"bg-container-3 !border-border focus:ring-0":
+										"bg-background-base !border-border focus:ring-0":
 											props.version === "draft",
 									},
 								)}
@@ -98,10 +98,10 @@ export const Header: Component<{
 								{T()("draft")}
 
 								<Show when={props.version === "draft"}>
-									<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-container-3" />
-									<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-container-3" />
-									<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-container-2 rounded-br-xl border-b border-r border-border" />
-									<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-container-2 rounded-bl-xl border-b border-l border-border" />
+									<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-card-base rounded-br-xl border-b border-r border-border" />
+									<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-card-base rounded-bl-xl border-b border-l border-border" />
 								</Show>
 							</A>
 						</li>
@@ -121,7 +121,7 @@ export const Header: Component<{
 									"opacity-50 cursor-not-allowed focus:ring-0 hover:text-inherit":
 										!props.state.canNavigateToPublished(),
 									"cursor-pointer": props.state.canNavigateToPublished(),
-									"bg-container-3 !border-border focus:ring-0":
+									"bg-background-base !border-border focus:ring-0":
 										props.version === "published",
 								},
 							)}
@@ -135,10 +135,10 @@ export const Header: Component<{
 							{T()("published")}
 
 							<Show when={props.version === "published"}>
-								<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-container-3" />
-								<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-container-3" />
-								<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-container-2 rounded-br-xl border-b border-r border-border" />
-								<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-container-2 rounded-bl-xl border-b border-l border-border" />
+								<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-background-base" />
+								<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-background-base" />
+								<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-card-base rounded-br-xl border-b border-r border-border" />
+								<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-card-base rounded-bl-xl border-b border-l border-border" />
 							</Show>
 						</A>
 					</li>
@@ -151,17 +151,17 @@ export const Header: Component<{
 								class={classNames(
 									"flex px-4 py-2 font-medium relative z-10 border-transparent border-x border-t rounded-t-xl",
 									{
-										"bg-container-3 !border-border focus:ring-0":
+										"bg-background-base !border-border focus:ring-0":
 											props.mode === "revisions",
 									},
 								)}
 							>
 								{T()("revisions")}
 								<Show when={props.mode === "revisions"}>
-									<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-container-3" />
-									<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-container-3" />
-									<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-container-2 rounded-br-xl border-b border-r border-border" />
-									<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-container-2 rounded-bl-xl border-b border-l border-border" />
+									<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-card-base rounded-br-xl border-b border-r border-border" />
+									<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-card-base rounded-bl-xl border-b border-l border-border" />
 								</Show>
 							</A>
 						</li>

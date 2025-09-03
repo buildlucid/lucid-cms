@@ -51,7 +51,7 @@ export const Th: Component<ThProps> = (props) => {
 			class={classNames(
 				"text-left first:pl-4 md:first:pl-6 relative last:pr-4 md:last:pr-6 px-4 bg-background-base bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 				{
-					"hover:bg-container-5": props.options?.sortable,
+					"hover:bg-card-base": props.options?.sortable,
 					hidden: props.options?.include === false,
 				},
 				props?.classes,
@@ -67,9 +67,7 @@ export const Th: Component<ThProps> = (props) => {
 						<Match when={props.options?.sortable !== true}>
 							<div class="flex items-center min-h-[50px]">
 								<span class="text-base mr-2.5 fill-body">{props?.icon}</span>
-								<span class="text-base text-body font-display">
-									{props?.label}
-								</span>
+								<span class="text-base text-body">{props?.label}</span>
 							</div>
 						</Match>
 						<Match when={props.options?.sortable === true}>
@@ -98,9 +96,7 @@ export const Th: Component<ThProps> = (props) => {
 							>
 								<div class="flex items-center">
 									<span class="text-base mr-2.5 fill-body">{props?.icon}</span>
-									<span class="text-base text-body font-display">
-										{props?.label}
-									</span>
+									<span class="text-base text-body">{props?.label}</span>
 								</div>
 								<Switch>
 									<Match when={sort() === "desc" || sort() === "asc"}>

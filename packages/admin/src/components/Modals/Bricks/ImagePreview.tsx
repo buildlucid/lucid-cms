@@ -32,16 +32,16 @@ const BrickImagePreview: Component = (props) => {
 				<div class="flex flex-col">
 					<Dialog.Title>{selectedBrick()?.title}</Dialog.Title>
 					<Show when={selectedBrick()?.description}>
-						<Dialog.Description class="mt-1">
+						<Dialog.Description class="mt-1 text-sm">
 							{selectedBrick()?.description}
 						</Dialog.Description>
 					</Show>
 				</div>
-				<Dialog.CloseButton class="hover:fill-error-contrast h-8 w-8 min-w-[32px] rounded-full flex justify-center items-center bg-container-1 hover:bg-error-base duration-200 transition-colors">
+				<Dialog.CloseButton class="h-8 w-8 min-w-[32px] rounded-full flex justify-center items-center text-body hover:text-title duration-200 transition-colors">
 					<FaSolidXmark />
 				</Dialog.CloseButton>
 			</div>
-			<div class="p-4">
+			<div class="p-4 md:p-6">
 				<BrickPreview
 					data={{
 						brick: selectedBrick(),

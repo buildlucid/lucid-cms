@@ -11,7 +11,7 @@ const LoadingRow: Component<LoadingRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<tr class="bg-container-3">
+		<tr class="bg-background-base">
 			<Show when={props.isSelectable}>
 				<Td
 					options={{

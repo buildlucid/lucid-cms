@@ -23,10 +23,10 @@ export const Label: Component<LabelProps> = (props) => {
 			<label
 				for={props.id}
 				class={classnames(
-					"text-sm transition-colors duration-200 ease-in-out flex justify-between",
+					"text-sm transition-colors duration-200 ease-in-out flex justify-between text-title",
 					{
 						"text-primary-hover": props.focused,
-						"pt-2 px-2.5": props.noPadding !== true && props.theme === "full",
+						"pt-2 px-2": props.noPadding !== true && props.theme === "full",
 						"mb-2": props.noPadding === true,
 					},
 				)}
@@ -56,12 +56,12 @@ export const Label: Component<LabelProps> = (props) => {
 					</Show>
 					{props?.label}
 					<Show when={props.required}>
-						<span class="text-error-base ml-1 inline">*</span>
+						<span class="text-error-base ml-1 inline text-xs">*</span>
 					</Show>
 				</span>
 
 				<Show when={!props.required && !props.hideOptionalText}>
-					<span class="text-unfocused">{T()("optional")}</span>
+					<span class="text-unfocused text-xs">{T()("optional")}</span>
 				</Show>
 			</label>
 		</Show>

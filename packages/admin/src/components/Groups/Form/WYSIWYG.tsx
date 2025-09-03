@@ -100,7 +100,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
 			<div
-				class={classnames("mt-1 bg-container-4 rounded-md", {
+				class={classnames("mt-1 bg-input-base rounded-md", {
 					"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
 				})}
 			>

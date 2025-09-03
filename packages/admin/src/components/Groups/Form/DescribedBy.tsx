@@ -10,7 +10,7 @@ export const DescribedBy: Component<DescribedByProps> = (props) => {
 		<Show when={props?.describedBy}>
 			<div
 				id={`${props.id}-description`}
-				class="text-sm mt-2.5 border-l-4 border-primary-base pl-2.5"
+				class="text-sm mt-2 border-l-4 border-primary-base pl-2"
 			>
 				{props?.describedBy}
 			</div>

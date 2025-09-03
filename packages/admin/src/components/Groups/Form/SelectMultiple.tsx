@@ -79,10 +79,9 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					class={classnames(
 						"flex flex-col transition-colors duration-200 ease-in-out relative",
 						{
-							"border-primary-base bg-container-3":
-								inputFocus() && props.theme === "full",
+							"border-primary-base": inputFocus() && props.theme === "full",
 							"border-error-base": props.errors?.message !== undefined,
-							"bg-container-4 rounded-md border border-border":
+							"bg-input-base rounded-md border border-border":
 								props.theme === "full",
 						},
 					)}
@@ -99,11 +98,11 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					{/* Select */}
 					<div
 						class={classnames(
-							"w-full pointer-events-none z-10 focus:outline-hidden px-2.5 text-sm text-title font-medium justify-between flex ",
+							"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-title font-medium justify-between flex ",
 							{
 								"pt-2 min-h-[40px]": props.copy?.label === undefined,
 								"min-h-[32px] mt-1": props.copy?.label !== undefined,
-								"bg-container-1 border border-border flex items-center min-h-[40px] rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
+								"bg-input-base border border-border flex items-center min-h-10 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic",
 								"bg-transparent pb-2 rounded-b-md": props.theme === "full",
 							},
@@ -134,7 +133,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 							</For>
 						</div>
 						{/* Icons */}
-						<div class="flex items-center ml-2.5">
+						<div class="flex items-center ml-2">
 							<FaSolidSort size={16} class="text-title ml-1" />
 						</div>
 					</div>
@@ -158,7 +157,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<DropdownMenu.Item
-											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2.5 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
+											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
 											onSelect={() => {
 												toggleValue(option);
 											}}
@@ -178,7 +177,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 							</ul>
 						</Match>
 						<Match when={props.options.length === 0}>
-							<span class="text-body w-full block px-2.5 py-1 text-sm">
+							<span class="text-body w-full block px-2 py-1 text-sm">
 								{T()("no_options_available")}
 							</span>
 						</Match>

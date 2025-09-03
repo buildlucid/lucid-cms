@@ -26,7 +26,7 @@ export const PerPage: Component<PerPageProps> = (props) => {
 	// Render
 	return (
 		<DropdownMenu.Root>
-			<DropdownMenu.Trigger class="dropdown-trigger px-2.5 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center font-display">
+			<DropdownMenu.Trigger class="dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center">
 				<span class="mr-2">
 					{T()("per_page", {
 						count: currentPerPage(),
@@ -49,9 +49,10 @@ export const PerPage: Component<PerPageProps> = (props) => {
 							<button
 								tabIndex={0}
 								class={classNames(
-									"w-full flex items-center justify-between group focus:outline-hidden focus:ring-1 focus:ring-primary-base px-1.5 py-1 rounded-md",
+									"w-full flex items-center justify-between group focus:outline-hidden focus:ring-1 focus:ring-primary-base px-2 py-1 rounded-md",
 									{
-										"bg-container-2 text-body": currentPerPage() === perpage,
+										"bg-dropdown-hover text-dropdown-contrast":
+											currentPerPage() === perpage,
 									},
 								)}
 								onClick={() => {

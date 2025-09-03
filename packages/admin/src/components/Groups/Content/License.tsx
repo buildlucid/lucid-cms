@@ -74,7 +74,7 @@ export const License: Component = () => {
 							</div>
 							<Button
 								type="button"
-								size="small"
+								size="medium"
 								theme="border-outline"
 								onClick={() => verify.action.mutate({})}
 								loading={verify.action.isPending}

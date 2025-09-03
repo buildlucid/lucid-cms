@@ -9,7 +9,7 @@ interface SectionHeadingProps {
 
 const SectionHeading: Component<SectionHeadingProps> = (props) => {
 	return (
-		<div class="flex justify-between mb-2">
+		<div class="flex justify-between mb-4">
 			<div class="w-full flex flex-col">
 				<Switch fallback={<h2 class="text-base">{props.title}</h2>}>
 					<Match when={props.headingType === "h3"}>

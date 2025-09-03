@@ -46,11 +46,11 @@ export const ActionBar: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<div class="sticky top-0 z-30 w-full px-5 py-4 gap-x-5 gap-y-2.5 bg-container-3 border border-border rounded-b-xl flex flex-col flex-wrap">
+		<div class="sticky top-0 z-30 w-full px-5 py-4 gap-x-5 gap-y-2.5 bg-background-base border border-border rounded-b-xl flex flex-col flex-wrap">
 			<div class="flex items-center gap-3 w-full text-sm overflow-x-auto">
 				<div class="flex items-center gap-1">
 					<Show when={props.mode === "edit" || props.mode === "revisions"}>
-						<div class="flex items-center gap-1.5 px-2.5 py-1 bg-container-1 rounded-md border border-border/50">
+						<div class="flex items-center gap-1.5 px-2.5 py-1 bg-background-hover rounded-md border border-border/50">
 							<FaSolidCircle
 								size={12}
 								class={classNames({
@@ -65,13 +65,13 @@ export const ActionBar: Component<{
 						</div>
 					</Show>
 					<Show when={props.version && props.mode === "create"}>
-						<div class="flex items-center gap-1.5 px-2.5 py-1 bg-container-1 rounded-md border border-border/50">
+						<div class="flex items-center gap-1.5 px-2.5 py-1 bg-background-hover rounded-md border border-border/50">
 							<FaSolidCircle size={12} class={"text-red-600"} />
 							<span class="font-medium text-title">{T()("unsaved")}</span>
 						</div>
 					</Show>
 					<Show when={props.state.ui.useAutoSave?.()}>
-						<div class="flex relative items-center gap-1.5 px-2.5 py-1 bg-container-1 rounded-md border border-border/50">
+						<div class="flex relative items-center gap-1.5 px-2.5 py-1 bg-background-hover rounded-md border border-border/50">
 							<FaSolidFloppyDisk size={12} class="text-body" />
 							<span class="text-body">
 								{props.state.ui.hasAutoSavePermission?.()
@@ -79,7 +79,7 @@ export const ActionBar: Component<{
 									: T()("disabled")}
 							</span>
 							<Show when={props.state.ui.isAutoSaving?.()}>
-								<div class="absolute inset-0 flex items-center justify-center bg-container-1 rounded-md">
+								<div class="absolute inset-0 flex items-center justify-center bg-background-hover rounded-md">
 									<Spinner size="sm" />
 								</div>
 							</Show>

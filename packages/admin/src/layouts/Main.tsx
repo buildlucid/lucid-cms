@@ -8,7 +8,7 @@ import {
 	createEffect,
 } from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router";
-import LogoIcon from "@assets/svgs/logo-icon.svg";
+import LogoColumn from "@assets/svgs/logo-column.svg";
 import api from "@/services/api";
 import { NavigationSidebar } from "@/components/Groups/Layout";
 import spawnToast from "@/utils/spawn-toast";
@@ -99,9 +99,13 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 						{props.children}
 					</Match>
 					<Match when={isLoading()}>
-						<div class="fixed inset-0 z-50 bg-container-1 flex items-center justify-center">
+						<div class="fixed inset-0 z-50 bg-background-base flex items-center justify-center">
 							<div class="absolute inset-0 z-20 flex-col flex items-center justify-center">
-								<img src={LogoIcon} alt="logo" class="size-6 animate-spin" />
+								<img
+									src={LogoColumn}
+									alt="Lucid CMS Logo"
+									class="h-24 animate-pulse"
+								/>
 							</div>
 						</div>
 					</Match>

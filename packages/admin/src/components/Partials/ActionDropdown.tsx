@@ -29,7 +29,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// Classes
 	const liItemClasses =
-		"flex justify-between my-1 items-center px-2.5 rounded-md hover:bg-container-2 w-full text-sm text-left py-1 text-title fill-primary-contrast";
+		"flex justify-between my-1 items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 text-title fill-dropdown-contrast";
 
 	// ----------------------------------------
 	// Render
@@ -58,7 +58,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 					rounded: true,
 				}}
 			>
-				<ul class="divide-container-2 divide-y">
+				<ul class="divide-border divide-y">
 					<For each={props.actions}>
 						{(action) => (
 							<Show when={action.hide !== true}>

@@ -124,8 +124,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						</Button>
 					</Match>
 					<Match when={typeof props.value === "number"}>
-						<div class="w-full border border-border rounded-md bg-container-4">
-							<div class="p-4 flex items-center justify-center ">
+						<div class="w-full border border-border rounded-md bg-input-base">
+							<div class="p-2 flex items-center justify-center">
 								<div class="w-full max-w-xs rounded-md overflow-hidden border border-border">
 									<AspectRatio ratio="16:9">
 										<MediaPreview
@@ -142,10 +142,10 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									</AspectRatio>
 								</div>
 							</div>
-							<div class="grid grid-cols-2 gap-2.5 bg-container-2 p-4">
+							<div class="grid grid-cols-2 gap-2 p-2 bg-card-base border-t border-border">
 								<Button
 									type="button"
-									theme="secondary"
+									theme="border-outline"
 									size="small"
 									onClick={openMediaSelectModal}
 									disabled={props.disabled}
@@ -157,7 +157,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								</Button>
 								<Button
 									type="button"
-									theme="secondary"
+									theme="border-outline"
 									size="small"
 									onClick={() => {
 										props.onChange(null, null);

@@ -87,10 +87,9 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				class={classnames(
 					"flex flex-col transition-colors duration-200 ease-in-out relative",
 					{
-						"border-primary-base bg-container-3":
-							inputFocus() && props.theme === "full",
+						"border-primary-base": inputFocus() && props.theme === "full",
 						"border-error-base": props.errors?.message !== undefined,
-						"bg-container-4 rounded-md border": props.theme === "full",
+						"bg-input-base rounded-md border": props.theme === "full",
 					},
 				)}
 			>
@@ -110,9 +109,9 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 							"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium resize-none w-full h-52 block",
 							{
 								"pt-2": props.copy?.label === undefined,
-								"bg-container-4 border border-border rounded-md mt-1 p-2.5 focus:border-primary-base duration-200 transition-colors":
+								"bg-input-base border border-border rounded-md mt-1 p-2 focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic",
-								"bg-transparent pb-2 px-2.5 pt-1 rounded-b-md":
+								"bg-transparent pb-2 px-2 pt-1 rounded-b-md":
 									props.theme === "full",
 							},
 						)}
@@ -151,7 +150,7 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 						}}
 					/>
 					<Show when={jsonError().hasError}>
-						<div class="bg-error-base rounded-md px-4 text-white text-sm py-1 absolute bottom-4 right-4">
+						<div class="bg-error-base text-error-contrast rounded-md px-2 text-sm py-1 absolute bottom-2 right-2">
 							Invalid JSON on line {jsonError().line}
 						</div>
 					</Show>

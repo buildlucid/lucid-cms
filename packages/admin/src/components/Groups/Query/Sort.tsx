@@ -65,7 +65,8 @@ const SortItem: Component<SortItemProps> = (props) => {
 						{
 							"bg-primary-base group-hover:bg-primary-hover":
 								sort() === "desc" || sort() === "asc",
-							"bg-container-2 group-hover:bg-container-4": sort() === undefined,
+							"bg-dropdown-hover group-hover:bg-input-base":
+								sort() === undefined,
 						},
 					)}
 				>
@@ -94,7 +95,7 @@ export const Sort: Component<SortProps> = (props) => {
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
 				class={
-					"dropdown-trigger px-2.5 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center font-display"
+					"dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center"
 				}
 			>
 				<DropdownMenu.Icon>

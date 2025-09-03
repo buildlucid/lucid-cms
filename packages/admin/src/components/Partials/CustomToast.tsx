@@ -56,7 +56,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"bg-container-1 rounded-md p-3 drop-shadow-md w-[400px] relative overflow-hidden",
+				"bg-background-base rounded-md p-4 border border-border drop-shadow-md w-[400px] relative overflow-hidden",
 				{
 					"animate-enter": props.toast.visible,
 					"animate-leave": !props.toast.visible,
@@ -90,8 +90,10 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 						</Match>
 					</Switch>
 				</span>
-				<div class="ml-2.5">
-					<p class="text-sm font-bold mb-1 capitalize">{props.title}</p>
+				<div class="ml-4">
+					<p class="text-sm font-bold mb-1 capitalize text-title">
+						{props.title}
+					</p>
 					<Show when={props.message}>
 						<p class="text-sm">{props.message}</p>
 					</Show>
@@ -99,7 +101,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			</div>
 			<button
 				data-panel-ignore
-				class="bg-container-4 hover:bg-container-3 flex justify-center top-1/2 -translate-y-1/2 items-center w-6 h-6 right-2.5 absolute rounded-full z-20 hover:text-error-base duration-200 transition-all shadow-md"
+				class="bg-input-base hover:bg-background-base flex justify-center top-1/2 -translate-y-1/2 items-center w-6 h-6 right-2.5 absolute rounded-full z-20 hover:text-error-base duration-200 transition-all shadow-md"
 				onClick={() => toast.dismiss(props.toast.id)}
 				type="button"
 			>

@@ -29,7 +29,7 @@ const ClientIntegrationRow: Component<ClientIntegrationRow> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<div class="bg-container-2 p-4 rounded-md border border-border mb-2.5 last:mb-0 flex items-center justify-between">
+		<div class="bg-card-base p-4 rounded-md border border-border mb-2.5 last:mb-0 flex items-center justify-between">
 			<div class="flex items-start">
 				<span
 					class={classNames("w-4 h-4 rounded-full block mr-2.5", {

@@ -9,7 +9,7 @@ import {
 	createEffect,
 	type Accessor,
 } from "solid-js";
-import { FaSolidArrowRight, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidXmark } from "solid-icons/fa";
 import notifyIllustration from "@assets/illustrations/notify.svg";
 import type { ErrorResponse } from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";

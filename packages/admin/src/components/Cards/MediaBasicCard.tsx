@@ -17,7 +17,7 @@ export const MediaBasicCardLoading: Component = () => {
 	// ----------------------------------
 	// Return
 	return (
-		<li class={"bg-container-2 border-border border rounded-md"}>
+		<li class={"bg-background-base border-border border rounded-md"}>
 			<AspectRatio ratio="16:9">
 				<span class="skeleton block w-full h-full rounded-b-none" />
 			</AspectRatio>
@@ -44,7 +44,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	return (
 		<li
 			class={classNames(
-				"bg-container-2 border-border border rounded-md group overflow-hidden relative cursor-pointer",
+				"bg-card-base border-border border rounded-md group overflow-hidden relative cursor-pointer",
 				{
 					"border-primary-base": props.current,
 				},
@@ -63,7 +63,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 				<MediaPreview media={props.media} alt={alt() || title() || ""} />
 			</AspectRatio>
 			{/* Content */}
-			<div class="p-2.5 border-t border-border">
+			<div class="p-2 border-t border-border">
 				<h3 class="line-clamp-1 text-sm">{title() || T()("no_translation")}</h3>
 			</div>
 		</li>

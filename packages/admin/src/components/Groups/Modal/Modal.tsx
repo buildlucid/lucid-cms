@@ -28,7 +28,7 @@ export const Modal: Component<ModalProps> = (props) => {
 					<Dialog.Content class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-animate-modal-hide data-expanded:animate-animate-modal-show">
 						<div
 							class={classNames(
-								"max-w-2xl w-full bg-container-3 rounded-xl overflow-hidden border-border border m-auto pointer-events-auto",
+								"max-w-2xl w-full bg-background-base rounded-xl overflow-hidden border-border border m-auto pointer-events-auto",
 								{
 									"max-w-7xl": props.options?.size === "large",
 								},

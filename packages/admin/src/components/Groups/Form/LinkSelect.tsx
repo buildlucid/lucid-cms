@@ -62,7 +62,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
-			<div class="mt-2.5 w-full flex flex-wrap gap-2.5">
+			<div class="mt-2 w-full flex flex-wrap gap-2">
 				<Switch>
 					<Match when={!linkLabel()}>
 						<Button
@@ -76,7 +76,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						</Button>
 					</Match>
 					<Match when={props.value}>
-						<div class="w-full flex items-center gap-2.5">
+						<div class="w-full flex items-center gap-2">
 							<Button
 								type="button"
 								theme="secondary"
@@ -86,7 +86,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								classes="capitalize"
 							>
 								<span class="line-clamp-1">{linkLabel()}</span>
-								<span class="ml-2.5 flex items-center border-l border-current pl-2.5">
+								<span class="ml-2 flex items-center border-l border-current pl-2">
 									<FaSolidPen size={12} class="text-current" />
 								</span>
 							</Button>

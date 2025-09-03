@@ -32,7 +32,7 @@ export const Search: Component<SearchProps> = (props) => {
 		<div class="relative w-full">
 			<input
 				type="text"
-				class="bg-container-1 px-2.5 rounded-md w-full border border-border text-sm text-title font-medium h-12 focus:outline-hidden focus:border-primary-base"
+				class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-title font-medium h-12 focus:outline-hidden focus:border-primary-base"
 				placeholder={T()("search")}
 				value={props.value}
 				onKeyDown={(e) => {
@@ -41,7 +41,7 @@ export const Search: Component<SearchProps> = (props) => {
 				onInput={(e) => setSearchQuery(e.currentTarget.value)}
 			/>
 			<Show when={props.isLoading}>
-				<div class="absolute right-2.5 top-0 bottom-0 flex items-center">
+				<div class="absolute right-2 top-0 bottom-0 flex items-center">
 					<Spinner size="sm" />
 				</div>
 			</Show>

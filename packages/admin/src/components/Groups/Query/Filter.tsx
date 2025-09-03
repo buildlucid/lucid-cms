@@ -256,7 +256,7 @@ export const Filter: Component<FilterProps> = (props) => {
 	return (
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
-				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-2.5 h-9 text-sm border border-transparent hover:border-primary-base rounded-md flex items-center font-display disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
+				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-2 h-9 text-sm border border-transparent hover:border-primary-base rounded-md flex items-center disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
 				disabled={props.disabled}
 			>
 				<DropdownMenu.Icon>

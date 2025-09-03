@@ -142,7 +142,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 										class="border border-border rounded-md overflow-hidden"
 									>
 										<Accordion.Header>
-											<Accordion.Trigger class="w-full flex items-center justify-between text-sm font-medium text-title bg-container-4/40 hover:bg-container-3/20 px-2.5 py-2.5 focus:outline-hidden focus:ring-1 ring-primary-base duration-200 transition-colors">
+											<Accordion.Trigger class="w-full flex items-center justify-between text-sm font-medium text-title bg-input-base/40 hover:bg-background-base/20 px-2.5 py-2.5 focus:outline-hidden focus:ring-1 ring-primary-base duration-200 transition-colors">
 												<Pill theme={getPillTheme(transaction.deliveryStatus)}>
 													{transaction.deliveryStatus}
 												</Pill>
@@ -153,7 +153,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 												</span>
 											</Accordion.Trigger>
 										</Accordion.Header>
-										<Accordion.Content class="px-2.5 py-2 bg-container-4/40 border-t border-border">
+										<Accordion.Content class="px-2.5 py-2 bg-input-base/40 border-t border-border">
 											<DetailsList
 												type="text"
 												items={[

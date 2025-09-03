@@ -26,7 +26,7 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 	return (
 		<>
 			<div
-				class="w-full bg-container-4 h-3 rounded-md overflow-hidden"
+				class="w-full bg-input-base h-3 rounded-md overflow-hidden"
 				role="progressbar"
 				aria-valuenow={getProgress()}
 				aria-valuemin="0"
