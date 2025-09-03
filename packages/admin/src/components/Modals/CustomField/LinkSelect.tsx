@@ -103,7 +103,7 @@ const LinkSelect: Component = () => {
 					<Button
 						type="button"
 						theme="primary"
-						size="small"
+						size="medium"
 						onClick={updateLink}
 					>
 						{T()("update")}
@@ -111,7 +111,7 @@ const LinkSelect: Component = () => {
 					<Button
 						type="button"
 						theme="border-outline"
-						size="small"
+						size="medium"
 						onClick={() => {
 							linkFieldStore.set("open", false);
 							linkFieldStore.set("selectedLink", null);

@@ -11,11 +11,14 @@ const Spinner: Component<SpinnerProps> = (props) => {
 		<div>
 			<svg
 				aria-hidden="true"
-				class={classNames("animate-spin text-gray-300 fill-primary-base", {
-					"w-4 h-4": props.size === "sm",
-					"w-6 h-6": props.size === "md",
-					"w-10 h-10": props.size === "lg",
-				})}
+				class={classNames(
+					"animate-spin text-secondary-base fill-primary-base",
+					{
+						"w-4 h-4": props.size === "sm",
+						"w-6 h-6": props.size === "md",
+						"w-10 h-10": props.size === "lg",
+					},
+				)}
 				viewBox="0 0 100 101"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"

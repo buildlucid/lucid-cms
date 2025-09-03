@@ -125,7 +125,7 @@ const GeneralSettingsRoute: Component = (props) => {
 						description={T()("clear_all_processed_images_setting_message")}
 					>
 						<Button
-							size="small"
+							size="medium"
 							type="button"
 							theme="danger"
 							onClick={() => {

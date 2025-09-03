@@ -68,7 +68,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						<Button
 							type="button"
 							theme="secondary"
-							size="x-small"
+							size="small"
 							onClick={openLinkModal}
 							disabled={props.disabled}
 						>
@@ -80,7 +80,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 							<Button
 								type="button"
 								theme="secondary"
-								size="x-small"
+								size="small"
 								onClick={openLinkModal}
 								disabled={props.disabled}
 								classes="capitalize"
@@ -92,8 +92,8 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 							</Button>
 							<Button
 								type="button"
-								theme="input-style"
-								size="x-icon"
+								theme="border-outline"
+								size="icon"
 								onClick={() => {
 									props.onChange(null);
 								}}

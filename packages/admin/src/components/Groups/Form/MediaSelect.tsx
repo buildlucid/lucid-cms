@@ -113,7 +113,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						<Button
 							type="button"
 							theme="secondary"
-							size="x-small"
+							size="small"
 							onClick={openMediaSelectModal}
 							disabled={props.disabled}
 							classes="capitalize"
@@ -146,7 +146,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								<Button
 									type="button"
 									theme="secondary"
-									size="x-small"
+									size="small"
 									onClick={openMediaSelectModal}
 									disabled={props.disabled}
 									classes="capitalize"
@@ -158,7 +158,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								<Button
 									type="button"
 									theme="secondary"
-									size="x-small"
+									size="small"
 									onClick={() => {
 										props.onChange(null, null);
 									}}

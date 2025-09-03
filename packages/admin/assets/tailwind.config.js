@@ -29,6 +29,7 @@ export default {
                 },
                 input: {
                     base: "#212121",
+                    contrast: "#E3E3E3",
                 },
                 container: {
                     1: "#070707", // navbar / header

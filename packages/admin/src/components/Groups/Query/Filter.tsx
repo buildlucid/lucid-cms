@@ -195,7 +195,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 					<div class="grid grid-cols-2 gap-4">
 						<Button
 							theme="secondary-toggle"
-							size="x-small"
+							size="small"
 							type="button"
 							active={boolValue()}
 							onClick={() => {
@@ -213,7 +213,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						</Button>
 						<Button
 							theme="secondary-toggle"
-							size="x-small"
+							size="small"
 							type="button"
 							active={boolValue() === false}
 							onClick={() => {

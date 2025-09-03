@@ -29,16 +29,12 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 				<div class="ml-2 flex gap-2">
 					<Button
 						theme="border-outline"
-						size="x-small"
+						size="small"
 						onClick={props.callbacks.reset}
 					>
 						{T()("reset")}
 					</Button>
-					<Button
-						theme="danger"
-						size="x-small"
-						onClick={props.callbacks.delete}
-					>
+					<Button theme="danger" size="small" onClick={props.callbacks.delete}>
 						{T()("delete")}
 					</Button>
 				</div>

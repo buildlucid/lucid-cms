@@ -55,7 +55,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 					<Button
 						type="button"
 						theme="secondary"
-						size="x-small"
+						size="small"
 						onClick={() => {
 							setSelectBrickOpen(true);
 						}}

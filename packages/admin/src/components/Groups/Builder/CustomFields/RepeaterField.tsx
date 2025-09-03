@@ -135,7 +135,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 				<Button
 					type="button"
 					theme="secondary"
-					size="x-small"
+					size="small"
 					onClick={addGroup}
 					disabled={isDisabled()}
 				>

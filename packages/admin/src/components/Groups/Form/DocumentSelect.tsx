@@ -74,7 +74,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 						<Button
 							type="button"
 							theme="secondary"
-							size="x-small"
+							size="small"
 							onClick={openDocuSelectModal}
 							disabled={props.disabled}
 							classes="capitalize"
@@ -104,7 +104,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							<Button
 								type="button"
 								theme="secondary"
-								size="x-small"
+								size="small"
 								onClick={openDocuSelectModal}
 								disabled={props.disabled}
 								classes="capitalize"
@@ -120,8 +120,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							</Button>
 							<Button
 								type="button"
-								theme="input-style"
-								size="x-icon"
+								theme="border-outline"
+								size="icon"
 								onClick={() => {
 									props.onChange(null, null);
 								}}

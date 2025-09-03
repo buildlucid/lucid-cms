@@ -119,7 +119,7 @@ export const Standard: Component<{
 							<Button
 								type="submit"
 								theme="primary"
-								size="x-icon"
+								size="icon"
 								onClick={() => {
 									props.actions?.create?.setOpen(true);
 								}}
@@ -133,7 +133,7 @@ export const Standard: Component<{
 						<Show when={showCreateLink()}>
 							<Link
 								theme="primary"
-								size="x-icon"
+								size="icon"
 								href={props.actions?.createLink?.link}
 							>
 								<FaSolidPlus />
@@ -150,7 +150,7 @@ export const Standard: Component<{
 						>
 							<Link
 								theme="primary"
-								size="x-icon"
+								size="icon"
 								href={props.actions?.link?.href}
 								target={props.actions?.link?.newTab ? "_blank" : undefined}
 							>
@@ -166,7 +166,7 @@ export const Standard: Component<{
 						>
 							<Button
 								theme="danger"
-								size="x-icon"
+								size="icon"
 								type="button"
 								onClick={() => props.actions?.delete?.setOpen(true)}
 							>

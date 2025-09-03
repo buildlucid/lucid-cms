@@ -2,19 +2,18 @@ import T from "@/translations";
 import { type Component, Show, type JSX, createMemo } from "solid-js";
 import classnames from "classnames";
 import spawnToast from "@/utils/spawn-toast";
+import Spinner from "@/components/Partials/Spinner";
 
 interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 	theme:
 		| "primary"
 		| "secondary"
-		| "container-outline"
 		| "border-outline"
 		| "danger"
 		| "basic"
 		| "secondary-toggle"
-		| "input-style"
 		| "danger-outline";
-	size: "x-small" | "small" | "medium" | "large" | "x-icon" | "icon" | "auto";
+	size: "small" | "medium" | "icon";
 	children: JSX.Element;
 
 	onClick?: () => void;
@@ -37,14 +36,10 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "primary",
 				"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base":
 					props.theme === "secondary",
-				"bg-transparent border border-primary-base hover:bg-primary-hover fill-primary-contrast text-title hover:text-primary-contrast ring-primary-base":
-					props.theme === "container-outline",
-				"bg-transparent border border-border hover:border-transparent hover:bg-primary-hover fill-primary-contrast text-title hover:text-primary-contrast ring-primary-base":
+				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-title hover:text-secondary-contrast ring-primary-base":
 					props.theme === "border-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					props.theme === "danger",
-				"bg-container-4 hover:bg-container-5 text-title ring-primary-base fill-title border border-border":
-					props.theme === "input-style",
 				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":
 					props.theme === "danger-outline",
 
@@ -56,13 +51,9 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "secondary-toggle" && props.active,
 
 				// Sizes
-				"px-2.5 h-9 text-sm": props.size === "x-small",
-				"px-5 py-2.5 h-10 text-sm": props.size === "small",
-				"px-5 py-3.5 text-sm": props.size === "medium",
-				"px-10 py-4 text-sm": props.size === "large",
-				"w-9 h-9 p-0 min-w-[36px]!": props.size === "x-icon",
-				"w-10 h-10 p-0 min-w-[40px]!": props.size === "icon",
-				"p-1": props.size === "auto",
+				"px-2 h-9 text-sm": props.size === "small",
+				"px-4 py-2 h-10 text-sm": props.size === "medium",
+				"w-9 h-9 p-0 min-w-[36px]!": props.size === "icon",
 				"opacity-80 cursor-not-allowed": props.permission === false,
 			},
 		);
@@ -91,26 +82,19 @@ const Button: Component<ButtonProps> = (props) => {
 		<button
 			{...props}
 			type={props.type}
-			class={classnames(classes(), props.classes)}
+			class={classnames(classes(), props.classes, {
+				"pointer-events-none": props.loading,
+			})}
 			onClick={buttonOnClick}
 			disabled={props.disabled || props.loading}
 		>
 			<Show when={props.loading !== undefined && props.loading}>
 				<div
 					class={classnames(
-						"flex items-center justify-center absolute inset-0 z-10 rounded-md",
-						{
-							"bg-primary-base/40":
-								props.theme === "primary" ||
-								props.theme === "container-outline" ||
-								props.theme === "border-outline",
-							"bg-secondary-base/40": props.theme === "secondary",
-							"bg-error-base/40": props.theme === "danger",
-							"bg-container-4/40": props.theme === "input-style",
-						},
+						"flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card-base/50",
 					)}
 				>
-					<div class="w-4 h-4 border-2 border-white rounded-full animate-spin" />
+					<Spinner size="sm" />
 				</div>
 			</Show>
 			{props.children}

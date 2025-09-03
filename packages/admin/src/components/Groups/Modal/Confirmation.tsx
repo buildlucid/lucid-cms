@@ -56,7 +56,7 @@ export const Confirmation: Component<{
 							<div class="flex">
 								<Button
 									theme={props.theme || "danger"}
-									size="small"
+									size="medium"
 									type={"button"}
 									loading={props.state.isLoading}
 									onClick={props.callbacks.onConfirm}
@@ -65,7 +65,7 @@ export const Confirmation: Component<{
 								</Button>
 								<Button
 									theme="border-outline"
-									size="small"
+									size="medium"
 									type={"button"}
 									classes="ml-2.5"
 									disabled={props.state.isLoading}

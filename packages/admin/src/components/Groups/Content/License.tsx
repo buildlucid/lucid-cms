@@ -40,7 +40,7 @@ export const License: Component = () => {
 				>
 					<Button
 						type="button"
-						size="small"
+						size="medium"
 						theme="secondary"
 						onClick={() => {
 							window.open(constants.cmsMarketingPage, "_blank");
@@ -74,7 +74,7 @@ export const License: Component = () => {
 							</div>
 							<Button
 								type="button"
-								size="x-small"
+								size="small"
 								theme="border-outline"
 								onClick={() => verify.action.mutate({})}
 								loading={verify.action.isPending}

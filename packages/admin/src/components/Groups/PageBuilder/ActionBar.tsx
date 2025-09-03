@@ -131,7 +131,7 @@ export const ActionBar: Component<{
 						<Button
 							type="button"
 							theme="secondary"
-							size="x-small"
+							size="small"
 							onClick={() => {
 								props.state.autoSave?.debouncedAutoSave.clear();
 								props.actions?.upsertDocumentAction?.();
@@ -147,7 +147,7 @@ export const ActionBar: Component<{
 						<Button
 							type="button"
 							theme="secondary"
-							size="x-small"
+							size="small"
 							onClick={() => {
 								props.state.autoSave?.debouncedAutoSave.clear();
 								props.actions?.publishDocumentAction?.(props.state.document());
@@ -163,7 +163,7 @@ export const ActionBar: Component<{
 						<Button
 							type="button"
 							theme="secondary"
-							size="x-small"
+							size="small"
 							onClick={props.actions.restoreRevisionAction}
 							disabled={props.state.selectedRevision?.() === undefined}
 							permission={props.state.ui.hasRestorePermission?.()}
@@ -174,8 +174,8 @@ export const ActionBar: Component<{
 					{/* Delete doc */}
 					<Show when={props.state.ui.showDeleteButton?.()}>
 						<Button
-							theme="input-style"
-							size="x-icon"
+							theme="border-outline"
+							size="icon"
 							type="button"
 							onClick={() => props.state.ui?.setDeleteOpen?.(true)}
 							permission={props.state.ui.hasDeletePermission?.()}

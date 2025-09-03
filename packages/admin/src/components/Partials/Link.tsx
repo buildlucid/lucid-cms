@@ -5,8 +5,15 @@ import { A } from "@solidjs/router";
 import spawnToast from "@/utils/spawn-toast";
 
 interface LinkProps extends JSX.HTMLAttributes<HTMLAnchorElement> {
-	theme: "primary" | "container-outline" | "danger" | "basic";
-	size: "x-small" | "small" | "medium" | "large" | "x-icon" | "icon" | "auto";
+	theme:
+		| "primary"
+		| "secondary"
+		| "border-outline"
+		| "danger"
+		| "basic"
+		| "secondary-toggle"
+		| "danger-outline";
+	size: "small" | "medium" | "icon";
 	children: JSX.Element;
 
 	replace?: boolean;
@@ -23,20 +30,21 @@ const Link: Component<LinkProps> = (props) => {
 		return classnames(
 			"flex items-center justify-center text-center focus:outline-hidden focus:ring-1 duration-200 transition-colors rounded-md relative font-base",
 			{
-				"bg-primary-base hover:bg-primary-hover text-primary-contrast hover:text-primary-contrast fill-primary-contrast ring-primary-base":
+				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
 					props.theme === "primary",
-				"bg-container-1 border border-primary-base hover:bg-primary-hover fill-primary-contrast text-title hover:text-primary-contrast":
-					props.theme === "container-outline",
+				"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base":
+					props.theme === "secondary",
+				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-title hover:text-secondary-contrast ring-primary-base":
+					props.theme === "border-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					props.theme === "danger",
+				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":
+					props.theme === "danger-outline",
+
 				// Sizes
-				"px-2.5 h-9 text-sm": props.size === "x-small",
-				"px-5 py-2.5 h-10 text-sm": props.size === "small",
-				"px-5 py-3.5 text-sm": props.size === "medium",
-				"px-10 py-4 text-sm": props.size === "large",
-				"w-9 h-9 p-0 min-w-[36px]!": props.size === "x-icon",
-				"w-10 h-10 p-0 min-w-[40px]!": props.size === "icon",
-				"p-1": props.size === "auto",
+				"px-2 h-9 text-sm": props.size === "small",
+				"px-4 py-2 h-10 text-sm": props.size === "medium",
+				"w-9 h-9 p-0 min-w-[36px]!": props.size === "icon",
 				"opacity-80 cursor-not-allowed": props.permission === false,
 			},
 		);

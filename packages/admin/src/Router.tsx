@@ -3,6 +3,7 @@ import { Router, Route } from "@solidjs/router";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
 // Routes
+import ComponentsRoute from "@/routes/Components";
 import LoginRoute from "@/routes/Login";
 import SetupRoute from "@/routes/Setup";
 import ForgotPasswordRoute from "@/routes/ForgotPassword";
@@ -27,6 +28,7 @@ const AppRouter: Component = () => {
 			{/* Authenticated */}
 			<Route path="/admin" component={MainLayout}>
 				<Route path="/" component={DashboardRoute} />
+				<Route path="/components" component={ComponentsRoute} />
 				<Route path="/account" component={AccountRoute} />
 				{/* Collections */}
 				<Route path="/collections" component={CollectionsListRoute} />

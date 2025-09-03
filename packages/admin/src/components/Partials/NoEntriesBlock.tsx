@@ -22,8 +22,8 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 	return (
 		<div class={"flex items-center justify-center"}>
 			<div class="text-center flex flex-col items-center">
-				<h2 class="mb-4">{props.copy?.title || T()("no_entries_title")}</h2>
-				<p class="max-w-96">
+				<h2 class="mb-2">{props.copy?.title || T()("no_entries_title")}</h2>
+				<p class="max-w-96 text-sm">
 					{props.copy?.description || T()("no_entries_description")}
 				</p>
 				<Show when={props.callbacks?.action !== undefined}>
