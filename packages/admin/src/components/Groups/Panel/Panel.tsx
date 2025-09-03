@@ -9,7 +9,7 @@ import {
 	createEffect,
 	type Accessor,
 } from "solid-js";
-import { FaSolidArrowRight } from "solid-icons/fa";
+import { FaSolidArrowRight, FaSolidXmark } from "solid-icons/fa";
 import notifyIllustration from "@assets/illustrations/notify.svg";
 import type { ErrorResponse } from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -106,10 +106,10 @@ export const Panel: Component<{
 			onOpenChange={() => props.state.setOpen(!props.state.open)}
 		>
 			<Dialog.Portal>
-				<Dialog.Overlay class="fixed inset-0 z-40 bg-black/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
+				<Dialog.Overlay class="fixed inset-0 z-40 bg-background-base/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-4 z-40 flex justify-end">
 					<Dialog.Content
-						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-container-3 animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
+						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-background-base animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.hasAttribute("data-panel-ignore")) {
@@ -156,7 +156,7 @@ export const Panel: Component<{
 							<Match when={props.state.open}>
 								{/* Header */}
 								<div
-									class={classNames("border-b border-border", {
+									class={classNames({
 										"mx-4 py-4": props.options?.padding === "16",
 										"mx-4 md:mx-6 py-4 md:py-6 ":
 											props.options?.padding === "24",
@@ -168,16 +168,16 @@ export const Panel: Component<{
 												<h2>{props.copy?.title}</h2>
 											</Show>
 											<Show when={props.copy?.description}>
-												<p class="mt-1">{props.copy?.description}</p>
+												<p class="mt-1 text-sm">{props.copy?.description}</p>
 											</Show>
 										</div>
-										<Dialog.CloseButton class="flex items-center w-10 h-10 min-w-10 rounded-full focus:outline-hidden focus:ring-1 ring-primary-base bg-container-4 border border-border hover:bg-container-3 justify-center">
-											<FaSolidArrowRight class="text-title" />
+										<Dialog.CloseButton class="flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus:ring-1 ring-primary-base bg-background-base justify-center">
+											<FaSolidXmark class="text-current" />
 											<span class="sr-only">{T()("back")}</span>
 										</Dialog.CloseButton>
 									</div>
 									<Show when={props.langauge?.contentLocale}>
-										<div class="mt-5">
+										<div class="mt-2">
 											<ContentLocaleSelect
 												value={contentLocale()}
 												setValue={setContentLocale}
@@ -198,8 +198,8 @@ export const Panel: Component<{
 									{/* content */}
 									<div
 										class={classNames({
-											"p-4": props.options?.padding === "16",
-											"p-4 md:p-6": props.options?.padding === "24",
+											"px-4": props.options?.padding === "16",
+											"px-4 md:px-6": props.options?.padding === "24",
 										})}
 									>
 										{props.children({
@@ -210,7 +210,7 @@ export const Panel: Component<{
 									{/* footer */}
 									<div
 										class={classNames(
-											"border-t border-border flex justify-between items-center gap-5",
+											"flex justify-between items-center gap-5",
 											{
 												"mx-4 py-4": props.options?.padding === "16",
 												"mx-4 md:mx-6 py-4 md:py-6 ":
@@ -218,13 +218,12 @@ export const Panel: Component<{
 											},
 										)}
 									>
-										<div class="flex min-w-max">
+										<div class="flex min-w-max gap-2">
 											<Show when={props.copy?.submit}>
 												<Button
 													type="submit"
 													theme="primary"
 													size="medium"
-													classes="mr-4"
 													loading={props.mutateState?.isLoading}
 													disabled={props.mutateState?.isDisabled}
 												>
