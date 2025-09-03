@@ -12,9 +12,23 @@ export default {
                     contrast: "#131313",
                 },
                 secondary: {
-                    base: "#FFFFFF",
-                    hover: "#F1F1F1",
-                    contrast: "#131313",
+                    base: "rgba(229, 229, 229, 1)",
+                    hover: "rgba(229, 229, 229, 0.9)",
+                    contrast: "#171717",
+                },
+                sidebar: {
+                    base: "#171717",
+                },
+                background: {
+                    base: "#0A0A0A",
+                    hover: "#171717",
+                },
+                card: {
+                    base: "#171717",
+                    hover: "#242424",
+                },
+                input: {
+                    base: "#212121",
                 },
                 container: {
                     1: "#070707", // navbar / header
@@ -37,12 +51,11 @@ export default {
                     contrast: "#000000",
                 },
                 border: {
-                    DEFAULT: "#252525",
-                    input: "#343434",
+                    DEFAULT: 'rgba(255, 255, 255, 0.1)',
                 },
                 // Typography
                 title: "#F1F1F1",
-                body: "#C7C7C7",
+                body: "#a1a1a1",
                 unfocused: "#A0A0A0",
             },
             fontFamily: {

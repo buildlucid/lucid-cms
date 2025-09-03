@@ -45,7 +45,7 @@ export const SimplifiedPagination: Component<{
 	};
 
 	return (
-		<div class="flex flex-col items-start gap-15">
+		<div class="flex flex-col items-start gap-4">
 			<span class="text-sm text-body md:mb-0 mb-2">
 				<Switch>
 					<Match when={textData().total === 0}>{T()("pagination_empty")}</Match>

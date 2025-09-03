@@ -125,7 +125,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					</Match>
 					<Match when={typeof props.value === "number"}>
 						<div class="w-full border border-border rounded-md bg-container-4">
-							<div class="p-15 flex items-center justify-center ">
+							<div class="p-4 flex items-center justify-center ">
 								<div class="w-full max-w-xs rounded-md overflow-hidden border border-border">
 									<AspectRatio ratio="16:9">
 										<MediaPreview
@@ -142,7 +142,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									</AspectRatio>
 								</div>
 							</div>
-							<div class="grid grid-cols-2 gap-2.5 bg-container-2 p-15">
+							<div class="grid grid-cols-2 gap-2.5 bg-container-2 p-4">
 								<Button
 									type="button"
 									theme="secondary"

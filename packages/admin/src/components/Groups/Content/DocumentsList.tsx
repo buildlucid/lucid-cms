@@ -121,7 +121,7 @@ export const DocumentsList: Component<{
 							meta: documents.data?.meta,
 						}}
 						options={{
-							padding: "20",
+							padding: "24",
 						}}
 					/>
 				),

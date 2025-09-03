@@ -40,7 +40,7 @@ export const DynamicContent: Component<{
 		createEntry?: () => void;
 	};
 	options?: {
-		padding?: "15" | "20";
+		padding?: "16" | "24";
 		hideNoEntries?: boolean;
 	};
 	children: JSXElement;
@@ -51,8 +51,8 @@ export const DynamicContent: Component<{
 		<>
 			<div
 				class={classNames("flex flex-col flex-1 h-full", {
-					"p-15 md:p-5": props.options?.padding === "20",
-					"p-15": props.options?.padding === "15",
+					"p-4 md:p-6": props.options?.padding === "24",
+					"p-4": props.options?.padding === "16",
 				})}
 			>
 				<Switch fallback={props.children}>

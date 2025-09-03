@@ -81,12 +81,12 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 	return (
 		<div class="grid grid-cols-main-layout min-h-full relative">
 			<NavigationSidebar />
-			<main class="flex flex-col mt-15 pr-15 w-full min-w-[calc(100vw-325px)]">
+			<main class="flex flex-col mt-4 pr-4 w-full min-w-[calc(100vw-220px)]">
 				<Switch>
 					<Match when={isSuccess()}>
 						<Alert
 							style="layout"
-							class="pb-15 -mt-15"
+							class="pb-4 -mt-4"
 							roundedBottom={!isCollectionBuilderRoute()}
 							alerts={[
 								{

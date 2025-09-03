@@ -46,8 +46,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 	// Render
 	return (
 		<Show when={props.brickConfig.length > 0}>
-			<div class="p-5">
-				<div class="flex justify-between mb-15">
+			<div class="p-6">
+				<div class="flex justify-between mb-4">
 					<div class="flex items-center">
 						<FaSolidLayerGroup class="text-white text-xl mr-2.5" />
 						<h2>{T()("builder_area")}:</h2>
@@ -76,6 +76,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 								tabStateHelpers.updateBrickOrders(
 									props.collectionKey,
 									props.documentId,
+									// @ts-expect-error
 									builderBricks().map((b) => {
 										return {
 											[b.key]: b.order,
@@ -174,7 +175,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				"view-transition-name": `brick-item-${props.brick.ref}`,
 			}}
 			class={classNames(
-				"drag-item w-full bg-container-2 border border-border rounded-md mb-15 last:mb-0 focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base",
+				"drag-item w-full bg-container-2 border border-border rounded-md mb-4 last:mb-0 focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base",
 				{
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.brick.ref,
 					"ring-1 ring-inset":
@@ -199,7 +200,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			{/* Header */}
 			<div
 				class={classNames(
-					"flex items-center justify-between cursor-pointer px-15 py-2.5 rounded-md focus:outline-hidden",
+					"flex items-center justify-between cursor-pointer px-4 py-2.5 rounded-md focus:outline-hidden",
 				)}
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
@@ -280,7 +281,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					documentId: props.documentId,
 				}}
 				options={{
-					padding: "15",
+					padding: "16",
 				}}
 			/>
 		</li>

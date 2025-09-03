@@ -491,5 +491,6 @@
 	"refresh_license_status": "Refresh status",
 	"license_host_blurb": "The host in your Lucid CMS config must match the host set on your license.",
 	"license_refresh_toast_title": "Status updated",
-	"license_refresh_toast_message": "License status has been refreshed."
+	"license_refresh_toast_message": "License status has been refreshed.",
+	"error_loading_collections": "There was an unknown error loading the collections."
 }

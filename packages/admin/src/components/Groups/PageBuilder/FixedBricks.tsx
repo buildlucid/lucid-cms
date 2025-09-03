@@ -150,7 +150,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					documentId: props.documentId,
 				}}
 				options={{
-					padding: "20",
+					padding: "24",
 					bleedTop: true,
 				}}
 			/>

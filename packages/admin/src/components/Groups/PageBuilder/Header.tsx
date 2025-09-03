@@ -24,7 +24,7 @@ export const Header: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<header class="bg-container-2 w-full -mt-15 pt-5 px-5 pb-0 border-x border-border z-31">
+		<header class="bg-container-2 w-full -mt-4 pt-6 px-6 pb-0 border-x border-border z-31">
 			<Breadcrumbs
 				breadcrumbs={[
 					{
@@ -72,7 +72,7 @@ export const Header: Component<{
 				</h1>
 			</Show>
 
-			<nav class="-mb-px bg-container-2 mt-15">
+			<nav class="-mb-px bg-container-2 mt-4">
 				<ul class="flex gap-2">
 					{/* Draft edit */}
 					<Show when={props.state.collection()?.config.useDrafts}>

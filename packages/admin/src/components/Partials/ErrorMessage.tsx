@@ -19,7 +19,7 @@ const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 					{
 						"bg-container-1 rounded-r-md border-l-4 border-l-error-base p-2.5 border border-border mb-5 last:mb-0":
 							props.theme === "background", // on background color
-						"bg-container-4/40 rounded-r-md border-l-4 border-l-error-base p-2.5 border-border border mb-15 last:mb-0":
+						"bg-container-4/40 rounded-r-md border-l-4 border-l-error-base p-2.5 border-border border mb-4 last:mb-0":
 							props.theme === "container", // on container color
 					},
 					props.classes,

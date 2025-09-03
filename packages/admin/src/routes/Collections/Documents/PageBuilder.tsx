@@ -99,8 +99,8 @@ const CollectionsDocumentsEditRoute: Component<
 	return (
 		<Switch>
 			<Match when={uiState.isLoading()}>
-				<div class="fixed top-15 left-[325px] bottom-15 right-15 flex flex-col">
-					<span class="h-32 w-full skeleton block mb-15" />
+				<div class="fixed top-4 left-[325px] bottom-4 right-4 flex flex-col">
+					<span class="h-32 w-full skeleton block mb-4" />
 					<span class="h-full w-full skeleton block" />
 				</div>
 			</Match>
@@ -133,7 +133,7 @@ const CollectionsDocumentsEditRoute: Component<
 					}}
 				/>
 
-				<div class="mt-15 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden">
+				<div class="mt-4 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden">
 					<Alert
 						style="layout"
 						alerts={[

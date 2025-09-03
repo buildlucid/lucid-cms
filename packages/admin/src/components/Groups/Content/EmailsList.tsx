@@ -59,7 +59,7 @@ export const EmailsList: Component<{
 							meta: emails.data?.meta,
 						}}
 						options={{
-							padding: "20",
+							padding: "24",
 						}}
 					/>
 				),

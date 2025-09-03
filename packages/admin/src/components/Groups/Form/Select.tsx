@@ -87,7 +87,7 @@ export const Select: Component<SelectProps> = (props) => {
 		<div
 			class={classNames("w-full", {
 				"mb-0": props.noMargin,
-				"mb-15 last:mb-0": !props.noMargin,
+				"mb-4 last:mb-0": !props.noMargin,
 				"mb-2.5 last:mb-0":
 					!props.noMargin &&
 					(props.theme === "basic" || props.theme === "basic-small"),
@@ -109,7 +109,7 @@ export const Select: Component<SelectProps> = (props) => {
 								inputFocus() && props.theme === "full",
 							"border-error-base":
 								props.errors?.message !== undefined || props.hasError,
-							"bg-container-4 rounded-md border border-border-input":
+							"bg-input-base rounded-md border border-border":
 								props.theme === "full",
 						},
 					)}
@@ -128,13 +128,12 @@ export const Select: Component<SelectProps> = (props) => {
 					{/* Trigger */}
 					<DropdownMenu.Trigger
 						class={classNames(
-							"focus:outline-hidden overflow-hidden px-2.5 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
+							"focus:outline-hidden overflow-hidden px-2 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
 							{
-								"bg-container-4 border border-border-input flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
+								"bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic" || props.theme === "basic-small",
-								"h-12 bg-container-4 border-border-input":
-									props.theme === "basic",
-								"h-9 bg-container-4 border-border-input":
+								"h-12 bg-input-base border-border": props.theme === "basic",
+								"h-9 bg-input-base border-border":
 									props.theme === "basic-small",
 								"mt-1": props.theme !== "full" && props.copy?.label,
 								"pt-2 h-10 flex items-center":
@@ -150,7 +149,7 @@ export const Select: Component<SelectProps> = (props) => {
 					>
 						<div class="flex items-center">
 							<Show when={props.shortcut}>
-								<span class="text-xs bg-container-3 px-2 py-1 rounded-md mr-1 border border-border">
+								<span class="text-xs bg-background-base px-2 py-1 rounded-md mr-1 border border-border">
 									{props.shortcut}
 								</span>
 							</Show>

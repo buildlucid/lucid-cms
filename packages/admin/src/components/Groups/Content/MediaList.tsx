@@ -62,7 +62,7 @@ export const MediaList: Component<{
 							meta: media.data?.meta,
 						}}
 						options={{
-							padding: "20",
+							padding: "24",
 						}}
 					/>
 				),
@@ -78,7 +78,7 @@ export const MediaList: Component<{
 				createEntry: () => props.state.setOpenCreateMediaPanel(true),
 			}}
 			options={{
-				padding: "20",
+				padding: "24",
 			}}
 		>
 			<Grid

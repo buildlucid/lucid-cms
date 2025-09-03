@@ -28,7 +28,7 @@ const BrickImagePreview: Component = (props) => {
 				noPadding: true,
 			}}
 		>
-			<div class="flex items-baseline justify-between p-15 md:p-5 border-b border-border">
+			<div class="flex items-baseline justify-between p-4 md:p-6 border-b border-border">
 				<div class="flex flex-col">
 					<Dialog.Title>{selectedBrick()?.title}</Dialog.Title>
 					<Show when={selectedBrick()?.description}>
@@ -41,7 +41,7 @@ const BrickImagePreview: Component = (props) => {
 					<FaSolidXmark />
 				</Dialog.CloseButton>
 			</div>
-			<div class="p-15">
+			<div class="p-4">
 				<BrickPreview
 					data={{
 						brick: selectedBrick(),

@@ -25,7 +25,7 @@ export const Modal: Component<ModalProps> = (props) => {
 			<Dialog.Portal>
 				<Dialog.Overlay class="fixed inset-0 z-40 bg-black/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-0 z-50">
-					<Dialog.Content class="overflow-y-auto h-full p-15 pointer-events-none! flex items-center justify-center animate-animate-modal-hide data-expanded:animate-animate-modal-show">
+					<Dialog.Content class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-animate-modal-hide data-expanded:animate-animate-modal-show">
 						<div
 							class={classNames(
 								"max-w-2xl w-full bg-container-3 rounded-xl overflow-hidden border-border border m-auto pointer-events-auto",
@@ -36,7 +36,7 @@ export const Modal: Component<ModalProps> = (props) => {
 						>
 							<div
 								class={classNames({
-									"p-15 md:p-5": !props.options?.noPadding,
+									"p-4 md:p-6": !props.options?.noPadding,
 								})}
 							>
 								{props.children}

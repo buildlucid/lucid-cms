@@ -49,7 +49,7 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 				/>
 			</div>
 			<Show when={props.labels}>
-				<div class="flex justify-between gap-15 mt-2.5">
+				<div class="flex justify-between gap-4 mt-2.5">
 					<span class="text-sm">{props.labels?.start}</span>
 					<span class="text-sm">{props.labels?.end}</span>
 				</div>

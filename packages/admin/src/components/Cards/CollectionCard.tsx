@@ -9,7 +9,7 @@ export const CollectionCardLoading: Component = () => {
 	// ----------------------------------
 	// Return
 	return (
-		<li class={"bg-container-2 border-border border rounded-md p-15"}>
+		<li class={"bg-card-base border-border border rounded-md p-4"}>
 			<span class="skeleton block h-5 w-1/2 mb-2" />
 			<span class="skeleton block h-5 w-full" />
 		</li>
@@ -52,15 +52,15 @@ const CollectionCard: Component<{
 	return (
 		<li class={""}>
 			<A
-				class="border-border border h-full w-full p-15 rounded-md bg-container-2 overflow-hidden cursor-pointer hover:border-primary-base transition-colors duration-200 flex flex-col"
+				class="border-border border h-full w-full p-4 rounded-md bg-card-base overflow-hidden cursor-pointer hover:border-primary-base transition-colors duration-200 flex flex-col"
 				href={collectionLink()}
 			>
-				<div class="flex items-center gap-1.5">
+				<div class="flex items-center gap-2">
 					<Show when={props.collection.mode === "single"}>
-						<FaSolidBox class="text-base text-primary-base" />
+						<FaSolidBox class="text-base text-secondary-base" />
 					</Show>
 					<Show when={props.collection.mode === "multiple"}>
-						<FaSolidBoxesStacked class="text-base text-primary-base" />
+						<FaSolidBoxesStacked class="text-base text-secondary-base" />
 					</Show>
 					<h3 class="text-base">{collectionName()}</h3>
 				</div>

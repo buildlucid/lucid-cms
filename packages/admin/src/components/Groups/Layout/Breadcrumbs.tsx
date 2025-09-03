@@ -21,7 +21,7 @@ export const Breadcrumbs: Component<{
 			<nav
 				class={classNames({
 					"border-b border-border": props.options?.noBorder !== true,
-					"px-15 md:px-5 py-15": props.options?.noPadding !== true,
+					"px-4 md:px-6 py-4": props.options?.noPadding !== true,
 				})}
 			>
 				<ul class="flex items-center">

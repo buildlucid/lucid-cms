@@ -83,7 +83,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 						</Button>
 					</Match>
 					<Match when={typeof props.value === "number"}>
-						{/* <div class="border border-border rounded-md p-15 bg-container-2 mb-2.5">
+						{/* <div class="border border-border rounded-md p-4 bg-container-2 mb-2.5">
 							<For each={Object.values(props.meta?.fields || {})}>
 								{(field, i) => {
 									if (field.type === "tab") return null;

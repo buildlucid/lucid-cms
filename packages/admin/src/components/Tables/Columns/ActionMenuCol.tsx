@@ -16,7 +16,7 @@ const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
 			<Match when={props.actions.length > 0}>
 				<Td
 					classes={
-						"row-actions-td text-right sticky right-0 bg-container-3 pointer-events-none"
+						"row-actions-td text-right sticky right-0 bg-background-base pointer-events-none"
 					}
 					options={{
 						noMinWidth: true,

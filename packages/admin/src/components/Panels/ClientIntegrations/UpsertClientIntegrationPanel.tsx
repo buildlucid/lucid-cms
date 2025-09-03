@@ -174,7 +174,7 @@ const UpsertClientIntegrationPanel: Component<
 				submit: panelSubmit(),
 			}}
 			options={{
-				padding: "20",
+				padding: "24",
 			}}
 		>
 			{() => (

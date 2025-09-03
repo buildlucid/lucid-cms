@@ -183,7 +183,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 				submit: panelSubmit(),
 			}}
 			options={{
-				padding: "20",
+				padding: "24",
 			}}
 		>
 			{() => (
@@ -232,10 +232,10 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 						<div class="w-full">
 							<For each={permissions?.data?.data}>
 								{(option) => (
-									<div class="mb-15 last:mb-0">
+									<div class="mb-4 last:mb-0">
 										{/* @ts-expect-error */}
 										<h4>{T(option.key)}</h4>
-										<div class="mt-2.5 border border-border p-15 rounded-md grid grid-cols-2 gap-x-15 gap-y-2.5">
+										<div class="mt-2.5 border border-border p-4 rounded-md grid grid-cols-2 gap-x-4 gap-y-2.5">
 											<For each={option.permissions}>
 												{(permission) => (
 													<Checkbox

@@ -30,7 +30,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 		<div
 			class={classnames("w-full relative", {
 				"mb-0": props.noMargin,
-				"mb-15 last:mb-0": !props.noMargin,
+				"mb-4 last:mb-0": !props.noMargin,
 				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",
 			})}
 		>
@@ -51,7 +51,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 						e.stopPropagation();
 					}}
 					class={classnames(
-						"h-5 w-5 min-w-[20px] text-primary-contrast rounded-md border-border-input border-[2px] cursor-pointer hover:border-primary-base bg-container-4 data-checked:bg-primary-base data-checked:border-primary-hover data-checked:fill-primary-contrast transition-colors duration-200",
+						"h-5 w-5 min-w-[20px] text-primary-contrast rounded-md border-border border-[2px] cursor-pointer hover:border-primary-base bg-input-base data-checked:bg-primary-base data-checked:border-primary-hover data-checked:fill-primary-contrast transition-colors duration-200",
 						{
 							"border-primary-base": inputFocus(),
 						},

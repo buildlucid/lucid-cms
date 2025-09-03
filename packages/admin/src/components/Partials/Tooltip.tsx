@@ -15,7 +15,7 @@ const TooltipInfo: Component<TooltipProps> = (props) => {
 				<Tooltip.Trigger
 					tabIndex={-1}
 					class={
-						"h-6 w-6 cursor-help hover:bg-primary-base absolute top-15 right-15 bg-primary-base rounded-full text-primary-contrast flex items-center justify-center duration-200 transition-colors"
+						"h-6 w-6 cursor-help hover:bg-primary-base absolute top-4 right-4 bg-primary-base rounded-full text-primary-contrast flex items-center justify-center duration-200 transition-colors"
 					}
 				>
 					<FaSolidInfo size={14} />

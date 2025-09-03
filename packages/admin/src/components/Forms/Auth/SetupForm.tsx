@@ -43,7 +43,7 @@ const SetupForm: Component = () => {
 				});
 			}}
 		>
-			<div class="grid grid-cols-2 gap-15">
+			<div class="grid grid-cols-2 gap-4">
 				<Input
 					id="firstName"
 					name="firstName"

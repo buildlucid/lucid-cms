@@ -22,7 +22,7 @@ export const Alert: Component<{
 		>
 			<AlertDialog.Portal>
 				<AlertDialog.Overlay class="fixed inset-0 z-40 bg-black/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
-				<div class="fixed inset-0 z-50 flex items-center justify-center p-15 overflow-y-auto">
+				<div class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
 					<AlertDialog.Content class="z-50 max-w-2xl w-full bg-container-3 rounded-xl border-border border m-auto animate-animate-modal-hide data-expanded:animate-animate-modal-show">
 						<div class="flex items-baseline justify-between mx-5 py-5 border-b border-border">
 							<AlertDialog.Title>{props.copy.title}</AlertDialog.Title>

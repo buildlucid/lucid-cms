@@ -63,7 +63,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 		<div
 			class={classnames("w-full", {
 				"mb-0": props.noMargin,
-				"mb-15 last:mb-0": !props.noMargin,
+				"mb-4 last:mb-0": !props.noMargin,
 				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",
 			})}
 		>
@@ -82,7 +82,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 							"border-primary-base bg-container-3":
 								inputFocus() && props.theme === "full",
 							"border-error-base": props.errors?.message !== undefined,
-							"bg-container-4 rounded-md border border-border-input":
+							"bg-container-4 rounded-md border border-border":
 								props.theme === "full",
 						},
 					)}

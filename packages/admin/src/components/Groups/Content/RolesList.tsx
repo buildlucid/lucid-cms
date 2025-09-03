@@ -56,7 +56,7 @@ export const RolesList: Component<{
 							meta: roles.data?.meta,
 						}}
 						options={{
-							padding: "20",
+							padding: "24",
 						}}
 					/>
 				),

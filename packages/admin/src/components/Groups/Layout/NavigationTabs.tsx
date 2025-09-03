@@ -14,11 +14,11 @@ export const NavigationTabs: Component<NavigationTabsProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<nav class="px-15 md:px-5">
+		<nav class="px-4 md:px-6">
 			<ul class="flex flex-row flex-wrap justify-start items-center">
 				<For each={props.tabs}>
 					{(tab) => (
-						<li class="mr-15">
+						<li class="mr-4">
 							<A
 								class="flex pb-2.5 font-medium text-body border-b-2 border-transparent hover:border-primary-base transition-colors duration-200"
 								activeClass="border-primary-base! text-title"

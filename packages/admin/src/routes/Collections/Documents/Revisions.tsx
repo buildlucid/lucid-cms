@@ -84,8 +84,8 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 	return (
 		<Switch>
 			<Match when={revisionState.documentIsLoading()}>
-				<div class="fixed top-15 left-[325px] bottom-15 right-15 flex flex-col">
-					<span class="h-32 w-full skeleton block mb-15" />
+				<div class="fixed top-4 left-[325px] bottom-4 right-4 flex flex-col">
+					<span class="h-32 w-full skeleton block mb-4" />
 					<span class="h-full w-full skeleton block" />
 				</div>
 			</Match>
@@ -117,10 +117,10 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 					}}
 				/>
 
-				<div class="mt-15 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden relative">
+				<div class="mt-4 bg-container-3 rounded-t-xl border border-border flex-grow overflow-hidden relative">
 					<Show when={!revisionState.revisionDocument()}>
 						<div class="absolute inset-0 flex items-center justify-center bg-black/60 flex-col z-20">
-							<div class="w-full max-w-xl px-15 py-15 text-center flex flex-col items-center">
+							<div class="w-full max-w-xl px-4 py-4 text-center flex flex-col items-center">
 								<h2 class="mb-2.5">{T()("no_revisions_found")}</h2>
 								<p class="mb-5">{T()("no_revisions_found_message")}</p>
 								<Link

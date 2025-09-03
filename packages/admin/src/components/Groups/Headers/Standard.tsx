@@ -84,12 +84,12 @@ export const Standard: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="bg-container-2 border-b border-border">
+		<div class="bg-background-base border-b border-border">
 			<div
 				class={classNames(
-					"flex justify-between flex-col-reverse md:flex-row items-start gap-x-10 gap-y-15 px-15 md:px-5 pt-15 md:pt-5 pb-15",
+					"flex justify-between flex-col-reverse md:flex-row items-start gap-x-8 gap-y-4 px-6 md:px-6 pt-6 md:pt-6 pb-4",
 					{
-						"md:pb-5": !props.slots?.bottom,
+						"md:pb-6": !props.slots?.bottom,
 					},
 				)}
 			>

@@ -77,8 +77,8 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				updateMe.action.mutate(updateData().data);
 			}}
 		>
-			<h3 class="mb-15">{T()("details")}</h3>
-			<div class="grid grid-cols-2 gap-15">
+			<h3 class="mb-4">{T()("details")}</h3>
+			<div class="grid grid-cols-2 gap-4">
 				<Input
 					id="firstName"
 					name="firstName"
@@ -131,7 +131,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				theme="full"
 			/>
 			<div class="mt-5">
-				<h3 class="mb-15">{T()("update_password")}</h3>
+				<h3 class="mb-4">{T()("update_password")}</h3>
 				<Input
 					id="currentPassword"
 					name="currentPassword"

@@ -35,7 +35,7 @@ const CopyAPIKey: Component<CopyAPIKeyProps> = (props) => {
 				disabled={true}
 				aria-label={T()("copy_api_key_modal_description")}
 			/>
-			<p class="mt-15">{T()("copy_api_key_modal_description")}</p>
+			<p class="mt-4">{T()("copy_api_key_modal_description")}</p>
 		</Alert>
 	);
 };

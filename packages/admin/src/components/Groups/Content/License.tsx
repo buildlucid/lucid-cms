@@ -27,7 +27,7 @@ export const License: Component = () => {
 				isLoading: status.isLoading,
 			}}
 			options={{
-				padding: "20",
+				padding: "24",
 			}}
 		>
 			<InfoRow.Root
@@ -56,7 +56,7 @@ export const License: Component = () => {
 					<UpdateLicenseForm licenseKey={status.data?.data?.key || ""} />
 				</InfoRow.Content>
 				<InfoRow.Content>
-					<div class="flex flex-col gap-15">
+					<div class="flex flex-col gap-4">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
 								<span
@@ -83,7 +83,7 @@ export const License: Component = () => {
 							</Button>
 						</div>
 						<Show when={!status.data?.data?.valid}>
-							<div class="flex items-center border-t border-border pt-15">
+							<div class="flex items-center border-t border-border pt-4">
 								<FaSolidTriangleExclamation
 									size={14}
 									class="text-error-base mr-2"

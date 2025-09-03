@@ -192,7 +192,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 					/>
 				</Match>
 				<Match when={props.filter.type === "boolean"}>
-					<div class="grid grid-cols-2 gap-15">
+					<div class="grid grid-cols-2 gap-4">
 						<Button
 							theme="secondary-toggle"
 							size="x-small"

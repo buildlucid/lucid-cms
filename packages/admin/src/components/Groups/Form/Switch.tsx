@@ -64,7 +64,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 		<div
 			class={classnames("relative", {
 				"mb-0": props.noMargin,
-				"mb-15 last:mb-0": !props.noMargin && props.options?.queryRow !== true,
+				"mb-4 last:mb-0": !props.noMargin && props.options?.queryRow !== true,
 				"w-full": props.options?.queryRow !== true,
 			})}
 		>
@@ -93,7 +93,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 			<button
 				type="button"
 				class={classnames(
-					"bg-container-4 h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border-input focus:ring-1 ring-inset focus:ring-primary-base group",
+					"bg-container-4 h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border focus:ring-1 ring-inset focus:ring-primary-base group",
 					{
 						"mt-1": props.options?.queryRow !== true,
 					},

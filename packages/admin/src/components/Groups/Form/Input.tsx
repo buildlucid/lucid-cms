@@ -54,7 +54,7 @@ export const Input: Component<InputProps> = (props) => {
 		<div
 			class={classnames("w-full", {
 				"mb-0": props.noMargin,
-				"mb-15 last:mb-0": !props.noMargin && props.theme === "full",
+				"mb-4 last:mb-0": !props.noMargin && props.theme === "full",
 				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",
 			})}
 		>
@@ -65,7 +65,7 @@ export const Input: Component<InputProps> = (props) => {
 						"border-primary-base bg-container-3":
 							inputFocus() && props.theme === "full",
 						"border-error-base": props.errors?.message !== undefined,
-						"bg-container-4 rounded-md border border-border-input":
+						"bg-container-4 rounded-md border border-border":
 							props.theme === "full",
 					},
 				)}
@@ -87,7 +87,7 @@ export const Input: Component<InputProps> = (props) => {
 						{
 							"pr-[38px]": props.type === "password",
 							"pt-2": props.copy?.label === undefined,
-							"bg-container-4 border border-border-input h-12 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
+							"bg-container-4 border border-border h-12 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
 								props.theme === "basic",
 							"bg-transparent pb-2 pt-1 rounded-b-md": props.theme === "full",
 						},

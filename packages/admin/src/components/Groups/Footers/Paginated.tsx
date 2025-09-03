@@ -13,7 +13,7 @@ export const Paginated: Component<{
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 	};
 	options?: {
-		padding?: "15" | "20";
+		padding?: "16" | "24";
 	};
 }> = (props) => {
 	// ----------------------------------------
@@ -21,8 +21,8 @@ export const Paginated: Component<{
 	return (
 		<footer
 			class={classNames("border-t border-border", {
-				"p-15 md:p-5": props.options?.padding === "20",
-				"p-15": props.options?.padding === "15",
+				"p-4 md:p-6": props.options?.padding === "24",
+				"p-4": props.options?.padding === "16",
 			})}
 		>
 			<Pagination

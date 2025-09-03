@@ -187,7 +187,7 @@ export const Table: Component<TableRootProps> = (props) => {
 									/>
 								)}
 							</Index>
-							<Th classes={"text-right right-0 hover:bg-container-3"}>
+							<Th classes={"text-right right-0 hover:bg-background-base"}>
 								<ColumnToggle
 									columns={includeRows() || []}
 									callbacks={{

@@ -33,7 +33,7 @@ const Alert: Component<AlertProps> = (props) => {
 				class={classNames(
 					"w-full",
 					{
-						"mb-15 last:mb-0": props.style === "block",
+						"mb-4 last:mb-0": props.style === "block",
 					},
 					props.class,
 				)}
@@ -43,9 +43,9 @@ const Alert: Component<AlertProps> = (props) => {
 						<Show when={show}>
 							<div
 								class={classNames("flex items-center border-border", {
-									"mb-2 last:mb-0 bg-container-3 border rounded-md p-15":
+									"mb-2 last:mb-0 bg-container-3 border rounded-md p-4":
 										props.style === "block",
-									"border-b md:px-5 px-15 py-15": props.style === "layout",
+									"border-b md:px-6 px-4 py-4": props.style === "layout",
 									"bg-warning-base text-warning-contrast":
 										type === "warning" && props.style === "layout",
 									"bg-error-base text-error-contrast":

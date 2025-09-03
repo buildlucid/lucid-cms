@@ -54,7 +54,7 @@ export const Form: Component<{
 							<ErrorMessage
 								theme="basic"
 								message={props.state.errors?.message}
-								classes="mb-15"
+								classes="mb-4"
 							/>
 						</Show>
 

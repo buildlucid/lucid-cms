@@ -39,7 +39,7 @@ export const CollectionsList: Component<{
 				},
 			}}
 			options={{
-				padding: "20",
+				padding: "24",
 			}}
 		>
 			<Grid

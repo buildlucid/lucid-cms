@@ -110,7 +110,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classNames("w-full mb-15 last:mb-0 relative", {
+			class={classNames("w-full mb-4 last:mb-0 relative", {
 				"mb-0!": !activeTab(),
 				"invisible h-0 opacity-0 mb-0!":
 					fieldConfig().type !== "tab"

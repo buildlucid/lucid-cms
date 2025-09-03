@@ -29,7 +29,7 @@ interface BrickProps {
 		documentId?: number;
 	};
 	options: {
-		padding?: "15" | "20";
+		padding?: "16" | "24";
 		bleedTop?: boolean;
 	};
 }
@@ -105,9 +105,9 @@ export const BrickBody: Component<BrickProps> = (props) => {
 		>
 			<div
 				class={classNames({
-					"p-15 pt-0": props.options.padding === "15",
-					"p-5": props.options.padding === "20",
-					"pt-15!": props.options.bleedTop,
+					"p-4 pt-0": props.options.padding === "16",
+					"p-6": props.options.padding === "24",
+					"pt-4!": props.options.bleedTop,
 				})}
 			>
 				{/* Tabs */}

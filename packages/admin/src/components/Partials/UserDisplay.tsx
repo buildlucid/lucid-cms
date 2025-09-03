@@ -1,4 +1,4 @@
-import { type Component, Switch, Match } from "solid-js";
+import { type Component, Switch, Match, Show } from "solid-js";
 import helpers from "@/utils/helpers";
 import classNames from "classnames";
 
@@ -21,13 +21,18 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 	}
 
 	return (
-		<div class="flex items-center">
+		<div
+			class={classNames("flex items-center", {
+				"w-full": props.mode === "long",
+			})}
+		>
 			<span
 				class={classNames(
-					" rounded-full flex bg-primary-base text-primary-contrast justify-center items-center text-xs font-bold",
+					"rounded-full flex bg-primary-base text-primary-contrast justify-center items-center text-xs font-bold",
 					{
 						"h-10 w-10 min-w-10": props.mode === "icon",
-						"h-8 w-8 min-w-[32px] mr-2.5": props.mode !== "icon",
+						"h-8 w-8 min-w-8": props.mode === "long",
+						"h-8 w-8 min-w-8 mr-2.5": props.mode === "short",
 					},
 				)}
 			>
@@ -40,11 +45,14 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 			<Switch>
 				<Match when={props.mode === "short"}>{props.user.username}</Match>
 				<Match when={props.mode === "long"}>
-					{helpers.formatUserName({
-						username: props.user.username,
-						firstName: props.user.firstName,
-						lastName: props.user.lastName,
-					})}
+					<div class="flex flex-col ml-2">
+						<p class="text-sm text-title">{props.user.username}</p>
+						<Show when={props.user.firstName}>
+							<p class="text-xs">
+								{props.user.firstName} {props.user.lastName}
+							</p>
+						</Show>
+					</div>
 				</Match>
 			</Switch>
 		</div>

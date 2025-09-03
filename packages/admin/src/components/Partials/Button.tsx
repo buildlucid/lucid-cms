@@ -43,7 +43,7 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "border-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					props.theme === "danger",
-				"bg-container-4 hover:bg-container-5 text-title ring-primary-base fill-title border border-border-input":
+				"bg-container-4 hover:bg-container-5 text-title ring-primary-base fill-title border border-border":
 					props.theme === "input-style",
 				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":
 					props.theme === "danger-outline",

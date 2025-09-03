@@ -56,7 +56,7 @@ export const Tr: Component<TrProps> = (props) => {
 	return (
 		<tr
 			class={classNames(
-				"bg-container-3 hover:bg-container-5 duration-200 transition-colors",
+				"bg-background-base hover:bg-background-hover duration-200 transition-colors",
 				{
 					"cursor-pointer":
 						firstPermittedAction() !== undefined || props.onClick,

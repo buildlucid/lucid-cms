@@ -53,7 +53,7 @@ export const Panel: Component<{
 	};
 	options?: {
 		hideFooter?: boolean;
-		padding?: "15" | "20";
+		padding?: "16" | "24";
 	};
 	children: (_props?: {
 		contentLocale: Accessor<string | undefined>;
@@ -107,7 +107,7 @@ export const Panel: Component<{
 		>
 			<Dialog.Portal>
 				<Dialog.Overlay class="fixed inset-0 z-40 bg-black/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
-				<div class="fixed inset-15 z-40 flex justify-end">
+				<div class="fixed inset-4 z-40 flex justify-end">
 					<Dialog.Content
 						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-container-3 animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
@@ -131,7 +131,15 @@ export const Panel: Component<{
 						<Switch>
 							{/* Loading / Not Open */}
 							<Match when={!props.state.open || props.fetchState?.isLoading}>
-								<div class="skeleton absolute inset-15 rounded-xl overflow-hidden" />
+								<div
+									class={classNames(
+										"skeleton absolute rounded-xl overflow-hidden",
+										{
+											"inset-4": props.options?.padding === "16",
+											"inset-6 md:inset-5": props.options?.padding === "24",
+										},
+									)}
+								/>
 							</Match>
 							{/* Fetch Error */}
 							<Match when={props.fetchState?.isError}>
@@ -147,7 +155,13 @@ export const Panel: Component<{
 							{/* Open */}
 							<Match when={props.state.open}>
 								{/* Header */}
-								<div class="border-b border-border mx-15 md:mx-5 py-15 md:py-5">
+								<div
+									class={classNames("border-b border-border", {
+										"mx-4 py-4": props.options?.padding === "16",
+										"mx-4 md:mx-6 py-4 md:py-6 ":
+											props.options?.padding === "24",
+									})}
+								>
 									<div class="flex justify-between items-start gap-x-10">
 										<div>
 											<Show when={props.copy?.title}>
@@ -184,8 +198,8 @@ export const Panel: Component<{
 									{/* content */}
 									<div
 										class={classNames({
-											"p-15": props.options?.padding === "15",
-											"p-15 md:p-5": props.options?.padding === "20",
+											"p-4": props.options?.padding === "16",
+											"p-4 md:p-6": props.options?.padding === "24",
 										})}
 									>
 										{props.children({
@@ -194,14 +208,23 @@ export const Panel: Component<{
 										})}
 									</div>
 									{/* footer */}
-									<div class="border-t border-border mx-15 md:mx-5 py-15 md:py-5 flex justify-between items-center gap-5">
+									<div
+										class={classNames(
+											"border-t border-border flex justify-between items-center gap-5",
+											{
+												"mx-4 py-4": props.options?.padding === "16",
+												"mx-4 md:mx-6 py-4 md:py-6 ":
+													props.options?.padding === "24",
+											},
+										)}
+									>
 										<div class="flex min-w-max">
 											<Show when={props.copy?.submit}>
 												<Button
 													type="submit"
 													theme="primary"
 													size="medium"
-													classes="mr-15"
+													classes="mr-4"
 													loading={props.mutateState?.isLoading}
 													disabled={props.mutateState?.isDisabled}
 												>

@@ -106,7 +106,7 @@ const GeneralSettingsRoute: Component = (props) => {
 					isLoading: clientIntegrations.isLoading,
 				}}
 				options={{
-					padding: "20",
+					padding: "24",
 				}}
 			>
 				<InfoRow.Root

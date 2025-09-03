@@ -142,10 +142,10 @@ const DocumentSelectContent: Component = () => {
 	return (
 		<div class="min-h-[70vh] flex flex-col">
 			{/* Header */}
-			<div class="p-15 md:p-5 border-b border-border">
+			<div class="p-4 md:p-6 border-b border-border">
 				<h2>{T()("select_document_title")}</h2>
 				<p class="mt-1">{T()("select_document_description")}</p>
-				<div class="w-full mt-15 flex justify-between">
+				<div class="w-full mt-4 flex justify-between">
 					<div class="flex gap-2.5">
 						<Filter
 							filters={getCollectionFieldFilters().map((field) => {

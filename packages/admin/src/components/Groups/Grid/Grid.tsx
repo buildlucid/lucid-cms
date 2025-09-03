@@ -16,7 +16,7 @@ export const Grid: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<ul class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-15">
+		<ul class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 			<Switch fallback={props.children}>
 				<Match when={props.state?.isLoading}>
 					<Switch>

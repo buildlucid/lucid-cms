@@ -56,7 +56,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 				isError: email.isError,
 			}}
 			options={{
-				padding: "20",
+				padding: "24",
 				hideFooter: true,
 			}}
 			copy={{
@@ -105,7 +105,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 						]}
 					/>
 					<SectionHeading title={T()("preview")} />
-					<div class="border border-border rounded-md overflow-hidden mb-15">
+					<div class="border border-border rounded-md overflow-hidden mb-4">
 						<iframe
 							class="w-full h-96"
 							srcdoc={email.data?.data.html || ""}
@@ -116,7 +116,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 						<SectionHeading title={T()("template_data")} />
 						<div
 							class={classNames({
-								"mb-15":
+								"mb-4":
 									email.data?.data.transactions?.length &&
 									email.data?.data.transactions.length > 0,
 							})}

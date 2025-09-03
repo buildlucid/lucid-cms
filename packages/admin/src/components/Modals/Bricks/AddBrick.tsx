@@ -70,8 +70,8 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 		>
 			{/* Search */}
 			<div class="h-14 w-full relative">
-				<div class="absolute top-0 left-15 h-full flex items-center justify-center pointer-events-none">
-					<FaSolidMagnifyingGlass class="w-15 text-unfocused" />
+				<div class="absolute top-0 left-4 h-full flex items-center justify-center pointer-events-none">
+					<FaSolidMagnifyingGlass class="w-4 text-unfocused" />
 				</div>
 				<input
 					class="h-full bg-container-3 w-full border-b border-border px-10 focus:outline-hidden text-title placeholder:text-unfocused"
@@ -81,20 +81,20 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 				/>
 				<Show when={getSearchQuery()}>
 					<button
-						class="absolute top-0 right-15 h-full flex items-center justify-center cursor-pointer"
+						class="absolute top-0 right-4 h-full flex items-center justify-center cursor-pointer"
 						onClick={() => {
 							setSearchQuery("");
 						}}
 						type="button"
 					>
-						<FaSolidXmark class="w-15 text-error-base" />
+						<FaSolidXmark class="w-4 text-error-base" />
 					</button>
 				</Show>
 			</div>
 			{/* Content */}
 			<div class="flex h-96">
 				{/* Options */}
-				<div class="w-[40%] p-15 overflow-y-auto h-full">
+				<div class="w-[40%] p-4 overflow-y-auto h-full">
 					<ul class="h-full w-full">
 						<For each={brickList()}>
 							{(brickConfig) => (
@@ -136,7 +136,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 					</ul>
 				</div>
 				{/* Preview */}
-				<div class="w-[60%] p-15 h-full pl-0">
+				<div class="w-[60%] p-4 h-full pl-0">
 					<div class="border border-border h-full rounded-md flex items-center justify-center relative">
 						<div class="w-[80%]">
 							<BrickPreview

@@ -46,7 +46,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 						"border-primary-base bg-container-3":
 							inputFocus() && props.theme === "full",
 						"border-error-base": props.errors?.message !== undefined,
-						"bg-container-4 rounded-md border border-border-input":
+						"bg-container-4 rounded-md border border-border":
 							props.theme === "full",
 					},
 				)}
@@ -66,7 +66,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 						"focus:outline-hidden text-sm text-title font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80",
 						{
 							"pt-2": props.copy?.label === undefined,
-							"bg-container-4 border border-border-input rounded-md mt-1 p-2.5 focus:border-primary-base duration-200 transition-colors":
+							"bg-container-4 border border-border rounded-md mt-1 p-2.5 focus:border-primary-base duration-200 transition-colors":
 								props.theme === "basic",
 							"bg-transparent pb-2 px-2.5 pt-1 rounded-b-md":
 								props.theme === "full",

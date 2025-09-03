@@ -57,11 +57,11 @@ const LinkSelect: Component = () => {
 				noPadding: true,
 			}}
 		>
-			<div class="p-5">
-				<div class="mb-5 pb-5 border-b border-border">
+			<div class="p-6">
+				<div class="mb-6 pb-6 border-b border-border">
 					<h2>{T()("set_link")}</h2>
 				</div>
-				<div class="mb-5 pb-5 border-b border-border">
+				<div class="mb-6 pb-6 border-b border-border">
 					<Input
 						id="label"
 						value={getLabel()}
@@ -99,7 +99,7 @@ const LinkSelect: Component = () => {
 					/>
 				</div>
 
-				<div class="w-full flex gap-15 mt-5">
+				<div class="w-full flex gap-4 mt-6">
 					<Button
 						type="button"
 						theme="primary"

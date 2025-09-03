@@ -6,7 +6,7 @@ interface SkeletonCardProps {
 
 const SkeletonCard: Component<SkeletonCardProps> = (props) => {
 	return (
-		<li class={"bg-container-1 p-15 border-border border rounded-md"}>
+		<li class={"bg-container-1 p-4 border-border border rounded-md"}>
 			<Switch>
 				<Match when={props.size === "small"}>
 					<span class="skeleton block h-3 w-1/4 mb-1" />

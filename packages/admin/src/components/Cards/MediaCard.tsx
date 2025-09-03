@@ -25,7 +25,7 @@ export const MediaCardLoading: Component = () => {
 			<AspectRatio ratio="16:9">
 				<span class="skeleton block w-full h-full rounded-b-none" />
 			</AspectRatio>
-			<div class="p-15">
+			<div class="p-4">
 				<span class="skeleton block h-5 w-1/2 mb-2" />
 				<span class="skeleton block h-5 w-full" />
 			</div>
@@ -67,7 +67,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyDown={() => {}}
 			onKeyPress={() => {}}
 		>
-			<div class="absolute top-15 right-15 z-10">
+			<div class="absolute top-4 right-4 z-10">
 				<ActionDropdown
 					actions={[
 						{
@@ -107,7 +107,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			{/* Image */}
 			<AspectRatio ratio="16:9" innerClass={"overflow-hidden"}>
 				<MediaPreview media={props.media} alt={alt() || title() || ""} />
-				<span class="inset-0 top-auto absolute flex gap-1 p-15">
+				<span class="inset-0 top-auto absolute flex gap-1 p-4">
 					<Pill theme="secondary">
 						{helpers.bytesToSize(props.media.meta.fileSize)}
 					</Pill>
@@ -115,7 +115,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				</span>
 			</AspectRatio>
 			{/* Content */}
-			<div class="p-15 border-t border-border">
+			<div class="p-4 border-t border-border">
 				<h3 class="mb-0.5 line-clamp-1">{title() || T()("no_translation")}</h3>
 				<ClickToCopy
 					type="simple"
