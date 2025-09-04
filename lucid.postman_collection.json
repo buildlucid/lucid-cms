@@ -1683,7 +1683,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"key\": \"2025/06/v4l4a9-pension-chats-screenshot-2.png\",\n\t\"fileName\": \"pension-chats-screenshot-2.png\",\n\t\"title\": [\n\t\t{ \n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"title value\"\n\t\t}\n\t],\n\t\"alt\": [\n\t\t{\n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"alt value\"\n\t\t}\n\t],\n    \"width\": 400,\n    \"height\": 100,\n    // \"blurHash\": \"fdsf\",\n    // \"averageColour\": \"#000\",\n    \"isDark\": true,\n    \"isLight\": false\n}",
+							"raw": "{\n\t\"key\": \"2025/06/v4l4a9-pension-chats-screenshot-2.png\",\n\t\"fileName\": \"pension-chats-screenshot-2.png\",\n\t\"folderId\": null,\n\t\"title\": [\n\t\t{ \n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"title value\"\n\t\t}\n\t],\n\t\"alt\": [\n\t\t{\n\t\t\t\"localeCode\": \"en\",\n\t\t\t\"value\": \"alt value\"\n\t\t}\n\t],\n    \"width\": 400,\n    \"height\": 100,\n    // \"blurHash\": \"fdsf\",\n    // \"averageColour\": \"#000\",\n    \"isDark\": true,\n    \"isLight\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1724,7 +1724,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/media/2",
+							"raw": "{{BASE_URL}}/api/v1/media/1",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -1732,7 +1732,7 @@
 								"api",
 								"v1",
 								"media",
-								"2"
+								"1"
 							]
 						}
 					},
@@ -1872,6 +1872,11 @@
 									"key": "filter[title]",
 									"value": "title value",
 									"disabled": true
+								},
+								{
+									"key": "filter[folderId]",
+									"value": "",
+									"disabled": true
 								}
 							]
 						}
@@ -1944,6 +1949,179 @@
 								"v1",
 								"media",
 								"processed"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Media Folders",
+			"item": [
+				{
+					"name": "Delete Single",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/folders/4",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"folders",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Multiple",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "lucid-content-lang",
+								"value": "{{LUCID_CONTENT_LANG}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/folders?filter[parentFolderId]=",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"folders"
+							],
+							"query": [
+								{
+									"key": "filter[title]",
+									"value": "Test",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "-title",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,updatedAt,title",
+									"disabled": true
+								},
+								{
+									"key": "perPage",
+									"value": "-1",
+									"disabled": true
+								},
+								{
+									"key": "filter[parentFolderId]",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Single",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"title\": \"Folder 1.2\",\n\t\"parentFolderId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/folders",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"folders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"title\": \"Folder 1\",\n\t\"parentFolderId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/folders/2",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"folders",
+								"2"
 							]
 						}
 					},
@@ -2661,7 +2839,112 @@
 		},
 		{
 			"name": "License",
-			"item": []
+			"item": [
+				{
+					"name": "Update License",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"licenseKey\": \"607F60-JEAJMZDVQM1X5GG-L2MORW0FO57MTGC-91F2XFAK43JWN96G-MEPPS0JO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/license",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"license"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify License",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"licenseKey\": \"607F60-JEAJMZDVQM1X5GG-L2MORW0FO57MTGC-91F2XFAK43JWN96G-MEPPS0JO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/license/verify",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"license",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "License Status",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"licenseKey\": \"607F60-JEAJMZDVQM1X5GG-L2MORW0FO57MTGC-91F2XFAK43JWN96G-MEPPS0JO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/license/status",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"license",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "Public",

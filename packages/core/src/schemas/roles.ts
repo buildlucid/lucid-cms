@@ -125,8 +125,12 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[name]": queryString.schema.filter(false, "Editor"),
-					"filter[roleIds]": queryString.schema.filter(true, "1,2"),
+					"filter[name]": queryString.schema.filter(false, {
+						example: "Editor",
+					}),
+					"filter[roleIds]": queryString.schema.filter(true, {
+						example: "1,2",
+					}),
 					sort: queryString.schema.sort("createdAt,name"),
 					include: queryString.schema.include("permissions"),
 					page: queryString.schema.page,

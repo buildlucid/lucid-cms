@@ -7,20 +7,24 @@ import deleteSingle from "../../../controllers/media/delete-single.js";
 import getPresignedUrl from "../../../controllers/media/get-presigned-url.js";
 import clearSingleProcessed from "../../../controllers/media/clear-single-processed.js";
 import clearAllProcessed from "../../../controllers/media/clear-all-processed.js";
+import moveFolder from "../../../controllers/media/move-folder.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 import createSingleFolder from "../../../controllers/media-folders/create-single.js";
+import getMultipleFolders from "../../../controllers/media-folders/get-multiple.js";
 import updateSingleFolder from "../../../controllers/media-folders/update-single.js";
 import deleteSingleFolder from "../../../controllers/media-folders/delete-single.js";
 
 const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
+	.get("/folders", ...getMultipleFolders)
 	.get("/:id", ...getSingle)
 	.post("/folders", ...createSingleFolder)
 	.post("/presigned-url", ...getPresignedUrl)
 	.post("/", ...createSingle)
 	.patch("/folders/:id", ...updateSingleFolder)
 	.patch("/:id", ...updateSingle)
+	.patch("/:id/move", ...moveFolder)
 	.delete("/folders/:id", ...deleteSingleFolder)
 	.delete("/processed", ...clearAllProcessed)
 	.delete("/:id/processed", ...clearSingleProcessed)

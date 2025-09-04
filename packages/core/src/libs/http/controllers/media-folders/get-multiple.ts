@@ -1,7 +1,7 @@
 import z from "zod/v4";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../schemas/media.js";
+import { controllerSchemas } from "../../../../schemas/media-folders.js";
 import { describeRoute } from "hono-openapi";
 import services from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -13,46 +13,42 @@ import {
 } from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
-import contentLocale from "../../middleware/content-locale.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
+import { inspect } from "node:util";
 
 const factory = createFactory();
 
 const getMultipleController = factory.createHandlers(
 	describeRoute({
-		description: "Get a multiple media items.",
-		tags: ["media"],
-		summary: "Get Multiple Media",
+		description: "Get multiple media folders.",
+		tags: ["media-folders"],
+		summary: "Get Multiple Media Folders",
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: honoOpenAPIParamaters({
 			query: controllerSchemas.getMultiple.query.string,
-			headers: {
-				contentLocale: true,
-			},
 		}),
 		validateResponse: true,
 	}),
 	authenticate,
-	contentLocale,
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.getMultiple.query.formatted,
 			{
-				nullableFields: ["folderId"],
+				nullableFields: ["parentFolderId"],
 			},
 		);
 
-		const media = await serviceWrapper(services.media.getMultiple, {
+		const folders = await serviceWrapper(services.mediaFolder.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_media_fetch_error_name"),
-				message: T("route_media_fetch_error_message"),
+				name: T("route_media_folders_fetch_error_name"),
+				message: T("route_media_folders_fetch_error_message"),
 			},
 		})(
 			{
@@ -62,17 +58,16 @@ const getMultipleController = factory.createHandlers(
 			},
 			{
 				query: formattedQuery,
-				localeCode: c.get("locale").code,
 			},
 		);
-		if (media.error) throw new LucidAPIError(media.error);
+		if (folders.error) throw new LucidAPIError(folders.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: media.data.data,
+				data: folders.data.data,
 				pagination: {
-					count: media.data.count,
+					count: folders.data.count,
 					page: formattedQuery.page,
 					perPage: formattedQuery.perPage,
 				},

@@ -8,6 +8,7 @@ const getFilterOperator = (
 ) => {
 	if (f.operator !== undefined) return f.operator;
 	if (Array.isArray(f.value)) return "in";
+	if (f.value === null) return "is";
 	return operators?.[key] || "=";
 };
 

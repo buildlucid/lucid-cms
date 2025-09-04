@@ -2,7 +2,12 @@ import type { ComparisonOperatorExpression } from "kysely";
 
 // -----------------------------------------------
 // Filters
-export type FilterValue = string | Array<string> | number | Array<number>;
+export type FilterValue =
+	| string
+	| Array<string>
+	| number
+	| Array<number>
+	| null;
 export type FilterOperator = ComparisonOperatorExpression | "%";
 export type FilterObject = {
 	value: FilterValue;

@@ -32,6 +32,7 @@ export interface MediaPropsT {
 	}>;
 	title_translation_value?: string | null;
 	alt_translation_value?: string | null;
+	folder_id: number | null;
 }
 
 export default class MediaFormatter {
@@ -56,6 +57,7 @@ export default class MediaFormatter {
 		return {
 			id: props.media.id,
 			key: props.media.key,
+			folderId: props.media.folder_id,
 			url: createMediaUrl({
 				key: props.media.key,
 				host: props.host,

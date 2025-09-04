@@ -3,9 +3,9 @@ import z, { type ZodType } from "zod/v4";
 import constants from "../../../constants/constants.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import type {
-	QueryParams,
 	QueryParamFilters,
 	FilterOperator,
+	FilterValue,
 } from "../../../types/query-params.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 
@@ -27,7 +27,7 @@ const buildSort = (query: unknown) => {
 	});
 };
 
-const buildFilter = (query: unknown) => {
+const buildFilter = (query: unknown, nullableFields?: string[]) => {
 	return Object.entries(
 		query as Record<string, string>,
 	).reduce<QueryParamFilters>((acc, [key, value]) => {
@@ -36,8 +36,17 @@ const buildFilter = (query: unknown) => {
 			if (!match) return acc;
 			const [, name, operator] = match;
 			if (!name) return acc;
+
+			let processedValue: FilterValue = value.includes(",")
+				? value.split(",")
+				: value;
+
+			if (nullableFields?.includes(name) && processedValue === "") {
+				processedValue = null;
+			}
+
 			acc[name] = {
-				value: value.includes(",") ? value.split(",") : value,
+				value: processedValue,
 				operator:
 					operator === "" || operator === undefined
 						? undefined
@@ -92,6 +101,9 @@ const addRemainingQuery = (query: unknown) => {
 const buildFormattedQuery = async <T extends ZodType>(
 	c: LucidHonoContext,
 	schema: T,
+	options?: {
+		nullableFields?: string[];
+	},
 ): Promise<z.infer<T>> => {
 	const querySchema = schema ?? z.object({});
 
@@ -99,7 +111,7 @@ const buildFormattedQuery = async <T extends ZodType>(
 
 	const formattedQueryObject = {
 		sort: buildSort(queryParams),
-		filter: buildFilter(queryParams),
+		filter: buildFilter(queryParams, options?.nullableFields),
 		include: buildInclude(queryParams),
 		exclude: buildExclude(queryParams),
 		page: buildPage(queryParams),

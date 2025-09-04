@@ -91,6 +91,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				mimeType: "mime_type",
 				type: "type",
 				extension: "file_extension",
+				folderId: "folder_id",
 			},
 			sorts: {
 				createdAt: "created_at",
@@ -119,6 +120,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.select((eb) => [
 				"id",
 				"key",
+				"folder_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -181,6 +183,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"folder_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -214,6 +217,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.select((eb) => [
 				"id",
 				"key",
+				"folder_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -276,6 +280,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"folder_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -312,6 +317,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					.select((eb) => [
 						"lucid_media.id",
 						"lucid_media.key",
+						"lucid_media.folder_id",
 						"lucid_media.e_tag",
 						"lucid_media.type",
 						"lucid_media.mime_type",
@@ -456,6 +462,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"folder_id",
 				"e_tag",
 				"type",
 				"mime_type",

@@ -166,15 +166,24 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[firstName]": queryString.schema.filter(false, "John"),
-					"filter[lastName]": queryString.schema.filter(false, "Smith"),
-					"filter[email]": queryString.schema.filter(
-						false,
-						"admin@lucidcms.io",
-					),
-					"filter[username]": queryString.schema.filter(false, "admin"),
-					"filter[roleIds]": queryString.schema.filter(true, "1,2,3"),
-					"filter[id]": queryString.schema.filter(true, "1,2"),
+					"filter[firstName]": queryString.schema.filter(false, {
+						example: "John",
+					}),
+					"filter[lastName]": queryString.schema.filter(false, {
+						example: "Smith",
+					}),
+					"filter[email]": queryString.schema.filter(false, {
+						example: "team@lucidjs.build",
+					}),
+					"filter[username]": queryString.schema.filter(false, {
+						example: "admin",
+					}),
+					"filter[roleIds]": queryString.schema.filter(true, {
+						example: "1,2,3",
+					}),
+					"filter[id]": queryString.schema.filter(true, {
+						example: "1,2",
+					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,firstName,lastName,email,username",
 					),

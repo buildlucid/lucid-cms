@@ -18,35 +18,38 @@ import permissions from "../../middleware/permissions.js";
 
 const factory = createFactory();
 
-const createSingleController = factory.createHandlers(
+const moveFolderController = factory.createHandlers(
 	describeRoute({
-		description: "Creates a single media item.",
+		description: "Move a single media entry to a new folder.",
 		tags: ["media"],
-		summary: "Create Media",
+		summary: "Move Media Folder",
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
 		parameters: honoOpenAPIParamaters({
+			params: controllerSchemas.moveFolder.params,
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.moveFolder.body),
 		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["create_media"]),
-	validate("json", controllerSchemas.createSingle.body),
+	permissions(["update_media"]),
+	validate("param", controllerSchemas.moveFolder.params),
+	validate("json", controllerSchemas.moveFolder.body),
 	async (c) => {
+		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 
-		const mediaIdRes = await serviceWrapper(services.media.createSingle, {
+		const updateMedia = await serviceWrapper(services.media.moveFolder, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: T("route_media_create_error_name"),
-				message: T("route_media_create_error_message"),
+				name: T("route_media_update_error_name"),
+				message: T("route_media_update_error_message"),
 			},
 		})(
 			{
@@ -55,25 +58,15 @@ const createSingleController = factory.createHandlers(
 				services: services,
 			},
 			{
-				key: body.key,
-				fileName: body.fileName,
-				title: body.title,
-				alt: body.alt,
-				public: true,
-				width: body.width,
-				height: body.height,
-				blurHash: body.blurHash,
-				averageColor: body.averageColor,
-				isDark: body.isDark,
-				isLight: body.isLight,
+				id: Number.parseInt(id, 10),
 				folderId: body.folderId,
 			},
 		);
-		if (mediaIdRes.error) throw new LucidAPIError(mediaIdRes.error);
+		if (updateMedia.error) throw new LucidAPIError(updateMedia.error);
 
 		c.status(204);
 		return c.body(null);
 	},
 );
 
-export default createSingleController;
+export default moveFolderController;

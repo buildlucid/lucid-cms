@@ -108,6 +108,7 @@ export interface MediaResponse {
 	id: number;
 	key: string;
 	url: string;
+	folderId: number | null;
 	title: {
 		localeCode: string | null;
 		value: string | null;
@@ -134,6 +135,16 @@ export interface MediaResponse {
 
 export interface MediaUrlResponse {
 	url: string;
+}
+
+export interface MediaFolderResponse {
+	id: number;
+	title: string;
+	parentFolderId: number | null;
+	createdBy: number | null;
+	updatedBy: number | null;
+	createdAt: string | null;
+	updatedAt: string | null;
 }
 
 export interface LocalesResponse {

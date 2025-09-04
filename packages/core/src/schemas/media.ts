@@ -8,6 +8,10 @@ const mediaResponseSchema = z.object({
 		description: "Media key",
 		example: "2024/09/5ttogd-placeholder-image.png",
 	}),
+	folderId: z.number().nullable().meta({
+		description: "Media folder ID",
+		example: 1,
+	}),
 	url: z.string().meta({
 		description: "Media URL",
 		example: "https://example.com/cdn/v1/2024/09/5ttogd-placeholder-image.png",
@@ -95,14 +99,25 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[title]": queryString.schema.filter(false, "Thumbnail"),
-					"filter[key]": queryString.schema.filter(false, "thumbnail-2022"),
-					"filter[mimeType]": queryString.schema.filter(
-						true,
-						"image/png,image/jpg",
-					),
-					"filter[type]": queryString.schema.filter(true, "document"),
-					"filter[extension]": queryString.schema.filter(true, "jpg,png"),
+					"filter[title]": queryString.schema.filter(false, {
+						example: "Thumbnail",
+					}),
+					"filter[key]": queryString.schema.filter(false, {
+						example: "thumbnail-2022",
+					}),
+					"filter[mimeType]": queryString.schema.filter(true, {
+						example: "image/png,image/jpg",
+					}),
+					"filter[folderId]": queryString.schema.filter(false, {
+						example: "1",
+						nullable: true,
+					}),
+					"filter[type]": queryString.schema.filter(true, {
+						example: "document",
+					}),
+					"filter[extension]": queryString.schema.filter(true, {
+						example: "jpg,png",
+					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,title,mimeType,extension",
 					),
@@ -116,6 +131,7 @@ export const controllerSchemas = {
 						title: queryFormatted.schema.filters.single.optional(),
 						key: queryFormatted.schema.filters.single.optional(),
 						mimeType: queryFormatted.schema.filters.union.optional(),
+						folderId: queryFormatted.schema.filters.single.optional(),
 						type: queryFormatted.schema.filters.union.optional(),
 						extension: queryFormatted.schema.filters.union.optional(),
 					})
@@ -173,6 +189,25 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	moveFolder: {
+		body: z.object({
+			folderId: z.number().nullable().meta({
+				description: "The media folder ID",
+				example: 1,
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	updateSingle: {
 		body: z.object({
 			key: z
@@ -180,6 +215,14 @@ export const controllerSchemas = {
 				.meta({
 					description: "The media key",
 					example: "2024/09/5ttogd-placeholder-image.png",
+				})
+				.optional(),
+			folderId: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The media folder ID",
+					example: 1,
 				})
 				.optional(),
 			fileName: z
@@ -339,6 +382,14 @@ export const controllerSchemas = {
 				description: "The media key",
 				example: "2024/09/5ttogd-placeholder-image.png",
 			}),
+			folderId: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The media folder ID",
+					example: 1,
+				})
+				.optional(),
 			fileName: z.string().meta({
 				description: "The filename",
 				example: "funny-cats.jpg",

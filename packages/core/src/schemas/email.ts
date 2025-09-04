@@ -148,20 +148,21 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[toAddress]": queryString.schema.filter(
-						false,
-						"admin@lucidcms.io",
-					),
-					"filter[subject]": queryString.schema.filter(
-						false,
-						"Welcome To Lucid",
-					),
-					"filter[currentStatus]": queryString.schema.filter(true, "sent"),
-					"filter[type]": queryString.schema.filter(true, "internal"),
-					"filter[template]": queryString.schema.filter(
-						false,
-						"password-reset",
-					),
+					"filter[toAddress]": queryString.schema.filter(false, {
+						example: "admin@lucidcms.io",
+					}),
+					"filter[subject]": queryString.schema.filter(false, {
+						example: "Welcome To Lucid",
+					}),
+					"filter[currentStatus]": queryString.schema.filter(true, {
+						example: "sent",
+					}),
+					"filter[type]": queryString.schema.filter(true, {
+						example: "internal",
+					}),
+					"filter[template]": queryString.schema.filter(false, {
+						example: "password-reset",
+					}),
 					sort: queryString.schema.sort(
 						"lastAttemptedAt,attemptCount,createdAt,updatedAt",
 					),

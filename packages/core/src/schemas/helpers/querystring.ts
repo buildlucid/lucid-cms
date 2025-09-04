@@ -6,14 +6,27 @@ export const filterOperators = z
 
 export const queryString = {
 	schema: {
-		filter: (multiple = false, example?: string, description?: string) =>
+		filter: (
+			multiple = false,
+			options?: {
+				example?: string;
+				description?: string;
+				/**
+				 * When true, if the filter value is empty it will be treated as you querying for the column being equal to null.
+				 * You'll also need to mark the column as nullable in the buildFormattedQuery helper in your controller.
+				 */
+				nullable?: boolean;
+			},
+		) =>
 			z
 				.string()
 				.meta({
 					description: multiple
-						? description || "Accepts multiple values separated by commas."
-						: description || "Accepts a single value only.",
-					example: example,
+						? options?.description ||
+							"Accepts multiple values separated by commas."
+						: (options?.description || "Accepts a single value only.") +
+							(options?.nullable ? " Leave empty for null comparison" : ""),
+					example: options?.example,
 				})
 				.optional(),
 		sort: (example: string) =>
@@ -93,7 +106,7 @@ export const queryFormatted = {
 	schema: {
 		filters: {
 			single: z.object({
-				value: z.union([z.string(), z.number()]),
+				value: z.union([z.string(), z.number(), z.null()]),
 				operator: filterOperators,
 			}),
 			union: z.object({

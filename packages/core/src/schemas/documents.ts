@@ -259,7 +259,9 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[createdBy]": queryString.schema.filter(true, "1"),
+					"filter[createdBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
 					sort: queryString.schema.sort("createdAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -304,33 +306,34 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[id]": queryString.schema.filter(true, "1"),
-					"filter[createdBy]": queryString.schema.filter(true, "1"),
-					"filter[updatedBy]": queryString.schema.filter(true, "1"),
-					"filter[createdAt]": queryString.schema.filter(
-						false,
-						"2025-03-15T09:22:10Z",
-					),
-					"filter[updatedAt]": queryString.schema.filter(
-						false,
-						"2025-03-15T09:22:10Z",
-					),
-					"filter[_customFieldKey]": queryString.schema.filter(
-						true,
-						undefined,
-						"Prefix custom field keys with an underscore to filter by them",
-					),
-					"filter[brickKey._customFieldKey]": queryString.schema.filter(
-						true,
-						undefined,
-						"Add a brick key before the custom field key to filter against the brick",
-					),
+					"filter[id]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[createdBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[updatedBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2025-03-15T09:22:10Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2025-03-15T09:22:10Z",
+					}),
+					"filter[_customFieldKey]": queryString.schema.filter(true, {
+						description:
+							"Prefix custom field keys with an underscore to filter by them",
+					}),
+					"filter[brickKey._customFieldKey]": queryString.schema.filter(true, {
+						description:
+							"Add a brick key before the custom field key to filter against the brick",
+					}),
 					"filter[brickKey.repeaterKey._customFieldKey]":
-						queryString.schema.filter(
-							true,
-							undefined,
-							"Target a repeater field by adding a repeater key after the brick key",
-						),
+						queryString.schema.filter(true, {
+							description:
+								"Target a repeater field by adding a repeater key after the brick key",
+						}),
 					sort: queryString.schema.sort("createdAt,updatedAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -481,33 +484,37 @@ export const controllerSchemas = {
 			query: {
 				string: z
 					.object({
-						"filter[id]": queryString.schema.filter(true, "1"),
-						"filter[createdBy]": queryString.schema.filter(true, "1"),
-						"filter[updatedBy]": queryString.schema.filter(true, "1"),
-						"filter[createdAt]": queryString.schema.filter(
-							false,
-							"2025-03-15T09:22:10Z",
-						),
-						"filter[updatedAt]": queryString.schema.filter(
-							false,
-							"2025-03-15T09:22:10Z",
-						),
-						"filter[_customFieldKey]": queryString.schema.filter(
-							true,
-							undefined,
-							"Prefix custom field keys with an underscore to filter by them",
-						),
+						"filter[id]": queryString.schema.filter(true, {
+							example: "1",
+						}),
+						"filter[createdBy]": queryString.schema.filter(true, {
+							example: "1",
+						}),
+						"filter[updatedBy]": queryString.schema.filter(true, {
+							example: "1",
+						}),
+						"filter[createdAt]": queryString.schema.filter(false, {
+							example: "2025-03-15T09:22:10Z",
+						}),
+						"filter[updatedAt]": queryString.schema.filter(false, {
+							example: "2025-03-15T09:22:10Z",
+						}),
+						"filter[_customFieldKey]": queryString.schema.filter(true, {
+							description:
+								"Prefix custom field keys with an underscore to filter by them",
+						}),
 						"filter[brickKey._customFieldKey]": queryString.schema.filter(
 							true,
-							undefined,
-							"Add a brick key before the custom field key to filter against the brick",
+							{
+								description:
+									"Add a brick key before the custom field key to filter against the brick",
+							},
 						),
 						"filter[brickKey.repeaterKey._customFieldKey]":
-							queryString.schema.filter(
-								true,
-								undefined,
-								"Target a repeater field by adding a repeater key after the brick key",
-							),
+							queryString.schema.filter(true, {
+								description:
+									"Target a repeater field by adding a repeater key after the brick key",
+							}),
 						include: queryString.schema.include("bricks"),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
@@ -552,33 +559,37 @@ export const controllerSchemas = {
 			query: {
 				string: z
 					.object({
-						"filter[id]": queryString.schema.filter(true, "1"),
-						"filter[createdBy]": queryString.schema.filter(true, "1"),
-						"filter[updatedBy]": queryString.schema.filter(true, "1"),
-						"filter[createdAt]": queryString.schema.filter(
-							false,
-							"2025-03-15T09:22:10Z",
-						),
-						"filter[updatedAt]": queryString.schema.filter(
-							false,
-							"2025-03-15T09:22:10Z",
-						),
-						"filter[_customFieldKey]": queryString.schema.filter(
-							true,
-							undefined,
-							"Prefix custom field keys with an underscore to filter by them",
-						),
+						"filter[id]": queryString.schema.filter(true, {
+							example: "1",
+						}),
+						"filter[createdBy]": queryString.schema.filter(true, {
+							example: "1",
+						}),
+						"filter[updatedBy]": queryString.schema.filter(true, {
+							example: "1",
+						}),
+						"filter[createdAt]": queryString.schema.filter(false, {
+							example: "2025-03-15T09:22:10Z",
+						}),
+						"filter[updatedAt]": queryString.schema.filter(false, {
+							example: "2025-03-15T09:22:10Z",
+						}),
+						"filter[_customFieldKey]": queryString.schema.filter(true, {
+							description:
+								"Prefix custom field keys with an underscore to filter by them",
+						}),
 						"filter[brickKey._customFieldKey]": queryString.schema.filter(
 							true,
-							undefined,
-							"Add a brick key before the custom field key to filter against the brick",
+							{
+								description:
+									"Add a brick key before the custom field key to filter against the brick",
+							},
 						),
 						"filter[brickKey.repeaterKey._customFieldKey]":
-							queryString.schema.filter(
-								true,
-								undefined,
-								"Target a repeater field by adding a repeater key after the brick key",
-							),
+							queryString.schema.filter(true, {
+								description:
+									"Target a repeater field by adding a repeater key after the brick key",
+							}),
 						sort: queryString.schema.sort("createdAt,updatedAt"),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,

@@ -30,6 +30,45 @@ const mediaFolderResponseSchema = z.object({
 });
 
 export const controllerSchemas = {
+	getMultiple: {
+		query: {
+			string: z
+				.object({
+					"filter[title]": queryString.schema.filter(false, {
+						example: "Heros",
+					}),
+					"filter[parentFolderId]": queryString.schema.filter(false, {
+						example: "1",
+						nullable: true,
+					}),
+					sort: queryString.schema.sort("createdAt,updatedAt,title"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				})
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						title: queryFormatted.schema.filters.single.optional(),
+						parentFolderId: queryFormatted.schema.filters.single.optional(),
+					})
+					.optional(),
+				sort: z
+					.array(
+						z.object({
+							key: z.enum(["createdAt", "updatedAt", "title"]),
+							value: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
+			}),
+		},
+		params: undefined,
+		body: undefined,
+		response: z.array(mediaFolderResponseSchema),
+	} satisfies ControllerSchema,
 	deleteSingle: {
 		body: undefined,
 		query: {
@@ -98,3 +137,7 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 };
+
+export type GetMultipleQueryParams = z.infer<
+	typeof controllerSchemas.getMultiple.query.formatted
+>;

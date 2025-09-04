@@ -9,6 +9,7 @@ import SettingsFormatter from "./settings.js";
 import PermissionsFormatter from "./permissions.js";
 import OptionsFormatter from "./options.js";
 import MediaFormatter from "./media.js";
+import MediaFoldersFormatter from "./media-folders.js";
 import LocalesFormatter from "./locales.js";
 import EmailsFormatter from "./emails.js";
 import CollectionsFormatter from "./collections.js";
@@ -39,6 +40,8 @@ class Formatter {
 				return new OptionsFormatter() as FormatterReturnType<T>;
 			case "media":
 				return new MediaFormatter() as FormatterReturnType<T>;
+			case "media-folders":
+				return new MediaFoldersFormatter() as FormatterReturnType<T>;
 			case "locales":
 				return new LocalesFormatter() as FormatterReturnType<T>;
 			case "emails":
@@ -117,6 +120,7 @@ type FormatterClassMap = {
 	permissions: PermissionsFormatter;
 	options: OptionsFormatter;
 	media: MediaFormatter;
+	"media-folders": MediaFoldersFormatter;
 	locales: LocalesFormatter;
 	emails: EmailsFormatter;
 	collections: CollectionsFormatter;

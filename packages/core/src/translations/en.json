@@ -169,6 +169,8 @@
 	"route_media_folders_delete_error_message": "An error occurred while deleting the media folder.",
 	"route_media_fetch_error_name": "Media(s) Fetch Error",
 	"route_media_fetch_error_message": "An error occurred while fetching the media(s).",
+	"route_media_folders_fetch_error_name": "Media Folder(s) Fetch Error",
+	"route_media_folders_fetch_error_message": "An error occurred while fetching the media folder(s).",
 	"route_media_presigned_url_error_name": "Presigned URL Error",
 	"route_media_presigned_url_error_message": "An error occurred while getting the presigned URL.",
 	"route_media_update_error_name": "Media Update Error",
