@@ -14,6 +14,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 	tableSchema = z.object({
 		id: z.number(),
 		key: z.string(),
+		folder_id: z.number().nullable(),
 		e_tag: z.string().nullable(),
 		public: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
@@ -64,6 +65,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		key: this.dbAdapter.getDataType("text"),
+		folder_id: this.dbAdapter.getDataType("integer"),
 		e_tag: this.dbAdapter.getDataType("text"),
 		public: this.dbAdapter.getDataType("boolean"),
 		type: this.dbAdapter.getDataType("text"),
