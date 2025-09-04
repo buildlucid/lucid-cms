@@ -82,4 +82,41 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 			select: ["parent_id"],
 		});
 	}
+	async getBreadcrumb(props: { folderId: number }) {
+		const query = this.db
+			.withRecursive("breadcrumb", (db) =>
+				db
+					.selectFrom("lucid_media_folders")
+					.select(["id", "title", "parent_folder_id"])
+					.where("id", "=", props.folderId)
+					.unionAll(
+						db
+							.selectFrom("lucid_media_folders")
+							.innerJoin(
+								"breadcrumb",
+								"breadcrumb.parent_folder_id",
+								"lucid_media_folders.id",
+							)
+							.select([
+								"lucid_media_folders.id",
+								"lucid_media_folders.title",
+								"lucid_media_folders.parent_folder_id",
+							]),
+					),
+			)
+			.selectFrom("breadcrumb")
+			.select(["id", "title", "parent_folder_id"])
+			.orderBy("parent_folder_id", "asc");
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "getBreadcrumb",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "multiple",
+			select: ["id", "title", "parent_folder_id"],
+		});
+	}
 }

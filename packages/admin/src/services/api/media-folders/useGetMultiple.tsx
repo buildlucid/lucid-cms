@@ -2,7 +2,7 @@ import { type Accessor, createMemo } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, MediaFolderResponse } from "@types";
+import type { ResponseBody, MultipleMediaFolderResponse } from "@types";
 
 interface QueryParams {
 	filters?: {
@@ -23,7 +23,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	return createQuery(() => ({
 		queryKey: ["media-folders.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<MediaFolderResponse[]>>({
+			request<ResponseBody<MultipleMediaFolderResponse>>({
 				url: "/api/v1/media/folders",
 				query: queryParams(),
 				config: {

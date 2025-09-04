@@ -146,6 +146,15 @@ export interface MediaFolderResponse {
 	createdAt: string | null;
 	updatedAt: string | null;
 }
+export interface MediaFolderBreadcrumbResponse {
+	id: number;
+	title: string;
+	parentFolderId: number | null;
+}
+export interface MultipleMediaFolderResponse {
+	folders: MediaFolderResponse[];
+	breadcrumbs: MediaFolderBreadcrumbResponse[];
+}
 
 export interface LocalesResponse {
 	code: string;

@@ -10,8 +10,23 @@ interface MediaFolderPropsT {
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 }
-
+interface MediaFolderBreadcrumbPropsT {
+	id: number;
+	title: string;
+	parent_folder_id: number | null;
+}
 export default class MediaFoldersFormatter {
+	formatBreadcrumbs = (props: {
+		breadcrumbs: MediaFolderBreadcrumbPropsT[];
+	}) => {
+		return props.breadcrumbs.map((b) => {
+			return {
+				id: b.id,
+				title: b.title,
+				parentFolderId: b.parent_folder_id,
+			};
+		});
+	};
 	formatMultiple = (props: { folders: MediaFolderPropsT[] }) => {
 		return props.folders.map((f) =>
 			this.formatSingle({

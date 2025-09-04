@@ -28,6 +28,16 @@ const mediaFolderResponseSchema = z.object({
 		example: "2022-01-01T00:00:00Z",
 	}),
 });
+const mediaFolderBreadcrumbResponseSchema = z.object({
+	id: z.number().meta({ description: "Media folder ID", example: 1 }),
+	title: z
+		.string()
+		.meta({ description: "Media folder title", example: "Heros" }),
+	parentFolderId: z
+		.number()
+		.nullable()
+		.meta({ description: "Media folder parent ID", example: 1 }),
+});
 
 export const controllerSchemas = {
 	getMultiple: {
@@ -67,7 +77,10 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		body: undefined,
-		response: z.array(mediaFolderResponseSchema),
+		response: z.object({
+			folders: z.array(mediaFolderResponseSchema),
+			breadcrumbs: z.array(mediaFolderBreadcrumbResponseSchema),
+		}),
 	} satisfies ControllerSchema,
 	deleteSingle: {
 		body: undefined,
