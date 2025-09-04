@@ -15,11 +15,12 @@ const generateHTML = async (paths: VitePaths): ServiceResponse<undefined> => {
             <head>
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <meta name="theme-color" content="#000000" />
+                <meta name="theme-color" content="#171717" />
                 <link rel="shortcut icon" type="image/ico" href="/admin/assets/favicon.ico" />
+                 <meta name="robots" content="noindex, nofollow">
                 <title>Lucid CMS</title>
             </head>
-            <body class="h-full bg-container-1">
+            <body class="h-full bg-sidebar-base">
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <div id="${constants.vite.rootSelector}" class="h-full"></div>
                 <script src="/${constants.vite.mount}" type="module"></script>

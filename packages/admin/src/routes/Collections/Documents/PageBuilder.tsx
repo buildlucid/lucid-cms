@@ -134,7 +134,7 @@ const CollectionsDocumentsEditRoute: Component<
 					}}
 				/>
 
-				<div class="mt-4 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden">
+				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden">
 					<Alert
 						style="layout"
 						alerts={[
