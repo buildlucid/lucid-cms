@@ -10,6 +10,7 @@ import Loading from "@/components/Partials/Loading";
 import Button from "@/components/Partials/Button";
 
 export const DynamicContent: Component<{
+	class?: string;
 	state?: {
 		isError?: boolean;
 		isSuccess?: boolean;
@@ -40,6 +41,7 @@ export const DynamicContent: Component<{
 		createEntry?: () => void;
 	};
 	options?: {
+		inline?: boolean;
 		padding?: "16" | "24";
 		hideNoEntries?: boolean;
 	};
@@ -50,9 +52,10 @@ export const DynamicContent: Component<{
 	return (
 		<>
 			<div
-				class={classNames("flex flex-col flex-1 h-full", {
+				class={classNames("flex flex-col", props.class, {
 					"p-4 md:p-6": props.options?.padding === "24",
 					"p-4": props.options?.padding === "16",
+					"flex-1 h-full": props.options?.inline !== true,
 				})}
 			>
 				<Switch fallback={props.children}>

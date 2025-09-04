@@ -4,6 +4,7 @@ import users from "./users";
 import roles from "./roles";
 import permissions from "./permissions";
 import media from "./media";
+import mediaFolders from "./media-folders";
 import settings from "./settings";
 import email from "./email";
 import locales from "./locales";
@@ -19,6 +20,7 @@ const exportObject: {
 	roles: typeof roles;
 	permissions: typeof permissions;
 	media: typeof media;
+	mediaFolders: typeof mediaFolders;
 	settings: typeof settings;
 	email: typeof email;
 	locales: typeof locales;
@@ -33,6 +35,7 @@ const exportObject: {
 	roles,
 	permissions,
 	media,
+	mediaFolders,
 	settings,
 	email,
 	locales,

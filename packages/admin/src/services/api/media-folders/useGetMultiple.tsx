@@ -1,23 +1,15 @@
-import { createMemo, type Accessor } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, MediaResponse } from "@types";
+import type { ResponseBody, MediaFolderResponse } from "@types";
 
 interface QueryParams {
-	queryString?: Accessor<string>;
 	filters?: {
-		name?: Accessor<string>;
-		key?: Accessor<string>;
-		mimeType?: Accessor<string>;
-		extension?: Accessor<string>;
-		type?: Accessor<string | string[]>;
-		folderId?: Accessor<number | null | string>;
+		parentFolderId?: Accessor<number | null | string>;
+		title?: Accessor<string>;
 	};
 	perPage?: number;
-	headers: {
-		"lucid-content-locale": Accessor<string | undefined> | string;
-	};
 }
 
 const useGetMultiple = (params: QueryHook<QueryParams>) => {
@@ -29,14 +21,13 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return createQuery(() => ({
-		queryKey: ["media.getMultiple", queryKey(), params.key?.()],
+		queryKey: ["media-folders.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<MediaResponse[]>>({
-				url: "/api/v1/media",
+			request<ResponseBody<MediaFolderResponse[]>>({
+				url: "/api/v1/media/folders",
 				query: queryParams(),
 				config: {
 					method: "GET",
-					headers: queryParams().headers,
 				},
 			}),
 		get enabled() {

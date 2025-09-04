@@ -73,6 +73,7 @@ const AppRouter: Component = () => {
 				/>
 				{/* Media */}
 				<Route path="/media" component={MediaListRoute} />
+				<Route path="/media/:folderId" component={MediaListRoute} />
 				{/* Users */}
 				<Route path="/users" component={UsersListRoute} />
 				{/* Roles */}

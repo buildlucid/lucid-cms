@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createMemo, For } from "solid-js";
+import { type Accessor, type Component, createMemo, For } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
@@ -11,11 +11,13 @@ import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
+import { useParams } from "@solidjs/router";
 
 export const MediaList: Component<{
 	state: {
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		setOpenCreateMediaPanel: (state: boolean) => void;
+		parentFolderId: Accessor<number | string>;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -37,6 +39,9 @@ export const MediaList: Component<{
 	const media = api.media.useGetMultiple({
 		queryParams: {
 			queryString: props.state.searchParams.getQueryString,
+			filters: {
+				folderId: props.state.parentFolderId,
+			},
 			headers: {
 				"lucid-content-locale": contentLocale,
 			},

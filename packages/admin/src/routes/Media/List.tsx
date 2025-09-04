@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createSignal } from "solid-js";
+import { type Component, createMemo, createSignal } from "solid-js";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
 import api from "@/services/api";
@@ -9,6 +9,8 @@ import { MediaList } from "@/components/Groups/Content";
 import Alert from "@/components/Blocks/Alert";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import { QueryRow } from "@/components/Groups/Query";
+import { useParams } from "@solidjs/router";
+import { MediaFolderList } from "@/components/Groups/Content/MediaFolderList";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -55,8 +57,20 @@ const MediaListRoute: Component = () => {
 			singleSort: true,
 		},
 	);
+	const params = useParams();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
+
+	// ----------------------------------------
+	// Memos
+	const folderIdFilter = createMemo(() => {
+		//* empty string does a IS NULL filter on this column
+		const id = params.folderId;
+		if (!id) return "";
+
+		const parsed = Number.parseInt(id, 10);
+		return Number.isNaN(parsed) ? "" : parsed;
+	});
 
 	// ----------------------------------------
 	// Queries / Mutations
@@ -194,10 +208,16 @@ const MediaListRoute: Component = () => {
 				),
 			}}
 		>
+			<MediaFolderList
+				state={{
+					parentFolderId: folderIdFilter,
+				}}
+			/>
 			<MediaList
 				state={{
 					searchParams: searchParams,
 					setOpenCreateMediaPanel: setOpenCreateMediaPanel,
+					parentFolderId: folderIdFilter,
 				}}
 			/>
 			<CreateUpdateMediaPanel
