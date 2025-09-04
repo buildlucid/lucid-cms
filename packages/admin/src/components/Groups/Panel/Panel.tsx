@@ -210,7 +210,7 @@ export const Panel: Component<{
 									{/* footer */}
 									<div
 										class={classNames(
-											"flex justify-between items-center gap-5",
+											"flex justify-between items-center gap-4",
 											{
 												"mx-4 py-4": props.options?.padding === "16",
 												"mx-4 md:mx-6 py-4 md:py-6 ":

@@ -58,7 +58,7 @@ const Alert: Component<AlertProps> = (props) => {
 							>
 								<span
 									class={classNames(
-										"w-6 h-6 flex items-center justify-center rounded-full min-w-[24px] mr-2.5",
+										"size-5 flex items-center justify-center rounded-full min-w-5 mr-2",
 										{
 											"bg-primary-base text-primary-contrast":
 												(type === "success" || type === "info") &&
@@ -80,20 +80,20 @@ const Alert: Component<AlertProps> = (props) => {
 								>
 									<Switch>
 										<Match when={type === "success"}>
-											<FaSolidCheck size={10} />
+											<FaSolidCheck size={8} />
 										</Match>
 										<Match when={type === "error"}>
-											<FaSolidExclamation size={10} />
+											<FaSolidExclamation size={8} />
 										</Match>
 										<Match when={type === "warning"}>
-											<FaSolidTriangleExclamation size={10} />
+											<FaSolidTriangleExclamation size={8} />
 										</Match>
 										<Match when={type === "info"}>
-											<FaSolidInfo size={10} />
+											<FaSolidInfo size={8} />
 										</Match>
 									</Switch>
 								</span>
-								<div>{message}</div>
+								<p class="text-sm text-current">{message}</p>
 							</div>
 						</Show>
 					)}

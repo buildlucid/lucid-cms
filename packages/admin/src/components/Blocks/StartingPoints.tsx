@@ -30,7 +30,7 @@ const StartingPoints: Component<StartingPointsProps> = (props) => {
 	return (
 		<section>
 			<h2 class="mb-4">{T()("quick_links")}</h2>
-			<ul class="grid grid-cols-1 gap-4 md:grid-cols-3 mb-4 pb-4 last:mb-0 last:pb-0">
+			<ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 pb-4 last:mb-0 last:pb-0">
 				<For each={props.links}>
 					{(link) => (
 						<li class="relative bg-card-base border border-border p-4 rounded-md h-full flex space-x-4 focus-within:ring-1 focus-within:ring-primary-base">

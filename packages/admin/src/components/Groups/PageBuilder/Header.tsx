@@ -24,55 +24,24 @@ export const Header: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<header class="bg-card-base w-full -mt-4 pt-6 px-6 pb-0 border-x border-border z-31">
-			<Breadcrumbs
-				breadcrumbs={[
-					{
-						link: `/admin/collections/${props.state.collectionKey()}`,
-						label: props.state.collectionName() || "",
-						include: props.state.collection()?.mode === "multiple",
-					},
-					{
-						link:
-							props.mode === "create"
-								? getDocumentRoute("create", {
-										collectionKey: props.state.collectionKey(),
-										useDrafts: props.state.collection()?.config.useDrafts,
-									})
-								: getDocumentRoute("edit", {
-										collectionKey: props.state.collectionKey(),
-										useDrafts: props.state.collection()?.config.useDrafts,
-										documentId: props.state.documentID(),
-									}),
-						label:
-							props.mode === "create"
-								? `${T()("create")} ${props.state.collectionSingularName()}`
-								: `${T()("edit")} ${props.state.collectionSingularName()} (#${props.state.documentID()})`,
-					},
-				]}
-				options={{
-					noBorder: true,
-					noPadding: true,
-				}}
-			/>
-
+		<header class="bg-background-base w-full -mt-4 pt-6 px-6 pb-px border-x border-border z-31">
 			<Show when={props.mode === "edit"}>
-				<h1 class="mt-2.5">
+				<h1>
 					{props.state.collectionSingularName()} - #{props.state.documentID()}
 				</h1>
 			</Show>
 			<Show when={props.mode === "create"}>
-				<h1 class="mt-2.5">
+				<h1>
 					{T()("create")} {props.state.collectionSingularName()}
 				</h1>
 			</Show>
 			<Show when={props.mode === "revisions"}>
-				<h1 class="mt-2.5">
+				<h1>
 					{props.state.collectionSingularName()} {T()("revisions")}
 				</h1>
 			</Show>
 
-			<nav class="-mb-px bg-card-base mt-4">
+			<nav class="-mb-px bg-background-base mt-4">
 				<ul class="flex gap-2">
 					{/* Draft edit */}
 					<Show when={props.state.collection()?.config.useDrafts}>
@@ -98,10 +67,11 @@ export const Header: Component<{
 								{T()("draft")}
 
 								<Show when={props.version === "draft"}>
-									<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-background-base" />
-									<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-background-base" />
-									<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-card-base rounded-br-xl border-b border-r border-border" />
-									<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-card-base rounded-bl-xl border-b border-l border-border" />
+									<span class="absolute -bottom-px -left-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute -bottom-px -right-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute -bottom-px -left-2 w-2 z-21 h-2 bg-background-base rounded-br-xl border-b border-r border-border" />
+									<span class="absolute -bottom-px -right-2 w-2 z-21 h-2 bg-background-base rounded-bl-xl border-b border-l border-border" />
+									<span class="absolute -bottom-px -left-2 -right-2 h-px z-20 bg-background-base" />
 								</Show>
 							</A>
 						</li>
@@ -135,10 +105,11 @@ export const Header: Component<{
 							{T()("published")}
 
 							<Show when={props.version === "published"}>
-								<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-background-base" />
-								<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-background-base" />
-								<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-card-base rounded-br-xl border-b border-r border-border" />
-								<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-card-base rounded-bl-xl border-b border-l border-border" />
+								<span class="absolute -bottom-px -left-2 w-[9px] h-2 z-20 bg-background-base" />
+								<span class="absolute -bottom-px -right-2 w-[9px] h-2 z-20 bg-background-base" />
+								<span class="absolute -bottom-px -left-2 w-2 z-21 h-2 bg-background-base rounded-br-xl border-b border-r border-border" />
+								<span class="absolute -bottom-px -right-2 w-2 z-21 h-2 bg-background-base rounded-bl-xl border-b border-l border-border" />
+								<span class="absolute -bottom-px -left-2 -right-2 h-px z-20 bg-background-base" />
 							</Show>
 						</A>
 					</li>
@@ -158,10 +129,11 @@ export const Header: Component<{
 							>
 								{T()("revisions")}
 								<Show when={props.mode === "revisions"}>
-									<span class="absolute bottom-0 -left-2 w-[9px] h-2 z-20 bg-background-base" />
-									<span class="absolute bottom-0 -right-2 w-[9px] h-2 z-20 bg-background-base" />
-									<span class="absolute bottom-[0.5px] -left-2 w-2 z-21 h-2 bg-card-base rounded-br-xl border-b border-r border-border" />
-									<span class="absolute bottom-[0.5px] -right-2 w-2 z-21 h-2 bg-card-base rounded-bl-xl border-b border-l border-border" />
+									<span class="absolute -bottom-px -left-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute -bottom-px -right-2 w-[9px] h-2 z-20 bg-background-base" />
+									<span class="absolute -bottom-px -left-2 w-2 z-21 h-2 bg-background-base rounded-br-xl border-b border-r border-border" />
+									<span class="absolute -bottom-px -right-2 w-2 z-21 h-2 bg-background-base rounded-bl-xl border-b border-l border-border" />
+									<span class="absolute -bottom-px -left-2 -right-2 h-px z-20 bg-background-base" />
 								</Show>
 							</A>
 						</li>

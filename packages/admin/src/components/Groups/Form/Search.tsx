@@ -32,7 +32,7 @@ export const Search: Component<SearchProps> = (props) => {
 		<div class="relative w-full">
 			<input
 				type="text"
-				class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-title font-medium h-12 focus:outline-hidden focus:border-primary-base"
+				class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-title font-medium h-10 focus:outline-hidden focus:border-primary-base"
 				placeholder={T()("search")}
 				value={props.value}
 				onKeyDown={(e) => {

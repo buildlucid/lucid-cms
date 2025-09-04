@@ -123,7 +123,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					</DragDrop>
 				</Match>
 				<Match when={groups().length === 0}>
-					<div class="w-full border-border bg-input-base border p-4 md:p-5 rounded-md flex items-center flex-col justify-center text-center">
+					<div class="w-full border-border bg-input-base border p-4 md:p-6 rounded-md flex items-center flex-col justify-center text-center">
 						<span class="text-sm text-unfocused capitalize">
 							{T()("no_entries")}
 						</span>

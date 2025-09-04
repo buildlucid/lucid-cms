@@ -65,7 +65,7 @@ export const Dashboard: Component = () => {
 					},
 				]}
 			/>
-			<div class="flex flex-col lg:flex-row gap-6">
+			<div class="flex flex-col lg:flex-row lg:items-start gap-6">
 				<div class="flex-1">
 					<StartingPoints
 						links={[
@@ -108,7 +108,7 @@ export const Dashboard: Component = () => {
 						]}
 					/>
 				</div>
-				<aside class="w-full lg:max-w-[260px]">
+				<aside class="w-full lg:max-w-[260px] lg:sticky lg:top-4 self-start">
 					<h2 class="mb-4">{T()("documentation")}</h2>
 					<ul>
 						<For each={docsLinks}>

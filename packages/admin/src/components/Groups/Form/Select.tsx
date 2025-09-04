@@ -131,7 +131,7 @@ export const Select: Component<SelectProps> = (props) => {
 							{
 								"bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic" || props.theme === "basic-small",
-								"h-12 bg-input-base border-border": props.theme === "basic",
+								"h-10 bg-input-base border-border": props.theme === "basic",
 								"h-9 bg-input-base border-border":
 									props.theme === "basic-small",
 								"mt-1": props.theme !== "full" && props.copy?.label,
