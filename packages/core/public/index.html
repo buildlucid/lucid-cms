@@ -3,40 +3,38 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" type="image/ico" href="/admin/assets/favicon.ico">
         <title>Lucid CMS</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <meta name="robots" content="noindex, nofollow">
     </head>
-    <body class="bg-[#131313] text-white min-h-screen">
+    <body class="bg-[#0A0A0A] text-white min-h-screen">
         <main class="h-screen w-full flex items-center justify-center">
             <div class="flex flex-col items-center justify-center max-w-2xl mx-auto p-10 m-auto">
-                <div class="flex flex-col items-center mb-16">
-                    <svg width="60" height="66" viewBox="0 0 30 33" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        class="mb-10">
-                        <rect x="8.00879" width="8.26731" height="30.9433" rx="4.13365" transform="rotate(15 8.00879 0)"
-                            fill="#C1FE77" />
-                        <rect x="22.0146" y="0.206909" width="8.26731" height="30.9433" rx="4.13365"
-                            transform="rotate(15 22.0146 0.206909)" fill="#C1FE77" />
-                    </svg>
+                <div class="flex flex-col items-center mb-6">
+                    <div class="mb-6 h-16 w-auto">
+                        <svg class="h-full" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 156 113"><path fill="url(#a)" d="M77.697 0c42.911 0 77.697 34.787 77.697 77.697-.001 10.825-2.217 21.13-6.216 30.492l-.002-.001c-.053.072-.104.148-.159.22-3.722 4.88-10.658 5.859-15.582 2.237-14.935-12.95-34.42-20.787-55.739-20.787-21.403 0-40.961 7.9-55.919 20.942-4.914 3.492-11.747 2.484-15.43-2.346-.016-.02-.03-.041-.045-.061C2.248 98.977 0 88.6 0 77.697 0 34.787 34.786 0 77.697 0Z"/><circle cx="77.397" cy="73.527" r="39.473" fill="url(#b)"/><defs><radialGradient id="b" cx="0" cy="0" r="1" gradientTransform="rotate(90 1.935 75.462) scale(39.4726)" gradientUnits="userSpaceOnUse"><stop stop-color="#C1FE77"/><stop offset="1" stop-color="#B1EC6A"/></radialGradient><linearGradient id="a" x1="78" x2="78" y1="0" y2="113" gradientUnits="userSpaceOnUse"><stop stop-color="#CECECE"/><stop offset="1" stop-color="#404040"/></linearGradient></defs></svg>
+                    </div>
 
-                    <h1 class="text-5xl font-bold mb-6 text-white text-center">
+                    <h1 class="text-lg font-bold mb-1 text-white text-center">
                         Lucid CMS
                     </h1>
 
-                    <p class="text-xl text-gray-300 text-center leading-relaxed max-w-xl">
+                    <p class="text-base text-[#a1a1a1] text-center leading-relaxed max-w-md">
                         Welcome to your content management system.
                         <span class="text-white font-medium">Access your admin panel</span> to start creating and managing
                         your content.
                     </p>
                 </div>
 
-                <div class="bg-[#242424] border border-[#343434] rounded-2xl p-8 w-full max-w-md">
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-semibold mb-2">Ready to get started?</h2>
-                        <p class="text-gray-400">Sign in to your admin dashboard</p>
+                <div class="bg-[#171717] border border-[#2E2E2E] rounded-md p-4 md:p-6 w-full max-w-md">
+                    <div class="text-center mb-4">
+                        <h2 class="text-base font-semibold mb-1">Ready to get started?</h2>
+                        <p class="text-[#a1a1a1] text-sm">Sign in to your admin dashboard</p>
                     </div>
 
                     <a href="/admin/login"
-                        class="w-full text-lg font-semibold text-black px-8 py-4 rounded-xl flex items-center justify-center group bg-[#c1fe77] hover:bg-[#d0ff96] transition-colors duration-200">
+                        class="w-full text-base text-black px-8 py-2 rounded-md flex items-center justify-center group bg-[#c1fe77] hover:bg-[#d0ff96] transition-colors duration-200">
                         <span>Go to Admin Panel</span>
                         <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -45,17 +43,12 @@
                         </svg>
                     </a>
 
-                    <div class="mt-6 pt-6 border-t border-[#343434]">
-                        <div class="flex flex-col space-y-3 text-sm text-center">
-                            <a href="https://lucidcms.io/getting-started/"
-                                class="text-gray-400 hover:text-white underline underline-offset-4 decoration-gray-500 hover:decoration-white transition-colors duration-200"
+                    <div class="mt-4 pt-4 border-t border-[#2E2E2E]">
+                        <div class="flex flex-col space-y-2 text-sm text-center">
+                            <a href="https://lucidjs.build/en/cms/docs/configuration/configuring-lucid-cms"
+                                class="text-[#a1a1a1] hover:text-white hover:underline transition-colors duration-200"
                                 target="_blank" rel="noreferrer">
-                                Getting Started Guide
-                            </a>
-                            <a href="https://lucidcms.io/guides/configuring-lucid/"
-                                class="text-gray-400 hover:text-white underline underline-offset-4 decoration-gray-500 hover:decoration-white transition-colors duration-200"
-                                target="_blank" rel="noreferrer">
-                                Configuration Documentation
+                                Configuring Lucid CMS
                             </a>
                         </div>
                     </div>
