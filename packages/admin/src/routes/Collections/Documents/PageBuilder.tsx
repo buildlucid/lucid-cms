@@ -99,7 +99,8 @@ const CollectionsDocumentsEditRoute: Component<
 	return (
 		<Switch>
 			<Match when={uiState.isLoading()}>
-				<div class="fixed top-4 left-[325px] bottom-4 right-4 flex flex-col">
+				<span class="absolute top-0 left-[220px] right-4 h-32 bg-background-hover z-5" />
+				<div class="fixed top-4 left-[220px] bottom-4 right-4 flex flex-col z-10">
 					<span class="h-32 w-full skeleton block mb-4" />
 					<span class="h-full w-full skeleton block" />
 				</div>
@@ -138,12 +139,12 @@ const CollectionsDocumentsEditRoute: Component<
 						style="layout"
 						alerts={[
 							{
-								type: "warning",
+								type: "info",
 								message: T()("locked_document_message"),
 								show: uiState.isBuilderLocked(),
 							},
 							{
-								type: "warning",
+								type: "info",
 								message: T()("collection_needs_migrating_message"),
 								show: uiState.collectionNeedsMigrating(),
 							},

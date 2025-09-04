@@ -122,6 +122,7 @@ export const Input: Component<InputProps> = (props) => {
 						onClick={() => {
 							setPasswordVisible(!passwordVisible());
 						}}
+						tabIndex={-1}
 					>
 						<Show when={passwordVisible()}>
 							<FaSolidEyeSlash size={18} class="text-unfocused" />

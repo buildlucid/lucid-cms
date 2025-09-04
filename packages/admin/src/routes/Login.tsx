@@ -3,9 +3,10 @@ import { type Component, createEffect, Switch, Match } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import api from "@/services/api";
 import LoginForm from "@/components/Forms/Auth/LoginForm";
-import Loading from "@/components/Partials/Loading";
+import FullPageLoading from "@/components/Partials/FullPageLoading";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import notifyIllustration from "@assets/illustrations/notify.svg";
+import LogoIcon from "@assets/svgs/logo-icon.svg";
 
 const LoginRoute: Component = () => {
 	// ----------------------------------------
@@ -31,7 +32,7 @@ const LoginRoute: Component = () => {
 	return (
 		<Switch>
 			<Match when={setupRequired.isLoading}>
-				<Loading />
+				<FullPageLoading />
 			</Match>
 			<Match when={setupRequired.isError}>
 				<ErrorBlock
@@ -46,9 +47,12 @@ const LoginRoute: Component = () => {
 				when={setupRequired.isSuccess && !setupRequired.data.data.setupRequired}
 			>
 				<>
-					<h1 class="mb-2 text-center">{T()("login_route_title")}</h1>
-					<p class="mb-10 text-center">{T()("login_route_description")}</p>
-					<div class="mb-10">
+					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
+					<h1 class="mb-1 text-center">{T()("login_route_title")}</h1>
+					<p class="text-center max-w-sm mx-auto">
+						{T()("login_route_description")}
+					</p>
+					<div class="my-10">
 						<LoginForm showForgotPassword={true} />
 					</div>
 				</>

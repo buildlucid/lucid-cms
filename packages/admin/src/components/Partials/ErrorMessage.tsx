@@ -26,7 +26,7 @@ const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 				)}
 			>
 				<p
-					class={classNames({
+					class={classNames("text-sm", {
 						"text-error-hover": props.theme === "basic", // on basic color
 					})}
 				>

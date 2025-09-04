@@ -8,11 +8,11 @@ import {
 	createEffect,
 } from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router";
-import LogoColumn from "@assets/svgs/logo-column.svg";
 import api from "@/services/api";
 import { NavigationSidebar } from "@/components/Groups/Layout";
 import spawnToast from "@/utils/spawn-toast";
 import Alert from "@/components/Blocks/Alert";
+import FullPageLoading from "@/components/Partials/FullPageLoading";
 
 interface MainLayoutProps {
 	children?: JSXElement;
@@ -99,15 +99,7 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 						{props.children}
 					</Match>
 					<Match when={isLoading()}>
-						<div class="fixed inset-0 z-50 bg-background-base flex items-center justify-center">
-							<div class="absolute inset-0 z-20 flex-col flex items-center justify-center">
-								<img
-									src={LogoColumn}
-									alt="Lucid CMS Logo"
-									class="h-24 animate-pulse"
-								/>
-							</div>
-						</div>
+						<FullPageLoading />
 					</Match>
 				</Switch>
 			</main>

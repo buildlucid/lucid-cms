@@ -3,9 +3,10 @@ import { type Component, createEffect, Switch, Match } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import api from "@/services/api";
 import SetupForm from "@/components/Forms/Auth/SetupForm";
-import Loading from "@/components/Partials/Loading";
+import FullPageLoading from "@/components/Partials/FullPageLoading";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import notifyIllustration from "@assets/illustrations/notify.svg";
+import LogoIcon from "@assets/svgs/logo-icon.svg";
 
 const SetupRoute: Component = () => {
 	// ----------------------------------------
@@ -31,7 +32,7 @@ const SetupRoute: Component = () => {
 	return (
 		<Switch>
 			<Match when={setupRequired.isLoading}>
-				<Loading />
+				<FullPageLoading />
 			</Match>
 			<Match when={setupRequired.isError}>
 				<ErrorBlock
@@ -51,8 +52,13 @@ const SetupRoute: Component = () => {
 			>
 				<>
 					<div class="mb-10 text-center">
-						<h1 class="mb-2">{T()("setup_route_title")}</h1>
-						<p>{T()("setup_route_description")}</p>
+						<img
+							src={LogoIcon}
+							alt="Lucid CMS Logo"
+							class="h-10 mx-auto mb-6"
+						/>
+						<h1 class="mb-1">{T()("setup_route_title")}</h1>
+						<p class="max-w-sm mx-auto">{T()("setup_route_description")}</p>
 					</div>
 					<SetupForm />
 				</>

@@ -92,10 +92,10 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 			{/* Header */}
 			<div
 				class={classNames(
-					"flex justify-between cursor-pointer pt-5 px-5 focus:outline-hidden",
+					"flex justify-between cursor-pointer pt-4 md:pt-6 px-4 md:px-6 focus:outline-hidden",
 					{
 						"pb-0": getBrickOpen(),
-						"pb-5": !getBrickOpen(),
+						"pb-4 md:pb-6": !getBrickOpen(),
 					},
 				)}
 				onClick={toggleDropdown}

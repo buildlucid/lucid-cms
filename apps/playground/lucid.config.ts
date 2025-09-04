@@ -155,6 +155,7 @@ export default defineConfig((env) => ({
 				email: "team@lucidjs.build",
 				name: "Lucid CMS",
 			},
+			simulate: true,
 			apiKey: env.LUCID_RESEND_API_KEY,
 			webhook: {
 				enabled: true,

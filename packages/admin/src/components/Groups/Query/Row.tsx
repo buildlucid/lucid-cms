@@ -42,7 +42,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					<button
 						type="button"
 						class={classNames(
-							"z-20 relative text-sm flex items-center gap-2 ml-2.5 hover:text-error-hover duration-200 transition-colors group",
+							"z-20 relative text-sm flex items-center gap-1.5 ml-2 hover:text-error-hover duration-200 transition-colors group",
 							{
 								"opacity-50": !props.searchParams.hasFiltersApplied(),
 							},

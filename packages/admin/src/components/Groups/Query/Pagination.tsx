@@ -58,7 +58,7 @@ export const Pagination: Component<{
 			</span>
 			<Show when={lastPage() > 1}>
 				<KobPagination.Root
-					class="flex [&>ul]:flex [&>ul]:border [&>ul]:border-border [&>ul]:rounded-md [&>ul]:overflow-hidden"
+					class="flex [&>ul]:flex [&>ul]:border [&>ul]:border-border [&>ul]:rounded-md [&>ul]:overflow-hidden bg-card-base"
 					page={page()}
 					onPageChange={(page) => {
 						props.state.searchParams.setParams({
@@ -72,7 +72,7 @@ export const Pagination: Component<{
 					count={lastPage()}
 					itemComponent={(props) => (
 						<KobPagination.Item
-							class="h-9 w-9 flex items-center justify-center data-current:bg-primary-base data-current:text-primary-contrast hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors"
+							class="h-9 w-9 flex items-center justify-center data-current:bg-secondary-base data-current:text-secondary-contrast hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors"
 							page={props.page}
 						>
 							{props.page}
@@ -84,11 +84,11 @@ export const Pagination: Component<{
 						</KobPagination.Ellipsis>
 					)}
 				>
-					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50">
+					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50">
 						<FaSolidChevronLeft />
 					</KobPagination.Previous>
 					<KobPagination.Items />
-					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50">
+					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50">
 						<FaSolidChevronRight />
 					</KobPagination.Next>
 				</KobPagination.Root>

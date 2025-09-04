@@ -66,6 +66,13 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 		>
 			{() => (
 				<>
+					<div class="border border-border rounded-md overflow-hidden mb-4">
+						<iframe
+							class="w-full h-96"
+							srcdoc={email.data?.data.html || ""}
+							title="Preview"
+						/>
+					</div>
 					<SectionHeading title={T()("details")} />
 					<DetailsList
 						type="text"
@@ -104,14 +111,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 							},
 						]}
 					/>
-					<SectionHeading title={T()("preview")} />
-					<div class="border border-border rounded-md overflow-hidden mb-4">
-						<iframe
-							class="w-full h-96"
-							srcdoc={email.data?.data.html || ""}
-							title="Preview"
-						/>
-					</div>
 					<Show when={email.data?.data.data}>
 						<SectionHeading title={T()("template_data")} />
 						<div
@@ -142,7 +141,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 										class="border border-border rounded-md overflow-hidden"
 									>
 										<Accordion.Header>
-											<Accordion.Trigger class="w-full flex items-center justify-between text-sm font-medium text-title bg-input-base/40 hover:bg-background-base/20 px-2.5 py-2.5 focus:outline-hidden focus:ring-1 ring-primary-base duration-200 transition-colors">
+											<Accordion.Trigger class="w-full flex items-center justify-between text-sm font-medium text-title bg-card-base hover:bg-card-hover p-4 focus:outline-hidden focus:ring-1 ring-primary-base duration-200 transition-colors">
 												<Pill theme={getPillTheme(transaction.deliveryStatus)}>
 													{transaction.deliveryStatus}
 												</Pill>
@@ -153,7 +152,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 												</span>
 											</Accordion.Trigger>
 										</Accordion.Header>
-										<Accordion.Content class="px-2.5 py-2 bg-input-base/40 border-t border-border">
+										<Accordion.Content class="p-4 bg-card-base border-t border-border">
 											<DetailsList
 												type="text"
 												items={[
