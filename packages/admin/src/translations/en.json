@@ -492,5 +492,12 @@
 	"license_host_blurb": "The host in your Lucid CMS config must match the host set on your license.",
 	"license_refresh_toast_title": "Status updated",
 	"license_refresh_toast_message": "License status has been refreshed.",
-	"error_loading_collections": "There was an unknown error loading the collections."
+	"error_loading_collections": "There was an unknown error loading the collections.",
+	"quick_links": "Quick Links",
+	"configuring_lucid_cms": "Configuring Lucid CMS",
+	"collection_builder": "Collection Builder",
+	"brick_builder": "Brick Builder",
+	"fetching_data": "Fetching Data",
+	"hooks": "Hooks",
+	"plugins": "Plugins"
 }

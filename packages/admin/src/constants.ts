@@ -1,4 +1,4 @@
 export default {
-	documentationUrl: "https://lucidcms.io",
+	documentationUrl: "https://lucidjs.build/en/cms/docs",
 	cmsMarketingPage: "https://lucidjs.build/en/cms",
 };
