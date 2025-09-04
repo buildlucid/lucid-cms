@@ -165,12 +165,16 @@
 	"route_media_clear_processed_error_message": "An error occurred while clearing the processed image(s).",
 	"route_media_delete_error_name": "Media Delete Error",
 	"route_media_delete_error_message": "An error occurred while deleting the media.",
+	"route_media_folders_delete_error_name": "Media Folder Delete Error",
+	"route_media_folders_delete_error_message": "An error occurred while deleting the media folder.",
 	"route_media_fetch_error_name": "Media(s) Fetch Error",
 	"route_media_fetch_error_message": "An error occurred while fetching the media(s).",
 	"route_media_presigned_url_error_name": "Presigned URL Error",
 	"route_media_presigned_url_error_message": "An error occurred while getting the presigned URL.",
 	"route_media_update_error_name": "Media Update Error",
 	"route_media_update_error_message": "An error occurred while updating the media.",
+	"route_media_folders_update_error_name": "Media Folder Update Error",
+	"route_media_folders_update_error_message": "An error occurred while updating the media folder.",
 	"route_media_upload_error_name": "Media Upload Error",
 	"route_media_upload_error_message": "An error occurred while uploading the media.",
 	"route_roles_create_error_name": "Role Create Error",
@@ -246,6 +250,8 @@
 	"media_duplicate_key_error_message": "The media key you have provided already exists.",
 	"route_media_create_error_name": "Media Create Error",
 	"route_media_create_error_message": "There was an error creating the media item.",
+	"route_media_folders_create_error_name": "Media Folder Create Error",
+	"route_media_folders_create_error_message": "There was an error creating the media folder.",
 	"media_error_not_awaiting_sync": "The media key has either expired, been created already or has been deleted.",
 	"vite_build_error_name": "Vite Build Error",
 	"vite_build_error_copy_assets_error": "An error occurred while copying over a @lucidcms/admin asset export to the Vite build directory.",
@@ -286,5 +292,6 @@
 	"license_verified_successfully": "License verified successfully.",
 	"license_is_invalid": "License is invalid.",
 	"unknown_verification_error": "Unknown verification error.",
-	"license_is_not_set": "License is not set."
+	"license_is_not_set": "License is not set.",
+	"circular_media_folder_parents_error_message": "The media folder cannot be a parent of itself."
 }

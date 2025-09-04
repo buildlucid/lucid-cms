@@ -259,9 +259,20 @@ export interface LucidEmailTransactions {
 	updated_at: TimestampMutateable;
 }
 
+export interface LucidMediaFolders {
+	id: Generated<number>;
+	title: string;
+	parent_folder_id: number | null;
+	created_by: number | null;
+	updated_by: number | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export interface LucidMedia {
 	id: Generated<number>;
 	key: string;
+	folder_id: number | null;
 	e_tag: string | null;
 	public: BooleanInt;
 	type: string;
@@ -390,6 +401,7 @@ export interface LucidDB {
 	lucid_user_tokens: LucidUserTokens;
 	lucid_emails: LucidEmails;
 	lucid_email_transactions: LucidEmailTransactions;
+	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_processed_images: HeadlessProcessedImages;

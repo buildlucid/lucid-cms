@@ -8,6 +8,7 @@ import EmailsRepository from "./emails.js";
 import LocalesRepository from "./locales.js";
 import MediaRepository from "./media.js";
 import MediaAwaitingSyncRepository from "./media-awaiting-sync.js";
+import MediaFoldersRepository from "./media-folders.js";
 import OptionsRepository from "./options.js";
 import ProcessedImagesRepository from "./processed-images.js";
 import RolePermissionsRepository from "./role-permissions.js";
@@ -78,6 +79,11 @@ class Repository {
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
+			case "media-folders":
+				return new MediaFoldersRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "options":
 				return new OptionsRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "processed-images":
@@ -133,6 +139,7 @@ type RepositoryClassMap = {
 	locales: LocalesRepository;
 	media: MediaRepository;
 	"media-awaiting-sync": MediaAwaitingSyncRepository;
+	"media-folders": MediaFoldersRepository;
 	options: OptionsRepository;
 	"processed-images": ProcessedImagesRepository;
 	"role-permissions": RolePermissionsRepository;

@@ -9,6 +9,7 @@ import collections from "./collections/index.js";
 import emails from "./email/index.js";
 import locales from "./locales/index.js";
 import media from "./media/index.js";
+import mediaFolders from "./media-folders/index.js";
 import options from "./options/index.js";
 import processedImage from "./processed-images/index.js";
 import roles from "./roles/index.js";
@@ -42,6 +43,7 @@ const lucidServices = {
 	license: license,
 	option: options,
 	media: media,
+	mediaFolder: mediaFolders,
 	processedImage: processedImage,
 	cdn: cdn,
 	locale: locales,

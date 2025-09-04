@@ -9,12 +9,19 @@ import clearSingleProcessed from "../../../controllers/media/clear-single-proces
 import clearAllProcessed from "../../../controllers/media/clear-all-processed.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
+import createSingleFolder from "../../../controllers/media-folders/create-single.js";
+import updateSingleFolder from "../../../controllers/media-folders/update-single.js";
+import deleteSingleFolder from "../../../controllers/media-folders/delete-single.js";
+
 const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/:id", ...getSingle)
+	.post("/folders", ...createSingleFolder)
 	.post("/presigned-url", ...getPresignedUrl)
 	.post("/", ...createSingle)
+	.patch("/folders/:id", ...updateSingleFolder)
 	.patch("/:id", ...updateSingle)
+	.delete("/folders/:id", ...deleteSingleFolder)
 	.delete("/processed", ...clearAllProcessed)
 	.delete("/:id/processed", ...clearSingleProcessed)
 	.delete("/:id", ...deleteSingle);

@@ -6,12 +6,48 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
+				.createTable("lucid_media_folders")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("parent_folder_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_media_folders.id").onDelete("cascade"),
+				)
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
 				.createTable("lucid_media")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.unique().notNull(),
+				)
+				.addColumn("folder_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_media_folders.id").onDelete("set null"),
 				)
 				.addColumn("e_tag", adapter.getDataType("text"))
 				.addColumn("public", adapter.getDataType("boolean"), (col) =>
