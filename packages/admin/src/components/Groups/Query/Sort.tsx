@@ -95,7 +95,7 @@ export const Sort: Component<SortProps> = (props) => {
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
 				class={
-					"dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center"
+					"dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
 				}
 			>
 				<DropdownMenu.Icon>

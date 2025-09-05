@@ -1,5 +1,11 @@
 import T from "@/translations";
-import { type Component, createMemo, type JSXElement, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	For,
+	type JSXElement,
+	Show,
+} from "solid-js";
 import classNames from "classnames";
 import { FaSolidPlus, FaSolidTrash } from "solid-icons/fa";
 import Link from "@/components/Partials/Link";
@@ -19,12 +25,13 @@ export const Standard: Component<{
 			setOpen: (_open: boolean) => void;
 			permission?: boolean;
 		};
-		create?: {
+		create?: Array<{
 			open: boolean;
 			setOpen: (_open: boolean) => void;
 			permission?: boolean;
 			label?: string;
-		};
+			secondary?: boolean;
+		}>;
 		createLink?: {
 			link: string;
 			label: string;
@@ -50,12 +57,13 @@ export const Standard: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const showCreateAction = createMemo(() => {
+	const showFirstCreateAction = createMemo(() => {
 		return (
 			props.actions?.create !== undefined &&
-			props.actions.create.permission !== false
+			props.actions.create[0].permission !== false
 		);
 	});
+
 	const showCreateLink = createMemo(() => {
 		return (
 			props.actions?.createLink !== undefined &&
@@ -68,10 +76,11 @@ export const Standard: Component<{
 	// Hooks & State
 	useKeyboardShortcuts({
 		newEntry: {
-			permission: () => showCreateAction() || showCreateLink(),
+			permission: () => showFirstCreateAction() || showCreateLink(),
 			callback: () => {
-				if (showCreateAction()) {
-					props.actions?.create?.setOpen(true);
+				if (showFirstCreateAction()) {
+					props.actions?.create?.[0]?.setOpen(true);
+					return;
 				}
 
 				if (showCreateLink() && props.actions?.createLink?.link) {
@@ -87,7 +96,7 @@ export const Standard: Component<{
 		<div class="bg-background-base border-b border-border">
 			<div
 				class={classNames(
-					"flex justify-between flex-col-reverse md:flex-row items-start gap-x-8 gap-y-4 px-6 md:px-6 pt-6 md:pt-6 pb-4",
+					"flex justify-between flex-col-reverse md:flex-row items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6 pb-4",
 					{
 						"md:pb-6": !props.slots?.bottom,
 					},
@@ -111,35 +120,35 @@ export const Standard: Component<{
 								props.actions.contentLocale !== false
 							}
 						>
-							<div class="w-full md:max-w-62">
-								<ContentLocaleSelect showShortcut={true} />
+							<div class="w-full md:max-w-42">
+								<ContentLocaleSelect showShortcut={false} />
 							</div>
 						</Show>
-						<Show when={showCreateAction()}>
-							<Button
-								type="submit"
-								theme="primary"
-								size="icon"
-								onClick={() => {
-									props.actions?.create?.setOpen(true);
-								}}
-							>
-								<FaSolidPlus />
-								<span class="sr-only">
-									{props.actions?.create?.label ?? T()("create")}
-								</span>
-							</Button>
-						</Show>
+						<For each={props.actions?.create}>
+							{(action) => (
+								<Show when={action.permission !== false}>
+									<Button
+										type="submit"
+										theme={action.secondary ? "border-outline" : "primary"}
+										size="small"
+										onClick={() => {
+											action.setOpen(true);
+										}}
+									>
+										<FaSolidPlus class="mr-1" />
+										{action.label ?? T()("create")}
+									</Button>
+								</Show>
+							)}
+						</For>
 						<Show when={showCreateLink()}>
 							<Link
 								theme="primary"
-								size="icon"
+								size="small"
 								href={props.actions?.createLink?.link}
 							>
-								<FaSolidPlus />
-								<span class="sr-only">
-									{props.actions?.createLink?.label ?? T()("create")} -{" "}
-								</span>
+								<FaSolidPlus class="mr-1" />
+								{props.actions?.createLink?.label ?? T()("create")}
 							</Link>
 						</Show>
 						<Show

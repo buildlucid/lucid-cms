@@ -66,14 +66,17 @@ const GeneralSettingsRoute: Component = (props) => {
 							description: T()("settings_route_description"),
 						}}
 						actions={{
-							create: {
-								open: rowTarget.getTriggers().update,
-								setOpen: (state) => {
-									rowTarget.setTargetId(undefined);
-									rowTarget.setTrigger("update", state);
+							create: [
+								{
+									open: rowTarget.getTriggers().update,
+									setOpen: (state) => {
+										rowTarget.setTargetId(undefined);
+										rowTarget.setTrigger("update", state);
+									},
+									permission: hasCreatePermission(),
+									label: T()("create_integration"),
 								},
-								permission: hasCreatePermission(),
-							},
+							],
 						}}
 						slots={{
 							bottom: (

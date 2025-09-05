@@ -502,5 +502,7 @@
 	"plugins": "Plugins",
 	"folders": "Folders",
 	"breadcrumbs": "Breadcrumbs",
-	"media_library": "Media Library"
+	"media_library": "Media Library",
+	"add_folder": "Add Folder",
+	"add_user": "Add User"
 }

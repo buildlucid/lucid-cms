@@ -102,11 +102,21 @@ const MediaListRoute: Component = () => {
 							description: T()("media_route_description"),
 						}}
 						actions={{
-							create: {
-								open: getOpenCreateMediaPanel(),
-								setOpen: setOpenCreateMediaPanel,
-								permission: userStore.get.hasPermission(["create_media"]).all,
-							},
+							create: [
+								{
+									open: false,
+									setOpen: () => {},
+									permission: userStore.get.hasPermission(["create_media"]).all,
+									label: T()("add_folder"),
+									secondary: true,
+								},
+								{
+									open: getOpenCreateMediaPanel(),
+									setOpen: setOpenCreateMediaPanel,
+									permission: userStore.get.hasPermission(["create_media"]).all,
+									label: T()("upload_media"),
+								},
+							],
 							contentLocale: true,
 						}}
 						slots={{

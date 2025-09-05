@@ -26,6 +26,7 @@ export default {
                 card: {
                     base: "#171717",
                     hover: "#242424",
+                    contrast: "#a1a1a1",
                 },
                 dropdown: {
                     base: "#171717",

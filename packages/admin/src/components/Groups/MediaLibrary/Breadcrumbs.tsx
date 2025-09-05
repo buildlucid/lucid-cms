@@ -14,7 +14,7 @@ export const Breadcrumbs: Component<{
 	// Render
 	return (
 		<ul
-			class="flex flex-wrap items-center gap-1 mb-4"
+			class="flex flex-wrap items-center gap-1"
 			aria-label={T()("breadcrumbs")}
 		>
 			<li>

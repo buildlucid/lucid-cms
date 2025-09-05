@@ -3,11 +3,12 @@ import api from "@/services/api";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Grid } from "@/components/Groups/Grid";
 import { A } from "@solidjs/router";
-import { FaSolidFolder } from "solid-icons/fa";
+import { FaSolidFolder, FaSolidPlus } from "solid-icons/fa";
 import { MediaFolderCardLoading } from "@/components/Cards/MediaFolderCard";
 import { Breadcrumbs } from "@/components/Groups/MediaLibrary";
 import T from "@/translations";
 import { Checkbox } from "@/components/Groups/Form";
+import Button from "@/components/Partials/Button";
 
 export const MediaFolderList: Component<{
 	state: {
@@ -39,13 +40,15 @@ export const MediaFolderList: Component<{
 			}}
 			class="pb-0!"
 		>
-			<h3 class="mb-1">{T()("folders")}</h3>
-			<Breadcrumbs
-				state={{
-					parentFolderId: props.state.parentFolderId,
-					breadcrumbs: folders.data?.data.breadcrumbs ?? [],
-				}}
-			/>
+			<div class="flex flex-col mb-4">
+				<h3 class="mb-1">{T()("folders")}</h3>
+				<Breadcrumbs
+					state={{
+						parentFolderId: props.state.parentFolderId,
+						breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+					}}
+				/>
+			</div>
 			<Grid
 				state={{
 					isLoading: folders.isLoading,

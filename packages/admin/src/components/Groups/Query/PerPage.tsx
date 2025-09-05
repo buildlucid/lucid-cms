@@ -26,7 +26,7 @@ export const PerPage: Component<PerPageProps> = (props) => {
 	// Render
 	return (
 		<DropdownMenu.Root>
-			<DropdownMenu.Trigger class="dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent hover:border-primary-base rounded-md fill-secondary-contrast flex items-center">
+			<DropdownMenu.Trigger class="dropdown-trigger px-2 h-9 text-sm bg-input-base hover:bg-secondary-hover hover:text-secondary-contrast text-input-contrast border border-border rounded-md fill-card-contrast flex items-center">
 				<span class="mr-2">
 					{T()("per_page", {
 						count: currentPerPage(),

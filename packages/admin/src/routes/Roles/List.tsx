@@ -42,11 +42,14 @@ const RolesListRoute: Component = () => {
 							description: T()("roles_route_description"),
 						}}
 						actions={{
-							create: {
-								open: openCreateRolePanel(),
-								setOpen: setOpenCreateRolePanel,
-								permission: userStore.get.hasPermission(["create_role"]).all,
-							},
+							create: [
+								{
+									open: openCreateRolePanel(),
+									setOpen: setOpenCreateRolePanel,
+									permission: userStore.get.hasPermission(["create_role"]).all,
+									label: T()("create_role"),
+								},
+							],
 						}}
 						slots={{
 							bottom: (

@@ -6,6 +6,7 @@ import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
 import { PerPage, Filter, Sort } from "@/components/Groups/Query";
+import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 
 interface QueryRowProps {
 	filters?: FilterProps["filters"];
@@ -17,7 +18,7 @@ interface QueryRowProps {
 
 export const QueryRow: Component<QueryRowProps> = (props) => {
 	return (
-		<div class="w-full px-4 md:px-6 pb-6 flex justify-between">
+		<div class="w-full px-4 md:px-6 pb-4 md:pb-6 flex justify-between">
 			<div class="flex gap-2.5 items-center">
 				<Show when={props.filters !== undefined}>
 					<Filter

@@ -53,11 +53,14 @@ const UsersListRoute: Component = () => {
 							description: T()("users_route_description"),
 						}}
 						actions={{
-							create: {
-								open: openCreateUserPanel(),
-								setOpen: setOpenCreateUserPanel,
-								permission: userStore.get.hasPermission(["create_user"]).all,
-							},
+							create: [
+								{
+									open: openCreateUserPanel(),
+									setOpen: setOpenCreateUserPanel,
+									permission: userStore.get.hasPermission(["create_user"]).all,
+									label: T()("add_user"),
+								},
+							],
 						}}
 						slots={{
 							bottom: (

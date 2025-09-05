@@ -86,7 +86,7 @@ export const MediaList: Component<{
 				padding: "24",
 			}}
 		>
-			<h3 class="mb-4">{T()("media")}</h3>
+			<h3 class="mb-4 ">{T()("media")}</h3>
 			<Grid
 				state={{
 					isLoading: media.isLoading,
