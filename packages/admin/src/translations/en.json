@@ -499,5 +499,8 @@
 	"brick_builder": "Brick Builder",
 	"fetching_data": "Fetching Data",
 	"hooks": "Hooks",
-	"plugins": "Plugins"
+	"plugins": "Plugins",
+	"folders": "Folders",
+	"breadcrumbs": "Breadcrumbs",
+	"media_library": "Media Library"
 }
