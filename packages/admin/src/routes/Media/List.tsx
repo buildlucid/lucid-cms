@@ -11,6 +11,7 @@ import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaP
 import { QueryRow } from "@/components/Groups/Query";
 import { useParams } from "@solidjs/router";
 import { MediaFolderList } from "@/components/Groups/Content/MediaFolderList";
+import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -60,6 +61,8 @@ const MediaListRoute: Component = () => {
 	const params = useParams();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
+	const [getOpenCreateMediaFolderPanel, setOpenCreateMediaFolderPanel] =
+		createSignal<boolean>(false);
 
 	// ----------------------------------------
 	// Memos
@@ -104,8 +107,8 @@ const MediaListRoute: Component = () => {
 						actions={{
 							create: [
 								{
-									open: false,
-									setOpen: () => {},
+									open: getOpenCreateMediaFolderPanel(),
+									setOpen: setOpenCreateMediaFolderPanel,
 									permission: userStore.get.hasPermission(["create_media"]).all,
 									label: T()("add_folder"),
 									secondary: true,
@@ -234,6 +237,13 @@ const MediaListRoute: Component = () => {
 				state={{
 					open: getOpenCreateMediaPanel(),
 					setOpen: setOpenCreateMediaPanel,
+				}}
+			/>
+			<CreateMediaFolderPanel
+				state={{
+					open: getOpenCreateMediaFolderPanel(),
+					setOpen: setOpenCreateMediaFolderPanel,
+					parentFolderId: folderIdFilter,
 				}}
 			/>
 		</Wrapper>

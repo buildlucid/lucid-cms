@@ -504,5 +504,9 @@
 	"breadcrumbs": "Breadcrumbs",
 	"media_library": "Media Library",
 	"add_folder": "Add Folder",
-	"add_user": "Add User"
+	"add_user": "Add User",
+	"create_media_folder_panel_title": "Create Folder",
+	"create_media_folder_panel_description": "Create a new media folder.",
+	"media_folder_create_toast_title": "Folder created",
+	"media_folder_create_toast_message": "The folder has been created"
 }

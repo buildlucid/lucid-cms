@@ -21,7 +21,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return createQuery(() => ({
-		queryKey: ["media-folders.getMultiple", queryKey(), params.key?.()],
+		queryKey: ["mediaFolders.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MultipleMediaFolderResponse>>({
 				url: "/api/v1/media/folders",
