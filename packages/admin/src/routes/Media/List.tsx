@@ -10,7 +10,6 @@ import Alert from "@/components/Blocks/Alert";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import { QueryRow } from "@/components/Groups/Query";
 import { useParams } from "@solidjs/router";
-import { MediaFolderList } from "@/components/Groups/Content/MediaFolderList";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
 
 const MediaListRoute: Component = () => {
@@ -221,11 +220,6 @@ const MediaListRoute: Component = () => {
 				),
 			}}
 		>
-			<MediaFolderList
-				state={{
-					parentFolderId: folderIdFilter,
-				}}
-			/>
 			<MediaList
 				state={{
 					searchParams: searchParams,

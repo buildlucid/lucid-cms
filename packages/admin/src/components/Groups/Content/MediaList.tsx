@@ -1,5 +1,11 @@
 import T from "@/translations";
-import { type Accessor, type Component, createMemo, For } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	createSignal,
+	For,
+} from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
@@ -11,7 +17,14 @@ import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
-import { useParams } from "@solidjs/router";
+import { MediaFolderCardLoading } from "@/components/Cards/MediaFolderCard";
+import {
+	Breadcrumbs,
+	SelectedActionPill,
+} from "@/components/Groups/MediaLibrary";
+import { Checkbox } from "@/components/Groups/Form";
+import { A } from "@solidjs/router";
+import { FaSolidFolder } from "solid-icons/fa";
 
 export const MediaList: Component<{
 	state: {
@@ -29,6 +42,8 @@ export const MediaList: Component<{
 			clear: false,
 		},
 	});
+	const [getSelectedFolders, setSelectedFolders] = createSignal([1]);
+	const [getSelectedMedia, setSelectedMedia] = createSignal([100]);
 
 	// ----------------------------------
 	// Memos
@@ -48,15 +63,31 @@ export const MediaList: Component<{
 		},
 		enabled: () => props.state.searchParams.getSettled(),
 	});
+	const folders = api.mediaFolders.useGetMultiple({
+		queryParams: {
+			filters: {
+				parentFolderId: props.state.parentFolderId,
+			},
+			perPage: -1,
+		},
+	});
+
+	// ----------------------------------------
+	// Memos
+	const isError = createMemo(() => {
+		return media.isError || folders.isError;
+	});
+	const isSuccess = createMemo(() => {
+		return media.isSuccess && folders.isSuccess;
+	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<DynamicContent
 			state={{
-				isError: media.isError,
-				isSuccess: media.isSuccess,
-				isEmpty: media.data?.data.length === 0,
+				isError: isError(),
+				isSuccess: isSuccess(),
 				searchParams: props.state.searchParams,
 			}}
 			slot={{
@@ -86,6 +117,54 @@ export const MediaList: Component<{
 				padding: "24",
 			}}
 		>
+			{/* Folders */}
+			<div class="flex flex-col mb-4">
+				<h3 class="mb-1">{T()("folders")}</h3>
+				<Breadcrumbs
+					state={{
+						parentFolderId: props.state.parentFolderId,
+						breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+					}}
+				/>
+			</div>
+			<Grid
+				state={{
+					isLoading: folders.isLoading,
+					totalItems: folders.data?.data.folders.length || 0,
+				}}
+				slots={{
+					loadingCard: <MediaFolderCardLoading />,
+				}}
+				class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
+			>
+				<For each={folders.data?.data.folders}>
+					{(folder) => (
+						<li>
+							<A
+								href={`/admin/media/${folder.id}`}
+								class="flex items-start gap-3 rounded-md border border-border p-3 bg-card-base hover:bg-card-hover"
+							>
+								<Checkbox
+									value={false}
+									onChange={() => {}}
+									copy={{}}
+									theme="fit"
+									noMargin={true}
+								/>
+								<div class="w-full flex flex-col -mt-px">
+									<div class="flex items-center gap-2 mb-1">
+										<FaSolidFolder size={18} />
+										<p class="text-sm font-medium text-title">{folder.title}</p>
+									</div>
+									<p class="text-sm text-body">2 folders, 13 assets</p>
+								</div>
+							</A>
+						</li>
+					)}
+				</For>
+			</Grid>
+
+			{/* Media */}
 			<h3 class="mb-4 ">{T()("media")}</h3>
 			<Grid
 				state={{
@@ -108,6 +187,14 @@ export const MediaList: Component<{
 				</For>
 			</Grid>
 
+			<SelectedActionPill
+				state={{
+					setSelectedFolders: getSelectedFolders,
+					setSelectedMedia: getSelectedMedia,
+				}}
+			/>
+
+			{/* Modals */}
 			<CreateUpdateMediaPanel
 				id={rowTarget.getTargetId}
 				state={{

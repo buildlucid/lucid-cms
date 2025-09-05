@@ -35,7 +35,7 @@ export const Breadcrumbs: Component<{
 				{(breadcrumb, i) => (
 					<>
 						<li aria-hidden="true" class="px-1">
-							<FaSolidChevronRight size={12} class="fill-current" />
+							<FaSolidChevronRight size={10} class="fill-current mt-px" />
 						</li>
 						<li>
 							<Switch>
