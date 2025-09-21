@@ -1,26 +1,34 @@
-import type { Component } from "solid-js";
+import { type Component, lazy } from "solid-js";
 import { Router, Route } from "@solidjs/router";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
 // Routes
-import ComponentsRoute from "@/routes/Components";
-import LoginRoute from "@/routes/Login";
-import SetupRoute from "@/routes/Setup";
-import ForgotPasswordRoute from "@/routes/ForgotPassword";
-import ResetPasswordRoute from "@/routes/ResetPassword";
-import DashboardRoute from "@/routes/Dashboard";
-import MediaListRoute from "@/routes/Media/List";
-import UsersListRoute from "@/routes/Users/List";
-import RolesListRoute from "@/routes/Roles/List";
-import SettingsGeneralRoute from "@/routes/Settings/General";
-import SettingsClientIntegrationRoute from "@/routes/Settings/ClientIntegration";
-import SettingsLicenseRoute from "@/routes/Settings/License";
-import EmailListRoute from "@/routes/Emails/List";
-import AccountRoute from "@/routes/Account";
-import CollectionsListRoute from "@/routes/Collections/List";
-import CollectionsDocumentsListRoute from "./routes/Collections/Documents/List";
-import CollectionDocumentPageBuilderRoute from "./routes/Collections/Documents/PageBuilder";
-import CollectionsDocumentsRevisionsRoute from "./routes/Collections/Documents/Revisions";
+const ComponentsRoute = lazy(() => import("@/routes/Components"));
+const LoginRoute = lazy(() => import("@/routes/Login"));
+const SetupRoute = lazy(() => import("@/routes/Setup"));
+const ForgotPasswordRoute = lazy(() => import("@/routes/ForgotPassword"));
+const ResetPasswordRoute = lazy(() => import("@/routes/ResetPassword"));
+const DashboardRoute = lazy(() => import("@/routes/Dashboard"));
+const MediaListRoute = lazy(() => import("@/routes/Media/List"));
+const UsersListRoute = lazy(() => import("@/routes/Users/List"));
+const RolesListRoute = lazy(() => import("@/routes/Roles/List"));
+const SettingsGeneralRoute = lazy(() => import("@/routes/Settings/General"));
+const SettingsClientIntegrationRoute = lazy(
+	() => import("@/routes/Settings/ClientIntegration"),
+);
+const SettingsLicenseRoute = lazy(() => import("@/routes/Settings/License"));
+const EmailListRoute = lazy(() => import("@/routes/Emails/List"));
+const AccountRoute = lazy(() => import("@/routes/Account"));
+const CollectionsListRoute = lazy(() => import("@/routes/Collections/List"));
+const CollectionsDocumentsListRoute = lazy(
+	() => import("./routes/Collections/Documents/List"),
+);
+const CollectionDocumentPageBuilderRoute = lazy(
+	() => import("./routes/Collections/Documents/PageBuilder"),
+);
+const CollectionsDocumentsRevisionsRoute = lazy(
+	() => import("./routes/Collections/Documents/Revisions"),
+);
 
 const AppRouter: Component = () => {
 	return (
