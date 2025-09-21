@@ -189,6 +189,29 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	deleteBatch: {
+		body: z.object({
+			folderIds: z.array(z.number()).meta({
+				description: "The media folder IDs",
+				example: [1, 2, 3],
+			}),
+			mediaIds: z.array(z.number()).meta({
+				description: "The media IDs",
+				example: [1, 2, 3],
+			}),
+			recursiveMedia: z.boolean().meta({
+				description: "Whether to delete all media in the folder",
+				default: false,
+				example: true,
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 	moveFolder: {
 		body: z.object({
 			folderId: z.number().nullable().meta({

@@ -10,6 +10,7 @@ import createSingle from "./create-single.js";
 import getMultipleFieldMeta from "./get-multiple-field-meta.js";
 import processMedia from "./process-media.js";
 import moveFolder from "./move-folder.js";
+import deleteBatch from "./delete-batch.js";
 
 export default {
 	checks,
@@ -24,4 +25,5 @@ export default {
 	getMultipleFieldMeta,
 	processMedia,
 	moveFolder,
+	deleteBatch,
 };

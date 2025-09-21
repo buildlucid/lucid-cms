@@ -165,6 +165,8 @@
 	"route_media_clear_processed_error_message": "An error occurred while clearing the processed image(s).",
 	"route_media_delete_error_name": "Media Delete Error",
 	"route_media_delete_error_message": "An error occurred while deleting the media.",
+	"route_media_delete_batch_error_name": "Media Batch Delete Error",
+	"route_media_delete_batch_error_message": "An error occurred while deleting the media batch.",
 	"route_media_folders_delete_error_name": "Media Folder Delete Error",
 	"route_media_folders_delete_error_message": "An error occurred while deleting the media folder.",
 	"route_media_fetch_error_name": "Media(s) Fetch Error",
