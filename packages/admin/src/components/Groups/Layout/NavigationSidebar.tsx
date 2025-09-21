@@ -62,7 +62,7 @@ export const NavigationSidebar: Component = () => {
 							type="link"
 							href="/admin"
 							icon="dashboard"
-							title={T()("home")}
+							title={T()("dashboard")}
 						/>
 						<IconLinkFull
 							type="link"
@@ -84,37 +84,6 @@ export const NavigationSidebar: Component = () => {
 							icon="email"
 							title={T()("email_activity")}
 							permission={userStore.get.hasPermission(["read_email"]).all}
-						/>
-
-						{/* Access & Permissions */}
-						<div class="w-full mt-6 mb-2">
-							<span class="text-xs">{T()("access_and_permissions")}</span>
-						</div>
-						<IconLinkFull
-							type="link"
-							href="/admin/users"
-							icon="users"
-							title={T()("user_accounts")}
-							permission={
-								userStore.get.hasPermission([
-									"create_user",
-									"update_user",
-									"delete_user",
-								]).some
-							}
-						/>
-						<IconLinkFull
-							type="link"
-							href="/admin/roles"
-							icon="roles"
-							title={T()("role_management")}
-							permission={
-								userStore.get.hasPermission([
-									"create_role",
-									"update_role",
-									"delete_role",
-								]).some
-							}
 						/>
 
 						{/* Collections */}
@@ -172,6 +141,37 @@ export const NavigationSidebar: Component = () => {
 								</For>
 							</Match>
 						</Switch>
+
+						{/* Access & Permissions */}
+						<div class="w-full mt-6 mb-2">
+							<span class="text-xs">{T()("access_and_permissions")}</span>
+						</div>
+						<IconLinkFull
+							type="link"
+							href="/admin/users"
+							icon="users"
+							title={T()("user_accounts")}
+							permission={
+								userStore.get.hasPermission([
+									"create_user",
+									"update_user",
+									"delete_user",
+								]).some
+							}
+						/>
+						<IconLinkFull
+							type="link"
+							href="/admin/roles"
+							icon="roles"
+							title={T()("role_management")}
+							permission={
+								userStore.get.hasPermission([
+									"create_role",
+									"update_role",
+									"delete_role",
+								]).some
+							}
+						/>
 					</ul>
 				</div>
 				<div class="pb-6 px-4">
