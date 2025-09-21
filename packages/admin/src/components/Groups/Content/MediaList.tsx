@@ -3,8 +3,8 @@ import {
 	type Accessor,
 	type Component,
 	createMemo,
-	createSignal,
 	For,
+	onCleanup,
 } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -17,14 +17,15 @@ import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
-import { MediaFolderCardLoading } from "@/components/Cards/MediaFolderCard";
+import {
+	MediaFolderCardLoading,
+	MediaFolderCard,
+} from "@/components/Cards/MediaFolderCard";
 import {
 	Breadcrumbs,
 	SelectedActionPill,
 } from "@/components/Groups/MediaLibrary";
-import { Checkbox } from "@/components/Groups/Form";
-import { A } from "@solidjs/router";
-import { FaSolidFolder } from "solid-icons/fa";
+import mediaStore from "@/store/mediaStore";
 
 export const MediaList: Component<{
 	state: {
@@ -42,8 +43,6 @@ export const MediaList: Component<{
 			clear: false,
 		},
 	});
-	const [getSelectedFolders, setSelectedFolders] = createSignal([1]);
-	const [getSelectedMedia, setSelectedMedia] = createSignal([100]);
 
 	// ----------------------------------
 	// Memos
@@ -138,29 +137,7 @@ export const MediaList: Component<{
 				class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
 			>
 				<For each={folders.data?.data.folders}>
-					{(folder) => (
-						<li>
-							<A
-								href={`/admin/media/${folder.id}`}
-								class="flex items-start gap-3 rounded-md border border-border p-3 bg-card-base hover:bg-card-hover"
-							>
-								<Checkbox
-									value={false}
-									onChange={() => {}}
-									copy={{}}
-									theme="fit"
-									noMargin={true}
-								/>
-								<div class="w-full flex flex-col -mt-px">
-									<div class="flex items-center gap-2 mb-1">
-										<FaSolidFolder size={18} />
-										<p class="text-sm font-medium text-title">{folder.title}</p>
-									</div>
-									<p class="text-sm text-body">2 folders, 13 assets</p>
-								</div>
-							</A>
-						</li>
-					)}
+					{(folder) => <MediaFolderCard folder={folder} />}
 				</For>
 			</Grid>
 
@@ -189,8 +166,16 @@ export const MediaList: Component<{
 
 			<SelectedActionPill
 				state={{
-					setSelectedFolders: getSelectedFolders,
-					setSelectedMedia: getSelectedMedia,
+					selectedFolders: mediaStore.get.selectedFolders,
+					selectedMedia: mediaStore.get.selectedMedia,
+				}}
+				actions={{
+					addSelectedFolder: mediaStore.get.addSelectedFolder,
+					addSelectedMedia: mediaStore.get.addSelectedMedia,
+					resetSelectedFolders: mediaStore.get.resetSelectedFolders,
+					resetSelectedMedia: mediaStore.get.resetSelectedMedia,
+					deleteSelectedFolders: () => {},
+					deleteSelectedMedia: () => {},
 				}}
 			/>
 

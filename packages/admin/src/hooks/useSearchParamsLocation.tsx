@@ -200,8 +200,11 @@ const useSearchParamsLocation = (
 		}
 
 		// Set search params
-		if (searchParams.toString()) navigate(`?${searchParams.toString()}`);
-		else navigate(location.pathname);
+		if (searchParams.toString())
+			navigate(`?${searchParams.toString()}`, {
+				scroll: false,
+			});
+		else navigate(location.pathname, { scroll: false });
 	};
 	const setStateFromLocation = (searchParams: URLSearchParams) => {
 		// on location change - update filters and sorts based on search params

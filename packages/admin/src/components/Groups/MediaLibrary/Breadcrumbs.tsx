@@ -20,7 +20,11 @@ export const Breadcrumbs: Component<{
 			<li>
 				<Switch>
 					<Match when={props.state.parentFolderId() !== ""}>
-						<A href={"/admin/media"} class="hover:text-title text-sm">
+						<A
+							href={"/admin/media"}
+							class="hover:text-title text-sm"
+							noScroll={true}
+						>
 							<span>{T()("media_library")}</span>
 						</A>
 					</Match>
@@ -43,6 +47,7 @@ export const Breadcrumbs: Component<{
 									<A
 										href={`/admin/media/${breadcrumb.id}`}
 										class="hover:text-title text-sm"
+										noScroll={true}
 									>
 										<span>{breadcrumb.title}</span>
 									</A>

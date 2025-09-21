@@ -1,19 +1,27 @@
 import T from "@/translations";
-import { type Accessor, createMemo, Show, type Component } from "solid-js";
+import { createMemo, Show, type Component } from "solid-js";
 import Button from "@/components/Partials/Button";
 
 export const SelectedActionPill: Component<{
 	state: {
-		setSelectedFolders: Accessor<Array<number>>;
-		setSelectedMedia: Accessor<Array<number>>;
+		selectedFolders: Array<number>;
+		selectedMedia: Array<number>;
+	};
+	actions: {
+		addSelectedFolder: (folder: number) => void;
+		addSelectedMedia: (media: number) => void;
+		resetSelectedFolders: () => void;
+		resetSelectedMedia: () => void;
+		deleteSelectedFolders: () => void;
+		deleteSelectedMedia: () => void;
 	};
 }> = (props) => {
 	// ----------------------------------------
 	// Memons
 	const hasSelected = createMemo(() => {
 		return (
-			props.state.setSelectedFolders().length > 0 ||
-			props.state.setSelectedMedia().length > 0
+			props.state.selectedFolders.length > 0 ||
+			props.state.selectedMedia.length > 0
 		);
 	});
 
@@ -26,16 +34,30 @@ export const SelectedActionPill: Component<{
 					<p class="text-sm">
 						<span class="font-bold">
 							{hasSelected()
-								? `${props.state.setSelectedFolders().length} ${T()("folders")}, ${props.state.setSelectedMedia().length} ${T()("media")}`
+								? `${props.state.selectedFolders.length} ${T()("folders")}, ${props.state.selectedMedia.length} ${T()("media")}`
 								: T()("nothing_selected")}
 						</span>{" "}
 						{T()("selected")}
 					</p>
 					<div class="ml-2 flex gap-2">
-						<Button theme="border-outline" size="small" onClick={() => {}}>
+						<Button
+							theme="border-outline"
+							size="small"
+							onClick={() => {
+								props.actions.resetSelectedFolders();
+								props.actions.resetSelectedMedia();
+							}}
+						>
 							{T()("reset")}
 						</Button>
-						<Button theme="danger" size="small" onClick={() => {}}>
+						<Button
+							theme="danger"
+							size="small"
+							onClick={() => {
+								props.actions.deleteSelectedFolders();
+								props.actions.deleteSelectedMedia();
+							}}
+						>
 							{T()("delete")}
 						</Button>
 					</div>
