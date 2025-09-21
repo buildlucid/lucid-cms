@@ -68,7 +68,7 @@ export const NavigationSidebar: Component = () => {
 							type="link"
 							href="/admin/media"
 							icon="media"
-							title={T()("media")}
+							title={T()("media_library")}
 							permission={
 								userStore.get.hasPermission([
 									"create_media",
@@ -77,11 +77,24 @@ export const NavigationSidebar: Component = () => {
 								]).some
 							}
 						/>
+
+						<IconLinkFull
+							type="link"
+							href="/admin/emails"
+							icon="email"
+							title={T()("email_activity")}
+							permission={userStore.get.hasPermission(["read_email"]).all}
+						/>
+
+						{/* Access & Permissions */}
+						<div class="w-full mt-6 mb-2">
+							<span class="text-xs">{T()("access_and_permissions")}</span>
+						</div>
 						<IconLinkFull
 							type="link"
 							href="/admin/users"
 							icon="users"
-							title={T()("users")}
+							title={T()("user_accounts")}
 							permission={
 								userStore.get.hasPermission([
 									"create_user",
@@ -94,7 +107,7 @@ export const NavigationSidebar: Component = () => {
 							type="link"
 							href="/admin/roles"
 							icon="roles"
-							title={T()("roles")}
+							title={T()("role_management")}
 							permission={
 								userStore.get.hasPermission([
 									"create_role",
@@ -102,13 +115,6 @@ export const NavigationSidebar: Component = () => {
 									"delete_role",
 								]).some
 							}
-						/>
-						<IconLinkFull
-							type="link"
-							href="/admin/emails"
-							icon="email"
-							title={T()("emails")}
-							permission={userStore.get.hasPermission(["read_email"]).all}
 						/>
 
 						{/* Collections */}
