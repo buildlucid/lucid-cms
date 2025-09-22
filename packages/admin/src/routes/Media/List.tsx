@@ -11,6 +11,7 @@ import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaP
 import { QueryRow } from "@/components/Groups/Query";
 import { useParams } from "@solidjs/router";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
+import { Switch } from "@/components/Groups/Form/Switch";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -62,6 +63,7 @@ const MediaListRoute: Component = () => {
 		createSignal<boolean>(false);
 	const [getOpenCreateMediaFolderPanel, setOpenCreateMediaFolderPanel] =
 		createSignal<boolean>(false);
+	const [isDeleted, setIsDeleted] = createSignal<boolean>(false);
 
 	// ----------------------------------------
 	// Memos
@@ -212,6 +214,23 @@ const MediaListRoute: Component = () => {
 											key: "updatedAt",
 										},
 									]}
+									custom={
+										<Switch
+											id="isDeleted"
+											value={isDeleted()}
+											onChange={(value) => {
+												setIsDeleted(value);
+											}}
+											name={"isDeleted"}
+											copy={{
+												true: T()("deleted"),
+												false: T()("active"),
+											}}
+											options={{
+												queryRow: true,
+											}}
+										/>
+									}
 									perPage={[10, 20, 40]}
 								/>
 							),
@@ -223,6 +242,7 @@ const MediaListRoute: Component = () => {
 			<MediaList
 				state={{
 					searchParams: searchParams,
+					isDeleted: isDeleted,
 					setOpenCreateMediaPanel: setOpenCreateMediaPanel,
 					parentFolderId: folderIdFilter,
 				}}

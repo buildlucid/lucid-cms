@@ -54,6 +54,7 @@ export type SearchParamsResponse = {
 	setFilterSchema: (filters: SearchParamsSchema["filters"]) => void;
 	hasFiltersApplied: Accessor<boolean>;
 	resetFilters: () => void;
+	hasDefaultFiltersApplied: Accessor<boolean>;
 };
 
 const useSearchParamsLocation = (
@@ -387,15 +388,14 @@ const useSearchParamsLocation = (
 		}
 
 		// Find first sort with value
-		const sorts = Object.entries(schema?.sorts || {}).reduce(
-			(acc, [key, value]) => {
-				if (value) {
-					acc[key] = value;
-				}
-				return acc;
-			},
-			{} as Record<string, "asc" | "desc" | undefined>,
-		);
+		const sorts = Object.entries(schema?.sorts || {}).reduce<
+			Record<string, "asc" | "desc" | undefined>
+		>((acc, [key, value]) => {
+			if (value) {
+				acc[key] = value;
+			}
+			return acc;
+		}, {});
 
 		setLocation({
 			filters: !hasFilters ? filters : undefined,
@@ -410,7 +410,7 @@ const useSearchParamsLocation = (
 			[key: string]: FilterValues;
 		} = {};
 		for (const [key] of filters) {
-			filterValues[key] = undefined;
+			filterValues[key] = schemaDefaults?.filters?.[key]?.value;
 		}
 		setLocation({ filters: filterValues });
 	};
@@ -454,6 +454,45 @@ const useSearchParamsLocation = (
 		}
 		return false;
 	});
+	const hasDefaultFiltersApplied = createMemo(() => {
+		const filters = getFilters();
+		for (const [key, currentValue] of filters) {
+			const target = schemaDefaults?.filters?.[key];
+			if (!target) continue;
+			if (target.type === "text") {
+				const left =
+					currentValue === undefined || currentValue === ""
+						? ""
+						: String(currentValue);
+				const right =
+					target.value === undefined || target.value === ""
+						? ""
+						: String(target.value);
+				if (left !== right) return false;
+			} else if (target.type === "boolean") {
+				const left =
+					currentValue === "" || currentValue === undefined
+						? undefined
+						: currentValue;
+				if (left !== target.value) return false;
+			} else if (target.type === "array") {
+				const toArray = (val: FilterValues): (string | number)[] => {
+					if (val === "" || val === undefined) return [];
+					if (Array.isArray(val)) return val;
+					return [val as string | number];
+				};
+				const leftArr = toArray(currentValue);
+				const rightArr = toArray(target.value);
+				if (leftArr.length !== rightArr.length) return false;
+				for (let i = 0; i < leftArr.length; i++) {
+					if (String(leftArr[i]) !== String(rightArr[i])) return false;
+				}
+			} else {
+				if (currentValue !== target.value) return false;
+			}
+		}
+		return true;
+	});
 
 	return {
 		getFilters,
@@ -471,6 +510,7 @@ const useSearchParamsLocation = (
 
 		hasFiltersApplied,
 		resetFilters,
+		hasDefaultFiltersApplied,
 	};
 };
 

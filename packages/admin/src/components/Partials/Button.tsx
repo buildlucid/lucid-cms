@@ -45,7 +45,7 @@ const Button: Component<ButtonProps> = (props) => {
 
 				// Toggles
 				"ring-primary-base": props.theme === "secondary-toggle",
-				"bg-transparent text-body fill-body hover:bg-primary-hover hover:text-primary-contrast hover:fill-primary-contrast border-border border":
+				"bg-transparent text-body fill-body hover:bg-secondary-base hover:text-secondary-contrast hover:fill-primary-contrast border-border border":
 					props.theme === "secondary-toggle" && !props.active,
 				"bg-primary-base text-primary-contrast fill-primary-contrast hover:bg-primary-hover border-primary-base border":
 					props.theme === "secondary-toggle" && props.active,

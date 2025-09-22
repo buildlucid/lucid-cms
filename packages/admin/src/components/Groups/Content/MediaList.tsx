@@ -5,6 +5,7 @@ import {
 	createMemo,
 	For,
 	onCleanup,
+	Show,
 } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -30,6 +31,7 @@ import mediaStore from "@/store/mediaStore";
 export const MediaList: Component<{
 	state: {
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		isDeleted: Accessor<boolean>;
 		setOpenCreateMediaPanel: (state: boolean) => void;
 		parentFolderId: Accessor<number | string>;
 	};
@@ -47,6 +49,7 @@ export const MediaList: Component<{
 	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
+	const isDeleted = createMemo(() => (props.state.isDeleted() ? 1 : 0));
 
 	// ----------------------------------
 	// Queries
@@ -55,6 +58,7 @@ export const MediaList: Component<{
 			queryString: props.state.searchParams.getQueryString,
 			filters: {
 				folderId: props.state.parentFolderId,
+				isDeleted: isDeleted,
 			},
 			headers: {
 				"lucid-content-locale": contentLocale,
@@ -117,32 +121,36 @@ export const MediaList: Component<{
 			}}
 		>
 			{/* Folders */}
-			<div class="flex flex-col mb-4">
-				<h3 class="mb-1">{T()("folders")}</h3>
-				<Breadcrumbs
+			<Show when={!props.state.isDeleted()}>
+				<div class="flex flex-col mb-4">
+					<h3 class="mb-1">{T()("folders")}</h3>
+					<Breadcrumbs
+						state={{
+							parentFolderId: props.state.parentFolderId,
+							breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+						}}
+					/>
+				</div>
+				<Grid
 					state={{
-						parentFolderId: props.state.parentFolderId,
-						breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+						isLoading: folders.isLoading,
+						totalItems: folders.data?.data.folders.length || 0,
 					}}
-				/>
-			</div>
-			<Grid
-				state={{
-					isLoading: folders.isLoading,
-					totalItems: folders.data?.data.folders.length || 0,
-				}}
-				slots={{
-					loadingCard: <MediaFolderCardLoading />,
-				}}
-				class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
-			>
-				<For each={folders.data?.data.folders}>
-					{(folder) => <MediaFolderCard folder={folder} />}
-				</For>
-			</Grid>
+					slots={{
+						loadingCard: <MediaFolderCardLoading />,
+					}}
+					class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
+				>
+					<For each={folders.data?.data.folders}>
+						{(folder) => <MediaFolderCard folder={folder} />}
+					</For>
+				</Grid>
+			</Show>
 
 			{/* Media */}
-			<h3 class="mb-4 ">{T()("media")}</h3>
+			<Show when={!props.state.isDeleted()}>
+				<h3 class="mb-4 ">{T()("media")}</h3>
+			</Show>
 			<Grid
 				state={{
 					isLoading: media.isLoading,

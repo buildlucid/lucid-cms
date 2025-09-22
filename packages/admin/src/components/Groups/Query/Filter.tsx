@@ -25,6 +25,8 @@ interface FilterItemProps {
 			label: string;
 			value: string;
 		}>;
+		trueLabel?: string;
+		falseLabel?: string;
 	};
 	searchParams: SearchParamsResponse;
 }
@@ -192,7 +194,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 					/>
 				</Match>
 				<Match when={props.filter.type === "boolean"}>
-					<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-2 gap-3">
 						<Button
 							theme="secondary-toggle"
 							size="small"
@@ -207,9 +209,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 								setFilterParam();
 							}}
 						>
-							{props.filter.options
-								? props.filter.options[0].label
-								: T()("active")}
+							{props.filter.trueLabel ? props.filter.trueLabel : T()("active")}
 						</Button>
 						<Button
 							theme="secondary-toggle"
@@ -225,8 +225,8 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 								setFilterParam();
 							}}
 						>
-							{props.filter.options
-								? props.filter.options[0].label
+							{props.filter.falseLabel
+								? props.filter.falseLabel
 								: T()("inactive")}
 						</Button>
 					</div>

@@ -13,6 +13,7 @@ interface QueryParams {
 		extension?: Accessor<string>;
 		type?: Accessor<string | string[]>;
 		folderId?: Accessor<number | null | string>;
+		isDeleted?: Accessor<1 | 0>;
 	};
 	perPage?: number;
 	headers: {
