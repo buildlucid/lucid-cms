@@ -349,6 +349,13 @@ export const controllerSchemas = {
 					example: true,
 				})
 				.optional(),
+			isDeleted: z
+				.boolean()
+				.meta({
+					description: "Whether the media is deleted",
+					example: true,
+				})
+				.optional(),
 		}),
 		query: {
 			string: undefined,

@@ -288,7 +288,7 @@ export interface LucidMedia {
 	custom_meta: string | null;
 	title_translation_key_id: number | null;
 	alt_translation_key_id: number | null;
-	is_deleted: BooleanInt;
+	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number | null;
 	created_at: TimestampImmutable;

@@ -276,6 +276,12 @@
 	"clear_all_processed_images_modal_description": "Are you sure you want to clear all processed images?",
 	"delete_media_modal_title": "Delete Media",
 	"delete_media_modal_description": "Are you sure you want to delete this media?",
+	"delete_media_permanently_modal_title": "Delete Media Permanently",
+	"delete_media_permanently_modal_description": "Are you sure you want to delete this media permanently? This action is irreversible.",
+	"restore_media_modal_title": "Restore Media",
+	"restore_media_modal_description": "Are you sure you want to restore this media?",
+	"restore_media_toast_title": "Media restored",
+	"restore_media_toast_message": "The media has been restored",
 	"clear_processed_images_modal_title": "Clear processed images",
 	"clear_processed_images_modal_description": "Are you sure you want to clear the processed images for this media?",
 	"delete_email_modal_title": "Delete Email",
@@ -515,5 +521,7 @@
 	"media_folder_create_toast_title": "Folder created",
 	"media_folder_create_toast_message": "The folder has been created",
 	"is_deleted": "Is Deleted",
-	"deleted": "Deleted"
+	"deleted": "Deleted",
+	"delete_permanently": "Delete Permanently",
+	"restore": "Restore"
 }

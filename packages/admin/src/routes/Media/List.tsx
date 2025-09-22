@@ -63,7 +63,7 @@ const MediaListRoute: Component = () => {
 		createSignal<boolean>(false);
 	const [getOpenCreateMediaFolderPanel, setOpenCreateMediaFolderPanel] =
 		createSignal<boolean>(false);
-	const [isDeleted, setIsDeleted] = createSignal<boolean>(false);
+	const [showingDeleted, setShowingDeleted] = createSignal<boolean>(false);
 
 	// ----------------------------------------
 	// Memos
@@ -217,9 +217,9 @@ const MediaListRoute: Component = () => {
 									custom={
 										<Switch
 											id="isDeleted"
-											value={isDeleted()}
+											value={showingDeleted()}
 											onChange={(value) => {
-												setIsDeleted(value);
+												setShowingDeleted(value);
 											}}
 											name={"isDeleted"}
 											copy={{
@@ -242,7 +242,7 @@ const MediaListRoute: Component = () => {
 			<MediaList
 				state={{
 					searchParams: searchParams,
-					isDeleted: isDeleted,
+					showingDeleted: showingDeleted,
 					setOpenCreateMediaPanel: setOpenCreateMediaPanel,
 					parentFolderId: folderIdFilter,
 				}}

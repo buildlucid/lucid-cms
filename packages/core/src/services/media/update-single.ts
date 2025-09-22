@@ -22,6 +22,8 @@ const updateSingle: ServiceFn<
 			averageColor?: string | null;
 			isDark?: boolean | null;
 			isLight?: boolean | null;
+			isDeleted?: boolean;
+			userId: number;
 		},
 	],
 	number | undefined
@@ -76,6 +78,30 @@ const updateSingle: ServiceFn<
 			],
 		});
 	if (upsertTranslationsRes.error) return upsertTranslationsRes;
+
+	// TODO: need better solution for partial updates before the bellow early returns when there is no key
+	if (data.isDeleted !== undefined) {
+		const updateMediaRes = await Media.updateSingle({
+			where: [{ key: "id", operator: "=", value: data.id }],
+			data: {
+				is_deleted: data.isDeleted,
+				is_deleted_at: data.isDeleted
+					? new Date().toISOString()
+					: data.isDeleted === false
+						? null
+						: undefined,
+				deleted_by: data.isDeleted
+					? data.userId
+					: data.isDeleted === false
+						? null
+						: undefined,
+			},
+			validation: {
+				enabled: true,
+			},
+		});
+		if (updateMediaRes.error) return updateMediaRes;
+	}
 
 	// early return if no key
 	if (data.key !== undefined && data.fileName === undefined) {

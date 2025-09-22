@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createMemo } from "solid-js";
+import { type Accessor, type Component, createMemo } from "solid-js";
 import classNames from "classnames";
 import userStore from "@/store/userStore";
 import type { MediaResponse } from "@types";
@@ -13,8 +13,13 @@ import MediaPreview from "@/components/Partials/MediaPreview";
 
 interface MediaCardProps {
 	media: MediaResponse;
-	rowTarget: ReturnType<typeof useRowTarget<"clear" | "delete" | "update">>;
+	rowTarget: ReturnType<
+		typeof useRowTarget<
+			"clear" | "delete" | "update" | "restore" | "deletePermanently"
+		>
+	>;
 	contentLocale?: string;
+	showingDeleted?: Accessor<boolean>;
 }
 
 export const MediaCardLoading: Component = () => {
@@ -78,6 +83,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTrigger("update", true);
 							},
 							permission: hasUpdatePermission(),
+							hide: props.showingDeleted?.(),
 						},
 						{
 							label: T()("clear_processed"),
@@ -97,6 +103,30 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTrigger("delete", true);
 							},
 							permission: userStore.get.hasPermission(["delete_media"]).all,
+							hide: props.showingDeleted?.(),
+							theme: "error",
+						},
+						{
+							label: T()("restore"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("restore", true);
+							},
+							permission: userStore.get.hasPermission(["update_media"]).all,
+							hide: props.showingDeleted?.() === false,
+							theme: "primary",
+						},
+						{
+							label: T()("delete_permanently"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("deletePermanently", true);
+							},
+							permission: userStore.get.hasPermission(["delete_media"]).all,
+							hide: props.showingDeleted?.() === false,
+							theme: "error",
 						},
 					]}
 					options={{

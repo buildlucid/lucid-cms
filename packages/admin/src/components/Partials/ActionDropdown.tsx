@@ -18,6 +18,7 @@ export interface ActionDropdownProps {
 		hide?: boolean;
 		isLoading?: boolean;
 		actionExclude?: boolean;
+		theme?: "error" | "primary";
 	}>;
 	options?: {
 		border?: boolean;
@@ -107,6 +108,10 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 												}}
 												class={classNames(liItemClasses, {
 													"cursor-not-allowed": action.permission === false,
+													"hover:bg-error-hover hover:text-error-contrast":
+														action.theme === "error",
+													"hover:bg-primary-base hover:text-primary-contrast":
+														action.theme === "primary",
 												})}
 											>
 												<span class="line-clamp-1 mr-2.5">{action.label}</span>

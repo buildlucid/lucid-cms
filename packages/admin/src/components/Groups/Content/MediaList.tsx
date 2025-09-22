@@ -27,11 +27,13 @@ import {
 	SelectedActionPill,
 } from "@/components/Groups/MediaLibrary";
 import mediaStore from "@/store/mediaStore";
+import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
+import DeleteMediaPermanently from "@/components/Modals/Media/DeleteMediaPermanently";
 
 export const MediaList: Component<{
 	state: {
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
-		isDeleted: Accessor<boolean>;
+		showingDeleted: Accessor<boolean>;
 		setOpenCreateMediaPanel: (state: boolean) => void;
 		parentFolderId: Accessor<number | string>;
 	};
@@ -43,13 +45,17 @@ export const MediaList: Component<{
 			update: false,
 			delete: false,
 			clear: false,
+			restore: false,
+			deletePermanently: false,
 		},
 	});
 
 	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
-	const isDeleted = createMemo(() => (props.state.isDeleted() ? 1 : 0));
+	const isDeletedFilter = createMemo(() =>
+		props.state.showingDeleted() ? 1 : 0,
+	);
 
 	// ----------------------------------
 	// Queries
@@ -58,7 +64,7 @@ export const MediaList: Component<{
 			queryString: props.state.searchParams.getQueryString,
 			filters: {
 				folderId: props.state.parentFolderId,
-				isDeleted: isDeleted,
+				isDeleted: isDeletedFilter,
 			},
 			headers: {
 				"lucid-content-locale": contentLocale,
@@ -121,7 +127,7 @@ export const MediaList: Component<{
 			}}
 		>
 			{/* Folders */}
-			<Show when={!props.state.isDeleted()}>
+			<Show when={!props.state.showingDeleted()}>
 				<div class="flex flex-col mb-4">
 					<h3 class="mb-1">{T()("folders")}</h3>
 					<Breadcrumbs
@@ -148,7 +154,7 @@ export const MediaList: Component<{
 			</Show>
 
 			{/* Media */}
-			<Show when={!props.state.isDeleted()}>
+			<Show when={!props.state.showingDeleted()}>
 				<h3 class="mb-4 ">{T()("media")}</h3>
 			</Show>
 			<Grid
@@ -167,6 +173,7 @@ export const MediaList: Component<{
 							media={item}
 							rowTarget={rowTarget}
 							contentLocale={contentLocale()}
+							showingDeleted={props.state.showingDeleted}
 						/>
 					)}
 				</For>
@@ -203,6 +210,24 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().delete,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("delete", state);
+					},
+				}}
+			/>
+			<DeleteMediaPermanently
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().deletePermanently,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deletePermanently", state);
+					},
+				}}
+			/>
+			<RestoreMedia
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().restore,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("restore", state);
 					},
 				}}
 			/>

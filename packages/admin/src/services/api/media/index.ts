@@ -6,6 +6,7 @@ import useDeleteAllProcessedImages from "./useDeleteAllProcessedImages";
 import useDeleteProcessedImages from "./useDeleteProcessedImages";
 import useCreateSingle from "./useCreateSingle";
 import useGetPresignedUrl from "./useGetPresignedUrl";
+import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 
 const exportObject: {
 	useGetMultiple: typeof useGetMultiple;
@@ -16,6 +17,7 @@ const exportObject: {
 	useDeleteProcessedImages: typeof useDeleteProcessedImages;
 	useCreateSingle: typeof useCreateSingle;
 	useGetPresignedUrl: typeof useGetPresignedUrl;
+	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
 } = {
 	useGetMultiple,
 	useGetSingle,
@@ -25,6 +27,7 @@ const exportObject: {
 	useDeleteProcessedImages,
 	useCreateSingle,
 	useGetPresignedUrl,
+	useDeleteSinglePermanently,
 };
 
 export default exportObject;

@@ -1,4 +1,4 @@
-import T from "@/translations";
+import T, { type TranslationKeys } from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody } from "@types";
@@ -22,6 +22,7 @@ interface Params {
 		averageColor?: string | null;
 		isDark?: boolean | null;
 		isLight?: boolean | null;
+		isDeleted?: boolean | null;
 	};
 }
 
@@ -39,6 +40,10 @@ export const updateSingleReq = (params: Params) => {
 interface UseUpdateSingleProps {
 	onSuccess?: () => void;
 	onError?: () => void;
+	toast?: {
+		title?: TranslationKeys;
+		message?: TranslationKeys;
+	};
 }
 
 const useUpdateSingle = (props?: UseUpdateSingleProps) => {
@@ -47,8 +52,8 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: updateSingleReq,
 		getSuccessToast: () => ({
-			title: T()("media_update_toast_title"),
-			message: T()("media_update_toast_message"),
+			title: T()(props?.toast?.title ?? "media_update_toast_title"),
+			message: T()(props?.toast?.message ?? "media_update_toast_message"),
 		}),
 		invalidates: ["media.getMultiple", "media.getSingle"],
 		onSuccess: props?.onSuccess,

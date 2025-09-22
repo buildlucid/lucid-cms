@@ -7,10 +7,11 @@ import en from "./en.json";
 
 const supportedLocales = ["en"] as const;
 export type SupportedLocales = (typeof supportedLocales)[number];
+export type TranslationKeys = keyof typeof en;
 
 export const [getLocale, setLocale] = createSignal<SupportedLocales>("en");
 
-i18next.init<keyof typeof en>({
+i18next.init<TranslationKeys>({
 	lng: getLocale(),
 	debug: false,
 	resources: {
@@ -25,7 +26,7 @@ const T = createMemo(() => {
 	i18next.changeLanguage(getLocale());
 	document.documentElement.lang = getLocale();
 	return i18next.t.bind(i18next) as (
-		key: keyof typeof en,
+		key: TranslationKeys,
 		data?: Record<string, string | number | undefined>,
 	) => string;
 });

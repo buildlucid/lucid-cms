@@ -70,6 +70,8 @@ const updateSingleController = factory.createHandlers(
 				averageColor: body.averageColor,
 				isDark: body.isDark,
 				isLight: body.isLight,
+				isDeleted: body.isDeleted,
+				userId: c.get("auth").id,
 			},
 		);
 		if (updateMedia.error) throw new LucidAPIError(updateMedia.error);
