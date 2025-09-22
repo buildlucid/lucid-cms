@@ -67,6 +67,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		deleted_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
+		updated_by: z.number().nullable(),
+		created_by: z.number().nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -92,6 +94,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		deleted_by: this.dbAdapter.getDataType("integer"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
+		updated_by: this.dbAdapter.getDataType("integer"),
+		created_by: this.dbAdapter.getDataType("integer"),
 	};
 	queryConfig = {
 		tableKeys: {
