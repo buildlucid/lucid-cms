@@ -1,11 +1,12 @@
-import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+// TODO: when queues are implemented, refer back to how media should be deleted here on this same commit as this message
 const deleteSingle: ServiceFn<
 	[
 		{
 			id: number;
+			userId: number;
 		},
 	],
 	undefined
@@ -15,14 +16,7 @@ const deleteSingle: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = Repository.get("media", context.db, context.config.db);
-	const ProcessedImages = Repository.get(
-		"processed-images",
-		context.db,
-		context.config.db,
-	);
-
-	const getMediaRes = await Media.selectSingle({
-		select: ["key"],
+	const deleteMediaRes = await Media.updateSingle({
 		where: [
 			{
 				key: "id",
@@ -30,74 +24,16 @@ const deleteSingle: ServiceFn<
 				value: data.id,
 			},
 		],
+		data: {
+			is_deleted: true,
+			is_deleted_at: new Date().toISOString(),
+			deleted_by: data.userId,
+		},
 		validation: {
-			enabled: true,
-			defaultError: {
-				message: T("media_not_found_message"),
-				status: 404,
-			},
+			enabled: false,
 		},
 	});
-	if (getMediaRes.error) return getMediaRes;
-
-	const [processedImagesRes, deleteMediaRes] = await Promise.all([
-		ProcessedImages.selectMultiple({
-			select: ["key", "file_size"],
-			where: [
-				{
-					key: "media_key",
-					operator: "=",
-					value: getMediaRes.data.key,
-				},
-			],
-			validation: {
-				enabled: true,
-			},
-		}),
-		Media.deleteSingle({
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
-				},
-			],
-			returning: [
-				"file_size",
-				"id",
-				"key",
-				"title_translation_key_id",
-				"alt_translation_key_id",
-			],
-			validation: {
-				enabled: true,
-			},
-		}),
-	]);
-	if (processedImagesRes.error) return processedImagesRes;
 	if (deleteMediaRes.error) return deleteMediaRes;
-
-	const [_, deleteObjectRes, deleteTranslationsRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(
-			processedImagesRes.data.map((i) => i.key),
-		),
-		context.services.media.strategies.delete(context, {
-			key: deleteMediaRes.data.key,
-			size: deleteMediaRes.data.file_size,
-			processedSize: processedImagesRes.data.reduce(
-				(acc, i) => acc + i.file_size,
-				0,
-			),
-		}),
-		context.services.translation.deleteMultiple(context, {
-			ids: [
-				deleteMediaRes.data.title_translation_key_id,
-				deleteMediaRes.data.alt_translation_key_id,
-			],
-		}),
-	]);
-	if (deleteObjectRes.error) return deleteObjectRes;
-	if (deleteTranslationsRes.error) return deleteTranslationsRes;
 
 	return {
 		error: undefined,

@@ -33,6 +33,9 @@ export interface MediaPropsT {
 	title_translation_value?: string | null;
 	alt_translation_value?: string | null;
 	folder_id: number | null;
+	is_deleted: BooleanInt;
+	is_deleted_at: Date | string | null;
+	deleted_by: number | null;
 }
 
 export default class MediaFormatter {
@@ -85,6 +88,9 @@ export default class MediaFormatter {
 				isDark: Formatter.formatBoolean(props.media.is_dark),
 				isLight: Formatter.formatBoolean(props.media.is_light),
 			},
+			isDeleted: Formatter.formatBoolean(props.media.is_deleted),
+			isDeletedAt: Formatter.formatDate(props.media.is_deleted_at),
+			deletedBy: props.media.deleted_by,
 			createdAt: Formatter.formatDate(props.media.created_at),
 			updatedAt: Formatter.formatDate(props.media.updated_at),
 		};

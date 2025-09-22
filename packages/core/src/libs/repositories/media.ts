@@ -59,6 +59,12 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			)
 			.optional(),
 		custom_meta: z.string().nullable(),
+		is_deleted: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
+		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
+		deleted_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
@@ -81,6 +87,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		title_translation_key_id: this.dbAdapter.getDataType("integer"),
 		alt_translation_key_id: this.dbAdapter.getDataType("integer"),
 		custom_meta: this.dbAdapter.getDataType("text"),
+		is_deleted: this.dbAdapter.getDataType("boolean"),
+		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
+		deleted_by: this.dbAdapter.getDataType("integer"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
@@ -92,6 +101,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				type: "type",
 				extension: "file_extension",
 				folderId: "folder_id",
+				isDeleted: "is_deleted",
+				deletedBy: "deleted_by",
 			},
 			sorts: {
 				createdAt: "created_at",
@@ -101,6 +112,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				height: "height",
 				mimeType: "mime_type",
 				extension: "file_extension",
+				deletedBy: "deleted_by",
+				isDeletedAt: "is_deleted_at",
 			},
 		},
 	} as const;
@@ -136,6 +149,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"average_color",
 				"is_dark",
 				"is_light",
+				"is_deleted",
+				"is_deleted_at",
+				"deleted_by",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -199,6 +215,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"average_color",
 				"is_dark",
 				"is_light",
+				"is_deleted",
+				"is_deleted_at",
+				"deleted_by",
 				"title_translations",
 				"alt_translations",
 			],
@@ -233,6 +252,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"average_color",
 				"is_dark",
 				"is_light",
+				"is_deleted",
+				"is_deleted_at",
+				"deleted_by",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -296,6 +318,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"average_color",
 				"is_dark",
 				"is_light",
+				"is_deleted",
+				"is_deleted_at",
+				"deleted_by",
 				"title_translations",
 				"alt_translations",
 			],
@@ -333,6 +358,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.alt_translation_key_id",
 						"lucid_media.created_at",
 						"lucid_media.updated_at",
+						"lucid_media.is_deleted",
+						"lucid_media.is_deleted_at",
+						"lucid_media.deleted_by",
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb
@@ -478,6 +506,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"average_color",
 				"is_dark",
 				"is_light",
+				"is_deleted",
+				"is_deleted_at",
+				"deleted_by",
 				"title_translations",
 				"alt_translations",
 			],

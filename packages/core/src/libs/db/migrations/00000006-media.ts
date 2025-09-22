@@ -95,6 +95,18 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 							.onUpdate("cascade"),
 				)
 				.addColumn("custom_meta", adapter.getDataType("text"))
+				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.getDefault("boolean", "false"),
+						),
+					),
+				)
+				.addColumn("is_deleted_at", adapter.getDataType("timestamp"))
+				.addColumn("deleted_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -110,6 +122,12 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 							adapter.getDefault("timestamp", "now"),
 						),
 					),
+				)
+				.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
 				)
 				.execute();
 

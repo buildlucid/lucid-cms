@@ -84,6 +84,18 @@ const mediaResponseSchema = z.object({
 		.meta({
 			description: "Media metadata",
 		}),
+	isDeleted: z.boolean().nullable().meta({
+		description: "Whether the media is deleted",
+		example: true,
+	}),
+	isDeletedAt: z.string().nullable().meta({
+		description: "The date the media was deleted",
+		example: "2022-01-01T00:00:00Z",
+	}),
+	deletedBy: z.number().nullable().meta({
+		description: "The user who deleted the media",
+		example: 1,
+	}),
 	createdAt: z.string().meta({
 		description: "Creation timestamp",
 		example: "2022-01-01T00:00:00Z",
@@ -118,6 +130,12 @@ export const controllerSchemas = {
 					"filter[extension]": queryString.schema.filter(true, {
 						example: "jpg,png",
 					}),
+					"filter[isDeleted]": queryString.schema.filter(true, {
+						example: "true",
+					}),
+					"filter[deletedBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,title,mimeType,extension",
 					),
@@ -134,6 +152,8 @@ export const controllerSchemas = {
 						folderId: queryFormatted.schema.filters.single.optional(),
 						type: queryFormatted.schema.filters.union.optional(),
 						extension: queryFormatted.schema.filters.union.optional(),
+						isDeleted: queryFormatted.schema.filters.single.optional(),
+						deletedBy: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
 				sort: z
@@ -148,6 +168,8 @@ export const controllerSchemas = {
 								"height",
 								"mimeType",
 								"extension",
+								"deletedBy",
+								"isDeletedAt",
 							]),
 							value: z.enum(["asc", "desc"]),
 						}),

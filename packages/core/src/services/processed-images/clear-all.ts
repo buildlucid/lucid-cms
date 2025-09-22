@@ -1,9 +1,10 @@
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
+// TODO: push this to a queue
 const clearAll: ServiceFn<[], undefined> = async (context) => {
 	const mediaStrategyRes =
-		await context.services.media.checks.checkHasMediaStrategy(context);
+		context.services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const ProcessedImages = Repository.get(

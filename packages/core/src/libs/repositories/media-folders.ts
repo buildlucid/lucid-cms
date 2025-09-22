@@ -43,6 +43,43 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 
 	// ----------------------------------------
 	// queries
+	async getDescendantIds(props: { folderIds: number[] }) {
+		const query = this.db
+			.withRecursive("desc_folders", (db) =>
+				db
+					.selectFrom("lucid_media_folders")
+					.select(["id", "parent_folder_id"])
+					.where("id", "in", props.folderIds)
+					.unionAll(
+						db
+							.selectFrom("lucid_media_folders")
+							.innerJoin(
+								"desc_folders",
+								"desc_folders.id",
+								"lucid_media_folders.parent_folder_id",
+							)
+							.select([
+								"lucid_media_folders.id",
+								"lucid_media_folders.parent_folder_id",
+							]),
+					),
+			)
+			.selectFrom("desc_folders")
+			.select(["id"])
+			.groupBy(["id"]);
+
+		const exec = await this.executeQuery(
+			() => query.execute() as Promise<{ id: number }[]>,
+			{ method: "getDescendantIds" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "multiple",
+			select: ["id"],
+		});
+	}
 	async checkCircularParents(props: {
 		folderId: number;
 		parentFolderId: number;

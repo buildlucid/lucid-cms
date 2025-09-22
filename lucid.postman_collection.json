@@ -1739,6 +1739,41 @@
 					"response": []
 				},
 				{
+					"name": "Move Folder",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"folderId\": 8\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/4/move",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"4",
+								"move"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Single",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -1884,6 +1919,41 @@
 					"response": []
 				},
 				{
+					"name": "Delete Batch",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"folderIds\": [5],\n\t\"mediaIds\": [],\n\t\"recursiveMedia\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/batch",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"batch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Delete Processed Images Single",
 					"request": {
 						"method": "DELETE",
@@ -2018,7 +2088,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/media/folders?filter[parentFolderId]=",
+							"raw": "{{BASE_URL}}/api/v1/media/folders?filter[parentFolderId]=1",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -2051,7 +2121,7 @@
 								},
 								{
 									"key": "filter[parentFolderId]",
-									"value": ""
+									"value": "1"
 								}
 							]
 						}
@@ -2070,7 +2140,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"title\": \"Folder 1.2\",\n\t\"parentFolderId\": 1\n}",
+							"raw": "{\n\t\"title\": \"Folder 1.1.1\",\n\t\"parentFolderId\": 5\n}",
 							"options": {
 								"raw": {
 									"language": "json"
