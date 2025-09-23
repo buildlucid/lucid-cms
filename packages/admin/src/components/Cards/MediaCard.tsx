@@ -1,15 +1,16 @@
 import T from "@/translations";
-import { type Accessor, type Component, createMemo } from "solid-js";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import classNames from "classnames";
 import userStore from "@/store/userStore";
 import type { MediaResponse } from "@types";
 import type useRowTarget from "@/hooks/useRowTarget";
 import helpers from "@/utils/helpers";
 import AspectRatio from "@/components/Partials/AspectRatio";
-import Pill from "@/components/Partials/Pill";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import { Checkbox } from "@/components/Groups/Form";
+import mediaStore from "@/store/mediaStore";
 
 interface MediaCardProps {
 	media: MediaResponse;
@@ -44,12 +45,14 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const hasUpdatePermission = createMemo(() => {
 		return userStore.get.hasPermission(["update_media"]).all;
 	});
-
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
 	const alt = createMemo(() => {
 		return helpers.getTranslation(props.media.alt, props.contentLocale);
+	});
+	const isSelected = createMemo(() => {
+		return mediaStore.get.selectedMedia.includes(props.media.id);
 	});
 
 	// ----------------------------------
@@ -72,7 +75,24 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyDown={() => {}}
 			onKeyPress={() => {}}
 		>
-			<div class="absolute top-3 right-3 z-10">
+			<Show when={hasUpdatePermission() && !props.showingDeleted?.()}>
+				<div class="absolute top-3 left-3 z-10">
+					<Checkbox
+						value={isSelected()}
+						onChange={() => {
+							if (isSelected()) {
+								mediaStore.get.removeSelectedMedia(props.media.id);
+							} else {
+								mediaStore.get.addSelectedMedia(props.media.id);
+							}
+						}}
+						copy={{}}
+						theme="fit"
+						noMargin={true}
+					/>
+				</div>
+			</Show>
+			<div class="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100">
 				<ActionDropdown
 					actions={[
 						{
@@ -137,12 +157,6 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			{/* Image */}
 			<AspectRatio ratio="16:9" innerClass={"overflow-hidden"}>
 				<MediaPreview media={props.media} alt={alt() || title() || ""} />
-				<span class="inset-0 top-auto absolute flex gap-1 p-3">
-					<Pill theme="secondary">
-						{helpers.bytesToSize(props.media.meta.fileSize)}
-					</Pill>
-					<Pill theme="secondary">{props.media.meta.extension}</Pill>
-				</span>
 			</AspectRatio>
 			{/* Content */}
 			<div class="p-3 border-t border-border">
