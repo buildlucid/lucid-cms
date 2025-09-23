@@ -20,7 +20,6 @@ import type {
 } from "./types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
-import Migration00000002 from "./migrations/00000002-translations.js";
 import Migration00000003 from "./migrations/00000003-options.js";
 import Migration00000004 from "./migrations/00000004-users-and-permissions.js";
 import Migration00000005 from "./migrations/00000005-emails.js";
@@ -221,7 +220,6 @@ export default abstract class DatabaseAdapter {
 	get migrations() {
 		return {
 			"00000001-locales": Migration00000001(this),
-			"00000002-translations": Migration00000002(this),
 			"00000003-options": Migration00000003(this),
 			"00000004-users-and-permissions": Migration00000004(this),
 			"00000005-emails": Migration00000005(this),

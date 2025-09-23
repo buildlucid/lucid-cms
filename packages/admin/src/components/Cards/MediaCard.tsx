@@ -72,7 +72,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyDown={() => {}}
 			onKeyPress={() => {}}
 		>
-			<div class="absolute top-4 right-4 z-10">
+			<div class="absolute top-3 right-3 z-10">
 				<ActionDropdown
 					actions={[
 						{
@@ -137,7 +137,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			{/* Image */}
 			<AspectRatio ratio="16:9" innerClass={"overflow-hidden"}>
 				<MediaPreview media={props.media} alt={alt() || title() || ""} />
-				<span class="inset-0 top-auto absolute flex gap-1 p-4">
+				<span class="inset-0 top-auto absolute flex gap-1 p-3">
 					<Pill theme="secondary">
 						{helpers.bytesToSize(props.media.meta.fileSize)}
 					</Pill>
@@ -145,12 +145,15 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				</span>
 			</AspectRatio>
 			{/* Content */}
-			<div class="p-4 border-t border-border">
-				<h3 class="mb-0.5 line-clamp-1">{title() || T()("no_translation")}</h3>
+			<div class="p-3 border-t border-border">
+				<h3 class="mb-0.5 line-clamp-1 text-sm">
+					{title() || T()("no_translation")}
+				</h3>
 				<ClickToCopy
 					type="simple"
 					text={props.media.key}
 					value={props.media.url}
+					class="text-xs"
 				/>
 			</div>
 		</li>

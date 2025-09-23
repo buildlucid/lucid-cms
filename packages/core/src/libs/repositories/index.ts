@@ -8,13 +8,12 @@ import EmailsRepository from "./emails.js";
 import LocalesRepository from "./locales.js";
 import MediaRepository from "./media.js";
 import MediaAwaitingSyncRepository from "./media-awaiting-sync.js";
+import MediaTranslationsRepository from "./media-translations.js";
 import MediaFoldersRepository from "./media-folders.js";
 import OptionsRepository from "./options.js";
 import ProcessedImagesRepository from "./processed-images.js";
 import RolePermissionsRepository from "./role-permissions.js";
 import RolesRepository from "./roles.js";
-import TranslationKeysRepository from "./translation-keys.js";
-import TranslationsRepository from "./translations.js";
 import UserRolesRepository from "./user-roles.js";
 import UsersRepository from "./users.js";
 import ClientIntegrationsRepository from "./client-integrations.js";
@@ -74,6 +73,11 @@ class Repository {
 				return new LocalesRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "media":
 				return new MediaRepository(db, dbAdapter) as RepositoryReturnType<T>;
+			case "media-translations":
+				return new MediaTranslationsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "media-awaiting-sync":
 				return new MediaAwaitingSyncRepository(
 					db,
@@ -98,16 +102,6 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "roles":
 				return new RolesRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "translation-keys":
-				return new TranslationKeysRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "translations":
-				return new TranslationsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
 			case "user-roles":
 				return new UserRolesRepository(
 					db,
@@ -138,14 +132,13 @@ type RepositoryClassMap = {
 	"email-transactions": EmailTransactionsRepository;
 	locales: LocalesRepository;
 	media: MediaRepository;
+	"media-translations": MediaTranslationsRepository;
 	"media-awaiting-sync": MediaAwaitingSyncRepository;
 	"media-folders": MediaFoldersRepository;
 	options: OptionsRepository;
 	"processed-images": ProcessedImagesRepository;
 	"role-permissions": RolePermissionsRepository;
 	roles: RolesRepository;
-	"translation-keys": TranslationKeysRepository;
-	translations: TranslationsRepository;
 	"user-roles": UserRolesRepository;
 	users: UsersRepository;
 	"client-integrations": ClientIntegrationsRepository;

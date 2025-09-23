@@ -76,24 +76,6 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("average_color", adapter.getDataType("text"))
 				.addColumn("is_dark", adapter.getDataType("boolean"))
 				.addColumn("is_light", adapter.getDataType("boolean"))
-				.addColumn(
-					"title_translation_key_id",
-					adapter.getDataType("integer"),
-					(col) =>
-						col
-							.references("lucid_translation_keys.id")
-							.onDelete("set null")
-							.onUpdate("cascade"),
-				)
-				.addColumn(
-					"alt_translation_key_id",
-					adapter.getDataType("integer"),
-					(col) =>
-						col
-							.references("lucid_translation_keys.id")
-							.onDelete("set null")
-							.onUpdate("cascade"),
-				)
 				.addColumn("custom_meta", adapter.getDataType("text"))
 				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
@@ -135,6 +117,42 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_media_key")
 				.on("lucid_media")
 				.column("key")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_media_translations")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("media_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_media.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("locale_code", adapter.getDataType("text"), (col) =>
+					col
+						.references("lucid_locales.code")
+						.notNull()
+						.onDelete("cascade")
+						.onUpdate("cascade"),
+				)
+				.addColumn("title", adapter.getDataType("text"))
+				.addColumn("alt", adapter.getDataType("text"))
+				.addUniqueConstraint(
+					"lucid_media_translations_media_id_locale_code_unique",
+					["media_id", "locale_code"],
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_media_translations_media_id")
+				.on("lucid_media_translations")
+				.column("media_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_media_translations_locale")
+				.on("lucid_media_translations")
+				.columns(["media_id", "locale_code"])
+				.unique()
 				.execute();
 
 			await db.schema

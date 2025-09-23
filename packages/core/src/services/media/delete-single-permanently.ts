@@ -63,13 +63,7 @@ const deleteSinglePermanently: ServiceFn<
 					value: data.id,
 				},
 			],
-			returning: [
-				"file_size",
-				"id",
-				"key",
-				"title_translation_key_id",
-				"alt_translation_key_id",
-			],
+			returning: ["file_size", "id", "key"],
 			validation: {
 				enabled: true,
 			},
@@ -78,7 +72,7 @@ const deleteSinglePermanently: ServiceFn<
 	if (processedImagesRes.error) return processedImagesRes;
 	if (deleteMediaRes.error) return deleteMediaRes;
 
-	const [_, deleteObjectRes, deleteTranslationsRes] = await Promise.all([
+	const [_, deleteObjectRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple(
 			processedImagesRes.data.map((i) => i.key),
 		),
@@ -90,15 +84,8 @@ const deleteSinglePermanently: ServiceFn<
 				0,
 			),
 		}),
-		context.services.translation.deleteMultiple(context, {
-			ids: [
-				deleteMediaRes.data.title_translation_key_id,
-				deleteMediaRes.data.alt_translation_key_id,
-			],
-		}),
 	]);
 	if (deleteObjectRes.error) return deleteObjectRes;
-	if (deleteTranslationsRes.error) return deleteTranslationsRes;
 
 	return {
 		error: undefined,

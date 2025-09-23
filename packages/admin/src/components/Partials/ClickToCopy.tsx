@@ -2,12 +2,14 @@ import T from "@/translations";
 import { type Component, Switch, Match } from "solid-js";
 import { FaSolidCopy } from "solid-icons/fa";
 import spawnToast from "@/utils/spawn-toast";
+import classNames from "classnames";
 
 interface ClickToCopyProps {
 	type: "simple";
 
 	text: string;
 	value: string;
+	class?: string;
 }
 
 const ClickToCopy: Component<ClickToCopyProps> = (props) => {
@@ -31,7 +33,10 @@ const ClickToCopy: Component<ClickToCopyProps> = (props) => {
 				<button
 					type="button"
 					onClick={copyToClipboard}
-					class="duration-200 cursor-copy transition-colors flex items-center max-w-full text-title fill-title whitespace-nowrap text-base hover:text-primary-hover hover:fill-primary-hover"
+					class={classNames(
+						"duration-200 cursor-copy transition-colors flex items-center max-w-full text-title fill-title whitespace-nowrap text-base hover:text-primary-hover hover:fill-primary-hover",
+						props.class,
+					)}
 				>
 					<FaSolidCopy class="mr-2" />
 					<span class="text-ellipsis overflow-hidden text-sm">

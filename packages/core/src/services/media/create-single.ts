@@ -1,9 +1,6 @@
-import {
-	mergeTranslationGroups,
-	getUniqueLocaleCodes,
-} from "../../utils/translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 
 const createSingle: ServiceFn<
 	[
@@ -32,38 +29,24 @@ const createSingle: ServiceFn<
 	number
 > = async (context, data) => {
 	const Media = Repository.get("media", context.db, context.config.db);
+	const MediaTranslations = Repository.get(
+		"media-translations",
+		context.db,
+		context.config.db,
+	);
 	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
 		context.config.db,
 	);
 
-	const [localeExistsRes, awaitingSyncRes] = await Promise.all([
-		context.services.locale.checks.checkLocalesExist(context, {
-			localeCodes: getUniqueLocaleCodes([data.title || [], data.alt || []]),
-		}),
-		context.services.media.checks.checkAwaitingSync(context, {
+	const awaitingSyncRes = await context.services.media.checks.checkAwaitingSync(
+		context,
+		{
 			key: data.key,
-		}),
-	]);
-	if (localeExistsRes.error) return localeExistsRes;
+		},
+	);
 	if (awaitingSyncRes.error) return awaitingSyncRes;
-
-	const translationKeyIdsRes =
-		await context.services.translation.createMultiple(context, {
-			keys: ["title", "alt"],
-			translations: mergeTranslationGroups([
-				{
-					translations: data.title || [],
-					key: "title",
-				},
-				{
-					translations: data.alt || [],
-					key: "alt",
-				},
-			]),
-		});
-	if (translationKeyIdsRes.error) return translationKeyIdsRes;
 
 	const syncMediaRes = await context.services.media.strategies.syncMedia(
 		context,
@@ -86,8 +69,6 @@ const createSingle: ServiceFn<
 				file_size: syncMediaRes.data.size,
 				width: data.width ?? null,
 				height: data.height ?? null,
-				title_translation_key_id: translationKeyIdsRes.data.title,
-				alt_translation_key_id: translationKeyIdsRes.data.alt,
 				blur_hash: data.blurHash ?? null,
 				average_color: data.averageColor ?? null,
 				is_dark: data.isDark ?? null,
@@ -124,6 +105,25 @@ const createSingle: ServiceFn<
 			},
 			data: undefined,
 		};
+	}
+
+	const translations = prepareMediaTranslations({
+		title: data.title || [],
+		alt: data.alt || [],
+		mediaId: mediaRes.data.id,
+	});
+	if (translations.length > 0) {
+		const mediaTranslationsRes = await MediaTranslations.upsertMultiple({
+			data: translations,
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
+		});
+		if (mediaTranslationsRes.error) {
+			await context.config.media?.strategy?.deleteSingle(syncMediaRes.data.key);
+			return mediaTranslationsRes;
+		}
 	}
 
 	return {

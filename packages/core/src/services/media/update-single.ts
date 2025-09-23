@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -29,6 +30,11 @@ const updateSingle: ServiceFn<
 	number | undefined
 > = async (context, data) => {
 	const Media = Repository.get("media", context.db, context.config.db);
+	const MediaTranslations = Repository.get(
+		"media-translations",
+		context.db,
+		context.config.db,
+	);
 	const MediaAwaitingSync = Repository.get(
 		"media-awaiting-sync",
 		context.db,
@@ -36,13 +42,7 @@ const updateSingle: ServiceFn<
 	);
 
 	const mediaRes = await Media.selectSingle({
-		select: [
-			"id",
-			"key",
-			"file_size",
-			"title_translation_key_id",
-			"alt_translation_key_id",
-		],
+		select: ["id", "key", "file_size"],
 		where: [
 			{
 				key: "id",
@@ -60,24 +60,21 @@ const updateSingle: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 
-	const upsertTranslationsRes =
-		await context.services.translation.upsertMultiple(context, {
-			keys: {
-				title: mediaRes.data.title_translation_key_id,
-				alt: mediaRes.data.alt_translation_key_id,
+	const translations = prepareMediaTranslations({
+		title: data.title || [],
+		alt: data.alt || [],
+		mediaId: mediaRes.data.id,
+	});
+	if (translations.length > 0) {
+		const mediaTranslationsRes = await MediaTranslations.upsertMultiple({
+			data: translations,
+			returning: ["id"],
+			validation: {
+				enabled: true,
 			},
-			items: [
-				{
-					translations: data.title || [],
-					key: "title",
-				},
-				{
-					translations: data.alt || [],
-					key: "alt",
-				},
-			],
 		});
-	if (upsertTranslationsRes.error) return upsertTranslationsRes;
+		if (mediaTranslationsRes.error) return mediaTranslationsRes;
+	}
 
 	// TODO: need better solution for partial updates before the bellow early returns when there is no key
 	if (data.isDeleted !== undefined) {

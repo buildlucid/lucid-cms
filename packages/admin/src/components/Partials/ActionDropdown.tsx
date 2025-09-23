@@ -30,7 +30,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// Classes
 	const liItemClasses =
-		"flex justify-between my-1 items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 text-title fill-dropdown-contrast";
+		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 text-title fill-dropdown-contrast";
 
 	// ----------------------------------------
 	// Render
@@ -59,14 +59,17 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 					rounded: true,
 				}}
 			>
-				<ul class="divide-border divide-y">
+				<ul class="flex flex-col gap-y-1">
 					<For each={props.actions}>
 						{(action) => (
 							<Show when={action.hide !== true}>
 								<li
-									class={classNames({
-										"opacity-50": action.permission === false,
-									})}
+									class={classNames(
+										"flex border-b border-border last:border-b-0 pb-1 last:pb-0",
+										{
+											"opacity-50": action.permission === false,
+										},
+									)}
 								>
 									<Switch>
 										<Match when={action.type === "link"}>

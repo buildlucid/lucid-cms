@@ -4,7 +4,6 @@ import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import { createMediaUrl } from "../../../utils/media/index.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import { objectifyTranslations } from "../../../utils/translations/index.js";
 import Formatter from "../../formatters/index.js";
 import type { MediaType, ServiceResponse } from "../../../types.js";
 import type {
@@ -16,7 +15,7 @@ import type {
 	SchemaDefinition,
 } from "../types.js";
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
-import type { MediaPropsT } from "../../formatters/media.js";
+import MediaFormatter, { type MediaPropsT } from "../../formatters/media.js";
 
 class MediaCustomField extends CustomField<"media"> {
 	type = "media" as const;
@@ -90,12 +89,14 @@ class MediaCustomField extends CustomField<"media"> {
 			averageColor: value?.average_color ?? null,
 			isDark: Formatter.formatBoolean(value?.is_dark ?? null),
 			isLight: Formatter.formatBoolean(value?.is_light ?? null),
-			title: objectifyTranslations(
-				value?.title_translations || [],
+			title: MediaFormatter.objectifyTranslations(
+				"title",
+				value?.translations || [],
 				meta.localization.locales,
 			),
-			alt: objectifyTranslations(
-				value?.alt_translations || [],
+			alt: MediaFormatter.objectifyTranslations(
+				"alt",
+				value?.translations || [],
 				meta.localization.locales,
 			),
 			type: (value?.type as MediaType) ?? null,

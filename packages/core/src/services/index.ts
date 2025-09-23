@@ -15,7 +15,6 @@ import processedImage from "./processed-images/index.js";
 import roles from "./roles/index.js";
 import settings from "./settings/index.js";
 import license from "./license/index.js";
-import translations from "./translations/index.js";
 import users from "./users/index.js";
 import userTokens from "./user-tokens/index.js";
 import permissions from "./permissions/index.js";
@@ -47,7 +46,6 @@ const lucidServices = {
 	processedImage: processedImage,
 	cdn: cdn,
 	locale: locales,
-	translation: translations,
 	crons: crons,
 	permission: permissions,
 	seed: seed,

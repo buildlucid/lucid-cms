@@ -40,20 +40,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				z.literal(this.dbAdapter.config.defaults.boolean.false),
 			])
 			.nullable(),
-		title_translation_key_id: z.number().nullable(),
-		alt_translation_key_id: z.number().nullable(),
-		title_translations: z
+		translations: z
 			.array(
 				z.object({
-					value: z.string().nullable(),
-					locale_code: z.string().nullable(),
-				}),
-			)
-			.optional(),
-		alt_translations: z
-			.array(
-				z.object({
-					value: z.string().nullable(),
+					title: z.string().nullable(),
+					alt: z.string().nullable(),
 					locale_code: z.string().nullable(),
 				}),
 			)
@@ -86,8 +77,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		average_color: this.dbAdapter.getDataType("text"),
 		is_dark: this.dbAdapter.getDataType("boolean"),
 		is_light: this.dbAdapter.getDataType("boolean"),
-		title_translation_key_id: this.dbAdapter.getDataType("integer"),
-		alt_translation_key_id: this.dbAdapter.getDataType("integer"),
 		custom_meta: this.dbAdapter.getDataType("text"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
@@ -145,8 +134,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"file_size",
 				"width",
 				"height",
-				"title_translation_key_id",
-				"alt_translation_key_id",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -159,35 +146,19 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
-							.selectFrom("lucid_translations")
+							.selectFrom("lucid_media_translations")
 							.select([
-								"lucid_translations.value",
-								"lucid_translations.locale_code",
+								"lucid_media_translations.title",
+								"lucid_media_translations.alt",
+								"lucid_media_translations.locale_code",
 							])
-							.where("lucid_translations.value", "is not", null)
 							.whereRef(
-								"lucid_translations.translation_key_id",
+								"lucid_media_translations.media_id",
 								"=",
-								"lucid_media.title_translation_key_id",
+								"lucid_media.id",
 							),
 					)
-					.as("title_translations"),
-				this.dbAdapter
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_translations")
-							.select([
-								"lucid_translations.value",
-								"lucid_translations.locale_code",
-							])
-							.where("lucid_translations.value", "is not", null)
-							.whereRef(
-								"lucid_translations.translation_key_id",
-								"=",
-								"lucid_media.alt_translation_key_id",
-							),
-					)
-					.as("alt_translations"),
+					.as("translations"),
 			])
 			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "=", props.id);
@@ -211,8 +182,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"file_size",
 				"width",
 				"height",
-				"title_translation_key_id",
-				"alt_translation_key_id",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -222,8 +191,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
-				"title_translations",
-				"alt_translations",
+				"translations",
 			],
 		});
 	}
@@ -248,8 +216,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"file_size",
 				"width",
 				"height",
-				"title_translation_key_id",
-				"alt_translation_key_id",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -262,35 +228,19 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
-							.selectFrom("lucid_translations")
+							.selectFrom("lucid_media_translations")
 							.select([
-								"lucid_translations.value",
-								"lucid_translations.locale_code",
+								"lucid_media_translations.title",
+								"lucid_media_translations.alt",
+								"lucid_media_translations.locale_code",
 							])
-							.where("lucid_translations.value", "is not", null)
 							.whereRef(
-								"lucid_translations.translation_key_id",
+								"lucid_media_translations.media_id",
 								"=",
-								"lucid_media.title_translation_key_id",
+								"lucid_media.id",
 							),
 					)
-					.as("title_translations"),
-				this.dbAdapter
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_translations")
-							.select([
-								"lucid_translations.value",
-								"lucid_translations.locale_code",
-							])
-							.where("lucid_translations.value", "is not", null)
-							.whereRef(
-								"lucid_translations.translation_key_id",
-								"=",
-								"lucid_media.alt_translation_key_id",
-							),
-					)
-					.as("alt_translations"),
+					.as("translations"),
 			])
 			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "in", props.ids);
@@ -314,8 +264,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"file_size",
 				"width",
 				"height",
-				"title_translation_key_id",
-				"alt_translation_key_id",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -325,8 +273,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
-				"title_translations",
-				"alt_translations",
+				"translations",
 			],
 		});
 	}
@@ -358,8 +305,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.average_color",
 						"lucid_media.is_dark",
 						"lucid_media.is_light",
-						"lucid_media.title_translation_key_id",
-						"lucid_media.alt_translation_key_id",
 						"lucid_media.created_at",
 						"lucid_media.updated_at",
 						"lucid_media.is_deleted",
@@ -368,85 +313,35 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb
-									.selectFrom("lucid_translations")
+									.selectFrom("lucid_media_translations")
 									.select([
-										"lucid_translations.value",
-										"lucid_translations.locale_code",
+										"lucid_media_translations.title",
+										"lucid_media_translations.alt",
+										"lucid_media_translations.locale_code",
 									])
-									.where("lucid_translations.value", "is not", null)
 									.whereRef(
-										"lucid_translations.translation_key_id",
+										"lucid_media_translations.media_id",
 										"=",
-										"lucid_media.title_translation_key_id",
+										"lucid_media.id",
 									),
 							)
-							.as("title_translations"),
-						this.dbAdapter
-							.jsonArrayFrom(
-								eb
-									.selectFrom("lucid_translations")
-									.select([
-										"lucid_translations.value",
-										"lucid_translations.locale_code",
-									])
-									.where("lucid_translations.value", "is not", null)
-									.whereRef(
-										"lucid_translations.translation_key_id",
-										"=",
-										"lucid_media.alt_translation_key_id",
-									),
-							)
-							.as("alt_translations"),
+							.as("translations"),
 					])
-					.leftJoin("lucid_translations as title_translations", (join) =>
+					.leftJoin("lucid_media_translations as translation", (join) =>
 						join
-							.onRef(
-								"title_translations.translation_key_id",
-								"=",
-								"lucid_media.title_translation_key_id",
-							)
-							.on("title_translations.locale_code", "=", props.localeCode),
+							.onRef("translation.media_id", "=", "lucid_media.id")
+							.on("translation.locale_code", "=", props.localeCode),
 					)
-					.leftJoin("lucid_translations as alt_translations", (join) =>
-						join
-							.onRef(
-								"alt_translations.translation_key_id",
-								"=",
-								"lucid_media.alt_translation_key_id",
-							)
-							.on("alt_translations.locale_code", "=", props.localeCode),
-					)
-					.select([
-						"title_translations.value as title_translation_value",
-						"alt_translations.value as alt_translation_value",
-					])
-					.groupBy([
-						"lucid_media.id",
-						"title_translations.value",
-						"alt_translations.value",
-					])
+					.groupBy(["lucid_media.id", "translation.title", "translation.alt"])
 					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 				const countQuery = this.db
 					.selectFrom("lucid_media")
 					.select(sql`count(distinct lucid_media.id)`.as("count"))
-					.leftJoin("lucid_translations as title_translations", (join) =>
+					.leftJoin("lucid_media_translations as translation", (join) =>
 						join
-							.onRef(
-								"title_translations.translation_key_id",
-								"=",
-								"lucid_media.title_translation_key_id",
-							)
-							.on("title_translations.locale_code", "=", props.localeCode),
-					)
-					.leftJoin("lucid_translations as alt_translations", (join) =>
-						join
-							.onRef(
-								"alt_translations.translation_key_id",
-								"=",
-								"lucid_media.alt_translation_key_id",
-							)
-							.on("alt_translations.locale_code", "=", props.localeCode),
+							.onRef("translation.media_id", "=", "lucid_media.id")
+							.on("translation.locale_code", "=", props.localeCode),
 					)
 					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
@@ -460,11 +355,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						meta: {
 							tableKeys: {
 								filters: {
-									title: "title_translations.value",
+									title: "translation.title",
 									...this.queryConfig.tableKeys.filters,
 								},
 								sorts: {
-									title: "title_translations.value",
+									title: "translation.title",
 									...this.queryConfig.tableKeys.sorts,
 								},
 							},
@@ -502,8 +397,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"file_size",
 				"width",
 				"height",
-				"title_translation_key_id",
-				"alt_translation_key_id",
+				"translations",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -513,8 +407,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
-				"title_translations",
-				"alt_translations",
 			],
 		});
 	}

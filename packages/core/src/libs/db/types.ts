@@ -146,18 +146,6 @@ export interface LucidLocales {
 	is_deleted_at: TimestampMutateable;
 }
 
-export interface LucidTranslationKeys {
-	id: Generated<number>;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidTranslations {
-	id: Generated<number>;
-	translation_key_id: number;
-	locale_code: string;
-	value: string | null;
-}
-
 export interface LucidOptions {
 	name: OptionsName;
 	value_int: number | null;
@@ -286,8 +274,6 @@ export interface LucidMedia {
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	custom_meta: string | null;
-	title_translation_key_id: number | null;
-	alt_translation_key_id: number | null;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number | null;
@@ -295,6 +281,14 @@ export interface LucidMedia {
 	updated_at: TimestampMutateable;
 	created_by: number | null;
 	updated_by: number | null;
+}
+
+export interface LucidMediaTranslations {
+	id: Generated<number>;
+	media_id: number;
+	locale_code: string;
+	title: string | null;
+	alt: string | null;
 }
 
 export interface LucidMediaAwaitingSync {
@@ -396,8 +390,6 @@ export interface LucidBricksTable {
 // Database
 export interface LucidDB {
 	lucid_locales: LucidLocales;
-	lucid_translation_keys: LucidTranslationKeys;
-	lucid_translations: LucidTranslations;
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
 	lucid_roles: LucidRoles;
@@ -408,6 +400,7 @@ export interface LucidDB {
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
+	lucid_media_translations: LucidMediaTranslations;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_processed_images: HeadlessProcessedImages;
 	lucid_client_integrations: LucidClientIntegrations;

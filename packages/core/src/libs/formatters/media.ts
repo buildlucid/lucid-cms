@@ -2,7 +2,7 @@ import Formatter from "./index.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import type { BooleanInt } from "../../libs/db/types.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
-import type { Config, UrlStrategy } from "../../types/config.js";
+import type { UrlStrategy } from "../../types/config.js";
 
 export interface MediaPropsT {
 	id: number;
@@ -14,24 +14,17 @@ export interface MediaPropsT {
 	file_size: number;
 	width: number | null;
 	height: number | null;
-	title_translation_key_id: number | null;
-	alt_translation_key_id: number | null;
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 	blur_hash: string | null;
 	average_color: string | null;
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
-	title_translations?: Array<{
-		value: string | null;
+	translations?: Array<{
+		title: string | null;
+		alt: string | null;
 		locale_code: string | null;
 	}>;
-	alt_translations?: Array<{
-		value: string | null;
-		locale_code: string | null;
-	}>;
-	title_translation_value?: string | null;
-	alt_translation_value?: string | null;
 	folder_id: number | null;
 	is_deleted: BooleanInt;
 	is_deleted_at: Date | string | null;
@@ -39,6 +32,25 @@ export interface MediaPropsT {
 }
 
 export default class MediaFormatter {
+	static objectifyTranslations = (
+		target: "title" | "alt",
+		translations: {
+			title: string | null;
+			alt: string | null;
+			locale_code: string | null;
+		}[],
+		locales: Array<string>,
+	): Record<string, string> => {
+		return locales.reduce<Record<string, string>>(
+			(acc, locale) => ({
+				// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+				...acc,
+				[locale ?? ""]:
+					translations.find((t) => t.locale_code === locale)?.[target] ?? "",
+			}),
+			{},
+		);
+	};
 	formatMultiple = (props: {
 		media: MediaPropsT[];
 		host: string;
@@ -67,13 +79,13 @@ export default class MediaFormatter {
 				urlStrategy: props.urlStrategy,
 			}),
 			title:
-				props.media.title_translations?.map((t) => ({
-					value: t.value,
+				props.media.translations?.map((t) => ({
+					value: t.title,
 					localeCode: t.locale_code,
 				})) ?? [],
 			alt:
-				props.media.alt_translations?.map((t) => ({
-					value: t.value,
+				props.media.translations?.map((t) => ({
+					value: t.alt,
 					localeCode: t.locale_code,
 				})) ?? [],
 			type: props.media.type as MediaType,

@@ -1,51 +1,51 @@
 import z from "zod/v4";
 import StaticRepository from "./parents/static-repository.js";
-import queryBuilder from "../query-builder/index.js";
 import type {
 	KyselyDB,
 	Select,
+	LucidMediaTranslations,
 	Insert,
-	LucidTranslations,
 } from "../db/types.js";
-import type { QueryBuilderWhere } from "../query-builder/index.js";
-import type { QueryProps } from "./types.js";
 import type DatabaseAdapter from "../db/adapter.js";
-export default class TranslationsRepository extends StaticRepository<"lucid_translations"> {
+import type { QueryProps } from "./types.js";
+
+export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid_media_translations"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_translations");
+		super(db, dbAdapter, "lucid_media_translations");
 	}
 	tableSchema = z.object({
 		id: z.number(),
-		translation_key_id: z.number(),
+		media_id: z.number(),
 		locale_code: z.string(),
-		value: z.string().nullable(),
+		title: z.string().nullable(),
+		alt: z.string().nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
-		translation_key_id: this.dbAdapter.getDataType("integer"),
+		media_id: this.dbAdapter.getDataType("integer"),
 		locale_code: this.dbAdapter.getDataType("text"),
-		value: this.dbAdapter.getDataType("text"),
+		title: this.dbAdapter.getDataType("text"),
+		alt: this.dbAdapter.getDataType("text"),
 	};
 	queryConfig = undefined;
 
-	// ----------------------------------------
+	// ------------------------------------------
 	// queries
 	async upsertMultiple<
-		K extends keyof Select<LucidTranslations>,
+		K extends keyof Select<LucidMediaTranslations>,
 		V extends boolean = false,
 	>(
 		props: QueryProps<
 			V,
 			{
-				data: Partial<Insert<LucidTranslations>>[];
-				where: QueryBuilderWhere<"lucid_translations">;
+				data: Partial<Insert<LucidMediaTranslations>>[];
 				returning?: K[];
 				returnAll?: true;
 			}
 		>,
 	) {
-		let query = this.db
-			.insertInto("lucid_translations")
+		const query = this.db
+			.insertInto("lucid_media_translations")
 			.values(
 				props.data.map((d) =>
 					this.formatData(d, {
@@ -54,25 +54,26 @@ export default class TranslationsRepository extends StaticRepository<"lucid_tran
 				),
 			)
 			.onConflict((oc) =>
-				oc.columns(["translation_key_id", "locale_code"]).doUpdateSet((eb) => ({
-					value: eb.ref("excluded.value"),
+				oc.columns(["media_id", "locale_code"]).doUpdateSet((eb) => ({
+					title: eb.ref("excluded.title"),
+					alt: eb.ref("excluded.alt"),
 				})),
 			)
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&
 					props.returning.length > 0,
-				// @ts-expect-error
-				(qb) => qb.returning(props.returning),
+				(qb) => qb.returning(props.returning as K[]),
 			)
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
-		// @ts-expect-error
-		query = queryBuilder.update(query, props.where);
-
-		const exec = await this.executeQuery(() => query.execute(), {
-			method: "upsertMultiple",
-		});
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<Pick<Select<LucidMediaTranslations>, K>[]>,
+			{
+				method: "upsertMultiple",
+			},
+		);
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
