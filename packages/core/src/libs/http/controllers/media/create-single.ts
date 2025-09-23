@@ -67,6 +67,7 @@ const createSingleController = factory.createHandlers(
 				isDark: body.isDark,
 				isLight: body.isLight,
 				folderId: body.folderId,
+				userId: c.get("auth").id,
 			},
 		);
 		if (mediaIdRes.error) throw new LucidAPIError(mediaIdRes.error);

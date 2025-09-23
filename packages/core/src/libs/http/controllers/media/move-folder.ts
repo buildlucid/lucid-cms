@@ -60,6 +60,7 @@ const moveFolderController = factory.createHandlers(
 			{
 				id: Number.parseInt(id, 10),
 				folderId: body.folderId,
+				userId: c.get("auth").id,
 			},
 		);
 		if (updateMedia.error) throw new LucidAPIError(updateMedia.error);

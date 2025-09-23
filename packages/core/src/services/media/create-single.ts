@@ -26,6 +26,7 @@ const createSingle: ServiceFn<
 			}[];
 			public?: boolean;
 			folderId?: number | null;
+			userId: number;
 		},
 	],
 	number
@@ -92,6 +93,8 @@ const createSingle: ServiceFn<
 				is_dark: data.isDark ?? null,
 				is_light: data.isLight ?? null,
 				folder_id: data.folderId ?? null,
+				created_by: data.userId,
+				updated_by: data.userId,
 			},
 			returning: ["id"],
 		}),

@@ -7,6 +7,7 @@ const moveFolder: ServiceFn<
 		{
 			id: number;
 			folderId: number | null;
+			userId: number;
 		},
 	],
 	number | undefined
@@ -42,6 +43,7 @@ const moveFolder: ServiceFn<
 		],
 		data: {
 			folder_id: data.folderId,
+			updated_by: data.userId,
 		},
 		returning: ["id"],
 		validation: {

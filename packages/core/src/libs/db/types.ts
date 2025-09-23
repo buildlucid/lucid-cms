@@ -293,6 +293,8 @@ export interface LucidMedia {
 	deleted_by: number | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
+	created_by: number | null;
+	updated_by: number | null;
 }
 
 export interface LucidMediaAwaitingSync {

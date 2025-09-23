@@ -173,6 +173,7 @@ const updateSingle: ServiceFn<
 				average_color: data.averageColor,
 				is_dark: data.isDark,
 				is_light: data.isLight,
+				updated_by: data.userId,
 			},
 			returning: ["id"],
 			validation: {
