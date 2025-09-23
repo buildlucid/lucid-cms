@@ -12,8 +12,7 @@ export const SelectedActionPill: Component<{
 		addSelectedMedia: (media: number) => void;
 		resetSelectedFolders: () => void;
 		resetSelectedMedia: () => void;
-		deleteSelectedFolders: () => void;
-		deleteSelectedMedia: () => void;
+		deleteAction: () => void;
 	};
 }> = (props) => {
 	// ----------------------------------------
@@ -54,8 +53,7 @@ export const SelectedActionPill: Component<{
 							theme="danger"
 							size="small"
 							onClick={() => {
-								props.actions.deleteSelectedFolders();
-								props.actions.deleteSelectedMedia();
+								props.actions.deleteAction();
 							}}
 						>
 							{T()("delete")}

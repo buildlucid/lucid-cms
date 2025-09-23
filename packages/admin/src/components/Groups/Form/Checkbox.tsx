@@ -19,6 +19,7 @@ interface CheckboxInputProps {
 	errors?: ErrorResult | FieldError;
 	noMargin?: boolean;
 	theme: "full" | "basic" | "fit";
+	class?: string;
 }
 
 export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
@@ -28,7 +29,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classnames("relative", {
+			class={classnames("relative", props.class, {
 				"mb-0": props.noMargin,
 				"mb-4 last:mb-0": !props.noMargin,
 				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",

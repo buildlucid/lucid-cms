@@ -1,14 +1,13 @@
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, RoleResponse } from "@types";
 
 interface Params {
 	id: number;
 }
 
 export const deleteSingleReq = (params: Params) => {
-	return request<ResponseBody<RoleResponse>>({
+	return request<undefined>({
 		url: `/api/v1/media/${params.id}`,
 		csrf: true,
 		config: {
@@ -25,7 +24,7 @@ interface UseDeleteProps {
 const useDeleteSingle = (props: UseDeleteProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<RoleResponse>>({
+	return serviceHelpers.useMutationWrapper<Params, undefined>({
 		mutationFn: deleteSingleReq,
 		getSuccessToast: () => ({
 			title: T()("media_deleted_toast_title"),

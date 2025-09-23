@@ -1,12 +1,5 @@
 import T from "@/translations";
-import {
-	type Accessor,
-	type Component,
-	createMemo,
-	For,
-	onCleanup,
-	Show,
-} from "solid-js";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
@@ -18,6 +11,7 @@ import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
+import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
 import {
 	MediaFolderCardLoading,
 	MediaFolderCard,
@@ -47,6 +41,7 @@ export const MediaList: Component<{
 			clear: false,
 			restore: false,
 			deletePermanently: false,
+			deleteBatch: false,
 		},
 	});
 
@@ -189,8 +184,9 @@ export const MediaList: Component<{
 					addSelectedMedia: mediaStore.get.addSelectedMedia,
 					resetSelectedFolders: mediaStore.get.resetSelectedFolders,
 					resetSelectedMedia: mediaStore.get.resetSelectedMedia,
-					deleteSelectedFolders: () => {},
-					deleteSelectedMedia: () => {},
+					deleteAction: () => {
+						rowTarget.setTrigger("deleteBatch", true);
+					},
 				}}
 			/>
 
@@ -237,6 +233,14 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().clear,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("clear", state);
+					},
+				}}
+			/>
+			<DeleteMediaBatch
+				state={{
+					open: rowTarget.getTriggers().deleteBatch,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deleteBatch", state);
 					},
 				}}
 			/>

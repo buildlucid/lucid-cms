@@ -7,6 +7,7 @@ import useDeleteProcessedImages from "./useDeleteProcessedImages";
 import useCreateSingle from "./useCreateSingle";
 import useGetPresignedUrl from "./useGetPresignedUrl";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
+import useDeleteBatch from "./useDeleteBatch";
 
 const exportObject: {
 	useGetMultiple: typeof useGetMultiple;
@@ -18,6 +19,7 @@ const exportObject: {
 	useCreateSingle: typeof useCreateSingle;
 	useGetPresignedUrl: typeof useGetPresignedUrl;
 	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
+	useDeleteBatch: typeof useDeleteBatch;
 } = {
 	useGetMultiple,
 	useGetSingle,
@@ -28,6 +30,7 @@ const exportObject: {
 	useCreateSingle,
 	useGetPresignedUrl,
 	useDeleteSinglePermanently,
+	useDeleteBatch,
 };
 
 export default exportObject;
