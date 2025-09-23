@@ -99,6 +99,7 @@ class MediaCustomField extends CustomField<"media"> {
 				meta.localization.locales,
 			),
 			type: (value?.type as MediaType) ?? null,
+			isDeleted: Formatter.formatBoolean(value?.is_deleted ?? null),
 		} satisfies CFResponse<"media">["meta"];
 	}
 	cfSpecificValidation(value: unknown, relationData?: MediaReferenceData[]) {

@@ -530,6 +530,7 @@ export type MediaResMeta = {
 	title: Record<string, string>;
 	alt: Record<string, string>;
 	type: MediaType | null;
+	isDeleted: boolean | null;
 } | null;
 export type DocumentResMeta = {
 	id: number | null;

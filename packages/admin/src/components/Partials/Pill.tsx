@@ -4,6 +4,7 @@ import type { Component, JSXElement } from "solid-js";
 export interface PillProps {
 	theme: "primary" | "grey" | "red" | "warning" | "secondary";
 	children: JSXElement;
+	class?: string;
 }
 
 const Pill: Component<PillProps> = (props) => {
@@ -13,6 +14,7 @@ const Pill: Component<PillProps> = (props) => {
 		<span
 			class={classNames(
 				"rounded-full px-2 py-0.5 text-xs font-medium inline-flex whitespace-nowrap",
+				props.class,
 				{
 					"bg-primary-base text-primary-contrast": props.theme === "primary",
 					"bg-input-base text-title": props.theme === "grey",

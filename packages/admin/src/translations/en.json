@@ -523,5 +523,6 @@
 	"is_deleted": "Is Deleted",
 	"deleted": "Deleted",
 	"delete_permanently": "Delete Permanently",
-	"restore": "Restore"
+	"restore": "Restore",
+	"show_deleted": "Show Deleted"
 }

@@ -13,6 +13,7 @@ export { MediaSelect } from "./MediaSelect";
 export { LinkSelect } from "./LinkSelect";
 export { Search } from "./Search";
 export { DocumentSelect } from "./DocumentSelect";
+export { CheckboxButton } from "./CheckboxButton";
 
 export { ErrorMessage } from "./ErrorMessage";
 export { DescribedBy } from "./DescribedBy";

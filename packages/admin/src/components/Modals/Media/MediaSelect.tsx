@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createMemo, For } from "solid-js";
+import { type Component, createMemo, createSignal, For } from "solid-js";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import mediaSelectStore from "@/store/forms/mediaSelectStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -12,6 +12,7 @@ import MediaBasicCard, {
 import { Modal } from "@/components/Groups/Modal";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Paginated } from "@/components/Groups/Footers";
+import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 
 const MediaSelectModal: Component = () => {
 	const open = createMemo(() => mediaSelectStore.get.open);
@@ -79,6 +80,7 @@ const SelectMediaContent: Component = () => {
 			singleSort: true,
 		},
 	);
+	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
 
 	// ----------------------------------
 	// Memos
@@ -91,6 +93,9 @@ const SelectMediaContent: Component = () => {
 			queryString: searchParams.getQueryString,
 			headers: {
 				"lucid-content-locale": contentLocale,
+			},
+			filters: {
+				isDeleted: showingDeleted,
 			},
 		},
 	});
@@ -197,6 +202,18 @@ const SelectMediaContent: Component = () => {
 								},
 							]}
 							searchParams={searchParams}
+						/>
+						<CheckboxButton
+							id="isDeleted"
+							value={showingDeleted() === 1}
+							onChange={(value) => {
+								setShowingDeleted(value ? 1 : 0);
+							}}
+							name={"isDeleted"}
+							copy={{
+								label: T()("show_deleted"),
+							}}
+							theme="error"
 						/>
 					</div>
 					<div>

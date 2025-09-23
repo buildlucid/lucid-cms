@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, Match, Switch, createMemo } from "solid-js";
+import { type Component, Match, Show, Switch, createMemo } from "solid-js";
 import classNames from "classnames";
 import type {
 	ErrorResult,
@@ -14,6 +14,7 @@ import Button from "@/components/Partials/Button";
 import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import Pill from "@/components/Partials/Pill";
 
 interface MediaSelectProps {
 	id: string;
@@ -76,6 +77,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						acc[t.localeCode] = t.value ?? "";
 						return acc;
 					}, {}),
+					isDeleted: media.isDeleted ?? null,
 				});
 			},
 			open: true,
@@ -125,9 +127,19 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					</Match>
 					<Match when={typeof props.value === "number"}>
 						<div class="w-full border border-border rounded-md bg-input-base">
-							<div class="p-2 flex items-center justify-center">
+							<div class="p-2 flex items-center justify-center relative">
 								<div class="w-full max-w-xs rounded-md overflow-hidden border border-border">
-									<AspectRatio ratio="16:9">
+									<Show when={props.meta?.isDeleted}>
+										<Pill theme="red" class="absolute top-2 right-2 z-10">
+											{T()("deleted")}
+										</Pill>
+									</Show>
+									<AspectRatio
+										ratio="16:9"
+										innerClass={classNames({
+											"opacity-50": props.meta?.isDeleted,
+										})}
+									>
 										<MediaPreview
 											media={{
 												url: props.meta?.url || "",

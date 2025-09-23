@@ -1,5 +1,10 @@
 import T from "@/translations";
-import { type Component, createMemo, createSignal } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+} from "solid-js";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
 import api from "@/services/api";
@@ -11,7 +16,9 @@ import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaP
 import { QueryRow } from "@/components/Groups/Query";
 import { useParams } from "@solidjs/router";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
-import { Switch } from "@/components/Groups/Form/Switch";
+import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
+import mediaStore from "@/store/mediaStore";
+import { useNavigate } from "@solidjs/router";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -59,6 +66,7 @@ const MediaListRoute: Component = () => {
 		},
 	);
 	const params = useParams();
+	const navigate = useNavigate();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
 	const [getOpenCreateMediaFolderPanel, setOpenCreateMediaFolderPanel] =
@@ -68,6 +76,8 @@ const MediaListRoute: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const folderIdFilter = createMemo(() => {
+		//* deleted media doesnt exist in folders
+		if (showingDeleted()) return "";
 		//* empty string does a IS NULL filter on this column
 		const id = params.folderId;
 		if (!id) return "";
@@ -80,6 +90,14 @@ const MediaListRoute: Component = () => {
 	// Queries / Mutations
 	const settings = api.settings.useGetSettings({
 		queryParams: {},
+	});
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		if (showingDeleted()) {
+			mediaStore.get.reset();
+		}
 	});
 
 	// ----------------------------------------
@@ -215,7 +233,7 @@ const MediaListRoute: Component = () => {
 										},
 									]}
 									custom={
-										<Switch
+										<CheckboxButton
 											id="isDeleted"
 											value={showingDeleted()}
 											onChange={(value) => {
@@ -223,12 +241,9 @@ const MediaListRoute: Component = () => {
 											}}
 											name={"isDeleted"}
 											copy={{
-												true: T()("deleted"),
-												false: T()("active"),
+												label: T()("show_deleted"),
 											}}
-											options={{
-												queryRow: true,
-											}}
+											theme="error"
 										/>
 									}
 									perPage={[10, 20, 40]}
