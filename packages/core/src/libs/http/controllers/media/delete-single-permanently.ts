@@ -18,14 +18,15 @@ const factory = createFactory();
 
 const deleteSingleController = factory.createHandlers(
 	describeRoute({
-		description: "Soft delete a single media item by its ID.",
+		description:
+			"Permanently delete a single media item by ID and clear its processed images if media is an image.",
 		tags: ["media"],
-		summary: "Delete Media",
+		summary: "Delete Media Permanently",
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.deleteSingle.params,
+			params: controllerSchemas.deleteSinglePermanently.params,
 			headers: {
 				csrf: true,
 			},
@@ -35,18 +36,21 @@ const deleteSingleController = factory.createHandlers(
 	validateCSRF,
 	authenticate,
 	permissions(["delete_media"]),
-	validate("param", controllerSchemas.deleteSingle.params),
+	validate("param", controllerSchemas.deleteSinglePermanently.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const deleteSingle = await serviceWrapper(services.media.deleteSingle, {
-			transaction: true,
-			defaultError: {
-				type: "basic",
-				name: T("route_media_delete_error_name"),
-				message: T("route_media_delete_error_message"),
+		const deleteSingle = await serviceWrapper(
+			services.media.deleteSinglePermanently,
+			{
+				transaction: true,
+				defaultError: {
+					type: "basic",
+					name: T("route_media_delete_error_name"),
+					message: T("route_media_delete_error_message"),
+				},
 			},
-		})(
+		)(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

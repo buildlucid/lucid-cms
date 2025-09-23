@@ -211,6 +211,20 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	deleteSinglePermanently: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	deleteBatch: {
 		body: z.object({
 			folderIds: z.array(z.number()).meta({

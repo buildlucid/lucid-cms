@@ -1,7 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-// TODO: when queues are implemented, refer back to how media should be deleted here on this same commit as this message
+// TODO: when queues are implemented, refer back to how media should be deleted at the delete-single-permanently service
 const deleteSingle: ServiceFn<
 	[
 		{

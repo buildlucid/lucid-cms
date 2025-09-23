@@ -6,6 +6,7 @@ import updateSingle from "../../../controllers/media/update-single.js";
 import deleteSingle from "../../../controllers/media/delete-single.js";
 import getPresignedUrl from "../../../controllers/media/get-presigned-url.js";
 import clearSingleProcessed from "../../../controllers/media/clear-single-processed.js";
+import deleteSinglePermanently from "../../../controllers/media/delete-single-permanently.js";
 import clearAllProcessed from "../../../controllers/media/clear-all-processed.js";
 import moveFolder from "../../../controllers/media/move-folder.js";
 import deleteBatch from "../../../controllers/media/delete-batch.js";
@@ -30,6 +31,7 @@ const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.delete("/processed", ...clearAllProcessed)
 	.delete("batch", ...deleteBatch)
 	.delete("/:id/processed", ...clearSingleProcessed)
+	.delete("/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:id", ...deleteSingle);
 
 export default mediaRoutes;

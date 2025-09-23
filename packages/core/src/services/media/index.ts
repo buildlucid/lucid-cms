@@ -3,6 +3,7 @@ import strategies from "./strategies/index.js";
 
 import getSingle from "./get-single.js";
 import deleteSingle from "./delete-single.js";
+import deleteSinglePermanently from "./delete-single-permanently.js";
 import getMultiple from "./get-multiple.js";
 import updateSingle from "./update-single.js";
 import getPresignedUrl from "./get-presigned-url.js";
@@ -18,6 +19,7 @@ export default {
 
 	getSingle,
 	deleteSingle,
+	deleteSinglePermanently,
 	getMultiple,
 	updateSingle,
 	getPresignedUrl,
