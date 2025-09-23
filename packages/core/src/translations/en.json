@@ -297,5 +297,6 @@
 	"license_is_invalid": "License is invalid.",
 	"unknown_verification_error": "Unknown verification error.",
 	"license_is_not_set": "License is not set.",
-	"circular_media_folder_parents_error_message": "The media folder cannot be a parent of itself."
+	"circular_media_folder_parents_error_message": "The media folder cannot be a parent of itself.",
+	"you_cannot_move_a_deleted_media": "You cannot move media that has been deleted."
 }
