@@ -1,11 +1,13 @@
 import { A } from "@solidjs/router";
 import type { MediaFolderResponse } from "@types";
 import { FaSolidFolder } from "solid-icons/fa";
-import { createMemo, Show, type Component } from "solid-js";
+import { type Accessor, createMemo, Show, type Component } from "solid-js";
 import userStore from "@/store/userStore";
 import mediaStore from "@/store/mediaStore";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { Checkbox } from "@/components/Groups/Form";
+import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
+import classNames from "classnames";
 
 export const MediaFolderCardLoading: Component = () => {
 	// ----------------------------------
@@ -22,7 +24,13 @@ export const MediaFolderCardLoading: Component = () => {
 
 export const MediaFolderCard: Component<{
 	folder: MediaFolderResponse;
+	isDragging: Accessor<boolean>;
 }> = (props) => {
+	// ----------------------------------
+	// Hooks
+	const draggable = createDraggable(props.folder.id);
+	const droppable = createDroppable(props.folder.id);
+
 	// ----------------------------------
 	// State & Hooks
 	const location = useLocation();
@@ -41,20 +49,31 @@ export const MediaFolderCard: Component<{
 	});
 
 	// ----------------------------------
+	// Handlers
+	const navigateToFolder = () => {
+		if (props.isDragging()) return;
+		navigate(getPath(), {
+			scroll: false,
+		});
+	};
+
+	// ----------------------------------
 	// Render
 	return (
 		<li
-			class="flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-card-hover"
-			onClick={() => {
-				navigate(getPath(), {
-					scroll: false,
-				});
-			}}
+			// @ts-expect-error
+			use:droppable
+			use:draggable
+			class={classNames(
+				"flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-card-hover",
+				{
+					"bg-card-hover": droppable.isActiveDroppable,
+				},
+			)}
+			onClick={navigateToFolder}
 			onKeyPress={(e) => {
 				if (e.key === "Enter") {
-					navigate(getPath(), {
-						scroll: false,
-					});
+					navigateToFolder();
 				}
 			}}
 		>

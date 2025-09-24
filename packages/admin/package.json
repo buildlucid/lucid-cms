@@ -53,6 +53,7 @@
         "@solidjs/router": "^0.15.3",
         "@tailwindcss/vite": "^4.1.4",
         "@tanstack/solid-query": "^5.74.4",
+        "@thisbeyond/solid-dnd": "^0.7.5",
         "blurhash": "^2.0.5",
         "classnames": "^2.5.1",
         "fast-average-color": "^9.5.0",

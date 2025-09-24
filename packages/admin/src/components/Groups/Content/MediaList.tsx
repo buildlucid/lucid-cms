@@ -1,5 +1,12 @@
 import T from "@/translations";
-import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	For,
+	Show,
+	createSignal,
+} from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
@@ -23,6 +30,11 @@ import {
 import mediaStore from "@/store/mediaStore";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
 import DeleteMediaPermanently from "@/components/Modals/Media/DeleteMediaPermanently";
+import {
+	DragDropProvider,
+	DragDropSensors,
+	type DragEventHandler,
+} from "@thisbeyond/solid-dnd";
 
 export const MediaList: Component<{
 	state: {
@@ -33,7 +45,7 @@ export const MediaList: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------
-	// Hooks
+	// State & Hooks
 	const rowTarget = useRowTarget({
 		triggers: {
 			update: false,
@@ -44,6 +56,7 @@ export const MediaList: Component<{
 			deleteBatch: false,
 		},
 	});
+	const [isDragging, setIsDragging] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -75,6 +88,19 @@ export const MediaList: Component<{
 			perPage: -1,
 		},
 	});
+
+	// ----------------------------------------
+	// Functions
+	const onDragEnd: DragEventHandler = (e) => {
+		console.log(e);
+		setTimeout(() => {
+			setIsDragging(false);
+		}, 100);
+	};
+	const onDragStart: DragEventHandler = (e) => {
+		console.log(e);
+		setIsDragging(true);
+	};
 
 	// ----------------------------------------
 	// Memos
@@ -121,58 +147,64 @@ export const MediaList: Component<{
 				padding: "24",
 			}}
 		>
-			{/* Folders */}
-			<Show when={!props.state.showingDeleted()}>
-				<div class="flex flex-col mb-4">
-					<h3 class="mb-1">{T()("folders")}</h3>
-					<Breadcrumbs
+			<DragDropProvider onDragEnd={onDragEnd} onDragStart={onDragStart}>
+				<DragDropSensors />
+				{/* Folders */}
+				<Show when={!props.state.showingDeleted()}>
+					<div class="flex flex-col mb-4">
+						<h3 class="mb-1">{T()("folders")}</h3>
+						<Breadcrumbs
+							state={{
+								parentFolderId: props.state.parentFolderId,
+								breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+							}}
+						/>
+					</div>
+					<Grid
 						state={{
-							parentFolderId: props.state.parentFolderId,
-							breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+							isLoading: folders.isLoading,
+							totalItems: folders.data?.data.folders.length || 0,
 						}}
-					/>
-				</div>
+						slots={{
+							loadingCard: <MediaFolderCardLoading />,
+						}}
+						class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
+					>
+						<For each={folders.data?.data.folders}>
+							{(folder) => (
+								<MediaFolderCard folder={folder} isDragging={isDragging} />
+							)}
+						</For>
+					</Grid>
+				</Show>
+
+				{/* Media */}
+				<Show when={!props.state.showingDeleted()}>
+					<h3 class="mb-4 ">{T()("media")}</h3>
+				</Show>
 				<Grid
 					state={{
-						isLoading: folders.isLoading,
-						totalItems: folders.data?.data.folders.length || 0,
+						isLoading: media.isLoading,
+						totalItems: media.data?.data.length || 0,
+						searchParams: props.state.searchParams,
 					}}
 					slots={{
-						loadingCard: <MediaFolderCardLoading />,
+						loadingCard: <MediaCardLoading />,
 					}}
-					class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
 				>
-					<For each={folders.data?.data.folders}>
-						{(folder) => <MediaFolderCard folder={folder} />}
+					<For each={media.data?.data}>
+						{(item) => (
+							<MediaCard
+								media={item}
+								rowTarget={rowTarget}
+								contentLocale={contentLocale()}
+								showingDeleted={props.state.showingDeleted}
+								isDragging={isDragging}
+							/>
+						)}
 					</For>
 				</Grid>
-			</Show>
-
-			{/* Media */}
-			<Show when={!props.state.showingDeleted()}>
-				<h3 class="mb-4 ">{T()("media")}</h3>
-			</Show>
-			<Grid
-				state={{
-					isLoading: media.isLoading,
-					totalItems: media.data?.data.length || 0,
-					searchParams: props.state.searchParams,
-				}}
-				slots={{
-					loadingCard: <MediaCardLoading />,
-				}}
-			>
-				<For each={media.data?.data}>
-					{(item) => (
-						<MediaCard
-							media={item}
-							rowTarget={rowTarget}
-							contentLocale={contentLocale()}
-							showingDeleted={props.state.showingDeleted}
-						/>
-					)}
-				</For>
-			</Grid>
+			</DragDropProvider>
 
 			<SelectedActionPill
 				state={{

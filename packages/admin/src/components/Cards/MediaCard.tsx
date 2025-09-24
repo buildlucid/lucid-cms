@@ -11,6 +11,7 @@ import ActionDropdown from "@/components/Partials/ActionDropdown";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import { Checkbox } from "@/components/Groups/Form";
 import mediaStore from "@/store/mediaStore";
+import { createDraggable } from "@thisbeyond/solid-dnd";
 
 interface MediaCardProps {
 	media: MediaResponse;
@@ -21,6 +22,7 @@ interface MediaCardProps {
 	>;
 	contentLocale?: string;
 	showingDeleted?: Accessor<boolean>;
+	isDragging: Accessor<boolean>;
 }
 
 export const MediaCardLoading: Component = () => {
@@ -41,6 +43,10 @@ export const MediaCardLoading: Component = () => {
 
 const MediaCard: Component<MediaCardProps> = (props) => {
 	// ----------------------------------
+	// Hooks
+	const draggable = createDraggable(props.media.id);
+
+	// ----------------------------------
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
 		return userStore.get.hasPermission(["update_media"]).all;
@@ -59,6 +65,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	// Return
 	return (
 		<li
+			// @ts-expect-error
+			use:draggable
 			class={classNames(
 				"bg-card-base border-border border rounded-md group overflow-hidden relative",
 				{
@@ -66,6 +74,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				},
 			)}
 			onClick={() => {
+				if (props.isDragging()) return;
 				if (hasUpdatePermission()) {
 					props.rowTarget.setTargetId(props.media.id);
 					props.rowTarget.setTrigger("update", true);

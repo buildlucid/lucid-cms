@@ -20,6 +20,7 @@ const Image: Component<ImageProps> = (props) => {
 				loading={props.loading}
 				alt={props.alt}
 				decoding="async"
+				onDragStart={(e) => e.preventDefault()}
 			/>
 			<KImage.Fallback
 				class={classNames("bg-input-base w-full h-full block", props.classes)}
