@@ -8,6 +8,7 @@ import useCreateSingle from "./useCreateSingle";
 import useGetPresignedUrl from "./useGetPresignedUrl";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 import useDeleteBatch from "./useDeleteBatch";
+import useMoveFolder from "./useMoveFolder";
 
 const exportObject: {
 	useGetMultiple: typeof useGetMultiple;
@@ -20,6 +21,7 @@ const exportObject: {
 	useGetPresignedUrl: typeof useGetPresignedUrl;
 	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
 	useDeleteBatch: typeof useDeleteBatch;
+	useMoveFolder: typeof useMoveFolder;
 } = {
 	useGetMultiple,
 	useGetSingle,
@@ -31,6 +33,7 @@ const exportObject: {
 	useGetPresignedUrl,
 	useDeleteSinglePermanently,
 	useDeleteBatch,
+	useMoveFolder,
 };
 
 export default exportObject;

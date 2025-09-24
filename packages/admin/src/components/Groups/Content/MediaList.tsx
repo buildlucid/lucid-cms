@@ -35,6 +35,9 @@ import {
 	DragDropSensors,
 	type DragEventHandler,
 } from "@thisbeyond/solid-dnd";
+import MoveToFolder, {
+	type MoveToFolderParams,
+} from "@/components/Modals/Media/MoveToFolder";
 
 export const MediaList: Component<{
 	state: {
@@ -54,9 +57,16 @@ export const MediaList: Component<{
 			restore: false,
 			deletePermanently: false,
 			deleteBatch: false,
+			moveToFolder: false,
 		},
 	});
 	const [isDragging, setIsDragging] = createSignal(false);
+	const [getMoveModalParams, setMoveModalParams] =
+		createSignal<MoveToFolderParams>({
+			mode: "media",
+			itemId: null,
+			target: null,
+		});
 
 	// ----------------------------------
 	// Memos
@@ -92,13 +102,27 @@ export const MediaList: Component<{
 	// ----------------------------------------
 	// Functions
 	const onDragEnd: DragEventHandler = (e) => {
-		console.log(e);
-		setTimeout(() => {
-			setIsDragging(false);
-		}, 100);
+		if (
+			e.draggable?.id &&
+			e.droppable?.id &&
+			e.draggable?.id !== e.droppable.id &&
+			typeof e.draggable.id === "string" &&
+			typeof e.droppable.id === "string"
+		) {
+			const draggableId = Number(e.draggable.id.split(":")[1]);
+			const droppableId = Number(e.droppable.id.split(":")[1]);
+			const mode = e.draggable.id.split(":")[0] as "folder" | "media";
+
+			setMoveModalParams({
+				mode: mode,
+				itemId: draggableId,
+				target: droppableId,
+			});
+			rowTarget.setTrigger("moveToFolder", true);
+		}
+		setTimeout(() => setIsDragging(false), 100);
 	};
-	const onDragStart: DragEventHandler = (e) => {
-		console.log(e);
+	const onDragStart: DragEventHandler = () => {
 		setIsDragging(true);
 	};
 
@@ -223,6 +247,15 @@ export const MediaList: Component<{
 			/>
 
 			{/* Modals */}
+			<MoveToFolder
+				state={{
+					open: rowTarget.getTriggers().moveToFolder,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("moveToFolder", state);
+					},
+					params: getMoveModalParams(),
+				}}
+			/>
 			<CreateUpdateMediaPanel
 				id={rowTarget.getTargetId}
 				state={{

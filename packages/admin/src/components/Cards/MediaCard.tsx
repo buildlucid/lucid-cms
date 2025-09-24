@@ -44,7 +44,7 @@ export const MediaCardLoading: Component = () => {
 const MediaCard: Component<MediaCardProps> = (props) => {
 	// ----------------------------------
 	// Hooks
-	const draggable = createDraggable(props.media.id);
+	const draggable = createDraggable(`media:${props.media.id}`);
 
 	// ----------------------------------
 	// Memos

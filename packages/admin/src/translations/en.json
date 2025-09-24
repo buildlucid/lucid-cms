@@ -530,5 +530,9 @@
 	"deleted": "Deleted",
 	"delete_permanently": "Delete Permanently",
 	"restore": "Restore",
-	"show_deleted": "Show Deleted"
+	"show_deleted": "Show Deleted",
+	"move_media_modal_title": "Move media to folder",
+	"move_media_modal_description": "Are you sure you want to move this media into the selected folder?",
+	"move_folder_modal_title": "Move folder to folder",
+	"move_folder_modal_description": "Are you sure you want to move this folder into the selected folder?"
 }

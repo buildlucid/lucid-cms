@@ -28,8 +28,8 @@ export const MediaFolderCard: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// Hooks
-	const draggable = createDraggable(props.folder.id);
-	const droppable = createDroppable(props.folder.id);
+	const draggable = createDraggable(`folder:${props.folder.id}`);
+	const droppable = createDroppable(`folder:${props.folder.id}`);
 
 	// ----------------------------------
 	// State & Hooks
