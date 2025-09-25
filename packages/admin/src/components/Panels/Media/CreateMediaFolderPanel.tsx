@@ -15,7 +15,7 @@ const CreateMediaFolderPanel: Component<{
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
-		parentFolderId: Accessor<number | string>;
+		parentFolderId: Accessor<number | string | undefined>;
 	};
 }> = (props) => {
 	// -----------------------------

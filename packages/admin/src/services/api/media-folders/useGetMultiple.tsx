@@ -6,7 +6,7 @@ import type { ResponseBody, MultipleMediaFolderResponse } from "@types";
 
 interface QueryParams {
 	filters?: {
-		parentFolderId?: Accessor<number | null | string>;
+		parentFolderId?: Accessor<number | string | undefined>;
 		title?: Accessor<string>;
 	};
 	perPage?: number;

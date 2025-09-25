@@ -76,8 +76,8 @@ const MediaListRoute: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const folderIdFilter = createMemo(() => {
-		//* deleted media doesnt exist in folders
-		if (showingDeleted()) return "";
+		//* deleted media can have folders, but we dont show them in that context, we just want to list all
+		if (showingDeleted()) return undefined;
 		//* empty string does a IS NULL filter on this column
 		const id = params.folderId;
 		if (!id) return "";

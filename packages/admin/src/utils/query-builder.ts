@@ -42,7 +42,7 @@ const queryBuilder = (query: QueryBuilderProps) => {
 	if (query.filters !== undefined && Object.keys(query.filters).length > 0) {
 		for (const key of Object.keys(query.filters)) {
 			const value = query.filters ? query.filters[key] : "";
-			if (value === undefined || value === null) return;
+			if (value === undefined || value === null) continue;
 
 			if (Array.isArray(value)) {
 				params.append(`filter[${key}]`, value.join(","));

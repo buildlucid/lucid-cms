@@ -12,7 +12,7 @@ interface QueryParams {
 		mimeType?: Accessor<string>;
 		extension?: Accessor<string>;
 		type?: Accessor<string | string[]>;
-		folderId?: Accessor<number | null | string>;
+		folderId?: Accessor<number | string | undefined>;
 		isDeleted?: Accessor<1 | 0> | 0 | 1;
 	};
 	perPage?: number;

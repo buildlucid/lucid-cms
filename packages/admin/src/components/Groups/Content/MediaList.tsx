@@ -23,7 +23,6 @@ import {
 	MediaFolderCardLoading,
 	MediaFolderCard,
 } from "@/components/Cards/MediaFolderCard";
-import type { MediaFolderResponse } from "@types";
 import {
 	Breadcrumbs,
 	SelectedActionPill,
@@ -45,7 +44,7 @@ export const MediaList: Component<{
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		showingDeleted: Accessor<boolean>;
 		setOpenCreateMediaPanel: (state: boolean) => void;
-		parentFolderId: Accessor<number | string>;
+		parentFolderId: Accessor<number | string | undefined>;
 	};
 }> = (props) => {
 	// ----------------------------------

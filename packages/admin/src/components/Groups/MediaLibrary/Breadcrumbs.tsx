@@ -6,7 +6,7 @@ import T from "@/translations";
 
 export const Breadcrumbs: Component<{
 	state: {
-		parentFolderId: Accessor<number | string>;
+		parentFolderId: Accessor<number | string | undefined>;
 		breadcrumbs: MediaFolderBreadcrumbResponse[];
 	};
 }> = (props) => {
