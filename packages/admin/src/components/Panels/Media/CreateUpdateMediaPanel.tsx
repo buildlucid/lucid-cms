@@ -15,7 +15,7 @@ import dateHelpers from "@/utils/date-helpers";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import { Panel } from "@/components/Groups/Panel";
-import { Input } from "@/components/Groups/Form";
+import { Input, Select } from "@/components/Groups/Form";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import DetailsList from "@/components/Partials/DetailsList";
 
@@ -24,6 +24,7 @@ interface CreateUpdateMediaPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
+		parentFolderId: Accessor<number | string>;
 	};
 }
 
@@ -58,6 +59,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		enabled: () => panelMode() === "update" && props.state.open,
 	});
 
+	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
+		queryParams: {},
+	});
+
 	// ---------------------------------
 	// Memos
 	const locales = createMemo(() => contentLocaleStore.get.locales);
@@ -68,6 +73,22 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			return type === "image";
 		}
 		return panelMode() === "create" ? false : media.data?.data.type === "image";
+	});
+
+	const folderOptions = createMemo(() => {
+		const folders = foldersHierarchy.data?.data || [];
+		const sorted = folders
+			.slice()
+			.sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0))
+			.map((f) => ({ value: f.id, label: f.meta?.label ?? f.title }));
+
+		return [{ value: undefined, label: T()("media_library") }, ...sorted];
+	});
+
+	const resolvedDefaultFolderId = createMemo(() => {
+		const d = props.state.parentFolderId?.();
+		if (d === undefined || d === "") return undefined;
+		return typeof d === "string" ? Number.parseInt(d, 10) : d;
 	});
 
 	const mutateIsLoading = createMemo(() => {
@@ -103,11 +124,13 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				key: undefined,
 				title: media.data?.data.title || [],
 				alt: media.data?.data.alt || [],
+				folderId: media.data?.data.folderId ?? null,
 			},
 			{
 				key: state?.key(),
 				title: state?.title(),
 				alt: state?.alt(),
+				folderId: state?.folderId(),
 			},
 		);
 
@@ -142,11 +165,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 	const panelFetchState = createMemo(() => {
 		if (panelMode() === "create") {
-			return undefined;
+			return {
+				isLoading: foldersHierarchy.isLoading,
+				isError: foldersHierarchy.isError,
+			};
 		}
 		return {
-			isLoading: media.isLoading,
-			isError: media.isError,
+			isLoading: media.isLoading || foldersHierarchy.isLoading,
+			isError: media.isError || foldersHierarchy.isError,
 		};
 	});
 
@@ -179,6 +205,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (media.isSuccess && panelMode() === "update") {
 			updateMedia?.setTitle(media.data?.data.title || []);
 			updateMedia?.setAlt(media.data?.data.alt || []);
+			updateMedia?.setFolderId(media.data?.data.folderId ?? null);
 			MediaFile.reset();
 			MediaFile.setCurrentFile({
 				name: media.data.data.key,
@@ -189,6 +216,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					: undefined,
 				type: media.data?.data.type || undefined,
 			});
+		}
+	});
+
+	createEffect(() => {
+		if (panelMode() === "create") {
+			createMedia.setFolderId(resolvedDefaultFolderId());
 		}
 	});
 
@@ -227,6 +260,34 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			{(lang) => (
 				<>
 					<MediaFile.Render />
+					<Select
+						id="media-folder"
+						value={
+							(targetState()?.folderId() ?? undefined) as unknown as
+								| string
+								| number
+								| undefined
+						}
+						onChange={(val) => {
+							const id =
+								typeof val === "string"
+									? Number.parseInt(val, 10)
+									: (val as number | undefined);
+							(
+								targetAction()?.setFolderId as (
+									v: number | null | undefined,
+								) => void
+							)(id ?? null);
+						}}
+						name="media-folder"
+						options={folderOptions()}
+						copy={{ label: T()("folders") }}
+						required={false}
+						errors={getBodyError("folderId", mutateErrors())}
+						noMargin={false}
+						noClear={true}
+						theme="full"
+					/>
 					<For each={locales()}>
 						{(locale, index) => (
 							<Show when={locale.code === lang?.contentLocale()}>

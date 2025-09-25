@@ -8,6 +8,9 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getTitle, setTitle] = createSignal<MediaResponse["title"]>([]);
 	const [getAlt, setAlt] = createSignal<MediaResponse["alt"]>([]);
 	const [getKey, setKey] = createSignal<string>();
+	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
+		undefined,
+	);
 	const [getPresignedUrlValue, setPresignedUrlValue] = createSignal<string>();
 	const [getPresignedUrlHeaders, setPresignedUrlHeaders] =
 		createSignal<Record<string, string>>();
@@ -113,6 +116,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				fileName: file?.name,
 				title: getTitle(),
 				alt: getAlt(),
+				folderId: getFolderId() ?? null,
 				width: imageMeta?.width,
 				height: imageMeta?.height,
 				blurHash: imageMeta?.blurHash,
@@ -146,17 +150,20 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		updateMedia,
 		setTitle,
 		setAlt,
+		setFolderId,
 		errors: errors,
 		isLoading: isLoading,
 		state: {
 			title: getTitle,
 			alt: getAlt,
 			key: getKey,
+			folderId: getFolderId,
 		},
 		reset: () => {
 			setTitle([]);
 			setAlt([]);
 			setKey(undefined);
+			setFolderId(undefined);
 			setPresignedUrlValue(undefined);
 			setUploadErrors();
 			updateSingle.reset();

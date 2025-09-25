@@ -4,9 +4,10 @@ import {
 	type Component,
 	createMemo,
 	createSignal,
+	createEffect,
 } from "solid-js";
 import { Panel } from "@/components/Groups/Panel";
-import { Input } from "@/components/Groups/Form";
+import { Input, Select } from "@/components/Groups/Form";
 import api from "@/services/api";
 import { getBodyError } from "@/utils/error-helpers";
 
@@ -20,6 +21,9 @@ const CreateMediaFolderPanel: Component<{
 	// -----------------------------
 	// State
 	const [getTitle, setTitle] = createSignal<string>("");
+	const [getSelectedParentId, setSelectedParentId] = createSignal<
+		number | null | undefined
+	>(undefined);
 
 	// -----------------------------
 	// Mutations
@@ -29,12 +33,35 @@ const CreateMediaFolderPanel: Component<{
 		},
 	});
 
+	// ----------------------------------------
+	// Queries
+	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
+		queryParams: {},
+	});
+
 	// -----------------------------
 	// Memos
 	const resolveParentFolderId = createMemo(() => {
 		const parent = props.state.parentFolderId();
 		if (parent === "") return null;
 		return typeof parent === "string" ? Number.parseInt(parent, 10) : parent;
+	});
+
+	const folderOptions = createMemo(() => {
+		const folders = foldersHierarchy.data?.data || [];
+		const sorted = folders
+			.slice()
+			.sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0))
+			.map((f) => ({ value: f.id, label: f.meta?.label ?? f.title }));
+		return [{ value: undefined, label: T()("media_library") }, ...sorted];
+	});
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		if (props.state.open) {
+			setSelectedParentId(resolveParentFolderId());
+		}
 	});
 
 	// -----------------------------
@@ -49,16 +76,21 @@ const CreateMediaFolderPanel: Component<{
 				isLoading: createFolder.action.isPending,
 				errors: createFolder.errors(),
 			}}
+			fetchState={{
+				isLoading: foldersHierarchy.isLoading,
+				isError: foldersHierarchy.isError,
+			}}
 			callbacks={{
 				onSubmit: () => {
 					createFolder.action.mutate({
 						title: getTitle(),
-						parentFolderId: resolveParentFolderId(),
+						parentFolderId: getSelectedParentId() ?? null,
 					});
 				},
 				reset: () => {
 					createFolder.reset();
 					setTitle("");
+					setSelectedParentId(undefined);
 				},
 			}}
 			copy={{
@@ -83,6 +115,22 @@ const CreateMediaFolderPanel: Component<{
 							label: T()("title"),
 						}}
 						errors={getBodyError("title", createFolder.errors)}
+						theme="full"
+					/>
+					<Select
+						id="parent-folder"
+						value={getSelectedParentId() ?? undefined}
+						onChange={(val) => {
+							const id =
+								typeof val === "string"
+									? Number.parseInt(val, 10)
+									: (val as number | undefined);
+							setSelectedParentId(id ?? null);
+						}}
+						name={"parent-folder"}
+						options={folderOptions()}
+						copy={{ label: T()("parent_page") }}
+						noClear={true}
 						theme="full"
 					/>
 				</>

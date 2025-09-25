@@ -9,6 +9,7 @@ const updateSingle: ServiceFn<
 			id: number;
 			key?: string;
 			fileName?: string;
+			folderId?: number | null;
 			title?: {
 				localeCode: string;
 				value: string | null;
@@ -77,7 +78,7 @@ const updateSingle: ServiceFn<
 	}
 
 	// TODO: need better solution for partial updates before the bellow early returns when there is no key
-	if (data.isDeleted !== undefined) {
+	if (data.isDeleted !== undefined || data.folderId !== undefined) {
 		const updateMediaRes = await Media.updateSingle({
 			where: [{ key: "id", operator: "=", value: data.id }],
 			data: {
@@ -92,6 +93,7 @@ const updateSingle: ServiceFn<
 					: data.isDeleted === false
 						? null
 						: undefined,
+				folder_id: data.folderId,
 			},
 			validation: {
 				enabled: true,

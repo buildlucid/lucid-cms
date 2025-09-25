@@ -13,6 +13,7 @@ interface Params {
 		localeCode: string | null;
 		value: string | null;
 	}>;
+	folderId?: number | null;
 	width?: number;
 	height?: number;
 	blurHash?: string;

@@ -23,6 +23,7 @@ import {
 	MediaFolderCardLoading,
 	MediaFolderCard,
 } from "@/components/Cards/MediaFolderCard";
+import type { MediaFolderResponse } from "@types";
 import {
 	Breadcrumbs,
 	SelectedActionPill,
@@ -263,6 +264,7 @@ export const MediaList: Component<{
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("update", state);
 					},
+					parentFolderId: props.state.parentFolderId,
 				}}
 			/>
 			<DeleteMedia

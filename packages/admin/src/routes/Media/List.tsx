@@ -19,6 +19,7 @@ import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderP
 import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 import mediaStore from "@/store/mediaStore";
 import { useNavigate } from "@solidjs/router";
+import type { MediaFolderResponse } from "@types";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -66,7 +67,6 @@ const MediaListRoute: Component = () => {
 		},
 	);
 	const params = useParams();
-	const navigate = useNavigate();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
 	const [getOpenCreateMediaFolderPanel, setOpenCreateMediaFolderPanel] =
@@ -266,6 +266,7 @@ const MediaListRoute: Component = () => {
 				state={{
 					open: getOpenCreateMediaPanel(),
 					setOpen: setOpenCreateMediaPanel,
+					parentFolderId: folderIdFilter,
 				}}
 			/>
 			<CreateMediaFolderPanel
