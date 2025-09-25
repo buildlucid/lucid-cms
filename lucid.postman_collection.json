@@ -2165,6 +2165,44 @@
 					"response": []
 				},
 				{
+					"name": "Get Hierarchy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "lucid-content-lang",
+								"value": "{{LUCID_CONTENT_LANG}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/folders/hierarchy",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"folders",
+								"hierarchy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Create Single",
 					"request": {
 						"method": "POST",

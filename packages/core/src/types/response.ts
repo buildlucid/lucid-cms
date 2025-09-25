@@ -144,6 +144,11 @@ export interface MediaFolderResponse {
 	id: number;
 	title: string;
 	parentFolderId: number | null;
+	meta?: {
+		level: number;
+		order: number;
+		label: string;
+	};
 	createdBy: number | null;
 	updatedBy: number | null;
 	createdAt: string | null;

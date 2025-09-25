@@ -1,7 +1,7 @@
 import Formatter from "./index.js";
 import type { MediaFolderResponse } from "../../types/response.js";
 
-interface MediaFolderPropsT {
+export interface MediaFolderPropsT {
 	id: number;
 	title: string;
 	parent_folder_id: number | null;
@@ -15,6 +15,12 @@ interface MediaFolderBreadcrumbPropsT {
 	title: string;
 	parent_folder_id: number | null;
 }
+export interface MediaFolderWithHierarchyPropsT extends MediaFolderPropsT {
+	level: number;
+	order: number;
+	label: string;
+}
+
 export default class MediaFoldersFormatter {
 	formatBreadcrumbs = (props: {
 		breadcrumbs: MediaFolderBreadcrumbPropsT[];
@@ -27,7 +33,9 @@ export default class MediaFoldersFormatter {
 			};
 		});
 	};
-	formatMultiple = (props: { folders: MediaFolderPropsT[] }) => {
+	formatMultiple = (props: {
+		folders: MediaFolderPropsT[] | MediaFolderWithHierarchyPropsT[];
+	}) => {
 		return props.folders.map((f) =>
 			this.formatSingle({
 				folder: f,
@@ -35,12 +43,26 @@ export default class MediaFoldersFormatter {
 		);
 	};
 	formatSingle = (props: {
-		folder: MediaFolderPropsT;
+		folder: MediaFolderPropsT | MediaFolderWithHierarchyPropsT;
 	}): MediaFolderResponse => {
+		let meta: MediaFolderResponse["meta"] | undefined;
+		if (
+			"level" in props.folder &&
+			"order" in props.folder &&
+			"label" in props.folder
+		) {
+			meta = {
+				level: props.folder?.level,
+				order: props.folder.order,
+				label: props.folder.label,
+			};
+		}
+
 		return {
 			id: props.folder.id,
 			title: props.folder.title,
 			parentFolderId: props.folder.parent_folder_id,
+			meta: meta,
 			createdBy: props.folder.created_by,
 			updatedBy: props.folder.updated_by,
 			createdAt: Formatter.formatDate(props.folder.created_at),

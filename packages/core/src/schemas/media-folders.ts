@@ -11,6 +11,15 @@ const mediaFolderResponseSchema = z.object({
 		.number()
 		.nullable()
 		.meta({ description: "Media folder parent ID", example: 1 }),
+	meta: z
+		.object({
+			level: z.number().meta({ description: "Media folder level", example: 1 }),
+			order: z.number().meta({ description: "Media folder order", example: 1 }),
+			label: z
+				.string()
+				.meta({ description: "Media folder label", example: "Heros" }),
+		})
+		.optional(),
 	createdBy: z
 		.number()
 		.nullable()
@@ -40,6 +49,15 @@ const mediaFolderBreadcrumbResponseSchema = z.object({
 });
 
 export const controllerSchemas = {
+	hierarchy: {
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		body: undefined,
+		response: z.array(mediaFolderResponseSchema),
+	} satisfies ControllerSchema,
 	getMultiple: {
 		query: {
 			string: z

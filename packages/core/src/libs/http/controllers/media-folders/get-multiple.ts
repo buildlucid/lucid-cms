@@ -14,7 +14,6 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
-import { inspect } from "node:util";
 
 const factory = createFactory();
 

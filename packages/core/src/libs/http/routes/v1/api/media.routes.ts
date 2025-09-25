@@ -16,10 +16,12 @@ import createSingleFolder from "../../../controllers/media-folders/create-single
 import getMultipleFolders from "../../../controllers/media-folders/get-multiple.js";
 import updateSingleFolder from "../../../controllers/media-folders/update-single.js";
 import deleteSingleFolder from "../../../controllers/media-folders/delete-single.js";
+import getAllFoldersHierarchy from "../../../controllers/media-folders/get-hierarchy.js";
 
 const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/folders", ...getMultipleFolders)
+	.get("/folders/hierarchy", ...getAllFoldersHierarchy)
 	.get("/:id", ...getSingle)
 	.post("/folders", ...createSingleFolder)
 	.post("/presigned-url", ...getPresignedUrl)
