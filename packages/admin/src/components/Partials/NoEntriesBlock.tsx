@@ -1,8 +1,9 @@
 import T from "@/translations";
 import { Show, type Component } from "solid-js";
 import Button from "@/components/Partials/Button";
+import classNames from "classnames";
 
-interface NoEntriesBlockProps {
+export interface NoEntriesBlockProps {
 	copy: {
 		title?: string;
 		description?: string;
@@ -14,13 +15,21 @@ interface NoEntriesBlockProps {
 	permissions?: {
 		create?: boolean;
 	};
+	options?: {
+		grow?: boolean;
+	};
+	class?: string;
 }
 
 const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<div class={"flex items-center justify-center"}>
+		<div
+			class={classNames("flex items-center justify-center", props.class, {
+				"flex-grow": props.options?.grow,
+			})}
+		>
 			<div class="text-center flex flex-col items-center">
 				<h2 class="mb-2">{props.copy?.title || T()("no_entries_title")}</h2>
 				<p class="max-w-96 text-sm">

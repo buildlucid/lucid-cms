@@ -87,7 +87,7 @@ export const NavigationSidebar: Component = () => {
 						/>
 
 						{/* Collections */}
-						<div class="w-full mt-6 mb-2">
+						<div class="w-full mt-4 mb-2">
 							<span class="text-xs">{T()("collections")}</span>
 						</div>
 						<Switch>
@@ -143,7 +143,7 @@ export const NavigationSidebar: Component = () => {
 						</Switch>
 
 						{/* Access & Permissions */}
-						<div class="w-full mt-6 mb-2">
+						<div class="w-full mt-4 mb-2">
 							<span class="text-xs">{T()("access_and_permissions")}</span>
 						</div>
 						<IconLinkFull
@@ -172,16 +172,39 @@ export const NavigationSidebar: Component = () => {
 								]).some
 							}
 						/>
+
+						{/* System */}
+						<div class="w-full mt-4 mb-2">
+							<span class="text-xs">{T()("system")}</span>
+						</div>
+						<IconLinkFull
+							type="link"
+							href="/admin/settings/overview"
+							icon="overview"
+							title={T()("overview")}
+						/>
+						<IconLinkFull
+							type="link"
+							href="/admin/settings/client-integrations"
+							icon="client-integrations"
+							title={T()("client_integrations")}
+						/>
+						<IconLinkFull
+							type="link"
+							href="/admin/settings/license"
+							icon="license"
+							title={T()("manage_license")}
+						/>
+						<IconLinkFull
+							type="link"
+							href="/admin/settings/queue-observability"
+							icon="queue"
+							title={T()("queue_observability")}
+						/>
 					</ul>
 				</div>
 				<div class="pb-6 px-4">
 					<ul class="flex flex-col border-t border-border pt-6">
-						<IconLinkFull
-							type="link"
-							href="/admin/settings"
-							icon="settings"
-							title={T()("settings")}
-						/>
 						<IconLinkFull
 							type="button"
 							icon="logout"
@@ -193,7 +216,7 @@ export const NavigationSidebar: Component = () => {
 							<li>
 								<A
 									href="/admin/account"
-									class="flex items-center justify-center mt-5"
+									class="flex items-center justify-center mt-6"
 								>
 									<UserDisplay
 										user={{

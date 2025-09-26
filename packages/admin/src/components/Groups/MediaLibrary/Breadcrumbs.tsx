@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import type { MediaFolderBreadcrumbResponse } from "@types";
 import { type Accessor, type Component, For, Match, Switch } from "solid-js";
-import { FaSolidChevronRight } from "solid-icons/fa";
+import { FaSolidChevronRight, FaSolidHouse } from "solid-icons/fa";
 import T from "@/translations";
 
 export const Breadcrumbs: Component<{
@@ -17,6 +17,14 @@ export const Breadcrumbs: Component<{
 			class="flex flex-wrap items-center gap-1"
 			aria-label={T()("breadcrumbs")}
 		>
+			<li>
+				<A href={"/admin"} class="hover:text-title text-sm">
+					<FaSolidHouse />
+				</A>
+			</li>
+			<li aria-hidden="true" class="px-1">
+				<FaSolidChevronRight size={10} class="fill-current mt-px" />
+			</li>
 			<li>
 				<Switch>
 					<Match when={props.state.parentFolderId() !== ""}>

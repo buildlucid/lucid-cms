@@ -86,7 +86,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 
 	const resolvedDefaultFolderId = createMemo(() => {
-		const d = props.state.parentFolderId?.();
+		const d = props.state.parentFolderId();
 		if (d === undefined || d === "") return undefined;
 		return typeof d === "string" ? Number.parseInt(d, 10) : d;
 	});
@@ -221,7 +221,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 	createEffect(() => {
 		if (panelMode() === "create") {
-			createMedia.setFolderId(resolvedDefaultFolderId());
+			const newFolderId = resolvedDefaultFolderId();
+			if (createMedia.state.folderId() !== newFolderId) {
+				createMedia.setFolderId(newFolderId);
+			}
 		}
 	});
 
@@ -262,22 +265,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					<MediaFile.Render />
 					<Select
 						id="media-folder"
-						value={
-							(targetState()?.folderId() ?? undefined) as unknown as
-								| string
-								| number
-								| undefined
-						}
+						value={targetState()?.folderId() ?? undefined}
 						onChange={(val) => {
 							const id =
-								typeof val === "string"
-									? Number.parseInt(val, 10)
-									: (val as number | undefined);
-							(
-								targetAction()?.setFolderId as (
-									v: number | null | undefined,
-								) => void
-							)(id ?? null);
+								typeof val === "string" ? Number.parseInt(val, 10) : val;
+							targetAction()?.setFolderId(id);
 						}}
 						name="media-folder"
 						options={folderOptions()}

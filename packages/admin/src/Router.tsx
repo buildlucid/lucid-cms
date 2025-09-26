@@ -89,7 +89,7 @@ const AppRouter: Component = () => {
 				{/* Emails */}
 				<Route path="/emails" component={EmailListRoute} />
 				{/* Settings */}
-				<Route path="/settings" component={SettingsGeneralRoute} />
+				<Route path="/settings/overview" component={SettingsGeneralRoute} />
 				<Route
 					path="/settings/client-integrations"
 					component={SettingsClientIntegrationRoute}

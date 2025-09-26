@@ -8,6 +8,7 @@ interface DropdownContentProps {
 		class?: string;
 		rounded?: boolean;
 		anchorWidth?: boolean;
+		maxHeight?: "md";
 	};
 	children: JSXElement;
 }
@@ -21,6 +22,7 @@ const DropdownContent: Component<DropdownContentProps> = (props) => {
 					"bg-dropdown-base border border-border px-2.5 py-2.5 shadow-md animate-animate-dropdown focus:outline-hidden focus:ring-1 ring-primary-base scrollbar",
 					{
 						"rounded-md": props.options?.rounded,
+						"max-h-60 overflow-y-auto": props.options?.maxHeight === "md",
 					},
 					props.options?.class,
 				)}

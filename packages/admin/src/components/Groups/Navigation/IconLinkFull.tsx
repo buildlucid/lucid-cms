@@ -10,6 +10,10 @@ import {
 	FaSolidBox,
 	FaSolidBoxesStacked,
 	FaSolidRightFromBracket,
+	FaSolidBarsProgress,
+	FaSolidDesktop,
+	FaSolidKey,
+	FaSolidMoneyCheck,
 } from "solid-icons/fa";
 import { A } from "@solidjs/router";
 
@@ -23,10 +27,13 @@ interface IconLinkFullProps {
 		| "collection-single"
 		| "media"
 		| "users"
-		| "settings"
+		| "overview"
 		| "roles"
 		| "email"
-		| "logout";
+		| "logout"
+		| "queue"
+		| "client-integrations"
+		| "license";
 	active?: boolean;
 	permission?: boolean;
 	onClick?: () => void;
@@ -56,8 +63,8 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				<Match when={props.icon === "users"}>
 					<FaSolidUsers class={iconClasses} />
 				</Match>
-				<Match when={props.icon === "settings"}>
-					<FaSolidGear class={iconClasses} />
+				<Match when={props.icon === "overview"}>
+					<FaSolidMoneyCheck class={iconClasses} />
 				</Match>
 				<Match when={props.icon === "roles"}>
 					<FaSolidUserLock class={iconClasses} />
@@ -67,6 +74,15 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				</Match>
 				<Match when={props.icon === "logout"}>
 					<FaSolidRightFromBracket class={iconClasses} />
+				</Match>
+				<Match when={props.icon === "queue"}>
+					<FaSolidBarsProgress class={iconClasses} />
+				</Match>
+				<Match when={props.icon === "client-integrations"}>
+					<FaSolidDesktop class={iconClasses} />
+				</Match>
+				<Match when={props.icon === "license"}>
+					<FaSolidKey class={iconClasses} />
 				</Match>
 			</Switch>
 		);

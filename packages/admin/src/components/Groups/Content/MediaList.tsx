@@ -38,6 +38,8 @@ import {
 import MoveToFolder, {
 	type MoveToFolderParams,
 } from "@/components/Modals/Media/MoveToFolder";
+import Button from "@/components/Partials/Button";
+import classNames from "classnames";
 
 export const MediaList: Component<{
 	state: {
@@ -125,14 +127,63 @@ export const MediaList: Component<{
 	const onDragStart: DragEventHandler = () => {
 		setIsDragging(true);
 	};
+	const openCreateMediaPanel = () => {
+		props.state.setOpenCreateMediaPanel(true);
+	};
 
 	// ----------------------------------------
 	// Memos
+	const foldersCount = createMemo(() => folders.data?.data.folders.length || 0);
+	const mediaCount = createMemo(() => media.data?.data.length || 0);
+	const isTopLevel = createMemo(() => props.state.parentFolderId() === "");
 	const isError = createMemo(() => {
 		return media.isError || folders.isError;
 	});
 	const isSuccess = createMemo(() => {
 		return media.isSuccess && folders.isSuccess;
+	});
+	const containerEmpty = createMemo(() => {
+		if (props.state.showingDeleted()) return mediaCount() === 0;
+		//* if we're at the top level and there are no folders or media, we're empty
+		return isTopLevel() && foldersCount() === 0 && mediaCount() === 0;
+	});
+	const noEntriesCopy = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return {
+				title: T()("no_deleted_media"),
+				description: T()("no_deleted_media_description"),
+			};
+		}
+		return {
+			title: T()("no_media"),
+			description: T()("no_media_description"),
+			button: T()("upload_media"),
+		};
+	});
+	const createEntryCallback = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return undefined;
+		}
+		return openCreateMediaPanel;
+	});
+	const showFoldersSection = createMemo(() => {
+		return (
+			!props.state.showingDeleted() && (!isTopLevel() || foldersCount() > 0)
+		);
+	});
+	const mediaGridNoEntriesCopy = createMemo(() => {
+		if (isTopLevel()) {
+			return {
+				title: T()("no_media"),
+				description: T()("no_media_description"),
+				button: T()("upload_media"),
+			};
+		}
+		return {
+			title: T()("no_media_in_folder"),
+			description: T()("no_media_in_folder_description"),
+			button: T()("upload_media"),
+		};
 	});
 
 	// ----------------------------------------
@@ -142,6 +193,7 @@ export const MediaList: Component<{
 			state={{
 				isError: isError(),
 				isSuccess: isSuccess(),
+				isEmpty: containerEmpty(),
 				searchParams: props.state.searchParams,
 			}}
 			slot={{
@@ -158,14 +210,10 @@ export const MediaList: Component<{
 				),
 			}}
 			copy={{
-				noEntries: {
-					title: T()("no_media"),
-					description: T()("no_media_description"),
-					button: T()("upload_media"),
-				},
+				noEntries: noEntriesCopy(),
 			}}
 			callback={{
-				createEntry: () => props.state.setOpenCreateMediaPanel(true),
+				createEntry: createEntryCallback(),
 			}}
 			options={{
 				padding: "24",
@@ -174,25 +222,30 @@ export const MediaList: Component<{
 			<DragDropProvider onDragEnd={onDragEnd} onDragStart={onDragStart}>
 				<DragDropSensors />
 				{/* Folders */}
-				<Show when={!props.state.showingDeleted()}>
-					<div class="flex flex-col mb-4">
-						<h3 class="mb-1">{T()("folders")}</h3>
-						<Breadcrumbs
-							state={{
-								parentFolderId: props.state.parentFolderId,
-								breadcrumbs: folders.data?.data.breadcrumbs ?? [],
-							}}
-						/>
-					</div>
+				<Show when={showFoldersSection()}>
+					<Breadcrumbs
+						state={{
+							parentFolderId: props.state.parentFolderId,
+							breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+						}}
+					/>
 					<Grid
 						state={{
 							isLoading: folders.isLoading,
-							totalItems: folders.data?.data.folders.length || 0,
+							totalItems: foldersCount(),
+						}}
+						options={{
+							disableEmpty: true,
 						}}
 						slots={{
 							loadingCard: <MediaFolderCardLoading />,
 						}}
-						class="border-b border-border pb-4 md:pb-6 mb-4 md:mb-6"
+						class={classNames(
+							"border-b border-border pb-4 md:pb-6 mb-4 md:mb-6",
+							{
+								"mt-4": foldersCount() > 0,
+							},
+						)}
 					>
 						<For each={folders.data?.data.folders}>
 							{(folder) => (
@@ -203,17 +256,23 @@ export const MediaList: Component<{
 				</Show>
 
 				{/* Media */}
-				<Show when={!props.state.showingDeleted()}>
-					<h3 class="mb-4 ">{T()("media")}</h3>
-				</Show>
 				<Grid
 					state={{
 						isLoading: media.isLoading,
-						totalItems: media.data?.data.length || 0,
+						totalItems: mediaCount(),
 						searchParams: props.state.searchParams,
 					}}
 					slots={{
 						loadingCard: <MediaCardLoading />,
+					}}
+					copy={{
+						empty: mediaGridNoEntriesCopy(),
+					}}
+					callback={{
+						createEntry: createEntryCallback(),
+					}}
+					options={{
+						growWhenEmpty: true,
 					}}
 				>
 					<For each={media.data?.data}>

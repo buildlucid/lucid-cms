@@ -127,7 +127,7 @@ export const Select: Component<SelectProps> = (props) => {
 					{/* Trigger */}
 					<DropdownMenu.Trigger
 						class={classNames(
-							"focus:outline-hidden overflow-hidden px-2 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80",
+							"focus:outline-hidden overflow-hidden px-2 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0",
 							{
 								"bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic" || props.theme === "basic-small",
@@ -179,7 +179,8 @@ export const Select: Component<SelectProps> = (props) => {
 					options={{
 						anchorWidth: true,
 						rounded: true,
-						class: "max-h-80 overflow-y-auto z-70 p-1.5!",
+						class: "z-70 p-1.5!",
+						maxHeight: "md",
 					}}
 				>
 					<Show when={props.search !== undefined}>
