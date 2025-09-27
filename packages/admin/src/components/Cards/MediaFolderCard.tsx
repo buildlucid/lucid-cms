@@ -8,6 +8,8 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { Checkbox } from "@/components/Groups/Form";
 import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
 import classNames from "classnames";
+import T from "@/translations";
+import ActionDropdown from "@/components/Partials/ActionDropdown";
 
 export const MediaFolderCardLoading: Component = () => {
 	// ----------------------------------
@@ -65,7 +67,7 @@ export const MediaFolderCard: Component<{
 			use:droppable
 			use:draggable
 			class={classNames(
-				"flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-card-hover",
+				"group flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-card-hover relative",
 				{
 					"bg-card-hover": droppable.isActiveDroppable,
 				},
@@ -77,6 +79,28 @@ export const MediaFolderCard: Component<{
 				}
 			}}
 		>
+			<div class="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100">
+				<ActionDropdown
+					actions={[
+						{
+							label: T()("edit"),
+							type: "button",
+							onClick: () => {
+								// Custom event to bubble up; MediaList will listen and open Update panel
+								const ev = new CustomEvent("lucid-folder-edit", {
+									detail: { id: props.folder.id },
+									bubbles: true,
+								});
+								document.dispatchEvent(ev);
+							},
+							permission: userStore.get.hasPermission(["update_media"]).all,
+						},
+					]}
+					options={{
+						border: true,
+					}}
+				/>
+			</div>
 			<Show when={hasUpdatePermission()}>
 				<Checkbox
 					value={isSelected()}

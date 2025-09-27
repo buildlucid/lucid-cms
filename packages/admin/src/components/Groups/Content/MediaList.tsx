@@ -6,6 +6,7 @@ import {
 	For,
 	Show,
 	createSignal,
+	createEffect,
 } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -41,6 +42,7 @@ import MoveToFolder, {
 } from "@/components/Modals/Media/MoveToFolder";
 import Button from "@/components/Partials/Button";
 import classNames from "classnames";
+import UpdateMediaFolderPanel from "@/components/Panels/Media/UpdateMediaFolderPanel";
 
 export const MediaList: Component<{
 	state: {
@@ -62,6 +64,7 @@ export const MediaList: Component<{
 			deleteBatch: false,
 			moveToFolder: false,
 			view: false,
+			updateFolder: false,
 		},
 	});
 	const [isDragging, setIsDragging] = createSignal(false);
@@ -71,6 +74,19 @@ export const MediaList: Component<{
 			itemId: null,
 			target: null,
 		});
+
+	// ----------------------------------
+	// Lifecycle
+	createEffect(() => {
+		document.addEventListener("lucid-folder-edit", (e: Event) =>
+			handleFolderEdit(e as CustomEvent<{ id: number }>),
+		);
+		return () => {
+			document.removeEventListener("lucid-folder-edit", (e: Event) =>
+				handleFolderEdit(e as CustomEvent<{ id: number }>),
+			);
+		};
+	});
 
 	// ----------------------------------
 	// Memos
@@ -131,6 +147,10 @@ export const MediaList: Component<{
 	};
 	const openCreateMediaPanel = () => {
 		props.state.setOpenCreateMediaPanel(true);
+	};
+	const handleFolderEdit = (e: CustomEvent<{ id: number }>) => {
+		rowTarget.setTargetId(e.detail.id);
+		rowTarget.setTrigger("updateFolder", true);
 	};
 
 	// ----------------------------------------
@@ -333,6 +353,16 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().view,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("view", state);
+					},
+					parentFolderId: props.state.parentFolderId,
+				}}
+			/>
+			<UpdateMediaFolderPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().updateFolder,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("updateFolder", state);
 					},
 					parentFolderId: props.state.parentFolderId,
 				}}

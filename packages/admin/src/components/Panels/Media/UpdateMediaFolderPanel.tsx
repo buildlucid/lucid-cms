@@ -11,7 +11,8 @@ import { Input, Select } from "@/components/Groups/Form";
 import api from "@/services/api";
 import { getBodyError } from "@/utils/error-helpers";
 
-const CreateMediaFolderPanel: Component<{
+const UpdateMediaFolderPanel: Component<{
+	id: Accessor<number | undefined>;
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
@@ -25,33 +26,27 @@ const CreateMediaFolderPanel: Component<{
 		number | null | undefined
 	>(undefined);
 
-	// -----------------------------
-	// Mutations
-	const createFolder = api.mediaFolders.useCreateSingle({
+	// ----------------------------------------
+	// Queries / Mutations
+	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
+		queryParams: {},
+	});
+
+	const updateFolder = api.mediaFolders.useUpdateSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
 		},
 	});
 
-	// ----------------------------------------
-	// Queries
-	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
-		queryParams: {},
-	});
-
 	// -----------------------------
 	// Memos
-	const resolveParentFolderId = createMemo(() => {
-		const parent = props.state.parentFolderId();
-		if (parent === "") return null;
-		return typeof parent === "string" ? Number.parseInt(parent, 10) : parent;
-	});
-
 	const folderOptions = createMemo(() => {
 		const folders = foldersHierarchy.data?.data || [];
+		const currentId = props.id();
 		const sorted = folders
 			.slice()
 			.sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0))
+			.filter((f) => f.id !== currentId)
 			.map((f) => {
 				let label = f.meta?.label ?? f.title;
 				if (f.meta?.level && f.meta?.level > 0) label = `| ${label}`;
@@ -65,7 +60,13 @@ const CreateMediaFolderPanel: Component<{
 	// Effects
 	createEffect(() => {
 		if (props.state.open) {
-			setSelectedParentId(resolveParentFolderId());
+			const currentId = props.id();
+			const folders = foldersHierarchy.data?.data || [];
+			const current = folders.find((f) => f.id === currentId);
+			if (current) {
+				setTitle(current.title);
+				setSelectedParentId(current.parentFolderId ?? null);
+			}
 		}
 	});
 
@@ -78,8 +79,8 @@ const CreateMediaFolderPanel: Component<{
 				setOpen: props.state.setOpen,
 			}}
 			mutateState={{
-				isLoading: createFolder.action.isPending,
-				errors: createFolder.errors(),
+				isLoading: updateFolder.action.isPending,
+				errors: updateFolder.errors(),
 			}}
 			fetchState={{
 				isLoading: foldersHierarchy.isLoading,
@@ -87,21 +88,24 @@ const CreateMediaFolderPanel: Component<{
 			}}
 			callbacks={{
 				onSubmit: () => {
-					createFolder.action.mutate({
-						title: getTitle(),
-						parentFolderId: getSelectedParentId() ?? null,
+					const id = props.id();
+					if (!id) return;
+					updateFolder.action.mutate({
+						id: id,
+						body: {
+							title: getTitle(),
+							parentFolderId: getSelectedParentId() ?? null,
+						},
 					});
 				},
 				reset: () => {
-					createFolder.reset();
+					updateFolder.reset();
 					setTitle("");
 					setSelectedParentId(undefined);
 				},
 			}}
 			copy={{
-				title: T()("create_media_folder_panel_title"),
-				description: T()("create_media_folder_panel_description"),
-				submit: T()("create"),
+				submit: T()("update"),
 			}}
 			options={{
 				padding: "24",
@@ -119,7 +123,7 @@ const CreateMediaFolderPanel: Component<{
 						copy={{
 							label: T()("title"),
 						}}
-						errors={getBodyError("title", createFolder.errors)}
+						errors={getBodyError("title", updateFolder.errors)}
 						theme="full"
 					/>
 					<Select
@@ -136,6 +140,7 @@ const CreateMediaFolderPanel: Component<{
 						options={folderOptions()}
 						copy={{ label: T()("folder") }}
 						noClear={true}
+						errors={getBodyError("parentFolderId", updateFolder.errors)}
 						theme="full"
 					/>
 				</>
@@ -144,4 +149,4 @@ const CreateMediaFolderPanel: Component<{
 	);
 };
 
-export default CreateMediaFolderPanel;
+export default UpdateMediaFolderPanel;
