@@ -16,6 +16,7 @@ import { DynamicContent } from "@/components/Groups/Layout";
 import { Grid } from "@/components/Groups/Grid";
 import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
 import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
@@ -60,6 +61,7 @@ export const MediaList: Component<{
 			deletePermanently: false,
 			deleteBatch: false,
 			moveToFolder: false,
+			view: false,
 		},
 	});
 	const [isDragging, setIsDragging] = createSignal(false);
@@ -321,6 +323,16 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().update,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("update", state);
+					},
+					parentFolderId: props.state.parentFolderId,
+				}}
+			/>
+			<ViewMediaPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().view,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("view", state);
 					},
 					parentFolderId: props.state.parentFolderId,
 				}}

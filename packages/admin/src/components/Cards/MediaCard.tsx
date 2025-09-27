@@ -17,7 +17,7 @@ interface MediaCardProps {
 	media: MediaResponse;
 	rowTarget: ReturnType<
 		typeof useRowTarget<
-			"clear" | "delete" | "update" | "restore" | "deletePermanently"
+			"clear" | "delete" | "update" | "restore" | "deletePermanently" | "view"
 		>
 	>;
 	contentLocale?: string;
@@ -70,13 +70,15 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			class={classNames(
 				"bg-card-base border-border border rounded-md group overflow-hidden relative",
 				{
-					"cursor-pointer": hasUpdatePermission(),
+					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),
 				},
 			)}
 			onClick={() => {
 				if (props.isDragging()) return;
-				if (hasUpdatePermission()) {
-					props.rowTarget.setTargetId(props.media.id);
+				props.rowTarget.setTargetId(props.media.id);
+				if (props.showingDeleted?.()) {
+					props.rowTarget.setTrigger("view", true);
+				} else if (hasUpdatePermission()) {
 					props.rowTarget.setTrigger("update", true);
 				}
 			}}
@@ -104,6 +106,16 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			<div class="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100">
 				<ActionDropdown
 					actions={[
+						{
+							label: T()("preview"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("view", true);
+							},
+							permission: true,
+							hide: !props.showingDeleted?.(),
+						},
 						{
 							label: T()("edit"),
 							type: "button",

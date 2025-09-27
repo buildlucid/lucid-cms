@@ -129,7 +129,7 @@ const CreateMediaFolderPanel: Component<{
 						}}
 						name={"parent-folder"}
 						options={folderOptions()}
-						copy={{ label: T()("parent_page") }}
+						copy={{ label: T()("folder") }}
 						noClear={true}
 						theme="full"
 					/>

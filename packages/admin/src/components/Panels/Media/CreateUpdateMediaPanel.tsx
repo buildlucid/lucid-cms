@@ -80,9 +80,13 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const sorted = folders
 			.slice()
 			.sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0))
-			.map((f) => ({ value: f.id, label: f.meta?.label ?? f.title }));
+			.map((f) => {
+				let label = f.meta?.label ?? f.title;
+				if (f.meta?.level && f.meta?.level > 0) label = `| ${label}`;
+				return { value: f.id, label: label };
+			});
 
-		return [{ value: undefined, label: T()("media_library") }, ...sorted];
+		return [{ value: undefined, label: T()("no_folder") }, ...sorted];
 	});
 
 	const resolvedDefaultFolderId = createMemo(() => {
@@ -263,6 +267,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			{(lang) => (
 				<>
 					<MediaFile.Render />
+					<SectionHeading title={T()("details")} />
 					<Select
 						id="media-folder"
 						value={targetState()?.folderId() ?? undefined}
@@ -273,7 +278,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						}}
 						name="media-folder"
 						options={folderOptions()}
-						copy={{ label: T()("folders") }}
+						copy={{ label: T()("folder") }}
 						required={false}
 						errors={getBodyError("folderId", mutateErrors())}
 						noMargin={false}
@@ -283,11 +288,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					<For each={locales()}>
 						{(locale, index) => (
 							<Show when={locale.code === lang?.contentLocale()}>
-								<SectionHeading
-									title={T()("details_lang", {
-										code: locale.code,
-									})}
-								/>
 								<Input
 									id={`name-${locale.code}`}
 									value={
@@ -305,7 +305,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									name={`name-${locale.code}`}
 									type="text"
 									copy={{
-										label: T()("name"),
+										label: T()("name_lang", {
+											code: locale.code,
+										}),
 									}}
 									errors={getErrorObject(inputError(index())?.name)}
 									autoComplete="off"
@@ -329,7 +331,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										name={`alt-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("alt"),
+											label: T()("alt_lang", {
+												code: locale.code,
+											}),
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
 										theme="full"
