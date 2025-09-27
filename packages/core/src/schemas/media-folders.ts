@@ -3,31 +3,33 @@ import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
 
 const mediaFolderResponseSchema = z.object({
-	id: z.number().meta({ description: "Media folder ID", example: 1 }),
-	title: z
-		.string()
-		.meta({ description: "Media folder title", example: "Heros" }),
+	id: z.number().meta({ description: "Folder ID", example: 1 }),
+	title: z.string().meta({ description: "Folder title", example: "Heros" }),
 	parentFolderId: z
 		.number()
 		.nullable()
-		.meta({ description: "Media folder parent ID", example: 1 }),
+		.meta({ description: "Folder parent ID", example: 1 }),
+	folderCount: z
+		.number()
+		.meta({ description: "Folder folder count", example: 1 }),
+	mediaCount: z
+		.number()
+		.meta({ description: "Folder media count", example: 1 }),
 	meta: z
 		.object({
-			level: z.number().meta({ description: "Media folder level", example: 1 }),
-			order: z.number().meta({ description: "Media folder order", example: 1 }),
-			label: z
-				.string()
-				.meta({ description: "Media folder label", example: "Heros" }),
+			level: z.number().meta({ description: "Folder level", example: 1 }),
+			order: z.number().meta({ description: "Folder order", example: 1 }),
+			label: z.string().meta({ description: "Folder label", example: "Heros" }),
 		})
 		.optional(),
 	createdBy: z
 		.number()
 		.nullable()
-		.meta({ description: "Media folder created by", example: 1 }),
+		.meta({ description: "Folder created by", example: 1 }),
 	updatedBy: z
 		.number()
 		.nullable()
-		.meta({ description: "Media folder updated by", example: 1 }),
+		.meta({ description: "Folder updated by", example: 1 }),
 	createdAt: z.string().meta({
 		description: "Creation timestamp",
 		example: "2022-01-01T00:00:00Z",
@@ -38,14 +40,12 @@ const mediaFolderResponseSchema = z.object({
 	}),
 });
 const mediaFolderBreadcrumbResponseSchema = z.object({
-	id: z.number().meta({ description: "Media folder ID", example: 1 }),
-	title: z
-		.string()
-		.meta({ description: "Media folder title", example: "Heros" }),
+	id: z.number().meta({ description: "Folder ID", example: 1 }),
+	title: z.string().meta({ description: "Folder title", example: "Heros" }),
 	parentFolderId: z
 		.number()
 		.nullable()
-		.meta({ description: "Media folder parent ID", example: 1 }),
+		.meta({ description: "Folder parent ID", example: 1 }),
 });
 
 export const controllerSchemas = {
@@ -108,7 +108,7 @@ export const controllerSchemas = {
 		},
 		params: z.object({
 			id: z.string().meta({
-				description: "The media folder ID",
+				description: "The folder ID",
 				example: 1,
 			}),
 		}),
@@ -120,7 +120,7 @@ export const controllerSchemas = {
 				.string()
 				.min(1)
 				.meta({
-					description: "The media folder title",
+					description: "The folder title",
 					example: "Heros",
 				})
 				.optional(),
@@ -128,7 +128,7 @@ export const controllerSchemas = {
 				.number()
 				.nullable()
 				.meta({
-					description: "The media folder parent ID",
+					description: "The folder parent ID",
 					example: 1,
 				})
 				.optional(),
@@ -139,7 +139,7 @@ export const controllerSchemas = {
 		},
 		params: z.object({
 			id: z.string().meta({
-				description: "The media folder ID",
+				description: "The folder ID",
 				example: 1,
 			}),
 		}),
@@ -148,14 +148,14 @@ export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
 			title: z.string().min(1).meta({
-				description: "The media folder title",
+				description: "The folder title",
 				example: "Heros",
 			}),
 			parentFolderId: z
 				.number()
 				.nullable()
 				.meta({
-					description: "The media folder parent ID",
+					description: "The folder parent ID",
 					example: 1,
 				})
 				.optional(),

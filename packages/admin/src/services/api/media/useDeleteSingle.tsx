@@ -30,7 +30,7 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 			title: T()("media_deleted_toast_title"),
 			message: T()("media_deleted_toast_message"),
 		}),
-		invalidates: ["media.getMultiple"],
+		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

@@ -37,6 +37,7 @@ const useMoveFolder = (props?: UseMoveFolderProps) => {
 			"media.getMultiple",
 			"media.getSingle",
 			"mediaFolders.getMultiple",
+			"mediaFolders.getHierarchy",
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

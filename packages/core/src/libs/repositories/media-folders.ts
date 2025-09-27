@@ -3,6 +3,7 @@ import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
+import queryBuilder from "../query-builder/index.js";
 
 export default class MediaFoldersRepository extends StaticRepository<"lucid_media_folders"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -12,6 +13,8 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 		id: z.number(),
 		title: z.string(),
 		parent_folder_id: z.number().nullable(),
+		folder_count: z.number().nullable().optional(),
+		media_count: z.number().nullable().optional(),
 		created_by: z.number().nullable(),
 		updated_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
@@ -43,6 +46,91 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 
 	// ----------------------------------------
 	// queries
+	async selectMultipleWithCounts<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				queryParams: Record<string, unknown>;
+			}
+		>,
+	) {
+		const exec = await this.executeQuery(
+			async () => {
+				const mainQuery = this.db
+					.selectFrom("lucid_media_folders")
+					.select((eb) => [
+						"lucid_media_folders.id",
+						"lucid_media_folders.title",
+						"lucid_media_folders.parent_folder_id",
+						"lucid_media_folders.created_by",
+						"lucid_media_folders.updated_by",
+						"lucid_media_folders.created_at",
+						"lucid_media_folders.updated_at",
+						eb
+							.selectFrom("lucid_media_folders as children")
+							.select(({ fn }) =>
+								fn.count<number>("children.id").as("folder_count"),
+							)
+							.whereRef(
+								"children.parent_folder_id",
+								"=",
+								"lucid_media_folders.id",
+							)
+							.as("folder_count"),
+						eb
+							.selectFrom("lucid_media")
+							.select(({ fn }) =>
+								fn.count<number>("lucid_media.id").as("media_count"),
+							)
+							.whereRef("lucid_media.folder_id", "=", "lucid_media_folders.id")
+							.as("media_count"),
+					]);
+
+				const countQuery = this.db
+					.selectFrom("lucid_media_folders")
+					.select(({ fn }) =>
+						fn.count<number>("lucid_media_folders.id").as("count"),
+					);
+
+				const { main, count } = queryBuilder.main(
+					{
+						main: mainQuery,
+						count: countQuery,
+					},
+					{
+						queryParams: props.queryParams,
+						meta: this.queryConfig,
+					},
+				);
+
+				const [mainResult, countResult] = await Promise.all([
+					main.execute(),
+					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
+				]);
+
+				return [mainResult, countResult] as const;
+			},
+			{ method: "selectMultipleWithCounts" },
+		);
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple-count",
+			select: [
+				"id",
+				"title",
+				"parent_folder_id",
+				"created_by",
+				"updated_by",
+				"created_at",
+				"updated_at",
+				"folder_count",
+				"media_count",
+			],
+		});
+	}
 	async getDescendantIds(props: { folderIds: number[] }) {
 		const query = this.db
 			.withRecursive("desc_folders", (db) =>

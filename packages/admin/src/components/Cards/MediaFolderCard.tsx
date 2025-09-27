@@ -10,6 +10,7 @@ import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
 import classNames from "classnames";
 import T from "@/translations";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
+import type useRowTarget from "@/hooks/useRowTarget";
 
 export const MediaFolderCardLoading: Component = () => {
 	// ----------------------------------
@@ -27,6 +28,7 @@ export const MediaFolderCardLoading: Component = () => {
 export const MediaFolderCard: Component<{
 	folder: MediaFolderResponse;
 	isDragging: Accessor<boolean>;
+	rowTarget: ReturnType<typeof useRowTarget<"updateFolder">>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks
@@ -86,12 +88,8 @@ export const MediaFolderCard: Component<{
 							label: T()("edit"),
 							type: "button",
 							onClick: () => {
-								// Custom event to bubble up; MediaList will listen and open Update panel
-								const ev = new CustomEvent("lucid-folder-edit", {
-									detail: { id: props.folder.id },
-									bubbles: true,
-								});
-								document.dispatchEvent(ev);
+								props.rowTarget.setTargetId(props.folder.id);
+								props.rowTarget.setTrigger("updateFolder", true);
 							},
 							permission: userStore.get.hasPermission(["update_media"]).all,
 						},
@@ -126,7 +124,10 @@ export const MediaFolderCard: Component<{
 						{props.folder.title}
 					</p>
 				</div>
-				<p class="text-sm text-body">2 folders, 13 assets</p>
+				<p class="text-sm text-body">
+					{props.folder.folderCount} {T()("folders")}, {props.folder.mediaCount}{" "}
+					{T()("media")}
+				</p>
 			</div>
 		</li>
 	);

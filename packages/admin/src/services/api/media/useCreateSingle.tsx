@@ -46,7 +46,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 	// Mutation
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Response>>({
 		mutationFn: createSingleReq,
-		invalidates: ["media.getMultiple"],
+		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

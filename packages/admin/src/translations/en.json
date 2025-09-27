@@ -538,6 +538,8 @@
 	"add_user": "Add User",
 	"create_media_folder_panel_title": "Create Folder",
 	"create_media_folder_panel_description": "Create a new media folder.",
+	"update_media_folder_panel_title": "Update Folder",
+	"update_media_folder_panel_description": "Update the folder details.",
 	"media_folder_create_toast_title": "Folder created",
 	"media_folder_create_toast_message": "The folder has been created",
 	"is_deleted": "Is Deleted",

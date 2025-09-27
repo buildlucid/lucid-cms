@@ -56,7 +56,12 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 			title: T()(props?.toast?.title ?? "media_update_toast_title"),
 			message: T()(props?.toast?.message ?? "media_update_toast_message"),
 		}),
-		invalidates: ["media.getMultiple", "media.getSingle"],
+		invalidates: [
+			"media.getMultiple",
+			"media.getSingle",
+			"mediaFolders.getMultiple",
+			"mediaFolders.getHierarchy",
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

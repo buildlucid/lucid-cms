@@ -144,6 +144,8 @@ export interface MediaFolderResponse {
 	id: number;
 	title: string;
 	parentFolderId: number | null;
+	folderCount: number;
+	mediaCount: number;
 	meta?: {
 		level: number;
 		order: number;

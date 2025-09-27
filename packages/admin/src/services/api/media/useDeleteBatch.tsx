@@ -35,7 +35,11 @@ const useDeleteBatch = (props: UseDeleteBatchProps) => {
 			title: T()("media_batch_deleted_toast_title"),
 			message: T()("media_batch_deleted_toast_message"),
 		}),
-		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
+		invalidates: [
+			"media.getMultiple",
+			"mediaFolders.getMultiple",
+			"mediaFolders.getHierarchy",
+		],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

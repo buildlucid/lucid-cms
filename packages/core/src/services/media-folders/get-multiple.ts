@@ -27,16 +27,7 @@ const getMultiple: ServiceFn<
 	const searchBreadcrumbs = parsedId && !Number.isNaN(parsedId);
 
 	const [foldersRes, breadcrumbsRes] = await Promise.all([
-		MediaFolders.selectMultipleFiltered({
-			select: [
-				"id",
-				"title",
-				"parent_folder_id",
-				"created_by",
-				"updated_by",
-				"created_at",
-				"updated_at",
-			],
+		MediaFolders.selectMultipleWithCounts({
 			queryParams: data.query,
 			validation: {
 				enabled: true,

@@ -76,19 +76,6 @@ export const MediaList: Component<{
 		});
 
 	// ----------------------------------
-	// Lifecycle
-	createEffect(() => {
-		document.addEventListener("lucid-folder-edit", (e: Event) =>
-			handleFolderEdit(e as CustomEvent<{ id: number }>),
-		);
-		return () => {
-			document.removeEventListener("lucid-folder-edit", (e: Event) =>
-				handleFolderEdit(e as CustomEvent<{ id: number }>),
-			);
-		};
-	});
-
-	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const isDeletedFilter = createMemo(() =>
@@ -147,10 +134,6 @@ export const MediaList: Component<{
 	};
 	const openCreateMediaPanel = () => {
 		props.state.setOpenCreateMediaPanel(true);
-	};
-	const handleFolderEdit = (e: CustomEvent<{ id: number }>) => {
-		rowTarget.setTargetId(e.detail.id);
-		rowTarget.setTrigger("updateFolder", true);
 	};
 
 	// ----------------------------------------
@@ -271,7 +254,11 @@ export const MediaList: Component<{
 					>
 						<For each={folders.data?.data.folders}>
 							{(folder) => (
-								<MediaFolderCard folder={folder} isDragging={isDragging} />
+								<MediaFolderCard
+									folder={folder}
+									isDragging={isDragging}
+									rowTarget={rowTarget}
+								/>
 							)}
 						</For>
 					</Grid>

@@ -5,6 +5,8 @@ export interface MediaFolderPropsT {
 	id: number;
 	title: string;
 	parent_folder_id: number | null;
+	folder_count?: number | null;
+	media_count?: number | null;
 	created_by: number | null;
 	updated_by: number | null;
 	created_at: Date | string | null;
@@ -62,6 +64,8 @@ export default class MediaFoldersFormatter {
 			id: props.folder.id,
 			title: props.folder.title,
 			parentFolderId: props.folder.parent_folder_id,
+			folderCount: props.folder.folder_count ?? 0,
+			mediaCount: props.folder.media_count ?? 0,
 			meta: meta,
 			createdBy: props.folder.created_by,
 			updatedBy: props.folder.updated_by,
