@@ -10,6 +10,9 @@ const Migration00000002: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
+				.addColumn("job_id", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
 				.addColumn("event_type", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
@@ -60,6 +63,12 @@ const Migration00000002: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_queue_jobs_job_id")
+				.on("lucid_queue_jobs")
+				.column("job_id")
 				.execute();
 
 			await db.schema

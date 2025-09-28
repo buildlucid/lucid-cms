@@ -4,7 +4,10 @@ import logger from "../../logger/index.js";
 /**
  * A passthrough queue adapter that will only mock the queue, and execute the event handlers immediately
  */
-const passthroughQueueAdapter: QueueAdapter = (context) => {
+const passthroughQueueAdapter: QueueAdapter<{
+	/** Bypasses the immediate execution of the event handlers */
+	bypassImmediateExecution?: boolean;
+}> = (context, adapterConfig) => {
 	return {
 		key: "passthrough-queue-adapter",
 		start: async () => {
@@ -19,6 +22,13 @@ const passthroughQueueAdapter: QueueAdapter = (context) => {
 				scope: context.logScope,
 				data: { event, data },
 			});
+
+			//* insert event into the database and KV
+
+			//* skip immediate execution
+			if (adapterConfig?.bypassImmediateExecution) {
+				return;
+			}
 		},
 	};
 };

@@ -1,3 +1,4 @@
+import type { ServiceFn } from "../../utils/services/types.js";
 import type createQueueContext from "./create-context.js";
 
 export type QueueEvent<T extends string = string> =
@@ -11,10 +12,14 @@ export type QueueEventID = string;
 
 export type QueueContext = ReturnType<typeof createQueueContext>;
 
-export type QueueEventHandlerFn = (data: unknown) => Promise<void>;
+export type QueueEventHandlerFn<D = unknown, R = unknown> = ServiceFn<[D], R>;
+
 export type QueueEventHandlers = Record<QueueEvent, QueueEventHandlerFn>;
 
-export type QueueAdapter = (context: QueueContext) => {
+export type QueueAdapter<AdapterConfig = unknown> = (
+	context: QueueContext,
+	adapterConfig?: AdapterConfig,
+) => {
 	key: string;
 	/**
 	 * Start the queue

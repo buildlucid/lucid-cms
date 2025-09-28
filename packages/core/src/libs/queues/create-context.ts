@@ -1,7 +1,8 @@
 import type { Config } from "../../types.js";
 import type { QueueEvent, QueueJobStatus, QueueEventID } from "./types.js";
-import logger from "../logger/index.js";
 import queueEventHandlers from "./event-handlers.js";
+
+export const QUEUE_LOG_SCOPE = "queue" as const;
 
 /**
  * Responsible for creating the context for the queue adapters.
@@ -46,7 +47,7 @@ const createQueueContext = (config: Config) => {
 		/**
 		 * The log scope for the queue
 		 */
-		logScope: "queue",
+		logScope: QUEUE_LOG_SCOPE,
 	};
 };
 

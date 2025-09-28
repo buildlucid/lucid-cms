@@ -9,6 +9,7 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 	}
 	tableSchema = z.object({
 		id: z.union([z.string(), z.number()]),
+		job_id: z.string(),
 		event_type: z.string(),
 		event_data: z.record(z.string(), z.unknown()).nullable(),
 		status: z.enum(["pending", "processing", "completed", "failed"]),
@@ -28,6 +29,7 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
+		job_id: this.dbAdapter.getDataType("text"),
 		event_type: this.dbAdapter.getDataType("text"),
 		event_data: this.dbAdapter.getDataType("json"),
 		status: this.dbAdapter.getDataType("text"),
@@ -48,6 +50,7 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 	queryConfig = {
 		tableKeys: {
 			filters: {
+				jobId: "job_id",
 				eventType: "event_type",
 				status: "status",
 				queueAdapterKey: "queue_adapter_key",
@@ -62,6 +65,7 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 				nextRetryAt: "next_retry_at",
 			},
 			sorts: {
+				jobId: "job_id",
 				eventType: "event_type",
 				status: "status",
 				queueAdapterKey: "queue_adapter_key",

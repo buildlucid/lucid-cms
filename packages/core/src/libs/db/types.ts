@@ -156,6 +156,7 @@ export interface LucidOptions {
 
 export interface LucidQueueJobs {
 	id: Generated<number>;
+	job_id: string;
 	event_type: QueueEvent;
 	event_data: JSONColumnType<
 		Record<string, unknown>,
