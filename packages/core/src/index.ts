@@ -1,6 +1,5 @@
 import createApp from "./libs/http/app.js";
 import setupCronJobs from "./libs/crons/index.js";
-import createQueueContext from "./libs/queues/create-context.js";
 
 export { default as z } from "zod/v4";
 export { LucidError } from "./utils/errors/index.js";
@@ -13,5 +12,4 @@ export { default as passthroughQueueAdapter } from "./libs/queues/adapters/passt
 export default {
 	createApp,
 	setupCronJobs,
-	createQueueContext,
 };

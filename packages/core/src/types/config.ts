@@ -333,7 +333,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		>;
 	};
 	queue: {
-		adapter: QueueAdapter;
+		adapter?: QueueAdapter;
 	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];

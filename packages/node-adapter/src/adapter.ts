@@ -33,15 +33,12 @@ const nodeAdapter = (options?: {
 				logger.serverStarting("Node");
 
 				const app = await lucid.createApp({ config });
-				const queueContext = lucid.createQueueContext(config);
 
 				const server = serve({
 					fetch: app.fetch,
 					port: options?.server?.port ?? 6543,
 					hostname: options?.server?.hostname,
 				});
-				const queueInstance = config.queue.adapter(queueContext);
-				await queueInstance.start();
 
 				server.on("listening", () => {
 					const address = server.address();
@@ -139,9 +136,6 @@ const startServer = async () => {
         const app = await lucid.createApp({
             config: resolved,
         });
-        const queueContext = lucid.createQueueContext(resolved);
-        const queueInstance = resolved.queue.adapter(queueContext);
-        await queueInstance.start();
         
         const cronJobs = lucid.setupCronJobs({
             config: resolved,

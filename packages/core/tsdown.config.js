@@ -11,6 +11,7 @@ export default defineConfig({
         "src/middleware.ts",
         "src/helpers.ts",
         "src/libs/cli/index.ts",
+        "src/libs/queues/worker/consumer.ts",
     ],
     external: [
         //* tsdown bundles optionalDependencies by default, so we need to exclude them

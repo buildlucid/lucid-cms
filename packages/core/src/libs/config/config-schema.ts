@@ -120,7 +120,7 @@ const ConfigSchema = z.object({
 		extensions: z.array(HonoAppSchema).optional(),
 	}),
 	queue: z.object({
-		adapter: QueueAdapterSchema,
+		adapter: QueueAdapterSchema.optional(),
 	}),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),

@@ -1,4 +1,3 @@
-import defaultQueueAdapter from "../libs/queues/adapters/default.js";
 import type { LucidConfig } from "../types/config.js";
 
 export const defaultConfig: Partial<LucidConfig> = {
@@ -38,9 +37,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 		middleware: [],
 		extensions: [],
 	},
-	queue: {
-		adapter: defaultQueueAdapter,
-	},
+	queue: {},
 	hooks: [],
 	collections: [],
 	plugins: [],

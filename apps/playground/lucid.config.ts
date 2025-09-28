@@ -1,4 +1,8 @@
-import { passthroughImageProcessor, z } from "@lucidcms/core";
+import {
+	passthroughImageProcessor,
+	passthroughQueueAdapter,
+	z,
+} from "@lucidcms/core";
 import { describeRoute } from "hono-openapi";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
@@ -87,6 +91,9 @@ export default defineConfig((env) => ({
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },
 	},
+	// queue: {
+	// adapter: passthroughQueueAdapter,
+	// },
 	// hooks: [
 	// 	{
 	// 		service: "documents",

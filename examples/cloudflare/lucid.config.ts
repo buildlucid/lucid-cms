@@ -1,4 +1,8 @@
-import { passthroughImageProcessor, z } from "@lucidcms/core";
+import {
+	passthroughImageProcessor,
+	passthroughQueueAdapter,
+	z,
+} from "@lucidcms/core";
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import LucidResend from "@lucidcms/plugin-resend";
@@ -61,6 +65,9 @@ export default defineConfig((env) => ({
 		urlStrategy: (media) => {
 			return `${env.LUCID_MEDIA_URL}/${env.LUCID_S3_BUCKET}/${media.key}`;
 		},
+	},
+	queue: {
+		adapter: passthroughQueueAdapter,
 	},
 	collections: [PageCollection, NewsCollection, SettingsCollection],
 	plugins: [

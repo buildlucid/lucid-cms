@@ -12,7 +12,7 @@ import logRoute from "./middleware/log-route.js";
 import type { Config, LucidErrorData } from "../../types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { StatusCode } from "hono/utils/http-status";
-import createQueueContext from "../queues/create-context.js";
+import getQueueAdapter from "../queues/get-adapter.js";
 
 /**
  * The entry point for creating the Hono app.
@@ -39,8 +39,8 @@ const createApp = async (props: {
 		await middleware(app, props.config);
 	}
 
-	const queueContext = createQueueContext(props.config);
-	const queueInstance = props.config.queue.adapter(queueContext);
+	const queueInstance = await getQueueAdapter(props.config);
+	await queueInstance.start();
 
 	app
 		.use(logRoute)
