@@ -1,5 +1,5 @@
 import type { Config } from "../../types.js";
-import type { QueueEvent, QueueEventStatus, QueueEventID } from "./types.js";
+import type { QueueEvent, QueueJobStatus, QueueEventID } from "./types.js";
 import logger from "../logger/index.js";
 import queueEventHandlers from "./event-handlers.js";
 
@@ -19,7 +19,7 @@ const createQueueContext = (config: Config) => {
 		addEvent: async (
 			event: QueueEvent,
 			payload: unknown,
-			status: QueueEventStatus,
+			status: QueueJobStatus,
 		) => {
 			//* insert event into the database, if KV is enabled, then also insert into the KV
 			console.log("addEvent", event, payload, status);
@@ -32,7 +32,7 @@ const createQueueContext = (config: Config) => {
 		 * */
 		updateEvent: async (
 			id: QueueEventID,
-			status: QueueEventStatus,
+			status: QueueJobStatus,
 			error?: string,
 		) => {
 			console.log("updateEvent", id, status, error);
@@ -44,15 +44,9 @@ const createQueueContext = (config: Config) => {
 			return eventHandlers[event];
 		},
 		/**
-		 * A logging helper
-		 * */
-		log: (message: string, data?: Record<string, unknown>) => {
-			logger.info({
-				message,
-				data,
-				scope: "queue",
-			});
-		},
+		 * The log scope for the queue
+		 */
+		logScope: "queue",
 	};
 };
 

@@ -23,6 +23,7 @@ import CollectionMigrationsRepository from "./collection-migrations.js";
 import DocumentsRepository from "./documents.js";
 import DocumentVersionsRepository from "./document-versions.js";
 import DocumentBricksRepository from "./document-bricks.js";
+import QueueJobsRepository from "./queue-jobs.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {
@@ -114,6 +115,11 @@ class Repository {
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
+			case "queue-jobs":
+				return new QueueJobsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			default:
 				throw new LucidError({
 					message: T("cannot_find_repository", {
@@ -145,6 +151,7 @@ type RepositoryClassMap = {
 	documents: DocumentsRepository;
 	"document-versions": DocumentVersionsRepository;
 	"document-bricks": DocumentBricksRepository;
+	"queue-jobs": QueueJobsRepository;
 };
 
 type RepositoryReturnType<T extends keyof RepositoryClassMap> =

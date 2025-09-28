@@ -1,4 +1,3 @@
-import type { Config } from "../../types.js";
 import type createQueueContext from "./create-context.js";
 
 export type QueueEvent<T extends string = string> =
@@ -6,11 +5,7 @@ export type QueueEvent<T extends string = string> =
 	| "media:delete"
 	| T;
 
-export type QueueEventStatus =
-	| "pending"
-	| "processing"
-	| "completed"
-	| "failed";
+export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
 
 export type QueueEventID = string;
 

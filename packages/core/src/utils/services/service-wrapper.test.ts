@@ -6,6 +6,8 @@ import serviceWrapper from "./service-wrapper.js";
 import mergeServiceError from "./utils/merge-errors.js";
 import lucidServices from "../../services/index.js";
 import type { ServiceResponse, ServiceFn } from "./types.js";
+import passthroughQueueAdapter from "../../libs/queues/adapters/passthrough.js";
+import createQueueContext from "../../libs/queues/create-context.js";
 
 const CONSTANTS = {
 	error: {
@@ -61,6 +63,9 @@ test("basic - one level deep service wrapper success and error", async () => {
 		};
 	};
 
+	const queueContext = createQueueContext(config);
+	const queueAdapter = passthroughQueueAdapter(queueContext);
+
 	// Execute
 	const [success, error] = await Promise.all([
 		serviceWrapper(testService, {
@@ -70,6 +75,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				data: {
@@ -85,6 +91,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				data: {
@@ -153,6 +160,9 @@ test("basic - two level deep service wrapper success and error", async () => {
 		};
 	};
 
+	const queueContext = createQueueContext(config);
+	const queueAdapter = passthroughQueueAdapter(queueContext);
+
 	// Execute
 	const [success, error] = await Promise.all([
 		serviceWrapper(testServiceOne, {
@@ -162,6 +172,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				data: {
@@ -177,6 +188,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				data: {
@@ -233,6 +245,9 @@ test("transaction - one level deep service wrapper success and error", async () 
 		};
 	};
 
+	const queueContext = createQueueContext(config);
+	const queueAdapter = passthroughQueueAdapter(queueContext);
+
 	// Execute
 	const [success, error] = await Promise.all([
 		serviceWrapper(createCollection, {
@@ -242,6 +257,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				collectionKey: successCollectionKey,
@@ -255,6 +271,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				collectionKey: errorCollectionKey,
@@ -338,6 +355,9 @@ test("transaction - two level deep service wrapper success and error", async () 
 		};
 	};
 
+	const queueContext = createQueueContext(config);
+	const queueAdapter = passthroughQueueAdapter(queueContext);
+
 	// Execute
 	const [success, error] = await Promise.all([
 		serviceWrapper(createCollectionWithDepth, {
@@ -347,6 +367,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				collectionKey: successCollectionKey,
@@ -365,6 +386,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				collectionKey: errorCollectionKey,
@@ -417,6 +439,9 @@ test("service wrapper schema validation", async () => {
 		};
 	};
 
+	const queueContext = createQueueContext(config);
+	const queueAdapter = passthroughQueueAdapter(queueContext);
+
 	// Execute
 	const [success, error] = await Promise.all([
 		serviceWrapper(testService, {
@@ -427,6 +452,7 @@ test("service wrapper schema validation", async () => {
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				key: "test",
@@ -441,6 +467,7 @@ test("service wrapper schema validation", async () => {
 				db: config.db.client,
 				config: config,
 				services: lucidServices,
+				queue: queueAdapter,
 			},
 			{
 				key: "test",

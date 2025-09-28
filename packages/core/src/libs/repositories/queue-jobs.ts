@@ -1,0 +1,86 @@
+import z from "zod/v4";
+import StaticRepository from "./parents/static-repository.js";
+import type { KyselyDB } from "../db/types.js";
+import type DatabaseAdapter from "../db/adapter.js";
+
+export default class QueueJobsRepository extends StaticRepository<"lucid_queue_jobs"> {
+	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
+		super(db, dbAdapter, "lucid_queue_jobs");
+	}
+	tableSchema = z.object({
+		id: z.union([z.string(), z.number()]),
+		event_type: z.string(),
+		event_data: z.record(z.string(), z.unknown()).nullable(),
+		status: z.enum(["pending", "processing", "completed", "failed"]),
+		queue_adapter_key: z.string(),
+		priority: z.number().nullable(),
+		attempts: z.number(),
+		max_attempts: z.number(),
+		error_message: z.string().nullable(),
+		created_at: z.union([z.string(), z.date()]).nullable(),
+		scheduled_for: z.union([z.string(), z.date()]).nullable(),
+		started_at: z.union([z.string(), z.date()]).nullable(),
+		completed_at: z.union([z.string(), z.date()]).nullable(),
+		failed_at: z.union([z.string(), z.date()]).nullable(),
+		next_retry_at: z.union([z.string(), z.date()]).nullable(),
+		created_by_user_id: z.union([z.string(), z.number()]).nullable(),
+		updated_at: z.union([z.string(), z.date()]).nullable(),
+	});
+	columnFormats = {
+		id: this.dbAdapter.getDataType("primary"),
+		event_type: this.dbAdapter.getDataType("text"),
+		event_data: this.dbAdapter.getDataType("json"),
+		status: this.dbAdapter.getDataType("text"),
+		queue_adapter_key: this.dbAdapter.getDataType("text"),
+		priority: this.dbAdapter.getDataType("integer"),
+		attempts: this.dbAdapter.getDataType("integer"),
+		max_attempts: this.dbAdapter.getDataType("integer"),
+		error_message: this.dbAdapter.getDataType("text"),
+		created_at: this.dbAdapter.getDataType("timestamp"),
+		scheduled_for: this.dbAdapter.getDataType("timestamp"),
+		started_at: this.dbAdapter.getDataType("timestamp"),
+		completed_at: this.dbAdapter.getDataType("timestamp"),
+		failed_at: this.dbAdapter.getDataType("timestamp"),
+		next_retry_at: this.dbAdapter.getDataType("timestamp"),
+		created_by_user_id: this.dbAdapter.getDataType("integer"),
+		updated_at: this.dbAdapter.getDataType("timestamp"),
+	};
+	queryConfig = {
+		tableKeys: {
+			filters: {
+				eventType: "event_type",
+				status: "status",
+				queueAdapterKey: "queue_adapter_key",
+				priority: "priority",
+				attempts: "attempts",
+				maxAttempts: "max_attempts",
+				createdByUserId: "created_by_user_id",
+				scheduledFor: "scheduled_for",
+				startedAt: "started_at",
+				completedAt: "completed_at",
+				failedAt: "failed_at",
+				nextRetryAt: "next_retry_at",
+			},
+			sorts: {
+				eventType: "event_type",
+				status: "status",
+				queueAdapterKey: "queue_adapter_key",
+				priority: "priority",
+				attempts: "attempts",
+				maxAttempts: "max_attempts",
+				createdAt: "created_at",
+				scheduledFor: "scheduled_for",
+				startedAt: "started_at",
+				completedAt: "completed_at",
+				failedAt: "failed_at",
+				nextRetryAt: "next_retry_at",
+				updatedAt: "updated_at",
+			},
+		},
+		operators: {
+			event_type: this.dbAdapter.config.fuzzOperator,
+			queue_adapter_key: this.dbAdapter.config.fuzzOperator,
+			error_message: this.dbAdapter.config.fuzzOperator,
+		},
+	} as const;
+}

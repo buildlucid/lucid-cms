@@ -5,6 +5,7 @@ import type DatabaseAdapter from "./adapter.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { EmailType, EmailDeliveryStatus } from "../email/types.js";
 import type { OptionsName } from "../../schemas/options.js";
+import type { QueueEvent, QueueJobStatus } from "../queues/types.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -151,6 +152,30 @@ export interface LucidOptions {
 	value_int: number | null;
 	value_text: string | null;
 	value_bool: BooleanInt | null;
+}
+
+export interface LucidQueueJobs {
+	id: Generated<number>;
+	event_type: QueueEvent;
+	event_data: JSONColumnType<
+		Record<string, unknown>,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
+	>;
+	queue_adapter_key: string;
+	status: QueueJobStatus;
+	priority: number;
+	attempts: number;
+	max_attempts: number;
+	error_message: string | null;
+	created_at: TimestampImmutable;
+	scheduled_for: TimestampMutateable;
+	started_at: TimestampMutateable;
+	completed_at: TimestampMutateable;
+	failed_at: TimestampMutateable;
+	next_retry_at: TimestampMutateable;
+	created_by_user_id: number | null;
+	updated_at: TimestampMutateable;
 }
 
 export interface LucidUsers {
@@ -406,6 +431,7 @@ export interface LucidDB {
 	lucid_client_integrations: LucidClientIntegrations;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
+	lucid_queue_jobs: LucidQueueJobs;
 	[key: LucidDocumentTableName]: LucidDocumentTable;
 	// @ts-expect-error
 	[key: LucidVersionTableName]: LucidVersionTable;
