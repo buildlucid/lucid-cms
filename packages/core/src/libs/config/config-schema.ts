@@ -7,6 +7,7 @@ import type {
 	UrlStrategy,
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
+import type { QueueAdapter } from "../queues/types.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
@@ -25,6 +26,13 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a UrlStrategy function",
+	},
+);
+
+const QueueAdapterSchema = z.custom<QueueAdapter>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected a QueueAdapter function",
 	},
 );
 
@@ -110,6 +118,9 @@ const ConfigSchema = z.object({
 	hono: z.object({
 		middleware: z.array(HonoAppSchema).optional(),
 		extensions: z.array(HonoAppSchema).optional(),
+	}),
+	queue: z.object({
+		adapter: QueueAdapterSchema,
 	}),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),

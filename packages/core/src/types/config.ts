@@ -10,6 +10,10 @@ import type { MediaType, EmailDeliveryStatus } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
 import type { LogTransport, LogLevel } from "../libs/logger/types.js";
+import type {
+	QueueAdapter,
+	QueueAdapterInstance,
+} from "../libs/queues/types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -254,6 +258,10 @@ export interface LucidConfig {
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
+	/** The queue adapter to use. */
+	queue?: {
+		adapter?: QueueAdapter;
+	};
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
 	/** A list of collections instances to register. These can be imported from `@lucidcms/core/builders`. */
@@ -323,6 +331,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		extensions: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
+	};
+	queue: {
+		adapter: QueueAdapter;
 	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];

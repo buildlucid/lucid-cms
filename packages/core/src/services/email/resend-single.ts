@@ -67,6 +67,11 @@ const resendSingle: ServiceFn<
 	});
 	if (html.error) return html;
 
+	await context.queue.add("email:resend", {
+		email: emailRes.data,
+		html: html.data,
+	});
+
 	let result: EmailStrategyResponse | undefined;
 	try {
 		result = await emailConfigRes.data.strategy(

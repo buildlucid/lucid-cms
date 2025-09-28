@@ -6,6 +6,8 @@ import { confirm } from "@inquirer/prompts";
 import migrateCollections from "../../collection/migrate-collections.js";
 import type { Config } from "../../../types.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
+import createQueueContext from "../../queues/create-context.js";
+import passthroughQueueAdapter from "../../queues/adapters/passthrough.js";
 
 const runSyncTasks = async (
 	config: Config,
@@ -14,16 +16,20 @@ const runSyncTasks = async (
 ): Promise<boolean> => {
 	logger.syncTasksStart();
 
+	const queueContext = createQueueContext(config);
+
 	const [localesResult, collectionsResult] = await Promise.all([
 		lucidServices.sync.syncLocales({
 			db: config.db.client,
 			config: config,
 			services: lucidServices,
+			queue: passthroughQueueAdapter(queueContext),
 		}),
 		lucidServices.sync.syncCollections({
 			db: config.db.client,
 			config: config,
 			services: lucidServices,
+			queue: passthroughQueueAdapter(queueContext),
 		}),
 	]);
 
@@ -77,6 +83,8 @@ const migrateCommand = (props?: {
 				}
 			}
 
+			const queueContext = createQueueContext(config);
+
 			logger.migrationStart();
 
 			//* check if collections need migrating
@@ -85,6 +93,7 @@ const migrateCommand = (props?: {
 					db: config.db.client,
 					config: config,
 					services: lucidServices,
+					queue: passthroughQueueAdapter(queueContext),
 				},
 				{
 					dryRun: true,
@@ -179,6 +188,7 @@ const migrateCommand = (props?: {
 							db: config.db.client,
 							config: config,
 							services: lucidServices,
+							queue: passthroughQueueAdapter(queueContext),
 						},
 						{ dryRun: false },
 					);

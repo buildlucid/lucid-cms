@@ -146,6 +146,7 @@ const streamSingleController = factory.createHandlers(
 				db: c.get("config").db.client,
 				config: c.get("config"),
 				services: services,
+				queue: c.get("queue"),
 			},
 			{
 				key: params.key,
@@ -166,6 +167,7 @@ const streamSingleController = factory.createHandlers(
 					db: c.get("config").db.client,
 					config: c.get("config"),
 					services: services,
+					queue: c.get("queue"),
 				},
 				{
 					fallback: query?.fallback ? Boolean(query?.fallback) : undefined,

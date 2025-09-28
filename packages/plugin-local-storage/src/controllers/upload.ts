@@ -46,6 +46,7 @@ const uploadController = (pluginOptions: PluginOptions) =>
 					config: c.get("config"),
 					// @ts-expect-error
 					services: undefined,
+					queue: c.get("queue"),
 				},
 				{
 					buffer: buffer ? Buffer.from(buffer) : undefined,

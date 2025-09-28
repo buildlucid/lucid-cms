@@ -43,6 +43,7 @@ const webhookController = (pluginOptions: PluginOptions) =>
 					config: c.get("config"),
 					// @ts-expect-error
 					services: undefined,
+					queue: c.get("queue"),
 				},
 				{
 					rawBody: rawBody,

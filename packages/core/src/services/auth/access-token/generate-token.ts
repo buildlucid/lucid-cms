@@ -18,6 +18,7 @@ const generateToken = async (
 				db: config.db.client,
 				config: config,
 				services: services,
+				queue: c.get("queue"),
 			},
 			{
 				userId: userId,
