@@ -13,14 +13,15 @@ type QueueJobResponse = Select<LucidQueueJobs>;
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
 const POLL_INTERVAL_INC = 1000;
-// TODO: make bellow configurable
-const CONCURRENT_LIMIT = 5;
-const TOTAL_JOBS_TO_PROCESS = 10;
+const BACKOFF_MULTIPLIER = 2;
 
 const startConsumer = async () => {
 	try {
 		const configPath = getConfigPath(process.cwd());
 		const { config } = await loadConfigFile({ path: configPath });
+
+		const CONCURRENT_LIMIT = config.queue.processing.concurrentLimit;
+		const TOTAL_JOBS_TO_PROCESS = config.queue.processing.batchSize;
 
 		const queueContext = createQueueContext(config);
 		const internalQueueAdapter = passthroughQueueAdapter(queueContext, {
@@ -125,7 +126,7 @@ const startConsumer = async () => {
 			const shouldRetry = job.attempts < job.max_attempts;
 
 			if (shouldRetry) {
-				const backoffSeconds = 2 ** job.attempts * 1000;
+				const backoffSeconds = BACKOFF_MULTIPLIER ** job.attempts * 1000;
 				const nextRetryAt = new Date(Date.now() + backoffSeconds);
 
 				await updateJob(job.job_id, {

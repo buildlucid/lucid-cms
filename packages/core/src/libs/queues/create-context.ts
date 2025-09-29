@@ -6,8 +6,6 @@ import type { ServiceResponse } from "../../utils/services/types.js";
 import queueEventHandlers from "./event-handlers.js";
 
 export const QUEUE_LOG_SCOPE = "queue" as const;
-// TODO: make this configurable
-const MAX_ATTEMPTS = 3;
 
 /**
  * Responsible for creating the context for the queue adapters.
@@ -51,7 +49,9 @@ const createQueueContext = (config: Config) => {
 						queue_adapter_key: options.queueAdapterKey,
 						priority: options?.priority ?? 0,
 						attempts: 0,
-						max_attempts: options?.maxAttempts ?? MAX_ATTEMPTS,
+						max_attempts:
+							options?.maxAttempts ??
+							config.queue.defaultJobOptions.maxAttempts,
 						error_message: null,
 						created_at: now.toISOString(),
 						scheduled_for: options.scheduledFor

@@ -121,6 +121,17 @@ const ConfigSchema = z.object({
 	}),
 	queue: z.object({
 		adapter: QueueAdapterSchema.optional(),
+		defaultJobOptions: z
+			.object({
+				maxAttempts: z.number().optional(),
+			})
+			.optional(),
+		processing: z
+			.object({
+				concurrentLimit: z.number().optional(),
+				batchSize: z.number().optional(),
+			})
+			.optional(),
 	}),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),

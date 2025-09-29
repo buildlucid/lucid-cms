@@ -258,9 +258,22 @@ export interface LucidConfig {
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
-	/** The queue adapter to use. */
+	/** Queue configuration for background job processing. */
 	queue?: {
+		/** The queue adapter to use. If not provided, defaults to the worker adapter. */
 		adapter?: QueueAdapter;
+		/** Default options applied when jobs are added to the queue. */
+		defaultJobOptions?: {
+			/** Maximum number of retry attempts for failed jobs. Default: 3 */
+			maxAttempts?: number;
+		};
+		/** Job processing configuration. */
+		processing?: {
+			/** Maximum number of jobs to process concurrently. Default: 5 */
+			concurrentLimit?: number;
+			/** Number of jobs to fetch from the database per poll. Default: 10 */
+			batchSize?: number;
+		};
 	};
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
@@ -334,6 +347,13 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	queue: {
 		adapter?: QueueAdapter;
+		defaultJobOptions: {
+			maxAttempts: number;
+		};
+		processing: {
+			concurrentLimit: number;
+			batchSize: number;
+		};
 	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
