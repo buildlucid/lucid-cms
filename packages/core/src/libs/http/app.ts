@@ -40,7 +40,7 @@ const createApp = async (props: {
 	}
 
 	const queueInstance = await getQueueAdapter(props.config);
-	await queueInstance.start();
+	await queueInstance.lifecycle.start();
 
 	app
 		.use(logRoute)
@@ -251,7 +251,13 @@ const createApp = async (props: {
 		);
 	}
 
-	return app;
+	return {
+		app,
+		destroy: async () => {
+			await queueInstance.lifecycle.kill();
+			props.config.db.client.destroy();
+		},
+	};
 };
 
 export default createApp;

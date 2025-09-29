@@ -1,7 +1,6 @@
 import { parentPort } from "node:worker_threads";
 import loadConfigFile from "../../config/load-config-file.js";
 import getConfigPath from "../../config/get-config-path.js";
-import queueEventHandlers from "../event-handlers.js";
 import type { Select } from "../../../types.js";
 import type { LucidQueueJobs } from "../../db/types.js";
 import logger from "../../logger/index.js";
@@ -14,6 +13,7 @@ type QueueJobResponse = Select<LucidQueueJobs>;
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
 const POLL_INTERVAL_INC = 1000;
+// TODO: make bellow configurable
 const CONCURRENT_LIMIT = 5;
 const TOTAL_JOBS_TO_PROCESS = 10;
 
@@ -22,15 +22,15 @@ const startConsumer = async () => {
 		const configPath = getConfigPath(process.cwd());
 		const { config } = await loadConfigFile({ path: configPath });
 
-		const eventHandlers = queueEventHandlers(config);
-
-		const internalQueueContext = createQueueContext(config);
-		const internalQueueAdapter = passthroughQueueAdapter(internalQueueContext, {
+		const queueContext = createQueueContext(config);
+		const internalQueueAdapter = passthroughQueueAdapter(queueContext, {
 			bypassImmediateExecution: true,
 		});
+		const eventHandlers = queueContext.getEventHandlers();
 
 		/**
 		 * Gets the ready jobs from the database
+		 * @todo this likley needs moving to the context helper?
 		 */
 		const getReadyJobs = async (): Promise<QueueJobResponse[]> => {
 			try {
@@ -56,7 +56,8 @@ const startConsumer = async () => {
 					.limit(TOTAL_JOBS_TO_PROCESS)
 					.execute();
 
-				return jobs;
+				// TODO: remove the as and fix the typing
+				return jobs as QueueJobResponse[];
 			} catch (error) {
 				logger.error({
 					message: "Error getting jobs",
@@ -69,6 +70,7 @@ const startConsumer = async () => {
 
 		/**
 		 * Updates a job in the database
+		 * @todo this likley needs moving to the context helper?
 		 */
 		const updateJob = async (
 			jobId: string,
@@ -114,6 +116,7 @@ const startConsumer = async () => {
 
 		/**
 		 * Handles a job failure by updating the job status and logging the error
+		 * @todo this likley needs moving to the context helper?
 		 */
 		const handleJobFailure = async (
 			job: QueueJobResponse,
@@ -160,6 +163,7 @@ const startConsumer = async () => {
 
 		/**
 		 * Processes a job by executing the event handler and updating the job status
+		 * @todo this likley needs moving to the context helper?
 		 */
 		const processJob = async (job: QueueJobResponse): Promise<void> => {
 			const handler =

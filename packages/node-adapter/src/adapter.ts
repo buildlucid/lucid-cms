@@ -32,7 +32,7 @@ const nodeAdapter = (options?: {
 				const startTime = process.hrtime();
 				logger.serverStarting("Node");
 
-				const app = await lucid.createApp({ config });
+				const { app, destroy } = await lucid.createApp({ config });
 
 				const server = serve({
 					fetch: app.fetch,
@@ -43,6 +43,10 @@ const nodeAdapter = (options?: {
 				server.on("listening", () => {
 					const address = server.address();
 					logger.serverStarted(address, startTime);
+				});
+
+				server.on("close", async () => {
+					await destroy?.();
 				});
 
 				return async () => {
@@ -133,7 +137,7 @@ const startServer = async () => {
     try {
         const resolved = await processConfig(config(process.env));
 
-        const app = await lucid.createApp({
+        const { app, destroy } = await lucid.createApp({
             config: resolved,
         });
         
@@ -163,6 +167,9 @@ const startServer = async () => {
                 if(address.address === '::') console.log('http://localhost:' + address.port); 
                 else console.log('http://' + address.address + ':' + address.port);
             }
+        });
+        server.on("close", async () => {
+            await destroy?.();
         });
 
         const gracefulShutdown = (signal) => {

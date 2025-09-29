@@ -160,23 +160,23 @@ export interface LucidQueueJobs {
 	event_type: QueueEvent;
 	event_data: JSONColumnType<
 		Record<string, unknown>,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
+		Record<string, unknown>,
+		Record<string, unknown>
 	>;
 	queue_adapter_key: string;
 	status: QueueJobStatus;
-	priority: number;
+	priority: number | null;
 	attempts: number;
 	max_attempts: number;
 	error_message: string | null;
 	created_at: TimestampImmutable;
-	scheduled_for: TimestampMutateable;
-	started_at: TimestampMutateable;
-	completed_at: TimestampMutateable;
-	failed_at: TimestampMutateable;
-	next_retry_at: TimestampMutateable;
+	scheduled_for: TimestampMutateable | null;
+	started_at: TimestampMutateable | null;
+	completed_at: TimestampMutateable | null;
+	failed_at: TimestampMutateable | null;
+	next_retry_at: TimestampMutateable | null;
 	created_by_user_id: number | null;
-	updated_at: TimestampMutateable;
+	updated_at: TimestampMutateable | null;
 }
 
 export interface LucidUsers {

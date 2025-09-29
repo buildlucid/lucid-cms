@@ -123,6 +123,28 @@ export default defineConfig((env) => ({
 						});
 					},
 				);
+				app.post(
+					"/add-event",
+					describeRoute({
+						description: "Add Event",
+						tags: ["lucid-hono-extensions"],
+						summary: "Add event job to the queue",
+						validateResponse: true,
+					}),
+					async (c) => {
+						const { event, data } = await c.req.json<{
+							event: string;
+							data: Record<string, unknown>;
+						}>();
+						const queue = c.get("queue");
+
+						queue?.add(event, data);
+
+						return c.json({
+							message: "Event added to the queue",
+						});
+					},
+				);
 			},
 		],
 	},

@@ -59,7 +59,7 @@ const cloudflareAdapter = (options?: {
 					await next();
 				});
 
-				const app = await lucid.createApp({
+				const { app, destroy } = await lucid.createApp({
 					config,
 					app: cloudflareApp,
 					hono: {
@@ -101,6 +101,9 @@ const cloudflareAdapter = (options?: {
 					const address = server.address();
 					logger.serverStarted(address, startTime);
 				});
+				server.on("close", async () => {
+					await destroy?.();
+				});
 
 				return async () => {
 					return new Promise<void>((resolve, reject) => {
@@ -138,7 +141,7 @@ export default {
             emailTemplates: emailTemplates,
         }));
 
-        const app = await lucid.createApp({
+        const { app } = await lucid.createApp({
             config: resolved,
             hono: {
                 middleware: [
