@@ -25,7 +25,7 @@ const passthroughQueueAdapter: QueueAdapter<{
 			});
 		},
 	},
-	add: async (event, data) => {
+	add: async (event, data, options) => {
 		logger.info({
 			message: "Adding job to the passthrough queue",
 			scope: context.logScope,
@@ -33,8 +33,9 @@ const passthroughQueueAdapter: QueueAdapter<{
 		});
 
 		//* insert event into the database and KV
-		const jobResponse = await context.insertJobToDB(event, data, {
+		const jobResponse = await context.insertJob(event, data, {
 			queueAdapterKey: ADAPTER_KEY,
+			...options,
 		});
 		if (jobResponse.error) return jobResponse;
 

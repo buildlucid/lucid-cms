@@ -20,6 +20,13 @@ export type QueueJobResponse = {
 	status: QueueJobStatus;
 };
 
+export type QueueJobOptions = {
+	priority?: number;
+	maxAttempts?: number;
+	scheduledFor?: Date;
+	createdByUserId?: number;
+};
+
 export type QueueAdapter<AdapterConfig = unknown> = (
 	context: QueueContext,
 	adapter?: AdapterConfig,
@@ -46,6 +53,7 @@ export type QueueAdapter<AdapterConfig = unknown> = (
 	add: (
 		event: QueueEvent,
 		data: Record<string, unknown>,
+		options?: QueueJobOptions,
 	) => ServiceResponse<QueueJobResponse>;
 };
 export type QueueAdapterInstance = ReturnType<QueueAdapter>;
