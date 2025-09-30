@@ -95,8 +95,10 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 		props: QueryProps<
 			V,
 			{
-				limit: number;
-				currentTime: Date;
+				data: {
+					limit: number;
+					currentTime: Date;
+				};
 			}
 		>,
 	) {
@@ -109,12 +111,12 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 					eb.and([
 						eb("status", "=", "failed"),
 						eb("attempts", "<", eb.ref("max_attempts")),
-						eb("next_retry_at", "<=", props.currentTime.toISOString()),
+						eb("next_retry_at", "<=", props.data.currentTime.toISOString()),
 					]),
 				]),
 			)
 			.orderBy(["priority desc", "created_at asc"])
-			.limit(props.limit);
+			.limit(props.data.limit);
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectJobsForProcessing",
