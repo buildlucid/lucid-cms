@@ -60,6 +60,15 @@ const setupCronJobs = (service: ServiceContext) => {
 							message: T("an_error_occurred_deleting_expired_media"),
 						},
 					})(service),
+					serviceWrapper(service.services.crons.deleteExpiredDeletedMedia, {
+						transaction: true,
+						logError: true,
+						defaultError: {
+							type: "cron",
+							name: T("cron_job_error_name"),
+							message: T("an_error_occurred_deleting_old_soft_deleted_media"),
+						},
+					})(service),
 				]);
 			} catch (error) {
 				logger.error({

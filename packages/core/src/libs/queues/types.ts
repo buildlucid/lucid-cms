@@ -26,6 +26,13 @@ export type QueueJobResponse = {
 	status: QueueJobStatus;
 };
 
+export type QueueBatchJobResponse = {
+	jobIds: string[];
+	event: QueueEvent;
+	status: QueueJobStatus;
+	count: number;
+};
+
 export type QueueJobOptions = {
 	priority?: number;
 	maxAttempts?: number;
@@ -65,5 +72,16 @@ export type QueueAdapter<AdapterConfig = unknown> = (
 			serviceContext: ServiceContext;
 		},
 	) => ServiceResponse<QueueJobResponse>;
+	/**
+	 * Push multiple jobs of the same type to the queue
+	 * */
+	addBatch: (
+		event: QueueEvent,
+		params: {
+			payloads: Record<string, unknown>[];
+			options?: QueueJobOptions;
+			serviceContext: ServiceContext;
+		},
+	) => ServiceResponse<QueueBatchJobResponse>;
 };
 export type QueueAdapterInstance = ReturnType<QueueAdapter>;

@@ -54,6 +54,33 @@ const workerQueueAdapter: QueueAdapter = (context) => {
 
 			return jobResponse;
 		},
+		addBatch: async (event, params) => {
+			if (!worker) {
+				return {
+					error: { message: "Worker queue is not started" },
+					data: undefined,
+				};
+			}
+
+			logger.info({
+				message: "Adding batch jobs to the worker queue",
+				scope: context.logScope,
+				data: { event, count: params.payloads.length },
+			});
+
+			const jobResponse = await context.insertMultipleJobs(
+				params.serviceContext,
+				{
+					event: event,
+					payloads: params.payloads,
+					queueAdapterKey: ADAPTER_KEY,
+					options: params.options,
+				},
+			);
+			if (jobResponse.error) return jobResponse;
+
+			return jobResponse;
+		},
 	};
 };
 

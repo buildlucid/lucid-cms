@@ -51,6 +51,35 @@ const passthroughQueueAdapter: QueueAdapter<{
 
 		return jobResponse;
 	},
+	addBatch: async (event, params) => {
+		logger.info({
+			message: "Adding batch jobs to the passthrough queue",
+			scope: context.logScope,
+			data: { event, count: params.payloads.length },
+		});
+
+		//* insert events into the database and KV
+		const jobResponse = await context.insertMultipleJobs(
+			params.serviceContext,
+			{
+				event: event,
+				payloads: params.payloads,
+				queueAdapterKey: ADAPTER_KEY,
+				options: params.options,
+			},
+		);
+		if (jobResponse.error) return jobResponse;
+
+		//* skip immediate execution
+		if (adapter?.bypassImmediateExecution) {
+			return jobResponse;
+		}
+
+		//* execute the event handlers immediately
+		const eventHandlers = context.getJobHandlers;
+
+		return jobResponse;
+	},
 });
 
 export default passthroughQueueAdapter;

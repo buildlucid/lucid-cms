@@ -1,5 +1,6 @@
 import type { QueueJobHandlers } from "./types.js";
 import sendEmailJob from "../../services/email/jobs/send-email.js";
+import hardDeleteSingleMediaJob from "../../services/media/jobs/hard-delete-single.js";
 
 /**
  * Constructs and returns the job handlers for the queue adapters
@@ -9,14 +10,7 @@ const jobHandlers = (params: {
 }): QueueJobHandlers => {
 	return {
 		"email:send": sendEmailJob,
-		"media:delete": async (context, data) => {
-			console.log("media:delete", data);
-
-			return {
-				data: undefined,
-				error: undefined,
-			};
-		},
+		"media:delete": hardDeleteSingleMediaJob,
 		...params.additionalHandlers,
 	};
 };

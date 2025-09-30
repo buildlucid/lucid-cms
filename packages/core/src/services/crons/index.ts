@@ -3,6 +3,7 @@ import clearExpiredTokens from "./clear-expired-tokens.js";
 import updateMediaStorage from "./update-media-storage.js";
 import deleteExpiredMedia from "./delete-expired-media.js";
 import clearExpiredCollections from "./clear-expired-collections.js";
+import deleteExpiredDeletedMedia from "./delete-expired-deleted-media.js";
 
 export default {
 	clearExpiredLocales,
@@ -10,4 +11,5 @@ export default {
 	updateMediaStorage,
 	deleteExpiredMedia,
 	clearExpiredCollections,
+	deleteExpiredDeletedMedia,
 };
