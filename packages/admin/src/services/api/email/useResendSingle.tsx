@@ -11,8 +11,7 @@ interface Params {
 export const resendSingleReq = (params: Params) => {
 	return request<
 		ResponseBody<{
-			success: boolean;
-			message: string;
+			jobId: string;
 		}>
 	>({
 		url: `/api/v1/emails/${params.id}/resend`,
@@ -34,27 +33,18 @@ const useResendSingle = (props: UseResendSingleProps) => {
 	return serviceHelpers.useMutationWrapper<
 		Params,
 		ResponseBody<{
-			success: boolean;
-			message: string;
+			jobId: string;
 		}>
 	>({
 		mutationFn: resendSingleReq,
 		invalidates: ["email.getMultiple", "email.getSingle"],
-		onSuccess: (data) => {
-			if (data.data.success) {
-				spawnToast({
-					title: T()("email_resent_toast_title"),
-					message: T()("email_resent_toast_message"),
-					status: "success",
-				});
-				props.onSuccess?.();
-			} else {
-				spawnToast({
-					title: T()("email_resent_toast_error_title"),
-					message: data.data.message ?? T()("email_resent_toast_error_message"),
-					status: "error",
-				});
-			}
+		onSuccess: () => {
+			spawnToast({
+				title: T()("email_resent_toast_title"),
+				message: T()("email_resent_toast_message"),
+				status: "success",
+			});
+			props.onSuccess?.();
 		},
 		onError: props.onError,
 	});

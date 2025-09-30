@@ -30,7 +30,7 @@ const workerQueueAdapter: QueueAdapter = (context) => {
 				}
 			},
 		},
-		add: async (event, data, options) => {
+		add: async (event, params) => {
 			if (!worker) {
 				return {
 					error: { message: "Worker queue is not started" },
@@ -41,12 +41,14 @@ const workerQueueAdapter: QueueAdapter = (context) => {
 			logger.info({
 				message: "Adding job to the worker queue",
 				scope: context.logScope,
-				data: { event, data },
+				data: { event },
 			});
 
-			const jobResponse = await context.insertJob(event, data, {
+			const jobResponse = await context.insertJob(event, {
+				payload: params.payload,
 				queueAdapterKey: ADAPTER_KEY,
-				...options,
+				options: params.options,
+				serviceContext: params.serviceContext,
 			});
 			if (jobResponse.error) return jobResponse;
 

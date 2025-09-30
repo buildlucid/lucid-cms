@@ -1,8 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import renderHandlebarsTemplate from "../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { EmailStrategyResponse } from "../../types/config.js";
 
 const resendSingle: ServiceFn<
 	[
@@ -11,8 +9,7 @@ const resendSingle: ServiceFn<
 		},
 	],
 	{
-		success: boolean;
-		message: string;
+		jobId: string;
 	}
 > = async (context, data) => {
 	const emailConfigRes =
@@ -27,21 +24,7 @@ const resendSingle: ServiceFn<
 	);
 
 	const emailRes = await Emails.selectSingle({
-		select: [
-			"id",
-			"from_address",
-			"from_name",
-			"to_address",
-			"subject",
-			"cc",
-			"bcc",
-			"template",
-			"data",
-			"type",
-			"attempt_count",
-			"created_at",
-			"updated_at",
-		],
+		select: ["id"],
 		where: [
 			{
 				key: "id",
@@ -59,47 +42,7 @@ const resendSingle: ServiceFn<
 	});
 	if (emailRes.error) return emailRes;
 
-	const templateData = (emailRes.data.data ?? {}) as Record<string, unknown>;
-
-	const html = await renderHandlebarsTemplate(context, {
-		template: emailRes.data.template,
-		data: templateData,
-	});
-	if (html.error) return html;
-
-	await context.queue.add("email:resend", {
-		email: emailRes.data,
-		html: html.data,
-	});
-
-	let result: EmailStrategyResponse | undefined;
-	try {
-		result = await emailConfigRes.data.strategy(
-			{
-				to: emailRes.data.to_address,
-				subject: emailRes.data.subject ?? "",
-				//* use current config
-				from: emailConfigRes.data.from,
-				html: html.data,
-				cc: emailRes.data.cc ?? undefined,
-				bcc: emailRes.data.bcc ?? undefined,
-			},
-			{
-				data: templateData,
-				template: emailRes.data.template,
-			},
-		);
-	} catch (error) {
-		result = {
-			success: false,
-			delivery_status: "failed",
-			message:
-				error instanceof Error ? error.message : T("email_failed_to_send"),
-			external_message_id: null,
-		};
-	}
-
-	const [updateRes, emailTransactionRes] = await Promise.all([
+	const [updateEmailRes, transactionRes] = await Promise.all([
 		Emails.updateSingle({
 			where: [
 				{
@@ -109,37 +52,73 @@ const resendSingle: ServiceFn<
 				},
 			],
 			data: {
-				current_status: result.delivery_status,
-				attempt_count: (emailRes.data.attempt_count ?? 0) + 1,
-				last_attempted_at: new Date().toISOString(),
+				current_status: "scheduled",
 				updated_at: new Date().toISOString(),
 			},
 		}),
 		EmailTransactions.createSingle({
 			data: {
 				email_id: emailRes.data.id,
-				delivery_status: result.delivery_status,
-				message: result.success ? null : result.message,
+				delivery_status: "scheduled",
+				message: null,
 				strategy_identifier: emailConfigRes.data.identifier,
-				strategy_data: result.data,
+				strategy_data: null,
 				simulate: emailConfigRes.data.simulate ?? false,
-				external_message_id: result.external_message_id,
+				external_message_id: null,
 			},
+			validation: {
+				enabled: true,
+			},
+			returning: ["id"],
 		}),
 	]);
+	if (transactionRes.error) return transactionRes;
+	if (updateEmailRes.error) return updateEmailRes;
 
-	if (updateRes.error) return updateRes;
-	if (emailTransactionRes.error) return emailTransactionRes;
+	const queueRes = await context.queue.add("email:send", {
+		payload: {
+			emailId: emailRes.data.id,
+			transactionId: transactionRes.data.id ?? 0,
+		},
+		serviceContext: context,
+	});
+	if (queueRes.error) {
+		await Promise.all([
+			Emails.updateSingle({
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: emailRes.data.id,
+					},
+				],
+				data: {
+					current_status: "failed",
+					updated_at: new Date().toISOString(),
+				},
+			}),
+			EmailTransactions.updateSingle({
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: transactionRes.data.id,
+					},
+				],
+				data: {
+					delivery_status: "failed",
+					message: queueRes.error.message,
+					updated_at: new Date().toISOString(),
+				},
+			}),
+		]);
+		return queueRes;
+	}
 
 	return {
 		error: undefined,
 		data: {
-			success: result.success,
-			message:
-				result.message ??
-				(result.success
-					? T("email_resent_successfully")
-					: T("email_failed_to_resend")),
+			jobId: queueRes.data.jobId,
 		},
 	};
 };

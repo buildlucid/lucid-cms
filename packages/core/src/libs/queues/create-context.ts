@@ -1,15 +1,17 @@
-import type { Config } from "../../types.js";
+import type { Config, KyselyDB } from "../../types.js";
 import type {
 	QueueEvent,
 	QueueJobStatus,
 	QueueJobResponse,
-	QueueAdapterInstance,
+	QueueJobOptions,
 } from "./types.js";
 import { randomUUID } from "node:crypto";
 import logger from "../logger/index.js";
-import type { ServiceResponse } from "../../utils/services/types.js";
-import queueEventHandlers from "./event-handlers.js";
-import services from "../../services/index.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
+import queueJobHandlers from "./job-handlers.js";
 
 export const QUEUE_LOG_SCOPE = "queue" as const;
 
@@ -19,7 +21,7 @@ const BACKOFF_MULTIPLIER = 2;
  * Responsible for creating the context for the queue adapters.
  */
 const createQueueContext = (config: Config) => {
-	const eventHandlers = queueEventHandlers(config);
+	const jobHandlers = queueJobHandlers(config);
 
 	return {
 		/**
@@ -30,42 +32,41 @@ const createQueueContext = (config: Config) => {
 		 * */
 		insertJob: async (
 			event: QueueEvent,
-			payload: Record<string, unknown>,
-			options: {
-				status?: QueueJobStatus;
-				priority?: number;
-				maxAttempts?: number;
-				scheduledFor?: Date;
-				createdByUserId?: number;
+			params: {
+				payload: Record<string, unknown>;
 				queueAdapterKey: string;
+				options?: QueueJobOptions;
+				serviceContext: ServiceContext;
 			},
 		): ServiceResponse<QueueJobResponse> => {
 			try {
 				//* insert event into the database, if KV is enabled, then also insert into the KV
 				const jobId = randomUUID();
 				const now = new Date();
+				const status = "pending";
 
-				const status = options?.status || "pending";
-
-				await config.db.client
+				await params.serviceContext.db
 					.insertInto("lucid_queue_jobs")
 					.values({
 						job_id: jobId,
 						event_type: event,
-						event_data: config.db.formatInsertValue("json", payload ?? {}),
+						event_data: config.db.formatInsertValue(
+							"json",
+							params.payload ?? {},
+						),
 						status: status,
-						queue_adapter_key: options.queueAdapterKey,
-						priority: options?.priority ?? 0,
+						queue_adapter_key: params.queueAdapterKey,
+						priority: params.options?.priority ?? 0,
 						attempts: 0,
 						max_attempts:
-							options?.maxAttempts ??
+							params.options?.maxAttempts ??
 							config.queue.defaultJobOptions.maxAttempts,
 						error_message: null,
 						created_at: now.toISOString(),
-						scheduled_for: options.scheduledFor
-							? options.scheduledFor.toISOString()
+						scheduled_for: params.options?.scheduledFor
+							? params.options.scheduledFor.toISOString()
 							: null,
-						created_by_user_id: options?.createdByUserId ?? null,
+						created_by_user_id: params.options?.createdByUserId ?? null,
 						updated_at: now.toISOString(),
 					})
 					.execute();
@@ -76,7 +77,7 @@ const createQueueContext = (config: Config) => {
 				//   await config.kv.lpush('pending_jobs', jobId);
 				// }
 
-				return { error: undefined, data: { jobId, event, status: status } };
+				return { error: undefined, data: { jobId, event, status } };
 			} catch (error) {
 				logger.error({
 					message: "Error adding event to the queue",
@@ -96,11 +97,11 @@ const createQueueContext = (config: Config) => {
 			}
 		},
 		/**
-		 * Responsible for getting the event handlers
+		 * Responsible for getting the job handlers
 		 */
-		getEventHandlers: () => {
-			// TODO: merge with the config.queues.eventHandlers
-			return eventHandlers;
+		getJobHandlers: () => {
+			// TODO: merge with the config.queues.jobHandlers
+			return jobHandlers;
 		},
 		/**
 		 * Responsible for getting the ready jobs

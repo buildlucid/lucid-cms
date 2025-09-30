@@ -16,7 +16,10 @@ const sendExternal: ServiceFn<
 			};
 		},
 	],
-	EmailResponse
+	{
+		jobId: string;
+		email: EmailResponse;
+	}
 > = async (context, data) =>
 	serviceWrapper(context.services.email.sendEmail, {
 		transaction: true,

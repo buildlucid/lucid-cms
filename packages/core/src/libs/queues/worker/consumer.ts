@@ -21,7 +21,7 @@ const startConsumer = async () => {
 		const internalQueueAdapter = passthroughQueueAdapter(queueContext, {
 			bypassImmediateExecution: true,
 		});
-		const eventHandlers = queueContext.getEventHandlers();
+		const jobHandlers = queueContext.getJobHandlers();
 
 		/**
 		 * Processes a job
@@ -29,19 +29,18 @@ const startConsumer = async () => {
 		const processJob = async (
 			job: Awaited<ReturnType<typeof queueContext.getReadyJobs>>[number],
 		): Promise<void> => {
-			const handler =
-				eventHandlers[job.event_type as keyof typeof eventHandlers];
+			const handler = jobHandlers[job.event_type as keyof typeof jobHandlers];
 
 			if (!handler) {
 				logger.warn({
-					message: "No handler found for job type",
+					message: "No job handler found for job type",
 					scope: QUEUE_LOG_SCOPE,
 					data: { jobId: job.job_id, eventType: job.event_type },
 				});
 
 				await queueContext.updateJob(job.job_id, {
 					status: "failed",
-					errorMessage: `No handler found for job type: ${job.event_type}`,
+					errorMessage: `No job handler found for job type: ${job.event_type}`,
 				});
 				return;
 			}
@@ -63,7 +62,7 @@ const startConsumer = async () => {
 						config: config,
 						db: config.db.client,
 						services: services,
-						// TODO: should handlers be able to push events to the queue??
+						// TODO: should handlers be able to push jobs to the queue??
 						//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
 						//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
 						queue: internalQueueAdapter,

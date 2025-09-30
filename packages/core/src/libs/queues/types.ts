@@ -1,8 +1,13 @@
-import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
+import type { KyselyDB } from "../../types.js";
+import type {
+	ServiceContext,
+	ServiceFn,
+	ServiceResponse,
+} from "../../utils/services/types.js";
 import type createQueueContext from "./create-context.js";
 
 export type QueueEvent<T extends string = string> =
-	| "email:resend"
+	| "email:send"
 	| "media:delete"
 	| T;
 
@@ -10,9 +15,10 @@ export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
 
 export type QueueContext = ReturnType<typeof createQueueContext>;
 
-export type QueueEventHandlerFn<D = unknown, R = unknown> = ServiceFn<[D], R>;
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type QueueJobHandlerFn<D = any, R = any> = ServiceFn<[D], R>;
 
-export type QueueEventHandlers = Record<QueueEvent, QueueEventHandlerFn>;
+export type QueueJobHandlers = Record<QueueEvent, QueueJobHandlerFn>;
 
 export type QueueJobResponse = {
 	jobId: string;
@@ -50,10 +56,14 @@ export type QueueAdapter<AdapterConfig = unknown> = (
 	 * @todo add additonal options to configure specifics on the job entry, ie:
 	 *       priority, maxAttempts, scheduledFor, createdByUserId, etc.
 	 * */
+
 	add: (
 		event: QueueEvent,
-		data: Record<string, unknown>,
-		options?: QueueJobOptions,
+		params: {
+			payload: Record<string, unknown>;
+			options?: QueueJobOptions;
+			serviceContext: ServiceContext;
+		},
 	) => ServiceResponse<QueueJobResponse>;
 };
 export type QueueAdapterInstance = ReturnType<QueueAdapter>;

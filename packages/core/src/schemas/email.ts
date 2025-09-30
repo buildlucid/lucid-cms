@@ -241,13 +241,9 @@ export const controllerSchemas = {
 			}),
 		}),
 		response: z.object({
-			success: z.boolean().meta({
-				description: "Whether the email was sent successfully",
-				example: true,
-			}),
-			message: z.string().meta({
-				description: "The response message",
-				example: "Email sent successfully",
+			jobId: z.string().meta({
+				description: "The job ID",
+				example: "1234567890",
 			}),
 		}),
 	} satisfies ControllerSchema,

@@ -1,10 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import renderHandlebarsTemplate from "../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
-import T from "../../translations/index.js";
-import type { EmailStrategyResponse } from "../../types/config.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -19,7 +16,10 @@ const sendEmail: ServiceFn<
 			data: Record<string, unknown>;
 		},
 	],
-	EmailResponse
+	{
+		jobId: string;
+		email: EmailResponse;
+	}
 > = async (context, data) => {
 	const Emails = Repository.get("emails", context.db, context.config.db);
 	const EmailTransactions = Repository.get(
@@ -33,39 +33,6 @@ const sendEmail: ServiceFn<
 		await context.services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
-	const html = await renderHandlebarsTemplate(context, {
-		template: data.template,
-		data: data.data,
-	});
-	if (html.error) return html;
-
-	let result: EmailStrategyResponse;
-	try {
-		result = await emailConfigRes.data.strategy(
-			{
-				to: data.to,
-				subject: data.subject,
-				from: emailConfigRes.data.from,
-				cc: data.cc,
-				bcc: data.bcc,
-				replyTo: data.replyTo,
-				html: html.data,
-			},
-			{
-				data: data.data,
-				template: data.template,
-			},
-		);
-	} catch (error) {
-		result = {
-			success: false,
-			delivery_status: "failed",
-			message:
-				error instanceof Error ? error.message : T("email_failed_to_send"),
-			external_message_id: null,
-		};
-	}
-
 	const newEmailRes = await Emails.createSingle({
 		data: {
 			from_address: emailConfigRes.data.from.email,
@@ -77,9 +44,9 @@ const sendEmail: ServiceFn<
 			bcc: data.bcc,
 			data: data.data,
 			type: data.type,
-			current_status: result.delivery_status,
-			attempt_count: 1,
-			last_attempted_at: new Date().toISOString(),
+			current_status: "scheduled",
+			attempt_count: 0,
+			last_attempted_at: undefined,
 		},
 		returnAll: true,
 		validation: {
@@ -91,25 +58,70 @@ const sendEmail: ServiceFn<
 	});
 	if (newEmailRes.error) return newEmailRes;
 
-	const emailTransactionRes = await EmailTransactions.createSingle({
+	const initialTransactionRes = await EmailTransactions.createSingle({
 		data: {
 			email_id: newEmailRes.data.id,
-			delivery_status: result.delivery_status,
-			message: result.success ? null : result.message,
+			delivery_status: "scheduled",
+			message: null,
 			strategy_identifier: emailConfigRes.data.identifier,
-			strategy_data: result.data,
+			strategy_data: null,
 			simulate: emailConfigRes.data.simulate ?? false,
-			external_message_id: result.external_message_id,
+			external_message_id: null,
 		},
+		returnAll: true,
 	});
-	if (emailTransactionRes.error) return emailTransactionRes;
+	if (initialTransactionRes.error) return initialTransactionRes;
+
+	const queueRes = await context.queue.add("email:send", {
+		payload: {
+			emailId: newEmailRes.data.id,
+			transactionId: initialTransactionRes.data?.id ?? 0,
+		},
+		serviceContext: context,
+	});
+	if (queueRes.error) {
+		//* if queueing fails, update email and transaction to failed
+		await Promise.all([
+			Emails.updateSingle({
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: newEmailRes.data.id,
+					},
+				],
+				data: {
+					current_status: "failed",
+					updated_at: new Date().toISOString(),
+				},
+			}),
+			EmailTransactions.updateSingle({
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: initialTransactionRes.data?.id ?? 0,
+					},
+				],
+				data: {
+					delivery_status: "failed",
+					message: queueRes.error.message || "Failed to queue email",
+					updated_at: new Date().toISOString(),
+				},
+			}),
+		]);
+		return queueRes;
+	}
 
 	return {
 		error: undefined,
-		data: EmailsFormatter.formatSingle({
-			email: newEmailRes.data,
-			html: html.data,
-		}),
+		data: {
+			jobId: queueRes.data.jobId,
+			email: EmailsFormatter.formatSingle({
+				email: newEmailRes.data,
+				html: undefined,
+			}),
+		},
 	};
 };
 
