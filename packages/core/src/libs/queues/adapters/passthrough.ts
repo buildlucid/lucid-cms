@@ -33,11 +33,11 @@ const passthroughQueueAdapter: QueueAdapter<{
 		});
 
 		//* insert event into the database and KV
-		const jobResponse = await context.insertJob(event, {
+		const jobResponse = await context.insertJob(params.serviceContext, {
+			event: event,
 			payload: params.payload,
 			queueAdapterKey: ADAPTER_KEY,
 			options: params.options,
-			serviceContext: params.serviceContext,
 		});
 		if (jobResponse.error) return jobResponse;
 
@@ -47,7 +47,7 @@ const passthroughQueueAdapter: QueueAdapter<{
 		}
 
 		//* execute the event handler immediately
-		const eventHandlers = context.getJobHandlers();
+		const eventHandlers = context.getJobHandlers;
 
 		return jobResponse;
 	},

@@ -44,11 +44,11 @@ const workerQueueAdapter: QueueAdapter = (context) => {
 				data: { event },
 			});
 
-			const jobResponse = await context.insertJob(event, {
+			const jobResponse = await context.insertJob(params.serviceContext, {
+				event: event,
 				payload: params.payload,
 				queueAdapterKey: ADAPTER_KEY,
 				options: params.options,
-				serviceContext: params.serviceContext,
 			});
 			if (jobResponse.error) return jobResponse;
 

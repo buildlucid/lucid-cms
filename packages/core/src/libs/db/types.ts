@@ -170,13 +170,13 @@ export interface LucidQueueJobs {
 	max_attempts: number;
 	error_message: string | null;
 	created_at: TimestampImmutable;
-	scheduled_for: TimestampMutateable | null;
-	started_at: TimestampMutateable | null;
-	completed_at: TimestampMutateable | null;
-	failed_at: TimestampMutateable | null;
-	next_retry_at: TimestampMutateable | null;
+	scheduled_for: TimestampMutateable;
+	started_at: TimestampMutateable;
+	completed_at: TimestampMutateable;
+	failed_at: TimestampMutateable;
+	next_retry_at: TimestampMutateable;
 	created_by_user_id: number | null;
-	updated_at: TimestampMutateable | null;
+	updated_at: TimestampMutateable;
 }
 
 export interface LucidUsers {

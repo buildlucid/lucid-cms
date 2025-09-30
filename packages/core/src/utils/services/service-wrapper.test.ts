@@ -63,7 +63,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 		};
 	};
 
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
 
 	// Execute
@@ -160,7 +160,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 		};
 	};
 
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
 
 	// Execute
@@ -245,7 +245,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 		};
 	};
 
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
 
 	// Execute
@@ -355,7 +355,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 		};
 	};
 
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
 
 	// Execute
@@ -439,7 +439,7 @@ test("service wrapper schema validation", async () => {
 		};
 	};
 
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
 
 	// Execute

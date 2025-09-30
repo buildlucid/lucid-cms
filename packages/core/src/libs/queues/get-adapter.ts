@@ -6,7 +6,7 @@ import type { Config } from "../../types/config.js";
 const getQueueAdapter = async (
 	config: Config,
 ): Promise<QueueAdapterInstance> => {
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 	try {
 		if (config.queue?.adapter) {
 			return config.queue?.adapter(queueContext);

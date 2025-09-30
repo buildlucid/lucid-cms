@@ -16,7 +16,7 @@ const runSyncTasks = async (
 ): Promise<boolean> => {
 	logger.syncTasksStart();
 
-	const queueContext = createQueueContext(config);
+	const queueContext = createQueueContext();
 
 	const [localesResult, collectionsResult] = await Promise.all([
 		lucidServices.sync.syncLocales({
@@ -83,7 +83,7 @@ const migrateCommand = (props?: {
 				}
 			}
 
-			const queueContext = createQueueContext(config);
+			const queueContext = createQueueContext();
 
 			logger.migrationStart();
 

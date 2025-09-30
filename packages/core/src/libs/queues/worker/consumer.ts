@@ -17,19 +17,22 @@ const startConsumer = async () => {
 
 		const CONCURRENT_LIMIT = config.queue.processing.concurrentLimit;
 
-		const queueContext = createQueueContext(config);
+		const queueContext = createQueueContext({
+			// additionalJobHandlers: config.queue.jobHandlers,
+		});
 		const internalQueueAdapter = passthroughQueueAdapter(queueContext, {
 			bypassImmediateExecution: true,
 		});
-		const jobHandlers = queueContext.getJobHandlers();
 
 		/**
 		 * Processes a job
 		 */
 		const processJob = async (
-			job: Awaited<ReturnType<typeof queueContext.getReadyJobs>>[number],
+			job: NonNullable<
+				Awaited<ReturnType<typeof queueContext.getReadyJobs>>["data"]
+			>[number],
 		): Promise<void> => {
-			const handler = jobHandlers[job.event_type as keyof typeof jobHandlers];
+			const handler = queueContext.getJobHandlers[job.event_type];
 
 			if (!handler) {
 				logger.warn({
@@ -38,10 +41,21 @@ const startConsumer = async () => {
 					data: { jobId: job.job_id, eventType: job.event_type },
 				});
 
-				await queueContext.updateJob(job.job_id, {
-					status: "failed",
-					errorMessage: `No job handler found for job type: ${job.event_type}`,
-				});
+				await queueContext.updateJob(
+					{
+						config,
+						db: config.db.client,
+						services,
+						queue: internalQueueAdapter,
+					},
+					{
+						jobId: job.job_id,
+						body: {
+							status: "failed",
+							errorMessage: `No job handler found for job type: ${job.event_type}`,
+						},
+					},
+				);
 				return;
 			}
 
@@ -52,10 +66,22 @@ const startConsumer = async () => {
 					data: { jobId: job.job_id, eventType: job.event_type },
 				});
 
-				await queueContext.updateJob(job.job_id, {
-					status: "processing",
-					attempts: job.attempts + 1,
-				});
+				const updateJobResInitial = await queueContext.updateJob(
+					{
+						config,
+						db: config.db.client,
+						services,
+						queue: internalQueueAdapter,
+					},
+					{
+						jobId: job.job_id,
+						body: {
+							status: "processing",
+							attempts: job.attempts + 1,
+						},
+					},
+				);
+				if (updateJobResInitial.error) return;
 
 				const handlerResult = await handler(
 					{
@@ -69,7 +95,6 @@ const startConsumer = async () => {
 					},
 					job.event_data,
 				);
-
 				if (handlerResult.error) {
 					logger.error({
 						message: "Job failed",
@@ -82,15 +107,36 @@ const startConsumer = async () => {
 					});
 
 					await queueContext.handleJobFailure(
-						job,
-						handlerResult.error.message ?? "Unknown error",
+						{
+							config,
+							db: config.db.client,
+							services,
+							queue: internalQueueAdapter,
+						},
+						{
+							job: job,
+							errorMessage: handlerResult.error.message ?? "Unknown error",
+						},
 					);
 					return;
 				}
 
-				await queueContext.updateJob(job.job_id, {
-					status: "completed",
-				});
+				const updateJobRes = await queueContext.updateJob(
+					{
+						config,
+						db: config.db.client,
+						services,
+						queue: internalQueueAdapter,
+					},
+					{
+						jobId: job.job_id,
+						body: {
+							status: "completed",
+						},
+					},
+				);
+				if (updateJobRes.error) return;
+
 				logger.debug({
 					message: "Job completed successfully",
 					scope: QUEUE_LOG_SCOPE,
@@ -106,7 +152,18 @@ const startConsumer = async () => {
 					data: { jobId: job.job_id, eventType: job.event_type, errorMessage },
 				});
 
-				await queueContext.handleJobFailure(job, errorMessage);
+				await queueContext.handleJobFailure(
+					{
+						config,
+						db: config.db.client,
+						services,
+						queue: internalQueueAdapter,
+					},
+					{
+						job: job,
+						errorMessage,
+					},
+				);
 			}
 		};
 
@@ -119,15 +176,30 @@ const startConsumer = async () => {
 		 */
 		const poll = async (): Promise<void> => {
 			try {
-				const jobs = await queueContext.getReadyJobs();
+				const jobsResult = await queueContext.getReadyJobs({
+					config,
+					db: config.db.client,
+					services,
+					queue: internalQueueAdapter,
+				});
+
+				if (jobsResult.error) {
+					logger.error({
+						message: "Error getting ready jobs",
+						scope: QUEUE_LOG_SCOPE,
+						data: { error: jobsResult.error },
+					});
+					return;
+				}
+
 				logger.debug({
 					message: "Jobs found",
 					scope: QUEUE_LOG_SCOPE,
-					data: { jobs: jobs.length },
+					data: { jobs: jobsResult.data.length },
 				});
 
 				//* we slow the polling down if no jobs are found
-				if (jobs.length === 0) {
+				if (jobsResult.data.length === 0) {
 					pollInterval = Math.min(
 						pollInterval + POLL_INTERVAL_INC,
 						MAX_POLL_INTERVAL,
@@ -137,8 +209,8 @@ const startConsumer = async () => {
 					pollInterval = MIN_POLL_INTERVAL;
 
 					const chunks = [];
-					for (let i = 0; i < jobs.length; i += CONCURRENT_LIMIT) {
-						chunks.push(jobs.slice(i, i + CONCURRENT_LIMIT));
+					for (let i = 0; i < jobsResult.data.length; i += CONCURRENT_LIMIT) {
+						chunks.push(jobsResult.data.slice(i, i + CONCURRENT_LIMIT));
 					}
 
 					for (const chunk of chunks) {

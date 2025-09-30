@@ -2,6 +2,7 @@ import z from "zod/v4";
 import StaticRepository from "./parents/static-repository.js";
 import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
+import type { QueryProps } from "./types.js";
 
 export default class QueueJobsRepository extends StaticRepository<"lucid_queue_jobs"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -87,4 +88,43 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			error_message: this.dbAdapter.config.fuzzOperator,
 		},
 	} as const;
+
+	// ----------------------------------------
+	// queries
+	async selectJobsForProcessing<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				limit: number;
+				currentTime: Date;
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_queue_jobs")
+			.selectAll()
+			.where((eb) =>
+				eb.or([
+					eb("status", "=", "pending"),
+					eb.and([
+						eb("status", "=", "failed"),
+						eb("attempts", "<", eb.ref("max_attempts")),
+						eb("next_retry_at", "<=", props.currentTime.toISOString()),
+					]),
+				]),
+			)
+			.orderBy(["priority desc", "created_at asc"])
+			.limit(props.limit);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectJobsForProcessing",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			selectAll: true,
+		});
+	}
 }

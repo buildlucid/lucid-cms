@@ -1,9 +1,9 @@
-import type { Config, KyselyDB } from "../../types.js";
 import type {
 	QueueEvent,
 	QueueJobStatus,
 	QueueJobResponse,
 	QueueJobOptions,
+	QueueJobHandlers,
 } from "./types.js";
 import { randomUUID } from "node:crypto";
 import logger from "../logger/index.js";
@@ -12,6 +12,8 @@ import type {
 	ServiceResponse,
 } from "../../utils/services/types.js";
 import queueJobHandlers from "./job-handlers.js";
+import Repository from "../repositories/index.js";
+import type { LucidQueueJobs, Select } from "../db/types.js";
 
 export const QUEUE_LOG_SCOPE = "queue" as const;
 
@@ -20,8 +22,12 @@ const BACKOFF_MULTIPLIER = 2;
 /**
  * Responsible for creating the context for the queue adapters.
  */
-const createQueueContext = (config: Config) => {
-	const jobHandlers = queueJobHandlers(config);
+const createQueueContext = (params?: {
+	additionalJobHandlers?: QueueJobHandlers;
+}) => {
+	const jobHandlers = queueJobHandlers({
+		additionalHandlers: params?.additionalJobHandlers,
+	});
 
 	return {
 		/**
@@ -31,12 +37,12 @@ const createQueueContext = (config: Config) => {
 		 * - Logs the job
 		 * */
 		insertJob: async (
-			event: QueueEvent,
-			params: {
+			serviceContext: ServiceContext,
+			data: {
+				event: QueueEvent;
 				payload: Record<string, unknown>;
 				queueAdapterKey: string;
 				options?: QueueJobOptions;
-				serviceContext: ServiceContext;
 			},
 		): ServiceResponse<QueueJobResponse> => {
 			try {
@@ -44,32 +50,35 @@ const createQueueContext = (config: Config) => {
 				const jobId = randomUUID();
 				const now = new Date();
 				const status = "pending";
+				const QueueJobs = Repository.get(
+					"queue-jobs",
+					serviceContext.db,
+					serviceContext.config.db,
+				);
 
-				await params.serviceContext.db
-					.insertInto("lucid_queue_jobs")
-					.values({
+				const createJobRes = await QueueJobs.createSingle({
+					data: {
 						job_id: jobId,
-						event_type: event,
-						event_data: config.db.formatInsertValue(
-							"json",
-							params.payload ?? {},
-						),
+						event_type: data.event,
+						event_data: data.payload,
 						status: status,
-						queue_adapter_key: params.queueAdapterKey,
-						priority: params.options?.priority ?? 0,
+						queue_adapter_key: data.queueAdapterKey,
+						priority: data.options?.priority ?? 0,
 						attempts: 0,
 						max_attempts:
-							params.options?.maxAttempts ??
-							config.queue.defaultJobOptions.maxAttempts,
+							data.options?.maxAttempts ??
+							serviceContext.config.queue.defaultJobOptions.maxAttempts,
 						error_message: null,
 						created_at: now.toISOString(),
-						scheduled_for: params.options?.scheduledFor
-							? params.options.scheduledFor.toISOString()
-							: null,
-						created_by_user_id: params.options?.createdByUserId ?? null,
+						scheduled_for: data.options?.scheduledFor
+							? data.options.scheduledFor.toISOString()
+							: undefined,
+						created_by_user_id: data.options?.createdByUserId ?? null,
 						updated_at: now.toISOString(),
-					})
-					.execute();
+					},
+					returning: ["id"],
+				});
+				if (createJobRes.error) return createJobRes;
 
 				// TODO: Insert into KV if configured
 				// if (config.kv) {
@@ -77,7 +86,10 @@ const createQueueContext = (config: Config) => {
 				//   await config.kv.lpush('pending_jobs', jobId);
 				// }
 
-				return { error: undefined, data: { jobId, event, status } };
+				return {
+					error: undefined,
+					data: { jobId, event: data.event, status },
+				};
 			} catch (error) {
 				logger.error({
 					message: "Error adding event to the queue",
@@ -99,148 +111,198 @@ const createQueueContext = (config: Config) => {
 		/**
 		 * Responsible for getting the job handlers
 		 */
-		getJobHandlers: () => {
-			// TODO: merge with the config.queues.jobHandlers
-			return jobHandlers;
-		},
+		getJobHandlers: jobHandlers,
 		/**
 		 * Responsible for getting the ready jobs
 		 */
-		getReadyJobs: async () => {
+		getReadyJobs: async (
+			serviceContext: ServiceContext,
+		): ServiceResponse<Select<LucidQueueJobs>[]> => {
 			try {
 				const now = new Date();
+				const QueueJobs = Repository.get(
+					"queue-jobs",
+					serviceContext.db,
+					serviceContext.config.db,
+				);
 
 				// TODO: Add KV use here once its implemented
 
-				const jobs = await config.db.client
-					.selectFrom("lucid_queue_jobs")
-					.selectAll()
-					.where((eb) =>
-						eb.or([
-							eb("status", "=", "pending"),
-							eb.and([
-								eb("status", "=", "failed"),
-								eb("attempts", "<", eb.ref("max_attempts")),
-								eb("next_retry_at", "<=", now.toISOString()),
-							]),
-						]),
-					)
-					.orderBy(["priority desc", "created_at asc"])
-					.limit(config.queue.processing.batchSize)
-					.execute();
+				const jobsRes = await QueueJobs.selectJobsForProcessing({
+					limit: serviceContext.config.queue.processing.batchSize,
+					currentTime: now,
+					validation: {
+						enabled: true,
+					},
+				});
+				if (jobsRes.error) return jobsRes;
 
-				return jobs;
+				return {
+					error: undefined,
+					data: jobsRes.data,
+				};
 			} catch (error) {
 				logger.error({
 					message: "Error getting jobs",
 					scope: QUEUE_LOG_SCOPE,
 					data: { error },
 				});
-				return [];
+				return {
+					error: { message: "Error getting jobs" },
+					data: undefined,
+				};
 			}
 		},
 		/**
 		 * Responsible for updating a job
 		 */
 		updateJob: async (
-			jobId: string,
-			updates: {
-				status?: QueueJobStatus;
-				attempts?: number;
-				nextRetryAt?: Date | null;
-				errorMessage?: string | null;
+			serviceContext: ServiceContext,
+			data: {
+				jobId: string;
+				body: {
+					status?: QueueJobStatus;
+					attempts?: number;
+					nextRetryAt?: Date | null;
+					errorMessage?: string | null;
+				};
 			},
-		) => {
-			const dbUpdates: Record<string, unknown> = {
-				updated_at: new Date().toISOString(),
-			};
+		): ServiceResponse<undefined> => {
+			try {
+				const dbUpdates: Record<string, unknown> = {
+					updated_at: new Date().toISOString(),
+				};
+				const QueueJobs = Repository.get(
+					"queue-jobs",
+					serviceContext.db,
+					serviceContext.config.db,
+				);
 
-			if (updates.status) {
-				dbUpdates.status = updates.status;
+				if (data.body.status) {
+					dbUpdates.status = data.body.status;
 
-				if (updates.status === "processing") {
-					dbUpdates.started_at = new Date().toISOString();
-				} else if (updates.status === "completed") {
-					dbUpdates.completed_at = new Date().toISOString();
-				} else if (updates.status === "failed") {
-					dbUpdates.failed_at = new Date().toISOString();
+					if (data.body.status === "processing") {
+						dbUpdates.started_at = new Date().toISOString();
+					} else if (data.body.status === "completed") {
+						dbUpdates.completed_at = new Date().toISOString();
+					} else if (data.body.status === "failed") {
+						dbUpdates.failed_at = new Date().toISOString();
+					}
 				}
-			}
 
-			if (updates.attempts !== undefined) {
-				dbUpdates.attempts = updates.attempts;
-			}
-			if (updates.nextRetryAt !== undefined) {
-				dbUpdates.next_retry_at = updates.nextRetryAt?.toISOString() || null;
-			}
-			if (updates.errorMessage !== undefined) {
-				dbUpdates.error_message = updates.errorMessage;
-			}
+				if (data.body.attempts !== undefined) {
+					dbUpdates.attempts = data.body.attempts;
+				}
+				if (data.body.nextRetryAt !== undefined) {
+					dbUpdates.next_retry_at =
+						data.body.nextRetryAt?.toISOString() || null;
+				}
+				if (data.body.errorMessage !== undefined) {
+					dbUpdates.error_message = data.body.errorMessage;
+				}
 
-			await config.db.client
-				.updateTable("lucid_queue_jobs")
-				.set(dbUpdates)
-				.where("job_id", "=", jobId)
-				.execute();
+				const updateJobRes = await QueueJobs.updateSingle({
+					data: dbUpdates,
+					where: [
+						{
+							key: "job_id",
+							operator: "=",
+							value: data.jobId,
+						},
+					],
+				});
+				if (updateJobRes.error) return updateJobRes;
+
+				return {
+					error: undefined,
+					data: undefined,
+				};
+			} catch (error) {
+				logger.error({
+					message: "Error updating job",
+					scope: QUEUE_LOG_SCOPE,
+					data: { error, jobId: data.jobId },
+				});
+				return {
+					error: { message: "Error updating job" },
+					data: undefined,
+				};
+			}
 		},
 		/**
 		 * Responsible for handling a job failure
 		 */
 		handleJobFailure: async (
-			job: {
-				job_id: string;
-				event_type: QueueEvent;
-				attempts: number;
-				max_attempts: number;
+			serviceContext: ServiceContext,
+			data: {
+				job: {
+					job_id: string;
+					event_type: QueueEvent;
+					attempts: number;
+					max_attempts: number;
+				};
+				errorMessage: string;
 			},
-			errorMessage: string,
-		) => {
-			const shouldRetry = job.attempts < job.max_attempts;
+		): ServiceResponse<void> => {
+			try {
+				const shouldRetry = data.job.attempts < data.job.max_attempts;
+				const QueueJobs = Repository.get(
+					"queue-jobs",
+					serviceContext.db,
+					serviceContext.config.db,
+				);
 
-			if (shouldRetry) {
-				const backoffSeconds = BACKOFF_MULTIPLIER ** job.attempts * 1000;
-				const nextRetryAt = new Date(Date.now() + backoffSeconds);
+				const nextRetryAt = shouldRetry
+					? new Date(
+							Date.now() + BACKOFF_MULTIPLIER ** data.job.attempts * 1000,
+						)
+					: undefined;
 
-				await config.db.client
-					.updateTable("lucid_queue_jobs")
-					.set({
-						status: "pending",
-						next_retry_at: nextRetryAt.toISOString(),
-						attempts: job.attempts + 1,
+				const updateJobRes = await QueueJobs.updateSingle({
+					data: {
+						status: shouldRetry ? "pending" : "failed",
+						next_retry_at: nextRetryAt?.toISOString(),
+						attempts: shouldRetry ? data.job.attempts + 1 : undefined,
+						error_message: shouldRetry ? undefined : data.errorMessage,
 						updated_at: new Date().toISOString(),
-					})
-					.where("job_id", "=", job.job_id)
-					.execute();
+					},
+					where: [
+						{
+							key: "job_id",
+							operator: "=",
+							value: data.job.job_id,
+						},
+					],
+					returning: ["id"],
+				});
+				if (updateJobRes.error) return updateJobRes;
 
-				logger.debug({
-					message: "Job will retry",
+				logger[shouldRetry ? "debug" : "error"]({
+					message: shouldRetry ? "Job will retry" : "Job failed permanently",
 					scope: QUEUE_LOG_SCOPE,
 					data: {
-						jobId: job.job_id,
-						eventType: job.event_type,
-						nextRetryAt: nextRetryAt.toISOString(),
+						jobId: data.job.job_id,
+						eventType: data.job.event_type,
+						...(shouldRetry
+							? { nextRetryAt: nextRetryAt?.toISOString() }
+							: { errorMessage: data.errorMessage }),
 					},
 				});
-			} else {
-				await config.db.client
-					.updateTable("lucid_queue_jobs")
-					.set({
-						status: "failed",
-						error_message: errorMessage,
-						updated_at: new Date().toISOString(),
-					})
-					.where("job_id", "=", job.job_id)
-					.execute();
 
+				return {
+					error: undefined,
+					data: undefined,
+				};
+			} catch (error) {
 				logger.error({
-					message: "Job failed permanently",
+					message: "Error handling job failure",
 					scope: QUEUE_LOG_SCOPE,
-					data: {
-						jobId: job.job_id,
-						eventType: job.event_type,
-						errorMessage,
-					},
+					data: { error, jobId: data.job.job_id },
 				});
+				return {
+					error: { message: "Error handling job failure" },
+					data: undefined,
+				};
 			}
 		},
 		/**
