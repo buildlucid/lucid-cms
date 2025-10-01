@@ -1,12 +1,10 @@
 import { subDays } from "date-fns";
 import constants from "../../constants/constants.js";
-import logger from "../../libs/logger/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
- * After 30 days of inactivity, non-active locales will be deleted from the database.
- *  @todo Expose the retention time?
+ * Finds all expired locales and queues them for deletion
  */
 const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	const Locales = Repository.get("locales", context.db, context.config.db);
@@ -15,7 +13,8 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	const thirtyDaysAgo = subDays(now, constants.retention.deletedLocales);
 	const thirtyDaysAgoTimestamp = thirtyDaysAgo.toISOString();
 
-	const deleteRes = await Locales.deleteMultiple({
+	const expiredLocalesRes = await Locales.selectMultiple({
+		select: ["code"],
 		where: [
 			{
 				key: "is_deleted_at",
@@ -28,17 +27,26 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
-		returning: ["code"],
 		validation: {
 			enabled: true,
 		},
 	});
-	if (deleteRes.error) return deleteRes;
+	if (expiredLocalesRes.error) return expiredLocalesRes;
 
-	logger.debug({
-		message: `The following ${deleteRes.data.length} locales have been deleted: ${deleteRes.data.map((l) => l.code).join(", ")}`,
-		scope: constants.logScopes.cron,
+	if (expiredLocalesRes.data.length === 0) {
+		return {
+			error: undefined,
+			data: undefined,
+		};
+	}
+
+	const queueRes = await context.queue.addBatch("locales:delete", {
+		payloads: expiredLocalesRes.data.map((locale) => ({
+			localeCode: locale.code,
+		})),
+		serviceContext: context,
 	});
+	if (queueRes.error) return queueRes;
 
 	return {
 		error: undefined,

@@ -2,7 +2,7 @@ import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
- * All expired tokens will be deleted from the database.
+ * Finds all expired tokens and queues them for deletion
  */
 const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
 	const UserTokens = Repository.get(
@@ -11,7 +11,8 @@ const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
 		context.config.db,
 	);
 
-	const deleteMultipleTokenRes = await UserTokens.deleteMultiple({
+	const expiredTokensRes = await UserTokens.selectMultiple({
+		select: ["id"],
 		where: [
 			{
 				key: "expiry_date",
@@ -19,8 +20,26 @@ const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
 				value: new Date().toISOString(),
 			},
 		],
+		validation: {
+			enabled: true,
+		},
 	});
-	if (deleteMultipleTokenRes.error) return deleteMultipleTokenRes;
+	if (expiredTokensRes.error) return expiredTokensRes;
+
+	if (expiredTokensRes.data.length === 0) {
+		return {
+			error: undefined,
+			data: undefined,
+		};
+	}
+
+	const queueRes = await context.queue.addBatch("user-tokens:delete", {
+		payloads: expiredTokensRes.data.map((token) => ({
+			tokenId: token.id,
+		})),
+		serviceContext: context,
+	});
+	if (queueRes.error) return queueRes;
 
 	return {
 		error: undefined,

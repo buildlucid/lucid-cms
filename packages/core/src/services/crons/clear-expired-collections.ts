@@ -1,12 +1,10 @@
 import { subDays } from "date-fns";
-import logger from "../../libs/logger/index.js";
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
- * After 30 days of inactivity, non-active collections will be deleted from the database.
- * @todo Expose the retention time?
+ * Finds all expired collections and queues them for deletion
  */
 const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 	const Collections = Repository.get(
@@ -19,7 +17,8 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 	const thirtyDaysAgo = subDays(now, constants.retention.deletedCollections);
 	const thirtyDaysAgoTimestamp = thirtyDaysAgo.toISOString();
 
-	const deleteRes = await Collections.deleteMultiple({
+	const expiredCollectionsRes = await Collections.selectMultiple({
+		select: ["key"],
 		where: [
 			{
 				key: "is_deleted_at",
@@ -32,17 +31,26 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
-		returning: ["key"],
 		validation: {
 			enabled: true,
 		},
 	});
-	if (deleteRes.error) return deleteRes;
+	if (expiredCollectionsRes.error) return expiredCollectionsRes;
 
-	logger.debug({
-		message: `The following ${deleteRes.data.length} collections have been deleted: ${deleteRes.data.map((c) => c.key).join(", ")}`,
-		scope: constants.logScopes.cron,
+	if (expiredCollectionsRes.data.length === 0) {
+		return {
+			error: undefined,
+			data: undefined,
+		};
+	}
+
+	const queueRes = await context.queue.addBatch("collections:delete", {
+		payloads: expiredCollectionsRes.data.map((collection) => ({
+			collectionKey: collection.key,
+		})),
+		serviceContext: context,
 	});
+	if (queueRes.error) return queueRes;
 
 	return {
 		error: undefined,
