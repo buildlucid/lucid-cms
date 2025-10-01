@@ -51,7 +51,7 @@ const setupCronJobs = (service: ServiceContext) => {
 							message: T("an_error_occurred_updating_media_storage"),
 						},
 					})(service),
-					serviceWrapper(service.services.crons.deleteExpiredMedia, {
+					serviceWrapper(service.services.crons.deleteExpiredUnsyncedMedia, {
 						transaction: true,
 						logError: true,
 						defaultError: {

@@ -9,6 +9,7 @@ import type createQueueContext from "./create-context.js";
 export type QueueEvent<T extends string = string> =
 	| "email:send"
 	| "media:delete"
+	| "media:delete-unsynced"
 	| T;
 
 export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
