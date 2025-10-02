@@ -91,9 +91,9 @@ export default defineConfig((env) => ({
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },
 	},
-	// queue: {
-	// adapter: passthroughQueueAdapter,
-	// },
+	queue: {
+		adapter: passthroughQueueAdapter,
+	},
 	// hooks: [
 	// 	{
 	// 		service: "documents",
@@ -120,28 +120,6 @@ export default defineConfig((env) => ({
 						return c.json({
 							host: "http://[::1]:6543",
 							logLevel: "debug",
-						});
-					},
-				);
-				app.post(
-					"/add-event",
-					describeRoute({
-						description: "Add Event",
-						tags: ["lucid-hono-extensions"],
-						summary: "Add event job to the queue",
-						validateResponse: true,
-					}),
-					async (c) => {
-						const { event, data } = await c.req.json<{
-							event: string;
-							data: Record<string, unknown>;
-						}>();
-						const queue = c.get("queue");
-
-						queue?.add(event, data);
-
-						return c.json({
-							message: "Event added to the queue",
 						});
 					},
 				);

@@ -41,7 +41,8 @@ export type QueueJobOptions = {
 	createdByUserId?: number;
 };
 
-export type QueueAdapter<AdapterConfig = unknown> = (
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type QueueAdapter<AdapterConfig = any> = (
 	context: QueueContext,
 	adapter?: AdapterConfig,
 ) => {
