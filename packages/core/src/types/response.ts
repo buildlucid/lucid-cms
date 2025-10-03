@@ -17,6 +17,7 @@ import type z from "zod/v4";
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type { EmailType, EmailDeliveryStatus } from "../types.js";
 import type { OptionsName } from "../schemas/options.js";
+import type { QueueEvent, QueueJobStatus } from "../libs/queues/types.js";
 
 export interface UserResponse {
 	id: number;
@@ -205,6 +206,27 @@ export interface EmailResponse {
 	}[];
 	createdAt: string | null;
 	updatedAt?: string | null;
+}
+
+export interface JobResponse {
+	id: number;
+	jobId: string;
+	eventType: QueueEvent;
+	eventData: Record<string, unknown>;
+	queueAdapterKey: string;
+	status: QueueJobStatus;
+	priority: number | null;
+	attempts: number;
+	maxAttempts: number;
+	errorMessage: string | null;
+	createdAt: string | null;
+	scheduledFor: string | null;
+	startedAt: string | null;
+	completedAt: string | null;
+	failedAt: string | null;
+	nextRetryAt: string | null;
+	createdByUserId: number | null;
+	updatedAt: string | null;
 }
 
 export interface CollectionResponse {
@@ -425,6 +447,7 @@ export type Permission =
 	| "read_email"
 	| "delete_email"
 	| "send_email"
+	| "read_job"
 	| "create_content"
 	| "publish_content"
 	| "restore_content"
@@ -449,6 +472,7 @@ export type PermissionGroupKey =
 	| "roles"
 	| "media"
 	| "emails"
+	| "jobs"
 	| "content"
 	| "client-integrations"
 	| "settings";

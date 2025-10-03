@@ -18,6 +18,10 @@ const permissionGroups: Record<PermissionGroupKey, PermissionGroup> =
 			key: "emails_permissions",
 			permissions: ["read_email", "delete_email", "send_email"],
 		},
+		jobs: {
+			key: "jobs_permissions",
+			permissions: ["read_job"],
+		},
 		content: {
 			key: "content_permissions",
 			permissions: [

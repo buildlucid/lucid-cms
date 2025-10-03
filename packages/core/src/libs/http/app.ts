@@ -197,6 +197,11 @@ const createApp = async (props: {
 								"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
 						},
 						{
+							name: "jobs",
+							description:
+								"Job endpoints for fetching existing jobs so you can monitor them and their status.",
+						},
+						{
 							name: "cdn",
 							description:
 								"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",

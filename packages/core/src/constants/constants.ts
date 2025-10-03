@@ -29,6 +29,7 @@ export default Object.freeze({
 					...permissionGroups.roles.permissions,
 					...permissionGroups.media.permissions,
 					...permissionGroups.emails.permissions,
+					...permissionGroups.jobs.permissions,
 					...permissionGroups.content.permissions,
 					...permissionGroups["client-integrations"].permissions,
 					...permissionGroups.settings.permissions,

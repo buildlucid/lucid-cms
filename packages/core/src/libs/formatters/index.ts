@@ -12,6 +12,7 @@ import MediaFormatter from "./media.js";
 import MediaFoldersFormatter from "./media-folders.js";
 import LocalesFormatter from "./locales.js";
 import EmailsFormatter from "./emails.js";
+import JobsFormatter from "./jobs.js";
 import CollectionsFormatter from "./collections.js";
 import ClientIntegrationsFormatter from "./client-integrations.js";
 import DocumentBricksFormatter from "./document-bricks.js";
@@ -46,6 +47,8 @@ class Formatter {
 				return new LocalesFormatter() as FormatterReturnType<T>;
 			case "emails":
 				return new EmailsFormatter() as FormatterReturnType<T>;
+			case "jobs":
+				return new JobsFormatter() as FormatterReturnType<T>;
 			case "collections":
 				return new CollectionsFormatter() as FormatterReturnType<T>;
 			case "client-integrations":
@@ -123,6 +126,7 @@ type FormatterClassMap = {
 	"media-folders": MediaFoldersFormatter;
 	locales: LocalesFormatter;
 	emails: EmailsFormatter;
+	jobs: JobsFormatter;
 	collections: CollectionsFormatter;
 	"client-integrations": ClientIntegrationsFormatter;
 	"document-bricks": DocumentBricksFormatter;

@@ -1750,7 +1750,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"folderId\": 8\n}",
+							"raw": "{\n\t\"folderId\": 4\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1758,7 +1758,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/media/4/move",
+							"raw": "{{BASE_URL}}/api/v1/media/2/move",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -1766,7 +1766,7 @@
 								"api",
 								"v1",
 								"media",
-								"4",
+								"2",
 								"move"
 							]
 						}
@@ -2957,6 +2957,32 @@
 				},
 				{
 					"name": "Extension Testing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"event\": \"email:resend\",\n\t\"data\": {\n\t\t\"html\": \"<div>hello world</div>\"\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/add-event",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"add-event"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Extension Testing Copy",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -3083,6 +3109,106 @@
 								"v1",
 								"license",
 								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs",
+			"item": [
+				{
+					"name": "Get Multiple",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/jobs",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "filter[jobId]",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "filter[eventType]",
+									"value": "email:send",
+									"disabled": true
+								},
+								{
+									"key": "filter[status]",
+									"value": "completed",
+									"disabled": true
+								},
+								{
+									"key": "filter[queueAdapterKey]",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,scheduledFor,startedAt,completedAt,failedAt,priority,attempts",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/jobs/12",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs",
+								"12"
 							]
 						}
 					},

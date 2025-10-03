@@ -7,6 +7,7 @@ import documentVersions from "./documents-versions/index.js";
 import documentBricks from "./documents-bricks/index.js";
 import collections from "./collections/index.js";
 import emails from "./email/index.js";
+import jobs from "./jobs/index.js";
 import locales from "./locales/index.js";
 import media from "./media/index.js";
 import mediaFolders from "./media-folders/index.js";
@@ -37,6 +38,7 @@ const lucidServices = {
 		token: userTokens,
 	},
 	email: emails,
+	job: jobs,
 	role: roles,
 	setting: settings,
 	license: license,
