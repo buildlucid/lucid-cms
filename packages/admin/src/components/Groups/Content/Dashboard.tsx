@@ -102,7 +102,7 @@ export const Dashboard: Component = () => {
 							{
 								title: T()("starting_point_settings"),
 								description: T()("starting_point_settings_description"),
-								href: "/admin/settings",
+								href: "/admin/system/overview",
 								icon: "settings",
 							},
 						]}

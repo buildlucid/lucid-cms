@@ -3,7 +3,7 @@ import { Show, type Component } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
 import { DynamicContent } from "@/components/Groups/Layout";
 import api from "@/services/api";
-import UpdateLicenseForm from "@/components/Forms/Settings/UpdateLicenseForm";
+import UpdateLicenseForm from "@/components/Forms/System/UpdateLicenseForm";
 import constants from "@/constants";
 import Button from "@/components/Partials/Button";
 import classNames from "classnames";

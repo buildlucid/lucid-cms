@@ -179,25 +179,25 @@ export const NavigationSidebar: Component = () => {
 						</div>
 						<IconLinkFull
 							type="link"
-							href="/admin/settings/overview"
+							href="/admin/system/overview"
 							icon="overview"
 							title={T()("overview")}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/settings/client-integrations"
+							href="/admin/system/client-integrations"
 							icon="client-integrations"
 							title={T()("client_integrations")}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/settings/license"
+							href="/admin/system/license"
 							icon="license"
 							title={T()("manage_license")}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/settings/queue-observability"
+							href="/admin/system/queue-observability"
 							icon="queue"
 							title={T()("queue_observability")}
 						/>

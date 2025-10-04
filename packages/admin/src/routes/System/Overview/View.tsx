@@ -9,14 +9,10 @@ import Button from "@/components/Partials/Button";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
 import DetailsList from "@/components/Partials/DetailsList";
-import {
-	Wrapper,
-	DynamicContent,
-	NavigationTabs,
-} from "@/components/Groups/Layout";
+import { Wrapper, DynamicContent } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 
-const GeneralSettingsRoute: Component = (props) => {
+const SystemOverviewRoute: Component = (props) => {
 	// ----------------------------------------
 	// State / Hooks
 	const [getOpenClearAllProcessedImages, setOpenClearAllProcessedImages] =
@@ -49,28 +45,8 @@ const GeneralSettingsRoute: Component = (props) => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("settings_route_title"),
-							description: T()("settings_route_description"),
-						}}
-						slots={{
-							bottom: (
-								<NavigationTabs
-									tabs={[
-										{
-											label: T()("general"),
-											href: "/admin/settings",
-										},
-										{
-											label: T()("client_integrations"),
-											href: "/admin/settings/client-integrations",
-										},
-										{
-											label: T()("license"),
-											href: "/admin/settings/license",
-										},
-									]}
-								/>
-							),
+							title: T()("system_overview_route_title"),
+							description: T()("system_overview_route_description"),
 						}}
 					/>
 				),
@@ -201,4 +177,4 @@ const GeneralSettingsRoute: Component = (props) => {
 	);
 };
 
-export default GeneralSettingsRoute;
+export default SystemOverviewRoute;

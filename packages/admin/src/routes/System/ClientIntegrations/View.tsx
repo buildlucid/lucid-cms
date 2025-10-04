@@ -12,11 +12,7 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import UpsertClientIntegrationPanel from "@/components/Panels/ClientIntegrations/UpsertClientIntegrationPanel";
 import InfoRow from "@/components/Blocks/InfoRow";
-import {
-	Wrapper,
-	NavigationTabs,
-	DynamicContent,
-} from "@/components/Groups/Layout";
+import { Wrapper, DynamicContent } from "@/components/Groups/Layout";
 import DeleteClientIntegration from "@/components/Modals/ClientIntegrations/DeleteClientIntegration";
 import CopyAPIKey from "@/components/Modals/ClientIntegrations/CopyAPIKey";
 import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";
@@ -25,7 +21,7 @@ import ErrorBlock from "@/components/Partials/ErrorBlock";
 import ClientIntegrationRow from "@/components/Rows/ClientIntegrationRow";
 import { Standard } from "@/components/Groups/Headers";
 
-const GeneralSettingsRoute: Component = (props) => {
+const SystemClientIntegrationsRoute: Component = (props) => {
 	// ----------------------------------------
 	// State / Hooks
 	const rowTarget = useRowTarget({
@@ -62,8 +58,8 @@ const GeneralSettingsRoute: Component = (props) => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("settings_route_title"),
-							description: T()("settings_route_description"),
+							title: T()("system_client_integrations_route_title"),
+							description: T()("system_client_integrations_route_description"),
 						}}
 						actions={{
 							create: [
@@ -78,35 +74,15 @@ const GeneralSettingsRoute: Component = (props) => {
 								},
 							],
 						}}
-						slots={{
-							bottom: (
-								<NavigationTabs
-									tabs={[
-										{
-											label: T()("general"),
-											href: "/admin/settings",
-										},
-										{
-											label: T()("client_integrations"),
-											href: "/admin/settings/client-integrations",
-										},
-										{
-											label: T()("license"),
-											href: "/admin/settings/license",
-										},
-									]}
-								/>
-							),
-						}}
 					/>
 				),
 			}}
 		>
 			<DynamicContent
 				state={{
-					isError: clientIntegrations.isError,
-					isSuccess: clientIntegrations.isSuccess,
-					isLoading: clientIntegrations.isLoading,
+					isError: isError(),
+					isSuccess: isSuccess(),
+					isLoading: isLoading(),
 				}}
 				options={{
 					padding: "24",
@@ -221,4 +197,4 @@ const GeneralSettingsRoute: Component = (props) => {
 	);
 };
 
-export default GeneralSettingsRoute;
+export default SystemClientIntegrationsRoute;

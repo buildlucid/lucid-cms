@@ -6,7 +6,7 @@ import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { JobsList } from "@/components/Groups/Content";
 
-const JobsListRoute: Component = () => {
+const SystemQueueObservabilityRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const searchParams = useSearchParamsLocation(
@@ -52,8 +52,8 @@ const JobsListRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("jobs_route_title"),
-							description: T()("jobs_route_description"),
+							title: T()("system_queue_observability_route_title"),
+							description: T()("system_queue_observability_route_description"),
 						}}
 						slots={{
 							bottom: (
@@ -150,4 +150,4 @@ const JobsListRoute: Component = () => {
 	);
 };
 
-export default JobsListRoute;
+export default SystemQueueObservabilityRoute;

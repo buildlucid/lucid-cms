@@ -12,13 +12,15 @@ const DashboardRoute = lazy(() => import("@/routes/Dashboard"));
 const MediaListRoute = lazy(() => import("@/routes/Media/List"));
 const UsersListRoute = lazy(() => import("@/routes/Users/List"));
 const RolesListRoute = lazy(() => import("@/routes/Roles/List"));
-const SettingsGeneralRoute = lazy(() => import("@/routes/Settings/General"));
-const SettingsClientIntegrationRoute = lazy(
-	() => import("@/routes/Settings/ClientIntegration"),
+const SystemOverviewRoute = lazy(() => import("@/routes/System/Overview/View"));
+const SystemClientIntegrationsRoute = lazy(
+	() => import("@/routes/System/ClientIntegrations/View"),
 );
-const SettingsLicenseRoute = lazy(() => import("@/routes/Settings/License"));
+const SystemLicenseRoute = lazy(() => import("@/routes/System/License/View"));
+const SystemQueueObservabilityRoute = lazy(
+	() => import("@/routes/System/QueueObservability/View"),
+);
 const EmailListRoute = lazy(() => import("@/routes/Emails/List"));
-const JobsListRoute = lazy(() => import("@/routes/Jobs/List"));
 const AccountRoute = lazy(() => import("@/routes/Account"));
 const CollectionsListRoute = lazy(() => import("@/routes/Collections/List"));
 const CollectionsDocumentsListRoute = lazy(
@@ -89,14 +91,17 @@ const AppRouter: Component = () => {
 				<Route path="/roles" component={RolesListRoute} />
 				{/* Emails */}
 				<Route path="/emails" component={EmailListRoute} />
-				{/* Settings */}
-				<Route path="/settings/overview" component={SettingsGeneralRoute} />
-				<Route path="/settings/queue-observability" component={JobsListRoute} />
+				{/* System */}
+				<Route path="/system/overview" component={SystemOverviewRoute} />
 				<Route
-					path="/settings/client-integrations"
-					component={SettingsClientIntegrationRoute}
+					path="/system/queue-observability"
+					component={SystemQueueObservabilityRoute}
 				/>
-				<Route path="/settings/license" component={SettingsLicenseRoute} />
+				<Route
+					path="/system/client-integrations"
+					component={SystemClientIntegrationsRoute}
+				/>
+				<Route path="/system/license" component={SystemLicenseRoute} />
 			</Route>
 			{/* Non authenticated */}
 			<Route path="/admin" component={AuthRoutes}>
