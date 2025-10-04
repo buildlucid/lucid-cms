@@ -4,6 +4,7 @@ export { Account } from "./Account";
 export { UserList } from "./UserList";
 export { RolesList } from "./RolesList";
 export { EmailsList } from "./EmailsList";
+export { JobsList } from "./JobsList";
 export { CollectionsList } from "./CollectionsList";
 export { DocumentsList } from "./DocumentsList";
 export { License } from "./License";

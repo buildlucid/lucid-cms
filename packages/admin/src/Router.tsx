@@ -18,6 +18,7 @@ const SettingsClientIntegrationRoute = lazy(
 );
 const SettingsLicenseRoute = lazy(() => import("@/routes/Settings/License"));
 const EmailListRoute = lazy(() => import("@/routes/Emails/List"));
+const JobsListRoute = lazy(() => import("@/routes/Jobs/List"));
 const AccountRoute = lazy(() => import("@/routes/Account"));
 const CollectionsListRoute = lazy(() => import("@/routes/Collections/List"));
 const CollectionsDocumentsListRoute = lazy(
@@ -90,6 +91,7 @@ const AppRouter: Component = () => {
 				<Route path="/emails" component={EmailListRoute} />
 				{/* Settings */}
 				<Route path="/settings/overview" component={SettingsGeneralRoute} />
+				<Route path="/settings/queue-observability" component={JobsListRoute} />
 				<Route
 					path="/settings/client-integrations"
 					component={SettingsClientIntegrationRoute}

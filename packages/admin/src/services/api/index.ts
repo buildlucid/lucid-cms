@@ -7,6 +7,7 @@ import media from "./media";
 import mediaFolders from "./media-folders";
 import settings from "./settings";
 import email from "./email";
+import jobs from "./jobs";
 import locales from "./locales";
 import collections from "./collections";
 import documents from "./documents";
@@ -23,6 +24,7 @@ const exportObject: {
 	mediaFolders: typeof mediaFolders;
 	settings: typeof settings;
 	email: typeof email;
+	jobs: typeof jobs;
 	locales: typeof locales;
 	collections: typeof collections;
 	documents: typeof documents;
@@ -38,6 +40,7 @@ const exportObject: {
 	mediaFolders,
 	settings,
 	email,
+	jobs,
 	locales,
 	collections,
 	documents,

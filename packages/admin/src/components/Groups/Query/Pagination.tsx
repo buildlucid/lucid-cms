@@ -58,7 +58,7 @@ export const Pagination: Component<{
 			</span>
 			<Show when={lastPage() > 1}>
 				<KobPagination.Root
-					class="flex [&>ul]:flex [&>ul]:border [&>ul]:border-border [&>ul]:rounded-md [&>ul]:overflow-hidden bg-card-base"
+					class="flex [&>ul]:flex [&>ul]:border [&>ul]:border-border [&>ul]:rounded-md [&>ul]:overflow-hidden"
 					page={page()}
 					onPageChange={(page) => {
 						props.state.searchParams.setParams({
@@ -72,23 +72,23 @@ export const Pagination: Component<{
 					count={lastPage()}
 					itemComponent={(props) => (
 						<KobPagination.Item
-							class="h-9 w-9 flex items-center justify-center data-current:bg-secondary-base data-current:text-secondary-contrast hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors"
+							class="h-9 w-9 flex items-center justify-center data-current:bg-secondary-base data-current:text-secondary-contrast hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors bg-card-base"
 							page={props.page}
 						>
 							{props.page}
 						</KobPagination.Item>
 					)}
 					ellipsisComponent={() => (
-						<KobPagination.Ellipsis class="h-9 w-9 flex items-center justify-center">
+						<KobPagination.Ellipsis class="h-9 w-9 flex items-center justify-center bg-card-base">
 							...
 						</KobPagination.Ellipsis>
 					)}
 				>
-					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50">
+					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50 bg-card-base">
 						<FaSolidChevronLeft />
 					</KobPagination.Previous>
 					<KobPagination.Items />
-					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50">
+					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50 bg-card-base">
 						<FaSolidChevronRight />
 					</KobPagination.Next>
 				</KobPagination.Root>
