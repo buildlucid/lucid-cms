@@ -1,5 +1,6 @@
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import services from "../../index.js";
 
 const checkCanStore: ServiceFn<
 	[
@@ -23,7 +24,7 @@ const checkCanStore: ServiceFn<
 		};
 	}
 
-	const storageUsed = await context.services.option.getSingle(context, {
+	const storageUsed = await services.option.getSingle(context, {
 		name: "media_storage_used",
 	});
 	if (storageUsed.error) return storageUsed;

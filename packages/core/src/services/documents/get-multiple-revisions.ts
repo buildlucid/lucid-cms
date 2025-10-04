@@ -8,6 +8,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionResponse } from "../../types/response.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
+import services from "../index.js";
 
 const getMultipleRevisions: ServiceFn<
 	[
@@ -22,7 +23,7 @@ const getMultipleRevisions: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const collectionRes = context.services.collection.getSingleInstance(context, {
+	const collectionRes = services.collection.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

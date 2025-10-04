@@ -3,6 +3,7 @@ import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const sendResetPassword: ServiceFn<
 	[
@@ -40,14 +41,14 @@ const sendResetPassword: ServiceFn<
 		minutes: constants.passwordResetTokenExpirationMinutes,
 	}).toISOString();
 
-	const userToken = await context.services.user.token.createSingle(context, {
+	const userToken = await services.user.token.createSingle(context, {
 		userId: userExistsRes.data.id,
 		tokenType: "password_reset",
 		expiryDate: expiryDate,
 	});
 	if (userToken.error) return userToken;
 
-	const sendEmail = await context.services.email.sendEmail(context, {
+	const sendEmail = await services.email.sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: T("reset_password_email_subject"),

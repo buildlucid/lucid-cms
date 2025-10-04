@@ -3,6 +3,7 @@ import mime from "mime-types";
 import Repository from "../../libs/repositories/index.js";
 import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const getPresignedUrl: ServiceFn<
 	[
@@ -68,7 +69,7 @@ const getPresignedUrl: ServiceFn<
 				enabled: true,
 			},
 		}),
-		context.services.media.strategies.getPresignedUrl(context, {
+		services.media.strategies.getPresignedUrl(context, {
 			key: keyRes.data,
 			mimeType: data.mimeType,
 			extension: extension || undefined,

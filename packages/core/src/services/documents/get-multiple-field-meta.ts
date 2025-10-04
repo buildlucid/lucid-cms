@@ -11,6 +11,7 @@ import type {
 	LucidDocumentTableName,
 } from "../../types.js";
 import type { BrickQueryResponse } from "../../libs/repositories/document-bricks.js";
+import services from "../index.js";
 
 const getMultipleFieldMeta: ServiceFn<
 	[
@@ -49,12 +50,9 @@ const getMultipleFieldMeta: ServiceFn<
 		const collectionKey = extractCollectionKey(v.table);
 		if (!collectionKey) return null;
 
-		const collectionRes = context.services.collection.getSingleInstance(
-			context,
-			{
-				key: collectionKey,
-			},
-		);
+		const collectionRes = services.collection.getSingleInstance(context, {
+			key: collectionKey,
+		});
 		if (collectionRes.error) return null;
 
 		const [versionTableRes, documentFieldsTableRes] = await Promise.all([

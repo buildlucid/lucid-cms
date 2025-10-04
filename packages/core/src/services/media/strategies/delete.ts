@@ -1,4 +1,5 @@
 import type { ServiceFn } from "../../../utils/services/types.js";
+import services from "../../index.js";
 
 const deleteObject: ServiceFn<
 	[
@@ -10,11 +11,10 @@ const deleteObject: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		context.services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const storageUsedRes = await context.services.option.getSingle(context, {
+	const storageUsedRes = await services.option.getSingle(context, {
 		name: "media_storage_used",
 	});
 	if (storageUsedRes.error) return storageUsedRes;
@@ -24,7 +24,7 @@ const deleteObject: ServiceFn<
 
 	const [_, updateStorageRes] = await Promise.all([
 		mediaStrategyRes.data.deleteSingle(data.key),
-		context.services.option.updateSingle(context, {
+		services.option.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
 		}),

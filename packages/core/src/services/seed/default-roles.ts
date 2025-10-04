@@ -4,6 +4,7 @@ import Formatter from "../../libs/formatters/index.js";
 import constants from "../../constants/constants.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const defaultRoles: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
@@ -29,7 +30,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 		const rolePromises = [];
 		for (const role of constants.seedDefaults.roles) {
 			rolePromises.push(
-				serviceWrapper(context.services.role.createSingle, {
+				serviceWrapper(services.role.createSingle, {
 					transaction: false,
 				})(context, {
 					name: role.name,

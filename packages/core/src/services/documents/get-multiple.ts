@@ -12,6 +12,7 @@ import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
+import services from "../index.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -26,7 +27,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const collectionRes = context.services.collection.getSingleInstance(context, {
+	const collectionRes = services.collection.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

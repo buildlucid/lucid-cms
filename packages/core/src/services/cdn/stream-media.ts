@@ -6,6 +6,7 @@ import constants from "../../constants/constants.js";
 import type { Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
+import services from "../index.js";
 
 /**
  * Streams the media based on the key.
@@ -46,8 +47,7 @@ const streamMedia: ServiceFn<
 		: selectedPreset?.format;
 	const quality = selectedPreset?.quality ?? constants.media.imagePresetQuality;
 
-	const mediaStrategyRes =
-		context.services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// ------------------------------
@@ -104,7 +104,7 @@ const streamMedia: ServiceFn<
 	}
 
 	// Process
-	return await context.services.processedImage.processImage(context, {
+	return await services.processedImage.processImage(context, {
 		key: data.key,
 		processKey: processKey,
 		options: {

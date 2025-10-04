@@ -3,6 +3,7 @@ import { generateProcessKey, createMediaUrl } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MediaUrlResponse } from "../../types/response.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
+import services from "../index.js";
 
 const processMedia: ServiceFn<
 	[
@@ -20,8 +21,7 @@ const processMedia: ServiceFn<
 		context.config.db,
 	);
 
-	const mediaStrategyRes =
-		context.services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	//* fetches the media item, if its not an image return the original url
@@ -106,19 +106,16 @@ const processMedia: ServiceFn<
 	}
 
 	//* process the image
-	const processRes = await context.services.processedImage.processImage(
-		context,
-		{
-			key: data.key,
-			processKey: processKey,
-			options: {
-				format: data.body.format,
-				quality: data.body.quality,
-				width: data.body.width,
-				height: data.body.height,
-			},
+	const processRes = await services.processedImage.processImage(context, {
+		key: data.key,
+		processKey: processKey,
+		options: {
+			format: data.body.format,
+			quality: data.body.quality,
+			width: data.body.width,
+			height: data.body.height,
 		},
-	);
+	});
 	if (processRes.error) return processRes;
 
 	return {

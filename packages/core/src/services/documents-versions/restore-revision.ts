@@ -1,5 +1,6 @@
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const restoreRevision: ServiceFn<
 	[
@@ -12,7 +13,7 @@ const restoreRevision: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = context.services.collection.getSingleInstance(context, {
+	const collectionRes = services.collection.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -29,8 +30,9 @@ const restoreRevision: ServiceFn<
 		};
 	}
 
-	const response =
-		await context.services.collection.documentVersions.promoteVersion(context, {
+	const response = await services.collection.documentVersions.promoteVersion(
+		context,
+		{
 			documentId: data.documentId,
 			collectionKey: data.collectionKey,
 			fromVersionId: data.versionId,
@@ -39,7 +41,8 @@ const restoreRevision: ServiceFn<
 				: "published",
 			userId: data.userId,
 			skipRevisionCheck: true,
-		});
+		},
+	);
 	if (response.error) return response;
 
 	return {

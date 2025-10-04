@@ -1,6 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -11,8 +12,7 @@ const deleteSinglePermanently: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		context.services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = Repository.get("media", context.db, context.config.db);
@@ -76,7 +76,7 @@ const deleteSinglePermanently: ServiceFn<
 		mediaStrategyRes.data.deleteMultiple(
 			processedImagesRes.data.map((i) => i.key),
 		),
-		context.services.media.strategies.delete(context, {
+		services.media.strategies.delete(context, {
 			key: deleteMediaRes.data.key,
 			size: deleteMediaRes.data.file_size,
 			processedSize: processedImagesRes.data.reduce(

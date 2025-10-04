@@ -4,6 +4,7 @@ import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import { generateSecret } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const resetPassword: ServiceFn<
 	[
@@ -21,7 +22,7 @@ const resetPassword: ServiceFn<
 	);
 	const Users = Repository.get("users", context.db, context.config.db);
 
-	const tokenRes = await context.services.user.token.getSingle(context, {
+	const tokenRes = await services.user.token.getSingle(context, {
 		token: data.token,
 		tokenType: "password_reset",
 	});
@@ -87,7 +88,7 @@ const resetPassword: ServiceFn<
 				},
 			],
 		}),
-		context.services.email.sendEmail(context, {
+		services.email.sendEmail(context, {
 			template: constants.emailTemplates.passwordResetSuccess,
 			type: "internal",
 			to: updatedUserRes.data.email,

@@ -3,8 +3,9 @@ import constants from "../../constants/constants.js";
 import logger from "../logger/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import services from "../../services/index.js";
 
-const setupCronJobs = (service: ServiceContext) => {
+const setupCronJobs = (context: ServiceContext) => {
 	return {
 		schedule: constants.cronSchedule,
 		register: async () => {
@@ -15,7 +16,7 @@ const setupCronJobs = (service: ServiceContext) => {
 				});
 
 				await Promise.allSettled([
-					serviceWrapper(service.services.crons.clearExpiredLocales, {
+					serviceWrapper(services.crons.clearExpiredLocales, {
 						transaction: true,
 						logError: true,
 						defaultError: {
@@ -23,8 +24,8 @@ const setupCronJobs = (service: ServiceContext) => {
 							name: T("cron_job_error_name"),
 							message: T("an_error_occurred_clearing_expired_locales"),
 						},
-					})(service),
-					serviceWrapper(service.services.crons.clearExpiredCollections, {
+					})(context),
+					serviceWrapper(services.crons.clearExpiredCollections, {
 						transaction: true,
 						logError: true,
 						defaultError: {
@@ -32,8 +33,8 @@ const setupCronJobs = (service: ServiceContext) => {
 							name: T("cron_job_error_name"),
 							message: T("an_error_occurred_clearing_expired_collections"),
 						},
-					})(service),
-					serviceWrapper(service.services.crons.clearExpiredTokens, {
+					})(context),
+					serviceWrapper(services.crons.clearExpiredTokens, {
 						transaction: true,
 						logError: true,
 						defaultError: {
@@ -41,8 +42,8 @@ const setupCronJobs = (service: ServiceContext) => {
 							name: T("cron_job_error_name"),
 							message: T("an_error_occurred_clearing_expired_tokens"),
 						},
-					})(service),
-					serviceWrapper(service.services.crons.updateMediaStorage, {
+					})(context),
+					serviceWrapper(services.crons.updateMediaStorage, {
 						transaction: true,
 						logError: true,
 						defaultError: {
@@ -50,8 +51,8 @@ const setupCronJobs = (service: ServiceContext) => {
 							name: T("cron_job_error_name"),
 							message: T("an_error_occurred_updating_media_storage"),
 						},
-					})(service),
-					serviceWrapper(service.services.crons.deleteExpiredUnsyncedMedia, {
+					})(context),
+					serviceWrapper(services.crons.deleteExpiredUnsyncedMedia, {
 						transaction: true,
 						logError: true,
 						defaultError: {
@@ -59,8 +60,8 @@ const setupCronJobs = (service: ServiceContext) => {
 							name: T("cron_job_error_name"),
 							message: T("an_error_occurred_deleting_expired_media"),
 						},
-					})(service),
-					serviceWrapper(service.services.crons.deleteExpiredDeletedMedia, {
+					})(context),
+					serviceWrapper(services.crons.deleteExpiredDeletedMedia, {
 						transaction: true,
 						logError: true,
 						defaultError: {
@@ -68,7 +69,7 @@ const setupCronJobs = (service: ServiceContext) => {
 							name: T("cron_job_error_name"),
 							message: T("an_error_occurred_deleting_old_soft_deleted_media"),
 						},
-					})(service),
+					})(context),
 				]);
 			} catch (error) {
 				logger.error({

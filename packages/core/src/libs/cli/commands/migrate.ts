@@ -1,7 +1,7 @@
 import loadConfigFile from "../../config/load-config-file.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import createMigrationLogger from "../logger/migration-logger.js";
-import lucidServices from "../../../services/index.js";
+import services from "../../../services/index.js";
 import { confirm } from "@inquirer/prompts";
 import migrateCollections from "../../collection/migrate-collections.js";
 import type { Config } from "../../../types.js";
@@ -19,16 +19,14 @@ const runSyncTasks = async (
 	const queueContext = createQueueContext();
 
 	const [localesResult, collectionsResult] = await Promise.all([
-		lucidServices.sync.syncLocales({
+		services.sync.syncLocales({
 			db: config.db.client,
 			config: config,
-			services: lucidServices,
 			queue: passthroughQueueAdapter(queueContext),
 		}),
-		lucidServices.sync.syncCollections({
+		services.sync.syncCollections({
 			db: config.db.client,
 			config: config,
-			services: lucidServices,
 			queue: passthroughQueueAdapter(queueContext),
 		}),
 	]);
@@ -92,7 +90,6 @@ const migrateCommand = (props?: {
 				{
 					db: config.db.client,
 					config: config,
-					services: lucidServices,
 					queue: passthroughQueueAdapter(queueContext),
 				},
 				{
@@ -187,7 +184,6 @@ const migrateCommand = (props?: {
 						{
 							db: config.db.client,
 							config: config,
-							services: lucidServices,
 							queue: passthroughQueueAdapter(queueContext),
 						},
 						{ dryRun: false },

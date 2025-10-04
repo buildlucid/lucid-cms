@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -24,7 +25,7 @@ const deleteSingle: ServiceFn<
 		};
 	}
 
-	await context.services.user.checks.checkNotLastUser(context);
+	await services.user.checks.checkNotLastUser(context);
 
 	const deleteUserRes = await Users.updateSingle({
 		data: {

@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const resendSingle: ServiceFn<
 	[
@@ -13,7 +14,7 @@ const resendSingle: ServiceFn<
 	}
 > = async (context, data) => {
 	const emailConfigRes =
-		await context.services.email.checks.checkHasEmailConfig(context);
+		await services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
 	const Emails = Repository.get("emails", context.db, context.config.db);

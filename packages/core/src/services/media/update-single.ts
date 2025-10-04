@@ -2,6 +2,7 @@ import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
+import services from "../index.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -129,24 +130,18 @@ const updateSingle: ServiceFn<
 	}
 
 	// check if media is awaiting sync
-	const awaitingSync = await context.services.media.checks.checkAwaitingSync(
-		context,
-		{
-			key: data.key,
-		},
-	);
+	const awaitingSync = await services.media.checks.checkAwaitingSync(context, {
+		key: data.key,
+	});
 	if (awaitingSync.error) return awaitingSync;
 
-	const updateObjectRes = await context.services.media.strategies.update(
-		context,
-		{
-			id: mediaRes.data.id,
-			previousSize: mediaRes.data.file_size,
-			previousKey: mediaRes.data.key,
-			updatedKey: data.key,
-			fileName: data.fileName,
-		},
-	);
+	const updateObjectRes = await services.media.strategies.update(context, {
+		id: mediaRes.data.id,
+		previousSize: mediaRes.data.file_size,
+		previousKey: mediaRes.data.key,
+		updatedKey: data.key,
+		fileName: data.fileName,
+	});
 	if (updateObjectRes.error) return updateObjectRes;
 
 	const [mediaUpdateRes, deleteMediaSyncRes] = await Promise.all([

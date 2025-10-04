@@ -2,14 +2,14 @@ import optionsServices from "../options/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { SettingsResponse } from "../../types/response.js";
-import T from "../../translations/index.js";
+import services from "../index.js";
 
 const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
 	const [optionsRes, processedImageCountRes] = await Promise.all([
 		optionsServices.getMultiple(context, {
 			names: ["media_storage_used", "license_key_last4"],
 		}),
-		context.services.processedImage.getCount(context),
+		services.processedImage.getCount(context),
 	]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;

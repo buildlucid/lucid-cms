@@ -4,6 +4,7 @@ import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -167,7 +168,7 @@ const updateSingle: ServiceFn<
 				},
 			},
 		}),
-		context.services.user.updateMultipleRoles(context, {
+		services.user.updateMultipleRoles(context, {
 			userId: data.userId,
 			roleIds: data.roleIds,
 		}),
@@ -176,7 +177,7 @@ const updateSingle: ServiceFn<
 	if (updateUserRes.error) return updateUserRes;
 
 	if (data.email !== undefined) {
-		const sendEmailRes = await context.services.email.sendEmail(context, {
+		const sendEmailRes = await services.email.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
 			to: data.email,

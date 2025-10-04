@@ -38,7 +38,6 @@ const verifyLicenseController = factory.createHandlers(
 		})({
 			db: c.get("config").db.client,
 			config: c.get("config"),
-			services: services,
 			queue: c.get("queue"),
 		});
 		if (res.error) throw new LucidAPIError(res.error);

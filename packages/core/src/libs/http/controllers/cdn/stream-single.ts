@@ -145,7 +145,6 @@ const streamSingleController = factory.createHandlers(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),
-				services: services,
 				queue: c.get("queue"),
 			},
 			{
@@ -166,7 +165,6 @@ const streamSingleController = factory.createHandlers(
 				{
 					db: c.get("config").db.client,
 					config: c.get("config"),
-					services: services,
 					queue: c.get("queue"),
 				},
 				{

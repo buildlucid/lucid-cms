@@ -1,5 +1,6 @@
 import Repository from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import services from "../../index.js";
 
 /**
  * Deletes expired media that is still awaiting sync
@@ -12,8 +13,7 @@ const deleteAwaitingSyncMedia: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		context.services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const MediaAwaitingSync = Repository.get(

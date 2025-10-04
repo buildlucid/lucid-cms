@@ -1,6 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
+import services from "../index.js";
 
 const createSingle: ServiceFn<
 	[
@@ -40,7 +41,7 @@ const createSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const awaitingSyncRes = await context.services.media.checks.checkAwaitingSync(
+	const awaitingSyncRes = await services.media.checks.checkAwaitingSync(
 		context,
 		{
 			key: data.key,
@@ -48,13 +49,10 @@ const createSingle: ServiceFn<
 	);
 	if (awaitingSyncRes.error) return awaitingSyncRes;
 
-	const syncMediaRes = await context.services.media.strategies.syncMedia(
-		context,
-		{
-			key: data.key,
-			fileName: data.fileName,
-		},
-	);
+	const syncMediaRes = await services.media.strategies.syncMedia(context, {
+		key: data.key,
+		fileName: data.fileName,
+	});
 	if (syncMediaRes.error) return syncMediaRes;
 
 	const [mediaRes, deleteMediaSyncRes] = await Promise.all([

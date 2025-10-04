@@ -3,6 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../types.js";
+import services from "../index.js";
 
 const deleteMultiple: ServiceFn<
 	[
@@ -22,12 +23,9 @@ const deleteMultiple: ServiceFn<
 	}
 
 	const collectionRes =
-		await context.services.collection.documents.checks.checkCollection(
-			context,
-			{
-				key: data.collectionKey,
-			},
-		);
+		await services.collection.documents.checks.checkCollection(context, {
+			key: data.collectionKey,
+		});
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.isLocked) {
@@ -118,7 +116,7 @@ const deleteMultiple: ServiceFn<
 	if (hookBeforeRes.error) return hookBeforeRes;
 
 	const nullifyPromises = data.ids.map((id) =>
-		context.services.collection.documents.nullifyDocumentReferences(context, {
+		services.collection.documents.nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: id,
 		}),

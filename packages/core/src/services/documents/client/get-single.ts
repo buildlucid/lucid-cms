@@ -10,6 +10,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ClientDocumentResponse } from "../../../types/response.js";
 import type { DocumentVersionType } from "../../../libs/db/types.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
+import services from "../../index.js";
 
 const getSingle: ServiceFn<
 	[
@@ -24,7 +25,7 @@ const getSingle: ServiceFn<
 	const Documents = Repository.get("documents", context.db, context.config.db);
 	const DocumentsFormatter = Formatter.get("documents");
 
-	const collectionRes = context.services.collection.getSingleInstance(context, {
+	const collectionRes = services.collection.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -72,13 +73,15 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const bricksRes =
-		await context.services.collection.documentBricks.getMultiple(context, {
+	const bricksRes = await services.collection.documentBricks.getMultiple(
+		context,
+		{
 			versionId: documentRes.data.version_id,
 			collectionKey: collectionRes.data.key,
 			versionType: data.status,
 			documentFieldsOnly: !data.query.include?.includes("bricks"),
-		});
+		},
+	);
 	if (bricksRes.error) return bricksRes;
 
 	return {

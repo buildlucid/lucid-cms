@@ -3,7 +3,6 @@ import Formatter from "../../libs/formatters/index.js";
 import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionResponse } from "../../types/response.js";
-import type { LucidDocumentTableName } from "../../types.js";
 import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 
 const getAll: ServiceFn<

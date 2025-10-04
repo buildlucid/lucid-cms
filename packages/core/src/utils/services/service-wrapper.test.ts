@@ -74,7 +74,6 @@ test("basic - one level deep service wrapper success and error", async () => {
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -90,7 +89,6 @@ test("basic - one level deep service wrapper success and error", async () => {
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -171,7 +169,6 @@ test("basic - two level deep service wrapper success and error", async () => {
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -187,7 +184,6 @@ test("basic - two level deep service wrapper success and error", async () => {
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -256,7 +252,6 @@ test("transaction - one level deep service wrapper success and error", async () 
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -270,7 +265,6 @@ test("transaction - one level deep service wrapper success and error", async () 
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -366,7 +360,6 @@ test("transaction - two level deep service wrapper success and error", async () 
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -385,7 +378,6 @@ test("transaction - two level deep service wrapper success and error", async () 
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -451,7 +443,6 @@ test("service wrapper schema validation", async () => {
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{
@@ -466,7 +457,6 @@ test("service wrapper schema validation", async () => {
 			{
 				db: config.db.client,
 				config: config,
-				services: lucidServices,
 				queue: queueAdapter,
 			},
 			{

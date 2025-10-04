@@ -1,6 +1,7 @@
 import { getFileMetadata } from "../../../utils/media/index.js";
 import type { MediaType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import services from "../../index.js";
 
 const update: ServiceFn<
 	[
@@ -21,8 +22,7 @@ const update: ServiceFn<
 		etag: string | null;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes =
-		context.services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// Fetch meta data from new file
@@ -30,11 +30,13 @@ const update: ServiceFn<
 	if (mediaMetaRes.error) return mediaMetaRes;
 
 	// Ensure we available storage space
-	const proposedSizeRes =
-		await context.services.media.checks.checkCanUpdateMedia(context, {
+	const proposedSizeRes = await services.media.checks.checkCanUpdateMedia(
+		context,
+		{
 			size: mediaMetaRes.data.size,
 			previousSize: data.previousSize,
-		});
+		},
+	);
 	if (proposedSizeRes.error) return proposedSizeRes;
 
 	const fileMetaData = await getFileMetadata({
@@ -68,11 +70,11 @@ const update: ServiceFn<
 
 	// update storage, processed images and delete temp
 	const [storageRes, clearProcessRes] = await Promise.all([
-		context.services.option.updateSingle(context, {
+		services.option.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: proposedSizeRes.data.proposedSize,
 		}),
-		context.services.processedImage.clearSingle(context, {
+		services.processedImage.clearSingle(context, {
 			id: data.id,
 		}),
 	]);

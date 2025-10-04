@@ -9,6 +9,7 @@ import type {
 	ServiceFn,
 } from "../../../types.js";
 import type { FieldRelationValues } from "./extract-related-entity-ids.js";
+import services from "../../index.js";
 
 export type FieldRelationResponse = Partial<
 	Record<
@@ -43,7 +44,7 @@ const fetchRelationData: ServiceFn<
 			.filter((i) => typeof i === "number");
 
 		fetchPromises.push(
-			context.services.media
+			services.media
 				.getMultipleFieldMeta(context, {
 					ids: mediaIds,
 				})
@@ -67,7 +68,7 @@ const fetchRelationData: ServiceFn<
 			.filter((i) => typeof i === "number");
 
 		fetchPromises.push(
-			context.services.user
+			services.user
 				.getMultipleFieldMeta(context, {
 					ids: userIds,
 				})
@@ -87,7 +88,7 @@ const fetchRelationData: ServiceFn<
 	}
 	if (data.values.document) {
 		fetchPromises.push(
-			context.services.collection.documents
+			services.collection.documents
 				.getMultipleFieldMeta(context, {
 					values: data.values.document.map((v) => ({
 						table: v.table as LucidDocumentTableName,

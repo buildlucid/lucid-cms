@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -17,7 +18,7 @@ const updateSingle: ServiceFn<
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		data.permissions !== undefined
-			? context.services.role.validatePermissions(context, {
+			? services.role.validatePermissions(context, {
 					permissions: data.permissions,
 				})
 			: undefined,

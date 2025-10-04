@@ -3,6 +3,7 @@ import Repository from "../../../libs/repositories/index.js";
 import renderHandlebarsTemplate from "../../../libs/email/render-handlebars-template.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { EmailStrategyResponse } from "../../../types/config.js";
+import services from "../../index.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -14,7 +15,7 @@ const sendEmail: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const emailConfigRes =
-		await context.services.email.checks.checkHasEmailConfig(context);
+		await services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
 	const Emails = Repository.get("emails", context.db, context.config.db);

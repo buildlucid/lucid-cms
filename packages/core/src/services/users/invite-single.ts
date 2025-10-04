@@ -4,6 +4,7 @@ import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const inviteSingle: ServiceFn<
 	[
@@ -29,7 +30,7 @@ const inviteSingle: ServiceFn<
 				email: data.email,
 			},
 		}),
-		context.services.user.checks.checkRolesExist(context, {
+		services.user.checks.checkRolesExist(context, {
 			roleIds: data.roleIds,
 		}),
 	]);
@@ -91,14 +92,14 @@ const inviteSingle: ServiceFn<
 		minutes: constants.userInviteTokenExpirationMinutes,
 	}).toISOString();
 
-	const userTokenRes = await context.services.user.token.createSingle(context, {
+	const userTokenRes = await services.user.token.createSingle(context, {
 		userId: newUserRes.data.id,
 		tokenType: "password_reset",
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const sendEmailRes = await context.services.email.sendEmail(context, {
+	const sendEmailRes = await services.email.sendEmail(context, {
 		type: "internal",
 		to: data.email,
 		subject: T("user_invite_email_subject"),

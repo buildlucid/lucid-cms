@@ -1,6 +1,5 @@
 import T from "../../translations/index.js";
 import pipeRemoteUrl from "./helpers/pipe-remote-url.js";
-import type { ReadStream } from "node:fs";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidErrorData } from "../../types/errors.js";
 

@@ -2,6 +2,7 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
+import services from "../index.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -30,7 +31,7 @@ const sendEmail: ServiceFn<
 	const EmailsFormatter = Formatter.get("emails");
 
 	const emailConfigRes =
-		await context.services.email.checks.checkHasEmailConfig(context);
+		await services.email.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
 	const newEmailRes = await Emails.createSingle({

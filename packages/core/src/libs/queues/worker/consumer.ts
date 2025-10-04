@@ -3,7 +3,6 @@ import loadConfigFile from "../../config/load-config-file.js";
 import getConfigPath from "../../config/get-config-path.js";
 import logger from "../../logger/index.js";
 import createQueueContext, { QUEUE_LOG_SCOPE } from "../create-context.js";
-import services from "../../../services/index.js";
 import passthroughQueueAdapter from "../adapters/passthrough.js";
 import Repository from "../../repositories/index.js";
 import type { Select, LucidQueueJobs } from "../../db/types.js";
@@ -132,7 +131,6 @@ const startConsumer = async () => {
 					{
 						config: config,
 						db: config.db.client,
-						services: services,
 						// TODO: should handlers be able to push jobs to the queue??
 						//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
 						//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter

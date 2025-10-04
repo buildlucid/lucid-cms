@@ -41,8 +41,6 @@ const webhookController = (pluginOptions: PluginOptions) =>
 				{
 					db: c.get("config").db.client,
 					config: c.get("config"),
-					// @ts-expect-error
-					services: undefined,
 					queue: c.get("queue"),
 				},
 				{

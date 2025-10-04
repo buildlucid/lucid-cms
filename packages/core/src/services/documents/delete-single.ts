@@ -3,6 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../types.js";
+import services from "../index.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -15,12 +16,9 @@ const deleteSingle: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const collectionRes =
-		await context.services.collection.documents.checks.checkCollection(
-			context,
-			{
-				key: data.collectionKey,
-			},
-		);
+		await services.collection.documents.checks.checkCollection(context, {
+			key: data.collectionKey,
+		});
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.isLocked) {
@@ -121,7 +119,7 @@ const deleteSingle: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
-		context.services.collection.documents.nullifyDocumentReferences(context, {
+		services.collection.documents.nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),
