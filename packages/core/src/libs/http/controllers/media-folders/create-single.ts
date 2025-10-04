@@ -42,7 +42,7 @@ const createSingleController = factory.createHandlers(
 		const body = c.req.valid("json");
 
 		const mediaFolderIdRes = await serviceWrapper(
-			services.mediaFolder.createSingle,
+			services.mediaFolders.createSingle,
 			{
 				transaction: true,
 				defaultError: {

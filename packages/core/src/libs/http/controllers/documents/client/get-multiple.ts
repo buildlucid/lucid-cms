@@ -48,7 +48,7 @@ const getMultipleController = factory.createHandlers(
 		);
 
 		const documents = await serviceWrapper(
-			services.collection.documents.client.getMultiple,
+			services.documents.client.getMultiple,
 			{
 				transaction: false,
 				defaultError: {

@@ -45,17 +45,14 @@ const getSingleController = factory.createHandlers(
 			controllerSchemas.client.getSingle.query.formatted,
 		);
 
-		const document = await serviceWrapper(
-			services.collection.documents.client.getSingle,
-			{
-				transaction: false,
-				defaultError: {
-					type: "basic",
-					name: T("route_document_fetch_error_name"),
-					message: T("route_document_fetch_error_message"),
-				},
+		const document = await serviceWrapper(services.documents.client.getSingle, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: T("route_document_fetch_error_name"),
+				message: T("route_document_fetch_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

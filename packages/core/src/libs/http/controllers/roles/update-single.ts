@@ -44,7 +44,7 @@ const updateSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 
-		const updateRole = await serviceWrapper(services.role.updateSingle, {
+		const updateRole = await serviceWrapper(services.roles.updateSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -66,7 +66,7 @@ const updateSingleController = factory.createHandlers(
 		);
 		if (updateRole.error) throw new LucidAPIError(updateRole.error);
 
-		const role = await serviceWrapper(services.role.getSingle, {
+		const role = await serviceWrapper(services.roles.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

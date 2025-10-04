@@ -41,7 +41,7 @@ const deleteSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const auth = c.get("auth");
 
-		const deleteSingle = await serviceWrapper(services.user.deleteSingle, {
+		const deleteSingle = await serviceWrapper(services.users.deleteSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

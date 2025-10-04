@@ -44,7 +44,7 @@ const updateSingleController = factory.createHandlers(
 		const body = c.req.valid("json");
 		const auth = c.get("auth");
 
-		const updateUser = await serviceWrapper(services.user.updateSingle, {
+		const updateUser = await serviceWrapper(services.users.updateSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

@@ -42,7 +42,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		);
 
-		const folders = await serviceWrapper(services.mediaFolder.getMultiple, {
+		const folders = await serviceWrapper(services.mediaFolders.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

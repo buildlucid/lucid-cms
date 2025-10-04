@@ -91,9 +91,9 @@ export default defineConfig((env) => ({
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },
 	},
-	queue: {
-		adapter: passthroughQueueAdapter,
-	},
+	// queue: {
+	// 	adapter: passthroughQueueAdapter,
+	// },
 	// hooks: [
 	// 	{
 	// 		service: "documents",

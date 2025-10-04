@@ -25,7 +25,7 @@ import type {
 	LucidBrickTableName,
 	LucidVersionTable,
 } from "../../types.js";
-import type { CollectionBuilder } from "../../builders.js";
+import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 

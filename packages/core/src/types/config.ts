@@ -277,7 +277,7 @@ export interface LucidConfig {
 	};
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
-	/** A list of collections instances to register. These can be imported from `@lucidcms/core/builders`. */
+	/** A list of collections instances to register. These can be imported from `@lucidcms/core`. */
 	collections?: CollectionBuilder[];
 	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
 	plugins?: LucidPlugin[];

@@ -13,7 +13,7 @@ const generateToken = async (
 	try {
 		const config = c.get("config");
 
-		const userRes = await services.user.getSingle(
+		const userRes = await services.users.getSingle(
 			{
 				db: config.db.client,
 				config: config,

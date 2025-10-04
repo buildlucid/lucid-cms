@@ -7,13 +7,13 @@ import type {
 	TableType,
 } from "../types.js";
 import type { ServiceResponse } from "../../../../types.js";
-import type { CollectionBuilder } from "../../../../builders.js";
+import type CollectionBuilder from "../../../../libs/builders/collection-builder/index.js";
 import type {
 	CFConfig,
 	FieldTypes,
 	TabFieldConfig,
 } from "../../../../types.js";
-import type { BrickBuilder } from "../../../../builders.js";
+import type BrickBuilder from "../../../../libs/builders/brick-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter.js";
 
 /**

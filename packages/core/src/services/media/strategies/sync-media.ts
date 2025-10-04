@@ -43,7 +43,7 @@ const syncMedia: ServiceFn<
 	});
 	if (fileMetaData.error) return fileMetaData;
 
-	const updateStorageRes = await services.option.updateSingle(context, {
+	const updateStorageRes = await services.options.updateSingle(context, {
 		name: "media_storage_used",
 		valueInt: proposedSizeRes.data.proposedSize,
 	});

@@ -30,7 +30,7 @@ const inviteSingle: ServiceFn<
 				email: data.email,
 			},
 		}),
-		services.user.checks.checkRolesExist(context, {
+		services.users.checks.checkRolesExist(context, {
 			roleIds: data.roleIds,
 		}),
 	]);
@@ -92,14 +92,14 @@ const inviteSingle: ServiceFn<
 		minutes: constants.userInviteTokenExpirationMinutes,
 	}).toISOString();
 
-	const userTokenRes = await services.user.token.createSingle(context, {
+	const userTokenRes = await services.userTokens.createSingle(context, {
 		userId: newUserRes.data.id,
 		tokenType: "password_reset",
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const sendEmailRes = await services.email.sendEmail(context, {
+	const sendEmailRes = await services.emails.sendEmail(context, {
 		type: "internal",
 		to: data.email,
 		subject: T("user_invite_email_subject"),

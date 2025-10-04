@@ -1,5 +1,5 @@
 import Formatter from "./index.js";
-import type { CollectionBuilder } from "../../builders.js";
+import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type {
 	Config,
 	DocumentResponse,

@@ -44,7 +44,7 @@ const getMultipleRevisionsController = factory.createHandlers(
 		);
 
 		const documentRevisions = await serviceWrapper(
-			services.collection.documents.getMultipleRevisions,
+			services.documents.getMultipleRevisions,
 			{
 				transaction: false,
 				defaultError: {

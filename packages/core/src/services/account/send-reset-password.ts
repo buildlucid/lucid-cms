@@ -41,14 +41,14 @@ const sendResetPassword: ServiceFn<
 		minutes: constants.passwordResetTokenExpirationMinutes,
 	}).toISOString();
 
-	const userToken = await services.user.token.createSingle(context, {
+	const userToken = await services.userTokens.createSingle(context, {
 		userId: userExistsRes.data.id,
 		tokenType: "password_reset",
 		expiryDate: expiryDate,
 	});
 	if (userToken.error) return userToken;
 
-	const sendEmail = await services.email.sendEmail(context, {
+	const sendEmail = await services.emails.sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: T("reset_password_email_subject"),

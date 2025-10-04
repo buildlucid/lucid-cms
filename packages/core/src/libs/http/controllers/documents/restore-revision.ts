@@ -40,7 +40,7 @@ const restoreRevisionController = factory.createHandlers(
 		const { collectionKey, id, versionId } = c.req.valid("param");
 
 		const restoreRevisionRes = await serviceWrapper(
-			services.collection.documentVersions.restoreRevision,
+			services.documentVersions.restoreRevision,
 			{
 				transaction: true,
 				defaultError: {

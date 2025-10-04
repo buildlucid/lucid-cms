@@ -14,7 +14,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 	);
 
 	const [storageUsedRes, processedImagesRes] = await Promise.all([
-		services.option.getSingle(context, {
+		services.options.getSingle(context, {
 			name: "media_storage_used",
 		}),
 		ProcessedImages.selectMultiple({
@@ -47,7 +47,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		ProcessedImages.deleteMultiple({
 			where: [],
 		}),
-		services.option.updateSingle(context, {
+		services.options.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
 		}),

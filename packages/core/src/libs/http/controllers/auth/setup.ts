@@ -39,7 +39,7 @@ const setupController = factory.createHandlers(
 			c.req.valid("json");
 
 		const createAdminRes = await serviceWrapper(
-			services.user.createInitialAdmin,
+			services.users.createInitialAdmin,
 			{
 				transaction: true,
 				defaultError: {

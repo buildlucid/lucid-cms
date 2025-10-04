@@ -1,5 +1,4 @@
-import { z } from "@lucidcms/core";
-import { CollectionBuilder } from "@lucidcms/core/builders";
+import { z, CollectionBuilder } from "@lucidcms/core";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import SEOBrick from "../bricks/seo.js";

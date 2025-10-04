@@ -21,7 +21,7 @@ const validatePermissions: ServiceFn<
 		};
 	}
 
-	const permissionsRes = await services.permission.getAll(context);
+	const permissionsRes = await services.permissions.getAll(context);
 	if (permissionsRes.error) return permissionsRes;
 
 	const permErrors: Array<{

@@ -10,7 +10,7 @@ import {
 import type { PluginOptions } from "../types/types.js";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { validate } from "@lucidcms/core/middleware";
+import { validateMiddleware } from "@lucidcms/core/api";
 
 const factory = createFactory();
 
@@ -28,7 +28,7 @@ const uploadController = (pluginOptions: PluginOptions) =>
 			}),
 			validateResponse: true,
 		}),
-		validate("query", controllerSchemas.upload.query.string),
+		validateMiddleware("query", controllerSchemas.upload.query.string),
 		async (c) => {
 			const query = c.req.valid("query");
 			const buffer = await c.req.arrayBuffer();

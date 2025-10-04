@@ -22,7 +22,7 @@ const sendExternal: ServiceFn<
 		email: EmailResponse;
 	}
 > = async (context, data) =>
-	serviceWrapper(services.email.sendEmail, {
+	serviceWrapper(services.emails.sendEmail, {
 		transaction: true,
 	})(context, {
 		type: "external",

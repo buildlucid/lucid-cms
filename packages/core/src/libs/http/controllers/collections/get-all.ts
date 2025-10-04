@@ -24,7 +24,7 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
-		const collections = await serviceWrapper(services.collection.getAll, {
+		const collections = await serviceWrapper(services.collections.getAll, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

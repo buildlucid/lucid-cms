@@ -41,7 +41,7 @@ const getMultipleController = factory.createHandlers(
 			controllerSchemas.getMultiple.query.formatted,
 		);
 
-		const jobs = await serviceWrapper(services.job.getMultiple, {
+		const jobs = await serviceWrapper(services.jobs.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

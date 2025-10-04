@@ -15,10 +15,12 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes =
-		await services.collection.documents.checks.checkCollection(context, {
+	const collectionRes = await services.documents.checks.checkCollection(
+		context,
+		{
 			key: data.collectionKey,
-		});
+		},
+	);
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.isLocked) {
@@ -119,7 +121,7 @@ const deleteSingle: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
-		services.collection.documents.nullifyDocumentReferences(context, {
+		services.documents.nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),

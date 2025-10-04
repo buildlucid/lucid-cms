@@ -41,7 +41,7 @@ const getMultipleController = factory.createHandlers(
 			controllerSchemas.getMultiple.query.formatted,
 		);
 
-		const emails = await serviceWrapper(services.email.getMultiple, {
+		const emails = await serviceWrapper(services.emails.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

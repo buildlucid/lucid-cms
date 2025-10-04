@@ -33,10 +33,12 @@ const updateSingle: ServiceFn<
 	// Checks
 
 	//* check collection exists
-	const collectionRes =
-		await services.collection.documents.checks.checkCollection(context, {
+	const collectionRes = await services.documents.checks.checkCollection(
+		context,
+		{
 			key: data.collectionKey,
-		});
+		},
+	);
 	if (collectionRes.error) return collectionRes;
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
@@ -124,12 +126,14 @@ const updateSingle: ServiceFn<
 	// Update document
 
 	//* delete all bricks that belong to the document and version
-	const deleteBricksRes =
-		await services.collection.documentBricks.deleteMultiple(context, {
+	const deleteBricksRes = await services.documentBricks.deleteMultiple(
+		context,
+		{
 			versionId: data.versionId,
 			documentId: data.documentId,
 			collectionKey: data.collectionKey,
-		});
+		},
+	);
 	if (deleteBricksRes.error) return deleteBricksRes;
 
 	//* create new bricks based on the given data
@@ -164,14 +168,16 @@ const updateSingle: ServiceFn<
 	const bodyData = merge(data, hookResponse.data);
 
 	// Save bricks for the new version
-	const createMultipleBricks =
-		await services.collection.documentBricks.createMultiple(context, {
+	const createMultipleBricks = await services.documentBricks.createMultiple(
+		context,
+		{
 			versionId: data.versionId,
 			documentId: data.documentId,
 			bricks: bodyData.bricks,
 			fields: bodyData.fields,
 			collection: collectionRes.data,
-		});
+		},
+	);
 	if (createMultipleBricks.error) return createMultipleBricks;
 
 	// Fire afterUpsert hook

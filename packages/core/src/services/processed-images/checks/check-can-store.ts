@@ -24,7 +24,7 @@ const checkCanStore: ServiceFn<
 		};
 	}
 
-	const storageUsed = await services.option.getSingle(context, {
+	const storageUsed = await services.options.getSingle(context, {
 		name: "media_storage_used",
 	});
 	if (storageUsed.error) return storageUsed;

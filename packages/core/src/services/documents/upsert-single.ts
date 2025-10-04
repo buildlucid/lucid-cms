@@ -27,10 +27,12 @@ const upsertSingle: ServiceFn<
 	// Checks
 
 	//* check collection exists
-	const collectionRes =
-		await services.collection.documents.checks.checkCollection(context, {
+	const collectionRes = await services.documents.checks.checkCollection(
+		context,
+		{
 			key: data.collectionKey,
-		});
+		},
+	);
 	if (collectionRes.error) return collectionRes;
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
@@ -101,7 +103,7 @@ const upsertSingle: ServiceFn<
 
 	//* for single collections types, check if a document already exists
 	const checkDocumentCountRes =
-		await services.collection.documents.checks.checkSingleCollectionDocumentCount(
+		await services.documents.checks.checkSingleCollectionDocumentCount(
 			context,
 			{
 				collectionKey: data.collectionKey,
@@ -137,15 +139,17 @@ const upsertSingle: ServiceFn<
 
 	// ----------------------------------------------
 	// Create and manage document versions
-	const createVersionRes =
-		await services.collection.documentVersions.createSingle(context, {
+	const createVersionRes = await services.documentVersions.createSingle(
+		context,
+		{
 			documentId: upsertDocRes.data.id,
 			userId: data.userId,
 			publish: data.publish,
 			bricks: data.bricks,
 			fields: data.fields,
 			collection: collectionRes.data,
-		});
+		},
+	);
 	if (createVersionRes.error) return createVersionRes;
 
 	return {

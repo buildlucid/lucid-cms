@@ -24,7 +24,7 @@ const getSettingsController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
-		const settings = await serviceWrapper(services.setting.getSettings, {
+		const settings = await serviceWrapper(services.settings.getSettings, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

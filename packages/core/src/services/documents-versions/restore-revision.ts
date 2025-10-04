@@ -13,7 +13,7 @@ const restoreRevision: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = services.collection.getSingleInstance(context, {
+	const collectionRes = services.collections.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -30,19 +30,16 @@ const restoreRevision: ServiceFn<
 		};
 	}
 
-	const response = await services.collection.documentVersions.promoteVersion(
-		context,
-		{
-			documentId: data.documentId,
-			collectionKey: data.collectionKey,
-			fromVersionId: data.versionId,
-			toVersionType: collectionRes.data.getData.config.useDrafts
-				? "draft"
-				: "published",
-			userId: data.userId,
-			skipRevisionCheck: true,
-		},
-	);
+	const response = await services.documentVersions.promoteVersion(context, {
+		documentId: data.documentId,
+		collectionKey: data.collectionKey,
+		fromVersionId: data.versionId,
+		toVersionType: collectionRes.data.getData.config.useDrafts
+			? "draft"
+			: "published",
+		userId: data.userId,
+		skipRevisionCheck: true,
+	});
 	if (response.error) return response;
 
 	return {

@@ -41,7 +41,7 @@ const resendSingleController = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const emailRes = await serviceWrapper(services.email.resendSingle, {
+		const emailRes = await serviceWrapper(services.emails.resendSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

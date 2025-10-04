@@ -40,17 +40,14 @@ const deleteSingleController = factory.createHandlers(
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");
 
-		const deleteSingle = await serviceWrapper(
-			services.collection.documents.deleteSingle,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: T("route_document_delete_error_name"),
-					message: T("route_document_delete_error_message"),
-				},
+		const deleteSingle = await serviceWrapper(services.documents.deleteSingle, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: T("route_document_delete_error_name"),
+				message: T("route_document_delete_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

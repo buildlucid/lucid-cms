@@ -34,7 +34,7 @@ const getSingleController = factory.createHandlers(
 	async (c) => {
 		const { key } = c.req.valid("param");
 
-		const collection = await serviceWrapper(services.collection.getSingle, {
+		const collection = await serviceWrapper(services.collections.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

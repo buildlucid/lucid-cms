@@ -43,17 +43,14 @@ const getMultipleController = factory.createHandlers(
 			controllerSchemas.getMultiple.query.formatted,
 		);
 
-		const documents = await serviceWrapper(
-			services.collection.documents.getMultiple,
-			{
-				transaction: false,
-				defaultError: {
-					type: "basic",
-					name: T("route_document_fetch_error_name"),
-					message: T("route_document_fetch_error_message"),
-				},
+		const documents = await serviceWrapper(services.documents.getMultiple, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: T("route_document_fetch_error_name"),
+				message: T("route_document_fetch_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

@@ -43,7 +43,7 @@ const inviteSingleController = factory.createHandlers(
 		const body = c.req.valid("json");
 		const auth = c.get("auth");
 
-		const userId = await serviceWrapper(services.user.inviteSingle, {
+		const userId = await serviceWrapper(services.users.inviteSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -68,7 +68,7 @@ const inviteSingleController = factory.createHandlers(
 		);
 		if (userId.error) throw new LucidAPIError(userId.error);
 
-		const user = await serviceWrapper(services.user.getSingle, {
+		const user = await serviceWrapper(services.users.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

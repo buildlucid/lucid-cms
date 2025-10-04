@@ -40,7 +40,7 @@ const deleteSingleController = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const deleteSingle = await serviceWrapper(services.role.deleteSingle, {
+		const deleteSingle = await serviceWrapper(services.roles.deleteSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

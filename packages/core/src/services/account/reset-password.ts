@@ -22,7 +22,7 @@ const resetPassword: ServiceFn<
 	);
 	const Users = Repository.get("users", context.db, context.config.db);
 
-	const tokenRes = await services.user.token.getSingle(context, {
+	const tokenRes = await services.userTokens.getSingle(context, {
 		token: data.token,
 		tokenType: "password_reset",
 	});
@@ -88,7 +88,7 @@ const resetPassword: ServiceFn<
 				},
 			],
 		}),
-		services.email.sendEmail(context, {
+		services.emails.sendEmail(context, {
 			template: constants.emailTemplates.passwordResetSuccess,
 			type: "internal",
 			to: updatedUserRes.data.email,

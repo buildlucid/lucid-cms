@@ -23,7 +23,7 @@ const getSingle: ServiceFn<
 	const Document = Repository.get("documents", context.db, context.config.db);
 	const DocumentFormatter = Formatter.get("documents");
 
-	const collectionRes = services.collection.getSingleInstance(context, {
+	const collectionRes = services.collections.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -70,15 +70,12 @@ const getSingle: ServiceFn<
 	}
 
 	if (data.query.include?.includes("bricks")) {
-		const bricksRes = await services.collection.documentBricks.getMultiple(
-			context,
-			{
-				versionId: versionId,
-				collectionKey: documentRes.data.collection_key,
-				//* if fetching a revision, we always default to the draft version so any sub-documents this may query due to the document custom field is always recent info
-				versionType: versionType !== "revision" ? versionType : "draft",
-			},
-		);
+		const bricksRes = await services.documentBricks.getMultiple(context, {
+			versionId: versionId,
+			collectionKey: documentRes.data.collection_key,
+			//* if fetching a revision, we always default to the draft version so any sub-documents this may query due to the document custom field is always recent info
+			versionType: versionType !== "revision" ? versionType : "draft",
+		});
 		if (bricksRes.error) return bricksRes;
 
 		return {

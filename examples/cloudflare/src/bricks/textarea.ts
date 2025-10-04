@@ -1,4 +1,4 @@
-import { BrickBuilder } from "@lucidcms/core/builders";
+import { BrickBuilder } from "@lucidcms/core";
 
 const TextareaBrick = new BrickBuilder("textarea", {
 	details: {

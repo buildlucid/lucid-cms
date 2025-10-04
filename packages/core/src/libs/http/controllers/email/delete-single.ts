@@ -37,7 +37,7 @@ const deleteSingleController = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const deleteSingle = await serviceWrapper(services.email.deleteSingle, {
+		const deleteSingle = await serviceWrapper(services.emails.deleteSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

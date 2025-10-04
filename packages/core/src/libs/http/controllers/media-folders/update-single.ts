@@ -45,7 +45,7 @@ const updateSingleController = factory.createHandlers(
 		const body = c.req.valid("json");
 
 		const updateMediaFolder = await serviceWrapper(
-			services.mediaFolder.updateSingle,
+			services.mediaFolders.updateSingle,
 			{
 				transaction: true,
 				defaultError: {

@@ -70,11 +70,11 @@ const update: ServiceFn<
 
 	// update storage, processed images and delete temp
 	const [storageRes, clearProcessRes] = await Promise.all([
-		services.option.updateSingle(context, {
+		services.options.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: proposedSizeRes.data.proposedSize,
 		}),
-		services.processedImage.clearSingle(context, {
+		services.processedImages.clearSingle(context, {
 			id: data.id,
 		}),
 	]);

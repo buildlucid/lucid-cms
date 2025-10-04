@@ -50,7 +50,7 @@ const getMultipleFieldMeta: ServiceFn<
 		const collectionKey = extractCollectionKey(v.table);
 		if (!collectionKey) return null;
 
-		const collectionRes = services.collection.getSingleInstance(context, {
+		const collectionRes = services.collections.getSingleInstance(context, {
 			key: collectionKey,
 		});
 		if (collectionRes.error) return null;

@@ -6,9 +6,7 @@ export default defineConfig({
     entry: [
         "src/index.ts",
         "src/types.ts",
-        "src/builders.ts",
         "src/api.ts",
-        "src/middleware.ts",
         "src/helpers.ts",
         "src/libs/cli/index.ts",
         "src/libs/queues/worker/consumer.ts",

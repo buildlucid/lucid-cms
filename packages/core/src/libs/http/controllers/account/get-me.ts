@@ -25,7 +25,7 @@ const getMeController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c: LucidHonoContext) => {
-		const user = await serviceWrapper(services.user.getSingle, {
+		const user = await serviceWrapper(services.users.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

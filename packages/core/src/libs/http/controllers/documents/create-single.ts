@@ -47,17 +47,14 @@ const createSingleController = factory.createHandlers(
 		//* manually run permissions middleware based on the publish flag
 		permissionCheck(c, publish ? ["publish_content"] : ["create_content"]);
 
-		const documentId = await serviceWrapper(
-			services.collection.documents.upsertSingle,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: T("route_document_create_error_name"),
-					message: T("route_document_create_error_message"),
-				},
+		const documentId = await serviceWrapper(services.documents.upsertSingle, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: T("route_document_create_error_name"),
+				message: T("route_document_create_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

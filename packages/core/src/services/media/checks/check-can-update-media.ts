@@ -39,7 +39,7 @@ const checkCanUpdateMedia: ServiceFn<
 		};
 	}
 
-	const storageUsedRes = await services.option.getSingle(context, {
+	const storageUsedRes = await services.options.getSingle(context, {
 		name: "media_storage_used",
 	});
 	if (storageUsedRes.error) return storageUsedRes;

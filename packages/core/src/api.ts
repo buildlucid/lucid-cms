@@ -1,4 +1,13 @@
 export { LucidAPIError } from "./utils/errors/index.js";
 export { default as formatAPIResponse } from "./libs/http/utils/build-response.js";
 export { default as serviceWrapper } from "./utils/services/service-wrapper.js";
+export { default as services } from "./services/index.js";
 export * from "./utils/open-api/index.js";
+
+export { default as authenticateMiddleware } from "./libs/http/middleware/authenticate.js";
+export { default as clientAuthenticationMiddleware } from "./libs/http/middleware/client-authenticate.js";
+export { default as contentLocaleMiddleware } from "./libs/http/middleware/content-locale.js";
+export { default as logRouteMiddleware } from "./libs/http/middleware/log-route.js";
+export { default as validateCSRFMiddleware } from "./libs/http/middleware/validate-csrf.js";
+export { default as validateMiddleware } from "./libs/http/middleware/validate.js";
+export { default as permissionsMiddleware } from "./libs/http/middleware/permissions.js";

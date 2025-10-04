@@ -41,11 +41,11 @@ const processImage: ServiceFn<
 
 	// Optimize image
 	const [imageRes, processedCountRes] = await Promise.all([
-		services.processedImage.optimizeImage(context, {
+		services.processedImages.optimizeImage(context, {
 			stream: mediaRes.data.body,
 			options: data.options,
 		}),
-		services.processedImage.getSingleCount(context, {
+		services.processedImages.getSingleCount(context, {
 			key: data.key,
 		}),
 	]);
@@ -92,7 +92,7 @@ const processImage: ServiceFn<
 	}
 
 	// Check if we can store it
-	const canStoreRes = await services.processedImage.checks.checkCanStore(
+	const canStoreRes = await services.processedImages.checks.checkCanStore(
 		context,
 		{
 			size: imageRes.data.size,
@@ -135,7 +135,7 @@ const processImage: ServiceFn<
 					type: "image",
 				},
 			}),
-			services.option.updateSingle(context, {
+			services.options.updateSingle(context, {
 				name: "media_storage_used",
 				valueInt: canStoreRes.data.proposedSize,
 			}),

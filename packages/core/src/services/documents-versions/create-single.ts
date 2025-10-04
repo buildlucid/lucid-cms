@@ -4,7 +4,7 @@ import merge from "lodash.merge";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { CollectionBuilder } from "../../builders.js";
+import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 
@@ -134,14 +134,16 @@ const createSingle: ServiceFn<
 	const bodyData = merge(data, hookResponse.data);
 
 	// Save bricks for the new version
-	const createMultipleBricks =
-		await services.collection.documentBricks.createMultiple(context, {
+	const createMultipleBricks = await services.documentBricks.createMultiple(
+		context,
+		{
 			versionId: newVersionRes.data.id,
 			documentId: data.documentId,
 			bricks: bodyData.bricks,
 			fields: bodyData.fields,
 			collection: data.collection,
-		});
+		},
+	);
 	if (createMultipleBricks.error) return createMultipleBricks;
 
 	// ----------------------------------------------

@@ -50,7 +50,7 @@ const promoteVersionController = factory.createHandlers(
 		);
 
 		const restoreRevisionRes = await serviceWrapper(
-			services.collection.documentVersions.promoteVersion,
+			services.documentVersions.promoteVersion,
 			{
 				transaction: true,
 				defaultError: {

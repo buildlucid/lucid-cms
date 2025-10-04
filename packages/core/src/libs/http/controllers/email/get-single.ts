@@ -36,7 +36,7 @@ const getSingleController = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const email = await serviceWrapper(services.email.getSingle, {
+		const email = await serviceWrapper(services.emails.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

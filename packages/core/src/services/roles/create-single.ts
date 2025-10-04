@@ -16,7 +16,7 @@ const createSingle: ServiceFn<
 	const Roles = Repository.get("roles", context.db, context.config.db);
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
-		services.role.validatePermissions(context, {
+		services.roles.validatePermissions(context, {
 			permissions: data.permissions,
 		}),
 		Roles.selectSingle({

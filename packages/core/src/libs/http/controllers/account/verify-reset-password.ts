@@ -28,7 +28,7 @@ const verifyResetPasswordController = factory.createHandlers(
 	async (c) => {
 		const { token } = c.req.valid("param");
 
-		const tokenResult = await serviceWrapper(services.user.token.getSingle, {
+		const tokenResult = await serviceWrapper(services.userTokens.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

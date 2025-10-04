@@ -40,7 +40,7 @@ const deleteSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 
 		const deleteSingleMediaFolder = await serviceWrapper(
-			services.mediaFolder.deleteSingle,
+			services.mediaFolders.deleteSingle,
 			{
 				transaction: true,
 				defaultError: {

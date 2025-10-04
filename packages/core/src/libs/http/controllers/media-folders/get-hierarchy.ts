@@ -24,7 +24,7 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
-		const folders = await serviceWrapper(services.mediaFolder.getHierarchy, {
+		const folders = await serviceWrapper(services.mediaFolders.getHierarchy, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

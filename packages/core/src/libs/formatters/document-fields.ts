@@ -15,7 +15,8 @@ import type {
 	Select,
 	FieldAltResponse,
 } from "../../types.js";
-import type { BrickBuilder, CollectionBuilder } from "../../builders.js";
+import type BrickBuilder from "../builders/brick-builder/index.js";
+import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";

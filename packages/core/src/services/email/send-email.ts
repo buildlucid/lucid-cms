@@ -31,7 +31,7 @@ const sendEmail: ServiceFn<
 	const EmailsFormatter = Formatter.get("emails");
 
 	const emailConfigRes =
-		await services.email.checks.checkHasEmailConfig(context);
+		await services.emails.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
 	const newEmailRes = await Emails.createSingle({

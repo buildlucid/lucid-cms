@@ -35,7 +35,7 @@ const clearAllProcessedController = factory.createHandlers(
 	permissions(["update_media"]),
 	async (c) => {
 		const clearProcessed = await serviceWrapper(
-			services.processedImage.clearAll,
+			services.processedImages.clearAll,
 			{
 				transaction: true,
 				defaultError: {

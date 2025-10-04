@@ -22,10 +22,12 @@ const deleteMultiple: ServiceFn<
 		};
 	}
 
-	const collectionRes =
-		await services.collection.documents.checks.checkCollection(context, {
+	const collectionRes = await services.documents.checks.checkCollection(
+		context,
+		{
 			key: data.collectionKey,
-		});
+		},
+	);
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.isLocked) {
@@ -116,7 +118,7 @@ const deleteMultiple: ServiceFn<
 	if (hookBeforeRes.error) return hookBeforeRes;
 
 	const nullifyPromises = data.ids.map((id) =>
-		services.collection.documents.nullifyDocumentReferences(context, {
+		services.documents.nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: id,
 		}),

@@ -106,7 +106,7 @@ const processMedia: ServiceFn<
 	}
 
 	//* process the image
-	const processRes = await services.processedImage.processImage(context, {
+	const processRes = await services.processedImages.processImage(context, {
 		key: data.key,
 		processKey: processKey,
 		options: {

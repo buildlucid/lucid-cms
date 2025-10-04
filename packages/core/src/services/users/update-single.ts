@@ -168,7 +168,7 @@ const updateSingle: ServiceFn<
 				},
 			},
 		}),
-		services.user.updateMultipleRoles(context, {
+		services.users.updateMultipleRoles(context, {
 			userId: data.userId,
 			roleIds: data.roleIds,
 		}),
@@ -177,7 +177,7 @@ const updateSingle: ServiceFn<
 	if (updateUserRes.error) return updateUserRes;
 
 	if (data.email !== undefined) {
-		const sendEmailRes = await services.email.sendEmail(context, {
+		const sendEmailRes = await services.emails.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
 			to: data.email,

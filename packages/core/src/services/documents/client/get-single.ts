@@ -25,7 +25,7 @@ const getSingle: ServiceFn<
 	const Documents = Repository.get("documents", context.db, context.config.db);
 	const DocumentsFormatter = Formatter.get("documents");
 
-	const collectionRes = services.collection.getSingleInstance(context, {
+	const collectionRes = services.collections.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -73,15 +73,12 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const bricksRes = await services.collection.documentBricks.getMultiple(
-		context,
-		{
-			versionId: documentRes.data.version_id,
-			collectionKey: collectionRes.data.key,
-			versionType: data.status,
-			documentFieldsOnly: !data.query.include?.includes("bricks"),
-		},
-	);
+	const bricksRes = await services.documentBricks.getMultiple(context, {
+		versionId: documentRes.data.version_id,
+		collectionKey: collectionRes.data.key,
+		versionType: data.status,
+		documentFieldsOnly: !data.query.include?.includes("bricks"),
+	});
 	if (bricksRes.error) return bricksRes;
 
 	return {

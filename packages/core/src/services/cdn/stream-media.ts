@@ -104,7 +104,7 @@ const streamMedia: ServiceFn<
 	}
 
 	// Process
-	return await services.processedImage.processImage(context, {
+	return await services.processedImages.processImage(context, {
 		key: data.key,
 		processKey: processKey,
 		options: {

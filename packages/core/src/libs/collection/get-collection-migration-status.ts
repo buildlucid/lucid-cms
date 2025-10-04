@@ -5,7 +5,7 @@ import {
 	setCachedMigrationResult,
 } from "./migration/cache.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { CollectionBuilder } from "../../builders.js";
+import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 
 export type MigrationStatus = {
 	requiresMigration: boolean;

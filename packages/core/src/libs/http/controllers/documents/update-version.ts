@@ -49,7 +49,7 @@ const updateVersionController = factory.createHandlers(
 		permissionCheck(c, ["create_content"]);
 
 		const documentId = await serviceWrapper(
-			services.collection.documentVersions.updateSingle,
+			services.documentVersions.updateSingle,
 			{
 				transaction: true,
 				defaultError: {

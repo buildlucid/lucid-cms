@@ -44,7 +44,7 @@ const deleteMultipleController = factory.createHandlers(
 		const { collectionKey } = c.req.valid("param");
 
 		const deleteMultiple = await serviceWrapper(
-			services.collection.documents.deleteMultiple,
+			services.documents.deleteMultiple,
 			{
 				transaction: true,
 				defaultError: {

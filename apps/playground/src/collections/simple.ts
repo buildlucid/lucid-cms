@@ -1,5 +1,4 @@
-import { z } from "@lucidcms/core";
-import { CollectionBuilder } from "@lucidcms/core/builders";
+import { z, CollectionBuilder } from "@lucidcms/core";
 import SimpleBrick from "../bricks/simple.js";
 import SimpleFixedBrick from "../bricks/simple-fixed.js";
 

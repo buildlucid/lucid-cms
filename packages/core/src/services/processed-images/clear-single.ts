@@ -37,7 +37,7 @@ const clearSingle: ServiceFn<
 	if (mediaRes.error) return mediaRes;
 
 	const [storageUsedRes, processedImagesRes] = await Promise.all([
-		services.option.getSingle(context, {
+		services.options.getSingle(context, {
 			name: "media_storage_used",
 		}),
 		ProcessedImages.selectMultiple({
@@ -84,7 +84,7 @@ const clearSingle: ServiceFn<
 				},
 			],
 		}),
-		services.option.updateSingle(context, {
+		services.options.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
 		}),

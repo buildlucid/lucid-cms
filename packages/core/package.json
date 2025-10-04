@@ -18,14 +18,6 @@
             "types": "./dist/api.d.ts",
             "default": "./dist/api.js"
         },
-        "./builders": {
-            "types": "./dist/builders.d.ts",
-            "default": "./dist/builders.js"
-        },
-        "./middleware": {
-            "types": "./dist/middleware.d.ts",
-            "default": "./dist/middleware.js"
-        },
         "./helpers": {
             "types": "./dist/helpers.d.ts",
             "default": "./dist/helpers.js"

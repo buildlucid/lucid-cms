@@ -34,7 +34,7 @@ const getSingleController = factory.createHandlers(
 	async (c) => {
 		const { code } = c.req.valid("param");
 
-		const localeRes = await serviceWrapper(services.locale.getSingle, {
+		const localeRes = await serviceWrapper(services.locales.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

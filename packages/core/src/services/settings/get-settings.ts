@@ -9,7 +9,7 @@ const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
 		optionsServices.getMultiple(context, {
 			names: ["media_storage_used", "license_key_last4"],
 		}),
-		services.processedImage.getCount(context),
+		services.processedImages.getCount(context),
 	]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;

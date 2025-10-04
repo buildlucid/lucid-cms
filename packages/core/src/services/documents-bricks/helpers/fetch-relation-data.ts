@@ -68,7 +68,7 @@ const fetchRelationData: ServiceFn<
 			.filter((i) => typeof i === "number");
 
 		fetchPromises.push(
-			services.user
+			services.users
 				.getMultipleFieldMeta(context, {
 					ids: userIds,
 				})
@@ -88,7 +88,7 @@ const fetchRelationData: ServiceFn<
 	}
 	if (data.values.document) {
 		fetchPromises.push(
-			services.collection.documents
+			services.documents
 				.getMultipleFieldMeta(context, {
 					values: data.values.document.map((v) => ({
 						table: v.table as LucidDocumentTableName,

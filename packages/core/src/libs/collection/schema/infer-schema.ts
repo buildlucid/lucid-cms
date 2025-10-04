@@ -4,7 +4,7 @@ import createVersionsTable from "./tables/versions-table.js";
 import createFieldTables from "./tables/fields-table.js";
 import type { CollectionSchema, CollectionSchemaTable } from "./types.js";
 import type { ServiceResponse } from "../../../types.js";
-import type { CollectionBuilder } from "../../../builders.js";
+import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../db/adapter.js";
 
 /**

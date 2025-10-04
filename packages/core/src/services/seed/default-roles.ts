@@ -30,7 +30,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 		const rolePromises = [];
 		for (const role of constants.seedDefaults.roles) {
 			rolePromises.push(
-				serviceWrapper(services.role.createSingle, {
+				serviceWrapper(services.roles.createSingle, {
 					transaction: false,
 				})(context, {
 					name: role.name,

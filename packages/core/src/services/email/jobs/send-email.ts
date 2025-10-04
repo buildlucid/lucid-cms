@@ -15,7 +15,7 @@ const sendEmail: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const emailConfigRes =
-		await services.email.checks.checkHasEmailConfig(context);
+		await services.emails.checks.checkHasEmailConfig(context);
 	if (emailConfigRes.error) return emailConfigRes;
 
 	const Emails = Repository.get("emails", context.db, context.config.db);

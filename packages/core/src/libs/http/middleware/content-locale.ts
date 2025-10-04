@@ -9,7 +9,7 @@ const contentLocale = createMiddleware(async (c: LucidHonoContext, next) => {
 	const contentLocale = c.req.header(constants.headers.contentLocale);
 	const config = c.get("config");
 
-	const localeRes = await serviceWrapper(services.locale.getSingleFallback, {
+	const localeRes = await serviceWrapper(services.locales.getSingleFallback, {
 		transaction: false,
 	})(
 		{

@@ -14,7 +14,7 @@ const deleteObject: ServiceFn<
 	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const storageUsedRes = await services.option.getSingle(context, {
+	const storageUsedRes = await services.options.getSingle(context, {
 		name: "media_storage_used",
 	});
 	if (storageUsedRes.error) return storageUsedRes;
@@ -24,7 +24,7 @@ const deleteObject: ServiceFn<
 
 	const [_, updateStorageRes] = await Promise.all([
 		mediaStrategyRes.data.deleteSingle(data.key),
-		services.option.updateSingle(context, {
+		services.options.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
 		}),

@@ -23,7 +23,7 @@ const getMultipleRevisions: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const collectionRes = services.collection.getSingleInstance(context, {
+	const collectionRes = services.collections.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

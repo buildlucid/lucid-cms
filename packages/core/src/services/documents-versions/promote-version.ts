@@ -39,7 +39,7 @@ const promoteVersion: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
-	const collectionRes = services.collection.getSingleInstance(context, {
+	const collectionRes = services.collections.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -295,13 +295,10 @@ const promoteVersion: ServiceFn<
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 
-	const insertRes = await services.collection.documentBricks.insertBrickTables(
-		context,
-		{
-			tables: sortedTables,
-			collection: collectionRes.data,
-		},
-	);
+	const insertRes = await services.documentBricks.insertBrickTables(context, {
+		tables: sortedTables,
+		collection: collectionRes.data,
+	});
 	if (insertRes.error) return insertRes;
 
 	// -------------------------------------------------------------------------------

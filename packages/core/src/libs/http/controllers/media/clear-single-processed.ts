@@ -41,7 +41,7 @@ const clearSingleProcessedController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 
 		const clearProcessed = await serviceWrapper(
-			services.processedImage.clearSingle,
+			services.processedImages.clearSingle,
 			{
 				transaction: true,
 				defaultError: {

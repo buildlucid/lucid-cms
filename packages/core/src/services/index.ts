@@ -12,7 +12,7 @@ import locales from "./locales/index.js";
 import media from "./media/index.js";
 import mediaFolders from "./media-folders/index.js";
 import options from "./options/index.js";
-import processedImage from "./processed-images/index.js";
+import processedImages from "./processed-images/index.js";
 import roles from "./roles/index.js";
 import settings from "./settings/index.js";
 import license from "./license/index.js";
@@ -24,35 +24,31 @@ import seed from "./seed/index.js";
 import sync from "./sync/index.js";
 import clientIntegrations from "./client-integrations/index.js";
 
-const lucidServices = {
-	auth: auth,
-	collection: {
-		...collections,
-		documents: documents,
-		documentVersions: documentVersions,
-		documentBricks: documentBricks,
-	},
-	account: account,
-	user: {
-		...users,
-		token: userTokens,
-	},
-	email: emails,
-	job: jobs,
-	role: roles,
-	setting: settings,
-	license: license,
-	option: options,
-	media: media,
-	mediaFolder: mediaFolders,
-	processedImage: processedImage,
-	cdn: cdn,
-	locale: locales,
-	crons: crons,
-	permission: permissions,
-	seed: seed,
-	sync: sync,
-	clientIntegrations: clientIntegrations,
+const services = {
+	auth,
+	account,
+	collections,
+	documents,
+	documentVersions,
+	documentBricks,
+	users,
+	userTokens,
+	emails,
+	jobs,
+	roles,
+	permissions,
+	settings,
+	license,
+	options,
+	media,
+	mediaFolders,
+	processedImages,
+	cdn,
+	locales,
+	crons,
+	seed,
+	sync,
+	clientIntegrations,
 };
 
-export default lucidServices;
+export default services;

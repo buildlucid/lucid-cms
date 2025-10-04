@@ -154,7 +154,7 @@ const updateMe: ServiceFn<
 	if (updateMeRes.error) return updateMeRes;
 
 	if (data.email !== undefined) {
-		const sendEmail = await services.email.sendEmail(context, {
+		const sendEmail = await services.emails.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
 			to: data.email,

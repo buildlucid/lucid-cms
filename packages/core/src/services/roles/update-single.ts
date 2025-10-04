@@ -18,7 +18,7 @@ const updateSingle: ServiceFn<
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		data.permissions !== undefined
-			? services.role.validatePermissions(context, {
+			? services.roles.validatePermissions(context, {
 					permissions: data.permissions,
 				})
 			: undefined,
