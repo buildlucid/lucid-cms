@@ -200,6 +200,7 @@ export const NavigationSidebar: Component = () => {
 							href="/admin/system/queue-observability"
 							icon="queue"
 							title={T()("queue_observability")}
+							permission={userStore.get.hasPermission(["read_job"]).all}
 						/>
 					</ul>
 				</div>

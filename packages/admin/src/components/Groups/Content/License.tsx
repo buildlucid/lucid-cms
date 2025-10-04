@@ -31,8 +31,8 @@ export const License: Component = () => {
 			}}
 		>
 			<InfoRow.Root
-				title={T()("license")}
-				description={T()("license_description")}
+				title={T()("manage_license")}
+				description={T()("manage_license_description")}
 			>
 				<InfoRow.Content
 					title={T()("purchase_license")}
@@ -55,7 +55,10 @@ export const License: Component = () => {
 				>
 					<UpdateLicenseForm licenseKey={status.data?.data?.key || ""} />
 				</InfoRow.Content>
-				<InfoRow.Content>
+				<InfoRow.Content
+					title={T()("license_status")}
+					description={T()("license_status_description")}
+				>
 					<div class="flex flex-col gap-4">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">

@@ -6,19 +6,18 @@ import {
 	createMemo,
 	type JSXElement,
 	createEffect,
+	Suspense,
 } from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router";
 import api from "@/services/api";
-import { NavigationSidebar } from "@/components/Groups/Layout";
+import { NavigationSidebar, Wrapper } from "@/components/Groups/Layout";
 import spawnToast from "@/utils/spawn-toast";
 import Alert from "@/components/Blocks/Alert";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
 
-interface MainLayoutProps {
+const MainLayout: Component<{
 	children?: JSXElement;
-}
-
-const MainLayout: Component<MainLayoutProps> = (props) => {
+}> = (props) => {
 	// ----------------------------------
 	// Hooks
 	const navigate = useNavigate();
@@ -96,7 +95,7 @@ const MainLayout: Component<MainLayoutProps> = (props) => {
 								},
 							]}
 						/>
-						{props.children}
+						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>
 					</Match>
 					<Match when={isLoading()}>
 						<FullPageLoading />

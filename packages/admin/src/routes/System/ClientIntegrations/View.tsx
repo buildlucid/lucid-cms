@@ -42,10 +42,6 @@ const SystemClientIntegrationsRoute: Component = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const isLoading = createMemo(() => clientIntegrations.isLoading);
-	const isError = createMemo(() => clientIntegrations.isError);
-	const isSuccess = createMemo(() => clientIntegrations.isSuccess);
-
 	const hasCreatePermission = createMemo(() => {
 		return userStore.get.hasPermission(["create_client_integration"]).all;
 	});
@@ -80,17 +76,17 @@ const SystemClientIntegrationsRoute: Component = (props) => {
 		>
 			<DynamicContent
 				state={{
-					isError: isError(),
-					isSuccess: isSuccess(),
-					isLoading: isLoading(),
+					isError: clientIntegrations.isError,
+					isSuccess: clientIntegrations.isSuccess,
+					isLoading: clientIntegrations.isLoading,
 				}}
 				options={{
 					padding: "24",
 				}}
 			>
 				<InfoRow.Root
-					title={T()("client_integrations")}
-					description={T()("client_integration_description")}
+					title={T()("manage_integrations")}
+					description={T()("manage_integrations_description")}
 				>
 					<Switch>
 						<Match
