@@ -6,7 +6,6 @@ import {
 	For,
 	Show,
 	createSignal,
-	createEffect,
 } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -40,7 +39,6 @@ import {
 import MoveToFolder, {
 	type MoveToFolderParams,
 } from "@/components/Modals/Media/MoveToFolder";
-import Button from "@/components/Partials/Button";
 import classNames from "classnames";
 import UpdateMediaFolderPanel from "@/components/Panels/Media/UpdateMediaFolderPanel";
 
