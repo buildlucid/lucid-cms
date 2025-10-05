@@ -61,6 +61,7 @@ const cloudflareAdapter = (options?: {
 
 				const { app, destroy } = await lucid.createApp({
 					config,
+					env: platformProxy?.env,
 					app: cloudflareApp,
 					hono: {
 						extensions: [
@@ -143,6 +144,7 @@ export default {
 
         const { app } = await lucid.createApp({
             config: resolved,
+			env: env,
             hono: {
                 middleware: [
                     async (app, config) => {

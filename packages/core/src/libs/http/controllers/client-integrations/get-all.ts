@@ -35,6 +35,7 @@ const getAllController = factory.createHandlers(
 			db: c.get("config").db.client,
 			config: c.get("config"),
 			queue: c.get("queue"),
+			env: c.get("env"),
 		});
 		if (getAllRes.error) throw new LucidAPIError(getAllRes.error);
 

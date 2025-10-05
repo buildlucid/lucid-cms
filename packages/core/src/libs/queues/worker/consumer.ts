@@ -15,7 +15,7 @@ const BACKOFF_MULTIPLIER = 2;
 const startConsumer = async () => {
 	try {
 		const configPath = getConfigPath(process.cwd());
-		const { config } = await loadConfigFile({ path: configPath });
+		const { config, env } = await loadConfigFile({ path: configPath });
 
 		const CONCURRENT_LIMIT = config.queue.processing.concurrentLimit;
 
@@ -131,6 +131,7 @@ const startConsumer = async () => {
 					{
 						config: config,
 						db: config.db.client,
+						env: env ?? null,
 						// TODO: should handlers be able to push jobs to the queue??
 						//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
 						//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter

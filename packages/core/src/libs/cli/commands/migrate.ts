@@ -23,11 +23,13 @@ const runSyncTasks = async (
 			db: config.db.client,
 			config: config,
 			queue: passthroughQueueAdapter(queueContext),
+			env: null,
 		}),
 		services.sync.syncCollections({
 			db: config.db.client,
 			config: config,
 			queue: passthroughQueueAdapter(queueContext),
+			env: null,
 		}),
 	]);
 
@@ -91,6 +93,7 @@ const migrateCommand = (props?: {
 					db: config.db.client,
 					config: config,
 					queue: passthroughQueueAdapter(queueContext),
+					env: null,
 				},
 				{
 					dryRun: true,
@@ -185,6 +188,7 @@ const migrateCommand = (props?: {
 							db: config.db.client,
 							config: config,
 							queue: passthroughQueueAdapter(queueContext),
+							env: null,
 						},
 						{ dryRun: false },
 					);

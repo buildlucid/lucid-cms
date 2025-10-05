@@ -32,7 +32,10 @@ const nodeAdapter = (options?: {
 				const startTime = process.hrtime();
 				logger.serverStarting("Node");
 
-				const { app, destroy } = await lucid.createApp({ config });
+				const { app, destroy } = await lucid.createApp({
+					config,
+					env: process.env,
+				});
 
 				const server = serve({
 					fetch: app.fetch,
@@ -139,6 +142,7 @@ const startServer = async () => {
 
         const { app, destroy } = await lucid.createApp({
             config: resolved,
+            env: process.env,
         });
         
         const cronJobs = lucid.setupCronJobs({

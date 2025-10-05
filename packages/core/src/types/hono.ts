@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import type {
 	Config,
+	EnvironmentVariables,
 	LocalesResponse,
 	UserPermissionsResponse,
 } from "../types.js";
@@ -32,6 +33,7 @@ export type LucidHonoVariables = {
 	auth: LucidAuth;
 	clientIntegrationAuth: LucidClientIntegrationAuth;
 	locale: LucidLocale;
+	env: EnvironmentVariables | null;
 };
 
 export type LucidHonoGeneric = {

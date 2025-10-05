@@ -55,6 +55,7 @@ const inviteSingleController = factory.createHandlers(
 				db: c.get("config").db.client,
 				config: c.get("config"),
 				queue: c.get("queue"),
+				env: c.get("env"),
 			},
 			{
 				email: body.email,
@@ -80,6 +81,7 @@ const inviteSingleController = factory.createHandlers(
 				db: c.get("config").db.client,
 				config: c.get("config"),
 				queue: c.get("queue"),
+				env: c.get("env"),
 			},
 			{
 				userId: userId.data,

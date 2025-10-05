@@ -3,10 +3,12 @@ import type { Config } from "../../types/config.js";
 import type { KyselyDB } from "../../libs/db/types.js";
 import type { LucidErrorData } from "../../types/errors.js";
 import type { QueueAdapterInstance } from "../../libs/queues/types.js";
+import type { EnvironmentVariables } from "../../libs/adapter/types.js";
 
 export type ServiceContext = {
 	db: KyselyDB;
 	config: Config;
+	env: EnvironmentVariables | null;
 	queue: QueueAdapterInstance;
 };
 export type ServiceProps<T> = {

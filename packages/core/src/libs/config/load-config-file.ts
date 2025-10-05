@@ -4,7 +4,11 @@ import { pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
 import processConfig from "./process-config.js";
 import type { Config } from "../../types/config.js";
-import type { AdapterDefineConfig, RuntimeAdapter } from "../adapter/types.js";
+import type {
+	AdapterDefineConfig,
+	EnvironmentVariables,
+	RuntimeAdapter,
+} from "../adapter/types.js";
 import type { ZodType } from "zod/v4";
 
 export const loadConfigFile = async (props?: {
@@ -14,7 +18,7 @@ export const loadConfigFile = async (props?: {
 	config: Config;
 	adapter?: RuntimeAdapter;
 	envSchema?: ZodType;
-	env: Record<string, unknown> | undefined;
+	env: EnvironmentVariables | undefined;
 }> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
@@ -30,7 +34,7 @@ export const loadConfigFile = async (props?: {
 		envSchema?: ZodType;
 	}>(importPath);
 
-	let env: Record<string, unknown> | undefined;
+	let env: EnvironmentVariables | undefined;
 	if (configModule.adapter?.getEnvVars) {
 		env = await configModule.adapter?.getEnvVars();
 	}

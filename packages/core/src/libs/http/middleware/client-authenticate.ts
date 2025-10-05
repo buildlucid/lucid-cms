@@ -33,6 +33,7 @@ const clientAuthentication = createMiddleware(
 				db: config.db.client,
 				config: config,
 				queue: c.get("queue"),
+				env: c.get("env"),
 			},
 			{
 				apiKey: apiKey,

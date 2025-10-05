@@ -9,7 +9,11 @@ import { LucidAPIError } from "../../utils/errors/index.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
 import logRoute from "./middleware/log-route.js";
-import type { Config, LucidErrorData } from "../../types.js";
+import type {
+	Config,
+	EnvironmentVariables,
+	LucidErrorData,
+} from "../../types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { StatusCode } from "hono/utils/http-status";
 import getQueueAdapter from "../queues/get-adapter.js";
@@ -19,6 +23,7 @@ import getQueueAdapter from "../queues/get-adapter.js";
  */
 const createApp = async (props: {
 	config: Config;
+	env?: EnvironmentVariables;
 	app?: Hono<LucidHonoGeneric>;
 	hono?: {
 		middleware?: Array<
@@ -74,10 +79,8 @@ const createApp = async (props: {
 		// TODO: add rate limiting. Might be adapter specific, due to some being stateless
 		.use(async (c, next) => {
 			c.set("config", props.config);
-			await next();
-		})
-		.use(async (c, next) => {
 			c.set("queue", queueInstance);
+			c.set("env", props.env ?? null);
 			await next();
 		})
 		.route("/", routes)
