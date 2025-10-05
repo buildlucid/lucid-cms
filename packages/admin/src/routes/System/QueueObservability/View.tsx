@@ -5,10 +5,12 @@ import { QueryRow } from "@/components/Groups/Query";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { JobsList } from "@/components/Groups/Content";
+import { useQueryClient } from "@tanstack/solid-query";
 
 const SystemQueueObservabilityRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const queryClient = useQueryClient();
 	const searchParams = useSearchParamsLocation(
 		{
 			filters: {
@@ -59,6 +61,11 @@ const SystemQueueObservabilityRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["jobs.getMultiple"],
+										});
+									}}
 									filters={[
 										{
 											label: T()("job_id"),

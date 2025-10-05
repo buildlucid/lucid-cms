@@ -172,7 +172,7 @@ export const DocumentsList: Component<{
 					},
 				]}
 				state={{
-					isLoading: documents.isLoading || props.state.isLoading,
+					isLoading: documents.isFetching || props.state.isLoading,
 					isSuccess: documents.isSuccess,
 				}}
 				options={{

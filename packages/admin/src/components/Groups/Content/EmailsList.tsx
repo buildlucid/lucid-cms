@@ -126,7 +126,7 @@ export const EmailsList: Component<{
 					},
 				]}
 				state={{
-					isLoading: emails.isLoading,
+					isLoading: emails.isFetching,
 					isSuccess: emails.isSuccess,
 				}}
 				options={{

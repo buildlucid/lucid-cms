@@ -18,12 +18,12 @@ import { useParams } from "@solidjs/router";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
 import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 import mediaStore from "@/store/mediaStore";
-import { useNavigate } from "@solidjs/router";
-import type { MediaFolderResponse } from "@types";
+import { useQueryClient } from "@tanstack/solid-query";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const queryClient = useQueryClient();
 	const searchParams = useSearchParamsLocation(
 		{
 			filters: {
@@ -145,6 +145,14 @@ const MediaListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["media.getMultiple"],
+										});
+										queryClient.invalidateQueries({
+											queryKey: ["mediaFolders.getMultiple"],
+										});
+									}}
 									filters={[
 										{
 											label: T()("title"),

@@ -44,7 +44,7 @@ export const CollectionsList: Component<{
 		>
 			<Grid
 				state={{
-					isLoading: collections.isLoading,
+					isLoading: collections.isFetching,
 					totalItems: collections.data?.data.length || 0,
 					searchParams: props.state.searchParams,
 				}}

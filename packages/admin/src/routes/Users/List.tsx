@@ -7,10 +7,12 @@ import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { UserList } from "@/components/Groups/Content";
+import { useQueryClient } from "@tanstack/solid-query";
 
 const UsersListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const queryClient = useQueryClient();
 	const searchParams = useSearchParamsLocation(
 		{
 			filters: {
@@ -66,6 +68,11 @@ const UsersListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["users.getMultiple"],
+										});
+									}}
 									filters={[
 										{
 											label: T()("first_name"),

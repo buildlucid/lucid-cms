@@ -7,10 +7,12 @@ import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { RolesList } from "@/components/Groups/Content";
+import { useQueryClient } from "@tanstack/solid-query";
 
 const RolesListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const queryClient = useQueryClient();
 	const searchParams = useSearchParamsLocation(
 		{
 			filters: {
@@ -55,6 +57,11 @@ const RolesListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["roles.getMultiple"],
+										});
+									}}
 									filters={[
 										{
 											label: T()("name"),

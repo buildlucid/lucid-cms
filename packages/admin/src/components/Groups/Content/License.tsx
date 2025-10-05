@@ -24,7 +24,7 @@ export const License: Component = () => {
 			state={{
 				isError: status.isError,
 				isSuccess: status.isSuccess,
-				isLoading: status.isLoading,
+				isLoading: status.isFetching,
 			}}
 			options={{
 				padding: "24",

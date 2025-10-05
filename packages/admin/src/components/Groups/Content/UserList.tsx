@@ -117,7 +117,7 @@ export const UserList: Component<{
 					},
 				]}
 				state={{
-					isLoading: users.isLoading,
+					isLoading: users.isFetching,
 					isSuccess: users.isSuccess,
 				}}
 				options={{

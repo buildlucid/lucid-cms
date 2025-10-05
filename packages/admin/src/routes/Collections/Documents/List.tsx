@@ -26,10 +26,12 @@ import { DocumentsList } from "@/components/Groups/Content";
 import Alert from "@/components/Blocks/Alert";
 import { Switch } from "@/components/Groups/Form";
 import type { DocumentVersionType } from "@types";
+import { useQueryClient } from "@tanstack/solid-query";
 
 const CollectionsDocumentsListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const queryClient = useQueryClient();
 	const params = useParams();
 	const navigate = useNavigate();
 	const searchParams = useSearchParamsLocation(undefined, {
@@ -154,6 +156,11 @@ const CollectionsDocumentsListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["documents.getMultiple"],
+										});
+									}}
 									filters={getCollectionFieldFilters().map((field) => {
 										const fieldKey = formatFieldFilters({
 											fieldKey: field.key,
@@ -233,7 +240,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 					collection: collection.data?.data,
 					displayInListing: getCollectionFieldIncludes,
 					searchParams: searchParams,
-					isLoading: collection.isLoading,
+					isLoading: collection.isFetching,
 					collectionIsSuccess: collectionIsSuccess,
 					status: getStatus,
 				}}

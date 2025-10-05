@@ -265,7 +265,7 @@ export const MediaList: Component<{
 				{/* Media */}
 				<Grid
 					state={{
-						isLoading: media.isLoading,
+						isLoading: media.isFetching,
 						totalItems: mediaCount(),
 						searchParams: props.state.searchParams,
 					}}

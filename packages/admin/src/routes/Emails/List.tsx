@@ -7,10 +7,12 @@ import Alert from "@/components/Blocks/Alert";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { EmailsList } from "@/components/Groups/Content";
+import { useQueryClient } from "@tanstack/solid-query";
 
 const EmailListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const queryClient = useQueryClient();
 	const searchParams = useSearchParamsLocation(
 		{
 			filters: {
@@ -80,6 +82,11 @@ const EmailListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["email.getMultiple"],
+										});
+									}}
 									filters={[
 										{
 											label: T()("to"),

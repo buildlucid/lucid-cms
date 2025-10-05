@@ -117,7 +117,7 @@ export const JobsList: Component<{
 					},
 				]}
 				state={{
-					isLoading: jobs.isLoading,
+					isLoading: jobs.isFetching,
 					isSuccess: jobs.isSuccess,
 				}}
 				options={{

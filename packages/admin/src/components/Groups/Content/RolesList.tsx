@@ -98,7 +98,7 @@ export const RolesList: Component<{
 					},
 				]}
 				state={{
-					isLoading: roles.isLoading,
+					isLoading: roles.isFetching,
 					isSuccess: roles.isSuccess,
 				}}
 				options={{

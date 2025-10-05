@@ -1,11 +1,18 @@
 import T from "@/translations";
-import { type Component, Show, type JSX } from "solid-js";
-import { FaSolidXmark } from "solid-icons/fa";
+import {
+	type Component,
+	Show,
+	type JSX,
+	createSignal,
+	createMemo,
+} from "solid-js";
+import { FaSolidXmark, FaSolidArrowsRotate } from "solid-icons/fa";
 import classNames from "classnames";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
 import { PerPage, Filter, Sort } from "@/components/Groups/Query";
+import Button from "@/components/Partials/Button";
 
 interface QueryRowProps {
 	filters?: FilterProps["filters"];
@@ -13,9 +20,32 @@ interface QueryRowProps {
 	perPage?: Array<number>;
 	custom?: JSX.Element;
 	searchParams: ReturnType<typeof useSearchParamsLocation>;
+	onRefresh?: () => void;
 }
 
 export const QueryRow: Component<QueryRowProps> = (props) => {
+	// ----------------------------------------
+	// State
+	const [isRefreshing, setIsRefreshing] = createSignal(false);
+
+	// ----------------------------------------
+	// Memos
+	const showRefreshButton = createMemo(() => {
+		return props.onRefresh !== undefined;
+	});
+
+	// ----------------------------------------
+	// Functions
+	const handleRefresh = () => {
+		setIsRefreshing(true);
+		props.onRefresh?.();
+		setTimeout(() => {
+			setIsRefreshing(false);
+		}, 1000);
+	};
+
+	// ----------------------------------------
+	// Render
 	return (
 		<div class="w-full px-4 md:px-6 pb-4 md:pb-6 flex justify-between">
 			<div class="flex gap-2.5 items-center">
@@ -55,7 +85,23 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					</button>
 				</Show>
 			</div>
-			<div>
+			<div class="flex gap-2.5 items-center">
+				<Show when={showRefreshButton()}>
+					<Button
+						theme="border-outline"
+						size="icon"
+						type="button"
+						onClick={handleRefresh}
+						disabled={isRefreshing()}
+						aria-label={T()("refresh")}
+					>
+						<FaSolidArrowsRotate
+							class={classNames({
+								"animate-spin": isRefreshing(),
+							})}
+						/>
+					</Button>
+				</Show>
 				<Show when={props.perPage !== undefined}>
 					<PerPage
 						options={props.perPage?.length === 0 ? undefined : props.perPage}

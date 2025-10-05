@@ -22,6 +22,7 @@
 	"bricks": "Bricks",
 	"document_not_published": "This document is not published",
 	"collections": "Collections",
+	"refresh": "Refresh",
 	"failed_count": "Failed Count",
 	"last_success_at": "Last Success At",
 	"change_order": "Change Order",
