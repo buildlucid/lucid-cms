@@ -182,6 +182,32 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.execute();
+
+			await db.schema
+				.createTable("lucid_user_logins")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("cascade"),
+				)
+				.addColumn("token_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_user_tokens.id").onDelete("set null"),
+				)
+				.addColumn("auth_method", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("ip_address", adapter.getDataType("varchar", 255))
+				.addColumn("user_agent", adapter.getDataType("text"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
 		},
 		async down(db: Kysely<unknown>) {},
 	};

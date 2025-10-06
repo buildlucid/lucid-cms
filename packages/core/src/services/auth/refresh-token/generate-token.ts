@@ -10,7 +10,7 @@ import type { LucidHonoContext } from "../../../types/hono.js";
 const generateToken = async (
 	c: LucidHonoContext,
 	userId: number,
-): ServiceResponse<undefined> => {
+): ServiceResponse<{ tokenId: number }> => {
 	const clearRes = await clearToken(c);
 	if (clearRes.error) return clearRes;
 
@@ -48,7 +48,7 @@ const generateToken = async (
 				Date.now() + constants.refreshTokenExpiration * 1000, // convert to ms
 			).toISOString(),
 		},
-		returning: ["token"],
+		returning: ["id"],
 		validation: {
 			enabled: true,
 		},
@@ -57,7 +57,9 @@ const generateToken = async (
 
 	return {
 		error: undefined,
-		data: undefined,
+		data: {
+			tokenId: createTokenRes.data.id,
+		},
 	};
 };
 

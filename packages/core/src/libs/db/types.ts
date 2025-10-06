@@ -233,6 +233,16 @@ export interface LucidUserTokens {
 	expiry_date: TimestampMutateable;
 }
 
+export interface LucidUserLogins {
+	id: Generated<number>;
+	user_id: number | null;
+	token_id: number | null;
+	auth_method: string;
+	ip_address: string | null;
+	user_agent: string | null;
+	created_at: TimestampImmutable;
+}
+
 export interface LucidEmails {
 	id: Generated<number>;
 	from_address: string;
@@ -422,6 +432,7 @@ export interface LucidDB {
 	lucid_role_permissions: LucidRolePermissions;
 	lucid_user_roles: LucidUserRoles;
 	lucid_user_tokens: LucidUserTokens;
+	lucid_user_logins: LucidUserLogins;
 	lucid_emails: LucidEmails;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_media_folders: LucidMediaFolders;

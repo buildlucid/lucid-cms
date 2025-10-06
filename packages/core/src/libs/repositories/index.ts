@@ -4,6 +4,7 @@ import type { KyselyDB } from "../db/types.js";
 import type DatabaseAdapter from "../db/adapter.js";
 // Repositories
 import UserTokensRepository from "./user-tokens.js";
+import UserLoginsRepository from "./user-logins.js";
 import EmailsRepository from "./emails.js";
 import LocalesRepository from "./locales.js";
 import MediaRepository from "./media.js";
@@ -35,6 +36,11 @@ class Repository {
 		switch (repository) {
 			case "user-tokens":
 				return new UserTokensRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
+			case "user-logins":
+				return new UserLoginsRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -132,6 +138,7 @@ class Repository {
 
 type RepositoryClassMap = {
 	"user-tokens": UserTokensRepository;
+	"user-logins": UserLoginsRepository;
 	collections: CollectionsRepository;
 	"collection-migrations": CollectionMigrationsRepository;
 	emails: EmailsRepository;

@@ -18,6 +18,7 @@ import settings from "./settings/index.js";
 import license from "./license/index.js";
 import users from "./users/index.js";
 import userTokens from "./user-tokens/index.js";
+import userLogins from "./user-logins/index.js";
 import permissions from "./permissions/index.js";
 import crons from "./crons/index.js";
 import seed from "./seed/index.js";
@@ -33,6 +34,7 @@ const services = {
 	documentBricks,
 	users,
 	userTokens,
+	userLogins,
 	emails,
 	jobs,
 	roles,

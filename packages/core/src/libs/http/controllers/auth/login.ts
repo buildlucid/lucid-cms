@@ -21,7 +21,6 @@ const loginController = factory.createHandlers(
 			"Authenticates a user and sets a refresh and access token as httpOnly cookies.",
 		tags: ["auth"],
 		summary: "Login",
-
 		responses: honoOpenAPIResponse(),
 		parameters: honoOpenAPIParamaters({
 			headers: {
@@ -64,6 +63,41 @@ const loginController = factory.createHandlers(
 		]);
 		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
 		if (accessRes.error) throw new LucidAPIError(accessRes.error);
+
+		const ipAddress =
+			c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
+			c.req.header("cf-connecting-ip") ||
+			c.req.header("x-real-ip") ||
+			null;
+		const userAgent = c.req.header("user-agent") || null;
+
+		const userLoginTrackRes = await serviceWrapper(
+			services.userLogins.createSingle,
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: T("route_login_error_name"),
+					message: T("route_login_error_message"),
+				},
+			},
+		)(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				queue: c.get("queue"),
+				env: c.get("env"),
+			},
+			{
+				userId: userRes.data.id,
+				tokenId: refreshRes.data.tokenId,
+				authMethod: "password",
+				ipAddress: ipAddress,
+				userAgent: userAgent,
+			},
+		);
+		if (userLoginTrackRes.error)
+			throw new LucidAPIError(userLoginTrackRes.error);
 
 		c.status(204);
 		return c.body(null);
