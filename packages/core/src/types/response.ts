@@ -480,3 +480,13 @@ export type PermissionGroupKey =
 export type ClientIntegrationResponse = z.infer<
 	typeof clientIntegrationResponseSchema
 >;
+
+export interface UserLoginResponse {
+	id: number;
+	userId: number | null;
+	tokenId: number | null;
+	authMethod: string;
+	ipAddress: string | null;
+	userAgent: string | null;
+	createdAt: string | null;
+}

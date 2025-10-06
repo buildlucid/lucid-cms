@@ -453,6 +453,59 @@
 			"name": "Users",
 			"item": [
 				{
+					"name": "Logins",
+					"item": [
+						{
+							"name": "Get Multiple",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/v1/users/logins/1",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"logins",
+										"1"
+									],
+									"query": [
+										{
+											"key": "filter[authMethod]",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "filter[ipAddress]",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "sort",
+											"value": "createdAt",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "perPage",
+											"value": "-1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Create Single",
 					"request": {
 						"method": "POST",
@@ -547,7 +600,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/users?filter[firstName:like]=lucid&filter[lastName]=",
+							"raw": "{{BASE_URL}}/api/v1/users",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -559,11 +612,13 @@
 							"query": [
 								{
 									"key": "filter[firstName:like]",
-									"value": "lucid"
+									"value": "lucid",
+									"disabled": true
 								},
 								{
 									"key": "filter[lastName]",
-									"value": ""
+									"value": "",
+									"disabled": true
 								},
 								{
 									"key": "filter[roleIds]",

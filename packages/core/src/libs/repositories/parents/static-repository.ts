@@ -146,20 +146,28 @@ abstract class StaticRepository<
 			V,
 			{
 				select: K[];
+				where?: QueryBuilderWhere<Table>;
 				queryParams: Partial<QueryParams>;
 			}
 		>,
 	) {
 		const exec = await this.executeQuery(
 			async () => {
-				const mainQuery = this.db
+				let mainQuery = this.db
 					.selectFrom(this.tableName)
 					// @ts-expect-error
 					.select(props.select);
 
-				const countQuery = this.db
+				let countQuery = this.db
 					.selectFrom(this.tableName)
 					.select(sql`count(*)`.as("count"));
+
+				if (props.where) {
+					// @ts-expect-error
+					mainQuery = queryBuilder.select(mainQuery, props.where);
+					// @ts-expect-error
+					countQuery = queryBuilder.select(countQuery, props.where);
+				}
 
 				const { main, count } = queryBuilder.main(
 					{

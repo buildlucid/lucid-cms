@@ -4,6 +4,7 @@ import type { BooleanInt } from "../db/types.js";
 // Formatters
 import UsersFormatter from "./users.js";
 import UserPermissionsFormatter from "./user-permissions.js";
+import UserLoginsFormatter from "./user-logins.js";
 import RolesFormatter from "./roles.js";
 import SettingsFormatter from "./settings.js";
 import PermissionsFormatter from "./permissions.js";
@@ -31,6 +32,8 @@ class Formatter {
 				return new UsersFormatter() as FormatterReturnType<T>;
 			case "user-permissions":
 				return new UserPermissionsFormatter() as FormatterReturnType<T>;
+			case "user-logins":
+				return new UserLoginsFormatter() as FormatterReturnType<T>;
 			case "settings":
 				return new SettingsFormatter() as FormatterReturnType<T>;
 			case "roles":
@@ -118,6 +121,7 @@ class Formatter {
 type FormatterClassMap = {
 	users: UsersFormatter;
 	"user-permissions": UserPermissionsFormatter;
+	"user-logins": UserLoginsFormatter;
 	settings: SettingsFormatter;
 	roles: RolesFormatter;
 	permissions: PermissionsFormatter;
