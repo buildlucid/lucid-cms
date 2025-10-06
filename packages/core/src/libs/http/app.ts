@@ -16,6 +16,7 @@ import type {
 } from "../../types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { StatusCode } from "hono/utils/http-status";
+import type { AdapterRuntimeContext } from "../adapter/types.js";
 import getQueueAdapter from "../queues/get-adapter.js";
 
 /**
@@ -23,6 +24,7 @@ import getQueueAdapter from "../queues/get-adapter.js";
  */
 const createApp = async (props: {
 	config: Config;
+	runtimeContext: AdapterRuntimeContext;
 	env?: EnvironmentVariables;
 	app?: Hono<LucidHonoGeneric>;
 	hono?: {
@@ -79,6 +81,7 @@ const createApp = async (props: {
 		// TODO: add rate limiting. Might be adapter specific, due to some being stateless
 		.use(async (c, next) => {
 			c.set("config", props.config);
+			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
 			c.set("env", props.env ?? null);
 			await next();

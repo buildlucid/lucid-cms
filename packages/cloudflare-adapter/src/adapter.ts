@@ -18,6 +18,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { relative } from "node:path";
 import { readFileSync } from "node:fs";
 import type { RuntimeAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
+import runtimeContext from "./runtime-context.js";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
@@ -61,6 +62,9 @@ const cloudflareAdapter = (options?: {
 
 				const { app, destroy } = await lucid.createApp({
 					config,
+					runtimeContext: runtimeContext({
+						dev: true,
+					}),
 					env: platformProxy?.env,
 					app: cloudflareApp,
 					hono: {
@@ -135,6 +139,7 @@ import config from "./${importPath}";
 import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import emailTemplates from './email-templates.json' with { type: 'json' };
+import { runtimeContext } from "@lucidcms/cloudflare-adapter";
 
 export default {
     async fetch(request, env, ctx) {
@@ -145,6 +150,9 @@ export default {
         const { app } = await lucid.createApp({
             config: resolved,
 			env: env,
+			runtimeContext: runtimeContext({
+                dev: false
+            }),
             hono: {
                 middleware: [
                     async (app, config) => {

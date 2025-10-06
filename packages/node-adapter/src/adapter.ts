@@ -9,6 +9,7 @@ import { build } from "rolldown";
 import { writeFile } from "node:fs/promises";
 import nodeExternals from "rollup-plugin-node-externals";
 import type { RuntimeAdapter } from "@lucidcms/core/types";
+import runtimeContext from "./runtime-context.js";
 
 const nodeAdapter = (options?: {
 	server?: {
@@ -34,6 +35,7 @@ const nodeAdapter = (options?: {
 
 				const { app, destroy } = await lucid.createApp({
 					config,
+					runtimeContext: runtimeContext,
 					env: process.env,
 				});
 
@@ -135,6 +137,7 @@ import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import { serve } from '@hono/node-server';
 import cron from 'node-cron';
+import { runtimeContext } from "@lucidcms/node-adapter";
 
 const startServer = async () => {
     try {
@@ -143,6 +146,7 @@ const startServer = async () => {
         const { app, destroy } = await lucid.createApp({
             config: resolved,
             env: process.env,
+            runtimeContext: runtimeContext,
         });
         
         const cronJobs = lucid.setupCronJobs({

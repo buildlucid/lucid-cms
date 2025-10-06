@@ -64,11 +64,7 @@ const loginController = factory.createHandlers(
 		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
 		if (accessRes.error) throw new LucidAPIError(accessRes.error);
 
-		const ipAddress =
-			c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
-			c.req.header("cf-connecting-ip") ||
-			c.req.header("x-real-ip") ||
-			null;
+		const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 		const userAgent = c.req.header("user-agent") || null;
 
 		const userLoginTrackRes = await serviceWrapper(
@@ -92,7 +88,7 @@ const loginController = factory.createHandlers(
 				userId: userRes.data.id,
 				tokenId: refreshRes.data.tokenId,
 				authMethod: "password",
-				ipAddress: ipAddress,
+				ipAddress: connectionInfo.address ?? null,
 				userAgent: userAgent,
 			},
 		);

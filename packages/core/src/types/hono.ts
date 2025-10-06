@@ -6,6 +6,7 @@ import type {
 	UserPermissionsResponse,
 } from "../types.js";
 import type { QueueAdapterInstance } from "../libs/queues/types.js";
+import type { AdapterRuntimeContext } from "../libs/adapter/types.js";
 
 export type LucidAuth = {
 	id: number;
@@ -29,6 +30,7 @@ export type LucidLocale = {
 
 export type LucidHonoVariables = {
 	config: Config;
+	runtimeContext: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	auth: LucidAuth;
 	clientIntegrationAuth: LucidClientIntegrationAuth;
