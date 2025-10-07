@@ -178,7 +178,10 @@ const ViewUserPanel: Component<ViewUserPanelProps> = (props) => {
 						]}
 					/>
 					<Show when={props.id !== undefined}>
-						<SectionHeading title={T()("user_logins")} />
+						<SectionHeading
+							title={T()("user_logins")}
+							description={T()("user_logins_description")}
+						/>
 						<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 							<div class="flex gap-2.5">
 								<Filter
@@ -275,6 +278,8 @@ const ViewUserPanel: Component<ViewUserPanelProps> = (props) => {
 								}}
 								options={{
 									isSelectable: false,
+									padding: "16",
+									totalLoadingRows: 5,
 								}}
 								theme="secondary"
 							>
@@ -288,6 +293,7 @@ const ViewUserPanel: Component<ViewUserPanelProps> = (props) => {
 												selected={selected[i]}
 												options={{
 													isSelectable,
+													padding: "16",
 												}}
 												callbacks={{
 													setSelected: setSelected,

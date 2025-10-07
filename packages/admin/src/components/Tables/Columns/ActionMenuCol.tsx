@@ -6,6 +6,7 @@ import { Td } from "@/components/Groups/Table";
 
 interface ActionMenuColProps {
 	actions: ActionDropdownProps["actions"];
+	padding?: "16" | "24";
 }
 
 const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
@@ -20,6 +21,7 @@ const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
 					}
 					options={{
 						noMinWidth: true,
+						padding: props.padding,
 					}}
 				>
 					<ActionDropdown actions={props.actions} />

@@ -156,9 +156,9 @@ export const Panel: Component<{
 							<Match when={props.state.open}>
 								{/* Header */}
 								<div
-									class={classNames({
-										"mx-4 py-4": props.options?.padding === "16",
-										"mx-4 md:mx-6 py-4 md:py-6 ":
+									class={classNames("border-b border-border", {
+										"mx-4 py-4 mb-4": props.options?.padding === "16",
+										"mx-4 md:mx-6 py-4 md:py-6 mb-4 md:mb-6":
 											props.options?.padding === "24",
 									})}
 								>

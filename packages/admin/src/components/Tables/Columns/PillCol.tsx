@@ -7,6 +7,7 @@ interface PillColProps {
 	theme?: PillProps["theme"];
 	options?: {
 		include?: boolean;
+		padding?: "16" | "24";
 	};
 }
 
@@ -17,6 +18,7 @@ const PillCol: Component<PillColProps> = (props) => {
 		<Td
 			options={{
 				include: props?.options?.include,
+				padding: props?.options?.padding,
 			}}
 		>
 			<Switch>

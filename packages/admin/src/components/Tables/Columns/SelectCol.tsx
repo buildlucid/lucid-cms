@@ -8,6 +8,7 @@ interface SelectColProps {
 	value: boolean;
 	onChange: (_value: boolean) => void;
 	theme?: TableTheme;
+	padding?: "16" | "24";
 }
 
 const SelectCol: Component<SelectColProps> = (props) => {
@@ -19,6 +20,7 @@ const SelectCol: Component<SelectColProps> = (props) => {
 				<Th
 					options={{
 						width: 65,
+						padding: props.padding,
 					}}
 					theme={props.theme}
 				>
@@ -35,6 +37,7 @@ const SelectCol: Component<SelectColProps> = (props) => {
 				<Td
 					options={{
 						width: 65,
+						padding: props.padding,
 					}}
 				>
 					<Checkbox

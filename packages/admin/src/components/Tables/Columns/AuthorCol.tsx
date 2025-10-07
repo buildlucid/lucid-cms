@@ -7,6 +7,7 @@ interface AuthorColProps {
 	user: UserResMeta;
 	options?: {
 		include?: boolean;
+		padding?: "16" | "24";
 	};
 }
 
@@ -17,6 +18,7 @@ const AuthorCol: Component<AuthorColProps> = (props) => {
 		<Td
 			options={{
 				include: props?.options?.include,
+				padding: props?.options?.padding,
 			}}
 		>
 			<Switch>

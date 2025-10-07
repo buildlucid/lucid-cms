@@ -7,6 +7,7 @@ interface TextColProps {
 	options?: {
 		include?: boolean;
 		maxLines?: number;
+		padding?: "16" | "24";
 	};
 }
 
@@ -17,6 +18,7 @@ const TextCol: Component<TextColProps> = (props) => {
 		<Td
 			options={{
 				include: props?.options?.include,
+				padding: props?.options?.padding,
 			}}
 		>
 			<span

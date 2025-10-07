@@ -6,6 +6,7 @@ interface DateColProps {
 	date?: string | null;
 	options?: {
 		include?: boolean;
+		padding?: "16" | "24";
 	};
 }
 
@@ -16,6 +17,7 @@ const DateCol: Component<DateColProps> = (props) => {
 		<Td
 			options={{
 				include: props?.options?.include,
+				padding: props?.options?.padding,
 			}}
 		>
 			<DateText date={props.date} />

@@ -17,7 +17,9 @@ const SectionHeading: Component<SectionHeadingProps> = (props) => {
 					</Match>
 				</Switch>
 
-				{props.description && <p class="mt-2.5">{props.description}</p>}
+				{props.description && (
+					<p class="mt-1 text-sm text-body max-w-2xl">{props.description}</p>
+				)}
 			</div>
 			<div>{props.children}</div>
 		</div>

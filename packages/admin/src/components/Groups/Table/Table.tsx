@@ -33,6 +33,8 @@ interface TableRootProps {
 	};
 	options?: {
 		isSelectable?: boolean;
+		padding?: "16" | "24";
+		totalLoadingRows?: number;
 	};
 	callbacks?: {
 		deleteRows?: (_selected: boolean[]) => Promise<void>;
@@ -174,6 +176,7 @@ export const Table: Component<TableRootProps> = (props) => {
 									value={allSelected()}
 									onChange={onSelectChange}
 									theme={props.theme}
+									padding={props.options?.padding}
 								/>
 							</Show>
 							<Index each={props.head}>
@@ -187,12 +190,19 @@ export const Table: Component<TableRootProps> = (props) => {
 										options={{
 											include: include()[index],
 											sortable: head().sortable,
+											padding: props.options?.padding,
 										}}
 										theme={props.theme}
 									/>
 								)}
 							</Index>
-							<Th classes={"text-right right-0"} theme={props.theme}>
+							<Th
+								classes={"text-right right-0"}
+								theme={props.theme}
+								options={{
+									padding: props.options?.padding,
+								}}
+							>
 								<ColumnToggle
 									columns={includeRows() || []}
 									callbacks={{
@@ -205,36 +215,19 @@ export const Table: Component<TableRootProps> = (props) => {
 					<tbody>
 						<Switch>
 							<Match when={props.state.isLoading}>
-								<LoadingRow
-									columns={props.head.length}
-									isSelectable={isSelectable()}
-									includes={include()}
-								/>
-								<LoadingRow
-									columns={props.head.length}
-									isSelectable={isSelectable()}
-									includes={include()}
-								/>
-								<LoadingRow
-									columns={props.head.length}
-									isSelectable={isSelectable()}
-									includes={include()}
-								/>
-								<LoadingRow
-									columns={props.head.length}
-									isSelectable={isSelectable()}
-									includes={include()}
-								/>
-								<LoadingRow
-									columns={props.head.length}
-									isSelectable={isSelectable()}
-									includes={include()}
-								/>
-								<LoadingRow
-									columns={props.head.length}
-									isSelectable={isSelectable()}
-									includes={include()}
-								/>
+								<Index
+									each={Array.from({
+										length: props.options?.totalLoadingRows ?? 10,
+									})}
+								>
+									{() => (
+										<LoadingRow
+											columns={props.head.length}
+											isSelectable={isSelectable()}
+											includes={include()}
+										/>
+									)}
+								</Index>
 							</Match>
 							<Match when={props.state.isSuccess}>
 								{props.children({

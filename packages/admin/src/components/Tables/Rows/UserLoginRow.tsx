@@ -26,19 +26,32 @@ const UserLoginRow: Component<UserLoginRowProps> = (props) => {
 		>
 			<TextCol
 				text={props.login.authMethod}
-				options={{ include: props?.include[0] }}
+				options={{
+					include: props?.include[0],
+					padding: props.options?.padding,
+				}}
 			/>
 			<TextCol
 				text={props.login.ipAddress || "-"}
-				options={{ include: props?.include[1] }}
+				options={{
+					include: props?.include[1],
+					padding: props.options?.padding,
+				}}
 			/>
 			<TextCol
 				text={props.login.userAgent || "-"}
-				options={{ include: props?.include[2], maxLines: 2 }}
+				options={{
+					include: props?.include[2],
+					maxLines: 2,
+					padding: props.options?.padding,
+				}}
 			/>
 			<DateCol
 				date={props.login.createdAt}
-				options={{ include: props?.include[3] }}
+				options={{
+					include: props?.include[3],
+					padding: props.options?.padding,
+				}}
 			/>
 		</Tr>
 	);

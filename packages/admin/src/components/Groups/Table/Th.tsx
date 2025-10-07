@@ -21,6 +21,7 @@ interface ThProps {
 		include?: boolean;
 		width?: number;
 		sortable?: boolean;
+		padding?: "16" | "24";
 	};
 	theme?: TableTheme;
 	children?: JSXElement;
@@ -51,13 +52,16 @@ export const Th: Component<ThProps> = (props) => {
 	return (
 		<th
 			class={classNames(
-				"text-left first:pl-4 md:first:pl-6 relative last:pr-4 md:last:pr-6 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
+				"text-left relative px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 				{
 					"hover:bg-card-base": props.options?.sortable,
 					hidden: props.options?.include === false,
 					"bg-background-base":
 						props.theme === "primary" || props.theme === undefined,
 					"bg-card-base": props.theme === "secondary",
+					"first:pl-4 md:first:pl-6 last:pr-4 md:last:pr-6":
+						props.options?.padding === "24" ||
+						props.options?.padding === undefined,
 				},
 				props?.classes,
 			)}
