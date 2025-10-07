@@ -4,7 +4,7 @@ import {
 	createSignal,
 	type Accessor,
 } from "solid-js";
-import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
+import { useLocation, useSearchParams } from "@solidjs/router";
 
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
@@ -62,7 +62,6 @@ const useSearchParamsLocation = (
 	options?: SearchParamsConfig,
 ): SearchParamsResponse => {
 	const location = useLocation();
-	const navigate = useNavigate();
 	const [, setSearchParams] = useSearchParams();
 
 	const [getSchema, setSchema] = createSignal(schemaDefaults);
@@ -201,7 +200,7 @@ const useSearchParamsLocation = (
 			}
 		}
 
-		// Set search params without remounting route; remove stale keys
+		// Set search params
 		const prev = new URLSearchParams(location.search);
 		const nextObj: Record<string, string | undefined> = {};
 		for (const [k, v] of searchParams.entries()) nextObj[k] = v;
