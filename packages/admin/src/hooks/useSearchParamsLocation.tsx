@@ -4,7 +4,7 @@ import {
 	createSignal,
 	type Accessor,
 } from "solid-js";
-import { useLocation, useNavigate } from "@solidjs/router";
+import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
@@ -63,6 +63,7 @@ const useSearchParamsLocation = (
 ): SearchParamsResponse => {
 	const location = useLocation();
 	const navigate = useNavigate();
+	const [, setSearchParams] = useSearchParams();
 
 	const [getSchema, setSchema] = createSignal(schemaDefaults);
 
@@ -200,12 +201,13 @@ const useSearchParamsLocation = (
 			}
 		}
 
-		// Set search params
-		if (searchParams.toString())
-			navigate(`?${searchParams.toString()}`, {
-				scroll: false,
-			});
-		else navigate(location.pathname, { scroll: false });
+		// Set search params without remounting route; remove stale keys
+		const prev = new URLSearchParams(location.search);
+		const nextObj: Record<string, string | undefined> = {};
+		for (const [k, v] of searchParams.entries()) nextObj[k] = v;
+		for (const [k] of prev.entries())
+			if (!searchParams.has(k)) nextObj[k] = undefined;
+		setSearchParams(nextObj, { scroll: false });
 	};
 	const setStateFromLocation = (searchParams: URLSearchParams) => {
 		// on location change - update filters and sorts based on search params
