@@ -5,12 +5,14 @@ import SelectCol from "@/components/Tables/Columns/SelectCol";
 import ActionMenuCol from "@/components/Tables/Columns/ActionMenuCol";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import classNames from "classnames";
+import type { TableTheme } from "./Table";
 
 interface TrProps extends TableRowProps {
 	actions?: ActionDropdownProps["actions"];
 	onClick?: () => void;
 	current?: boolean;
 	children: JSXElement;
+	theme?: TableTheme;
 }
 
 // Table Row
@@ -55,15 +57,14 @@ export const Tr: Component<TrProps> = (props) => {
 	// Render
 	return (
 		<tr
-			class={classNames(
-				"bg-background-base hover:bg-background-hover duration-200 transition-colors",
-				{
-					"cursor-pointer":
-						firstPermittedAction() !== undefined || props.onClick,
-					"after:border-l-4 after:border-primary-base after:left-0 after:top-0 after:bottom-0 after:absolute relative":
-						props.current,
-				},
-			)}
+			class={classNames("duration-200 transition-colors", {
+				"cursor-pointer": firstPermittedAction() !== undefined || props.onClick,
+				"after:border-l-4 after:border-primary-base after:left-0 after:top-0 after:bottom-0 after:absolute relative":
+					props.current,
+				"bg-background-base hover:bg-background-hover":
+					props.theme === "primary" || props.theme === undefined,
+				"bg-card-base hover:bg-card-hover": props.theme === "secondary",
+			})}
 			onClick={onClickHandler}
 			onKeyDown={(e) => {
 				if (e.key === "Enter") {

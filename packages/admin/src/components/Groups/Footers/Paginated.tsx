@@ -14,6 +14,7 @@ export const Paginated: Component<{
 	};
 	options?: {
 		padding?: "16" | "24";
+		embedded?: boolean;
 	};
 }> = (props) => {
 	// ----------------------------------------
@@ -23,6 +24,7 @@ export const Paginated: Component<{
 			class={classNames("border-t border-border", {
 				"p-4 md:p-6": props.options?.padding === "24",
 				"p-4": props.options?.padding === "16",
+				"p-0 mt-4 border-t-0": props.options?.embedded,
 			})}
 		>
 			<Pagination

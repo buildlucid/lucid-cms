@@ -1,11 +1,13 @@
 import { type Component, Switch, Match } from "solid-js";
 import { Td, Th } from "@/components/Groups/Table";
 import { Checkbox } from "@/components/Groups/Form";
+import type { TableTheme } from "@/components/Groups/Table/Table";
 
 interface SelectColProps {
 	type?: "th" | "td";
 	value: boolean;
 	onChange: (_value: boolean) => void;
+	theme?: TableTheme;
 }
 
 const SelectCol: Component<SelectColProps> = (props) => {
@@ -18,6 +20,7 @@ const SelectCol: Component<SelectColProps> = (props) => {
 					options={{
 						width: 65,
 					}}
+					theme={props.theme}
 				>
 					<Checkbox
 						value={props.value}

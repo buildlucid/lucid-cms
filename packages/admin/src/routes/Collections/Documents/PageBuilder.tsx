@@ -1,12 +1,5 @@
 import T from "@/translations";
-import {
-	type Component,
-	Switch,
-	Match,
-	Show,
-	createEffect,
-	on,
-} from "solid-js";
+import { type Component, Switch, Match, createEffect, on } from "solid-js";
 import {
 	Header,
 	ActionBar,

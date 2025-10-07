@@ -8,6 +8,7 @@ import {
 } from "solid-js";
 import { FaSolidCaretUp, FaSolidMinus } from "solid-icons/fa";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { TableTheme } from "./Table";
 
 interface ThProps {
 	key?: string;
@@ -21,6 +22,7 @@ interface ThProps {
 		width?: number;
 		sortable?: boolean;
 	};
+	theme?: TableTheme;
 	children?: JSXElement;
 }
 
@@ -49,10 +51,13 @@ export const Th: Component<ThProps> = (props) => {
 	return (
 		<th
 			class={classNames(
-				"text-left first:pl-4 md:first:pl-6 relative last:pr-4 md:last:pr-6 px-4 bg-background-base bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
+				"text-left first:pl-4 md:first:pl-6 relative last:pr-4 md:last:pr-6 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 				{
 					"hover:bg-card-base": props.options?.sortable,
 					hidden: props.options?.include === false,
+					"bg-background-base":
+						props.theme === "primary" || props.theme === undefined,
+					"bg-card-base": props.theme === "secondary",
 				},
 				props?.classes,
 			)}

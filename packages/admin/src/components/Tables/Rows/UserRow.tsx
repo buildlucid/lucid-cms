@@ -13,7 +13,7 @@ interface UserRowProps extends TableRowProps {
 	user: UserResponse;
 	include: boolean[];
 	rowTarget: ReturnType<
-		typeof useRowTarget<"update" | "delete" | "passwordReset">
+		typeof useRowTarget<"view" | "update" | "delete" | "passwordReset">
 	>;
 }
 
@@ -34,6 +34,15 @@ const UserRow: Component<UserRowProps> = (props) => {
 			index={props.index}
 			selected={props.selected}
 			actions={[
+				{
+					label: T()("view"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("view", true);
+					},
+					permission: true,
+				},
 				{
 					label: T()("edit"),
 					type: "button",

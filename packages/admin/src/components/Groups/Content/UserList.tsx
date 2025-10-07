@@ -12,6 +12,7 @@ import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
+import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
 import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import DeleteUser from "@/components/Modals/User/DeleteUser";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
@@ -28,6 +29,7 @@ export const UserList: Component<{
 	// Hooks
 	const rowTarget = useRowTarget({
 		triggers: {
+			view: false,
 			update: false,
 			delete: false,
 			passwordReset: false,
@@ -144,6 +146,15 @@ export const UserList: Component<{
 					</Index>
 				)}
 			</Table>
+			<ViewUserPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().view,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("view", state);
+					},
+				}}
+			/>
 			<UpdateUserPanel
 				id={rowTarget.getTargetId}
 				state={{

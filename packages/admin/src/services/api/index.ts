@@ -1,6 +1,7 @@
 import auth from "./auth";
 import account from "./account";
 import users from "./users";
+import userLogins from "./user-logins";
 import roles from "./roles";
 import permissions from "./permissions";
 import media from "./media";
@@ -18,6 +19,7 @@ const exportObject: {
 	auth: typeof auth;
 	account: typeof account;
 	users: typeof users;
+	userLogins: typeof userLogins;
 	roles: typeof roles;
 	permissions: typeof permissions;
 	media: typeof media;
@@ -34,6 +36,7 @@ const exportObject: {
 	auth,
 	account,
 	users,
+	userLogins,
 	roles,
 	permissions,
 	media,

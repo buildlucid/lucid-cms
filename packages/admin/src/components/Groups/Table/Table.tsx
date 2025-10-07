@@ -14,6 +14,8 @@ import { SelectAction, Th, ColumnToggle } from "@/components/Groups/Table";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
 
+export type TableTheme = "primary" | "secondary";
+
 interface TableRootProps {
 	key: string;
 	rows: number;
@@ -35,6 +37,7 @@ interface TableRootProps {
 	callbacks?: {
 		deleteRows?: (_selected: boolean[]) => Promise<void>;
 	};
+	theme?: TableTheme;
 	children: (_props: {
 		include: boolean[];
 		isSelectable: boolean;
@@ -170,6 +173,7 @@ export const Table: Component<TableRootProps> = (props) => {
 									type="th"
 									value={allSelected()}
 									onChange={onSelectChange}
+									theme={props.theme}
 								/>
 							</Show>
 							<Index each={props.head}>
@@ -184,10 +188,11 @@ export const Table: Component<TableRootProps> = (props) => {
 											include: include()[index],
 											sortable: head().sortable,
 										}}
+										theme={props.theme}
 									/>
 								)}
 							</Index>
-							<Th classes={"text-right right-0 hover:bg-background-base"}>
+							<Th classes={"text-right right-0"} theme={props.theme}>
 								<ColumnToggle
 									columns={includeRows() || []}
 									callbacks={{

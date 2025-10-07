@@ -25,5 +25,15 @@ export default class UserLoginsRepository extends StaticRepository<"lucid_user_l
 		user_agent: this.dbAdapter.getDataType("text"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
-	queryConfig = undefined;
+	queryConfig = {
+		tableKeys: {
+			filters: {
+				authMethod: "auth_method",
+				ipAddress: "ip_address",
+			},
+			sorts: {
+				createdAt: "created_at",
+			},
+		},
+	} as const;
 }
