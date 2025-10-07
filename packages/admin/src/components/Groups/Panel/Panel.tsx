@@ -158,7 +158,7 @@ export const Panel: Component<{
 								<div
 									class={classNames("border-b border-border", {
 										"mx-4 py-4 mb-4": props.options?.padding === "16",
-										"mx-4 md:mx-6 py-4 md:py-6 mb-4 md:mb-6":
+										"mx-4 md:mx-6 py-4 md:pt-6 mb-4":
 											props.options?.padding === "24",
 									})}
 								>
