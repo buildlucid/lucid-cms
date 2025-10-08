@@ -254,6 +254,25 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	restoreMultiple: {
+		body: z.object({
+			ids: z.array(z.number()).meta({
+				description: "An array of document IDs you wish to restore",
+				example: [1, 2, 3],
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	getMultipleRevisions: {
 		body: undefined,
 		query: {
@@ -321,6 +340,12 @@ export const controllerSchemas = {
 					"filter[updatedAt]": queryString.schema.filter(false, {
 						example: "2025-03-15T09:22:10Z",
 					}),
+					"filter[isDeleted]": queryString.schema.filter(true, {
+						example: "true",
+					}),
+					"filter[deletedBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
 					"filter[_customFieldKey]": queryString.schema.filter(true, {
 						description:
 							"Prefix custom field keys with an underscore to filter by them",
@@ -370,6 +395,8 @@ export const controllerSchemas = {
 								.optional(),
 							createdAt: queryFormatted.schema.filters.single.optional(),
 							updatedAt: queryFormatted.schema.filters.single.optional(),
+							isDeleted: queryFormatted.schema.filters.single.optional(),
+							deletedBy: queryFormatted.schema.filters.union.optional(),
 						}),
 					])
 					.optional(),

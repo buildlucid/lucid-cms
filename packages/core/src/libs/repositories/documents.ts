@@ -355,12 +355,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				"ub_user.last_name as ub_user_last_name",
 				"ub_user.username as ub_user_username",
 			])
-			.where(`${dynamicConfig.tableName}.id`, "=", props.id)
-			.where(
-				`${dynamicConfig.tableName}.is_deleted`,
-				"=",
-				this.dbAdapter.getDefault("boolean", "false"),
-			);
+			.where(`${dynamicConfig.tableName}.id`, "=", props.id);
 
 		const exec = await this.executeQuery(
 			() =>
@@ -476,11 +471,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${props.tables.versions}.id as version_id`,
 					`${props.tables.versions}.type as version_type`,
 				])
-				.where(
-					`${dynamicConfig.tableName}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
-				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
@@ -496,11 +486,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					sql`count(distinct ${sql.ref(`${dynamicConfig.tableName}.id`)})`.as(
 						"count",
 					),
-				)
-				.where(
-					`${dynamicConfig.tableName}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
 				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
@@ -637,11 +622,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${props.tables.versions}.id as version_id`,
 					`${props.tables.versions}.type as version_type`,
 				])
-				.where(
-					`${dynamicConfig.tableName}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
-				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
@@ -706,12 +686,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		const unionQueries = props.tables.map((table) => {
 			return this.db
 				.selectFrom(table)
-				.select([`${table}.id`, `${table}.collection_key`])
-				.where(
-					`${table}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
-				);
+				.select([`${table}.id`, `${table}.collection_key`]);
 		});
 
 		let query = unionQueries[0];

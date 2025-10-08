@@ -7,6 +7,7 @@ import deleteSingle from "./delete-single.js";
 import updateMultipleRoles from "./update-multiple-roles.js";
 import updateSingle from "./update-single.js";
 import getMultipleFieldMeta from "./get-multiple-field-meta.js";
+import restoreMultiple from "./restore-multiple.js";
 
 export default {
 	checks,
@@ -18,4 +19,5 @@ export default {
 	updateMultipleRoles,
 	updateSingle,
 	getMultipleFieldMeta,
+	restoreMultiple,
 };

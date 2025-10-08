@@ -48,6 +48,8 @@ const groupDocumentFilters = (
 		"updatedBy",
 		"createdAt",
 		"updatedAt",
+		"isDeleted",
+		"deletedBy",
 	];
 
 	const documentFilters: QueryParamFilters = {};

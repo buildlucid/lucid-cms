@@ -78,6 +78,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				username: "lucid_users.username",
 				roleIds: "lucid_user_roles.role_id",
 				id: "lucid_users.id",
+				isDeleted: "lucid_users.is_deleted",
+				deletedBy: "lucid_users.deleted_by",
 			},
 			sorts: {
 				createdAt: "lucid_users.created_at",
@@ -145,6 +147,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					.as("roles"),
 			])
 			.where("id", "=", props.id)
+			// TODO: services should determin if this should be included on a case by case basis
 			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
@@ -296,11 +299,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 					)
-					.where(
-						"lucid_users.is_deleted",
-						"=",
-						this.dbAdapter.getDefault("boolean", "false"),
-					)
 					.groupBy("lucid_users.id");
 
 				const countQuery = this.db
@@ -308,11 +306,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					.select(sql`count(distinct lucid_users.id)`.as("count"))
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
-					)
-					.where(
-						"lucid_users.is_deleted",
-						"=",
-						this.dbAdapter.getDefault("boolean", "false"),
 					);
 
 				const { main, count } = queryBuilder.main(

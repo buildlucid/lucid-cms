@@ -184,6 +184,12 @@ export const controllerSchemas = {
 					"filter[id]": queryString.schema.filter(true, {
 						example: "1,2",
 					}),
+					"filter[isDeleted]": queryString.schema.filter(false, {
+						example: "true",
+					}),
+					"filter[deletedBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,firstName,lastName,email,username",
 					),
@@ -201,6 +207,8 @@ export const controllerSchemas = {
 						username: queryFormatted.schema.filters.single.optional(),
 						roleIds: queryFormatted.schema.filters.union.optional(),
 						id: queryFormatted.schema.filters.union.optional(),
+						isDeleted: queryFormatted.schema.filters.single.optional(),
+						deletedBy: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
 				sort: z
@@ -226,6 +234,20 @@ export const controllerSchemas = {
 		params: undefined,
 		body: undefined,
 		response: z.array(userResponseSchema),
+	} satisfies ControllerSchema,
+	restoreMultiple: {
+		body: z.object({
+			ids: z.array(z.number()).meta({
+				description: "An array of user IDs you wish to restore",
+				example: [1, 2, 3],
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
 	} satisfies ControllerSchema,
 	deleteSingle: {
 		body: undefined,

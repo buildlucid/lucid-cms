@@ -248,6 +248,20 @@ export const controllerSchemas = {
 		params: undefined,
 		response: undefined,
 	} satisfies ControllerSchema,
+	restoreMultiple: {
+		body: z.object({
+			ids: z.array(z.number()).meta({
+				description: "The media IDs",
+				example: [1, 2, 3],
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 	moveFolder: {
 		body: z.object({
 			folderId: z.number().nullable().meta({

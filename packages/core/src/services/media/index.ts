@@ -12,6 +12,7 @@ import getMultipleFieldMeta from "./get-multiple-field-meta.js";
 import processMedia from "./process-media.js";
 import moveFolder from "./move-folder.js";
 import deleteBatch from "./delete-batch.js";
+import restoreMultiple from "./restore-multiple.js";
 
 export default {
 	checks,
@@ -28,4 +29,5 @@ export default {
 	processMedia,
 	moveFolder,
 	deleteBatch,
+	restoreMultiple,
 };
