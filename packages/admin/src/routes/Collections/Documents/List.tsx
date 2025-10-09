@@ -39,6 +39,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 	});
 	const [getStatus, setStatus] =
 		createSignal<Exclude<DocumentVersionType, "revision">>("draft");
+	const [showingDeleted, setShowingDeleted] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -156,6 +157,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									showingDeleted={showingDeleted}
+									setShowingDeleted={setShowingDeleted}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
 											queryKey: ["documents.getMultiple"],
@@ -243,6 +246,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 					isLoading: collection.isFetching,
 					collectionIsSuccess: collectionIsSuccess,
 					status: getStatus,
+					showingDeleted: showingDeleted,
 				}}
 			/>
 		</Wrapper>

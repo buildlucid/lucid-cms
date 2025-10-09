@@ -30,6 +30,7 @@ const UserSearchSelect: Component<UserSearchSelectProps> = (props) => {
 		queryParams: {
 			filters: {
 				username: getSearchQuery() !== "" ? getSearchQuery : undefined,
+				isDeleted: 0,
 			},
 		},
 	});

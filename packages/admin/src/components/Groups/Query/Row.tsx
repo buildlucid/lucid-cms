@@ -3,6 +3,7 @@ import {
 	type Component,
 	Show,
 	type JSX,
+	type Accessor,
 	createSignal,
 	createMemo,
 } from "solid-js";
@@ -13,6 +14,7 @@ import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
 import { PerPage, Filter, Sort } from "@/components/Groups/Query";
 import Button from "@/components/Partials/Button";
+import { CheckboxButton } from "@/components/Groups/Form";
 
 interface QueryRowProps {
 	filters?: FilterProps["filters"];
@@ -21,6 +23,8 @@ interface QueryRowProps {
 	custom?: JSX.Element;
 	searchParams: ReturnType<typeof useSearchParamsLocation>;
 	onRefresh?: () => void;
+	showingDeleted?: Accessor<boolean>;
+	setShowingDeleted?: (value: boolean) => void;
 }
 
 export const QueryRow: Component<QueryRowProps> = (props) => {
@@ -63,6 +67,25 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					/>
 				</Show>
 				<Show when={props.custom !== undefined}>{props.custom}</Show>
+				<Show
+					when={
+						props.showingDeleted !== undefined &&
+						props.setShowingDeleted !== undefined
+					}
+				>
+					<CheckboxButton
+						id="isDeleted"
+						value={props.showingDeleted?.() ?? false}
+						onChange={(value) => {
+							props.setShowingDeleted?.(value);
+						}}
+						name={"isDeleted"}
+						copy={{
+							label: T()("show_deleted"),
+						}}
+						theme="error"
+					/>
+				</Show>
 				<Show
 					when={
 						props.filters !== undefined &&

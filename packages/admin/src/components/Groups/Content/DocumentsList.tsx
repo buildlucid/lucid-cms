@@ -38,6 +38,7 @@ export const DocumentsList: Component<{
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		status: Accessor<Exclude<DocumentVersionType, "revision">>;
+		showingDeleted: Accessor<boolean>;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -83,6 +84,9 @@ export const DocumentsList: Component<{
 				value: props.state.collection?.details.singularName,
 			}) || T()("collection"),
 	);
+	const isDeletedFilter = createMemo(() =>
+		props.state.showingDeleted() ? 1 : 0,
+	);
 
 	// ----------------------------------
 	// Queries
@@ -92,6 +96,9 @@ export const DocumentsList: Component<{
 			location: {
 				collectionKey: collectionKey,
 				versionType: props.state.status,
+			},
+			filters: {
+				isDeleted: isDeletedFilter,
 			},
 		},
 		enabled: () => documentQueryEnabled(),

@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, Index } from "solid-js";
+import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import {
 	FaSolidT,
@@ -23,6 +23,7 @@ export const UserList: Component<{
 	state: {
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		setOpenCreateUserPanel: (state: boolean) => void;
+		showingDeleted: Accessor<boolean>;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -37,10 +38,19 @@ export const UserList: Component<{
 	});
 
 	// ----------------------------------
+	// Memos
+	const isDeletedFilter = createMemo(() =>
+		props.state.showingDeleted() ? 1 : 0,
+	);
+
+	// ----------------------------------
 	// Queries
 	const users = api.users.useGetMultiple({
 		queryParams: {
 			queryString: props.state?.searchParams.getQueryString,
+			filters: {
+				isDeleted: isDeletedFilter,
+			},
 		},
 		enabled: () => props.state?.searchParams.getSettled(),
 	});

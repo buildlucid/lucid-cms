@@ -16,7 +16,6 @@ import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaP
 import { QueryRow } from "@/components/Groups/Query";
 import { useParams } from "@solidjs/router";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
-import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 import mediaStore from "@/store/mediaStore";
 import { useQueryClient } from "@tanstack/solid-query";
 
@@ -145,6 +144,8 @@ const MediaListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									showingDeleted={showingDeleted}
+									setShowingDeleted={setShowingDeleted}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
 											queryKey: ["media.getMultiple"],
@@ -240,20 +241,6 @@ const MediaListRoute: Component = () => {
 											key: "updatedAt",
 										},
 									]}
-									custom={
-										<CheckboxButton
-											id="isDeleted"
-											value={showingDeleted()}
-											onChange={(value) => {
-												setShowingDeleted(value);
-											}}
-											name={"isDeleted"}
-											copy={{
-												label: T()("show_deleted"),
-											}}
-											theme="error"
-										/>
-									}
 									perPage={[10, 20, 40]}
 								/>
 							),

@@ -42,6 +42,7 @@ const UsersListRoute: Component = () => {
 		},
 	);
 	const [openCreateUserPanel, setOpenCreateUserPanel] = createSignal(false);
+	const [showingDeleted, setShowingDeleted] = createSignal(false);
 
 	// ----------------------------------
 	// Render
@@ -68,6 +69,8 @@ const UsersListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
+									showingDeleted={showingDeleted}
+									setShowingDeleted={setShowingDeleted}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
 											queryKey: ["users.getMultiple"],
@@ -113,6 +116,7 @@ const UsersListRoute: Component = () => {
 				state={{
 					searchParams: searchParams,
 					setOpenCreateUserPanel: setOpenCreateUserPanel,
+					showingDeleted: showingDeleted,
 				}}
 			/>
 			<CreateUserPanel
