@@ -415,6 +415,8 @@
 	"delete_processed_images_toast_message": "Processed images have been deleted",
 	"media_update_toast_title": "Media updated",
 	"media_update_toast_message": "Media has been updated",
+	"media_restore_toast_title": "Media Restored",
+	"media_restore_toast_message": "The selected media has been restored.",
 	"media_create_toast_title": "Media created",
 	"media_create_toast_message": "Media has been created",
 	"media_deleted_toast_title": "Media deleted",

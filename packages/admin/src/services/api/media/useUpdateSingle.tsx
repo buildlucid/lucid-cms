@@ -41,10 +41,6 @@ export const updateSingleReq = (params: Params) => {
 interface UseUpdateSingleProps {
 	onSuccess?: () => void;
 	onError?: () => void;
-	toast?: {
-		title?: TranslationKeys;
-		message?: TranslationKeys;
-	};
 }
 
 const useUpdateSingle = (props?: UseUpdateSingleProps) => {
@@ -53,8 +49,8 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: updateSingleReq,
 		getSuccessToast: () => ({
-			title: T()(props?.toast?.title ?? "media_update_toast_title"),
-			message: T()(props?.toast?.message ?? "media_update_toast_message"),
+			title: T()("media_update_toast_title"),
+			message: T()("media_update_toast_message"),
 		}),
 		invalidates: [
 			"media.getMultiple",

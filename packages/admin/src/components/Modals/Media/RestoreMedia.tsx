@@ -14,13 +14,9 @@ interface RestoreMediaProps {
 const RestoreMedia: Component<RestoreMediaProps> = (props) => {
 	// ----------------------------------------
 	// Mutations
-	const restoreMedia = api.media.useUpdateSingle({
+	const restoreMedia = api.media.useRestore({
 		onSuccess: () => {
 			props.state.setOpen(false);
-		},
-		toast: {
-			title: "restore_media_toast_title",
-			message: "restore_media_toast_message",
 		},
 	});
 
@@ -45,9 +41,8 @@ const RestoreMedia: Component<RestoreMediaProps> = (props) => {
 					const id = props.id();
 					if (!id) return console.error("No id provided");
 					restoreMedia.action.mutate({
-						id: id,
 						body: {
-							isDeleted: false,
+							ids: [id],
 						},
 					});
 				},

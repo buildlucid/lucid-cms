@@ -3,7 +3,7 @@ import useGetSingle from "./useGetSingle";
 import useUpdateSingle from "./useUpdateSingle";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteSingle from "./useDeleteSingle";
-import useRestore from "./userRestore";
+import useRestore from "./useRestore";
 
 const exportObject: {
 	useGetMultiple: typeof useGetMultiple;
