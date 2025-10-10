@@ -3,6 +3,7 @@ import Formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types/response.js";
+import type { QueryBuilderWhere } from "../../libs/query-builder/index.js";
 
 export interface ServiceData {
 	userId: number;
@@ -12,6 +13,8 @@ const getSingle: ServiceFn<
 	[
 		{
 			userId: number;
+			/** When true, it will only return users that are active and not soft-deleted  */
+			activeUser?: boolean;
 		},
 	],
 	UserResponse
@@ -19,8 +22,23 @@ const getSingle: ServiceFn<
 	const Users = Repository.get("users", context.db, context.config.db);
 	const UsersFormatter = Formatter.get("users");
 
-	const userRes = await Users.selectSingleById({
-		id: data.userId,
+	const userQueryWhere: QueryBuilderWhere<"lucid_users"> = [
+		{
+			key: "id",
+			operator: "=",
+			value: data.userId,
+		},
+	];
+	if (data.activeUser) {
+		userQueryWhere.push({
+			key: "is_deleted",
+			operator: "=",
+			value: context.config.db.getDefault("boolean", "false"),
+		});
+	}
+
+	const userRes = await Users.selectSinglePreset({
+		where: userQueryWhere,
 		validation: {
 			enabled: true,
 			defaultError: {

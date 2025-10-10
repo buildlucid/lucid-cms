@@ -50,6 +50,14 @@ export const userResponseSchema = z.object({
 		description: "The user's roles",
 	}),
 	permissions: z.array(userResponsePermissionSchema),
+	isDeleted: z.boolean().meta({
+		description: "If the user is soft-deleted or not",
+		example: true,
+	}),
+	isDeletedAt: z.string().nullable().meta({
+		description: "The date the user was deleted",
+		example: "2021-06-10T20:00:00.000Z",
+	}),
 	createdAt: z.string().nullable().meta({
 		description: "The date the user was added",
 		example: "2021-06-10T20:00:00.000Z",
@@ -102,7 +110,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: userResponseSchema,
+		response: undefined,
 	} satisfies ControllerSchema,
 	updateSingle: {
 		body: z.object({

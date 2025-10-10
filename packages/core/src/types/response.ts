@@ -31,6 +31,8 @@ export interface UserResponse {
 	roles?: UserPermissionsResponse["roles"];
 	permissions?: UserPermissionsResponse["permissions"];
 
+	isDeleted: boolean;
+	deletedAt?: string | null;
 	createdAt: string | null;
 	updatedAt?: string | null;
 }

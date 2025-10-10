@@ -1,7 +1,9 @@
 import z from "zod/v4";
 import { sql } from "kysely";
 import StaticRepository from "./parents/static-repository.js";
-import queryBuilder from "../query-builder/index.js";
+import queryBuilder, {
+	type QueryBuilderWhere,
+} from "../query-builder/index.js";
 import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
 import type { Select, KyselyDB } from "../db/types.js";
@@ -100,55 +102,54 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 	// ----------------------------------------
 	// queries
-	async selectSingleById<V extends boolean = false>(
+	async selectSinglePreset<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
-				id: number;
+				where: QueryBuilderWhere<"lucid_users">;
 			}
 		>,
 	) {
-		const query = this.db
-			.selectFrom("lucid_users")
-			.select((eb) => [
-				"email",
-				"first_name",
-				"last_name",
-				"id",
-				"created_at",
-				"updated_at",
-				"username",
-				"super_admin",
-				"triggered_password_reset",
-				this.dbAdapter
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_user_roles")
-							.innerJoin(
-								"lucid_roles",
-								"lucid_roles.id",
-								"lucid_user_roles.role_id",
-							)
-							.select((eb) => [
-								"lucid_roles.id",
-								"lucid_roles.name",
-								"lucid_roles.description",
-								this.dbAdapter
-									.jsonArrayFrom(
-										eb
-											.selectFrom("lucid_role_permissions")
-											.select(["permission"])
-											.whereRef("role_id", "=", "lucid_roles.id"),
-									)
-									.as("permissions"),
-							])
-							.whereRef("user_id", "=", "lucid_users.id"),
-					)
-					.as("roles"),
-			])
-			.where("id", "=", props.id)
-			// TODO: services should determin if this should be included on a case by case basis
-			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
+		let query = this.db.selectFrom("lucid_users").select((eb) => [
+			"email",
+			"first_name",
+			"last_name",
+			"id",
+			"created_at",
+			"updated_at",
+			"username",
+			"super_admin",
+			"triggered_password_reset",
+			"is_deleted",
+			"is_deleted_at",
+			this.dbAdapter
+				.jsonArrayFrom(
+					eb
+						.selectFrom("lucid_user_roles")
+						.innerJoin(
+							"lucid_roles",
+							"lucid_roles.id",
+							"lucid_user_roles.role_id",
+						)
+						.select((eb) => [
+							"lucid_roles.id",
+							"lucid_roles.name",
+							"lucid_roles.description",
+							this.dbAdapter
+								.jsonArrayFrom(
+									eb
+										.selectFrom("lucid_role_permissions")
+										.select(["permission"])
+										.whereRef("role_id", "=", "lucid_roles.id"),
+								)
+								.as("permissions"),
+						])
+						.whereRef("user_id", "=", "lucid_users.id"),
+				)
+				.as("roles"),
+		]);
+
+		query = queryBuilder.select(query, props.where);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -191,6 +192,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"updated_at",
 				"username",
 				"super_admin",
+				"is_deleted",
+				"is_deleted_at",
 			])
 			.where("id", "in", props.ids)
 			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
@@ -278,6 +281,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						"lucid_users.updated_at",
 						"lucid_users.username",
 						"lucid_users.super_admin",
+						"lucid_users.is_deleted",
+						"lucid_users.is_deleted_at",
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb

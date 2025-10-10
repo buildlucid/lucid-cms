@@ -24,9 +24,6 @@ const inviteSingleController = factory.createHandlers(
 		description: "Invite a single user.",
 		tags: ["users"],
 		summary: "Invite User",
-		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
-		}),
 		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
@@ -69,32 +66,8 @@ const inviteSingleController = factory.createHandlers(
 		);
 		if (userId.error) throw new LucidAPIError(userId.error);
 
-		const user = await serviceWrapper(services.users.getSingle, {
-			transaction: false,
-			defaultError: {
-				type: "basic",
-				name: T("route_user_fetch_error_name"),
-				message: T("route_user_fetch_error_message"),
-			},
-		})(
-			{
-				db: c.get("config").db.client,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-			},
-			{
-				userId: userId.data,
-			},
-		);
-		if (user.error) throw new LucidAPIError(user.error);
-
-		c.status(200);
-		return c.json(
-			formatAPIResponse(c, {
-				data: user.data,
-			}),
-		);
+		c.status(201);
+		return c.body(null);
 	},
 );
 

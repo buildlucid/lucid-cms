@@ -22,6 +22,7 @@ const generateToken = async (
 			},
 			{
 				userId: userId,
+				activeUser: true,
 			},
 		);
 		if (userRes.error) return userRes;
