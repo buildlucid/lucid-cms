@@ -55,7 +55,7 @@ const handleResponse = async <ResponseBody, Data = unknown>(
 	params: RequestParams<Data>,
 	fetchRes: Response,
 ): Promise<ResponseBody> => {
-	if (fetchRes.status === 204) {
+	if (fetchRes.status === 204 || fetchRes.status === 201) {
 		return {} as ResponseBody;
 	}
 
