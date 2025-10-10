@@ -48,15 +48,15 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	});
 
 	// ---------------------------------
-	// Effects
-
-	// ---------------------------------
 	// Memos
 	const isLoading = createMemo(() => {
 		return roles.isLoading;
 	});
 	const isError = createMemo(() => {
 		return roles.isError;
+	});
+	const mutationIsPending = createMemo(() => {
+		return createUser.action.isPending;
 	});
 
 	// ---------------------------------
@@ -72,7 +72,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 				isError: isError(),
 			}}
 			mutateState={{
-				isLoading: createUser.action.isPending,
+				isLoading: mutationIsPending(),
 				errors: createUser.errors(),
 			}}
 			callbacks={{

@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { createMemo, type Component } from "solid-js";
+import { type Accessor, createMemo, type Component } from "solid-js";
 import type { TableRowProps } from "@/types/components";
 import type { UserResponse } from "@types";
 import userStore from "@/store/userStore";
@@ -13,8 +13,11 @@ interface UserRowProps extends TableRowProps {
 	user: UserResponse;
 	include: boolean[];
 	rowTarget: ReturnType<
-		typeof useRowTarget<"view" | "update" | "delete" | "passwordReset">
+		typeof useRowTarget<
+			"view" | "update" | "delete" | "passwordReset" | "restore"
+		>
 	>;
+	showingDeleted?: Accessor<boolean>;
 }
 
 const UserRow: Component<UserRowProps> = (props) => {
@@ -52,6 +55,18 @@ const UserRow: Component<UserRowProps> = (props) => {
 					},
 					permission:
 						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
+					hide: props.showingDeleted?.(),
+				},
+				{
+					label: T()("restore"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("restore", true);
+					},
+					permission: userStore.get.hasPermission(["update_user"]).all,
+					hide: props.showingDeleted?.() === false,
+					theme: "primary",
 				},
 				{
 					label: T()("delete"),
@@ -63,6 +78,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					permission:
 						userStore.get.hasPermission(["delete_user"]).all && !currentUser(),
 					actionExclude: true,
+					hide: props.showingDeleted?.(),
 				},
 				{
 					label: T()("reset_password"),
@@ -74,6 +90,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					permission:
 						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
 					actionExclude: true,
+					hide: props.showingDeleted?.(),
 				},
 			]}
 			options={props.options}

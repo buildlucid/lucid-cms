@@ -5,18 +5,13 @@ import type { ResponseBody } from "@types";
 
 interface Params {
 	body: {
-		email: string;
-		username: string;
-		firstName?: string;
-		lastName?: string;
-		superAdmin?: boolean;
-		roleIds: number[];
+		ids: Array<number>;
 	};
 }
 
-export const createSingleReq = (params: Params) => {
+export const restoreReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: "/api/v1/users",
+		url: "/api/v1/users/restore",
 		csrf: true,
 		config: {
 			method: "POST",
@@ -25,19 +20,19 @@ export const createSingleReq = (params: Params) => {
 	});
 };
 
-interface UseUpdateSingleProps {
+interface UseRestoreProps {
 	onSuccess?: () => void;
 	onError?: () => void;
 }
 
-const useCreateSingle = (props?: UseUpdateSingleProps) => {
+const useRestore = (props?: UseRestoreProps) => {
 	// -----------------------------
 	// Mutation
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
-		mutationFn: createSingleReq,
+		mutationFn: restoreReq,
 		getSuccessToast: () => ({
-			title: T()("user_create_toast_title"),
-			message: T()("user_create_toast_message"),
+			title: T()("user_restore_toast_title"),
+			message: T()("user_restore_toast_message"),
 		}),
 		invalidates: ["users.getMultiple"],
 		onSuccess: props?.onSuccess,
@@ -45,4 +40,4 @@ const useCreateSingle = (props?: UseUpdateSingleProps) => {
 	});
 };
 
-export default useCreateSingle;
+export default useRestore;

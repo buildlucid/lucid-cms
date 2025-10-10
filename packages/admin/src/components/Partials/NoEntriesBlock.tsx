@@ -26,9 +26,13 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classNames("flex items-center justify-center", props.class, {
-				"flex-grow": props.options?.grow,
-			})}
+			class={classNames(
+				"flex items-center justify-center p-4 md:p-6",
+				props.class,
+				{
+					"flex-grow": props.options?.grow,
+				},
+			)}
 		>
 			<div class="text-center flex flex-col items-center">
 				<h2 class="mb-2">{props.copy?.title || T()("no_entries_title")}</h2>

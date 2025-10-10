@@ -18,6 +18,7 @@ import DeleteUser from "@/components/Modals/User/DeleteUser";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
 import { Table } from "@/components/Groups/Table";
 import UserRow from "@/components/Tables/Rows/UserRow";
+import RestoreUsers from "@/components/Modals/User/RestoreUser";
 
 export const UserList: Component<{
 	state: {
@@ -34,14 +35,40 @@ export const UserList: Component<{
 			update: false,
 			delete: false,
 			passwordReset: false,
+			restore: false,
 		},
 	});
+
+	// ----------------------------------
+	// Functions
+	const openCreateUserPanel = () => {
+		props.state.setOpenCreateUserPanel(true);
+	};
 
 	// ----------------------------------
 	// Memos
 	const isDeletedFilter = createMemo(() =>
 		props.state.showingDeleted() ? 1 : 0,
 	);
+	const noEntriesCopy = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return {
+				title: T()("no_deleted_users"),
+				description: T()("no_deleted_users_description"),
+			};
+		}
+		return {
+			title: T()("no_users"),
+			description: T()("no_users_description"),
+			button: T()("create_user"),
+		};
+	});
+	const createEntryCallback = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return undefined;
+		}
+		return openCreateUserPanel;
+	});
 
 	// ----------------------------------
 	// Queries
@@ -79,16 +106,10 @@ export const UserList: Component<{
 				),
 			}}
 			copy={{
-				noEntries: {
-					title: T()("no_users"),
-					description: T()("no_users_description"),
-					button: T()("create_user"),
-				},
+				noEntries: noEntriesCopy(),
 			}}
 			callback={{
-				createEntry: () => {
-					props.state.setOpenCreateUserPanel(true);
-				},
+				createEntry: createEntryCallback(),
 			}}
 		>
 			<Table
@@ -151,6 +172,7 @@ export const UserList: Component<{
 								callbacks={{
 									setSelected: setSelected,
 								}}
+								showingDeleted={props.state.showingDeleted}
 							/>
 						)}
 					</Index>
@@ -189,6 +211,15 @@ export const UserList: Component<{
 					open: rowTarget.getTriggers().passwordReset,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("passwordReset", state);
+					},
+				}}
+			/>
+			<RestoreUsers
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().restore,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("restore", state);
 					},
 				}}
 			/>

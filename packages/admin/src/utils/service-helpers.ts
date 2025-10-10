@@ -1,6 +1,6 @@
 import type { Accessor } from "solid-js";
 import { createSignal, onCleanup } from "solid-js";
-import { createMutation, useQueryClient } from "@tanstack/solid-query";
+import { useMutation, useQueryClient } from "@tanstack/solid-query";
 import helpers from "@/utils/helpers";
 import { validateSetError } from "@/utils/error-handling";
 import spawnToast from "@/utils/spawn-toast";
@@ -82,7 +82,7 @@ const useMutationWrapper = <Params, Response>({
 	const [errors, setErrors] = createSignal<ErrorResponse>();
 	const queryClient = useQueryClient();
 
-	const mutation = createMutation(() => ({
+	const mutation = useMutation(() => ({
 		mutationFn,
 		onSettled: (data, error) => {
 			if (data) {
