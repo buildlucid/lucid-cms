@@ -14,10 +14,10 @@ import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
+	.post("/:collectionKey/restore", ...restoreMultiple)
 	.post("/:collectionKey/:id", ...createVersion)
 	.delete("/:collectionKey", ...deleteMultiple)
 	.delete("/:collectionKey/:id", ...deleteSingle)
-	.post("/:collectionKey/restore", ...restoreMultiple)
 	.get("/:collectionKey/:status", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:statusOrId", ...getSingle)

@@ -9,6 +9,7 @@ import useGetSingleVersion from "./useGetSingleVersion";
 import useGetMultipleRevisions from "./useGetMultipleRevisions";
 import useRestoreRevision from "./useRestoreRevision";
 import useUpdateSingleVersion from "./useUpdateSingleVersion";
+import useRestore from "./useRestore";
 
 const exportObject: {
 	useGetMultiple: typeof useGetMultiple;
@@ -22,6 +23,7 @@ const exportObject: {
 	useGetMultipleRevisions: typeof useGetMultipleRevisions;
 	useRestoreRevision: typeof useRestoreRevision;
 	useUpdateSingleVersion: typeof useUpdateSingleVersion;
+	useRestore: typeof useRestore;
 } = {
 	useGetMultiple,
 	useDeleteSingle,
@@ -34,6 +36,7 @@ const exportObject: {
 	useGetMultipleRevisions,
 	useRestoreRevision,
 	useUpdateSingleVersion,
+	useRestore,
 };
 
 export default exportObject;

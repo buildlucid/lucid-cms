@@ -29,6 +29,7 @@ import PublishDocument from "@/components/Modals/Documents/PublishDocument";
 import { Table } from "@/components/Groups/Table";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
 
 export const DocumentsList: Component<{
 	state: {
@@ -50,11 +51,23 @@ export const DocumentsList: Component<{
 			delete: false,
 			promote: false,
 			publish: false,
+			restore: false,
 		},
 	});
 	const [getDocumentId, setDocumentId] = createSignal<number>();
 	const [getPublishedVersionId, setPublishedVersionId] = createSignal<number>();
 	const [getDraftVersionId, setDraftVersionId] = createSignal<number>();
+
+	// ----------------------------------
+	// Functions
+	const documentCreateEntry = () => {
+		navigate(
+			getDocumentRoute("create", {
+				collectionKey: collectionKey(),
+				useDrafts: props.state.collection?.config.useDrafts,
+			}),
+		);
+	};
 
 	// ----------------------------------
 	// Memos
@@ -87,6 +100,34 @@ export const DocumentsList: Component<{
 	const isDeletedFilter = createMemo(() =>
 		props.state.showingDeleted() ? 1 : 0,
 	);
+	const noEntriesCopy = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return {
+				title: T()("no_deleted_documents", {
+					collectionMultiple: collectionName(),
+				}),
+				description: T()("no_deleted_documents_description"),
+			};
+		}
+		return {
+			title: T()("no_documents", {
+				collectionMultiple: collectionName(),
+			}),
+			description: T()("no_documents_description", {
+				collectionMultiple: collectionName().toLowerCase(),
+				collectionSingle: collectionSingularName().toLowerCase(),
+			}),
+			button: T()("create_document", {
+				collectionSingle: collectionSingularName(),
+			}),
+		};
+	});
+	const createEntryCallback = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return undefined;
+		}
+		return documentCreateEntry;
+	});
 
 	// ----------------------------------
 	// Queries
@@ -134,31 +175,13 @@ export const DocumentsList: Component<{
 				),
 			}}
 			copy={{
-				noEntries: {
-					title: T()("no_documents", {
-						collectionMultiple: collectionName(),
-					}),
-					description: T()("no_documents_description", {
-						collectionMultiple: collectionName().toLowerCase(),
-						collectionSingle: collectionSingularName().toLowerCase(),
-					}),
-					button: T()("create_document", {
-						collectionSingle: collectionSingularName(),
-					}),
-				},
+				noEntries: noEntriesCopy(),
 			}}
 			permissions={{
 				create: userStore.get.hasPermission(["create_content"]).some,
 			}}
 			callback={{
-				createEntry: () => {
-					navigate(
-						getDocumentRoute("create", {
-							collectionKey: collectionKey(),
-							useDrafts: props.state.collection?.config.useDrafts,
-						}),
-					);
-				},
+				createEntry: createEntryCallback(),
 			}}
 		>
 			<Table
@@ -249,6 +272,7 @@ export const DocumentsList: Component<{
 										},
 										permission: userStore.get.hasPermission(["update_content"])
 											.some,
+										hide: props.state.showingDeleted(),
 									},
 									{
 										label: T()("publish"),
@@ -263,8 +287,21 @@ export const DocumentsList: Component<{
 											.all,
 										hide:
 											props.state.collection?.config.useDrafts !== true ||
-											props.state.status() !== "draft",
+											props.state.status() !== "draft" ||
+											props.state.showingDeleted(),
 										actionExclude: true,
+									},
+									{
+										label: T()("restore"),
+										type: "button",
+										onClick: () => {
+											rowTarget.setTargetId(doc().id);
+											rowTarget.setTrigger("restore", true);
+										},
+										permission: userStore.get.hasPermission(["update_media"])
+											.all,
+										hide: props.state.showingDeleted() === false,
+										theme: "primary",
 									},
 									{
 										label: T()("delete"),
@@ -276,6 +313,8 @@ export const DocumentsList: Component<{
 										permission: userStore.get.hasPermission(["delete_content"])
 											.all,
 										actionExclude: true,
+										theme: "error",
+										hide: props.state.showingDeleted(),
 									},
 								]}
 							/>
@@ -336,6 +375,16 @@ export const DocumentsList: Component<{
 								statusOverride: "published",
 							}),
 						);
+					},
+				}}
+			/>
+			<RestoreDocument
+				id={rowTarget.getTargetId}
+				collection={props.state.collection}
+				state={{
+					open: rowTarget.getTriggers().restore,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("restore", state);
 					},
 				}}
 			/>
