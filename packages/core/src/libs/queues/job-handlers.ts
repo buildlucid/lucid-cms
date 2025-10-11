@@ -6,6 +6,8 @@ import updateMediaStorageJob from "../../services/media/jobs/update-storage.js";
 import deleteCollectionJob from "../../services/collections/jobs/delete-single.js";
 import deleteLocaleJob from "../../services/locales/jobs/delete-single.js";
 import deleteTokenJob from "../../services/user-tokens/jobs/delete-single.js";
+import deleteDocumentJob from "../../services/documents/jobs/delete-single.js";
+import deleteUserJob from "../../services/users/jobs/delete-single.js";
 
 /**
  * Constructs and returns the job handlers for the queue adapters
@@ -21,6 +23,8 @@ const jobHandlers = (params: {
 		"collections:delete": deleteCollectionJob,
 		"locales:delete": deleteLocaleJob,
 		"user-tokens:delete": deleteTokenJob,
+		"users:delete": deleteUserJob,
+		"documents:delete": deleteDocumentJob,
 		...params.additionalHandlers,
 	};
 };

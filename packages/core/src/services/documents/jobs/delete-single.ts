@@ -1,11 +1,14 @@
-import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
-import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
-import type { ServiceFn } from "../../types.js";
-import services from "../index.js";
+import { getTableNames } from "../../../libs/collection/schema/live/schema-filters.js";
+import Repository from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
+import executeHooks from "../../../utils/hooks/execute-hooks.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import services from "../../index.js";
 
-const deleteSinglePermanently: ServiceFn<
+/**
+ * Deletes a single document
+ */
+const deleteDocument: ServiceFn<
 	[
 		{
 			id: number;
@@ -137,4 +140,4 @@ const deleteSinglePermanently: ServiceFn<
 	};
 };
 
-export default deleteSinglePermanently;
+export default deleteDocument;

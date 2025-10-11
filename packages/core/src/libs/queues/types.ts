@@ -10,6 +10,12 @@ export type QueueEvent<T extends string = string> =
 	| "email:send"
 	| "media:delete"
 	| "media:delete-unsynced"
+	| "media:update-storage"
+	| "collections:delete"
+	| "locales:delete"
+	| "user-tokens:delete"
+	| "users:delete"
+	| "documents:delete"
 	| T;
 
 export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";

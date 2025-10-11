@@ -70,6 +70,26 @@ const setupCronJobs = (context: ServiceContext) => {
 							message: T("an_error_occurred_deleting_old_soft_deleted_media"),
 						},
 					})(context),
+					serviceWrapper(services.crons.deleteExpiredDeletedUsers, {
+						transaction: true,
+						logError: true,
+						defaultError: {
+							type: "cron",
+							name: T("cron_job_error_name"),
+							message: T("an_error_occurred_deleting_old_soft_deleted_users"),
+						},
+					})(context),
+					serviceWrapper(services.crons.deleteExpiredDeletedDocuments, {
+						transaction: true,
+						logError: true,
+						defaultError: {
+							type: "cron",
+							name: T("cron_job_error_name"),
+							message: T(
+								"an_error_occurred_deleting_old_soft_deleted_documents",
+							),
+						},
+					})(context),
 				]);
 			} catch (error) {
 				logger.error({
