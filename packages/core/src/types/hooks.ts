@@ -88,6 +88,7 @@ export type HookServiceHandlers = {
 						collectionKey: string;
 						userId: number;
 						collectionTableNames: CollectionTableNames;
+						hardDelete: boolean;
 					};
 					data: {
 						ids: number[];
@@ -104,6 +105,7 @@ export type HookServiceHandlers = {
 						collectionKey: string;
 						userId: number;
 						collectionTableNames: CollectionTableNames;
+						hardDelete: boolean;
 					};
 					data: {
 						ids: number[];

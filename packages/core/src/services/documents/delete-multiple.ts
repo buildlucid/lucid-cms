@@ -109,6 +109,7 @@ const deleteMultiple: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				hardDelete: false,
 			},
 			data: {
 				ids: data.ids,
@@ -170,6 +171,7 @@ const deleteMultiple: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				hardDelete: false,
 			},
 			data: {
 				ids: data.ids,

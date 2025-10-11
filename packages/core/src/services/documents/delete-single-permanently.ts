@@ -42,7 +42,7 @@ const deleteSinglePermanently: ServiceFn<
 
 	const getDocumentRes = await Documents.selectSingle(
 		{
-			select: ["id", "is_deleted"],
+			select: ["id"],
 			where: [
 				{
 					key: "id",
@@ -53,11 +53,6 @@ const deleteSinglePermanently: ServiceFn<
 					key: "collection_key",
 					operator: "=",
 					value: data.collectionKey,
-				},
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "true"),
 				},
 			],
 			validation: {
@@ -75,71 +70,78 @@ const deleteSinglePermanently: ServiceFn<
 	);
 	if (getDocumentRes.error) return getDocumentRes;
 
-	// TODO: add a new hook to indicate this is a hard delete, or keep this as delete, but add a new hook for the soft delete called soft delete etc.
-	// const hookBeforeRes = await executeHooks(
-	// 	{
-	// 		service: "documents",
-	// 		event: "beforeDelete",
-	// 		config: context.config,
-	// 		collectionInstance: collectionRes.data,
-	// 	},
-	// 	context,
-	// 	{
-	// 		meta: {
-	// 			collection: collectionRes.data,
-	// 			collectionKey: data.collectionKey,
-	// 			userId: data.userId,
-	// 			collectionTableNames: tableNamesRes.data,
-	// 		},
-	// 		data: {
-	// 			ids: [data.id],
-	// 		},
-	// 	},
-	// );
-	// if (hookBeforeRes.error) return hookBeforeRes;
-
-	const deleteDocumentRes = await Documents.deleteSingle(
+	const hookBeforeRes = await executeHooks(
 		{
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
-				},
-			],
-			returning: ["id"],
-			validation: {
-				enabled: true,
+			service: "documents",
+			event: "beforeDelete",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		context,
+		{
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
+				hardDelete: true,
+			},
+			data: {
+				ids: [data.id],
 			},
 		},
+	);
+	if (hookBeforeRes.error) return hookBeforeRes;
+
+	const [deleteDocumentRes, deleteRelationsRes] = await Promise.all([
+		Documents.deleteSingle(
+			{
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: data.id,
+					},
+				],
+				returning: ["id"],
+				validation: {
+					enabled: true,
+				},
+			},
+			{
+				tableName: tableNamesRes.data.document,
+			},
+		),
+		services.documents.nullifyDocumentReferences(context, {
+			collectionKey: collectionRes.data.key,
+			documentId: data.id,
+		}),
+	]);
+	if (deleteDocumentRes.error) return deleteDocumentRes;
+	if (deleteRelationsRes.error) return deleteRelationsRes;
+
+	const hookAfterRes = await executeHooks(
 		{
-			tableName: tableNamesRes.data.document,
+			service: "documents",
+			event: "afterDelete",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		context,
+		{
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				userId: data.userId,
+				collectionTableNames: tableNamesRes.data,
+				hardDelete: true,
+			},
+			data: {
+				ids: [data.id],
+			},
 		},
 	);
-	if (deleteDocumentRes.error) return deleteDocumentRes;
-
-	// TODO: add a new hook to indicate this is a hard delete, or keep this as delete, but add a new hook for the soft delete called soft delete etc.
-	// const hookAfterRes = await executeHooks(
-	// 	{
-	// 		service: "documents",
-	// 		event: "afterDelete",
-	// 		config: context.config,
-	// 		collectionInstance: collectionRes.data,
-	// 	},
-	// 	context,
-	// 	{
-	// 		meta: {
-	// 			collection: collectionRes.data,
-	// 			collectionKey: data.collectionKey,
-	// 			userId: data.userId,
-	// 			collectionTableNames: tableNamesRes.data,
-	// 		},
-	// 		data: {
-	// 			ids: [data.id],
-	// 		},
-	// 	},
-	// );
-	// if (hookAfterRes.error) return hookAfterRes;
+	if (hookAfterRes.error) return hookAfterRes;
 
 	return {
 		error: undefined,

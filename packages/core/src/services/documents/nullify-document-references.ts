@@ -14,6 +14,9 @@ import type {
 } from "../../libs/collection/schema/types.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 
+/**
+ * Goes through all bricks and repeaters in the collection and nullifies references to the target document.
+ */
 const nullifyDocumentReferences: ServiceFn<
 	[
 		{

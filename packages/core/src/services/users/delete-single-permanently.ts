@@ -25,17 +25,12 @@ const deleteSinglePermanently: ServiceFn<
 	}
 
 	const getUserRes = await Users.selectSingle({
-		select: ["id", "is_deleted"],
+		select: ["id"],
 		where: [
 			{
 				key: "id",
 				operator: "=",
 				value: data.userId,
-			},
-			{
-				key: "is_deleted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "true"),
 			},
 		],
 		validation: {

@@ -7,6 +7,10 @@ import {
 import type { PluginOptionsInternal } from "../../types/index.js";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 
+/**
+ * Handles the before delete hook for documents. What this does is:
+ * - Updates all of the descendants of the deleted document fullSlug fields so that they dont include the deleted document's slug
+ */
 const beforeDeleteHandler =
 	(
 		options: PluginOptionsInternal,

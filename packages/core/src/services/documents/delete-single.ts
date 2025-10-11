@@ -89,6 +89,7 @@ const deleteSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				hardDelete: false,
 			},
 			data: {
 				ids: [data.id],
@@ -143,6 +144,7 @@ const deleteSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				hardDelete: false,
 			},
 			data: {
 				ids: [data.id],
