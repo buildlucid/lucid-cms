@@ -141,6 +141,11 @@ export function useDocumentUIState(props: {
 			return true;
 		}
 
+		// lock builder if document is deleted
+		if (props.document()?.isDeleted === true) {
+			return true;
+		}
+
 		// lock published version, if in edit mode and the collection supports drafts
 		if (props.version === "published") {
 			if (props.mode === "edit") {
@@ -210,6 +215,7 @@ export function useDocumentUIState(props: {
 	 * Determines if the delete document button should be visible
 	 */
 	const showDeleteButton = createMemo(() => {
+		if (props.document()?.isDeleted) return false;
 		return props.mode === "edit" && props.collection()?.mode === "multiple";
 	});
 
@@ -234,6 +240,7 @@ export function useDocumentUIState(props: {
 			props.collection()?.config.useDrafts === true
 		)
 			return false;
+		if (props.document()?.isDeleted) return false;
 
 		return (
 			userStore.get.hasPermission(["update_content"]).all &&
@@ -259,6 +266,7 @@ export function useDocumentUIState(props: {
 	 * Determines if the restore reviision button should be visible
 	 */
 	const showRestoreRevisionButton = createMemo(() => {
+		if (props.document()?.isDeleted) return false;
 		if (props.mode !== "revisions") return false;
 		if (props.selectedRevision?.() === undefined) return false;
 		if (!props.restoreRevisionAction) return false;

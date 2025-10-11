@@ -345,6 +345,7 @@ export interface DocumentResponse {
 			createdBy: number | null;
 		} | null;
 	};
+	isDeleted: boolean;
 	createdBy: {
 		id: number;
 		email: string | null;

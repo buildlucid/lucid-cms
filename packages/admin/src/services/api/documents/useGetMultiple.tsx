@@ -12,7 +12,10 @@ interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: Record<
 		string,
-		Accessor<string | string[] | undefined | number> | string | string[]
+		| Accessor<string | string[] | undefined | number>
+		| number
+		| string
+		| string[]
 	>;
 	location: {
 		collectionKey: Accessor<string | undefined> | string;

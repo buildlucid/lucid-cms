@@ -73,6 +73,7 @@ export default class DocumentsFormatter {
 			}),
 			bricks: props.bricks ?? null,
 			fields: props.fields ?? null,
+			isDeleted: Formatter.formatBoolean(props.document.is_deleted),
 			createdBy: props.document.cb_user_id
 				? {
 						id: props.document.cb_user_id,

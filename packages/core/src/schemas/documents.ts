@@ -76,6 +76,10 @@ const documentResponseBaseSchema = z.object({
 		draft: documentResponseVersionSchema.nullable(),
 		published: documentResponseVersionSchema.nullable(),
 	}),
+	isDeleted: z.boolean().meta({
+		description: "Whether the document has been deleted",
+		example: false,
+	}),
 	createdBy: documentResponseUserSchema.nullable(),
 	updatedBy: documentResponseUserSchema.nullable(),
 	createdAt: z.string().nullable().meta({

@@ -248,6 +248,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				`${dynamicConfig.tableName}.created_at`,
 				`${dynamicConfig.tableName}.updated_at`,
 				`${dynamicConfig.tableName}.updated_by`,
+				`${dynamicConfig.tableName}.is_deleted`,
 			])
 			.select([
 				(eb) =>
@@ -409,6 +410,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${dynamicConfig.tableName}.created_at`,
 					`${dynamicConfig.tableName}.updated_at`,
 					`${dynamicConfig.tableName}.updated_by`,
+					`${dynamicConfig.tableName}.is_deleted`,
 				])
 				.select([
 					(eb) =>
@@ -585,6 +587,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${dynamicConfig.tableName}.created_at`,
 					`${dynamicConfig.tableName}.updated_at`,
 					`${dynamicConfig.tableName}.updated_by`,
+					`${dynamicConfig.tableName}.is_deleted`,
 				])
 				.select([
 					(eb) =>
@@ -650,6 +653,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								updatedBy: `${dynamicConfig.tableName}.updated_by`,
 								createdAt: `${dynamicConfig.tableName}.created_at`,
 								updatedAt: `${dynamicConfig.tableName}.updated_at`,
+								isDeleted: `${dynamicConfig.tableName}.is_deleted`,
+								deletedBy: `${dynamicConfig.tableName}.deleted_by`,
 							},
 							sorts: {
 								createdAt: `${dynamicConfig.tableName}.created_at`,

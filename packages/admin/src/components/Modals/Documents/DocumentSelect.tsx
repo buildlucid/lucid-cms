@@ -26,6 +26,7 @@ import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
 } from "@/utils/document-table-helpers";
+import { isDev } from "solid-js/web";
 
 const DocumentSelectModal: Component = () => {
 	const open = createMemo(() => documentSelectStore.get.open);
@@ -84,6 +85,9 @@ const DocumentSelectContent: Component = () => {
 			location: {
 				collectionKey: collectionKey,
 				versionType: getStatus,
+			},
+			filters: {
+				isDeleted: 0,
 			},
 		},
 		enabled: () => searchParams.getSettled() && collection.isSuccess,
