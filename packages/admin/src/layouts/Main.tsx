@@ -80,7 +80,7 @@ const MainLayout: Component<{
 	return (
 		<div class="grid grid-cols-main-layout min-h-full relative">
 			<NavigationSidebar />
-			<main class="flex flex-col mt-4 pr-4 w-full min-w-[calc(100vw-220px)]">
+			<main class="flex flex-col mt-4 pr-4 w-full min-w-[calc(100vw-236px)]">
 				<Switch>
 					<Match when={isSuccess()}>
 						<Alert
