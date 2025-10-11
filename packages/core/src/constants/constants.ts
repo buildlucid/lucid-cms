@@ -125,10 +125,7 @@ export default Object.freeze({
 		validation: "validation",
 		typeGeneration: "type-generation",
 	} as const,
-	retention: {
-		deletedCollections: 30, // days
-		deletedLocales: 30, // days
-	},
+	retention: 30,
 	cronSchedule: "0 0 * * *",
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds

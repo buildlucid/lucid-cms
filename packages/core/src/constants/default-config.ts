@@ -1,4 +1,5 @@
-import type { LucidConfig } from "../types/config.js";
+import constants from "./constants.js";
+import type { Config, LucidConfig } from "../types/config.js";
 
 export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
@@ -58,6 +59,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 			ignore: [],
 		},
 	},
+	softDelete: {
+		defaultRetentionDays: constants.retention,
+	} satisfies Config["softDelete"],
 };
 
 export default defaultConfig;

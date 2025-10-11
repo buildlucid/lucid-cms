@@ -151,6 +151,20 @@ const ConfigSchema = z.object({
 				.optional(),
 		})
 		.optional(),
+	softDelete: z
+		.object({
+			defaultRetentionDays: z.number().int().positive().optional(),
+			retentionDays: z
+				.object({
+					locales: z.number().int().positive().optional(),
+					users: z.number().int().positive().optional(),
+					media: z.number().int().positive().optional(),
+					collections: z.number().int().positive().optional(),
+					documents: z.number().int().positive().optional(),
+				})
+				.optional(),
+		})
+		.optional(),
 });
 
 export default ConfigSchema;

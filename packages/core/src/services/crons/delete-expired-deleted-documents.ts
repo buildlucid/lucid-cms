@@ -1,7 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
-import { subDays } from "date-fns";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
  * Finds all soft-deleted documents for all collections that are older than 30 days and queues them for permanent deletion
@@ -25,8 +25,7 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 		.map((table) => table.data)
 		.filter((table) => table !== undefined);
 
-	// TODO: Add support for collections to define their own cleanup time, then fallback to a global config option, then 30 days
-	const thirtyDaysAgo = subDays(new Date(), 30);
+	const compDate = getRetentionDays(context.config.softDelete, "documents");
 
 	const expiredDocLookup = await Promise.all(
 		docTables.map(async (table) => {
@@ -42,7 +41,7 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 						{
 							key: "is_deleted_at",
 							operator: "<",
-							value: thirtyDaysAgo.toISOString(),
+							value: compDate,
 						},
 					],
 					validation: {

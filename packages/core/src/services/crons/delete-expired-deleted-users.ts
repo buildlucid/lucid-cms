@@ -1,7 +1,6 @@
 import Repository from "../../libs/repositories/index.js";
-import { subDays } from "date-fns";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { id } from "zod/v4/locales";
+import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
  * Finds all soft-deleted users older than 30 days and queues them for permanent deletion
@@ -9,8 +8,7 @@ import type { id } from "zod/v4/locales";
 const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 	const Users = Repository.get("users", context.db, context.config.db);
 
-	// TODO: make this configurable
-	const thirtyDaysAgo = subDays(new Date(), 30);
+	const compDate = getRetentionDays(context.config.softDelete, "users");
 
 	const softDeletedUsersRes = await Users.selectMultiple({
 		select: ["id"],
@@ -23,7 +21,7 @@ const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 			{
 				key: "is_deleted_at",
 				operator: "<",
-				value: thirtyDaysAgo.toISOString(),
+				value: compDate,
 			},
 		],
 		validation: {

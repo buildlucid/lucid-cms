@@ -10,10 +10,7 @@ import type { MediaType, EmailDeliveryStatus } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
 import type { LogTransport, LogLevel } from "../libs/logger/types.js";
-import type {
-	QueueAdapter,
-	QueueAdapterInstance,
-} from "../libs/queues/types.js";
+import type { QueueAdapter } from "../libs/queues/types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -275,6 +272,24 @@ export interface LucidConfig {
 			batchSize?: number;
 		};
 	};
+	/** Configure the soft-delete behavior for different data types */
+	softDelete?: {
+		/** The fallback number of days to retain deleted data. If left blank, this will fallback to 30 days. */
+		defaultRetentionDays?: number;
+		/** Define retention days for specific data types */
+		retentionDays?: {
+			/** Days to retain locales that don't exist in your lucid.config */
+			locales?: number;
+			/** Days to retain users */
+			users?: number;
+			/** Days to retain media */
+			media?: number;
+			/** Days to retain collections that don't exist in your lucid.config */
+			collections?: number;
+			/** Days to retain documents */
+			documents?: number;
+		};
+	};
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
 	/** A list of collections instances to register. These can be imported from `@lucidcms/core`. */
@@ -353,6 +368,16 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		processing: {
 			concurrentLimit: number;
 			batchSize: number;
+		};
+	};
+	softDelete: {
+		defaultRetentionDays: number;
+		retentionDays?: {
+			locales?: number;
+			users?: number;
+			media?: number;
+			collections?: number;
+			documents?: number;
 		};
 	};
 	hooks: Array<AllHooks>;

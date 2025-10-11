@@ -1,7 +1,6 @@
-import { subDays } from "date-fns";
-import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
  * Finds all expired locales and queues them for deletion
@@ -9,9 +8,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 	const Locales = Repository.get("locales", context.db, context.config.db);
 
-	const now = new Date();
-	const thirtyDaysAgo = subDays(now, constants.retention.deletedLocales);
-	const thirtyDaysAgoTimestamp = thirtyDaysAgo.toISOString();
+	const compDate = getRetentionDays(context.config.softDelete, "locales");
 
 	const expiredLocalesRes = await Locales.selectMultiple({
 		select: ["code"],
@@ -19,7 +16,7 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 			{
 				key: "is_deleted_at",
 				operator: "<",
-				value: thirtyDaysAgoTimestamp,
+				value: compDate,
 			},
 			{
 				key: "is_deleted",

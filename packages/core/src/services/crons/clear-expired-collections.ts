@@ -1,7 +1,6 @@
-import { subDays } from "date-fns";
-import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
  * Finds all expired collections and queues them for deletion
@@ -13,9 +12,7 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 		context.config.db,
 	);
 
-	const now = new Date();
-	const thirtyDaysAgo = subDays(now, constants.retention.deletedCollections);
-	const thirtyDaysAgoTimestamp = thirtyDaysAgo.toISOString();
+	const compDate = getRetentionDays(context.config.softDelete, "collections");
 
 	const expiredCollectionsRes = await Collections.selectMultiple({
 		select: ["key"],
@@ -23,7 +20,7 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 			{
 				key: "is_deleted_at",
 				operator: "<",
-				value: thirtyDaysAgoTimestamp,
+				value: compDate,
 			},
 			{
 				key: "is_deleted",
