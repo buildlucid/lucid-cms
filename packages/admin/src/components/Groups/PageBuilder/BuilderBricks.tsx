@@ -1,5 +1,13 @@
 import T from "@/translations";
-import { type Component, createMemo, For, Show, createSignal } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	For,
+	Show,
+	createSignal,
+	Switch,
+	Match,
+} from "solid-js";
 import type { CollectionBrickConfig, CollectionResponse } from "@types";
 import {
 	FaSolidCircleChevronUp,
@@ -64,44 +72,58 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 						{T()("add_brick")}
 					</Button>
 				</div>
-				<ol class="w-full">
-					<DragDrop
-						sortOrder={(ref, targetRef) => {
-							brickStore.get.swapBrickOrder({
-								brickRef: ref,
-								targetBrickRef: targetRef,
-							});
+				<Switch>
+					<Match when={builderBricks().length === 0}>
+						<div class="p-4 md:p-6 border border-dashed border-border rounded-md min-h-60 flex items-center justify-center">
+							<div class="max-w-sm text-center mx-auto">
+								<h3 class="mb-1">{T()("builder_area_title")}</h3>
+								<p class="text-sm">{T()("builder_area_empty")}</p>
+							</div>
+						</div>
+					</Match>
+					<Match when={builderBricks().length > 0}>
+						<ol class="w-full">
+							<DragDrop
+								sortOrder={(ref, targetRef) => {
+									brickStore.get.swapBrickOrder({
+										brickRef: ref,
+										targetBrickRef: targetRef,
+									});
 
-							if (props.collectionKey && props.documentId) {
-								tabStateHelpers.updateBrickOrders(
-									props.collectionKey,
-									props.documentId,
-									// @ts-expect-error
-									builderBricks().map((b) => {
-										return {
-											[b.key]: b.order,
-										};
-									}),
-								);
-							}
-						}}
-					>
-						{({ dragDrop }) => (
-							<For each={builderBricks()}>
-								{(brick) => (
-									<BuilderBrickRow
-										brick={brick}
-										brickConfig={props.brickConfig}
-										collectionMigrationStatus={props.collectionMigrationStatus}
-										dragDrop={dragDrop}
-										collectionKey={props.collectionKey}
-										documentId={props.documentId}
-									/>
+									if (props.collectionKey && props.documentId) {
+										tabStateHelpers.updateBrickOrders(
+											props.collectionKey,
+											props.documentId,
+											// @ts-expect-error
+											builderBricks().map((b) => {
+												return {
+													[b.key]: b.order,
+												};
+											}),
+										);
+									}
+								}}
+							>
+								{({ dragDrop }) => (
+									<For each={builderBricks()}>
+										{(brick) => (
+											<BuilderBrickRow
+												brick={brick}
+												brickConfig={props.brickConfig}
+												collectionMigrationStatus={
+													props.collectionMigrationStatus
+												}
+												dragDrop={dragDrop}
+												collectionKey={props.collectionKey}
+												documentId={props.documentId}
+											/>
+										)}
+									</For>
 								)}
-							</For>
-						)}
-					</DragDrop>
-				</ol>
+							</DragDrop>
+						</ol>
+					</Match>
+				</Switch>
 			</div>
 
 			<AddBrick
