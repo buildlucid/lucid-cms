@@ -20,6 +20,7 @@ import { Table } from "@/components/Groups/Table";
 import UserRow from "@/components/Tables/Rows/UserRow";
 import RestoreUsers from "@/components/Modals/User/RestoreUser";
 import DeleteUserPermanently from "@/components/Modals/User/DeleteUserPermanently";
+import userStore from "@/store/userStore";
 
 export const UserList: Component<{
 	state: {
@@ -71,6 +72,12 @@ export const UserList: Component<{
 		}
 		return openCreateUserPanel;
 	});
+	const rowsAreSelectable = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return userStore.get.hasPermission(["update_user"]).some;
+		}
+		return false;
+	});
 
 	// ----------------------------------
 	// Queries
@@ -83,6 +90,10 @@ export const UserList: Component<{
 		},
 		enabled: () => props.state?.searchParams.getSettled(),
 	});
+
+	// ----------------------------------
+	// Mutations
+	const restoreUsers = api.users.useRestore();
 
 	// ----------------------------------------
 	// Render
@@ -156,7 +167,8 @@ export const UserList: Component<{
 					isSuccess: users.isSuccess,
 				}}
 				options={{
-					isSelectable: props.state.showingDeleted(),
+					isSelectable: rowsAreSelectable(),
+					allowRestore: true,
 				}}
 				callbacks={{
 					restoreRows: async (selected) => {
@@ -166,6 +178,11 @@ export const UserList: Component<{
 								ids.push(users.data?.data[i].id);
 							}
 						}
+						await restoreUsers.action.mutateAsync({
+							body: {
+								ids: ids,
+							},
+						});
 					},
 				}}
 			>

@@ -35,10 +35,18 @@ interface TableRootProps {
 		isSelectable?: boolean;
 		padding?: "16" | "24";
 		totalLoadingRows?: number;
+		allowRestore?: boolean;
+		allowDelete?: boolean;
 	};
 	callbacks?: {
 		deleteRows?: (_selected: boolean[]) => Promise<void>;
 		restoreRows?: (_selected: boolean[]) => Promise<void>;
+	};
+	copy?: {
+		deleteModalTitle?: string;
+		deleteModalDescription?: string;
+		restoreModalTitle?: string;
+		restoreModalDescription?: string;
 	};
 	theme?: TableTheme;
 	children: (_props: {
@@ -247,10 +255,13 @@ export const Table: Component<TableRootProps> = (props) => {
 				selected={selected}
 				selectedCount={selectedCount}
 				setSelected={setSelected}
+				allowRestore={props.options?.allowRestore ?? false}
+				allowDelete={props.options?.allowDelete ?? false}
 				callbacks={{
 					delete: props.callbacks?.deleteRows,
 					restore: props.callbacks?.restoreRows,
 				}}
+				copy={props.copy}
 			/>
 		</>
 	);

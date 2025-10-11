@@ -617,5 +617,9 @@
 	"move_folder_modal_title": "Move folder to folder",
 	"move_folder_modal_description": "Are you sure you want to move this folder into the selected folder?",
 	"builder_area_title": "Builder Zone",
-	"builder_area_empty": "You can add and edit bricks in this area to dynamically build content on your site or app."
+	"builder_area_empty": "You can add and edit bricks in this area to dynamically build content on your site or app.",
+	"delete_items_modal_title": "Delete Items",
+	"delete_items_modal_description": "Are you sure you want to delete the selected items?",
+	"restore_items_modal_title": "Restore Items",
+	"restore_items_modal_description": "Are you sure you want to restore the selected items?"
 }

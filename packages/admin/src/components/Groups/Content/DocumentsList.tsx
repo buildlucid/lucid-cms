@@ -85,7 +85,10 @@ export const DocumentsList: Component<{
 			props.state.searchParams.getSettled() === true &&
 			props.state.collectionIsSuccess() === true,
 	);
-	const hasDeletePermission = createMemo(() => {
+	const rowsAreSelectable = createMemo(() => {
+		if (props.state.showingDeleted()) {
+			return userStore.get.hasPermission(["update_content"]).some;
+		}
 		return userStore.get.hasPermission(["delete_content"]).some;
 	});
 	const collectionName = createMemo(() =>
@@ -152,6 +155,7 @@ export const DocumentsList: Component<{
 	const deleteMultiple = api.documents.useDeleteMultiple({
 		getCollectionName: collectionSingularName,
 	});
+	const restoreDocuments = api.documents.useRestore();
 
 	// ----------------------------------------
 	// Render
@@ -208,7 +212,9 @@ export const DocumentsList: Component<{
 					isSuccess: documents.isSuccess,
 				}}
 				options={{
-					isSelectable: hasDeletePermission(),
+					isSelectable: rowsAreSelectable(),
+					allowRestore: props.state.showingDeleted(),
+					allowDelete: !props.state.showingDeleted(),
 				}}
 				callbacks={{
 					deleteRows: async (selected) => {
@@ -219,6 +225,20 @@ export const DocumentsList: Component<{
 							}
 						}
 						await deleteMultiple.action.mutateAsync({
+							collectionKey: collectionKey(),
+							body: {
+								ids: ids,
+							},
+						});
+					},
+					restoreRows: async (selected) => {
+						const ids: number[] = [];
+						for (const i in selected) {
+							if (selected[i] && documents.data?.data[i].id) {
+								ids.push(documents.data?.data[i].id);
+							}
+						}
+						await restoreDocuments.action.mutateAsync({
 							collectionKey: collectionKey(),
 							body: {
 								ids: ids,
