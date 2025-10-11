@@ -25,7 +25,7 @@ const csrfController = factory.createHandlers(
 		const tokenRes = await services.auth.csrf.generateToken(c);
 		if (tokenRes.error) throw new LucidAPIError(tokenRes.error);
 
-		c.status(201);
+		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
 				data: {
