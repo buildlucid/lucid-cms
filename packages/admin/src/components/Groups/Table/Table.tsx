@@ -38,6 +38,7 @@ interface TableRootProps {
 	};
 	callbacks?: {
 		deleteRows?: (_selected: boolean[]) => Promise<void>;
+		restoreRows?: (_selected: boolean[]) => Promise<void>;
 	};
 	theme?: TableTheme;
 	children: (_props: {
@@ -242,24 +243,15 @@ export const Table: Component<TableRootProps> = (props) => {
 				</table>
 			</div>
 			{/* Select Action */}
-			<Show
-				when={selectedCount() > 0 && props.callbacks?.deleteRows !== undefined}
-			>
-				<SelectAction
-					data={{
-						selected: selectedCount(),
-					}}
-					callbacks={{
-						reset: () => setSelected((prev) => prev.map(() => false)),
-						delete: async () => {
-							if (props.callbacks?.deleteRows) {
-								await props.callbacks.deleteRows(selected());
-								setSelected((prev) => prev.map(() => false));
-							}
-						},
-					}}
-				/>
-			</Show>
+			<SelectAction
+				selected={selected}
+				selectedCount={selectedCount}
+				setSelected={setSelected}
+				callbacks={{
+					delete: props.callbacks?.deleteRows,
+					restore: props.callbacks?.restoreRows,
+				}}
+			/>
 		</>
 	);
 };

@@ -156,7 +156,17 @@ export const UserList: Component<{
 					isSuccess: users.isSuccess,
 				}}
 				options={{
-					isSelectable: false,
+					isSelectable: props.state.showingDeleted(),
+				}}
+				callbacks={{
+					restoreRows: async (selected) => {
+						const ids: number[] = [];
+						for (const i in selected) {
+							if (selected[i] && users.data?.data[i].id) {
+								ids.push(users.data?.data[i].id);
+							}
+						}
+					},
 				}}
 			>
 				{({ include, isSelectable, selected, setSelected }) => (
