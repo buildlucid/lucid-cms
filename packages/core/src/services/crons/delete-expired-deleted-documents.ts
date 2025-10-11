@@ -37,7 +37,7 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 						{
 							key: "is_deleted",
 							operator: "=",
-							value: true,
+							value: context.config.db.getDefault("boolean", "true"),
 						},
 						{
 							key: "is_deleted_at",

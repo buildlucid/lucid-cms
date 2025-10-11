@@ -138,68 +138,75 @@ const cloudflareAdapter = (options?: {
 import config from "./${importPath}";
 import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
-import emailTemplates from './email-templates.json' with { type: 'json' };
+import emailTemplates from "./email-templates.json" with { type: "json" };
 import { runtimeContext } from "@lucidcms/cloudflare-adapter";
 
 export default {
-    async fetch(request, env, ctx) {
-        const resolved = await processConfig(config(env, {
-            emailTemplates: emailTemplates,
-        }));
+	async fetch(request, env, ctx) {
+		const resolved = await processConfig(
+			config(env, {
+				emailTemplates: emailTemplates,
+			}),
+		);
 
-        const { app } = await lucid.createApp({
-            config: resolved,
+		const { app } = await lucid.createApp({
+			config: resolved,
 			env: env,
 			runtimeContext: runtimeContext({
-                dev: false
-            }),
-            hono: {
-                middleware: [
-                    async (app, config) => {
-                        app.use("*", async (c, next) => {
-                            c.env = Object.assign(c.env, env);
-                            c.set("cf", env.cf);
-                            c.set("caches", env.caches);
-                            c.set("ctx", {
-                                waitUntil: ctx.waitUntil,
-                                passThroughOnException: ctx.passThroughOnException,
-                            });
-                            await next();
-                        })
-                    }
-                ],
-                extensions: [
-                    async (app, config) => {
-                        app.get("/admin/*", async (c) => {
-                            const url = new URL(c.req.url);
-                    
-                            const indexRequestUrl = url.origin + "/admin/index.html";
-                            const indexRequest = new Request(indexRequestUrl);
-                            const indexAsset = await c.env.ASSETS.fetch(indexRequest);
-                            return new Response(indexAsset.body, {
-                                status: indexAsset.status,
-                                headers: indexAsset.headers,
-                            });
-                        });
-                    },
-                ],
-            }
-        });
+				dev: false,
+			}),
+			hono: {
+				middleware: [
+					async (app, config) => {
+						app.use("*", async (c, next) => {
+							c.env = Object.assign(c.env, env);
+							c.set("cf", env.cf);
+							c.set("caches", env.caches);
+							c.set("ctx", {
+								waitUntil: ctx.waitUntil,
+								passThroughOnException: ctx.passThroughOnException,
+							});
+							await next();
+						});
+					},
+				],
+				extensions: [
+					async (app, config) => {
+						app.get("/admin/*", async (c) => {
+							const url = new URL(c.req.url);
 
-        return app.fetch(request, env, ctx);
-    },
-    async scheduled(controller, env, ctx) {
-        const runCronService = async () => {
-            const resolved = await processConfig(config(env));
-            
-            const cronJobs = lucid.setupCronJobs({
-                config: resolved,
-            });
-            await cronJobs.register();
-        };
+							const indexRequestUrl = url.origin + "/admin/index.html";
+							const indexRequest = new Request(indexRequestUrl);
+							const indexAsset = await c.env.ASSETS.fetch(indexRequest);
+							return new Response(indexAsset.body, {
+								status: indexAsset.status,
+								headers: indexAsset.headers,
+							});
+						});
+					},
+				],
+			},
+		});
 
-        ctx.waitUntil(runCronService());
-    },
+		return app.fetch(request, env, ctx);
+	},
+	async scheduled(controller, env, ctx) {
+		const runCronService = async () => {
+			const resolved = await processConfig(config(env));
+
+			const cronJobSetup = lucid.setupCronJobs({
+				createQueue: true,
+			});
+			await cronJobSetup.register({
+				config: resolved,
+				db: resolved.db.client,
+				queue: cronJobSetup.queue,
+				env: env,
+			});
+		};
+
+		ctx.waitUntil(runCronService());
+	},
 };`;
 
 					await writeFile(tempEntryFile, entry);

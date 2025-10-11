@@ -264,6 +264,7 @@ const createApp = async (props: {
 
 	return {
 		app,
+		queue: queueInstance,
 		destroy: async () => {
 			await queueInstance.lifecycle.kill();
 			props.config.db.client.destroy();

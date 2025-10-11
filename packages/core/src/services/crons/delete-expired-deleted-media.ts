@@ -17,7 +17,7 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: true,
+				value: context.config.db.getDefault("boolean", "true"),
 			},
 			{
 				key: "is_deleted_at",

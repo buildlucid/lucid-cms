@@ -131,73 +131,78 @@ const nodeAdapter = (options?: {
 					});
 
 					const entry = /* ts */ `
-import 'dotenv/config'
+import "dotenv/config";
 import config from "./${constants.CONFIG_FILE}";
 import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
-import { serve } from '@hono/node-server';
-import cron from 'node-cron';
+import { serve } from "@hono/node-server";
+import cron from "node-cron";
 import { runtimeContext } from "@lucidcms/node-adapter";
 
 const startServer = async () => {
-    try {
-        const resolved = await processConfig(config(process.env));
+	try {
+		const resolved = await processConfig(config(process.env));
 
-        const { app, destroy } = await lucid.createApp({
-            config: resolved,
-            env: process.env,
-            runtimeContext: runtimeContext,
-        });
-        
-        const cronJobs = lucid.setupCronJobs({
-            config: resolved,
-        });
+		const { app, destroy, queue } = await lucid.createApp({
+			config: resolved,
+			env: process.env,
+			runtimeContext: runtimeContext,
+		});
 
-        const port = Number.parseInt(process.env.PORT || '6543', 10);
-        const hostname = process.env.HOST || process.env.HOSTNAME;
+		const cronJobSetup = lucid.setupCronJobs({
+			createQueue: false,
+		});
 
-        const server = serve({
-            fetch: app.fetch,
-            port,
-            hostname,
-        });
+		const port = Number.parseInt(process.env.PORT || "6543", 10);
+		const hostname = process.env.HOST || process.env.HOSTNAME;
 
-        if (cronJobs.schedule) {
-            cron.schedule(cronJobs.schedule, async () => {
-                await cronJobs.register();
-            });
-        }
+		const server = serve({
+			fetch: app.fetch,
+			port,
+			hostname,
+		});
 
-        server.on("listening", () => {
-            const address = server.address();
-            if(typeof address === 'string') console.log(address);
-            else {
-                if(address.address === '::') console.log('http://localhost:' + address.port); 
-                else console.log('http://' + address.address + ':' + address.port);
-            }
-        });
-        server.on("close", async () => {
-            await destroy?.();
-        });
+		if (cronJobSetup.schedule) {
+			cron.schedule(cronJobSetup.schedule, async () => {
+				await cronJobSetup.register({
+					config: resolved,
+					db: resolved.db.client,
+					queue: queue,
+					env: process.env,
+				});
+			});
+		}
 
-        const gracefulShutdown = (signal) => {
-            server.close((error) => {
-                if (error) {
-                    console.error(error);
-                    process.exit(1);
-                } else {
-                    process.exit(0);
-                }
-            });
-        };
+		server.on("listening", () => {
+			const address = server.address();
+			if (typeof address === "string") console.log(address);
+			else {
+				if (address.address === "::")
+					console.log("http://localhost:" + address.port);
+				else console.log("http://" + address.address + ":" + address.port);
+			}
+		});
+		server.on("close", async () => {
+			await destroy?.();
+		});
 
-        process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-        process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+		const gracefulShutdown = (signal) => {
+			server.close((error) => {
+				if (error) {
+					console.error(error);
+					process.exit(1);
+				} else {
+					process.exit(0);
+				}
+			});
+		};
 
-    } catch (error) {
-        console.error(error);
-        process.exit(1);
-    }
+		process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+		process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
+	}
 };
 
 startServer();`;
