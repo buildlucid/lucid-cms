@@ -14,7 +14,12 @@ interface UserRowProps extends TableRowProps {
 	include: boolean[];
 	rowTarget: ReturnType<
 		typeof useRowTarget<
-			"view" | "update" | "delete" | "passwordReset" | "restore"
+			| "view"
+			| "update"
+			| "delete"
+			| "passwordReset"
+			| "restore"
+			| "deletePermanently"
 		>
 	>;
 	showingDeleted?: Accessor<boolean>;
@@ -79,6 +84,17 @@ const UserRow: Component<UserRowProps> = (props) => {
 						userStore.get.hasPermission(["delete_user"]).all && !currentUser(),
 					actionExclude: true,
 					hide: props.showingDeleted?.(),
+				},
+				{
+					label: T()("delete_permanently"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("deletePermanently", true);
+					},
+					permission: userStore.get.hasPermission(["delete_user"]).all,
+					hide: props.showingDeleted?.() === false,
+					theme: "error",
 				},
 				{
 					label: T()("reset_password"),

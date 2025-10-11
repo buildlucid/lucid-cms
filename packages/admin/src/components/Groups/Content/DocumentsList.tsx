@@ -30,6 +30,7 @@ import { Table } from "@/components/Groups/Table";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
+import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
 
 export const DocumentsList: Component<{
 	state: {
@@ -52,6 +53,7 @@ export const DocumentsList: Component<{
 			promote: false,
 			publish: false,
 			restore: false,
+			deletePermanently: false,
 		},
 	});
 	const [getDocumentId, setDocumentId] = createSignal<number>();
@@ -316,6 +318,18 @@ export const DocumentsList: Component<{
 										theme: "error",
 										hide: props.state.showingDeleted(),
 									},
+									{
+										label: T()("delete_permanently"),
+										type: "button",
+										onClick: () => {
+											rowTarget.setTargetId(doc().id);
+											rowTarget.setTrigger("deletePermanently", true);
+										},
+										permission: userStore.get.hasPermission(["delete_content"])
+											.all,
+										hide: props.state.showingDeleted?.() === false,
+										theme: "error",
+									},
 								]}
 							/>
 						)}
@@ -385,6 +399,16 @@ export const DocumentsList: Component<{
 					open: rowTarget.getTriggers().restore,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("restore", state);
+					},
+				}}
+			/>
+			<DeleteDocumentPermanently
+				id={rowTarget.getTargetId}
+				collection={props.state.collection as CollectionResponse}
+				state={{
+					open: rowTarget.getTriggers().deletePermanently,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deletePermanently", state);
 					},
 				}}
 			/>

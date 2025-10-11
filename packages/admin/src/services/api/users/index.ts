@@ -4,6 +4,7 @@ import useUpdateSingle from "./useUpdateSingle";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteSingle from "./useDeleteSingle";
 import useRestore from "./useRestore";
+import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 
 const exportObject: {
 	useGetMultiple: typeof useGetMultiple;
@@ -12,6 +13,7 @@ const exportObject: {
 	useCreateSingle: typeof useCreateSingle;
 	useDeleteSingle: typeof useDeleteSingle;
 	useRestore: typeof useRestore;
+	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
 } = {
 	useGetMultiple,
 	useGetSingle,
@@ -19,6 +21,7 @@ const exportObject: {
 	useCreateSingle,
 	useDeleteSingle,
 	useRestore,
+	useDeleteSinglePermanently,
 };
 
 export default exportObject;

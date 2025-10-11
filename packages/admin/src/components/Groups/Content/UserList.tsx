@@ -19,6 +19,7 @@ import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset"
 import { Table } from "@/components/Groups/Table";
 import UserRow from "@/components/Tables/Rows/UserRow";
 import RestoreUsers from "@/components/Modals/User/RestoreUser";
+import DeleteUserPermanently from "@/components/Modals/User/DeleteUserPermanently";
 
 export const UserList: Component<{
 	state: {
@@ -36,6 +37,7 @@ export const UserList: Component<{
 			delete: false,
 			passwordReset: false,
 			restore: false,
+			deletePermanently: false,
 		},
 	});
 
@@ -220,6 +222,15 @@ export const UserList: Component<{
 					open: rowTarget.getTriggers().restore,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("restore", state);
+					},
+				}}
+			/>
+			<DeleteUserPermanently
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().deletePermanently,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deletePermanently", state);
 					},
 				}}
 			/>
