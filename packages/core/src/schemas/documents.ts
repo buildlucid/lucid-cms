@@ -258,6 +258,24 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	deleteSinglePermanently: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	restoreMultiple: {
 		body: z.object({
 			ids: z.array(z.number()).meta({

@@ -701,6 +701,42 @@
 					"response": []
 				},
 				{
+					"name": "Delete Single Permanently",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users/1/permanent",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"permanent"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Restore Multiple",
 					"request": {
 						"method": "POST",
@@ -1042,6 +1078,43 @@
 								"v1",
 								"documents",
 								"simple"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Permanently",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/documents/page/1/permanent",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"page",
+								"1",
+								"permanent"
 							]
 						}
 					},
