@@ -11,3 +11,4 @@ export { default as logRouteMiddleware } from "./libs/http/middleware/log-route.
 export { default as validateCSRFMiddleware } from "./libs/http/middleware/validate-csrf.js";
 export { default as validateMiddleware } from "./libs/http/middleware/validate.js";
 export { default as permissionsMiddleware } from "./libs/http/middleware/permissions.js";
+export { default as cacheMiddleware } from "./libs/http/middleware/cache.js";

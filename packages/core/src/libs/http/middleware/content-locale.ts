@@ -17,6 +17,7 @@ const contentLocale = createMiddleware(async (c: LucidHonoContext, next) => {
 			config: config,
 			queue: c.get("queue"),
 			env: c.get("env"),
+			kv: c.get("kv"),
 		},
 		{
 			code: Array.isArray(contentLocale) ? contentLocale[0] : contentLocale,

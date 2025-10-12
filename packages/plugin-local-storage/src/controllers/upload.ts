@@ -46,6 +46,7 @@ const uploadController = (pluginOptions: PluginOptions) =>
 					config: c.get("config"),
 					queue: c.get("queue"),
 					env: c.get("env"),
+					kv: c.get("kv"),
 				},
 				{
 					buffer: buffer ? Buffer.from(buffer) : undefined,

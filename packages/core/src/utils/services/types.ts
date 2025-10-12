@@ -4,12 +4,14 @@ import type { KyselyDB } from "../../libs/db/types.js";
 import type { LucidErrorData } from "../../types/errors.js";
 import type { QueueAdapterInstance } from "../../libs/queues/types.js";
 import type { EnvironmentVariables } from "../../libs/adapter/types.js";
+import type { KVAdapterInstance } from "../../libs/kv/types.js";
 
 export type ServiceContext = {
 	db: KyselyDB;
 	config: Config;
 	env: EnvironmentVariables | null;
 	queue: QueueAdapterInstance;
+	kv: KVAdapterInstance;
 };
 export type ServiceProps<T> = {
 	serviceConfig?: ServiceContext;

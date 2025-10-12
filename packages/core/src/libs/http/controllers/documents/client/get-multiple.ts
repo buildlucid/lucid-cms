@@ -14,6 +14,7 @@ import {
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
+import cache from "../../../middleware/cache.js";
 
 const factory = createFactory();
 
@@ -40,6 +41,15 @@ const getMultipleController = factory.createHandlers(
 	clientAuthentication,
 	validate("param", controllerSchemas.client.getMultiple.params),
 	validate("query", controllerSchemas.client.getMultiple.query.string),
+	// TODO: Re-enable when the cache clear is implemented. Also create a new group keys helper
+	// cache({
+	// 	ttl: 60 * 60 * 24,
+	// 	mode: "include-query",
+	// 	groups: (c) => [
+	// 		"documents",
+	// 		`document:${c.req.param("collectionKey")}:${c.req.param("status")}`,
+	// 	],
+	// }),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");
 		const formattedQuery = await buildFormattedQuery(
@@ -63,6 +73,7 @@ const getMultipleController = factory.createHandlers(
 				config: c.get("config"),
 				queue: c.get("queue"),
 				env: c.get("env"),
+				kv: c.get("kv"),
 			},
 			{
 				collectionKey,

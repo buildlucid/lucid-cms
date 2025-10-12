@@ -36,7 +36,12 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src"
 	},
-	"files": ["dist", "templates", "public", "admin"],
+	"files": [
+		"dist",
+		"templates",
+		"public",
+		"admin"
+	],
 	"author": "Lucid",
 	"repository": {
 		"type": "git",
@@ -76,19 +81,20 @@
 		"kysely": "0.27.4",
 		"lodash.merge": "^4.6.2",
 		"mime-types": "^3.0.1",
+		"node-object-hash": "^3.1.1",
 		"semver": "^7.7.1",
 		"slug": "^10.0.0",
 		"zod": "^3.25.67"
 	},
 	"optionalDependencies": {
 		"@inquirer/prompts": "^7.5.3",
+		"better-sqlite3": "^12.4.1",
 		"chokidar": "^4.0.3",
 		"commander": "^14.0.0",
 		"jiti": "^2.4.2",
 		"minimatch": "^10.0.3",
 		"mjml": "^5.0.0-alpha.6",
-		"sharp": "^0.34.2",
-		"better-sqlite3": "^12.4.1"
+		"sharp": "^0.34.2"
 	},
 	"volta": {
 		"node": "22.15.0"

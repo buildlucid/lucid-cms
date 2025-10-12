@@ -143,7 +143,7 @@ const startServer = async () => {
 	try {
 		const resolved = await processConfig(config(process.env));
 
-		const { app, destroy, queue } = await lucid.createApp({
+		const { app, destroy, queue, kv } = await lucid.createApp({
 			config: resolved,
 			env: process.env,
 			runtimeContext: runtimeContext,
@@ -169,6 +169,7 @@ const startServer = async () => {
 					db: resolved.db.client,
 					queue: queue,
 					env: process.env,
+					kv: kv,
 				});
 			});
 		}

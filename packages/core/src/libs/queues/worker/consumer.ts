@@ -6,6 +6,7 @@ import createQueueContext, { QUEUE_LOG_SCOPE } from "../create-context.js";
 import passthroughQueueAdapter from "../adapters/passthrough.js";
 import Repository from "../../repositories/index.js";
 import type { Select, LucidQueueJobs } from "../../db/types.js";
+import getKVAdapter from "../../kv/get-adapter.js";
 
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
@@ -18,6 +19,8 @@ const startConsumer = async () => {
 		const { config, env } = await loadConfigFile({ path: configPath });
 
 		const CONCURRENT_LIMIT = config.queue.processing.concurrentLimit;
+
+		const kvInstance = await getKVAdapter(config);
 
 		const queueContext = createQueueContext({
 			// additionalJobHandlers: config.queue.jobHandlers,
@@ -136,6 +139,7 @@ const startConsumer = async () => {
 						//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
 						//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
 						queue: internalQueueAdapter,
+						kv: kvInstance,
 					},
 					job.event_data,
 				);

@@ -19,6 +19,7 @@ const generateToken = async (
 				config: config,
 				queue: c.get("queue"),
 				env: c.get("env"),
+				kv: c.get("kv"),
 			},
 			{
 				userId: userId,

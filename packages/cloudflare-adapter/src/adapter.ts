@@ -134,9 +134,11 @@ const cloudflareAdapter = (options?: {
 					const configIsTs = options.configPath.endsWith(".ts");
 					const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
 
+					// TODO: ensure that the KV setup within the cron setup is correct
+
 					const entry = /* ts */ `
 import config from "./${importPath}";
-import lucid from "@lucidcms/core";
+import lucid, { passthroughKVAdapter } from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import emailTemplates from "./email-templates.json" with { type: "json" };
 import { runtimeContext } from "@lucidcms/cloudflare-adapter";
@@ -193,6 +195,7 @@ export default {
 	async scheduled(controller, env, ctx) {
 		const runCronService = async () => {
 			const resolved = await processConfig(config(env));
+			const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
 
 			const cronJobSetup = lucid.setupCronJobs({
 				createQueue: true,
@@ -202,6 +205,7 @@ export default {
 				db: resolved.db.client,
 				queue: cronJobSetup.queue,
 				env: env,
+				kv: kv,
 			});
 		};
 

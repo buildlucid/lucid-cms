@@ -43,6 +43,7 @@ const webhookController = (pluginOptions: PluginOptions) =>
 					config: c.get("config"),
 					queue: c.get("queue"),
 					env: c.get("env"),
+					kv: c.get("kv"),
 				},
 				{
 					rawBody: rawBody,

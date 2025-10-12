@@ -3,6 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
 
 const regenerateKeys: ServiceFn<
 	[
@@ -62,6 +63,9 @@ const regenerateKeys: ServiceFn<
 		},
 	});
 	if (updateKeysRes.error) return updateKeysRes;
+
+	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
+	await context.kv.delete(cacheKey);
 
 	return {
 		error: undefined,

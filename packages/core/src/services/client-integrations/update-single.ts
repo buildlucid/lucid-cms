@@ -1,6 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -20,7 +21,7 @@ const updateSingle: ServiceFn<
 	);
 
 	const checkExistsRes = await ClientIntegrations.selectSingle({
-		select: ["id"],
+		select: ["id", "key"],
 		where: [
 			{
 				key: "id",
@@ -58,6 +59,9 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (updateRes.error) return updateRes;
+
+	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
+	await context.kv.delete(cacheKey);
 
 	return {
 		error: undefined,

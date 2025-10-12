@@ -8,6 +8,7 @@ import type { Config } from "../../../types.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 import createQueueContext from "../../queues/create-context.js";
 import passthroughQueueAdapter from "../../queues/adapters/passthrough.js";
+import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
 
 const runSyncTasks = async (
 	config: Config,
@@ -24,12 +25,14 @@ const runSyncTasks = async (
 			config: config,
 			queue: passthroughQueueAdapter(queueContext),
 			env: null,
+			kv: passthroughKVAdapter(),
 		}),
 		services.sync.syncCollections({
 			db: config.db.client,
 			config: config,
 			queue: passthroughQueueAdapter(queueContext),
 			env: null,
+			kv: passthroughKVAdapter(),
 		}),
 	]);
 
@@ -94,6 +97,7 @@ const migrateCommand = (props?: {
 					config: config,
 					queue: passthroughQueueAdapter(queueContext),
 					env: null,
+					kv: passthroughKVAdapter(),
 				},
 				{
 					dryRun: true,
@@ -189,6 +193,7 @@ const migrateCommand = (props?: {
 							config: config,
 							queue: passthroughQueueAdapter(queueContext),
 							env: null,
+							kv: passthroughKVAdapter(),
 						},
 						{ dryRun: false },
 					);
