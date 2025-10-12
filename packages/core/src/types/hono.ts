@@ -7,6 +7,7 @@ import type {
 } from "../types.js";
 import type { QueueAdapterInstance } from "../libs/queues/types.js";
 import type { AdapterRuntimeContext } from "../libs/adapter/types.js";
+import type { KVAdapterInstance } from "../libs/kv/types.js";
 
 export type LucidAuth = {
 	id: number;
@@ -32,6 +33,7 @@ export type LucidHonoVariables = {
 	config: Config;
 	runtimeContext: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
+	kv: KVAdapterInstance;
 	auth: LucidAuth;
 	clientIntegrationAuth: LucidClientIntegrationAuth;
 	locale: LucidLocale;

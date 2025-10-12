@@ -39,18 +39,16 @@ const createApp = async (props: {
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 
-	//* Hono Middleware
-	for (const middleware of props.config.hono?.middleware || []) {
-		await middleware(app, props.config);
-	}
-	for (const middleware of props.hono?.middleware || []) {
-		await middleware(app, props.config);
-	}
-
-	const queueInstance = await getQueueAdapter(props.config);
-	await queueInstance.lifecycle.start();
-
 	const kvInstance = await getKVAdapter(props.config);
+
+	const [queueInstance] = await Promise.all([
+		getQueueAdapter(props.config).then(async (adapter) => {
+			await adapter.lifecycle.start();
+			return adapter;
+		}),
+		...(props.config.hono?.middleware || []).map((m) => m(app, props.config)),
+		...(props.hono?.middleware || []).map((m) => m(app, props.config)),
+	]);
 
 	app
 		.use(logRoute)
@@ -86,6 +84,7 @@ const createApp = async (props: {
 			c.set("config", props.config);
 			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
+			c.set("kv", kvInstance);
 			c.set("env", props.env ?? null);
 			await next();
 		})
@@ -268,6 +267,7 @@ const createApp = async (props: {
 	return {
 		app,
 		queue: queueInstance,
+		kv: kvInstance,
 		destroy: async () => {
 			await queueInstance.lifecycle.kill();
 			props.config.db.client.destroy();

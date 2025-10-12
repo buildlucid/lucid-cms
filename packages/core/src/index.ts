@@ -7,6 +7,7 @@ export { default as DatabaseAdapter } from "./libs/db/adapter.js";
 export { default as sharpImageProcessor } from "./libs/image-processor/sharp-processor.js";
 export { default as passthroughImageProcessor } from "./libs/image-processor/passthrough-processor.js";
 export { default as passthroughQueueAdapter } from "./libs/queues/adapters/passthrough.js";
+export { default as passthroughKVAdapter } from "./libs/kv/adapters/passthrough.js";
 export { default as BrickBuilder } from "./libs/builders/brick-builder/index.js";
 export { default as CollectionBuilder } from "./libs/builders/collection-builder/index.js";
 export { default as FieldBuilder } from "./libs/builders/field-builder/index.js";

@@ -1,12 +1,17 @@
 import type { KVAdapterInstance } from "../types.js";
 
-const passthroughKVAdapter = async (): Promise<KVAdapterInstance> => {
-	console.log("Passthrough KV Adapter initialized");
-	return {
-		get: async (key: string) => {
-			return null;
-		},
-	};
-};
+/**
+ * Passthrough KV adapter implementation.
+ *
+ * This adapter is a no-op implementation of the KVAdapterInstance interface.
+ * It does not perform any actual key-value operations and returns as if the operation was successful and that there is no cache.
+ */
+const passthroughKVAdapter = (): KVAdapterInstance => ({
+	get: async () => null,
+	set: async () => {},
+	has: async () => false,
+	delete: async () => {},
+	clear: async () => {},
+});
 
 export default passthroughKVAdapter;

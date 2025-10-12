@@ -2,11 +2,12 @@ import type { KVAdapterInstance } from "./types.js";
 import type { Config } from "../../types/config.js";
 import passthroughKVAdapter from "./adapters/passthrough.js";
 
-const getQueueAdapter = async (config: Config): Promise<KVAdapterInstance> => {
+/**
+ * Returns the ideal KV adapter based on config and the runtime environment
+ */
+const getKVAdapter = async (config: Config): Promise<KVAdapterInstance> => {
 	try {
-		if (config.kv?.adapter) {
-			return config.kv.adapter();
-		}
+		if (config.kv) return config.kv();
 
 		const { default: betterSQLiteKVAdapter } = await import(
 			"./adapters/better-sqlite.js"
@@ -17,4 +18,4 @@ const getQueueAdapter = async (config: Config): Promise<KVAdapterInstance> => {
 	}
 };
 
-export default getQueueAdapter;
+export default getKVAdapter;

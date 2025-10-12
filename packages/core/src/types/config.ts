@@ -151,6 +151,8 @@ export type UrlStrategy = (media: {
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
 	db: DatabaseAdapter;
+	/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
+	kv?: KVAdapter;
 	/** The cors configuration. */
 	cors?: {
 		/** Allowed origins. Your configured host is already added by default. */
@@ -273,11 +275,6 @@ export interface LucidConfig {
 			batchSize?: number;
 		};
 	};
-	/** Configure the KV store adapter to use. */
-	kv?: {
-		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
-		adapter?: KVAdapter;
-	};
 	/** Configure the soft-delete behavior for different data types */
 	softDelete?: {
 		/** The fallback number of days to retain deleted data. If left blank, this will fallback to 30 days. */
@@ -321,6 +318,7 @@ export interface LucidConfig {
 
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
+	kv?: KVAdapter;
 	email?: {
 		identifier?: string;
 		from?: {
@@ -375,9 +373,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			concurrentLimit: number;
 			batchSize: number;
 		};
-	};
-	kv?: {
-		adapter?: KVAdapter;
 	};
 	softDelete: {
 		defaultRetentionDays: number;

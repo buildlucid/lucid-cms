@@ -137,11 +137,7 @@ const ConfigSchema = z.object({
 			batchSize: z.number(),
 		}),
 	}),
-	kv: z
-		.object({
-			adapter: KVAdapterSchema.optional(),
-		})
-		.optional(),
+	kv: KVAdapterSchema.optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
 	compilerOptions: z
