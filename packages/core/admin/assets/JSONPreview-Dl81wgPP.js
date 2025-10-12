@@ -1,0 +1,1 @@
+import{t,i as o}from"./index-CQ3-BSEL.js";var s=t('<pre class="text-xs text-title p-4 bg-card-base rounded-md border border-border overflow-auto">');const l=e=>(()=>{var r=s();return o(r,()=>JSON.stringify(e.json,null,2)),r})();export{l as J};

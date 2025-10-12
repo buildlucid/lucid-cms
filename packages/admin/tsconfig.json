@@ -24,7 +24,7 @@
                 "../core/src/types.ts"
             ],
             "@assets/*": [
-                "assets/*"
+                "src/assets/*"
             ]
         }
     }

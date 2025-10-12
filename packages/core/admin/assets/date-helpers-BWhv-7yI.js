@@ -1,0 +1,1 @@
+const n=e=>e?new Date(e).toLocaleDateString("en-gb",{year:"numeric",month:"long",day:"numeric"}):void 0,r=e=>e?new Date(e).toLocaleDateString("en-gb",{year:"numeric",month:"long",day:"numeric",hour:"numeric",minute:"numeric"}):void 0,a={formatDate:n,formatFullDate:r};export{a as d};

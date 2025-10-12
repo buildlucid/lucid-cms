@@ -53,7 +53,7 @@ const serveCommand = async (options?: {
 		});
 		if (!migrateResult) process.exit(2);
 
-		const viteBuildRes = await vite.buildApp(configRes.config, undefined, true);
+		const viteBuildRes = await vite.buildApp(configRes.config);
 		if (viteBuildRes.error) {
 			logger.error(
 				viteBuildRes.error.message ?? "Failed to build app",

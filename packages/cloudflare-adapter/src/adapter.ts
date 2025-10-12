@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { build } from "rolldown";
 import lucid from "@lucidcms/core";
 import {
-	getVitePaths,
+	getBuildPaths,
 	stripImportsPlugin,
 	stripAdapterExportPlugin,
 } from "@lucidcms/core/helpers";
@@ -70,7 +70,7 @@ const cloudflareAdapter = (options?: {
 					hono: {
 						extensions: [
 							async (app, con) => {
-								const paths = getVitePaths(con);
+								const paths = getBuildPaths(con);
 								app.use(
 									"/*",
 									serveStatic({

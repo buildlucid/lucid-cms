@@ -1,5 +1,3 @@
-import { existsSync } from "node:fs";
-
 /**
  * A number of dependencies that are needed for the dev and build commands are set as optional dependencies
  * as they're only required for the CLI and not when running on a server.Add commentMore actions
@@ -15,22 +13,9 @@ const installOptionalDeps = async () => {
 		"minimatch",
 		"commander",
 		"@inquirer/prompts",
-		"vite-plugin-solid",
 		"rolldown",
-		// "@lucidcms/admin",
-		"solid-js",
-		"@tailwindcss/vite",
-		"tailwindcss",
-		"vite",
 		"mjml",
 	];
-
-	//* due to core having @lucidcms/admin as a devDependency set to *, we dont want to run this check in our workspace environment
-	//* potential conflicts if users have the same structure - not the end of the world though, theyd have @lucidcms/admin installed anyway.
-	const isWorkspace =
-		process.cwd().includes("packages/core") ||
-		existsSync("../../packages/admin");
-	if (!isWorkspace) optionalDeps.push("@lucidcms/admin");
 
 	const missingDeps = [];
 

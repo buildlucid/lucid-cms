@@ -88,6 +88,8 @@ export default Object.freeze({
 	directories: {
 		public: "public",
 		lucid: ".lucid",
+		admin: "admin",
+		plugins: "plugins",
 	},
 	typeGeneration: {
 		file: "types.d.ts",
@@ -96,14 +98,6 @@ export default Object.freeze({
 		modules: {
 			coreTypes: "@lucidcms/core/types",
 		} as const,
-	},
-	vite: {
-		dist: "admin",
-		mount: "mount.jsx",
-		html: "index.html",
-		rootSelector: "root",
-		buildMetadata: "spa-build-metadata.json",
-		port: 24678,
 	},
 	brickTypes: {
 		builder: "builder",

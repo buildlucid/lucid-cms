@@ -4,6 +4,7 @@ import Button from "@/components/Partials/Button";
 import { FaSolidXmark } from "solid-icons/fa";
 import { Standard } from "@/components/Groups/Headers";
 import InfoRow from "@/components/Blocks/InfoRow";
+import PluginLoader from "@/components/PluginLoader";
 
 const ComponentsRoute: Component = () => {
 	// ----------------------------------------
@@ -110,6 +111,12 @@ const ComponentsRoute: Component = () => {
 							</Button>
 						</div>
 					</InfoRow.Content>
+				</InfoRow.Root>
+				<InfoRow.Root
+					title="Dynamic Plugin"
+					description="A proof of concept for dynamic component plugin loading"
+				>
+					<PluginLoader />
 				</InfoRow.Root>
 			</DynamicContent>
 		</Wrapper>

@@ -1,5 +1,41 @@
 @import "tailwindcss";
-@config './tailwind.config.js';
+@config '../tailwind.config.js';
+
+@font-face {
+	font-family: "Inter";
+	src: url("./fonts/inter-light.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 300;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Inter";
+	src: url("./fonts/inter-regular.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Inter";
+	src: url("./fonts/inter-medium.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Inter";
+	src: url("./fonts/inter-semibold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Inter";
+	src: url("./fonts/inter-bold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+}
 
 @layer base {
 	*,
@@ -37,14 +73,15 @@
 	p,
 	li,
 	a {
-		@apply text-base font-normal tracking-wide leading-relaxed text-body font-body ;
+		@apply text-base font-normal tracking-wide leading-relaxed text-body font-body;
 	}
-	a, button {
+	a,
+	button {
 		@apply hover:text-primary-hover duration-200 transition-colors ease-in-out focus:outline-hidden focus:ring-1 focus:ring-primary-base;
 	}
-    button {
-        @apply cursor-pointer;
-    }
+	button {
+		@apply cursor-pointer;
+	}
 
 	/* Other */
 	body {

@@ -51,7 +51,7 @@ const buildCommand = async (options?: {
 		await Promise.all([prerenderMjmlTemplates(configRes.config)]);
 
 		const [viteBuildRes] = await Promise.all([
-			vite.buildApp(configRes.config, undefined, options?.silent),
+			vite.buildApp(configRes.config),
 			configRes.adapter.cli.build(
 				configRes.config,
 				{
@@ -86,8 +86,7 @@ const partialBuildDirClear = async (outDir: string | undefined) => {
 	const items = await readdir(outDir, { recursive: true });
 
 	const preservePaths = [
-		path.join(constants.directories.public, constants.vite.dist),
-		// path.join(constants.directories.temp, constants.vite.buildMetadata),
+		path.join(constants.directories.public, constants.directories.admin),
 	];
 
 	for (const item of items) {

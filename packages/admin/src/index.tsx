@@ -1,6 +1,5 @@
 /* @refresh reload */
-import "../assets/fonts.css";
-import "../assets/index.css";
+import "./index.css";
 import { render } from "solid-js/web";
 import App from "./App";
 

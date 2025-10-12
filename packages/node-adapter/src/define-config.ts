@@ -1,4 +1,4 @@
-import { getVitePaths } from "@lucidcms/core/helpers";
+import { getBuildPaths } from "@lucidcms/core/helpers";
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
@@ -13,7 +13,7 @@ const defineConfig = (factory: AdapterDefineConfig): AdapterDefineConfig => {
 				extensions: [
 					...(lucidConfig.hono?.extensions || []),
 					async (app, config) => {
-						const paths = getVitePaths(config);
+						const paths = getBuildPaths(config);
 						app.use(
 							"/*",
 							serveStatic({
