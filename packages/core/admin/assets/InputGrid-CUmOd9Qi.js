@@ -1,1 +1,0 @@
-import{t as r,i as a,w as e,P as c,k as m}from"./index-CQ3-BSEL.js";var t=r("<div>");const i=s=>(()=>{var l=t();return a(l,()=>s.children),e(()=>c(l,m("grid gap-4 mb-4 last:mb-0",{"md:grid-cols-2":s.columns===2,"md:grid-cols-2 lg:grid-cols-3":s.columns===3,"md:grid-cols-2 lg:grid-cols-4":s.columns===4}))),l})();export{i as I};

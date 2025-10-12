@@ -1,1 +1,0 @@
-const o=(t,i)=>{var n,r;if(typeof i=="function")return i()?(r=(n=i())==null?void 0:n.errors)==null?void 0:r.body[t]:void 0;if(i)return i.errors.body[t]},d=t=>{if(t!==void 0&&typeof t!="string"&&!Array.isArray(t))return t};export{d as a,o as g};

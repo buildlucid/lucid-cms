@@ -11,6 +11,7 @@ import type { LucidHonoGeneric } from "./hono.js";
 import type { Hono } from "hono";
 import type { LogTransport, LogLevel } from "../libs/logger/types.js";
 import type { QueueAdapter } from "../libs/queues/types.js";
+import type { KVAdapter } from "../libs/kv/types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -257,7 +258,7 @@ export interface LucidConfig {
 	};
 	/** Queue configuration for background job processing. */
 	queue?: {
-		/** The queue adapter to use. If not provided, defaults to the worker adapter. */
+		/** The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter. */
 		adapter?: QueueAdapter;
 		/** Default options applied when jobs are added to the queue. */
 		defaultJobOptions?: {
@@ -271,6 +272,11 @@ export interface LucidConfig {
 			/** Number of jobs to fetch from the database per poll. Default: 10 */
 			batchSize?: number;
 		};
+	};
+	/** Configure the KV store adapter to use. */
+	kv?: {
+		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
+		adapter?: KVAdapter;
 	};
 	/** Configure the soft-delete behavior for different data types */
 	softDelete?: {
@@ -369,6 +375,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			concurrentLimit: number;
 			batchSize: number;
 		};
+	};
+	kv?: {
+		adapter?: KVAdapter;
 	};
 	softDelete: {
 		defaultRetentionDays: number;

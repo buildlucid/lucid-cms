@@ -18,6 +18,7 @@ import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { StatusCode } from "hono/utils/http-status";
 import type { AdapterRuntimeContext } from "../adapter/types.js";
 import getQueueAdapter from "../queues/get-adapter.js";
+import getKVAdapter from "../kv/get-adapter.js";
 
 /**
  * The entry point for creating the Hono app.
@@ -48,6 +49,8 @@ const createApp = async (props: {
 
 	const queueInstance = await getQueueAdapter(props.config);
 	await queueInstance.lifecycle.start();
+
+	const kvInstance = await getKVAdapter(props.config);
 
 	app
 		.use(logRoute)

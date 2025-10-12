@@ -8,6 +8,7 @@ import type {
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { QueueAdapter } from "../queues/types.js";
+import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
@@ -33,6 +34,13 @@ const QueueAdapterSchema = z.custom<QueueAdapter>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a QueueAdapter function",
+	},
+);
+
+const KVAdapterSchema = z.custom<KVAdapter>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected a KVAdapter function",
 	},
 );
 
@@ -121,18 +129,19 @@ const ConfigSchema = z.object({
 	}),
 	queue: z.object({
 		adapter: QueueAdapterSchema.optional(),
-		defaultJobOptions: z
-			.object({
-				maxAttempts: z.number().optional(),
-			})
-			.optional(),
-		processing: z
-			.object({
-				concurrentLimit: z.number().optional(),
-				batchSize: z.number().optional(),
-			})
-			.optional(),
+		defaultJobOptions: z.object({
+			maxAttempts: z.number(),
+		}),
+		processing: z.object({
+			concurrentLimit: z.number(),
+			batchSize: z.number(),
+		}),
 	}),
+	kv: z
+		.object({
+			adapter: KVAdapterSchema.optional(),
+		})
+		.optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
 	compilerOptions: z

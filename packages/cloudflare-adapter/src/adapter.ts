@@ -240,7 +240,7 @@ export default {
 								"rolldown",
 							]),
 						],
-						external: ["sharp", "ws"],
+						external: ["sharp", "ws", "better-sqlite3"],
 					});
 
 					//* clean up temporary files

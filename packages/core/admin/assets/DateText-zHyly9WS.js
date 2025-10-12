@@ -1,1 +1,0 @@
-import{y as a,t as l,i as u,w as m,s as f}from"./index-CQ3-BSEL.js";import{d as r}from"./date-helpers-BWhv-7yI.js";var i=l('<span class="whitespace-nowrap text-sm">');const d=t=>{const s=a(()=>t.date?r.formatDate(t.date):null),n=a(()=>t.date?r.formatFullDate(t.date):null);return(()=>{var e=i();return u(e,()=>s()||"-"),m(()=>f(e,"title",n()||"")),e})()};export{d as D};

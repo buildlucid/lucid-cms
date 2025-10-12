@@ -46,9 +46,9 @@ export default defineConfig((env) => ({
 	// cors: {
 	// 	origin: [],
 	// },
-	logger: {
-		level: "debug",
-	},
+	// logger: {
+	// level: "debug",
+	// },
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),
 	}),

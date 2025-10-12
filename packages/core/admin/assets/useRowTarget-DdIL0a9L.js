@@ -1,1 +1,0 @@
-import{b as t}from"./index-CQ3-BSEL.js";const c=g=>{const[s,i]=t(g.triggers),[o,r]=t();return{getTriggers:s,setTrigger:(a,e)=>{i(n=>({...n,[a]:e})),e===!1&&r(void 0)},getTargetId:o,setTargetId:r}};export{c as u};
