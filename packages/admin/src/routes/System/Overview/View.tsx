@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createMemo, createSignal } from "solid-js";
+import { type Component, Show, createMemo, createSignal } from "solid-js";
 import helpers from "@/utils/helpers";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -8,6 +8,7 @@ import InfoRow from "@/components/Blocks/InfoRow";
 import Button from "@/components/Partials/Button";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
+import ClearCache from "@/components/Modals/System/ClearCache";
 import DetailsList from "@/components/Partials/DetailsList";
 import { Wrapper, DynamicContent } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
@@ -17,6 +18,7 @@ const SystemOverviewRoute: Component = (props) => {
 	// State / Hooks
 	const [getOpenClearAllProcessedImages, setOpenClearAllProcessedImages] =
 		createSignal(false);
+	const [getOpenClearCache, setOpenClearCache] = createSignal(false);
 
 	// ----------------------------------
 	// Queries
@@ -35,6 +37,9 @@ const SystemOverviewRoute: Component = (props) => {
 		return Math.floor(((total - remaining) / total) * 100);
 	});
 	const contentLocales = createMemo(() => contentLocaleStore.get.locales);
+	const canClearCache = createMemo(
+		() => userStore.get.hasPermission(["clear_kv"]).all,
+	);
 
 	// ----------------------------------------
 	// Render
@@ -116,6 +121,29 @@ const SystemOverviewRoute: Component = (props) => {
 					</InfoRow.Content>
 				</InfoRow.Root>
 
+				{/* Cache */}
+				<InfoRow.Root
+					title={T()("cache")}
+					description={T()("cache_setting_message")}
+				>
+					<InfoRow.Content
+						title={T()("clear_cache")}
+						description={T()("clear_cache_setting_message")}
+					>
+						<Button
+							size="medium"
+							type="button"
+							theme="danger"
+							onClick={() => {
+								setOpenClearCache(true);
+							}}
+							permission={userStore.get.hasPermission(["clear_kv"]).all}
+						>
+							{T()("clear_cache_button")}
+						</Button>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
 				{/* Locales */}
 				<InfoRow.Root
 					title={T()("locales")}
@@ -171,6 +199,12 @@ const SystemOverviewRoute: Component = (props) => {
 				state={{
 					open: getOpenClearAllProcessedImages(),
 					setOpen: setOpenClearAllProcessedImages,
+				}}
+			/>
+			<ClearCache
+				state={{
+					open: getOpenClearCache(),
+					setOpen: setOpenClearCache,
 				}}
 			/>
 		</Wrapper>
