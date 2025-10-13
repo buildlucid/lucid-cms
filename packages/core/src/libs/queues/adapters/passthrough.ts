@@ -180,7 +180,6 @@ const passthroughQueueAdapter: QueueAdapter<{
 			data: { event },
 		});
 
-		//* insert event into the database and KV
 		const jobResponse = await context.insertJob(params.serviceContext, {
 			event: event,
 			payload: params.payload,
@@ -217,7 +216,6 @@ const passthroughQueueAdapter: QueueAdapter<{
 			data: { event, count: params.payloads.length },
 		});
 
-		//* insert events into the database and KV
 		const jobResponse = await context.insertMultipleJobs(
 			params.serviceContext,
 			{

@@ -30,7 +30,6 @@ const createQueueContext = (params?: {
 		/**
 		 * Responsible for adding a job to the queue.
 		 * - Inserts job into the database
-		 * - If KV is enabled, then also inserts into the KV
 		 * - Logs the job
 		 * */
 		insertJob: async (
@@ -43,7 +42,6 @@ const createQueueContext = (params?: {
 			},
 		): ServiceResponse<QueueJobResponse> => {
 			try {
-				//* insert event into the database, if KV is enabled, then also insert into the KV
 				const jobId = randomUUID();
 				const now = new Date();
 				const status = "pending";
@@ -77,12 +75,6 @@ const createQueueContext = (params?: {
 				});
 				if (createJobRes.error) return createJobRes;
 
-				// TODO: Insert into KV if configured
-				// if (config.kv) {
-				//   await config.kv.set(`job:${jobId}`, job);
-				//   await config.kv.lpush('pending_jobs', jobId);
-				// }
-
 				return {
 					error: undefined,
 					data: { jobId, event: data.event, status },
@@ -108,7 +100,6 @@ const createQueueContext = (params?: {
 		/**
 		 * Responsible for adding multiple jobs of the same type to the queue.
 		 * - Inserts multiple jobs into the database in a single operation
-		 * - If KV is enabled, then also inserts into the KV
 		 * - Logs the jobs
 		 * */
 		insertMultipleJobs: async (
@@ -158,14 +149,6 @@ const createQueueContext = (params?: {
 					returning: ["id"],
 				});
 				if (createJobsRes.error) return createJobsRes;
-
-				// TODO: Insert into KV if configured
-				// if (config.kv) {
-				//   for (const job of jobsData) {
-				//     await config.kv.set(`job:${job.jobId}`, job);
-				//     await config.kv.lpush('pending_jobs', job.jobId);
-				//   }
-				// }
 
 				return {
 					error: undefined,
