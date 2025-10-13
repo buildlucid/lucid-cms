@@ -1,3 +1,4 @@
+import cacheKeys from "../../../libs/kv/cache-keys.js";
 import Repository from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -28,6 +29,8 @@ const deleteLocale: ServiceFn<
 		},
 	});
 	if (deleteRes.error) return deleteRes;
+
+	await context.kv.delete(cacheKeys.http.static.clientLocales);
 
 	return {
 		error: undefined,

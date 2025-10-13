@@ -1,3 +1,5 @@
+const HTTP_STATIC_PREFIX = "http:static:";
+
 const cacheKeys = {
 	/**
 	 * Generate a cache key for API key authentication
@@ -10,8 +12,17 @@ const cacheKeys = {
 	 */
 	http: {
 		response: (hash: string) => `http:${hash}`,
-		group: (group: string) => `_http_cache_group:${group}`,
+		tag: (tag: string) => `_http_cache_tag:${tag}`,
+		tags: {
+			clientLocales: "client-locales",
+		},
+		static: {
+			clientLocales: `${HTTP_STATIC_PREFIX}client-locales`,
+		} as const,
 	},
 } as const;
+
+export type HttpStaticValues =
+	(typeof cacheKeys.http.static)[keyof typeof cacheKeys.http.static];
 
 export default cacheKeys;

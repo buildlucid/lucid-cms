@@ -1,47 +1,47 @@
-import type { KVAdapterInstance } from "./types.js";
 import cacheKeys from "./cache-keys.js";
+import type { KVAdapterInstance } from "./types.js";
 
 /**
- * Adds a key to multiple cache groups.
+ * Adds a key to multiple cache tags.
  */
-export const addKeyToGroups = async (
+export const addKeyToTag = async (
 	kv: KVAdapterInstance,
-	groups: string[],
+	tags: string[],
 	key: string,
 ) => {
 	await Promise.all(
-		groups.map(async (group) => {
-			const groupKey = cacheKeys.http.group(group);
-			const existingKeys = (await kv.get<string[]>(groupKey)) || [];
+		tags.map(async (tag) => {
+			const tagKey = cacheKeys.http.tag(tag);
+			const existingKeys = (await kv.get<string[]>(tagKey)) || [];
 
 			if (!existingKeys.includes(key)) {
 				existingKeys.push(key);
-				await kv.set(groupKey, existingKeys);
+				await kv.set(tagKey, existingKeys);
 			}
 		}),
 	);
 };
 
 /**
- * Invalidates a cache group by deleting all keys associated with it.
+ * Invalidates a cache tag by deleting all keys associated with it.
  */
-export const invalidateHttpCacheGroup = async (
+export const invalidateHttpCacheTag = async (
 	kv: KVAdapterInstance,
-	group: string,
+	tag: string,
 ) => {
-	const groupKey = cacheKeys.http.group(group);
-	const keys = (await kv.get<string[]>(groupKey)) || [];
+	const tagKey = cacheKeys.http.tag(tag);
+	const keys = (await kv.get<string[]>(tagKey)) || [];
 
 	await Promise.all(keys.map((key) => kv.delete(key)));
-	await kv.delete(groupKey);
+	await kv.delete(tagKey);
 };
 
 /**
- * Invalidates multiple cache groups by deleting all keys associated with them.
+ * Invalidates multiple cache tags by deleting all keys associated with them.
  */
-export const invalidateHttpCacheGroups = async (
+export const invalidateHttpCacheTags = async (
 	kv: KVAdapterInstance,
-	groups: string[],
+	tags: string[],
 ) => {
-	await Promise.all(groups.map((group) => invalidateHttpCacheGroup(kv, group)));
+	await Promise.all(tags.map((tag) => invalidateHttpCacheTag(kv, tag)));
 };

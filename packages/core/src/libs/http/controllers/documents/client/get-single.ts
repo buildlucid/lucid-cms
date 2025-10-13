@@ -1,20 +1,20 @@
-import z from "zod/v4";
-import T from "../../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../../schemas/documents.js";
 import { describeRoute } from "hono-openapi";
+import z from "zod/v4";
+import { controllerSchemas } from "../../../../../schemas/documents.js";
 import services from "../../../../../services/index.js";
-import formatAPIResponse from "../../../utils/build-response.js";
-import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
-import validate from "../../../middleware/validate.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import buildFormattedQuery from "../../../utils/build-formatted-query.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import cache from "../../../middleware/cache.js";
+import clientAuthentication from "../../../middleware/client-authenticate.js";
+import validate from "../../../middleware/validate.js";
+import buildFormattedQuery from "../../../utils/build-formatted-query.js";
+import formatAPIResponse from "../../../utils/build-response.js";
 
 const factory = createFactory();
 
@@ -43,7 +43,7 @@ const getSingleController = factory.createHandlers(
 	// cache({
 	// 	ttl: 60 * 60 * 24,
 	// 	mode: "include-query",
-	// 	groups: (c) => [
+	// 	tags: (c) => [
 	// 		"documents",
 	// 		`document:${c.req.param("collectionKey")}:${c.req.param("status")}`,
 	// 	],

@@ -1,14 +1,15 @@
-import T from "../../../translations/index.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
-import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import { createMiddleware } from "hono/factory";
+import constants from "../../../constants/constants.js";
 import services from "../../../services/index.js";
+import T from "../../../translations/index.js";
 import type {
 	LucidClientIntegrationAuth,
 	LucidHonoContext,
 } from "../../../types/hono.js";
-import cacheKeys from "../../kv/cache-keys.js";
 import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.js";
+import { LucidAPIError } from "../../../utils/errors/index.js";
+import serviceWrapper from "../../../utils/services/service-wrapper.js";
+import cacheKeys from "../../kv/cache-keys.js";
 
 const clientAuthentication = createMiddleware(
 	async (c: LucidHonoContext, next) => {
@@ -64,7 +65,7 @@ const clientAuthentication = createMiddleware(
 		if (verifyApiKey.error) throw new LucidAPIError(verifyApiKey.error);
 
 		await kv.set(cacheKey, verifyApiKey.data, {
-			expirationTtl: 300,
+			expirationTtl: constants.ttl["5-minutes"],
 		});
 
 		c.set("clientIntegrationAuth", verifyApiKey.data);

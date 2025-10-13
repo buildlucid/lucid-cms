@@ -1,9 +1,13 @@
-import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import Formatter from "../../libs/formatters/index.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
 import logger from "../../libs/logger/index.js";
+import Repository from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
+/**
+ * Syncs the locales in the database with the locales in the config. Handles, creating, soft-deleting, and restoring.
+ */
 const syncLocales: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
@@ -110,6 +114,8 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	if (typeof createRes !== "boolean" && createRes.error) return createRes;
 	if (typeof deleteRes !== "boolean" && deleteRes.error) return deleteRes;
 	if (typeof restoreRes !== "boolean" && restoreRes.error) return restoreRes;
+
+	await context.kv.delete(cacheKeys.http.static.clientLocales);
 
 	return {
 		error: undefined,

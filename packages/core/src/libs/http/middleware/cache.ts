@@ -1,8 +1,8 @@
 import { createMiddleware } from "hono/factory";
-import type { LucidHonoContext } from "../../../types/hono.js";
 import { hasher } from "node-object-hash";
-import { addKeyToGroups } from "../../kv/http-cache.js";
-import cacheKeys from "../../kv/cache-keys.js";
+import type { LucidHonoContext } from "../../../types/hono.js";
+import cacheKeys, { type HttpStaticValues } from "../../kv/cache-keys.js";
+import { addKeyToTag } from "../../kv/http-cache.js";
 
 const hashInstance = hasher({ sort: true, coerce: true });
 
@@ -10,17 +10,23 @@ type CacheOptions = {
 	/** The time-to-live (TTL) for the cached response in seconds. */
 	ttl: number;
 	/** The mode for generating the cache key. */
-	mode: "path-only" | "include-query";
+	mode: "path-only" | "include-query" | "static";
 	/** The headers to include in the cache key. */
 	includeHeaders?: string[];
-	/** The groups to add the cache key to. */
-	groups?: string[] | ((c: LucidHonoContext) => string[]);
+	/** The tags to add the cache key to. */
+	tags?: string[] | ((c: LucidHonoContext) => string[]);
+	/** Bypasses hash generation and uses a simple string key. Useful for endpoints with no variations. */
+	staticKey?: HttpStaticValues;
 };
 
 /**
  * Generate a cache key based on the request context and options.
  */
 const generateCacheKey = (c: LucidHonoContext, options: CacheOptions) => {
+	if (options.staticKey) {
+		return options.staticKey;
+	}
+
 	const { mode = "include-query", includeHeaders = [] } = options;
 
 	const cacheObject: Record<string, unknown> = {
@@ -79,9 +85,12 @@ const cache = (options: CacheOptions) =>
 		const kv = c.get("kv");
 		const cacheKey = generateCacheKey(c, options);
 
-		const cached = await kv.get(cacheKey);
+		const cached = await kv.get<{ data: unknown; cachedAt: number }>(cacheKey);
 		if (cached !== null) {
-			return c.json(cached);
+			const age = Math.floor((Date.now() - cached.cachedAt) / 1000);
+			c.header("X-Cache", "HIT");
+			c.header("Age", age.toString());
+			return c.json(cached.data);
 		}
 
 		await next();
@@ -92,18 +101,25 @@ const cache = (options: CacheOptions) =>
 			response.headers.get("content-type")?.includes("application/json")
 		) {
 			const data = await response.json();
-			await kv.set(cacheKey, data, {
-				expirationTtl: options.ttl,
-			});
+			await kv.set(
+				cacheKey,
+				{
+					data: data,
+					cachedAt: Date.now(),
+				},
+				{
+					expirationTtl: options.ttl,
+				},
+			);
 
-			if (options.groups) {
-				const groups =
-					typeof options.groups === "function"
-						? options.groups(c)
-						: options.groups;
-				await addKeyToGroups(kv, groups, cacheKey);
+			if (options.tags) {
+				const tags =
+					typeof options.tags === "function" ? options.tags(c) : options.tags;
+				await addKeyToTag(kv, tags, cacheKey);
 			}
 		}
+
+		c.header("X-Cache", "MISS");
 	});
 
 export default cache;
