@@ -17,6 +17,7 @@ export interface MigrationLogger extends SharedLogger {
 	collectionMigrationComplete: () => void;
 	migrationComplete: (startTime: [number, number]) => void;
 	migrationFailed: (error: unknown, step?: string) => void;
+	clearingKVCache: () => void;
 }
 
 const createMigrationLogger = (): MigrationLogger => ({
@@ -92,6 +93,9 @@ const createMigrationLogger = (): MigrationLogger => ({
 			`\n${colors.textRed}Migration failed${stepMessage}:${colors.reset}`,
 			error,
 		);
+	},
+	clearingKVCache: () => {
+		console.log(`${colors.textGray}  - Clearing KV cache...${colors.reset}`);
 	},
 	...sharedLogger(),
 });

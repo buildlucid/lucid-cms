@@ -10,16 +10,18 @@ import createQueueContext from "../../queues/create-context.js";
 import createMigrationLogger from "../logger/migration-logger.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
+import type { KVAdapterInstance } from "../../kv/types.js";
 
 const runSyncTasks = async (
 	config: Config,
 	logger: ReturnType<typeof createMigrationLogger>,
 	mode: "process" | "return",
+	kvInstance?: KVAdapterInstance,
 ): Promise<boolean> => {
 	logger.syncTasksStart();
 
 	const queueContext = createQueueContext();
-	const kvInstance = await getKVAdapter(config);
+	const kv = kvInstance ?? (await getKVAdapter(config));
 
 	const [localesResult, collectionsResult] = await Promise.all([
 		services.sync.syncLocales({
@@ -27,14 +29,14 @@ const runSyncTasks = async (
 			config: config,
 			queue: passthroughQueueAdapter(queueContext),
 			env: null,
-			kv: kvInstance,
+			kv: kv,
 		}),
 		services.sync.syncCollections({
 			db: config.db.client,
 			config: config,
 			queue: passthroughQueueAdapter(queueContext),
 			env: null,
-			kv: kvInstance,
+			kv: kv,
 		}),
 	]);
 
@@ -164,6 +166,8 @@ const migrateCommand = (props?: {
 				else return false;
 			}
 
+			const kvInstance = await getKVAdapter(config);
+
 			logger.logsStart();
 
 			//* run database migrations if needed
@@ -180,7 +184,7 @@ const migrateCommand = (props?: {
 			}
 
 			//* run sync tasks (locales, collections). We dont skip these as migrations are being ran also.
-			const syncResult = await runSyncTasks(config, logger, mode);
+			const syncResult = await runSyncTasks(config, logger, mode, kvInstance);
 			if (!syncResult && mode === "return") {
 				return false;
 			}
@@ -195,7 +199,7 @@ const migrateCommand = (props?: {
 							config: config,
 							queue: passthroughQueueAdapter(queueContext),
 							env: null,
-							kv: passthroughKVAdapter(),
+							kv: kvInstance,
 						},
 						{ dryRun: false },
 					);
@@ -215,6 +219,9 @@ const migrateCommand = (props?: {
 					else return false;
 				}
 			}
+
+			logger.clearingKVCache();
+			await kvInstance.clear();
 
 			logger.migrationComplete(overallStartTime);
 			if (mode === "process") process.exit(0);
