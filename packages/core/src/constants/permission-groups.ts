@@ -43,7 +43,7 @@ const permissionGroups: Record<PermissionGroupKey, PermissionGroup> =
 		},
 		settings: {
 			key: "settings_permissions",
-			permissions: ["update_license"],
+			permissions: ["update_license", "clear_kv"],
 		},
 	});
 

@@ -2535,6 +2535,36 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Clear KV",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/settings/kv",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"settings",
+								"kv"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -2744,7 +2774,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft?filter[_slug]=en",
+									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft",
 									"host": [
 										"{{BASE_URL}}"
 									],
@@ -2789,7 +2819,8 @@
 										},
 										{
 											"key": "filter[_slug]",
-											"value": "en"
+											"value": "en",
+											"disabled": true
 										}
 									]
 								}
@@ -2808,7 +2839,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/documents/page/draft",
+									"raw": "{{BASE_URL}}/api/v1/client/documents/page/published",
 									"host": [
 										"{{BASE_URL}}"
 									],
@@ -2818,7 +2849,7 @@
 										"client",
 										"documents",
 										"page",
-										"draft"
+										"published"
 									],
 									"query": [
 										{

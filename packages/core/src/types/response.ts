@@ -463,6 +463,7 @@ export type Permission =
 	| "update_client_integration"
 	| "delete_client_integration"
 	| "regenerate_client_integration"
+	| "clear_kv"
 	| "update_license";
 
 export type PermissionGroup = {

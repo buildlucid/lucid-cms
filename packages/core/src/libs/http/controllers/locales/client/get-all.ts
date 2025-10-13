@@ -29,7 +29,7 @@ const getAllController = factory.createHandlers(
 	clientAuthentication,
 	cache({
 		ttl: constants.ttl["24-hours"],
-		mode: "path-only",
+		mode: "static",
 		staticKey: cacheKeys.http.static.clientLocales,
 	}),
 	async (c) => {

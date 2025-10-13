@@ -76,4 +76,13 @@ export const controllerSchemas = {
 		params: undefined,
 		response: settingsResponseSchema,
 	} satisfies ControllerSchema,
+	clearKV: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 };
