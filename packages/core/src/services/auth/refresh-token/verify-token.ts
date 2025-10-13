@@ -4,6 +4,7 @@ import constants from "../../../constants/constants.js";
 import Repository from "../../../libs/repositories/index.js";
 import services from "../../index.js";
 import { getCookie } from "hono/cookie";
+import cacheKeys from "../../../libs/kv/cache-keys.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 
@@ -37,6 +38,18 @@ const verifyToken = async (
 		const decode = (await verify(_refresh, config.keys.refreshTokenSecret)) as {
 			id: number;
 		};
+
+		const kv = c.get("kv");
+		const kvEntry = await kv.get<{ user_id: number }>(
+			cacheKeys.auth.refresh(_refresh),
+		);
+
+		if (kvEntry && kvEntry.user_id === decode.id) {
+			return {
+				error: undefined,
+				data: { user_id: kvEntry.user_id },
+			};
+		}
 
 		const tokenRes = await UserTokens.selectSingle({
 			select: ["id", "user_id"],
@@ -73,10 +86,27 @@ const verifyToken = async (
 		});
 		if (tokenRes.error) return tokenRes;
 
+		if (!tokenRes.data.user_id) {
+			return {
+				error: {
+					type: "authorisation",
+					name: T("refresh_token_error_name"),
+					message: T("no_refresh_token_found"),
+				},
+				data: undefined,
+			};
+		}
+
+		await kv.set(
+			cacheKeys.auth.refresh(_refresh),
+			{ user_id: tokenRes.data.user_id },
+			{ expirationTtl: constants.refreshTokenExpiration },
+		);
+
 		return {
 			error: undefined,
 			data: {
-				user_id: tokenRes.data.user_id as number,
+				user_id: tokenRes.data.user_id,
 			},
 		};
 	} catch (err) {

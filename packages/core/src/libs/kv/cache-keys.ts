@@ -6,6 +6,10 @@ const cacheKeys = {
 	 */
 	auth: {
 		client: (apiKey: string) => `auth:client:${apiKey}`,
+		/**
+		 * Cache key for refresh token existence
+		 */
+		refresh: (token: string) => `auth:refresh:${token}`,
 	},
 	/**
 	 * Generate cache keys for HTTP responses (used by cache middleware)

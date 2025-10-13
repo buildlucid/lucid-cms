@@ -4,6 +4,7 @@ import Repository from "../../../libs/repositories/index.js";
 import clearToken from "./clear-token.js";
 import { setCookie } from "hono/cookie";
 import { randomBytes } from "node:crypto";
+import cacheKeys from "../../../libs/kv/cache-keys.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 
@@ -54,6 +55,13 @@ const generateToken = async (
 		},
 	});
 	if (createTokenRes.error) return createTokenRes;
+
+	const kv = c.get("kv");
+	await kv.set(
+		cacheKeys.auth.refresh(token),
+		{ user_id: userId },
+		{ expirationTtl: constants.refreshTokenExpiration },
+	);
 
 	return {
 		error: undefined,
