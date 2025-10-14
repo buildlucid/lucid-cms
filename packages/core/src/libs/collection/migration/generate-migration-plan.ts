@@ -1,17 +1,17 @@
-import determineColumnMods from "./determine-column-mods.js";
-import determineColumnModType from "../helpers/column-mod-type.js";
-import normaliseColumn from "../helpers/normalise-column.js";
-import logger from "../../../libs/logger/index.js";
-import getTablePriority from "../helpers/get-table-priority.js";
 import constants from "../../../constants/constants.js";
-import type { ServiceResponse, InferredTable } from "../../../types.js";
 import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
+import type DatabaseAdapter from "../../../libs/db-adapter/adapter-base.js";
+import logger from "../../../libs/logger/index.js";
+import type { InferredTable, ServiceResponse } from "../../../types.js";
+import determineColumnModType from "../helpers/column-mod-type.js";
+import getTablePriority from "../helpers/get-table-priority.js";
+import normaliseColumn from "../helpers/normalise-column.js";
+import determineColumnMods from "./determine-column-mods.js";
 import type {
-	MigrationPlan,
 	ColumnOperation,
+	MigrationPlan,
 	TableMigration,
 } from "./types.js";
-import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 const DISABLE_REMOVE_TABLES = true;
 const DISABLE_REMOVE_COLUMNS = true;

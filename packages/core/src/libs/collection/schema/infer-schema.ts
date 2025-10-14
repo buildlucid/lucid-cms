@@ -1,11 +1,11 @@
-import T from "../../../translations/index.js";
-import createDocumentTable from "./tables/document-table.js";
-import createVersionsTable from "./tables/versions-table.js";
-import createFieldTables from "./tables/fields-table.js";
-import type { CollectionSchema, CollectionSchemaTable } from "./types.js";
-import type { ServiceResponse } from "../../../types.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type DatabaseAdapter from "../../db/adapter.js";
+import T from "../../../translations/index.js";
+import type { ServiceResponse } from "../../../types.js";
+import type DatabaseAdapter from "../../db-adapter/adapter-base.js";
+import createDocumentTable from "./tables/document-table.js";
+import createFieldTables from "./tables/fields-table.js";
+import createVersionsTable from "./tables/versions-table.js";
+import type { CollectionSchema, CollectionSchemaTable } from "./types.js";
 
 /**
  * Infers the collection schema from a given CollectionBuilder instance

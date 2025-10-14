@@ -1,10 +1,15 @@
+import { sql } from "kysely";
 import z from "zod/v4";
 import { optionsNameSchema } from "../../schemas/options.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type {
+	Insert,
+	KyselyDB,
+	LucidOptions,
+	Select,
+} from "../db-adapter/types.js";
 import StaticRepository from "./parents/static-repository.js";
-import type { KyselyDB, Select, Insert, LucidOptions } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryProps } from "./types.js";
-import { sql } from "kysely";
 
 export default class OptionsRepository extends StaticRepository<"lucid_options"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {

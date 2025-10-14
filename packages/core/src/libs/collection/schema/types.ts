@@ -1,6 +1,6 @@
-import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { ColumnDataType } from "kysely";
 import type { FieldTypes } from "../../../types.js";
+import type { OnDelete, OnUpdate } from "../../db-adapter/types.js";
 
 export type TableType =
 	| "document"

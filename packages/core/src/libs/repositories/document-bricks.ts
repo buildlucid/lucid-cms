@@ -7,9 +7,9 @@ import type {
 	LucidVersionTable,
 	LucidVersionTableName,
 	Select,
-} from "../db/types.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
+} from "../db-adapter/types.js";
+import type { KyselyDB } from "../db-adapter/types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type { DynamicConfig } from "./types.js";
 import type { CollectionSchemaColumn } from "../collection/schema/types.js";
 

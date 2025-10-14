@@ -1,7 +1,7 @@
-import UserPermissionsFormatter from "./user-permissions.js";
-import Formatter from "./index.js";
-import type { BooleanInt } from "../db/types.js";
 import type { UserResponse } from "../../types/response.js";
+import type { BooleanInt } from "../db-adapter/types.js";
+import Formatter from "./index.js";
+import UserPermissionsFormatter from "./user-permissions.js";
 
 export interface UserPropT {
 	created_at: Date | string | null;
@@ -26,18 +26,14 @@ export interface UserPropT {
 }
 
 export default class UsersFormatter {
-	formatMultiple = (props: {
-		users: UserPropT[];
-	}) => {
+	formatMultiple = (props: { users: UserPropT[] }) => {
 		return props.users.map((u) =>
 			this.formatSingle({
 				user: u,
 			}),
 		);
 	};
-	formatSingle = (props: {
-		user: UserPropT;
-	}): UserResponse => {
+	formatSingle = (props: { user: UserPropT }): UserResponse => {
 		const { roles, permissions } =
 			new UserPermissionsFormatter().formatMultiple({
 				roles: props.user.roles || [],

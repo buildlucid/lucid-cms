@@ -1,8 +1,8 @@
 import type { ZodType } from "zod/v4";
-import type { EnvironmentVariables } from "../../libs/adapter/types.js";
-import type { KyselyDB } from "../../libs/db/types.js";
-import type { KVAdapterInstance } from "../../libs/kv/types.js";
-import type { QueueAdapterInstance } from "../../libs/queues/types.js";
+import type { KyselyDB } from "../../libs/db-adapter/types.js";
+import type { KVAdapterInstance } from "../../libs/kv-adapter/types.js";
+import type { QueueAdapterInstance } from "../../libs/queue-adapter/types.js";
+import type { EnvironmentVariables } from "../../libs/runtime-adapter/types.js";
 import type { Config } from "../../types/config.js";
 import type { LucidErrorData } from "../../types/errors.js";
 

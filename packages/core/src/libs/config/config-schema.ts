@@ -1,14 +1,14 @@
-import z from "zod/v4";
-import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { Hono } from "hono";
+import z from "zod/v4";
 import type {
 	Config,
 	ImageProcessor,
 	UrlStrategy,
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { QueueAdapter } from "../queues/types.js";
-import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
+import type { KVAdapter } from "../kv-adapter/types.js";
+import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
+import type { QueueAdapter } from "../queue-adapter/types.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>

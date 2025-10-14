@@ -1,14 +1,13 @@
-import z from "zod/v4";
 import { sql } from "kysely";
-import StaticRepository from "./parents/static-repository.js";
+import z from "zod/v4";
+import type { GetMultipleQueryParams } from "../../schemas/users.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type { KyselyDB, LucidUsers, Select } from "../db-adapter/types.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../query-builder/index.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
-import type { Select, KyselyDB } from "../db/types.js";
-import type { LucidUsers } from "../db/types.js";
-import type { GetMultipleQueryParams } from "../../schemas/users.js";
 
 export default class UsersRepository extends StaticRepository<"lucid_users"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {

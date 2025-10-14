@@ -8,7 +8,7 @@ import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import cacheKeys from "../../../../kv/cache-keys.js";
+import cacheKeys from "../../../../kv-adapter/cache-keys.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import formatAPIResponse from "../../../utils/build-response.js";

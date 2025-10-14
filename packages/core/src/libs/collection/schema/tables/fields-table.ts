@@ -1,20 +1,20 @@
-import T from "../../../../translations/index.js";
-import buildTableName from "../../helpers/build-table-name.js";
-import prefixGeneratedColName from "../../helpers/prefix-generated-column-name.js";
-import type {
-	CollectionSchemaTable,
-	CollectionSchemaColumn,
-	TableType,
-} from "../types.js";
-import type { ServiceResponse } from "../../../../types.js";
+import type BrickBuilder from "../../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../../libs/builders/collection-builder/index.js";
+import type DatabaseAdapter from "../../../../libs/db-adapter/adapter-base.js";
+import T from "../../../../translations/index.js";
 import type {
 	CFConfig,
 	FieldTypes,
+	ServiceResponse,
 	TabFieldConfig,
 } from "../../../../types.js";
-import type BrickBuilder from "../../../../libs/builders/brick-builder/index.js";
-import type DatabaseAdapter from "../../../../libs/db/adapter.js";
+import buildTableName from "../../helpers/build-table-name.js";
+import prefixGeneratedColName from "../../helpers/prefix-generated-column-name.js";
+import type {
+	CollectionSchemaColumn,
+	CollectionSchemaTable,
+	TableType,
+} from "../types.js";
 
 /**
  * Creates table schemas for fields

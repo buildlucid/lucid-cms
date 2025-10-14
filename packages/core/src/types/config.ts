@@ -1,17 +1,17 @@
+import type { Readable } from "node:stream";
+import type { Hono } from "hono";
+import type { InlineConfig } from "vite";
 import type z from "zod/v4";
 import type CollectionBuilder from "../libs/builders/collection-builder/index.js";
-import type DatabaseAdapter from "../libs/db/adapter.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
-import type { Readable } from "node:stream";
-import type { AllHooks } from "./hooks.js";
+import type DatabaseAdapter from "../libs/db-adapter/adapter-base.js";
+import type { KVAdapter } from "../libs/kv-adapter/types.js";
+import type { LogLevel, LogTransport } from "../libs/logger/types.js";
+import type { QueueAdapter } from "../libs/queue-adapter/types.js";
+import type { EmailDeliveryStatus, MediaType } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
-import type { InlineConfig } from "vite";
-import type { MediaType, EmailDeliveryStatus } from "../types.js";
 import type { LucidHonoGeneric } from "./hono.js";
-import type { Hono } from "hono";
-import type { LogTransport, LogLevel } from "../libs/logger/types.js";
-import type { QueueAdapter } from "../libs/queues/types.js";
-import type { KVAdapter } from "../libs/kv/types.js";
+import type { AllHooks } from "./hooks.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -143,9 +143,7 @@ export type ImageProcessor = (
 	options: ImageProcessorOptions,
 ) => ServiceResponse<ImageProcessorResult>;
 
-export type UrlStrategy = (media: {
-	key: string;
-}) => string;
+export type UrlStrategy = (media: { key: string }) => string;
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {

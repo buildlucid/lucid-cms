@@ -1,26 +1,26 @@
-import z from "zod/v4";
-import DynamicRepository from "./parents/dynamic-repository.js";
-import { versionTypesSchema } from "../../schemas/document-versions.js";
 import { sql } from "kysely";
-import queryBuilder from "../query-builder/index.js";
+import z from "zod/v4";
+import { versionTypesSchema } from "../../schemas/document-versions.js";
+import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
+import type { BrickTypes } from "../builders/brick-builder/types.js";
+import type {
+	CollectionSchemaColumn,
+	CollectionSchemaTable,
+} from "../collection/schema/types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type {
 	DocumentVersionType,
+	KyselyDB,
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTable,
 	LucidVersionTableName,
 	Select,
-} from "../db/types.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
-import type { DynamicConfig, QueryProps } from "./types.js";
-import type {
-	CollectionSchemaColumn,
-	CollectionSchemaTable,
-} from "../collection/schema/types.js";
+} from "../db-adapter/types.js";
+import queryBuilder from "../query-builder/index.js";
 import type { BrickQueryResponse } from "./document-bricks.js";
-import type { BrickTypes } from "../builders/brick-builder/types.js";
-import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
+import DynamicRepository from "./parents/dynamic-repository.js";
+import type { DynamicConfig, QueryProps } from "./types.js";
 
 export interface RevisionsQueryResponse extends Select<LucidVersionTable> {
 	// documents

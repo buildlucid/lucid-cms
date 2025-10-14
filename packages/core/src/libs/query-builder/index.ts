@@ -8,7 +8,7 @@ import type {
 	ComparisonOperatorExpression,
 	OperandValueExpressionOrList,
 } from "kysely";
-import type { LucidDB } from "../db/types.js";
+import type { LucidDB } from "../db-adapter/types.js";
 
 export type QueryBuilderWhere<Table extends keyof LucidDB> = Array<{
 	key: ReferenceExpression<LucidDB, Table>;

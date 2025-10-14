@@ -1,16 +1,16 @@
-import T from "../../translations/index.js";
-import collectionsServices from "../collections/index.js";
-import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
-import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
-import fetchRelationData from "./helpers/fetch-relation-data.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
+import Formatter from "../../libs/formatters/index.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
-import type { DocumentVersionType } from "../../libs/db/types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import collectionsServices from "../collections/index.js";
+import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
+import fetchRelationData from "./helpers/fetch-relation-data.js";
 
 /**
  * Returns all of the bricks and collection fields

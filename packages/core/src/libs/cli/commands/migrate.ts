@@ -3,14 +3,14 @@ import services from "../../../services/index.js";
 import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
-import getKVAdapter from "../../kv/get-adapter.js";
-import passthroughQueueAdapter from "../../queues/adapters/passthrough.js";
-import createQueueContext from "../../queues/create-context.js";
+import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
+import getKVAdapter from "../../kv-adapter/get-adapter.js";
+import type { KVAdapterInstance } from "../../kv-adapter/types.js";
+import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
+import createQueueContext from "../../queue-adapter/create-context.js";
 import createMigrationLogger from "../logger/migration-logger.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
-import type { KVAdapterInstance } from "../../kv/types.js";
 
 const runSyncTasks = async (
 	config: Config,

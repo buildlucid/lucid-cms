@@ -11,7 +11,7 @@ import {
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentResponse } from "../../types/response.js";
-import type { DocumentVersionType } from "../../libs/db/types.js";
+import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
 import services from "../index.js";
 
 const getMultiple: ServiceFn<

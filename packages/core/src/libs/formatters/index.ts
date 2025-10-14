@@ -1,26 +1,26 @@
 import T from "../../translations/index.js";
 import { LucidError } from "../../utils/errors/index.js";
-import type { BooleanInt } from "../db/types.js";
-// Formatters
-import UsersFormatter from "./users.js";
-import UserPermissionsFormatter from "./user-permissions.js";
-import UserLoginsFormatter from "./user-logins.js";
-import RolesFormatter from "./roles.js";
-import SettingsFormatter from "./settings.js";
-import PermissionsFormatter from "./permissions.js";
-import OptionsFormatter from "./options.js";
-import MediaFormatter from "./media.js";
-import MediaFoldersFormatter from "./media-folders.js";
-import LocalesFormatter from "./locales.js";
-import EmailsFormatter from "./emails.js";
-import JobsFormatter from "./jobs.js";
-import CollectionsFormatter from "./collections.js";
+import type { BooleanInt } from "../db-adapter/types.js";
 import ClientIntegrationsFormatter from "./client-integrations.js";
+import CollectionsFormatter from "./collections.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import DocumentFieldsFormatter from "./document-fields.js";
 import DocumentVErsionsFormatter from "./document-versions.js";
 import DocumentFormatter from "./documents.js";
+import EmailsFormatter from "./emails.js";
+import JobsFormatter from "./jobs.js";
 import LicenseFormatter from "./license.js";
+import LocalesFormatter from "./locales.js";
+import MediaFormatter from "./media.js";
+import MediaFoldersFormatter from "./media-folders.js";
+import OptionsFormatter from "./options.js";
+import PermissionsFormatter from "./permissions.js";
+import RolesFormatter from "./roles.js";
+import SettingsFormatter from "./settings.js";
+import UserLoginsFormatter from "./user-logins.js";
+import UserPermissionsFormatter from "./user-permissions.js";
+// Formatters
+import UsersFormatter from "./users.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Formatter {

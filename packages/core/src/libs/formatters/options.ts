@@ -1,5 +1,5 @@
 import Formatter from "./index.js";
-import type { LucidOptions, Select } from "../db/types.js";
+import type { LucidOptions, Select } from "../db-adapter/types.js";
 import type { OptionsResponse } from "../../types/response.js";
 
 export default class OptionsFormatter {

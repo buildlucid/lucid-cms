@@ -10,8 +10,13 @@ import type {
 	UpdateObject,
 } from "kysely";
 import type { LucidErrorData } from "../../../types.js";
-import type DatabaseAdapter from "../../db/adapter.js";
-import type { Insert, Update, LucidDB, KyselyDB } from "../../db/types.js";
+import type DatabaseAdapter from "../../db-adapter/adapter-base.js";
+import type {
+	Insert,
+	Update,
+	LucidDB,
+	KyselyDB,
+} from "../../db-adapter/types.js";
 import type {
 	QueryResult,
 	ValidationConfigExtend,

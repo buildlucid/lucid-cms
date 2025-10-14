@@ -1,12 +1,12 @@
 import z from "zod/v4";
-import StaticRepository from "./parents/static-repository.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type {
-	KyselyDB,
-	Select,
-	LucidMediaTranslations,
 	Insert,
-} from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
+	KyselyDB,
+	LucidMediaTranslations,
+	Select,
+} from "../db-adapter/types.js";
+import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid_media_translations"> {

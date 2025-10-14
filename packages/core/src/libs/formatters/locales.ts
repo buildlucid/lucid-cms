@@ -1,6 +1,6 @@
 import Formatter from "./index.js";
 import type { LocalesResponse } from "../../types/response.js";
-import type { LucidLocales, Select } from "../db/types.js";
+import type { LucidLocales, Select } from "../db-adapter/types.js";
 import type { Config } from "../../types.js";
 
 export default class LocalesFormatter {

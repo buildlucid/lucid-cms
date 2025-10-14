@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import Formatter from "../../libs/formatters/index.js";
-import cacheKeys from "../../libs/kv/cache-keys.js";
+import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import logger from "../../libs/logger/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";

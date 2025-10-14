@@ -1,15 +1,15 @@
-import T from "../../../translations/index.js";
-import Repository from "../../../libs/repositories/index.js";
-import Formatter from "../../../libs/formatters/index.js";
-import { groupDocumentFilters } from "../../../utils/helpers/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../../libs/collection/schema/live/schema-filters.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
-import type { ClientDocumentResponse } from "../../../types/response.js";
-import type { DocumentVersionType } from "../../../libs/db/types.js";
+import type { DocumentVersionType } from "../../../libs/db-adapter/types.js";
+import Formatter from "../../../libs/formatters/index.js";
+import Repository from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
+import T from "../../../translations/index.js";
+import type { ClientDocumentResponse } from "../../../types/response.js";
+import { groupDocumentFilters } from "../../../utils/helpers/index.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 import services from "../../index.js";
 
 const getSingle: ServiceFn<

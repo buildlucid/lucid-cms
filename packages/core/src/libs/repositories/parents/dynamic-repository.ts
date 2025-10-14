@@ -2,7 +2,12 @@ import BaseRepository from "./base-repository.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../../query-builder/index.js";
-import type { Select, Insert, Update, LucidDB } from "../../db/types.js";
+import type {
+	Select,
+	Insert,
+	Update,
+	LucidDB,
+} from "../../db-adapter/types.js";
 import type { QueryProps, DynamicConfig } from "../types.js";
 
 abstract class DynamicRepository<

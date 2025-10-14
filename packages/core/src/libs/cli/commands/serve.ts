@@ -1,24 +1,22 @@
-import loadConfigFile from "../../config/load-config-file.js";
 import getConfigPath from "../../config/get-config-path.js";
-import installOptionalDeps from "../utils/install-optional-deps.js";
-import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
-import createDevLogger from "../logger/dev-logger.js";
-import migrateCommand from "./migrate.js";
-import copyPublicAssets from "../utils/copy-public-assets.js";
-import vite from "../../vite/index.js";
+import loadConfigFile from "../../config/load-config-file.js";
+import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import generateTypes from "../../type-generation/index.js";
+import vite from "../../vite/index.js";
+import createDevLogger from "../logger/dev-logger.js";
+import copyPublicAssets from "../utils/copy-public-assets.js";
+import installOptionalDeps from "../utils/install-optional-deps.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
+import migrateCommand from "./migrate.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
  */
-const serveCommand = async (options?: {
-	initial?: boolean;
-}) => {
+const serveCommand = async (options?: { initial?: boolean }) => {
 	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 	const logger = createDevLogger();
-	let destroy: (() => Promise<void>) | undefined = undefined;
+	let destroy: (() => Promise<void>) | undefined;
 
 	const isInitialRun = options?.initial ?? false;
 

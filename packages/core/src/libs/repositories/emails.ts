@@ -1,7 +1,7 @@
 import z from "zod/v4";
 import StaticRepository from "./parents/static-repository.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import type { KyselyDB } from "../db-adapter/types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type { QueryProps } from "./types.js";
 import { emailDeliveryStatusSchema } from "../../schemas/email.js";
 export default class EmailsRepository extends StaticRepository<"lucid_emails"> {

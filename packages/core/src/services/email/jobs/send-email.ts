@@ -1,8 +1,8 @@
-import T from "../../../translations/index.js";
+import renderHandlebarsTemplate from "../../../libs/email-adapter/templates/render-handlebars-template.js";
 import Repository from "../../../libs/repositories/index.js";
-import renderHandlebarsTemplate from "../../../libs/email/render-handlebars-template.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import T from "../../../translations/index.js";
 import type { EmailStrategyResponse } from "../../../types/config.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 import services from "../../index.js";
 
 const sendEmail: ServiceFn<

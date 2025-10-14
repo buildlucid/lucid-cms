@@ -1,6 +1,6 @@
 import Formatter from "./index.js";
 import { createMediaUrl } from "../../utils/media/index.js";
-import type { BooleanInt } from "../../libs/db/types.js";
+import type { BooleanInt } from "../../libs/db-adapter/types.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
 import type { UrlStrategy } from "../../types/config.js";
 

@@ -1,9 +1,9 @@
+import type { ColumnDataType } from "kysely";
 import type { ZodType } from "zod/v4";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
-import type { OnDelete, OnUpdate } from "../db/types.js";
-import type { ColumnDataType } from "kysely";
 import type { LocaleValue } from "../../types/shared.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type { OnDelete, OnUpdate } from "../db-adapter/types.js";
 
 // -----------------------------------------------
 // Custom Field

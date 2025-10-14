@@ -1,24 +1,24 @@
-import T from "../../translations/index.js";
+import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
+import type { StatusCode } from "hono/utils/http-status";
 import { openAPISpecs } from "hono-openapi";
-import constants from "../../constants/constants.js";
-import routes from "./routes/v1/index.js";
-import { LucidAPIError } from "../../utils/errors/index.js";
 import packageJson from "../../../package.json" with { type: "json" };
-import { Scalar } from "@scalar/hono-api-reference";
-import logRoute from "./middleware/log-route.js";
+import constants from "../../constants/constants.js";
+import T from "../../translations/index.js";
+import type { LucidHonoGeneric } from "../../types/hono.js";
 import type {
 	Config,
 	EnvironmentVariables,
 	LucidErrorData,
 } from "../../types.js";
-import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { StatusCode } from "hono/utils/http-status";
-import type { AdapterRuntimeContext } from "../adapter/types.js";
-import getQueueAdapter from "../queues/get-adapter.js";
-import getKVAdapter from "../kv/get-adapter.js";
+import { LucidAPIError } from "../../utils/errors/index.js";
+import getKVAdapter from "../kv-adapter/get-adapter.js";
+import getQueueAdapter from "../queue-adapter/get-adapter.js";
+import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
+import logRoute from "./middleware/log-route.js";
+import routes from "./routes/v1/index.js";
 
 /**
  * The entry point for creating the Hono app.

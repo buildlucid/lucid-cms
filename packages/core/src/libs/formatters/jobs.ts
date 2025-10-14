@@ -1,6 +1,6 @@
-import Formatter from "./index.js";
 import type { JobResponse } from "../../types/response.js";
-import type { QueueEvent, QueueJobStatus } from "../queues/types.js";
+import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
+import Formatter from "./index.js";
 
 interface JobPropT {
 	id: number;

@@ -1,30 +1,30 @@
 import T from "../../translations/index.js";
 import { LucidError } from "../../utils/errors/index.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
-// Repositories
-import UserTokensRepository from "./user-tokens.js";
-import UserLoginsRepository from "./user-logins.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type { KyselyDB } from "../db-adapter/types.js";
+import ClientIntegrationsRepository from "./client-integrations.js";
+import CollectionMigrationsRepository from "./collection-migrations.js";
+import CollectionsRepository from "./collections.js";
+import DocumentBricksRepository from "./document-bricks.js";
+import DocumentVersionsRepository from "./document-versions.js";
+import DocumentsRepository from "./documents.js";
+import EmailTransactionsRepository from "./email-transactions.js";
 import EmailsRepository from "./emails.js";
 import LocalesRepository from "./locales.js";
 import MediaRepository from "./media.js";
 import MediaAwaitingSyncRepository from "./media-awaiting-sync.js";
-import MediaTranslationsRepository from "./media-translations.js";
 import MediaFoldersRepository from "./media-folders.js";
+import MediaTranslationsRepository from "./media-translations.js";
 import OptionsRepository from "./options.js";
 import ProcessedImagesRepository from "./processed-images.js";
+import QueueJobsRepository from "./queue-jobs.js";
 import RolePermissionsRepository from "./role-permissions.js";
 import RolesRepository from "./roles.js";
+import UserLoginsRepository from "./user-logins.js";
 import UserRolesRepository from "./user-roles.js";
+// Repositories
+import UserTokensRepository from "./user-tokens.js";
 import UsersRepository from "./users.js";
-import ClientIntegrationsRepository from "./client-integrations.js";
-import EmailTransactionsRepository from "./email-transactions.js";
-import CollectionsRepository from "./collections.js";
-import CollectionMigrationsRepository from "./collection-migrations.js";
-import DocumentsRepository from "./documents.js";
-import DocumentVersionsRepository from "./document-versions.js";
-import DocumentBricksRepository from "./document-bricks.js";
-import QueueJobsRepository from "./queue-jobs.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 class Repository {

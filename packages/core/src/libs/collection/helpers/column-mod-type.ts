@@ -1,5 +1,5 @@
+import type DatabaseAdapter from "../../../libs/db-adapter/adapter-base.js";
 import type { ModifyColumnOperation } from "../migration/types.js";
-import type DatabaseAdapter from "../../../libs/db/adapter.js";
 
 /**
  * Determines if the column needs to be dropeed and re-created or altered. Only alters if:

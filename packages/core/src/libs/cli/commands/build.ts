@@ -1,15 +1,14 @@
-import { mkdir, rm, stat } from "node:fs/promises";
-import { readdir } from "node:fs/promises";
+import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import path, { join } from "node:path";
+import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import vite from "../../vite/index.js";
-import installOptionalDeps from "../utils/install-optional-deps.js";
-import prerenderMjmlTemplates from "../../email/prerender-mjml-templates.js";
-import createBuildLogger from "../logger/build-logger.js";
-import constants from "../../../constants/constants.js";
-import copyPublicAssets from "../utils/copy-public-assets.js";
+import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import generateTypes from "../../type-generation/index.js";
+import vite from "../../vite/index.js";
+import createBuildLogger from "../logger/build-logger.js";
+import copyPublicAssets from "../utils/copy-public-assets.js";
+import installOptionalDeps from "../utils/install-optional-deps.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.

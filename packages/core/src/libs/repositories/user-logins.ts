@@ -1,7 +1,7 @@
 import z from "zod/v4";
 import StaticRepository from "./parents/static-repository.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
+import type { KyselyDB } from "../db-adapter/types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 
 export default class UserLoginsRepository extends StaticRepository<"lucid_user_logins"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {

@@ -1,19 +1,19 @@
-import T from "../../../translations/index.js";
-import z from "zod/v4";
-import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
-import keyToTitle from "../utils/key-to-title.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
+import z from "zod/v4";
+import T from "../../../translations/index.js";
+import type { ServiceResponse } from "../../../types.js";
+import type { BooleanInt } from "../../db-adapter/types.js";
 import Formatter from "../../formatters/index.js";
+import CustomField from "../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	SchemaDefinition,
 	GetSchemaDefinitionProps,
+	SchemaDefinition,
 } from "../types.js";
-import type { BooleanInt } from "../../db/types.js";
-import type { ServiceResponse } from "../../../types.js";
+import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class CheckboxCustomField extends CustomField<"checkbox"> {
 	type = "checkbox" as const;

@@ -1,14 +1,14 @@
-import type DatabaseAdapter from "../../../libs/db/adapter.js";
+import type {
+	AlterTableBuilder,
+	AlterTableColumnAlteringBuilder,
+	CreateTableBuilder,
+} from "kysely";
+import type DatabaseAdapter from "../../../libs/db-adapter/adapter-base.js";
 import type {
 	AddColumnOperation,
 	ModifyColumnOperation,
 	RemoveColumnOperation,
 } from "./types.js";
-import type {
-	CreateTableBuilder,
-	AlterTableColumnAlteringBuilder,
-	AlterTableBuilder,
-} from "kysely";
 
 /**
  * Adds a column to a table using the provided query builder

@@ -1,4 +1,4 @@
-import cacheKeys from "../../../libs/kv/cache-keys.js";
+import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
 import Repository from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

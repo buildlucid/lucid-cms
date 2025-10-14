@@ -1,23 +1,26 @@
-import type { DocumentVersionType } from "../libs/db/types.js";
+import type z from "zod/v4";
+import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 import type {
 	CollectionBrickConfig,
 	CollectionConfigSchemaType,
 } from "../libs/builders/collection-builder/types.js";
-import type { ErrorResult } from "./errors.js";
+import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type {
 	CFConfig,
-	FieldTypes,
 	FieldResponseMeta,
 	FieldResponseValue,
+	FieldTypes,
 } from "../libs/custom-fields/types.js";
-import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
-import type { LocaleValue } from "./shared.js";
+import type { DocumentVersionType } from "../libs/db-adapter/types.js";
+import type {
+	QueueEvent,
+	QueueJobStatus,
+} from "../libs/queue-adapter/types.js";
 import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
-import type z from "zod/v4";
-import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
-import type { EmailType, EmailDeliveryStatus } from "../types.js";
 import type { OptionsName } from "../schemas/options.js";
-import type { QueueEvent, QueueJobStatus } from "../libs/queues/types.js";
+import type { EmailDeliveryStatus, EmailType } from "../types.js";
+import type { ErrorResult } from "./errors.js";
+import type { LocaleValue } from "./shared.js";
 
 export interface UserResponse {
 	id: number;

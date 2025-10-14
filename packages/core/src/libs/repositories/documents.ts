@@ -1,23 +1,10 @@
+import { type SelectQueryBuilder, sql } from "kysely";
 import z from "zod/v4";
-import DynamicRepository from "./parents/dynamic-repository.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
-import { sql, type SelectQueryBuilder } from "kysely";
-import queryBuilder from "../query-builder/index.js";
 import type {
-	GetMultipleQueryParams,
 	ClientGetSingleQueryParams,
+	GetMultipleQueryParams,
 } from "../../schemas/documents.js";
-import type {
-	LucidDocumentTable,
-	Insert,
-	Select,
-	LucidDocumentTableName,
-	LucidVersionTableName,
-	DocumentVersionType,
-} from "../db/types.js";
-import type { QueryProps, DynamicConfig } from "./types.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
 import type {
 	Config,
@@ -25,9 +12,22 @@ import type {
 	LucidBrickTableName,
 	LucidVersionTable,
 } from "../../types.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
+import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type {
+	DocumentVersionType,
+	Insert,
+	KyselyDB,
+	LucidDocumentTable,
+	LucidDocumentTableName,
+	LucidVersionTableName,
+	Select,
+} from "../db-adapter/types.js";
+import queryBuilder from "../query-builder/index.js";
+import DynamicRepository from "./parents/dynamic-repository.js";
+import type { DynamicConfig, QueryProps } from "./types.js";
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join
@@ -680,9 +680,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	async selectMultipleUnion(props: {
-		tables: LucidDocumentTableName[];
-	}) {
+	async selectMultipleUnion(props: { tables: LucidDocumentTableName[] }) {
 		if (props.tables.length === 0) {
 			return {
 				error: undefined,

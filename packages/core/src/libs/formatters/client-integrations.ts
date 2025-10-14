@@ -1,6 +1,6 @@
-import Formatter from "./index.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
-import type { BooleanInt } from "../db/types.js";
+import type { BooleanInt } from "../db-adapter/types.js";
+import Formatter from "./index.js";
 
 export interface ClientIntegrationQueryRes {
 	id: number;
@@ -13,9 +13,7 @@ export interface ClientIntegrationQueryRes {
 }
 
 export default class ClientIntegrationsFormatter {
-	formatMultiple = (props: {
-		integrations: ClientIntegrationQueryRes[];
-	}) => {
+	formatMultiple = (props: { integrations: ClientIntegrationQueryRes[] }) => {
 		return props.integrations.map((i) =>
 			this.formatSingle({
 				integration: i,

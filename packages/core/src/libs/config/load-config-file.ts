@@ -1,15 +1,15 @@
-import getConfigPath from "./get-config-path.js";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
-import processConfig from "./process-config.js";
+import type { ZodType } from "zod/v4";
 import type { Config } from "../../types/config.js";
 import type {
 	AdapterDefineConfig,
 	EnvironmentVariables,
 	RuntimeAdapter,
-} from "../adapter/types.js";
-import type { ZodType } from "zod/v4";
+} from "../runtime-adapter/types.js";
+import getConfigPath from "./get-config-path.js";
+import processConfig from "./process-config.js";
 
 export const loadConfigFile = async (props?: {
 	path?: string;

@@ -1,9 +1,9 @@
 import z from "zod/v4";
-import StaticRepository from "./parents/static-repository.js";
-import type { KyselyDB } from "../db/types.js";
-import type DatabaseAdapter from "../db/adapter.js";
-import type { QueryProps } from "./types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type { KyselyDB } from "../db-adapter/types.js";
 import queryBuilder from "../query-builder/index.js";
+import StaticRepository from "./parents/static-repository.js";
+import type { QueryProps } from "./types.js";
 
 export default class MediaFoldersRepository extends StaticRepository<"lucid_media_folders"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {

@@ -1,13 +1,13 @@
 import type { Context } from "hono";
+import type { KVAdapterInstance } from "../libs/kv-adapter/types.js";
+import type { QueueAdapterInstance } from "../libs/queue-adapter/types.js";
+import type { AdapterRuntimeContext } from "../libs/runtime-adapter/types.js";
 import type {
 	Config,
 	EnvironmentVariables,
 	LocalesResponse,
 	UserPermissionsResponse,
 } from "../types.js";
-import type { QueueAdapterInstance } from "../libs/queues/types.js";
-import type { AdapterRuntimeContext } from "../libs/adapter/types.js";
-import type { KVAdapterInstance } from "../libs/kv/types.js";
 
 export type LucidAuth = {
 	id: number;
