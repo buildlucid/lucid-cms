@@ -1,10 +1,10 @@
 import crypto from "node:crypto";
 import type {
-	MediaAdapterFileSystemOptions,
+	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetPresignedUrl,
 } from "../../../types.js";
 
-export default (options: MediaAdapterFileSystemOptions) => {
+export default (options: FileSystemMediaAdapterOptions) => {
 	const getPresignedUrl: MediaAdapterServiceGetPresignedUrl = async (
 		key,
 		meta,

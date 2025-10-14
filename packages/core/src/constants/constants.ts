@@ -151,4 +151,5 @@ export default Object.freeze({
 		"24-hours": 86400,
 		"5-minutes": 300,
 	},
+	defaultUploadDirectory: "uploads",
 });

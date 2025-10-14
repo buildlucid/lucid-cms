@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import type { ServiceFn } from "@lucidcms/core/types";
+import constants from "../../constants/constants.js";
 import { keyPaths } from "../../libs/media-adapter/adapters/file-system/helpers.js";
+import type { FileSystemMediaAdapterOptions } from "../../libs/media-adapter/types.js";
 import T from "../../translations/index.js";
 import checks from "./checks/index.js";
 
@@ -11,6 +13,7 @@ const uploadSingle: ServiceFn<
 			key: string;
 			token: string;
 			timestamp: string;
+			mediaAdapterOptions?: FileSystemMediaAdapterOptions;
 		},
 	],
 	boolean
@@ -19,12 +22,13 @@ const uploadSingle: ServiceFn<
 		key: data.key,
 		token: data.token,
 		timestamp: data.timestamp,
+		secretKey:
+			data.mediaAdapterOptions?.secretKey ?? context.config.keys.cookieSecret,
 	});
 	if (checkPresignedTokenRes.error) return checkPresignedTokenRes;
 	const { targetDir, targetPath } = keyPaths(
 		data.key,
-		// TODO: make this configurable
-		"uploads",
+		data.mediaAdapterOptions?.uploadDir ?? constants.defaultUploadDirectory,
 	);
 	await mkdir(targetDir, { recursive: true });
 	if (Buffer.isBuffer(data.buffer)) {

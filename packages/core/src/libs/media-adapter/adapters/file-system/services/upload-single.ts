@@ -1,12 +1,12 @@
 import { createWriteStream } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import type {
-	MediaAdapterFileSystemOptions,
+	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceUploadSingle,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
 
-export default (options: MediaAdapterFileSystemOptions) => {
+export default (options: FileSystemMediaAdapterOptions) => {
 	const uploadSingle: MediaAdapterServiceUploadSingle = async (props) => {
 		try {
 			const { targetDir, targetPath } = keyPaths(props.key, options.uploadDir);

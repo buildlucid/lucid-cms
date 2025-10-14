@@ -1,4 +1,5 @@
 import {
+	fileSystemMediaAdapter,
 	passthroughImageProcessor,
 	passthroughQueueAdapter,
 	z,
@@ -81,6 +82,10 @@ export default defineConfig((env) => ({
 	},
 	disableOpenAPI: false,
 	media: {
+		// adapter: fileSystemMediaAdapter({
+		// 	uploadDir: "uploads",
+		// 	secretKey: "secret-key",
+		// }),
 		maxFileSize: 200 * 1024 * 1024, // 200MB
 		processedImageLimit: 10,
 		storeProcessedImages: true,

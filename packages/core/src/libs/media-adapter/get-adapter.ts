@@ -22,8 +22,13 @@ const getMediaAdapter = async (
 > => {
 	try {
 		if (config.media.adapter) {
+			const adapter =
+				typeof config.media.adapter === "function"
+					? await config.media.adapter()
+					: config.media.adapter;
+
 			return {
-				adapter: await config.media.adapter(),
+				adapter: await adapter,
 				enabled: true,
 			};
 		}
@@ -36,8 +41,8 @@ const getMediaAdapter = async (
 		);
 
 		return {
-			adapter: fileSystemAdapter({
-				uploadDir: "uploads",
+			adapter: await fileSystemAdapter({
+				uploadDir: constants.defaultUploadDirectory,
 				secretKey: config.keys.encryptionKey,
 			}),
 			enabled: true,

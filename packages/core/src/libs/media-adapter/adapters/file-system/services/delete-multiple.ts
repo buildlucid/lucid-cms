@@ -1,12 +1,12 @@
 import { constants } from "node:fs";
 import { access, unlink } from "node:fs/promises";
 import type {
-	MediaAdapterFileSystemOptions,
+	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceDeleteMultiple,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
 
-export default (options: MediaAdapterFileSystemOptions) => {
+export default (options: FileSystemMediaAdapterOptions) => {
 	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (keys) => {
 		try {
 			for (const key of keys) {

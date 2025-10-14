@@ -5,12 +5,12 @@ import { fileTypeFromFile } from "file-type";
 import mime from "mime-types";
 import T from "../../../../../translations/index.js";
 import type {
-	MediaAdapterFileSystemOptions,
+	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceStream,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
 
-export default (adapterOptions: MediaAdapterFileSystemOptions) => {
+export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 	const stream: MediaAdapterServiceStream = async (
 		key: string,
 		options?: {

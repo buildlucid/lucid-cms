@@ -69,6 +69,7 @@ const uploadMediaController = factory.createHandlers(
 				key: query.key,
 				token: query.token,
 				timestamp: query.timestamp,
+				mediaAdapterOptions: mediaAdapter.adapter?.getOptions?.(),
 			},
 		);
 		if (uploadMedia.error) throw new LucidAPIError(uploadMedia.error);

@@ -60,11 +60,12 @@ export type MediaAdapterServiceDeleteMultiple = (
 	keys: string[],
 ) => ServiceResponse<undefined>;
 
-export type MediaAdapter = () =>
-	| MediaAdapterInstance
-	| Promise<MediaAdapterInstance>;
+export type MediaAdapter<T = undefined> = T extends undefined
+	? () => MediaAdapterInstance | Promise<MediaAdapterInstance>
+	: (options: T) => MediaAdapterInstance<T> | Promise<MediaAdapterInstance<T>>;
 
-export type MediaAdapterInstance = {
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type MediaAdapterInstance<T = any> = {
 	/** The adapter type */
 	type: "media-adapter";
 	/** A unique identifier key for the adapter of this type */
@@ -99,11 +100,13 @@ export type MediaAdapterInstance = {
 		/** Delete multiple media items */
 		deleteMultiple: MediaAdapterServiceDeleteMultiple;
 	};
+	/** Get passed adapter options */
+	getOptions?: () => T;
 };
 
-export type MediaAdapterFileSystemOptions = {
-	/** The directory where the files will be uploaded */
+export type FileSystemMediaAdapterOptions = {
+	/** The directory where the files will be uploaded. Defaults to "uploads" */
 	uploadDir: string;
-	/** The secret key used to sign the URLs */
+	/** The secret key used to sign the URLs. Falls back to the configs keys.encryptionKey */
 	secretKey: string;
 };

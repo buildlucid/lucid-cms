@@ -2,12 +2,12 @@ import { constants } from "node:fs";
 import { access, unlink } from "node:fs/promises";
 import T from "../../../../../translations/index.js";
 import type {
-	MediaAdapterFileSystemOptions,
+	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceDeleteSingle,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
 
-export default (options: MediaAdapterFileSystemOptions) => {
+export default (options: FileSystemMediaAdapterOptions) => {
 	const deletSingle: MediaAdapterServiceDeleteSingle = async (key) => {
 		try {
 			const { targetPath } = keyPaths(key, options.uploadDir);

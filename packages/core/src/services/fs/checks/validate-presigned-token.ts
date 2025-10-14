@@ -9,12 +9,13 @@ const validatePresignedToken: ServiceFn<
 			key: string;
 			token: string;
 			timestamp: string;
+			secretKey: string;
 		},
 	],
 	undefined
-> = async (context, data) => {
+> = async (_, data) => {
 	const expectedToken = crypto
-		.createHmac("sha256", context.config.keys.encryptionKey)
+		.createHmac("sha256", data.secretKey)
 		.update(`${data.key}${data.timestamp}`)
 		.digest("hex");
 

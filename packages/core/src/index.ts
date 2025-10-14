@@ -10,6 +10,7 @@ export { default as passthroughImageProcessor } from "./libs/image-processor/pro
 // export { default as sharpImageProcessor } from "./libs/image-processor/processors/sharp.js";
 export { default as passthroughKVAdapter } from "./libs/kv-adapter/adapters/passthrough.js";
 export { default as logger } from "./libs/logger/index.js";
+export { default as fileSystemMediaAdapter } from "./libs/media-adapter/adapters/file-system/index.js";
 export { default as passthroughQueueAdapter } from "./libs/queue-adapter/adapters/passthrough.js";
 export { LucidError } from "./utils/errors/index.js";
 

@@ -6,12 +6,12 @@ import { fileTypeFromFile } from "file-type";
 import mime from "mime-types";
 import T from "../../../../../translations/index.js";
 import type {
-	MediaAdapterFileSystemOptions,
+	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetMeta,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
 
-export default (options: MediaAdapterFileSystemOptions) => {
+export default (options: FileSystemMediaAdapterOptions) => {
 	const getMetadata: MediaAdapterServiceGetMeta = async (key) => {
 		try {
 			const { targetPath } = keyPaths(key, options.uploadDir);

@@ -8,7 +8,10 @@ import type {
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { KVAdapter } from "../kv-adapter/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
-import type { MediaAdapter } from "../media-adapter/types.js";
+import type {
+	MediaAdapter,
+	MediaAdapterInstance,
+} from "../media-adapter/types.js";
 import type { QueueAdapter } from "../queue-adapter/types.js";
 
 const HonoAppSchema = z.custom<
@@ -16,6 +19,8 @@ const HonoAppSchema = z.custom<
 >((data) => typeof data === "function", {
 	message: "Expected a Hono app function",
 });
+
+// TODO: improve all function custom schemas bellow
 
 const ImageProcessorSchema = z.custom<ImageProcessor>(
 	(data) => typeof data === "function",
@@ -45,12 +50,11 @@ const KVAdapterSchema = z.custom<KVAdapter>(
 	},
 );
 
-const MediaAdapterSchema = z.custom<MediaAdapter>(
-	(data) => typeof data === "function",
-	{
-		message: "Expected a MediaAdapter function",
-	},
-);
+const MediaAdapterSchema = z.custom<
+	MediaAdapter | MediaAdapterInstance | Promise<MediaAdapterInstance>
+>((data) => typeof data === "function" || typeof data === "object", {
+	message: "Expected a MediaAdapter function",
+});
 
 const ConfigSchema = z.object({
 	db: z.unknown(),

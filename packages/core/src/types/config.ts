@@ -7,7 +7,10 @@ import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db-adapter/adapter-base.js";
 import type { KVAdapter } from "../libs/kv-adapter/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
-import type { MediaAdapter } from "../libs/media-adapter/types.js";
+import type {
+	MediaAdapter,
+	MediaAdapterInstance,
+} from "../libs/media-adapter/types.js";
 import type { QueueAdapter } from "../libs/queue-adapter/types.js";
 import type { EmailDeliveryStatus, MediaType } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
@@ -214,7 +217,10 @@ export interface LucidConfig {
 	/** Media settings. */
 	media?: {
 		/** The media adapter to use. */
-		adapter?: MediaAdapter;
+		adapter?:
+			| MediaAdapter
+			| MediaAdapterInstance
+			| Promise<MediaAdapterInstance>;
 		/** The storage limit in bytes. */
 		storageLimit?: number;
 		/** The maximum file size in bytes. */
@@ -338,7 +344,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		defaultLocale: string;
 	};
 	media: {
-		adapter?: MediaAdapter;
+		adapter?:
+			| MediaAdapter
+			| MediaAdapterInstance
+			| Promise<MediaAdapterInstance>;
 		storageLimit: number;
 		maxFileSize: number;
 		processedImageLimit: number;
