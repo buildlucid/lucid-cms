@@ -1,13 +1,13 @@
-import { expect, test, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, expect, test } from "vitest";
 import z from "zod/v4";
+import passthroughKVAdapter from "../../libs/kv-adapter/adapters/passthrough.js";
+import passthroughQueueAdapter from "../../libs/queue-adapter/adapters/passthrough.js";
+import createQueueContext from "../../libs/queue-adapter/create-context.js";
 import testConfig from "../test-helpers/test-config.js";
 import testDatabase from "../test-helpers/test-database.js";
 import serviceWrapper from "./service-wrapper.js";
+import type { ServiceFn, ServiceResponse } from "./types.js";
 import mergeServiceError from "./utils/merge-errors.js";
-import lucidServices from "../../services/index.js";
-import type { ServiceResponse, ServiceFn } from "./types.js";
-import passthroughQueueAdapter from "../../libs/queues/adapters/passthrough.js";
-import createQueueContext from "../../libs/queues/create-context.js";
 
 const CONSTANTS = {
 	error: {
@@ -65,6 +65,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 
 	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
 	const [success, error] = await Promise.all([
@@ -75,6 +76,8 @@ test("basic - one level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				data: {
@@ -90,6 +93,8 @@ test("basic - one level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				data: {
@@ -160,6 +165,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 
 	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
 	const [success, error] = await Promise.all([
@@ -170,6 +176,8 @@ test("basic - two level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				data: {
@@ -185,6 +193,8 @@ test("basic - two level deep service wrapper success and error", async () => {
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				data: {
@@ -243,6 +253,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 
 	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
 	const [success, error] = await Promise.all([
@@ -253,6 +264,8 @@ test("transaction - one level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				collectionKey: successCollectionKey,
@@ -266,6 +279,8 @@ test("transaction - one level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				collectionKey: errorCollectionKey,
@@ -351,6 +366,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 
 	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
 	const [success, error] = await Promise.all([
@@ -361,6 +377,8 @@ test("transaction - two level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				collectionKey: successCollectionKey,
@@ -379,6 +397,8 @@ test("transaction - two level deep service wrapper success and error", async () 
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				collectionKey: errorCollectionKey,
@@ -433,6 +453,7 @@ test("service wrapper schema validation", async () => {
 
 	const queueContext = createQueueContext();
 	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
 	const [success, error] = await Promise.all([
@@ -444,6 +465,8 @@ test("service wrapper schema validation", async () => {
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				key: "test",
@@ -458,6 +481,8 @@ test("service wrapper schema validation", async () => {
 				db: config.db.client,
 				config: config,
 				queue: queueAdapter,
+				kv: kvAdapter,
+				env: null,
 			},
 			{
 				key: "test",
