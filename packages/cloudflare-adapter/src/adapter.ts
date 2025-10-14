@@ -1,23 +1,23 @@
-import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
+import { readFileSync } from "node:fs";
+import { unlink, writeFile } from "node:fs/promises";
+import { relative } from "node:path";
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { build } from "rolldown";
+import { serveStatic } from "@hono/node-server/serve-static";
 import lucid from "@lucidcms/core";
 import {
 	getBuildPaths,
-	stripImportsPlugin,
 	stripAdapterExportPlugin,
+	stripImportsPlugin,
 } from "@lucidcms/core/helpers";
-import { writeFile, unlink } from "node:fs/promises";
+import type { LucidHonoGeneric, RuntimeAdapter } from "@lucidcms/core/types";
+import { Hono } from "hono";
+import { build } from "rolldown";
 import {
-	getPlatformProxy,
 	type GetPlatformProxyOptions,
+	getPlatformProxy,
 	type PlatformProxy,
 } from "wrangler";
-import { serveStatic } from "@hono/node-server/serve-static";
-import { relative } from "node:path";
-import { readFileSync } from "node:fs";
-import type { RuntimeAdapter, LucidHonoGeneric } from "@lucidcms/core/types";
+import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import runtimeContext from "./runtime-context.js";
 
 const cloudflareAdapter = (options?: {
@@ -244,7 +244,7 @@ export default {
 								"rolldown",
 							]),
 						],
-						external: ["sharp", "ws", "better-sqlite3"],
+						external: ["sharp", "ws", "better-sqlite3", "file-type"],
 					});
 
 					//* clean up temporary files

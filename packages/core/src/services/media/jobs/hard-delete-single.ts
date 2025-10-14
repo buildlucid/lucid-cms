@@ -11,7 +11,8 @@ const hardDeleteSingleMedia: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = Repository.get("media", context.db, context.config.db);
@@ -72,7 +73,7 @@ const hardDeleteSingleMedia: ServiceFn<
 	if (deleteMediaRes.error) return deleteMediaRes;
 
 	const [_, deleteObjectRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(
+		mediaStrategyRes.data.services.deleteMultiple(
 			processedImagesRes.data.map((i) => i.key),
 		),
 		services.media.strategies.delete(context, {

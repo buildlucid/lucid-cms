@@ -11,7 +11,8 @@ const clearSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const ProcessedImages = Repository.get(
@@ -72,7 +73,7 @@ const clearSingle: ServiceFn<
 	const newStorageUsed = (storageUsedRes.data.valueInt || 0) - totalSize;
 
 	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(
+		mediaStrategyRes.data.services.deleteMultiple(
 			processedImagesRes.data.map((i) => i.key),
 		),
 		ProcessedImages.deleteMultiple({

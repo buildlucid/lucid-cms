@@ -1,16 +1,17 @@
+import getMediaAdapter from "../../../libs/media-adapter/get-adapter.js";
+import type { MediaAdapterInstance } from "../../../libs/media-adapter/types.js";
 import T from "../../../translations/index.js";
-import type { Config } from "../../../types/config.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 
-const checkHasMediaStrategy = (
+const checkHasMediaStrategy = async (
 	context: ServiceContext,
-): Awaited<
-	ServiceResponse<Exclude<Config["media"]["strategy"], undefined>>
-> => {
-	if (context.config.media?.strategy === undefined) {
+): ServiceResponse<MediaAdapterInstance> => {
+	const mediaAdapter = await getMediaAdapter(context.config);
+
+	if (!mediaAdapter.enabled) {
 		return {
 			error: {
 				type: "basic",
@@ -24,10 +25,7 @@ const checkHasMediaStrategy = (
 
 	return {
 		error: undefined,
-		data: context.config.media.strategy as Exclude<
-			Config["media"]["strategy"],
-			undefined
-		>,
+		data: mediaAdapter.adapter,
 	};
 };
 

@@ -8,6 +8,7 @@ import type {
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { KVAdapter } from "../kv-adapter/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
+import type { MediaAdapter } from "../media-adapter/types.js";
 import type { QueueAdapter } from "../queue-adapter/types.js";
 
 const HonoAppSchema = z.custom<
@@ -41,6 +42,13 @@ const KVAdapterSchema = z.custom<KVAdapter>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a KVAdapter function",
+	},
+);
+
+const MediaAdapterSchema = z.custom<MediaAdapter>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected a MediaAdapter function",
 	},
 );
 
@@ -90,6 +98,7 @@ const ConfigSchema = z.object({
 		.optional(),
 	preRenderedEmailTemplates: z.record(z.string(), z.string()).optional(),
 	media: z.object({
+		adapter: MediaAdapterSchema.optional(),
 		storageLimit: z.number(),
 		maxFileSize: z.number(),
 		fallbackImage: z.string().optional(),

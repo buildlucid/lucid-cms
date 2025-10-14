@@ -1,7 +1,7 @@
+import path from "node:path";
+import Database from "better-sqlite3";
 import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
 import type { KVAdapterInstance, KVSetOptions } from "../types.js";
-import Database from "better-sqlite3";
-import path from "node:path";
 
 const MILLISECONDS_PER_SECOND = 1000;
 const CLEANUP_INTERVAL_MS = 5 * 60 * MILLISECONDS_PER_SECOND;

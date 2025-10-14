@@ -1,5 +1,5 @@
-import { getFileMetadata } from "../../../utils/media/index.js";
 import type { MediaType } from "../../../types/response.js";
+import { getFileMetadata } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import services from "../../index.js";
 
@@ -22,11 +22,14 @@ const update: ServiceFn<
 		etag: string | null;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// Fetch meta data from new file
-	const mediaMetaRes = await mediaStrategyRes.data.getMeta(data.updatedKey);
+	const mediaMetaRes = await mediaStrategyRes.data.services.getMeta(
+		data.updatedKey,
+	);
 	if (mediaMetaRes.error) return mediaMetaRes;
 
 	// Ensure we available storage space
@@ -46,7 +49,7 @@ const update: ServiceFn<
 	if (fileMetaData.error) return fileMetaData;
 
 	// Delete old file
-	const deleteOldRes = await mediaStrategyRes.data.deleteSingle(
+	const deleteOldRes = await mediaStrategyRes.data.services.delete(
 		data.previousKey,
 	);
 	if (deleteOldRes.error) {

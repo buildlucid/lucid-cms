@@ -14,10 +14,11 @@ const getPresignedUrl: ServiceFn<
 		headers?: Record<string, string>;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const presignedUrlRes = await mediaStrategyRes.data.getPresignedUrl(
+	const presignedUrlRes = await mediaStrategyRes.data.services.getPresignedUrl(
 		data.key,
 		{
 			host: context.config.host,

@@ -1,11 +1,11 @@
+import type { Readable } from "node:stream";
+import constants from "../../constants/constants.js";
+import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import {
 	chooseAcceptHeaderFormat,
 	generateProcessKey,
 } from "../../utils/media/index.js";
-import constants from "../../constants/constants.js";
-import type { Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import services from "../index.js";
 
 /**
@@ -47,13 +47,14 @@ const streamMedia: ServiceFn<
 		: selectedPreset?.format;
 	const quality = selectedPreset?.quality ?? constants.media.imagePresetQuality;
 
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// ------------------------------
 	// OG Image
 	if (!selectedPreset && !format) {
-		const res = await mediaStrategyRes.data.stream(data.key, {
+		const res = await mediaStrategyRes.data.services.stream(data.key, {
 			range: data.range,
 		});
 		if (res.error) return res;
@@ -85,7 +86,7 @@ const streamMedia: ServiceFn<
 		public: true,
 	});
 
-	const res = await mediaStrategyRes.data.stream(processKey, {
+	const res = await mediaStrategyRes.data.services.stream(processKey, {
 		range: data.range,
 	});
 	if (res.data) {

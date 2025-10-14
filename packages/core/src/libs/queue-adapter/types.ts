@@ -1,4 +1,3 @@
-import type { KyselyDB } from "../../types.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -56,6 +55,8 @@ export type QueueAdapter<AdapterConfig = any> = (
 	/**
 	 * Lifecycle methods
 	 * */
+
+	// TODO: rename to init and destroy to keep inline with other adapters
 	lifecycle: {
 		/**
 		 * Start the queue process

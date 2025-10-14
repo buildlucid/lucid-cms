@@ -1,11 +1,12 @@
-import type { SettingsResponse } from "../../types/response.js";
 import type { Config } from "../../types/config.js";
+import type { SettingsResponse } from "../../types/response.js";
 import LicenseFormatter from "./license.js";
 
 interface SettingsPropsT {
 	mediaStorageUsed: number;
 	processedImageCount: number;
 	licenseKeyLast4: string | null;
+	mediaAdapterEnabled: boolean;
 }
 
 export default class SettingsFormatter {
@@ -19,7 +20,7 @@ export default class SettingsFormatter {
 				from: props.config.email?.from ?? null,
 			},
 			media: {
-				enabled: props.config.media?.strategy !== undefined,
+				enabled: props.settings.mediaAdapterEnabled,
 				storage: {
 					total: props.config.media.storageLimit,
 					remaining:

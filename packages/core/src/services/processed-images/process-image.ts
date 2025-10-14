@@ -1,7 +1,7 @@
-import Repository from "../../libs/repositories/index.js";
 import { PassThrough, type Readable } from "node:stream";
-import type { ServiceFn } from "../../utils/services/types.js";
+import Repository from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 
 const processImage: ServiceFn<
@@ -19,11 +19,12 @@ const processImage: ServiceFn<
 		body: Readable;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// get og image
-	const mediaRes = await mediaStrategyRes.data.stream(data.key);
+	const mediaRes = await mediaStrategyRes.data.services.stream(data.key);
 	if (mediaRes.error) return mediaRes;
 
 	// If the response is not an image
@@ -125,7 +126,7 @@ const processImage: ServiceFn<
 					file_size: imageRes.data.size,
 				},
 			}),
-			mediaStrategyRes.data.uploadSingle({
+			mediaStrategyRes.data.services.upload({
 				key: data.processKey,
 				data: imageRes.data.buffer,
 				meta: {

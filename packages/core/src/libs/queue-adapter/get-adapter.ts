@@ -15,7 +15,7 @@ const getQueueAdapter = async (
 		}
 
 		const { default: workerQueueAdapter } = await import(
-			"./adapters/worker.js"
+			"./adapters/worker/index.js"
 		);
 		return workerQueueAdapter(queueContext);
 	} catch (error) {

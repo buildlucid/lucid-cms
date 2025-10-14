@@ -1,5 +1,6 @@
 export type KVAdapter = () => KVAdapterInstance | Promise<KVAdapterInstance>;
 
+// TODO: add lifecycle fns, init, destroy
 export type KVAdapterInstance = {
 	get: <R>(key: string) => Promise<R | null>;
 	set: <T>(key: string, value: T, options?: KVSetOptions) => Promise<void>;

@@ -1,8 +1,8 @@
 import Repository from "../../libs/repositories/index.js";
-import { generateProcessKey, createMediaUrl } from "../../utils/media/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { MediaUrlResponse } from "../../types/response.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
+import type { MediaUrlResponse } from "../../types/response.js";
+import { createMediaUrl, generateProcessKey } from "../../utils/media/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 
 const processMedia: ServiceFn<
@@ -21,7 +21,8 @@ const processMedia: ServiceFn<
 		context.config.db,
 	);
 
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	//* fetches the media item, if its not an image return the original url

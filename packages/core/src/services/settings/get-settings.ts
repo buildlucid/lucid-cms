@@ -1,15 +1,17 @@
-import optionsServices from "../options/index.js";
 import Formatter from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import type { SettingsResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
+import optionsServices from "../options/index.js";
 
 const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
-	const [optionsRes, processedImageCountRes] = await Promise.all([
+	const [optionsRes, processedImageCountRes, mediaAdapter] = await Promise.all([
 		optionsServices.getMultiple(context, {
 			names: ["media_storage_used", "license_key_last4"],
 		}),
 		services.processedImages.getCount(context),
+		getMediaAdapter(context.config),
 	]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;
@@ -30,6 +32,7 @@ const getSettings: ServiceFn<[], SettingsResponse> = async (context) => {
 				mediaStorageUsed: mediaStorageUsedRes?.valueInt || 0,
 				processedImageCount: processedImageCountRes.data,
 				licenseKeyLast4: licenseKeyLast4Res?.valueText ?? null,
+				mediaAdapterEnabled: mediaAdapter?.enabled || false,
 			},
 			config: context.config,
 		}),

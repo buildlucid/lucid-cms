@@ -121,6 +121,7 @@ export default Object.freeze({
 		kv: "kv-adapter",
 		queue: "queue-adapter",
 		imageProcessor: "image-processor",
+		mediaAdapter: "media-adapter",
 	} as const,
 	retention: 30,
 	cronSchedule: "0 0 * * *",
@@ -129,6 +130,7 @@ export default Object.freeze({
 	accessTokenExpiration: 300, // 5 minutes in seconds
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
+	presignedUrlExpiration: 3600000, // 1 hour in ms
 	documentation:
 		"https://lucidjs.build/en/cms/docs/configuration/configuring-lucid-cms/",
 	mediaAwaitingSyncInterval: 3600000, // 1 hour in ms

@@ -13,7 +13,8 @@ const deleteAwaitingSyncMedia: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes = services.media.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const MediaAwaitingSync = Repository.get(
@@ -22,7 +23,7 @@ const deleteAwaitingSyncMedia: ServiceFn<
 		context.config.db,
 	);
 
-	await mediaStrategyRes.data.deleteSingle(data.key);
+	await mediaStrategyRes.data.services.delete(data.key);
 
 	const deleteRes = await MediaAwaitingSync.deleteSingle({
 		where: [

@@ -3,27 +3,27 @@ import {
 	passthroughQueueAdapter,
 	z,
 } from "@lucidcms/core";
-import { describeRoute } from "hono-openapi";
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import PostgresAdapter from "@lucidcms/postgres-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
-import Database from "better-sqlite3";
-import transporter from "./src/services/email-transporter.js";
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
+import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
+import LucidLocalStorage from "@lucidcms/plugin-local-storage";
 // import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
+import LucidPages from "@lucidcms/plugin-pages";
 import LucidResend from "@lucidcms/plugin-resend";
 import LucidS3 from "@lucidcms/plugin-s3";
-import LucidPages from "@lucidcms/plugin-pages";
-import LucidLocalStorage from "@lucidcms/plugin-local-storage";
-// Collections
-import PageCollection from "./src/collections/pages.js";
+import PostgresAdapter from "@lucidcms/postgres-adapter";
+import SQLiteAdapter from "@lucidcms/sqlite-adapter";
+import Database from "better-sqlite3";
+import { describeRoute } from "hono-openapi";
 import BlogCollection from "./src/collections/blogs.js";
 import MainMenuCollection from "./src/collections/main-menu.js";
+// Collections
+import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
-import TestCollection from "./src/collections/test.js";
 import SimpleCollection from "./src/collections/simple.js";
+import TestCollection from "./src/collections/test.js";
+import transporter from "./src/services/email-transporter.js";
 // import postgres from "postgres";
 
 export const adapter = nodeAdapter();
@@ -178,10 +178,10 @@ export default defineConfig((env) => ({
 		// 		secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
 		// 	},
 		// }),
-		LucidLocalStorage({
-			uploadDir: "uploads",
-			secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
-		}),
+		// LucidLocalStorage({
+		// 	uploadDir: "uploads",
+		// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
+		// }),
 	],
 	// compilerOptions: {
 	// 	outDir: "out",

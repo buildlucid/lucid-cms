@@ -1,6 +1,6 @@
 import { Worker } from "node:worker_threads";
-import logger from "../../logger/index.js";
-import type { QueueAdapter } from "../types.js";
+import logger from "../../../logger/index.js";
+import type { QueueAdapter } from "../../types.js";
 
 const ADAPTER_KEY = "worker-queue-adapter";
 
@@ -19,7 +19,7 @@ const workerQueueAdapter: QueueAdapter = (context) => {
 					scope: context.logScope,
 				});
 				const workerUrl = new URL(
-					"./libs/queues/worker/consumer.js",
+					"./libs/queue-adapter/adapters/worker/consumer.js",
 					import.meta.url,
 				);
 				worker = new Worker(workerUrl);

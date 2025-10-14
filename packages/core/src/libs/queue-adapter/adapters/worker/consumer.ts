@@ -1,12 +1,12 @@
 import { parentPort } from "node:worker_threads";
-import getConfigPath from "../../config/get-config-path.js";
-import loadConfigFile from "../../config/load-config-file.js";
-import type { LucidQueueJobs, Select } from "../../db-adapter/types.js";
-import getKVAdapter from "../../kv-adapter/get-adapter.js";
-import logger from "../../logger/index.js";
-import Repository from "../../repositories/index.js";
-import passthroughQueueAdapter from "../adapters/passthrough.js";
-import createQueueContext, { QUEUE_LOG_SCOPE } from "../create-context.js";
+import getConfigPath from "../../../config/get-config-path.js";
+import loadConfigFile from "../../../config/load-config-file.js";
+import type { LucidQueueJobs, Select } from "../../../db-adapter/types.js";
+import getKVAdapter from "../../../kv-adapter/get-adapter.js";
+import logger from "../../../logger/index.js";
+import Repository from "../../../repositories/index.js";
+import createQueueContext, { QUEUE_LOG_SCOPE } from "../../create-context.js";
+import passthroughQueueAdapter from "../passthrough.js";
 
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;

@@ -1,16 +1,17 @@
+import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import {
 	passthroughImageProcessor,
+	passthroughKVAdapter,
 	passthroughQueueAdapter,
 	z,
 } from "@lucidcms/core";
-import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
+import LucidPages from "@lucidcms/plugin-pages";
 import LucidResend from "@lucidcms/plugin-resend";
 import LucidS3 from "@lucidcms/plugin-s3";
-import LucidPages from "@lucidcms/plugin-pages";
+import NewsCollection from "./src/collections/news.js";
 // Collections
 import PageCollection from "./src/collections/pages.js";
-import NewsCollection from "./src/collections/news.js";
 import SettingsCollection from "./src/collections/settings.js";
 
 export const adapter = cloudflareAdapter();
@@ -37,7 +38,7 @@ export const envSchema = z.object({
 export default defineConfig((env) => ({
 	host: env.LUCID_HOST,
 	db: new LibSQLAdapter({
-		url: env.LUCID_TURSO_URL,
+		url: "http://127.0.0.1:8081", //env.LUCID_TURSO_URL,
 		authToken: env.LUCID_TURSO_AUTH_TOKEN,
 	}),
 	keys: {
@@ -69,6 +70,7 @@ export default defineConfig((env) => ({
 	queue: {
 		adapter: passthroughQueueAdapter,
 	},
+	kv: passthroughKVAdapter,
 	collections: [PageCollection, NewsCollection, SettingsCollection],
 	plugins: [
 		LucidPages({
