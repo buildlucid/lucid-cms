@@ -1,5 +1,4 @@
 import path from "node:path";
-import Database from "better-sqlite3";
 import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
 import type { KVAdapterInstance, KVSetOptions } from "../types.js";
 
@@ -14,6 +13,9 @@ const DATABASE_FILENAME = "kv.db";
  * This is the default KV adapter for Lucid CMS and is used when the user hasn't specified a different adapter and their runtime supports better-sqlite3.
  */
 const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
+	const betterSqlite = await import("better-sqlite3");
+	const Database = betterSqlite.default;
+
 	const lucidDirectory = await ensureLucidDirectoryExists();
 	const databasePath = path.join(lucidDirectory, DATABASE_FILENAME);
 	const database = new Database(databasePath, {});
@@ -67,12 +69,7 @@ const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
 				return row.value as R;
 			}
 		},
-		set: async (
-			key: string,
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			value: any,
-			options?: KVSetOptions,
-		) => {
+		set: async (key: string, value: unknown, options?: KVSetOptions) => {
 			const serialised =
 				typeof value === "string" ? value : JSON.stringify(value);
 

@@ -38,7 +38,7 @@ export const envSchema = z.object({
 export default defineConfig((env) => ({
 	host: env.LUCID_HOST,
 	db: new LibSQLAdapter({
-		url: "http://127.0.0.1:8081", //env.LUCID_TURSO_URL,
+		url: env.LUCID_TURSO_URL,
 		authToken: env.LUCID_TURSO_AUTH_TOKEN,
 	}),
 	keys: {
@@ -62,7 +62,6 @@ export default defineConfig((env) => ({
 	},
 	disableOpenAPI: true,
 	media: {
-		imageProcessor: passthroughImageProcessor,
 		urlStrategy: (media) => {
 			return `${env.LUCID_MEDIA_URL}/${env.LUCID_S3_BUCKET}/${media.key}`;
 		},
@@ -70,7 +69,6 @@ export default defineConfig((env) => ({
 	queue: {
 		adapter: passthroughQueueAdapter,
 	},
-	kv: passthroughKVAdapter,
 	collections: [PageCollection, NewsCollection, SettingsCollection],
 	plugins: [
 		LucidPages({
