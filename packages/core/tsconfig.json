@@ -17,10 +17,6 @@
     "compilerOptions": {
         "rootDir": "./src",
         "outDir": "./dist",
-        "typeRoots": [
-            "node_modules/@types",
-            "src/types/*"
-        ],
         "paths": {
             "@lucidcms/sqlite-adapter": [
                 "../sqlite-adapter/src"

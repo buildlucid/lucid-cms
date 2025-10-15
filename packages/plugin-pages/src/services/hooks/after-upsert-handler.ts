@@ -6,7 +6,7 @@ import {
 } from "../index.js";
 import constants from "../../constants.js";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
-import type { PluginOptionsInternal } from "../../types/index.js";
+import type { PluginOptionsInternal } from "../../types/types.js";
 
 const afterUpsertHandler =
 	(

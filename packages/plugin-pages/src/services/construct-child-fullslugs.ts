@@ -5,7 +5,7 @@ import type {
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
-import type { CollectionConfig } from "../types/index.js";
+import type { CollectionConfig } from "../types/types.js";
 
 /**
  *  Constructs the fullSlug for the child documents

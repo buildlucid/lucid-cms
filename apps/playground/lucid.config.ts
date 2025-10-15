@@ -154,9 +154,9 @@ export default defineConfig((env) => ({
 		// 	},
 		// }),
 	],
-	compilerOptions: {
-		paths: {
-			outDir: "out",
-		},
-	},
+	// compilerOptions: {
+	// 	paths: {
+	// 		outDir: "out",
+	// 	},
+	// },
 }));

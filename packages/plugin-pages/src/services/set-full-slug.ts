@@ -1,4 +1,4 @@
-import type { CollectionConfig } from "../types/index.js";
+import type { CollectionConfig } from "../types/types.js";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 
 /**

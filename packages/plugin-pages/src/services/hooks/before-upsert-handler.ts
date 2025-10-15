@@ -12,7 +12,7 @@ import {
 	constructParentFullSlug,
 	setFullSlug,
 } from "../index.js";
-import type { PluginOptionsInternal } from "../../types/index.js";
+import type { PluginOptionsInternal } from "../../types/types.js";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 

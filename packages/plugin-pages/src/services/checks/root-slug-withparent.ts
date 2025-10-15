@@ -5,7 +5,7 @@ import type {
 	FieldError,
 	ServiceResponse,
 } from "@lucidcms/core/types";
-import type { CollectionConfig } from "../../types/index.js";
+import type { CollectionConfig } from "../../types/types.js";
 
 /**
  *  If slug is / and parentPage is set (would cause fullSlug to be the same as parentPage just with trailing slash)

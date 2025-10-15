@@ -3,7 +3,7 @@ import type { ServiceResponse } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
 	PluginOptionsInternal,
-} from "../types/index.js";
+} from "../types/types.js";
 
 /**
  *  Fetches the target collection from the plugin options

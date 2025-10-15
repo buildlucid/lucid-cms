@@ -4,7 +4,7 @@ import {
 	getDescendantFields,
 	updateFullSlugFields,
 } from "../index.js";
-import type { PluginOptionsInternal } from "../../types/index.js";
+import type { PluginOptionsInternal } from "../../types/types.js";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 
 /**

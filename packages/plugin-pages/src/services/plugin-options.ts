@@ -1,4 +1,4 @@
-import type { PluginOptions, PluginOptionsInternal } from "../types/index.js";
+import type { PluginOptions, PluginOptionsInternal } from "../types/types.js";
 
 const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 	return {
