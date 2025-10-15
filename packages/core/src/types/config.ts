@@ -59,8 +59,11 @@ export type UrlStrategy = (media: { key: string }) => string;
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
 	db: DatabaseAdapter;
-	/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
-	kv?: KVAdapter;
+	/** KV storage settings. */
+	kv?: {
+		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
+		adapter?: KVAdapter;
+	};
 	/** The cors configuration. */
 	cors?: {
 		/** Allowed origins. Your configured host is already added by default. */
@@ -227,7 +230,9 @@ export interface LucidConfig {
 
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
-	kv?: KVAdapter;
+	kv?: {
+		adapter: KVAdapter;
+	};
 	email: {
 		from: {
 			email: string;
