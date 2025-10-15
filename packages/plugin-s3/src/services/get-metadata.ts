@@ -1,10 +1,10 @@
-import T from "../translations/index.js";
+import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
+import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
-import type { MediaStrategyGetMeta } from "@lucidcms/core/types";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getMetadata: MediaStrategyGetMeta = async (key) => {
+	const getMetadata: MediaAdapterServiceGetMeta = async (key) => {
 		try {
 			const response = await client.sign(
 				new Request(

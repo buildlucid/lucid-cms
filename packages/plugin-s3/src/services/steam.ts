@@ -1,11 +1,11 @@
-import T from "../translations/index.js";
-import type { AwsClient } from "aws4fetch";
-import type { PluginOptions } from "../types/types.js";
-import type { MediaStrategyStream } from "@lucidcms/core/types";
 import type { Readable } from "node:stream";
+import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
+import type { AwsClient } from "aws4fetch";
+import T from "../translations/index.js";
+import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const stream: MediaStrategyStream = async (
+	const stream: MediaAdapterServiceStream = async (
 		key: string,
 		options?: {
 			range?: {

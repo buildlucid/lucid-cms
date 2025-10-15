@@ -1,8 +1,0 @@
-{
-	"file_not_found": "The file was not found.",
-	"invalid_key": "Invalid key",
-	"route_localstorage_upload_error_name": "Local Storage Upload Error",
-	"route_localstorage_upload_error_message": "There was an error uploading the file to local storage.",
-	"invalid_or_expired_token": "Invalid or expired token.",
-	"invalid_file": "Invalid file."
-}

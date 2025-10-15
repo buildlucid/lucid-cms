@@ -6,7 +6,6 @@ import {
 } from "@lucidcms/core";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
-import LucidLocalStorage from "@lucidcms/plugin-local-storage";
 // import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
@@ -84,7 +83,7 @@ export default defineConfig((env) => ({
 	media: {
 		// adapter: fileSystemMediaAdapter({
 		// 	uploadDir: "uploads",
-		// 	secretKey: "secret-key",
+		// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
 		// }),
 		maxFileSize: 200 * 1024 * 1024, // 200MB
 		processedImageLimit: 10,
@@ -182,10 +181,6 @@ export default defineConfig((env) => ({
 		// 		accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
 		// 		secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
 		// 	},
-		// }),
-		// LucidLocalStorage({
-		// 	uploadDir: "uploads",
-		// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
 		// }),
 	],
 	// compilerOptions: {

@@ -1,10 +1,10 @@
-import T from "../translations/index.js";
+import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
+import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
-import type { MediaStrategyUploadSingle } from "@lucidcms/core/types";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const uploadSingle: MediaStrategyUploadSingle = async (props) => {
+	const uploadSingle: MediaAdapterServiceUploadSingle = async (props) => {
 		try {
 			const headers = new Headers();
 

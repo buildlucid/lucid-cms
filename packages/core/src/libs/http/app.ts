@@ -274,8 +274,12 @@ const createApp = async (props: {
 		queue: queueInstance,
 		kv: kvInstance,
 		destroy: async () => {
-			await queueInstance.lifecycle.kill();
-			props.config.db.client.destroy();
+			await Promise.allSettled([
+				queueInstance.lifecycle.kill(),
+				// kvInstance.lifecycle.kill(),
+				mediaInstance?.lifecycle?.destroy?.(),
+				props.config.db.client.destroy(),
+			]);
 		},
 	};
 };

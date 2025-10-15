@@ -1,7 +1,8 @@
+import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import services from "../index.js";
+import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 
 const createSingle: ServiceFn<
 	[
@@ -55,7 +56,7 @@ const createSingle: ServiceFn<
 	});
 	if (syncMediaRes.error) return syncMediaRes;
 
-	const [mediaRes, deleteMediaSyncRes] = await Promise.all([
+	const [mediaRes, deleteMediaSyncRes, mediaAdapter] = await Promise.all([
 		Media.createSingle({
 			data: {
 				key: syncMediaRes.data.key,
@@ -90,12 +91,15 @@ const createSingle: ServiceFn<
 				enabled: true,
 			},
 		}),
+		getMediaAdapter(context.config),
 	]);
 	if (mediaRes.error) return mediaRes;
 	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
 
 	if (mediaRes.data === undefined) {
-		await context.config.media?.strategy?.deleteSingle(syncMediaRes.data.key);
+		if (mediaAdapter.enabled) {
+			await mediaAdapter.adapter.services.delete(syncMediaRes.data.key);
+		}
 		return {
 			error: {
 				type: "basic",
@@ -119,7 +123,9 @@ const createSingle: ServiceFn<
 			},
 		});
 		if (mediaTranslationsRes.error) {
-			await context.config.media?.strategy?.deleteSingle(syncMediaRes.data.key);
+			if (mediaAdapter.enabled) {
+				await mediaAdapter.adapter.services.delete(syncMediaRes.data.key);
+			}
 			return mediaTranslationsRes;
 		}
 	}

@@ -1,11 +1,14 @@
-import T from "../translations/index.js";
-import { PRESIGNED_URL_EXPIRY } from "../constants.js";
+import type { MediaAdapterServiceGetPresignedUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
+import { PRESIGNED_URL_EXPIRY } from "../constants.js";
+import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
-import type { MediaStrategyGetPresignedUrl } from "@lucidcms/core/types";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getPresignedUrl: MediaStrategyGetPresignedUrl = async (key, meta) => {
+	const getPresignedUrl: MediaAdapterServiceGetPresignedUrl = async (
+		key,
+		meta,
+	) => {
 		try {
 			const headers = new Headers();
 

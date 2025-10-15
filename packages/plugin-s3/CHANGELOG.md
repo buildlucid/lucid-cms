@@ -1,5 +1,12 @@
 # @lucidcms/plugin-s3
 
+## 2.1.0
+
+### Minor Changes
+
+- Reworked to use the new media adapter pattern.
+- Bumped core peer dependency version to `0.13.0`.
+
 ## 2.0.1
 
 ### Patch Changes
@@ -17,7 +24,7 @@
 
 ### Minor Changes
 
-- Range support on streams. 
+- Range support on streams.
 
 ## 1.1.2
 

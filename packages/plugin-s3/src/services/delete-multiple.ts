@@ -1,10 +1,10 @@
-import T from "../translations/index.js";
+import type { MediaAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
+import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
-import type { MediaStrategyDeleteMultiple } from "@lucidcms/core/types";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const deleteMultiple: MediaStrategyDeleteMultiple = async (keys) => {
+	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (keys) => {
 		try {
 			const deleteXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Delete>

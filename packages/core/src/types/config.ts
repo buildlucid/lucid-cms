@@ -12,7 +12,7 @@ import type {
 	MediaAdapterInstance,
 } from "../libs/media-adapter/types.js";
 import type { QueueAdapter } from "../libs/queue-adapter/types.js";
-import type { EmailDeliveryStatus, MediaType } from "../types.js";
+import type { EmailDeliveryStatus } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
@@ -60,73 +60,6 @@ export type EmailStrategyResponse = {
 	message: string;
 	external_message_id?: string | null;
 	data?: Record<string, unknown> | null;
-};
-
-export type MediaStrategyGetPresignedUrl = (
-	key: string,
-	meta: {
-		host: string;
-		mimeType: string;
-		extension?: string;
-	},
-) => ServiceResponse<{
-	url: string;
-	headers?: Record<string, string>;
-}>;
-
-export type MediaStrategyGetMeta = (key: string) => ServiceResponse<{
-	size: number;
-	mimeType: string | null;
-	etag: string | null;
-}>;
-
-export type MediaStrategyStream = (
-	key: string,
-	options?: {
-		range?: {
-			start: number;
-			end?: number;
-		};
-	},
-) => ServiceResponse<{
-	contentLength: number | undefined;
-	contentType: string | undefined;
-	body: Readable;
-	isPartialContent?: boolean;
-	totalSize?: number;
-	range?: {
-		start: number;
-		end: number;
-	};
-}>;
-
-export type MediaStrategyUploadSingle = (props: {
-	key: string;
-	data: Readable | Buffer;
-	meta: {
-		mimeType: string;
-		extension: string;
-		size: number;
-		type: MediaType;
-	};
-}) => ServiceResponse<{
-	etag?: string;
-}>;
-
-export type MediaStrategyDeleteSingle = (
-	key: string,
-) => ServiceResponse<undefined>;
-export type MediaStrategyDeleteMultiple = (
-	keys: string[],
-) => ServiceResponse<undefined>;
-
-export type MediaStrategy = {
-	getPresignedUrl: MediaStrategyGetPresignedUrl;
-	getMeta: MediaStrategyGetMeta;
-	stream: MediaStrategyStream;
-	uploadSingle: MediaStrategyUploadSingle;
-	deleteSingle: MediaStrategyDeleteSingle;
-	deleteMultiple: MediaStrategyDeleteMultiple;
 };
 
 export type ImageProcessorOptions = {
@@ -216,7 +149,7 @@ export interface LucidConfig {
 	preRenderedEmailTemplates?: Record<string, string>;
 	/** Media settings. */
 	media?: {
-		/** The media adapter to use. */
+		/** The media adapter to use. This determines how media is stored, retrieved and deleted. */
 		adapter?:
 			| MediaAdapter
 			| MediaAdapterInstance
@@ -230,8 +163,6 @@ export interface LucidConfig {
 		 *  - If a string is passed, it will attempt to stream the url as the response.
 		 **/
 		fallbackImage?: string;
-		/** The media strategy services to use. These determine how media is stored, retrieved and deleted. */
-		strategy?: MediaStrategy;
 		/** The image processor to use. */
 		imageProcessor?: ImageProcessor;
 		/** The processed image limit. */
@@ -250,10 +181,7 @@ export interface LucidConfig {
 				quality?: number;
 			}
 		>;
-		/**
-		 * The url strategy to use. This is used to generate the url for the media.
-		 * This is useful when you want to overide using the cdn endpoint and stream media directly from your bucket for instance.
-		 */
+		/** The url strategy to use. This is used to generate the url for the media. */
 		urlStrategy?: UrlStrategy;
 	};
 	/** Hono middleware and extensions to register. Allows you to register custom routes, middleware, and more. */
@@ -353,7 +281,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		processedImageLimit: number;
 		storeProcessedImages: boolean;
 		fallbackImage: string | undefined;
-		strategy?: MediaStrategy;
 		imageProcessor?: ImageProcessor;
 		onDemandFormats: boolean;
 		imagePresets: Record<

@@ -1,5 +1,5 @@
-import constants from "./constants.js";
 import type { Config, LucidConfig } from "../types/config.js";
+import constants from "./constants.js";
 
 export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
@@ -22,7 +22,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		storageLimit: 5368709120,
 		maxFileSize: 16777216,
 		fallbackImage: undefined,
-		strategy: undefined,
 		processedImageLimit: 10,
 		storeProcessedImages: true,
 		onDemandFormats: false,

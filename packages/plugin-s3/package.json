@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/plugin-s3",
-	"version": "2.0.1",
+	"version": "2.1.0",
 	"private": false,
 	"description": "The official S3 plugin for Lucid CMS",
 	"type": "module",
@@ -20,14 +20,22 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"author": "Lucid",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/buildlucid/lucid-cms.git",
 		"directory": "packages/plugin-s3"
 	},
-	"keywords": ["CMS", "Lucid CMS", "Lucid", "S3", "Plugin"],
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"Lucid",
+		"S3",
+		"Plugin"
+	],
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@lucidcms/config": "*",

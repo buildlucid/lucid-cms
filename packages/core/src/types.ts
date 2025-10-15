@@ -3,6 +3,7 @@ export * from "./libs/custom-fields/types.js";
 export * from "./libs/db-adapter/types.js";
 export * from "./libs/email-adapter/types.js";
 export * from "./libs/logger/types.js";
+export * from "./libs/media-adapter/types.js";
 export * from "./libs/runtime-adapter/types.js";
 export * from "./types/config.js";
 export * from "./types/errors.js";
