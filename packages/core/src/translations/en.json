@@ -291,5 +291,6 @@
 	"file_not_found": "File not found.",
 	"invalid_key": "Invalid key.",
 	"invalid_or_expired_token": "Invalid or expired token.",
-	"invalid_file": "Invalid file."
+	"invalid_file": "Invalid file.",
+	"email_successfully_sent": "Email sent successfully."
 }

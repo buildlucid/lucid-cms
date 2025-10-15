@@ -135,19 +135,9 @@ export default defineConfig((env) => ({
 			],
 		}),
 		// LucidNodemailer({
-		// 	from: {
-		// 		email: "team@lucidjs.build",
-		// 		name: "Lucid CMS",
-		// 	},
 		// 	transporter: transporter,
-		// 	simulate: true,
 		// }),
 		// LucidResend({
-		// 	from: {
-		// 		email: "team@lucidjs.build",
-		// 		name: "Lucid CMS",
-		// 	},
-		// 	simulate: true,
 		// 	apiKey: env.LUCID_RESEND_API_KEY,
 		// 	webhook: {
 		// 		enabled: true,

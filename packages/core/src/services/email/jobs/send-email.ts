@@ -64,29 +64,38 @@ const sendEmail: ServiceFn<
 	if (html.error) return html;
 
 	let result: EmailStrategyResponse | undefined;
-	try {
-		result = await emailAdapter.adapter.services.send(
-			{
-				to: emailRes.data.to_address,
-				subject: emailRes.data.subject ?? "",
-				from: context.config.email.from,
-				html: html.data,
-				cc: emailRes.data.cc ?? undefined,
-				bcc: emailRes.data.bcc ?? undefined,
-			},
-			{
-				data: emailRes.data.data,
-				template: emailRes.data.template,
-			},
-		);
-	} catch (error) {
+	if (emailAdapter.simulated) {
 		result = {
-			success: false,
-			deliveryStatus: "failed",
-			message:
-				error instanceof Error ? error.message : T("email_failed_to_send"),
-			externalMessageId: null,
+			success: true,
+			deliveryStatus: "sent",
+			message: T("email_successfully_sent"),
+			data: null,
 		};
+	} else {
+		try {
+			result = await emailAdapter.adapter.services.send(
+				{
+					to: emailRes.data.to_address,
+					subject: emailRes.data.subject ?? "",
+					from: context.config.email.from,
+					html: html.data,
+					cc: emailRes.data.cc ?? undefined,
+					bcc: emailRes.data.bcc ?? undefined,
+				},
+				{
+					data: emailRes.data.data,
+					template: emailRes.data.template,
+				},
+			);
+		} catch (error) {
+			result = {
+				success: false,
+				deliveryStatus: "failed",
+				message:
+					error instanceof Error ? error.message : T("email_failed_to_send"),
+				externalMessageId: null,
+			};
+		}
 	}
 
 	const [updateRes, emailTransactionRes] = await Promise.all([

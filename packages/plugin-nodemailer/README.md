@@ -24,10 +24,6 @@ export default defineConfig((env) => ({
     // ...other config
     plugins: [
         LucidNodemailer({
-            from: {
-                email: "team@lucidjs.build",
-                name: "Lucid CMS",
-            },
             transporter: transporter,
         }),
     ],
@@ -40,23 +36,8 @@ This plugin offers the following configuration options to control email sending 
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `from` | `object` | The default sender information for emails |
 | `transporter` | `Transporter` | A configured Nodemailer transporter instance |
-| `simulate` | `boolean` | If true, the email will not send, but still register as a success |
-
-### from
-
-The `from` object contains the default sender information that will be used for all emails sent through this plugin.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `email` | `string` | The email address that emails will be sent from |
-| `name` | `string` | The display name that will appear as the sender |
 
 ### transporter
 
 This should be a configured Nodemailer transporter instance. You can create this using any of the transport methods supported by Nodemailer, such as SMTP, Gmail, or other email service providers.
-
-### simulate
-
-When this is set to true, no emails will be sent out, however the strategy will still return as if it was a success.
