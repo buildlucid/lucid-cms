@@ -1,6 +1,5 @@
 import type { Readable } from "node:stream";
 import type { Hono } from "hono";
-import type { InlineConfig } from "vite";
 import type z from "zod/v4";
 import type CollectionBuilder from "../libs/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
@@ -219,8 +218,6 @@ export interface LucidConfig {
 			/** The path to the email templates directory. This can be used to override or extend the default templates. */
 			emailTemplates?: string;
 		};
-		/** Extend Vites config, this is used to build the SPA. */
-		vite?: InlineConfig;
 		watch?: {
 			/** The files to ignore. */
 			ignore?: string[];
@@ -311,7 +308,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			outDir: string;
 			emailTemplates: string;
 		};
-		vite?: InlineConfig;
 		watch: {
 			ignore: string[];
 		};

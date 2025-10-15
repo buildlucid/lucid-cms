@@ -173,7 +173,6 @@ const ConfigSchema = z.object({
 					emailTemplates: z.string().optional(),
 				})
 				.optional(),
-			vite: z.unknown().optional(),
 			watch: z
 				.object({
 					ignore: z.array(z.string()).optional(),
