@@ -1,5 +1,6 @@
 import {
 	fileSystemMediaAdapter,
+	passthroughEmailAdapter,
 	passthroughImageProcessor,
 	passthroughQueueAdapter,
 	z,
@@ -95,6 +96,9 @@ export default defineConfig((env) => ({
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },
 	},
+	// email: {
+	// 	adapter: passthroughEmailAdapter,
+	// },
 	// queue: {
 	// 	adapter: passthroughQueueAdapter,
 	// },
@@ -107,29 +111,6 @@ export default defineConfig((env) => ({
 	// 		},
 	// 	},
 	// ],
-	hono: {
-		extensions: [
-			async (app) => {
-				app.get(
-					"/config-test",
-					describeRoute({
-						description: "Lucid Hono Extensions",
-						tags: ["lucid-hono-extensions"],
-						summary: "Testing the lucid hono extensions config",
-						validateResponse: true,
-					}),
-					(c) => {
-						// @ts-expect-error
-						console.log(c.env?.TEST_ENV_VAR);
-						return c.json({
-							host: "http://[::1]:6543",
-							logLevel: "debug",
-						});
-					},
-				);
-			},
-		],
-	},
 	collections: [
 		PageCollection,
 		BlogCollection,
@@ -161,18 +142,18 @@ export default defineConfig((env) => ({
 		// 	transporter: transporter,
 		// 	simulate: true,
 		// }),
-		LucidResend({
-			from: {
-				email: "team@lucidjs.build",
-				name: "Lucid CMS",
-			},
-			simulate: true,
-			apiKey: env.LUCID_RESEND_API_KEY,
-			webhook: {
-				enabled: true,
-				secret: env.LUCID_RESEND_WEBHOOK_SECRET,
-			},
-		}),
+		// LucidResend({
+		// 	from: {
+		// 		email: "team@lucidjs.build",
+		// 		name: "Lucid CMS",
+		// 	},
+		// 	simulate: true,
+		// 	apiKey: env.LUCID_RESEND_API_KEY,
+		// 	webhook: {
+		// 		enabled: true,
+		// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
+		// 	},
+		// }),
 		// LucidS3({
 		// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 		// 	bucket: "headless-cms",

@@ -6,6 +6,10 @@ export const defaultConfig: Partial<LucidConfig> = {
 		level: "info",
 	},
 	email: {
+		from: {
+			email: "hello@mylucid.cms",
+			name: "Lucid CMS",
+		},
 		simulate: false,
 	},
 	disableOpenAPI: false,

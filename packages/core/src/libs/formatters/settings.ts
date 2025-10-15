@@ -16,8 +16,7 @@ export default class SettingsFormatter {
 	}): SettingsResponse => {
 		return {
 			email: {
-				enabled: props.config.email !== undefined,
-				from: props.config.email?.from ?? null,
+				from: props.config.email.from,
 			},
 			media: {
 				enabled: props.settings.mediaAdapterEnabled,

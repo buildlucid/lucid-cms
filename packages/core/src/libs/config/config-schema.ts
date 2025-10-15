@@ -7,6 +7,10 @@ import type {
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { KVAdapter } from "../kv-adapter/types.js";
+import type {
+	EmailAdapter,
+	EmailAdapterInstance,
+} from "../email-adapter/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type {
 	MediaAdapter,
@@ -56,6 +60,12 @@ const MediaAdapterSchema = z.custom<
 	message: "Expected a MediaAdapter function",
 });
 
+const EmailAdapterSchema = z.custom<
+	EmailAdapter | EmailAdapterInstance | Promise<EmailAdapterInstance>
+>((data) => typeof data === "function" || typeof data === "object", {
+	message: "Expected an EmailAdapter function",
+});
+
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	host: z.string(),
@@ -89,7 +99,6 @@ const ConfigSchema = z.object({
 		.optional(),
 	email: z
 		.object({
-			identifier: z.string().optional(),
 			from: z
 				.object({
 					email: z.string(),
@@ -97,7 +106,7 @@ const ConfigSchema = z.object({
 				})
 				.optional(),
 			simulate: z.boolean().optional(),
-			strategy: z.unknown().optional(),
+			adapter: EmailAdapterSchema.optional(),
 		})
 		.optional(),
 	preRenderedEmailTemplates: z.record(z.string(), z.string()).optional(),

@@ -2,6 +2,7 @@ import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
+import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
 
 const resendSingle: ServiceFn<
 	[
@@ -13,10 +14,6 @@ const resendSingle: ServiceFn<
 		jobId: string;
 	}
 > = async (context, data) => {
-	const emailConfigRes =
-		await services.emails.checks.checkHasEmailConfig(context);
-	if (emailConfigRes.error) return emailConfigRes;
-
 	const Emails = Repository.get("emails", context.db, context.config.db);
 	const EmailTransactions = Repository.get(
 		"email-transactions",
@@ -24,23 +21,26 @@ const resendSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const emailRes = await Emails.selectSingle({
-		select: ["id"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
+	const [emailRes, emailAdapter] = await Promise.all([
+		Emails.selectSingle({
+			select: ["id"],
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.id,
+				},
+			],
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("email_not_found_message"),
+					status: 404,
+				},
 			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: T("email_not_found_message"),
-				status: 404,
-			},
-		},
-	});
+		}),
+		getEmailAdapter(context.config),
+	]);
 	if (emailRes.error) return emailRes;
 
 	const [updateEmailRes, transactionRes] = await Promise.all([
@@ -62,9 +62,9 @@ const resendSingle: ServiceFn<
 				email_id: emailRes.data.id,
 				delivery_status: "scheduled",
 				message: null,
-				strategy_identifier: emailConfigRes.data.identifier,
+				strategy_identifier: emailAdapter.adapter.key,
 				strategy_data: null,
-				simulate: emailConfigRes.data.simulate ?? false,
+				simulate: emailAdapter.simulated,
 				external_message_id: null,
 			},
 			validation: {

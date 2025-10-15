@@ -1,17 +1,17 @@
-import T from "@/translations";
-import { type Component, Show, createMemo, createSignal } from "solid-js";
-import helpers from "@/utils/helpers";
-import api from "@/services/api";
-import userStore from "@/store/userStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
-import Button from "@/components/Partials/Button";
-import ProgressBar from "@/components/Partials/ProgressBar";
+import { Standard } from "@/components/Groups/Headers";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
 import ClearCache from "@/components/Modals/System/ClearCache";
+import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
-import { Wrapper, DynamicContent } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
+import ProgressBar from "@/components/Partials/ProgressBar";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import userStore from "@/store/userStore";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 const SystemOverviewRoute: Component = (props) => {
 	// ----------------------------------------
@@ -179,12 +179,6 @@ const SystemOverviewRoute: Component = (props) => {
 								{
 									label: T()("media_enabled"),
 									value: settingsData.data?.data?.media.enabled
-										? T()("yes")
-										: T()("no"),
-								},
-								{
-									label: T()("email_enabled"),
-									value: settingsData.data?.data?.email.enabled
 										? T()("yes")
 										: T()("no"),
 								},

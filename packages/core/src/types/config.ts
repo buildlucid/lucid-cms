@@ -12,7 +12,10 @@ import type {
 	MediaAdapterInstance,
 } from "../libs/media-adapter/types.js";
 import type { QueueAdapter } from "../libs/queue-adapter/types.js";
-import type { EmailDeliveryStatus } from "../types.js";
+import type {
+	EmailAdapter,
+	EmailAdapterInstance,
+} from "../libs/email-adapter/types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
@@ -31,36 +34,6 @@ export type LucidPluginOptions<T = undefined> = (
 	lucid: string;
 	config: Config;
 }>;
-
-export type EmailStrategy = (
-	email: {
-		to: string;
-		subject: string;
-		from: {
-			email: string;
-			name: string;
-		};
-		html: string;
-		text?: string;
-		cc?: string;
-		bcc?: string;
-		replyTo?: string;
-	},
-	meta: {
-		data: {
-			[key: string]: unknown;
-		};
-		template: string;
-	},
-) => Promise<EmailStrategyResponse>;
-
-export type EmailStrategyResponse = {
-	success: boolean;
-	delivery_status: EmailDeliveryStatus;
-	message: string;
-	external_message_id?: string | null;
-	data?: Record<string, unknown> | null;
-};
 
 export type ImageProcessorOptions = {
 	width?: number;
@@ -131,17 +104,18 @@ export interface LucidConfig {
 	};
 	/** Email settings. */
 	email?: {
-		/** The email strategy identifier. */
-		identifier?: string;
 		/** The email from settings. */
 		from?: {
 			/** The email address to send emails from. */
-			email: string;
+			email?: string;
 			/** The name to send emails from. */
-			name: string;
+			name?: string;
 		};
-		/** The email strategy services to use. These determine how emails are sent. */
-		strategy?: EmailStrategy;
+		/** The email adapter to use. Determines how emails are sent. */
+		adapter?:
+			| EmailAdapter
+			| EmailAdapterInstance
+			| Promise<EmailAdapterInstance>;
 		/** When set to true, the plugin will not send emails but will still return as a success */
 		simulate?: boolean;
 	};
@@ -254,14 +228,16 @@ export interface LucidConfig {
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	kv?: KVAdapter;
-	email?: {
-		identifier?: string;
-		from?: {
+	email: {
+		from: {
 			email: string;
 			name: string;
 		};
-		strategy?: EmailStrategy;
-		simulate?: boolean;
+		adapter?:
+			| EmailAdapter
+			| EmailAdapterInstance
+			| Promise<EmailAdapterInstance>;
+		simulate: boolean;
 	};
 	disableOpenAPI: boolean;
 	localization: {

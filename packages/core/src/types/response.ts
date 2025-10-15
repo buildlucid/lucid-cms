@@ -50,11 +50,10 @@ export interface UserPermissionsResponse {
 
 export interface SettingsResponse {
 	email: {
-		enabled: boolean;
 		from: {
 			email: string;
 			name: string;
-		} | null;
+		};
 	};
 	media: {
 		enabled: boolean;

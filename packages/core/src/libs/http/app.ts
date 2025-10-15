@@ -17,6 +17,7 @@ import { LucidAPIError } from "../../utils/errors/index.js";
 import getKVAdapter from "../kv-adapter/get-adapter.js";
 import getMediaAdapter from "../media-adapter/get-adapter.js";
 import getQueueAdapter from "../queue-adapter/get-adapter.js";
+import getEmailAdapter from "../email-adapter/get-adapter.js";
 import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/v1/index.js";
@@ -42,12 +43,16 @@ const createApp = async (props: {
 
 	const kvInstance = await getKVAdapter(props.config);
 
-	const [queueInstance, mediaInstance] = await Promise.all([
+	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
 		getQueueAdapter(props.config).then(async (a) => {
 			await a.lifecycle.start();
 			return a;
 		}),
 		getMediaAdapter(props.config).then(async (a) => {
+			await a.adapter?.lifecycle?.init?.();
+			return a.adapter;
+		}),
+		getEmailAdapter(props.config).then(async (a) => {
 			await a.adapter?.lifecycle?.init?.();
 			return a.adapter;
 		}),
@@ -278,6 +283,7 @@ const createApp = async (props: {
 				queueInstance.lifecycle.kill(),
 				// kvInstance.lifecycle.kill(),
 				mediaInstance?.lifecycle?.destroy?.(),
+				emailInstance?.lifecycle?.destroy?.(),
 				props.config.db.client.destroy(),
 			]);
 		},

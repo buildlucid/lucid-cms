@@ -1,9 +1,9 @@
 import renderHandlebarsTemplate from "../../../libs/email-adapter/templates/render-handlebars-template.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
-import type { EmailStrategyResponse } from "../../../types/config.js";
+import type { EmailStrategyResponse } from "../../../libs/email-adapter/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import getEmailAdapter from "../../../libs/email-adapter/get-adapter.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -14,10 +14,6 @@ const sendEmail: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const emailConfigRes =
-		await services.emails.checks.checkHasEmailConfig(context);
-	if (emailConfigRes.error) return emailConfigRes;
-
 	const Emails = Repository.get("emails", context.db, context.config.db);
 	const EmailTransactions = Repository.get(
 		"email-transactions",
@@ -25,37 +21,40 @@ const sendEmail: ServiceFn<
 		context.config.db,
 	);
 
-	const emailRes = await Emails.selectSingle({
-		select: [
-			"id",
-			"from_address",
-			"from_name",
-			"to_address",
-			"subject",
-			"cc",
-			"bcc",
-			"template",
-			"data",
-			"type",
-			"attempt_count",
-			"created_at",
-			"updated_at",
-		],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.emailId,
+	const [emailRes, emailAdapter] = await Promise.all([
+		Emails.selectSingle({
+			select: [
+				"id",
+				"from_address",
+				"from_name",
+				"to_address",
+				"subject",
+				"cc",
+				"bcc",
+				"template",
+				"data",
+				"type",
+				"attempt_count",
+				"created_at",
+				"updated_at",
+			],
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.emailId,
+				},
+			],
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("email_not_found_message"),
+					status: 404,
+				},
 			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: T("email_not_found_message"),
-				status: 404,
-			},
-		},
-	});
+		}),
+		getEmailAdapter(context.config),
+	]);
 	if (emailRes.error) return emailRes;
 
 	const html = await renderHandlebarsTemplate(context, {
@@ -66,11 +65,11 @@ const sendEmail: ServiceFn<
 
 	let result: EmailStrategyResponse | undefined;
 	try {
-		result = await emailConfigRes.data.strategy(
+		result = await emailAdapter.adapter.services.send(
 			{
 				to: emailRes.data.to_address,
 				subject: emailRes.data.subject ?? "",
-				from: emailConfigRes.data.from,
+				from: context.config.email.from,
 				html: html.data,
 				cc: emailRes.data.cc ?? undefined,
 				bcc: emailRes.data.bcc ?? undefined,
@@ -83,10 +82,10 @@ const sendEmail: ServiceFn<
 	} catch (error) {
 		result = {
 			success: false,
-			delivery_status: "failed",
+			deliveryStatus: "failed",
 			message:
 				error instanceof Error ? error.message : T("email_failed_to_send"),
-			external_message_id: null,
+			externalMessageId: null,
 		};
 	}
 
@@ -100,7 +99,7 @@ const sendEmail: ServiceFn<
 				},
 			],
 			data: {
-				current_status: result.delivery_status,
+				current_status: result.deliveryStatus,
 				attempt_count: (emailRes.data.attempt_count ?? 0) + 1,
 				last_attempted_at: new Date().toISOString(),
 				updated_at: new Date().toISOString(),
@@ -115,10 +114,10 @@ const sendEmail: ServiceFn<
 				},
 			],
 			data: {
-				delivery_status: result.delivery_status,
+				delivery_status: result.deliveryStatus,
 				message: result.success ? null : result.message,
 				strategy_data: result.data,
-				external_message_id: result.external_message_id,
+				external_message_id: result.externalMessageId,
 				updated_at: new Date().toISOString(),
 			},
 		}),

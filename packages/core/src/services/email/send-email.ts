@@ -3,6 +3,7 @@ import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
 import services from "../index.js";
+import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -30,33 +31,32 @@ const sendEmail: ServiceFn<
 	);
 	const EmailsFormatter = Formatter.get("emails");
 
-	const emailConfigRes =
-		await services.emails.checks.checkHasEmailConfig(context);
-	if (emailConfigRes.error) return emailConfigRes;
-
-	const newEmailRes = await Emails.createSingle({
-		data: {
-			from_address: emailConfigRes.data.from.email,
-			from_name: emailConfigRes.data.from.name,
-			to_address: data.to,
-			subject: data.subject,
-			template: data.template,
-			cc: data.cc,
-			bcc: data.bcc,
-			data: data.data,
-			type: data.type,
-			current_status: "scheduled",
-			attempt_count: 0,
-			last_attempted_at: undefined,
-		},
-		returnAll: true,
-		validation: {
-			enabled: true,
-			defaultError: {
-				status: 500,
+	const [newEmailRes, emailAdapter] = await Promise.all([
+		Emails.createSingle({
+			data: {
+				from_address: context.config.email.from.email,
+				from_name: context.config.email.from.name,
+				to_address: data.to,
+				subject: data.subject,
+				template: data.template,
+				cc: data.cc,
+				bcc: data.bcc,
+				data: data.data,
+				type: data.type,
+				current_status: "scheduled",
+				attempt_count: 0,
+				last_attempted_at: undefined,
 			},
-		},
-	});
+			returnAll: true,
+			validation: {
+				enabled: true,
+				defaultError: {
+					status: 500,
+				},
+			},
+		}),
+		getEmailAdapter(context.config),
+	]);
 	if (newEmailRes.error) return newEmailRes;
 
 	const initialTransactionRes = await EmailTransactions.createSingle({
@@ -64,9 +64,9 @@ const sendEmail: ServiceFn<
 			email_id: newEmailRes.data.id,
 			delivery_status: "scheduled",
 			message: null,
-			strategy_identifier: emailConfigRes.data.identifier,
+			strategy_identifier: emailAdapter.adapter.key,
 			strategy_data: null,
-			simulate: emailConfigRes.data.simulate ?? false,
+			simulate: emailAdapter.simulated,
 			external_message_id: null,
 		},
 		returnAll: true,

@@ -122,6 +122,7 @@ export default Object.freeze({
 		queue: "queue-adapter",
 		imageProcessor: "image-processor",
 		mediaAdapter: "media-adapter",
+		emailAdapter: "email-adapter",
 	} as const,
 	retention: 30,
 	cronSchedule: "0 0 * * *",
