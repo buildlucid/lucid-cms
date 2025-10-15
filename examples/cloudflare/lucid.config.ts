@@ -66,6 +66,13 @@ export default defineConfig((env) => ({
 			return `${env.LUCID_MEDIA_URL}/${env.LUCID_S3_BUCKET}/${media.key}`;
 		},
 	},
+	email: {
+		from: {
+			email: env.LUCID_RESEND_FROM_EMAIL,
+			name: env.LUCID_RESEND_FROM_NAME,
+		},
+		simulate: true,
+	},
 	queue: {
 		adapter: passthroughQueueAdapter,
 	},
@@ -81,12 +88,7 @@ export default defineConfig((env) => ({
 			],
 		}),
 		LucidResend({
-			from: {
-				email: env.LUCID_RESEND_FROM_EMAIL,
-				name: env.LUCID_RESEND_FROM_NAME,
-			},
 			apiKey: env.LUCID_RESEND_API_KEY,
-			simulate: true,
 			webhook: {
 				enabled: false,
 				secret: env.LUCID_RESEND_WEBHOOK_SECRET,
