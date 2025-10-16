@@ -9,7 +9,14 @@ import type { KVAdapterInstance } from "./types.js";
  */
 const getKVAdapter = async (config: Config): Promise<KVAdapterInstance> => {
 	try {
-		if (config.kv) return await config.kv.adapter();
+		if (config.kv?.adapter) {
+			const adapter =
+				typeof config.kv.adapter === "function"
+					? await config.kv.adapter()
+					: config.kv.adapter;
+
+			return await adapter;
+		}
 
 		const { default: betterSQLiteKVAdapter } = await import(
 			"./adapters/better-sqlite.js"

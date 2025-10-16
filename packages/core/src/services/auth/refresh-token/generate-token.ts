@@ -57,7 +57,7 @@ const generateToken = async (
 	if (createTokenRes.error) return createTokenRes;
 
 	const kv = c.get("kv");
-	await kv.set(
+	await kv.command.set(
 		cacheKeys.auth.refresh(token),
 		{ user_id: userId },
 		{ expirationTtl: constants.refreshTokenExpiration },

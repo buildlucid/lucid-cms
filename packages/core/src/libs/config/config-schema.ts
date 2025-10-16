@@ -6,7 +6,7 @@ import type {
 	UrlStrategy,
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { KVAdapter } from "../kv-adapter/types.js";
+import type { KVAdapter, KVAdapterInstance } from "../kv-adapter/types.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
@@ -47,12 +47,11 @@ const QueueAdapterSchema = z.custom<QueueAdapter>(
 	},
 );
 
-const KVAdapterSchema = z.custom<KVAdapter>(
-	(data) => typeof data === "function",
-	{
-		message: "Expected a KVAdapter function",
-	},
-);
+const KVAdapterSchema = z.custom<
+	KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>
+>((data) => typeof data === "function" || typeof data === "object", {
+	message: "Expected a KVAdapter function",
+});
 
 const MediaAdapterSchema = z.custom<
 	MediaAdapter | MediaAdapterInstance | Promise<MediaAdapterInstance>

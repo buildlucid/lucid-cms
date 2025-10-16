@@ -61,7 +61,7 @@ const updateSingle: ServiceFn<
 	if (updateRes.error) return updateRes;
 
 	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
-	await context.kv.delete(cacheKey);
+	await context.kv.command.delete(cacheKey);
 
 	return {
 		error: undefined,

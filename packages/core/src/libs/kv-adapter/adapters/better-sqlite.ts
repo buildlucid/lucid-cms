@@ -56,43 +56,52 @@ const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
 	if (cleanupInterval.unref) cleanupInterval.unref();
 
 	return {
-		get: async <R>(key: string): Promise<R | null> => {
-			const row = stmts.get.get(key, Date.now()) as
-				| { value: string }
-				| undefined;
-
-			if (!row) return null;
-
-			try {
-				return JSON.parse(row.value) as R;
-			} catch {
-				return row.value as R;
-			}
+		type: "kv-adapter",
+		key: "sqlite",
+		lifecycle: {
+			destroy: async () => {
+				database.close();
+			},
 		},
-		set: async (key: string, value: unknown, options?: KVSetOptions) => {
-			const serialised =
-				typeof value === "string" ? value : JSON.stringify(value);
+		command: {
+			get: async <R>(key: string): Promise<R | null> => {
+				const row = stmts.get.get(key, Date.now()) as
+					| { value: string }
+					| undefined;
 
-			let expiresAt: number | null = null;
+				if (!row) return null;
 
-			if (options?.expirationTtl) {
-				expiresAt =
-					Date.now() + options.expirationTtl * MILLISECONDS_PER_SECOND;
-			} else if (options?.expirationTimestamp) {
-				expiresAt = options.expirationTimestamp * MILLISECONDS_PER_SECOND;
-			}
+				try {
+					return JSON.parse(row.value) as R;
+				} catch {
+					return row.value as R;
+				}
+			},
+			set: async (key: string, value: unknown, options?: KVSetOptions) => {
+				const serialised =
+					typeof value === "string" ? value : JSON.stringify(value);
 
-			stmts.set.run(key, serialised, expiresAt);
-		},
-		has: async (key: string): Promise<boolean> => {
-			const row = stmts.has.get(key, Date.now());
-			return row !== undefined;
-		},
-		delete: async (key: string) => {
-			stmts.delete.run(key);
-		},
-		clear: async () => {
-			stmts.clear.run();
+				let expiresAt: number | null = null;
+
+				if (options?.expirationTtl) {
+					expiresAt =
+						Date.now() + options.expirationTtl * MILLISECONDS_PER_SECOND;
+				} else if (options?.expirationTimestamp) {
+					expiresAt = options.expirationTimestamp * MILLISECONDS_PER_SECOND;
+				}
+
+				stmts.set.run(key, serialised, expiresAt);
+			},
+			has: async (key: string): Promise<boolean> => {
+				const row = stmts.has.get(key, Date.now());
+				return row !== undefined;
+			},
+			delete: async (key: string) => {
+				stmts.delete.run(key);
+			},
+			clear: async () => {
+				stmts.clear.run();
+			},
 		},
 	};
 };

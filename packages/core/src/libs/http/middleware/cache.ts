@@ -87,7 +87,9 @@ const cache = (options: CacheOptions) =>
 		const kv = c.get("kv");
 		const cacheKey = generateCacheKey(c, options);
 
-		const cached = await kv.get<{ data: unknown; cachedAt: number }>(cacheKey);
+		const cached = await kv.command.get<{ data: unknown; cachedAt: number }>(
+			cacheKey,
+		);
 		if (cached !== null) {
 			const age = Math.floor((Date.now() - cached.cachedAt) / 1000);
 			c.header("X-Cache", "HIT");
@@ -103,7 +105,7 @@ const cache = (options: CacheOptions) =>
 			response.headers.get("content-type")?.includes("application/json")
 		) {
 			const data = await response.json();
-			await kv.set(
+			await kv.command.set(
 				cacheKey,
 				{
 					data: data,

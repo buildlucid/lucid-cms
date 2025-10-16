@@ -221,7 +221,7 @@ const migrateCommand = (props?: {
 			}
 
 			logger.clearingKVCache();
-			await kvInstance.clear();
+			await kvInstance.command.clear();
 
 			logger.migrationComplete(overallStartTime);
 			if (mode === "process") process.exit(0);

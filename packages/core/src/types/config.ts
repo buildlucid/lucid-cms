@@ -4,7 +4,7 @@ import type z from "zod/v4";
 import type CollectionBuilder from "../libs/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db-adapter/adapter-base.js";
-import type { KVAdapter } from "../libs/kv-adapter/types.js";
+import type { KVAdapter, KVAdapterInstance } from "../libs/kv-adapter/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
 	MediaAdapter,
@@ -61,7 +61,7 @@ export interface LucidConfig {
 	/** KV storage settings. */
 	kv?: {
 		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
-		adapter?: KVAdapter;
+		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 	};
 	/** The cors configuration. */
 	cors?: {
@@ -228,7 +228,7 @@ export interface LucidConfig {
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	kv?: {
-		adapter: KVAdapter;
+		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 	};
 	email: {
 		from: {

@@ -41,7 +41,10 @@ const createApp = async (props: {
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 
-	const kvInstance = await getKVAdapter(props.config);
+	const kvInstance = await getKVAdapter(props.config).then(async (i) => {
+		await i.lifecycle?.init?.();
+		return i;
+	});
 
 	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
 		getQueueAdapter(props.config).then(async (a) => {
@@ -281,7 +284,7 @@ const createApp = async (props: {
 		destroy: async () => {
 			await Promise.allSettled([
 				queueInstance.lifecycle.kill(),
-				// kvInstance.lifecycle.kill(),
+				kvInstance.lifecycle?.destroy?.(),
 				mediaInstance?.lifecycle?.destroy?.(),
 				emailInstance?.lifecycle?.destroy?.(),
 				props.config.db.client.destroy(),

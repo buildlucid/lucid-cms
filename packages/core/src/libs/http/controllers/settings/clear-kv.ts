@@ -23,7 +23,7 @@ const clearKVController = factory.createHandlers(
 	authenticate,
 	permissions(["clear_kv"]),
 	async (c) => {
-		await c.get("kv").clear();
+		await c.get("kv").command.clear();
 
 		c.status(204);
 		return c.body(null);

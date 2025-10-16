@@ -24,7 +24,7 @@ const clearToken = async (c: LucidHonoContext): ServiceResponse<undefined> => {
 
 	deleteCookie(c, constants.cookies.refreshToken, { path: "/" });
 
-	await c.get("kv").delete(cacheKeys.auth.refresh(_refresh));
+	await c.get("kv").command.delete(cacheKeys.auth.refresh(_refresh));
 
 	const deleteMultipleTokenRes = await UserTokens.deleteMultiple({
 		where: [

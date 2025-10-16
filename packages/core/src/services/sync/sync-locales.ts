@@ -115,7 +115,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	if (typeof deleteRes !== "boolean" && deleteRes.error) return deleteRes;
 	if (typeof restoreRes !== "boolean" && restoreRes.error) return restoreRes;
 
-	await context.kv.delete(cacheKeys.http.static.clientLocales);
+	await context.kv.command.delete(cacheKeys.http.static.clientLocales);
 
 	return {
 		error: undefined,

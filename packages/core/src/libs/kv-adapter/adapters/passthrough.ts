@@ -7,11 +7,15 @@ import type { KVAdapterInstance } from "../types.js";
  * It does not perform any actual key-value operations and returns as if the operation was successful and that there is no cache.
  */
 const passthroughKVAdapter = (): KVAdapterInstance => ({
-	get: async () => null,
-	set: async () => {},
-	has: async () => false,
-	delete: async () => {},
-	clear: async () => {},
+	type: "kv-adapter",
+	key: "passthrough",
+	command: {
+		get: async () => null,
+		set: async () => {},
+		has: async () => false,
+		delete: async () => {},
+		clear: async () => {},
+	},
 });
 
 export default passthroughKVAdapter;
