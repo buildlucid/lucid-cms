@@ -37,7 +37,7 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch("locales:delete", {
+	const queueRes = await context.queue.command.addBatch("locales:delete", {
 		payloads: expiredLocalesRes.data.map((locale) => ({
 			localeCode: locale.code,
 		})),

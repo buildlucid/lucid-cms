@@ -3,6 +3,7 @@ import {
 	passthroughEmailAdapter,
 	passthroughImageProcessor,
 	passthroughQueueAdapter,
+	workerQueueAdapter,
 	z,
 } from "@lucidcms/core";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
@@ -48,7 +49,7 @@ export default defineConfig((env) => ({
 	// 	origin: [],
 	// },
 	// logger: {
-	// level: "debug",
+	// 	level: "debug",
 	// },
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),
@@ -99,9 +100,17 @@ export default defineConfig((env) => ({
 	// email: {
 	// 	adapter: passthroughEmailAdapter,
 	// },
-	// queue: {
-	// 	adapter: passthroughQueueAdapter,
-	// },
+	queue: {
+		// adapter: passthroughQueueAdapter,
+		// adapter: passthroughQueueAdapter({
+		// 	bypassImmediateExecution: false,
+		// }),
+		adapter: workerQueueAdapter,
+		// adapter: workerQueueAdapter({
+		// 	concurrentLimit: 10,
+		// 	batchSize: 3,
+		// }),
+	},
 	// hooks: [
 	// 	{
 	// 		service: "documents",

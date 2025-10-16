@@ -1,14 +1,14 @@
-import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
+import { writeFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import lucid from "@lucidcms/core";
 import {
-	stripImportsPlugin,
 	stripAdapterExportPlugin,
+	stripImportsPlugin,
 } from "@lucidcms/core/helpers";
-import { build } from "rolldown";
-import { writeFile } from "node:fs/promises";
-import nodeExternals from "rollup-plugin-node-externals";
 import type { RuntimeAdapter } from "@lucidcms/core/types";
+import { build } from "rolldown";
+import nodeExternals from "rollup-plugin-node-externals";
+import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import runtimeContext from "./runtime-context.js";
 
 const nodeAdapter = (options?: {
@@ -149,7 +149,7 @@ const startServer = async () => {
 			runtimeContext: runtimeContext,
 		});
 
-		const cronJobSetup = lucid.setupCronJobs({
+		const cronJobSetup = await lucid.setupCronJobs({
 			createQueue: false,
 		});
 

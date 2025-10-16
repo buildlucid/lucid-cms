@@ -4,17 +4,21 @@ import type z from "zod/v4";
 import type CollectionBuilder from "../libs/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db-adapter/adapter-base.js";
+import type {
+	EmailAdapter,
+	EmailAdapterInstance,
+} from "../libs/email-adapter/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv-adapter/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
 	MediaAdapter,
 	MediaAdapterInstance,
 } from "../libs/media-adapter/types.js";
-import type { QueueAdapter } from "../libs/queue-adapter/types.js";
 import type {
-	EmailAdapter,
-	EmailAdapterInstance,
-} from "../libs/email-adapter/types.js";
+	QueueAdapter,
+	QueueAdapterFactory,
+	QueueAdapterInstance,
+} from "../libs/queue-adapter/types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
@@ -172,19 +176,7 @@ export interface LucidConfig {
 	/** Queue configuration for background job processing. */
 	queue?: {
 		/** The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter. */
-		adapter?: QueueAdapter;
-		/** Default options applied when jobs are added to the queue. */
-		defaultJobOptions?: {
-			/** Maximum number of retry attempts for failed jobs. Default: 3 */
-			maxAttempts?: number;
-		};
-		/** Job processing configuration. */
-		processing?: {
-			/** Maximum number of jobs to process concurrently. Default: 5 */
-			concurrentLimit?: number;
-			/** Number of jobs to fetch from the database per poll. Default: 10 */
-			batchSize?: number;
-		};
+		adapter?: QueueAdapterFactory | QueueAdapter;
 	};
 	/** Configure the soft-delete behavior for different data types */
 	softDelete?: {
@@ -280,15 +272,8 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
-	queue: {
-		adapter?: QueueAdapter;
-		defaultJobOptions: {
-			maxAttempts: number;
-		};
-		processing: {
-			concurrentLimit: number;
-			batchSize: number;
-		};
+	queue?: {
+		adapter?: QueueAdapterFactory | QueueAdapter;
 	};
 	softDelete: {
 		defaultRetentionDays: number;

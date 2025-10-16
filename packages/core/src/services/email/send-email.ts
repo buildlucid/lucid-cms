@@ -1,9 +1,9 @@
-import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { EmailResponse } from "../../types/response.js";
-import services from "../index.js";
 import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
+import Formatter from "../../libs/formatters/index.js";
+import Repository from "../../libs/repositories/index.js";
+import type { EmailResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import services from "../index.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -73,7 +73,7 @@ const sendEmail: ServiceFn<
 	});
 	if (initialTransactionRes.error) return initialTransactionRes;
 
-	const queueRes = await context.queue.add("email:send", {
+	const queueRes = await context.queue.command.add("email:send", {
 		payload: {
 			emailId: newEmailRes.data.id,
 			transactionId: initialTransactionRes.data?.id ?? 0,

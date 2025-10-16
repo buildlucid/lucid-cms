@@ -41,15 +41,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		middleware: [],
 		extensions: [],
 	},
-	queue: {
-		defaultJobOptions: {
-			maxAttempts: 3,
-		},
-		processing: {
-			concurrentLimit: 5,
-			batchSize: 10,
-		},
-	},
 	hooks: [],
 	collections: [],
 	plugins: [],

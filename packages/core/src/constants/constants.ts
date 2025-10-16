@@ -153,4 +153,9 @@ export default Object.freeze({
 		"5-minutes": 300,
 	},
 	defaultUploadDirectory: "uploads",
+	queue: {
+		maxAttempts: 3,
+		concurrentLimit: 5,
+		batchSize: 10,
+	},
 });

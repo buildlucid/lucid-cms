@@ -12,7 +12,7 @@ import type { QueueAdapterInstance } from "../queue-adapter/types.js";
  * Creates the environment for running cron jobs
  * - creates a passthrough queue adapter so runtime adapters can build the ServiceContext. This allows crons to insert jobs into the queue.
  */
-const setupCronJobs = (config: { createQueue: boolean }) => {
+const setupCronJobs = async (config: { createQueue: boolean }) => {
 	let queueInstance: QueueAdapterInstance | undefined;
 
 	//* depending on the runtime adapter, they may already be able to access the main queue adapter instance via the createApp function.
@@ -20,10 +20,10 @@ const setupCronJobs = (config: { createQueue: boolean }) => {
 		//* we dont pass additionalJobHandlers as at least currently, we dont expose a way for devs to register their own CRON jobs,
 		//* meaning we dont need crons to be able to access job handlers that are not core.
 		const queueContext = createQueueContext();
-		queueInstance = passthroughQueueAdapter(queueContext, {
+		queueInstance = await passthroughQueueAdapter({
 			//* we bypass immediate execution as we only want to use the queue adapter so CRON job services can push jobs into the queue.
 			bypassImmediateExecution: true,
-		});
+		})(queueContext);
 	}
 
 	return {

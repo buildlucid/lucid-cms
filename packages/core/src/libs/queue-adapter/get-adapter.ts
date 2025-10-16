@@ -3,7 +3,7 @@ import type { Config } from "../../types/config.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "./adapters/passthrough.js";
 import createQueueContext from "./create-context.js";
-import type { QueueAdapterInstance } from "./types.js";
+import type { QueueAdapterFactory, QueueAdapterInstance } from "./types.js";
 
 const getQueueAdapter = async (
 	config: Config,
@@ -11,13 +11,22 @@ const getQueueAdapter = async (
 	const queueContext = createQueueContext();
 	try {
 		if (config.queue?.adapter) {
-			return config.queue?.adapter(queueContext);
+			const adapter = config.queue.adapter;
+
+			const factory: QueueAdapterFactory =
+				typeof adapter === "function"
+					? (adapter as QueueAdapterFactory)
+					: adapter;
+
+			const instance = await factory(queueContext);
+
+			return instance;
 		}
 
 		const { default: workerQueueAdapter } = await import(
 			"./adapters/worker/index.js"
 		);
-		return workerQueueAdapter(queueContext);
+		return workerQueueAdapter()(queueContext);
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.queue,
@@ -26,7 +35,7 @@ const getQueueAdapter = async (
 					? error.message
 					: "Failed to initialize queue adapter",
 		});
-		return passthroughQueueAdapter(queueContext);
+		return passthroughQueueAdapter()(queueContext);
 	}
 };
 

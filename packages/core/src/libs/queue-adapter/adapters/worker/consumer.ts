@@ -1,4 +1,5 @@
-import { parentPort } from "node:worker_threads";
+import { parentPort, workerData } from "node:worker_threads";
+import constants from "../../../../constants/constants.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
 import type { LucidQueueJobs, Select } from "../../../db-adapter/types.js";
@@ -7,27 +8,32 @@ import logger from "../../../logger/index.js";
 import Repository from "../../../repositories/index.js";
 import createQueueContext, { QUEUE_LOG_SCOPE } from "../../create-context.js";
 import passthroughQueueAdapter from "../passthrough.js";
+import type { WorkerQueueAdapterOptions } from "./index.js";
 
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
 const POLL_INTERVAL_INC = 1000;
 const BACKOFF_MULTIPLIER = 2;
 
+const options = workerData.options as WorkerQueueAdapterOptions;
+
+const CONCURRENT_LIMIT =
+	options.concurrentLimit ?? constants.queue.concurrentLimit;
+const BATCH_SIZE = options.batchSize ?? constants.queue.batchSize;
+
 const startConsumer = async () => {
 	try {
 		const configPath = getConfigPath(process.cwd());
 		const { config, env } = await loadConfigFile({ path: configPath });
-
-		const CONCURRENT_LIMIT = config.queue.processing.concurrentLimit;
 
 		const kvInstance = await getKVAdapter(config);
 
 		const queueContext = createQueueContext({
 			// additionalJobHandlers: config.queue.jobHandlers,
 		});
-		const internalQueueAdapter = passthroughQueueAdapter(queueContext, {
+		const internalQueueAdapter = await passthroughQueueAdapter({
 			bypassImmediateExecution: true,
-		});
+		})(queueContext);
 
 		const QueueJobs = Repository.get("queue-jobs", config.db.client, config.db);
 
@@ -186,7 +192,7 @@ const startConsumer = async () => {
 			try {
 				const jobsResult = await QueueJobs.selectJobsForProcessing({
 					data: {
-						limit: config.queue.processing.batchSize,
+						limit: BATCH_SIZE,
 						currentTime: new Date(),
 					},
 					validation: {

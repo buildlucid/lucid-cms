@@ -46,51 +46,49 @@ export type QueueJobOptions = {
 	createdByUserId?: number;
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export type QueueAdapter<AdapterConfig = any> = (
+export type QueueAdapter<Options = undefined> = Options extends undefined
+	? () => QueueAdapterFactory
+	: (options: Options) => QueueAdapterFactory<Options>;
+
+// biome-ignore lint/suspicious/noExplicitAny: generic adapter options
+export type QueueAdapterFactory<Options = any> = (
 	context: QueueContext,
-	adapter?: AdapterConfig,
-) => {
-	key: string;
-	/**
-	 * Lifecycle methods
-	 * */
+) => QueueAdapterInstance<Options> | Promise<QueueAdapterInstance<Options>>;
 
-	// TODO: rename to init and destroy to keep inline with other adapters
-	lifecycle: {
-		/**
-		 * Start the queue process
-		 * */
-		start: () => Promise<void>;
-		/**
-		 * Kill the queue process
-		 * */
-		kill: () => Promise<void>;
+// biome-ignore lint/suspicious/noExplicitAny: generic adapter options
+export type QueueAdapterInstance<Options = any> = {
+	/** The adapter type */
+	type: "queue-adapter";
+	/** A unique identifier key for the adapter of this type */
+	key: "worker" | "passthrough" | string;
+	/**  Lifecycle methods */
+	lifecycle?: {
+		/** Initialize the adapter */
+		init?: () => Promise<void>;
+		/** Destroy the adapter */
+		destroy?: () => Promise<void>;
 	};
-	/**
-	 * Push a job to the queue
-	 * @todo add additonal options to configure specifics on the job entry, ie:
-	 *       priority, maxAttempts, scheduledFor, createdByUserId, etc.
-	 * */
-
-	add: (
-		event: QueueEvent,
-		params: {
-			payload: Record<string, unknown>;
-			options?: QueueJobOptions;
-			serviceContext: ServiceContext;
-		},
-	) => ServiceResponse<QueueJobResponse>;
-	/**
-	 * Push multiple jobs of the same type to the queue
-	 * */
-	addBatch: (
-		event: QueueEvent,
-		params: {
-			payloads: Record<string, unknown>[];
-			options?: QueueJobOptions;
-			serviceContext: ServiceContext;
-		},
-	) => ServiceResponse<QueueBatchJobResponse>;
+	/** The queue commands */
+	command: {
+		/** Push a job to the queue */
+		add: (
+			event: QueueEvent,
+			params: {
+				payload: Record<string, unknown>;
+				options?: QueueJobOptions;
+				serviceContext: ServiceContext;
+			},
+		) => ServiceResponse<QueueJobResponse>;
+		/** Push multiple jobs of the same type to the queue */
+		addBatch: (
+			event: QueueEvent,
+			params: {
+				payloads: Record<string, unknown>[];
+				options?: QueueJobOptions;
+				serviceContext: ServiceContext;
+			},
+		) => ServiceResponse<QueueBatchJobResponse>;
+	};
+	/** Get passed adapter options */
+	getOptions?: () => Options | undefined;
 };
-export type QueueAdapterInstance = ReturnType<QueueAdapter>;

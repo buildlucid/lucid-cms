@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
+import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
 import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
-import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
 
 const resendSingle: ServiceFn<
 	[
@@ -76,7 +76,7 @@ const resendSingle: ServiceFn<
 	if (transactionRes.error) return transactionRes;
 	if (updateEmailRes.error) return updateEmailRes;
 
-	const queueRes = await context.queue.add("email:send", {
+	const queueRes = await context.queue.command.add("email:send", {
 		payload: {
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,

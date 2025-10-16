@@ -1,6 +1,6 @@
-import Repository from "../../libs/repositories/index.js";
-import constants from "../../constants/constants.js";
 import { addMilliseconds } from "date-fns";
+import constants from "../../constants/constants.js";
+import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -40,12 +40,15 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 		};
 	}
 
-	const queueRes = await context.queue.addBatch("media:delete-unsynced", {
-		payloads: allExpiredMediaRes.data.map((media) => ({
-			key: media.key,
-		})),
-		serviceContext: context,
-	});
+	const queueRes = await context.queue.command.addBatch(
+		"media:delete-unsynced",
+		{
+			payloads: allExpiredMediaRes.data.map((media) => ({
+				key: media.key,
+			})),
+			serviceContext: context,
+		},
+	);
 	if (queueRes.error) return queueRes;
 
 	return {

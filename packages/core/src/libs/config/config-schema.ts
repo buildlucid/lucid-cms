@@ -6,17 +6,21 @@ import type {
 	UrlStrategy,
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { KVAdapter, KVAdapterInstance } from "../kv-adapter/types.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
 } from "../email-adapter/types.js";
+import type { KVAdapter, KVAdapterInstance } from "../kv-adapter/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type {
 	MediaAdapter,
 	MediaAdapterInstance,
 } from "../media-adapter/types.js";
-import type { QueueAdapter } from "../queue-adapter/types.js";
+import type {
+	QueueAdapter,
+	QueueAdapterFactory,
+	QueueAdapterInstance,
+} from "../queue-adapter/types.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
@@ -40,7 +44,7 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	},
 );
 
-const QueueAdapterSchema = z.custom<QueueAdapter>(
+const QueueAdapterSchema = z.custom<QueueAdapterFactory | QueueAdapter>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a QueueAdapter function",
@@ -147,16 +151,11 @@ const ConfigSchema = z.object({
 		middleware: z.array(HonoAppSchema).optional(),
 		extensions: z.array(HonoAppSchema).optional(),
 	}),
-	queue: z.object({
-		adapter: QueueAdapterSchema.optional(),
-		defaultJobOptions: z.object({
-			maxAttempts: z.number(),
-		}),
-		processing: z.object({
-			concurrentLimit: z.number(),
-			batchSize: z.number(),
-		}),
-	}),
+	queue: z
+		.object({
+			adapter: QueueAdapterSchema.optional(),
+		})
+		.optional(),
 	kv: z
 		.object({
 			adapter: KVAdapterSchema.optional(),

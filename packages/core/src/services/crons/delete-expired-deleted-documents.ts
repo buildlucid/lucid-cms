@@ -1,6 +1,6 @@
+import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
@@ -56,14 +56,17 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 
 			if (softDeletedDocsRes.data.length === 0) return;
 
-			const queueRes = await context.queue.addBatch("documents:delete", {
-				payloads: softDeletedDocsRes.data.map((d) => ({
-					id: d.id,
-					collectionKey: d.collection_key,
-					userId: d.deleted_by ?? d.created_by,
-				})),
-				serviceContext: context,
-			});
+			const queueRes = await context.queue.command.addBatch(
+				"documents:delete",
+				{
+					payloads: softDeletedDocsRes.data.map((d) => ({
+						id: d.id,
+						collectionKey: d.collection_key,
+						userId: d.deleted_by ?? d.created_by,
+					})),
+					serviceContext: context,
+				},
+			);
 			if (queueRes.error) return queueRes;
 		}),
 	);

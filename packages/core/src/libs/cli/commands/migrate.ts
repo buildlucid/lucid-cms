@@ -22,19 +22,20 @@ const runSyncTasks = async (
 
 	const queueContext = createQueueContext();
 	const kv = kvInstance ?? (await getKVAdapter(config));
+	const queue = await passthroughQueueAdapter()(queueContext);
 
 	const [localesResult, collectionsResult] = await Promise.all([
 		services.sync.syncLocales({
 			db: config.db.client,
 			config: config,
-			queue: passthroughQueueAdapter(queueContext),
+			queue: queue,
 			env: null,
 			kv: kv,
 		}),
 		services.sync.syncCollections({
 			db: config.db.client,
 			config: config,
-			queue: passthroughQueueAdapter(queueContext),
+			queue: queue,
 			env: null,
 			kv: kv,
 		}),
@@ -91,6 +92,7 @@ const migrateCommand = (props?: {
 			}
 
 			const queueContext = createQueueContext();
+			const queue = await passthroughQueueAdapter()(queueContext);
 
 			logger.migrationStart();
 
@@ -99,7 +101,7 @@ const migrateCommand = (props?: {
 				{
 					db: config.db.client,
 					config: config,
-					queue: passthroughQueueAdapter(queueContext),
+					queue: queue,
 					env: null,
 					kv: passthroughKVAdapter(),
 				},
@@ -197,7 +199,7 @@ const migrateCommand = (props?: {
 						{
 							db: config.db.client,
 							config: config,
-							queue: passthroughQueueAdapter(queueContext),
+							queue: queue,
 							env: null,
 							kv: kvInstance,
 						},

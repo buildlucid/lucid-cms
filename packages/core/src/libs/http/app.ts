@@ -14,10 +14,10 @@ import type {
 	LucidErrorData,
 } from "../../types.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
+import getEmailAdapter from "../email-adapter/get-adapter.js";
 import getKVAdapter from "../kv-adapter/get-adapter.js";
 import getMediaAdapter from "../media-adapter/get-adapter.js";
 import getQueueAdapter from "../queue-adapter/get-adapter.js";
-import getEmailAdapter from "../email-adapter/get-adapter.js";
 import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/v1/index.js";
@@ -48,7 +48,7 @@ const createApp = async (props: {
 
 	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
 		getQueueAdapter(props.config).then(async (a) => {
-			await a.lifecycle.start();
+			await a.lifecycle?.init?.();
 			return a;
 		}),
 		getMediaAdapter(props.config).then(async (a) => {
@@ -283,7 +283,7 @@ const createApp = async (props: {
 		kv: kvInstance,
 		destroy: async () => {
 			await Promise.allSettled([
-				queueInstance.lifecycle.kill(),
+				queueInstance.lifecycle?.destroy?.(),
 				kvInstance.lifecycle?.destroy?.(),
 				mediaInstance?.lifecycle?.destroy?.(),
 				emailInstance?.lifecycle?.destroy?.(),

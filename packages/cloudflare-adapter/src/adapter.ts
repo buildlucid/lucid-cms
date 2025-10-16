@@ -197,7 +197,7 @@ export default {
 			const resolved = await processConfig(config(env));
 			const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
 
-			const cronJobSetup = lucid.setupCronJobs({
+			const cronJobSetup = await lucid.setupCronJobs({
 				createQueue: true,
 			});
 			await cronJobSetup.register({

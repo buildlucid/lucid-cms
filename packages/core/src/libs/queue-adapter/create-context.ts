@@ -1,18 +1,19 @@
-import type {
-	QueueEvent,
-	QueueJobResponse,
-	QueueBatchJobResponse,
-	QueueJobOptions,
-	QueueJobHandlers,
-} from "./types.js";
 import { randomUUID } from "node:crypto";
-import logger from "../logger/index.js";
+import constants from "../../constants/constants.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import queueJobHandlers from "./job-handlers.js";
+import logger from "../logger/index.js";
 import Repository from "../repositories/index.js";
+import queueJobHandlers from "./job-handlers.js";
+import type {
+	QueueBatchJobResponse,
+	QueueEvent,
+	QueueJobHandlers,
+	QueueJobOptions,
+	QueueJobResponse,
+} from "./types.js";
 
 export const QUEUE_LOG_SCOPE = "queue" as const;
 
@@ -61,8 +62,7 @@ const createQueueContext = (params?: {
 						priority: data.options?.priority ?? 0,
 						attempts: 0,
 						max_attempts:
-							data.options?.maxAttempts ??
-							serviceContext.config.queue.defaultJobOptions.maxAttempts,
+							data.options?.maxAttempts ?? constants.queue.maxAttempts,
 						error_message: null,
 						created_at: now.toISOString(),
 						scheduled_for: data.options?.scheduledFor
@@ -136,8 +136,7 @@ const createQueueContext = (params?: {
 						priority: data.options?.priority ?? 0,
 						attempts: 0,
 						max_attempts:
-							data.options?.maxAttempts ??
-							serviceContext.config.queue.defaultJobOptions.maxAttempts,
+							data.options?.maxAttempts ?? constants.queue.maxAttempts,
 						error_message: null,
 						created_at: now.toISOString(),
 						scheduled_for: data.options?.scheduledFor
