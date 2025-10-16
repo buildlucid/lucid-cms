@@ -44,7 +44,7 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	},
 );
 
-const QueueAdapterSchema = z.custom<QueueAdapterFactory | QueueAdapter>(
+const QueueAdapterSchema = z.custom<QueueAdapterFactory>(
 	(data) => typeof data === "function",
 	{
 		message: "Expected a QueueAdapter function",

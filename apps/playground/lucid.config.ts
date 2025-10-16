@@ -48,9 +48,9 @@ export default defineConfig((env) => ({
 	// cors: {
 	// 	origin: [],
 	// },
-	// logger: {
-	// 	level: "debug",
-	// },
+	logger: {
+		level: "debug",
+	},
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),
 	}),
@@ -101,11 +101,11 @@ export default defineConfig((env) => ({
 	// 	adapter: passthroughEmailAdapter,
 	// },
 	queue: {
-		// adapter: passthroughQueueAdapter,
-		// adapter: passthroughQueueAdapter({
-		// 	bypassImmediateExecution: false,
-		// }),
-		adapter: workerQueueAdapter,
+		// adapter: passthroughQueueAdapter(),
+		adapter: passthroughQueueAdapter({
+			bypassImmediateExecution: false,
+		}),
+		// adapter: workerQueueAdapter(),
 		// adapter: workerQueueAdapter({
 		// 	concurrentLimit: 10,
 		// 	batchSize: 3,

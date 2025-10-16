@@ -11,16 +11,7 @@ const getQueueAdapter = async (
 	const queueContext = createQueueContext();
 	try {
 		if (config.queue?.adapter) {
-			const adapter = config.queue.adapter;
-
-			const factory: QueueAdapterFactory =
-				typeof adapter === "function"
-					? (adapter as QueueAdapterFactory)
-					: adapter;
-
-			const instance = await factory(queueContext);
-
-			return instance;
+			return await config.queue.adapter(queueContext);
 		}
 
 		const { default: workerQueueAdapter } = await import(

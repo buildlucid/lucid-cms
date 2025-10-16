@@ -176,7 +176,7 @@ export interface LucidConfig {
 	/** Queue configuration for background job processing. */
 	queue?: {
 		/** The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter. */
-		adapter?: QueueAdapterFactory | QueueAdapter;
+		adapter?: QueueAdapterFactory;
 	};
 	/** Configure the soft-delete behavior for different data types */
 	softDelete?: {
@@ -273,7 +273,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		>;
 	};
 	queue?: {
-		adapter?: QueueAdapterFactory | QueueAdapter;
+		adapter?: QueueAdapterFactory;
 	};
 	softDelete: {
 		defaultRetentionDays: number;
