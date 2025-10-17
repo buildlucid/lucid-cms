@@ -7,7 +7,6 @@ import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
 import getKVAdapter from "../../kv-adapter/get-adapter.js";
 import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
-import createQueueContext from "../../queue-adapter/create-context.js";
 import createMigrationLogger from "../logger/migration-logger.js";
 import installOptionalDeps from "../utils/install-optional-deps.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
@@ -20,9 +19,8 @@ const runSyncTasks = async (
 ): Promise<boolean> => {
 	logger.syncTasksStart();
 
-	const queueContext = createQueueContext();
 	const kv = kvInstance ?? (await getKVAdapter(config));
-	const queue = await passthroughQueueAdapter()(queueContext);
+	const queue = passthroughQueueAdapter();
 
 	const [localesResult, collectionsResult] = await Promise.all([
 		services.sync.syncLocales({
@@ -91,8 +89,7 @@ const migrateCommand = (props?: {
 				}
 			}
 
-			const queueContext = createQueueContext();
-			const queue = await passthroughQueueAdapter()(queueContext);
+			const queue = passthroughQueueAdapter();
 
 			logger.migrationStart();
 

@@ -6,7 +6,7 @@ import type { LucidQueueJobs, Select } from "../../../db-adapter/types.js";
 import getKVAdapter from "../../../kv-adapter/get-adapter.js";
 import logger from "../../../logger/index.js";
 import Repository from "../../../repositories/index.js";
-import createQueueContext, { QUEUE_LOG_SCOPE } from "../../create-context.js";
+import getJobHandler from "../../job-handlers.js";
 import passthroughQueueAdapter from "../passthrough.js";
 import type { WorkerQueueAdapterOptions } from "./index.js";
 
@@ -28,12 +28,9 @@ const startConsumer = async () => {
 
 		const kvInstance = await getKVAdapter(config);
 
-		const queueContext = createQueueContext({
-			// additionalJobHandlers: config.queue.jobHandlers,
-		});
 		const internalQueueAdapter = await passthroughQueueAdapter({
 			bypassImmediateExecution: true,
-		})(queueContext);
+		});
 
 		const QueueJobs = Repository.get("queue-jobs", config.db.client, config.db);
 
@@ -53,7 +50,7 @@ const startConsumer = async () => {
 
 				logger.debug({
 					message: "Job will retry",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: {
 						jobId: job.job_id,
 						eventType: job.event_type,
@@ -72,7 +69,7 @@ const startConsumer = async () => {
 			} else {
 				logger.error({
 					message: "Job failed permanently",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: {
 						jobId: job.job_id,
 						eventType: job.event_type,
@@ -95,12 +92,12 @@ const startConsumer = async () => {
 		 * Processes a job
 		 */
 		const processJob = async (job: Select<LucidQueueJobs>): Promise<void> => {
-			const handler = queueContext.getJobHandlers[job.event_type];
+			const handler = getJobHandler(job.event_type);
 
 			if (!handler) {
 				logger.warn({
 					message: "No job handler found for job type",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: { jobId: job.job_id, eventType: job.event_type },
 				});
 
@@ -119,7 +116,7 @@ const startConsumer = async () => {
 			try {
 				logger.debug({
 					message: "Processing job",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: { jobId: job.job_id, eventType: job.event_type },
 				});
 
@@ -170,7 +167,7 @@ const startConsumer = async () => {
 
 				logger.debug({
 					message: "Job completed successfully",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: { jobId: job.job_id, eventType: job.event_type },
 				});
 			} catch (error) {
@@ -202,7 +199,7 @@ const startConsumer = async () => {
 				if (jobsResult.error) {
 					logger.error({
 						message: "Error getting ready jobs",
-						scope: QUEUE_LOG_SCOPE,
+						scope: constants.logScopes.queue,
 						data: { error: jobsResult.error },
 					});
 					return;
@@ -210,7 +207,7 @@ const startConsumer = async () => {
 
 				logger.debug({
 					message: "Jobs found",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: { jobs: jobsResult.data.length },
 				});
 
@@ -236,7 +233,7 @@ const startConsumer = async () => {
 			} catch (error) {
 				logger.error({
 					message: "Polling error",
-					scope: QUEUE_LOG_SCOPE,
+					scope: constants.logScopes.queue,
 					data: { error },
 				});
 			}
@@ -250,13 +247,13 @@ const startConsumer = async () => {
 
 		logger.debug({
 			message: "Starting queue polling",
-			scope: QUEUE_LOG_SCOPE,
+			scope: constants.logScopes.queue,
 		});
 		poll();
 	} catch (error) {
 		logger.error({
 			message: "Consumer startup error",
-			scope: QUEUE_LOG_SCOPE,
+			scope: constants.logScopes.queue,
 			data: { error },
 		});
 		process.exit(1);

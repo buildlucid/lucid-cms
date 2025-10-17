@@ -5,7 +5,6 @@ import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue-adapter/adapters/passthrough.js";
-import createQueueContext from "../queue-adapter/create-context.js";
 import type { QueueAdapterInstance } from "../queue-adapter/types.js";
 
 /**
@@ -19,11 +18,10 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 	if (config.createQueue) {
 		//* we dont pass additionalJobHandlers as at least currently, we dont expose a way for devs to register their own CRON jobs,
 		//* meaning we dont need crons to be able to access job handlers that are not core.
-		const queueContext = createQueueContext();
-		queueInstance = await passthroughQueueAdapter({
+		queueInstance = passthroughQueueAdapter({
 			//* we bypass immediate execution as we only want to use the queue adapter so CRON job services can push jobs into the queue.
 			bypassImmediateExecution: true,
-		})(queueContext);
+		});
 	}
 
 	return {

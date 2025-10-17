@@ -7,26 +7,30 @@ import hardDeleteSingleMediaJob from "../../services/media/jobs/hard-delete-sing
 import updateMediaStorageJob from "../../services/media/jobs/update-storage.js";
 import deleteTokenJob from "../../services/user-tokens/jobs/delete-single.js";
 import deleteUserJob from "../../services/users/jobs/delete-single.js";
-import type { QueueJobHandlers } from "./types.js";
+import type {
+	QueueJobHandlerFn,
+	QueueEvent,
+	QueueJobHandlers,
+} from "./types.js";
 
-/**
- * Constructs and returns the job handlers for the queue adapters
- */
-const jobHandlers = (params: {
-	additionalHandlers?: QueueJobHandlers;
-}): QueueJobHandlers => {
-	return {
-		"email:send": sendEmailJob,
-		"media:delete": hardDeleteSingleMediaJob,
-		"media:delete-unsynced": deleteAwaitingSyncMediaJob,
-		"media:update-storage": updateMediaStorageJob,
-		"collections:delete": deleteCollectionJob,
-		"locales:delete": deleteLocaleJob,
-		"user-tokens:delete": deleteTokenJob,
-		"users:delete": deleteUserJob,
-		"documents:delete": deleteDocumentJob,
-		...params.additionalHandlers,
-	};
+const jobHandlersMap: Record<QueueEvent, QueueJobHandlerFn> = {
+	"email:send": sendEmailJob,
+	"media:delete": hardDeleteSingleMediaJob,
+	"media:delete-unsynced": deleteAwaitingSyncMediaJob,
+	"media:update-storage": updateMediaStorageJob,
+	"collections:delete": deleteCollectionJob,
+	"locales:delete": deleteLocaleJob,
+	"user-tokens:delete": deleteTokenJob,
+	"users:delete": deleteUserJob,
+	"documents:delete": deleteDocumentJob,
 };
 
-export default jobHandlers;
+const getJobHandler = (
+	event: QueueEvent,
+	additionalHandlers?: QueueJobHandlers,
+): QueueJobHandlerFn | undefined => {
+	const handler = additionalHandlers?.[event] ?? jobHandlersMap[event];
+	return handler;
+};
+
+export default getJobHandler;

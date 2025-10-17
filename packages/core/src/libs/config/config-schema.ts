@@ -18,7 +18,6 @@ import type {
 } from "../media-adapter/types.js";
 import type {
 	QueueAdapter,
-	QueueAdapterFactory,
 	QueueAdapterInstance,
 } from "../queue-adapter/types.js";
 
@@ -44,12 +43,11 @@ const UrlStrategySchema = z.custom<UrlStrategy>(
 	},
 );
 
-const QueueAdapterSchema = z.custom<QueueAdapterFactory>(
-	(data) => typeof data === "function",
-	{
-		message: "Expected a QueueAdapter function",
-	},
-);
+const QueueAdapterSchema = z.custom<
+	QueueAdapter | QueueAdapterInstance | Promise<QueueAdapterInstance>
+>((data) => typeof data === "function" || typeof data === "object", {
+	message: "Expected a QueueAdapter function",
+});
 
 const KVAdapterSchema = z.custom<
 	KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>

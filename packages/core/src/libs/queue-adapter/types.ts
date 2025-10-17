@@ -3,7 +3,6 @@ import type {
 	ServiceFn,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import type createQueueContext from "./create-context.js";
 
 export type QueueEvent<T extends string = string> =
 	| "email:send"
@@ -18,8 +17,6 @@ export type QueueEvent<T extends string = string> =
 	| T;
 
 export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
-
-export type QueueContext = ReturnType<typeof createQueueContext>;
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type QueueJobHandlerFn<D = any, R = any> = ServiceFn<[D], R>;
@@ -46,17 +43,12 @@ export type QueueJobOptions = {
 	createdByUserId?: number;
 };
 
-export type QueueAdapter<Options = undefined> = Options extends undefined
-	? () => QueueAdapterFactory
-	: (options: Options) => QueueAdapterFactory<Options>;
+export type QueueAdapter<T = undefined> = T extends undefined
+	? () => QueueAdapterInstance | Promise<QueueAdapterInstance>
+	: (options: T) => QueueAdapterInstance<T> | Promise<QueueAdapterInstance<T>>;
 
 // biome-ignore lint/suspicious/noExplicitAny: generic adapter options
-export type QueueAdapterFactory<Options = any> = (
-	context: QueueContext,
-) => QueueAdapterInstance<Options> | Promise<QueueAdapterInstance<Options>>;
-
-// biome-ignore lint/suspicious/noExplicitAny: generic adapter options
-export type QueueAdapterInstance<Options = any> = {
+export type QueueAdapterInstance<T = any> = {
 	/** The adapter type */
 	type: "queue-adapter";
 	/** A unique identifier key for the adapter of this type */
@@ -90,5 +82,5 @@ export type QueueAdapterInstance<Options = any> = {
 		) => ServiceResponse<QueueBatchJobResponse>;
 	};
 	/** Get passed adapter options */
-	getOptions?: () => Options | undefined;
+	getOptions?: () => T;
 };

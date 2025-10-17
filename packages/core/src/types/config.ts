@@ -16,7 +16,6 @@ import type {
 } from "../libs/media-adapter/types.js";
 import type {
 	QueueAdapter,
-	QueueAdapterFactory,
 	QueueAdapterInstance,
 } from "../libs/queue-adapter/types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
@@ -176,7 +175,10 @@ export interface LucidConfig {
 	/** Queue configuration for background job processing. */
 	queue?: {
 		/** The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter. */
-		adapter?: QueueAdapterFactory;
+		adapter?:
+			| QueueAdapter
+			| QueueAdapterInstance
+			| Promise<QueueAdapterInstance>;
 	};
 	/** Configure the soft-delete behavior for different data types */
 	softDelete?: {
@@ -273,7 +275,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		>;
 	};
 	queue?: {
-		adapter?: QueueAdapterFactory;
+		adapter?:
+			| QueueAdapter
+			| QueueAdapterInstance
+			| Promise<QueueAdapterInstance>;
 	};
 	softDelete: {
 		defaultRetentionDays: number;

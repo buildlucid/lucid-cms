@@ -101,10 +101,10 @@ export default defineConfig((env) => ({
 	// 	adapter: passthroughEmailAdapter,
 	// },
 	queue: {
-		// adapter: passthroughQueueAdapter(),
-		adapter: passthroughQueueAdapter({
-			bypassImmediateExecution: false,
-		}),
+		// adapter: passthroughQueueAdapter,
+		// adapter: passthroughQueueAdapter({
+		// 	bypassImmediateExecution: false,
+		// }),
 		// adapter: workerQueueAdapter(),
 		// adapter: workerQueueAdapter({
 		// 	concurrentLimit: 10,
