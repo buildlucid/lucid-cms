@@ -2,7 +2,6 @@ import { afterAll, beforeAll, expect, test } from "vitest";
 import z from "zod/v4";
 import passthroughKVAdapter from "../../libs/kv-adapter/adapters/passthrough.js";
 import passthroughQueueAdapter from "../../libs/queue-adapter/adapters/passthrough.js";
-import createQueueContext from "../../libs/queue-adapter/create-context.js";
 import testConfig from "../test-helpers/test-config.js";
 import testDatabase from "../test-helpers/test-database.js";
 import serviceWrapper from "./service-wrapper.js";
@@ -63,8 +62,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 		};
 	};
 
-	const queueContext = createQueueContext();
-	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const queueAdapter = passthroughQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -163,8 +161,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 		};
 	};
 
-	const queueContext = createQueueContext();
-	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const queueAdapter = passthroughQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -251,8 +248,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 		};
 	};
 
-	const queueContext = createQueueContext();
-	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const queueAdapter = passthroughQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -364,8 +360,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 		};
 	};
 
-	const queueContext = createQueueContext();
-	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const queueAdapter = passthroughQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -451,8 +446,7 @@ test("service wrapper schema validation", async () => {
 		};
 	};
 
-	const queueContext = createQueueContext();
-	const queueAdapter = passthroughQueueAdapter(queueContext);
+	const queueAdapter = passthroughQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
