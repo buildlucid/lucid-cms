@@ -1,7 +1,6 @@
 import { constants, createReadStream } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import path from "node:path";
-import { fileTypeFromFile } from "file-type";
 import mime from "mime-types";
 import T from "../../../../../translations/index.js";
 import type {
@@ -22,6 +21,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 	) => {
 		try {
 			const { targetPath } = keyPaths(key, adapterOptions.uploadDir);
+			const fileType = await import("file-type");
 			try {
 				await access(targetPath, constants.F_OK);
 			} catch {
@@ -35,7 +35,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 			}
 			const [stats, fileTypeResult] = await Promise.all([
 				stat(targetPath),
-				fileTypeFromFile(targetPath),
+				fileType.fileTypeFromFile(targetPath),
 			]);
 			let mimeType: string | undefined;
 			const totalSize = stats.size;

@@ -2,7 +2,6 @@ import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import path from "node:path";
-import { fileTypeFromFile } from "file-type";
 import mime from "mime-types";
 import T from "../../../../../translations/index.js";
 import type {
@@ -26,9 +25,10 @@ export default (options: FileSystemMediaAdapterOptions) => {
 					data: undefined,
 				};
 			}
+			const fileType = await import("file-type");
 			const [stats, fileTypeResult] = await Promise.all([
 				stat(targetPath),
-				fileTypeFromFile(targetPath),
+				fileType.fileTypeFromFile(targetPath),
 			]);
 			let mimeType: string | null = null;
 			if (fileTypeResult) {
