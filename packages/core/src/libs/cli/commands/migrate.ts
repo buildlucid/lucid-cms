@@ -8,7 +8,6 @@ import getKVAdapter from "../../kv-adapter/get-adapter.js";
 import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
 import createMigrationLogger from "../logger/migration-logger.js";
-import installOptionalDeps from "../utils/install-optional-deps.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 
 const runSyncTasks = async (
@@ -68,7 +67,6 @@ const migrateCommand = (props?: {
 			const mode = props?.mode ?? "process";
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
 
-			await installOptionalDeps();
 			let config: Config;
 			if (props?.config) {
 				config = props.config;

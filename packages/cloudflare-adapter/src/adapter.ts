@@ -60,7 +60,7 @@ const cloudflareAdapter = (options?: {
 					await next();
 				});
 
-				const { app, destroy } = await lucid.createApp({
+				const { app, destroy, adapterKeys } = await lucid.createApp({
 					config,
 					runtimeContext: runtimeContext({
 						dev: true,
@@ -110,16 +110,53 @@ const cloudflareAdapter = (options?: {
 					await destroy?.();
 				});
 
-				return async () => {
-					return new Promise<void>((resolve, reject) => {
-						server.close((error) => {
-							if (error) {
-								reject(error);
-							} else {
-								resolve();
-							}
+				return {
+					destroy: async () => {
+						return new Promise<void>((resolve, reject) => {
+							server.close((error) => {
+								if (error) {
+									reject(error);
+								} else {
+									resolve();
+								}
+							});
 						});
-					});
+					},
+					onComplete: () => {
+						const warnings = [];
+						if (adapterKeys.database === "sqlite") {
+							warnings.push(
+								"The SQLite database adapter is not supported in Cloudflare Workers.",
+							);
+						}
+						if (adapterKeys.media === "file-system") {
+							warnings.push(
+								"The media file system adapter is not supported in Cloudflare. When using Wrangler or once deployed, the media featured will be disabled.",
+							);
+						}
+						if (adapterKeys.email === "passthrough") {
+							warnings.push(
+								"You are currently using the email passthrough adapter. This means emails will not be sent and just stored in the database.",
+							);
+						}
+						if (adapterKeys.queue === "worker") {
+							warnings.push(
+								"The queue worker adapter isn't ideal for use in Cloudflare workers. Consider using the passthrough adapter for immediate execution of jobs.",
+							);
+						}
+						if (adapterKeys.kv === "sqlite") {
+							warnings.push(
+								"The SQLite KV adapter is not supported in Cloudflare Workers. This will fall back to the passthrough adapter when using Wrangler or once deployed.",
+							);
+						}
+
+						if (warnings.length > 0) {
+							console.log();
+							for (const message of warnings) {
+								logger.warn(`  - ${message}`);
+							}
+						}
+					},
 				};
 			},
 			build: async (_, options, logger) => {
@@ -133,8 +170,6 @@ const cloudflareAdapter = (options?: {
 
 					const configIsTs = options.configPath.endsWith(".ts");
 					const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
-
-					// TODO: ensure that the KV setup within the cron setup is correct
 
 					const entry = /* ts */ `
 import config from "./${importPath}";

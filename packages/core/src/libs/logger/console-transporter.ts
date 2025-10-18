@@ -38,7 +38,7 @@ const createConsoleTransport = (
 
 		switch (level) {
 			case "error":
-				consoleLogger = console.error;
+				consoleLogger = console.info;
 				break;
 			case "warn":
 				consoleLogger = console.warn;

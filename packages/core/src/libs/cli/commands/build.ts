@@ -8,7 +8,6 @@ import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import createBuildLogger from "../logger/build-logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
-import installOptionalDeps from "../utils/install-optional-deps.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -17,7 +16,6 @@ const buildCommand = async (options?: {
 	cacheSpa?: boolean;
 	silent?: boolean;
 }) => {
-	await installOptionalDeps();
 	const overallStartTime = process.hrtime();
 	const configPath = getConfigPath(process.cwd());
 	const configRes = await loadConfigFile({ path: configPath });
@@ -49,7 +47,7 @@ const buildCommand = async (options?: {
 
 		await Promise.all([prerenderMjmlTemplates(configRes.config)]);
 
-		const [viteBuildRes] = await Promise.all([
+		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
 			configRes.adapter.cli.build(
 				configRes.config,
@@ -67,6 +65,7 @@ const buildCommand = async (options?: {
 
 		await Promise.all([copyPublicAssets(configRes.config)]);
 
+		await runtimeBuildRes?.onComplete?.();
 		logger.buildComplete(overallStartTime);
 
 		process.exit(0);

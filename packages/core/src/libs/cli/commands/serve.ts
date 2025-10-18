@@ -5,7 +5,6 @@ import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import createDevLogger from "../logger/dev-logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
-import installOptionalDeps from "../utils/install-optional-deps.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
 
@@ -13,7 +12,6 @@ import migrateCommand from "./migrate.js";
  * The CLI serve command. Directly starts the dev server
  */
 const serveCommand = async (options?: { initial?: boolean }) => {
-	await installOptionalDeps();
 	const configPath = getConfigPath(process.cwd());
 	const logger = createDevLogger();
 	let destroy: (() => Promise<void>) | undefined;
@@ -65,7 +63,13 @@ const serveCommand = async (options?: { initial?: boolean }) => {
 			copyPublicAssets(configRes.config),
 		]);
 
-		destroy = await configRes.adapter?.cli?.serve(configRes.config, logger);
+		const serverRes = await configRes.adapter?.cli?.serve(
+			configRes.config,
+			logger,
+		);
+		destroy = serverRes?.destroy;
+
+		await serverRes?.onComplete?.();
 	} catch (error) {
 		logger.error("Failed to start server", error);
 		process.exit(1);

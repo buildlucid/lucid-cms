@@ -8,7 +8,10 @@ import type { LucidHonoContext } from "../../types.js";
 export type ServeHandler = (
 	config: Config,
 	logger: DevLogger,
-) => Promise<() => Promise<void>>;
+) => Promise<{
+	destroy: () => Promise<void>;
+	onComplete?: () => Promise<void> | void;
+}>;
 
 export type BuildHandler = (
 	config: Config,
@@ -17,7 +20,9 @@ export type BuildHandler = (
 		outputPath: string;
 	},
 	logger: BuildLogger,
-) => Promise<void>;
+) => Promise<void | {
+	onComplete?: () => Promise<void> | void;
+}>;
 
 export type AdapterRuntimeContext = {
 	getConnectionInfo: (c: LucidHonoContext) => NetAddrInfo;

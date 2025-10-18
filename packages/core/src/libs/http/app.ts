@@ -281,6 +281,13 @@ const createApp = async (props: {
 		app,
 		queue: queueInstance,
 		kv: kvInstance,
+		adapterKeys: {
+			queue: queueInstance.key,
+			kv: kvInstance.key,
+			media: mediaInstance?.key,
+			email: emailInstance.key,
+			database: props.config.db.adapter,
+		},
 		destroy: async () => {
 			await Promise.allSettled([
 				queueInstance.lifecycle?.destroy?.(),

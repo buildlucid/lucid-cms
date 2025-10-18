@@ -1,6 +1,5 @@
 import chokidar, { type FSWatcher } from "chokidar";
 import { spawn } from "node:child_process";
-import installOptionalDeps from "../utils/install-optional-deps.js";
 import createDevLogger from "../logger/dev-logger.js";
 import path from "node:path";
 import { minimatch } from "minimatch";
@@ -13,7 +12,6 @@ import loadConfigFile from "../../config/load-config-file.js";
 const devCommand = async (options?: {
 	watch?: string | boolean;
 }) => {
-	await installOptionalDeps();
 	const logger = createDevLogger();
 	let childProcess: ReturnType<typeof spawn> | undefined = undefined;
 	let rebuilding = false;

@@ -10,10 +10,7 @@ export default defineConfig({
 		"src/libs/cli/index.ts",
 		"src/libs/queue-adapter/adapters/worker/consumer.ts",
 	],
-	external: [
-		//* tsdown bundles optionalDependencies by default, so we need to exclude them
-		...Object.keys(packageJson.optionalDependencies),
-	],
+	external: [...Object.keys(packageJson.dependencies)],
 	dts: true,
 	format: "esm",
 	shims: false,
