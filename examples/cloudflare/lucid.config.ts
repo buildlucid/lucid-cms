@@ -73,9 +73,9 @@ export default defineConfig((env) => ({
 		},
 		simulate: true,
 	},
-	queue: {
-		adapter: passthroughQueueAdapter,
-	},
+	// queue: {
+	// 	adapter: passthroughQueueAdapter,
+	// },
 	collections: [PageCollection, NewsCollection, SettingsCollection],
 	plugins: [
 		LucidPages({
@@ -87,21 +87,21 @@ export default defineConfig((env) => ({
 				},
 			],
 		}),
-		LucidResend({
-			apiKey: env.LUCID_RESEND_API_KEY,
-			webhook: {
-				enabled: false,
-				secret: env.LUCID_RESEND_WEBHOOK_SECRET,
-			},
-		}),
-		LucidS3({
-			endpoint: env.LUCID_S3_ENDPOINT,
-			bucket: env.LUCID_S3_BUCKET,
-			clientOptions: {
-				region: "auto",
-				accessKeyId: env.LUCID_S3_ACCESS_KEY,
-				secretAccessKey: env.LUCID_S3_SECRET_KEY,
-			},
-		}),
+		// LucidResend({
+		// 	apiKey: env.LUCID_RESEND_API_KEY,
+		// 	webhook: {
+		// 		enabled: false,
+		// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
+		// 	},
+		// }),
+		// LucidS3({
+		// 	endpoint: env.LUCID_S3_ENDPOINT,
+		// 	bucket: env.LUCID_S3_BUCKET,
+		// 	clientOptions: {
+		// 		region: "auto",
+		// 		accessKeyId: env.LUCID_S3_ACCESS_KEY,
+		// 		secretAccessKey: env.LUCID_S3_SECRET_KEY,
+		// 	},
+		// }),
 	],
 }));

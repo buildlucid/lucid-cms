@@ -20,4 +20,7 @@ export type LucidLogger = {
 	warn: (log: LogData) => void;
 	info: (log: LogData) => void;
 	debug: (log: LogData) => void;
+	setBuffering: (enabled: boolean) => void;
+	flushBuffer: () => void;
+	clearBuffer: () => void;
 };

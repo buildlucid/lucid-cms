@@ -24,8 +24,34 @@ export type BuildHandler = (
 	onComplete?: () => Promise<void> | void;
 }>;
 
+export type AdapterKeys = {
+	queue: string;
+	kv: string;
+	media: string | null;
+	email: string;
+	database: string;
+};
+
+export type RuntimeSupport = {
+	unsupported?: {
+		databaseAdapter?: Array<{ key: string; message?: string }>;
+		queueAdapter?: Array<{ key: string; message?: string }>;
+		kvAdapter?: Array<{ key: string; message?: string }>;
+		mediaAdapter?: Array<{ key: string; message?: string }>;
+		emailAdapter?: Array<{ key: string; message?: string }>;
+	};
+	notices?: {
+		databaseAdapter?: Array<{ key: string; message: string }>;
+		queueAdapter?: Array<{ key: string; message: string }>;
+		kvAdapter?: Array<{ key: string; message: string }>;
+		mediaAdapter?: Array<{ key: string; message: string }>;
+		emailAdapter?: Array<{ key: string; message: string }>;
+	};
+};
+
 export type AdapterRuntimeContext = {
 	getConnectionInfo: (c: LucidHonoContext) => NetAddrInfo;
+	support?: RuntimeSupport;
 };
 
 export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema>;

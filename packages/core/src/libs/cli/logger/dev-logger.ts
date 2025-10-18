@@ -2,6 +2,7 @@ import constants from "../../../constants/constants.js";
 import { colors, divider, formatBadge, formatDuration } from "./helpers.js";
 import sharedLogger, { type SharedLogger } from "./shared-logger.js";
 import type { AddressInfo } from "node:net";
+import logger from "../../logger/index.js";
 
 export interface DevLogger extends SharedLogger {
 	serverStarting: (adapterName: string) => void;
@@ -46,6 +47,10 @@ const createDevLogger = (): DevLogger => ({
 		console.log(
 			`\n${colors.textGray}Press CTRL-C to stop the server${colors.reset}`,
 		);
+		console.log();
+
+		//* set buffering to false on runtime logger so any logs it captured during commands are flushed to the console post startup
+		logger.setBuffering(false);
 	},
 	...sharedLogger(),
 });

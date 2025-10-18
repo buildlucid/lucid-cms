@@ -7,13 +7,18 @@ import createDevLogger from "../logger/dev-logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
+import logger from "../../logger/index.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
  */
-const serveCommand = async (options?: { initial?: boolean }) => {
+const serveCommand = async (options?: {
+	initial?: boolean;
+	bufferLogs?: boolean;
+}) => {
+	logger.setBuffering(true);
 	const configPath = getConfigPath(process.cwd());
-	const logger = createDevLogger();
+	const devLogger = createDevLogger();
 	let destroy: (() => Promise<void>) | undefined;
 
 	const isInitialRun = options?.initial ?? false;
@@ -36,7 +41,8 @@ const serveCommand = async (options?: { initial?: boolean }) => {
 		});
 
 		if (!envValid.success) {
-			logger.envValidationFailed(envValid.message);
+			devLogger.envValidationFailed(envValid.message);
+			logger.setBuffering(false);
 			process.exit(1);
 		}
 
@@ -47,11 +53,14 @@ const serveCommand = async (options?: { initial?: boolean }) => {
 			skipSyncSteps: !isInitialRun,
 			skipEnvValidation: true,
 		});
-		if (!migrateResult) process.exit(2);
+		if (!migrateResult) {
+			logger.setBuffering(false);
+			process.exit(2);
+		}
 
 		const viteBuildRes = await vite.buildApp(configRes.config);
 		if (viteBuildRes.error) {
-			logger.error(
+			devLogger.error(
 				viteBuildRes.error.message ?? "Failed to build app",
 				viteBuildRes.error,
 			);
@@ -65,13 +74,14 @@ const serveCommand = async (options?: { initial?: boolean }) => {
 
 		const serverRes = await configRes.adapter?.cli?.serve(
 			configRes.config,
-			logger,
+			devLogger,
 		);
 		destroy = serverRes?.destroy;
 
 		await serverRes?.onComplete?.();
 	} catch (error) {
-		logger.error("Failed to start server", error);
+		devLogger.error("Failed to start server", error);
+		logger.setBuffering(false);
 		process.exit(1);
 	}
 
@@ -79,8 +89,9 @@ const serveCommand = async (options?: { initial?: boolean }) => {
 		try {
 			await destroy?.();
 		} catch (error) {
-			logger.error("Error during shutdown", error);
+			devLogger.error("Error during shutdown", error);
 		}
+		logger.setBuffering(false);
 		process.exit(0);
 	};
 

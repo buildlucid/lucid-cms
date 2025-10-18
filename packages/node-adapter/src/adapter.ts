@@ -33,11 +33,13 @@ const nodeAdapter = (options?: {
 				const startTime = process.hrtime();
 				logger.serverStarting("Node");
 
-				const { app, destroy, adapterKeys } = await lucid.createApp({
+				const { app, destroy, issues } = await lucid.createApp({
 					config,
 					runtimeContext: runtimeContext,
 					env: process.env,
 				});
+
+				logger.issueGroup(issues);
 
 				const server = serve({
 					fetch: app.fetch,
@@ -65,21 +67,6 @@ const nodeAdapter = (options?: {
 								}
 							});
 						});
-					},
-					onComplete: () => {
-						const warnings = [];
-						if (adapterKeys.email === "passthrough") {
-							warnings.push(
-								"You are currently using the email passthrough adapter. This means emails will not be sent and just stored in the database.",
-							);
-						}
-
-						if (warnings.length > 0) {
-							console.log();
-							for (const message of warnings) {
-								logger.warn(`  - ${message}`);
-							}
-						}
 					},
 				};
 			},

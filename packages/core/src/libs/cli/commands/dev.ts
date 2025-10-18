@@ -5,6 +5,7 @@ import path from "node:path";
 import { minimatch } from "minimatch";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import logger from "../../logger/index.js";
 
 /**
  * The CLI dev command. Watches for file changes and spawns child processes running the serve command for hot-reloading.
@@ -12,7 +13,9 @@ import loadConfigFile from "../../config/load-config-file.js";
 const devCommand = async (options?: {
 	watch?: string | boolean;
 }) => {
-	const logger = createDevLogger();
+	logger.setBuffering(true);
+
+	const devLogger = createDevLogger();
 	let childProcess: ReturnType<typeof spawn> | undefined = undefined;
 	let rebuilding = false;
 	let startupTimer: NodeJS.Timeout | undefined = undefined;
@@ -78,12 +81,13 @@ const devCommand = async (options?: {
 			});
 
 			childProcess.on("error", (error) => {
-				logger.error("Failed to start server", error);
+				devLogger.error("Failed to start server", error);
 				rebuilding = false;
 			});
 
 			childProcess.on("spawn", () => {
 				console.clear();
+				logger.setBuffering(true);
 			});
 
 			childProcess.on("exit", (code, signal) => {
@@ -92,7 +96,9 @@ const devCommand = async (options?: {
 				if (code === 2) process.exit(0);
 
 				if (signal !== "SIGTERM" && signal !== "SIGKILL" && code !== 0) {
-					logger.error(`Server exited with code ${code} and signal ${signal}`);
+					devLogger.error(
+						`Server exited with code ${code} and signal ${signal}`,
+					);
 				}
 				rebuilding = false;
 			});
@@ -101,7 +107,7 @@ const devCommand = async (options?: {
 				rebuilding = false;
 			}, 200);
 		} catch (error) {
-			logger.error("Failed to spawn server process", error);
+			devLogger.error("Failed to spawn server process", error);
 			rebuilding = false;
 		}
 	};
@@ -133,7 +139,7 @@ const devCommand = async (options?: {
 
 				await killChildProcess();
 			} catch (error) {
-				logger.error("Error during shutdown", error);
+				devLogger.error("Error during shutdown", error);
 			} finally {
 				process.exit(0);
 			}

@@ -21,6 +21,7 @@ import getQueueAdapter from "../queue-adapter/get-adapter.js";
 import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/v1/index.js";
+import featureSupportChecks from "./utils/feature-support-checks.js";
 
 /**
  * The entry point for creating the Hono app.
@@ -277,17 +278,22 @@ const createApp = async (props: {
 		);
 	}
 
+	const supportChecksRes = featureSupportChecks(
+		{
+			queue: queueInstance.key,
+			kv: kvInstance.key,
+			media: mediaInstance?.key || null,
+			email: emailInstance.key,
+			database: props.config.db.adapter,
+		},
+		props.runtimeContext.support,
+	);
+
 	return {
 		app,
 		queue: queueInstance,
 		kv: kvInstance,
-		adapterKeys: {
-			queue: queueInstance.key,
-			kv: kvInstance.key,
-			media: mediaInstance?.key,
-			email: emailInstance.key,
-			database: props.config.db.adapter,
-		},
+		issues: supportChecksRes.issues,
 		destroy: async () => {
 			await Promise.allSettled([
 				queueInstance.lifecycle?.destroy?.(),

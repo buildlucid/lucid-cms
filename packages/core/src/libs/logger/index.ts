@@ -10,9 +10,27 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 } as const;
 
 let logger: LucidLogger | null = null;
+let isBuffering = false;
+let logBuffer: Array<{ level: LogLevel; log: LogData }> = [];
 
 const shouldLog = (currentLevel: LogLevel, messageLevel: LogLevel): boolean => {
 	return LOG_LEVELS[messageLevel] <= LOG_LEVELS[currentLevel];
+};
+
+const writeLog = (
+	level: LogLevel,
+	log: LogData,
+	transport: LogTransport,
+	configLevel: LogLevel,
+) => {
+	if (isBuffering) {
+		logBuffer.push({ level, log });
+		return;
+	}
+
+	if (shouldLog(configLevel, level)) {
+		transport(level, log);
+	}
 };
 
 export const initializeLogger = (props?: {
@@ -32,27 +50,43 @@ export const initializeLogger = (props?: {
 			transport: transport,
 		},
 		error: (log: LogData) => {
-			if (shouldLog(level, "error")) {
-				transport("error", log);
-			}
+			writeLog("error", log, transport, level);
 		},
 		warn: (log: LogData) => {
-			if (shouldLog(level, "warn")) {
-				transport("warn", log);
-			}
+			writeLog("warn", log, transport, level);
 		},
 		info: (log: LogData) => {
-			if (shouldLog(level, "info")) {
-				transport("info", log);
-			}
+			writeLog("info", log, transport, level);
 		},
 		debug: (log: LogData) => {
-			if (shouldLog(level, "debug")) {
-				transport("debug", log);
+			writeLog("debug", log, transport, level);
+		},
+		setBuffering: (enabled: boolean) => {
+			isBuffering = enabled;
+			if (!enabled) {
+				flushBuffer();
 			}
+		},
+		flushBuffer: () => {
+			flushBuffer();
+		},
+		clearBuffer: () => {
+			logBuffer = [];
 		},
 	} satisfies LucidLogger;
 };
+
+const flushBuffer = () => {
+	if (!logger) return;
+
+	for (const { level, log } of logBuffer) {
+		if (shouldLog(logger.config.level, level)) {
+			logger.config.transport(level, log);
+		}
+	}
+	logBuffer = [];
+};
+
 if (!logger) initializeLogger();
 
 export const getLogger = (): LucidLogger => {
@@ -72,6 +106,9 @@ const loggerProxy: LucidLogger = {
 	warn: (log: LogData) => getLogger().warn(log),
 	info: (log: LogData) => getLogger().info(log),
 	debug: (log: LogData) => getLogger().debug(log),
+	setBuffering: (enabled: boolean) => getLogger().setBuffering(enabled),
+	flushBuffer: () => getLogger().flushBuffer(),
+	clearBuffer: () => getLogger().clearBuffer(),
 };
 
 export default loggerProxy;

@@ -9,14 +9,15 @@ import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
 import createMigrationLogger from "../logger/migration-logger.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
+import logger from "../../logger/index.js";
 
 const runSyncTasks = async (
 	config: Config,
-	logger: ReturnType<typeof createMigrationLogger>,
+	migrationLogger: ReturnType<typeof createMigrationLogger>,
 	mode: "process" | "return",
 	kvInstance?: KVAdapterInstance,
 ): Promise<boolean> => {
-	logger.syncTasksStart();
+	migrationLogger.syncTasksStart();
 
 	const kv = kvInstance ?? (await getKVAdapter(config));
 	const queue = passthroughQueueAdapter();
@@ -39,17 +40,24 @@ const runSyncTasks = async (
 	]);
 
 	if (localesResult.error) {
-		logger.migrationFailed(localesResult.error, "locale sync");
-		if (mode === "process") process.exit(1);
-		else return false;
+		migrationLogger.migrationFailed(localesResult.error, "locale sync");
+		if (mode === "process") {
+			logger.setBuffering(false);
+			process.exit(1);
+		} else return false;
 	}
 	if (collectionsResult.error) {
-		logger.migrationFailed(collectionsResult.error, "collections sync");
-		if (mode === "process") process.exit(1);
-		else return false;
+		migrationLogger.migrationFailed(
+			collectionsResult.error,
+			"collections sync",
+		);
+		if (mode === "process") {
+			logger.setBuffering(false);
+			process.exit(1);
+		} else return false;
 	}
 
-	logger.syncTasksComplete();
+	migrationLogger.syncTasksComplete();
 	return true;
 };
 
@@ -62,8 +70,9 @@ const migrateCommand = (props?: {
 		skipEnvValidation?: boolean;
 	}) => {
 		try {
+			logger.setBuffering(true);
 			const overallStartTime = process.hrtime();
-			const logger = createMigrationLogger();
+			const migrationLogger = createMigrationLogger();
 			const mode = props?.mode ?? "process";
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
 
@@ -81,7 +90,7 @@ const migrateCommand = (props?: {
 					});
 
 					if (!envValid.success) {
-						logger.envValidationFailed(envValid.message);
+						migrationLogger.envValidationFailed(envValid.message);
 						process.exit(1);
 					}
 				}
@@ -89,7 +98,7 @@ const migrateCommand = (props?: {
 
 			const queue = passthroughQueueAdapter();
 
-			logger.migrationStart();
+			migrationLogger.migrationStart();
 
 			//* check if collections need migrating
 			const collectionMigrationResult = await migrateCollections(
@@ -107,7 +116,7 @@ const migrateCommand = (props?: {
 
 			let needsCollectionMigrations = false;
 			if (collectionMigrationResult.error) {
-				logger.warn(
+				migrationLogger.warn(
 					`Could not check collection migration status: ${collectionMigrationResult.error.message}`,
 				);
 				needsCollectionMigrations = true;
@@ -123,20 +132,25 @@ const migrateCommand = (props?: {
 				config.db.client,
 			);
 
-			logger.migrationCheckStatus(needsDbMigrations, needsCollectionMigrations);
+			migrationLogger.migrationCheckStatus(
+				needsDbMigrations,
+				needsCollectionMigrations,
+			);
 
 			//* if no migrations are needed, just run seeds and exit
 			if (!needsCollectionMigrations && !needsDbMigrations) {
-				logger.logsStart();
 				if (!skipSyncSteps) {
-					const syncResult = await runSyncTasks(config, logger, mode);
+					migrationLogger.logsStart();
+					const syncResult = await runSyncTasks(config, migrationLogger, mode);
 					if (!syncResult && mode === "return") {
 						return false;
 					}
 				}
-				logger.migrationComplete(overallStartTime);
-				if (mode === "process") process.exit(0);
-				else return true;
+				migrationLogger.migrationComplete(overallStartTime);
+				if (mode === "process") {
+					logger.setBuffering(false);
+					process.exit(0);
+				} else return true; //* dont clear logger buffer here as it was called by the serve command
 			}
 
 			//* migrations are needed - prompt the user
@@ -150,45 +164,58 @@ const migrateCommand = (props?: {
 				});
 			} catch (error) {
 				if (error instanceof Error && error.name === "ExitPromptError") {
-					if (mode === "process") process.exit(0);
+					if (mode === "process") {
+						logger.setBuffering(false);
+						process.exit(0);
+					}
 					//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
 					else return false;
 				}
 				throw error;
 			}
 			if (!shouldProceed) {
-				logger.migrationSkipped();
-				if (mode === "process") process.exit(0);
+				migrationLogger.migrationSkipped();
+				if (mode === "process") {
+					logger.setBuffering(false);
+					process.exit(0);
+				}
 				//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
 				else return false;
 			}
 
 			const kvInstance = await getKVAdapter(config);
 
-			logger.logsStart();
+			migrationLogger.logsStart();
 
 			//* run database migrations if needed
 			if (needsDbMigrations) {
-				logger.dbMigrationStart();
+				migrationLogger.dbMigrationStart();
 				try {
 					await config.db.migrateToLatest();
-					logger.dbMigrationComplete();
+					migrationLogger.dbMigrationComplete();
 				} catch (error) {
-					logger.migrationFailed(error, "database migration");
-					if (mode === "process") process.exit(1);
-					else return false;
+					migrationLogger.migrationFailed(error, "database migration");
+					if (mode === "process") {
+						logger.setBuffering(false);
+						process.exit(1);
+					} else return false;
 				}
 			}
 
 			//* run sync tasks (locales, collections). We dont skip these as migrations are being ran also.
-			const syncResult = await runSyncTasks(config, logger, mode, kvInstance);
+			const syncResult = await runSyncTasks(
+				config,
+				migrationLogger,
+				mode,
+				kvInstance,
+			);
 			if (!syncResult && mode === "return") {
 				return false;
 			}
 
 			//* run collection migrations if needed
 			if (needsCollectionMigrations) {
-				logger.collectionMigrationStart();
+				migrationLogger.collectionMigrationStart();
 				try {
 					const result = await migrateCollections(
 						{
@@ -202,25 +229,29 @@ const migrateCommand = (props?: {
 					);
 
 					if (result.error) {
-						logger.migrationFailed(
+						migrationLogger.migrationFailed(
 							result.error.message,
 							"collection migrations",
 						);
-						if (mode === "process") process.exit(1);
-						else return false;
+						if (mode === "process") {
+							logger.setBuffering(false);
+							process.exit(1);
+						} else return false;
 					}
-					logger.collectionMigrationComplete();
+					migrationLogger.collectionMigrationComplete();
 				} catch (error) {
-					logger.migrationFailed(error, "collection migrations");
-					if (mode === "process") process.exit(1);
-					else return false;
+					migrationLogger.migrationFailed(error, "collection migrations");
+					if (mode === "process") {
+						logger.setBuffering(false);
+						process.exit(1);
+					} else return false;
 				}
 			}
 
-			logger.clearingKVCache();
+			migrationLogger.clearingKVCache();
 			await kvInstance.command.clear();
 
-			logger.migrationComplete(overallStartTime);
+			migrationLogger.migrationComplete(overallStartTime);
 			if (mode === "process") process.exit(0);
 			else return true;
 		} catch (error) {

@@ -8,6 +8,7 @@ import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import createBuildLogger from "../logger/build-logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
+import logger from "../../logger/index.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -16,13 +17,14 @@ const buildCommand = async (options?: {
 	cacheSpa?: boolean;
 	silent?: boolean;
 }) => {
+	logger.setBuffering(true);
 	const overallStartTime = process.hrtime();
 	const configPath = getConfigPath(process.cwd());
 	const configRes = await loadConfigFile({ path: configPath });
 
-	const logger = createBuildLogger(options?.silent);
+	const buildLogger = createBuildLogger(options?.silent);
 
-	logger.buildStart();
+	buildLogger.buildStart();
 
 	try {
 		if (options?.cacheSpa) {
@@ -36,7 +38,7 @@ const buildCommand = async (options?: {
 		}
 
 		if (!configRes.adapter?.cli?.build) {
-			logger.info("No build handler found in adapter");
+			buildLogger.info("No build handler found in adapter");
 			return;
 		}
 
@@ -55,22 +57,25 @@ const buildCommand = async (options?: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
 				},
-				logger,
+				buildLogger,
 			),
 		]);
 		if (viteBuildRes.error) {
-			logger.buildFailed(viteBuildRes.error);
+			buildLogger.buildFailed(viteBuildRes.error);
+			logger.setBuffering(false);
 			process.exit(1);
 		}
 
 		await Promise.all([copyPublicAssets(configRes.config)]);
 
 		await runtimeBuildRes?.onComplete?.();
-		logger.buildComplete(overallStartTime);
+		buildLogger.buildComplete(overallStartTime);
 
+		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		logger.buildFailed(error);
+		buildLogger.buildFailed(error);
+		logger.setBuffering(false);
 		process.exit(1);
 	}
 };
