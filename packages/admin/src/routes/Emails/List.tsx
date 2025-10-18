@@ -1,9 +1,7 @@
 import T from "@/translations";
 import type { Component } from "solid-js";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import api from "@/services/api";
 import { QueryRow } from "@/components/Groups/Query";
-import Alert from "@/components/Blocks/Alert";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { EmailsList } from "@/components/Groups/Content";
@@ -48,30 +46,11 @@ const EmailListRoute: Component = () => {
 		},
 	);
 
-	// ----------------------------------------
-	// Queries / Mutations
-	const settings = api.settings.useGetSettings({
-		queryParams: {},
-	});
-
 	// ----------------------------------
 	// Render
-
 	return (
 		<Wrapper
 			slots={{
-				topBar: (
-					<Alert
-						style="layout"
-						alerts={[
-							{
-								type: "warning",
-								message: T()("email_support_config_stategy_error"),
-								show: settings.data?.data.media.enabled === false,
-							},
-						]}
-					/>
-				),
 				header: (
 					<Standard
 						copy={{

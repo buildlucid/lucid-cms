@@ -58,11 +58,6 @@ export const Dashboard: Component = () => {
 						message: T()("media_support_config_stategy_error"),
 						show: settings.data?.data.media.enabled === false,
 					},
-					{
-						type: "warning",
-						message: T()("email_support_config_stategy_error"),
-						show: settings.data?.data.email.enabled === false,
-					},
 				]}
 			/>
 			<div class="flex flex-col lg:flex-row lg:items-start gap-6">
