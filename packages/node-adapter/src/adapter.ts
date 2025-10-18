@@ -71,8 +71,7 @@ const nodeAdapter = (options?: {
 				};
 			},
 			build: async (_, options, logger) => {
-				const startTime = logger.appBuildStart("Node");
-
+				logger.info("Using:", logger.color.blue("Node Runtime Adapter"));
 				const configOutput = `${options.outputPath}/${constants.CONFIG_FILE}`;
 				const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
 
@@ -213,10 +212,12 @@ const startServer = async () => {
 startServer();`;
 
 					await writeFile(entryOutput, entry);
-
-					logger.appBuildComplete(startTime);
 				} catch (error) {
-					logger.buildFailed(error);
+					logger.error(
+						error instanceof Error
+							? error.message
+							: "An error occured building via the Node Adapter",
+					);
 					throw error;
 				}
 			},

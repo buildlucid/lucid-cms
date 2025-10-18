@@ -138,13 +138,13 @@ const createBadge = (
 	backgroundColor?: (str: string) => string,
 	foregroundColor?: (str: string) => string,
 ): string => {
-	const bg = backgroundColor ?? picocolors.bgBlue;
-	const fg = foregroundColor ?? picocolors.white;
+	const bg = backgroundColor ?? picocolors.bgGreenBright;
+	const fg = foregroundColor ?? picocolors.black;
 
 	return bg(fg(` ${text} `));
 };
 
-export const logger = {
+const logger = {
 	info,
 	error,
 	warn,
@@ -156,3 +156,7 @@ export const logger = {
 	startTimer,
 	createBadge,
 };
+
+export type CLILogger = typeof logger;
+
+export default logger;

@@ -4,11 +4,11 @@ import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
+import logger from "../../logger/index.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
-import createBuildLogger from "../logger/build-logger.js";
+import cliLogger from "../logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
-import logger from "../../logger/index.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -18,13 +18,9 @@ const buildCommand = async (options?: {
 	silent?: boolean;
 }) => {
 	logger.setBuffering(true);
-	const overallStartTime = process.hrtime();
+	const startTime = cliLogger.startTimer();
 	const configPath = getConfigPath(process.cwd());
 	const configRes = await loadConfigFile({ path: configPath });
-
-	const buildLogger = createBuildLogger(options?.silent);
-
-	buildLogger.buildStart();
 
 	try {
 		if (options?.cacheSpa) {
@@ -38,7 +34,7 @@ const buildCommand = async (options?: {
 		}
 
 		if (!configRes.adapter?.cli?.build) {
-			buildLogger.info("No build handler found in adapter");
+			cliLogger.error("No build handler found in adapter");
 			return;
 		}
 
@@ -57,24 +53,60 @@ const buildCommand = async (options?: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
 				},
-				buildLogger,
+				cliLogger,
 			),
 		]);
 		if (viteBuildRes.error) {
-			buildLogger.buildFailed(viteBuildRes.error);
+			cliLogger.error(
+				viteBuildRes.error.message ??
+					"There was an error while building the SPA or component plugins",
+			);
 			logger.setBuffering(false);
 			process.exit(1);
 		}
+		cliLogger.info("SPA and component plugins built");
 
-		await Promise.all([copyPublicAssets(configRes.config)]);
+		await copyPublicAssets(configRes.config);
+		cliLogger.info(
+			"Public assets copied to output directory:",
+			cliLogger.color.green(
+				`./${configRes.config.compilerOptions.paths.outDir}`,
+			),
+		);
+
+		for (const collection of configRes.config.collections) {
+			if (!collection.key) continue;
+			cliLogger.info(
+				"Build includes collection:",
+				cliLogger.color.yellow(collection.key),
+			);
+		}
+		for (const plugin of configRes.config.plugins) {
+			const res = await plugin(configRes.config);
+			cliLogger.info("Build includes plugin:", cliLogger.color.yellow(res.key));
+		}
 
 		await runtimeBuildRes?.onComplete?.();
-		buildLogger.buildComplete(overallStartTime);
+		const endTime = startTime();
+
+		cliLogger.log(
+			cliLogger.createBadge("READY"),
+			"Build completed",
+			cliLogger.color.green("successfully"),
+			cliLogger.color.gray("in"),
+			cliLogger.color.gray(cliLogger.formatMilliseconds(endTime)),
+			{
+				spaceAfter: true,
+				spaceBefore: true,
+			},
+		);
 
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		buildLogger.buildFailed(error);
+		cliLogger.error(
+			error instanceof Error ? error.message : "An unknown error occurred",
+		);
 		logger.setBuffering(false);
 		process.exit(1);
 	}

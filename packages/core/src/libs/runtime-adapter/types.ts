@@ -1,9 +1,9 @@
 import type z from "zod/v4";
-import type RuntimeAdapterSchema from "./schema.js";
 import type { Config, LucidConfig } from "../../types/config.js";
-import type { DevLogger } from "../cli/logger/dev-logger.js";
-import type { BuildLogger } from "../cli/logger/build-logger.js";
 import type { LucidHonoContext } from "../../types.js";
+import type { DevLogger } from "../cli/logger/dev-logger.js";
+import type { CLILogger } from "../cli/logger.js";
+import type RuntimeAdapterSchema from "./schema.js";
 
 export type ServeHandler = (
 	config: Config,
@@ -19,7 +19,7 @@ export type BuildHandler = (
 		configPath: string;
 		outputPath: string;
 	},
-	logger: BuildLogger,
+	logger: CLILogger,
 ) => Promise<void | {
 	onComplete?: () => Promise<void> | void;
 }>;

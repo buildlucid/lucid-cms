@@ -127,7 +127,7 @@ const cloudflareAdapter = (options?: {
 				};
 			},
 			build: async (_, options, logger) => {
-				const startTime = logger.appBuildStart("Cloudflare");
+				logger.info("Using:", logger.color.blue("Cloudflare Worker Adapter"));
 
 				try {
 					const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
@@ -251,10 +251,12 @@ export default {
 
 					//* clean up temporary files
 					await unlink(tempEntryFile);
-
-					logger.appBuildComplete(startTime);
 				} catch (error) {
-					logger.buildFailed(error);
+					logger.error(
+						error instanceof Error
+							? error.message
+							: "An error occured building via the Cloudflare Worker Adapter",
+					);
 					throw error;
 				}
 			},
