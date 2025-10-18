@@ -8,6 +8,7 @@ import logger from "../../logger/index.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
+import calculateOutDirSize from "../utils/calculate-outdir-size.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
 
 /**
@@ -64,30 +65,63 @@ const buildCommand = async (options?: {
 			logger.setBuffering(false);
 			process.exit(1);
 		}
-		cliLogger.info("SPA and component plugins built");
+		const relativePath = path.relative(process.cwd(), configPath);
+		cliLogger.info(
+			"Loaded config from:",
+			cliLogger.color.green(`./${relativePath}`),
+		);
+
+		const relativeBuildPath = path.relative(
+			process.cwd(),
+			configRes.config.compilerOptions.paths.outDir,
+		);
 
 		await copyPublicAssets(configRes.config);
 		cliLogger.info(
 			"Public assets copied to output directory:",
 			cliLogger.color.green(
-				`./${configRes.config.compilerOptions.paths.outDir}`,
+				`./${relativeBuildPath}/${constants.directories.public}`,
+			),
+		);
+		cliLogger.info(
+			"SPA and component plugins built:",
+			cliLogger.color.green(
+				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.admin}`,
 			),
 		);
 
+		let fieldCount = 0;
+		const collectionKeys = new Set<string>();
+		const brickKeys = new Set<string>();
 		for (const collection of configRes.config.collections) {
 			if (!collection.key) continue;
-			cliLogger.info(
-				"Build includes collection:",
-				cliLogger.color.yellow(collection.key),
-			);
+			collectionKeys.add(collection.key);
+			for (const brick of collection.brickInstances) {
+				if (brickKeys.has(brick.key)) continue;
+				brickKeys.add(brick.key);
+				fieldCount += brick.flatFields.length;
+			}
+			fieldCount += collection.flatFields.length;
 		}
-		for (const plugin of configRes.config.plugins) {
-			const res = await plugin(configRes.config);
-			cliLogger.info("Build includes plugin:", cliLogger.color.yellow(res.key));
-		}
+		cliLogger.info(
+			cliLogger.color.yellow(collectionKeys.size),
+			`collection${collectionKeys.size === 1 ? "" : "s"} with`,
+			cliLogger.color.yellow(brickKeys.size),
+			`brick${brickKeys.size === 1 ? "" : "s"} and`,
+			cliLogger.color.yellow(fieldCount),
+			`field${fieldCount === 1 ? "" : "s"}`,
+		);
+		cliLogger.info(
+			cliLogger.color.yellow(configRes.config.plugins.length),
+			`plugin${configRes.config.plugins.length === 1 ? "" : "s"} loaded`,
+		);
 
 		await runtimeBuildRes?.onComplete?.();
 		const endTime = startTime();
+
+		const distSize = await calculateOutDirSize(
+			configRes.config.compilerOptions.paths.outDir,
+		);
 
 		cliLogger.log(
 			cliLogger.createBadge("READY"),
@@ -95,6 +129,7 @@ const buildCommand = async (options?: {
 			cliLogger.color.green("successfully"),
 			cliLogger.color.gray("in"),
 			cliLogger.color.gray(cliLogger.formatMilliseconds(endTime)),
+			cliLogger.color.gray(`(${cliLogger.formatBytes(distSize)})`),
 			{
 				spaceAfter: true,
 				spaceBefore: true,
