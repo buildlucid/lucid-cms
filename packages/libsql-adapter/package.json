@@ -33,7 +33,7 @@
 		"@lucidcms/config": "*",
 		"@lucidcms/core": "*",
 		"@types/node": "^22.15.2",
-		"tsdown": "^0.12.5",
+		"tsdown": "^0.15.7",
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {

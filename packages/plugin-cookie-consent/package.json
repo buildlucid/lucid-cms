@@ -31,7 +31,7 @@
 		"@lucidcms/core": "*",
 		"@types/node": "^22.15.2",
 		"@biomejs/biome": "^1.9.4",
-		"tsdown": "^0.12.5",
+		"tsdown": "^0.15.7",
 		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {
