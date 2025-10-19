@@ -2,8 +2,7 @@ import { afterAll, beforeAll, expect, test } from "vitest";
 import z from "zod/v4";
 import passthroughKVAdapter from "../../libs/kv-adapter/adapters/passthrough.js";
 import passthroughQueueAdapter from "../../libs/queue-adapter/adapters/passthrough.js";
-import testConfig from "../test-helpers/test-config.js";
-import testDatabase from "../test-helpers/test-database.js";
+import getTestConfig from "../test-helpers/get-test-config.js";
 import serviceWrapper from "./service-wrapper.js";
 import type { ServiceFn, ServiceResponse } from "./types.js";
 import mergeServiceError from "./utils/merge-errors.js";
@@ -25,18 +24,21 @@ const CONSTANTS = {
 
 // -----------------------------------------------
 // Setup and Teardown
+const testConfig = getTestConfig();
+
 beforeAll(async () => {
-	await testDatabase.migrate();
+	await testConfig.migrate();
 });
+
 afterAll(async () => {
-	await testDatabase.destroy();
+	await testConfig.destroy();
 });
 
 // -----------------------------------------------
 // Tests
 
 test("basic - one level deep service wrapper success and error", async () => {
-	const config = await testConfig.basic();
+	const config = await testConfig.getConfig();
 
 	// Setup
 	const testService: ServiceFn<
@@ -110,7 +112,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 test("basic - two level deep service wrapper success and error", async () => {
 	//* requires service to handle returning errors
 
-	const config = await testConfig.basic();
+	const config = await testConfig.getConfig();
 
 	// Setup
 	const testServiceOne: ServiceFn<
@@ -207,7 +209,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 });
 
 test("transaction - one level deep service wrapper success and error", async () => {
-	const config = await testConfig.basic();
+	const config = await testConfig.getConfig();
 	const successCollectionKey = "transaction_test_success_1";
 	const errorCollectionKey = "transaction_test_error_1";
 
@@ -297,7 +299,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 });
 
 test("transaction - two level deep service wrapper success and error", async () => {
-	const config = await testConfig.basic();
+	const config = await testConfig.getConfig();
 	const successCollectionKey = "transaction_test_success_2";
 	const successCollectionKeyLevel2 = "transaction_test_success_2_level2";
 	const errorCollectionKey = "transaction_test_error_2";
@@ -428,7 +430,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 });
 
 test("service wrapper schema validation", async () => {
-	const config = await testConfig.basic();
+	const config = await testConfig.getConfig();
 
 	const schema = z.object({
 		key: z.string(),
