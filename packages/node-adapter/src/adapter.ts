@@ -30,7 +30,8 @@ const nodeAdapter = (options?: {
 		},
 		cli: {
 			serve: async ({ config, logger, onListening }) => {
-				logger.serverStarting("Node");
+				logger.info("Using:", logger.color.blue("Node Runtime Adapter"));
+				logger.info("Starting development server...");
 
 				const { app, destroy, issues } = await lucid.createApp({
 					config,
@@ -38,7 +39,20 @@ const nodeAdapter = (options?: {
 					env: process.env,
 				});
 
-				logger.issueGroup(issues);
+				for (const issue of issues) {
+					if (issue.level === "unsupported") {
+						logger.error(
+							issue.type,
+							issue.key,
+							"-",
+							issue.message ||
+								"This is unsupported in your current runtime environment.",
+						);
+					}
+					if (issue.level === "notice" && issue.message) {
+						logger.warn(issue.type, issue.key, "-", issue.message);
+					}
+				}
 
 				const server = serve({
 					fetch: app.fetch,
@@ -54,6 +68,9 @@ const nodeAdapter = (options?: {
 				});
 
 				server.on("close", async () => {
+					logger.info("Shutting down Node Adapter development server...", {
+						spaceBefore: true,
+					});
 					await destroy?.();
 				});
 

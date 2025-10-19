@@ -1,4 +1,4 @@
-import chokidar, { type FSWatcher } from "chokidar";
+import chokidar from "chokidar";
 import path from "node:path";
 import { minimatch } from "minimatch";
 import getConfigPath from "../../config/get-config-path.js";
@@ -6,14 +6,14 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
-import createDevLogger from "../logger/dev-logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
 import logger from "../../logger/index.js";
+import cliLogger from "../logger.js";
+import constants from "../../../constants/constants.js";
 
 const devCommand = async (options?: { watch?: string | boolean }) => {
-	const devLogger = createDevLogger();
 	const configPath = getConfigPath(process.cwd());
 
 	let serverDestroy: (() => Promise<void>) | undefined;
@@ -46,7 +46,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			});
 
 			if (!envValid.success) {
-				devLogger.envValidationFailed(envValid.message);
+				cliLogger.error("Environment variable validation failed");
+				envValid.message && cliLogger.error(envValid.message);
 				logger.setBuffering(false);
 				process.exit(1);
 			}
@@ -68,10 +69,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const viteBuildRes = await vite.buildApp(configResult.config);
 			if (viteBuildRes.error) {
-				devLogger.error(
-					viteBuildRes.error.message ?? "Failed to build app",
-					viteBuildRes.error,
-				);
+				cliLogger.error(viteBuildRes.error.message ?? "Failed to build app");
 				logger.setBuffering(false);
 				rebuilding = false;
 				return;
@@ -82,13 +80,44 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 				copyPublicAssets(configResult.config),
 			]);
 
-			console.clear();
+			process.stdout.write("\x1B[2J\x1B[3J\x1B[H");
 
 			const serverRes = await configResult.adapter?.cli?.serve({
 				config: configResult.config,
-				logger: devLogger,
+				logger: cliLogger,
 				onListening: async (props) => {
-					devLogger.serverStarted(props.address);
+					const serverUrl =
+						typeof props.address === "string"
+							? props.address
+							: props.address
+								? `http://${props.address.address === "::" ? "localhost" : props.address.address}:${props.address.port}`
+								: "unknown";
+
+					cliLogger.log(
+						cliLogger.createBadge("LUCID CMS"),
+						"Development server ready",
+						{
+							spaceBefore: true,
+							spaceAfter: true,
+						},
+					);
+
+					cliLogger.log(
+						"🔐 Admin panel      ",
+						cliLogger.color.blue(`${serverUrl}/admin`),
+						{ symbol: "line" },
+					);
+
+					cliLogger.log(
+						"📖 Documentation    ",
+						cliLogger.color.blue(constants.documentation),
+						{ symbol: "line" },
+					);
+
+					cliLogger.log(
+						cliLogger.color.gray("Press CTRL-C to stop the server"),
+						{ spaceBefore: true, spaceAfter: true },
+					);
 					logger.setBuffering(false);
 				},
 			});
@@ -96,7 +125,10 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			serverDestroy = serverRes?.destroy;
 			await serverRes?.onComplete?.();
 		} catch (error) {
-			devLogger.error("Failed to start server", error);
+			cliLogger.error("Failed to start the server");
+			if (error instanceof Error) {
+				cliLogger.errorInstance(error);
+			}
 			logger.setBuffering(false);
 		} finally {
 			rebuilding = false;
@@ -149,7 +181,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 		})
 		.on("change", (changedPath) => {
 			if (changedPath === configPath) {
-				devLogger.info("Config file changed, reloading...");
+				cliLogger.info("Config file changed, reloading...");
 			}
 			if (isIgnoredFile(changedPath)) return;
 			startServer();
@@ -169,7 +201,10 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			await watcher?.close();
 			await serverDestroy?.();
 		} catch (error) {
-			devLogger.error("Error during shutdown", error);
+			cliLogger.error("Error during shutdown");
+			if (error instanceof Error) {
+				cliLogger.error(error.message);
+			}
 		} finally {
 			logger.setBuffering(false);
 			process.exit(0);

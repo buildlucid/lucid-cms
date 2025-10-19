@@ -1,14 +1,13 @@
 import type z from "zod/v4";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
-import type { DevLogger } from "../cli/logger/dev-logger.js";
 import type { CLILogger } from "../cli/logger.js";
 import type RuntimeAdapterSchema from "./schema.js";
 import type { AddressInfo } from "node:net";
 
 export type ServeHandler = (props: {
 	config: Config;
-	logger: DevLogger;
+	logger: CLILogger;
 	onListening: (props: {
 		address: AddressInfo | string | null;
 	}) => Promise<void>;

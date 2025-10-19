@@ -38,7 +38,8 @@ const cloudflareAdapter = (options?: {
 		},
 		cli: {
 			serve: async ({ config, logger, onListening }) => {
-				logger.serverStarting("Cloudflare");
+				logger.info("Using:", logger.color.blue("Cloudflare Worker Adapter"));
+				logger.info("Starting development server...");
 
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
@@ -95,8 +96,20 @@ const cloudflareAdapter = (options?: {
 					},
 				});
 
-				logger.issueGroup(issues);
-
+				for (const issue of issues) {
+					if (issue.level === "unsupported") {
+						logger.error(
+							issue.type,
+							issue.key,
+							"-",
+							issue.message ||
+								"This is unsupported in your current runtime environment.",
+						);
+					}
+					if (issue.level === "notice" && issue.message) {
+						logger.warn(issue.type, issue.key, "-", issue.message);
+					}
+				}
 				const server = serve({
 					fetch: app.fetch,
 					port: options?.server?.port ?? 6543,
@@ -110,6 +123,12 @@ const cloudflareAdapter = (options?: {
 					});
 				});
 				server.on("close", async () => {
+					logger.info(
+						"Shutting down Cloudflare Worker Adapter development server...",
+						{
+							spaceBefore: true,
+						},
+					);
 					await destroy?.();
 				});
 

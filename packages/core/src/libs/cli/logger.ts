@@ -154,6 +154,34 @@ const formatBytes = (bytes: number): string => {
 	return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 };
 
+const errorInstance = (error: Error) => {
+	const lines = [
+		`${logger.color.red(logger.color.bold(error.name))}: ${error.message}`,
+		"",
+	];
+
+	if (error.stack) {
+		const stackLines = error.stack.split("\n").slice(1, 4); // First 3 stack frames
+		lines.push(...stackLines.map((line) => logger.color.gray(line.trim())));
+	}
+
+	const maxLength = Math.max(...lines.map((l) => l.length));
+	const width = Math.min(maxLength + 4, 80);
+
+	console.log();
+	console.log(logger.color.red(`╭${"─".repeat(width - 2)}╮`));
+
+	for (const line of lines) {
+		const padding = " ".repeat(width - line.length - 4);
+		console.log(
+			`${logger.color.red("│")}  ${line}${padding} ${logger.color.red("│")}`,
+		);
+	}
+
+	console.log(logger.color.red(`╰${"─".repeat(width - 2)}╯`));
+	console.log();
+};
+
 const logger = {
 	info,
 	error,
@@ -166,6 +194,7 @@ const logger = {
 	startTimer,
 	createBadge,
 	formatBytes,
+	errorInstance,
 };
 
 export type CLILogger = typeof logger;
