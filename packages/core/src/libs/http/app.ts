@@ -48,8 +48,12 @@ const createApp = async (props: {
 	});
 
 	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
-		getQueueAdapter(props.config).then(async (a) => {
-			await a.lifecycle?.init?.();
+		getQueueAdapter(props.config, props.runtimeContext).then(async (a) => {
+			await a.lifecycle?.init?.({
+				config: props.config,
+				runtimeContext: props.runtimeContext,
+				env: props.env,
+			});
 			return a;
 		}),
 		getMediaAdapter(props.config).then(async (a) => {

@@ -4,11 +4,16 @@ import constants from "../../../../constants/constants.js";
 import logger from "../../../logger/index.js";
 import Repository from "../../../repositories/index.js";
 import type {
-	QueueAdapter,
 	QueueAdapterInstance,
 	QueueBatchJobResponse,
 	QueueJobResponse,
 } from "../../types.js";
+import type {
+	AdapterRuntimeContext,
+	Config,
+	EnvironmentVariables,
+} from "../../../../types.js";
+import { join } from "node:path";
 
 const ADAPTER_KEY = "worker";
 
@@ -33,11 +38,22 @@ function workerQueueAdapter(
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
 		lifecycle: {
-			init: async () => {
+			init: async (params) => {
 				logger.debug({
 					message: "The worker queue has started",
 					scope: constants.logScopes.queue,
 				});
+				if (!params.runtimeContext.configEntryPoint) {
+					throw new Error(
+						"configEntryPoint is required. Your runtime likely does not support this queue adapter.",
+					);
+				}
+
+				const configEntryPath = join(
+					params.config.compilerOptions.paths.outDir,
+					params.runtimeContext.configEntryPoint,
+				);
+
 				const workerUrl = new URL(
 					"./libs/queue-adapter/adapters/worker/consumer.js",
 					import.meta.url,
@@ -47,6 +63,10 @@ function workerQueueAdapter(
 						options: {
 							concurrentLimit: options.concurrentLimit,
 							batchSize: options.batchSize,
+						},
+						runtime: {
+							configEntryPath: configEntryPath,
+							env: params.env,
 						},
 					},
 				});

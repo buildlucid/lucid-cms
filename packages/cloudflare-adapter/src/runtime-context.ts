@@ -36,7 +36,14 @@ const runtimeContext = (params: { dev: boolean }) =>
 					{
 						key: "file-system",
 						message:
-							"The media file system adapter is not supported in Cloudflare. When using Wrangler or once deployed, the media featured will be disabled.",
+							"The media file system adapter is not supported in Cloudflare Workers. When using Wrangler or once deployed, the media featured will be disabled.",
+					},
+				],
+				queueAdapter: [
+					{
+						key: "worker",
+						message:
+							"The queue worker adapter is not supported in Cloudflare Workers. Consider using the passthrough adapter for immediate execution of jobs.",
 					},
 				],
 			},
@@ -48,15 +55,9 @@ const runtimeContext = (params: { dev: boolean }) =>
 							"You are currently using the email passthrough adapter. This means emails will not be sent and just stored in the database.",
 					},
 				],
-				queueAdapter: [
-					{
-						key: "worker",
-						message:
-							"The queue worker adapter isn't ideal for use in Cloudflare workers. Consider using the passthrough adapter for immediate execution of jobs.",
-					},
-				],
 			},
 		},
+		configEntryPoint: null,
 	}) satisfies AdapterRuntimeContext;
 
 export default runtimeContext;

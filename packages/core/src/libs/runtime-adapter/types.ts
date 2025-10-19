@@ -56,6 +56,8 @@ export type RuntimeSupport = {
 export type AdapterRuntimeContext = {
 	getConnectionInfo: (c: LucidHonoContext) => NetAddrInfo;
 	support?: RuntimeSupport;
+	/** If the adapter bundles the config and server entry point separately, the path to the config file relative to the output directory */
+	configEntryPoint: string | null;
 };
 
 export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema>;

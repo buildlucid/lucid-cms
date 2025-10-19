@@ -1,4 +1,6 @@
 import { parentPort, workerData } from "node:worker_threads";
+import { pathToFileURL } from "node:url";
+import path from "node:path";
 import constants from "../../../../constants/constants.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
@@ -9,6 +11,12 @@ import Repository from "../../../repositories/index.js";
 import getJobHandler from "../../job-handlers.js";
 import passthroughQueueAdapter from "../passthrough.js";
 import type { WorkerQueueAdapterOptions } from "./index.js";
+import type {
+	AdapterDefineConfig,
+	EnvironmentVariables,
+} from "../../../runtime-adapter/types.js";
+import type { Config } from "../../../../types.js";
+import processConfig from "../../../config/process-config.js";
 
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
@@ -16,19 +24,53 @@ const POLL_INTERVAL_INC = 1000;
 const BACKOFF_MULTIPLIER = 2;
 
 const options = workerData.options as WorkerQueueAdapterOptions;
+const runtime = workerData.runtime as {
+	configEntryPath: string;
+	env: EnvironmentVariables | undefined;
+};
 
 const CONCURRENT_LIMIT =
 	options.concurrentLimit ?? constants.queue.concurrentLimit;
 const BATCH_SIZE = options.batchSize ?? constants.queue.batchSize;
 
-const startConsumer = async () => {
+/**
+ * Attempts to load the config through jiti if it exists.
+ * Otherwise, we're likely in a production environment, in which try and load the config through the runtime's built config output.
+ */
+const getConfig = async (): Promise<{
+	config: Config;
+	env: EnvironmentVariables | undefined;
+}> => {
 	try {
 		const configPath = getConfigPath(process.cwd());
-		const { config, env } = await loadConfigFile({ path: configPath });
+		const result = await loadConfigFile({ path: configPath });
+		return {
+			config: result.config,
+			env: result.env,
+		};
+	} catch (_) {
+		const configPath = path.resolve(process.cwd(), runtime.configEntryPath);
+		const configUrl = pathToFileURL(configPath).href;
+
+		const configModule = await import(configUrl);
+		const configFn = configModule.default as AdapterDefineConfig;
+
+		const processedConfig = await processConfig(configFn(runtime.env || {}));
+
+		return {
+			config: processedConfig,
+			env: runtime.env,
+		};
+	}
+};
+
+const startConsumer = async () => {
+	try {
+		const { config, env } = await getConfig();
 
 		const kvInstance = await getKVAdapter(config);
 
-		const internalQueueAdapter = await passthroughQueueAdapter({
+		const internalQueueAdapter = passthroughQueueAdapter({
 			bypassImmediateExecution: true,
 		});
 

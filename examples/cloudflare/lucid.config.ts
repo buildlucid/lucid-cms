@@ -1,10 +1,5 @@
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
-import {
-	passthroughImageProcessor,
-	passthroughKVAdapter,
-	passthroughQueueAdapter,
-	z,
-} from "@lucidcms/core";
+import { z } from "@lucidcms/core";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import LucidPages from "@lucidcms/plugin-pages";
 import LucidResend from "@lucidcms/plugin-resend";
@@ -72,9 +67,6 @@ export default defineConfig((env) => ({
 			name: env.LUCID_RESEND_FROM_NAME,
 		},
 		simulate: true,
-	},
-	queue: {
-		adapter: passthroughQueueAdapter,
 	},
 	collections: [PageCollection, NewsCollection, SettingsCollection],
 	plugins: [

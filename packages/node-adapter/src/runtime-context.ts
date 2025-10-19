@@ -3,6 +3,7 @@ import type {
 	AdapterRuntimeContext,
 } from "@lucidcms/core/types";
 import { getConnInfo } from "@hono/node-server/conninfo";
+import constants from "./constants.js";
 
 const runtimeContext = {
 	getConnectionInfo: (c: LucidHonoContext) => {
@@ -20,6 +21,7 @@ const runtimeContext = {
 			],
 		},
 	},
+	configEntryPoint: constants.CONFIG_FILE,
 } satisfies AdapterRuntimeContext;
 
 export default runtimeContext;
