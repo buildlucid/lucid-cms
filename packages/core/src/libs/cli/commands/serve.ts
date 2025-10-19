@@ -72,10 +72,14 @@ const serveCommand = async (options?: {
 			copyPublicAssets(configRes.config),
 		]);
 
-		const serverRes = await configRes.adapter?.cli?.serve(
-			configRes.config,
-			devLogger,
-		);
+		const serverRes = await configRes.adapter?.cli?.serve({
+			config: configRes.config,
+			logger: devLogger,
+			onListening: async (props) => {
+				devLogger.serverStarted(props.address);
+				logger.setBuffering(false);
+			},
+		});
 		destroy = serverRes?.destroy;
 
 		await serverRes?.onComplete?.();

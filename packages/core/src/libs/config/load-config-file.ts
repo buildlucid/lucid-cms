@@ -11,15 +11,16 @@ import type {
 import getConfigPath from "./get-config-path.js";
 import processConfig from "./process-config.js";
 
-export const loadConfigFile = async (props?: {
-	path?: string;
-	bypassCache?: boolean;
-}): Promise<{
+export type LoadConfigResult = {
 	config: Config;
 	adapter?: RuntimeAdapter;
 	envSchema?: ZodType;
 	env: EnvironmentVariables | undefined;
-}> => {
+};
+
+export const loadConfigFile = async (props?: {
+	path?: string;
+}): Promise<LoadConfigResult> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
 
@@ -40,7 +41,7 @@ export const loadConfigFile = async (props?: {
 	}
 
 	const configdefault = configModule.default(env || {});
-	const config = await processConfig(configdefault, props?.bypassCache);
+	const config = await processConfig(configdefault);
 
 	const adapter = configModule.adapter;
 	const envSchema = configModule.envSchema;

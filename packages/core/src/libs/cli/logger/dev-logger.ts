@@ -6,10 +6,7 @@ import logger from "../../logger/index.js";
 
 export interface DevLogger extends SharedLogger {
 	serverStarting: (adapterName: string) => void;
-	serverStarted: (
-		address: AddressInfo | string | null,
-		startTime: [number, number],
-	) => void;
+	serverStarted: (address: AddressInfo | string | null) => void;
 	error: (message: string, error?: unknown) => void;
 	info: (message: string) => void;
 }
@@ -19,13 +16,7 @@ const createDevLogger = (): DevLogger => ({
 		console.log(`\n${divider}\n`);
 		console.log(`🚀 Starting ${adapterName} development server...`);
 	},
-	serverStarted: (
-		address: AddressInfo | string | null,
-		startTime: [number, number],
-	) => {
-		const diff = process.hrtime(startTime);
-		const milliseconds = diff[0] * 1000 + diff[1] / 1000000;
-
+	serverStarted: (address: AddressInfo | string | null) => {
 		const serverUrl =
 			typeof address === "string"
 				? address
@@ -35,7 +26,7 @@ const createDevLogger = (): DevLogger => ({
 
 		console.log(`\n${divider}\n`);
 		console.log(
-			`${formatBadge("READY", colors.bgLimeGreen, colors.textGreen)} ${colors.textLimeGreen}Development server ready${colors.reset} in ${formatDuration(milliseconds)}\n`,
+			`${formatBadge("READY", colors.bgLimeGreen, colors.textGreen)} ${colors.textLimeGreen}Development server ready${colors.reset}\n`,
 		);
 
 		console.log(

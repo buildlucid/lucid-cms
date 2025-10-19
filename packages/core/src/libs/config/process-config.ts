@@ -11,20 +11,13 @@ import logger, { initializeLogger } from "../logger/index.js";
 import constants from "../../constants/constants.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 
-let cachedConfig: Config;
-
 /**
  * Responsible for:
  * - merging the default config with the config
  * - initializing the plugins
  * - validation & checks
  */
-const processConfig = async (
-	config: LucidConfig,
-	bypassCache?: boolean,
-): Promise<Config> => {
-	if (cachedConfig !== undefined && !bypassCache) return cachedConfig;
-
+const processConfig = async (config: LucidConfig): Promise<Config> => {
 	let configRes = mergeConfig(config, defaultConfig);
 	try {
 		// merge plugin config
@@ -100,8 +93,6 @@ const processConfig = async (
 			level: configRes.logger.level,
 			force: true,
 		});
-
-		cachedConfig = configRes;
 
 		return configRes;
 	} catch (err) {

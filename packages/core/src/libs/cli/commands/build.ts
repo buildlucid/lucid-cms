@@ -48,14 +48,14 @@ const buildCommand = async (options?: {
 
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
-			configRes.adapter.cli.build(
-				configRes.config,
-				{
+			configRes.adapter.cli.build({
+				config: configRes.config,
+				options: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
 				},
-				cliLogger,
-			),
+				logger: cliLogger,
+			}),
 		]);
 		if (viteBuildRes.error) {
 			cliLogger.error(

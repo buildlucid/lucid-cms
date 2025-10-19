@@ -5,7 +5,8 @@ const mergeConfig = (
 	config: LucidConfig,
 	defaultConfig: Partial<LucidConfig>,
 ) => {
-	return merge(defaultConfig, config) as Config;
+	const clonedDefaults = structuredClone(defaultConfig);
+	return merge(clonedDefaults, config) as Config;
 };
 
 export default mergeConfig;

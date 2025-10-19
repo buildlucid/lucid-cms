@@ -29,8 +29,7 @@ const nodeAdapter = (options?: {
 			return process.env as Record<string, unknown>;
 		},
 		cli: {
-			serve: async (config, logger) => {
-				const startTime = process.hrtime();
+			serve: async ({ config, logger, onListening }) => {
 				logger.serverStarting("Node");
 
 				const { app, destroy, issues } = await lucid.createApp({
@@ -49,7 +48,9 @@ const nodeAdapter = (options?: {
 
 				server.on("listening", () => {
 					const address = server.address();
-					logger.serverStarted(address, startTime);
+					onListening({
+						address: address,
+					});
 				});
 
 				server.on("close", async () => {
@@ -70,7 +71,7 @@ const nodeAdapter = (options?: {
 					},
 				};
 			},
-			build: async (_, options, logger) => {
+			build: async ({ options, logger }) => {
 				logger.info("Using:", logger.color.blue("Node Runtime Adapter"));
 				const configOutput = `${options.outputPath}/${constants.CONFIG_FILE}`;
 				const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;

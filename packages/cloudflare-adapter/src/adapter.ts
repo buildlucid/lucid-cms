@@ -37,8 +37,7 @@ const cloudflareAdapter = (options?: {
 			return platformProxy.env;
 		},
 		cli: {
-			serve: async (config, logger) => {
-				const startTime = process.hrtime();
+			serve: async ({ config, logger, onListening }) => {
 				logger.serverStarting("Cloudflare");
 
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
@@ -106,7 +105,9 @@ const cloudflareAdapter = (options?: {
 
 				server.on("listening", () => {
 					const address = server.address();
-					logger.serverStarted(address, startTime);
+					onListening({
+						address: address,
+					});
 				});
 				server.on("close", async () => {
 					await destroy?.();
@@ -126,7 +127,7 @@ const cloudflareAdapter = (options?: {
 					},
 				};
 			},
-			build: async (_, options, logger) => {
+			build: async ({ options, logger }) => {
 				logger.info("Using:", logger.color.blue("Cloudflare Worker Adapter"));
 
 				try {

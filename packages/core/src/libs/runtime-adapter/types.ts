@@ -4,23 +4,27 @@ import type { LucidHonoContext } from "../../types.js";
 import type { DevLogger } from "../cli/logger/dev-logger.js";
 import type { CLILogger } from "../cli/logger.js";
 import type RuntimeAdapterSchema from "./schema.js";
+import type { AddressInfo } from "node:net";
 
-export type ServeHandler = (
-	config: Config,
-	logger: DevLogger,
-) => Promise<{
+export type ServeHandler = (props: {
+	config: Config;
+	logger: DevLogger;
+	onListening: (props: {
+		address: AddressInfo | string | null;
+	}) => Promise<void>;
+}) => Promise<{
 	destroy: () => Promise<void>;
 	onComplete?: () => Promise<void> | void;
 }>;
 
-export type BuildHandler = (
-	config: Config,
+export type BuildHandler = (props: {
+	config: Config;
 	options: {
 		configPath: string;
 		outputPath: string;
-	},
-	logger: CLILogger,
-) => Promise<void | {
+	};
+	logger: CLILogger;
+}) => Promise<void | {
 	onComplete?: () => Promise<void> | void;
 }>;
 

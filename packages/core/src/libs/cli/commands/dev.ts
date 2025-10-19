@@ -1,161 +1,118 @@
 import chokidar, { type FSWatcher } from "chokidar";
-import { spawn } from "node:child_process";
-import createDevLogger from "../logger/dev-logger.js";
 import path from "node:path";
 import { minimatch } from "minimatch";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
+import generateTypes from "../../type-generation/index.js";
+import vite from "../../vite/index.js";
+import createDevLogger from "../logger/dev-logger.js";
+import copyPublicAssets from "../utils/copy-public-assets.js";
+import validateEnvVars from "../utils/validate-env-vars.js";
+import migrateCommand from "./migrate.js";
 import logger from "../../logger/index.js";
 
-/**
- * The CLI dev command. Watches for file changes and spawns child processes running the serve command for hot-reloading.
- */
-const devCommand = async (options?: {
-	watch?: string | boolean;
-}) => {
-	logger.setBuffering(true);
-
+const devCommand = async (options?: { watch?: string | boolean }) => {
 	const devLogger = createDevLogger();
-	let childProcess: ReturnType<typeof spawn> | undefined = undefined;
+	const configPath = getConfigPath(process.cwd());
+
+	let serverDestroy: (() => Promise<void>) | undefined;
 	let rebuilding = false;
-	let startupTimer: NodeJS.Timeout | undefined = undefined;
 	let isInitialRun = true;
 
-	const configPath = getConfigPath(process.cwd());
-	//* this will get cached so will mostly affect startup time only, it does mean the compilerOptions will not get updated if the config changes
-	const configRes = await loadConfigFile({
-		path: configPath,
-	});
+	const currentConfig = await loadConfigFile({ path: configPath });
 
-	/**
-	 * Kills the child process
-	 */
-	const killChildProcess = async (): Promise<void> => {
-		if (!childProcess) return;
-
-		return new Promise<void>((resolve) => {
-			const cleanup = () => {
-				childProcess = undefined;
-				resolve();
-			};
-
-			const forceKillTimer = setTimeout(() => {
-				if (childProcess && !childProcess.killed) {
-					childProcess.kill("SIGKILL");
-				}
-				cleanup();
-			}, 2000);
-
-			childProcess?.once("exit", () => {
-				clearTimeout(forceKillTimer);
-				cleanup();
-			});
-			childProcess?.kill("SIGTERM");
-		});
-	};
-
-	/**
-	 * Starts the serve command in a child process
-	 */
-	const startChildServer = async () => {
+	const startServer = async () => {
 		if (rebuilding) return;
 		rebuilding = true;
 
-		if (startupTimer) clearTimeout(startupTimer);
-
-		await killChildProcess();
-
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		logger.setBuffering(true);
 
 		try {
-			const args = [process.argv[1] as string, "serve"];
-			if (isInitialRun) {
-				args.push("--initial");
-				isInitialRun = false;
+			await serverDestroy?.();
+
+			const configResult = await loadConfigFile({ path: configPath });
+
+			const [envValid] = await Promise.all([
+				validateEnvVars({
+					envSchema: configResult.envSchema,
+					env: configResult.env,
+				}),
+			]);
+
+			generateTypes({
+				envSchema: configResult.envSchema,
+				configPath: configPath,
+			});
+
+			if (!envValid.success) {
+				devLogger.envValidationFailed(envValid.message);
+				logger.setBuffering(false);
+				process.exit(1);
 			}
 
-			childProcess = spawn(process.execPath, args, {
-				stdio: ["inherit", "inherit", "inherit"],
-				// env: { ...process.env },
-				detached: false,
+			const migrateResult = await migrateCommand({
+				config: configResult.config,
+				mode: "return",
+			})({
+				skipSyncSteps: !isInitialRun,
+				skipEnvValidation: true,
 			});
 
-			childProcess.on("error", (error) => {
-				devLogger.error("Failed to start server", error);
+			if (!migrateResult) {
+				logger.setBuffering(false);
+				process.exit(2);
+			}
+
+			isInitialRun = false;
+
+			const viteBuildRes = await vite.buildApp(configResult.config);
+			if (viteBuildRes.error) {
+				devLogger.error(
+					viteBuildRes.error.message ?? "Failed to build app",
+					viteBuildRes.error,
+				);
+				logger.setBuffering(false);
 				rebuilding = false;
+				return;
+			}
+
+			await Promise.all([
+				prerenderMjmlTemplates(configResult.config),
+				copyPublicAssets(configResult.config),
+			]);
+
+			console.clear();
+
+			const serverRes = await configResult.adapter?.cli?.serve({
+				config: configResult.config,
+				logger: devLogger,
+				onListening: async (props) => {
+					devLogger.serverStarted(props.address);
+					logger.setBuffering(false);
+				},
 			});
 
-			childProcess.on("spawn", () => {
-				console.clear();
-				logger.setBuffering(true);
-			});
-
-			childProcess.on("exit", (code, signal) => {
-				rebuilding = false;
-				//* exit code 2 = migration cancelled, exit dev process
-				if (code === 2) process.exit(0);
-
-				if (signal !== "SIGTERM" && signal !== "SIGKILL" && code !== 0) {
-					devLogger.error(
-						`Server exited with code ${code} and signal ${signal}`,
-					);
-				}
-				rebuilding = false;
-			});
-
-			startupTimer = setTimeout(() => {
-				rebuilding = false;
-			}, 200);
+			serverDestroy = serverRes?.destroy;
+			await serverRes?.onComplete?.();
 		} catch (error) {
-			devLogger.error("Failed to spawn server process", error);
+			devLogger.error("Failed to start server", error);
+			logger.setBuffering(false);
+		} finally {
 			rebuilding = false;
 		}
 	};
-	await startChildServer();
 
-	/**
-	 * Debounced restart function to avoid rapid restarts
-	 */
-	let restartTimer: NodeJS.Timeout | undefined = undefined;
-	const debouncedRestart = () => {
-		if (restartTimer) {
-			clearTimeout(restartTimer);
-		}
-		restartTimer = setTimeout(() => {
-			startChildServer();
-		}, 150);
-	};
+	await startServer();
 
-	/**
-	 * Sets up the shutdown handlers.
-	 */
-	const setupShutdownHandlers = (watcher?: FSWatcher) => {
-		const shutdown = async () => {
-			try {
-				if (startupTimer) clearTimeout(startupTimer);
-				if (restartTimer) clearTimeout(restartTimer);
-
-				await watcher?.close();
-
-				await killChildProcess();
-			} catch (error) {
-				devLogger.error("Error during shutdown", error);
-			} finally {
-				process.exit(0);
-			}
-		};
-
-		process.on("SIGINT", shutdown);
-		process.on("SIGTERM", shutdown);
-		process.on("SIGHUP", shutdown);
-	};
+	let restartTimer: NodeJS.Timeout | undefined;
 
 	const watchPath =
 		typeof options?.watch === "string" ? options?.watch : process.cwd();
 
 	const distPath = path.join(
 		process.cwd(),
-		configRes.config.compilerOptions.paths.outDir,
+		currentConfig.config.compilerOptions.paths.outDir,
 	);
 
 	const ignorePatterns = [
@@ -172,7 +129,7 @@ const devCommand = async (options?: {
 		"**/*.sqlite",
 		"**/*.sqlite-shm",
 		"**/*.sqlite-wal",
-		...(configRes.config.compilerOptions.watch?.ignore ?? []),
+		...(currentConfig.config.compilerOptions.watch?.ignore ?? []),
 	];
 
 	const isIgnoredFile = (filePath: string) => {
@@ -181,7 +138,7 @@ const devCommand = async (options?: {
 	};
 
 	const watcher = chokidar
-		.watch(watchPath, {
+		.watch([watchPath, configPath], {
 			ignored: ignorePatterns,
 			ignoreInitial: true,
 			persistent: true,
@@ -190,20 +147,38 @@ const devCommand = async (options?: {
 				stabilityThreshold: 100,
 			},
 		})
-		.on("change", (e) => {
-			if (isIgnoredFile(e)) return;
-			debouncedRestart();
+		.on("change", (changedPath) => {
+			if (changedPath === configPath) {
+				devLogger.info("Config file changed, reloading...");
+			}
+			if (isIgnoredFile(changedPath)) return;
+			startServer();
 		})
-		.on("add", (e) => {
-			if (isIgnoredFile(e)) return;
-			debouncedRestart();
+		.on("add", (addedPath) => {
+			if (isIgnoredFile(addedPath)) return;
+			startServer();
 		})
-		.on("unlink", (e) => {
-			if (isIgnoredFile(e)) return;
-			debouncedRestart();
+		.on("unlink", (deletedPath) => {
+			if (isIgnoredFile(deletedPath)) return;
+			startServer();
 		});
 
-	setupShutdownHandlers(watcher);
+	const shutdown = async () => {
+		try {
+			if (restartTimer) clearTimeout(restartTimer);
+			await watcher?.close();
+			await serverDestroy?.();
+		} catch (error) {
+			devLogger.error("Error during shutdown", error);
+		} finally {
+			logger.setBuffering(false);
+			process.exit(0);
+		}
+	};
+
+	process.on("SIGINT", shutdown);
+	process.on("SIGTERM", shutdown);
+	process.on("SIGHUP", shutdown);
 };
 
 export default devCommand;
