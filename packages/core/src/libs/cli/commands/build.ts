@@ -124,12 +124,12 @@ const buildCommand = async (options?: {
 		);
 
 		cliLogger.log(
-			cliLogger.createBadge("READY"),
+			cliLogger.createBadge("LUCID CMS"),
 			"Build completed",
-			cliLogger.color.green("successfully"),
-			cliLogger.color.gray("in"),
-			cliLogger.color.gray(cliLogger.formatMilliseconds(endTime)),
-			cliLogger.color.gray(`(${cliLogger.formatBytes(distSize)})`),
+			"successfully",
+			"in",
+			cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
+			cliLogger.color.green(`(${cliLogger.formatBytes(distSize)})`),
 			{
 				spaceAfter: true,
 				spaceBefore: true,
