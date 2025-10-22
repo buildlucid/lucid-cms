@@ -1,6 +1,6 @@
-import T from "../../translations/index.js";
-import slug from "slug";
 import { getMonth, getYear } from "date-fns";
+import slug from "slug";
+import T from "../../translations/index.js";
 import type { ServiceResponse } from "../services/types.js";
 
 /**
@@ -31,15 +31,10 @@ const generateKey = (props: {
 	});
 	if (filename.length > 254) filename = filename.slice(0, 254);
 	const uuid = Math.random().toString(36).slice(-6);
-	const date = new Date();
-	const month = getMonth(date);
-	const monthF = month + 1 >= 10 ? `${month + 1}` : `0${month + 1}`;
-
-	const key = `${getYear(date)}/${monthF}/${uuid}-${filename}.${ext}`;
 
 	return {
 		error: undefined,
-		data: props.public ? `public/${key}` : `private/${key}`,
+		data: `${props.public ? "public/" : "private/"}${uuid}-${filename}.${ext}`,
 	};
 };
 
