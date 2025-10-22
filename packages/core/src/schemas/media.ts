@@ -1,6 +1,6 @@
 import z from "zod/v4";
-import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const mediaResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 1 }),

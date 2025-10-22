@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import services from "../index.js";
+import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -67,43 +67,7 @@ const updateSingle: ServiceFn<
 		alt: data.alt || [],
 		mediaId: mediaRes.data.id,
 	});
-	if (translations.length > 0) {
-		const mediaTranslationsRes = await MediaTranslations.upsertMultiple({
-			data: translations,
-			returning: ["id"],
-			validation: {
-				enabled: true,
-			},
-		});
-		if (mediaTranslationsRes.error) return mediaTranslationsRes;
-	}
 
-	// TODO: need better solution for partial updates before the bellow early returns when there is no key
-	if (data.isDeleted !== undefined || data.folderId !== undefined) {
-		const updateMediaRes = await Media.updateSingle({
-			where: [{ key: "id", operator: "=", value: data.id }],
-			data: {
-				is_deleted: data.isDeleted,
-				is_deleted_at: data.isDeleted
-					? new Date().toISOString()
-					: data.isDeleted === false
-						? null
-						: undefined,
-				deleted_by: data.isDeleted
-					? data.userId
-					: data.isDeleted === false
-						? null
-						: undefined,
-				folder_id: data.folderId,
-			},
-			validation: {
-				enabled: true,
-			},
-		});
-		if (updateMediaRes.error) return updateMediaRes;
-	}
-
-	// early return if no key
 	if (data.key !== undefined && data.fileName === undefined) {
 		return {
 			error: {
@@ -122,74 +86,90 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	if (data.key === undefined || data.fileName === undefined) {
-		return {
-			error: undefined,
-			data: undefined,
-		};
+	let updateObjectRes: Awaited<
+		ReturnType<typeof services.media.strategies.update>
+	>["data"];
+
+	if (data.key !== undefined && data.fileName !== undefined) {
+		const awaitingSync = await services.media.checks.checkAwaitingSync(
+			context,
+			{
+				key: data.key,
+			},
+		);
+		if (awaitingSync.error) return awaitingSync;
+
+		const updateRes = await services.media.strategies.update(context, {
+			id: mediaRes.data.id,
+			previousSize: mediaRes.data.file_size,
+			previousKey: mediaRes.data.key,
+			updatedKey: data.key,
+			fileName: data.fileName,
+		});
+		if (updateRes.error) return updateRes;
+
+		updateObjectRes = updateRes.data;
 	}
 
-	// check if media is awaiting sync
-	const awaitingSync = await services.media.checks.checkAwaitingSync(context, {
-		key: data.key,
-	});
-	if (awaitingSync.error) return awaitingSync;
-
-	const updateObjectRes = await services.media.strategies.update(context, {
-		id: mediaRes.data.id,
-		previousSize: mediaRes.data.file_size,
-		previousKey: mediaRes.data.key,
-		updatedKey: data.key,
-		fileName: data.fileName,
-	});
-	if (updateObjectRes.error) return updateObjectRes;
-
-	const [mediaUpdateRes, deleteMediaSyncRes] = await Promise.all([
-		Media.updateSingle({
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
+	const [mediaUpdateRes, deleteMediaSyncRes, mediaTranslationsRes] =
+		await Promise.all([
+			Media.updateSingle({
+				where: [{ key: "id", operator: "=", value: data.id }],
+				data: {
+					key: updateObjectRes?.key,
+					e_tag: updateObjectRes?.etag,
+					type: updateObjectRes?.type,
+					mime_type: updateObjectRes?.mimeType,
+					file_extension: updateObjectRes?.extension,
+					file_size: updateObjectRes?.size,
+					width: data.width,
+					height: data.height,
+					blur_hash: data.blurHash,
+					average_color: data.averageColor,
+					is_dark: data.isDark,
+					is_light: data.isLight,
+					folder_id: data.folderId,
+					is_deleted: data.isDeleted,
+					is_deleted_at: data.isDeleted
+						? new Date().toISOString()
+						: data.isDeleted === false
+							? null
+							: undefined,
+					deleted_by: data.isDeleted
+						? data.userId
+						: data.isDeleted === false
+							? null
+							: undefined,
+					updated_at: new Date().toISOString(),
+					updated_by: data.userId,
 				},
-			],
-			data: {
-				key: updateObjectRes.data.key,
-				e_tag: updateObjectRes.data.etag,
-				type: updateObjectRes.data.type,
-				mime_type: updateObjectRes.data.mimeType,
-				file_extension: updateObjectRes.data.extension,
-				file_size: updateObjectRes.data.size,
-				width: data.width,
-				height: data.height,
-				updated_at: new Date().toISOString(),
-				blur_hash: data.blurHash,
-				average_color: data.averageColor,
-				is_dark: data.isDark,
-				is_light: data.isLight,
-				updated_by: data.userId,
-			},
-			returning: ["id"],
-			validation: {
-				enabled: true,
-			},
-		}),
-		MediaAwaitingSync.deleteSingle({
-			where: [
-				{
-					key: "key",
-					operator: "=",
-					value: data.key,
+				returning: ["id"],
+				validation: {
+					enabled: true,
 				},
-			],
-			returning: ["key"],
-			validation: {
-				enabled: true,
-			},
-		}),
-	]);
+			}),
+			updateObjectRes !== undefined
+				? MediaAwaitingSync.deleteSingle({
+						where: [{ key: "key", operator: "=", value: data.key }],
+						returning: ["key"],
+						validation: {
+							enabled: true,
+						},
+					})
+				: Promise.resolve({ error: undefined, data: undefined }),
+			translations.length > 0
+				? MediaTranslations.upsertMultiple({
+						data: translations,
+						returning: ["id"],
+						validation: {
+							enabled: true,
+						},
+					})
+				: Promise.resolve({ error: undefined, data: undefined }),
+		]);
 	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
 	if (mediaUpdateRes.error) return mediaUpdateRes;
+	if (mediaTranslationsRes.error) return mediaTranslationsRes;
 
 	return {
 		error: undefined,
