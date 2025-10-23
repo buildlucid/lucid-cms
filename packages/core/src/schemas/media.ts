@@ -6,7 +6,7 @@ const mediaResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 1 }),
 	key: z.string().meta({
 		description: "Media key",
-		example: "2024/09/5ttogd-placeholder-image.png",
+		example: "public/5ttogd-placeholder-image.png",
 	}),
 	folderId: z.number().nullable().meta({
 		description: "Media folder ID",
@@ -14,7 +14,7 @@ const mediaResponseSchema = z.object({
 	}),
 	url: z.string().meta({
 		description: "Media URL",
-		example: "https://example.com/cdn/v1/2024/09/5ttogd-placeholder-image.png",
+		example: "https://example.com/cdn/v1/public/5ttogd-placeholder-image.png",
 	}),
 	public: z.boolean().meta({
 		description:
@@ -296,7 +296,7 @@ export const controllerSchemas = {
 				.string()
 				.meta({
 					description: "The media key",
-					example: "2024/09/5ttogd-placeholder-image.png",
+					example: "public/5ttogd-placeholder-image.png",
 				})
 				.optional(),
 			folderId: z
@@ -456,7 +456,7 @@ export const controllerSchemas = {
 			}),
 			key: z.string().meta({
 				description: "The media key",
-				example: "2024/09/5ttogd-placeholder-image.png",
+				example: "public/5ttogd-placeholder-image.png",
 			}),
 			headers: z
 				.record(z.string(), z.string())
@@ -473,7 +473,7 @@ export const controllerSchemas = {
 		body: z.object({
 			key: z.string().meta({
 				description: "The media key",
-				example: "2024/09/5ttogd-placeholder-image.png",
+				example: "public/5ttogd-placeholder-image.png",
 			}),
 			folderId: z
 				.number()
@@ -600,14 +600,14 @@ export const controllerSchemas = {
 			params: z.object({
 				key: z.string().meta({
 					description: "The media key you wish to stream",
-					example: "2024/09/5ttogd-placeholder-image.png",
+					example: "public/5ttogd-placeholder-image.png",
 				}),
 			}),
 			response: z.object({
 				url: z.string().meta({
 					description: "The URL of the media",
 					example:
-						"https://example.com/cdn/v1/2024/09/5ttogd-placeholder-image.png",
+						"https://example.com/cdn/v1/public/5ttogd-placeholder-image.png",
 				}),
 			}),
 		},

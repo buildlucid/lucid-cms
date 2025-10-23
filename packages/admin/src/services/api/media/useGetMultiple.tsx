@@ -1,8 +1,8 @@
-import { createMemo, type Accessor } from "solid-js";
 import { createQuery } from "@tanstack/solid-query";
+import type { MediaResponse, ResponseBody } from "@types";
+import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, MediaResponse } from "@types";
 
 interface QueryParams {
 	queryString?: Accessor<string>;
@@ -14,6 +14,7 @@ interface QueryParams {
 		type?: Accessor<string | string[]>;
 		folderId?: Accessor<number | string | undefined>;
 		isDeleted?: Accessor<1 | 0> | 0 | 1;
+		public?: Accessor<1 | 0> | 0 | 1;
 	};
 	perPage?: number;
 	headers: {

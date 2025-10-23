@@ -1,18 +1,18 @@
-import T from "@/translations";
 import { type Component, createMemo, createSignal, For } from "solid-js";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
-import mediaSelectStore from "@/store/forms/mediaSelectStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import api from "@/services/api";
-import { PerPage, Filter, Sort } from "@/components/Groups/Query";
-import { Grid } from "@/components/Groups/Grid";
 import MediaBasicCard, {
 	MediaBasicCardLoading,
 } from "@/components/Cards/MediaBasicCard";
-import { Modal } from "@/components/Groups/Modal";
-import { DynamicContent } from "@/components/Groups/Layout";
 import { Paginated } from "@/components/Groups/Footers";
 import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
+import { Grid } from "@/components/Groups/Grid";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { Modal } from "@/components/Groups/Modal";
+import { Filter, PerPage, Sort } from "@/components/Groups/Query";
+import useSearchParamsState from "@/hooks/useSearchParamsState";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import mediaSelectStore from "@/store/forms/mediaSelectStore";
+import T from "@/translations";
 
 const MediaSelectModal: Component = () => {
 	const open = createMemo(() => mediaSelectStore.get.open);
@@ -96,6 +96,7 @@ const SelectMediaContent: Component = () => {
 			},
 			filters: {
 				isDeleted: showingDeleted,
+				public: 1,
 			},
 		},
 	});

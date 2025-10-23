@@ -1,18 +1,18 @@
-import T from "@/translations";
+import { DropdownMenu } from "@kobalte/core";
+import type { ErrorResult } from "@types";
+import classnames from "classnames";
+import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
-	Show,
 	createSignal,
 	For,
-	Switch,
 	Match,
+	Show,
+	Switch,
 } from "solid-js";
-import classnames from "classnames";
-import type { ErrorResult } from "@types";
-import { FaSolidCheck, FaSolidXmark, FaSolidSort } from "solid-icons/fa";
-import { DropdownMenu } from "@kobalte/core";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
+import T from "@/translations";
 
 export type SelectMultipleValueT = {
 	value: string | number;
@@ -149,6 +149,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						anchorWidth: true,
 						rounded: true,
 						class: "max-h-36 overflow-y-auto z-70 p-1.5!",
+						noMargin: true,
 					}}
 				>
 					<Switch>

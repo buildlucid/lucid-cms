@@ -630,5 +630,12 @@
 	"delete_items_modal_title": "Delete Items",
 	"delete_items_modal_description": "Are you sure you want to delete the selected items?",
 	"restore_items_modal_title": "Restore Items",
-	"restore_items_modal_description": "Are you sure you want to restore the selected items?"
+	"restore_items_modal_description": "Are you sure you want to restore the selected items?",
+	"publicly_available": "Publicly Available",
+	"media_public_description": "Should this media be publically available to the internet? If you plan on using it within a document, the answer should be yes. When private, you need to be either logged in or use a shared link to access it.",
+	"public": "Public",
+	"private": "Private",
+	"visibility": "Visibility",
+	"private_pill_tooltip": "This media is private and can only be accessed by logged in users or those with a shared link.",
+	"deleted_pill_tooltip": "This media item is soft-deleted and will be permanently removed after a certain period of time."
 }

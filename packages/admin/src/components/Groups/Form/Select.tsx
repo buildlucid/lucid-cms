@@ -1,21 +1,21 @@
-import T from "@/translations";
-import {
-	type Component,
-	Show,
-	createSignal,
-	For,
-	Switch,
-	Match,
-	createEffect,
-} from "solid-js";
-import classNames from "classnames";
+import { DropdownMenu } from "@kobalte/core";
 import { debounce } from "@solid-primitives/scheduled";
 import type { ErrorResult, FieldError } from "@types";
+import classNames from "classnames";
 import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
-import { DropdownMenu } from "@kobalte/core";
+import {
+	type Component,
+	createEffect,
+	createSignal,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 import Spinner from "@/components/Partials/Spinner";
+import T from "@/translations";
 
 export type ValueT = string | number | undefined;
 
@@ -181,6 +181,7 @@ export const Select: Component<SelectProps> = (props) => {
 						rounded: true,
 						class: "z-70 p-1.5!",
 						maxHeight: "md",
+						noMargin: true,
 					}}
 				>
 					<Show when={props.search !== undefined}>

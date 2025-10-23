@@ -1,7 +1,7 @@
-import T from "@/translations";
-import api from "@/services/api";
-import { type Accessor, createMemo, createSignal } from "solid-js";
 import type { ErrorResponse, MediaResponse } from "@types";
+import { type Accessor, createMemo, createSignal } from "solid-js";
+import api from "@/services/api";
+import T from "@/translations";
 import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
@@ -11,6 +11,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
 	);
+	const [getPublic, setPublic] = createSignal<boolean>(true);
 	const [getPresignedUrlValue, setPresignedUrlValue] = createSignal<string>();
 	const [getPresignedUrlHeaders, setPresignedUrlHeaders] =
 		createSignal<Record<string, string>>();
@@ -32,7 +33,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	// Functions
 	const getMediaPresignedUrl = async (fileName: string, mimeType: string) => {
 		await getPresignedUrl.action.mutateAsync({
-			body: { fileName, mimeType },
+			body: { fileName, mimeType, public: getPublic() },
 		});
 	};
 	const uploadFile = async (file: File) => {
@@ -151,6 +152,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		setTitle,
 		setAlt,
 		setFolderId,
+		setPublic,
 		errors: errors,
 		isLoading: isLoading,
 		state: {
@@ -158,6 +160,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			alt: getAlt,
 			key: getKey,
 			folderId: getFolderId,
+			public: getPublic,
 		},
 		reset: () => {
 			setTitle([]);
@@ -165,6 +168,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			setKey(undefined);
 			setFolderId(undefined);
 			setPresignedUrlValue(undefined);
+			setPublic(true);
 			setUploadErrors();
 			updateSingle.reset();
 		},

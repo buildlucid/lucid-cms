@@ -1,23 +1,23 @@
-import T from "@/translations";
 import {
-	type Component,
 	type Accessor,
-	createMemo,
-	Show,
-	For,
+	type Component,
 	createEffect,
+	createMemo,
+	For,
+	Show,
 } from "solid-js";
-import api from "@/services/api";
-import useSingleFileUpload from "@/hooks/useSingleFileUpload";
+import SectionHeading from "@/components/Blocks/SectionHeading";
+import { Checkbox, Input, Select } from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
+import DetailsList from "@/components/Partials/DetailsList";
 import { useCreateMedia, useUpdateMedia } from "@/hooks/actions";
-import helpers from "@/utils/helpers";
+import useSingleFileUpload from "@/hooks/useSingleFileUpload";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import { Panel } from "@/components/Groups/Panel";
-import { Input, Select } from "@/components/Groups/Form";
-import SectionHeading from "@/components/Blocks/SectionHeading";
-import DetailsList from "@/components/Partials/DetailsList";
+import helpers from "@/utils/helpers";
 
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -210,6 +210,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			updateMedia?.setTitle(media.data?.data.title || []);
 			updateMedia?.setAlt(media.data?.data.alt || []);
 			updateMedia?.setFolderId(media.data?.data.folderId ?? null);
+			updateMedia?.setPublic(media.data?.data.public ?? true);
 			MediaFile.reset();
 			MediaFile.setCurrentFile({
 				name: media.data.data.key,
@@ -268,22 +269,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				<>
 					<MediaFile.Render />
 					<SectionHeading title={T()("details")} />
-					<Select
-						id="media-folder"
-						value={targetState()?.folderId() ?? undefined}
+					<Checkbox
+						id="public"
+						value={targetState()?.public() ?? true}
 						onChange={(val) => {
-							const id =
-								typeof val === "string" ? Number.parseInt(val, 10) : val;
-							targetAction()?.setFolderId(id);
+							targetAction()?.setPublic(val);
 						}}
-						name="media-folder"
-						options={folderOptions()}
-						copy={{ label: T()("folder") }}
-						required={false}
-						errors={getBodyError("folderId", mutateErrors())}
-						noMargin={false}
-						noClear={true}
+						name="public"
+						copy={{
+							label: T()("publicly_available"),
+							tooltip: T()("media_public_description"),
+						}}
 						theme="full"
+						errors={getBodyError("featured", mutateErrors())}
 					/>
 					<For each={locales()}>
 						{(locale, index) => (
@@ -342,6 +340,23 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							</Show>
 						)}
 					</For>
+					<Select
+						id="media-folder"
+						value={targetState()?.folderId() ?? undefined}
+						onChange={(val) => {
+							const id =
+								typeof val === "string" ? Number.parseInt(val, 10) : val;
+							targetAction()?.setFolderId(id);
+						}}
+						name="media-folder"
+						options={folderOptions()}
+						copy={{ label: T()("folder") }}
+						required={false}
+						errors={getBodyError("folderId", mutateErrors())}
+						noMargin={false}
+						noClear={true}
+						theme="full"
+					/>
 					<Show when={props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />
 						<DetailsList

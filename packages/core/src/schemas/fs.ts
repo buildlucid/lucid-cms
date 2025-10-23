@@ -17,7 +17,7 @@ export const controllerSchemas = {
 				}),
 				key: z.string().meta({
 					description: "The media key",
-					example: "2024/09/5ttogd-placeholder-image.png",
+					example: "public/5ttogd-placeholder-image.png",
 				}),
 			}),
 			formatted: undefined,

@@ -1,15 +1,15 @@
-import T from "@/translations";
-import { type Component, type Accessor, createMemo, Show, For } from "solid-js";
-import api from "@/services/api";
-import helpers from "@/utils/helpers";
-import dateHelpers from "@/utils/date-helpers";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import { Panel } from "@/components/Groups/Panel";
-import { Input, Select } from "@/components/Groups/Form";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
-import DetailsList from "@/components/Partials/DetailsList";
+import { Checkbox, Input, Select } from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
 import AspectRatio from "@/components/Partials/AspectRatio";
+import DetailsList from "@/components/Partials/DetailsList";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
+import helpers from "@/utils/helpers";
 
 interface ViewMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -112,18 +112,15 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 						</Show>
 					</AspectRatio>
 					<SectionHeading title={T()("details")} />
-					<Select
-						id="media-folder"
-						value={media.data?.data.folderId ?? undefined}
+					<Checkbox
+						id="public"
+						value={media.data?.data.public ?? true}
 						onChange={() => {}}
-						name="media-folder"
-						options={folderOptions()}
-						copy={{ label: T()("folder") }}
-						required={false}
-						errors={undefined}
-						noMargin={false}
-						noClear={true}
-						disabled={true}
+						name="public"
+						copy={{
+							label: T()("publicly_available"),
+							tooltip: T()("media_public_description"),
+						}}
 						theme="full"
 					/>
 					<For each={locales()}>
@@ -175,6 +172,20 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							</Show>
 						)}
 					</For>
+					<Select
+						id="media-folder"
+						value={media.data?.data.folderId ?? undefined}
+						onChange={() => {}}
+						name="media-folder"
+						options={folderOptions()}
+						copy={{ label: T()("folder") }}
+						required={false}
+						errors={undefined}
+						noMargin={false}
+						noClear={true}
+						disabled={true}
+						theme="full"
+					/>
 					<Show when={props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />
 						<DetailsList

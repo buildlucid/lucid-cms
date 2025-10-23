@@ -1,20 +1,20 @@
-import T from "@/translations";
-import { type Component, Match, Show, Switch, createMemo } from "solid-js";
-import classNames from "classnames";
 import type {
 	ErrorResult,
 	FieldError,
-	MediaResponse,
 	MediaResMeta,
+	MediaResponse,
 } from "@types";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import mediaSelectStore from "@/store/forms/mediaSelectStore";
-import helpers from "@/utils/helpers";
-import Button from "@/components/Partials/Button";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
+import classNames from "classnames";
+import { type Component, createMemo, Match, Show, Switch } from "solid-js";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import AspectRatio from "@/components/Partials/AspectRatio";
+import Button from "@/components/Partials/Button";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import mediaSelectStore from "@/store/forms/mediaSelectStore";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 interface MediaSelectProps {
 	id: string;
@@ -77,7 +77,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						acc[t.localeCode] = t.value ?? "";
 						return acc;
 					}, {}),
-					isDeleted: media.isDeleted ?? null,
+					isDeleted: media.isDeleted ?? false,
+					public: media.public,
 				});
 			},
 			open: true,
@@ -129,10 +130,21 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						<div class="w-full border border-border rounded-md bg-input-base">
 							<div class="p-2 flex items-center justify-center relative">
 								<div class="w-full max-w-xs rounded-md overflow-hidden border border-border">
-									<Show when={props.meta?.isDeleted}>
-										<Pill theme="red" class="absolute top-2 right-2 z-10">
-											{T()("deleted")}
-										</Pill>
+									<Show
+										when={props.meta?.isDeleted || props.meta?.public === false}
+									>
+										<div class="absolute top-2 right-2 z-10 gap-2 flex items-center">
+											<Show when={props.meta?.isDeleted}>
+												<Pill theme="red" tooltip={T()("deleted_pill_tooltip")}>
+													{T()("deleted")}
+												</Pill>
+											</Show>
+											<Show when={!props.meta?.public}>
+												<Pill theme="red" tooltip={T()("private_pill_tooltip")}>
+													{T()("private")}
+												</Pill>
+											</Show>
+										</div>
 									</Show>
 									<AspectRatio
 										ratio="16:9"

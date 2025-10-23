@@ -1,23 +1,23 @@
-import T from "@/translations";
+import { useParams } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
 } from "solid-js";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import userStore from "@/store/userStore";
-import api from "@/services/api";
-import { Wrapper } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
-import { MediaList } from "@/components/Groups/Content";
 import Alert from "@/components/Blocks/Alert";
-import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import { MediaList } from "@/components/Groups/Content";
+import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
-import { useParams } from "@solidjs/router";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
+import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import api from "@/services/api";
 import mediaStore from "@/store/mediaStore";
-import { useQueryClient } from "@tanstack/solid-query";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 
 const MediaListRoute: Component = () => {
 	// ----------------------------------
@@ -45,6 +45,10 @@ const MediaListRoute: Component = () => {
 				key: {
 					value: "",
 					type: "text",
+				},
+				public: {
+					value: undefined,
+					type: "boolean",
 				},
 			},
 			sorts: {
@@ -159,6 +163,13 @@ const MediaListRoute: Component = () => {
 											label: T()("title"),
 											key: "title",
 											type: "text",
+										},
+										{
+											label: T()("visibility"),
+											key: "public",
+											type: "boolean",
+											trueLabel: T()("public"),
+											falseLabel: T()("private"),
 										},
 										{
 											label: T()("mime_type"),

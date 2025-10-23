@@ -1,8 +1,8 @@
-import T from "@/translations";
-import { type Component, Show, type JSX, createMemo } from "solid-js";
 import classnames from "classnames";
-import spawnToast from "@/utils/spawn-toast";
+import { type Component, createMemo, type JSX, Show } from "solid-js";
 import Spinner from "@/components/Partials/Spinner";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 	theme:
@@ -45,7 +45,7 @@ const Button: Component<ButtonProps> = (props) => {
 
 				// Toggles
 				"ring-primary-base": props.theme === "secondary-toggle",
-				"bg-transparent text-body fill-body hover:bg-secondary-base hover:text-secondary-contrast hover:fill-primary-contrast border-border border":
+				"bg-input-base border border-border text-input-contrast fill-body hover:bg-secondary-base hover:text-secondary-contrast hover:fill-primary-contrast":
 					props.theme === "secondary-toggle" && !props.active,
 				"bg-primary-base text-primary-contrast fill-primary-contrast hover:bg-primary-hover border-primary-base border":
 					props.theme === "secondary-toggle" && props.active,

@@ -5,6 +5,7 @@ export interface PillProps {
 	theme: "primary" | "grey" | "red" | "warning" | "secondary";
 	children: JSXElement;
 	class?: string;
+	tooltip?: string;
 }
 
 const Pill: Component<PillProps> = (props) => {
@@ -24,6 +25,7 @@ const Pill: Component<PillProps> = (props) => {
 						props.theme === "secondary",
 				},
 			)}
+			title={props.tooltip}
 		>
 			{props.children}
 		</span>

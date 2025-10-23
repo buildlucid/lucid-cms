@@ -1,6 +1,6 @@
-import type { Component, JSXElement, ValidComponent } from "solid-js";
-import classNames from "classnames";
 import { DropdownMenu } from "@kobalte/core";
+import classNames from "classnames";
+import type { Component, JSXElement, ValidComponent } from "solid-js";
 
 interface DropdownContentProps {
 	options?: {
@@ -9,6 +9,7 @@ interface DropdownContentProps {
 		rounded?: boolean;
 		anchorWidth?: boolean;
 		maxHeight?: "md";
+		noMargin?: boolean;
 	};
 	children: JSXElement;
 }
@@ -19,10 +20,11 @@ const DropdownContent: Component<DropdownContentProps> = (props) => {
 			<DropdownMenu.Content
 				as={props.options?.as}
 				class={classNames(
-					"bg-dropdown-base border border-border px-2.5 py-2.5 shadow-md animate-animate-dropdown focus:outline-hidden focus:ring-1 ring-primary-base scrollbar",
+					"bg-dropdown-base border border-border px-2.5 py-2.5 shadow-md animate-animate-dropdown focus:outline-hidden scrollbar",
 					{
 						"rounded-md": props.options?.rounded,
 						"max-h-60 overflow-y-auto": props.options?.maxHeight === "md",
+						"mt-2": props.options?.noMargin !== true,
 					},
 					props.options?.class,
 				)}

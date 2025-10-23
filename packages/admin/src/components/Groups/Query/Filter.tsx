@@ -1,20 +1,20 @@
-import T from "@/translations";
+import { DropdownMenu } from "@kobalte/core";
+import { FaSolidFilter, FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
-	Match,
-	Switch,
-	For,
-	createSignal,
 	createEffect,
 	createMemo,
+	createSignal,
+	For,
+	Match,
 	Show,
+	Switch,
 } from "solid-js";
-import { FaSolidFilter, FaSolidXmark } from "solid-icons/fa";
-import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
-import { DropdownMenu } from "@kobalte/core";
-import DropdownContent from "@/components/Partials/DropdownContent";
-import { SelectMultiple, Input, Select } from "@/components/Groups/Form";
+import { Input, Select, SelectMultiple } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import DropdownContent from "@/components/Partials/DropdownContent";
+import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 interface FilterItemProps {
 	filter: {

@@ -11,8 +11,6 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import getMediaAdapter from "../../../media-adapter/get-adapter.js";
-import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 
 const factory = createFactory();
@@ -30,8 +28,6 @@ const uploadMediaController = factory.createHandlers(
 		}),
 		validateResponse: true,
 	}),
-	authenticate,
-	permissions(["create_media", "update_media"]),
 	validate("query", controllerSchemas.upload.query.string),
 	async (c) => {
 		const mediaAdapter = await getMediaAdapter(c.get("config"));
