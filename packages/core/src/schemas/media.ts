@@ -16,6 +16,11 @@ const mediaResponseSchema = z.object({
 		description: "Media URL",
 		example: "https://example.com/cdn/v1/2024/09/5ttogd-placeholder-image.png",
 	}),
+	public: z.boolean().meta({
+		description:
+			"Media visibility. Private media can only be accessed by authorized users and when shared",
+		example: true,
+	}),
 	title: z
 		.array(
 			z.object({

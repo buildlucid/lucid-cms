@@ -134,6 +134,7 @@ export interface MediaResponse {
 		isDark: boolean | null;
 		isLight: boolean | null;
 	};
+	public: boolean;
 	isDeleted: boolean | null;
 	isDeletedAt: string | null;
 	deletedBy: number | null;

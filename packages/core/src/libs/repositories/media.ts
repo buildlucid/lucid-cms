@@ -96,6 +96,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				folderId: "folder_id",
 				isDeleted: "is_deleted",
 				deletedBy: "deleted_by",
+				public: "public",
 			},
 			sorts: {
 				createdAt: "created_at",
@@ -143,6 +144,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
+				"public",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -160,6 +162,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("translations"),
 			])
+			// TODO: make optional
 			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "=", props.id);
 
@@ -192,6 +195,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"translations",
+				"public",
 			],
 		});
 	}
@@ -225,6 +229,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
+				"public",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -242,6 +247,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("translations"),
 			])
+			// TODO: make optional
 			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "in", props.ids);
 
@@ -274,6 +280,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"translations",
+				"public",
 			],
 		});
 	}
@@ -310,6 +317,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_deleted",
 						"lucid_media.is_deleted_at",
 						"lucid_media.deleted_by",
+						"lucid_media.public",
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb
@@ -333,6 +341,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.on("translation.locale_code", "=", props.localeCode),
 					)
 					.groupBy(["lucid_media.id", "translation.title", "translation.alt"])
+					// TODO: make optional
 					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 				const countQuery = this.db
@@ -343,6 +352,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.onRef("translation.media_id", "=", "lucid_media.id")
 							.on("translation.locale_code", "=", props.localeCode),
 					)
+					// TODO: make optional
 					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
 
 				const { main, count } = queryBuilder.main(
@@ -407,6 +417,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
+				"public",
 			],
 		});
 	}

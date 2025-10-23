@@ -1,8 +1,8 @@
-import Formatter from "./index.js";
-import { createMediaUrl } from "../../utils/media/index.js";
 import type { BooleanInt } from "../../libs/db-adapter/types.js";
-import type { MediaResponse, MediaType } from "../../types/response.js";
 import type { UrlStrategy } from "../../types/config.js";
+import type { MediaResponse, MediaType } from "../../types/response.js";
+import { createMediaUrl } from "../../utils/media/index.js";
+import Formatter from "./index.js";
 
 export interface MediaPropsT {
 	id: number;
@@ -29,6 +29,7 @@ export interface MediaPropsT {
 	is_deleted: BooleanInt;
 	is_deleted_at: Date | string | null;
 	deleted_by: number | null;
+	public: BooleanInt;
 }
 
 export default class MediaFormatter {
@@ -100,6 +101,7 @@ export default class MediaFormatter {
 				isDark: Formatter.formatBoolean(props.media.is_dark),
 				isLight: Formatter.formatBoolean(props.media.is_light),
 			},
+			public: Formatter.formatBoolean(props.media.public),
 			isDeleted: Formatter.formatBoolean(props.media.is_deleted),
 			isDeletedAt: Formatter.formatDate(props.media.is_deleted_at),
 			deletedBy: props.media.deleted_by,
