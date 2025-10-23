@@ -162,8 +162,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("translations"),
 			])
-			// TODO: make optional
-			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
@@ -247,8 +245,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("translations"),
 			])
-			// TODO: make optional
-			.where("public", "=", this.dbAdapter.getDefault("boolean", "true"))
 			.where("id", "in", props.ids);
 
 		const exec = await this.executeQuery(() => query.execute(), {
@@ -340,9 +336,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.onRef("translation.media_id", "=", "lucid_media.id")
 							.on("translation.locale_code", "=", props.localeCode),
 					)
-					.groupBy(["lucid_media.id", "translation.title", "translation.alt"])
-					// TODO: make optional
-					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
+					.groupBy(["lucid_media.id", "translation.title", "translation.alt"]);
 
 				const countQuery = this.db
 					.selectFrom("lucid_media")
@@ -351,9 +345,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						join
 							.onRef("translation.media_id", "=", "lucid_media.id")
 							.on("translation.locale_code", "=", props.localeCode),
-					)
-					// TODO: make optional
-					.where("public", "=", this.dbAdapter.getDefault("boolean", "true"));
+					);
 
 				const { main, count } = queryBuilder.main(
 					{

@@ -135,11 +135,14 @@ export const controllerSchemas = {
 					"filter[extension]": queryString.schema.filter(true, {
 						example: "jpg,png",
 					}),
-					"filter[isDeleted]": queryString.schema.filter(true, {
+					"filter[isDeleted]": queryString.schema.filter(false, {
 						example: "true",
 					}),
 					"filter[deletedBy]": queryString.schema.filter(true, {
 						example: "1",
+					}),
+					"filter[public]": queryString.schema.filter(false, {
+						example: "true",
 					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,title,mimeType,extension",
@@ -159,6 +162,7 @@ export const controllerSchemas = {
 						extension: queryFormatted.schema.filters.union.optional(),
 						isDeleted: queryFormatted.schema.filters.single.optional(),
 						deletedBy: queryFormatted.schema.filters.union.optional(),
+						public: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				sort: z

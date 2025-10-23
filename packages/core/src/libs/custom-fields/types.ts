@@ -515,12 +515,12 @@ export type TabResMeta = null;
 export type TextResMeta = null;
 export type WysiwygResMeta = null;
 export type MediaResMeta = {
-	id: number | null;
-	url: string | null;
-	key: string | null;
-	mimeType: string | null;
-	extension: string | null;
-	fileSize: number | null;
+	id: number;
+	url: string;
+	key: string;
+	mimeType: string;
+	extension: string;
+	fileSize: number;
 	width: number | null;
 	height: number | null;
 	blurHash: string | null;
@@ -529,8 +529,9 @@ export type MediaResMeta = {
 	isLight: boolean | null;
 	title: Record<string, string>;
 	alt: Record<string, string>;
-	type: MediaType | null;
-	isDeleted: boolean | null;
+	type: MediaType;
+	isDeleted: boolean;
+	public: boolean;
 } | null;
 export type DocumentResMeta = {
 	id: number | null;

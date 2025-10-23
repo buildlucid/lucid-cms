@@ -1,6 +1,6 @@
+import type { MediaPropsT } from "../../libs/formatters/media.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { MediaPropsT } from "../../libs/formatters/media.js";
 
 const getMultipleFieldMeta: ServiceFn<
 	[

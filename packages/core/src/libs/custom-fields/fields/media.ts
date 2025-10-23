@@ -1,21 +1,21 @@
-import T from "../../../translations/index.js";
 import z from "zod/v4";
-import CustomField from "../custom-field.js";
-import keyToTitle from "../utils/key-to-title.js";
-import { createMediaUrl } from "../../../utils/media/index.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
-import Formatter from "../../formatters/index.js";
+import T from "../../../translations/index.js";
 import type { MediaType, ServiceResponse } from "../../../types.js";
+import { createMediaUrl } from "../../../utils/media/index.js";
+import type { FieldFormatMeta } from "../../formatters/document-fields.js";
+import Formatter from "../../formatters/index.js";
+import MediaFormatter, { type MediaPropsT } from "../../formatters/media.js";
+import CustomField from "../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	MediaReferenceData,
 	GetSchemaDefinitionProps,
+	MediaReferenceData,
 	SchemaDefinition,
 } from "../types.js";
-import type { FieldFormatMeta } from "../../formatters/document-fields.js";
-import MediaFormatter, { type MediaPropsT } from "../../formatters/media.js";
+import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class MediaCustomField extends CustomField<"media"> {
 	type = "media" as const;
@@ -73,34 +73,35 @@ class MediaCustomField extends CustomField<"media"> {
 	) {
 		if (value === null || value === undefined) return null;
 		return {
-			id: value?.id ?? null,
+			id: value.id ?? null,
 			url: createMediaUrl({
-				key: value?.key ?? "",
+				key: value.key,
 				host: meta.host,
 				urlStrategy: meta.config.media?.urlStrategy,
 			}),
-			key: value?.key ?? null,
-			mimeType: value?.mime_type ?? null,
-			extension: value?.file_extension ?? null,
-			fileSize: value?.file_size ?? null,
-			width: value?.width ?? null,
-			height: value?.height ?? null,
-			blurHash: value?.blur_hash ?? null,
-			averageColor: value?.average_color ?? null,
-			isDark: Formatter.formatBoolean(value?.is_dark ?? null),
-			isLight: Formatter.formatBoolean(value?.is_light ?? null),
+			key: value.key,
+			mimeType: value.mime_type,
+			extension: value.file_extension,
+			fileSize: value.file_size,
+			width: value.width,
+			height: value.height,
+			blurHash: value.blur_hash,
+			averageColor: value.average_color,
+			isDark: Formatter.formatBoolean(value.is_dark),
+			isLight: Formatter.formatBoolean(value.is_light),
 			title: MediaFormatter.objectifyTranslations(
 				"title",
-				value?.translations || [],
+				value.translations || [],
 				meta.localization.locales,
 			),
 			alt: MediaFormatter.objectifyTranslations(
 				"alt",
-				value?.translations || [],
+				value.translations || [],
 				meta.localization.locales,
 			),
-			type: (value?.type as MediaType) ?? null,
-			isDeleted: Formatter.formatBoolean(value?.is_deleted ?? null),
+			type: value.type as MediaType,
+			public: Formatter.formatBoolean(value.public),
+			isDeleted: Formatter.formatBoolean(value.is_deleted),
 		} satisfies CFResponse<"media">["meta"];
 	}
 	cfSpecificValidation(value: unknown, relationData?: MediaReferenceData[]) {
