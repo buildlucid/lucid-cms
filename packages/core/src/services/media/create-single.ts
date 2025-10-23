@@ -1,5 +1,7 @@
+import constants from "../../constants/constants.js";
 import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import Repository from "../../libs/repositories/index.js";
+import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
@@ -23,7 +25,6 @@ const createSingle: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
-			public?: boolean;
 			folderId?: number | null;
 			userId: number;
 		},
@@ -56,12 +57,18 @@ const createSingle: ServiceFn<
 	});
 	if (syncMediaRes.error) return syncMediaRes;
 
+	const keyVisibility = getKeyVisibility(syncMediaRes.data.key);
+
+	//* we infer the public value based on the key so there cannot be drift between the media uploaded via the
+	//* upload endpoint and this media update endpoint which the SPA calls afterwards
+	const isPublic = keyVisibility === constants.media.visibilityKeys.public;
+
 	const [mediaRes, deleteMediaSyncRes, mediaAdapter] = await Promise.all([
 		Media.createSingle({
 			data: {
 				key: syncMediaRes.data.key,
 				e_tag: syncMediaRes.data.etag ?? undefined,
-				public: data.public ?? true,
+				public: isPublic,
 				type: syncMediaRes.data.type,
 				mime_type: syncMediaRes.data.mimeType,
 				file_extension: syncMediaRes.data.extension,

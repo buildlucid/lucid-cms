@@ -137,6 +137,10 @@ export default Object.freeze({
 	mediaAwaitingSyncInterval: 3600000, // 1 hour in ms
 	media: {
 		imagePresetQuality: 80,
+		visibilityKeys: {
+			private: "private",
+			public: "public",
+		} as const,
 	},
 	license: {
 		statusRecheckIntervalSeconds: 21600, //  6 hours

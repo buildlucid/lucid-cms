@@ -1,20 +1,19 @@
-import z from "zod/v4";
-import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../schemas/media.js";
 import { describeRoute } from "hono-openapi";
+import { controllerSchemas } from "../../../../schemas/media.js";
 import services from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
 	honoOpenAPIRequestBody,
+	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
-import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import validate from "../../middleware/validate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
 
@@ -61,7 +60,6 @@ const createSingleController = factory.createHandlers(
 				fileName: body.fileName,
 				title: body.title,
 				alt: body.alt,
-				public: true,
 				width: body.width,
 				height: body.height,
 				blurHash: body.blurHash,

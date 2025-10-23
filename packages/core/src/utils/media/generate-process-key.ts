@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 
 const generateProcessKey = (data: {
@@ -15,7 +16,9 @@ const generateProcessKey = (data: {
 	if (data.options.format) key = key.concat(`.${data.options.format}`);
 	else key = key.concat(`.${ext}`);
 
-	return data.public ? `public/${key}` : `private/${key}`;
+	return data.public
+		? `${constants.media.visibilityKeys.public}/${key}`
+		: `${constants.media.visibilityKeys.private}/${key}`;
 };
 
 export default generateProcessKey;

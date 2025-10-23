@@ -1,5 +1,7 @@
+import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
@@ -111,6 +113,17 @@ const updateSingle: ServiceFn<
 		updateObjectRes = updateRes.data;
 	}
 
+	const keyVisibility = updateObjectRes?.key
+		? getKeyVisibility(updateObjectRes.key)
+		: undefined;
+
+	//* we infer the public value based on the key so there cannot be drift between the media uploaded via the
+	//* upload endpoint and this media update endpoint which the SPA calls afterwards
+	const isPublic =
+		keyVisibility !== undefined
+			? keyVisibility === constants.media.visibilityKeys.public
+			: undefined;
+
 	const [mediaUpdateRes, deleteMediaSyncRes, mediaTranslationsRes] =
 		await Promise.all([
 			Media.updateSingle({
@@ -129,6 +142,7 @@ const updateSingle: ServiceFn<
 					is_dark: data.isDark,
 					is_light: data.isLight,
 					folder_id: data.folderId,
+					public: isPublic,
 					is_deleted: data.isDeleted,
 					is_deleted_at: data.isDeleted
 						? new Date().toISOString()
