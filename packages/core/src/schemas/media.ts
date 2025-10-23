@@ -439,6 +439,10 @@ export const controllerSchemas = {
 				description: "The media's mime type",
 				example: "image/jpeg",
 			}),
+			public: z.boolean().meta({
+				description: "Whether the media is public",
+				example: true,
+			}),
 		}),
 		query: {
 			string: undefined,

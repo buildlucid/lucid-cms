@@ -1,6 +1,6 @@
-import T from "../../translations/index.js";
 import mime from "mime-types";
 import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -10,6 +10,7 @@ const getPresignedUrl: ServiceFn<
 		{
 			fileName: string;
 			mimeType: string;
+			public: boolean;
 		},
 	],
 	{
@@ -30,7 +31,7 @@ const getPresignedUrl: ServiceFn<
 	const keyRes = generateKey({
 		name: data.fileName,
 		extension: extension || null,
-		public: true,
+		public: data.public,
 	});
 	if (keyRes.error) return keyRes;
 
