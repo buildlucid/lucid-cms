@@ -12,3 +12,4 @@ export { default as validateCSRFMiddleware } from "./libs/http/middleware/valida
 export { default as validateMiddleware } from "./libs/http/middleware/validate.js";
 export { default as permissionsMiddleware } from "./libs/http/middleware/permissions.js";
 export { default as cacheMiddleware } from "./libs/http/middleware/cache.js";
+export { default as authorizePrivateMediaMiddleware } from "./libs/http/middleware/authorize-private-media.js";

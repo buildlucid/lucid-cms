@@ -1,20 +1,20 @@
+import { Readable } from "node:stream";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
-import validate from "../../middleware/validate.js";
-import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { describeRoute } from "hono-openapi";
+import { controllerSchemas } from "../../../../schemas/cdn.js";
 import services from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-response.js";
-import { Readable } from "node:stream";
+import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
+import validate from "../../middleware/validate.js";
 
 const factory = createFactory();
 
 /**
  * Steam a piece of media based on the given key.
- * @todo check this is working correctly since the Hono migration
  */
 const streamSingleController = factory.createHandlers(
 	describeRoute({
@@ -122,6 +122,7 @@ const streamSingleController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	validate("param", controllerSchemas.streamSingle.params),
+	authorizePrivateMedia,
 	validate("query", controllerSchemas.streamSingle.query.string),
 	async (c) => {
 		const params = c.req.valid("param");
