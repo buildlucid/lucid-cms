@@ -10,7 +10,7 @@ const sharpProcessor: ImageProcessor = async (stream, options) => {
 	try {
 		const sharp = await import("sharp");
 
-		const transform = sharp.default();
+		const transform = sharp.default().rotate();
 		stream.pipe(transform);
 
 		if (options.format) {
