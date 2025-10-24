@@ -14,6 +14,7 @@ import LocalesRepository from "./locales.js";
 import MediaRepository from "./media.js";
 import MediaAwaitingSyncRepository from "./media-awaiting-sync.js";
 import MediaFoldersRepository from "./media-folders.js";
+import MediaShareLinksRepository from "./media-share-links.js";
 import MediaTranslationsRepository from "./media-translations.js";
 import OptionsRepository from "./options.js";
 import ProcessedImagesRepository from "./processed-images.js";
@@ -95,6 +96,11 @@ class Repository {
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
+			case "media-share-links":
+				return new MediaShareLinksRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			case "options":
 				return new OptionsRepository(db, dbAdapter) as RepositoryReturnType<T>;
 			case "processed-images":
@@ -148,6 +154,7 @@ type RepositoryClassMap = {
 	"media-translations": MediaTranslationsRepository;
 	"media-awaiting-sync": MediaAwaitingSyncRepository;
 	"media-folders": MediaFoldersRepository;
+	"media-share-links": MediaShareLinksRepository;
 	options: OptionsRepository;
 	"processed-images": ProcessedImagesRepository;
 	"role-permissions": RolePermissionsRepository;
