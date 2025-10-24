@@ -1,17 +1,17 @@
-import chokidar from "chokidar";
 import path from "node:path";
+import chokidar from "chokidar";
 import { minimatch } from "minimatch";
+import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
+import logger from "../../logger/index.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
+import cliLogger from "../logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
-import logger from "../../logger/index.js";
-import cliLogger from "../logger.js";
-import constants from "../../../constants/constants.js";
 
 const devCommand = async (options?: { watch?: string | boolean }) => {
 	const configPath = getConfigPath(process.cwd());
@@ -161,6 +161,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 		"**/*.sqlite",
 		"**/*.sqlite-shm",
 		"**/*.sqlite-wal",
+		`${constants.defaultUploadDirectory}/**`,
 		...(currentConfig.config.compilerOptions.watch?.ignore ?? []),
 	];
 
