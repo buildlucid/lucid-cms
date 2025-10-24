@@ -20,7 +20,7 @@ import getMediaAdapter from "../media-adapter/get-adapter.js";
 import getQueueAdapter from "../queue-adapter/get-adapter.js";
 import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
 import logRoute from "./middleware/log-route.js";
-import routes from "./routes/v1/index.js";
+import routes from "./routes/index.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";
 
 /**
@@ -196,6 +196,16 @@ const createApp = async (props: {
 							name: "media",
 							description:
 								"Media endpoints for creating, updating, deleting, getting presigned URLs and clearing processed images.",
+						},
+						{
+							name: "media-folders",
+							description:
+								"Media folder endpoints for creating, updating, deleting and fetching media folders.",
+						},
+						{
+							name: "media-share-links",
+							description:
+								"Media share link endpoints for creating, updating, deleting and fetching media share links.",
 						},
 						{
 							name: "emails",

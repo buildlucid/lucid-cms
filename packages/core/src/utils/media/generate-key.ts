@@ -1,4 +1,3 @@
-import { getMonth, getYear } from "date-fns";
 import slug from "slug";
 import T from "../../translations/index.js";
 import type { ServiceResponse } from "../services/types.js";

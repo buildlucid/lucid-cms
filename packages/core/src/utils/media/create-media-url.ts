@@ -15,7 +15,7 @@ const createMediaUrl = (props: {
 			key: props.key,
 		});
 	}
-	return `${props.host}/cdn/v1/${props.key}`;
+	return `${props.host}/cdn/${props.key}`;
 };
 
 export default createMediaUrl;

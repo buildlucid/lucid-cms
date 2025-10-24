@@ -146,6 +146,20 @@ export interface MediaUrlResponse {
 	url: string;
 }
 
+export interface MediaShareLinkResponse {
+	id: number;
+	token: string;
+	url: string;
+	name: string | null;
+	description: string | null;
+	expiresAt: string | null;
+	createdAt: string | null;
+	updatedAt: string | null;
+	createdBy: number | null;
+	updatedBy: number | null;
+	hasPassword: boolean;
+}
+
 export interface MediaFolderResponse {
 	id: number;
 	title: string;

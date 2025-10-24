@@ -14,7 +14,7 @@ const mediaResponseSchema = z.object({
 	}),
 	url: z.string().meta({
 		description: "Media URL",
-		example: "https://example.com/cdn/v1/public/5ttogd-placeholder-image.png",
+		example: "https://example.com/cdn/public/5ttogd-placeholder-image.png",
 	}),
 	public: z.boolean().meta({
 		description:
@@ -459,7 +459,7 @@ export const controllerSchemas = {
 		response: z.object({
 			url: z.string().meta({
 				description: "The presigned URL to upload media to",
-				example: "https://example.com/cdn/v1/key",
+				example: "https://example.com/cdn/key",
 			}),
 			key: z.string().meta({
 				description: "The media key",
@@ -614,7 +614,7 @@ export const controllerSchemas = {
 				url: z.string().meta({
 					description: "The URL of the media",
 					example:
-						"https://example.com/cdn/v1/public/5ttogd-placeholder-image.png",
+						"https://example.com/cdn/public/5ttogd-placeholder-image.png",
 				}),
 			}),
 		},

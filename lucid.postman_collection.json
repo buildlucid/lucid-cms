@@ -2508,6 +2508,192 @@
 			]
 		},
 		{
+			"name": "Media Share Links",
+			"item": [
+				{
+					"name": "Delete Single",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/1/share-links/1",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"1",
+								"share-links",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Multiple",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "lucid-content-lang",
+								"value": "{{LUCID_CONTENT_LANG}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/share-links",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"share-links"
+							],
+							"query": [
+								{
+									"key": "filter[token]",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "filter[name]",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "filter[createdBy]",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "filter[updatedBy]",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "-name",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "name,expiresAt,createdAt,updatedAt",
+									"disabled": true
+								},
+								{
+									"key": "perPage",
+									"value": "-1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Single",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"\",\n\t\"description\": \"\",\n\t\"password\": null,\n\t\"expiresAt\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/1/share-links",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"1",
+								"share-links"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "_csrf",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"\",\n\t\"description\": \"\",\n\t\"password\": null,\n\t\"expiresAt\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/media/1/share-links",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"media",
+								"1",
+								"share-links"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Settings",
 			"item": [
 				{
@@ -3000,16 +3186,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{BASE_URL}}/cdn/v1/2025/06/q6ko0u-pension-chats-screenshot-2.png",
+							"raw": "{{BASE_URL}}/cdn/private/5v6syi-img5867.jpg",
 							"host": [
 								"{{BASE_URL}}"
 							],
 							"path": [
 								"cdn",
-								"v1",
-								"2025",
-								"06",
-								"q6ko0u-pension-chats-screenshot-2.png"
+								"private",
+								"5v6syi-img5867.jpg"
 							],
 							"query": [
 								{
@@ -3035,13 +3219,12 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/cdn/v1/en-name-169895d6298714?fallback=true",
+							"raw": "{{BASE_URL}}/cdn/en-name-169895d6298714?fallback=true",
 							"host": [
 								"{{BASE_URL}}"
 							],
 							"path": [
 								"cdn",
-								"v1",
 								"en-name-169895d6298714"
 							],
 							"query": [
@@ -3064,7 +3247,8 @@
 									""
 								],
 								"type": "text/javascript",
-								"packages": {}
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -3072,15 +3256,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/cdn/v1/2025/05/ki0ezi-screenshot-2025-05-01-at-19.png?preset=thumbnail",
+							"raw": "{{BASE_URL}}/cdn/public/ki0ezi-screenshot-2025-05-01-at-19.png?preset=thumbnail",
 							"host": [
 								"{{BASE_URL}}"
 							],
 							"path": [
 								"cdn",
-								"v1",
-								"2025",
-								"05",
+								"public",
 								"ki0ezi-screenshot-2025-05-01-at-19.png"
 							],
 							"query": [

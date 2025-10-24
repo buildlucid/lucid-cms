@@ -14,6 +14,7 @@ import license from "./license/index.js";
 import locales from "./locales/index.js";
 import media from "./media/index.js";
 import mediaFolders from "./media-folders/index.js";
+import mediaShareLinks from "./media-share-links/index.js";
 import options from "./options/index.js";
 import permissions from "./permissions/index.js";
 import processedImages from "./processed-images/index.js";
@@ -44,6 +45,7 @@ const services = {
 	options,
 	media,
 	mediaFolders,
+	mediaShareLinks,
 	processedImages,
 	cdn,
 	locales,

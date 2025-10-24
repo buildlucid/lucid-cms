@@ -332,6 +332,8 @@ export interface LucidMediaShareLinks {
 	token: string;
 	password: string | null;
 	expires_at: TimestampMutateable;
+	name: string | null;
+	description: string | null;
 	created_by: number | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;

@@ -1,6 +1,7 @@
 export { default as changeKeyVisibility } from "./change-key-visibility.js";
 export { default as chooseAcceptHeaderFormat } from "./choose-accept-header-format.js";
 export { default as createMediaUrl } from "./create-media-url.js";
+export { default as createShareLinkUrl } from "./create-share-link-url.js";
 export { default as generateKey } from "./generate-key.js";
 export { default as generateProcessKey } from "./generate-process-key.js";
 export type { FileMetadata } from "./get-file-metadata.js";

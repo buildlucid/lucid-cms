@@ -18,6 +18,8 @@ const Migration00000009: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("password", adapter.getDataType("text"))
 				.addColumn("expires_at", adapter.getDataType("timestamp"))
+				.addColumn("name", adapter.getDataType("text"))
+				.addColumn("description", adapter.getDataType("text"))
 				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)

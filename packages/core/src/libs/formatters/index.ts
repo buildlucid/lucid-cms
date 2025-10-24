@@ -13,6 +13,7 @@ import LicenseFormatter from "./license.js";
 import LocalesFormatter from "./locales.js";
 import MediaFormatter from "./media.js";
 import MediaFoldersFormatter from "./media-folders.js";
+import MediaShareLinksFormatter from "./media-share-links.js";
 import OptionsFormatter from "./options.js";
 import PermissionsFormatter from "./permissions.js";
 import RolesFormatter from "./roles.js";
@@ -46,6 +47,8 @@ class Formatter {
 				return new MediaFormatter() as FormatterReturnType<T>;
 			case "media-folders":
 				return new MediaFoldersFormatter() as FormatterReturnType<T>;
+			case "media-share-links":
+				return new MediaShareLinksFormatter() as FormatterReturnType<T>;
 			case "locales":
 				return new LocalesFormatter() as FormatterReturnType<T>;
 			case "emails":
@@ -128,6 +131,7 @@ type FormatterClassMap = {
 	options: OptionsFormatter;
 	media: MediaFormatter;
 	"media-folders": MediaFoldersFormatter;
+	"media-share-links": MediaShareLinksFormatter;
 	locales: LocalesFormatter;
 	emails: EmailsFormatter;
 	jobs: JobsFormatter;
