@@ -124,6 +124,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				averageColor: imageMeta?.averageColor,
 				isDark: imageMeta?.isDark,
 				isLight: imageMeta?.isLight,
+				public: getPublic(),
 			},
 		});
 

@@ -1,24 +1,32 @@
 import constants from "../../constants/constants.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
+import getKeyVisibility from "./get-key-visibility.js";
 
+/**
+ * Generates a unique key for processed images based on the media key, its options and visibility. Looks like:
+ * private/processed/def456-image-w400.webp
+ */
 const generateProcessKey = (data: {
 	key: string;
 	options: ImageProcessorOptions;
-	public: boolean;
 }) => {
-	const [targetK, ext] = data.key.split(".");
-	let key = `processed/${targetK}`;
+	const lastDotIndex = data.key.lastIndexOf(".");
+	const keyWithoutExt = data.key.slice(0, lastDotIndex);
+	const ext = data.key.slice(lastDotIndex + 1);
 
-	if (data.options.quality) key = key.concat(`-${data.options.quality}`);
-	if (data.options.width) key = key.concat(`-${data.options.width}`);
-	if (data.options.height) key = key.concat(`-${data.options.height}`);
+	const visibility = getKeyVisibility(data.key);
 
-	if (data.options.format) key = key.concat(`.${data.options.format}`);
-	else key = key.concat(`.${ext}`);
+	const keyWithoutVisibility = keyWithoutExt.replace(`${visibility}/`, "");
 
-	return data.public
-		? `${constants.media.visibilityKeys.public}/${key}`
-		: `${constants.media.visibilityKeys.private}/${key}`;
+	const suffixes: string[] = [];
+	if (data.options.width) suffixes.push(`w${data.options.width}`);
+	if (data.options.height) suffixes.push(`h${data.options.height}`);
+	if (data.options.quality) suffixes.push(`q${data.options.quality}`);
+
+	const suffix = suffixes.length > 0 ? `-${suffixes.join("-")}` : "";
+	const finalExt = data.options.format ?? ext;
+
+	return `${visibility}/${constants.media.processedKey}/${keyWithoutVisibility}${suffix}.${finalExt}`;
 };
 
 export default generateProcessKey;

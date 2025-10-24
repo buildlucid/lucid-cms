@@ -60,6 +60,11 @@ export type MediaAdapterServiceDeleteMultiple = (
 	keys: string[],
 ) => ServiceResponse<undefined>;
 
+export type MediaAdapterServiceRenameKey = (props: {
+	from: string;
+	to: string;
+}) => ServiceResponse<undefined>;
+
 export type MediaAdapter<T = undefined> = T extends undefined
 	? () => MediaAdapterInstance | Promise<MediaAdapterInstance>
 	: (options: T) => MediaAdapterInstance<T> | Promise<MediaAdapterInstance<T>>;
@@ -99,6 +104,8 @@ export type MediaAdapterInstance<T = any> = {
 		delete: MediaAdapterServiceDeleteSingle;
 		/** Delete multiple media items */
 		deleteMultiple: MediaAdapterServiceDeleteMultiple;
+		/** Rename a media key (copy then delete) */
+		rename: MediaAdapterServiceRenameKey;
 	};
 	/** Get passed adapter options */
 	getOptions?: () => T;

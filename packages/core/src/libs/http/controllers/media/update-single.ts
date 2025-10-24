@@ -63,6 +63,7 @@ const updateSingleController = factory.createHandlers(
 				id: Number.parseInt(id, 10),
 				fileName: body.fileName,
 				key: body.key,
+				public: body.public,
 				folderId: body.folderId,
 				title: body.title,
 				alt: body.alt,

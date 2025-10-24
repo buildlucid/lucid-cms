@@ -6,5 +6,7 @@
 	"delete_multiple_failed": "Delete multiple failed with status {{status}} and message {{statusText}}.",
 	"delete_single_failed": "Delete single failed with status {{status}} and message {{statusText}}.",
 	"stream_failed": "Stream failed with status {{status}} and message {{statusText}}.",
-	"upload_failed": "Upload failed with status {{status}} and message {{statusText}}."
+	"upload_failed": "Upload failed with status {{status}} and message {{statusText}}.",
+	"copy_failed": "Copy failed with status {{status}} and message {{statusText}}.",
+	"delete_failed": "Delete failed with status {{status}} and message {{statusText}}."
 }

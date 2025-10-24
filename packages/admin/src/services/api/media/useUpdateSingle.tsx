@@ -1,7 +1,7 @@
-import T, { type TranslationKeys } from "@/translations";
+import type { ResponseBody } from "@types";
+import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody } from "@types";
 
 interface Params {
 	id: number;
@@ -24,6 +24,7 @@ interface Params {
 		isDark?: boolean | null;
 		isLight?: boolean | null;
 		isDeleted?: boolean | null;
+		public?: boolean;
 	};
 }
 

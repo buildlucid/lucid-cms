@@ -299,6 +299,13 @@ export const controllerSchemas = {
 					example: "public/5ttogd-placeholder-image.png",
 				})
 				.optional(),
+			public: z
+				.boolean()
+				.meta({
+					description: "Whether the media is public",
+					example: true,
+				})
+				.optional(),
 			folderId: z
 				.number()
 				.nullable()

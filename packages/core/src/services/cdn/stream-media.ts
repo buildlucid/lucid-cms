@@ -4,6 +4,7 @@ import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import {
 	chooseAcceptHeaderFormat,
 	generateProcessKey,
+	isProcessedImageKey,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -11,9 +12,6 @@ import services from "../index.js";
 /**
  * Streams the media based on the key.
  * If a preset is provided, it will generate a processed image and stream that.
- * @todo add a check for whether the given key is a processed image. If it is, stream the processed image and dont allow reszing/formatting.
- * @todo add a media type check, if its not an image then dont allow reszing/formatting.
- * @todo add a check to see if the media is public. If not it will require a generated media url.
  */
 const streamMedia: ServiceFn<
 	[
@@ -40,6 +38,35 @@ const streamMedia: ServiceFn<
 		};
 	}
 > = async (context, data) => {
+	const mediaStrategyRes =
+		await services.media.checks.checkHasMediaStrategy(context);
+	if (mediaStrategyRes.error) return mediaStrategyRes;
+
+	const isProcessedKey = isProcessedImageKey(data.key);
+
+	//* if its already processed, dont allow it to be processed further
+	if (isProcessedKey) {
+		const res = await mediaStrategyRes.data.services.stream(data.key, {
+			range: data.range,
+		});
+		if (res.error) return res;
+		return {
+			error: undefined,
+			data: {
+				key: data.key,
+				contentLength: res.data.contentLength,
+				contentType: res.data.contentType,
+				body: res.data.body,
+				isPartialContent: res.data.isPartialContent,
+				totalSize: res.data.totalSize,
+				range: res.data.range,
+			},
+		};
+	}
+
+	// ------------------------------
+	// OG Image
+
 	const selectedPreset =
 		context.config.media.imagePresets?.[data.query.preset ?? ""];
 	const format = context.config.media.onDemandFormats
@@ -47,18 +74,11 @@ const streamMedia: ServiceFn<
 		: selectedPreset?.format;
 	const quality = selectedPreset?.quality ?? constants.media.imagePresetQuality;
 
-	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
-
-	// ------------------------------
-	// OG Image
 	if (!selectedPreset && !format) {
 		const res = await mediaStrategyRes.data.services.stream(data.key, {
 			range: data.range,
 		});
 		if (res.error) return res;
-
 		return {
 			error: undefined,
 			data: {
@@ -83,7 +103,6 @@ const streamMedia: ServiceFn<
 			width: selectedPreset?.width,
 			height: selectedPreset?.height,
 		},
-		public: true,
 	});
 
 	const res = await mediaStrategyRes.data.services.stream(processKey, {

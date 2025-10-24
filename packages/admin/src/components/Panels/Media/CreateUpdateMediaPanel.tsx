@@ -129,12 +129,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				title: media.data?.data.title || [],
 				alt: media.data?.data.alt || [],
 				folderId: media.data?.data.folderId ?? null,
+				public: media.data?.data.public ?? true,
 			},
 			{
 				key: state?.key(),
 				title: state?.title(),
 				alt: state?.alt(),
 				folderId: state?.folderId(),
+				public: state?.public(),
 			},
 		);
 

@@ -6,6 +6,7 @@ import getMetadata from "./services/get-metadata.js";
 import getPresignedUrl from "./services/get-presigned-url.js";
 import stream from "./services/steam.js";
 import uploadSingle from "./services/upload-single.js";
+import rename from "./services/rename.js";
 import type { PluginOptions } from "./types/types.js";
 
 const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
@@ -21,6 +22,7 @@ const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
 			upload: uploadSingle(client, options),
 			delete: deletSingle(client, options),
 			deleteMultiple: deleteMultiple(client, options),
+			rename: rename(client, options),
 		},
 		getOptions: () => options,
 	};
