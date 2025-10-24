@@ -21,6 +21,7 @@ import Migration00000005 from "./migrations/00000005-emails.js";
 import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
+import Migration00000009 from "./migrations/00000009-share-links.js";
 import type {
 	DatabaseConfig,
 	InferredTable,
@@ -228,6 +229,7 @@ export default abstract class DatabaseAdapter {
 			"00000006-media": Migration00000006(this),
 			"00000007-collections": Migration00000007(this),
 			"00000008-integrations": Migration00000008(this),
+			"00000009-share-link": Migration00000009(this),
 		};
 	}
 }

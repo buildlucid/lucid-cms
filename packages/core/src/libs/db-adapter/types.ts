@@ -326,6 +326,18 @@ export interface LucidMedia {
 	updated_by: number | null;
 }
 
+export interface LucidMediaShareLinks {
+	id: Generated<number>;
+	media_id: number;
+	token: string;
+	password: string | null;
+	expires_at: TimestampMutateable;
+	created_by: number | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+	updated_by: number | null;
+}
+
 export interface LucidMediaTranslations {
 	id: Generated<number>;
 	media_id: number;
@@ -446,6 +458,7 @@ export interface LucidDB {
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
+	lucid_media_share_links: LucidMediaShareLinks;
 	lucid_processed_images: HeadlessProcessedImages;
 	lucid_client_integrations: LucidClientIntegrations;
 	lucid_collections: LucidCollections;
