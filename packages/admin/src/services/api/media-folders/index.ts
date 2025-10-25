@@ -3,12 +3,7 @@ import useGetHierarchy from "./useGetHierarchy";
 import useCreateSingle from "./useCreateSingle";
 import useUpdateSingle from "./useUpdateSingle";
 
-const exportObject: {
-	useGetMultiple: typeof useGetMultiple;
-	useGetHierarchy: typeof useGetHierarchy;
-	useCreateSingle: typeof useCreateSingle;
-	useUpdateSingle: typeof useUpdateSingle;
-} = {
+const exportObject = {
 	useGetMultiple,
 	useGetHierarchy,
 	useCreateSingle,

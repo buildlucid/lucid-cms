@@ -16,25 +16,7 @@ import documents from "./documents";
 import clientIntegrations from "./client-integrations";
 import license from "./license";
 
-const exportObject: {
-	auth: typeof auth;
-	account: typeof account;
-	users: typeof users;
-	userLogins: typeof userLogins;
-	roles: typeof roles;
-	permissions: typeof permissions;
-	media: typeof media;
-	mediaFolders: typeof mediaFolders;
-	mediaShareLinks: typeof mediaShareLinks;
-	settings: typeof settings;
-	email: typeof email;
-	jobs: typeof jobs;
-	locales: typeof locales;
-	collections: typeof collections;
-	documents: typeof documents;
-	clientIntegrations: typeof clientIntegrations;
-	license: typeof license;
-} = {
+const exportObject = {
 	auth,
 	account,
 	users,

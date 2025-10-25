@@ -11,20 +11,7 @@ import useDeleteBatch from "./useDeleteBatch";
 import useMoveFolder from "./useMoveFolder";
 import useRestore from "./useRestore";
 
-const exportObject: {
-	useGetMultiple: typeof useGetMultiple;
-	useGetSingle: typeof useGetSingle;
-	useUpdateSingle: typeof useUpdateSingle;
-	useDeleteSingle: typeof useDeleteSingle;
-	useDeleteAllProcessedImages: typeof useDeleteAllProcessedImages;
-	useDeleteProcessedImages: typeof useDeleteProcessedImages;
-	useCreateSingle: typeof useCreateSingle;
-	useGetPresignedUrl: typeof useGetPresignedUrl;
-	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
-	useDeleteBatch: typeof useDeleteBatch;
-	useMoveFolder: typeof useMoveFolder;
-	useRestore: typeof useRestore;
-} = {
+const exportObject = {
 	useGetMultiple,
 	useGetSingle,
 	useUpdateSingle,

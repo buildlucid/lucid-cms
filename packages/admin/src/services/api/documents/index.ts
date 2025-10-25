@@ -12,21 +12,7 @@ import useUpdateSingleVersion from "./useUpdateSingleVersion";
 import useRestore from "./useRestore";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 
-const exportObject: {
-	useGetMultiple: typeof useGetMultiple;
-	useDeleteSingle: typeof useDeleteSingle;
-	useDeleteMultiple: typeof useDeleteMultiple;
-	useCreateSingleVersion: typeof useCreateSingleVersion;
-	useCreateSingle: typeof useCreateSingle;
-	useGetSingle: typeof useGetSingle;
-	usePromoteSingle: typeof usePromoteSingle;
-	useGetSingleVersion: typeof useGetSingleVersion;
-	useGetMultipleRevisions: typeof useGetMultipleRevisions;
-	useRestoreRevision: typeof useRestoreRevision;
-	useUpdateSingleVersion: typeof useUpdateSingleVersion;
-	useRestore: typeof useRestore;
-	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
-} = {
+const exportObject = {
 	useGetMultiple,
 	useDeleteSingle,
 	useDeleteMultiple,

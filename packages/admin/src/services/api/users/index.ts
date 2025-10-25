@@ -6,15 +6,7 @@ import useDeleteSingle from "./useDeleteSingle";
 import useRestore from "./useRestore";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 
-const exportObject: {
-	useGetMultiple: typeof useGetMultiple;
-	useGetSingle: typeof useGetSingle;
-	useUpdateSingle: typeof useUpdateSingle;
-	useCreateSingle: typeof useCreateSingle;
-	useDeleteSingle: typeof useDeleteSingle;
-	useRestore: typeof useRestore;
-	useDeleteSinglePermanently: typeof useDeleteSinglePermanently;
-} = {
+const exportObject = {
 	useGetMultiple,
 	useGetSingle,
 	useUpdateSingle,

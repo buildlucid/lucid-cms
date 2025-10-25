@@ -6,15 +6,7 @@ import useDeleteSingle from "./useDeleteSingle";
 import useDeleteAllForMedia from "./useDeleteAllForMedia";
 import useDeleteAllSystem from "./useDeleteAllSystem";
 
-const exportObject: {
-	useGetMultiple: typeof useGetMultiple;
-	useGetSingle: typeof useGetSingle;
-	useCreateSingle: typeof useCreateSingle;
-	useUpdateSingle: typeof useUpdateSingle;
-	useDeleteSingle: typeof useDeleteSingle;
-	useDeleteAllForMedia: typeof useDeleteAllForMedia;
-	useDeleteAllSystem: typeof useDeleteAllSystem;
-} = {
+const exportObject = {
 	useGetMultiple,
 	useGetSingle,
 	useCreateSingle,

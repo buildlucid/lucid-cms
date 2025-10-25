@@ -1,10 +1,7 @@
 import useGetAll from "./useGetAll";
 import useGetSingle from "./useGetSingle";
 
-const exportObject: {
-	useGetAll: typeof useGetAll;
-	useGetSingle: typeof useGetSingle;
-} = {
+const exportObject = {
 	useGetAll,
 	useGetSingle,
 };

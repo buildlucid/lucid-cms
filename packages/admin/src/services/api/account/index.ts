@@ -4,13 +4,7 @@ import useVerifyResetToken from "./useVerifyResetToken.jsx";
 import useGetAuthenticatedUser from "./useGetAuthenticatedUser.jsx";
 import useUpdateMe from "./useUpdateMe.jsx";
 
-const exportObject: {
-	useForgotPassword: typeof useForgotPassword;
-	useResetPassword: typeof useResetPassword;
-	useVerifyResetToken: typeof useVerifyResetToken;
-	useGetAuthenticatedUser: typeof useGetAuthenticatedUser;
-	useUpdateMe: typeof useUpdateMe;
-} = {
+const exportObject = {
 	useForgotPassword,
 	useResetPassword,
 	useVerifyResetToken,
