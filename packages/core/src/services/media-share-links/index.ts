@@ -5,6 +5,8 @@ import deleteSingle from "./delete-single.js";
 import deleteMultiple from "./delete-multiple.js";
 import deleteAll from "./delete-all.js";
 import getSingle from "./get-single.js";
+import streamMedia from "./stream-media.js";
+import authorizeShare from "./authorize-share.js";
 
 export default {
 	createSingle,
@@ -14,4 +16,6 @@ export default {
 	deleteMultiple,
 	deleteAll,
 	getSingle,
+	streamMedia,
+	authorizeShare,
 };

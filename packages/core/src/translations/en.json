@@ -304,5 +304,8 @@
 	"invalid_key": "Invalid key.",
 	"invalid_or_expired_token": "Invalid or expired token.",
 	"invalid_file": "Invalid file.",
-	"email_successfully_sent": "Email sent successfully."
+	"email_successfully_sent": "Email sent successfully.",
+	"go_back": "Go back",
+	"enter_password": "Enter password",
+	"continue": "Continue"
 }

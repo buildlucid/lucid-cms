@@ -19,6 +19,9 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 		updated_by: z.number().nullable(),
 		created_by: z.number().nullable(),
+
+		media_is_deleted: z.number().nullable().optional(),
+		media_key: z.string().nullable().optional(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -50,4 +53,63 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 			},
 		},
 	} as const;
+
+	// ----------------------------------------
+	// queries
+	async selectSingleWithMediaByToken<V extends boolean = false>(props: {
+		token: string;
+	}) {
+		const exec = await this.executeQuery(
+			async () => {
+				const query = this.db
+					.selectFrom("lucid_media_share_links")
+					.innerJoin(
+						"lucid_media",
+						"lucid_media.id",
+						"lucid_media_share_links.media_id",
+					)
+					.select([
+						"lucid_media_share_links.id",
+						"lucid_media_share_links.media_id",
+						"lucid_media_share_links.token",
+						"lucid_media_share_links.password",
+						"lucid_media_share_links.expires_at",
+						"lucid_media_share_links.name",
+						"lucid_media_share_links.description",
+						"lucid_media_share_links.created_at",
+						"lucid_media_share_links.updated_at",
+						"lucid_media_share_links.updated_by",
+						"lucid_media_share_links.created_by",
+						"lucid_media.is_deleted as media_is_deleted",
+						"lucid_media.key as media_key",
+					])
+					.where("lucid_media_share_links.token", "=", props.token)
+					.limit(1);
+
+				return query.executeTakeFirst();
+			},
+			{ method: "selectSingleWithMediaByToken" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "single",
+			select: [
+				"id",
+				"media_id",
+				"token",
+				"password",
+				"expires_at",
+				"name",
+				"description",
+				"created_at",
+				"updated_at",
+				"updated_by",
+				"created_by",
+				"media_is_deleted",
+				"media_key",
+			],
+		});
+	}
 }

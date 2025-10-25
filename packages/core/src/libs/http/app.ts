@@ -243,6 +243,10 @@ const createApp = async (props: {
 								"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
 						},
 						{
+							name: "share",
+							description: "Share endpoints for accessing shared media files.",
+						},
+						{
 							name: "settings",
 							description:
 								"Setting endpoints to recieve current settings and meta data on Lucid.",

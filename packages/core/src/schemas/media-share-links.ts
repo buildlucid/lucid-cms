@@ -2,6 +2,11 @@ import z from "zod/v4";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
+export const tokenSchema = z
+	.string()
+	.length(12)
+	.regex(/^[A-Za-z0-9_-]+$/, "Invalid token format");
+
 export const mediaShareLinkResponseSchema = z.object({
 	id: z.number().meta({ description: "Share link ID", example: 1 }),
 	token: z.string().meta({

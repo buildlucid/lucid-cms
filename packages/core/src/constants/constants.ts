@@ -132,6 +132,7 @@ export default Object.freeze({
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
 	presignedUrlExpiration: 3600000, // 1 hour in ms
+	shareLinkExpiration: 86400, // 24 hours in seconds
 	documentation:
 		"https://lucidjs.build/en/cms/docs/configuration/configuring-lucid-cms/",
 	mediaAwaitingSyncInterval: 3600000, // 1 hour in ms

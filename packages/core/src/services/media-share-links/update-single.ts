@@ -3,6 +3,7 @@ import { scrypt } from "@noble/hashes/scrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import constants from "../../constants/constants.js";
 import Formatter from "../../libs/formatters/index.js";
+import generateShareToken from "../../utils/share-link/generate-token.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -25,6 +26,7 @@ const updateSingle: ServiceFn<
 	);
 
 	let password: string | null | undefined;
+	let tokenRefresh: string | undefined = undefined;
 	if (data.password === null) {
 		password = null;
 	} else if (typeof data.password === "string") {
@@ -35,6 +37,7 @@ const updateSingle: ServiceFn<
 				constants.scrypt,
 			),
 		).toString("base64");
+		tokenRefresh = generateShareToken();
 	}
 
 	const updateRes = await MediaShareLinks.updateSingle({
@@ -47,6 +50,7 @@ const updateSingle: ServiceFn<
 			description: data.description,
 			expires_at: Formatter.normalizeDate(data.expiresAt),
 			password,
+			token: tokenRefresh,
 			updated_at: new Date().toISOString(),
 			updated_by: data.userId,
 		},

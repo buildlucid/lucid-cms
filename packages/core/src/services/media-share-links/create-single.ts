@@ -5,6 +5,7 @@ import Formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import generateShareToken from "../../utils/share-link/generate-token.js";
 
 const createSingle: ServiceFn<
 	[
@@ -26,7 +27,7 @@ const createSingle: ServiceFn<
 	);
 	const formatter = Formatter.get("media-share-links");
 
-	const token = crypto.randomBytes(9).toString("base64url").slice(0, 12);
+	const token = generateShareToken();
 
 	const hashedPassword = data.password
 		? Buffer.from(
