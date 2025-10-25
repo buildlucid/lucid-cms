@@ -123,6 +123,7 @@
 	"created_by": "Created By",
 	"collection_key": "Collection Key",
 	"name": "Name",
+	"message": "Message",
 	"file_extension": "File Extension",
 	"username_or_email": "Username or Email",
 	"file_size": "File Size",

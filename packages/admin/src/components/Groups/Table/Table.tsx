@@ -20,7 +20,7 @@ interface TableRootProps {
 	key: string;
 	rows: number;
 	caption?: string;
-	searchParams: ReturnType<typeof useSearchParamsLocation>;
+	searchParams?: ReturnType<typeof useSearchParamsLocation>;
 	head: {
 		label: string;
 		key: string;

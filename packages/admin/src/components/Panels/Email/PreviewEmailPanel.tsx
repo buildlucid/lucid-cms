@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, type Accessor, Show, For } from "solid-js";
+import { type Component, type Accessor, Show, Index } from "solid-js";
 import api from "@/services/api";
 import { Panel } from "@/components/Groups/Panel";
 import SectionHeading from "@/components/Blocks/SectionHeading";
@@ -7,9 +7,14 @@ import DetailsList from "@/components/Partials/DetailsList";
 import JSONPreview from "@/components/Partials/JSONPreview";
 import dateHelpers from "@/utils/date-helpers";
 import classNames from "classnames";
-import { Accordion } from "@kobalte/core";
-import Pill from "@/components/Partials/Pill";
-import type { EmailDeliveryStatus } from "@lucidcms/core/types";
+import { Table } from "@/components/Groups/Table";
+import EmailTransactionRow from "@/components/Tables/Rows/EmailTransactionRow";
+import {
+	FaSolidEnvelope,
+	FaSolidCalendar,
+	FaSolidTag,
+	FaSolidCommentDots,
+} from "solid-icons/fa";
 
 interface PreviewEmailPanelProps {
 	id: Accessor<number | undefined>;
@@ -30,18 +35,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 		},
 		enabled: () => !!props.id(),
 	});
-
-	// ---------------------------------
-	// Helpers
-	const getPillTheme = (deliveryStatus: EmailDeliveryStatus) => {
-		if (deliveryStatus === "sent" || deliveryStatus === "delivered") {
-			return "primary";
-		}
-		if (deliveryStatus === "failed") {
-			return "red";
-		}
-		return "grey";
-	};
 
 	// ---------------------------------
 	// Render
@@ -133,62 +126,69 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 						}
 					>
 						<SectionHeading title={T()("transactions")} />
-						<Accordion.Root multiple class="flex flex-col gap-2.5">
-							<For each={email.data?.data.transactions}>
-								{(transaction, i) => (
-									<Accordion.Item
-										value={`tx-${i()}`}
-										class="border border-border rounded-md overflow-hidden"
-									>
-										<Accordion.Header>
-											<Accordion.Trigger class="w-full flex items-center justify-between text-sm font-medium text-title bg-card-base hover:bg-card-hover p-4 focus:outline-hidden focus:ring-1 ring-primary-base duration-200 transition-colors">
-												<Pill theme={getPillTheme(transaction.deliveryStatus)}>
-													{transaction.deliveryStatus}
-												</Pill>
-												<span class="text-body">
-													{dateHelpers.formatDate(
-														transaction.createdAt ?? null,
-													)}
-												</span>
-											</Accordion.Trigger>
-										</Accordion.Header>
-										<Accordion.Content class="p-4 bg-card-base border-t border-border">
-											<DetailsList
-												type="text"
-												items={[
-													{
-														label: T()("status"),
-														value: (
-															<Pill
-																theme={getPillTheme(transaction.deliveryStatus)}
-															>
-																{transaction.deliveryStatus}
-															</Pill>
-														),
-													},
-													{
-														label: T()("identifier"),
-														value: transaction.strategyIdentifier,
-													},
-													{
-														label: T()("created_at"),
-														value: dateHelpers.formatDate(
-															transaction.createdAt,
-														),
-													},
-													{
-														label: T()("updated_at"),
-														value: dateHelpers.formatDate(
-															transaction.updatedAt,
-														),
-													},
-												]}
+						<div class="bg-card-base border border-border rounded-md">
+							<Table
+								key={"email.transactions"}
+								rows={email.data?.data.transactions?.length || 0}
+								head={[
+									{
+										label: T()("status"),
+										key: "status",
+										icon: <FaSolidEnvelope />,
+									},
+									{
+										label: T()("identifier"),
+										key: "identifier",
+										icon: <FaSolidTag />,
+									},
+									{
+										label: T()("message"),
+										key: "message",
+										icon: <FaSolidCommentDots />,
+									},
+									{
+										label: T()("created_at"),
+										key: "createdAt",
+										icon: <FaSolidCalendar />,
+									},
+									{
+										label: T()("updated_at"),
+										key: "updatedAt",
+										icon: <FaSolidCalendar />,
+									},
+								]}
+								state={{
+									isLoading: false,
+									isSuccess: true,
+								}}
+								options={{
+									isSelectable: false,
+									padding: "16",
+								}}
+								theme="secondary"
+							>
+								{({ include, isSelectable, selected, setSelected }) => (
+									<Index each={email.data?.data.transactions || []}>
+										{(transaction, i) => (
+											<EmailTransactionRow
+												index={i}
+												transaction={transaction()}
+												include={include}
+												selected={selected[i]}
+												options={{
+													isSelectable,
+													padding: "16",
+												}}
+												callbacks={{
+													setSelected: setSelected,
+												}}
+												theme="secondary"
 											/>
-										</Accordion.Content>
-									</Accordion.Item>
+										)}
+									</Index>
 								)}
-							</For>
-						</Accordion.Root>
+							</Table>
+						</div>
 					</Show>
 				</>
 			)}
