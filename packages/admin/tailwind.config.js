@@ -81,6 +81,11 @@ export default {
                 "animate-slide-from-right-out":
                     "animate-slide-from-right-out 200ms ease 100ms forwards",
 
+                "animate-slide-from-bottom-in":
+                    "animate-slide-from-bottom-in 200ms ease",
+                "animate-slide-from-bottom-out":
+                    "animate-slide-from-bottom-out 200ms ease 100ms forwards",
+
                 "animate-overlay-show": "animate-overlay-show 0.2s ease",
                 "animate-overlay-hide": "animate-overlay-hide 0.2s ease",
                 "animate-modal-show": "animate-modal-show 0.2s ease",

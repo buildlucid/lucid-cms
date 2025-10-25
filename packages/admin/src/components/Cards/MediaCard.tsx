@@ -17,7 +17,14 @@ interface MediaCardProps {
 	media: MediaResponse;
 	rowTarget: ReturnType<
 		typeof useRowTarget<
-			"clear" | "delete" | "update" | "restore" | "deletePermanently" | "view"
+			| "clear"
+			| "delete"
+			| "update"
+			| "restore"
+			| "deletePermanently"
+			| "view"
+			| "viewShareLinks"
+			| "createShareLink"
 		>
 	>;
 	contentLocale?: string;
@@ -122,6 +129,26 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
 								props.rowTarget.setTrigger("update", true);
+							},
+							permission: hasUpdatePermission(),
+							hide: props.showingDeleted?.(),
+						},
+						{
+							label: T()("create_share_link"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("createShareLink", true);
+							},
+							permission: hasUpdatePermission(),
+							hide: props.showingDeleted?.(),
+						},
+						{
+							label: T()("view_share_links"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("viewShareLinks", true);
 							},
 							permission: hasUpdatePermission(),
 							hide: props.showingDeleted?.(),

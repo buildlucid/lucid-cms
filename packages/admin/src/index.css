@@ -77,7 +77,7 @@
 	}
 	a,
 	button {
-		@apply hover:text-primary-hover duration-200 transition-colors ease-in-out focus:outline-hidden focus:ring-1 focus:ring-primary-base;
+		@apply hover:text-primary-hover duration-200 transition-colors ease-in-out focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base;
 	}
 	button {
 		@apply cursor-pointer;
@@ -159,7 +159,7 @@
 		@apply left-1/2! -translate-x-1/2! shadow-none! bg-background-base! rounded-md border-border! border! text-body!;
 	}
 	.ql-tooltip input {
-		@apply bg-background-base! rounded-md border-border! border! text-body! focus:outline-hidden focus:ring-1 ring-primary-base;
+		@apply bg-background-base! rounded-md border-border! border! text-body! focus:outline-hidden focus-visible:ring-1 ring-primary-base;
 	}
 	.ql-tooltip .ql-action,
 	.ql-tooltip .ql-remove {
@@ -273,6 +273,27 @@
 		}
 		100% {
 			transform: translateX(100%);
+			opacity: 0;
+		}
+	}
+
+	@keyframes animate-slide-from-bottom-in {
+		0% {
+			transform: translateY(100%);
+			opacity: 0;
+		}
+		100% {
+			transform: translateY(0%);
+			opacity: 1;
+		}
+	}
+	@keyframes animate-slide-from-bottom-out {
+		0% {
+			transform: translateY(0%);
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(100%);
 			opacity: 0;
 		}
 	}

@@ -23,6 +23,7 @@ export interface ActionDropdownProps {
 	options?: {
 		border?: boolean;
 		placement?: "bottom-end";
+		raised?: boolean;
 	};
 }
 
@@ -57,6 +58,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 				options={{
 					class: "w-[200px] p-1.5!",
 					rounded: true,
+					raised: props.options?.raised,
 				}}
 			>
 				<ul class="flex flex-col gap-y-1">

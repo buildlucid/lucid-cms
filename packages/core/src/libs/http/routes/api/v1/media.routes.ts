@@ -23,12 +23,14 @@ import getMediaShareLinks from "../../../controllers/media-share-links/get-multi
 import createMediaShareLink from "../../../controllers/media-share-links/create-single.js";
 import updateMediaShareLink from "../../../controllers/media-share-links/update-single.js";
 import deleteMediaShareLink from "../../../controllers/media-share-links/delete-single.js";
+import getSingleMediaShareLink from "../../../controllers/media-share-links/get-single.js";
 
 const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/folders", ...getMultipleFolders)
 	.get("/folders/hierarchy", ...getAllFoldersHierarchy)
 	.get("/:id/share-links", ...getMediaShareLinks)
+	.get("/:id/share-links/:linkId", ...getSingleMediaShareLink)
 	.get("/:id", ...getSingle)
 	.post("/folders", ...createSingleFolder)
 	.post("/presigned-url", ...getPresignedUrl)

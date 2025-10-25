@@ -4,6 +4,7 @@ export interface TableRowProps {
 	options?: {
 		isSelectable?: boolean;
 		padding?: "16" | "24";
+		raisedActions?: boolean;
 	};
 	callbacks?: {
 		setSelected?: (i: number) => void;

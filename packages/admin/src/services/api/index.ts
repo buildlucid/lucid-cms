@@ -6,6 +6,7 @@ import roles from "./roles";
 import permissions from "./permissions";
 import media from "./media";
 import mediaFolders from "./media-folders";
+import mediaShareLinks from "./media-share-links";
 import settings from "./settings";
 import email from "./email";
 import jobs from "./jobs";
@@ -24,6 +25,7 @@ const exportObject: {
 	permissions: typeof permissions;
 	media: typeof media;
 	mediaFolders: typeof mediaFolders;
+	mediaShareLinks: typeof mediaShareLinks;
 	settings: typeof settings;
 	email: typeof email;
 	jobs: typeof jobs;
@@ -41,6 +43,7 @@ const exportObject: {
 	permissions,
 	media,
 	mediaFolders,
+	mediaShareLinks,
 	settings,
 	email,
 	jobs,

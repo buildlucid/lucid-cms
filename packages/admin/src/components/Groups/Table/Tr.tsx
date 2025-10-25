@@ -84,7 +84,10 @@ export const Tr: Component<TrProps> = (props) => {
 				/>
 			</Show>
 			{props.children}
-			<ActionMenuCol actions={props.actions || []} />
+			<ActionMenuCol
+				actions={props.actions || []}
+				raised={props.options?.raisedActions}
+			/>
 		</tr>
 	);
 };

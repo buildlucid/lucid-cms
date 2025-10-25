@@ -176,6 +176,18 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	getSingle: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({ description: "The media ID", example: 1 }),
+			linkId: z.string().meta({ description: "The share link ID", example: 1 }),
+		}),
+		response: mediaShareLinkResponseSchema,
+	} satisfies ControllerSchema,
 };
 
 export type GetMultipleShareLinksQueryParams = z.infer<

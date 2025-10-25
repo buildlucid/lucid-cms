@@ -20,7 +20,7 @@ import ErrorMessage from "@/components/Partials/ErrorMessage";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import classNames from "classnames";
 
-export const Panel: Component<{
+export const BottomPanel: Component<{
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -108,9 +108,9 @@ export const Panel: Component<{
 		>
 			<Dialog.Portal>
 				<Dialog.Overlay class="fixed inset-0 z-40 bg-background-base/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
-				<div class="fixed inset-4 z-40 flex justify-end">
+				<div class="fixed inset-x-4 bottom-0 top-5 [@media(min-height:500px)]:top-20 [@media(min-height:953px)]:top-56 z-40 flex items-end justify-center">
 					<Dialog.Content
-						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-background-base animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
+						class="w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.hasAttribute("data-panel-ignore")) {
@@ -207,6 +207,72 @@ export const Panel: Component<{
 												})}
 											</div>
 											{/* footer */}
+											<Show when={!props.options?.hideFooter}>
+												<div
+													class={classNames(
+														"flex justify-between items-center gap-4",
+														{
+															"mx-4 py-4": props.options?.padding === "16",
+															"mx-4 md:mx-6 py-4 md:py-6 ":
+																props.options?.padding === "24",
+														},
+													)}
+												>
+													<div class="flex min-w-max gap-2">
+														<Show when={props.copy?.submit}>
+															<Button
+																type="submit"
+																theme="primary"
+																size="medium"
+																loading={props.mutateState?.isLoading}
+																disabled={props.mutateState?.isDisabled}
+															>
+																{props.copy?.submit}
+															</Button>
+														</Show>
+														<Button
+															size="medium"
+															theme="border-outline"
+															type="button"
+															onClick={() => props.state.setOpen(false)}
+														>
+															{T()("close")}
+														</Button>
+													</div>
+													<Show when={props.mutateState?.errors?.message}>
+														<ErrorMessage
+															theme="basic"
+															message={props.mutateState?.errors?.message}
+														/>
+													</Show>
+												</div>
+											</Show>
+										</div>
+									}
+								>
+									<form
+										class="grow flex flex-col justify-between"
+										onSubmit={(e) => {
+											e.preventDefault();
+											if (props.callbacks?.onSubmit)
+												props.callbacks?.onSubmit();
+										}}
+									>
+										{/* content */}
+										<div
+											class={classNames({
+												"px-4": props.options?.padding === "16",
+												"px-4 md:px-6": props.options?.padding === "24",
+												grow: props.options?.growContent,
+											})}
+										>
+											{props.children({
+												contentLocale: contentLocale,
+												setContentLocale: setContentLocale,
+											})}
+										</div>
+										{/* footer */}
+										<Show when={!props.options?.hideFooter}>
 											<div
 												class={classNames(
 													"flex justify-between items-center gap-4",
@@ -245,69 +311,7 @@ export const Panel: Component<{
 													/>
 												</Show>
 											</div>
-										</div>
-									}
-								>
-									<form
-										class="grow flex flex-col justify-between"
-										onSubmit={(e) => {
-											e.preventDefault();
-											if (props.callbacks?.onSubmit)
-												props.callbacks?.onSubmit();
-										}}
-									>
-										{/* content */}
-										<div
-											class={classNames({
-												"px-4": props.options?.padding === "16",
-												"px-4 md:px-6": props.options?.padding === "24",
-												grow: props.options?.growContent,
-											})}
-										>
-											{props.children({
-												contentLocale: contentLocale,
-												setContentLocale: setContentLocale,
-											})}
-										</div>
-										{/* footer */}
-										<div
-											class={classNames(
-												"flex justify-between items-center gap-4",
-												{
-													"mx-4 py-4": props.options?.padding === "16",
-													"mx-4 md:mx-6 py-4 md:py-6 ":
-														props.options?.padding === "24",
-												},
-											)}
-										>
-											<div class="flex min-w-max gap-2">
-												<Show when={props.copy?.submit}>
-													<Button
-														type="submit"
-														theme="primary"
-														size="medium"
-														loading={props.mutateState?.isLoading}
-														disabled={props.mutateState?.isDisabled}
-													>
-														{props.copy?.submit}
-													</Button>
-												</Show>
-												<Button
-													size="medium"
-													theme="border-outline"
-													type="button"
-													onClick={() => props.state.setOpen(false)}
-												>
-													{T()("close")}
-												</Button>
-											</div>
-											<Show when={props.mutateState?.errors?.message}>
-												<ErrorMessage
-													theme="basic"
-													message={props.mutateState?.errors?.message}
-												/>
-											</Show>
-										</div>
+										</Show>
 									</form>
 								</Show>
 							</Match>

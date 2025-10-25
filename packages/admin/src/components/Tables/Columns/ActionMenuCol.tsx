@@ -7,6 +7,7 @@ import { Td } from "@/components/Groups/Table";
 interface ActionMenuColProps {
 	actions: ActionDropdownProps["actions"];
 	padding?: "16" | "24";
+	raised?: boolean;
 }
 
 const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
@@ -17,14 +18,17 @@ const ActionMenuCol: Component<ActionMenuColProps> = (props) => {
 			<Match when={props.actions.length > 0}>
 				<Td
 					classes={
-						"row-actions-td text-right sticky right-0 bg-background-base pointer-events-none"
+						"row-actions-td text-right sticky right-0 pointer-events-none"
 					}
 					options={{
 						noMinWidth: true,
 						padding: props.padding,
 					}}
 				>
-					<ActionDropdown actions={props.actions} />
+					<ActionDropdown
+						actions={props.actions}
+						options={{ raised: props.raised ?? false }}
+					/>
 				</Td>
 			</Match>
 			<Match when={props.actions.length === 0}>

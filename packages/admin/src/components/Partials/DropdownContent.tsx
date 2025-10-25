@@ -10,6 +10,7 @@ interface DropdownContentProps {
 		anchorWidth?: boolean;
 		maxHeight?: "md";
 		noMargin?: boolean;
+		raised?: boolean;
 	};
 	children: JSXElement;
 }
@@ -25,6 +26,7 @@ const DropdownContent: Component<DropdownContentProps> = (props) => {
 						"rounded-md": props.options?.rounded,
 						"max-h-60 overflow-y-auto": props.options?.maxHeight === "md",
 						"mt-2": props.options?.noMargin !== true,
+						"z-100": props.options?.raised,
 					},
 					props.options?.class,
 				)}

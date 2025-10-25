@@ -17,6 +17,9 @@ import { Grid } from "@/components/Groups/Grid";
 import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
+import CreateShareLinkPanel from "@/components/Panels/Media/CreateShareLinkPanel";
+import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
+import CopyShareLinkURL from "@/components/Modals/Media/CopyShareLinkURL";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
 import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
@@ -63,6 +66,9 @@ export const MediaList: Component<{
 			moveToFolder: false,
 			view: false,
 			updateFolder: false,
+			createShareLink: false,
+			viewShareLinks: false,
+			copyShareLinkURL: false,
 		},
 	});
 	const [isDragging, setIsDragging] = createSignal(false);
@@ -72,6 +78,8 @@ export const MediaList: Component<{
 			itemId: null,
 			target: null,
 		});
+	const [getCreatedShareLinkIds, setCreatedShareLinkIds] =
+		createSignal<[number, number]>();
 
 	// ----------------------------------
 	// Memos
@@ -342,6 +350,30 @@ export const MediaList: Component<{
 					parentFolderId: props.state.parentFolderId,
 				}}
 			/>
+			<CreateShareLinkPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().createShareLink,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("createShareLink", state);
+					},
+				}}
+				callbacks={{
+					onCreateSuccess: (mediaId: number, shareLinkId: number) => {
+						setCreatedShareLinkIds([mediaId, shareLinkId]);
+						rowTarget.setTrigger("copyShareLinkURL", true);
+					},
+				}}
+			/>
+			<ViewShareLinksPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().viewShareLinks,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("viewShareLinks", state);
+					},
+				}}
+			/>
 			<UpdateMediaFolderPanel
 				id={rowTarget.getTargetId}
 				state={{
@@ -393,6 +425,15 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().deleteBatch,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("deleteBatch", state);
+					},
+				}}
+			/>
+			<CopyShareLinkURL
+				ids={getCreatedShareLinkIds}
+				state={{
+					open: rowTarget.getTriggers().copyShareLinkURL,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("copyShareLinkURL", state);
 					},
 				}}
 			/>
