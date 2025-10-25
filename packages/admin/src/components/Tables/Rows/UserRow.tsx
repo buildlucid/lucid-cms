@@ -15,6 +15,7 @@ interface UserRowProps extends TableRowProps {
 	rowTarget: ReturnType<
 		typeof useRowTarget<
 			| "view"
+			| "viewLogins"
 			| "update"
 			| "delete"
 			| "passwordReset"
@@ -43,15 +44,6 @@ const UserRow: Component<UserRowProps> = (props) => {
 			selected={props.selected}
 			actions={[
 				{
-					label: T()("view"),
-					type: "button",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.user.id);
-						props.rowTarget.setTrigger("view", true);
-					},
-					permission: true,
-				},
-				{
 					label: T()("edit"),
 					type: "button",
 					onClick: () => {
@@ -60,6 +52,25 @@ const UserRow: Component<UserRowProps> = (props) => {
 					},
 					permission:
 						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
+					hide: props.showingDeleted?.(),
+				},
+				{
+					label: T()("view_details"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("view", true);
+					},
+					permission: true,
+				},
+				{
+					label: T()("view_logins"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("viewLogins", true);
+					},
+					permission: true,
 					hide: props.showingDeleted?.(),
 				},
 				{
@@ -84,6 +95,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 						userStore.get.hasPermission(["delete_user"]).all && !currentUser(),
 					actionExclude: true,
 					hide: props.showingDeleted?.(),
+					theme: "error",
 				},
 				{
 					label: T()("delete_permanently"),
@@ -95,6 +107,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					permission: userStore.get.hasPermission(["delete_user"]).all,
 					hide: props.showingDeleted?.() === false,
 					theme: "error",
+					actionExclude: true,
 				},
 				{
 					label: T()("reset_password"),
@@ -107,6 +120,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
 					actionExclude: true,
 					hide: props.showingDeleted?.(),
+					theme: "primary",
 				},
 			]}
 			options={props.options}

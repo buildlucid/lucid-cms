@@ -13,6 +13,7 @@ import useRowTarget from "@/hooks/useRowTarget";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
+import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
 import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import DeleteUser from "@/components/Modals/User/DeleteUser";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
@@ -34,6 +35,7 @@ export const UserList: Component<{
 	const rowTarget = useRowTarget({
 		triggers: {
 			view: false,
+			viewLogins: false,
 			update: false,
 			delete: false,
 			passwordReset: false,
@@ -213,6 +215,15 @@ export const UserList: Component<{
 					open: rowTarget.getTriggers().view,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("view", state);
+					},
+				}}
+			/>
+			<ViewUserLoginsPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().viewLogins,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("viewLogins", state);
 					},
 				}}
 			/>
