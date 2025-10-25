@@ -22,6 +22,7 @@ import { Filter, Sort, PerPage } from "@/components/Groups/Query";
 import useRowTarget from "@/hooks/useRowTarget";
 import ShareLinkRow from "@/components/Tables/Rows/ShareLinkRow";
 import DeleteShareLink from "@/components/Modals/Media/DeleteShareLink";
+import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
 
 interface ViewShareLinksPanelProps {
 	id?: Accessor<number | undefined>;
@@ -108,9 +109,10 @@ const ViewShareLinksPanelContent: Component<{
 		},
 	);
 
-	const rowTarget = useRowTarget<"delete">({
+	const rowTarget = useRowTarget<"delete" | "update">({
 		triggers: {
 			delete: false,
+			update: false,
 		},
 	});
 
@@ -279,6 +281,16 @@ const ViewShareLinksPanelContent: Component<{
 				</DynamicContent>
 			</Show>
 
+			<UpsertShareLinkPanel
+				mediaId={props.id}
+				linkId={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().update,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("update", state);
+					},
+				}}
+			/>
 			<DeleteShareLink
 				mediaId={props.id}
 				linkId={rowTarget.getTargetId}

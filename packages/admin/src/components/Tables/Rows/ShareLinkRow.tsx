@@ -13,7 +13,7 @@ import { Tr } from "@/components/Groups/Table";
 interface ShareLinkRowProps extends TableRowProps {
 	link: MediaShareLinkResponse;
 	include: boolean[];
-	rowTarget: ReturnType<typeof useRowTarget<"delete">>;
+	rowTarget: ReturnType<typeof useRowTarget<"delete" | "update">>;
 	theme?: "primary" | "secondary";
 }
 
@@ -27,6 +27,14 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 			options={props.options}
 			callbacks={props.callbacks}
 			actions={[
+				{
+					label: T()("update"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.link.id);
+						props.rowTarget.setTrigger("update", true);
+					},
+				},
 				{
 					label: T()("delete"),
 					type: "button",

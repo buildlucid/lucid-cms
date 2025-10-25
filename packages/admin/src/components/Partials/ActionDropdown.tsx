@@ -1,5 +1,12 @@
 import T from "@/translations";
-import { type Component, For, Switch, Match, Show } from "solid-js";
+import {
+	type Component,
+	For,
+	Switch,
+	Match,
+	Show,
+	createSignal,
+} from "solid-js";
 import { FaSolidEllipsisVertical, FaSolidChevronRight } from "solid-icons/fa";
 import classNames from "classnames";
 import spawnToast from "@/utils/spawn-toast";
@@ -29,6 +36,10 @@ export interface ActionDropdownProps {
 
 const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
+	// State
+	const [isOpen, setIsOpen] = createSignal(false);
+
+	// ----------------------------------------
 	// Classes
 	const liItemClasses =
 		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 text-title fill-dropdown-contrast";
@@ -36,7 +47,11 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root placement={props.options?.placement}>
+		<DropdownMenu.Root
+			placement={props.options?.placement}
+			open={isOpen()}
+			onOpenChange={setIsOpen}
+		>
 			<DropdownMenu.Trigger
 				onClick={(e) => {
 					e.stopPropagation();
@@ -110,6 +125,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 														return;
 													}
 													action.onClick?.();
+													setIsOpen(false);
 												}}
 												class={classNames(liItemClasses, {
 													"cursor-not-allowed": action.permission === false,

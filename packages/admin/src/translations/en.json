@@ -662,5 +662,10 @@
 	"no_share_links": "No Share Links",
 	"no_share_links_description": "No share links have been created for this media item yet.",
 	"are_you_sure": "Are you sure?",
-	"expires_at": "Expires At"
+	"expires_at": "Expires At",
+	"update_share_link_panel_title": "Update Share Link",
+	"update_share_link_panel_description": "Update the share link details.",
+	"share_link_leave_blank_to_keep_existing": "A password is already set, leave blank to keep existing value or enter a new password",
+	"share_link_remove_the_password": "Check this to remove the password requirement for this share link",
+	"remove_password": "Remove Password"
 }

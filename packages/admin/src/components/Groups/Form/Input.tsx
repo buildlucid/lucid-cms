@@ -8,6 +8,7 @@ import {
 	DescribedBy,
 	ErrorMessage,
 } from "@/components/Groups/Form";
+import classNames from "classnames";
 
 interface InputProps {
 	id: string;
@@ -118,7 +119,13 @@ export const Input: Component<InputProps> = (props) => {
 				<Show when={props.type === "password"}>
 					<button
 						type="button"
-						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors"
+						class={classNames(
+							"absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors",
+							{
+								"top-10":
+									props.required !== true && props.hideOptionalText !== true,
+							},
+						)}
 						onClick={() => {
 							setPasswordVisible(!passwordVisible());
 						}}

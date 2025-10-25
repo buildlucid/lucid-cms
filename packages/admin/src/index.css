@@ -102,6 +102,9 @@
 	[data-overflowing="true"] .row-actions-td {
 		filter: drop-shadow(-5px 0px 5px rgba(0, 0, 0, 0.1));
 	}
+	input[type="date"]::-webkit-calendar-picker-indicator {
+		@apply invert opacity-60;
+	}
 
 	.dropdown-trigger {
 		@apply duration-200 transition-colors outline-primary-base focus:outline-1;

@@ -40,7 +40,7 @@ const TextCol: Component<TextColProps> = (props) => {
 			<button
 				type="button"
 				onClick={copyToClipboard}
-				class="flex items-center gap-2 w-full ring-offset-4 ring-offset-card-base rounded-sm"
+				class="flex items-center gap-2 ring-offset-4 ring-offset-card-base rounded-sm line-clamp-1"
 			>
 				<FaSolidCopy />
 				<span class="text-sm">{props.text || "-"}</span>

@@ -17,7 +17,7 @@ import { Grid } from "@/components/Groups/Grid";
 import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
-import CreateShareLinkPanel from "@/components/Panels/Media/CreateShareLinkPanel";
+import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
 import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
 import CopyShareLinkURL from "@/components/Modals/Media/CopyShareLinkURL";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
@@ -350,8 +350,8 @@ export const MediaList: Component<{
 					parentFolderId: props.state.parentFolderId,
 				}}
 			/>
-			<CreateShareLinkPanel
-				id={rowTarget.getTargetId}
+			<UpsertShareLinkPanel
+				mediaId={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().createShareLink,
 					setOpen: (state: boolean) => {
