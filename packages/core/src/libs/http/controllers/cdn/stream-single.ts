@@ -10,6 +10,11 @@ import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
 import validate from "../../middleware/validate.js";
+import {
+	applyRangeHeaders,
+	applyStreamingHeaders,
+	parseRangeHeader,
+} from "../../utils/streaming.js";
 
 const factory = createFactory();
 
@@ -128,17 +133,7 @@ const streamSingleController = factory.createHandlers(
 		const params = c.req.valid("param");
 		const query = c.req.valid("query");
 
-		// Parse Range header for video streaming support
-		let range: { start: number; end?: number } | undefined;
-		const rangeHeader = c.req.header("range");
-		if (rangeHeader) {
-			const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-			if (match?.[1]) {
-				const start = Number.parseInt(match[1], 10);
-				const end = match[2] ? Number.parseInt(match[2], 10) : undefined;
-				range = { start, end };
-			}
-		}
+		const range = parseRangeHeader(c.req.header("range"));
 
 		const response = await serviceWrapper(services.cdn.streamMedia, {
 			transaction: false,
@@ -190,28 +185,16 @@ const streamSingleController = factory.createHandlers(
 			});
 		}
 
-		c.header("Accept-Ranges", "bytes");
-
-		// For partial content (range requests), set 206 status and Content-Range header
-		if (
-			response.data.isPartialContent &&
-			response.data.range &&
-			response.data.totalSize
-		) {
-			c.status(206);
-			c.header(
-				"Content-Range",
-				`bytes ${response.data.range.start}-${response.data.range.end}/${response.data.totalSize}`,
-			);
-		} else {
-			c.header("Cache-Control", "public, max-age=31536000, immutable");
-		}
-
-		c.header("Content-Disposition", `inline; filename="${response.data.key}"`);
-		if (response.data.contentLength)
-			c.header("Content-Length", response.data.contentLength.toString());
-		if (response.data.contentType)
-			c.header("Content-Type", response.data.contentType);
+		applyRangeHeaders(c, {
+			isPartial: response.data.isPartialContent,
+			range: response.data.range,
+			totalSize: response.data.totalSize,
+		});
+		applyStreamingHeaders(c, {
+			key: response.data.key,
+			contentLength: response.data.contentLength,
+			contentType: response.data.contentType,
+		});
 
 		return stream(c, async (stream) => {
 			if (response.data.body instanceof ReadableStream) {
