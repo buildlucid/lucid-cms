@@ -192,6 +192,26 @@ export const controllerSchemas = {
 		}),
 		response: mediaShareLinkResponseSchema,
 	} satisfies ControllerSchema,
+	deleteMultiple: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().meta({ description: "The media ID", example: 1 }),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	deleteAll: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 };
 
 export type GetMultipleShareLinksQueryParams = z.infer<
