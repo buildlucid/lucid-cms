@@ -2,6 +2,7 @@ import Repository from "../../libs/repositories/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import constants from "../../constants/constants.js";
+import Formatter from "../../libs/formatters/index.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -44,7 +45,7 @@ const updateSingle: ServiceFn<
 		data: {
 			name: data.name,
 			description: data.description,
-			expires_at: data.expiresAt,
+			expires_at: Formatter.normalizeDate(data.expiresAt),
 			password,
 			updated_at: new Date().toISOString(),
 			updated_by: data.userId,

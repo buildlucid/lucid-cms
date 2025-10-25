@@ -24,6 +24,10 @@ export const mediaShareLinkResponseSchema = z.object({
 		description: "ISO date string when the link expires",
 		example: "2025-01-01T00:00:00Z",
 	}),
+	hasExpired: z.boolean().meta({
+		description: "Whether the link has expired based on the current date",
+		example: false,
+	}),
 	hasPassword: z.boolean().meta({
 		description: "Whether a password is set for this link",
 		example: true,

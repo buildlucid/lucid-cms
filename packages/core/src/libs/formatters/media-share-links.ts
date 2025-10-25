@@ -29,6 +29,10 @@ export default class MediaShareLinksFormatter {
 		link: MediaShareLinkPropsT;
 		host: string;
 	}): MediaShareLinkResponse => {
+		const hasExpired = props.link.expires_at
+			? new Date(props.link.expires_at).getTime() < new Date().getTime()
+			: false;
+
 		return {
 			id: props.link.id,
 			token: props.link.token,
@@ -36,6 +40,7 @@ export default class MediaShareLinksFormatter {
 			name: props.link.name,
 			description: props.link.description,
 			expiresAt: Formatter.formatDate(props.link.expires_at),
+			hasExpired,
 			hasPassword: Boolean(
 				props.link.password && props.link.password.length > 0,
 			),

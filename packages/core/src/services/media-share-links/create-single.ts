@@ -43,7 +43,7 @@ const createSingle: ServiceFn<
 			media_id: data.mediaId,
 			token: token,
 			password: hashedPassword,
-			expires_at: data.expiresAt,
+			expires_at: Formatter.normalizeDate(data.expiresAt) ?? undefined,
 			name: data.name ?? null,
 			description: data.description ?? null,
 			created_at: new Date().toISOString(),

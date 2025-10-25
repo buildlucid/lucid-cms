@@ -109,6 +109,19 @@ class Formatter {
 		if (typeof count === "number") return count;
 		return Number.parseInt(count || "0") || 0;
 	};
+	/** Used to normalize user input date to a ISO string */
+	static normalizeDate = (date: Date | string | null | undefined) => {
+		if (date === null) return null;
+		if (date === undefined) return undefined;
+
+		const dateObject = typeof date === "string" ? new Date(date) : date;
+
+		if (Number.isNaN(dateObject.getTime())) {
+			return null;
+		}
+
+		return dateObject.toISOString();
+	};
 	/**
 	 * Handles formatting a BooleanInt response from the DB to a boolean
 	 */

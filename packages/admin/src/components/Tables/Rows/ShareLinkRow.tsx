@@ -66,6 +66,11 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				date={props.link.expiresAt}
 				options={{ include: props?.include[3] }}
 			/>
+			<PillCol
+				text={props.link.hasExpired ? T()("yes") : T()("no")}
+				theme={props.link.hasExpired ? "red" : "grey"}
+				options={{ include: props?.include[3] }}
+			/>
 			<DateCol
 				date={props.link.createdAt}
 				options={{ include: props?.include[4] }}

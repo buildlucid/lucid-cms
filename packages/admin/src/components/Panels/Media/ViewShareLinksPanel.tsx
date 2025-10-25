@@ -11,6 +11,7 @@ import {
 	FaSolidCalendar,
 	FaSolidLock,
 	FaSolidT,
+	FaSolidClock,
 } from "solid-icons/fa";
 import api from "@/services/api";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
@@ -237,6 +238,11 @@ const ViewShareLinksPanelContent: Component<{
 								key: "expiresAt",
 								icon: <FaSolidCalendar />,
 								sortable: true,
+							},
+							{
+								label: T()("has_expired"),
+								key: "hasExpired",
+								icon: <FaSolidClock />,
 							},
 							{
 								label: T()("created_at"),

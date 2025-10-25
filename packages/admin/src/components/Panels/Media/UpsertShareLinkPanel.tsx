@@ -12,6 +12,7 @@ import helpers from "@/utils/helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import { Panel } from "@/components/Groups/Panel";
 import { Input, Textarea, Checkbox } from "@/components/Groups/Form";
+import dateHelpers from "@/utils/date-helpers";
 
 interface UpsertShareLinkPanelProps {
 	mediaId?: Accessor<number | undefined>;
@@ -70,7 +71,9 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 			setName(shareLink.data?.data.name || "");
 			setDescription(shareLink.data?.data.description || "");
 			setPassword("");
-			setExpiresAt(shareLink.data?.data.expiresAt || "");
+			setExpiresAt(
+				dateHelpers.toDateInputValue(shareLink.data?.data.expiresAt),
+			);
 		}
 	});
 
@@ -286,6 +289,9 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 						copy={{
 							label: T()("expires_at"),
 							placeholder: T()("optional"),
+							describedBy: shareLink.data?.data.hasExpired
+								? T()("share_link_expired_description")
+								: undefined,
 						}}
 						errors={getBodyError("expiresAt", errors)}
 						theme="full"

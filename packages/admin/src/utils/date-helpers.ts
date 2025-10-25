@@ -22,9 +22,21 @@ const formatFullDate = (date?: string | null) => {
 	});
 };
 
+const toDateInputValue = (utcDate?: string | null) => {
+	if (!utcDate) return "";
+
+	const date = new Date(utcDate);
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+
+	return `${year}-${month}-${day}`;
+};
+
 const dateHelpers = {
 	formatDate,
 	formatFullDate,
+	toDateInputValue,
 };
 
 export default dateHelpers;

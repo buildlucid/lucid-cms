@@ -153,6 +153,7 @@ export interface MediaShareLinkResponse {
 	name: string | null;
 	description: string | null;
 	expiresAt: string | null;
+	hasExpired: boolean;
 	createdAt: string | null;
 	updatedAt: string | null;
 	createdBy: number | null;

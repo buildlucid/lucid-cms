@@ -667,5 +667,7 @@
 	"update_share_link_panel_description": "Update the share link details.",
 	"share_link_leave_blank_to_keep_existing": "A password is already set, leave blank to keep existing value or enter a new password",
 	"share_link_remove_the_password": "Check this to remove the password requirement for this share link",
-	"remove_password": "Remove Password"
+	"remove_password": "Remove Password",
+	"has_expired": "Has Expired",
+	"share_link_expired_description": "This share link has expired and is no longer available."
 }
