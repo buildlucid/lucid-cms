@@ -1,6 +1,6 @@
 import T from "@/translations";
 import type { Component } from "solid-js";
-import { createSignal } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore";
@@ -26,6 +26,11 @@ const DeleteMediaBatch: Component<DeleteMediaBatchProps> = (props) => {
 			mediaStore.get.reset();
 		},
 	});
+	// ---------------------------------------
+	// Memos
+	const noFolderItemsSelected = createMemo(
+		() => mediaStore.get.selectedFolders.length === 0,
+	);
 
 	// ------------------------------
 	// Render
@@ -57,23 +62,28 @@ const DeleteMediaBatch: Component<DeleteMediaBatchProps> = (props) => {
 					deleteMediaBatch.reset();
 				},
 			}}
+			options={{
+				noContent: noFolderItemsSelected(),
+			}}
 		>
-			<div class="bg-card-base p-4 rounded-md border border-border">
-				<CheckboxInput
-					id="recursiveMedia"
-					value={recursiveMedia()}
-					onChange={(value) => {
-						setRecursiveMedia(value);
-					}}
-					name="recursiveMedia"
-					copy={{
-						label: T()("recursive_media_deletion"),
-						describedBy: T()("recursive_media_deletion_description"),
-					}}
-					theme="fit"
-					noMargin={true}
-				/>
-			</div>
+			<Show when={!noFolderItemsSelected()}>
+				<div class="bg-card-base p-4 rounded-md border border-border">
+					<CheckboxInput
+						id="recursiveMedia"
+						value={recursiveMedia()}
+						onChange={(value) => {
+							setRecursiveMedia(value);
+						}}
+						name="recursiveMedia"
+						copy={{
+							label: T()("recursive_media_deletion"),
+							describedBy: T()("recursive_media_deletion_description"),
+						}}
+						theme="fit"
+						noMargin={true}
+					/>
+				</div>
+			</Show>
 		</Confirmation>
 	);
 };

@@ -26,6 +26,9 @@ export const Confirmation: Component<{
 	slots?: {
 		actionRow?: JSXElement;
 	};
+	options?: {
+		noContent?: boolean;
+	};
 	children?: JSXElement;
 }> = (props) => {
 	// ------------------------------
@@ -64,7 +67,7 @@ export const Confirmation: Component<{
 							class={classNames(
 								"mx-4 md:mx-6 py-4 md:py-6 flex flex-wrap items-center gap-2 justify-between",
 								{
-									"!pt-0": !props.children,
+									"!pt-0": !props.children || props.options?.noContent,
 								},
 							)}
 						>
