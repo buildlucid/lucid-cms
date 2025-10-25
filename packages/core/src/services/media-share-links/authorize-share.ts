@@ -31,15 +31,26 @@ const authorizeShare: ServiceFn<
 	const linkRes = await MediaShareLinks.selectSingleWithMediaByToken({
 		token: data.token,
 	});
-	if (linkRes.error) return linkRes;
+	if (linkRes.error) {
+		return {
+			error: {
+				type: "basic",
+				name: T("share_link_not_found_title"),
+				status: 404,
+				message: T("share_link_not_found_message"),
+			},
+			data: undefined,
+		};
+	}
 
 	//* check if expired
 	if (linkRes.data.expires_at && isPast(linkRes.data.expires_at)) {
 		return {
 			error: {
 				type: "basic",
+				name: T("share_link_expired_title"),
 				status: 410,
-				message: T("invalid_or_expired_token"),
+				message: T("share_link_expired_message"),
 			},
 			data: undefined,
 		};
@@ -51,8 +62,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
+				name: T("share_link_media_deleted_title"),
 				status: 410,
-				message: T("media_not_found_message"),
+				message: T("share_link_media_deleted_message"),
 			},
 			data: undefined,
 		};
@@ -79,8 +91,9 @@ const authorizeShare: ServiceFn<
 			return {
 				error: {
 					type: "authorisation",
+					name: T("share_link_access_denied_title"),
 					status: 401,
-					message: T("please_ensure_password_is_correct"),
+					message: T("share_link_incorrect_password_message"),
 				},
 				data: undefined,
 			};

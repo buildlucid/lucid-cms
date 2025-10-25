@@ -29,10 +29,10 @@ interface UpsertShareLinkPanelProps {
 const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 	// ------------------------------
 	// State
-	const [getName, setName] = createSignal<string>("");
-	const [getDescription, setDescription] = createSignal<string>("");
-	const [getPassword, setPassword] = createSignal<string>("");
-	const [getExpiresAt, setExpiresAt] = createSignal<string>("");
+	const [getName, setName] = createSignal<string>();
+	const [getDescription, setDescription] = createSignal<string>();
+	const [getPassword, setPassword] = createSignal<string>();
+	const [getExpiresAt, setExpiresAt] = createSignal<string>();
 	const [getRemovePassword, setRemovePassword] = createSignal<boolean>(false);
 
 	// ---------------------------------
@@ -211,7 +211,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 				<>
 					<Input
 						id="share-link-name"
-						value={getName()}
+						value={getName() || ""}
 						onChange={setName}
 						name="name"
 						type="text"
@@ -224,7 +224,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 					/>
 					<Textarea
 						id="share-link-description"
-						value={getDescription()}
+						value={getDescription() || ""}
 						onChange={setDescription}
 						name="description"
 						copy={{
@@ -259,7 +259,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 					<Show when={!getRemovePassword()}>
 						<Input
 							id="share-link-password"
-							value={getPassword()}
+							value={getPassword() || ""}
 							onChange={(value) => {
 								setPassword(value);
 								//* if user starts typing a password, uncheck remove password
@@ -282,7 +282,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 					</Show>
 					<Input
 						id="share-link-expires-at"
-						value={getExpiresAt()}
+						value={getExpiresAt() || ""}
 						onChange={setExpiresAt}
 						name="expiresAt"
 						type="date"

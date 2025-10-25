@@ -1,7 +1,8 @@
 import { Readable } from "node:stream";
-import type { StatusCode } from "hono/utils/http-status";
+import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
+import type { StatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import services from "../../../../services/index.js";
@@ -9,21 +10,25 @@ import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
+import {
+	renderErrorPage,
+	renderPasswordForm,
+} from "../../../../utils/share-link/renderers.js";
 import validate from "../../middleware/validate.js";
-import { getCookie } from "hono/cookie";
 import {
 	applyRangeHeaders,
 	applyStreamingHeaders,
 	parseRangeHeader,
 } from "../../utils/streaming.js";
-import {
-	renderErrorPage,
-	renderPasswordForm,
-} from "../../../../utils/share-link/renderers.js";
-import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 
 const factory = createFactory();
 
+/**
+ * Stream shared media content by token.
+ * Handles password protection, expired links, and deleted media.
+ * Returns an HTML password form if authentication is required, or streams the media content.
+ */
 const streamMediaController = factory.createHandlers(
 	describeRoute({
 		description:
@@ -63,7 +68,7 @@ const streamMediaController = factory.createHandlers(
 			c.header("Content-Type", "text/html; charset=utf-8");
 			return c.body(
 				renderErrorPage(
-					status === 404 ? T("page_not_found") : T("media_not_found_name"),
+					authorizeRes.error.name || T("share_link_error_title"),
 					authorizeRes.error.message || T("unknown_service_error"),
 				),
 			);

@@ -82,6 +82,8 @@ const createSingle: ServiceFn<
 				folder_id: data.folderId ?? null,
 				created_by: data.userId,
 				updated_by: data.userId,
+				updated_at: new Date().toISOString(),
+				created_at: new Date().toISOString(),
 			},
 			returning: ["id"],
 		}),

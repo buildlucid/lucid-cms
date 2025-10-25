@@ -144,7 +144,6 @@ export const controllerSchemas = {
 		body: z.object({
 			name: z
 				.string()
-				.min(1)
 				.meta({ description: "Optional display name" })
 				.optional(),
 			description: z
