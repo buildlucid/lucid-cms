@@ -234,6 +234,7 @@ export const Table: Component<TableRootProps> = (props) => {
 											columns={props.head.length}
 											isSelectable={isSelectable()}
 											includes={include()}
+											theme={props.theme}
 										/>
 									)}
 								</Index>

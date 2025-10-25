@@ -91,11 +91,9 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 					</Switch>
 				</span>
 				<div class="ml-4">
-					<p class="text-sm font-bold mb-1 capitalize text-title">
-						{props.title}
-					</p>
+					<p class="text-sm font-bold capitalize text-title">{props.title}</p>
 					<Show when={props.message}>
-						<p class="text-sm">{props.message}</p>
+						<p class="text-sm mt-1">{props.message}</p>
 					</Show>
 				</div>
 			</div>

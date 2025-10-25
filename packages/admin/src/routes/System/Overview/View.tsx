@@ -3,6 +3,7 @@ import InfoRow from "@/components/Blocks/InfoRow";
 import { Standard } from "@/components/Groups/Headers";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
+import DeleteAllShareLinksSystem from "@/components/Modals/Media/DeleteAllShareLinksSystem";
 import ClearCache from "@/components/Modals/System/ClearCache";
 import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
@@ -19,6 +20,8 @@ const SystemOverviewRoute: Component = (props) => {
 	const [getOpenClearAllProcessedImages, setOpenClearAllProcessedImages] =
 		createSignal(false);
 	const [getOpenClearCache, setOpenClearCache] = createSignal(false);
+	const [getOpenDeleteAllShareLinks, setOpenDeleteAllShareLinks] =
+		createSignal(false);
 
 	// ----------------------------------
 	// Queries
@@ -121,6 +124,29 @@ const SystemOverviewRoute: Component = (props) => {
 					</InfoRow.Content>
 				</InfoRow.Root>
 
+				{/* Share Links */}
+				<InfoRow.Root
+					title={T()("share_links")}
+					description={T()("share_links_setting_message")}
+				>
+					<InfoRow.Content
+						title={T()("delete_all_share_links_system")}
+						description={T()("delete_all_share_links_system_setting_message")}
+					>
+						<Button
+							size="medium"
+							type="button"
+							theme="danger"
+							onClick={() => {
+								setOpenDeleteAllShareLinks(true);
+							}}
+							permission={userStore.get.hasPermission(["update_media"]).all}
+						>
+							{T()("delete_all_share_links_system_button")}
+						</Button>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
 				{/* Cache */}
 				<InfoRow.Root
 					title={T()("cache")}
@@ -193,6 +219,12 @@ const SystemOverviewRoute: Component = (props) => {
 				state={{
 					open: getOpenClearAllProcessedImages(),
 					setOpen: setOpenClearAllProcessedImages,
+				}}
+			/>
+			<DeleteAllShareLinksSystem
+				state={{
+					open: getOpenDeleteAllShareLinks(),
+					setOpen: setOpenDeleteAllShareLinks,
 				}}
 			/>
 			<ClearCache

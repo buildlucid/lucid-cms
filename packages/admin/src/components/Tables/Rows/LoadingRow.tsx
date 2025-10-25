@@ -1,17 +1,26 @@
 import { type Component, Index, Show } from "solid-js";
 import { Td } from "@/components/Groups/Table";
+import type { TableTheme } from "@/components/Groups/Table/Table";
+import classNames from "classnames";
 
 interface LoadingRowProps {
 	columns: number;
 	isSelectable: boolean;
 	includes: boolean[];
+	theme?: TableTheme;
 }
 
 const LoadingRow: Component<LoadingRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<tr class="bg-background-base">
+		<tr
+			class={classNames({
+				"bg-background-base":
+					props.theme === "primary" || props.theme === undefined,
+				"bg-card-base": props.theme === "secondary",
+			})}
+		>
 			<Show when={props.isSelectable}>
 				<Td
 					options={{

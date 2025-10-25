@@ -25,6 +25,7 @@ interface MediaCardProps {
 			| "view"
 			| "viewShareLinks"
 			| "createShareLink"
+			| "deleteAllShareLinks"
 		>
 	>;
 	contentLocale?: string;
@@ -134,6 +135,17 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: props.showingDeleted?.(),
 						},
 						{
+							label: T()("restore"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("restore", true);
+							},
+							permission: userStore.get.hasPermission(["update_media"]).all,
+							hide: props.showingDeleted?.() === false,
+							theme: "primary",
+						},
+						{
 							label: T()("create_share_link"),
 							type: "button",
 							onClick: () => {
@@ -154,6 +166,17 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: props.showingDeleted?.(),
 						},
 						{
+							label: T()("delete_share_links"),
+							type: "button",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.media.id);
+								props.rowTarget.setTrigger("deleteAllShareLinks", true);
+							},
+							permission: hasUpdatePermission(),
+							hide: props.showingDeleted?.(),
+							theme: "error",
+						},
+						{
 							label: T()("clear_processed"),
 							type: "button",
 							onClick: () => {
@@ -162,6 +185,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							},
 							hide: props.media.type !== "image",
 							permission: hasUpdatePermission(),
+							theme: "error",
 						},
 						{
 							label: T()("delete"),
@@ -174,17 +198,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: props.showingDeleted?.(),
 							theme: "error",
 						},
-						{
-							label: T()("restore"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("restore", true);
-							},
-							permission: userStore.get.hasPermission(["update_media"]).all,
-							hide: props.showingDeleted?.() === false,
-							theme: "primary",
-						},
+
 						{
 							label: T()("delete_permanently"),
 							type: "button",

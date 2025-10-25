@@ -23,6 +23,7 @@ import CopyShareLinkURL from "@/components/Modals/Media/CopyShareLinkURL";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import ClearProcessedMedia from "@/components/Modals/Media/ClearProcessedImages";
 import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
+import DeleteAllShareLinks from "@/components/Modals/Media/DeleteAllShareLinks";
 import {
 	MediaFolderCardLoading,
 	MediaFolderCard,
@@ -69,6 +70,7 @@ export const MediaList: Component<{
 			createShareLink: false,
 			viewShareLinks: false,
 			copyShareLinkURL: false,
+			deleteAllShareLinks: false,
 		},
 	});
 	const [isDragging, setIsDragging] = createSignal(false);
@@ -434,6 +436,15 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().copyShareLinkURL,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("copyShareLinkURL", state);
+					},
+				}}
+			/>
+			<DeleteAllShareLinks
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().deleteAllShareLinks,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deleteAllShareLinks", state);
 					},
 				}}
 			/>
