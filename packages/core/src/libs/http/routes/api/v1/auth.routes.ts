@@ -7,6 +7,7 @@ import setupRequiredController from "../../../controllers/auth/setup-required.js
 import setupController from "../../../controllers/auth/setup.js";
 import getProvidersController from "../../../controllers/auth/get-providers.js";
 import validateInvitationController from "../../../controllers/auth/validate-invitation.js";
+import acceptInvitationController from "../../../controllers/auth/accept-invitation.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const authRoutes = new Hono<LucidHonoGeneric>()
@@ -17,6 +18,7 @@ const authRoutes = new Hono<LucidHonoGeneric>()
 	.post("/setup", ...setupController)
 	.post("/login", ...loginController)
 	.post("/logout", ...logoutController)
-	.post("/token", ...tokenController);
+	.post("/token", ...tokenController)
+	.post("/invitation/accept/:token", ...acceptInvitationController);
 
 export default authRoutes;

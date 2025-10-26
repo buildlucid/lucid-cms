@@ -44,7 +44,7 @@ const generateToken = async (
 		data: {
 			user_id: userId,
 			token: token,
-			token_type: "refresh",
+			token_type: constants.userTokens.refresh,
 			expiry_date: new Date(
 				Date.now() + constants.refreshTokenExpiration * 1000, // convert to ms
 			).toISOString(),

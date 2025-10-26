@@ -1,6 +1,7 @@
-import Repository from "../../libs/repositories/index.js";
-import type { ValidateInvitationResponse } from "../../types.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import Repository from "../../../libs/repositories/index.js";
+import type { ValidateInvitationResponse } from "../../../types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import constants from "../../../constants/constants.js";
 
 /**
  * Validates a invitation token and returns the user information if valid.
@@ -31,7 +32,7 @@ const validateInvitation: ServiceFn<
 			{
 				key: "token_type",
 				operator: "=",
-				value: "invitation",
+				value: constants.userTokens.invitation,
 			},
 			{
 				key: "expiry_date",

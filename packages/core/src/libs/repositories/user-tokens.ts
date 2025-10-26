@@ -2,6 +2,7 @@ import z from "zod/v4";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type { KyselyDB } from "../db-adapter/types.js";
 import StaticRepository from "./parents/static-repository.js";
+import constants from "../../constants/constants.js";
 
 export default class UserTokensRepository extends StaticRepository<"lucid_user_tokens"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -10,7 +11,11 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 	tableSchema = z.object({
 		id: z.number(),
 		user_id: z.number(),
-		token_type: z.union([z.literal("password_reset"), z.literal("refresh")]),
+		token_type: z.union([
+			z.literal(constants.userTokens.passwordReset),
+			z.literal(constants.userTokens.refresh),
+			z.literal(constants.userTokens.invitation),
+		]),
 		token: z.string(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		expiry_date: z.union([z.string(), z.date()]),

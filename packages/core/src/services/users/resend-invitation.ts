@@ -64,7 +64,7 @@ const resendInvitation: ServiceFn<
 			{
 				key: "token_type",
 				operator: "=",
-				value: "invitation",
+				value: constants.userTokens.invitation,
 			},
 		],
 		validation: {
@@ -79,7 +79,7 @@ const resendInvitation: ServiceFn<
 
 	const userTokenRes = await services.userTokens.createSingle(context, {
 		userId: userRes.data.id,
-		tokenType: "invitation",
+		tokenType: constants.userTokens.invitation,
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;

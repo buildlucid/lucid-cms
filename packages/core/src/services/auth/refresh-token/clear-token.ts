@@ -36,7 +36,7 @@ const clearToken = async (c: LucidHonoContext): ServiceResponse<undefined> => {
 			{
 				key: "token_type",
 				operator: "=",
-				value: "refresh",
+				value: constants.userTokens.refresh,
 			},
 			{
 				key: "user_id",

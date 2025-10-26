@@ -24,7 +24,7 @@ const resetPassword: ServiceFn<
 
 	const tokenRes = await services.userTokens.getSingle(context, {
 		token: data.token,
-		tokenType: "password_reset",
+		tokenType: constants.userTokens.passwordReset,
 	});
 	if (tokenRes.error) return tokenRes;
 

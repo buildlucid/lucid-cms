@@ -4,7 +4,7 @@ import csrf from "./csrf/index.js";
 import login from "./login.js";
 import setupRequired from "./setup-required.js";
 import providers from "./providers/index.js";
-import validateInvitation from "./validate-invitation.js";
+import invitation from "./invitation/index.js";
 
 export default {
 	accessToken,
@@ -13,5 +13,5 @@ export default {
 	login,
 	setupRequired,
 	providers,
-	validateInvitation,
+	invitation,
 };

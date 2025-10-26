@@ -33,14 +33,17 @@ const validateInvitationController = factory.createHandlers(
 	async (c) => {
 		const { token } = c.req.valid("param");
 
-		const validateRes = await serviceWrapper(services.auth.validateInvitation, {
-			transaction: false,
-			defaultError: {
-				type: "basic",
-				name: T("default_error_name"),
-				message: T("default_error_message"),
+		const validateRes = await serviceWrapper(
+			services.auth.invitation.validateInvitation,
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: T("default_error_name"),
+					message: T("default_error_message"),
+				},
 			},
-		})(
+		)(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

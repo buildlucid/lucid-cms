@@ -95,7 +95,7 @@ const inviteSingle: ServiceFn<
 
 	const userTokenRes = await services.userTokens.createSingle(context, {
 		userId: newUserRes.data.id,
-		tokenType: "invitation",
+		tokenType: constants.userTokens.invitation,
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;

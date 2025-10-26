@@ -25,6 +25,9 @@ const resendInvitationController = factory.createHandlers(
 		responses: honoOpenAPIResponse(),
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.resendInvitation.params,
+			headers: {
+				csrf: true,
+			},
 		}),
 		validateResponse: true,
 	}),

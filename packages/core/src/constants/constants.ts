@@ -165,4 +165,9 @@ export default Object.freeze({
 		concurrentLimit: 5,
 		batchSize: 10,
 	},
+	userTokens: {
+		passwordReset: "password_reset",
+		refresh: "refresh",
+		invitation: "invitation",
+	} as const,
 });

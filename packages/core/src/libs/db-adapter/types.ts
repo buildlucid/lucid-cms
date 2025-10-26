@@ -13,6 +13,7 @@ import type { MigrationPlan } from "../collection/migration/types.js";
 import type { EmailDeliveryStatus, EmailType } from "../email-adapter/types.js";
 import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
+import type constants from "../../constants/constants.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -251,10 +252,13 @@ export interface LucidUserRoles {
 	updated_at: TimestampMutateable;
 }
 
+export type UserTokenType =
+	(typeof constants.userTokens)[keyof typeof constants.userTokens];
+
 export interface LucidUserTokens {
 	id: Generated<number>;
 	user_id: number | null;
-	token_type: "password_reset" | "refresh" | "invitation";
+	token_type: UserTokenType;
 	token: string;
 	created_at: TimestampImmutable;
 	expiry_date: TimestampMutateable;

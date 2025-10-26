@@ -1,11 +1,12 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { UserTokenType } from "../../libs/db-adapter/types.js";
 
 const getSingle: ServiceFn<
 	[
 		{
-			tokenType: "password_reset";
+			tokenType: UserTokenType;
 			token: string;
 		},
 	],

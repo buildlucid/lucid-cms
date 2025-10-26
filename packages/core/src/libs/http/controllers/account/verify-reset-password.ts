@@ -10,6 +10,7 @@ import {
 	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
 } from "../../../../utils/open-api/index.js";
+import constants from "../../../../constants/constants.js";
 
 const factory = createFactory();
 
@@ -44,7 +45,7 @@ const verifyResetPasswordController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				tokenType: "password_reset",
+				tokenType: constants.userTokens.passwordReset,
 				token: token,
 			},
 		);

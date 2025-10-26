@@ -1,12 +1,13 @@
 import crypto from "node:crypto";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import type { UserTokenType } from "../../libs/db-adapter/types.js";
 
 const createSingle: ServiceFn<
 	[
 		{
 			userId: number;
-			tokenType: "password_reset" | "invitation";
+			tokenType: UserTokenType;
 			expiryDate: string;
 		},
 	],

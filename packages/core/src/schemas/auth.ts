@@ -1,4 +1,5 @@
 import z from "zod/v4";
+import T from "../translations/index.js";
 import type { ControllerSchema } from "../types.js";
 import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 
@@ -172,5 +173,33 @@ export const controllerSchemas = {
 				}),
 			}),
 		]),
+	} satisfies ControllerSchema,
+	acceptInvitation: {
+		body: z
+			.object({
+				password: z.string().min(8).max(128).meta({
+					description: "Your new password",
+					example: "password123",
+				}),
+				passwordConfirmation: z.string().min(8).max(128).meta({
+					description: "A repeat of your new password",
+					example: "password123",
+				}),
+			})
+			.refine((data) => data.password === data.passwordConfirmation, {
+				message: T("please_ensure_passwords_match"),
+				path: ["passwordConfirmation"],
+			}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			token: z.string().meta({
+				description: "The invitation token",
+				example: "abc123def456",
+			}),
+		}),
+		response: undefined,
 	} satisfies ControllerSchema,
 };

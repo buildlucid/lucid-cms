@@ -11,6 +11,120 @@
 			"name": "Auth",
 			"item": [
 				{
+					"name": "Invitation",
+					"item": [
+						{
+							"name": "Validate Invitation Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/v1/auth/invitation/validate/:token",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"invitation",
+										"validate",
+										":token"
+									],
+									"variable": [
+										{
+											"key": "token",
+											"value": "gdfg"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Accept Invitation (password)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "_csrf",
+										"value": "{{CSRF}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/v1/auth/invitation/accept/:token",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"invitation",
+										"accept",
+										":token"
+									],
+									"variable": [
+										{
+											"key": "token",
+											"value": "gdfg"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "CSRF Token",
 					"event": [
 						{
@@ -140,59 +254,6 @@
 								"v1",
 								"auth",
 								"setup-required"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Validate Invitation Token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{BASE_URL}}/api/v1/auth/invitation/validate/:token",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"invitation",
-								"validate",
-								":token"
-							],
-							"variable": [
-								{
-									"key": "token",
-									"value": "gdfg"
-								}
 							]
 						}
 					},

@@ -43,7 +43,7 @@ const sendResetPassword: ServiceFn<
 
 	const userToken = await services.userTokens.createSingle(context, {
 		userId: userExistsRes.data.id,
-		tokenType: "password_reset",
+		tokenType: constants.userTokens.passwordReset,
 		expiryDate: expiryDate,
 	});
 	if (userToken.error) return userToken;
