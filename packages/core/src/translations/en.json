@@ -197,6 +197,8 @@
 	"route_setup_required_error_message": "An error occurred while checking if setup is required.",
 	"route_providers_error_name": "Providers Error",
 	"route_providers_error_message": "An error occurred while fetching the providers.",
+	"route_initiate_auth_error_name": "Initiate Auth Error",
+	"route_initiate_auth_error_message": "An error occurred while initiating the authentication.",
 	"account_not_found_message": "The account you are trying to access does not exist.",
 	"media_not_found_name": "Media Not Found",
 	"media_not_found_message": "The media you are trying to access does not exist.",
@@ -322,5 +324,12 @@
 	"share_link_media_deleted_message": "The media file associated with this link has been deleted.",
 	"share_link_access_denied_title": "Access Denied",
 	"share_link_incorrect_password_message": "The password you entered is incorrect. Please try again.",
-	"share_link_error_title": "Unable to Access Resource"
+	"share_link_error_title": "Unable to Access Resource",
+	"provider_not_found_name": "Provider Not Found",
+	"provider_not_found_message": "The provider you are trying to access does not exist or is not enabled.",
+	"invitation_already_accepted_name": "Invitation Already Accepted",
+	"oidc_failed_to_generate_auth_url_name": "OIDC Auth URL Generation Failed",
+	"oidc_failed_to_generate_auth_url_message": "Failed to generate OIDC auth URL",
+	"saml_failed_to_generate_auth_url_name": "SAML Auth URL Generation Failed",
+	"saml_failed_to_generate_auth_url_message": "Failed to generate SAML auth URL"
 }

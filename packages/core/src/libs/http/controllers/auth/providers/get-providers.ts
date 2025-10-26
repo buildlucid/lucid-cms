@@ -1,14 +1,14 @@
 import { z } from "zod/v4";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { controllerSchemas } from "../../../../schemas/auth.js";
-import services from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
-import formatAPIResponse from "../../utils/build-response.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
-import T from "../../../../translations/index.js";
-import type { LucidHonoContext } from "../../../../types/hono.js";
+import { controllerSchemas } from "../../../../../schemas/auth.js";
+import services from "../../../../../services/index.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import formatAPIResponse from "../../../utils/build-response.js";
+import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
+import T from "../../../../../translations/index.js";
+import type { LucidHonoContext } from "../../../../../types/hono.js";
 
 const factory = createFactory();
 

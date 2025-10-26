@@ -202,4 +202,32 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	initiateAuth: {
+		body: z.object({
+			invitationToken: z
+				.string()
+				.meta({
+					description:
+						"An optional invitation token. This is used so on user invite acceptance, providers can be used to authenticate the user.",
+					example: "abc123def456",
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			providerKey: z.string().meta({
+				description: "The provider key",
+				example: "google",
+			}),
+		}),
+		response: z.object({
+			redirectUrl: z.string().meta({
+				description: "The redirect URL",
+				example: "https://example.com/auth/callback",
+			}),
+		}),
+	} satisfies ControllerSchema,
 };

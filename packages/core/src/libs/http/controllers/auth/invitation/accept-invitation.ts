@@ -1,17 +1,17 @@
-import T from "../../../../translations/index.js";
+import T from "../../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import validate from "../../middleware/validate.js";
-import { controllerSchemas } from "../../../../schemas/auth.js";
+import validate from "../../../middleware/validate.js";
+import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import services from "../../../../../services/index.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
 	honoOpenAPIRequestBody,
-} from "../../../../utils/open-api/index.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
+} from "../../../../../utils/open-api/index.js";
+import validateCSRF from "../../../middleware/validate-csrf.js";
 
 const factory = createFactory();
 

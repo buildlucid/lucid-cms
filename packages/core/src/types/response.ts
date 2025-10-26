@@ -45,6 +45,9 @@ export type AuthProvidersResponse = {
 	disablePassword: boolean;
 	providers: Array<Omit<AuthProvider, "config" | "enabled">>;
 };
+export type InitiateAuthResponse = {
+	redirectUrl: string;
+};
 
 export interface UserPermissionsResponse {
 	roles: Array<{

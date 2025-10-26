@@ -5,9 +5,7 @@ import type {
 	ServiceFn,
 } from "../../../utils/services/types.js";
 
-const getProviders: ServiceFn<[], AuthProvidersResponse> = async (
-	context: ServiceContext,
-) => {
+const getProviders: ServiceFn<[], AuthProvidersResponse> = async (context) => {
 	const providersRes = getAvailableProviders(context.config);
 
 	const providers = providersRes.providers.map((p) => {

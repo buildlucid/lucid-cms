@@ -1,17 +1,17 @@
 import z from "zod/v4";
-import T from "../../../../translations/index.js";
+import T from "../../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../schemas/auth.js";
+import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
-import formatAPIResponse from "../../utils/build-response.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { LucidAPIError } from "../../../../utils/errors/index.js";
+import services from "../../../../../services/index.js";
+import formatAPIResponse from "../../../utils/build-response.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
-} from "../../../../utils/open-api/index.js";
-import validate from "../../middleware/validate.js";
+} from "../../../../../utils/open-api/index.js";
+import validate from "../../../middleware/validate.js";
 
 const factory = createFactory();
 
