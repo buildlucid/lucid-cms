@@ -20,6 +20,7 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../queue-adapter/types.js";
+import { AuthProviderSchema } from "../auth-providers/schema.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
@@ -86,6 +87,14 @@ const ConfigSchema = z.object({
 		level: LogLevelSchema,
 		transport: LogTransportSchema.optional(),
 	}),
+	auth: z
+		.object({
+			password: z.object({
+				enabled: z.boolean().optional(),
+			}),
+			providers: z.array(AuthProviderSchema).optional(),
+		})
+		.optional(),
 	disableOpenAPI: z.boolean(),
 	localization: z
 		.object({

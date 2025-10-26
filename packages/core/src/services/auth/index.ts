@@ -3,6 +3,7 @@ import refreshToken from "./refresh-token/index.js";
 import csrf from "./csrf/index.js";
 import login from "./login.js";
 import setupRequired from "./setup-required.js";
+import providers from "./providers/index.js";
 
 export default {
 	accessToken,
@@ -10,4 +11,5 @@ export default {
 	csrf,
 	login,
 	setupRequired,
+	providers,
 };

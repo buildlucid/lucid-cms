@@ -62,6 +62,26 @@ export default defineConfig((env) => ({
 	// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
 	// authToken: env?.TURSO_AUTH_TOKEN as string,
 	// }),
+	auth: {
+		password: {
+			enabled: true,
+		},
+		providers: [
+			{
+				key: "microsoft",
+				name: "Microsoft",
+				icon: "/public/microsoft-icon.svg",
+				enabled: true,
+				type: "oidc",
+				config: {
+					type: "oidc",
+					clientId: "id",
+					clientSecret: "secret",
+					issuer: "https://login.microsoftonline.com/{tenant}/v2.0",
+				},
+			},
+		],
+	},
 	keys: {
 		encryptionKey: env.LUCID_ENCRYPTION_KEY,
 		cookieSecret: env.LUCID_COOKIE_SECRET,
@@ -92,7 +112,7 @@ export default defineConfig((env) => ({
 		storeProcessedImages: true,
 		onDemandFormats: true,
 		fallbackImage: "https://placehold.co/600x400",
-		imageProcessor: passthroughImageProcessor,
+		// imageProcessor: passthroughImageProcessor,
 		// urlStrategy: (media) => {
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },

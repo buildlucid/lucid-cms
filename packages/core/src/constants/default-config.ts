@@ -5,6 +5,12 @@ export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
 		level: "info",
 	},
+	auth: {
+		password: {
+			enabled: true,
+		},
+		providers: [],
+	},
 	email: {
 		from: {
 			email: "hello@mylucid.cms",

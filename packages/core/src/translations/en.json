@@ -191,6 +191,8 @@
 	"route_client_integrations_update_error_message": "An error occurred while updating the client integration.",
 	"route_setup_required_error_name": "Setup Required Error",
 	"route_setup_required_error_message": "An error occurred while checking if setup is required.",
+	"route_providers_error_name": "Providers Error",
+	"route_providers_error_message": "An error occurred while fetching the providers.",
 	"account_not_found_message": "The account you are trying to access does not exist.",
 	"media_not_found_name": "Media Not Found",
 	"media_not_found_message": "The media you are trying to access does not exist.",

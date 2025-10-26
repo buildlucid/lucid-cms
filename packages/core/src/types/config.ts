@@ -21,6 +21,7 @@ import type {
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
+import type { AuthProvider } from "../libs/auth-providers/types.js";
 
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
@@ -92,6 +93,16 @@ export interface LucidConfig {
 		level?: LogLevel;
 		/** Custom log transport. If not provided, logs will default to console output. */
 		transport?: LogTransport;
+	};
+	/** The authentication configuration */
+	auth?: {
+		/** Password authentication configuration */
+		password?: {
+			/** Whether password authentication is enabled. */
+			enabled?: boolean;
+		};
+		/** The authentication providers to use. */
+		providers?: AuthProvider[];
 	};
 	/** Disables the OpenAPI documentation site. */
 	disableOpenAPI?: boolean;
@@ -223,6 +234,12 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
+	};
+	auth: {
+		password: {
+			enabled: boolean;
+		};
+		providers: AuthProvider[];
 	};
 	email: {
 		from: {

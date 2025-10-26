@@ -1,5 +1,6 @@
 import z from "zod/v4";
 import type { ControllerSchema } from "../types.js";
+import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 
 export const controllerSchemas = {
 	getCSRF: {
@@ -107,5 +108,20 @@ export const controllerSchemas = {
 		},
 		params: undefined,
 		response: undefined,
+	} satisfies ControllerSchema,
+	getProviders: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.object({
+			disablePassword: z.boolean().meta({
+				description: "Whether password login is disabled",
+				example: false,
+			}),
+			providers: z.array(AuthProviderSchema.omit({ config: true })),
+		}),
 	} satisfies ControllerSchema,
 };

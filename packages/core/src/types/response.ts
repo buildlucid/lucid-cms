@@ -18,7 +18,7 @@ import type {
 } from "../libs/queue-adapter/types.js";
 import type { clientIntegrationResponseSchema } from "../schemas/client-integrations.js";
 import type { OptionsName } from "../schemas/options.js";
-import type { EmailDeliveryStatus, EmailType } from "../types.js";
+import type { AuthProvider, EmailDeliveryStatus, EmailType } from "../types.js";
 import type { ErrorResult } from "./errors.js";
 import type { LocaleValue } from "./shared.js";
 
@@ -39,6 +39,11 @@ export interface UserResponse {
 	createdAt: string | null;
 	updatedAt?: string | null;
 }
+
+export type AuthProvidersResponse = {
+	disablePassword: boolean;
+	providers: Array<Omit<AuthProvider, "config" | "enabled">>;
+};
 
 export interface UserPermissionsResponse {
 	roles: Array<{
