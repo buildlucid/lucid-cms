@@ -1,48 +1,51 @@
-import { z } from "zod/v4";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import { z } from "zod/v4";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import services from "../../../../../services/index.js";
-import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import formatAPIResponse from "../../../utils/build-response.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIRequestBody,
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
-import T from "../../../../../translations/index.js";
-import validateCSRF from "../../../middleware/validate-csrf.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import validate from "../../../middleware/validate.js";
+import validateCSRF from "../../../middleware/validate-csrf.js";
+import formatAPIResponse from "../../../utils/build-response.js";
 
 const factory = createFactory();
 
-const initiateAuthController = factory.createHandlers(
+const providerInitiateController = factory.createHandlers(
 	describeRoute({
-		description: "Initiate authentication with a provider.",
+		description:
+			"Handle OAuth/SAML auth initiation. Creates auth state and redirects to provider login page",
 		tags: ["auth"],
 		summary: "Initiate Provider Authentication",
 		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.initiateAuth.response),
+			schema: z.toJSONSchema(controllerSchemas.providerInitiate.response),
 		}),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.initiateAuth.params,
+			params: controllerSchemas.providerInitiate.params,
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.initiateAuth.body),
+		requestBody: honoOpenAPIRequestBody(
+			controllerSchemas.providerInitiate.body,
+		),
 		validateResponse: true,
 	}),
 	validateCSRF,
-	validate("param", controllerSchemas.initiateAuth.params),
-	validate("json", controllerSchemas.initiateAuth.body),
+	validate("param", controllerSchemas.providerInitiate.params),
+	validate("json", controllerSchemas.providerInitiate.body),
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
 		const { invitationToken } = c.req.valid("json");
 
 		const initiateAuthRes = await serviceWrapper(
-			services.auth.providers.initiateAuth,
+			services.auth.providers.initiate,
 			{
 				transaction: true,
 				defaultError: {
@@ -75,4 +78,4 @@ const initiateAuthController = factory.createHandlers(
 	},
 );
 
-export default initiateAuthController;
+export default providerInitiateController;

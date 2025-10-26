@@ -1,14 +1,14 @@
-import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
-import type { InitiateAuthResponse } from "../../../types.js";
-import Repository from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
-import T from "../../../translations/index.js";
-import constants from "../../../constants/constants.js";
-import Formatter from "../../../libs/formatters/index.js";
 import { randomUUID } from "node:crypto";
+import constants from "../../../constants/constants.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
+import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
+import Formatter from "../../../libs/formatters/index.js";
+import Repository from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
+import type { InitiateAuthResponse } from "../../../types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 
-const initiateAuth: ServiceFn<
+const initiate: ServiceFn<
 	[
 		{
 			providerKey: string;
@@ -48,7 +48,7 @@ const initiateAuth: ServiceFn<
 	}
 
 	//* validate invitation token if provided
-	let invitationTokenId: number | undefined = undefined;
+	let invitationTokenId: number | undefined;
 	if (data.invitationToken) {
 		const invitationTokenRes = await UserTokens.selectSingle({
 			select: ["id", "user_id", "expiry_date"],
@@ -116,12 +116,11 @@ const initiateAuth: ServiceFn<
 	});
 	if (stateRes.error) return stateRes;
 
-	const adapterRes = await getAuthProviderAdapter(provider);
+	const adapterRes = getAuthProviderAdapter(provider);
 	if (adapterRes.error) return adapterRes;
 
 	const redirectUrl = await adapterRes.data.getAuthUrl({
-		// TODO: implement callback url
-		redirectUri: `${context.config.host}/cb`,
+		redirectUri: `${context.config.host}/api/v1/auth/providers/${data.providerKey}/callback`,
 		state: stateToken,
 	});
 	if (redirectUrl.error) return redirectUrl;
@@ -134,4 +133,4 @@ const initiateAuth: ServiceFn<
 	};
 };
 
-export default initiateAuth;
+export default initiate;

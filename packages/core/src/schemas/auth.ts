@@ -1,7 +1,7 @@
 import z from "zod/v4";
+import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 import T from "../translations/index.js";
 import type { ControllerSchema } from "../types.js";
-import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 
 export const controllerSchemas = {
 	getCSRF: {
@@ -202,7 +202,7 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
-	initiateAuth: {
+	providerInitiate: {
 		body: z.object({
 			invitationToken: z
 				.string()
@@ -227,6 +227,73 @@ export const controllerSchemas = {
 			redirectUrl: z.string().meta({
 				description: "The redirect URL",
 				example: "https://example.com/auth/callback",
+			}),
+		}),
+	} satisfies ControllerSchema,
+	providerOIDCCallback: {
+		body: undefined,
+		query: {
+			string: z.object({
+				code: z.string().meta({
+					description: "The authorization code returned by the OAuth provider",
+					example: "4/0AY0e-g7xQZ9...",
+				}),
+				state: z.string().meta({
+					description: "The state token for CSRF protection",
+					example: "abc123def456",
+				}),
+			}),
+			formatted: z.object({
+				code: z.string().meta({
+					description: "The authorization code returned by the OAuth provider",
+					example: "4/0AY0e-g7xQZ9...",
+				}),
+				state: z.string().meta({
+					description: "The state token for CSRF protection",
+					example: "abc123def456",
+				}),
+			}),
+		},
+		params: z.object({
+			providerKey: z.string().meta({
+				description: "The provider key",
+				example: "google",
+			}),
+		}),
+		response: z.object({
+			accessToken: z.string().meta({
+				description: "The JWT access token",
+				example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+			}),
+			refreshToken: z.string().meta({
+				description: "The JWT refresh token",
+				example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+			}),
+			user: z.object({
+				id: z.number().meta({
+					description: "The user ID",
+					example: 1,
+				}),
+				email: z.string().meta({
+					description: "The user email",
+					example: "user@example.com",
+				}),
+				username: z.string().meta({
+					description: "The username",
+					example: "johndoe",
+				}),
+				first_name: z.string().nullable().meta({
+					description: "The user's first name",
+					example: "John",
+				}),
+				last_name: z.string().nullable().meta({
+					description: "The user's last name",
+					example: "Doe",
+				}),
+				activated: z.boolean().meta({
+					description: "Whether the user account is activated",
+					example: true,
+				}),
 			}),
 		}),
 	} satisfies ControllerSchema,

@@ -1,11 +1,11 @@
 import type z from "zod/v4";
+import type { ServiceResponse } from "../../utils/services/types.js";
 import type {
+	AuthProviderConfigSchema,
 	AuthProviderSchema,
 	OIDCConfigSchema,
 	SAMLConfigSchema,
-	AuthProviderConfigSchema,
 } from "./schema.js";
-import type { ServiceResponse } from "../../utils/services/types.js";
 
 export type OIDCAuthConfig = z.infer<typeof OIDCConfigSchema>;
 export type SAMLAuthConfig = z.infer<typeof SAMLConfigSchema>;
@@ -40,9 +40,9 @@ export interface AuthAdapterCallbackResult {
 
 export interface AuthAdapter {
 	getAuthUrl: (params: AuthAdapterGetAuthUrlParams) => ServiceResponse<string>;
-	// handleCallback: (
-	// 	params: AuthAdapterHandleCallbackParams,
-	// ) => ServiceResponse<AuthAdapterCallbackResult>;
+	handleCallback: (
+		params: AuthAdapterHandleCallbackParams,
+	) => ServiceResponse<AuthAdapterCallbackResult>;
 }
 
 export interface OIDCAdapter extends AuthAdapter {

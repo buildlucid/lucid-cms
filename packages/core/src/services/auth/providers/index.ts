@@ -1,7 +1,11 @@
 import getProviders from "./get-providers.js";
-import initiateAuth from "./initiate-auth.js";
+import initiate from "./initiate.js";
+import oidcCallback from "./oidc-callback.js";
+import samlCallback from "./saml-callback.js";
 
 export default {
 	getProviders,
-	initiateAuth,
+	initiate,
+	samlCallback,
+	oidcCallback,
 };

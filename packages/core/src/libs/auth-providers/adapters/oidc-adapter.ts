@@ -1,5 +1,5 @@
-import type { OIDCAdapter, OIDCAuthConfig } from "../types.js";
 import T from "../../../translations/index.js";
+import type { OIDCAdapter, OIDCAuthConfig } from "../types.js";
 
 const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 	return {
@@ -35,6 +35,117 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 							err instanceof Error
 								? err.message
 								: T("oidc_failed_to_generate_auth_url_message"),
+					},
+					data: undefined,
+				};
+			}
+		},
+		handleCallback: async (params) => {
+			try {
+				const tokenEndpoint =
+					config.tokenEndpoint || `${config.issuer}/oauth2/v2.0/token`;
+
+				const tokenResponse = await fetch(tokenEndpoint, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					body: new URLSearchParams({
+						client_id: config.clientId,
+						client_secret: config.clientSecret,
+						code: params.code,
+						grant_type: "authorization_code",
+					}),
+				});
+				if (!tokenResponse.ok) {
+					const errorText = await tokenResponse.text();
+					return {
+						error: {
+							type: "basic",
+							status: tokenResponse.status,
+							name: T("oidc_token_exchange_failed_name"),
+							message: T("oidc_token_exchange_failed_message", {
+								message: errorText,
+							}),
+						},
+						data: undefined,
+					};
+				}
+
+				const tokenData = await tokenResponse.json();
+				const accessToken = tokenData.access_token;
+				if (!accessToken) {
+					return {
+						error: {
+							type: "basic",
+							status: 500,
+							name: T("oidc_access_token_missing_name"),
+							message: T("oidc_access_token_missing_message"),
+						},
+						data: undefined,
+					};
+				}
+
+				//* fetch user information using access token
+				const userinfoEndpoint =
+					config.userinfoEndpoint || `${config.issuer}/oauth2/v2.0/userinfo`;
+
+				const userInfoResponse = await fetch(userinfoEndpoint, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
+				if (!userInfoResponse.ok) {
+					const errorText = await userInfoResponse.text();
+					return {
+						error: {
+							type: "basic",
+							status: userInfoResponse.status,
+							name: T("oidc_user_info_fetch_failed_name"),
+							message: T("oidc_user_info_fetch_failed_message", {
+								message: errorText,
+							}),
+						},
+						data: undefined,
+					};
+				}
+
+				const userInfo = await userInfoResponse.json();
+
+				const providerUserId = userInfo.sub || userInfo.id;
+				const email = userInfo.email;
+
+				if (!providerUserId || !email) {
+					return {
+						error: {
+							type: "basic",
+							status: 500,
+							name: T("oidc_user_info_fetch_failed_name"),
+							message: T("oidc_user_info_fetch_failed_message"),
+						},
+						data: undefined,
+					};
+				}
+
+				return {
+					error: undefined,
+					data: {
+						providerUserId,
+						email,
+						firstName: userInfo.given_name || userInfo.first_name,
+						lastName: userInfo.family_name || userInfo.last_name,
+					},
+				};
+			} catch (err) {
+				return {
+					error: {
+						type: "basic",
+						status: 500,
+						name: T("oidc_callback_failed_name"),
+						message:
+							err instanceof Error
+								? err.message
+								: T("oidc_callback_failed_message"),
 					},
 					data: undefined,
 				};

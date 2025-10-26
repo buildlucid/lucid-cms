@@ -1,6 +1,6 @@
-import type { SAMLAdapter, SAMLAuthConfig } from "../types.js";
 import { randomUUID } from "node:crypto";
 import T from "../../../translations/index.js";
+import type { SAMLAdapter, SAMLAuthConfig } from "../types.js";
 
 const createSAMLAdapter = (config: SAMLAuthConfig): SAMLAdapter => {
 	return {
@@ -52,6 +52,17 @@ const createSAMLAdapter = (config: SAMLAuthConfig): SAMLAdapter => {
 					data: undefined,
 				};
 			}
+		},
+		handleCallback: async () => {
+			return {
+				error: undefined,
+				data: {
+					providerUserId: "1",
+					email: "user@example.com",
+					firstName: "John",
+					lastName: "Doe",
+				},
+			};
 		},
 	};
 };
