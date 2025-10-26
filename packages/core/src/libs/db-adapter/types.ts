@@ -463,6 +463,14 @@ export interface LucidBricksTable {
 	[key: CustomFieldColumnName]: unknown;
 }
 
+export interface LucidAuthStates {
+	id: Generated<number>;
+	state: string;
+	provider_key: string;
+	invitation_token_id: number | null;
+	created_at: TimestampImmutable;
+}
+
 // ------------------------------------------------------------------------------
 // Database
 export interface LucidDB {
@@ -487,6 +495,7 @@ export interface LucidDB {
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_queue_jobs: LucidQueueJobs;
+	lucid_auth_states: LucidAuthStates;
 	[key: LucidDocumentTableName]: LucidDocumentTable;
 	// @ts-expect-error
 	[key: LucidVersionTableName]: LucidVersionTable;

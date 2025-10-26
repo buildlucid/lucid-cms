@@ -274,6 +274,40 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 					),
 				)
 				.execute();
+
+			await db.schema
+				.createTable("lucid_auth_states")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("state", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("provider_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn(
+					"invitation_token_id",
+					adapter.getDataType("integer"),
+					(col) => col.references("lucid_user_tokens.id").onDelete("cascade"),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("lucid_auth_states_state_index")
+				.on("lucid_auth_states")
+				.column("state")
+				.execute();
 		},
 		async down(db: Kysely<unknown>) {},
 	};

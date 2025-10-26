@@ -24,6 +24,7 @@ import RolesRepository from "./roles.js";
 import UserLoginsRepository from "./user-logins.js";
 import UserRolesRepository from "./user-roles.js";
 import UserAuthProvidersRepository from "./user-auth-providers.js";
+import AuthStatesRepository from "./auth-states.js";
 // Repositories
 import UserTokensRepository from "./user-tokens.js";
 import UsersRepository from "./users.js";
@@ -138,6 +139,11 @@ class Repository {
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
+			case "auth-states":
+				return new AuthStatesRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
 			default:
 				throw new LucidError({
 					message: T("cannot_find_repository", {
@@ -173,6 +179,7 @@ type RepositoryClassMap = {
 	"document-versions": DocumentVersionsRepository;
 	"document-bricks": DocumentBricksRepository;
 	"queue-jobs": QueueJobsRepository;
+	"auth-states": AuthStatesRepository;
 };
 
 type RepositoryReturnType<T extends keyof RepositoryClassMap> =
