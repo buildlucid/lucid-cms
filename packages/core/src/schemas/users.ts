@@ -46,6 +46,10 @@ export const userResponseSchema = z.object({
 		description: "Should the UI force a password reset?",
 		example: false,
 	}),
+	invitationAccepted: z.boolean().meta({
+		description: "If the user has accepted the invitation",
+		example: true,
+	}),
 	roles: z.array(userResponseRoleSchema).meta({
 		description: "The user's roles",
 	}),

@@ -29,6 +29,10 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
+		invitation_accepted: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		is_deleted: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
@@ -64,6 +68,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		password: this.dbAdapter.getDataType("text"),
 		secret: this.dbAdapter.getDataType("text"),
 		triggered_password_reset: this.dbAdapter.getDataType("boolean"),
+		invitation_accepted: this.dbAdapter.getDataType("boolean"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		deleted_by: this.dbAdapter.getDataType("integer"),
@@ -79,6 +84,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				username: "lucid_users.username",
 				roleIds: "lucid_user_roles.role_id",
 				id: "lucid_users.id",
+				invitationAccepted: "lucid_users.invitation_accepted",
 				isDeleted: "lucid_users.is_deleted",
 				deletedBy: "lucid_users.deleted_by",
 			},
@@ -119,6 +125,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			"username",
 			"super_admin",
 			"triggered_password_reset",
+			"invitation_accepted",
 			"is_deleted",
 			"is_deleted_at",
 			this.dbAdapter
@@ -168,6 +175,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"username",
 				"super_admin",
 				"triggered_password_reset",
+				"invitation_accepted",
 				"roles",
 			],
 		});
@@ -177,12 +185,13 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				ids: number[];
+				where?: QueryBuilderWhere<"lucid_users">;
 			}
 		>,
 	) {
-		const query = this.db
+		let query = this.db
 			.selectFrom("lucid_users")
-			.select((eb) => [
+			.select([
 				"email",
 				"first_name",
 				"last_name",
@@ -193,9 +202,13 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"super_admin",
 				"is_deleted",
 				"is_deleted_at",
+				"invitation_accepted",
 			])
-			.where("id", "in", props.ids)
-			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"));
+			.where("id", "in", props.ids);
+
+		if (props.where !== undefined && props.where.length > 0) {
+			query = queryBuilder.select(query, props.where);
+		}
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleByIds",
@@ -214,6 +227,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"updated_at",
 				"username",
 				"super_admin",
+				"invitation_accepted",
 			],
 		});
 	}
@@ -282,6 +296,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						"lucid_users.super_admin",
 						"lucid_users.is_deleted",
 						"lucid_users.is_deleted_at",
+						"lucid_users.invitation_accepted",
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb
@@ -349,6 +364,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"username",
 				"super_admin",
 				"roles",
+				"invitation_accepted",
 			],
 		});
 	}

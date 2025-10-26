@@ -43,6 +43,17 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						),
 				)
+				.addColumn(
+					"invitation_accepted",
+					adapter.getDataType("boolean"),
+					(col) =>
+						col.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "false"),
+							),
+						),
+				)
 				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(

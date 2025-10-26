@@ -200,6 +200,11 @@ export interface LucidUsers {
 		BooleanInt | undefined,
 		BooleanInt
 	>;
+	invitation_accepted: ColumnType<
+		BooleanInt,
+		BooleanInt | undefined,
+		BooleanInt
+	>;
 	is_deleted: BooleanInt | null;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number | null;
@@ -249,7 +254,7 @@ export interface LucidUserRoles {
 export interface LucidUserTokens {
 	id: Generated<number>;
 	user_id: number | null;
-	token_type: "password_reset" | "refresh";
+	token_type: "password_reset" | "refresh" | "invitation";
 	token: string;
 	created_at: TimestampImmutable;
 	expiry_date: TimestampMutateable;

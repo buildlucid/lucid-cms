@@ -21,6 +21,18 @@ const getMultipleFieldMeta: ServiceFn<
 
 	const userRes = await User.selectMultipleByIds({
 		ids: data.ids,
+		where: [
+			{
+				key: "is_deleted",
+				operator: "=",
+				value: context.config.db.getDefault("boolean", "false"),
+			},
+			{
+				key: "invitation_accepted",
+				operator: "=",
+				value: context.config.db.getDefault("boolean", "true"),
+			},
+		],
 		validation: {
 			enabled: true,
 		},

@@ -13,6 +13,7 @@ export interface UserPropT {
 	updated_at: Date | string | null;
 	username: string;
 	triggered_password_reset?: BooleanInt;
+	invitation_accepted: BooleanInt;
 	is_deleted: BooleanInt | null;
 	is_deleted_at: Date | string | null;
 	roles?: {
@@ -50,6 +51,9 @@ export default class UsersFormatter {
 			permissions: permissions,
 			triggerPasswordReset: Formatter.formatBoolean(
 				props.user.triggered_password_reset,
+			),
+			invitationAccepted: Formatter.formatBoolean(
+				props.user.invitation_accepted,
 			),
 			isDeleted: Formatter.formatBoolean(props.user.is_deleted ?? false),
 			deletedAt: Formatter.formatDate(props.user.is_deleted_at),

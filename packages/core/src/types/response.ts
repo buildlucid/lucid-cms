@@ -30,6 +30,7 @@ export interface UserResponse {
 	firstName: string | null;
 	lastName: string | null;
 	triggerPasswordReset?: boolean | null;
+	invitationAccepted: boolean;
 
 	roles?: UserPermissionsResponse["roles"];
 	permissions?: UserPermissionsResponse["permissions"];
