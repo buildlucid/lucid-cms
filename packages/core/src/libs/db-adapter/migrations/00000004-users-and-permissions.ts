@@ -74,6 +74,61 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_user_auth_providers")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("provider_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("provider_user_id", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("linked_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.addColumn("metadata", adapter.getDataType("json"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("lucid_user_auth_providers_user_id_index")
+				.on("lucid_user_auth_providers")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createIndex("lucid_user_auth_providers_provider_lookup_index")
+				.on("lucid_user_auth_providers")
+				.columns(["provider_key", "provider_user_id"])
+				.execute();
+
+			await db.schema
 				.createTable("lucid_roles")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),

@@ -207,6 +207,21 @@ export interface LucidUsers {
 	updated_at: TimestampMutateable;
 }
 
+export interface LucidUserAuthProviders {
+	id: Generated<number>;
+	user_id: number;
+	provider_key: string;
+	provider_user_id: string;
+	linked_at: TimestampImmutable;
+	metadata: JSONColumnType<
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
+	>;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export interface LucidRoles {
 	id: Generated<number>;
 	name: string;
@@ -454,6 +469,7 @@ export interface LucidDB {
 	lucid_user_roles: LucidUserRoles;
 	lucid_user_tokens: LucidUserTokens;
 	lucid_user_logins: LucidUserLogins;
+	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_emails: LucidEmails;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_media_folders: LucidMediaFolders;

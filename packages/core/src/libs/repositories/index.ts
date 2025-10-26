@@ -23,6 +23,7 @@ import RolePermissionsRepository from "./role-permissions.js";
 import RolesRepository from "./roles.js";
 import UserLoginsRepository from "./user-logins.js";
 import UserRolesRepository from "./user-roles.js";
+import UserAuthProvidersRepository from "./user-auth-providers.js";
 // Repositories
 import UserTokensRepository from "./user-tokens.js";
 import UsersRepository from "./users.js";
@@ -42,6 +43,11 @@ class Repository {
 				) as RepositoryReturnType<T>;
 			case "user-logins":
 				return new UserLoginsRepository(
+					db,
+					dbAdapter,
+				) as RepositoryReturnType<T>;
+			case "user-auth-providers":
+				return new UserAuthProvidersRepository(
 					db,
 					dbAdapter,
 				) as RepositoryReturnType<T>;
@@ -145,6 +151,7 @@ class Repository {
 type RepositoryClassMap = {
 	"user-tokens": UserTokensRepository;
 	"user-logins": UserLoginsRepository;
+	"user-auth-providers": UserAuthProvidersRepository;
 	collections: CollectionsRepository;
 	"collection-migrations": CollectionMigrationsRepository;
 	emails: EmailsRepository;
