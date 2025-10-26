@@ -60,8 +60,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 		);
 		if (callbackAuthRes.error) throw new LucidAPIError(callbackAuthRes.error);
 
-		// Redirect to admin with tokens in query params (or use cookies)
-		// For now, returning JSON - you'll likely want to redirect with tokens
+		// TODO: if successful, redirect the user based on the redirectUrl and set a access/refresh token
+
 		c.status(200);
 		return c.json({
 			data: callbackAuthRes.data,
