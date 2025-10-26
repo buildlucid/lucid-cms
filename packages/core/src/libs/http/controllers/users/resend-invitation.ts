@@ -6,38 +6,36 @@ import services from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
+	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
 } from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 import permissions from "../../middleware/permissions.js";
 
 const factory = createFactory();
 
-const inviteSingleController = factory.createHandlers(
+const resendInvitationController = factory.createHandlers(
 	describeRoute({
-		description: "Invite a single user.",
+		description:
+			"Resend an invitation email to a user who has not yet accepted their invitation.",
 		tags: ["users"],
-		summary: "Invite User",
+		summary: "Resend User Invitation",
+		responses: honoOpenAPIResponse(),
 		parameters: honoOpenAPIParamaters({
-			headers: {
-				csrf: true,
-			},
+			params: controllerSchemas.resendInvitation.params,
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
 		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,
 	permissions(["create_user"]),
-	validate("json", controllerSchemas.createSingle.body),
+	validate("param", controllerSchemas.resendInvitation.params),
 	async (c) => {
-		const body = c.req.valid("json");
-		const auth = c.get("auth");
+		const { id } = c.req.valid("param");
 
-		const userId = await serviceWrapper(services.users.inviteSingle, {
+		const resendRes = await serviceWrapper(services.users.resendInvitation, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -53,20 +51,14 @@ const inviteSingleController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				email: body.email,
-				username: body.username,
-				roleIds: body.roleIds,
-				firstName: body.firstName,
-				lastName: body.lastName,
-				superAdmin: body.superAdmin,
-				authSuperAdmin: auth.superAdmin,
+				userId: Number.parseInt(id, 10),
 			},
 		);
-		if (userId.error) throw new LucidAPIError(userId.error);
+		if (resendRes.error) throw new LucidAPIError(resendRes.error);
 
-		c.status(201);
+		c.status(204);
 		return c.body(null);
 	},
 );
 
-export default inviteSingleController;
+export default resendInvitationController;

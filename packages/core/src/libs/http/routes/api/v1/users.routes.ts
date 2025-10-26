@@ -6,17 +6,19 @@ import deleteSingle from "../../../controllers/users/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/users/delete-single-permanently.js";
 import restoreMultiple from "../../../controllers/users/restore-multiple.js";
 import updateSingle from "../../../controllers/users/update-single.js";
+import resendInvitation from "../../../controllers/users/resend-invitation.js";
 import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const usersRoutes = new Hono<LucidHonoGeneric>()
-	.post("/", ...inviteSingle)
 	.get("/", ...getMultiple)
 	.get("/:id", ...getSingle)
 	.get("/logins/:id", ...getMultipleLogins)
+	.post("/:id/resend-invitation", ...resendInvitation)
+	.post("/", ...inviteSingle)
+	.post("/restore", ...restoreMultiple)
 	.delete("/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:id", ...deleteSingle)
-	.post("/restore", ...restoreMultiple)
 	.patch("/:id", ...updateSingle);
 
 export default usersRoutes;

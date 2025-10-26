@@ -518,3 +518,14 @@ export interface UserLoginResponse {
 	userAgent: string | null;
 	createdAt: string | null;
 }
+
+export interface ValidateInvitationResponse {
+	valid: boolean;
+	user?: {
+		id: UserResponse["id"];
+		email: UserResponse["email"];
+		username: UserResponse["username"];
+		firstName: UserResponse["firstName"];
+		lastName: UserResponse["lastName"];
+	};
+}

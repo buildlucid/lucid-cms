@@ -124,4 +124,53 @@ export const controllerSchemas = {
 			providers: z.array(AuthProviderSchema.omit({ config: true })),
 		}),
 	} satisfies ControllerSchema,
+	validateInvitation: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			token: z.string().meta({
+				description: "The invitation token",
+				example: "abc123def456",
+			}),
+		}),
+		response: z.union([
+			z.object({
+				valid: z.literal(true).meta({
+					description: "Indicates the token is valid",
+					example: true,
+				}),
+				user: z.object({
+					id: z.number().meta({
+						description: "The user's ID",
+						example: 1,
+					}),
+					email: z.string().meta({
+						description: "The user's email address",
+						example: "user@example.com",
+					}),
+					username: z.string().meta({
+						description: "The user's username",
+						example: "johndoe",
+					}),
+					firstName: z.string().nullable().meta({
+						description: "The user's first name",
+						example: "John",
+					}),
+					lastName: z.string().nullable().meta({
+						description: "The user's last name",
+						example: "Doe",
+					}),
+				}),
+			}),
+			z.object({
+				valid: z.literal(false).meta({
+					description: "Indicates the token is not valid",
+					example: false,
+				}),
+			}),
+		]),
+	} satisfies ControllerSchema,
 };

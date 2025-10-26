@@ -35,6 +35,7 @@
 	"if_account_exists_with_email_not_found": "If an account exists with the email provided, a password reset link will be sent to the email address.",
 	"reset_password_email_subject": "Reset your password",
 	"user_invite_email_subject": "You have been invited to join a Lucid project",
+	"invitation_already_accepted_message": "This invitation has already been accepted.",
 	"password_reset_success_subject": "Password reset successful",
 	"email_update_success_subject": "Email update successful",
 	"please_ensure_passwords_match": "Please ensure that the passwords match and try again.",

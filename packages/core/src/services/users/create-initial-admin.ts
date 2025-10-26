@@ -51,6 +51,7 @@ const createInitialAdmin: ServiceFn<
 			triggered_password_reset: false,
 			password: hashedPassword,
 			secret: encryptSecret,
+			invitation_accepted: true,
 		},
 		returning: ["id"],
 		validation: { enabled: true },

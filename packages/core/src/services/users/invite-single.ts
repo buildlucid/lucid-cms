@@ -76,6 +76,7 @@ const inviteSingle: ServiceFn<
 			super_admin: data.authSuperAdmin ? data.superAdmin : false,
 			triggered_password_reset: false,
 			secret: encryptSecret,
+			invitation_accepted: false,
 		},
 		returning: ["id"],
 		validation: {
@@ -94,7 +95,7 @@ const inviteSingle: ServiceFn<
 
 	const userTokenRes = await services.userTokens.createSingle(context, {
 		userId: newUserRes.data.id,
-		tokenType: "password_reset",
+		tokenType: "invitation",
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;
@@ -108,7 +109,7 @@ const inviteSingle: ServiceFn<
 			firstName: data.firstName,
 			lastName: data.lastName,
 			email: data.email,
-			resetLink: `${context.config.host}${constants.locations.resetPassword}?token=${userTokenRes.data.token}`,
+			resetLink: `${context.config.host}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
 		},
 	});
 	if (sendEmailRes.error) return sendEmailRes;

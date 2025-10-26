@@ -66,6 +66,7 @@ export default Object.freeze({
 	},
 	locations: {
 		resetPassword: "/admin/reset-password",
+		acceptInvitation: "/admin/accept-invitation",
 	},
 	errors: {
 		name: T("default_error_name"),
