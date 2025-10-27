@@ -1,9 +1,6 @@
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import type { AuthProvidersResponse } from "../../../types.js";
-import type {
-	ServiceContext,
-	ServiceFn,
-} from "../../../utils/services/types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 
 const getProviders: ServiceFn<[], AuthProvidersResponse> = async (context) => {
 	const providersRes = getAvailableProviders(context.config);

@@ -348,5 +348,11 @@
 	"invitation_token_not_found_message": "The invitation token you provided is invalid or has expired.",
 	"provider_already_linked_name": "Provider Already Linked",
 	"provider_already_linked_message": "The provider you are trying to link is already linked to another account.",
-	"no_account_linked_message": "No account is linked to the provider you are trying to access."
+	"no_account_linked_message": "No account is linked to the provider you are trying to access.",
+	"no_account_found_name": "No Account Found",
+	"no_account_found_message": "No account was found for the provider you are trying to access.",
+	"email_mismatch_name": "Email Mismatch",
+	"email_mismatch_message": "The email address you provided does not match the email address associated with the account you are trying to access.",
+	"user_mismatch_name": "User Mismatch",
+	"user_mismatch_message": "The user you are trying to access does not match the user you are currently using."
 }

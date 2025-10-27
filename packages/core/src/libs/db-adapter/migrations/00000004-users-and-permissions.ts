@@ -230,7 +230,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_users.id").onDelete("cascade"),
+					col.references("lucid_users.id").notNull().onDelete("cascade"),
 				)
 				.addColumn("token_type", adapter.getDataType("varchar", 255))
 				.addColumn("token", adapter.getDataType("varchar", 255), (col) =>

@@ -7,13 +7,13 @@ import type {
 	Migration,
 	Transaction,
 } from "kysely";
+import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { EmailDeliveryStatus, EmailType } from "../email-adapter/types.js";
 import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
-import type constants from "../../constants/constants.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 
@@ -257,7 +257,7 @@ export type UserTokenType =
 
 export interface LucidUserTokens {
 	id: Generated<number>;
-	user_id: number | null;
+	user_id: number;
 	token_type: UserTokenType;
 	token: string;
 	created_at: TimestampImmutable;

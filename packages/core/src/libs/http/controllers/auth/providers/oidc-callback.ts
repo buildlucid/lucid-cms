@@ -60,12 +60,46 @@ const providerOIDCCallbackController = factory.createHandlers(
 		);
 		if (callbackAuthRes.error) throw new LucidAPIError(callbackAuthRes.error);
 
-		// TODO: if successful, redirect the user based on the redirectUrl and set a access/refresh token
+		const [refreshRes, accessRes] = await Promise.all([
+			services.auth.refreshToken.generateToken(c, callbackAuthRes.data.userId),
+			services.auth.accessToken.generateToken(c, callbackAuthRes.data.userId),
+		]);
+		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
+		if (accessRes.error) throw new LucidAPIError(accessRes.error);
 
-		c.status(200);
-		return c.json({
-			data: callbackAuthRes.data,
-		});
+		const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+		const userAgent = c.req.header("user-agent") || null;
+
+		const userLoginTrackRes = await serviceWrapper(
+			services.userLogins.createSingle,
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: T("route_login_error_name"),
+					message: T("route_login_error_message"),
+				},
+			},
+		)(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				queue: c.get("queue"),
+				env: c.get("env"),
+				kv: c.get("kv"),
+			},
+			{
+				userId: callbackAuthRes.data.userId,
+				tokenId: refreshRes.data.tokenId,
+				authMethod: providerKey,
+				ipAddress: connectionInfo.address ?? null,
+				userAgent: userAgent,
+			},
+		);
+		if (userLoginTrackRes.error)
+			throw new LucidAPIError(userLoginTrackRes.error);
+
+		return c.redirect(callbackAuthRes.data.redirectUrl);
 	},
 );
 

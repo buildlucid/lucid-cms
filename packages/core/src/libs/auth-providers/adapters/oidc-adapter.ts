@@ -49,6 +49,7 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/x-www-form-urlencoded",
+						Accept: "application/json",
 					},
 					body: new URLSearchParams({
 						client_id: config.clientId,
