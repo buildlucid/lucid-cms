@@ -14,7 +14,7 @@ export const controllerSchemas = {
 		response: z.object({
 			_csrf: z.string().meta({
 				description:
-					"Store this value and use it for the _csrf header on required endpoints.",
+					"Store this value and use it for the X-CSRF-Token header on required endpoints.",
 				example:
 					"55b26b90b9715d0e9cc425e8f1ba565cad5157e3d56ae8380d8c832a5fb3fcb7",
 			}),

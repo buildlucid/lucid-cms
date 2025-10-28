@@ -1,9 +1,9 @@
-import serviceWrapper from "../../../utils/services/service-wrapper.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
-import constants from "../../../constants/constants.js";
 import { createMiddleware } from "hono/factory";
+import constants from "../../../constants/constants.js";
 import services from "../../../services/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import { LucidAPIError } from "../../../utils/errors/index.js";
+import serviceWrapper from "../../../utils/services/service-wrapper.js";
 
 const contentLocale = createMiddleware(async (c: LucidHonoContext, next) => {
 	const contentLocale = c.req.header(constants.headers.contentLocale);

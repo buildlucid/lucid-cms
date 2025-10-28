@@ -1,8 +1,8 @@
-import T from "@/translations";
 import { createSignal } from "solid-js";
-import request, { type RequestParams, getFetchURL } from "@/utils/request";
-import { LucidError } from "@/utils/error-handling";
 import { csrfReq } from "@/services/api/auth/useCsrf";
+import T from "@/translations";
+import { LucidError } from "@/utils/error-handling";
+import request, { getFetchURL, type RequestParams } from "@/utils/request";
 
 const [getRunning, setRunning] = createSignal(false);
 const [refreshTokenPromise, setRefreshTokenPromise] =
@@ -44,7 +44,7 @@ export const refreshTokenReq = async (): Promise<boolean> => {
 		method: "POST",
 		credentials: "include",
 		headers: {
-			_csrf: csrfToken || "",
+			"X-CSRF-Token": csrfToken || "",
 		},
 	});
 

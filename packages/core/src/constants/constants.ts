@@ -5,7 +5,7 @@ export default Object.freeze({
 	locales: ["en"] as const,
 	openAPIDocsRoute: "/documentation",
 	headers: {
-		csrf: "_csrf",
+		csrf: "X-CSRF-Token",
 		contentLocale: "lucid-content-locale",
 	},
 	cookies: {

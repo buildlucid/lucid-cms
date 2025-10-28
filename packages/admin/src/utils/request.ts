@@ -1,8 +1,8 @@
-import queryBuilder, { type QueryBuilderProps } from "@/utils/query-builder";
-import { LucidError, handleSiteErrors } from "@/utils/error-handling";
 import type { ErrorResponse } from "@types";
-import { csrfReq, clearCsrfSession } from "@/services/api/auth/useCsrf";
+import { clearCsrfSession, csrfReq } from "@/services/api/auth/useCsrf";
 import useRefreshToken from "@/services/api/auth/useRefreshToken";
+import { handleSiteErrors, LucidError } from "@/utils/error-handling";
+import queryBuilder, { type QueryBuilderProps } from "@/utils/query-builder";
 
 export interface RequestParams<Data> {
 	url: string;
@@ -43,7 +43,7 @@ const prepareHeaders = async (
 	const updatedHeaders = { ...headers };
 	if (csrf) {
 		const csrfToken = await csrfReq();
-		if (csrfToken) updatedHeaders._csrf = csrfToken;
+		if (csrfToken) updatedHeaders["X-CSRF-Token"] = csrfToken;
 	}
 	if (headers["Content-Type"] === undefined && typeof body === "string") {
 		updatedHeaders["Content-Type"] = "application/json";
