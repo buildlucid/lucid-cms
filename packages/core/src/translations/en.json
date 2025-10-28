@@ -332,8 +332,6 @@
 	"invitation_already_accepted_name": "Invitation Already Accepted",
 	"oidc_failed_to_generate_auth_url_name": "OIDC Auth URL Generation Failed",
 	"oidc_failed_to_generate_auth_url_message": "Failed to generate OIDC auth URL",
-	"saml_failed_to_generate_auth_url_name": "SAML Auth URL Generation Failed",
-	"saml_failed_to_generate_auth_url_message": "Failed to generate SAML auth URL",
 	"invalid_or_expired_state_message": "The state you provided is invalid or has expired.",
 	"provider_mismatch_name": "Provider Mismatch",
 	"provider_mismatch_message": "The provider you are trying to access does not match the provider you are currently using.",

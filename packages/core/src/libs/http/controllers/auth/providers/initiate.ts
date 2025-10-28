@@ -20,7 +20,7 @@ const factory = createFactory();
 const providerInitiateController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Handle OAuth/SAML auth initiation. Creates auth state and redirects to provider login page",
+			"Handle oidc auth initiation. Creates auth state and redirects to provider login page",
 		tags: ["auth"],
 		summary: "Initiate Provider Authentication",
 		responses: honoOpenAPIResponse({

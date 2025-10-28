@@ -8,6 +8,7 @@ const LoginRoute = lazy(() => import("@/routes/Login"));
 const SetupRoute = lazy(() => import("@/routes/Setup"));
 const ForgotPasswordRoute = lazy(() => import("@/routes/ForgotPassword"));
 const ResetPasswordRoute = lazy(() => import("@/routes/ResetPassword"));
+const AcceptInvitationRoute = lazy(() => import("@/routes/AcceptInvitation"));
 const DashboardRoute = lazy(() => import("@/routes/Dashboard"));
 const MediaListRoute = lazy(() => import("@/routes/Media/List"));
 const UsersListRoute = lazy(() => import("@/routes/Users/List"));
@@ -109,6 +110,7 @@ const AppRouter: Component = () => {
 				<Route path="/setup" component={SetupRoute} />
 				<Route path="/forgot-password" component={ForgotPasswordRoute} />
 				<Route path="/reset-password" component={ResetPasswordRoute} />
+				<Route path="/accept-invitation" component={AcceptInvitationRoute} />
 			</Route>
 		</Router>
 	);

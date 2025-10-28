@@ -124,6 +124,7 @@ export default Object.freeze({
 		imageProcessor: "image-processor",
 		mediaAdapter: "media-adapter",
 		emailAdapter: "email-adapter",
+		oidcAuth: "oidc-auth",
 	} as const,
 	retention: 30,
 	cronSchedule: "0 0 * * *",

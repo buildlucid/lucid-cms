@@ -11,23 +11,8 @@ export const OIDCConfigSchema = z.object({
 	userinfoEndpoint: z.url().optional(),
 });
 
-export const SAMLConfigSchema = z.object({
-	type: z.literal("saml"),
-	entryPoint: z.url(),
-	certificate: z.string(),
-	issuer: z.string(),
-	attributeMapping: z
-		.object({
-			email: z.string().optional(),
-			firstName: z.string().optional(),
-			lastName: z.string().optional(),
-		})
-		.optional(),
-});
-
 export const AuthProviderConfigSchema = z.discriminatedUnion("type", [
 	OIDCConfigSchema,
-	SAMLConfigSchema,
 ]);
 
 export const AuthProviderSchema = z.object({
@@ -35,6 +20,6 @@ export const AuthProviderSchema = z.object({
 	name: z.string(),
 	icon: z.string().optional(),
 	enabled: z.boolean(),
-	type: z.enum(["oidc", "saml"]),
+	type: z.enum(["oidc"]),
 	config: AuthProviderConfigSchema,
 });

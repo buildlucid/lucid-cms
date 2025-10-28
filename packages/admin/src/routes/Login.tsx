@@ -1,5 +1,13 @@
 import T from "@/translations";
-import { type Component, createEffect, Switch, Match } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	Switch,
+	Match,
+	Show,
+	For,
+} from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import api from "@/services/api";
 import LoginForm from "@/components/Forms/Auth/LoginForm";
@@ -18,6 +26,23 @@ const LoginRoute: Component = () => {
 	const setupRequired = api.auth.useSetupRequired({
 		queryParams: {},
 	});
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+	});
+	const initiateProvider = api.auth.useInitiateProvider();
+
+	// ----------------------------------------
+	// Memos
+	const isLoading = createMemo(
+		() => setupRequired.isLoading || providers.isLoading,
+	);
+	const isError = createMemo(() => setupRequired.isError || providers.isError);
+	const isSuccess = createMemo(
+		() =>
+			setupRequired.isSuccess &&
+			providers.isSuccess &&
+			!setupRequired.data.data.setupRequired,
+	);
 
 	// ----------------------------------------
 	// Effects
@@ -31,10 +56,10 @@ const LoginRoute: Component = () => {
 	// Render
 	return (
 		<Switch>
-			<Match when={setupRequired.isLoading}>
+			<Match when={isLoading()}>
 				<FullPageLoading />
 			</Match>
-			<Match when={setupRequired.isError}>
+			<Match when={isError()}>
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
@@ -43,9 +68,7 @@ const LoginRoute: Component = () => {
 					}}
 				/>
 			</Match>
-			<Match
-				when={setupRequired.isSuccess && !setupRequired.data.data.setupRequired}
-			>
+			<Match when={isSuccess()}>
 				<>
 					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
 					<h1 class="mb-1 text-center">{T()("login_route_title")}</h1>
@@ -53,8 +76,40 @@ const LoginRoute: Component = () => {
 						{T()("login_route_description")}
 					</p>
 					<div class="my-10">
-						<LoginForm showForgotPassword={true} />
+						<Show when={providers.data?.data.disablePassword === false}>
+							<LoginForm showForgotPassword={true} />
+						</Show>
 					</div>
+
+					<Show
+						when={
+							providers.data?.data.providers?.length &&
+							providers.data?.data.providers?.length > 0
+						}
+					>
+						<div class="my-8">
+							<h2 class="mb-3 text-center">Sign in with a provider</h2>
+							<div class="flex flex-col gap-2 items-center">
+								<For each={providers.data?.data.providers ?? []}>
+									{(p) => (
+										<button
+											type="button"
+											class="px-4 py-2 border rounded"
+											onClick={() =>
+												initiateProvider.action.mutate({
+													providerKey: p.key,
+													body: {},
+												})
+											}
+											disabled={initiateProvider.action.isPending}
+										>
+											Continue with {p.name}
+										</button>
+									)}
+								</For>
+							</div>
+						</div>
+					</Show>
 				</>
 			</Match>
 		</Switch>

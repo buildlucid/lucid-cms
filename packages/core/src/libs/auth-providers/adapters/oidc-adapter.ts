@@ -1,3 +1,5 @@
+import constants from "../../../constants/constants.js";
+import { logger } from "../../../index.js";
 import T from "../../../translations/index.js";
 import type { OIDCAdapter, OIDCAuthConfig } from "../types.js";
 
@@ -21,11 +23,30 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				url.searchParams.set("state", params.state);
 				url.searchParams.set("scope", scopes);
 
+				logger.debug({
+					scope: constants.logScopes.oidcAuth,
+					message: `Generating OIDC auth URL for ${config.clientId}`,
+					data: {
+						authEndpoint,
+						scopes,
+						redirectUri: params.redirectUri,
+						state: params.state,
+					},
+				});
+
 				return {
 					error: undefined,
 					data: url.toString(),
 				};
 			} catch (err) {
+				logger.error({
+					scope: constants.logScopes.oidcAuth,
+					message: `Failed to generate OIDC auth URL for ${config.clientId}`,
+					data: {
+						redirectUri: params.redirectUri,
+						state: params.state,
+					},
+				});
 				return {
 					error: {
 						type: "basic",
@@ -74,6 +95,7 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				}
 
 				const tokenData = await tokenResponse.json();
+				console.log("tokenData", tokenData);
 				const accessToken = tokenData.access_token;
 				if (!accessToken) {
 					return {
@@ -112,6 +134,12 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				}
 
 				const userInfo = await userInfoResponse.json();
+				console.log("userInfo", userInfo);
+				logger.debug({
+					scope: constants.logScopes.oidcAuth,
+					message: "OIDC user info",
+					data: userInfo,
+				});
 
 				const providerUserId = userInfo.sub || userInfo.id;
 				const email = userInfo.email;

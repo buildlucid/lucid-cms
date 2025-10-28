@@ -4,11 +4,9 @@ import type {
 	AuthProviderConfigSchema,
 	AuthProviderSchema,
 	OIDCConfigSchema,
-	SAMLConfigSchema,
 } from "./schema.js";
 
 export type OIDCAuthConfig = z.infer<typeof OIDCConfigSchema>;
-export type SAMLAuthConfig = z.infer<typeof SAMLConfigSchema>;
 export type AuthProviderConfig = z.infer<typeof AuthProviderConfigSchema>;
 export type AuthProvider = z.infer<typeof AuthProviderSchema>;
 export type AuthProviderTypes = AuthProviderConfig["type"];
@@ -47,7 +45,4 @@ export interface AuthAdapter {
 
 export interface OIDCAdapter extends AuthAdapter {
 	config: OIDCAuthConfig;
-}
-export interface SAMLAdapter extends AuthAdapter {
-	config: SAMLAuthConfig;
 }
