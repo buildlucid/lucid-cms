@@ -25,22 +25,25 @@ const oidcCallback: ServiceFn<
 	);
 
 	//* retrieve and validate auth state
-	// TODO: store auth state ttl in constants
-	const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-
 	const authStateRes = await AuthStates.selectSingle({
-		select: ["id", "provider_key", "invitation_token_id"],
+		select: [
+			"id",
+			"provider_key",
+			"invitation_token_id",
+			"redirect_path",
+			"action_type",
+		],
 		where: [
 			{
 				key: "state",
 				operator: "=",
 				value: data.state,
 			},
-			// {
-			// 	key: "created_at",
-			// 	operator: ">",
-			// 	value: tenMinutesAgo.toISOString(),
-			// },
+			{
+				key: "expiry_date",
+				operator: ">",
+				value: new Date().toISOString(),
+			},
 		],
 		validation: {
 			enabled: true,
@@ -100,6 +103,8 @@ const oidcCallback: ServiceFn<
 		firstName: userInfoRes.data.firstName,
 		lastName: userInfoRes.data.lastName,
 		invitationTokenId: authStateRes.data.invitation_token_id ?? undefined,
+		redirectPath: authStateRes.data.redirect_path ?? undefined,
+		actionType: authStateRes.data.action_type ?? undefined,
 	});
 	if (processAuthRes.error) return processAuthRes;
 

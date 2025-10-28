@@ -171,4 +171,13 @@ export default Object.freeze({
 		refresh: "refresh",
 		invitation: "invitation",
 	} as const,
+	authState: {
+		actionTypes: {
+			invitation: "invitation",
+			authLink: "authenticated-link",
+			login: "login",
+		} as const,
+		defaultRedirectPath: "/admin",
+		ttl: 600000,
+	},
 });

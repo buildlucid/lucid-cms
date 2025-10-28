@@ -467,10 +467,16 @@ export interface LucidBricksTable {
 	[key: CustomFieldColumnName]: unknown;
 }
 
+export type AuthStateActionType =
+	(typeof constants.authState.actionTypes)[keyof typeof constants.authState.actionTypes];
+
 export interface LucidAuthStates {
 	id: Generated<number>;
 	state: string;
 	provider_key: string;
+	action_type: AuthStateActionType;
+	expiry_date: TimestampImmutable;
+	redirect_path: string | null;
 	invitation_token_id: number | null;
 	created_at: TimestampImmutable;
 }

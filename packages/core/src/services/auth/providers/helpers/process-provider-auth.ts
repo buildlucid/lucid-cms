@@ -1,6 +1,9 @@
+import constants from "../../../../constants/constants.js";
 import Formatter from "../../../../libs/formatters/index.js";
 import Repository from "../../../../libs/repositories/index.js";
 import T from "../../../../translations/index.js";
+import type { AuthStateActionType } from "../../../../types.js";
+import urlAddPath from "../../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 
 /**
@@ -16,6 +19,8 @@ const processProviderAuth: ServiceFn<
 			firstName?: string;
 			lastName?: string;
 			invitationTokenId?: number;
+			redirectPath?: string;
+			actionType: AuthStateActionType;
 		},
 	],
 	{
@@ -35,11 +40,17 @@ const processProviderAuth: ServiceFn<
 	);
 	const Users = Repository.get("users", context.db, context.config.db);
 
-	// TODO: have this be determined by the state. if user authenticates on the account page, redirect to account page etc.
-	const redirectUrl = `${context.config.host}/admin`;
+	const redirectUrl = urlAddPath(
+		context.config.host,
+		data.redirectPath ?? constants.authState.defaultRedirectPath,
+	);
 
+	// -----------------------------------------------------
 	//* invitation flow
-	if (data.invitationTokenId) {
+	if (
+		data.actionType === constants.authState.actionTypes.invitation &&
+		data.invitationTokenId
+	) {
 		const invitationTokenRes = await UserTokens.selectSingle({
 			select: ["user_id"],
 			where: [
@@ -175,8 +186,8 @@ const processProviderAuth: ServiceFn<
 		};
 	}
 
-	//* regular login flow
-	// TODO: join user on provider link
+	// -----------------------------------------------------
+	// login flow
 	const [providerLinkRes, userByEmailRes] = await Promise.all([
 		UserAuthProviders.selectSingle({
 			select: ["user_id"],
@@ -234,8 +245,11 @@ const processProviderAuth: ServiceFn<
 		};
 	}
 
-	// TODO: add a new link flow, so if the user is authenticated already, and they login with a
-	// provider that they dont have linked yet, we should link them
+	// -----------------------------------------------------
+	// authentication link flow
+	if (data.actionType === constants.authState.actionTypes.authLink) {
+		// TODO: if the user is authenticated and the auth provider is currently not link, link it to the user
+	}
 
 	return {
 		error: undefined,

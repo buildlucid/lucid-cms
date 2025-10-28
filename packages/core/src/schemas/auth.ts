@@ -212,6 +212,18 @@ export const controllerSchemas = {
 					example: "abc123def456",
 				})
 				.optional(),
+			actionType: z.enum(["invitation", "authenticated-link", "login"]).meta({
+				description:
+					"The type of action to be performed by the auth provider on callback. Are we accepting an invitation (so we should verify the token, user etc.), are we just logging in, or are we authenticated and attempting to link a new provider?",
+				example: "login",
+			}),
+			redirectPath: z
+				.string()
+				.meta({
+					description: "The redirect path on a successful callback",
+					example: "/admin",
+				})
+				.optional(),
 		}),
 		query: {
 			string: undefined,

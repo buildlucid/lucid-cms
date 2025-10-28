@@ -40,16 +40,19 @@ export const envSchema = z.object({
 	LUCID_LOCAL_STORAGE_SECRET_KEY: z.string(),
 	LUCID_RESEND_API_KEY: z.string(),
 	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
+	GITHUB_CLIENT_ID: z.string(),
+	GITHUB_CLIENT_SECRET: z.string(),
 });
 
 export default defineConfig((env) => ({
-	host: "http://localhost:6543",
+	// host: "http://localhost:6543",
+	host: "https://lucidcms-86.localcan.dev",
 	// host: "https://cms.lucidjs.build",
 	// cors: {
 	// 	origin: [],
 	// },
 	logger: {
-		level: "debug",
+		level: "silent",
 	},
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),
@@ -68,16 +71,20 @@ export default defineConfig((env) => ({
 		},
 		providers: [
 			{
-				key: "microsoft",
-				name: "Microsoft",
-				icon: "/public/microsoft-icon.svg",
+				key: "github",
+				name: "GitHub",
+				icon: "/public/github-icon.svg",
 				enabled: true,
 				type: "oidc",
 				config: {
 					type: "oidc",
-					clientId: "id",
-					clientSecret: "secret",
-					issuer: "https://login.microsoftonline.com/{tenant}/v2.0",
+					clientId: env.GITHUB_CLIENT_ID,
+					clientSecret: env.GITHUB_CLIENT_SECRET,
+					issuer: "https://github.com",
+					authorizationEndpoint: "https://github.com/login/oauth/authorize",
+					tokenEndpoint: "https://github.com/login/oauth/access_token",
+					userinfoEndpoint: "https://api.github.com/user",
+					scopes: ["read:user", "user:email"],
 				},
 			},
 		],

@@ -286,6 +286,10 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("provider_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("redirect_path", adapter.getDataType("text"))
+				.addColumn("action_type", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
 				.addColumn(
 					"invitation_token_id",
 					adapter.getDataType("integer"),
@@ -300,6 +304,9 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						)
 						.notNull(),
+				)
+				.addColumn("expiry_date", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
 				)
 				.execute();
 

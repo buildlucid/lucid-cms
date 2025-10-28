@@ -1,17 +1,23 @@
 import { randomUUID } from "node:crypto";
+import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import Formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
-import type { InitiateAuthResponse } from "../../../types.js";
+import type {
+	AuthStateActionType,
+	InitiateAuthResponse,
+} from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const initiate: ServiceFn<
 	[
 		{
 			providerKey: string;
+			actionType: AuthStateActionType;
+			redirectPath?: string;
 			invitationToken?: string;
 		},
 	],
@@ -112,6 +118,11 @@ const initiate: ServiceFn<
 			state: stateToken,
 			provider_key: data.providerKey,
 			invitation_token_id: invitationTokenId,
+			expiry_date: addMilliseconds(
+				new Date(),
+				constants.authState.ttl,
+			).toISOString(),
+			redirect_path: data.redirectPath,
 		},
 	});
 	if (stateRes.error) return stateRes;

@@ -42,7 +42,7 @@ const providerInitiateController = factory.createHandlers(
 	validate("json", controllerSchemas.providerInitiate.body),
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
-		const { invitationToken } = c.req.valid("json");
+		const { invitationToken, redirectPath, actionType } = c.req.valid("json");
 
 		const initiateAuthRes = await serviceWrapper(
 			services.auth.providers.initiate,
@@ -65,6 +65,8 @@ const providerInitiateController = factory.createHandlers(
 			{
 				providerKey,
 				invitationToken,
+				redirectPath,
+				actionType,
 			},
 		);
 		if (initiateAuthRes.error) throw new LucidAPIError(initiateAuthRes.error);
