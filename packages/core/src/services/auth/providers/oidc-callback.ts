@@ -22,6 +22,7 @@ const oidcCallback: ServiceFn<
 	{
 		redirectUrl: string;
 		userId: number;
+		grantAuthentication: boolean;
 	}
 > = async (context, data) => {
 	const AuthStates = Repository.get(
@@ -116,6 +117,7 @@ const oidcCallback: ServiceFn<
 		data: {
 			userId: processAuthRes.data.userId,
 			redirectUrl: processAuthRes.data.redirectUrl,
+			grantAuthentication: processAuthRes.data.grantAuthentication,
 		},
 	};
 };

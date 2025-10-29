@@ -21,11 +21,13 @@ const processProviderAuth: ServiceFn<
 			invitationTokenId?: number;
 			redirectPath?: string;
 			actionType: AuthStateActionType;
+			authenticatedUserId?: number;
 		},
 	],
 	{
 		userId: number;
 		redirectUrl: string;
+		grantAuthentication: boolean;
 	}
 > = async (context, data) => {
 	const UserAuthProviders = Repository.get(
@@ -51,117 +53,99 @@ const processProviderAuth: ServiceFn<
 		data.actionType === constants.authState.actionTypes.invitation &&
 		data.invitationTokenId
 	) {
-		const invitationTokenRes = await UserTokens.selectSingle({
-			select: ["user_id"],
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.invitationTokenId,
+		const [invitationTokenRes, userAuthProviderRes] = await Promise.all([
+			UserTokens.selectUserInvitation({
+				id: data.invitationTokenId,
+				validation: {
+					enabled: true,
+					defaultError: {
+						status: 404,
+						message: T("invitation_token_not_found_message"),
+					},
 				},
-			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					status: 404,
-					message: T("invitation_token_not_found_message"),
-				},
-			},
-		});
+			}),
+			UserAuthProviders.selectSingle({
+				select: ["user_id"],
+				where: [
+					{
+						key: "provider_key",
+						operator: "=",
+						value: data.providerKey,
+					},
+					{
+						key: "provider_user_id",
+						operator: "=",
+						value: data.providerUserId,
+					},
+				],
+			}),
+		]);
 		if (invitationTokenRes.error) return invitationTokenRes;
+		if (userAuthProviderRes.error) return userAuthProviderRes;
 
-		const userId = invitationTokenRes.data.user_id;
-
-		// TODO: join off user token query
-		const userRes = await Users.selectSingle({
-			select: ["email", "invitation_accepted", "first_name", "last_name"],
-			where: [
-				{ key: "id", operator: "=", value: userId },
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "false"),
-				},
-			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					status: 404,
-					message: T("user_not_found_message"),
-				},
-			},
-		});
-		if (userRes.error) return userRes;
-
-		if (userRes.data.email !== data.email) {
+		//* check if the user is soft deleted
+		if (Formatter.formatBoolean(invitationTokenRes.data.user_is_deleted)) {
 			return {
 				error: {
-					type: "basic",
 					status: 400,
-					name: T("email_mismatch_name"),
-					message: T("email_mismatch_message"),
+					name: T("auth_provider_user_is_deleted_name"),
+					message: T("auth_provider_user_is_deleted_message"),
 				},
-				data: undefined,
+			};
+		}
+		//* check if the user has accepted an invitation already
+		if (
+			Formatter.formatBoolean(invitationTokenRes.data.user_invitation_accepted)
+		) {
+			return {
+				error: {
+					status: 400,
+					name: T("auth_provider_user_invitation_accepted_name"),
+					message: T("auth_provider_user_invitation_accepted_message"),
+				},
+			};
+		}
+		//* we've found a user auth provider entry for the users provider userid,
+		//* but the entry doesnt match the users id that theyre accepting the invitation on behalf of
+		if (
+			userAuthProviderRes.data &&
+			invitationTokenRes.data.user_id !== userAuthProviderRes.data.user_id
+		) {
+			return {
+				error: {
+					status: 400,
+					name: T("auth_provider_user_id_mismatch_name"),
+					message: T("auth_provider_user_id_mismatch_message"),
+				},
 			};
 		}
 
-		if (Formatter.formatBoolean(userRes.data.invitation_accepted)) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					name: T("invitation_already_accepted_name"),
-					message: T("invitation_already_accepted_message"),
-				},
-				data: undefined,
-			};
-		}
-
-		// TODO: join off user token query
-		const existingLinkRes = await UserAuthProviders.selectSingle({
-			select: ["user_id"],
-			where: [
-				{
-					key: "provider_key",
-					operator: "=",
-					value: data.providerKey,
-				},
-				{
-					key: "provider_user_id",
-					operator: "=",
-					value: data.providerUserId,
-				},
-			],
-		});
-		if (existingLinkRes.data && existingLinkRes.data.user_id !== userId) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					name: T("provider_already_linked_name"),
-					message: T("provider_already_linked_message"),
-				},
-				data: undefined,
-			};
-		}
-
+		//* update the user, create a user auth provider entry and delete the invitation token
 		const [linkRes, updateUserRes] = await Promise.all([
-			existingLinkRes.data
+			userAuthProviderRes.data
 				? undefined
 				: UserAuthProviders.createSingle({
 						data: {
-							user_id: userId,
+							user_id: invitationTokenRes.data.user_id,
 							provider_key: data.providerKey,
 							provider_user_id: data.providerUserId,
 							linked_at: new Date().toISOString(),
+							updated_at: new Date().toISOString(),
 						},
 					}),
 			Users.updateSingle({
-				where: [{ key: "id", operator: "=", value: userId }],
+				where: [
+					{ key: "id", operator: "=", value: invitationTokenRes.data.user_id },
+				],
 				data: {
-					first_name: userRes.data.first_name ?? data.firstName,
-					last_name: userRes.data.last_name ?? data.lastName,
+					first_name: invitationTokenRes.data.user_first_name
+						? undefined
+						: data.firstName,
+					last_name: invitationTokenRes.data.user_last_name
+						? undefined
+						: data.lastName,
 					invitation_accepted: true,
+					updated_at: new Date().toISOString(),
 				},
 			}),
 			UserTokens.deleteSingle({
@@ -180,82 +164,144 @@ const processProviderAuth: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				userId: userId,
+				userId: invitationTokenRes.data.user_id,
 				redirectUrl: redirectUrl,
+				grantAuthentication: true,
+			},
+		};
+	}
+
+	// ----------------------------------------------------
+	// authLink flow
+	if (data.actionType === constants.authState.actionTypes.authLink) {
+		//* the user is trying to link a provider, but the autenticatedUserId is not provided
+		if (!data.authenticatedUserId) {
+			return {
+				error: {
+					status: 401,
+					name: T("auth_provider_link_user_not_authenticated_name"),
+					message: T("auth_provider_link_user_not_authenticated_message"),
+				},
+				data: undefined,
+			};
+		}
+
+		const userAuthProviderRes = await UserAuthProviders.selectUserAuthProvider({
+			providerKey: data.providerKey,
+			providerUserId: data.providerUserId,
+		});
+		if (userAuthProviderRes.error) return userAuthProviderRes;
+
+		//* check if the target user is deleted
+		if (
+			userAuthProviderRes.data &&
+			Formatter.formatBoolean(userAuthProviderRes.data.user_is_deleted)
+		) {
+			return {
+				error: {
+					status: 404,
+					name: T("auth_provider_user_is_deleted_name"),
+					message: T("auth_provider_user_is_deleted_message"),
+				},
+				data: undefined,
+			};
+		}
+
+		//* check if the user auth provider is exists, but linked to another user
+		if (
+			userAuthProviderRes.data &&
+			userAuthProviderRes.data.user_id !== data.authenticatedUserId
+		) {
+			return {
+				error: {
+					status: 400,
+					name: T("auth_provider_user_id_mismatch_name"),
+					message: T("auth_provider_user_id_mismatch_message"),
+				},
+				data: undefined,
+			};
+		}
+
+		//* check if the authenticated user is trying to link to a provider they already have
+		if (
+			userAuthProviderRes.data &&
+			userAuthProviderRes.data.user_id === data.authenticatedUserId
+		) {
+			return {
+				error: {
+					status: 400,
+					name: T("auth_provider_already_linked_name"),
+					message: T("auth_provider_already_linked_message"),
+				},
+				data: undefined,
+			};
+		}
+
+		//* create the auth provider link
+		const [linkRes, updateUserRes] = await Promise.all([
+			UserAuthProviders.createSingle({
+				data: {
+					user_id: data.authenticatedUserId,
+					provider_key: data.providerKey,
+					provider_user_id: data.providerUserId,
+					linked_at: new Date().toISOString(),
+					updated_at: new Date().toISOString(),
+				},
+			}),
+			Users.updateSingle({
+				where: [{ key: "id", operator: "=", value: data.authenticatedUserId }],
+				data: {
+					updated_at: new Date().toISOString(),
+				},
+			}),
+		]);
+		if (linkRes.error) return linkRes;
+		if (updateUserRes.error) return updateUserRes;
+
+		return {
+			error: undefined,
+			data: {
+				userId: data.authenticatedUserId,
+				redirectUrl: redirectUrl,
+				// they're already authenticated, so dont bother refreshing their access/refresh tokens
+				grantAuthentication: false,
 			},
 		};
 	}
 
 	// -----------------------------------------------------
 	// login flow
-	const [providerLinkRes, userByEmailRes] = await Promise.all([
-		UserAuthProviders.selectSingle({
-			select: ["user_id"],
-			where: [
-				{
-					key: "provider_key",
-					operator: "=",
-					value: data.providerKey,
-				},
-				{
-					key: "provider_user_id",
-					operator: "=",
-					value: data.providerUserId,
-				},
-			],
-			validation: {
-				enabled: true,
+	const userAuthProviderRes = await UserAuthProviders.selectUserAuthProvider({
+		providerKey: data.providerKey,
+		providerUserId: data.providerUserId,
+		validation: {
+			enabled: true,
+			defaultError: {
+				status: 404,
+				name: T("auth_provider_user_not_found_name"),
+				message: T("auth_provider_user_not_found_message"),
 			},
-		}),
-		Users.selectSingle({
-			select: ["id"],
-			where: [
-				{
-					key: "email",
-					operator: "=",
-					value: data.email,
-				},
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "false"),
-				},
-			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					name: T("no_account_found_name"),
-					message: T("no_account_found_message"),
-				},
-			},
-		}),
-	]);
-	if (providerLinkRes.error) return providerLinkRes;
-	if (userByEmailRes.error) return userByEmailRes;
+		},
+	});
+	if (userAuthProviderRes.error) return userAuthProviderRes;
 
-	if (providerLinkRes.data.user_id !== userByEmailRes.data.id) {
+	if (Formatter.formatBoolean(userAuthProviderRes.data.user_is_deleted)) {
 		return {
 			error: {
-				type: "basic",
-				status: 400,
-				name: T("user_mismatch_name"),
-				message: T("user_mismatch_message"),
+				status: 404,
+				name: T("auth_provider_user_is_deleted_name"),
+				message: T("auth_provider_user_is_deleted_message"),
 			},
 			data: undefined,
 		};
 	}
 
-	// -----------------------------------------------------
-	// authentication link flow
-	if (data.actionType === constants.authState.actionTypes.authLink) {
-		// TODO: if the user is authenticated and the auth provider is currently not link, link it to the user
-	}
-
 	return {
 		error: undefined,
 		data: {
-			userId: providerLinkRes.data.user_id,
+			userId: userAuthProviderRes.data.user_id,
 			redirectUrl: redirectUrl,
+			grantAuthentication: true,
 		},
 	};
 };

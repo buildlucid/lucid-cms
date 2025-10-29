@@ -1,10 +1,9 @@
-import T from "../../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
 import Repository from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
 
 /**
  * Accepts an invitation by setting the user's password and marking the invitation as accepted.
