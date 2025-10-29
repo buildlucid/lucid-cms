@@ -5,6 +5,12 @@ import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import processProviderAuth from "./helpers/process-provider-auth.js";
 
+/**
+ * The callback endpoint for OIDC auth flow.
+ *
+ * Verifies the provider and state key, then proceeds to authenticate / link the provider to the user based on the
+ * states action type.
+ */
 const oidcCallback: ServiceFn<
 	[
 		{
@@ -23,6 +29,23 @@ const oidcCallback: ServiceFn<
 		context.db,
 		context.config.db,
 	);
+
+	//* get provider config
+	const availableProviders = getAvailableProviders(context.config);
+	const provider = availableProviders.providers.find(
+		(p) => p.key === data.providerKey,
+	);
+	if (!provider) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				name: T("provider_not_found_name"),
+				message: T("provider_not_found_message"),
+			},
+			data: undefined,
+		};
+	}
 
 	//* retrieve and validate auth state
 	const authStateRes = await AuthStates.selectSingle({
@@ -44,6 +67,11 @@ const oidcCallback: ServiceFn<
 				operator: ">",
 				value: new Date().toISOString(),
 			},
+			{
+				key: "provider_key",
+				operator: "=",
+				value: data.providerKey,
+			},
 		],
 		validation: {
 			enabled: true,
@@ -55,36 +83,6 @@ const oidcCallback: ServiceFn<
 	});
 	if (authStateRes.error) return authStateRes;
 
-	//* provider key matche check
-	if (authStateRes.data.provider_key !== data.providerKey) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				name: T("provider_mismatch_name"),
-				message: T("provider_mismatch_message"),
-			},
-			data: undefined,
-		};
-	}
-
-	//* get provider config
-	const availableProviders = getAvailableProviders(context.config);
-	const provider = availableProviders.providers.find(
-		(p) => p.key === data.providerKey,
-	);
-	if (!provider) {
-		return {
-			error: {
-				type: "basic",
-				status: 404,
-				name: T("provider_not_found_name"),
-				message: T("provider_not_found_message"),
-			},
-			data: undefined,
-		};
-	}
-
 	//* get provider adapter and use the adapter to handle callback and get user info
 	const adapterRes = getAuthProviderAdapter(provider);
 	if (adapterRes.error) return adapterRes;
@@ -95,23 +93,23 @@ const oidcCallback: ServiceFn<
 	});
 	if (userInfoRes.error) return userInfoRes;
 
-	//* process authentication
-	const processAuthRes = await processProviderAuth(context, {
-		providerKey: data.providerKey,
-		providerUserId: userInfoRes.data.providerUserId,
-		email: userInfoRes.data.email,
-		firstName: userInfoRes.data.firstName,
-		lastName: userInfoRes.data.lastName,
-		invitationTokenId: authStateRes.data.invitation_token_id ?? undefined,
-		redirectPath: authStateRes.data.redirect_path ?? undefined,
-		actionType: authStateRes.data.action_type ?? undefined,
-	});
+	//* process authentication & cleanup
+	const [processAuthRes] = await Promise.all([
+		processProviderAuth(context, {
+			providerKey: data.providerKey,
+			providerUserId: userInfoRes.data.providerUserId,
+			email: userInfoRes.data.email,
+			firstName: userInfoRes.data.firstName,
+			lastName: userInfoRes.data.lastName,
+			invitationTokenId: authStateRes.data.invitation_token_id ?? undefined,
+			redirectPath: authStateRes.data.redirect_path ?? undefined,
+			actionType: authStateRes.data.action_type ?? undefined,
+		}),
+		AuthStates.deleteSingle({
+			where: [{ key: "id", operator: "=", value: authStateRes.data.id }],
+		}),
+	]);
 	if (processAuthRes.error) return processAuthRes;
-
-	//* delete auth state
-	await AuthStates.deleteSingle({
-		where: [{ key: "id", operator: "=", value: authStateRes.data.id }],
-	});
 
 	return {
 		error: undefined,
