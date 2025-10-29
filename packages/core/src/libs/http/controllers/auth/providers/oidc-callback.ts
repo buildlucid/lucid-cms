@@ -11,6 +11,9 @@ import {
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import validate from "../../../middleware/validate.js";
+import constants from "../../../../../constants/constants.js";
+import urlAddPath from "../../../../../utils/helpers/url-add-path.js";
+import buildErrorURL from "../../../utils/build-error-url.js";
 
 const factory = createFactory();
 
@@ -33,6 +36,11 @@ const providerOIDCCallbackController = factory.createHandlers(
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
 		const { code, state } = c.req.valid("query");
+
+		const baseRedirectUrl = urlAddPath(
+			c.get("config").host,
+			constants.authState.defaultRedirectPath,
+		);
 
 		const callbackAuthRes = await serviceWrapper(
 			services.auth.providers.oidcCallback,
@@ -58,7 +66,9 @@ const providerOIDCCallbackController = factory.createHandlers(
 				state,
 			},
 		);
-		if (callbackAuthRes.error) throw new LucidAPIError(callbackAuthRes.error);
+		if (callbackAuthRes.error) {
+			return c.redirect(buildErrorURL(baseRedirectUrl, callbackAuthRes.error));
+		}
 
 		if (callbackAuthRes.data.grantAuthentication) {
 			const [refreshRes, accessRes] = await Promise.all([
@@ -68,8 +78,16 @@ const providerOIDCCallbackController = factory.createHandlers(
 				),
 				services.auth.accessToken.generateToken(c, callbackAuthRes.data.userId),
 			]);
-			if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
-			if (accessRes.error) throw new LucidAPIError(accessRes.error);
+			if (refreshRes.error) {
+				return c.redirect(
+					buildErrorURL(callbackAuthRes.data.redirectUrl, refreshRes.error),
+				);
+			}
+			if (accessRes.error) {
+				return c.redirect(
+					buildErrorURL(callbackAuthRes.data.redirectUrl, accessRes.error),
+				);
+			}
 
 			const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 			const userAgent = c.req.header("user-agent") || null;
@@ -100,8 +118,14 @@ const providerOIDCCallbackController = factory.createHandlers(
 					userAgent: userAgent,
 				},
 			);
-			if (userLoginTrackRes.error)
-				throw new LucidAPIError(userLoginTrackRes.error);
+			if (userLoginTrackRes.error) {
+				return c.redirect(
+					buildErrorURL(
+						callbackAuthRes.data.redirectUrl,
+						userLoginTrackRes.error,
+					),
+				);
+			}
 		}
 
 		return c.redirect(callbackAuthRes.data.redirectUrl);
