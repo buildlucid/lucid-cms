@@ -94,16 +94,23 @@ const initiate: ServiceFn<
 					value: invitationTokenRes.data.user_id,
 				},
 			],
+			validation: {
+				enabled: true,
+				defaultError: {
+					status: 404,
+					message: T("user_not_found_message"),
+				},
+			},
 		});
 		if (userRes.error) return userRes;
 
-		if (Formatter.formatBoolean(userRes.data?.invitation_accepted)) {
+		if (Formatter.formatBoolean(userRes.data.invitation_accepted)) {
 			return {
 				error: {
 					type: "basic",
 					status: 400,
-					name: T("invitation_already_accepted_name"),
-					message: T("invitation_already_accepted_message"),
+					name: T("user_invitation_already_accepted_name"),
+					message: T("user_invitation_already_accepted_message"),
 				},
 				data: undefined,
 			};

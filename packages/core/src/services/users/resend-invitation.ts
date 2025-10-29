@@ -1,10 +1,10 @@
-import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import Formatter from "../../libs/formatters/index.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
-import Formatter from "../../libs/formatters/index.js";
 
 /**
  * Resends an invitation email to a user who has not yet accepted their invitation.
@@ -48,7 +48,8 @@ const resendInvitation: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("invitation_already_accepted_message"),
+				name: T("user_invitation_already_accepted_name"),
+				message: T("user_invitation_already_accepted_message"),
 			},
 			data: undefined,
 		};

@@ -1,7 +1,10 @@
+import constants from "../../../constants/constants.js";
+import { logger } from "../../../index.js";
+import Formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
 import type { ValidateInvitationResponse } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import constants from "../../../constants/constants.js";
 
 /**
  * Validates a invitation token and returns the user information if valid.
@@ -54,7 +57,14 @@ const validateInvitation: ServiceFn<
 	}
 
 	const userRes = await Users.selectSingle({
-		select: ["id", "email", "username", "first_name", "last_name"],
+		select: [
+			"id",
+			"email",
+			"username",
+			"first_name",
+			"last_name",
+			"invitation_accepted",
+		],
 		where: [
 			{
 				key: "id",
@@ -67,6 +77,21 @@ const validateInvitation: ServiceFn<
 		},
 	});
 	if (userRes.error) {
+		logger.error({
+			message: T("user_not_found_message"),
+		});
+		return {
+			error: undefined,
+			data: {
+				valid: false,
+			},
+		};
+	}
+
+	if (Formatter.formatBoolean(userRes.data?.invitation_accepted)) {
+		logger.error({
+			message: T("user_invitation_already_accepted_message"),
+		});
 		return {
 			error: undefined,
 			data: {

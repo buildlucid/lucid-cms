@@ -1,5 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
+import Formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
@@ -65,7 +66,7 @@ const acceptInvitation: ServiceFn<
 	if (tokenRes.error) return tokenRes;
 
 	const userRes = await Users.selectSingle({
-		select: ["id"],
+		select: ["id", "invitation_accepted"],
 		where: [
 			{
 				key: "id",
@@ -82,6 +83,18 @@ const acceptInvitation: ServiceFn<
 		},
 	});
 	if (userRes.error) return userRes;
+
+	if (Formatter.formatBoolean(userRes.data?.invitation_accepted)) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				name: T("user_invitation_already_accepted_name"),
+				message: T("user_invitation_already_accepted_message"),
+			},
+			data: undefined,
+		};
+	}
 
 	const { secret, encryptSecret } = generateSecret(
 		context.config.keys.encryptionKey,
