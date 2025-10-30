@@ -6,7 +6,22 @@ import type {
 	OIDCConfigSchema,
 } from "./schema.js";
 
-export type OIDCAuthConfig = z.infer<typeof OIDCConfigSchema>;
+export type OIDCUserInfo = {
+	userId: string | number;
+	email: string;
+	firstName?: string;
+	lastName?: string;
+	// displayName?: string;
+};
+
+export interface OIDCAuthConfig<TUserInfoResponse = unknown>
+	extends z.infer<typeof OIDCConfigSchema> {
+	mappers?: {
+		userInfo?: (
+			response: TUserInfoResponse,
+		) => Awaited<ServiceResponse<OIDCUserInfo>> | ServiceResponse<OIDCUserInfo>;
+	};
+}
 export type AuthProviderConfig = z.infer<typeof AuthProviderConfigSchema>;
 export type AuthProvider = z.infer<typeof AuthProviderSchema>;
 export type AuthProviderTypes = AuthProviderConfig["type"];
@@ -27,13 +42,15 @@ export interface AuthAdapterGetAuthUrlParams {
 export interface AuthAdapterHandleCallbackParams {
 	code: string;
 	state: string;
+	redirectUri: string;
 }
 
 export interface AuthAdapterCallbackResult {
-	providerUserId: string;
+	userId: string;
 	email: string;
 	firstName?: string;
 	lastName?: string;
+	// displayName?: string;
 }
 
 export interface AuthAdapter {

@@ -1,17 +1,17 @@
-import {
-	type Component,
-	Switch,
-	Match,
-	Show,
-	createSignal,
-	For,
-} from "solid-js";
-import { useLocation, useNavigate } from "@solidjs/router";
-import api from "@/services/api";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
 import notifyIllustration from "@assets/illustrations/notify.svg";
 import LogoIcon from "@assets/svgs/logo-icon.svg";
+import { useLocation, useNavigate } from "@solidjs/router";
+import {
+	type Component,
+	createSignal,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
+import FullPageLoading from "@/components/Partials/FullPageLoading";
+import api from "@/services/api";
 
 const AcceptInvitationRoute: Component = () => {
 	// ----------------------------------------
@@ -65,6 +65,7 @@ const AcceptInvitationRoute: Component = () => {
 			providerKey,
 			body: {
 				invitationToken: token,
+				actionType: "invitation",
 			},
 		});
 	};

@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import { logger } from "../../../index.js";
 import T from "../../../translations/index.js";
+import mapStandardUserInfo from "../helpers/default-user-info-mapper.js";
 import type { OIDCAdapter, OIDCAuthConfig } from "../types.js";
 
 const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
@@ -8,26 +9,30 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 		config,
 		getAuthUrl: async (params) => {
 			try {
-				const authEndpoint =
-					config.authorizationEndpoint ||
-					`${config.issuer}/oauth2/v2.0/authorize`;
-
 				const scopes = config.scopes
 					? config.scopes.join(" ")
 					: "openid profile email";
 
-				const url = new URL(authEndpoint);
+				const url = new URL(config.authorizationEndpoint);
 				url.searchParams.set("client_id", config.clientId);
 				url.searchParams.set("response_type", "code");
 				url.searchParams.set("redirect_uri", params.redirectUri);
 				url.searchParams.set("state", params.state);
 				url.searchParams.set("scope", scopes);
 
+				if (config.additionalAuthParams) {
+					for (const [key, value] of Object.entries(
+						config.additionalAuthParams,
+					)) {
+						url.searchParams.set(key, value);
+					}
+				}
+
 				logger.debug({
 					scope: constants.logScopes.oidcAuth,
 					message: `Generating OIDC auth URL for ${config.clientId}`,
 					data: {
-						authEndpoint,
+						authEndpoint: config.authorizationEndpoint,
 						scopes,
 						redirectUri: params.redirectUri,
 						state: params.state,
@@ -64,7 +69,7 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 		handleCallback: async (params) => {
 			try {
 				const tokenEndpoint =
-					config.tokenEndpoint || `${config.issuer}/oauth2/v2.0/token`;
+					config.tokenEndpoint || `${config.issuer}/oauth2/token`;
 
 				const tokenResponse = await fetch(tokenEndpoint, {
 					method: "POST",
@@ -77,6 +82,7 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 						client_secret: config.clientSecret,
 						code: params.code,
 						grant_type: "authorization_code",
+						redirect_uri: params.redirectUri,
 					}),
 				});
 				if (!tokenResponse.ok) {
@@ -95,7 +101,7 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				}
 
 				const tokenData = await tokenResponse.json();
-				console.log("tokenData", tokenData);
+
 				const accessToken = tokenData.access_token;
 				if (!accessToken) {
 					return {
@@ -109,13 +115,13 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					};
 				}
 
-				//* fetch user information using access token
 				const userinfoEndpoint =
-					config.userinfoEndpoint || `${config.issuer}/oauth2/v2.0/userinfo`;
+					config.userinfoEndpoint || `${config.issuer}/oauth2/userinfo`;
 
 				const userInfoResponse = await fetch(userinfoEndpoint, {
 					headers: {
 						Authorization: `Bearer ${accessToken}`,
+						Accept: "application/json",
 					},
 				});
 				if (!userInfoResponse.ok) {
@@ -133,24 +139,25 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					};
 				}
 
-				const userInfo = await userInfoResponse.json();
-				console.log("userInfo", userInfo);
+				const rawUserInfo = await userInfoResponse.json();
+
 				logger.debug({
 					scope: constants.logScopes.oidcAuth,
-					message: "OIDC user info",
-					data: userInfo,
+					message: "OIDC raw user info",
+					data: rawUserInfo,
 				});
 
-				const providerUserId = userInfo.sub || userInfo.id;
-				const email = userInfo.email;
+				const userInfoRes = await (config.mappers?.userInfo
+					? config.mappers.userInfo(rawUserInfo)
+					: mapStandardUserInfo(rawUserInfo));
+				if (userInfoRes.error) return userInfoRes;
 
-				if (!providerUserId || !email) {
+				if (!userInfoRes.data.userId || !userInfoRes.data.email) {
 					return {
 						error: {
-							type: "basic",
 							status: 500,
-							name: T("oidc_user_info_fetch_failed_name"),
-							message: T("oidc_user_info_fetch_failed_message"),
+							name: T("oidc_user_info_incomplete_name"),
+							message: T("oidc_user_info_incomplete_message"),
 						},
 						data: undefined,
 					};
@@ -159,10 +166,10 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				return {
 					error: undefined,
 					data: {
-						providerUserId,
-						email,
-						firstName: userInfo.given_name || userInfo.first_name,
-						lastName: userInfo.family_name || userInfo.last_name,
+						userId: String(userInfoRes.data.userId),
+						email: userInfoRes.data.email,
+						firstName: userInfoRes.data.firstName,
+						lastName: userInfoRes.data.lastName,
 					},
 				};
 			} catch (err) {

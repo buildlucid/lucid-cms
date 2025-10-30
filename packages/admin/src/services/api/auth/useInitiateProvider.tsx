@@ -1,11 +1,13 @@
+import type { InitiateAuthResponse, ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, InitiateAuthResponse } from "@types";
 
 interface Params {
 	providerKey: string;
 	body: {
 		invitationToken?: string;
+		actionType: "invitation" | "login" | "authenticated-link";
+		redirectPath?: string;
 	};
 }
 

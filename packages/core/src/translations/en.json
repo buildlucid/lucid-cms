@@ -355,5 +355,7 @@
 	"auth_provider_already_linked_name": "Already Linked",
 	"auth_provider_already_linked_message": "You are already linked to this auth provider.",
 	"auth_provider_user_not_found_name": "Auth Provider Not Found",
-	"auth_provider_user_not_found_message": "You are trying to authenticate with an auth provider that hasnt been linked to your account."
+	"auth_provider_user_not_found_message": "You are trying to authenticate with an auth provider that hasnt been linked to your account.",
+	"oidc_user_info_incomplete_name": "Incomplete User Info",
+	"oidc_user_info_incomplete_message": "The default OIDC user info mapper failed to get the re."
 }

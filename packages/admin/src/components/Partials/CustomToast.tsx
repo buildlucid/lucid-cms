@@ -1,21 +1,21 @@
-import {
-	type Component,
-	createSignal,
-	createEffect,
-	onCleanup,
-	Switch,
-	Match,
-	createMemo,
-	Show,
-} from "solid-js";
-import { toast, type Toast } from "solid-toast";
 import classNames from "classnames";
 import {
-	FaSolidTriangleExclamation,
 	FaSolidCheck,
 	FaSolidExclamation,
 	FaSolidInfo,
+	FaSolidTriangleExclamation,
 } from "solid-icons/fa";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Match,
+	onCleanup,
+	Show,
+	Switch,
+} from "solid-js";
+import { type Toast, toast } from "solid-toast";
 
 interface CustomToastProps {
 	title: string;
@@ -90,10 +90,12 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 						</Match>
 					</Switch>
 				</span>
-				<div class="ml-4">
-					<p class="text-sm font-bold capitalize text-title">{props.title}</p>
+				<div class="ml-4 gap-y-1 flex flex-col">
+					<Show when={props.title}>
+						<p class="text-sm font-bold capitalize text-title">{props.title}</p>
+					</Show>
 					<Show when={props.message}>
-						<p class="text-sm mt-1">{props.message}</p>
+						<p class="text-sm">{props.message}</p>
 					</Show>
 				</div>
 			</div>

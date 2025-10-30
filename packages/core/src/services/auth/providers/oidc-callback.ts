@@ -1,5 +1,6 @@
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
+import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -91,6 +92,10 @@ const oidcCallback: ServiceFn<
 	const userInfoRes = await adapterRes.data.handleCallback({
 		code: data.code,
 		state: data.state,
+		redirectUri: buildCallbackRedirectUrl(
+			context.config.host,
+			data.providerKey,
+		),
 	});
 	if (userInfoRes.error) return userInfoRes;
 
@@ -98,7 +103,7 @@ const oidcCallback: ServiceFn<
 	const [processAuthRes] = await Promise.all([
 		processProviderAuth(context, {
 			providerKey: data.providerKey,
-			providerUserId: userInfoRes.data.providerUserId,
+			providerUserId: userInfoRes.data.userId,
 			email: userInfoRes.data.email,
 			firstName: userInfoRes.data.firstName,
 			lastName: userInfoRes.data.lastName,

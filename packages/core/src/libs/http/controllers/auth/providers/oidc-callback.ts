@@ -1,18 +1,16 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { z } from "zod/v4";
+import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import services from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
-import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import urlAddPath from "../../../../../utils/helpers/url-add-path.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import validate from "../../../middleware/validate.js";
-import constants from "../../../../../constants/constants.js";
-import urlAddPath from "../../../../../utils/helpers/url-add-path.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
 
 const factory = createFactory();
@@ -22,9 +20,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 		description: "Handle OAuth callback from authentication provider.",
 		tags: ["auth"],
 		summary: "OIDC Provider Authentication Callback",
-		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.providerOIDCCallback.response),
-		}),
+		responses: honoOpenAPIResponse(),
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.providerOIDCCallback.params,
 			query: controllerSchemas.providerOIDCCallback.query.string,

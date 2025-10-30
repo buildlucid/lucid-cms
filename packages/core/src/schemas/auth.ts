@@ -272,41 +272,6 @@ export const controllerSchemas = {
 				example: "google",
 			}),
 		}),
-		response: z.object({
-			accessToken: z.string().meta({
-				description: "The JWT access token",
-				example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-			}),
-			refreshToken: z.string().meta({
-				description: "The JWT refresh token",
-				example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-			}),
-			user: z.object({
-				id: z.number().meta({
-					description: "The user ID",
-					example: 1,
-				}),
-				email: z.string().meta({
-					description: "The user email",
-					example: "user@example.com",
-				}),
-				username: z.string().meta({
-					description: "The username",
-					example: "johndoe",
-				}),
-				first_name: z.string().nullable().meta({
-					description: "The user's first name",
-					example: "John",
-				}),
-				last_name: z.string().nullable().meta({
-					description: "The user's last name",
-					example: "Doe",
-				}),
-				activated: z.boolean().meta({
-					description: "Whether the user account is activated",
-					example: true,
-				}),
-			}),
-		}),
+		response: undefined,
 	} satisfies ControllerSchema,
 };

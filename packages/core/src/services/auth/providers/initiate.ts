@@ -3,6 +3,7 @@ import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
+import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import Formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
@@ -125,6 +126,7 @@ const initiate: ServiceFn<
 			state: stateToken,
 			provider_key: data.providerKey,
 			invitation_token_id: invitationTokenId,
+			action_type: data.actionType,
 			expiry_date: addMilliseconds(
 				new Date(),
 				constants.authState.ttl,
@@ -138,7 +140,10 @@ const initiate: ServiceFn<
 	if (adapterRes.error) return adapterRes;
 
 	const redirectUrl = await adapterRes.data.getAuthUrl({
-		redirectUri: `${context.config.host}/api/v1/auth/providers/${data.providerKey}/callback`,
+		redirectUri: buildCallbackRedirectUrl(
+			context.config.host,
+			data.providerKey,
+		),
 		state: stateToken,
 	});
 	if (redirectUrl.error) return redirectUrl;

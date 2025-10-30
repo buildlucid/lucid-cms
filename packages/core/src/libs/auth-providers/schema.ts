@@ -5,10 +5,16 @@ export const OIDCConfigSchema = z.object({
 	clientId: z.string(),
 	clientSecret: z.string(),
 	issuer: z.url(),
+	authorizationEndpoint: z.url(),
 	scopes: z.array(z.string()).optional(),
-	authorizationEndpoint: z.url().optional(),
 	tokenEndpoint: z.url().optional(),
 	userinfoEndpoint: z.url().optional(),
+	additionalAuthParams: z.record(z.string(), z.string()).optional(),
+	mappers: z
+		.object({
+			userInfo: z.any().optional(),
+		})
+		.optional(),
 });
 
 export const AuthProviderConfigSchema = z.discriminatedUnion("type", [

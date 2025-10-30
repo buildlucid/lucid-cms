@@ -71,8 +71,8 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 				"lucid_users.invitation_accepted as user_invitation_accepted",
 				"lucid_users.is_deleted as user_is_deleted",
 			])
-			.where("expiry_date", ">", new Date().toISOString())
-			.where("id", "=", props.id);
+			.where("lucid_user_tokens.expiry_date", ">", new Date().toISOString())
+			.where("lucid_user_tokens.id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectUserInvitation",
