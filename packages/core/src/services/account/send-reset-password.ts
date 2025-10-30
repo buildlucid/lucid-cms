@@ -1,7 +1,7 @@
-import T from "../../translations/index.js";
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 
@@ -15,6 +15,17 @@ const sendResetPassword: ServiceFn<
 		message: string;
 	}
 > = async (context, data) => {
+	if (context.config.auth.password.enabled === false) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("password_authentication_disabled_message"),
+			},
+			data: undefined,
+		};
+	}
+
 	const Users = Repository.get("users", context.db, context.config.db);
 
 	const userExistsRes = await Users.selectSingle({

@@ -1,9 +1,9 @@
-import T from "../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
-import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
-import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import constants from "../../constants/constants.js";
+import Formatter from "../../libs/formatters/index.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const login: ServiceFn<
@@ -17,6 +17,17 @@ const login: ServiceFn<
 		id: number;
 	}
 > = async (context, data) => {
+	if (context.config.auth.password.enabled === false) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("password_authentication_disabled_message"),
+			},
+			data: undefined,
+		};
+	}
+
 	const Users = Repository.get("users", context.db, context.config.db);
 
 	const userRes = await Users.selectSingleByEmailUsername({

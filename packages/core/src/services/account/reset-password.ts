@@ -1,7 +1,7 @@
-import T from "../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import { generateSecret } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -15,6 +15,17 @@ const resetPassword: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
+	if (context.config.auth.password.enabled === false) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("password_authentication_disabled_message"),
+			},
+			data: undefined,
+		};
+	}
+
 	const UserTokens = Repository.get(
 		"user-tokens",
 		context.db,
