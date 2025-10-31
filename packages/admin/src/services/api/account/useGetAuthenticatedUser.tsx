@@ -1,10 +1,11 @@
-import { createEffect, createMemo } from "solid-js";
+import { useLocation, useNavigate } from "@solidjs/router";
 import { createQuery } from "@tanstack/solid-query";
-import { useNavigate } from "@solidjs/router";
+import type { ResponseBody, UserResponse } from "@types";
+import { createEffect, createMemo } from "solid-js";
 import userStore from "@/store/userStore";
+import getLoginRedirectURL from "@/utils/login-route";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, UserResponse } from "@types";
 
 // biome-ignore lint/suspicious/noEmptyInterface: <explanation>
 interface QueryParams {}
@@ -16,6 +17,7 @@ const useGetAuthenticatedUser = (
 	},
 ) => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const queryParams = createMemo(() =>
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
 	);
@@ -43,7 +45,7 @@ const useGetAuthenticatedUser = (
 			if (options?.authLayout) {
 				return;
 			}
-			navigate("/admin/login");
+			navigate(getLoginRedirectURL(location.search));
 		}
 	});
 

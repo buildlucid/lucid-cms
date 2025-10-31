@@ -1,12 +1,12 @@
-import T from "@/translations";
-import { type Component, createEffect, Switch, Match } from "solid-js";
-import { useNavigate } from "@solidjs/router";
-import api from "@/services/api";
-import SetupForm from "@/components/Forms/Auth/SetupForm";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
 import notifyIllustration from "@assets/illustrations/notify.svg";
 import LogoIcon from "@assets/svgs/logo-icon.svg";
+import { useNavigate } from "@solidjs/router";
+import { type Component, createEffect, Match, Switch } from "solid-js";
+import SetupForm from "@/components/Forms/Auth/SetupForm";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
+import FullPageLoading from "@/components/Partials/FullPageLoading";
+import api from "@/services/api";
+import T from "@/translations";
 
 const SetupRoute: Component = () => {
 	// ----------------------------------------

@@ -1,12 +1,12 @@
-import T from "@/translations";
-import { type Component, Switch, Match } from "solid-js";
-import { useLocation, useNavigate } from "@solidjs/router";
-import api from "@/services/api";
 import notifyIllustration from "@assets/illustrations/notify.svg";
-import ResetPasswordForm from "@/components/Forms/Auth/ResetPasswordForm";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
 import LogoIcon from "@assets/svgs/logo-icon.svg";
+import { useLocation, useNavigate } from "@solidjs/router";
+import { type Component, Match, Switch } from "solid-js";
+import ResetPasswordForm from "@/components/Forms/Auth/ResetPasswordForm";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
+import FullPageLoading from "@/components/Partials/FullPageLoading";
+import api from "@/services/api";
+import T from "@/translations";
 
 const ResetPasswordRoute: Component = () => {
 	// ----------------------------------------
