@@ -3,6 +3,8 @@ import LogoIcon from "@assets/svgs/logo-icon.svg";
 import { useLocation, useNavigate } from "@solidjs/router";
 import {
 	type Component,
+	createEffect,
+	createMemo,
 	createSignal,
 	For,
 	Match,
@@ -11,48 +13,78 @@ import {
 } from "solid-js";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
+import constants from "@/constants";
 import api from "@/services/api";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 const AcceptInvitationRoute: Component = () => {
 	// ----------------------------------------
 	// State
 	const location = useLocation();
 	const navigate = useNavigate();
-
-	const urlParams = new URLSearchParams(location.search);
-	const token = urlParams.get("token");
-
-	if (!token) {
-		navigate("/admin/login");
-	}
-
 	const [password, setPassword] = createSignal("");
 	const [passwordConfirmation, setPasswordConfirmation] = createSignal("");
+
+	// ---------------------------------------
+	// Memos
+	const token = createMemo(() => {
+		const urlParams = new URLSearchParams(location.search);
+		return urlParams.get("token");
+	});
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		const urlParams = new URLSearchParams(location.search);
+
+		if (!token()) {
+			navigate("/admin/login");
+		}
+
+		const errorName = urlParams.get(constants.errorQueryParams.errorName);
+		const errorMessage = urlParams.get(constants.errorQueryParams.errorMessage);
+
+		if (errorName || errorMessage) {
+			spawnToast({
+				title: errorName ?? T()("error_title"),
+				message: errorMessage ?? undefined,
+				status: "error",
+			});
+			urlParams.delete(constants.errorQueryParams.errorName);
+			urlParams.delete(constants.errorQueryParams.errorMessage);
+
+			navigate(
+				`${location.pathname}${urlParams.size > 0 ? `?${urlParams.toString()}` : ""}`,
+			);
+		}
+	});
 
 	// ----------------------------------------
 	// Queries / Mutations
 	const validateInvitation = api.auth.useValidateInvitation({
 		queryParams: {
 			location: {
-				token: token as string,
+				token: token() as string,
 			},
 		},
-		enabled: () => token !== null,
+		enabled: () => token() !== null,
 	});
-
 	const providers = api.auth.useGetProviders({
 		queryParams: {},
-		enabled: () => token !== null,
+		enabled: () => token() !== null,
 	});
-
 	const initiateProvider = api.auth.useInitiateProvider();
 	const acceptInvitation = api.auth.useAcceptInvitation();
 
+	// ----------------------------------------
+	// Handlers
 	const handleAcceptWithPassword = async (e: Event) => {
 		e.preventDefault();
-		if (!token) return;
+		const inviteToken = token();
+		if (!inviteToken) return;
 		await acceptInvitation.action.mutateAsync({
-			token,
+			token: inviteToken,
 			body: {
 				password: password(),
 				passwordConfirmation: passwordConfirmation(),
@@ -60,11 +92,12 @@ const AcceptInvitationRoute: Component = () => {
 		});
 	};
 	const handleInitiate = async (providerKey: string) => {
-		if (!token) return;
+		const inviteToken = token();
+		if (!inviteToken) return;
 		await initiateProvider.action.mutateAsync({
 			providerKey,
 			body: {
-				invitationToken: token,
+				invitationToken: inviteToken,
 				actionType: "invitation",
 			},
 		});

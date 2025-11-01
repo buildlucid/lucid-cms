@@ -33,10 +33,38 @@ const providerOIDCCallbackController = factory.createHandlers(
 		const { providerKey } = c.req.valid("param");
 		const { code, state } = c.req.valid("query");
 
-		const baseRedirectUrl = urlAddPath(
-			c.get("config").host,
-			constants.authState.defaultRedirectPath,
+		const errorRedirectURLRes = await serviceWrapper(
+			services.auth.providers.errorRedirectUrl,
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: T("route_callback_auth_error_name"),
+					message: T("route_callback_auth_error_message"),
+				},
+			},
+		)(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				queue: c.get("queue"),
+				env: c.get("env"),
+				kv: c.get("kv"),
+			},
+			{
+				providerKey,
+				state,
+			},
 		);
+		if (errorRedirectURLRes.error) {
+			const baseRedirectUrl = urlAddPath(
+				c.get("config").host,
+				constants.authState.defaultRedirectPath,
+			);
+			return c.redirect(
+				buildErrorURL(baseRedirectUrl, errorRedirectURLRes.error),
+			);
+		}
 
 		const callbackAuthRes = await serviceWrapper(
 			services.auth.providers.oidcCallback,
@@ -63,7 +91,12 @@ const providerOIDCCallbackController = factory.createHandlers(
 			},
 		);
 		if (callbackAuthRes.error) {
-			return c.redirect(buildErrorURL(baseRedirectUrl, callbackAuthRes.error));
+			return c.redirect(
+				buildErrorURL(
+					errorRedirectURLRes.data.redirectUrl,
+					callbackAuthRes.error,
+				),
+			);
 		}
 
 		if (callbackAuthRes.data.grantAuthentication) {
@@ -76,12 +109,12 @@ const providerOIDCCallbackController = factory.createHandlers(
 			]);
 			if (refreshRes.error) {
 				return c.redirect(
-					buildErrorURL(callbackAuthRes.data.redirectUrl, refreshRes.error),
+					buildErrorURL(errorRedirectURLRes.data.redirectUrl, refreshRes.error),
 				);
 			}
 			if (accessRes.error) {
 				return c.redirect(
-					buildErrorURL(callbackAuthRes.data.redirectUrl, accessRes.error),
+					buildErrorURL(errorRedirectURLRes.data.redirectUrl, accessRes.error),
 				);
 			}
 
@@ -117,7 +150,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 			if (userLoginTrackRes.error) {
 				return c.redirect(
 					buildErrorURL(
-						callbackAuthRes.data.redirectUrl,
+						errorRedirectURLRes.data.redirectUrl,
 						userLoginTrackRes.error,
 					),
 				);

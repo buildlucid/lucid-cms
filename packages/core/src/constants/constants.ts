@@ -178,6 +178,7 @@ export default Object.freeze({
 			login: "login",
 		} as const,
 		defaultRedirectPath: "/admin",
+		defaultErrorRedirectPath: "/admin/login",
 		ttl: 600000,
 	},
 });

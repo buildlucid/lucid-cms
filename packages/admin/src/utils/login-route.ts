@@ -1,4 +1,9 @@
-const MAINTAIN_PARAMS = ["errorName", "errorMessage"];
+import constants from "@/constants";
+
+const MAINTAIN_PARAMS = [
+	constants.errorQueryParams.errorMessage,
+	constants.errorQueryParams.errorName,
+];
 
 const getLoginRedirectURL = (search: string) => {
 	const urlQueryParams = new URLSearchParams(search);

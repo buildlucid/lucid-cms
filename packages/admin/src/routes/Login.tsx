@@ -13,8 +13,10 @@ import {
 import LoginForm from "@/components/Forms/Auth/LoginForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
+import constants from "@/constants";
 import api from "@/services/api";
 import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 const LoginRoute: Component = () => {
 	// ----------------------------------------
@@ -49,6 +51,29 @@ const LoginRoute: Component = () => {
 	createEffect(() => {
 		if (setupRequired.isSuccess && setupRequired.data.data.setupRequired) {
 			navigate("/admin/setup");
+		}
+	});
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		const urlParams = new URLSearchParams(location.search);
+
+		const errorName = urlParams.get(constants.errorQueryParams.errorName);
+		const errorMessage = urlParams.get(constants.errorQueryParams.errorMessage);
+
+		if (errorName || errorMessage) {
+			spawnToast({
+				title: errorName ?? T()("error_title"),
+				message: errorMessage ?? undefined,
+				status: "error",
+			});
+			urlParams.delete(constants.errorQueryParams.errorName);
+			urlParams.delete(constants.errorQueryParams.errorMessage);
+
+			navigate(
+				`${location.pathname}${urlParams.size > 0 ? `?${urlParams.toString()}` : ""}`,
+			);
 		}
 	});
 
