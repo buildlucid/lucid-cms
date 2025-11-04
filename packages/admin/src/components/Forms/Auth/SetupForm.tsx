@@ -1,7 +1,7 @@
-import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
-import api from "@/services/api";
 import { Form, Input } from "@/components/Groups/Form";
+import api from "@/services/api";
+import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
 const SetupForm: Component = () => {
@@ -31,6 +31,7 @@ const SetupForm: Component = () => {
 			}}
 			options={{
 				buttonFullWidth: true,
+				buttonSize: "large",
 			}}
 			onSubmit={() => {
 				setup.action.mutate({

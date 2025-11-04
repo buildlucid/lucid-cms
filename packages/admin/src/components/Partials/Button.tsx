@@ -13,7 +13,7 @@ interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 		| "basic"
 		| "secondary-toggle"
 		| "danger-outline";
-	size: "small" | "medium" | "icon";
+	size: "small" | "medium" | "icon" | "large";
 	children: JSX.Element;
 
 	onClick?: () => void;
@@ -53,6 +53,7 @@ const Button: Component<ButtonProps> = (props) => {
 				// Sizes
 				"px-2 h-9 text-sm": props.size === "small",
 				"px-4 py-2 h-10 text-sm": props.size === "medium",
+				"px-6 py-3 h-12 text-base": props.size === "large",
 				"w-9 h-9 p-0 min-w-[36px]!": props.size === "icon",
 				"opacity-80 cursor-not-allowed": props.permission === false,
 			},

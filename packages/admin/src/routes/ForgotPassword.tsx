@@ -1,7 +1,7 @@
-import T from "@/translations";
+import LogoIcon from "@assets/svgs/logo-icon.svg";
 import type { Component } from "solid-js";
 import ForgotPasswordForm from "@/components/Forms/Auth/ForgotPasswordForm";
-import LogoIcon from "@assets/svgs/logo-icon.svg";
+import T from "@/translations";
 
 const ForgotPasswordRoute: Component = () => {
 	// ----------------------------------------

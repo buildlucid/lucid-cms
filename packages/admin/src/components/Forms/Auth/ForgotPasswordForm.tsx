@@ -1,9 +1,9 @@
-import T from "@/translations";
-import { type Component, createSignal, Show } from "solid-js";
 import { A } from "@solidjs/router";
-import { getBodyError } from "@/utils/error-helpers";
-import api from "@/services/api";
+import { type Component, createSignal, Show } from "solid-js";
 import { Form, Input } from "@/components/Groups/Form";
+import api from "@/services/api";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
 
 interface ForgotPasswordFormProps {
 	showBackToLogin?: boolean;
@@ -35,6 +35,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 			}}
 			options={{
 				buttonFullWidth: true,
+				buttonSize: "large",
 			}}
 			onSubmit={() => {
 				forgotPassword.action.mutate({ email: email() });

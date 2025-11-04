@@ -1,7 +1,7 @@
-import T from "@/translations";
 import { type Component, createSignal } from "solid-js";
 import { Form, Input } from "@/components/Groups/Form";
 import api from "@/services/api";
+import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
 interface ResetPasswordFormProps {
@@ -31,6 +31,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 			}}
 			options={{
 				buttonFullWidth: true,
+				buttonSize: "large",
 			}}
 			onSubmit={() => {
 				resetPassword.action.mutate({

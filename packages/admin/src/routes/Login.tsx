@@ -13,6 +13,7 @@ import {
 import LoginForm from "@/components/Forms/Auth/LoginForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
+import ProviderButton from "@/components/Partials/ProviderButton";
 import constants from "@/constants";
 import api from "@/services/api";
 import T from "@/translations";
@@ -112,25 +113,28 @@ const LoginRoute: Component = () => {
 					}
 				>
 					<div class="my-8">
-						<h2 class="mb-3 text-center">Sign in with a provider</h2>
-						<div class="flex flex-col gap-2 items-center">
+						<Show when={providers.data?.data.disablePassword === false}>
+							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
+								<span class="w-20 h-px bg-border" />
+								<span class="text-body text-sm mx-2.5">{T()("or")}</span>
+								<span class="w-20 h-px bg-border" />
+							</span>
+						</Show>
+						<div class="flex flex-col gap-4 items-center">
 							<For each={providers.data?.data.providers ?? []}>
 								{(p) => (
-									<button
-										type="button"
-										class="px-4 py-2 border rounded"
-										onClick={() =>
+									<ProviderButton
+										provider={p}
+										onClick={() => {
 											initiateProvider.action.mutate({
 												providerKey: p.key,
 												body: {
 													actionType: "login",
 												},
-											})
-										}
+											});
+										}}
 										disabled={initiateProvider.action.isPending}
-									>
-										Continue with {p.name}
-									</button>
+									/>
 								)}
 							</For>
 						</div>

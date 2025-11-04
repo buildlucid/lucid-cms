@@ -113,6 +113,19 @@
 		@apply bg-input-base rounded-md animate-pulse;
 	}
 
+	.blur-background {
+		background: radial-gradient(
+				900px 600px at 5% 0%,
+				rgba(193, 254, 119, 0.07),
+				transparent 60%
+			),
+			radial-gradient(
+				800px 500px at 100% 100%,
+				rgba(208, 255, 150, 0.05),
+				transparent 60%
+			);
+	}
+
 	.hide-scrollbar::-webkit-scrollbar {
 		display: none;
 		-ms-overflow-style: none;

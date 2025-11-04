@@ -1,11 +1,11 @@
-import T from "@/translations";
-import { type Component, type JSXElement, Switch, Match, Show } from "solid-js";
-import classNames from "classnames";
-import Button from "@/components/Partials/Button";
-import ErrorMessage from "@/components/Partials/ErrorMessage";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
 import notifySvg from "@assets/illustrations/notify.svg";
 import type { ErrorResponse } from "@types";
+import classNames from "classnames";
+import { type Component, type JSXElement, Match, Show, Switch } from "solid-js";
+import Button from "@/components/Partials/Button";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
+import ErrorMessage from "@/components/Partials/ErrorMessage";
+import T from "@/translations";
 
 export const Form: Component<{
 	queryState?: {
@@ -21,6 +21,7 @@ export const Form: Component<{
 	};
 	options?: {
 		buttonFullWidth?: boolean;
+		buttonSize?: "large";
 	};
 	permission?: boolean;
 	onSubmit?: () => void;
@@ -60,7 +61,7 @@ export const Form: Component<{
 
 						<div class="flex items-center gap-2">
 							<Button
-								size="medium"
+								size={props.options?.buttonSize || "medium"}
 								classes={classNames({
 									"w-full": props.options?.buttonFullWidth,
 								})}

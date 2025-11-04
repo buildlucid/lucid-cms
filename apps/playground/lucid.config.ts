@@ -45,8 +45,8 @@ export const envSchema = z.object({
 });
 
 export default defineConfig((env) => ({
-	// host: "http://localhost:6543",
-	host: "https://lucidcms-86.localcan.dev",
+	host: "http://localhost:6543",
+	// host: "https://lucidcms-86.localcan.dev",
 	// host: "https://cms.lucidjs.build",
 	// cors: {
 	// 	origin: [],
@@ -73,7 +73,7 @@ export default defineConfig((env) => ({
 			{
 				key: "github",
 				name: "GitHub",
-				icon: "/public/github-icon.svg",
+				// icon: "/public/github-icon.svg",
 				enabled: true,
 				type: "oidc",
 				config: {
