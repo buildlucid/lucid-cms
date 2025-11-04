@@ -33,6 +33,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 			options={{
 				buttonFullWidth: true,
 				buttonSize: "large",
+				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
 				login.action.mutate({

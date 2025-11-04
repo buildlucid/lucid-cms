@@ -4,11 +4,11 @@ import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
-interface ResetPasswordFormProps {
+interface AcceptInvitationFormProps {
 	token: string;
 }
 
-const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
+const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 	// ----------------------------------------
 	// State
 	const [password, setPassword] = createSignal("");
@@ -16,18 +16,18 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 
 	// ----------------------------------------
 	// Mutations
-	const resetPassword = api.account.useResetPassword();
+	const acceptInvitation = api.auth.useAcceptInvitation();
 
 	// ----------------------------------------
 	// Render
 	return (
 		<Form
 			state={{
-				isLoading: resetPassword.action.isPending,
-				errors: resetPassword.errors(),
+				isLoading: acceptInvitation.action.isPending,
+				errors: acceptInvitation.errors(),
 			}}
 			content={{
-				submit: T()("reset_password"),
+				submit: T()("accept_invitation"),
 			}}
 			options={{
 				buttonFullWidth: true,
@@ -35,10 +35,12 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
-				resetPassword.action.mutate({
+				acceptInvitation.action.mutate({
 					token: props.token,
-					password: password(),
-					passwordConfirmation: passwordConfirmation(),
+					body: {
+						password: password(),
+						passwordConfirmation: passwordConfirmation(),
+					},
 				});
 			}}
 		>
@@ -53,7 +55,8 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				}}
 				required={true}
 				autoFoucs={true}
-				errors={getBodyError("password", resetPassword.errors)}
+				autoComplete="new-password"
+				errors={getBodyError("password", acceptInvitation.errors)}
 				theme="full"
 			/>
 			<Input
@@ -66,11 +69,12 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 					label: T()("confirm_password"),
 				}}
 				required={true}
-				errors={getBodyError("passwordConfirmation", resetPassword.errors)}
+				autoComplete="new-password"
+				errors={getBodyError("passwordConfirmation", acceptInvitation.errors)}
 				theme="full"
 			/>
 		</Form>
 	);
 };
 
-export default ResetPasswordForm;
+export default AcceptInvitationForm;

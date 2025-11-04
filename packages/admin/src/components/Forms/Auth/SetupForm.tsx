@@ -32,6 +32,7 @@ const SetupForm: Component = () => {
 			options={{
 				buttonFullWidth: true,
 				buttonSize: "large",
+				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
 				setup.action.mutate({

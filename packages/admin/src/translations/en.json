@@ -690,5 +690,12 @@
 	"share_links_setting_message": "Manage share links for media items. Share links provide temporary access to private media files",
 	"media_share_links_delete_all_system_toast_title": "All share links deleted",
 	"media_share_links_delete_all_system_toast_message": "All share links in the system have been deleted",
-	"delete_share_links": "Delete Share Links"
+	"delete_share_links": "Delete Share Links",
+	"accept_invitation": "Accept Invitation",
+	"accept_invitation_route_title": "Accept Invitation",
+	"accept_invitation_route_description": "Choose a provider or set a password to complete your invitation and proceed.",
+	"invalid_invitation_token": "Invalid invitation token",
+	"invalid_invitation_token_description": "The invitation link is invalid or has expired. Please request a new invitation.",
+	"sign_in_with_provider": "Sign in with a provider",
+	"accept_with_password": "Accept with password"
 }

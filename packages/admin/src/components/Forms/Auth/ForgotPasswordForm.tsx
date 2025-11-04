@@ -36,6 +36,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 			options={{
 				buttonFullWidth: true,
 				buttonSize: "large",
+				disableErrorMessage: true,
 			}}
 			onSubmit={() => {
 				forgotPassword.action.mutate({ email: email() });

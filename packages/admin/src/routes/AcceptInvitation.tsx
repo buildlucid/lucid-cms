@@ -11,6 +11,8 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AcceptInvitationForm from "@/components/Forms/Auth/AcceptInvitationForm";
+import ProviderButton from "@/components/Partials/ProviderButton";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import Spinner from "@/components/Partials/Spinner";
 import constants from "@/constants";
@@ -20,11 +22,12 @@ import spawnToast from "@/utils/spawn-toast";
 
 const AcceptInvitationRoute: Component = () => {
 	// ----------------------------------------
-	// State
+	// State & Hooks
 	const location = useLocation();
 	const navigate = useNavigate();
-	const [password, setPassword] = createSignal("");
-	const [passwordConfirmation, setPasswordConfirmation] = createSignal("");
+	const [targetProviderKey, setTargetProviderKey] = createSignal<string | null>(
+		null,
+	);
 
 	// ---------------------------------------
 	// Memos
@@ -32,6 +35,37 @@ const AcceptInvitationRoute: Component = () => {
 		const urlParams = new URLSearchParams(location.search);
 		return urlParams.get("token");
 	});
+
+	// ----------------------------------------
+	// Queries / Mutations
+	const validateInvitation = api.auth.useValidateInvitation({
+		queryParams: {
+			location: {
+				token: token() as string,
+			},
+		},
+		enabled: () => token() !== null,
+	});
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+		enabled: () => token() !== null,
+	});
+	const initiateProvider = api.auth.useInitiateProvider();
+
+	// ---------------------------------------
+	// Derived state
+	const isLoading = createMemo(
+		() => validateInvitation.isLoading || providers.isLoading,
+	);
+	const isInvalid = createMemo(
+		() =>
+			validateInvitation.isError ||
+			(validateInvitation.isSuccess &&
+				validateInvitation.data?.data.valid === false),
+	);
+	const isReady = createMemo(
+		() => validateInvitation.isSuccess && providers.isSuccess,
+	);
 
 	// ----------------------------------------
 	// Effects
@@ -60,134 +94,88 @@ const AcceptInvitationRoute: Component = () => {
 		}
 	});
 
-	// ----------------------------------------
-	// Queries / Mutations
-	const validateInvitation = api.auth.useValidateInvitation({
-		queryParams: {
-			location: {
-				token: token() as string,
-			},
-		},
-		enabled: () => token() !== null,
+	createEffect(() => {
+		if (
+			!initiateProvider.action.isPending &&
+			(initiateProvider.action.isSuccess || initiateProvider.action.isError)
+		) {
+			setTargetProviderKey(null);
+		}
 	});
-	const providers = api.auth.useGetProviders({
-		queryParams: {},
-		enabled: () => token() !== null,
-	});
-	const initiateProvider = api.auth.useInitiateProvider();
-	const acceptInvitation = api.auth.useAcceptInvitation();
-
-	// ----------------------------------------
-	// Handlers
-	const handleAcceptWithPassword = async (e: Event) => {
-		e.preventDefault();
-		const inviteToken = token();
-		if (!inviteToken) return;
-		await acceptInvitation.action.mutateAsync({
-			token: inviteToken,
-			body: {
-				password: password(),
-				passwordConfirmation: passwordConfirmation(),
-			},
-		});
-	};
-	const handleInitiate = async (providerKey: string) => {
-		const inviteToken = token();
-		if (!inviteToken) return;
-		await initiateProvider.action.mutateAsync({
-			providerKey,
-			body: {
-				invitationToken: inviteToken,
-				actionType: "invitation",
-			},
-		});
-	};
 
 	// ----------------------------------------
 	// Render
 	return (
 		<Switch>
-			<Match when={validateInvitation.isLoading || providers.isLoading}>
+			<Match when={isLoading()}>
 				<div class="flex items-center justify-center h-full">
 					<Spinner size="sm" />
 				</div>
 			</Match>
-			<Match
-				when={
-					validateInvitation.isError ||
-					(validateInvitation.isSuccess &&
-						validateInvitation.data?.data.valid === false)
-				}
-			>
+			<Match when={isInvalid()}>
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: "Invalid invitation token",
-						description:
-							"The invitation link is invalid or has expired. Please request a new invitation.",
+						title: T()("invalid_invitation_token"),
+						description: T()("invalid_invitation_token_description"),
 					}}
 					link={{
-						text: "Back to login",
+						text: T()("back_to_login"),
 						href: "/admin/login",
 					}}
 				/>
 			</Match>
-			<Match when={validateInvitation.isSuccess && providers.isSuccess}>
+			<Match when={isReady()}>
 				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-				<h1 class="mb-1 text-center">Accept invitation</h1>
+				<h1 class="mb-1 text-center">{T()("accept_invitation_route_title")}</h1>
 				<p class="text-center max-w-sm mx-auto">
-					Choose a provider or accept by setting a password.
+					{T()("accept_invitation_route_description")}
 				</p>
 
-				<div class="my-8">
-					<h2 class="mb-3 text-center">Sign in with a provider</h2>
-					<div class="flex flex-col gap-2 items-center">
-						<For each={providers.data?.data.providers ?? []}>
-							{(p) => (
-								<button
-									type="button"
-									class="px-4 py-2 border rounded"
-									onClick={[handleInitiate, p.key]}
-									disabled={initiateProvider.action.isPending}
-								>
-									Continue with {p.name}
-								</button>
-							)}
-						</For>
-					</div>
-				</div>
-
 				<Show when={providers.data?.data.disablePassword === false}>
+					<div class="my-10">
+						<AcceptInvitationForm token={token() as string} />
+					</div>
+				</Show>
+
+				<Show
+					when={
+						providers.data?.data.providers?.length &&
+						providers.data?.data.providers?.length > 0
+					}
+				>
 					<div class="my-8">
-						<h2 class="mb-3 text-center">Accept with password</h2>
-						<form
-							class="flex flex-col gap-3 max-w-sm mx-auto"
-							onSubmit={handleAcceptWithPassword}
-						>
-							<input
-								type="password"
-								placeholder="Password"
-								value={password()}
-								onInput={(e) => setPassword(e.currentTarget.value)}
-								class="px-3 py-2 border rounded"
-								required
-							/>
-							<input
-								type="password"
-								placeholder="Confirm password"
-								value={passwordConfirmation()}
-								onInput={(e) => setPasswordConfirmation(e.currentTarget.value)}
-								class="px-3 py-2 border rounded"
-								required
-							/>
-							<button
-								type="submit"
-								class="px-4 py-2 border rounded"
-								disabled={acceptInvitation.action.isPending}
-							>
-								Accept invitation
-							</button>
-						</form>
+						<Show when={providers.data?.data.disablePassword === false}>
+							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
+								<span class="w-20 h-px bg-border" />
+								<span class="text-body text-sm mx-2.5">{T()("or")}</span>
+								<span class="w-20 h-px bg-border" />
+							</span>
+						</Show>
+						<div class="flex flex-col gap-4 items-center">
+							<For each={providers.data?.data.providers ?? []}>
+								{(p) => (
+									<ProviderButton
+										provider={p}
+										onClick={() => {
+											setTargetProviderKey(p.key);
+											initiateProvider.action.mutate({
+												providerKey: p.key,
+												body: {
+													invitationToken: token() as string,
+													actionType: "invitation",
+												},
+											});
+										}}
+										disabled={initiateProvider.action.isPending}
+										isLoading={
+											initiateProvider.action.isPending &&
+											targetProviderKey() === p.key
+										}
+									/>
+								)}
+							</For>
+						</div>
 					</div>
 				</Show>
 			</Match>

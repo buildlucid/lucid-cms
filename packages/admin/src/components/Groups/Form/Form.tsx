@@ -22,6 +22,7 @@ export const Form: Component<{
 	options?: {
 		buttonFullWidth?: boolean;
 		buttonSize?: "large";
+		disableErrorMessage?: boolean;
 	};
 	permission?: boolean;
 	onSubmit?: () => void;
@@ -51,7 +52,12 @@ export const Form: Component<{
 				>
 					{props.children}
 					<div class="mt-4 w-full">
-						<Show when={props.state.errors?.message}>
+						<Show
+							when={
+								props.state.errors?.message &&
+								props.options?.disableErrorMessage !== true
+							}
+						>
 							<ErrorMessage
 								theme="basic"
 								message={props.state.errors?.message}
