@@ -5,6 +5,7 @@ import {
 	type Component,
 	createEffect,
 	createMemo,
+	createSignal,
 	For,
 	Match,
 	Show,
@@ -23,6 +24,9 @@ const LoginRoute: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
+	const [targetProviderKey, setTargetProviderKey] = createSignal<string | null>(
+		null,
+	);
 
 	// ----------------------------------------
 	// Queries
@@ -78,6 +82,15 @@ const LoginRoute: Component = () => {
 		}
 	});
 
+	createEffect(() => {
+		if (
+			!initiateProvider.action.isPending &&
+			(initiateProvider.action.isSuccess || initiateProvider.action.isError)
+		) {
+			setTargetProviderKey(null);
+		}
+	});
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -126,6 +139,7 @@ const LoginRoute: Component = () => {
 									<ProviderButton
 										provider={p}
 										onClick={() => {
+											setTargetProviderKey(p.key);
 											initiateProvider.action.mutate({
 												providerKey: p.key,
 												body: {
@@ -134,6 +148,10 @@ const LoginRoute: Component = () => {
 											});
 										}}
 										disabled={initiateProvider.action.isPending}
+										isLoading={
+											initiateProvider.action.isPending &&
+											targetProviderKey() === p.key
+										}
 									/>
 								)}
 							</For>
