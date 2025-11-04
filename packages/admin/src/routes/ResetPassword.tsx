@@ -1,7 +1,13 @@
 import notifyIllustration from "@assets/illustrations/notify.svg";
 import LogoIcon from "@assets/svgs/logo-icon.svg";
 import { useLocation, useNavigate } from "@solidjs/router";
-import { type Component, Match, Switch } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	Match,
+	Switch,
+} from "solid-js";
 import ResetPasswordForm from "@/components/Forms/Auth/ResetPasswordForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
@@ -24,6 +30,9 @@ const ResetPasswordRoute: Component = () => {
 
 	// ----------------------------------------
 	// Queries / Mutations
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+	});
 	const checkToken = api.account.useVerifyResetToken({
 		queryParams: {
 			location: {
@@ -34,13 +43,28 @@ const ResetPasswordRoute: Component = () => {
 	});
 
 	// ----------------------------------------
+	// Memos
+	const isLoading = createMemo(
+		() => providers.isLoading || checkToken.isLoading,
+	);
+	const isError = createMemo(() => providers.isError || checkToken.isError);
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		if (providers.isSuccess && providers.data?.data.disablePassword === true) {
+			navigate("/admin/login");
+		}
+	});
+
+	// ----------------------------------------
 	// Render
 	return (
 		<Switch>
-			<Match when={checkToken.isLoading}>
+			<Match when={isLoading()}>
 				<FullPageLoading />
 			</Match>
-			<Match when={checkToken.isError}>
+			<Match when={isError()}>
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
@@ -53,7 +77,13 @@ const ResetPasswordRoute: Component = () => {
 					}}
 				/>
 			</Match>
-			<Match when={checkToken.isSuccess}>
+			<Match
+				when={
+					checkToken.isSuccess &&
+					providers.isSuccess &&
+					providers.data?.data.disablePassword === false
+				}
+			>
 				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
 				<h1 class="mb-1 text-center">{T()("reset_password_route_title")}</h1>
 				<p class="text-center max-w-sm mx-auto">
