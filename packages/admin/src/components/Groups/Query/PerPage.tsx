@@ -49,7 +49,7 @@ export const PerPage: Component<PerPageProps> = (props) => {
 							<button
 								tabIndex={0}
 								class={classNames(
-									"w-full flex items-center justify-between group focus:outline-hidden focus:ring-1 focus:ring-primary-base px-2 py-1 rounded-md",
+									"w-full flex items-center justify-between group focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base px-2 py-1 rounded-md",
 									{
 										"bg-dropdown-hover text-dropdown-contrast":
 											currentPerPage() === perpage,

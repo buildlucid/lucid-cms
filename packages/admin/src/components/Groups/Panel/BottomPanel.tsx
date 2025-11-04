@@ -172,7 +172,7 @@ export const BottomPanel: Component<{
 												<p class="mt-1 text-sm">{props.copy?.description}</p>
 											</Show>
 										</div>
-										<Dialog.CloseButton class="flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus:ring-1 ring-primary-base bg-background-base justify-center">
+										<Dialog.CloseButton class="flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus-visible:ring-1 ring-primary-base bg-background-base justify-center">
 											<FaSolidXmark class="text-current" />
 											<span class="sr-only">{T()("back")}</span>
 										</Dialog.CloseButton>

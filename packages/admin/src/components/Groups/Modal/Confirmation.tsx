@@ -56,7 +56,7 @@ export const Confirmation: Component<{
 									</AlertDialog.Description>
 								</Show>
 							</div>
-							<AlertDialog.CloseButton class="text-body hover:text-title ring-error-base focus:ring-1 focus:outline-hidden h-8 w-8 min-w-[32px] rounded-full flex justify-center items-center duration-200 transition-colors">
+							<AlertDialog.CloseButton class="text-body hover:text-title ring-error-base focus-visible:ring-1 focus:outline-hidden h-8 w-8 min-w-[32px] rounded-full flex justify-center items-center duration-200 transition-colors">
 								<FaSolidXmark class="fill-current" />
 							</AlertDialog.CloseButton>
 						</div>

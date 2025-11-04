@@ -116,7 +116,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 										{value.label}
 										<button
 											type="button"
-											class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-hidden focus:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
+											class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
 											onClick={(e) => {
 												e.stopPropagation();
 												e.preventDefault();

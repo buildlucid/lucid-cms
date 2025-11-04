@@ -78,7 +78,7 @@ export const RevisionsSidebar: Component<{
 							<button
 								type="button"
 								class={classNames(
-									"bg-card-base border-border border text-left rounded-md mb-2.5 last:mb-0 flex flex-col p-4 focus:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
+									"bg-card-base border-border border text-left rounded-md mb-2.5 last:mb-0 flex flex-col p-4 focus-visible:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
 									{
 										"border-primary-base":
 											revision.id === props.state.versionId(),

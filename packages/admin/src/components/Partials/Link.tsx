@@ -28,7 +28,7 @@ const Link: Component<LinkProps> = (props) => {
 	// Memos
 	const classes = createMemo(() => {
 		return classnames(
-			"flex items-center justify-center text-center focus:outline-hidden focus:ring-1 duration-200 transition-colors rounded-md relative font-base",
+			"flex items-center justify-center text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative font-base",
 			{
 				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
 					props.theme === "primary",

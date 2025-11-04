@@ -10,7 +10,7 @@ import {
 } from "solid-js";
 import ForgotPasswordForm from "@/components/Forms/Auth/ForgotPasswordForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
+import Spinner from "@/components/Partials/Spinner";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -44,7 +44,9 @@ const ForgotPasswordRoute: Component = () => {
 	return (
 		<Switch>
 			<Match when={isLoading()}>
-				<FullPageLoading />
+				<div class="flex items-center justify-center h-full">
+					<Spinner size="sm" />
+				</div>
 			</Match>
 			<Match when={isError()}>
 				<ErrorBlock

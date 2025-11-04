@@ -162,7 +162,7 @@ export const Select: Component<SelectProps> = (props) => {
 							<Show when={props.noClear !== true}>
 								<button
 									type="button"
-									class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus:ring-1 ring-error-base focus:fill-error-base"
+									class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
 									onClick={(e) => {
 										e.stopPropagation();
 										props.onChange(undefined);
@@ -213,7 +213,7 @@ export const Select: Component<SelectProps> = (props) => {
 										<div class="absolute right-2 top-0 bottom-0 flex items-center">
 											<button
 												type="button"
-												class="bg-primary-base pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus:ring-1 ring-error-base focus:fill-error-base"
+												class="bg-primary-base pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
 												onClick={() => {
 													setDebouncedValue("");
 												}}

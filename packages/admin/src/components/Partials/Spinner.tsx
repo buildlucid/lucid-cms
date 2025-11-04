@@ -1,6 +1,6 @@
-import T from "@/translations";
-import type { Component } from "solid-js";
 import classNames from "classnames";
+import type { Component } from "solid-js";
+import T from "@/translations";
 
 interface SpinnerProps {
 	size: "sm" | "md" | "lg";

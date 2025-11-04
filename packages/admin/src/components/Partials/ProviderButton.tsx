@@ -13,7 +13,7 @@ const ProviderButton: Component<{
 	return (
 		<button
 			type="button"
-			class="px-6 py-3 h-12 text-base flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 font-base border border-border hover:border-transparent text-body fill-title bg-input-base hover:bg-secondary-hover hover:text-secondary-contrast hover:fill-secondary-contrast w-full group"
+			class="px-6 py-3 h-12 text-base flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 font-base border border-border hover:border-transparent text-body fill-title bg-input-base hover:bg-secondary-hover hover:text-secondary-contrast hover:fill-secondary-contrast w-full group"
 			onClick={props.onClick}
 			disabled={props.disabled || props.isLoading}
 		>

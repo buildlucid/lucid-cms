@@ -13,8 +13,8 @@ import {
 } from "solid-js";
 import LoginForm from "@/components/Forms/Auth/LoginForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
 import ProviderButton from "@/components/Partials/ProviderButton";
+import Spinner from "@/components/Partials/Spinner";
 import constants from "@/constants";
 import api from "@/services/api";
 import T from "@/translations";
@@ -96,7 +96,9 @@ const LoginRoute: Component = () => {
 	return (
 		<Switch>
 			<Match when={isLoading()}>
-				<FullPageLoading />
+				<div class="flex items-center justify-center h-full">
+					<Spinner size="sm" />
+				</div>
 			</Match>
 			<Match when={isError()}>
 				<ErrorBlock

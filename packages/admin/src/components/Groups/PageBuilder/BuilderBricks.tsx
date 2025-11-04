@@ -239,7 +239,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				<div class="flex items-center">
 					<button
 						type="button"
-						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								ref: props.brick.ref,

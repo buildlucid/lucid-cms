@@ -100,7 +100,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			{/* Group Header */}
 			<div
 				class={classNames(
-					"w-full bg-input-base focus:outline-hidden focus:ring-1 ring-inset ring-primary-base cursor-pointer p-2.5 rounded-md border border-border flex justify-between items-center",
+					"w-full bg-input-base focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer p-2.5 rounded-md border border-border flex justify-between items-center",
 					{
 						"border-b-0 rounded-b-none": getGroupOpen(),
 						"ring-1 ring-inset":
@@ -123,7 +123,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				<div class="flex items-center">
 					<button
 						type="button"
-						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.state.dragDrop.onDragStart(e, {
 								ref: ref(),

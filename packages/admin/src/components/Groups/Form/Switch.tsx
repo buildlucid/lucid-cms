@@ -93,7 +93,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 			<button
 				type="button"
 				class={classnames(
-					"bg-input-base h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border focus:ring-1 ring-inset focus:ring-primary-base group",
+					"bg-input-base h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border focus-visible:ring-1 ring-inset focus:ring-primary-base group",
 					{
 						"mt-1": props.options?.queryRow !== true,
 					},

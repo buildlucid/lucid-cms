@@ -4,7 +4,7 @@ import { useNavigate } from "@solidjs/router";
 import { type Component, createEffect, Match, Switch } from "solid-js";
 import SetupForm from "@/components/Forms/Auth/SetupForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
+import Spinner from "@/components/Partials/Spinner";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -32,7 +32,9 @@ const SetupRoute: Component = () => {
 	return (
 		<Switch>
 			<Match when={setupRequired.isLoading}>
-				<FullPageLoading />
+				<div class="flex items-center justify-center h-full">
+					<Spinner size="sm" />
+				</div>
 			</Match>
 			<Match when={setupRequired.isError}>
 				<ErrorBlock

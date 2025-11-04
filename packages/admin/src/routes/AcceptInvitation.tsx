@@ -12,7 +12,7 @@ import {
 	Switch,
 } from "solid-js";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
-import FullPageLoading from "@/components/Partials/FullPageLoading";
+import Spinner from "@/components/Partials/Spinner";
 import constants from "@/constants";
 import api from "@/services/api";
 import T from "@/translations";
@@ -108,7 +108,9 @@ const AcceptInvitationRoute: Component = () => {
 	return (
 		<Switch>
 			<Match when={validateInvitation.isLoading || providers.isLoading}>
-				<FullPageLoading />
+				<div class="flex items-center justify-center h-full">
+					<Spinner size="sm" />
+				</div>
 			</Match>
 			<Match
 				when={
