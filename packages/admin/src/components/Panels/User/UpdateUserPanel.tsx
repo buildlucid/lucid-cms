@@ -13,7 +13,7 @@ import { getBodyError } from "@/utils/error-helpers";
 import userStore from "@/store/userStore";
 import helpers from "@/utils/helpers";
 import { Panel } from "@/components/Groups/Panel";
-import { Checkbox, SelectMultiple } from "@/components/Groups/Form";
+import { SelectMultiple, Switch } from "@/components/Groups/Form";
 
 interface UpdateUserPanelProps {
 	id: Accessor<number | undefined>;
@@ -159,29 +159,39 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 						theme="full"
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
-						<Checkbox
-							id="superAdmin"
-							value={getIsSuperAdmin()}
-							onChange={(value) => setIsSuperAdmin(value)}
-							name={"superAdmin"}
-							copy={{
-								label: T()("is_super_admin"),
-							}}
-							errors={getBodyError("superAdmin", updateUser.errors)}
-							theme="full"
-						/>
+						<div class="flex items-center justify-between gap-4 mb-4">
+							<span class="text-sm text-title">{T()("is_super_admin")}</span>
+							<Switch
+								id="superAdmin"
+								value={getIsSuperAdmin()}
+								onChange={setIsSuperAdmin}
+								name={"superAdmin"}
+								copy={{
+									true: T()("yes"),
+									false: T()("no"),
+								}}
+								errors={getBodyError("superAdmin", updateUser.errors)}
+								fullWidth
+								noMargin
+							/>
+						</div>
 					</Show>
-					<Checkbox
-						id="isLocked"
-						value={getIsLocked()}
-						onChange={setIsLocked}
-						name={"isLocked"}
-						copy={{
-							label: T()("is_locked"),
-						}}
-						errors={getBodyError("isLocked", updateUser.errors)}
-						theme="full"
-					/>
+					<div class="flex items-center justify-between gap-4">
+						<span class="text-sm text-title">{T()("is_locked")}</span>
+						<Switch
+							id="isLocked"
+							value={getIsLocked()}
+							onChange={setIsLocked}
+							name={"isLocked"}
+							copy={{
+								true: T()("locked"),
+								false: T()("unlocked"),
+							}}
+							errors={getBodyError("isLocked", updateUser.errors)}
+							fullWidth
+							noMargin
+						/>
+					</div>
 				</>
 			)}
 		</Panel>

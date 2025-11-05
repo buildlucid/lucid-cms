@@ -209,9 +209,8 @@ const DocumentSelectContent: Component = () => {
 									true: T()("published"),
 									false: T()("draft"),
 								}}
-								options={{
-									queryRow: true,
-								}}
+								noMargin
+								fullWidth
 							/>
 						</Show>
 					</div>

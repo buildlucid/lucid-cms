@@ -224,9 +224,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 													true: T()("published"),
 													false: T()("draft"),
 												}}
-												options={{
-													queryRow: true,
-												}}
+												noMargin
+												fullWidth
 											/>
 										</Show>
 									}

@@ -27,9 +27,7 @@ interface SwitchProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
-	options?: {
-		queryRow?: boolean;
-	};
+	fullWidth?: boolean;
 	fieldColumnIsMissing?: boolean;
 }
 
@@ -64,8 +62,8 @@ export const Switch: Component<SwitchProps> = (props) => {
 		<div
 			class={classnames("relative", {
 				"mb-0": props.noMargin,
-				"mb-4 last:mb-0": !props.noMargin && props.options?.queryRow !== true,
-				"w-full": props.options?.queryRow !== true,
+				"mb-4 last:mb-0": props.noMargin !== true,
+				"w-full": props.fullWidth !== true,
 			})}
 		>
 			<Label
@@ -94,9 +92,6 @@ export const Switch: Component<SwitchProps> = (props) => {
 				type="button"
 				class={classnames(
 					"bg-input-base h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border focus-visible:ring-1 ring-inset focus:ring-primary-base group",
-					{
-						"mt-1": props.options?.queryRow !== true,
-					},
 				)}
 				onClick={() => {
 					checkboxRef?.click();
