@@ -13,6 +13,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -33,7 +34,7 @@ const resendInvitationController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["create_user"]),
+	permissions([Permissions.CreateUser]),
 	validate("param", controllerSchemas.resendInvitation.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

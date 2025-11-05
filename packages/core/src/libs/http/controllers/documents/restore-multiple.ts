@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -34,7 +35,7 @@ const restoreMultipleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["update_content"]),
+	permissions([Permissions.UpdateContent]),
 	validate("param", controllerSchemas.restoreMultiple.params),
 	validate("json", controllerSchemas.restoreMultiple.body),
 	async (c) => {

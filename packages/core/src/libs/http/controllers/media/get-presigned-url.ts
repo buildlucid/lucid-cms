@@ -16,6 +16,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -37,7 +38,7 @@ const getPresignedUrlController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["create_media", "update_media"]),
+	permissions([Permissions.CreateMedia, Permissions.UpdateMedia]),
 	validate("json", controllerSchemas.getPresignedUrl.body),
 	async (c) => {
 		const body = c.req.valid("json");

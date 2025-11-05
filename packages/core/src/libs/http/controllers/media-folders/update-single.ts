@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -37,7 +38,7 @@ const updateSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["update_media"]),
+	permissions([Permissions.UpdateMedia]),
 	validate("param", controllerSchemas.updateSingle.params),
 	validate("json", controllerSchemas.updateSingle.body),
 	async (c) => {

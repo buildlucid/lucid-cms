@@ -13,6 +13,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -35,7 +36,11 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["create_content", "update_content", "delete_content"]),
+	permissions([
+		Permissions.CreateContent,
+		Permissions.UpdateContent,
+		Permissions.DeleteContent,
+	]),
 	validate("param", controllerSchemas.deleteSinglePermanently.params),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");

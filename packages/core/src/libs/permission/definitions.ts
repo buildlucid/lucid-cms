@@ -2,112 +2,109 @@ import type { PermissionGroup } from "./types.js";
 
 export const Permissions = {
 	// User permissions
-	UserCreateSingle: "create_user",
-	UserUpdateSingle: "update_user",
-	UserDeleteSingle: "delete_user",
+	CreateUser: "create_user",
+	UpdateUser: "update_user",
+	DeleteUser: "delete_user",
 
 	// Role permissions
-	RoleCreateSingle: "create_role",
-	RoleUpdateSingle: "update_role",
-	RoleDeleteSingle: "delete_role",
+	CreateRole: "create_role",
+	UpdateRole: "update_role",
+	DeleteRole: "delete_role",
 
 	// Media permissions
-	MediaCreateSingle: "create_media",
-	MediaUpdateSingle: "update_media",
-	MediaDeleteSingle: "delete_media",
+	CreateMedia: "create_media",
+	UpdateMedia: "update_media",
+	DeleteMedia: "delete_media",
 
 	// Email permissions
-	EmailReadSingle: "read_email",
-	EmailDeleteSingle: "delete_email",
-	EmailSendSingle: "send_email",
+	ReadEmail: "read_email",
+	DeleteEmail: "delete_email",
+	SendEmail: "send_email",
 
 	// Job permissions
-	JobReadSingle: "read_job",
+	ReadJob: "read_job",
 
 	// Content permissions
-	ContentCreateSingle: "create_content",
-	ContentUpdateSingle: "update_content",
-	ContentDeleteSingle: "delete_content",
-	ContentRestoreSingle: "restore_content",
-	ContentPublishSingle: "publish_content",
+	CreateContent: "create_content",
+	UpdateContent: "update_content",
+	DeleteContent: "delete_content",
+	RestoreContent: "restore_content",
+	PublishContent: "publish_content",
 
 	// Collection permissions
-	CollectionCreateSingle: "create_collection",
-	CollectionUpdateSingle: "update_collection",
-	CollectionDeleteSingle: "delete_collection",
+	CreateCollection: "create_collection",
+	UpdateCollection: "update_collection",
+	DeleteCollection: "delete_collection",
 
 	// Client integration permissions
-	ClientIntegrationCreateSingle: "create_client_integration",
-	ClientIntegrationUpdateSingle: "update_client_integration",
-	ClientIntegrationDeleteSingle: "delete_client_integration",
-	ClientIntegrationRegenerateSingle: "regenerate_client_integration",
+	CreateClientIntegration: "create_client_integration",
+	UpdateClientIntegration: "update_client_integration",
+	DeleteClientIntegration: "delete_client_integration",
+	RegenerateClientIntegration: "regenerate_client_integration",
 
 	// Settings permissions
-	SettingsUpdateLicense: "update_license",
-	SettingsClearKv: "clear_kv",
+	UpdateLicense: "update_license",
+	ClearKv: "clear_kv",
 } as const;
 
 export const PermissionGroups = Object.freeze({
 	users: {
 		key: "users_permissions",
 		permissions: [
-			Permissions.UserCreateSingle,
-			Permissions.UserUpdateSingle,
-			Permissions.UserDeleteSingle,
+			Permissions.CreateUser,
+			Permissions.UpdateUser,
+			Permissions.DeleteUser,
 		],
 	},
 	roles: {
 		key: "roles_permissions",
 		permissions: [
-			Permissions.RoleCreateSingle,
-			Permissions.RoleUpdateSingle,
-			Permissions.RoleDeleteSingle,
+			Permissions.CreateRole,
+			Permissions.UpdateRole,
+			Permissions.DeleteRole,
 		],
 	},
 	media: {
 		key: "media_permissions",
 		permissions: [
-			Permissions.MediaCreateSingle,
-			Permissions.MediaUpdateSingle,
-			Permissions.MediaDeleteSingle,
+			Permissions.CreateMedia,
+			Permissions.UpdateMedia,
+			Permissions.DeleteMedia,
 		],
 	},
 	emails: {
 		key: "emails_permissions",
 		permissions: [
-			Permissions.EmailReadSingle,
-			Permissions.EmailDeleteSingle,
-			Permissions.EmailSendSingle,
+			Permissions.ReadEmail,
+			Permissions.DeleteEmail,
+			Permissions.SendEmail,
 		],
 	},
 	jobs: {
 		key: "jobs_permissions",
-		permissions: [Permissions.JobReadSingle],
+		permissions: [Permissions.ReadJob],
 	},
 	content: {
 		key: "content_permissions",
 		permissions: [
-			Permissions.ContentCreateSingle,
-			Permissions.ContentUpdateSingle,
-			Permissions.ContentDeleteSingle,
-			Permissions.ContentRestoreSingle,
-			Permissions.ContentPublishSingle,
+			Permissions.CreateContent,
+			Permissions.UpdateContent,
+			Permissions.DeleteContent,
+			Permissions.RestoreContent,
+			Permissions.PublishContent,
 		],
 	},
 	"client-integrations": {
 		key: "client-integrations_permissions",
 		permissions: [
-			Permissions.ClientIntegrationCreateSingle,
-			Permissions.ClientIntegrationUpdateSingle,
-			Permissions.ClientIntegrationDeleteSingle,
-			Permissions.ClientIntegrationRegenerateSingle,
+			Permissions.CreateClientIntegration,
+			Permissions.UpdateClientIntegration,
+			Permissions.DeleteClientIntegration,
+			Permissions.RegenerateClientIntegration,
 		],
 	},
 	settings: {
 		key: "settings_permissions",
-		permissions: [
-			Permissions.SettingsUpdateLicense,
-			Permissions.SettingsClearKv,
-		],
+		permissions: [Permissions.UpdateLicense, Permissions.ClearKv],
 	},
 }) satisfies Record<string, PermissionGroup>;

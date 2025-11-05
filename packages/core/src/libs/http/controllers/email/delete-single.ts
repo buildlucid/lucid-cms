@@ -12,6 +12,7 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -32,7 +33,7 @@ const deleteSingleController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	authenticate,
-	permissions(["delete_email"]),
+	permissions([Permissions.DeleteEmail]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

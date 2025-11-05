@@ -4,6 +4,7 @@ import type { BooleanInt } from "../db-adapter/types.js";
 import Formatter from "./index.js";
 import hasAccess from "../permission/has-access.js";
 import UserPermissionsFormatter from "./user-permissions.js";
+import { Permissions } from "../permission/definitions.js";
 
 export interface UserPropT {
 	created_at: Date | string | null;
@@ -58,7 +59,7 @@ export default class UsersFormatter {
 
 		const canViewSensitive = hasAccess({
 			user: props.authUser,
-			requiredPermissions: ["update_user"],
+			requiredPermissions: [Permissions.UpdateUser],
 			resourceOwnerId: props.user.id,
 		});
 

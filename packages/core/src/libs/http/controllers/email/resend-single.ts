@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -36,7 +37,7 @@ const resendSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["send_email"]),
+	permissions([Permissions.SendEmail]),
 	validate("param", controllerSchemas.resendSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

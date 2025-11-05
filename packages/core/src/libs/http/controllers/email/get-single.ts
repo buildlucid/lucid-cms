@@ -14,6 +14,7 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -31,7 +32,7 @@ const getSingleController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	authenticate,
-	permissions(["read_email"]),
+	permissions([Permissions.ReadEmail]),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

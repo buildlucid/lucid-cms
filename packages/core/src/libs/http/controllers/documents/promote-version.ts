@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import { permissionCheck } from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -46,7 +47,9 @@ const promoteVersionController = factory.createHandlers(
 		//* manually run permissions middleware based on version type
 		permissionCheck(
 			c,
-			versionType === "published" ? ["publish_content"] : ["update_content"],
+			versionType === "published"
+				? [Permissions.PublishContent]
+				: [Permissions.UpdateContent],
 		);
 
 		const restoreRevisionRes = await serviceWrapper(

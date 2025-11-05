@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -36,7 +37,7 @@ const deleteMultipleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["delete_content"]),
+	permissions([Permissions.DeleteContent]),
 	validate("json", controllerSchemas.deleteMultiple.body),
 	validate("param", controllerSchemas.deleteMultiple.params),
 	async (c) => {

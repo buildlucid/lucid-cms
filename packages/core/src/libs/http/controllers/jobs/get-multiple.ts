@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -33,7 +34,7 @@ const getMultipleController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	authenticate,
-	permissions(["read_job"]),
+	permissions([Permissions.ReadJob]),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

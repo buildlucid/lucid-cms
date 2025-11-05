@@ -7,6 +7,7 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -21,7 +22,7 @@ const clearKVController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["clear_kv"]),
+	permissions([Permissions.ClearKv]),
 	async (c) => {
 		await c.get("kv").command.clear();
 

@@ -1,4 +1,3 @@
-import z from "zod/v4";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/license.js";
@@ -15,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -32,7 +32,7 @@ const updateLicenseController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions(["update_license"]),
+	permissions([Permissions.UpdateLicense]),
 	validate("json", controllerSchemas.update.body),
 	async (c) => {
 		const body = c.req.valid("json");
