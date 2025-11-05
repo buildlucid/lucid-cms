@@ -1,4 +1,4 @@
-import type { PermissionGroup } from "../../types/response.js";
+import type { PermissionGroup } from "../permission/types.js";
 
 export default class PermissionsFormatter {
 	formatMultiple = (props: {

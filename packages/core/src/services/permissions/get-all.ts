@@ -1,13 +1,13 @@
 import Formatter from "../../libs/formatters/index.js";
-import permissionGroups from "../../constants/permission-groups.js";
+import { PermissionGroups } from "../../libs/permission/definitions.js";
+import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { Permission } from "../../types/response.js";
 
 const getAll: ServiceFn<[], Permission[]> = async () => {
 	const PermissionsFormatter = Formatter.get("permissions");
 
 	const formattedPermissions = PermissionsFormatter.formatMultiple({
-		permissions: permissionGroups,
+		permissions: PermissionGroups,
 	});
 
 	return {

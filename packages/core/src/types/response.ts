@@ -21,6 +21,7 @@ import type { OptionsName } from "../schemas/options.js";
 import type { AuthProvider, EmailDeliveryStatus, EmailType } from "../types.js";
 import type { ErrorResult } from "./errors.js";
 import type { LocaleValue } from "./shared.js";
+import type { Permission } from "../libs/permission/types.js";
 
 export interface UserResponse {
 	id: number;
@@ -468,50 +469,6 @@ export interface ErrorResponse {
 	message: string;
 	errors?: ErrorResult;
 }
-
-export type Permission =
-	| "create_user"
-	| "update_user"
-	| "delete_user"
-	| "create_role"
-	| "update_role"
-	| "delete_role"
-	| "create_media"
-	| "update_media"
-	| "delete_media"
-	| "read_email"
-	| "delete_email"
-	| "send_email"
-	| "read_job"
-	| "create_content"
-	| "publish_content"
-	| "restore_content"
-	| "update_content"
-	| "delete_content"
-	| "delete_collection"
-	| "create_collection"
-	| "update_collection"
-	| "create_client_integration"
-	| "update_client_integration"
-	| "delete_client_integration"
-	| "regenerate_client_integration"
-	| "clear_kv"
-	| "update_license";
-
-export type PermissionGroup = {
-	key: string;
-	permissions: Permission[];
-};
-
-export type PermissionGroupKey =
-	| "users"
-	| "roles"
-	| "media"
-	| "emails"
-	| "jobs"
-	| "content"
-	| "client-integrations"
-	| "settings";
 
 export type ClientIntegrationResponse = z.infer<
 	typeof clientIntegrationResponseSchema

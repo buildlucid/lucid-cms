@@ -1,4 +1,5 @@
-import type { RoleResponse, Permission } from "../../types/response.js";
+import type { RoleResponse } from "../../types/response.js";
+import type { Permission } from "../permission/types.js";
 import Formatter from "./index.js";
 
 interface RolePropsT {
@@ -15,18 +16,14 @@ interface RolePropsT {
 }
 
 export default class RolesFormatter {
-	formatMultiple = (props: {
-		roles: RolePropsT[];
-	}) => {
+	formatMultiple = (props: { roles: RolePropsT[] }) => {
 		return props.roles.map((r) =>
 			this.formatSingle({
 				role: r,
 			}),
 		);
 	};
-	formatSingle = (props: {
-		role: RolePropsT;
-	}): RoleResponse => {
+	formatSingle = (props: { role: RolePropsT }): RoleResponse => {
 		return {
 			id: props.role.id,
 			name: props.role.name,

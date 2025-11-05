@@ -14,3 +14,4 @@ export * from "./types/schema.js";
 export * from "./types/shared.js";
 export * from "./utils/services/types.js";
 export * from "./libs/auth-providers/types.js";
+export * from "./libs/permission/types.js";

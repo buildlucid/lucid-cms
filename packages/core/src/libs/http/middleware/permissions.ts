@@ -1,9 +1,9 @@
 import { createMiddleware } from "hono/factory";
 import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import type { Permission } from "../../../types/response.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import hasAccess from "../../permission/has-access.js";
+import type { Permission } from "../../permission/types.js";
 
 export const permissionCheck = (
 	c: LucidHonoContext,

@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import type { ErrorResult } from "../../types/errors.js";
-import type { Permission } from "../../types/response.js";
+import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 

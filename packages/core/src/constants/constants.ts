@@ -1,5 +1,5 @@
 import T from "../translations/index.js";
-import permissionGroups from "./permission-groups.js";
+import { PermissionGroups } from "../libs/permission/definitions.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,
@@ -25,22 +25,22 @@ export default Object.freeze({
 				name: "Admin",
 				description: "The admin role has permissions to do everything.",
 				permissions: [
-					...permissionGroups.users.permissions,
-					...permissionGroups.roles.permissions,
-					...permissionGroups.media.permissions,
-					...permissionGroups.emails.permissions,
-					...permissionGroups.jobs.permissions,
-					...permissionGroups.content.permissions,
-					...permissionGroups["client-integrations"].permissions,
-					...permissionGroups.settings.permissions,
+					...PermissionGroups.users.permissions,
+					...PermissionGroups.roles.permissions,
+					...PermissionGroups.media.permissions,
+					...PermissionGroups.emails.permissions,
+					...PermissionGroups.jobs.permissions,
+					...PermissionGroups.content.permissions,
+					...PermissionGroups["client-integrations"].permissions,
+					...PermissionGroups.settings.permissions,
 				],
 			},
 			{
 				name: "Editor",
 				description: "The editor role has permissions to manage content.",
 				permissions: [
-					...permissionGroups.media.permissions,
-					...permissionGroups.content.permissions,
+					...PermissionGroups.media.permissions,
+					...PermissionGroups.content.permissions,
 				],
 			},
 		],
