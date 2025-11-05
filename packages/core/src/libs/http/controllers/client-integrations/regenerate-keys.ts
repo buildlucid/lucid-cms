@@ -14,6 +14,8 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
+import permissions from "../../middleware/permissions.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -35,6 +37,7 @@ const regenerateKeysController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.RegenerateClientIntegration]),
 	validate("param", controllerSchemas.regenerateKeys.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
