@@ -30,6 +30,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 		SelectMultipleValueT[]
 	>([]);
 	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
+	const [getIsLocked, setIsLocked] = createSignal(false);
 
 	// ---------------------------------
 	// Queries
@@ -72,6 +73,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 				}) || [],
 			);
 			setIsSuperAdmin(user.data?.data.superAdmin || false);
+			setIsLocked(user.data?.data.isLocked || false);
 		}
 	});
 
@@ -88,10 +90,12 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 			{
 				roleIds: user.data?.data.roles?.map((role) => role.id),
 				superAdmin: user.data?.data.superAdmin,
+				isLocked: user.data?.data.isLocked,
 			},
 			{
 				roleIds: getSelectedRoles().map((role) => role.value) as number[],
 				superAdmin: getIsSuperAdmin(),
+				isLocked: getIsLocked(),
 			},
 		);
 	});
@@ -167,6 +171,17 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 							theme="full"
 						/>
 					</Show>
+					<Checkbox
+						id="isLocked"
+						value={getIsLocked()}
+						onChange={setIsLocked}
+						name={"isLocked"}
+						copy={{
+							label: T()("is_locked"),
+						}}
+						errors={getBodyError("isLocked", updateUser.errors)}
+						theme="full"
+					/>
 				</>
 			)}
 		</Panel>

@@ -7,6 +7,7 @@ import {
 	FaSolidEnvelope,
 	FaSolidUserTie,
 	FaSolidIdCard,
+	FaSolidLock,
 } from "solid-icons/fa";
 import api from "@/services/api";
 import useRowTarget from "@/hooks/useRowTarget";
@@ -151,6 +152,12 @@ export const UserList: Component<{
 						label: T()("super_admin"),
 						key: "superAdmin",
 						icon: <FaSolidUserTie />,
+					},
+					{
+						label: T()("is_locked"),
+						key: "isLocked",
+						icon: <FaSolidLock />,
+						sortable: true,
 					},
 					{
 						label: T()("email"),

@@ -32,9 +32,14 @@ const UsersListRoute: Component = () => {
 					value: "",
 					type: "text",
 				},
+				isLocked: {
+					value: undefined,
+					type: "boolean",
+				},
 			},
 			sorts: {
 				createdAt: undefined,
+				isLocked: undefined,
 			},
 		},
 		{
@@ -97,11 +102,22 @@ const UsersListRoute: Component = () => {
 											key: "username",
 											type: "text",
 										},
+										{
+											label: T()("is_locked"),
+											key: "isLocked",
+											type: "boolean",
+											trueLabel: T()("locked"),
+											falseLabel: T()("unlocked"),
+										},
 									]}
 									sorts={[
 										{
 											label: T()("created_at"),
 											key: "createdAt",
+										},
+										{
+											label: T()("is_locked"),
+											key: "isLocked",
 										},
 									]}
 									perPage={[]}

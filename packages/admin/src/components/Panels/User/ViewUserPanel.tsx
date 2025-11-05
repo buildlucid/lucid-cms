@@ -114,6 +114,10 @@ const ViewUserPanelContent: Component<{
 						label: T()("roles"),
 						value: userRoles(),
 					},
+					{
+						label: T()("is_locked"),
+						value: props.state.user?.isLocked ? T()("yes") : T()("no"),
+					},
 				]}
 			/>
 			<SectionHeading title={T()("meta")} />

@@ -10,6 +10,7 @@ interface Params {
 		superAdmin?: boolean;
 		triggerPasswordReset?: boolean;
 		isDeleted?: false;
+		isLocked?: boolean;
 	};
 }
 

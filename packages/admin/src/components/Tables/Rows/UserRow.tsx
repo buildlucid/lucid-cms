@@ -139,13 +139,17 @@ const UserRow: Component<UserRowProps> = (props) => {
 				text={props.user.superAdmin ? T()("super_admin") : T()("standard")}
 				options={{ include: props?.include[3] }}
 			/>
+			<PillCol
+				text={props.user.isLocked ? T()("locked") : T()("unlocked")}
+				options={{ include: props?.include[4] }}
+			/>
 			<TextCol
 				text={props.user.email}
-				options={{ include: props?.include[4] }}
+				options={{ include: props?.include[5] }}
 			/>
 			<DateCol
 				date={props.user.createdAt}
-				options={{ include: props?.include[5] }}
+				options={{ include: props?.include[6] }}
 			/>
 		</Tr>
 	);
