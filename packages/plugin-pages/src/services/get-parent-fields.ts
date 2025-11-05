@@ -1,12 +1,12 @@
-import T from "../translations/index.js";
-import constants from "../constants.js";
-import type {
-	ServiceFn,
-	FieldInputSchema,
-	DocumentVersionType,
-	CollectionTableNames,
-} from "@lucidcms/core/types";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
+import type {
+	CollectionTableNames,
+	DocumentVersionType,
+	FieldInputSchema,
+	ServiceFn,
+} from "@lucidcms/core/types";
+import constants from "../constants.js";
+import T from "../translations/index.js";
 
 export type ParentPageQueryResponse = {
 	_slug: string | null;
@@ -70,17 +70,15 @@ const getParentFields: ServiceFn<
 						"parent_page_not_found_or_doesnt_have_a_published_version",
 					),
 					errors: {
-						body: {
-							fields: [
-								{
-									key: constants.fields.parentPage.key,
-									localeCode: data.defaultLocale,
-									message: T(
-										"parent_page_not_found_or_doesnt_have_a_published_version",
-									),
-								},
-							],
-						},
+						fields: [
+							{
+								key: constants.fields.parentPage.key,
+								localeCode: data.defaultLocale,
+								message: T(
+									"parent_page_not_found_or_doesnt_have_a_published_version",
+								),
+							},
+						],
 					},
 				},
 				data: undefined,

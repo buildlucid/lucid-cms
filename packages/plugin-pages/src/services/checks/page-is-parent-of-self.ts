@@ -1,6 +1,6 @@
-import T from "../../translations/index.js";
-import constants from "../../constants.js";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
+import constants from "../../constants.js";
+import T from "../../translations/index.js";
 
 /**
  *  Returns an error if the parentPage field is set to the same document as the current document
@@ -22,15 +22,13 @@ const checkParentIsPageOfSelf = (data: {
 				status: 400,
 				message: T("cannot_have_self_as_parent_page_message"),
 				errors: {
-					body: {
-						fields: [
-							{
-								key: constants.fields.parentPage.key,
-								localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
-								message: T("cannot_have_self_as_parent_page_message"),
-							},
-						],
-					},
+					fields: [
+						{
+							key: constants.fields.parentPage.key,
+							localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
+							message: T("cannot_have_self_as_parent_page_message"),
+						},
+					],
 				},
 			},
 			data: undefined,

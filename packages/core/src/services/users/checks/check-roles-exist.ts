@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
 import Repository from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkRolesExist: ServiceFn<
@@ -39,11 +39,9 @@ const checkRolesExist: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						roleIds: {
-							code: "invalid",
-							message: T("role_not_found_message"),
-						},
+					roleIds: {
+						code: "invalid",
+						message: T("role_not_found_message"),
 					},
 				},
 			},

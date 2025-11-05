@@ -1,7 +1,7 @@
-import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -43,22 +43,20 @@ const inviteSingle: ServiceFn<
 				type: "basic",
 				status: 500,
 				errors: {
-					body: {
-						email:
-							userExistsRes.data.email === data.email
-								? {
-										code: "invalid",
-										message: T("duplicate_entry_error_message"),
-									}
-								: undefined,
-						username:
-							userExistsRes.data.username === data.username
-								? {
-										code: "invalid",
-										message: T("duplicate_entry_error_message"),
-									}
-								: undefined,
-					},
+					email:
+						userExistsRes.data.email === data.email
+							? {
+									code: "invalid",
+									message: T("duplicate_entry_error_message"),
+								}
+							: undefined,
+					username:
+						userExistsRes.data.username === data.username
+							? {
+									code: "invalid",
+									message: T("duplicate_entry_error_message"),
+								}
+							: undefined,
 				},
 			},
 			data: undefined,

@@ -1,5 +1,5 @@
-import type { Accessor } from "solid-js";
 import type { ErrorResponse, ErrorResultObj, ErrorResultValue } from "@types";
+import type { Accessor } from "solid-js";
 
 export const getBodyError = <T = ErrorResultObj>(
 	key: string,
@@ -10,15 +10,13 @@ export const getBodyError = <T = ErrorResultObj>(
 			return undefined;
 		}
 
-		// @ts-expect-error-base
-		return errors()?.errors?.body[key] as T | undefined;
+		return errors()?.errors?.[key] as T | undefined;
 	}
 
 	if (!errors) {
 		return undefined;
 	}
-	// @ts-expect-error-base
-	return errors.errors.body[key] as T | undefined;
+	return errors.errors?.[key] as T | undefined;
 };
 
 export const getErrorObject = (

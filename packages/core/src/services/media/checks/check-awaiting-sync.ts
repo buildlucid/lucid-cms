@@ -1,7 +1,7 @@
-import T from "../../../translations/index.js";
-import Repository from "../../../libs/repositories/index.js";
-import constants from "../../../constants/constants.js";
 import { addMilliseconds } from "date-fns";
+import constants from "../../../constants/constants.js";
+import Repository from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -49,11 +49,9 @@ const checkAwaitingSync: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						file: {
-							code: "media_error",
-							message: T("media_error_not_awaiting_sync"),
-						},
+					file: {
+						code: "media_error",
+						message: T("media_error_not_awaiting_sync"),
 					},
 				},
 			},

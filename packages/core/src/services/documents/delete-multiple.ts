@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
+import executeHooks from "../../utils/hooks/execute-hooks.js";
 import services from "../index.js";
 
 const deleteMultiple: ServiceFn<
@@ -78,15 +78,13 @@ const deleteMultiple: ServiceFn<
 				type: "basic",
 				message: T("document_not_found_message"),
 				errors: {
-					body: {
-						ids: {
-							message:
-								documentsRes.data.length > 0
-									? T("only_found_ids_error_message", {
-											ids: documentsRes.data.map((doc) => doc.id).join(", "),
-										})
-									: T("no_document_ids_found_message"),
-						},
+					ids: {
+						message:
+							documentsRes.data.length > 0
+								? T("only_found_ids_error_message", {
+										ids: documentsRes.data.map((doc) => doc.id).join(", "),
+									})
+								: T("no_document_ids_found_message"),
 					},
 				},
 				status: 404,

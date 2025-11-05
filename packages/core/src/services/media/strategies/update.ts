@@ -59,11 +59,9 @@ const update: ServiceFn<
 				message: deleteOldRes.error.message,
 				status: 500,
 				errors: {
-					body: {
-						file: {
-							code: "media_error",
-							message: deleteOldRes.error.message,
-						},
+					file: {
+						code: "media_error",
+						message: deleteOldRes.error.message,
 					},
 				},
 			},

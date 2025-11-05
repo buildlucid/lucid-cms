@@ -106,11 +106,9 @@ const updateMe: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						email: {
-							code: "invalid",
-							message: T("this_email_is_already_in_use"),
-						},
+					email: {
+						code: "invalid",
+						message: T("this_email_is_already_in_use"),
 					},
 				},
 			},
@@ -123,11 +121,9 @@ const updateMe: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						username: {
-							code: "invalid",
-							message: T("this_username_is_already_in_use"),
-						},
+					username: {
+						code: "invalid",
+						message: T("this_username_is_already_in_use"),
 					},
 				},
 			},

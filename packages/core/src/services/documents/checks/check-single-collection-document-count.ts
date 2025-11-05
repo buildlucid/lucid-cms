@@ -1,7 +1,7 @@
-import T from "../../../translations/index.js";
 import Repository from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import T from "../../../translations/index.js";
 import type { LucidDocumentTableName } from "../../../types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
  * Checks if the given single collection has more than one document
@@ -60,11 +60,9 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 				message: T("this_collection_has_a_document_already"),
 				status: 400,
 				errors: {
-					body: {
-						collectionKey: {
-							code: "invalid",
-							message: T("this_collection_has_a_document_already"),
-						},
+					collectionKey: {
+						code: "invalid",
+						message: T("this_collection_has_a_document_already"),
 					},
 				},
 			},

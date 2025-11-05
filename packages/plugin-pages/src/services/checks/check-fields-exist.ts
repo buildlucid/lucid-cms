@@ -1,9 +1,9 @@
-import T from "../../translations/index.js";
 import type {
 	FieldError,
 	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
+import T from "../../translations/index.js";
 
 /**
  *  Returns an error if the required fields do not exist
@@ -52,9 +52,7 @@ const checkFieldsExist = (data: {
 				message: T("cannot_find_required_field_message"),
 				status: 400,
 				errors: {
-					body: {
-						fields: fieldErrors,
-					},
+					fields: fieldErrors,
 				},
 			},
 			data: undefined,

@@ -1,7 +1,7 @@
-import errorTypeDefaults from "./error-type-defaults.js";
-import constants from "../../constants/constants.js";
 import type z from "zod/v4";
+import constants from "../../constants/constants.js";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
+import errorTypeDefaults from "./error-type-defaults.js";
 
 /**
  * The LucidAPIError class should be used to throw errors within the API request lifecycle. This will be caught by Hono's error handler and will return a formatted error response. If the error is a Zod error, it will be formatted into a more readable format.
@@ -23,11 +23,9 @@ import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
  *    message: "Validation error occurred",
  *    status: 400,
  *    errors: {
- *        body: {
- *            email: {
- *                code: "invalid_email",
- *                message: "Invalid email address",
- *            },
+ *        email: {
+ *             code: "invalid_email",
+ *             message: "Invalid email address",
  *        },
  *    },
  * });

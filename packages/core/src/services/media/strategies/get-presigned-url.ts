@@ -34,11 +34,9 @@ const getPresignedUrl: ServiceFn<
 				message: presignedUrlRes.error.message,
 				status: 500,
 				errors: {
-					body: {
-						file: {
-							code: "media_error",
-							message: presignedUrlRes.error.message,
-						},
+					file: {
+						code: "media_error",
+						message: presignedUrlRes.error.message,
 					},
 				},
 			},

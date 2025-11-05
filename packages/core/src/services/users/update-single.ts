@@ -1,7 +1,7 @@
-import T from "../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
-import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -99,11 +99,9 @@ const updateSingle: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						email: {
-							code: "invalid",
-							message: T("this_email_is_already_in_use"),
-						},
+					email: {
+						code: "invalid",
+						message: T("this_email_is_already_in_use"),
 					},
 				},
 			},
@@ -116,11 +114,9 @@ const updateSingle: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						username: {
-							code: "invalid",
-							message: T("this_username_is_already_in_use"),
-						},
+					username: {
+						code: "invalid",
+						message: T("this_username_is_already_in_use"),
 					},
 				},
 			},

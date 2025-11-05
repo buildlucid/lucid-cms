@@ -1,13 +1,13 @@
-import T from "../../translations/index.js";
-import constants from "../../constants.js";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
-	ServiceFn,
-	FieldInputSchema,
-	FieldError,
-	DocumentVersionType,
 	CollectionTableNames,
+	DocumentVersionType,
+	FieldError,
+	FieldInputSchema,
+	ServiceFn,
 } from "@lucidcms/core/types";
+import constants from "../../constants.js";
+import T from "../../translations/index.js";
 
 /**
  *  Query for document fields that have same slug and parentPage for each slug translation (would cause duplicate fullSlug)
@@ -126,9 +126,7 @@ const checkDuplicateSlugParents: ServiceFn<
 					status: 400,
 					message: T("duplicate_slug_field_found_message"),
 					errors: {
-						body: {
-							fields: fieldErrors,
-						},
+						fields: fieldErrors,
 					},
 				},
 				data: undefined,

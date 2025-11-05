@@ -38,12 +38,10 @@ const restoreMultiple: ServiceFn<
 				type: "basic",
 				message: T("media_not_found_message"),
 				errors: {
-					body: {
-						ids: {
-							message: T("only_found_ids_error_message", {
-								ids: existRes.data.map((m) => m.id).join(", "),
-							}),
-						},
+					ids: {
+						message: T("only_found_ids_error_message", {
+							ids: existRes.data.map((m) => m.id).join(", "),
+						}),
 					},
 				},
 				status: 404,

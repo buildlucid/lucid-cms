@@ -28,13 +28,11 @@ const checkCanStoreMedia: ServiceFn<
 				}),
 				status: 500,
 				errors: {
-					body: {
-						file: {
-							code: "storage",
-							message: T("file_too_large_max_size_is", {
-								size: maxFileSize,
-							}),
-						},
+					file: {
+						code: "storage",
+						message: T("file_too_large_max_size_is", {
+							size: maxFileSize,
+						}),
 					},
 				},
 			},
@@ -60,13 +58,11 @@ const checkCanStoreMedia: ServiceFn<
 				}),
 				status: 500,
 				errors: {
-					body: {
-						file: {
-							code: "storage",
-							message: T("file_exceeds_storage_limit_max_limit_is", {
-								size: storageLimit,
-							}),
-						},
+					file: {
+						code: "storage",
+						message: T("file_exceeds_storage_limit_max_limit_is", {
+							size: storageLimit,
+						}),
 					},
 				},
 			},

@@ -78,11 +78,9 @@ const updateSingle: ServiceFn<
 				type: "basic",
 				status: 400,
 				errors: {
-					body: {
-						file: {
-							code: "media_error",
-							message: T("media_error_missing_file_name"),
-						},
+					file: {
+						code: "media_error",
+						message: T("media_error_missing_file_name"),
 					},
 				},
 			},

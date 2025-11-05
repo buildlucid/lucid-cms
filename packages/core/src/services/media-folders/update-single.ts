@@ -1,6 +1,6 @@
 import Repository from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import T from "../../translations/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -25,14 +25,12 @@ const updateSingle: ServiceFn<
 				message: T("circular_media_folder_parents_error_message"),
 				status: 400,
 				errors: {
-					body: {
-						fields: [
-							{
-								key: "parentFolderId",
-								message: T("circular_media_folder_parents_error_message"),
-							},
-						],
-					},
+					fields: [
+						{
+							key: "parentFolderId",
+							message: T("circular_media_folder_parents_error_message"),
+						},
+					],
 				},
 			},
 			data: undefined,
@@ -52,14 +50,12 @@ const updateSingle: ServiceFn<
 					message: T("circular_media_folder_parents_error_message"),
 					status: 400,
 					errors: {
-						body: {
-							fields: [
-								{
-									key: "parentFolderId",
-									message: T("circular_media_folder_parents_error_message"),
-								},
-							],
-						},
+						fields: [
+							{
+								key: "parentFolderId",
+								message: T("circular_media_folder_parents_error_message"),
+							},
+						],
 					},
 				},
 				data: undefined,

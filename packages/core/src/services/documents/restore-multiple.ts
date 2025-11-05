@@ -1,6 +1,6 @@
-import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import services from "../index.js";
 
@@ -64,12 +64,10 @@ const restoreMultiple: ServiceFn<
 				type: "basic",
 				message: T("document_not_found_message"),
 				errors: {
-					body: {
-						ids: {
-							message: T("only_found_ids_error_message", {
-								ids: docsExistRes.data.map((d) => d.id).join(", "),
-							}),
-						},
+					ids: {
+						message: T("only_found_ids_error_message", {
+							ids: docsExistRes.data.map((d) => d.id).join(", "),
+						}),
 					},
 				},
 				status: 404,

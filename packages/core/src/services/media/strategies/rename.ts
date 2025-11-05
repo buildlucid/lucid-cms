@@ -24,11 +24,9 @@ const rename: ServiceFn<
 				type: "basic",
 				status: 500,
 				errors: {
-					body: {
-						file: {
-							code: "media_error",
-							message: res.error.message,
-						},
+					file: {
+						code: "media_error",
+						message: res.error.message,
 					},
 				},
 			},

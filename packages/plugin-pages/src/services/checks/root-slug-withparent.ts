@@ -1,10 +1,10 @@
-import T from "../../translations/index.js";
-import constants from "../../constants.js";
 import type {
-	FieldInputSchema,
 	FieldError,
+	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
+import constants from "../../constants.js";
+import T from "../../translations/index.js";
 import type { CollectionConfig } from "../../types/types.js";
 
 /**
@@ -36,9 +36,7 @@ const checkRootSlugWithParent = (data: {
 					status: 400,
 					message: T("slug_cannot_be_slash_and_parent_page_set_message"),
 					errors: {
-						body: {
-							fields: fieldErrors,
-						},
+						fields: fieldErrors,
 					},
 				},
 				data: undefined,
@@ -51,14 +49,12 @@ const checkRootSlugWithParent = (data: {
 				status: 400,
 				message: T("slug_cannot_be_slash_and_parent_page_set_message"),
 				errors: {
-					body: {
-						fields: [
-							{
-								key: constants.fields.parentPage.key,
-								message: T("slug_cannot_be_slash_and_parent_page_set_message"),
-							},
-						],
-					},
+					fields: [
+						{
+							key: constants.fields.parentPage.key,
+							message: T("slug_cannot_be_slash_and_parent_page_set_message"),
+						},
+					],
 				},
 			},
 			data: undefined,

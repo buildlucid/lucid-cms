@@ -63,12 +63,10 @@ const validatePermissions: ServiceFn<
 				type: "basic",
 				status: 500,
 				errors: {
-					body: {
-						permissions: permErrors.reduce<ErrorResult>((acc, e) => {
-							acc[e.key] = e.error;
-							return acc;
-						}, {}),
-					},
+					permissions: permErrors.reduce<ErrorResult>((acc, e) => {
+						acc[e.key] = e.error;
+						return acc;
+					}, {}),
 				},
 			},
 			data: undefined,

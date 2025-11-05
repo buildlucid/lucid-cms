@@ -1,8 +1,8 @@
-import T from "../../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
-import generateSecret from "../../../utils/helpers/generate-secret.js";
-import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import constants from "../../../constants/constants.js";
+import T from "../../../translations/index.js";
+import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
+import generateSecret from "../../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkPassed = (value: string | undefined) => {
@@ -40,11 +40,9 @@ const checkUpdatePassword: ServiceFn<
 				message: T("please_provide_current_password"),
 				status: 400,
 				errors: {
-					body: {
-						currentPassword: {
-							code: "required",
-							message: T("please_provide_current_password"),
-						},
+					currentPassword: {
+						code: "required",
+						message: T("please_provide_current_password"),
 					},
 				},
 			},
@@ -63,11 +61,9 @@ const checkUpdatePassword: ServiceFn<
 				message: T("please_provide_new_password"),
 				status: 400,
 				errors: {
-					body: {
-						newPassword: {
-							code: "required",
-							message: T("please_provide_new_password"),
-						},
+					newPassword: {
+						code: "required",
+						message: T("please_provide_new_password"),
 					},
 				},
 			},
@@ -94,11 +90,9 @@ const checkUpdatePassword: ServiceFn<
 				message: T("please_ensure_passwords_match"),
 				status: 400,
 				errors: {
-					body: {
-						passwordConfirmation: {
-							code: "invalid",
-							message: T("please_ensure_passwords_match"),
-						},
+					passwordConfirmation: {
+						code: "invalid",
+						message: T("please_ensure_passwords_match"),
 					},
 				},
 			},
@@ -120,11 +114,9 @@ const checkUpdatePassword: ServiceFn<
 				message: T("please_ensure_password_is_correct"),
 				status: 400,
 				errors: {
-					body: {
-						currentPassword: {
-							code: "invalid",
-							message: T("please_ensure_password_is_correct"),
-						},
+					currentPassword: {
+						code: "invalid",
+						message: T("please_ensure_password_is_correct"),
 					},
 				},
 			},

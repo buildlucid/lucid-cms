@@ -1,5 +1,5 @@
-import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
 
@@ -40,11 +40,9 @@ const createSingle: ServiceFn<
 				message: T("not_unique_error_message"),
 				status: 400,
 				errors: {
-					body: {
-						name: {
-							code: "invalid",
-							message: T("not_unique_error_message"),
-						},
+					name: {
+						code: "invalid",
+						message: T("not_unique_error_message"),
 					},
 				},
 			},

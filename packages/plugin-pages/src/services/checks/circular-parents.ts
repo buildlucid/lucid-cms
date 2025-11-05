@@ -1,12 +1,12 @@
-import T from "../../translations/index.js";
-import constants from "../../constants.js";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
-	ServiceFn,
-	FieldInputSchema,
-	DocumentVersionType,
 	CollectionTableNames,
+	DocumentVersionType,
+	FieldInputSchema,
+	ServiceFn,
 } from "@lucidcms/core/types";
+import constants from "../../constants.js";
+import T from "../../translations/index.js";
 
 /**
  *  Recursively checks all parent pages for a circular reference and errors in that case
@@ -92,15 +92,13 @@ const checkCircularParents: ServiceFn<
 					status: 400,
 					message: T("circular_parents_error_message"),
 					errors: {
-						body: {
-							fields: [
-								{
-									key: constants.fields.parentPage.key,
-									localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
-									message: T("circular_parents_error_message"),
-								},
-							],
-						},
+						fields: [
+							{
+								key: constants.fields.parentPage.key,
+								localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
+								message: T("circular_parents_error_message"),
+							},
+						],
 					},
 				},
 				data: undefined,
