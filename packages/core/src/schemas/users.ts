@@ -50,10 +50,13 @@ export const userResponseSchema = z.object({
 		description: "If the user has accepted the invitation",
 		example: true,
 	}),
-	roles: z.array(userResponseRoleSchema).meta({
-		description: "The user's roles",
-	}),
-	permissions: z.array(userResponsePermissionSchema),
+	roles: z
+		.array(userResponseRoleSchema)
+		.meta({
+			description: "The user's roles",
+		})
+		.optional(),
+	permissions: z.array(userResponsePermissionSchema).optional(),
 	isDeleted: z.boolean().meta({
 		description: "If the user is soft-deleted or not",
 		example: true,
@@ -70,6 +73,31 @@ export const userResponseSchema = z.object({
 		description: "The date the user row was last updated",
 		example: "2021-06-10T20:00:00.000Z",
 	}),
+	hasPassword: z.boolean().optional().meta({
+		description: "Whether the user has a password set",
+		example: true,
+	}),
+	authProviders: z
+		.array(
+			z.object({
+				id: z
+					.number()
+					.meta({ description: "The auth provider link ID", example: 1 }),
+				providerKey: z
+					.string()
+					.meta({ description: "The provider key", example: "github" }),
+				providerUserId: z.string().meta({
+					description: "The provider's user identifier for this user",
+					example: "123456",
+				}),
+				linkedAt: z
+					.string()
+					.nullable()
+					.meta({ description: "When the provider was linked", example: null }),
+			}),
+		)
+		.optional()
+		.meta({ description: "Actively linked auth providers for the user" }),
 });
 
 export const controllerSchemas = {

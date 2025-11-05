@@ -51,6 +51,7 @@ const getSingleController = factory.createHandlers(
 			},
 			{
 				userId: Number.parseInt(id, 10),
+				authUser: c.get("auth"),
 			},
 		);
 		if (user.error) throw new LucidAPIError(user.error);

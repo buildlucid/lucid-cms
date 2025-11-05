@@ -42,6 +42,7 @@ const getMeController = factory.createHandlers(
 			},
 			{
 				userId: c.get("auth").id,
+				authUser: c.get("auth"),
 			},
 		);
 		if (user.error) throw new LucidAPIError(user.error);

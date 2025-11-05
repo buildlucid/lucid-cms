@@ -39,6 +39,16 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		]),
 		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
 		deleted_by: z.number().nullable(),
+		auth_providers: z
+			.array(
+				z.object({
+					id: z.number(),
+					provider_key: z.string(),
+					provider_user_id: z.string(),
+					linked_at: z.union([z.string(), z.date()]).nullable(),
+				}),
+			)
+			.optional(),
 		roles: z
 			.array(
 				z.object({
@@ -107,7 +117,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 	// ----------------------------------------
 	// queries
-	async selectSinglePreset<V extends boolean = false>(
+	async selectAccessTokenUser<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
@@ -116,18 +126,10 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		>,
 	) {
 		let query = this.db.selectFrom("lucid_users").select((eb) => [
-			"email",
-			"first_name",
-			"last_name",
 			"id",
-			"created_at",
-			"updated_at",
 			"username",
+			"email",
 			"super_admin",
-			"triggered_password_reset",
-			"invitation_accepted",
-			"is_deleted",
-			"is_deleted_at",
 			this.dbAdapter
 				.jsonArrayFrom(
 					eb
@@ -158,6 +160,85 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		query = queryBuilder.select(query, props.where);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectAccessTokenUser",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: ["id", "username", "email", "super_admin", "roles"],
+		});
+	}
+	async selectSinglePreset<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				where: QueryBuilderWhere<"lucid_users">;
+			}
+		>,
+	) {
+		let query = this.db.selectFrom("lucid_users").select((eb) => [
+			"email",
+			"first_name",
+			"last_name",
+			"id",
+			"created_at",
+			"updated_at",
+			"username",
+			"super_admin",
+			"triggered_password_reset",
+			"invitation_accepted",
+			"is_deleted",
+			"is_deleted_at",
+			"password",
+			this.dbAdapter
+				.jsonArrayFrom(
+					eb
+						.selectFrom("lucid_user_roles")
+						.innerJoin(
+							"lucid_roles",
+							"lucid_roles.id",
+							"lucid_user_roles.role_id",
+						)
+						.select((eb) => [
+							"lucid_roles.id",
+							"lucid_roles.name",
+							"lucid_roles.description",
+							this.dbAdapter
+								.jsonArrayFrom(
+									eb
+										.selectFrom("lucid_role_permissions")
+										.select(["permission"])
+										.whereRef("role_id", "=", "lucid_roles.id"),
+								)
+								.as("permissions"),
+						])
+						.whereRef("user_id", "=", "lucid_users.id"),
+				)
+				.as("roles"),
+			this.dbAdapter
+				.jsonArrayFrom(
+					eb
+						.selectFrom("lucid_user_auth_providers")
+						.select([
+							"lucid_user_auth_providers.id",
+							"lucid_user_auth_providers.provider_key",
+							"lucid_user_auth_providers.provider_user_id",
+							"lucid_user_auth_providers.linked_at",
+						])
+						.whereRef(
+							"lucid_user_auth_providers.user_id",
+							"=",
+							"lucid_users.id",
+						),
+				)
+				.as("auth_providers"),
+		]);
+
+		query = queryBuilder.select(query, props.where);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
 		});
 		if (exec.response.error) return exec.response;
@@ -176,7 +257,9 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"super_admin",
 				"triggered_password_reset",
 				"invitation_accepted",
+				"password",
 				"roles",
+				"auth_providers",
 			],
 		});
 	}

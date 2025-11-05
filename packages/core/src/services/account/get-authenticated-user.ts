@@ -2,12 +2,14 @@ import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types.js";
+import type { LucidAuth } from "../../types/hono.js";
 import Formatter from "../../libs/formatters/index.js";
 
 const getAuthenticatedUser: ServiceFn<
 	[
 		{
 			userId: number;
+			authUser: LucidAuth;
 		},
 	],
 	UserResponse
@@ -42,6 +44,7 @@ const getAuthenticatedUser: ServiceFn<
 		error: undefined,
 		data: UsersFormatter.formatSingle({
 			user: userRes.data,
+			authUser: data.authUser,
 		}),
 	};
 };

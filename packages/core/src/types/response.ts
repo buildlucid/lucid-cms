@@ -31,10 +31,15 @@ export interface UserResponse {
 	lastName: string | null;
 	triggerPasswordReset?: boolean | null;
 	invitationAccepted: boolean;
-
 	roles?: UserPermissionsResponse["roles"];
 	permissions?: UserPermissionsResponse["permissions"];
-
+	hasPassword?: boolean;
+	authProviders?: Array<{
+		id: number;
+		providerKey: string;
+		providerUserId: string;
+		linkedAt: string | null;
+	}>;
 	isDeleted: boolean;
 	deletedAt?: string | null;
 	createdAt: string | null;

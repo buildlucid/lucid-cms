@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import { sign } from "hono/jwt";
-import services from "../../../services/index.js";
+import Repository from "../../../libs/repositories/index.js";
+import Formatter from "../../../libs/formatters/index.js";
 import { setCookie } from "hono/cookie";
 import { randomBytes } from "node:crypto";
 import type { ServiceResponse } from "../../../utils/services/types.js";
@@ -13,31 +14,35 @@ const generateToken = async (
 	try {
 		const config = c.get("config");
 
-		const userRes = await services.users.getSingle(
-			{
-				db: config.db.client,
-				config: config,
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-			},
-			{
-				userId: userId,
-				activeUser: true,
-			},
-		);
+		const Users = Repository.get("users", config.db.client, config.db);
+		const userRes = await Users.selectAccessTokenUser({
+			where: [
+				{ key: "id", operator: "=", value: userId },
+				{
+					key: "is_deleted",
+					operator: "=",
+					value: config.db.getDefault("boolean", "false"),
+				},
+			],
+			validation: { enabled: true },
+		});
 		if (userRes.error) return userRes;
 
 		const now = Date.now();
 		const nonce = randomBytes(8).toString("hex");
+
+		const UserPermissionsFormatter = Formatter.get("user-permissions");
+		const { permissions } = UserPermissionsFormatter.formatMultiple({
+			roles: userRes.data.roles || [],
+		});
 
 		const token = await sign(
 			{
 				id: userRes.data.id,
 				username: userRes.data.username,
 				email: userRes.data.email,
-				permissions: userRes.data.permissions,
-				superAdmin: userRes.data.superAdmin ?? false,
+				permissions: permissions,
+				superAdmin: Formatter.formatBoolean(userRes.data.super_admin ?? false),
 				exp: Math.floor(now / 1000) + constants.accessTokenExpiration,
 				iat: Math.floor(now / 1000),
 				nonce: nonce,

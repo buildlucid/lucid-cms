@@ -3,11 +3,8 @@ import Formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types/response.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { QueryBuilderWhere } from "../../libs/query-builder/index.js";
-
-export interface ServiceData {
-	userId: number;
-}
 
 const getSingle: ServiceFn<
 	[
@@ -15,6 +12,7 @@ const getSingle: ServiceFn<
 			userId: number;
 			/** When true, it will only return users that are active and not soft-deleted  */
 			activeUser?: boolean;
+			authUser: LucidAuth;
 		},
 	],
 	UserResponse
@@ -53,6 +51,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: UsersFormatter.formatSingle({
 			user: userRes.data,
+			authUser: data.authUser,
 		}),
 	};
 };
