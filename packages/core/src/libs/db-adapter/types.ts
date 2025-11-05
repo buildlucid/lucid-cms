@@ -206,6 +206,7 @@ export interface LucidUsers {
 		BooleanInt | undefined,
 		BooleanInt
 	>;
+	is_locked: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted: BooleanInt | null;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number | null;

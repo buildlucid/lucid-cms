@@ -17,6 +17,7 @@ export interface UserPropT {
 	username: string;
 	triggered_password_reset?: BooleanInt;
 	invitation_accepted: BooleanInt;
+	is_locked: BooleanInt;
 	is_deleted: BooleanInt | null;
 	is_deleted_at: Date | string | null;
 	password?: string | null;
@@ -70,6 +71,7 @@ export default class UsersFormatter {
 			username: props.user.username,
 			firstName: props.user.first_name,
 			lastName: props.user.last_name,
+			isLocked: Formatter.formatBoolean(props.user.is_locked),
 			roles: canViewSensitive ? roles : undefined,
 			permissions: canViewSensitive ? permissions : undefined,
 			triggerPasswordReset: Formatter.formatBoolean(

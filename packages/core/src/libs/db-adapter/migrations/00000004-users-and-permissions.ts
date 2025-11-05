@@ -54,6 +54,16 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						),
 				)
+				.addColumn("is_locked", adapter.getDataType("boolean"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "false"),
+							),
+						)
+						.notNull(),
+				)
 				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(

@@ -23,6 +23,11 @@ const generateToken = async (
 					operator: "=",
 					value: config.db.getDefault("boolean", "false"),
 				},
+				{
+					key: "is_locked",
+					operator: "=",
+					value: config.db.getDefault("boolean", "false"),
+				},
 			],
 			validation: { enabled: true },
 		});

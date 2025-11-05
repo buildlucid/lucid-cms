@@ -70,6 +70,7 @@ const updateSingleController = factory.createHandlers(
 				superAdmin: body.superAdmin,
 				triggerPasswordReset: body.triggerPasswordReset,
 				isDeleted: body.isDeleted,
+				isLocked: body.isLocked,
 			},
 		);
 		if (updateUser.error) throw new LucidAPIError(updateUser.error);

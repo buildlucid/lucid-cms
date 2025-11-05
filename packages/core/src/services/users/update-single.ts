@@ -19,6 +19,7 @@ const updateSingle: ServiceFn<
 			superAdmin?: boolean;
 			triggerPasswordReset?: boolean;
 			isDeleted?: boolean;
+			isLocked?: boolean;
 			auth: {
 				id: number;
 				superAdmin: boolean;
@@ -148,6 +149,7 @@ const updateSingle: ServiceFn<
 				updated_at: new Date().toISOString(),
 				triggered_password_reset: data.triggerPasswordReset,
 				is_deleted: data.isDeleted,
+				is_locked: data.isLocked,
 			},
 			where: [
 				{

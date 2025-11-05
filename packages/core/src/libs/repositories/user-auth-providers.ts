@@ -29,6 +29,10 @@ export default class UserAuthProvidersRepository extends StaticRepository<"lucid
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
+		user_is_locked: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -90,6 +94,7 @@ export default class UserAuthProvidersRepository extends StaticRepository<"lucid
 				"lucid_users.first_name as user_first_name",
 				"lucid_users.last_name as user_last_name",
 				"lucid_users.is_deleted as user_is_deleted",
+				"lucid_users.is_locked as user_is_locked",
 			])
 			.where("lucid_user_auth_providers.provider_key", "=", props.providerKey)
 			.where(
@@ -119,6 +124,7 @@ export default class UserAuthProvidersRepository extends StaticRepository<"lucid
 				"user_first_name",
 				"user_last_name",
 				"user_is_deleted",
+				"user_is_locked",
 			],
 		});
 	}

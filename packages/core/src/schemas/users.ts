@@ -42,6 +42,10 @@ export const userResponseSchema = z.object({
 		description: "The user's last name",
 		example: "Smith",
 	}),
+	isLocked: z.boolean().meta({
+		description: "If the user is locked from logging in",
+		example: false,
+	}),
 	triggerPasswordReset: z.boolean().nullable().meta({
 		description: "Should the UI force a password reset?",
 		example: false,
@@ -175,6 +179,13 @@ export const controllerSchemas = {
 					example: false,
 				})
 				.optional(),
+			isLocked: z
+				.boolean()
+				.meta({
+					description: "Lock or unlock the user",
+					example: false,
+				})
+				.optional(),
 		}),
 		query: {
 			string: undefined,
@@ -227,11 +238,14 @@ export const controllerSchemas = {
 					"filter[isDeleted]": queryString.schema.filter(false, {
 						example: "true",
 					}),
+					"filter[isLocked]": queryString.schema.filter(false, {
+						example: "true",
+					}),
 					"filter[deletedBy]": queryString.schema.filter(true, {
 						example: "1",
 					}),
 					sort: queryString.schema.sort(
-						"createdAt,updatedAt,firstName,lastName,email,username",
+						"createdAt,updatedAt,firstName,lastName,email,username,isLocked",
 					),
 					include: queryString.schema.include("permissions"),
 					page: queryString.schema.page,
@@ -248,6 +262,7 @@ export const controllerSchemas = {
 						roleIds: queryFormatted.schema.filters.union.optional(),
 						id: queryFormatted.schema.filters.union.optional(),
 						isDeleted: queryFormatted.schema.filters.single.optional(),
+						isLocked: queryFormatted.schema.filters.single.optional(),
 						deletedBy: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
@@ -261,6 +276,7 @@ export const controllerSchemas = {
 								"lastName",
 								"email",
 								"username",
+								"isLocked",
 							]),
 							value: z.enum(["asc", "desc"]),
 						}),

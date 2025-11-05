@@ -31,7 +31,7 @@ const login: ServiceFn<
 	const Users = Repository.get("users", context.db, context.config.db);
 
 	const userRes = await Users.selectSingleByEmailUsername({
-		select: ["id", "password", "is_deleted", "secret"],
+		select: ["id", "password", "is_deleted", "is_locked", "secret"],
 		where: {
 			username: data.usernameOrEmail,
 			email: data.usernameOrEmail,
@@ -52,6 +52,17 @@ const login: ServiceFn<
 			error: {
 				type: "authorisation",
 				message: T("login_suspended_error_message"),
+				status: 401,
+			},
+			data: undefined,
+		};
+	}
+
+	if (Formatter.formatBoolean(userRes.data.is_locked)) {
+		return {
+			error: {
+				type: "authorisation",
+				message: T("login_locked_error_message"),
 				status: 401,
 			},
 			data: undefined,

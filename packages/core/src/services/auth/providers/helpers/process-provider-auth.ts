@@ -93,6 +93,18 @@ const processProviderAuth: ServiceFn<
 				},
 			};
 		}
+
+		//* check if the user is locked
+		if (Formatter.formatBoolean(invitationTokenRes.data.user_is_locked)) {
+			return {
+				error: {
+					status: 401,
+					name: T("auth_provider_user_is_locked_name"),
+					message: T("auth_provider_user_is_locked_message"),
+				},
+			};
+		}
+
 		//* check if the user has accepted an invitation already
 		if (
 			Formatter.formatBoolean(invitationTokenRes.data.user_invitation_accepted)
@@ -207,6 +219,21 @@ const processProviderAuth: ServiceFn<
 			};
 		}
 
+		//* check if the target user is locked
+		if (
+			userAuthProviderRes.data &&
+			Formatter.formatBoolean(userAuthProviderRes.data.user_is_locked)
+		) {
+			return {
+				error: {
+					status: 401,
+					name: T("auth_provider_user_is_locked_name"),
+					message: T("auth_provider_user_is_locked_message"),
+				},
+				data: undefined,
+			};
+		}
+
 		//* check if the user auth provider is exists, but linked to another user
 		if (
 			userAuthProviderRes.data &&
@@ -291,6 +318,17 @@ const processProviderAuth: ServiceFn<
 				status: 404,
 				name: T("auth_provider_user_is_deleted_name"),
 				message: T("auth_provider_user_is_deleted_message"),
+			},
+			data: undefined,
+		};
+	}
+
+	if (Formatter.formatBoolean(userAuthProviderRes.data.user_is_locked)) {
+		return {
+			error: {
+				status: 401,
+				name: T("auth_provider_user_is_locked_name"),
+				message: T("auth_provider_user_is_locked_message"),
 			},
 			data: undefined,
 		};

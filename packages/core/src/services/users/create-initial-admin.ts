@@ -49,6 +49,7 @@ const createInitialAdmin: ServiceFn<
 			last_name: data.lastName,
 			super_admin: true,
 			triggered_password_reset: false,
+			is_locked: false,
 			password: hashedPassword,
 			secret: encryptSecret,
 			invitation_accepted: true,

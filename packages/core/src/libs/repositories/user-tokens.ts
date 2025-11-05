@@ -32,6 +32,10 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
+		user_is_locked: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -70,6 +74,7 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 				"lucid_users.last_name as user_last_name",
 				"lucid_users.invitation_accepted as user_invitation_accepted",
 				"lucid_users.is_deleted as user_is_deleted",
+				"lucid_users.is_locked as user_is_locked",
 			])
 			.where("lucid_user_tokens.expiry_date", ">", new Date().toISOString())
 			.where("lucid_user_tokens.id", "=", props.id);
@@ -94,6 +99,7 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 				"user_last_name",
 				"user_invitation_accepted",
 				"user_is_deleted",
+				"user_is_locked",
 			],
 		});
 	}

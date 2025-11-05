@@ -75,6 +75,7 @@ const inviteSingle: ServiceFn<
 			triggered_password_reset: false,
 			secret: encryptSecret,
 			invitation_accepted: false,
+			is_locked: false,
 		},
 		returning: ["id"],
 		validation: {
