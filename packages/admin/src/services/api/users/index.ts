@@ -6,6 +6,7 @@ import useDeleteSingle from "./useDeleteSingle";
 import useRestore from "./useRestore";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 import useResendInvitation from "./useResendInvitation";
+import useUnlinkAuthProvider from "./useUnlinkAuthProvider";
 
 const exportObject = {
 	useGetMultiple,
@@ -16,6 +17,7 @@ const exportObject = {
 	useRestore,
 	useDeleteSinglePermanently,
 	useResendInvitation,
+	useUnlinkAuthProvider,
 };
 
 export default exportObject;

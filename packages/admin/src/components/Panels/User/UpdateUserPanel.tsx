@@ -34,6 +34,8 @@ const UpdateUserPanel: Component<{
 	>([]);
 	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
 	const [getIsLocked, setIsLocked] = createSignal(false);
+	const [getUnlinkingProviderKey, setUnlinkingProviderKey] =
+		createSignal<string>();
 
 	// ---------------------------------
 	// Queries
@@ -64,6 +66,11 @@ const UpdateUserPanel: Component<{
 	const updateUser = api.users.useUpdateSingle({
 		onSuccess: () => {
 			props.state.setOpen(false);
+		},
+	});
+	const unlinkAuthProvider = api.users.useUnlinkAuthProvider({
+		onMutate: (params) => {
+			setUnlinkingProviderKey(params.providerKey);
 		},
 	});
 
@@ -228,8 +235,18 @@ const UpdateUserPanel: Component<{
 										<AuthProviderRow
 											provider={provider}
 											linkedProvider={linkedProvidersByKey()[provider.key]}
+											isLoading={
+												unlinkAuthProvider.action.isPending &&
+												getUnlinkingProviderKey() === provider.key
+											}
 											onUnlink={() => {
-												alert(`Unlink ${provider.name} not implemented yet.`);
+												const userId = props.id();
+												if (!userId) return;
+
+												unlinkAuthProvider.action.mutate({
+													userId,
+													providerKey: provider.key,
+												});
 											}}
 										/>
 									)}

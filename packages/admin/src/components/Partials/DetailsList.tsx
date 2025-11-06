@@ -29,7 +29,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 					<Show when={item.show !== false}>
 						<li
 							class={classNames(
-								"flex mb-2 last:mb-0 gap-2 border-b border-border pb-2 last:pb-0 last:border-b-0",
+								"flex mb-2 last:mb-0 gap-x-2 border-b border-border pb-2 last:pb-0 last:border-b-0",
 								{
 									"flex-col items-start lg:justify-between":
 										props.type === "text",

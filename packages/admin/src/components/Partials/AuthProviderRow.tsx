@@ -10,6 +10,7 @@ const AuthProviderRow: Component<{
 	provider: AuthProvidersResponse["providers"][number];
 	linkedProvider?: NonNullable<UserResponse["authProviders"]>[number];
 	onUnlink?: () => void;
+	isLoading?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
@@ -59,6 +60,7 @@ const AuthProviderRow: Component<{
 					theme="danger-outline"
 					size="small"
 					type="button"
+					loading={props.isLoading}
 				>
 					{T()("unlink")}
 				</Button>
