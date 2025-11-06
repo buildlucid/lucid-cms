@@ -2,7 +2,7 @@ import T from "@/translations";
 import { type Component, Show, createMemo } from "solid-js";
 import classNames from "classnames";
 import userStore from "@/store/userStore";
-import ActionDropdown from "../Partials/ActionDropdown";
+import ActionDropdown from "./ActionDropdown";
 import type useRowTarget from "@/hooks/useRowTarget";
 import type { ClientIntegrationResponse } from "@types";
 

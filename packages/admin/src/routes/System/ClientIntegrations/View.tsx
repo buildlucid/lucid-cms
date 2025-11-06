@@ -18,7 +18,7 @@ import CopyAPIKey from "@/components/Modals/ClientIntegrations/CopyAPIKey";
 import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";
 import Button from "@/components/Partials/Button";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
-import ClientIntegrationRow from "@/components/Rows/ClientIntegrationRow";
+import ClientIntegrationRow from "@/components/Partials/ClientIntegrationRow";
 import { Standard } from "@/components/Groups/Headers";
 
 const SystemClientIntegrationsRoute: Component = (props) => {

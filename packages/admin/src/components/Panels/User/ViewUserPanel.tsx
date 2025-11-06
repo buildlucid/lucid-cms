@@ -1,11 +1,11 @@
 import T from "@/translations";
-import { type Component, type Accessor, createMemo } from "solid-js";
+import { type Component, type Accessor, createMemo, Show } from "solid-js";
 import api from "@/services/api";
 import dateHelpers from "@/utils/date-helpers";
 import { Panel } from "@/components/Groups/Panel";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import DetailsList from "@/components/Partials/DetailsList";
-import type { UserResponse } from "@types";
+import type { AuthProvidersResponse, UserResponse } from "@types";
 
 const ViewUserPanel: Component<{
 	id?: Accessor<number | undefined>;
@@ -24,13 +24,17 @@ const ViewUserPanel: Component<{
 		},
 		enabled: () => props.state.open && props.id !== undefined,
 	});
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+		enabled: () => props.state.open,
+	});
 
 	// ---------------------------------
 	// Memos
 	const panelFetchState = createMemo(() => {
 		return {
-			isLoading: user.isLoading,
-			isError: user.isError,
+			isLoading: user.isLoading || providers.isLoading,
+			isError: user.isError || providers.isError,
 		};
 	});
 
@@ -60,6 +64,7 @@ const ViewUserPanel: Component<{
 						setOpen: props.state.setOpen,
 						user: user.data?.data,
 					}}
+					providers={providers.data?.data.providers}
 				/>
 			)}
 		</Panel>
@@ -73,11 +78,51 @@ const ViewUserPanelContent: Component<{
 		setOpen: (_state: boolean) => void;
 		user: UserResponse | undefined;
 	};
+	providers: AuthProvidersResponse["providers"] | undefined;
 }> = (props) => {
 	// ---------------------------------
 	// Memos
 	const userRoles = createMemo(() => {
 		return props.state.user?.roles?.map((r) => r.name).join(", ") || "-";
+	});
+	const providersByKey = createMemo(() => {
+		const map: Record<string, AuthProvidersResponse["providers"][number]> = {};
+		const list = props.providers ?? [];
+		for (const provider of list) {
+			map[provider.key] = provider;
+		}
+		return map;
+	});
+	const linkedProviders = createMemo(() => {
+		const authProviders = props.state.user?.authProviders ?? [];
+		return authProviders
+			.map((linked) => {
+				const provider = providersByKey()[linked.providerKey];
+				if (!provider) return null;
+				return {
+					provider,
+					linked,
+				};
+			})
+			.filter(
+				(
+					item,
+				): item is {
+					provider: AuthProvidersResponse["providers"][number];
+					linked: NonNullable<UserResponse["authProviders"]>[number];
+				} => item !== null,
+			);
+	});
+	const authProviderItems = createMemo(() => {
+		return linkedProviders().map(({ provider, linked }) => {
+			const formattedDate = dateHelpers.formatFullDate(linked.linkedAt);
+			return {
+				label: provider.name,
+				value: formattedDate
+					? T()("linked_on", { date: formattedDate })
+					: T()("linked"),
+			};
+		});
 	});
 
 	// ---------------------------------
@@ -109,14 +154,19 @@ const ViewUserPanelContent: Component<{
 						value: props.state.user?.superAdmin
 							? T()("super_admin")
 							: T()("standard"),
+						show: props.state.user?.superAdmin !== undefined,
 					},
 					{
 						label: T()("roles"),
 						value: userRoles(),
+						show:
+							props.state.user?.roles !== undefined &&
+							props.state.user?.roles.length > 0,
 					},
 					{
 						label: T()("is_locked"),
 						value: props.state.user?.isLocked ? T()("yes") : T()("no"),
+						show: props.state.user?.isLocked !== undefined,
 					},
 				]}
 			/>
@@ -134,6 +184,10 @@ const ViewUserPanelContent: Component<{
 					},
 				]}
 			/>
+			<Show when={authProviderItems().length > 0}>
+				<SectionHeading title={T()("auth_providers")} />
+				<DetailsList type="text" items={authProviderItems()} />
+			</Show>
 		</>
 	);
 };

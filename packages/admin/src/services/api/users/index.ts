@@ -5,6 +5,7 @@ import useCreateSingle from "./useCreateSingle";
 import useDeleteSingle from "./useDeleteSingle";
 import useRestore from "./useRestore";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
+import useResendInvitation from "./useResendInvitation";
 
 const exportObject = {
 	useGetMultiple,
@@ -14,6 +15,7 @@ const exportObject = {
 	useDeleteSingle,
 	useRestore,
 	useDeleteSinglePermanently,
+	useResendInvitation,
 };
 
 export default exportObject;

@@ -6,6 +6,7 @@ import {
 	createSignal,
 	createEffect,
 	Show,
+	For,
 } from "solid-js";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import api from "@/services/api";
@@ -14,16 +15,18 @@ import userStore from "@/store/userStore";
 import helpers from "@/utils/helpers";
 import { Panel } from "@/components/Groups/Panel";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
+import Spinner from "@/components/Partials/Spinner";
+import type { UserResponse } from "@types";
+import AuthProviderRow from "@/components/Partials/AuthProviderRow";
+import SectionHeading from "@/components/Blocks/SectionHeading";
 
-interface UpdateUserPanelProps {
+const UpdateUserPanel: Component<{
 	id: Accessor<number | undefined>;
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
 	};
-}
-
-const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
+}> = (props) => {
 	// ------------------------------
 	// State
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
@@ -50,6 +53,10 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 			},
 		},
 		enabled: () => !!props.id(),
+	});
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+		enabled: () => userStore.get.user?.superAdmin ?? false,
 	});
 
 	// ---------------------------------
@@ -80,10 +87,20 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 	// ---------------------------------
 	// Memos
 	const isLoading = createMemo(() => {
-		return user.isLoading || roles.isLoading;
+		return user.isLoading || roles.isLoading || providers.isLoading;
 	});
 	const isError = createMemo(() => {
-		return user.isError || roles.isError;
+		return user.isError || roles.isError || providers.isError;
+	});
+	const linkedProvidersByKey = createMemo(() => {
+		const authProviders = user.data?.data.authProviders ?? [];
+		return authProviders.reduce(
+			(acc, provider) => {
+				acc[provider.providerKey] = provider;
+				return acc;
+			},
+			{} as Record<string, NonNullable<UserResponse["authProviders"]>[number]>,
+		);
 	});
 	const updateData = createMemo(() => {
 		return helpers.updateData(
@@ -139,6 +156,7 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 		>
 			{() => (
 				<>
+					<SectionHeading title={T()("details")} />
 					<SelectMultiple
 						id="roles"
 						values={getSelectedRoles()}
@@ -159,39 +177,66 @@ const UpdateUserPanel: Component<UpdateUserPanelProps> = (props) => {
 						theme="full"
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
-						<div class="flex items-center justify-between gap-4 mb-4">
-							<span class="text-sm text-title">{T()("is_super_admin")}</span>
-							<Switch
-								id="superAdmin"
-								value={getIsSuperAdmin()}
-								onChange={setIsSuperAdmin}
-								name={"superAdmin"}
-								copy={{
-									true: T()("yes"),
-									false: T()("no"),
-								}}
-								errors={getBodyError("superAdmin", updateUser.errors)}
-								fullWidth
-								noMargin
-							/>
-						</div>
+						<>
+							<div class="mb-4 flex items-center justify-between gap-4">
+								<Switch
+									id="superAdmin"
+									value={getIsSuperAdmin()}
+									onChange={setIsSuperAdmin}
+									name={"superAdmin"}
+									theme="relaxed"
+									copy={{
+										true: T()("yes"),
+										false: T()("no"),
+									}}
+									errors={getBodyError("superAdmin", updateUser.errors)}
+									fullWidth
+									noMargin
+								/>
+								<span class="text-sm text-body">{T()("is_super_admin")}</span>
+							</div>
+							<div class="flex items-center justify-between gap-4 mb-4">
+								<Switch
+									id="isLocked"
+									value={getIsLocked()}
+									onChange={setIsLocked}
+									name={"isLocked"}
+									theme="relaxed"
+									copy={{
+										true: T()("locked"),
+										false: T()("unlocked"),
+									}}
+									errors={getBodyError("isLocked", updateUser.errors)}
+									fullWidth
+									noMargin
+								/>
+								<span class="text-sm text-body">{T()("is_locked")}</span>
+							</div>
+						</>
 					</Show>
-					<div class="flex items-center justify-between gap-4">
-						<span class="text-sm text-title">{T()("is_locked")}</span>
-						<Switch
-							id="isLocked"
-							value={getIsLocked()}
-							onChange={setIsLocked}
-							name={"isLocked"}
-							copy={{
-								true: T()("locked"),
-								false: T()("unlocked"),
-							}}
-							errors={getBodyError("isLocked", updateUser.errors)}
-							fullWidth
-							noMargin
-						/>
-					</div>
+					<Show when={userStore.get.user?.superAdmin}>
+						<SectionHeading title={T()("auth_providers")} />
+						<Show
+							when={(providers.data?.data.providers?.length ?? 0) > 0}
+							fallback={
+								<span class="text-sm text-body">{T()("no_results")}</span>
+							}
+						>
+							<div class="flex flex-col gap-3">
+								<For each={providers.data?.data.providers || []}>
+									{(provider) => (
+										<AuthProviderRow
+											provider={provider}
+											linkedProvider={linkedProvidersByKey()[provider.key]}
+											onUnlink={() => {
+												alert(`Unlink ${provider.name} not implemented yet.`);
+											}}
+										/>
+									)}
+								</For>
+							</div>
+						</Show>
+					</Show>
 				</>
 			)}
 		</Panel>

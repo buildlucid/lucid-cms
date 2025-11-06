@@ -18,6 +18,7 @@ import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
 import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import DeleteUser from "@/components/Modals/User/DeleteUser";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
+import ResendInvitation from "@/components/Modals/User/ResendInvitation";
 import { Table } from "@/components/Groups/Table";
 import UserRow from "@/components/Tables/Rows/UserRow";
 import RestoreUsers from "@/components/Modals/User/RestoreUser";
@@ -42,6 +43,7 @@ export const UserList: Component<{
 			passwordReset: false,
 			restore: false,
 			deletePermanently: false,
+			resendInvitation: false,
 		},
 	});
 
@@ -93,10 +95,19 @@ export const UserList: Component<{
 		},
 		enabled: () => props.state?.searchParams.getSettled(),
 	});
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+	});
 
 	// ----------------------------------
 	// Mutations
 	const restoreUsers = api.users.useRestore();
+
+	// ----------------------------------------
+	// Effects
+	const isLoading = createMemo(() => {
+		return users.isLoading || providers.isLoading;
+	});
 
 	// ----------------------------------------
 	// Render
@@ -172,7 +183,7 @@ export const UserList: Component<{
 					},
 				]}
 				state={{
-					isLoading: users.isFetching,
+					isLoading: isLoading(),
 					isSuccess: users.isSuccess,
 				}}
 				options={{
@@ -211,6 +222,7 @@ export const UserList: Component<{
 									setSelected: setSelected,
 								}}
 								showingDeleted={props.state.showingDeleted}
+								passwordAuthEnabled={!providers.data?.data.disablePassword}
 							/>
 						)}
 					</Index>
@@ -231,6 +243,15 @@ export const UserList: Component<{
 					open: rowTarget.getTriggers().viewLogins,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("viewLogins", state);
+					},
+				}}
+			/>
+			<ResendInvitation
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().resendInvitation,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("resendInvitation", state);
 					},
 				}}
 			/>

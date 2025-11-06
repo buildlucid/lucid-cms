@@ -1,5 +1,11 @@
 import T from "@/translations";
-import { type Component, createSignal, createEffect, onMount } from "solid-js";
+import {
+	type Component,
+	createSignal,
+	createEffect,
+	onMount,
+	createMemo,
+} from "solid-js";
 import classnames from "classnames";
 import type { ErrorResult, FieldError } from "@types";
 import {
@@ -29,6 +35,7 @@ interface SwitchProps {
 	noMargin?: boolean;
 	fullWidth?: boolean;
 	fieldColumnIsMissing?: boolean;
+	theme?: "default" | "relaxed";
 }
 
 export const Switch: Component<SwitchProps> = (props) => {
@@ -38,14 +45,25 @@ export const Switch: Component<SwitchProps> = (props) => {
 	let overlayRef: HTMLSpanElement | undefined;
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [overlayStyle, setOverlayStyle] = createSignal({});
+	const theme = createMemo(() => props.theme ?? "default");
 
 	const updateOverlayPosition = () => {
 		if (falseSpanRef && trueSpanRef && overlayRef) {
 			const activeSpan = props.value ? trueSpanRef : falseSpanRef;
-			setOverlayStyle({
-				width: `${activeSpan.offsetWidth}px`,
+			const relaxedTheme = theme() === "relaxed";
+			const gap = relaxedTheme ? 4 : 0;
+			const widthValue = Math.max(
+				activeSpan.offsetWidth - (relaxedTheme ? gap * 2 : 0),
+				0,
+			);
+			const style: Record<string, string> = {
+				width: `${widthValue}px`,
 				transform: `translateX(${props.value ? falseSpanRef.offsetWidth : 0}px)`,
-			});
+			};
+			if (relaxedTheme) {
+				style.left = `${gap}px`;
+			}
+			setOverlayStyle(style);
 		}
 	};
 
@@ -55,6 +73,10 @@ export const Switch: Component<SwitchProps> = (props) => {
 
 	createEffect(() => {
 		props.value;
+		updateOverlayPosition();
+	});
+	createEffect(() => {
+		theme();
 		updateOverlayPosition();
 	});
 
@@ -91,7 +113,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 			<button
 				type="button"
 				class={classnames(
-					"bg-input-base h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-border focus-visible:ring-1 ring-inset focus:ring-primary-base group",
+					"h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-inset focus-visible:ring-1 transition-colors duration-200 group bg-input-base ring-border focus-visible:ring-primary-base",
 				)}
 				onClick={() => {
 					checkboxRef?.click();
@@ -107,11 +129,9 @@ export const Switch: Component<SwitchProps> = (props) => {
 				<span
 					ref={falseSpanRef}
 					class={classnames(
-						"flex-1 py-1 px-2 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
-						{
-							"text-secondary-contrast": !props.value,
-							"text-title": props.value,
-						},
+						"flex-1 py-1 px-3 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
+						!props.value && "text-secondary-contrast",
+						props.value && "text-title",
 					)}
 				>
 					{props.copy?.false || T()("false")}
@@ -119,19 +139,25 @@ export const Switch: Component<SwitchProps> = (props) => {
 				<span
 					ref={trueSpanRef}
 					class={classnames(
-						"flex-1 px-2 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
-						{
-							"text-secondary-contrast": props.value,
-							"text-title": !props.value,
-						},
+						"flex-1 px-3 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
+						props.value && "text-secondary-contrast",
+						!props.value && "text-title",
 					)}
 				>
 					{props.copy?.true || T()("true")}
 				</span>
 				<span
 					ref={overlayRef}
-					class="bg-secondary-base absolute top-0 bottom-0 transition-all duration-200 rounded-md z-0 group-hover:bg-secondary-hover"
-					style={overlayStyle()}
+					class={classnames(
+						"absolute transition-all duration-200 rounded-md z-0 bg-secondary-base group-hover:bg-secondary-hover",
+						{
+							"top-0 bottom-0": theme() === "default",
+							"top-1 bottom-1": theme() === "relaxed",
+						},
+					)}
+					style={{
+						...overlayStyle(),
+					}}
 				/>
 			</button>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />

@@ -21,9 +21,11 @@ interface UserRowProps extends TableRowProps {
 			| "passwordReset"
 			| "restore"
 			| "deletePermanently"
+			| "resendInvitation"
 		>
 	>;
 	showingDeleted?: Accessor<boolean>;
+	passwordAuthEnabled?: boolean;
 }
 
 const UserRow: Component<UserRowProps> = (props) => {
@@ -34,6 +36,12 @@ const UserRow: Component<UserRowProps> = (props) => {
 	});
 	const username = createMemo(() => {
 		return currentUser() ? `${props.user.username} (you)` : props.user.username;
+	});
+	const canUpdateNotSelf = createMemo(() => {
+		return userStore.get.hasPermission(["update_user"]).all && !currentUser();
+	});
+	const canDeleteNotSelf = createMemo(() => {
+		return userStore.get.hasPermission(["delete_user"]).all && !currentUser();
 	});
 
 	// ----------------------------------
@@ -50,12 +58,11 @@ const UserRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("update", true);
 					},
-					permission:
-						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
-					hide: props.showingDeleted?.(),
+					permission: canUpdateNotSelf(),
+					hide: props.showingDeleted?.() || currentUser(),
 				},
 				{
-					label: T()("view_details"),
+					label: T()("details"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -64,7 +71,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					permission: true,
 				},
 				{
-					label: T()("view_logins"),
+					label: T()("logins"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -80,8 +87,36 @@ const UserRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("restore", true);
 					},
-					permission: userStore.get.hasPermission(["update_user"]).all,
+					permission: canUpdateNotSelf(),
 					hide: props.showingDeleted?.() === false,
+					theme: "primary",
+				},
+				{
+					label: T()("reset_password"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("passwordReset", true);
+					},
+					permission: canUpdateNotSelf(),
+					actionExclude: true,
+					hide:
+						props.showingDeleted?.() ||
+						!props.passwordAuthEnabled ||
+						currentUser(),
+					theme: "primary",
+				},
+				{
+					label: T()("resend_invitation"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("resendInvitation", true);
+					},
+					permission: canUpdateNotSelf(),
+					hide:
+						props.showingDeleted?.() || props.user.invitationAccepted !== false,
+					actionExclude: true,
 					theme: "primary",
 				},
 				{
@@ -91,10 +126,9 @@ const UserRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					permission:
-						userStore.get.hasPermission(["delete_user"]).all && !currentUser(),
+					permission: canDeleteNotSelf(),
 					actionExclude: true,
-					hide: props.showingDeleted?.(),
+					hide: props.showingDeleted?.() || currentUser(),
 					theme: "error",
 				},
 				{
@@ -104,23 +138,10 @@ const UserRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("deletePermanently", true);
 					},
-					permission: userStore.get.hasPermission(["delete_user"]).all,
-					hide: props.showingDeleted?.() === false,
+					permission: canDeleteNotSelf(),
+					hide: props.showingDeleted?.() === false || currentUser(),
 					theme: "error",
 					actionExclude: true,
-				},
-				{
-					label: T()("reset_password"),
-					type: "button",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.user.id);
-						props.rowTarget.setTrigger("passwordReset", true);
-					},
-					permission:
-						userStore.get.hasPermission(["update_user"]).all && !currentUser(),
-					actionExclude: true,
-					hide: props.showingDeleted?.(),
-					theme: "primary",
 				},
 			]}
 			options={props.options}
