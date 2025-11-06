@@ -60,7 +60,6 @@ const unlinkAuthProviderController = factory.createHandlers(
 				auth: auth,
 				targetUserId: auth.id,
 				providerKey: providerId,
-				compareTargetAndAuthIds: false,
 			},
 		);
 		if (unlinkAuthProvider.error) {

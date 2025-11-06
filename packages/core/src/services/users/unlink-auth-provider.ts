@@ -7,8 +7,8 @@ import type { ServiceFn } from "../../utils/services/types.js";
 /**
  * Unlinks an auth provider from the target user.
  *
- * If password auth is enabled, you may only unlink the last auth provider if you have a password set.
- * If password auth is disabled, you cannot unlink the last auth provider.
+ * When password authentication is disabled you cannot unlink the last auth provider.
+ * When password authentication is enabled the last auth provider can always be removed.
  */
 const unlinkAuthProvider: ServiceFn<
 	[
@@ -16,7 +16,6 @@ const unlinkAuthProvider: ServiceFn<
 			auth: LucidAuth;
 			targetUserId: number;
 			providerKey: string;
-			compareTargetAndAuthIds: boolean;
 		},
 	],
 	undefined
@@ -28,20 +27,11 @@ const unlinkAuthProvider: ServiceFn<
 		context.config.db,
 	);
 
-	if (data.compareTargetAndAuthIds && data.auth.id === data.targetUserId) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: T("error_cant_unlink_yourself"),
-			},
-			data: undefined,
-		};
-	}
+	const passwordEnabled = context.config.auth.password.enabled === true;
 
 	const [userRes, providerRes, providersCountRes] = await Promise.all([
 		Users.selectSingle({
-			select: ["id", "password"],
+			select: ["id"],
 			where: [
 				{
 					key: "id",
@@ -94,13 +84,11 @@ const unlinkAuthProvider: ServiceFn<
 	if (providerRes.error) return providerRes;
 	if (providersCountRes.error) return providersCountRes;
 
-	const providersCount = Formatter.parseCount(providersCountRes.data?.count);
-	const passwordEnabled = context.config.auth.password.enabled === true;
-	const hasPassword = Boolean(userRes.data.password);
-	const isLastProvider = providersCount <= 1;
+	if (passwordEnabled === false) {
+		const providersCount = Formatter.parseCount(providersCountRes.data?.count);
+		const isLastProvider = providersCount <= 1;
 
-	if (isLastProvider) {
-		if (!passwordEnabled) {
+		if (isLastProvider) {
 			return {
 				error: {
 					type: "basic",
@@ -108,20 +96,6 @@ const unlinkAuthProvider: ServiceFn<
 					name: T("auth_provider_cannot_remove_last_link_name"),
 					message: T(
 						"auth_provider_cannot_remove_last_link_password_disabled_message",
-					),
-				},
-				data: undefined,
-			};
-		}
-
-		if (!hasPassword) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					name: T("auth_provider_cannot_remove_last_link_name"),
-					message: T(
-						"auth_provider_cannot_remove_last_link_no_password_message",
 					),
 				},
 				data: undefined,
