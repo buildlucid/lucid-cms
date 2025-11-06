@@ -10,6 +10,7 @@ import updateSingle from "./update-single.js";
 import getMultipleFieldMeta from "./get-multiple-field-meta.js";
 import restoreMultiple from "./restore-multiple.js";
 import resendInvitation from "./resend-invitation.js";
+import unlinkAuthProvider from "./unlink-auth-provider.js";
 
 export default {
 	checks,
@@ -24,4 +25,5 @@ export default {
 	getMultipleFieldMeta,
 	restoreMultiple,
 	resendInvitation,
+	unlinkAuthProvider,
 };

@@ -8,6 +8,7 @@ import restoreMultiple from "../../../controllers/users/restore-multiple.js";
 import updateSingle from "../../../controllers/users/update-single.js";
 import resendInvitation from "../../../controllers/users/resend-invitation.js";
 import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js";
+import unlinkAuthProvider from "../../../controllers/users/unlink-auth-provider.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const usersRoutes = new Hono<LucidHonoGeneric>()
@@ -17,6 +18,7 @@ const usersRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:id/resend-invitation", ...resendInvitation)
 	.post("/", ...inviteSingle)
 	.post("/restore", ...restoreMultiple)
+	.delete("/:id/auth-providers/:providerId", ...unlinkAuthProvider)
 	.delete("/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:id", ...deleteSingle)
 	.patch("/:id", ...updateSingle);

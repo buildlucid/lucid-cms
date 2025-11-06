@@ -76,6 +76,20 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	unlinkAuthProvider: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			providerId: z.string().min(1).meta({
+				description: "The provider key you wish to unlink",
+				example: "github",
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	updateMe: {
 		body: z.object({
 			firstName: z

@@ -988,6 +988,43 @@
 					"response": []
 				},
 				{
+					"name": "Unlink Auth Provider",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users/1/auth-providers/github",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"auth-providers",
+								"github"
+							]
+						},
+						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+					},
+					"response": []
+				},
+				{
 					"name": "Restore Multiple",
 					"request": {
 						"method": "POST",
@@ -1719,6 +1756,42 @@
 								"f32511d8d8bc9be1fc28e0236d1f3f26872dcb902d78a4fe75e1a0ad69bd598c"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unlink Auth Provider",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{CSRF}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/account/auth-providers/github",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"account",
+								"auth-providers",
+								"github"
+							]
+						},
+						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
 					"response": []
 				}
