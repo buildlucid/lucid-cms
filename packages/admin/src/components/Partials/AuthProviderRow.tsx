@@ -10,6 +10,7 @@ const AuthProviderRow: Component<{
 	provider: AuthProvidersResponse["providers"][number];
 	linkedProvider?: NonNullable<UserResponse["authProviders"]>[number];
 	onUnlink?: () => void;
+	onLink?: () => void;
 	isLoading?: boolean;
 }> = (props) => {
 	// ----------------------------------------
@@ -63,6 +64,17 @@ const AuthProviderRow: Component<{
 					loading={props.isLoading}
 				>
 					{T()("unlink")}
+				</Button>
+			</Show>
+			<Show when={!linked() && props.onLink}>
+				<Button
+					onClick={props.onLink}
+					theme="border-outline"
+					size="small"
+					type="button"
+					loading={props.isLoading}
+				>
+					{T()("link")}
 				</Button>
 			</Show>
 		</div>

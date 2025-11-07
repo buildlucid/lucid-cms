@@ -19,19 +19,10 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 	const [lastName, setLastName] = createSignal(props.lastName ?? "");
 	const [username, setUsername] = createSignal(props.username ?? "");
 	const [email, setEmail] = createSignal(props.email ?? "");
-	const [currentPassword, setCurrentPassword] = createSignal("");
-	const [newPassword, setNewPassword] = createSignal("");
-	const [confirmPassword, setConfirmPassword] = createSignal("");
 
 	// ----------------------------------------
 	// Mutations
-	const updateMe = api.account.useUpdateMe({
-		onSuccess: () => {
-			setCurrentPassword("");
-			setNewPassword("");
-			setConfirmPassword("");
-		},
-	});
+	const updateMe = api.account.useUpdateMe();
 
 	// ----------------------------------------
 	// Memos
@@ -42,18 +33,12 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				lastName: props.lastName,
 				username: props.username,
 				email: props.email,
-				currentPassword: "",
-				newPassword: "",
-				passwordConfirmation: "",
 			},
 			{
 				firstName: firstName(),
 				lastName: lastName(),
 				username: username(),
 				email: email(),
-				currentPassword: currentPassword(),
-				newPassword: newPassword(),
-				passwordConfirmation: confirmPassword(),
 			},
 		);
 	});
@@ -72,6 +57,9 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 			}}
 			content={{
 				submit: T()("update"),
+			}}
+			options={{
+				hideSubmitWhenDisabled: true,
 			}}
 			onSubmit={() => {
 				updateMe.action.mutate(updateData().data);
@@ -130,50 +118,6 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				errors={getBodyError("email", updateMe.errors)}
 				theme="full"
 			/>
-			<div class="mt-5">
-				<h3 class="mb-4">{T()("update_password")}</h3>
-				<Input
-					id="currentPassword"
-					name="currentPassword"
-					type="password"
-					value={currentPassword()}
-					onChange={setCurrentPassword}
-					copy={{
-						label: T()("current_password"),
-					}}
-					errors={getBodyError("currentPassword", updateMe.errors)}
-					theme="full"
-					hideOptionalText={true}
-				/>
-				<Input
-					id="newPassword"
-					name="newPassword"
-					type="password"
-					value={newPassword()}
-					onChange={setNewPassword}
-					copy={{
-						label: T()("new_password"),
-					}}
-					errors={getBodyError("newPassword", updateMe.errors)}
-					theme="full"
-					hideOptionalText={true}
-				/>
-				<Show when={newPassword() !== ""}>
-					<Input
-						id="passwordConfirmation"
-						name="passwordConfirmation"
-						type="password"
-						value={confirmPassword()}
-						onChange={setConfirmPassword}
-						copy={{
-							label: T()("confirm_password"),
-						}}
-						errors={getBodyError("passwordConfirmation", updateMe.errors)}
-						theme="full"
-						hideOptionalText={true}
-					/>
-				</Show>
-			</div>
 		</Form>
 	);
 };

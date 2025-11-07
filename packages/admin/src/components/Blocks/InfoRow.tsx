@@ -5,6 +5,7 @@ interface InfoRowProps {
 	title?: string;
 	description?: string;
 	permission?: boolean;
+	actions?: JSXElement;
 
 	left?: JSXElement;
 	children?: JSXElement;
@@ -36,19 +37,30 @@ const InfoRowContent: Component<InfoRowProps> = (props) => {
 	// Render
 	return (
 		<div class="bg-card-base p-4 rounded-md border border-border mb-4 last:mb-0">
-			<Show when={props.title}>
-				<h3 class="text-base mb-1">{props.title}</h3>
+			<Show when={props.title || props.description || props.actions}>
+				<div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+					<div>
+						<Show when={props.title}>
+							<h3 class="text-base mb-1">{props.title}</h3>
+						</Show>
+						<Show when={props.description}>
+							<p class="text-sm max-w-4xl">{props.description}</p>
+						</Show>
+					</div>
+					<Show when={props.actions}>
+						<div class="flex items-center gap-2">{props.actions}</div>
+					</Show>
+				</div>
 			</Show>
-			<Show when={props.description}>
-				<p class="text-sm max-w-4xl">{props.description}</p>
+			<Show when={props.children}>
+				<div
+					class={classNames({
+						"mt-4": props.title || props.description,
+					})}
+				>
+					{props.children}
+				</div>
 			</Show>
-			<div
-				class={classNames({
-					"mt-4": props.title || props.description,
-				})}
-			>
-				{props.children}
-			</div>
 		</div>
 	);
 };

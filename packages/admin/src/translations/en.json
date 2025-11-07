@@ -1,4 +1,5 @@
 {
+	"link": "Link",
 	"logins": "Logins",
 	"or": "or",
 	"continue_with": "Continue With",
@@ -175,6 +176,9 @@
 	"is_super_admin": "Is super admin",
 	"is_locked": "Account locked",
 	"auth_providers": "Auth Providers",
+	"security": "Security",
+	"account_security_description": "Manage your password and linked authentication providers.",
+	"account_auth_providers_description": "Manage linked authentication providers and connect new ones.",
 	"linked": "Linked",
 	"linked_on": "Linked on {{date}}",
 	"not_linked": "Not linked",

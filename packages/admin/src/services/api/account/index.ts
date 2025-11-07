@@ -1,8 +1,9 @@
-import useForgotPassword from "./useForgotPassword.jsx";
-import useResetPassword from "./useResetPassword.jsx";
-import useVerifyResetToken from "./useVerifyResetToken.jsx";
-import useGetAuthenticatedUser from "./useGetAuthenticatedUser.jsx";
-import useUpdateMe from "./useUpdateMe.jsx";
+import useForgotPassword from "./useForgotPassword";
+import useResetPassword from "./useResetPassword";
+import useVerifyResetToken from "./useVerifyResetToken";
+import useGetAuthenticatedUser from "./useGetAuthenticatedUser";
+import useUpdateMe from "./useUpdateMe";
+import useUnlinkAuthProvider from "./useUnlinkAuthProvider";
 
 const exportObject = {
 	useForgotPassword,
@@ -10,6 +11,7 @@ const exportObject = {
 	useVerifyResetToken,
 	useGetAuthenticatedUser,
 	useUpdateMe,
+	useUnlinkAuthProvider,
 };
 
 export default exportObject;
