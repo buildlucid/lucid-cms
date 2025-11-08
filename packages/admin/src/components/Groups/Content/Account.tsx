@@ -162,6 +162,7 @@ export const Account: Component = () => {
 									{T()("reset_password")}
 								</Button>
 							}
+							actionAlignment="center"
 						/>
 					</Show>
 					<Show when={providersList().length > 0}>
@@ -245,7 +246,6 @@ export const Account: Component = () => {
 						}}
 						name={"cms-locale"}
 						noClear={true}
-						theme={"basic"}
 					/>
 				</InfoRow.Content>
 			</InfoRow.Root>

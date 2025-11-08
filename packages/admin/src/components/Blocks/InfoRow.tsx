@@ -6,7 +6,7 @@ interface InfoRowProps {
 	description?: string;
 	permission?: boolean;
 	actions?: JSXElement;
-
+	actionAlignment?: "top" | "center";
 	left?: JSXElement;
 	children?: JSXElement;
 }
@@ -38,7 +38,17 @@ const InfoRowContent: Component<InfoRowProps> = (props) => {
 	return (
 		<div class="bg-card-base p-4 rounded-md border border-border mb-4 last:mb-0">
 			<Show when={props.title || props.description || props.actions}>
-				<div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+				<div
+					class={classNames(
+						"flex flex-col gap-6 md:flex-row md:justify-between",
+						{
+							"md:items-start":
+								props.actionAlignment === "top" ||
+								props.actionAlignment === undefined,
+							"md:items-center": props.actionAlignment === "center",
+						},
+					)}
+				>
 					<div>
 						<Show when={props.title}>
 							<h3 class="text-base mb-1">{props.title}</h3>

@@ -107,21 +107,23 @@ const SystemOverviewRoute: Component = (props) => {
 					<InfoRow.Content
 						title={T()("clear_all")}
 						description={T()("clear_all_processed_images_setting_message")}
-					>
-						<Button
-							size="medium"
-							type="button"
-							theme="danger"
-							onClick={() => {
-								setOpenClearAllProcessedImages(true);
-							}}
-							permission={userStore.get.hasPermission(["update_media"]).all}
-						>
-							{T()("clear_all_processed_images_button", {
-								count: settingsData.data?.data?.media.processed.total || 0,
-							})}
-						</Button>
-					</InfoRow.Content>
+						actions={
+							<Button
+								size="medium"
+								type="button"
+								theme="danger-outline"
+								onClick={() => {
+									setOpenClearAllProcessedImages(true);
+								}}
+								permission={userStore.get.hasPermission(["update_media"]).all}
+							>
+								{T()("clear_all_processed_images_button", {
+									count: settingsData.data?.data?.media.processed.total || 0,
+								})}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
 				</InfoRow.Root>
 
 				{/* Share Links */}
@@ -132,19 +134,21 @@ const SystemOverviewRoute: Component = (props) => {
 					<InfoRow.Content
 						title={T()("delete_all_share_links_system")}
 						description={T()("delete_all_share_links_system_setting_message")}
-					>
-						<Button
-							size="medium"
-							type="button"
-							theme="danger"
-							onClick={() => {
-								setOpenDeleteAllShareLinks(true);
-							}}
-							permission={userStore.get.hasPermission(["update_media"]).all}
-						>
-							{T()("delete_all_share_links_system_button")}
-						</Button>
-					</InfoRow.Content>
+						actions={
+							<Button
+								size="medium"
+								type="button"
+								theme="danger-outline"
+								onClick={() => {
+									setOpenDeleteAllShareLinks(true);
+								}}
+								permission={userStore.get.hasPermission(["update_media"]).all}
+							>
+								{T()("delete_all_share_links_system_button")}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
 				</InfoRow.Root>
 
 				{/* Cache */}
@@ -155,19 +159,21 @@ const SystemOverviewRoute: Component = (props) => {
 					<InfoRow.Content
 						title={T()("clear_cache")}
 						description={T()("clear_cache_setting_message")}
-					>
-						<Button
-							size="medium"
-							type="button"
-							theme="danger"
-							onClick={() => {
-								setOpenClearCache(true);
-							}}
-							permission={userStore.get.hasPermission(["clear_kv"]).all}
-						>
-							{T()("clear_cache_button")}
-						</Button>
-					</InfoRow.Content>
+						actions={
+							<Button
+								size="medium"
+								type="button"
+								theme="danger-outline"
+								onClick={() => {
+									setOpenClearCache(true);
+								}}
+								permission={userStore.get.hasPermission(["clear_kv"]).all}
+							>
+								{T()("clear_cache_button")}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
 				</InfoRow.Root>
 
 				{/* Locales */}
@@ -181,6 +187,7 @@ const SystemOverviewRoute: Component = (props) => {
 					>
 						<DetailsList
 							type="text"
+							theme="contained"
 							items={
 								contentLocales().map((locale) => ({
 									label: locale.name || locale.code,
@@ -201,6 +208,7 @@ const SystemOverviewRoute: Component = (props) => {
 					<InfoRow.Content>
 						<DetailsList
 							type="pill"
+							theme="contained"
 							items={[
 								{
 									label: T()("media_enabled"),

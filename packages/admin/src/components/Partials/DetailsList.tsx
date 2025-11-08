@@ -17,13 +17,19 @@ interface DetailsListProps {
 		show?: boolean;
 		stacked?: boolean;
 	}>;
+	theme?: "contained";
 }
 
 const DetailsList: Component<DetailsListProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<ul class="w-full mb-6 last:mb-0 border border-border rounded-md p-4 bg-card-base">
+		<ul
+			class={classNames("w-full bg-card-base", {
+				"mb-6 last:mb-0 border border-border rounded-md p-4":
+					props.theme !== "contained",
+			})}
+		>
 			<For each={props.items}>
 				{(item) => (
 					<Show when={item.show !== false}>

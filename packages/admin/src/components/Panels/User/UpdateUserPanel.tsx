@@ -184,40 +184,34 @@ const UpdateUserPanel: Component<{
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
 						<>
-							<div class="mb-4 flex items-center justify-between gap-4">
-								<Switch
-									id="superAdmin"
-									value={getIsSuperAdmin()}
-									onChange={setIsSuperAdmin}
-									name={"superAdmin"}
-									theme="relaxed"
-									copy={{
-										true: T()("yes"),
-										false: T()("no"),
-									}}
-									errors={getBodyError("superAdmin", updateUser.errors)}
-									fullWidth
-									noMargin
-								/>
-								<span class="text-sm text-body">{T()("is_super_admin")}</span>
-							</div>
-							<div class="flex items-center justify-between gap-4 mb-4">
-								<Switch
-									id="isLocked"
-									value={getIsLocked()}
-									onChange={setIsLocked}
-									name={"isLocked"}
-									theme="relaxed"
-									copy={{
-										true: T()("locked"),
-										false: T()("unlocked"),
-									}}
-									errors={getBodyError("isLocked", updateUser.errors)}
-									fullWidth
-									noMargin
-								/>
-								<span class="text-sm text-body">{T()("is_locked")}</span>
-							</div>
+							<Switch
+								id="superAdmin"
+								value={getIsSuperAdmin()}
+								onChange={setIsSuperAdmin}
+								name={"superAdmin"}
+								theme="relaxed"
+								copy={{
+									true: T()("yes"),
+									false: T()("no"),
+									label: T()("is_super_admin"),
+								}}
+								errors={getBodyError("superAdmin", updateUser.errors)}
+								hideOptionalText={true}
+							/>
+							<Switch
+								id="isLocked"
+								value={getIsLocked()}
+								onChange={setIsLocked}
+								name={"isLocked"}
+								theme="relaxed"
+								copy={{
+									true: T()("locked"),
+									false: T()("unlocked"),
+									label: T()("is_locked"),
+								}}
+								errors={getBodyError("isLocked", updateUser.errors)}
+								hideOptionalText={true}
+							/>
 						</>
 					</Show>
 					<Show when={userStore.get.user?.superAdmin}>

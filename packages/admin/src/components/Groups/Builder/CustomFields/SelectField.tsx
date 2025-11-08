@@ -107,7 +107,6 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			theme={"basic"}
 		/>
 	);
 };

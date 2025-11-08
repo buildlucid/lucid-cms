@@ -95,6 +95,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						}}
 						errors={getBodyError("newPassword", updateMe.errors)}
 						hideOptionalText={true}
+						noMargin={true}
 					/>
 					<Input
 						id="passwordConfirmation"
@@ -107,6 +108,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						}}
 						errors={getBodyError("passwordConfirmation", updateMe.errors)}
 						hideOptionalText={true}
+						noMargin={true}
 					/>
 				</div>
 			</Form>

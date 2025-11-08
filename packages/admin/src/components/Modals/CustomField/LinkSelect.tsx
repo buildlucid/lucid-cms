@@ -93,7 +93,6 @@ const LinkSelect: Component = () => {
 							label: T()("open_in_new_tab"),
 						}}
 						required={false}
-						theme={"basic"}
 					/>
 				</div>
 
