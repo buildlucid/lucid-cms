@@ -24,7 +24,7 @@ export const Label: Component<LabelProps> = (props) => {
 				class={classnames(
 					"text-sm transition-colors duration-200 ease-in-out flex justify-between text-title mb-1.5",
 					{
-						"text-primary-hover": props.focused,
+						"!text-primary-hover": props.focused,
 						"pt-2 px-2 !mb-0": props.theme === "full",
 					},
 				)}
