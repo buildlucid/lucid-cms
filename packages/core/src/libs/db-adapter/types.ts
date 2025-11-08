@@ -475,6 +475,7 @@ export interface LucidAuthStates {
 	id: Generated<number>;
 	state: string;
 	provider_key: string;
+	authenticated_user_id: number | null;
 	action_type: AuthStateActionType;
 	expiry_date: TimestampImmutable;
 	redirect_path: string | null;

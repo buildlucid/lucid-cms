@@ -18,7 +18,6 @@ const oidcCallback: ServiceFn<
 			providerKey: string;
 			code: string;
 			state: string;
-			authenticatedUserId?: number;
 		},
 	],
 	{
@@ -58,6 +57,7 @@ const oidcCallback: ServiceFn<
 			"invitation_token_id",
 			"redirect_path",
 			"action_type",
+			"authenticated_user_id",
 		],
 		where: [
 			{
@@ -111,7 +111,7 @@ const oidcCallback: ServiceFn<
 			invitationTokenId: authStateRes.data.invitation_token_id ?? undefined,
 			redirectPath: authStateRes.data.redirect_path ?? undefined,
 			actionType: authStateRes.data.action_type ?? undefined,
-			authenticatedUserId: data.authenticatedUserId,
+			authenticatedUserId: authStateRes.data.authenticated_user_id ?? undefined,
 		}),
 		AuthStates.deleteSingle({
 			where: [{ key: "id", operator: "=", value: authStateRes.data.id }],

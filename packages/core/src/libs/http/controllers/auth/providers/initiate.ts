@@ -14,6 +14,7 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../../utils/build-response.js";
+import softAuthenticate from "../../../middleware/soft-authenticate.js";
 
 const factory = createFactory();
 
@@ -38,6 +39,7 @@ const providerInitiateController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	validateCSRF,
+	softAuthenticate,
 	validate("param", controllerSchemas.providerInitiate.params),
 	validate("json", controllerSchemas.providerInitiate.body),
 	async (c) => {
@@ -67,6 +69,7 @@ const providerInitiateController = factory.createHandlers(
 				invitationToken,
 				redirectPath,
 				actionType,
+				authenticatedUserId: c.get("auth")?.id,
 			},
 		);
 		if (initiateAuthRes.error) throw new LucidAPIError(initiateAuthRes.error);

@@ -12,7 +12,6 @@ import {
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
-import softAuthenticate from "../../../middleware/soft-authenticate.js";
 
 const factory = createFactory();
 
@@ -28,7 +27,6 @@ const providerOIDCCallbackController = factory.createHandlers(
 		}),
 		validateResponse: true,
 	}),
-	softAuthenticate,
 	validate("param", controllerSchemas.providerOIDCCallback.params),
 	validate("query", controllerSchemas.providerOIDCCallback.query.string),
 	async (c) => {
@@ -90,7 +88,6 @@ const providerOIDCCallbackController = factory.createHandlers(
 				providerKey,
 				code,
 				state,
-				authenticatedUserId: c.get("auth")?.id,
 			},
 		);
 		if (callbackAuthRes.error) {

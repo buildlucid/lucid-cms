@@ -20,6 +20,7 @@ const initiate: ServiceFn<
 			actionType: AuthStateActionType;
 			redirectPath?: string;
 			invitationToken?: string;
+			authenticatedUserId?: number;
 		},
 	],
 	InitiateAuthResponse
@@ -127,6 +128,7 @@ const initiate: ServiceFn<
 			provider_key: data.providerKey,
 			invitation_token_id: invitationTokenId,
 			action_type: data.actionType,
+			authenticated_user_id: data.authenticatedUserId,
 			expiry_date: addMilliseconds(
 				new Date(),
 				constants.authState.ttl,
