@@ -1,12 +1,93 @@
 import type { Component } from "solid-js";
+import { createSignal } from "solid-js";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
 import { FaSolidXmark } from "solid-icons/fa";
 import { Standard } from "@/components/Groups/Headers";
 import InfoRow from "@/components/Blocks/InfoRow";
 import PluginLoader from "@/components/PluginLoader";
+import {
+	Input,
+	Textarea,
+	Switch,
+	Select,
+	SelectMultiple,
+	Color,
+	Checkbox,
+	JSONTextarea,
+	Search,
+	CheckboxButton,
+	WYSIWYG,
+} from "@/components/Groups/Form";
 
 const ComponentsRoute: Component = () => {
+	// ----------------------------------------
+	// State
+	const [inputText, setInputText] = createSignal("Sample text");
+	const [inputEmail, setInputEmail] = createSignal("example@email.com");
+	const [inputPassword, setInputPassword] = createSignal("password123");
+	const [inputNumber, setInputNumber] = createSignal("42");
+
+	const [textareaValue, setTextareaValue] = createSignal(
+		"This is a sample textarea content.\n\nIt supports multiple lines.",
+	);
+
+	const [switchValue, setSwitchValue] = createSignal(false);
+
+	const [selectValue, setSelectValue] = createSignal<
+		string | number | undefined
+	>("option1");
+	const selectOptions = [
+		{ value: "option1", label: "Option 1" },
+		{ value: "option2", label: "Option 2" },
+		{ value: "option3", label: "Option 3" },
+		{ value: "option4", label: "Option 4" },
+	];
+
+	const [selectMultipleValues, setSelectMultipleValues] = createSignal([
+		{ value: "option1", label: "Option 1" },
+		{ value: "option2", label: "Option 2" },
+	]);
+	const selectMultipleOptions = [
+		{ value: "option1", label: "Option 1" },
+		{ value: "option2", label: "Option 2" },
+		{ value: "option3", label: "Option 3" },
+		{ value: "option4", label: "Option 4" },
+		{ value: "option5", label: "Option 5" },
+	];
+
+	const [colorValue, setColorValue] = createSignal("#3b82f6");
+	const colorPresets = [
+		"#ef4444",
+		"#f97316",
+		"#eab308",
+		"#22c55e",
+		"#3b82f6",
+		"#8b5cf6",
+		"#ec4899",
+	];
+
+	const [checkboxValue, setCheckboxValue] = createSignal(true);
+
+	const [jsonTextareaValue, setJsonTextareaValue] = createSignal(`{
+	"name": "John Doe",
+	"age": 30,
+	"email": "john@example.com",
+	"hobbies": ["reading", "coding", "gaming"]
+}`);
+
+	const [searchValue, setSearchValue] = createSignal("");
+
+	const [checkboxButtonValues, setCheckboxButtonValues] = createSignal({
+		option1: true,
+		option2: false,
+		option3: true,
+	});
+
+	const [wysiwygValue, setWysiwygValue] = createSignal(
+		"<p>This is <strong>rich text</strong> content with <em>formatting</em>.</p>",
+	);
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -112,6 +193,279 @@ const ComponentsRoute: Component = () => {
 						</div>
 					</InfoRow.Content>
 				</InfoRow.Root>
+
+				{/* Form Components */}
+				<InfoRow.Root
+					title={"Input Fields"}
+					description={"Various input field types"}
+				>
+					<InfoRow.Content title={"Text Input"}>
+						<Input
+							id="text-input"
+							value={inputText()}
+							onChange={setInputText}
+							type="text"
+							name="text-input"
+							copy={{
+								label: "Text Input",
+								placeholder: "Enter some text...",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content title={"Email Input"}>
+						<Input
+							id="email-input"
+							value={inputEmail()}
+							onChange={setInputEmail}
+							type="email"
+							name="email-input"
+							copy={{
+								label: "Email Input",
+								placeholder: "Enter email address...",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content title={"Password Input"}>
+						<Input
+							id="password-input"
+							value={inputPassword()}
+							onChange={setInputPassword}
+							type="password"
+							name="password-input"
+							copy={{
+								label: "Password Input",
+								placeholder: "Enter password...",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content title={"Number Input"}>
+						<Input
+							id="number-input"
+							value={inputNumber()}
+							onChange={setInputNumber}
+							type="number"
+							name="number-input"
+							copy={{
+								label: "Number Input",
+								placeholder: "Enter a number...",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root title={"Textarea"} description={"Multi-line text input"}>
+					<InfoRow.Content title={"Basic Textarea"}>
+						<Textarea
+							id="textarea"
+							value={textareaValue()}
+							onChange={setTextareaValue}
+							name="textarea"
+							copy={{
+								label: "Textarea",
+								placeholder: "Enter multi-line text...",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root title={"Switch"} description={"Toggle switch component"}>
+					<InfoRow.Content title={"Basic Switch"}>
+						<div class="w-full max-w-xs">
+							<Switch
+								id="switch"
+								value={switchValue()}
+								onChange={setSwitchValue}
+								name="switch"
+								copy={{
+									label: "Enable Feature",
+									true: "On",
+									false: "Off",
+								}}
+							/>
+						</div>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"Select"}
+					description={"Single selection dropdown"}
+				>
+					<InfoRow.Content title={"Basic Select"}>
+						<Select
+							id="select"
+							value={selectValue()}
+							onChange={setSelectValue}
+							options={selectOptions}
+							name="select"
+							copy={{
+								label: "Choose an option",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"Select Multiple"}
+					description={"Multiple selection dropdown"}
+				>
+					<InfoRow.Content title={"Multi Select"}>
+						<SelectMultiple
+							id="select-multiple"
+							values={selectMultipleValues()}
+							onChange={setSelectMultipleValues}
+							options={selectMultipleOptions}
+							name="select-multiple"
+							copy={{
+								label: "Choose multiple options",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"Color Picker"}
+					description={"Color input with presets"}
+				>
+					<InfoRow.Content title={"Color Input"}>
+						<Color
+							id="color"
+							value={colorValue()}
+							onChange={setColorValue}
+							name="color"
+							copy={{
+								label: "Choose a color",
+							}}
+							presets={colorPresets}
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root title={"Checkbox"} description={"Single checkbox input"}>
+					<InfoRow.Content title={"Basic Checkbox"}>
+						<Checkbox
+							id="checkbox"
+							value={checkboxValue()}
+							onChange={setCheckboxValue}
+							name="checkbox"
+							copy={{
+								label: "Accept terms and conditions",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"JSON Textarea"}
+					description={"Textarea with JSON validation"}
+				>
+					<InfoRow.Content title={"JSON Editor"}>
+						<JSONTextarea
+							id="json-textarea"
+							value={jsonTextareaValue()}
+							onChange={setJsonTextareaValue}
+							name="json-textarea"
+							copy={{
+								label: "JSON Content",
+								placeholder: "Enter valid JSON...",
+							}}
+							theme="basic"
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"Search"}
+					description={"Search input with loading state"}
+				>
+					<InfoRow.Content title={"Basic Search"}>
+						<Search
+							value={searchValue()}
+							onChange={setSearchValue}
+							isLoading={false}
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"Checkbox Buttons"}
+					description={"Button-style checkboxes"}
+				>
+					<InfoRow.Content title={"Checkbox Buttons"}>
+						<div class="flex flex-col gap-2">
+							<CheckboxButton
+								id="checkbox-btn-1"
+								value={checkboxButtonValues().option1}
+								onChange={(value) =>
+									setCheckboxButtonValues((prev) => ({
+										...prev,
+										option1: value,
+									}))
+								}
+								name="checkbox-btn-1"
+								copy={{
+									label: "Primary Option",
+								}}
+								theme="primary"
+							/>
+							<CheckboxButton
+								id="checkbox-btn-2"
+								value={checkboxButtonValues().option2}
+								onChange={(value) =>
+									setCheckboxButtonValues((prev) => ({
+										...prev,
+										option2: value,
+									}))
+								}
+								name="checkbox-btn-2"
+								copy={{
+									label: "Secondary Option",
+								}}
+								theme="primary"
+							/>
+							<CheckboxButton
+								id="checkbox-btn-3"
+								value={checkboxButtonValues().option3}
+								onChange={(value) =>
+									setCheckboxButtonValues((prev) => ({
+										...prev,
+										option3: value,
+									}))
+								}
+								name="checkbox-btn-3"
+								copy={{
+									label: "Error Option",
+								}}
+								theme="error"
+							/>
+						</div>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				<InfoRow.Root
+					title={"WYSIWYG Editor"}
+					description={"Rich text editor with formatting toolbar"}
+				>
+					<InfoRow.Content title={"Rich Text Editor"}>
+						<WYSIWYG
+							id="wysiwyg"
+							value={wysiwygValue()}
+							onChange={setWysiwygValue}
+							copy={{
+								label: "Content Editor",
+								placeholder: "Start writing...",
+							}}
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
 				<InfoRow.Root
 					title="Dynamic Plugin"
 					description="A proof of concept for dynamic component plugin loading"
