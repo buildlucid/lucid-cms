@@ -1,39 +1,42 @@
 {
-	"name": "@lucidcms/playground",
-	"private": true,
-	"description": "This is the Lucid playground app used for internal testing.",
-	"main": "src/index.ts",
-	"type": "module",
-	"scripts": {
-		"dev": "lucidcms dev",
-		"serve": "lucidcms serve",
-		"build": "lucidcms build",
-		"start": "lucidcms build && node dist/server.js",
-		"migrate": "lucidcms migrate",
-		"wrangler:dev": "wrangler --env dev dev --test-scheduled",
-		"wrangler:deploy": "npm run build && wrangler --env prod deploy"
-	},
-	"dependencies": {
-		"@lucidcms/cloudflare-adapter": "*",
-		"@lucidcms/core": "*",
-		"@lucidcms/libsql-adapter": "*",
-		"@lucidcms/node-adapter": "*",
-		"@lucidcms/plugin-nodemailer": "*",
-		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/plugin-resend": "*",
-		"@lucidcms/plugin-s3": "*",
-		"@lucidcms/postgres-adapter": "*",
-		"@lucidcms/sqlite-adapter": "*",
-		"better-sqlite3": "^11.9.1",
-		"nodemailer": "^6.10.1"
-	},
-	"author": "",
-	"license": "ISC",
-	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.13",
-		"typescript": "^5.8.3"
-	},
-	"volta": {
-		"node": "22.15.0"
-	}
+    "name": "@lucidcms/playground",
+    "private": true,
+    "description": "This is the Lucid playground app used for internal testing.",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "dev": "lucidcms dev",
+        "serve": "lucidcms serve",
+        "build": "lucidcms build",
+        "start": "lucidcms build && node dist/server.js",
+        "migrate": "lucidcms migrate",
+        "wrangler:dev": "wrangler --env dev dev --test-scheduled",
+        "wrangler:deploy": "npm run build && wrangler --env prod deploy"
+    },
+    "dependencies": {
+        "@lucidcms/cloudflare-adapter": "*",
+        "@lucidcms/core": "*",
+        "@lucidcms/libsql-adapter": "*",
+        "@lucidcms/node-adapter": "*",
+        "@lucidcms/plugin-nodemailer": "*",
+        "@lucidcms/plugin-pages": "*",
+        "@lucidcms/plugin-resend": "*",
+        "@lucidcms/plugin-s3": "*",
+        "@lucidcms/postgres-adapter": "*",
+        "@lucidcms/sqlite-adapter": "*",
+        "@lucidcms/auth-github": "*",
+        "@lucidcms/auth-google": "*",
+        "@lucidcms/auth-microsoft": "*",
+        "better-sqlite3": "^11.9.1",
+        "nodemailer": "^6.10.1"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/better-sqlite3": "^7.6.13",
+        "typescript": "^5.8.3"
+    },
+    "volta": {
+        "node": "22.15.0"
+    }
 }

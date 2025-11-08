@@ -27,6 +27,8 @@ import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import transporter from "./src/services/email-transporter.js";
 // import postgres from "postgres";
+import GitHubAuth from "@lucidcms/auth-github";
+import GoogleAuth from "@lucidcms/auth-google";
 
 export const adapter = nodeAdapter();
 // export const adapter = cloudflareAdapter();
@@ -42,11 +44,13 @@ export const envSchema = z.object({
 	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
 	GITHUB_CLIENT_ID: z.string(),
 	GITHUB_CLIENT_SECRET: z.string(),
+	GOOGLE_CLIENT_ID: z.string(),
+	GOOGLE_CLIENT_SECRET: z.string(),
 });
 
 export default defineConfig((env) => ({
-	host: "http://localhost:6543",
-	// host: "https://lucidcms-86.localcan.dev",
+	// host: "http://localhost:6543",
+	host: "https://lucidcms-86.localcan.dev",
 	// host: "https://cms.lucidjs.build",
 	// cors: {
 	// 	origin: [],
@@ -69,25 +73,6 @@ export default defineConfig((env) => ({
 		password: {
 			enabled: true,
 		},
-		providers: [
-			{
-				key: "github",
-				name: "GitHub",
-				// icon: "/public/github-icon.svg",
-				enabled: true,
-				type: "oidc",
-				config: {
-					type: "oidc",
-					clientId: env.GITHUB_CLIENT_ID,
-					clientSecret: env.GITHUB_CLIENT_SECRET,
-					issuer: "https://github.com",
-					authorizationEndpoint: "https://github.com/login/oauth/authorize",
-					tokenEndpoint: "https://github.com/login/oauth/access_token",
-					userinfoEndpoint: "https://api.github.com/user",
-					scopes: ["read:user", "user:email"],
-				},
-			},
-		],
 	},
 	keys: {
 		encryptionKey: env.LUCID_ENCRYPTION_KEY,
@@ -156,6 +141,14 @@ export default defineConfig((env) => ({
 		SimpleCollection,
 	],
 	plugins: [
+		GitHubAuth({
+			clientId: env.GITHUB_CLIENT_ID,
+			clientSecret: env.GITHUB_CLIENT_SECRET,
+		}),
+		GoogleAuth({
+			clientId: env.GOOGLE_CLIENT_ID,
+			clientSecret: env.GOOGLE_CLIENT_SECRET,
+		}),
 		LucidPages({
 			collections: [
 				{

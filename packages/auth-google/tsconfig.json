@@ -1,0 +1,12 @@
+{
+    "extends": "@lucidcms/config/tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist",
+    },
+    "exclude": [
+        "./dist",
+        "./node_modules",
+        "./.turbo"
+    ]
+}

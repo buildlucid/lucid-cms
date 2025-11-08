@@ -25,6 +25,9 @@ The following packages are licensed under the **MIT License**, a permissive open
 - `@lucidcms/plugin-s3`
 - `@lucidcms/plugin-nodemailer`
 - `@lucidcms/plugin-pages`
+- `@lucidcms/auth-github`
+- `@lucidcms/auth-google`
+- `@lucidcms/auth-microsoft`
 - All other packages in `packages/` that are prefixed with `plugin-`
 
 Each MIT-licensed package includes its own `LICENSE` file.
