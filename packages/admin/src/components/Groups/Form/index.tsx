@@ -1,6 +1,7 @@
 export { Form } from "./Form";
 export { CheckboxInput as Checkbox } from "./Checkbox";
 export { Input } from "./Input";
+export { InputFull } from "./InputFull";
 export { Textarea } from "./Textarea";
 export { Select } from "./Select";
 export { SelectMultiple } from "./SelectMultiple";

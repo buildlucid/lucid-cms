@@ -121,7 +121,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							label: T()("publicly_available"),
 							tooltip: T()("media_public_description"),
 						}}
-						theme="basic"
 					/>
 					<For each={locales()}>
 						{(locale) => (
@@ -145,7 +144,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 									errors={undefined}
 									autoComplete="off"
 									disabled={true}
-									theme="basic"
 								/>
 								<Show when={showAltInput()}>
 									<Input
@@ -166,7 +164,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 										}}
 										errors={undefined}
 										disabled={true}
-										theme="basic"
 									/>
 								</Show>
 							</Show>
@@ -184,7 +181,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 						noMargin={false}
 						noClear={true}
 						disabled={true}
-						theme="basic"
 					/>
 					<Show when={props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />

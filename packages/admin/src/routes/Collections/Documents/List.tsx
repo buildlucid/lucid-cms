@@ -225,7 +225,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 													false: T()("draft"),
 												}}
 												noMargin
-												fullWidth
+												inline
 											/>
 										</Show>
 									}

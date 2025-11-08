@@ -107,7 +107,6 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			theme={"basic"}
 		/>
 	);
 };

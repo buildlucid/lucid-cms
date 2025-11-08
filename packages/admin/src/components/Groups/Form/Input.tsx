@@ -8,9 +8,8 @@ import {
 	DescribedBy,
 	ErrorMessage,
 } from "@/components/Groups/Form";
-import classNames from "classnames";
 
-interface InputProps {
+export const Input: Component<{
 	id: string;
 	value: string;
 	onChange: (_value: string) => void;
@@ -33,12 +32,8 @@ interface InputProps {
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	hideOptionalText?: boolean;
-
-	theme: "basic" | "full";
 	fieldColumnIsMissing?: boolean;
-}
-
-export const Input: Component<InputProps> = (props) => {
+}> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [passwordVisible, setPasswordVisible] = createSignal(false);
 
@@ -53,96 +48,73 @@ export const Input: Component<InputProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classnames("w-full", {
+			class={classnames("w-full relative", {
 				"mb-0": props.noMargin,
-				"mb-4 last:mb-0": !props.noMargin && props.theme === "full",
-				"mb-3 last:mb-0": !props.noMargin && props.theme === "basic",
+				"mb-3 last:mb-0": !props.noMargin,
 			})}
 		>
-			<div
+			<Label
+				id={props.id}
+				label={props.copy?.label}
+				focused={inputFocus()}
+				required={props.required}
+				theme={"basic"}
+				altLocaleError={props.altLocaleError}
+				localised={props.localised}
+				hideOptionalText={props.hideOptionalText}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
+			/>
+			<input
 				class={classnames(
-					"flex flex-col transition-colors duration-200 ease-in-out relative",
+					"w-full focus:outline-hidden px-2 text-sm text-title disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
 					{
-						"border-primary-base": inputFocus() && props.theme === "full",
-						"border-error-base": props.errors?.message !== undefined,
-						"bg-input-base rounded-md border border-border":
-							props.theme === "full",
+						"pr-[32px]": props.type === "password",
 					},
 				)}
-			>
-				<Label
-					id={props.id}
-					label={props.copy?.label}
-					focused={inputFocus()}
-					required={props.required}
-					theme={props.theme}
-					altLocaleError={props.altLocaleError}
-					localised={props.localised}
-					hideOptionalText={props.hideOptionalText}
-					fieldColumnIsMissing={props.fieldColumnIsMissing}
-				/>
-				<input
-					class={classnames(
-						"focus:outline-hidden px-2 text-sm text-title disabled:cursor-not-allowed disabled:opacity-80",
-						{
-							"pr-[32px]": props.type === "password",
-							"pt-2": props.copy?.label === undefined,
-							"bg-input-base border border-border h-10 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
-								props.theme === "basic",
-							"bg-transparent pb-2 pt-1 rounded-b-md": props.theme === "full",
-						},
-					)}
-					onKeyDown={(e) => {
-						e.stopPropagation();
-					}}
-					id={props.id}
-					name={props.name}
-					type={inputType()}
-					value={props.value}
-					onInput={(e) => props.onChange(e.currentTarget.value)}
-					placeholder={props.copy?.placeholder}
-					aria-describedby={
-						props.copy?.describedBy ? `${props.id}-description` : undefined
+				onKeyDown={(e) => {
+					e.stopPropagation();
+				}}
+				id={props.id}
+				name={props.name}
+				type={inputType()}
+				value={props.value}
+				onInput={(e) => props.onChange(e.currentTarget.value)}
+				placeholder={props.copy?.placeholder}
+				aria-describedby={
+					props.copy?.describedBy ? `${props.id}-description` : undefined
+				}
+				autocomplete={props.autoComplete}
+				autofocus={props.autoFoucs}
+				required={props.required}
+				disabled={props.disabled}
+				onFocus={() => setInputFocus(true)}
+				onKeyUp={(e) => props.onKeyUp?.(e)}
+				onBlur={() => {
+					setInputFocus(false);
+					props.onBlur?.();
+				}}
+			/>
+			{/* Show Password */}
+			<Show when={props.type === "password"}>
+				<button
+					type="button"
+					class={
+						"absolute right-2.5 bottom-2.5 text-primary-hover hover:text-primary-base duration-200 transition-colors"
 					}
-					autocomplete={props.autoComplete}
-					autofocus={props.autoFoucs}
-					required={props.required}
-					disabled={props.disabled}
-					onFocus={() => setInputFocus(true)}
-					onKeyUp={(e) => props.onKeyUp?.(e)}
-					onBlur={() => {
-						setInputFocus(false);
-						props.onBlur?.();
+					onClick={() => {
+						setPasswordVisible(!passwordVisible());
 					}}
-				/>
-				{/* Show Password */}
-				<Show when={props.type === "password"}>
-					<button
-						type="button"
-						class={classNames(
-							"absolute  text-primary-hover hover:text-primary-base duration-200 transition-colors",
-							{
-								"top-10":
-									props.required !== true && props.hideOptionalText !== true,
-								"right-2.5 top-1/2 -translate-y-1/2": props.theme === "full",
-								"right-2.5 bottom-2.5": props.theme === "basic",
-							},
-						)}
-						onClick={() => {
-							setPasswordVisible(!passwordVisible());
-						}}
-						tabIndex={-1}
-					>
-						<Show when={passwordVisible()}>
-							<FaSolidEyeSlash size={18} class="text-unfocused" />
-						</Show>
-						<Show when={!passwordVisible()}>
-							<FaSolidEye size={18} class="text-unfocused" />
-						</Show>
-					</button>
-				</Show>
-				<Tooltip copy={props.copy?.tooltip} theme={props.theme} />
-			</div>
+					tabIndex={-1}
+				>
+					<Show when={passwordVisible()}>
+						<FaSolidEyeSlash size={18} class="text-unfocused" />
+					</Show>
+					<Show when={!passwordVisible()}>
+						<FaSolidEye size={18} class="text-unfocused" />
+					</Show>
+				</button>
+			</Show>
+			<Tooltip copy={props.copy?.tooltip} theme={"basic"} />
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>

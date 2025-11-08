@@ -120,7 +120,6 @@ const CreateMediaFolderPanel: Component<{
 							label: T()("title"),
 						}}
 						errors={getBodyError("title", createFolder.errors)}
-						theme="basic"
 					/>
 					<Select
 						id="parent-folder"
@@ -136,7 +135,6 @@ const CreateMediaFolderPanel: Component<{
 						options={folderOptions()}
 						copy={{ label: T()("folder") }}
 						noClear={true}
-						theme="basic"
 					/>
 				</>
 			)}

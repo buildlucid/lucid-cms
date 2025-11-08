@@ -22,7 +22,6 @@ interface JSONTextareaProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
-	theme: "full" | "basic";
 	fieldColumnIsMissing?: boolean;
 }
 
@@ -83,78 +82,60 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				"mb-5 last:mb-0": !props.noMargin,
 			})}
 		>
-			<div
-				class={classnames(
-					"flex flex-col transition-colors duration-200 ease-in-out relative",
-					{
-						"border-primary-base": inputFocus() && props.theme === "full",
-						"border-error-base": props.errors?.message !== undefined,
-						"bg-input-base rounded-md border": props.theme === "full",
-					},
-				)}
-			>
-				<Label
-					id={props.id}
-					label={props.copy?.label}
-					focused={inputFocus()}
-					required={props.required}
-					theme={props.theme}
-					altLocaleError={props.altLocaleError}
-					localised={props.localised}
-					fieldColumnIsMissing={props.fieldColumnIsMissing}
-				/>
-				<div class="relative">
-					<textarea
-						class={classnames(
-							"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium resize-none w-full h-52 block",
-							{
-								"pt-2": props.copy?.label === undefined,
-								"bg-input-base border border-border rounded-md mt-1 p-2 focus:border-primary-base duration-200 transition-colors":
-									props.theme === "basic",
-								"bg-transparent pb-2 px-2 pt-1 rounded-b-md":
-									props.theme === "full",
-							},
-						)}
-						onKeyDown={(e) => {
-							e.stopPropagation();
-							const textarea = e.currentTarget;
+			<Label
+				id={props.id}
+				label={props.copy?.label}
+				focused={inputFocus()}
+				required={props.required}
+				theme={"basic"}
+				altLocaleError={props.altLocaleError}
+				localised={props.localised}
+				fieldColumnIsMissing={props.fieldColumnIsMissing}
+			/>
+			<div class="relative">
+				<textarea
+					class={
+						"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium resize-none w-full h-52 block bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
+					}
+					onKeyDown={(e) => {
+						e.stopPropagation();
+						const textarea = e.currentTarget;
 
-							if (e.key === "Tab") {
-								e.preventDefault();
-								const start = textarea.selectionStart;
-								const end = textarea.selectionEnd;
-								const value = textarea.value;
-								textarea.value = `${value.substring(
-									0,
-									start,
-								)}\t${value.substring(end, value.length)}`;
-								textarea.selectionStart = textarea.selectionEnd = start + 1;
-							}
-						}}
-						id={props.id}
-						name={props.name}
-						value={props.value}
-						onInput={inputChange}
-						placeholder={props.copy?.placeholder}
-						aria-describedby={
-							props.copy?.describedBy ? `${props.id}-description` : undefined
+						if (e.key === "Tab") {
+							e.preventDefault();
+							const start = textarea.selectionStart;
+							const end = textarea.selectionEnd;
+							const value = textarea.value;
+							textarea.value = `${value.substring(
+								0,
+								start,
+							)}\t${value.substring(end, value.length)}`;
+							textarea.selectionStart = textarea.selectionEnd = start + 1;
 						}
-						autofocus={props.autoFoucs}
-						required={props.required}
-						disabled={props.disabled}
-						onFocus={() => setInputFocus(true)}
-						onKeyUp={(e) => props.onKeyUp?.(e)}
-						onBlur={() => {
-							setInputFocus(false);
-							props.onBlur?.();
-						}}
-					/>
-					<Show when={jsonError().hasError}>
-						<div class="bg-error-base text-error-contrast rounded-md px-2 text-sm py-1 absolute bottom-2 right-2">
-							Invalid JSON on line {jsonError().line}
-						</div>
-					</Show>
-				</div>
+					}}
+					id={props.id}
+					name={props.name}
+					value={props.value}
+					onInput={inputChange}
+					placeholder={props.copy?.placeholder}
+					aria-describedby={
+						props.copy?.describedBy ? `${props.id}-description` : undefined
+					}
+					autofocus={props.autoFoucs}
+					required={props.required}
+					disabled={props.disabled}
+					onFocus={() => setInputFocus(true)}
+					onKeyUp={(e) => props.onKeyUp?.(e)}
+					onBlur={() => {
+						setInputFocus(false);
+						props.onBlur?.();
+					}}
+				/>
+				<Show when={jsonError().hasError}>
+					<div class="bg-error-base text-error-contrast rounded-md px-2 text-sm py-1 absolute bottom-2 right-2">
+						Invalid JSON on line {jsonError().line}
+					</div>
+				</Show>
 			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />

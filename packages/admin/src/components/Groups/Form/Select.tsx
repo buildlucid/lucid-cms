@@ -45,7 +45,7 @@ export interface SelectProps {
 	noMargin?: boolean;
 	noClear?: boolean;
 	hasError?: boolean;
-	theme: "full" | "basic" | "basic-small";
+	small?: boolean;
 	shortcut?: string;
 	fieldColumnIsMissing?: boolean;
 }
@@ -87,13 +87,9 @@ export const Select: Component<SelectProps> = (props) => {
 		<div
 			class={classNames("w-full", {
 				"mb-0": props.noMargin,
-				"mb-4 last:mb-0": !props.noMargin,
-				"mb-3 last:mb-0":
-					!props.noMargin &&
-					(props.theme === "basic" || props.theme === "basic-small"),
+				"mb-3 last:mb-0": !props.noMargin,
 			})}
 		>
-			{/* Select */}
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
@@ -101,80 +97,57 @@ export const Select: Component<SelectProps> = (props) => {
 				flip={true}
 				gutter={5}
 			>
-				<div
+				<Label
+					id={props.id}
+					label={props.copy?.label}
+					focused={inputFocus()}
+					required={props.required}
+					theme={"basic"}
+					altLocaleError={props.altLocaleError}
+					localised={props.localised}
+					fieldColumnIsMissing={props.fieldColumnIsMissing}
+				/>
+				<DropdownMenu.Trigger
 					class={classNames(
-						"flex flex-col transition-colors duration-200 ease-in-out relative",
+						"focus:outline-hidden overflow-hidden px-2 text-sm text-title font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
 						{
-							"border-primary-base": inputFocus() && props.theme === "full",
-							"border-error-base":
-								props.errors?.message !== undefined || props.hasError,
-							"bg-input-base rounded-md border border-border":
-								props.theme === "full",
+							"h-10": !props.small,
+							"h-9": props.small,
+							"border-error-base": props.hasError,
 						},
 					)}
+					onFocus={() => setInputFocus(true)}
+					onBlur={() => setInputFocus(false)}
+					disabled={props.disabled}
 				>
-					{/* Label */}
-					<Label
-						id={props.id}
-						label={props.copy?.label}
-						focused={inputFocus()}
-						required={props.required}
-						theme={props.theme}
-						altLocaleError={props.altLocaleError}
-						localised={props.localised}
-						fieldColumnIsMissing={props.fieldColumnIsMissing}
-					/>
-					{/* Trigger */}
-					<DropdownMenu.Trigger
-						class={classNames(
-							"focus:outline-hidden overflow-hidden px-2 text-sm text-title font-medium w-full flex justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0",
-							{
-								"bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors":
-									props.theme === "basic" || props.theme === "basic-small",
-								"h-10 bg-input-base border-border": props.theme === "basic",
-								"h-9 bg-input-base border-border":
-									props.theme === "basic-small",
-								"mt-1": props.theme !== "full" && props.copy?.label,
-								"pt-2 h-10 flex items-center":
-									props.copy?.label === undefined && props.theme === "full",
-								"bg-transparent pb-2 pt-1 rounded-b-md": props.theme === "full",
-								"border-error-base":
-									props.hasError && props.theme === "basic-small",
-							},
+					<div class="flex items-center">
+						<Show when={props.shortcut}>
+							<span class="text-xs bg-background-base px-2 py-1 rounded-md mr-1 border border-border">
+								{props.shortcut}
+							</span>
+						</Show>
+						{selectedLabel() ? (
+							<span class="truncate">{selectedLabel()}</span>
+						) : (
+							<span class="text-body">{T()("nothing_selected")}</span>
 						)}
-						onFocus={() => setInputFocus(true)}
-						onBlur={() => setInputFocus(false)}
-						disabled={props.disabled}
-					>
-						<div class="flex items-center">
-							<Show when={props.shortcut}>
-								<span class="text-xs bg-background-base px-2 py-1 rounded-md mr-1 border border-border">
-									{props.shortcut}
-								</span>
-							</Show>
-							{selectedLabel() ? (
-								<span class="truncate">{selectedLabel()}</span>
-							) : (
-								<span class="text-body">{T()("nothing_selected")}</span>
-							)}
-						</div>
-						<div class="flex items-center gap-1">
-							<Show when={props.noClear !== true}>
-								<button
-									type="button"
-									class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
-									onClick={(e) => {
-										e.stopPropagation();
-										props.onChange(undefined);
-									}}
-								>
-									<FaSolidXmark size={16} class="text-title" />
-								</button>
-							</Show>
-							<FaSolidSort size={16} class="text-title ml-1" />
-						</div>
-					</DropdownMenu.Trigger>
-				</div>
+					</div>
+					<div class="flex items-center gap-1">
+						<Show when={props.noClear !== true}>
+							<button
+								type="button"
+								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
+								onClick={(e) => {
+									e.stopPropagation();
+									props.onChange(undefined);
+								}}
+							>
+								<FaSolidXmark size={16} class="text-title" />
+							</button>
+						</Show>
+						<FaSolidSort size={16} class="text-title ml-1" />
+					</div>
+				</DropdownMenu.Trigger>
 				<DropdownContent
 					options={{
 						anchorWidth: true,
@@ -243,7 +216,7 @@ export const Select: Component<SelectProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<li
-											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
+											class="flex items-center justify-between text-sm text-body hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
 											onClick={() => {
 												props.onChange(option.value);
 												setDebouncedValue("");

@@ -45,7 +45,6 @@ export const ColumnToggle: Component<ColumnToggleProps> = (props) => {
 									label: column.label,
 								}}
 								noMargin={true}
-								theme="basic"
 							/>
 						</li>
 					)}

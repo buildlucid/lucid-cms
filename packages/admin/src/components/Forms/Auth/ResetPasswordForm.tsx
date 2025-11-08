@@ -1,5 +1,5 @@
 import { type Component, createSignal } from "solid-js";
-import { Form, Input } from "@/components/Groups/Form";
+import { Form, InputFull } from "@/components/Groups/Form";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -42,7 +42,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				});
 			}}
 		>
-			<Input
+			<InputFull
 				id="password"
 				name="password"
 				type="password"
@@ -54,9 +54,8 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				required={true}
 				autoFoucs={true}
 				errors={getBodyError("password", resetPassword.errors)}
-				theme="full"
 			/>
-			<Input
+			<InputFull
 				id="passwordConfirmation"
 				name="passwordConfirmation"
 				type="password"
@@ -67,7 +66,6 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				}}
 				required={true}
 				errors={getBodyError("passwordConfirmation", resetPassword.errors)}
-				theme="full"
 			/>
 		</Form>
 	);

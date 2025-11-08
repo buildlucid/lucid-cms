@@ -26,7 +26,6 @@ import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
 } from "@/utils/document-table-helpers";
-import { isDev } from "solid-js/web";
 
 const DocumentSelectModal: Component = () => {
 	const open = createMemo(() => documentSelectStore.get.open);
@@ -210,7 +209,6 @@ const DocumentSelectContent: Component = () => {
 									false: T()("draft"),
 								}}
 								noMargin
-								fullWidth
 							/>
 						</Show>
 					</div>

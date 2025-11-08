@@ -33,7 +33,7 @@ interface SwitchProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
-	fullWidth?: boolean;
+	inline?: boolean;
 	fieldColumnIsMissing?: boolean;
 	theme?: "default" | "relaxed";
 }
@@ -85,7 +85,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 			class={classnames("relative", {
 				"mb-0": props.noMargin,
 				"mb-3 last:mb-0": props.noMargin !== true,
-				"w-full": props.fullWidth !== true,
+				"w-full": props.inline !== true,
 			})}
 		>
 			<Label

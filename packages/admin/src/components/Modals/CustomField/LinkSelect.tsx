@@ -72,7 +72,6 @@ const LinkSelect: Component = () => {
 							label: T()("label"),
 						}}
 						required={false}
-						theme={"basic"}
 					/>
 					<Input
 						id="url"
@@ -84,7 +83,6 @@ const LinkSelect: Component = () => {
 							label: T()("url"),
 						}}
 						required={false}
-						theme={"basic"}
 					/>
 					<Checkbox
 						id="open_in_new_tab"

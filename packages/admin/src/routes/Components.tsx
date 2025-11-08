@@ -8,6 +8,7 @@ import InfoRow from "@/components/Blocks/InfoRow";
 import PluginLoader from "@/components/PluginLoader";
 import {
 	Input,
+	InputFull,
 	Textarea,
 	Switch,
 	Select,
@@ -197,68 +198,103 @@ const ComponentsRoute: Component = () => {
 				{/* Form Components */}
 				<InfoRow.Root
 					title={"Input Fields"}
-					description={"Various input field types"}
+					description={"Various input field types with basic and full themes"}
 				>
 					<InfoRow.Content title={"Text Input"}>
-						<Input
-							id="text-input"
-							value={inputText()}
-							onChange={setInputText}
-							type="text"
-							name="text-input"
-							copy={{
-								label: "Text Input",
-								placeholder: "Enter some text...",
-							}}
-							theme="basic"
-						/>
+						<div class="space-y-4">
+							<Input
+								id="text-input-basic"
+								value={inputText()}
+								onChange={setInputText}
+								type="text"
+								name="text-input-basic"
+								copy={{
+									label: "Basic Theme",
+									placeholder: "Enter some text...",
+								}}
+							/>
+							<InputFull
+								id="text-input-full"
+								value={inputText()}
+								onChange={setInputText}
+								type="text"
+								name="text-input-full"
+								copy={{
+									label: "Full Theme",
+									placeholder: "Enter some text...",
+								}}
+							/>
+						</div>
 					</InfoRow.Content>
 					<InfoRow.Content title={"Email Input"}>
-						<Input
-							id="email-input"
-							value={inputEmail()}
-							onChange={setInputEmail}
-							type="email"
-							name="email-input"
-							copy={{
-								label: "Email Input",
-								placeholder: "Enter email address...",
-							}}
-							theme="basic"
-						/>
+						<div class="space-y-4">
+							<Input
+								id="email-input-basic"
+								value={inputEmail()}
+								onChange={setInputEmail}
+								type="email"
+								name="email-input-basic"
+								copy={{
+									label: "Basic Theme",
+									placeholder: "Enter email address...",
+								}}
+							/>
+							<InputFull
+								id="email-input-full"
+								value={inputEmail()}
+								onChange={setInputEmail}
+								type="email"
+								name="email-input-full"
+								copy={{
+									label: "Full Theme",
+									placeholder: "Enter email address...",
+								}}
+							/>
+						</div>
 					</InfoRow.Content>
 					<InfoRow.Content title={"Password Input"}>
-						<Input
-							id="password-input"
-							value={inputPassword()}
-							onChange={setInputPassword}
-							type="password"
-							name="password-input"
-							copy={{
-								label: "Password Input",
-								placeholder: "Enter password...",
-							}}
-							theme="basic"
-						/>
+						<div class="space-y-4">
+							<Input
+								id="password-input-basic"
+								value={inputPassword()}
+								onChange={setInputPassword}
+								type="password"
+								name="password-input-basic"
+								copy={{
+									label: "Basic Theme",
+									placeholder: "Enter password...",
+								}}
+							/>
+							<InputFull
+								id="password-input-full"
+								value={inputPassword()}
+								onChange={setInputPassword}
+								type="password"
+								name="password-input-full"
+								copy={{
+									label: "Full Theme",
+									placeholder: "Enter password...",
+								}}
+							/>
+						</div>
 					</InfoRow.Content>
 					<InfoRow.Content title={"Number Input"}>
 						<Input
-							id="number-input"
+							id="number-input-basic"
 							value={inputNumber()}
 							onChange={setInputNumber}
 							type="number"
-							name="number-input"
+							name="number-input-basic"
 							copy={{
-								label: "Number Input",
+								label: "Basic Theme",
 								placeholder: "Enter a number...",
 							}}
-							theme="basic"
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
 
 				<InfoRow.Root title={"Textarea"} description={"Multi-line text input"}>
-					<InfoRow.Content title={"Basic Textarea"}>
+					<InfoRow.Content title={"Textarea"}>
 						<Textarea
 							id="textarea"
 							value={textareaValue()}
@@ -268,26 +304,23 @@ const ComponentsRoute: Component = () => {
 								label: "Textarea",
 								placeholder: "Enter multi-line text...",
 							}}
-							theme="basic"
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
 
 				<InfoRow.Root title={"Switch"} description={"Toggle switch component"}>
 					<InfoRow.Content title={"Basic Switch"}>
-						<div class="w-full max-w-xs">
-							<Switch
-								id="switch"
-								value={switchValue()}
-								onChange={setSwitchValue}
-								name="switch"
-								copy={{
-									label: "Enable Feature",
-									true: "On",
-									false: "Off",
-								}}
-							/>
-						</div>
+						<Switch
+							id="switch"
+							value={switchValue()}
+							onChange={setSwitchValue}
+							name="switch"
+							copy={{
+								label: "Enable Feature",
+								true: "On",
+								false: "Off",
+							}}
+						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
 
@@ -295,18 +328,30 @@ const ComponentsRoute: Component = () => {
 					title={"Select"}
 					description={"Single selection dropdown"}
 				>
-					<InfoRow.Content title={"Basic Select"}>
-						<Select
-							id="select"
-							value={selectValue()}
-							onChange={setSelectValue}
-							options={selectOptions}
-							name="select"
-							copy={{
-								label: "Choose an option",
-							}}
-							theme="basic"
-						/>
+					<InfoRow.Content title={"Select"}>
+						<div class="space-y-4">
+							<Select
+								id="select"
+								value={selectValue()}
+								onChange={setSelectValue}
+								options={selectOptions}
+								name="select"
+								copy={{
+									label: "Regular Size",
+								}}
+							/>
+							<Select
+								id="select-small"
+								value={selectValue()}
+								onChange={setSelectValue}
+								options={selectOptions}
+								name="select-small"
+								copy={{
+									label: "Small Size",
+								}}
+								small={true}
+							/>
+						</div>
 					</InfoRow.Content>
 				</InfoRow.Root>
 
@@ -314,7 +359,7 @@ const ComponentsRoute: Component = () => {
 					title={"Select Multiple"}
 					description={"Multiple selection dropdown"}
 				>
-					<InfoRow.Content title={"Multi Select"}>
+					<InfoRow.Content title={"Select Multiple"}>
 						<SelectMultiple
 							id="select-multiple"
 							values={selectMultipleValues()}
@@ -324,7 +369,6 @@ const ComponentsRoute: Component = () => {
 							copy={{
 								label: "Choose multiple options",
 							}}
-							theme="basic"
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
@@ -348,7 +392,7 @@ const ComponentsRoute: Component = () => {
 				</InfoRow.Root>
 
 				<InfoRow.Root title={"Checkbox"} description={"Single checkbox input"}>
-					<InfoRow.Content title={"Basic Checkbox"}>
+					<InfoRow.Content title={"Checkbox"}>
 						<Checkbox
 							id="checkbox"
 							value={checkboxValue()}
@@ -357,7 +401,6 @@ const ComponentsRoute: Component = () => {
 							copy={{
 								label: "Accept terms and conditions",
 							}}
-							theme="basic"
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
@@ -366,7 +409,7 @@ const ComponentsRoute: Component = () => {
 					title={"JSON Textarea"}
 					description={"Textarea with JSON validation"}
 				>
-					<InfoRow.Content title={"JSON Editor"}>
+					<InfoRow.Content title={"JSON Textarea"}>
 						<JSONTextarea
 							id="json-textarea"
 							value={jsonTextareaValue()}
@@ -376,7 +419,6 @@ const ComponentsRoute: Component = () => {
 								label: "JSON Content",
 								placeholder: "Enter valid JSON...",
 							}}
-							theme="basic"
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>

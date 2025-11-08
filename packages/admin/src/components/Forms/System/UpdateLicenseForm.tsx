@@ -88,7 +88,6 @@ const UpdateLicenseForm: Component<{
 					placeholder: placeholder(),
 				}}
 				errors={getBodyError("licenseKey", updateLicense.errors)}
-				theme="basic"
 				hideOptionalText={true}
 				noMargin={true}
 				disabled={!clearIsDisabled()}

@@ -128,7 +128,6 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 				id={props.id}
 				label={props.copy?.label}
 				required={props.required}
-				noPadding={true}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				theme="basic"

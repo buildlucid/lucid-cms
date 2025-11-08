@@ -36,7 +36,6 @@ interface SelectMultipleProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
-	theme: "full" | "basic";
 }
 
 export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
@@ -61,13 +60,11 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classnames("w-full", {
+			class={classnames("w-full relative", {
 				"mb-0": props.noMargin,
-				"mb-4 last:mb-0": !props.noMargin,
-				"mb-3 last:mb-0": !props.noMargin && props.theme === "basic",
+				"mb-3 last:mb-0": !props.noMargin,
 			})}
 		>
-			{/* Select */}
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
@@ -75,77 +72,56 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 				flip={true}
 				gutter={5}
 			>
+				{/* Label */}
+				<Label
+					id={props.id}
+					label={props.copy?.label}
+					required={props.required}
+					theme={"basic"}
+					altLocaleError={props.altLocaleError}
+					localised={props.localised}
+				/>
+				{/* Select */}
 				<div
-					class={classnames(
-						"flex flex-col transition-colors duration-200 ease-in-out relative",
-						{
-							"border-primary-base": inputFocus() && props.theme === "full",
-							"border-error-base": props.errors?.message !== undefined,
-							"bg-input-base rounded-md border border-border":
-								props.theme === "full",
-						},
-					)}
+					class={
+						"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-title font-medium justify-between flex bg-input-base border border-border items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors"
+					}
 				>
-					{/* Label */}
-					<Label
-						id={props.id}
-						label={props.copy?.label}
-						required={props.required}
-						theme={props.theme}
-						altLocaleError={props.altLocaleError}
-						localised={props.localised}
-					/>
-					{/* Select */}
-					<div
-						class={classnames(
-							"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-title font-medium justify-between flex ",
-							{
-								"pt-2 min-h-[40px]":
-									props.copy?.label === undefined && props.theme === "full",
-								"min-h-[32px] mt-1":
-									props.copy?.label !== undefined && props.theme === "full",
-								"bg-input-base border border-border flex items-center min-h-10 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
-									props.theme === "basic",
-								"bg-transparent pb-2 rounded-b-md": props.theme === "full",
-							},
-						)}
-					>
-						{/* Selected Items */}
-						<div class="flex flex-wrap gap-1">
-							<For each={props.values}>
-								{(value) => (
-									<span class="bg-secondary-base hover:bg-secondary-hover duration-200 transition-colors rounded-md text-secondary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
-										{value.label}
-										<button
-											type="button"
-											class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
-											onClick={(e) => {
-												e.stopPropagation();
-												e.preventDefault();
-												setValues(
-													props.values.filter((v) => v.value !== value.value),
-												);
-											}}
-										>
-											<FaSolidXmark size={16} class="" />
-											<span class="sr-only">{T()("remove")}</span>
-										</button>
-									</span>
-								)}
-							</For>
-						</div>
-						{/* Icons */}
-						<div class="flex items-center ml-2">
-							<FaSolidSort size={16} class="text-title ml-1" />
-						</div>
+					{/* Selected Items */}
+					<div class="flex flex-wrap gap-1">
+						<For each={props.values}>
+							{(value) => (
+								<span class="bg-secondary-base hover:bg-secondary-hover duration-200 transition-colors rounded-md text-secondary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
+									{value.label}
+									<button
+										type="button"
+										class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
+										onClick={(e) => {
+											e.stopPropagation();
+											e.preventDefault();
+											setValues(
+												props.values.filter((v) => v.value !== value.value),
+											);
+										}}
+									>
+										<FaSolidXmark size={16} class="" />
+										<span class="sr-only">{T()("remove")}</span>
+									</button>
+								</span>
+							)}
+						</For>
 					</div>
-					{/* Trigger */}
-					<DropdownMenu.Trigger
-						class="absolute inset-0 w-full left-0 rounded-md focus:outline-hidden"
-						onFocus={() => setInputFocus(true)}
-						onBlur={() => setInputFocus(false)}
-					/>
+					{/* Icons */}
+					<div class="flex items-center ml-2">
+						<FaSolidSort size={16} class="text-title ml-1" />
+					</div>
 				</div>
+				{/* Trigger */}
+				<DropdownMenu.Trigger
+					class="absolute inset-0 w-full left-0 rounded-md focus:outline-hidden"
+					onFocus={() => setInputFocus(true)}
+					onBlur={() => setInputFocus(false)}
+				/>
 				<DropdownContent
 					options={{
 						anchorWidth: true,
@@ -160,7 +136,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<DropdownMenu.Item
-											class="flex items-center justify-between text-sm text-body hover:bg-card-hover hover:text-primary-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
+											class="flex items-center justify-between text-sm text-body hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
 											onSelect={() => {
 												toggleValue(option);
 											}}

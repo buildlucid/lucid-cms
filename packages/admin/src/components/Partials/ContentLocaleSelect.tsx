@@ -82,7 +82,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					noMargin={true}
 					noClear={true}
 					hasError={props.hasError}
-					theme="basic-small"
+					small={true}
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
 				/>
 			</Match>
@@ -99,7 +99,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					noMargin={true}
 					noClear={true}
 					hasError={props.hasError}
-					theme="basic-small"
+					small={true}
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
 				/>
 			</Match>

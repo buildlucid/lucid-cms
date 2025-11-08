@@ -1,5 +1,5 @@
 import { type Component, createSignal } from "solid-js";
-import { Form, Input } from "@/components/Groups/Form";
+import { Form, InputFull } from "@/components/Groups/Form";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -45,7 +45,7 @@ const SetupForm: Component = () => {
 			}}
 		>
 			<div class="grid grid-cols-2 gap-4">
-				<Input
+				<InputFull
 					id="firstName"
 					name="firstName"
 					type="text"
@@ -56,9 +56,8 @@ const SetupForm: Component = () => {
 					}}
 					autoFoucs={true}
 					errors={getBodyError("firstName", setup.errors)}
-					theme="full"
 				/>
-				<Input
+				<InputFull
 					id="lastName"
 					name="lastName"
 					type="text"
@@ -68,10 +67,9 @@ const SetupForm: Component = () => {
 						label: T()("last_name"),
 					}}
 					errors={getBodyError("lastName", setup.errors)}
-					theme="full"
 				/>
 			</div>
-			<Input
+			<InputFull
 				id="username"
 				name="username"
 				type="text"
@@ -82,9 +80,8 @@ const SetupForm: Component = () => {
 				}}
 				required={true}
 				errors={getBodyError("username", setup.errors)}
-				theme="full"
 			/>
-			<Input
+			<InputFull
 				id="email"
 				name="email"
 				type="email"
@@ -96,9 +93,8 @@ const SetupForm: Component = () => {
 				required={true}
 				autoComplete="email"
 				errors={getBodyError("email", setup.errors)}
-				theme="full"
 			/>
-			<Input
+			<InputFull
 				id="password"
 				name="password"
 				type="password"
@@ -110,9 +106,8 @@ const SetupForm: Component = () => {
 				required={true}
 				autoComplete="new-password"
 				errors={getBodyError("password", setup.errors)}
-				theme="full"
 			/>
-			<Input
+			<InputFull
 				id="passwordConfirmation"
 				name="passwordConfirmation"
 				type="password"
@@ -124,7 +119,6 @@ const SetupForm: Component = () => {
 				required={true}
 				autoComplete="new-password"
 				errors={getBodyError("passwordConfirmation", setup.errors)}
-				theme="full"
 			/>
 		</Form>
 	);

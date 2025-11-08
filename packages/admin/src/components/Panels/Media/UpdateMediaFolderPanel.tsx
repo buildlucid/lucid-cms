@@ -126,7 +126,6 @@ const UpdateMediaFolderPanel: Component<{
 							label: T()("title"),
 						}}
 						errors={getBodyError("title", updateFolder.errors)}
-						theme="basic"
 					/>
 					<Select
 						id="parent-folder"
@@ -143,7 +142,6 @@ const UpdateMediaFolderPanel: Component<{
 						copy={{ label: T()("folder") }}
 						noClear={true}
 						errors={getBodyError("parentFolderId", updateFolder.errors)}
-						theme="basic"
 					/>
 				</>
 			)}

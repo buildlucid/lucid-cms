@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { type Component, createSignal, Show } from "solid-js";
-import { Form, Input } from "@/components/Groups/Form";
+import { Form, InputFull } from "@/components/Groups/Form";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -42,7 +42,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				forgotPassword.action.mutate({ email: email() });
 			}}
 		>
-			<Input
+			<InputFull
 				id="email"
 				name="email"
 				type="email"
@@ -54,7 +54,6 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				required={true}
 				autoFoucs={true}
 				errors={getBodyError("email", forgotPassword.errors)}
-				theme="full"
 			/>
 			<Show when={props.showBackToLogin}>
 				<A

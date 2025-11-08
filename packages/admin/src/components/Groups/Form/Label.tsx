@@ -8,8 +8,7 @@ interface LabelProps {
 	label?: string;
 	focused?: boolean;
 	required?: boolean;
-	noPadding?: boolean;
-	theme: "full" | "basic" | "basic-small";
+	theme: "full" | "basic";
 	hideOptionalText?: boolean;
 
 	localised?: boolean;
@@ -23,11 +22,10 @@ export const Label: Component<LabelProps> = (props) => {
 			<label
 				for={props.id}
 				class={classnames(
-					"text-sm transition-colors duration-200 ease-in-out flex justify-between text-title",
+					"text-sm transition-colors duration-200 ease-in-out flex justify-between text-title mb-1.5",
 					{
 						"text-primary-hover": props.focused,
-						"pt-2 px-2": props.noPadding !== true && props.theme === "full",
-						"mb-2": props.noPadding === true,
+						"pt-2 px-2 !mb-0": props.theme === "full",
 					},
 				)}
 			>

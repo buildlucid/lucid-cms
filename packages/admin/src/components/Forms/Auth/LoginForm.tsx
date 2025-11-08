@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { type Component, createSignal, Show } from "solid-js";
-import { Form, Input } from "@/components/Groups/Form";
+import { Form, InputFull } from "@/components/Groups/Form";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -42,7 +42,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				});
 			}}
 		>
-			<Input
+			<InputFull
 				id="usernameOrEmail"
 				name="usernameOrEmail"
 				type="text"
@@ -55,9 +55,8 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				autoFoucs={true}
 				autoComplete="username"
 				errors={getBodyError("usernameOrEmail", login.errors)}
-				theme="full"
 			/>
-			<Input
+			<InputFull
 				id="password"
 				name="password"
 				type="password"
@@ -69,7 +68,6 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 				required={true}
 				autoComplete="current-password"
 				errors={getBodyError("password", login.errors)}
-				theme="full"
 			/>
 			<Show when={props.showForgotPassword}>
 				<A

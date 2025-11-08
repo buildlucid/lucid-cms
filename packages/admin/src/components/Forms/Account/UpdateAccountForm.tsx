@@ -76,7 +76,6 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 						label: T()("first_name"),
 					}}
 					errors={getBodyError("firstName", updateMe.errors)}
-					theme="basic"
 				/>
 				<Input
 					id="lastName"
@@ -88,7 +87,6 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 						label: T()("last_name"),
 					}}
 					errors={getBodyError("lastName", updateMe.errors)}
-					theme="basic"
 				/>
 			</div>
 			<Input
@@ -102,7 +100,6 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				}}
 				required={true}
 				errors={getBodyError("username", updateMe.errors)}
-				theme="basic"
 			/>
 			<Input
 				id="email"
@@ -115,7 +112,6 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				}}
 				required={true}
 				errors={getBodyError("email", updateMe.errors)}
-				theme="basic"
 			/>
 		</Form>
 	);
