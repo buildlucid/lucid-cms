@@ -98,7 +98,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		<div
 			class={classNames("w-full", {
 				"mb-0": props.noMargin,
-				"mb-2.5 last:mb-0": !props.noMargin,
+				"mb-3 last:mb-0": !props.noMargin,
 			})}
 		>
 			<Label

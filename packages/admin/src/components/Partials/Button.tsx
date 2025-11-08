@@ -38,9 +38,9 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "secondary",
 				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-title hover:text-secondary-contrast ring-primary-base":
 					props.theme === "border-outline",
-				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
+				"bg-error hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					props.theme === "danger",
-				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":
+				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-title fill-error-contrast hover:text-error-contrast":
 					props.theme === "danger-outline",
 
 				// Toggles

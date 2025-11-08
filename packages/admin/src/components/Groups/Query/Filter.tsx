@@ -175,7 +175,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 							}
 						}}
 						noMargin={true}
-						theme="full"
+						theme="basic"
 					/>
 				</Match>
 				<Match when={props.filter.type === "select"}>
@@ -190,7 +190,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						name={`${props.filter.key}-${props.filter.type}`}
 						options={props.filter.options || []}
 						noMargin={true}
-						theme="full"
+						theme="basic"
 					/>
 				</Match>
 				<Match when={props.filter.type === "boolean"}>
@@ -242,7 +242,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						name={`${props.filter.key}-${props.filter.type}`}
 						options={props.filter.options || []}
 						noMargin={true}
-						theme="full"
+						theme="basic"
 					/>
 				</Match>
 			</Switch>

@@ -190,7 +190,7 @@ const UpsertClientIntegrationPanel: Component<
 						}}
 						required={true}
 						errors={getBodyError("name", errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<Textarea
 						id="description"
@@ -202,7 +202,7 @@ const UpsertClientIntegrationPanel: Component<
 						}}
 						rows={3}
 						errors={getBodyError("description", errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<Checkbox
 						id="enabled"
@@ -213,7 +213,7 @@ const UpsertClientIntegrationPanel: Component<
 							label: T()("enabled"),
 						}}
 						errors={getBodyError("enabled", errors)}
-						theme="full"
+						theme="basic"
 					/>
 				</>
 			)}

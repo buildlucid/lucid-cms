@@ -65,7 +65,6 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				updateMe.action.mutate(updateData().data);
 			}}
 		>
-			<h3 class="mb-4">{T()("details")}</h3>
 			<div class="grid grid-cols-2 gap-4">
 				<Input
 					id="firstName"
@@ -77,7 +76,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 						label: T()("first_name"),
 					}}
 					errors={getBodyError("firstName", updateMe.errors)}
-					theme="full"
+					theme="basic"
 				/>
 				<Input
 					id="lastName"
@@ -89,7 +88,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 						label: T()("last_name"),
 					}}
 					errors={getBodyError("lastName", updateMe.errors)}
-					theme="full"
+					theme="basic"
 				/>
 			</div>
 			<Input
@@ -103,7 +102,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				}}
 				required={true}
 				errors={getBodyError("username", updateMe.errors)}
-				theme="full"
+				theme="basic"
 			/>
 			<Input
 				id="email"
@@ -116,7 +115,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				}}
 				required={true}
 				errors={getBodyError("email", updateMe.errors)}
-				theme="full"
+				theme="basic"
 			/>
 		</Form>
 	);

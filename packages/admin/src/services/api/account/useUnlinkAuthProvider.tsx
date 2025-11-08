@@ -1,3 +1,4 @@
+import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody } from "@types";
@@ -29,6 +30,10 @@ const useUnlinkAuthProvider = (props?: UseUnlinkAccountAuthProviderProps) => {
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 		onMutate: props?.onMutate,
+		getSuccessToast: () => ({
+			title: T()("auth_provider_unlinked_toast_title"),
+			message: T()("auth_provider_unlinked_toast_message"),
+		}),
 	});
 };
 

@@ -29,7 +29,7 @@ export const Color: Component<ColorProps> = (props) => {
 	return (
 		<div
 			class={classnames(
-				"mb-2.5 last:mb-0 flex flex-col transition-colors duration-200 ease-in-out relative w-full",
+				"mb-3 last:mb-0 flex flex-col transition-colors duration-200 ease-in-out relative w-full",
 			)}
 		>
 			<Label

@@ -220,7 +220,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 							placeholder: T()("optional"),
 						}}
 						errors={getBodyError("name", errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<Textarea
 						id="share-link-description"
@@ -232,7 +232,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 							placeholder: T()("optional"),
 						}}
 						errors={getBodyError("description", errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<Show
 						when={
@@ -253,7 +253,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 								label: T()("remove_password"),
 								describedBy: T()("share_link_remove_the_password"),
 							}}
-							theme="full"
+							theme="basic"
 						/>
 					</Show>
 					<Show when={!getRemovePassword()}>
@@ -277,7 +277,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 										: undefined,
 							}}
 							errors={getBodyError("password", errors)}
-							theme="full"
+							theme="basic"
 						/>
 					</Show>
 					<Input
@@ -294,7 +294,7 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 								: undefined,
 						}}
 						errors={getBodyError("expiresAt", errors)}
-						theme="full"
+						theme="basic"
 					/>
 				</>
 			)}

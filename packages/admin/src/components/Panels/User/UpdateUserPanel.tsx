@@ -181,7 +181,7 @@ const UpdateUserPanel: Component<{
 							}) || []
 						}
 						errors={getBodyError("roleIds", updateUser.errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
 						<>

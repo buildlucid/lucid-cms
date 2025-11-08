@@ -151,7 +151,7 @@ export const Account: Component = () => {
 					<Show when={providers.data?.data.disablePassword === false}>
 						<InfoRow.Content
 							title={T()("password")}
-							description={T()("password_description")}
+							description={T()("account_password_description")}
 							actions={
 								<Button
 									theme="border-outline"
@@ -226,8 +226,8 @@ export const Account: Component = () => {
 			</Show>
 			{/* Configuration */}
 			<InfoRow.Root
-				title={T()("configuration")}
-				description={T()("configuration_description")}
+				title={T()("account_preferences")}
+				description={T()("account_preferences_description")}
 			>
 				<InfoRow.Content
 					title={T()("cms_locale")}

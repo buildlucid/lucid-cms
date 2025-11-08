@@ -81,23 +81,23 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						label: T()("current_password"),
 					}}
 					errors={getBodyError("currentPassword", updateMe.errors)}
-					theme="full"
+					theme="basic"
 					hideOptionalText={true}
 				/>
-				<Input
-					id="newPassword"
-					name="newPassword"
-					type="password"
-					value={newPassword()}
-					onChange={setNewPassword}
-					copy={{
-						label: T()("new_password"),
-					}}
-					errors={getBodyError("newPassword", updateMe.errors)}
-					theme="full"
-					hideOptionalText={true}
-				/>
-				<Show when={newPassword() !== ""}>
+				<div class="grid grid-cols-2 gap-4">
+					<Input
+						id="newPassword"
+						name="newPassword"
+						type="password"
+						value={newPassword()}
+						onChange={setNewPassword}
+						copy={{
+							label: T()("new_password"),
+						}}
+						errors={getBodyError("newPassword", updateMe.errors)}
+						theme="basic"
+						hideOptionalText={true}
+					/>
 					<Input
 						id="passwordConfirmation"
 						name="passwordConfirmation"
@@ -108,10 +108,10 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							label: T()("confirm_password"),
 						}}
 						errors={getBodyError("passwordConfirmation", updateMe.errors)}
-						theme="full"
+						theme="basic"
 						hideOptionalText={true}
 					/>
-				</Show>
+				</div>
 			</Form>
 		</Modal>
 	);

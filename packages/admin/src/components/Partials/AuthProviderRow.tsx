@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { createMemo, Show } from "solid-js";
+import { createMemo, createSignal, onCleanup, Show } from "solid-js";
 import { FaSolidCircleUser } from "solid-icons/fa";
 import type { AuthProvidersResponse, UserResponse } from "@types";
 import Button from "@/components/Partials/Button";
@@ -14,6 +14,34 @@ const AuthProviderRow: Component<{
 	isLoading?: boolean;
 }> = (props) => {
 	// ----------------------------------------
+	// State
+	const [awaitingConfirmation, setAwaitingConfirmation] = createSignal(false);
+	let confirmationTimeout: number | undefined;
+
+	// ----------------------------------------
+	// Functions
+	const handleUnlinkClick = () => {
+		if (awaitingConfirmation()) {
+			clearTimeout(confirmationTimeout);
+			setAwaitingConfirmation(false);
+			props.onUnlink?.();
+		} else {
+			setAwaitingConfirmation(true);
+			confirmationTimeout = window.setTimeout(() => {
+				setAwaitingConfirmation(false);
+			}, 4000);
+		}
+	};
+
+	// ----------------------------------------
+	// Effects
+	onCleanup(() => {
+		if (confirmationTimeout) {
+			clearTimeout(confirmationTimeout);
+		}
+	});
+
+	// ----------------------------------------
 	// Memos
 	const linked = createMemo(() => props.linkedProvider !== undefined);
 	const formattedLinkedDate = createMemo(() =>
@@ -23,12 +51,12 @@ const AuthProviderRow: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-card-base p-2">
-			<div class="flex items-center gap-3">
+		<div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-input-base p-2">
+			<div class="flex items-center gap-2">
 				<Show
 					when={props.provider.icon}
 					fallback={
-						<FaSolidCircleUser class="size-10 rounded-full bg-input-base p-2 text-title" />
+						<FaSolidCircleUser class="size-10 rounded-full bg-card-base p-2 text-title" />
 					}
 				>
 					<img
@@ -57,13 +85,13 @@ const AuthProviderRow: Component<{
 			</div>
 			<Show when={linked() && props.onUnlink}>
 				<Button
-					onClick={props.onUnlink}
+					onClick={handleUnlinkClick}
 					theme="danger-outline"
 					size="small"
 					type="button"
 					loading={props.isLoading}
 				>
-					{T()("unlink")}
+					{awaitingConfirmation() ? T()("click_to_confirm") : T()("unlink")}
 				</Button>
 			</Show>
 			<Show when={!linked() && props.onLink}>

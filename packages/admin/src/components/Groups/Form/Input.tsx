@@ -56,7 +56,7 @@ export const Input: Component<InputProps> = (props) => {
 			class={classnames("w-full", {
 				"mb-0": props.noMargin,
 				"mb-4 last:mb-0": !props.noMargin && props.theme === "full",
-				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",
+				"mb-3 last:mb-0": !props.noMargin && props.theme === "basic",
 			})}
 		>
 			<div
@@ -120,10 +120,12 @@ export const Input: Component<InputProps> = (props) => {
 					<button
 						type="button"
 						class={classNames(
-							"absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors",
+							"absolute  text-primary-hover hover:text-primary-base duration-200 transition-colors",
 							{
 								"top-10":
 									props.required !== true && props.hideOptionalText !== true,
+								"right-2.5 top-1/2 -translate-y-1/2": props.theme === "full",
+								"right-2.5 bottom-2.5": props.theme === "basic",
 							},
 						)}
 						onClick={() => {

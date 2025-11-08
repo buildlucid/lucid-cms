@@ -122,7 +122,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						}}
 						required={true}
 						errors={getBodyError("username", createUser.errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<InputGrid columns={2}>
 						<Input
@@ -136,7 +136,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							}}
 							noMargin={true}
 							errors={getBodyError("firstName", createUser.errors)}
-							theme="full"
+							theme="basic"
 						/>
 						<Input
 							id="lastName"
@@ -149,7 +149,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							}}
 							noMargin={true}
 							errors={getBodyError("lastName", createUser.errors)}
-							theme="full"
+							theme="basic"
 						/>
 					</InputGrid>
 					<InputGrid columns={1}>
@@ -165,7 +165,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							noMargin={true}
 							required={true}
 							errors={getBodyError("email", createUser.errors)}
-							theme="full"
+							theme="basic"
 						/>
 					</InputGrid>
 					<SelectMultiple
@@ -185,7 +185,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							}) || []
 						}
 						errors={getBodyError("roleIds", createUser.errors)}
-						theme="full"
+						theme="basic"
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
 						<Checkbox
@@ -197,7 +197,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 								label: T()("is_super_admin"),
 							}}
 							errors={getBodyError("superAdmin", createUser.errors)}
-							theme="full"
+							theme="basic"
 						/>
 					</Show>
 				</>

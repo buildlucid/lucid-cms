@@ -64,7 +64,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 			class={classnames("w-full", {
 				"mb-0": props.noMargin,
 				"mb-4 last:mb-0": !props.noMargin,
-				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",
+				"mb-3 last:mb-0": !props.noMargin && props.theme === "basic",
 			})}
 		>
 			{/* Select */}
@@ -100,8 +100,10 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						class={classnames(
 							"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-title font-medium justify-between flex ",
 							{
-								"pt-2 min-h-[40px]": props.copy?.label === undefined,
-								"min-h-[32px] mt-1": props.copy?.label !== undefined,
+								"pt-2 min-h-[40px]":
+									props.copy?.label === undefined && props.theme === "full",
+								"min-h-[32px] mt-1":
+									props.copy?.label !== undefined && props.theme === "full",
 								"bg-input-base border border-border flex items-center min-h-10 rounded-md mt-1 focus:border-primary-base duration-200 transition-colors":
 									props.theme === "basic",
 								"bg-transparent pb-2 rounded-b-md": props.theme === "full",
@@ -112,7 +114,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						<div class="flex flex-wrap gap-1">
 							<For each={props.values}>
 								{(value) => (
-									<span class="bg-primary-base hover:bg-primary-hover duration-200 transition-colors rounded-md text-primary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
+									<span class="bg-secondary-base hover:bg-secondary-hover duration-200 transition-colors rounded-md text-secondary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
 										{value.label}
 										<button
 											type="button"
@@ -158,7 +160,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<DropdownMenu.Item
-											class="flex items-center justify-between text-sm text-body hover:bg-primary-hover hover:text-primary-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
+											class="flex items-center justify-between text-sm text-body hover:bg-card-hover hover:text-primary-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
 											onSelect={() => {
 												toggleValue(option);
 											}}

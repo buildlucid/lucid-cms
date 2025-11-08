@@ -282,7 +282,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							label: T()("publicly_available"),
 							tooltip: T()("media_public_description"),
 						}}
-						theme="full"
+						theme="basic"
 						errors={getBodyError("featured", mutateErrors())}
 					/>
 					<For each={locales()}>
@@ -311,7 +311,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									}}
 									errors={getErrorObject(inputError(index())?.name)}
 									autoComplete="off"
-									theme="full"
+									theme="basic"
 								/>
 								<Show when={showAltInput()}>
 									<Input
@@ -336,7 +336,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}),
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
-										theme="full"
+										theme="basic"
 									/>
 								</Show>
 							</Show>
@@ -357,7 +357,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						errors={getBodyError("folderId", mutateErrors())}
 						noMargin={false}
 						noClear={true}
-						theme="full"
+						theme="basic"
 					/>
 					<Show when={props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />

@@ -32,7 +32,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 			class={classnames("relative", props.class, {
 				"mb-0": props.noMargin,
 				"mb-4 last:mb-0": !props.noMargin,
-				"mb-2.5 last:mb-0": !props.noMargin && props.theme === "basic",
+				"mb-3 last:mb-0": !props.noMargin && props.theme === "basic",
 				"w-full": props.theme !== "fit",
 			})}
 		>

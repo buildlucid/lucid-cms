@@ -36,7 +36,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 		<div
 			class={classnames("w-full", {
 				"mb-0": props.noMargin,
-				"mb-5 last:mb-0": !props.noMargin,
+				"mb-3 last:mb-0": !props.noMargin,
 			})}
 		>
 			<div
