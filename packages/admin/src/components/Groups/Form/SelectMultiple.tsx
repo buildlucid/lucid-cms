@@ -61,8 +61,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 	return (
 		<div
 			class={classnames("w-full relative", {
-				"mb-0": props.noMargin,
-				"mb-3 last:mb-0": !props.noMargin,
+				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
 		>
 			<DropdownMenu.Root

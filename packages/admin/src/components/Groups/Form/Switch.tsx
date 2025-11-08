@@ -83,7 +83,6 @@ export const Switch: Component<SwitchProps> = (props) => {
 	return (
 		<div
 			class={classnames("relative", {
-				"mb-0": props.noMargin,
 				"mb-3 last:mb-0": props.noMargin !== true,
 				"w-full": props.inline !== true,
 			})}

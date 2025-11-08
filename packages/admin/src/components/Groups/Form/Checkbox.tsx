@@ -29,8 +29,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 	return (
 		<div
 			class={classnames("relative w-full", props.class, {
-				"mb-0": props.noMargin,
-				"mb-3 last:mb-0": !props.noMargin,
+				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
 		>
 			<Checkbox.Root

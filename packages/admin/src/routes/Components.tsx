@@ -453,7 +453,7 @@ const ComponentsRoute: Component = () => {
 								}
 								name="checkbox-btn-1"
 								copy={{
-									label: "Primary Option",
+									label: "Primary Option (selected)",
 								}}
 								theme="primary"
 							/>
@@ -468,7 +468,7 @@ const ComponentsRoute: Component = () => {
 								}
 								name="checkbox-btn-2"
 								copy={{
-									label: "Secondary Option",
+									label: "Primary Option (not selected)",
 								}}
 								theme="primary"
 							/>

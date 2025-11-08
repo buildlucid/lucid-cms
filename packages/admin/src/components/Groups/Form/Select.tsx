@@ -86,8 +86,7 @@ export const Select: Component<SelectProps> = (props) => {
 	return (
 		<div
 			class={classNames("w-full", {
-				"mb-0": props.noMargin,
-				"mb-3 last:mb-0": !props.noMargin,
+				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
 		>
 			<DropdownMenu.Root

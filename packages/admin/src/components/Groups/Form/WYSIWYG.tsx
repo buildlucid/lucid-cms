@@ -85,8 +85,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 	return (
 		<div
 			class={classnames("w-full max-w-full", {
-				"mb-0": props.noMargin,
-				"mb-3 last:mb-0": !props.noMargin,
+				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
 		>
 			<Label
