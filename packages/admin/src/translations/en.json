@@ -436,7 +436,7 @@
 	"setup_success_toast_message": "Your admin account has been created successfully",
 	"create_initial_admin": "Create Admin Account",
 	"setup_route_title": "Welcome to Lucid CMS",
-	"setup_route_description": "Let's get you started by creating your admin account",
+	"setup_route_description": "It looks like you're setting up Lucid CMS for the first time. Let's get you started by creating your super admin account.",
 	"role_created_toast_title": "Role created",
 	"role_created_toast_message": "The role has been created",
 	"role_update_toast_title": "Role updated",

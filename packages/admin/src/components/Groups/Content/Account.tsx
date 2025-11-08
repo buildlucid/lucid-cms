@@ -31,8 +31,6 @@ export const Account: Component = () => {
 	const [linkingProviderKey, setLinkingProviderKey] = createSignal<string>();
 	const [unlinkingProviderKey, setUnlinkingProviderKey] =
 		createSignal<string>();
-	const [providerErrorMessage, setProviderErrorMessage] =
-		createSignal<string>();
 	const [passwordModalOpen, setPasswordModalOpen] = createSignal(false);
 
 	// ----------------------------------------
@@ -86,7 +84,6 @@ export const Account: Component = () => {
 	createEffect(() => {
 		const search = location.search;
 		if (!search) {
-			setProviderErrorMessage(undefined);
 			return;
 		}
 
@@ -96,7 +93,6 @@ export const Account: Component = () => {
 		const hasError = errorName !== null || errorMessage !== null;
 
 		if (!hasError) {
-			setProviderErrorMessage(undefined);
 			return;
 		}
 
@@ -108,7 +104,6 @@ export const Account: Component = () => {
 			message,
 			status: "error",
 		});
-		setProviderErrorMessage(message);
 
 		urlParams.delete(constants.errorQueryParams.errorName);
 		urlParams.delete(constants.errorQueryParams.errorMessage);
@@ -145,8 +140,8 @@ export const Account: Component = () => {
 			{/* Security */}
 			<Show
 				when={
-					providers.data?.data.disablePassword === false &&
-					providers.data?.data.providers?.length > 0
+					providers.data?.data.disablePassword === false ||
+					(providers.data?.data.providers?.length ?? 0) > 0
 				}
 			>
 				<InfoRow.Root
@@ -193,10 +188,7 @@ export const Account: Component = () => {
 												onUnlink={
 													linkedProvider
 														? () => {
-																if (unlinkAuthProvider.action.isPending) {
-																	return;
-																}
-																setProviderErrorMessage(undefined);
+																if (unlinkAuthProvider.action.isPending) return;
 																unlinkAuthProvider.action.mutate({
 																	providerKey: provider.key,
 																});
@@ -209,7 +201,6 @@ export const Account: Component = () => {
 																if (initiateProvider.action.isPending) {
 																	return;
 																}
-																setProviderErrorMessage(undefined);
 																setLinkingProviderKey(provider.key);
 																initiateProvider.action.mutate({
 																	providerKey: provider.key,

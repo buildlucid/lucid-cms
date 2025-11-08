@@ -15,8 +15,8 @@ interface UpdateAccountFormProps {
 const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 	// ----------------------------------------
 	// State
-	const [firstName, setFirstName] = createSignal(props.firstName ?? "");
-	const [lastName, setLastName] = createSignal(props.lastName ?? "");
+	const [firstName, setFirstName] = createSignal(props.firstName);
+	const [lastName, setLastName] = createSignal(props.lastName);
 	const [username, setUsername] = createSignal(props.username ?? "");
 	const [email, setEmail] = createSignal(props.email ?? "");
 
@@ -71,7 +71,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					id="firstName"
 					name="firstName"
 					type="text"
-					value={firstName()}
+					value={firstName() ?? ""}
 					onChange={setFirstName}
 					copy={{
 						label: T()("first_name"),
@@ -83,7 +83,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					id="lastName"
 					name="lastName"
 					type="text"
-					value={lastName()}
+					value={lastName() ?? ""}
 					onChange={setLastName}
 					copy={{
 						label: T()("last_name"),
