@@ -29,6 +29,7 @@ import transporter from "./src/services/email-transporter.js";
 // import postgres from "postgres";
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
+import MicrosoftAuth from "@lucidcms/auth-microsoft";
 
 export const adapter = nodeAdapter();
 // export const adapter = cloudflareAdapter();
@@ -46,6 +47,9 @@ export const envSchema = z.object({
 	GITHUB_CLIENT_SECRET: z.string(),
 	GOOGLE_CLIENT_ID: z.string(),
 	GOOGLE_CLIENT_SECRET: z.string(),
+	MICROSOFT_CLIENT_ID: z.string(),
+	MICROSOFT_CLIENT_SECRET: z.string(),
+	MICROSOFT_TENANT_ID: z.string(),
 });
 
 export default defineConfig((env) => ({
@@ -148,6 +152,11 @@ export default defineConfig((env) => ({
 		GoogleAuth({
 			clientId: env.GOOGLE_CLIENT_ID,
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
+		}),
+		MicrosoftAuth({
+			clientId: env.MICROSOFT_CLIENT_ID,
+			clientSecret: env.MICROSOFT_CLIENT_SECRET,
+			tenant: env.MICROSOFT_TENANT_ID,
 		}),
 		LucidPages({
 			collections: [

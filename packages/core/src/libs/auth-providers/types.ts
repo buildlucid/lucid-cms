@@ -8,7 +8,6 @@ import type {
 
 export type OIDCUserInfo = {
 	userId: string | number;
-	email: string;
 	firstName?: string;
 	lastName?: string;
 	// displayName?: string;
@@ -47,7 +46,6 @@ export interface AuthAdapterHandleCallbackParams {
 
 export interface AuthAdapterCallbackResult {
 	userId: string;
-	email: string;
 	firstName?: string;
 	lastName?: string;
 	// displayName?: string;

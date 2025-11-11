@@ -15,7 +15,6 @@ const processProviderAuth: ServiceFn<
 		{
 			providerKey: string;
 			providerUserId: string;
-			email: string;
 			firstName?: string;
 			lastName?: string;
 			invitationTokenId?: number;

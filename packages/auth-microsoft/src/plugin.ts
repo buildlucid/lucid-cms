@@ -18,7 +18,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 		};
 	}
 
-	const tenant = pluginOptions.tenant ?? "common";
+	const tenant = pluginOptions.tenant ?? "organizations";
 
 	config.auth.providers.push({
 		key: "microsoft",
@@ -34,7 +34,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 			authorizationEndpoint: `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize`,
 			tokenEndpoint: `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`,
 			userinfoEndpoint: "https://graph.microsoft.com/oidc/userinfo",
-			scopes: ["openid", "profile", "email"],
+			scopes: ["openid", "profile"],
 		},
 	});
 

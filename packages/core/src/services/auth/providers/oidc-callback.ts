@@ -105,7 +105,6 @@ const oidcCallback: ServiceFn<
 		processProviderAuth(context, {
 			providerKey: data.providerKey,
 			providerUserId: userInfoRes.data.userId,
-			email: userInfoRes.data.email,
 			firstName: userInfoRes.data.firstName,
 			lastName: userInfoRes.data.lastName,
 			invitationTokenId: authStateRes.data.invitation_token_id ?? undefined,

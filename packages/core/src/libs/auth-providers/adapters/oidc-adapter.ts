@@ -152,7 +152,7 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					: mapStandardUserInfo(rawUserInfo));
 				if (userInfoRes.error) return userInfoRes;
 
-				if (!userInfoRes.data.userId || !userInfoRes.data.email) {
+				if (!userInfoRes.data.userId) {
 					return {
 						error: {
 							status: 500,
@@ -167,7 +167,6 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					error: undefined,
 					data: {
 						userId: String(userInfoRes.data.userId),
-						email: userInfoRes.data.email,
 						firstName: userInfoRes.data.firstName,
 						lastName: userInfoRes.data.lastName,
 					},

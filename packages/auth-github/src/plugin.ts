@@ -31,7 +31,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 			authorizationEndpoint: "https://github.com/login/oauth/authorize",
 			tokenEndpoint: "https://github.com/login/oauth/access_token",
 			userinfoEndpoint: "https://api.github.com/user",
-			scopes: ["read:user", "user:email"],
+			scopes: ["read:user"],
 		},
 	});
 

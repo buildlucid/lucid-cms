@@ -8,7 +8,6 @@ const mapStandardUserInfo = (
 	rawUserInfo: Record<string, unknown>,
 ): Awaited<ServiceResponse<OIDCUserInfo>> => {
 	const userId = (rawUserInfo?.sub || rawUserInfo?.id) as string;
-	const email = rawUserInfo?.email as string;
 	const firstName = (rawUserInfo?.given_name || rawUserInfo?.first_name) as
 		| string
 		| undefined;
@@ -16,7 +15,7 @@ const mapStandardUserInfo = (
 		| string
 		| undefined;
 
-	if (!userId || !email) {
+	if (!userId) {
 		return {
 			error: {
 				status: 400,
@@ -29,7 +28,7 @@ const mapStandardUserInfo = (
 
 	return {
 		error: undefined,
-		data: { userId, email, firstName, lastName },
+		data: { userId, firstName, lastName },
 	};
 };
 
