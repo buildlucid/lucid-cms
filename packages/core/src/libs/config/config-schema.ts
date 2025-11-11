@@ -176,6 +176,17 @@ const ConfigSchema = z.object({
 				.object({
 					outDir: z.string().optional(),
 					emailTemplates: z.string().optional(),
+					copyPublic: z
+						.array(
+							z.union([
+								z.string(),
+								z.object({
+									input: z.string(),
+									output: z.string().optional(),
+								}),
+							]),
+						)
+						.optional(),
 				})
 				.optional(),
 			watch: z

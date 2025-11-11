@@ -2,6 +2,8 @@
 import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
 import type { LucidPluginOptions } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types/types.js";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const plugin: LucidPluginOptions<PluginOptions> = async (
 	config,
@@ -19,7 +21,7 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 	config.auth.providers.push({
 		key: "google",
 		name: "Google",
-		// icon: "/public/google-icon.svg",
+		icon: "/assets/auth-provider-icons/google-icon.svg",
 		enabled: pluginOptions.enabled ?? true,
 		type: "oidc",
 		config: {
@@ -32,6 +34,13 @@ const plugin: LucidPluginOptions<PluginOptions> = async (
 			userinfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",
 			scopes: ["openid", "profile", "email"],
 		},
+	});
+
+	const currentDir = dirname(fileURLToPath(import.meta.url));
+
+	config.compilerOptions.paths.copyPublic.push({
+		input: path.join(currentDir, "../assets/google-icon.svg"),
+		output: "assets/auth-provider-icons/google-icon.svg",
 	});
 
 	return {

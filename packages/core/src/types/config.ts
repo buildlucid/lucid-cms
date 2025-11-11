@@ -23,6 +23,13 @@ import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 
+export type CopyPublicEntry =
+	| string
+	| {
+			input: string;
+			output?: string;
+	  };
+
 export type LucidPlugin = (config: Config) => Promise<{
 	key: string;
 	lucid: string;
@@ -222,6 +229,8 @@ export interface LucidConfig {
 			outDir?: string;
 			/** The path to the email templates directory. This can be used to override or extend the default templates. */
 			emailTemplates?: string;
+			/** Additional files or directories to copy into the public output directory. */
+			copyPublic?: CopyPublicEntry[];
 		};
 		watch?: {
 			/** The files to ignore. */
@@ -314,6 +323,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		paths: {
 			outDir: string;
 			emailTemplates: string;
+			copyPublic: CopyPublicEntry[];
 		};
 		watch: {
 			ignore: string[];

@@ -54,6 +54,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 		paths: {
 			outDir: "dist",
 			emailTemplates: "./templates",
+			copyPublic: [],
 		},
 		watch: {
 			ignore: [],

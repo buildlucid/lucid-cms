@@ -1,0 +1,1 @@
+Testing local public directory support

@@ -20,7 +20,8 @@
         "lint:fix": "biome lint --write ./src"
     },
     "files": [
-        "dist"
+        "dist",
+        "assets"
     ],
     "author": "Lucid",
     "repository": {

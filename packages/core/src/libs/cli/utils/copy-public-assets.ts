@@ -2,32 +2,138 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { getDirName } from "../../../utils/helpers/index.js";
 import constants from "../../../constants/constants.js";
-import type { Config } from "../../../types.js";
+import type { Config, ServiceResponse } from "../../../types.js";
 
 const currentDir = getDirName(import.meta.url);
 
-const copyPublicAssets = async (config: Config) => {
-	const assetsPath = path.join(currentDir, "../../../public");
-
-	const outDir = path.join(
-		config.compilerOptions.paths.outDir,
-		constants.directories.public,
-	);
-
-	await fs.mkdir(outDir, { recursive: true });
-
-	const assets = await fs.readdir(assetsPath);
-
-	for (const asset of assets) {
-		const assetPath = path.join(assetsPath, asset);
-		const outPath = path.join(outDir, asset);
-		await fs.copyFile(assetPath, outPath);
+/**
+ * Checks if a path exists
+ */
+const pathExists = async (targetPath: string) => {
+	try {
+		await fs.stat(targetPath);
+		return true;
+	} catch {
+		return false;
 	}
+};
 
-	return {
-		error: undefined,
-		data: undefined,
-	};
+/**
+ * Checks if a path is a directory
+ */
+const isDirectory = async (targetPath: string) => {
+	const stats = await fs.stat(targetPath);
+	return stats.isDirectory();
+};
+
+/**
+ * Ensures a directory exists
+ */
+const ensureDir = async (dirPath: string) => {
+	await fs.mkdir(dirPath, { recursive: true });
+};
+
+/**
+ * Copies a file from srcFile to destFile
+ * - Creates the directory if it doesn't exist
+ */
+const copyFileTo = async (srcFile: string, destFile: string) => {
+	await ensureDir(path.dirname(destFile));
+	await fs.copyFile(srcFile, destFile);
+};
+
+/**
+ * Copies the contents of srcDir into destDir
+ */
+const copyDirectoryContentsInto = async (srcDir: string, destDir: string) => {
+	await ensureDir(destDir);
+	const entries = await fs.readdir(srcDir, { withFileTypes: true });
+	await Promise.all(
+		entries.map(async (entry) => {
+			const srcPath = path.join(srcDir, entry.name);
+			const destPath = path.join(destDir, entry.name);
+			if (entry.isDirectory()) {
+				await copyDirectoryContentsInto(srcPath, destPath);
+			} else if (entry.isFile()) {
+				await copyFileTo(srcPath, destPath);
+			}
+		}),
+	);
+};
+
+/**
+ * Copies the public assets from various sources into the output directory
+ */
+const copyPublicAssets = async (config: Config): ServiceResponse<undefined> => {
+	try {
+		const assetsPath = path.join(currentDir, "../../../public");
+
+		const outDir = path.join(
+			config.compilerOptions.paths.outDir,
+			constants.directories.public,
+		);
+
+		await ensureDir(outDir);
+
+		//* core public assets (lowest prio)
+		if (await pathExists(assetsPath)) {
+			await copyDirectoryContentsInto(assetsPath, outDir);
+		}
+
+		//* config defined additional public assets (medium prio)
+		const additionalPublic = config.compilerOptions.paths.copyPublic ?? [];
+		await Promise.all(
+			additionalPublic.map(async (entry) => {
+				const isString = typeof entry === "string";
+				const source = isString ? entry : entry.input;
+				const output = isString ? undefined : entry.output;
+
+				const absSource = path.isAbsolute(source)
+					? source
+					: path.join(process.cwd(), source);
+				if (!(await pathExists(absSource))) return;
+
+				if (await isDirectory(absSource)) {
+					if (output) {
+						const destDir = path.join(outDir, output);
+						await copyDirectoryContentsInto(absSource, destDir);
+					} else {
+						const destPath = path.join(outDir, path.basename(absSource));
+						await copyDirectoryContentsInto(absSource, destPath);
+					}
+				} else {
+					if (output) {
+						const destFile = path.join(outDir, output);
+						await copyFileTo(absSource, destFile);
+					} else {
+						const destFile = path.join(outDir, path.basename(absSource));
+						await copyFileTo(absSource, destFile);
+					}
+				}
+			}),
+		);
+
+		//* cwd public assets (highest prio)
+		const cwdPublic = path.join(process.cwd(), constants.directories.public);
+		if ((await pathExists(cwdPublic)) && (await isDirectory(cwdPublic))) {
+			await copyDirectoryContentsInto(cwdPublic, outDir);
+		}
+
+		return {
+			error: undefined,
+			data: undefined,
+		};
+	} catch (error) {
+		return {
+			error: {
+				message:
+					error instanceof Error
+						? error.message
+						: "An error occurred while copying public assets",
+			},
+			data: undefined,
+		};
+	}
 };
 
 export default copyPublicAssets;
