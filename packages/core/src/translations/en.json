@@ -326,7 +326,7 @@
 	"share_link_not_found_title": "Not Found",
 	"share_link_not_found_message": "The shared content you are trying to access does not exist or has been removed. Contact the owner of the link if you believe this is an error.",
 	"share_link_expired_title": "Link Expired",
-	"share_link_expired_message": "This share link has expired and is no longer accessible.",
+	"share_link_expired_message": "This share link has expired and is no longer accessible",
 	"share_link_media_deleted_title": "Content Unavailable",
 	"share_link_media_deleted_message": "The media file associated with this link has been deleted.",
 	"share_link_access_denied_title": "Access Denied",
