@@ -135,11 +135,11 @@ const ViewUserPanelContent: Component<{
 				items={[
 					{
 						label: T()("username"),
-						value: props.state.user?.username,
+						value: props.state.user?.username || "-",
 					},
 					{
 						label: T()("email"),
-						value: props.state.user?.email,
+						value: props.state.user?.email || "-",
 					},
 					{
 						label: T()("first_name"),
@@ -176,11 +176,15 @@ const ViewUserPanelContent: Component<{
 				items={[
 					{
 						label: T()("created_at"),
-						value: dateHelpers.formatDate(props.state.user?.createdAt),
+						value: props.state.user?.createdAt
+							? dateHelpers.formatDate(props.state.user?.createdAt)
+							: "-",
 					},
 					{
 						label: T()("updated_at"),
-						value: dateHelpers.formatDate(props.state.user?.updatedAt),
+						value: props.state.user?.updatedAt
+							? dateHelpers.formatDate(props.state.user?.updatedAt)
+							: "-",
 					},
 				]}
 			/>
