@@ -22,31 +22,12 @@ import type { AuthProvider, EmailDeliveryStatus, EmailType } from "../types.js";
 import type { ErrorResult } from "./errors.js";
 import type { LocaleValue } from "./shared.js";
 import type { Permission } from "../libs/permission/types.js";
+import type { UserResponse } from "./responses/user.js";
 
-export interface UserResponse {
-	id: number;
-	superAdmin?: boolean;
-	email: string;
-	username: string;
-	firstName: string | null;
-	lastName: string | null;
-	isLocked: boolean;
-	triggerPasswordReset?: boolean | null;
-	invitationAccepted: boolean;
-	roles?: UserPermissionsResponse["roles"];
-	permissions?: UserPermissionsResponse["permissions"];
-	hasPassword?: boolean;
-	authProviders?: Array<{
-		id: number;
-		providerKey: string;
-		providerUserId: string;
-		linkedAt: string | null;
-	}>;
-	isDeleted: boolean;
-	deletedAt?: string | null;
-	createdAt: string | null;
-	updatedAt?: string | null;
-}
+export type {
+	UserPermissionsResponse,
+	UserResponse,
+} from "./responses/user.js";
 
 export type AuthProvidersResponse = {
 	disablePassword: boolean;
@@ -55,14 +36,6 @@ export type AuthProvidersResponse = {
 export type InitiateAuthResponse = {
 	redirectUrl: string;
 };
-
-export interface UserPermissionsResponse {
-	roles: Array<{
-		id: number;
-		name: string;
-	}>;
-	permissions: Permission[];
-}
 
 export interface SettingsResponse {
 	email: {

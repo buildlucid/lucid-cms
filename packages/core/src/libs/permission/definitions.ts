@@ -2,16 +2,19 @@ import type { PermissionGroup } from "./types.js";
 
 export const Permissions = {
 	// User permissions
+	ReadUser: "read_user",
 	CreateUser: "create_user",
 	UpdateUser: "update_user",
 	DeleteUser: "delete_user",
 
 	// Role permissions
+	ReadRole: "read_role",
 	CreateRole: "create_role",
 	UpdateRole: "update_role",
 	DeleteRole: "delete_role",
 
 	// Media permissions
+	ReadMedia: "read_media",
 	CreateMedia: "create_media",
 	UpdateMedia: "update_media",
 	DeleteMedia: "delete_media",
@@ -25,18 +28,15 @@ export const Permissions = {
 	ReadJob: "read_job",
 
 	// Content permissions
+	ReadDocument: "read_document",
 	CreateContent: "create_content",
 	UpdateContent: "update_content",
 	DeleteContent: "delete_content",
 	RestoreContent: "restore_content",
 	PublishContent: "publish_content",
 
-	// Collection permissions
-	CreateCollection: "create_collection",
-	UpdateCollection: "update_collection",
-	DeleteCollection: "delete_collection",
-
 	// Client integration permissions
+	ReadClientIntegration: "read_client_integration",
 	CreateClientIntegration: "create_client_integration",
 	UpdateClientIntegration: "update_client_integration",
 	DeleteClientIntegration: "delete_client_integration",
@@ -51,6 +51,7 @@ export const PermissionGroups = Object.freeze({
 	users: {
 		key: "users_permissions",
 		permissions: [
+			Permissions.ReadUser,
 			Permissions.CreateUser,
 			Permissions.UpdateUser,
 			Permissions.DeleteUser,
@@ -59,6 +60,7 @@ export const PermissionGroups = Object.freeze({
 	roles: {
 		key: "roles_permissions",
 		permissions: [
+			Permissions.ReadRole,
 			Permissions.CreateRole,
 			Permissions.UpdateRole,
 			Permissions.DeleteRole,
@@ -67,6 +69,7 @@ export const PermissionGroups = Object.freeze({
 	media: {
 		key: "media_permissions",
 		permissions: [
+			Permissions.ReadMedia,
 			Permissions.CreateMedia,
 			Permissions.UpdateMedia,
 			Permissions.DeleteMedia,
@@ -87,6 +90,7 @@ export const PermissionGroups = Object.freeze({
 	content: {
 		key: "content_permissions",
 		permissions: [
+			Permissions.ReadDocument,
 			Permissions.CreateContent,
 			Permissions.UpdateContent,
 			Permissions.DeleteContent,
@@ -97,6 +101,7 @@ export const PermissionGroups = Object.freeze({
 	"client-integrations": {
 		key: "client-integrations_permissions",
 		permissions: [
+			Permissions.ReadClientIntegration,
 			Permissions.CreateClientIntegration,
 			Permissions.UpdateClientIntegration,
 			Permissions.DeleteClientIntegration,

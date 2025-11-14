@@ -2,7 +2,6 @@ import Repository from "../../libs/repositories/index.js";
 import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types/response.js";
-import type { LucidAuth } from "../../types/hono.js";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
 
 const getMultiple: ServiceFn<

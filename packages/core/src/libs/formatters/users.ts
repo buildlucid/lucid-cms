@@ -58,43 +58,62 @@ export default class UsersFormatter {
 				roles: props.user.roles || [],
 			});
 
+		const canViewDetails = hasAccess({
+			user: props.authUser,
+			optionalPermissions: [
+				Permissions.ReadUser,
+				Permissions.UpdateUser,
+				Permissions.DeleteUser,
+				Permissions.CreateUser,
+			],
+			resourceOwnerId: props.user.id,
+		});
+
 		const canViewSensitive = hasAccess({
 			user: props.authUser,
 			requiredPermissions: [Permissions.UpdateUser],
 			resourceOwnerId: props.user.id,
 		});
 
-		return {
+		const response: UserResponse = {
 			id: props.user.id,
-			superAdmin: Formatter.formatBoolean(props.user.super_admin ?? false),
 			email: props.user.email,
 			username: props.user.username,
 			firstName: props.user.first_name,
 			lastName: props.user.last_name,
-			isLocked: Formatter.formatBoolean(props.user.is_locked),
-			roles: canViewSensitive ? roles : undefined,
-			permissions: canViewSensitive ? permissions : undefined,
-			triggerPasswordReset: Formatter.formatBoolean(
-				props.user.triggered_password_reset,
-			),
-			invitationAccepted: Formatter.formatBoolean(
-				props.user.invitation_accepted,
-			),
-			hasPassword: canViewSensitive ? Boolean(props.user.password) : undefined,
-			authProviders: canViewSensitive
-				? (props.user.auth_providers || []).map((p) => {
-						return {
-							id: p.id,
-							providerKey: p.provider_key,
-							providerUserId: p.provider_user_id,
-							linkedAt: Formatter.formatDate(p.linked_at),
-						};
-					})
-				: undefined,
 			isDeleted: Formatter.formatBoolean(props.user.is_deleted ?? false),
-			deletedAt: Formatter.formatDate(props.user.is_deleted_at),
-			createdAt: Formatter.formatDate(props.user.created_at),
-			updatedAt: Formatter.formatDate(props.user.updated_at),
 		};
+
+		if (canViewDetails) {
+			response.deletedAt = Formatter.formatDate(props.user.is_deleted_at);
+			response.createdAt = Formatter.formatDate(props.user.created_at);
+			response.updatedAt = Formatter.formatDate(props.user.updated_at);
+		}
+
+		if (canViewSensitive) {
+			response.isLocked = Formatter.formatBoolean(props.user.is_locked);
+			response.superAdmin = Formatter.formatBoolean(
+				props.user.super_admin ?? false,
+			);
+			response.triggerPasswordReset = Formatter.formatBoolean(
+				props.user.triggered_password_reset,
+			);
+			response.invitationAccepted = Formatter.formatBoolean(
+				props.user.invitation_accepted,
+			);
+			response.roles = roles;
+			response.permissions = permissions;
+			response.hasPassword = Boolean(props.user.password);
+			response.authProviders = (props.user.auth_providers || []).map((p) => {
+				return {
+					id: p.id,
+					providerKey: p.provider_key,
+					providerUserId: p.provider_user_id,
+					linkedAt: Formatter.formatDate(p.linked_at),
+				};
+			});
+		}
+
+		return response;
 	};
 }

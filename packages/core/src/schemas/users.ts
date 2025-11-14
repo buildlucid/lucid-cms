@@ -22,10 +22,13 @@ export const userResponseSchema = z.object({
 		description: "The user's ID",
 		example: 1,
 	}),
-	superAdmin: z.boolean().meta({
-		description: "Whether the user is a superadmin.",
-		example: true,
-	}),
+	superAdmin: z
+		.boolean()
+		.meta({
+			description: "Whether the user is a superadmin.",
+			example: true,
+		})
+		.optional(),
 	email: z.email().meta({
 		description: "The user's email address",
 		example: "admin@lucidcms.io",
@@ -42,18 +45,28 @@ export const userResponseSchema = z.object({
 		description: "The user's last name",
 		example: "Smith",
 	}),
-	isLocked: z.boolean().meta({
-		description: "If the user is locked from logging in",
-		example: false,
-	}),
-	triggerPasswordReset: z.boolean().nullable().meta({
-		description: "Should the UI force a password reset?",
-		example: false,
-	}),
-	invitationAccepted: z.boolean().meta({
-		description: "If the user has accepted the invitation",
-		example: true,
-	}),
+	isLocked: z
+		.boolean()
+		.meta({
+			description: "If the user is locked from logging in",
+			example: false,
+		})
+		.optional(),
+	triggerPasswordReset: z
+		.boolean()
+		.nullable()
+		.meta({
+			description: "Should the UI force a password reset?",
+			example: false,
+		})
+		.optional(),
+	invitationAccepted: z
+		.boolean()
+		.meta({
+			description: "If the user has accepted the invitation",
+			example: true,
+		})
+		.optional(),
 	roles: z
 		.array(userResponseRoleSchema)
 		.meta({
@@ -65,22 +78,37 @@ export const userResponseSchema = z.object({
 		description: "If the user is soft-deleted or not",
 		example: true,
 	}),
-	isDeletedAt: z.string().nullable().meta({
-		description: "The date the user was deleted",
-		example: "2021-06-10T20:00:00.000Z",
-	}),
-	createdAt: z.string().nullable().meta({
-		description: "The date the user was added",
-		example: "2021-06-10T20:00:00.000Z",
-	}),
-	updatedAt: z.string().nullable().meta({
-		description: "The date the user row was last updated",
-		example: "2021-06-10T20:00:00.000Z",
-	}),
-	hasPassword: z.boolean().optional().meta({
-		description: "Whether the user has a password set",
-		example: true,
-	}),
+	deletedAt: z
+		.string()
+		.nullable()
+		.meta({
+			description: "The date the user was deleted",
+			example: "2021-06-10T20:00:00.000Z",
+		})
+		.optional(),
+	createdAt: z
+		.string()
+		.nullable()
+		.meta({
+			description: "The date the user was added",
+			example: "2021-06-10T20:00:00.000Z",
+		})
+		.optional(),
+	updatedAt: z
+		.string()
+		.nullable()
+		.meta({
+			description: "The date the user row was last updated",
+			example: "2021-06-10T20:00:00.000Z",
+		})
+		.optional(),
+	hasPassword: z
+		.boolean()
+		.meta({
+			description: "Whether the user has a password set",
+			example: true,
+		})
+		.optional(),
 	authProviders: z
 		.array(
 			z.object({
@@ -100,8 +128,8 @@ export const userResponseSchema = z.object({
 					.meta({ description: "When the provider was linked", example: null }),
 			}),
 		)
-		.optional()
-		.meta({ description: "Actively linked auth providers for the user" }),
+		.meta({ description: "Actively linked auth providers for the user" })
+		.optional(),
 });
 
 export const controllerSchemas = {
