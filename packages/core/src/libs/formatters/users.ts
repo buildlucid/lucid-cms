@@ -60,12 +60,7 @@ export default class UsersFormatter {
 
 		const canViewDetails = hasAccess({
 			user: props.authUser,
-			optionalPermissions: [
-				Permissions.ReadUser,
-				Permissions.UpdateUser,
-				Permissions.DeleteUser,
-				Permissions.CreateUser,
-			],
+			requiredPermissions: [Permissions.ReadUser],
 			resourceOwnerId: props.user.id,
 		});
 
