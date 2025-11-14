@@ -10,8 +10,10 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 
@@ -29,6 +31,7 @@ const deleteSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.DeleteMedia]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { id, linkId } = c.req.valid("param");

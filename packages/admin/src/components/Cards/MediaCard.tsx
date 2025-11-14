@@ -59,6 +59,15 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const hasUpdatePermission = createMemo(() => {
 		return userStore.get.hasPermission(["update_media"]).all;
 	});
+	const canReadMedia = createMemo(() => {
+		return userStore.get.hasPermission(["read_media"]).all;
+	});
+	const hasCreatePermission = createMemo(() => {
+		return userStore.get.hasPermission(["create_media"]).all;
+	});
+	const hasDeletePermission = createMemo(() => {
+		return userStore.get.hasPermission(["delete_media"]).all;
+	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
@@ -106,7 +115,6 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							}
 						}}
 						copy={{}}
-						theme="fit"
 						noMargin={true}
 					/>
 				</div>
@@ -141,7 +149,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTargetId(props.media.id);
 								props.rowTarget.setTrigger("restore", true);
 							},
-							permission: userStore.get.hasPermission(["update_media"]).all,
+							permission: hasUpdatePermission(),
 							hide: props.showingDeleted?.() === false,
 							theme: "primary",
 						},
@@ -152,7 +160,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTargetId(props.media.id);
 								props.rowTarget.setTrigger("createShareLink", true);
 							},
-							permission: hasUpdatePermission(),
+							permission: hasCreatePermission(),
 							hide: props.showingDeleted?.(),
 						},
 						{
@@ -162,7 +170,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTargetId(props.media.id);
 								props.rowTarget.setTrigger("viewShareLinks", true);
 							},
-							permission: hasUpdatePermission(),
+							permission: canReadMedia(),
 							hide: props.showingDeleted?.(),
 						},
 						{
@@ -194,7 +202,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTargetId(props.media.id);
 								props.rowTarget.setTrigger("delete", true);
 							},
-							permission: userStore.get.hasPermission(["delete_media"]).all,
+							permission: hasDeletePermission(),
 							hide: props.showingDeleted?.(),
 							theme: "error",
 						},
@@ -206,7 +214,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 								props.rowTarget.setTargetId(props.media.id);
 								props.rowTarget.setTrigger("deletePermanently", true);
 							},
-							permission: userStore.get.hasPermission(["delete_media"]).all,
+							permission: hasDeletePermission(),
 							hide: props.showingDeleted?.() === false,
 							theme: "error",
 						},

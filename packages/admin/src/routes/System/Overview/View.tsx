@@ -43,6 +43,12 @@ const SystemOverviewRoute: Component = (props) => {
 	const canClearCache = createMemo(
 		() => userStore.get.hasPermission(["clear_kv"]).all,
 	);
+	const canDeleteAllShareLinks = createMemo(
+		() => userStore.get.hasPermission(["delete_media"]).all,
+	);
+	const canClearAllProcessedImages = createMemo(
+		() => userStore.get.hasPermission(["update_media"]).all,
+	);
 
 	// ----------------------------------------
 	// Render
@@ -115,7 +121,7 @@ const SystemOverviewRoute: Component = (props) => {
 								onClick={() => {
 									setOpenClearAllProcessedImages(true);
 								}}
-								permission={userStore.get.hasPermission(["update_media"]).all}
+								permission={canClearAllProcessedImages()}
 							>
 								{T()("clear_all_processed_images_button", {
 									count: settingsData.data?.data?.media.processed.total || 0,
@@ -142,7 +148,7 @@ const SystemOverviewRoute: Component = (props) => {
 								onClick={() => {
 									setOpenDeleteAllShareLinks(true);
 								}}
-								permission={userStore.get.hasPermission(["update_media"]).all}
+								permission={canDeleteAllShareLinks()}
 							>
 								{T()("delete_all_share_links_system_button")}
 							</Button>
@@ -167,7 +173,7 @@ const SystemOverviewRoute: Component = (props) => {
 								onClick={() => {
 									setOpenClearCache(true);
 								}}
-								permission={userStore.get.hasPermission(["clear_kv"]).all}
+								permission={canClearCache()}
 							>
 								{T()("clear_cache_button")}
 							</Button>

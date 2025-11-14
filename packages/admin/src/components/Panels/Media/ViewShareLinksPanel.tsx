@@ -24,6 +24,7 @@ import useRowTarget from "@/hooks/useRowTarget";
 import ShareLinkRow from "@/components/Tables/Rows/ShareLinkRow";
 import DeleteShareLink from "@/components/Modals/Media/DeleteShareLink";
 import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
+import userStore from "@/store/userStore";
 
 interface ViewShareLinksPanelProps {
 	id?: Accessor<number | undefined>;
@@ -126,6 +127,12 @@ const ViewShareLinksPanelContent: Component<{
 			shareLinksSearchParams.getSettled()
 		);
 	});
+	const canUpdateShareLinks = createMemo(
+		() => userStore.get.hasPermission(["update_media"]).all,
+	);
+	const canDeleteShareLinks = createMemo(
+		() => userStore.get.hasPermission(["delete_media"]).all,
+	);
 
 	// ---------------------------------
 	// Queries
@@ -279,6 +286,10 @@ const ViewShareLinksPanelContent: Component<{
 										rowTarget={rowTarget}
 										theme="secondary"
 										index={i}
+										permissions={{
+											update: canUpdateShareLinks(),
+											delete: canDeleteShareLinks(),
+										}}
 									/>
 								)}
 							</Index>

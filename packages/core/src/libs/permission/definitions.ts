@@ -28,7 +28,7 @@ export const Permissions = {
 	ReadJob: "read_job",
 
 	// Content permissions
-	ReadDocument: "read_document",
+	ReadContent: "read_content",
 	CreateContent: "create_content",
 	UpdateContent: "update_content",
 	DeleteContent: "delete_content",
@@ -90,7 +90,7 @@ export const PermissionGroups = Object.freeze({
 	content: {
 		key: "content_permissions",
 		permissions: [
-			Permissions.ReadDocument,
+			Permissions.ReadContent,
 			Permissions.CreateContent,
 			Permissions.UpdateContent,
 			Permissions.DeleteContent,
@@ -99,7 +99,7 @@ export const PermissionGroups = Object.freeze({
 		],
 	},
 	"client-integrations": {
-		key: "client-integrations_permissions",
+		key: "client_integrations_permissions",
 		permissions: [
 			Permissions.ReadClientIntegration,
 			Permissions.CreateClientIntegration,

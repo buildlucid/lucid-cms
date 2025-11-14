@@ -1,6 +1,5 @@
 import T from "@/translations";
 import type { Component } from "solid-js";
-import userStore from "@/store/userStore";
 import type { MediaShareLinkResponse } from "@types";
 import type { TableRowProps } from "@/types/components";
 import type useRowTarget from "@/hooks/useRowTarget";
@@ -15,6 +14,10 @@ interface ShareLinkRowProps extends TableRowProps {
 	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"delete" | "update">>;
 	theme?: "primary" | "secondary";
+	permissions: {
+		update: boolean;
+		delete: boolean;
+	};
 }
 
 const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
@@ -30,6 +33,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				{
 					label: T()("update"),
 					type: "button",
+					permission: props.permissions.update,
 					onClick: () => {
 						props.rowTarget.setTargetId(props.link.id);
 						props.rowTarget.setTrigger("update", true);
@@ -38,6 +42,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				{
 					label: T()("delete"),
 					type: "button",
+					permission: props.permissions.delete,
 					onClick: () => {
 						props.rowTarget.setTargetId(props.link.id);
 						props.rowTarget.setTrigger("delete", true);

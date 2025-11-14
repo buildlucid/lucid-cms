@@ -2,6 +2,7 @@ import { type Component, lazy } from "solid-js";
 import { Router, Route } from "@solidjs/router";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
+import PermissionGuard from "@/guards/Permission";
 // Routes
 const ComponentsRoute = lazy(() => import("@/routes/Components"));
 const LoginRoute = lazy(() => import("@/routes/Login"));
@@ -43,66 +44,142 @@ const AppRouter: Component = () => {
 				<Route path="/components" component={ComponentsRoute} />
 				<Route path="/account" component={AccountRoute} />
 				{/* Collections */}
-				<Route path="/collections" component={CollectionsListRoute} />
+				<Route
+					path="/collections"
+					component={() => (
+						<PermissionGuard permission={"read_content"}>
+							<CollectionsListRoute />
+						</PermissionGuard>
+					)}
+				/>
 				<Route
 					path="/collections/:collectionKey"
-					component={CollectionsDocumentsListRoute}
+					component={() => (
+						<PermissionGuard permission={"read_content"}>
+							<CollectionsDocumentsListRoute />
+						</PermissionGuard>
+					)}
 				/>
 				{/* Page builder */}
 				<Route
 					path="/collections/:collectionKey/draft/create"
 					component={() => (
-						<CollectionDocumentPageBuilderRoute mode="create" version="draft" />
+						<PermissionGuard permission={"read_content"}>
+							<CollectionDocumentPageBuilderRoute
+								mode="create"
+								version="draft"
+							/>
+						</PermissionGuard>
 					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/published/create"
 					component={() => (
-						<CollectionDocumentPageBuilderRoute
-							mode="create"
-							version="published"
-						/>
+						<PermissionGuard permission={"read_content"}>
+							<CollectionDocumentPageBuilderRoute
+								mode="create"
+								version="published"
+							/>
+						</PermissionGuard>
 					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/draft/:documentId"
 					component={() => (
-						<CollectionDocumentPageBuilderRoute mode="edit" version="draft" />
+						<PermissionGuard permission={"read_content"}>
+							<CollectionDocumentPageBuilderRoute mode="edit" version="draft" />
+						</PermissionGuard>
 					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/published/:documentId"
 					component={() => (
-						<CollectionDocumentPageBuilderRoute
-							mode="edit"
-							version="published"
-						/>
+						<PermissionGuard permission={"read_content"}>
+							<CollectionDocumentPageBuilderRoute
+								mode="edit"
+								version="published"
+							/>
+						</PermissionGuard>
 					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/revisions/:documentId/:versionId"
-					component={() => <CollectionsDocumentsRevisionsRoute />}
+					component={() => (
+						<PermissionGuard permission={"read_content"}>
+							<CollectionsDocumentsRevisionsRoute />
+						</PermissionGuard>
+					)}
 				/>
 				{/* Media */}
-				<Route path="/media" component={MediaListRoute} />
-				<Route path="/media/:folderId" component={MediaListRoute} />
+				<Route
+					path="/media"
+					component={() => (
+						<PermissionGuard permission={"read_media"}>
+							<MediaListRoute />
+						</PermissionGuard>
+					)}
+				/>
+				<Route
+					path="/media/:folderId"
+					component={() => (
+						<PermissionGuard permission={"read_media"}>
+							<MediaListRoute />
+						</PermissionGuard>
+					)}
+				/>
 				{/* Users */}
-				<Route path="/users" component={UsersListRoute} />
+				<Route
+					path="/users"
+					component={() => (
+						<PermissionGuard permission={"read_user"}>
+							<UsersListRoute />
+						</PermissionGuard>
+					)}
+				/>
 				{/* Roles */}
-				<Route path="/roles" component={RolesListRoute} />
+				<Route
+					path="/roles"
+					component={() => (
+						<PermissionGuard permission={"read_role"}>
+							<RolesListRoute />
+						</PermissionGuard>
+					)}
+				/>
 				{/* Emails */}
-				<Route path="/emails" component={EmailListRoute} />
+				<Route
+					path="/emails"
+					component={() => (
+						<PermissionGuard permission={"read_email"}>
+							<EmailListRoute />
+						</PermissionGuard>
+					)}
+				/>
 				{/* System */}
 				<Route path="/system/overview" component={SystemOverviewRoute} />
 				<Route
 					path="/system/queue-observability"
-					component={SystemQueueObservabilityRoute}
+					component={() => (
+						<PermissionGuard permission={"read_job"}>
+							<SystemQueueObservabilityRoute />
+						</PermissionGuard>
+					)}
 				/>
 				<Route
 					path="/system/client-integrations"
-					component={SystemClientIntegrationsRoute}
+					component={() => (
+						<PermissionGuard permission={"read_client_integration"}>
+							<SystemClientIntegrationsRoute />
+						</PermissionGuard>
+					)}
 				/>
-				<Route path="/system/license" component={SystemLicenseRoute} />
+				<Route
+					path="/system/license"
+					component={() => (
+						<PermissionGuard permission={"update_license"}>
+							<SystemLicenseRoute />
+						</PermissionGuard>
+					)}
+				/>
 			</Route>
 			{/* Non authenticated */}
 			<Route path="/admin" component={AuthRoutes}>

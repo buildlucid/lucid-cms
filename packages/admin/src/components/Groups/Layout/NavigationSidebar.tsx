@@ -17,6 +17,33 @@ export const NavigationSidebar: Component = () => {
 	// Mutations
 	const logout = api.auth.useLogout();
 	const user = createMemo(() => userStore.get.user);
+	const canReadDocuments = createMemo(
+		() => userStore.get.hasPermission(["read_content"]).all,
+	);
+	const canReadMedia = createMemo(
+		() => userStore.get.hasPermission(["read_media"]).all,
+	);
+	const canReadEmails = createMemo(
+		() => userStore.get.hasPermission(["read_email"]).all,
+	);
+	const canReadUsers = createMemo(
+		() => userStore.get.hasPermission(["read_user"]).all,
+	);
+	const canReadRoles = createMemo(
+		() => userStore.get.hasPermission(["read_role"]).all,
+	);
+	const canReadJobs = createMemo(
+		() => userStore.get.hasPermission(["read_job"]).all,
+	);
+	const canManageLicense = createMemo(
+		() => userStore.get.hasPermission(["update_license"]).all,
+	);
+	const canReadClientIntegrations = createMemo(
+		() => userStore.get.hasPermission(["read_client_integration"]).all,
+	);
+	const showAccessAndPermissions = createMemo(
+		() => canReadUsers() || canReadRoles(),
+	);
 
 	// ----------------------------------
 	// Queries
@@ -69,13 +96,7 @@ export const NavigationSidebar: Component = () => {
 							href="/admin/media"
 							icon="media"
 							title={T()("media_library")}
-							permission={
-								userStore.get.hasPermission([
-									"create_media",
-									"update_media",
-									"delete_media",
-								]).some
-							}
+							permission={canReadMedia()}
 						/>
 
 						<IconLinkFull
@@ -83,94 +104,88 @@ export const NavigationSidebar: Component = () => {
 							href="/admin/emails"
 							icon="email"
 							title={T()("email_activity")}
-							permission={userStore.get.hasPermission(["read_email"]).all}
+							permission={canReadEmails()}
 						/>
 
 						{/* Collections */}
-						<div class="w-full mt-4 mb-2">
-							<span class="text-xs">{T()("collections")}</span>
-						</div>
-						<Switch>
-							<Match when={collectionsIsLoading()}>
-								<span class="skeleton block h-8 w-full mb-1" />
-								<span class="skeleton block h-8 w-full mb-1" />
-								<span class="skeleton block h-8 w-full mb-1" />
-							</Match>
-							<Match when={collectionsIsError()}>
-								<div class="bg-background-base rounded-md p-2">
-									<p class="text-xs text-center">
-										{T()("error_loading_collections")}
-									</p>
+						<Show when={canReadDocuments()}>
+							<>
+								<div class="w-full mt-4 mb-2">
+									<span class="text-xs">{T()("collections")}</span>
 								</div>
-							</Match>
-							<Match when={true}>
-								<For each={multiCollections()}>
-									{(collection) => (
-										<IconLinkFull
-											type="link"
-											href={`/admin/collections/${collection.key}`}
-											icon="collection-multiple"
-											title={helpers.getLocaleValue({
-												value: collection.details.name,
-											})}
-										/>
-									)}
-								</For>
-								<For each={singleCollections()}>
-									{(collection) => (
-										<IconLinkFull
-											type="link"
-											href={
-												collection.documentId
-													? getDocumentRoute("edit", {
-															collectionKey: collection.key,
-															useDrafts: collection.config.useDrafts,
-															documentId: collection.documentId,
-														})
-													: getDocumentRoute("create", {
-															collectionKey: collection.key,
-															useDrafts: collection.config.useDrafts,
-														})
-											}
-											icon="collection-single"
-											title={helpers.getLocaleValue({
-												value: collection.details.name,
-											})}
-										/>
-									)}
-								</For>
-							</Match>
-						</Switch>
+								<Switch>
+									<Match when={collectionsIsLoading()}>
+										<span class="skeleton block h-8 w-full mb-1" />
+										<span class="skeleton block h-8 w-full mb-1" />
+										<span class="skeleton block h-8 w-full mb-1" />
+									</Match>
+									<Match when={collectionsIsError()}>
+										<div class="bg-background-base rounded-md p-2">
+											<p class="text-xs text-center">
+												{T()("error_loading_collections")}
+											</p>
+										</div>
+									</Match>
+									<Match when={true}>
+										<For each={multiCollections()}>
+											{(collection) => (
+												<IconLinkFull
+													type="link"
+													href={`/admin/collections/${collection.key}`}
+													icon="collection-multiple"
+													title={helpers.getLocaleValue({
+														value: collection.details.name,
+													})}
+												/>
+											)}
+										</For>
+										<For each={singleCollections()}>
+											{(collection) => (
+												<IconLinkFull
+													type="link"
+													href={
+														collection.documentId
+															? getDocumentRoute("edit", {
+																	collectionKey: collection.key,
+																	useDrafts: collection.config.useDrafts,
+																	documentId: collection.documentId,
+																})
+															: getDocumentRoute("create", {
+																	collectionKey: collection.key,
+																	useDrafts: collection.config.useDrafts,
+																})
+													}
+													icon="collection-single"
+													title={helpers.getLocaleValue({
+														value: collection.details.name,
+													})}
+												/>
+											)}
+										</For>
+									</Match>
+								</Switch>
+							</>
+						</Show>
 
 						{/* Access & Permissions */}
-						<div class="w-full mt-4 mb-2">
-							<span class="text-xs">{T()("access_and_permissions")}</span>
-						</div>
+						<Show when={showAccessAndPermissions()}>
+							<div class="w-full mt-4 mb-2">
+								<span class="text-xs">{T()("access_and_permissions")}</span>
+							</div>
+						</Show>
 						<IconLinkFull
 							type="link"
 							href="/admin/users"
 							icon="users"
 							title={T()("user_accounts")}
-							permission={
-								userStore.get.hasPermission([
-									"create_user",
-									"update_user",
-									"delete_user",
-								]).some
-							}
+							permission={canReadUsers()}
 						/>
 						<IconLinkFull
 							type="link"
 							href="/admin/roles"
 							icon="roles"
 							title={T()("role_management")}
-							permission={
-								userStore.get.hasPermission([
-									"create_role",
-									"update_role",
-									"delete_role",
-								]).some
-							}
+							permission={canReadRoles()}
 						/>
 
 						{/* System */}
@@ -188,19 +203,21 @@ export const NavigationSidebar: Component = () => {
 							href="/admin/system/client-integrations"
 							icon="client-integrations"
 							title={T()("client_integrations")}
+							permission={canReadClientIntegrations()}
 						/>
 						<IconLinkFull
 							type="link"
 							href="/admin/system/license"
 							icon="license"
 							title={T()("manage_license")}
+							permission={canManageLicense()}
 						/>
 						<IconLinkFull
 							type="link"
 							href="/admin/system/queue-observability"
 							icon="queue"
 							title={T()("queue_observability")}
-							permission={userStore.get.hasPermission(["read_job"]).all}
+							permission={canReadJobs()}
 						/>
 					</ul>
 				</div>

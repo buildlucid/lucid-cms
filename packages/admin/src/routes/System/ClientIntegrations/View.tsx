@@ -125,6 +125,7 @@ const SystemClientIntegrationsRoute: Component = (props) => {
 											rowTarget.setTargetId(undefined);
 											rowTarget.setTrigger("update", true);
 										}}
+										permission={hasCreatePermission()}
 									>
 										{T()("create_integration")}
 									</Button>
