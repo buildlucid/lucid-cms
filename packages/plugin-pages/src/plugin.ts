@@ -1,5 +1,5 @@
 import T from "./translations/index.js";
-import type { LucidPluginOptions } from "@lucidcms/core/types";
+import type { LucidPlugin } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types/types.js";
 import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
 import { logger } from "@lucidcms/core";
@@ -11,57 +11,57 @@ import {
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
 
-const plugin: LucidPluginOptions<PluginOptions> = async (config, plugin) => {
+const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	const options = pluginOptions(plugin);
-
-	for (const collectionConfig of options.collections) {
-		const collectionInstance = config.collections.find(
-			(c) => c.key === collectionConfig.collectionKey,
-		);
-		if (!collectionInstance) {
-			logger.warn({
-				message: T("cannot_find_collection", {
-					collection: collectionConfig.collectionKey,
-				}),
-				scope: PLUGIN_KEY,
-			});
-			continue;
-		}
-
-		registerFields(collectionInstance, collectionConfig);
-
-		if (!collectionInstance.config.hooks) {
-			collectionInstance.config.hooks = [];
-		}
-	}
-
-	if (config.hooks && Array.isArray(config.hooks)) {
-		config.hooks.push({
-			service: "documents",
-			event: "beforeUpsert",
-			handler: beforeUpsertHandler(options),
-		});
-		config.hooks.push({
-			service: "documents",
-			event: "afterUpsert",
-			handler: afterUpsertHandler(options),
-		});
-		config.hooks.push({
-			service: "documents",
-			event: "beforeDelete",
-			handler: beforeDeleteHandler(options),
-		});
-		config.hooks.push({
-			service: "documents",
-			event: "versionPromote",
-			handler: versionPromoteHandler(options),
-		});
-	}
 
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
-		config: config,
+		recipe: (draft) => {
+			for (const collectionConfig of options.collections) {
+				const collectionInstance = draft.collections.find(
+					(c) => c.key === collectionConfig.collectionKey,
+				);
+				if (!collectionInstance) {
+					logger.warn({
+						message: T("cannot_find_collection", {
+							collection: collectionConfig.collectionKey,
+						}),
+						scope: PLUGIN_KEY,
+					});
+					continue;
+				}
+
+				registerFields(collectionInstance, collectionConfig);
+
+				if (!collectionInstance.config.hooks) {
+					collectionInstance.config.hooks = [];
+				}
+			}
+
+			if (draft.hooks && Array.isArray(draft.hooks)) {
+				draft.hooks.push({
+					service: "documents",
+					event: "beforeUpsert",
+					handler: beforeUpsertHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
+					event: "afterUpsert",
+					handler: afterUpsertHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
+					event: "beforeDelete",
+					handler: beforeDeleteHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
+					event: "versionPromote",
+					handler: versionPromoteHandler(options),
+				});
+			}
+		},
 	};
 };
 

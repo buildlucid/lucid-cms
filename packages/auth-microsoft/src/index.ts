@@ -1,9 +1,5 @@
-import type { Config } from "@lucidcms/core/types";
-import type { PluginOptions } from "./types/types.js";
 import plugin from "./plugin.js";
 
-const lucidMicrosoftAuthPlugin =
-	(pluginOptions: PluginOptions) => (config: Config) =>
-		plugin(config, pluginOptions);
+const lucidMicrosoftAuthPlugin = plugin;
 
 export default lucidMicrosoftAuthPlugin;

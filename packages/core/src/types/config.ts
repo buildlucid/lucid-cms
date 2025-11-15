@@ -22,6 +22,7 @@ import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
+import type { WritableDraft } from "immer";
 
 export type CopyPublicEntry =
 	| string
@@ -30,20 +31,20 @@ export type CopyPublicEntry =
 			output?: string;
 	  };
 
-export type LucidPlugin = (config: Config) => Promise<{
-	key: string;
-	lucid: string;
-	config: Config;
-}>;
+export type LucidPluginRecipe = (draft: WritableDraft<Config>) => void;
 
-export type LucidPluginOptions<T = undefined> = (
-	config: Config,
-	pluginOptions: T,
-) => Promise<{
+export type LucidPluginResponse = {
 	key: string;
 	lucid: string;
-	config: Config;
-}>;
+	lifecycle?: {
+		init?: () => Promise<void>;
+	};
+	recipe: LucidPluginRecipe;
+};
+
+export type LucidPlugin<T = undefined> = (
+	pluginOptions: T,
+) => LucidPluginResponse;
 
 export type ImageProcessorOptions = {
 	width?: number;
@@ -221,7 +222,7 @@ export interface LucidConfig {
 	/** A list of collections instances to register. These can be imported from `@lucidcms/core`. */
 	collections?: CollectionBuilder[];
 	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
-	plugins?: LucidPlugin[];
+	plugins?: LucidPluginResponse[];
 	/** Compiler options. */
 	compilerOptions?: {
 		paths?: {
@@ -318,7 +319,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
-	plugins: Array<LucidPlugin>;
+	plugins: Array<LucidPluginResponse>;
 	compilerOptions: {
 		paths: {
 			outDir: string;

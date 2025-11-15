@@ -21,12 +21,10 @@ export default defineConfig((env) => ({
 	},
 	collections: [],
 	plugins: [
-		async (config) => {
-			return {
-				config: config,
-				key: "plugin-testing",
-				lucid: "100.0.0",
-			};
+		{
+			key: "plugin-testing",
+			lucid: "100.0.0",
+			recipe: (draft) => {},
 		},
 	],
 }));

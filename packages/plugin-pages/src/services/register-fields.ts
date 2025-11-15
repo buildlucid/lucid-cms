@@ -3,9 +3,10 @@ import constants from "../constants.js";
 import { z } from "@lucidcms/core";
 import type { CollectionBuilder } from "@lucidcms/core";
 import type { CollectionConfig } from "../types/types.js";
+import type { WritableDraft } from "immer";
 
 const registerFields = (
-	collection: CollectionBuilder,
+	collection: WritableDraft<CollectionBuilder>,
 	config: CollectionConfig,
 ) => {
 	collection

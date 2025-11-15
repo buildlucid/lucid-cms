@@ -33,8 +33,9 @@ export const envSchema = z.object({
 export default defineConfig((env) => ({
 	host: env.LUCID_HOST,
 	db: new LibSQLAdapter({
-		url: env.LUCID_TURSO_URL,
-		authToken: env.LUCID_TURSO_AUTH_TOKEN,
+		// url: env.LUCID_TURSO_URL,
+		// authToken: env.LUCID_TURSO_AUTH_TOKEN,
+		url: "http://127.0.0.1:8081",
 	}),
 	keys: {
 		encryptionKey: env.LUCID_ENCRYPTION_KEY,

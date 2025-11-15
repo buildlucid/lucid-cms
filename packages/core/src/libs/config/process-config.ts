@@ -7,6 +7,7 @@ import BrickConfigSchema from "../builders/brick-builder/schema.js";
 import CustomFieldSchema from "../custom-fields/schema.js";
 import { initializeLogger } from "../logger/index.js";
 import type { Config, LucidConfig } from "../../types/config.js";
+import { produce } from "immer";
 
 let cachedConfig: Config | undefined;
 
@@ -27,19 +28,21 @@ const processConfig = async (
 	}
 
 	let configRes = mergeConfig(config, defaultConfig);
+
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
-		const postPluginConfig = configRes.plugins.reduce(async (acc, plugin) => {
-			const configAfterPlugin = await acc;
-			const pluginRes = await plugin(configAfterPlugin);
+		for (const pluginDef of configRes.plugins) {
+			if (pluginDef.lifecycle?.init) {
+				await pluginDef.lifecycle.init();
+			}
+
+			configRes = produce(configRes, pluginDef.recipe);
+
 			checks.checkPluginVersion({
-				key: pluginRes.key,
-				requiredVersions: pluginRes.lucid,
+				key: pluginDef.key,
+				requiredVersions: pluginDef.lucid,
 			});
-			return pluginRes.config;
-		}, Promise.resolve(configRes));
-		const res = await postPluginConfig;
-		configRes = res;
+		}
 	}
 
 	// validate config
