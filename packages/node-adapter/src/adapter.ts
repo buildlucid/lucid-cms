@@ -30,8 +30,16 @@ const nodeAdapter = (options?: {
 		},
 		cli: {
 			serve: async ({ config, logger, onListening }) => {
-				logger.info("Using:", logger.color.blue("Node Runtime Adapter"));
-				logger.info("Starting development server...");
+				logger.instance.info(
+					"Using:",
+					logger.instance.color.blue("Node Runtime Adapter"),
+					{
+						silent: logger.silent,
+					},
+				);
+				logger.instance.info("Starting development server...", {
+					silent: logger.silent,
+				});
 
 				const { app, destroy, issues } = await lucid.createApp({
 					config,
@@ -41,16 +49,21 @@ const nodeAdapter = (options?: {
 
 				for (const issue of issues) {
 					if (issue.level === "unsupported") {
-						logger.error(
+						logger.instance.error(
 							issue.type,
 							issue.key,
 							"-",
 							issue.message ||
 								"This is unsupported in your current runtime environment.",
+							{
+								silent: logger.silent,
+							},
 						);
 					}
 					if (issue.level === "notice" && issue.message) {
-						logger.warn(issue.type, issue.key, "-", issue.message);
+						logger.instance.warn(issue.type, issue.key, "-", issue.message, {
+							silent: logger.silent,
+						});
 					}
 				}
 
@@ -68,9 +81,13 @@ const nodeAdapter = (options?: {
 				});
 
 				server.on("close", async () => {
-					logger.info("Shutting down Node Adapter development server...", {
-						spaceBefore: true,
-					});
+					logger.instance.info(
+						"Shutting down Node Adapter development server...",
+						{
+							silent: logger.silent,
+							spaceBefore: true,
+						},
+					);
 					await destroy?.();
 				});
 
@@ -89,7 +106,13 @@ const nodeAdapter = (options?: {
 				};
 			},
 			build: async ({ options, logger }) => {
-				logger.info("Using:", logger.color.blue("Node Runtime Adapter"));
+				logger.instance.info(
+					"Using:",
+					logger.instance.color.blue("Node Runtime Adapter"),
+					{
+						silent: logger.silent,
+					},
+				);
 				const configOutput = `${options.outputPath}/${constants.CONFIG_FILE}`;
 				const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
 
@@ -231,10 +254,13 @@ startServer();`;
 
 					await writeFile(entryOutput, entry);
 				} catch (error) {
-					logger.error(
+					logger.instance.error(
 						error instanceof Error
 							? error.message
 							: "An error occured building via the Node Adapter",
+						{
+							silent: logger.silent,
+						},
 					);
 					throw error;
 				}

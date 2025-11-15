@@ -77,6 +77,7 @@
 		"@noble/hashes": "^1.8.0",
 		"@scalar/hono-api-reference": "^0.9.1",
 		"better-sqlite3": "^12.4.1",
+		"boxen": "^8.0.1",
 		"chokidar": "^4.0.3",
 		"commander": "^14.0.0",
 		"date-fns": "^4.1.0",

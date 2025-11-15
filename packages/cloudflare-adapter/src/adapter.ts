@@ -38,8 +38,16 @@ const cloudflareAdapter = (options?: {
 		},
 		cli: {
 			serve: async ({ config, logger, onListening }) => {
-				logger.info("Using:", logger.color.blue("Cloudflare Worker Adapter"));
-				logger.info("Starting development server...");
+				logger.instance.info(
+					"Using:",
+					logger.instance.color.blue("Cloudflare Worker Adapter"),
+					{
+						silent: logger.silent,
+					},
+				);
+				logger.instance.info("Starting development server...", {
+					silent: logger.silent,
+				});
 
 				const cloudflareApp = new Hono<LucidHonoGeneric>();
 
@@ -98,16 +106,21 @@ const cloudflareAdapter = (options?: {
 
 				for (const issue of issues) {
 					if (issue.level === "unsupported") {
-						logger.error(
+						logger.instance.error(
 							issue.type,
 							issue.key,
 							"-",
 							issue.message ||
 								"This is unsupported in your current runtime environment.",
+							{
+								silent: logger.silent,
+							},
 						);
 					}
 					if (issue.level === "notice" && issue.message) {
-						logger.warn(issue.type, issue.key, "-", issue.message);
+						logger.instance.warn(issue.type, issue.key, "-", issue.message, {
+							silent: logger.silent,
+						});
 					}
 				}
 				const server = serve({
@@ -123,10 +136,11 @@ const cloudflareAdapter = (options?: {
 					});
 				});
 				server.on("close", async () => {
-					logger.info(
+					logger.instance.info(
 						"Shutting down Cloudflare Worker Adapter development server...",
 						{
 							spaceBefore: true,
+							silent: logger.silent,
 						},
 					);
 					await destroy?.();
@@ -147,7 +161,13 @@ const cloudflareAdapter = (options?: {
 				};
 			},
 			build: async ({ options, logger }) => {
-				logger.info("Using:", logger.color.blue("Cloudflare Worker Adapter"));
+				logger.instance.info(
+					"Using:",
+					logger.instance.color.blue("Cloudflare Worker Adapter"),
+					{
+						silent: logger.silent,
+					},
+				);
 
 				try {
 					const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
@@ -272,10 +292,13 @@ export default {
 					//* clean up temporary files
 					await unlink(tempEntryFile);
 				} catch (error) {
-					logger.error(
+					logger.instance.error(
 						error instanceof Error
 							? error.message
 							: "An error occured building via the Cloudflare Worker Adapter",
+						{
+							silent: logger.silent,
+						},
 					);
 					throw error;
 				}

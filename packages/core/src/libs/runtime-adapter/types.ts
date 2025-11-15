@@ -7,7 +7,10 @@ import type { AddressInfo } from "node:net";
 
 export type ServeHandler = (props: {
 	config: Config;
-	logger: CLILogger;
+	logger: {
+		instance: CLILogger;
+		silent: boolean;
+	};
 	onListening: (props: {
 		address: AddressInfo | string | null;
 	}) => Promise<void>;
@@ -22,7 +25,10 @@ export type BuildHandler = (props: {
 		configPath: string;
 		outputPath: string;
 	};
-	logger: CLILogger;
+	logger: {
+		instance: CLILogger;
+		silent: boolean;
+	};
 }) => Promise<void | {
 	onComplete?: () => Promise<void> | void;
 }>;

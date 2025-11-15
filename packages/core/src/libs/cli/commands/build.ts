@@ -35,7 +35,9 @@ const buildCommand = async (options?: {
 		}
 
 		if (!configRes.adapter?.cli?.build) {
-			cliLogger.error("No build handler found in adapter");
+			cliLogger.error("No build handler found in adapter", {
+				silent: options?.silent ?? false,
+			});
 			return;
 		}
 
@@ -54,13 +56,19 @@ const buildCommand = async (options?: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
 				},
-				logger: cliLogger,
+				logger: {
+					instance: cliLogger,
+					silent: options?.silent ?? false,
+				},
 			}),
 		]);
 		if (viteBuildRes.error) {
 			cliLogger.error(
 				viteBuildRes.error.message ??
 					"There was an error while building the SPA or component plugins",
+				{
+					silent: options?.silent ?? false,
+				},
 			);
 			logger.setBuffering(false);
 			process.exit(1);
@@ -69,6 +77,9 @@ const buildCommand = async (options?: {
 		cliLogger.info(
 			"Loaded config from:",
 			cliLogger.color.green(`./${relativePath}`),
+			{
+				silent: options?.silent ?? false,
+			},
 		);
 
 		const relativeBuildPath = path.relative(
@@ -82,12 +93,18 @@ const buildCommand = async (options?: {
 			cliLogger.color.green(
 				`./${relativeBuildPath}/${constants.directories.public}`,
 			),
+			{
+				silent: options?.silent ?? false,
+			},
 		);
 		cliLogger.info(
 			"SPA and component plugins built:",
 			cliLogger.color.green(
 				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.admin}`,
 			),
+			{
+				silent: options?.silent ?? false,
+			},
 		);
 
 		let fieldCount = 0;
@@ -110,10 +127,16 @@ const buildCommand = async (options?: {
 			`brick${brickKeys.size === 1 ? "" : "s"} and`,
 			cliLogger.color.yellow(fieldCount),
 			`field${fieldCount === 1 ? "" : "s"}`,
+			{
+				silent: options?.silent ?? false,
+			},
 		);
 		cliLogger.info(
 			cliLogger.color.yellow(configRes.config.plugins.length),
 			`plugin${configRes.config.plugins.length === 1 ? "" : "s"} loaded`,
+			{
+				silent: options?.silent ?? false,
+			},
 		);
 
 		await runtimeBuildRes?.onComplete?.();
@@ -133,6 +156,7 @@ const buildCommand = async (options?: {
 			{
 				spaceAfter: true,
 				spaceBefore: true,
+				silent: options?.silent ?? false,
 			},
 		);
 
@@ -141,6 +165,9 @@ const buildCommand = async (options?: {
 	} catch (error) {
 		cliLogger.error(
 			error instanceof Error ? error.message : "An unknown error occurred",
+			{
+				silent: options?.silent ?? false,
+			},
 		);
 		logger.setBuffering(false);
 		process.exit(1);

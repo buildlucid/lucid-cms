@@ -1,4 +1,7 @@
+import boxen from "boxen";
 import picocolors from "picocolors";
+import { ZodError } from "zod/v4";
+import tidyZodError from "../../utils/errors/tidy-zod-errors.js";
 
 const symbols = {
 	tick: { icon: "✓", color: picocolors.green },
@@ -17,6 +20,7 @@ interface LogConfig {
 	indent?: number;
 	spaceBefore?: boolean;
 	spaceAfter?: boolean;
+	silent?: boolean;
 }
 
 interface PrintConfig extends LogConfig {
@@ -30,9 +34,10 @@ const printMessage = (parts: string[], config: PrintConfig) => {
 		spaceBefore = false,
 		spaceAfter = false,
 		defaultSymbol,
+		silent = false,
 	} = config;
 
-	if (spaceBefore) console.log();
+	if (spaceBefore && silent !== true) console.log();
 
 	const indentStr = " ".repeat(indent);
 
@@ -51,9 +56,9 @@ const printMessage = (parts: string[], config: PrintConfig) => {
 
 	const message = parts.join(" ");
 
-	console.log(`${indentStr}${prefix}${message}`);
+	if (silent !== true) console.log(`${indentStr}${prefix}${message}`);
 
-	if (spaceAfter) console.log();
+	if (spaceAfter && silent !== true) console.log();
 };
 
 const isConfig = (arg: unknown): arg is LogConfig => {
@@ -63,7 +68,8 @@ const isConfig = (arg: unknown): arg is LogConfig => {
 		("symbol" in arg ||
 			"indent" in arg ||
 			"spaceBefore" in arg ||
-			"spaceAfter" in arg)
+			"spaceAfter" in arg ||
+			"silent" in arg)
 	);
 };
 
@@ -154,32 +160,39 @@ const formatBytes = (bytes: number): string => {
 	return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 };
 
+const formatZodError = (error: ZodError) => {
+	const message = tidyZodError(error).trim();
+	return boxen(message, {
+		padding: 1,
+		margin: 1,
+		borderColor: "red",
+		borderStyle: "round",
+		title: "Validation Error",
+	});
+};
+
 const errorInstance = (error: Error) => {
-	const lines = [
-		`${logger.color.red(logger.color.bold(error.name))}: ${error.message}`,
-		"",
-	];
+	if (error instanceof ZodError) {
+		console.log(formatZodError(error));
+		return;
+	}
+
+	const lines = [error.message];
 
 	if (error.stack) {
-		const stackLines = error.stack.split("\n").slice(1, 4); // First 3 stack frames
-		lines.push(...stackLines.map((line) => logger.color.gray(line.trim())));
+		const stackLines = error.stack.split("\n").slice(1, 3);
+		lines.push("", ...stackLines.map((line) => logger.color.gray(line.trim())));
 	}
 
-	const maxLength = Math.max(...lines.map((l) => l.length));
-	const width = Math.min(maxLength + 4, 80);
-
-	console.log();
-	console.log(logger.color.red(`╭${"─".repeat(width - 2)}╮`));
-
-	for (const line of lines) {
-		const padding = " ".repeat(width - line.length - 4);
-		console.log(
-			`${logger.color.red("│")}  ${line}${padding} ${logger.color.red("│")}`,
-		);
-	}
-
-	console.log(logger.color.red(`╰${"─".repeat(width - 2)}╯`));
-	console.log();
+	console.log(
+		boxen(lines.join("\n"), {
+			padding: 1,
+			margin: 1,
+			borderColor: "red",
+			borderStyle: "round",
+			title: error.name,
+		}),
+	);
 };
 
 const logger = {

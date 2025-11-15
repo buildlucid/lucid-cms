@@ -196,13 +196,11 @@ export default abstract class DatabaseAdapter {
 		}
 
 		if (error) {
-			console.log(error);
 			throw new LucidError({
 				message:
 					error instanceof Error ? error?.message : T("db_migration_failed"),
 				// @ts-expect-error
 				data: error.errors,
-				kill: true,
 			});
 		}
 	}

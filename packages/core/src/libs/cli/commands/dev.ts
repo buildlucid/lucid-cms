@@ -84,7 +84,10 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const serverRes = await configResult.adapter?.cli?.serve({
 				config: configResult.config,
-				logger: cliLogger,
+				logger: {
+					instance: cliLogger,
+					silent: false,
+				},
 				onListening: async (props) => {
 					const serverUrl =
 						typeof props.address === "string"

@@ -67,7 +67,10 @@ const serveCommand = async () => {
 
 		const serverRes = await configRes.adapter?.cli?.serve({
 			config: configRes.config,
-			logger: cliLogger,
+			logger: {
+				instance: cliLogger,
+				silent: false,
+			},
 			onListening: async (props) => {
 				const serverUrl =
 					typeof props.address === "string"
