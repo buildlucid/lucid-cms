@@ -8,13 +8,24 @@ import CustomFieldSchema from "../custom-fields/schema.js";
 import { initializeLogger } from "../logger/index.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 
+let cachedConfig: Config | undefined;
+
 /**
  * Responsible for:
  * - merging the default config with the config
  * - initializing the plugins
  * - validation & checks
  */
-const processConfig = async (config: LucidConfig): Promise<Config> => {
+const processConfig = async (
+	config: LucidConfig,
+	options?: {
+		bypassCache?: boolean;
+	},
+): Promise<Config> => {
+	if (cachedConfig !== undefined && !options?.bypassCache) {
+		return cachedConfig;
+	}
+
 	let configRes = mergeConfig(config, defaultConfig);
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
@@ -85,6 +96,8 @@ const processConfig = async (config: LucidConfig): Promise<Config> => {
 		level: configRes.logger.level,
 		force: true,
 	});
+
+	cachedConfig = configRes;
 
 	return configRes;
 };

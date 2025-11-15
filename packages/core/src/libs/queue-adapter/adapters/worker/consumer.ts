@@ -55,7 +55,9 @@ const getConfig = async (): Promise<{
 		const configModule = await import(configUrl);
 		const configFn = configModule.default as AdapterDefineConfig;
 
-		const processedConfig = await processConfig(configFn(runtime.env || {}));
+		const processedConfig = await processConfig(configFn(runtime.env || {}), {
+			bypassCache: true,
+		});
 
 		return {
 			config: processedConfig,

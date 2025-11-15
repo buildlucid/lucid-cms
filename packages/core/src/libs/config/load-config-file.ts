@@ -41,7 +41,9 @@ export const loadConfigFile = async (props?: {
 	}
 
 	const configdefault = configModule.default(env || {});
-	const config = await processConfig(configdefault);
+	const config = await processConfig(configdefault, {
+		bypassCache: true,
+	});
 
 	const adapter = configModule.adapter;
 	const envSchema = configModule.envSchema;
