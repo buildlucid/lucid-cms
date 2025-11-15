@@ -56,18 +56,47 @@ const migrateRollbackCommand = async (options?: {
 			process.exit(0);
 		}
 
-		const migrationsToRollback = Math.min(steps, executedMigrations.length);
+		const protectedMigrations = config.db.protectedMigrations;
+		const migrationsToRollback: string[] = [];
+
+		for (
+			let i = executedMigrations.length - 1;
+			i >= 0 && migrationsToRollback.length < steps;
+			i--
+		) {
+			const migration = executedMigrations[i];
+			if (!migration) continue;
+
+			if (protectedMigrations.includes(migration.name)) {
+				cliLogger.error(
+					`Cannot rollback protected migration: "${migration.name}"`,
+				);
+				cliLogger.info(
+					"Protected migrations are essential for the CMS to function and cannot be rolled back.",
+				);
+				cliLogger.info(
+					"If you need to reset the database, use",
+					cliLogger.color.cyan("migrate:reset"),
+					"or",
+					cliLogger.color.cyan("migrate:fresh"),
+				);
+				logger.setBuffering(false);
+				process.exit(1);
+			}
+
+			migrationsToRollback.push(migration.name);
+		}
 
 		cliLogger.info(`Found ${executedMigrations.length} executed migration(s)`);
 		cliLogger.warn(
-			`Preparing to rollback ${migrationsToRollback} migration(s)`,
+			`Preparing to rollback ${migrationsToRollback.length} migration(s)`,
 		);
 
 		if (!force) {
 			let shouldProceed: boolean;
 			try {
 				shouldProceed = await confirm({
-					message: `Are you sure you want to rollback ${migrationsToRollback} migration(s)? This action cannot be undone.`,
+					message: `Are you sure you want to rollback ${migrationsToRollback.length} migration(s)? This action cannot be undone.`,
 					default: false,
 				});
 			} catch (error) {
@@ -85,10 +114,12 @@ const migrateRollbackCommand = async (options?: {
 			}
 		}
 
-		cliLogger.info(`Rolling back ${migrationsToRollback} migration(s)...`);
+		cliLogger.info(
+			`Rolling back ${migrationsToRollback.length} migration(s)...`,
+		);
 
 		let rolledBackCount = 0;
-		for (let i = 0; i < migrationsToRollback; i++) {
+		for (let i = 0; i < migrationsToRollback.length; i++) {
 			const { error, results } = await migrator.migrateDown();
 
 			if (results) {

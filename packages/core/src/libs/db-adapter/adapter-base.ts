@@ -43,6 +43,25 @@ export default abstract class DatabaseAdapter {
 			plugins: config.plugins,
 		});
 	}
+	/**
+	 * Returns the list of migration names that cannot be rolled back.
+	 * If migrate:rollback attempts to rollback a core migration, it will exit the process.
+	 *
+	 * For the initial release, all of these migrations are required to be run. There is no
+	 * valid version prior to this release, and as such you should never be able to rollback
+	 * the database to a previous version.
+	 */
+	readonly protectedMigrations = [
+		"00000001-locales",
+		"00000002-options",
+		"00000003-users-and-permissions",
+		"00000004-queues",
+		"00000005-emails",
+		"00000006-media",
+		"00000007-collections",
+		"00000008-integrations",
+		"00000009-share-link",
+	];
 	abstract initialize(): Promise<void>;
 	/**
 	 * Return your Kysely DB's adapters jsonArrayFrom helper that aggregates a subquery into a JSON array
