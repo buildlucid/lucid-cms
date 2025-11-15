@@ -13,14 +13,10 @@ import constants from "../../../constants/constants.js";
 /**
  * The CLI serve command. Directly starts the dev server
  */
-const serveCommand = async (options?: {
-	initial?: boolean;
-}) => {
+const serveCommand = async () => {
 	logger.setBuffering(true);
 	const configPath = getConfigPath(process.cwd());
 	let destroy: (() => Promise<void>) | undefined;
-
-	const isInitialRun = options?.initial ?? false;
 
 	try {
 		const configRes = await loadConfigFile({
@@ -50,7 +46,7 @@ const serveCommand = async (options?: {
 			config: configRes.config,
 			mode: "return",
 		})({
-			skipSyncSteps: !isInitialRun,
+			skipSyncSteps: false,
 			skipEnvValidation: true,
 		});
 		if (!migrateResult) {

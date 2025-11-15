@@ -21,7 +21,10 @@ class PostgresAdapter extends DatabaseAdapter {
 		super({
 			adapter: "postgres",
 			dialect: new PostgresJSDialect({
-				postgres: postgres(url, options),
+				postgres: postgres(url, {
+					...options,
+					onnotice: () => {},
+				}),
 			}),
 			plugins: [new ParseJSONResultsPlugin()],
 		});
@@ -64,7 +67,7 @@ class PostgresAdapter extends DatabaseAdapter {
 			fuzzOperator: "%",
 		};
 	}
-	async inferSchema(tx?: KyselyDB): Promise<InferredTable[]> {
+	async inferSchema(): Promise<InferredTable[]> {
 		const res = await sql<{
 			table_name: string;
 			name: string;
@@ -139,7 +142,7 @@ class PostgresAdapter extends DatabaseAdapter {
             LEFT JOIN foreign_keys fk ON 
                 tc.table_name = fk.table_name AND 
                 tc.name = fk.column_name
-        `.execute(tx ?? this.client);
+        `.execute(this.client);
 
 		const tableMap = new Map<string, InferredTable>();
 
@@ -176,6 +179,19 @@ class PostgresAdapter extends DatabaseAdapter {
 		}
 
 		return Array.from(tableMap.values());
+	}
+	async dropAllTables(): Promise<void> {
+		const tables = await sql<{ tablename: string }>`
+                SELECT tablename 
+                FROM pg_tables 
+                WHERE schemaname = 'public'
+            `.execute(this.client);
+
+		for (const table of tables.rows) {
+			await sql`DROP TABLE IF EXISTS ${sql.table(table.tablename)} CASCADE`.execute(
+				this.client,
+			);
+		}
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "text" && typeof value === "string") {

@@ -14,9 +14,9 @@ import { LucidError } from "../../utils/errors/index.js";
 import logger from "../logger/index.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
-import Migration00000002 from "./migrations/00000002-queues.js";
-import Migration00000003 from "./migrations/00000003-options.js";
-import Migration00000004 from "./migrations/00000004-users-and-permissions.js";
+import Migration00000002 from "./migrations/00000002-options.js";
+import Migration00000003 from "./migrations/00000003-users-and-permissions.js";
+import Migration00000004 from "./migrations/00000004-queues.js";
 import Migration00000005 from "./migrations/00000005-emails.js";
 import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
@@ -55,7 +55,11 @@ export default abstract class DatabaseAdapter {
 	/**
 	 * Infers the database schema. Uses the transaction client if provided, otherwise falls back to the base client
 	 */
-	abstract inferSchema(tx?: KyselyDB): Promise<InferredTable[]>;
+	abstract inferSchema(): Promise<InferredTable[]>;
+	/**
+	 * Drops all tables in the database
+	 */
+	abstract dropAllTables(): Promise<void>;
 	/**
 	 * Handles formatting of certain values based on the columns data type. This is used specifically for default values
 	 */
@@ -173,6 +177,7 @@ export default abstract class DatabaseAdapter {
 		}
 
 		if (error) {
+			console.log(error);
 			throw new LucidError({
 				message:
 					error instanceof Error ? error?.message : T("db_migration_failed"),
@@ -222,9 +227,9 @@ export default abstract class DatabaseAdapter {
 	get migrations() {
 		return {
 			"00000001-locales": Migration00000001(this),
-			"00000002-queues": Migration00000002(this),
-			"00000003-options": Migration00000003(this),
-			"00000004-users-and-permissions": Migration00000004(this),
+			"00000002-options": Migration00000002(this),
+			"00000003-users-and-permissions": Migration00000003(this),
+			"00000004-queues": Migration00000004(this),
 			"00000005-emails": Migration00000005(this),
 			"00000006-media": Migration00000006(this),
 			"00000007-collections": Migration00000007(this),

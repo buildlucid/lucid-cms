@@ -73,12 +73,14 @@ const migrateCommand = (props?: {
 	return async (options?: {
 		skipSyncSteps?: boolean;
 		skipEnvValidation?: boolean;
+		force?: boolean;
 	}) => {
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
 			const mode = props?.mode ?? "process";
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
+			const force = options?.force ?? false;
 
 			let config: Config;
 			if (props?.config) {
@@ -182,15 +184,29 @@ const migrateCommand = (props?: {
 			}
 
 			//* migrations are needed - prompt the user
-			let shouldProceed: boolean;
-			try {
-				shouldProceed = await confirm({
-					message:
-						"Migrations are needed to continue. Do you want to run them now?",
-					default: true,
-				});
-			} catch (error) {
-				if (error instanceof Error && error.name === "ExitPromptError") {
+			if (!force) {
+				let shouldProceed: boolean;
+				try {
+					shouldProceed = await confirm({
+						message:
+							"Migrations are needed to continue. Do you want to run them now?",
+						default: true,
+					});
+				} catch (error) {
+					if (error instanceof Error && error.name === "ExitPromptError") {
+						if (mode === "process") {
+							logger.setBuffering(false);
+							process.exit(0);
+						}
+						//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
+						else return false;
+					}
+					throw error;
+				}
+				if (!shouldProceed) {
+					cliLogger.info(
+						"Exiting without running migrations. Run this command again when you're ready",
+					);
 					if (mode === "process") {
 						logger.setBuffering(false);
 						process.exit(0);
@@ -198,18 +214,6 @@ const migrateCommand = (props?: {
 					//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
 					else return false;
 				}
-				throw error;
-			}
-			if (!shouldProceed) {
-				cliLogger.info(
-					"Exiting without running migrations. Run this command again when you're ready",
-				);
-				if (mode === "process") {
-					logger.setBuffering(false);
-					process.exit(0);
-				}
-				//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
-				else return false;
 			}
 
 			const kvInstance = await getKVAdapter(config);
