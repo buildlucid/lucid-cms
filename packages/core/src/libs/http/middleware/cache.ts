@@ -11,14 +11,20 @@ const hashInstance = hasher({ sort: true, coerce: true });
 type CacheOptions = {
 	/** The time-to-live (TTL) for the cached response in seconds. */
 	ttl: number;
-	/** The mode for generating the cache key. */
+	/**
+	 * The mode for generating the cache key.
+	 *
+	 * - "path-only": only the path is used for the cache key, unless you specify includeHeaders
+	 * - "include-query": the query parameters are included in the cache key
+	 * - "static": a static key is used for the cache key
+	 */
 	mode: "path-only" | "include-query" | "static";
 	/** The headers to include in the cache key. */
 	includeHeaders?: string[];
 	/** The tags to add the cache key to. */
 	tags?: string[] | ((c: LucidHonoContext) => string[]);
 	/** Bypasses hash generation and uses a simple string key. Useful for endpoints with no variations. */
-	staticKey?: HttpStaticValues;
+	staticKey?: HttpStaticValues | ((c: LucidHonoContext) => HttpStaticValues);
 };
 
 /**
@@ -26,7 +32,9 @@ type CacheOptions = {
  */
 const generateCacheKey = (c: LucidHonoContext, options: CacheOptions) => {
 	if (options.staticKey) {
-		return options.staticKey;
+		return typeof options.staticKey === "function"
+			? options.staticKey(c)
+			: options.staticKey;
 	}
 
 	const { mode = "include-query", includeHeaders = [] } = options;

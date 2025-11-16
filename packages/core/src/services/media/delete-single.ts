@@ -1,3 +1,5 @@
+import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -34,6 +36,11 @@ const deleteSingle: ServiceFn<
 		},
 	});
 	if (deleteMediaRes.error) return deleteMediaRes;
+
+	await Promise.all([
+		context.kv.command.delete(cacheKeys.http.static.clientMediaSingle(data.id)),
+		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+	]);
 
 	return {
 		error: undefined,

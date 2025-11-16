@@ -28,6 +28,9 @@ const processMediaController = factory.createHandlers(
 		}),
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.client.processMedia.params,
+			headers: {
+				authorization: true,
+			},
 		}),
 		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.client.processMedia.body,

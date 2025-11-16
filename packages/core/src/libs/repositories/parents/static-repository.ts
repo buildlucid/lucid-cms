@@ -440,6 +440,51 @@ abstract class StaticRepository<
 			selectAll: props.returnAll,
 		});
 	}
+	async updateMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Update<T>>;
+				where: QueryBuilderWhere<Table>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+	) {
+		let query = this.db
+			.updateTable(this.tableName)
+			.set(
+				this.formatData(props.data, {
+					type: "update",
+				}),
+			)
+			.$if(
+				props.returnAll !== true &&
+					props.returning !== undefined &&
+					props.returning.length > 0,
+				// @ts-expect-error
+				(qb) => qb.returning(props.returning),
+			)
+			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+
+		// @ts-expect-error
+		query = queryBuilder.update(query, props.where);
+
+		const exec = await this.executeQuery(
+			() => query.execute() as Promise<Pick<Select<T>, K>[] | undefined>,
+			{
+				method: "updateMultiple",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+		});
+	}
 }
 
 export default StaticRepository;

@@ -1,4 +1,6 @@
 import constants from "../../constants/constants.js";
+import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import Repository from "../../libs/repositories/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
@@ -138,6 +140,8 @@ const createSingle: ServiceFn<
 			return mediaTranslationsRes;
 		}
 	}
+
+	await invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]);
 
 	return {
 		error: undefined,

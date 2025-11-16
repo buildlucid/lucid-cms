@@ -1,7 +1,8 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import media from "./index.js";
+import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
+import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 
 const moveFolder: ServiceFn<
 	[
@@ -62,6 +63,11 @@ const moveFolder: ServiceFn<
 		},
 	});
 	if (mediaUpdateRes.error) return mediaUpdateRes;
+
+	await Promise.all([
+		context.kv.command.delete(cacheKeys.http.static.clientMediaSingle(data.id)),
+		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+	]);
 
 	return {
 		error: undefined,

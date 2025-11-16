@@ -1,3 +1,5 @@
+import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import services from "../index.js";
@@ -44,19 +46,20 @@ const deleteBatch: ServiceFn<
 	const updates = [
 		...(data.mediaIds && data.mediaIds.length > 0
 			? [
-					Media.updateSingle({
+					Media.updateMultiple({
 						where: [{ key: "id", operator: "in", value: data.mediaIds }],
 						data: {
 							is_deleted: true,
 							is_deleted_at: new Date().toISOString(),
 							deleted_by: data.userId,
 						},
+						returning: ["id"],
 					}),
 				]
 			: []),
 		...(data.recursiveMedia && descendantFolderIds.length > 0
 			? [
-					Media.updateSingle({
+					Media.updateMultiple({
 						where: [
 							{ key: "folder_id", operator: "in", value: descendantFolderIds },
 						],
@@ -65,14 +68,25 @@ const deleteBatch: ServiceFn<
 							is_deleted_at: new Date().toISOString(),
 							deleted_by: data.userId,
 						},
+						returning: ["id"],
 					}),
 				]
 			: []),
 	];
+	const clearCachePromises = [];
 	if (updates.length > 0) {
 		const res = await Promise.all(updates);
 		for (const r of res) {
 			if (r.error) return { error: r.error, data: undefined };
+			if (r.data && r.data.length > 0) {
+				for (const item of r.data) {
+					clearCachePromises.push(
+						context.kv.command.delete(
+							cacheKeys.http.static.clientMediaSingle(item.id),
+						),
+					);
+				}
+			}
 		}
 	}
 
@@ -84,6 +98,11 @@ const deleteBatch: ServiceFn<
 		});
 		if (delFoldersRes.error) return delFoldersRes;
 	}
+
+	await Promise.all([
+		...clearCachePromises,
+		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+	]);
 
 	return { error: undefined, data: undefined };
 };

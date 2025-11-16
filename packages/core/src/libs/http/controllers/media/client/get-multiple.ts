@@ -1,9 +1,11 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
-import { controllerSchemas } from "../../../../../schemas/documents.js";
+import constants from "../../../../../constants/constants.js";
+import { controllerSchemas } from "../../../../../schemas/media.js";
 import services from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
+import cacheKeys from "../../../../kv-adapter/cache-keys.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
@@ -12,6 +14,7 @@ import {
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
+import contentLocale from "../../../middleware/content-locale.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -21,52 +24,48 @@ const factory = createFactory();
 const getMultipleController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get multiple documents by filters via the client integration.",
-		tags: ["client-documents"],
-		summary: "Get Multiple Documents",
+			"Get multiple media items by filters via the client integration. Supports pagination and translated metadata.",
+		tags: ["client-media"],
+		summary: "Get Multiple Media",
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.client.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.client.getMultiple.params,
 			query: controllerSchemas.client.getMultiple.query.string,
 			headers: {
 				authorization: true,
+				contentLocale: true,
 			},
 		}),
 		validateResponse: true,
 	}),
 	clientAuthentication,
-	validate("param", controllerSchemas.client.getMultiple.params),
+	contentLocale,
 	validate("query", controllerSchemas.client.getMultiple.query.string),
-	// TODO: Re-enable when the cache clear is implemented. Also create a new group keys helper
-	// cache({
-	// 	ttl: 60 * 60 * 24,
-	// 	mode: "include-query",
-	// 	tags: (c) => [
-	// 		"documents",
-	// 		`document:${c.req.param("collectionKey")}:${c.req.param("status")}`,
-	// 	],
-	// }),
+	cache({
+		ttl: constants.ttl["5-minutes"],
+		mode: "include-query",
+		includeHeaders: [constants.headers.contentLocale],
+		tags: [cacheKeys.http.tags.clientMedia],
+	}),
 	async (c) => {
-		const { collectionKey, status } = c.req.valid("param");
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.client.getMultiple.query.formatted,
+			{
+				nullableFields: ["folderId"],
+			},
 		);
 
-		const documents = await serviceWrapper(
-			services.documents.client.getMultiple,
-			{
-				transaction: false,
-				defaultError: {
-					type: "basic",
-					name: T("route_document_fetch_error_name"),
-					message: T("route_document_fetch_error_message"),
-				},
+		const media = await serviceWrapper(services.media.getMultiple, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: T("route_media_fetch_error_name"),
+				message: T("route_media_fetch_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),
@@ -75,19 +74,18 @@ const getMultipleController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				collectionKey,
-				status,
 				query: formattedQuery,
+				localeCode: c.get("locale").code,
 			},
 		);
-		if (documents.error) throw new LucidAPIError(documents.error);
+		if (media.error) throw new LucidAPIError(media.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: documents.data.data,
+				data: media.data.data,
 				pagination: {
-					count: documents.data.count,
+					count: media.data.count,
 					page: formattedQuery.page,
 					perPage: formattedQuery.perPage,
 				},

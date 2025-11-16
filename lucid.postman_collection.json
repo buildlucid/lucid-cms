@@ -3540,6 +3540,128 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Get Single",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{CLIENT_API_KEY}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/v1/client/media/1",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"client",
+										"media",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Multiple",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "lucid-content-lang",
+										"value": "{{LUCID_CONTENT_LANG}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{CLIENT_API_KEY}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/v1/client/media?filter[mimeType]=image/jpeg,image/png",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"client",
+										"media"
+									],
+									"query": [
+										{
+											"key": "filter[key]",
+											"value": "placeholder-1708801580511",
+											"disabled": true
+										},
+										{
+											"key": "filter[mimeType]",
+											"value": "image/jpeg,image/png"
+										},
+										{
+											"key": "filter[extension]",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "sort",
+											"value": "-title",
+											"disabled": true
+										},
+										{
+											"key": "sort",
+											"value": "createdAt,updatedAt,title,fileSize,width,height,mimeType,fileExtension",
+											"disabled": true
+										},
+										{
+											"key": "filter[type]",
+											"value": "image,video",
+											"disabled": true
+										},
+										{
+											"key": "filter[title]",
+											"value": "title value",
+											"disabled": true
+										},
+										{
+											"key": "filter[folderId]",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}

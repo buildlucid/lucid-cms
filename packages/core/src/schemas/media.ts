@@ -111,82 +111,86 @@ const mediaResponseSchema = z.object({
 	}),
 });
 
+const mediaGetMultipleQueryStringSchema = z
+	.object({
+		"filter[title]": queryString.schema.filter(false, {
+			example: "Thumbnail",
+		}),
+		"filter[key]": queryString.schema.filter(false, {
+			example: "thumbnail-2022",
+		}),
+		"filter[mimeType]": queryString.schema.filter(true, {
+			example: "image/png,image/jpg",
+		}),
+		"filter[folderId]": queryString.schema.filter(false, {
+			example: "1",
+			nullable: true,
+		}),
+		"filter[type]": queryString.schema.filter(true, {
+			example: "document",
+		}),
+		"filter[extension]": queryString.schema.filter(true, {
+			example: "jpg,png",
+		}),
+		"filter[isDeleted]": queryString.schema.filter(false, {
+			example: "true",
+		}),
+		"filter[deletedBy]": queryString.schema.filter(true, {
+			example: "1",
+		}),
+		"filter[public]": queryString.schema.filter(false, {
+			example: "true",
+		}),
+		sort: queryString.schema.sort(
+			"createdAt,updatedAt,title,mimeType,extension",
+		),
+		page: queryString.schema.page,
+		perPage: queryString.schema.perPage,
+	})
+	.meta(queryString.meta);
+
+const mediaGetMultipleQueryFormattedSchema = z.object({
+	filter: z
+		.object({
+			title: queryFormatted.schema.filters.single.optional(),
+			key: queryFormatted.schema.filters.single.optional(),
+			mimeType: queryFormatted.schema.filters.union.optional(),
+			folderId: queryFormatted.schema.filters.single.optional(),
+			type: queryFormatted.schema.filters.union.optional(),
+			extension: queryFormatted.schema.filters.union.optional(),
+			isDeleted: queryFormatted.schema.filters.single.optional(),
+			deletedBy: queryFormatted.schema.filters.union.optional(),
+			public: queryFormatted.schema.filters.single.optional(),
+		})
+		.optional(),
+	sort: z
+		.array(
+			z.object({
+				key: z.enum([
+					"createdAt",
+					"updatedAt",
+					"title",
+					"fileSize",
+					"width",
+					"height",
+					"mimeType",
+					"extension",
+					"deletedBy",
+					"isDeletedAt",
+				]),
+				value: z.enum(["asc", "desc"]),
+			}),
+		)
+		.optional(),
+	page: queryFormatted.schema.page,
+	perPage: queryFormatted.schema.perPage,
+});
+
 export const controllerSchemas = {
 	getMultiple: {
 		query: {
-			string: z
-				.object({
-					"filter[title]": queryString.schema.filter(false, {
-						example: "Thumbnail",
-					}),
-					"filter[key]": queryString.schema.filter(false, {
-						example: "thumbnail-2022",
-					}),
-					"filter[mimeType]": queryString.schema.filter(true, {
-						example: "image/png,image/jpg",
-					}),
-					"filter[folderId]": queryString.schema.filter(false, {
-						example: "1",
-						nullable: true,
-					}),
-					"filter[type]": queryString.schema.filter(true, {
-						example: "document",
-					}),
-					"filter[extension]": queryString.schema.filter(true, {
-						example: "jpg,png",
-					}),
-					"filter[isDeleted]": queryString.schema.filter(false, {
-						example: "true",
-					}),
-					"filter[deletedBy]": queryString.schema.filter(true, {
-						example: "1",
-					}),
-					"filter[public]": queryString.schema.filter(false, {
-						example: "true",
-					}),
-					sort: queryString.schema.sort(
-						"createdAt,updatedAt,title,mimeType,extension",
-					),
-					page: queryString.schema.page,
-					perPage: queryString.schema.perPage,
-				})
-				.meta(queryString.meta),
-			formatted: z.object({
-				filter: z
-					.object({
-						title: queryFormatted.schema.filters.single.optional(),
-						key: queryFormatted.schema.filters.single.optional(),
-						mimeType: queryFormatted.schema.filters.union.optional(),
-						folderId: queryFormatted.schema.filters.single.optional(),
-						type: queryFormatted.schema.filters.union.optional(),
-						extension: queryFormatted.schema.filters.union.optional(),
-						isDeleted: queryFormatted.schema.filters.single.optional(),
-						deletedBy: queryFormatted.schema.filters.union.optional(),
-						public: queryFormatted.schema.filters.single.optional(),
-					})
-					.optional(),
-				sort: z
-					.array(
-						z.object({
-							key: z.enum([
-								"createdAt",
-								"updatedAt",
-								"title",
-								"fileSize",
-								"width",
-								"height",
-								"mimeType",
-								"extension",
-								"deletedBy",
-								"isDeletedAt",
-							]),
-							value: z.enum(["asc", "desc"]),
-						}),
-					)
-					.optional(),
-				page: queryFormatted.schema.page,
-				perPage: queryFormatted.schema.perPage,
-			}),
+			string: mediaGetMultipleQueryStringSchema,
+			formatted: mediaGetMultipleQueryFormattedSchema,
 		},
 		params: undefined,
 		body: undefined,
@@ -618,9 +622,35 @@ export const controllerSchemas = {
 				}),
 			}),
 		},
+		getSingle: {
+			body: undefined,
+			query: {
+				string: undefined,
+				formatted: undefined,
+			},
+			params: z.object({
+				id: z.string().meta({
+					description: "The media ID",
+					example: 1,
+				}),
+			}),
+			response: mediaResponseSchema,
+		} satisfies ControllerSchema,
+		getMultiple: {
+			query: {
+				string: mediaGetMultipleQueryStringSchema,
+				formatted: mediaGetMultipleQueryFormattedSchema,
+			},
+			params: undefined,
+			body: undefined,
+			response: z.array(mediaResponseSchema),
+		} satisfies ControllerSchema,
 	},
 };
 
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
+>;
+export type ClientGetMultipleQueryParams = z.infer<
+	typeof controllerSchemas.client.getMultiple.query.formatted
 >;

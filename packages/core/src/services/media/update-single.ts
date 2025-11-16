@@ -1,5 +1,7 @@
 import constants from "../../constants/constants.js";
 import Formatter from "../../libs/formatters/index.js";
+import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
@@ -235,6 +237,11 @@ const updateSingle: ServiceFn<
 	if (mediaUpdateRes.error) return mediaUpdateRes;
 	if (mediaTranslationsRes.error) return mediaTranslationsRes;
 	if (clearProcessedRes.error) return clearProcessedRes;
+
+	await Promise.all([
+		context.kv.command.delete(cacheKeys.http.static.clientMediaSingle(data.id)),
+		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+	]);
 
 	return {
 		error: undefined,

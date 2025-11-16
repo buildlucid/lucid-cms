@@ -6,7 +6,10 @@ import { controllerSchemas } from "../../../../../schemas/locales.js";
 import services from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
+import {
+	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
+} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import cacheKeys from "../../../../kv-adapter/cache-keys.js";
 import cache from "../../../middleware/cache.js";
@@ -23,6 +26,11 @@ const getAllController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.client.getAll.response),
 			paginated: true,
+		}),
+		parameters: honoOpenAPIParamaters({
+			headers: {
+				authorization: true,
+			},
 		}),
 		validateResponse: true,
 	}),

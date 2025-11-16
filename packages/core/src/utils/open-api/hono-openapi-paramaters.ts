@@ -11,7 +11,6 @@ const honoOpenAPIParamaters = (props: {
 		// undefine means dont include in the schema, boolean means required or not
 		csrf?: boolean;
 		contentLocale?: boolean;
-		clientKey?: boolean;
 		authorization?: boolean;
 	};
 	params?: ZodType;
