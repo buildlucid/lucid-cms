@@ -1,13 +1,15 @@
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import { z } from "@lucidcms/core";
+// import type { KVNamespace } from "@cloudflare/workers-types";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
-import LucidPages from "@lucidcms/plugin-pages";
-import LucidResend from "@lucidcms/plugin-resend";
-import LucidS3 from "@lucidcms/plugin-s3";
-import NewsCollection from "./src/collections/news.js";
+import PagesPlugin from "@lucidcms/plugin-pages";
+import ResendPlugin from "@lucidcms/plugin-resend";
+import S3Plugin from "@lucidcms/plugin-s3";
+// import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 // Collections
 import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
+import NewsCollection from "./src/collections/news.js";
 
 export const adapter = cloudflareAdapter();
 
@@ -28,14 +30,15 @@ export const envSchema = z.object({
 	LUCID_S3_ACCESS_KEY: z.string(),
 	LUCID_S3_SECRET_KEY: z.string(),
 	LUCID_MEDIA_URL: z.string(),
+	// LUCID_CLOUDFLARE_KV: z.custom<KVNamespace>(),
 });
 
 export default defineConfig((env) => ({
 	host: env.LUCID_HOST,
 	db: new LibSQLAdapter({
-		// url: env.LUCID_TURSO_URL,
-		// authToken: env.LUCID_TURSO_AUTH_TOKEN,
-		url: "http://127.0.0.1:8081",
+		url: env.LUCID_TURSO_URL,
+		authToken: env.LUCID_TURSO_AUTH_TOKEN,
+		// url: "http://127.0.0.1:8081",
 	}),
 	keys: {
 		encryptionKey: env.LUCID_ENCRYPTION_KEY,
@@ -71,7 +74,7 @@ export default defineConfig((env) => ({
 	},
 	collections: [PageCollection, NewsCollection, SettingsCollection],
 	plugins: [
-		LucidPages({
+		PagesPlugin({
 			collections: [
 				{
 					collectionKey: "page",
@@ -80,14 +83,14 @@ export default defineConfig((env) => ({
 				},
 			],
 		}),
-		LucidResend({
+		ResendPlugin({
 			apiKey: env.LUCID_RESEND_API_KEY,
 			webhook: {
 				enabled: false,
 				secret: env.LUCID_RESEND_WEBHOOK_SECRET,
 			},
 		}),
-		LucidS3({
+		S3Plugin({
 			endpoint: env.LUCID_S3_ENDPOINT,
 			bucket: env.LUCID_S3_BUCKET,
 			clientOptions: {
@@ -96,5 +99,8 @@ export default defineConfig((env) => ({
 				secretAccessKey: env.LUCID_S3_SECRET_KEY,
 			},
 		}),
+		// CloudflareKVPlugin({
+		// 	namespace: env.LUCID_CLOUDFLARE_KV,
+		// }),
 	],
 }));

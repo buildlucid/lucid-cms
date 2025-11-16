@@ -6,30 +6,31 @@ import {
 	workerQueueAdapter,
 	z,
 } from "@lucidcms/core";
-import LibSQLAdapter from "@lucidcms/libsql-adapter";
+import Database from "better-sqlite3";
+import { describeRoute } from "hono-openapi";
+import transporter from "./src/services/email-transporter.js";
+// Adapters
 import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
 // import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
+import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import LucidNodemailer from "@lucidcms/plugin-nodemailer";
 import LucidPages from "@lucidcms/plugin-pages";
 import LucidResend from "@lucidcms/plugin-resend";
 import LucidS3 from "@lucidcms/plugin-s3";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
-import { describeRoute } from "hono-openapi";
-import BlogCollection from "./src/collections/blogs.js";
-import MainMenuCollection from "./src/collections/main-menu.js";
+// import CloudflareKVAdapter from "@lucidcms/plugin-cloudflare-kv";
+import GitHubAuth from "@lucidcms/auth-github";
+import GoogleAuth from "@lucidcms/auth-google";
+import MicrosoftAuth from "@lucidcms/auth-microsoft";
 // Collections
 import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
-import transporter from "./src/services/email-transporter.js";
-// import postgres from "postgres";
-import GitHubAuth from "@lucidcms/auth-github";
-import GoogleAuth from "@lucidcms/auth-google";
-import MicrosoftAuth from "@lucidcms/auth-microsoft";
+import BlogCollection from "./src/collections/blogs.js";
+import MainMenuCollection from "./src/collections/main-menu.js";
 
 export const adapter = nodeAdapter();
 // export const adapter = cloudflareAdapter();
