@@ -25,21 +25,17 @@ const serveCommand = async () => {
 			path: configPath,
 		});
 
-		const [envValid] = await Promise.all([
-			validateEnvVars({
-				envSchema: configRes.envSchema,
-				env: configRes.env,
-			}),
-		]);
+		const envValid = await validateEnvVars({
+			envSchema: configRes.envSchema,
+			env: configRes.env,
+		});
 
 		generateTypes({
 			envSchema: configRes.envSchema,
 			configPath: configPath,
 		});
 
-		if (!envValid.success) {
-			cliLogger.error("Environment variable validation failed");
-			envValid.message && cliLogger.error(envValid.message);
+		if (!envValid) {
 			logger.setBuffering(false);
 			process.exit(1);
 		}

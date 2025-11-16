@@ -36,21 +36,17 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const configResult = await loadConfigFile({ path: configPath });
 
-			const [envValid] = await Promise.all([
-				validateEnvVars({
-					envSchema: configResult.envSchema,
-					env: configResult.env,
-				}),
-			]);
+			const envValid = await validateEnvVars({
+				envSchema: configResult.envSchema,
+				env: configResult.env,
+			});
 
 			generateTypes({
 				envSchema: configResult.envSchema,
 				configPath: configPath,
 			});
 
-			if (!envValid.success) {
-				cliLogger.error("Environment variable validation failed");
-				envValid.message && cliLogger.error(envValid.message);
+			if (!envValid) {
 				logger.setBuffering(false);
 				process.exit(1);
 			}

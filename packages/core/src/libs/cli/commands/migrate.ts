@@ -95,9 +95,8 @@ const migrateCommand = (props?: {
 						env: res.env,
 					});
 
-					if (!envValid.success) {
-						cliLogger.error("Environment variable validation failed");
-						envValid.message && cliLogger.error(envValid.message);
+					if (!envValid) {
+						logger.setBuffering(false);
 						process.exit(1);
 					}
 				}

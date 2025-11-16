@@ -207,6 +207,7 @@ const logger = {
 	startTimer,
 	createBadge,
 	formatBytes,
+	formatZodError,
 	errorInstance,
 };
 

@@ -1,4 +1,5 @@
 import type { ZodType } from "zod/v4";
+import cliLogger from "../logger.js";
 
 /**
  * Validates the environment variables against the schema if present
@@ -6,30 +7,21 @@ import type { ZodType } from "zod/v4";
 const validateEnvVars = async (props: {
 	envSchema: ZodType | undefined;
 	env: Record<string, unknown> | undefined;
-}): Promise<{
-	success: boolean;
-	message?: string;
-}> => {
+}): Promise<boolean> => {
 	const { envSchema, env } = props;
 
 	if (!envSchema || !env) {
-		return {
-			success: true,
-		};
+		return true;
 	}
 
-	const result = envSchema.safeParse(env);
+	try {
+		envSchema.parse(env);
+		return true;
+	} catch (error) {
+		if (error instanceof Error) cliLogger.errorInstance(error);
 
-	if (!result.success) {
-		return {
-			success: false,
-			message: result.error.message,
-		};
+		return false;
 	}
-
-	return {
-		success: true,
-	};
 };
 
 export default validateEnvVars;
