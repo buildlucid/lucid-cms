@@ -12,9 +12,12 @@ import cliLogger from "../logger.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
 import validateEnvVars from "../utils/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
+import updateAvailable from "../utils/update-available.js";
 
 const devCommand = async (options?: { watch?: string | boolean }) => {
 	const configPath = getConfigPath(process.cwd());
+
+	const coreUpdateAvailable = updateAvailable();
 
 	let serverDestroy: (() => Promise<void>) | undefined;
 	let rebuilding = false;
@@ -96,11 +99,14 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 								? `http://${props.address.address === "::" ? "localhost" : props.address.address}:${props.address.port}`
 								: "unknown";
 
+					const coreUpdateAvailabeRes = await coreUpdateAvailable;
+					coreUpdateAvailabeRes.renderUpdateBox();
+
 					cliLogger.log(
 						cliLogger.createBadge("LUCID CMS"),
 						"Development server ready",
 						{
-							spaceBefore: true,
+							spaceBefore: !coreUpdateAvailabeRes.show,
 							spaceAfter: true,
 						},
 					);
@@ -121,6 +127,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 						cliLogger.color.gray("Press CTRL-C to stop the server"),
 						{ spaceBefore: true, spaceAfter: true },
 					);
+
 					logger.setBuffering(false);
 				},
 			});

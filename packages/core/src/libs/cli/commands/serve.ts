@@ -9,6 +9,7 @@ import migrateCommand from "./migrate.js";
 import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import constants from "../../../constants/constants.js";
+import updateAvailable from "../utils/update-available.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
@@ -17,6 +18,7 @@ const serveCommand = async () => {
 	logger.setBuffering(true);
 	const configPath = getConfigPath(process.cwd());
 	let destroy: (() => Promise<void>) | undefined;
+	const coreUpdateAvailable = updateAvailable();
 
 	try {
 		const configRes = await loadConfigFile({
@@ -79,11 +81,14 @@ const serveCommand = async () => {
 							? `http://${props.address.address === "::" ? "localhost" : props.address.address}:${props.address.port}`
 							: "unknown";
 
+				const coreUpdateAvailabeRes = await coreUpdateAvailable;
+				coreUpdateAvailabeRes.renderUpdateBox();
+
 				cliLogger.log(
 					cliLogger.createBadge("LUCID CMS"),
 					"Development server ready",
 					{
-						spaceBefore: true,
+						spaceBefore: !coreUpdateAvailabeRes.show,
 						spaceAfter: true,
 					},
 				);
@@ -104,6 +109,7 @@ const serveCommand = async () => {
 					spaceBefore: true,
 					spaceAfter: true,
 				});
+
 				logger.setBuffering(false);
 			},
 		});
