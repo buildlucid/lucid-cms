@@ -14,13 +14,14 @@ import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
 // import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
-import LucidNodemailer from "@lucidcms/plugin-nodemailer";
-import LucidPages from "@lucidcms/plugin-pages";
-import LucidResend from "@lucidcms/plugin-resend";
-import LucidS3 from "@lucidcms/plugin-s3";
+import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
+import PagesPlugin from "@lucidcms/plugin-pages";
+import ResendPlugin from "@lucidcms/plugin-resend";
+import S3Plugin from "@lucidcms/plugin-s3";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-// import CloudflareKVAdapter from "@lucidcms/plugin-cloudflare-kv";
+// import RedisPlugin from "@lucidcms/plugin-redis";
+// import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
@@ -51,6 +52,7 @@ export const envSchema = z.object({
 	MICROSOFT_CLIENT_ID: z.string(),
 	MICROSOFT_CLIENT_SECRET: z.string(),
 	MICROSOFT_TENANT_ID: z.string(),
+	// REDIS_CONNECTION: z.string(),
 });
 
 export default defineConfig((env) => ({
@@ -159,7 +161,7 @@ export default defineConfig((env) => ({
 			clientSecret: env.MICROSOFT_CLIENT_SECRET,
 			tenant: env.MICROSOFT_TENANT_ID,
 		}),
-		LucidPages({
+		PagesPlugin({
 			collections: [
 				{
 					collectionKey: "page",
@@ -173,17 +175,20 @@ export default defineConfig((env) => ({
 				},
 			],
 		}),
-		// LucidNodemailer({
+		// RedisPlugin({
+		// 	connection: env.REDIS_CONNECTION,
+		// }),
+		// NodemailerPlugin({
 		// 	transporter: transporter,
 		// }),
-		// LucidResend({
+		// ResendPlugin({
 		// 	apiKey: env.LUCID_RESEND_API_KEY,
 		// 	webhook: {
 		// 		enabled: true,
 		// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
 		// 	},
 		// }),
-		// LucidS3({
+		// S3Plugin({
 		// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 		// 	bucket: "headless-cms",
 		// 	clientOptions: {
