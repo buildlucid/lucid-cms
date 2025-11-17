@@ -1,4 +1,5 @@
 {
+	"plugin_init_error": "An error occurred while initializing the plugin '{{key}}'.",
 	"default_error_name": "An error occurred!",
 	"default_error_message": "An error occurred! Please try again later.",
 	"validation_error": "Validation Error",

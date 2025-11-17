@@ -8,11 +8,6 @@ import type {
 	QueueBatchJobResponse,
 	QueueJobResponse,
 } from "../../types.js";
-import type {
-	AdapterRuntimeContext,
-	Config,
-	EnvironmentVariables,
-} from "../../../../types.js";
 import { join } from "node:path";
 
 const ADAPTER_KEY = "worker";

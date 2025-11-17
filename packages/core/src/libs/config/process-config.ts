@@ -8,6 +8,8 @@ import CustomFieldSchema from "../custom-fields/schema.js";
 import { initializeLogger } from "../logger/index.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 import { produce } from "immer";
+import LucidError from "../../utils/errors/lucid-error.js";
+import T from "../../translations/index.js";
 
 let cachedConfig: Config | undefined;
 
@@ -32,16 +34,23 @@ const processConfig = async (
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
 		for (const pluginDef of configRes.plugins) {
-			if (pluginDef.lifecycle?.init) {
-				await pluginDef.lifecycle.init();
+			if (pluginDef.hooks?.init) {
+				const res = await pluginDef.hooks.init();
+				if (res.error) {
+					//* will get caught by the CLI
+					throw new LucidError({
+						scope: pluginDef.key,
+						message: res.error.message ?? T("plugin_init_error"),
+					});
+				}
 			}
-
-			configRes = produce(configRes, pluginDef.recipe);
 
 			checks.checkPluginVersion({
 				key: pluginDef.key,
 				requiredVersions: pluginDef.lucid,
 			});
+
+			configRes = produce(configRes, pluginDef.recipe);
 		}
 	}
 

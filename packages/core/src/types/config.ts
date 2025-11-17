@@ -18,7 +18,7 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue-adapter/types.js";
-import type { ServiceResponse } from "../utils/services/types.js";
+import type { ServiceFn, ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
@@ -31,15 +31,27 @@ export type CopyPublicEntry =
 			output?: string;
 	  };
 
+export type LucidPluginBuildHookResult = {
+	artifacts?: Array<{
+		path: string;
+		content: string;
+	}>;
+};
+
+export type LucidPluginHookInit = () => ServiceResponse<void>;
+export type LucidPluginHookBuild = ServiceFn<[], LucidPluginBuildHookResult>;
+
+export type LucidPluginHooks = {
+	init?: LucidPluginHookInit;
+	build?: LucidPluginHookBuild;
+};
+
 export type LucidPluginRecipe = (draft: WritableDraft<Config>) => void;
 
 export type LucidPluginResponse = {
 	key: string;
 	lucid: string;
-	lifecycle?: {
-		init?: () => Promise<void>;
-		build?: () => Promise<void>;
-	};
+	hooks?: LucidPluginHooks;
 	recipe: LucidPluginRecipe;
 };
 
