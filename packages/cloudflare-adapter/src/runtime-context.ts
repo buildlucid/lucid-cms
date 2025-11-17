@@ -4,18 +4,19 @@ import type {
 } from "@lucidcms/core/types";
 import { getConnInfo as getConnInfoNode } from "@hono/node-server/conninfo";
 import { getConnInfo as getConnInfoCloudflare } from "hono/cloudflare-workers";
+import { ADAPTER_KEY } from "./constants.js";
 
-const runtimeContext = (params: { dev: boolean }) =>
+const getRuntimeContext = (params: {
+	server: "node" | "cloudflare";
+	compiled: boolean;
+}) =>
 	({
-		getConnectionInfo: params.dev
-			? (c: LucidHonoContext) => {
-					const connectionInfo = getConnInfoNode(c);
-					return connectionInfo.remote;
-				}
-			: (c: LucidHonoContext) => {
-					const connectionInfo = getConnInfoCloudflare(c);
-					return connectionInfo.remote;
-				},
+		runtime: ADAPTER_KEY,
+		compiled: params.compiled,
+		getConnectionInfo:
+			params.server === "node"
+				? (c: LucidHonoContext) => getConnInfoNode(c).remote
+				: (c: LucidHonoContext) => getConnInfoCloudflare(c).remote,
 		support: {
 			unsupported: {
 				databaseAdapter: [
@@ -60,4 +61,4 @@ const runtimeContext = (params: { dev: boolean }) =>
 		configEntryPoint: null,
 	}) satisfies AdapterRuntimeContext;
 
-export default runtimeContext;
+export default getRuntimeContext;

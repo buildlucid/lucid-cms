@@ -59,7 +59,13 @@ export type RuntimeSupport = {
 };
 
 export type AdapterRuntimeContext = {
+	/** The runtime key of the adapter */
+	runtime: string;
+	/** True when running from built/compiled bundle, false when running from source in development */
+	compiled: boolean;
+	/** The function to get the connection information from the Hono context */
 	getConnectionInfo: (c: LucidHonoContext) => NetAddrInfo;
+	/** The support information for the runtime adapter */
 	support?: RuntimeSupport;
 	/** If the adapter bundles the config and server entry point separately, the path to the config file relative to the output directory */
 	configEntryPoint: string | null;

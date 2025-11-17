@@ -18,7 +18,7 @@ import {
 	type PlatformProxy,
 } from "wrangler";
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
-import runtimeContext from "./runtime-context.js";
+import getRuntimeContext from "./runtime-context.js";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
@@ -70,8 +70,9 @@ const cloudflareAdapter = (options?: {
 
 				const { app, destroy, issues } = await lucid.createApp({
 					config,
-					runtimeContext: runtimeContext({
-						dev: true,
+					runtimeContext: getRuntimeContext({
+						server: "node",
+						compiled: false,
 					}),
 					env: platformProxy?.env,
 					app: cloudflareApp,
@@ -183,7 +184,7 @@ import config from "./${importPath}";
 import lucid, { passthroughKVAdapter } from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import emailTemplates from "./email-templates.json" with { type: "json" };
-import { runtimeContext } from "@lucidcms/cloudflare-adapter";
+import { getRuntimeContext } from "@lucidcms/cloudflare-adapter";
 
 export default {
 	async fetch(request, env, ctx) {
@@ -196,8 +197,9 @@ export default {
 		const { app } = await lucid.createApp({
 			config: resolved,
 			env: env,
-			runtimeContext: runtimeContext({
-				dev: false,
+			runtimeContext: getRuntimeContext({
+				server: "cloudflare",
+				compiled: true,
 			}),
 			hono: {
 				middleware: [
