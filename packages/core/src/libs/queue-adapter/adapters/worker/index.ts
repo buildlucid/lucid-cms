@@ -25,13 +25,13 @@ export type WorkerQueueAdapterOptions = {
 /**
  * The worker queue adapter
  */
-function workerQueueAdapter(): QueueAdapterInstance<WorkerQueueAdapterOptions>;
+function workerQueueAdapter(): QueueAdapterInstance;
 function workerQueueAdapter(
 	options: WorkerQueueAdapterOptions,
-): QueueAdapterInstance<WorkerQueueAdapterOptions>;
+): QueueAdapterInstance;
 function workerQueueAdapter(
 	options: WorkerQueueAdapterOptions = {},
-): QueueAdapterInstance<WorkerQueueAdapterOptions> {
+): QueueAdapterInstance {
 	let worker: Worker | null = null;
 
 	return {
@@ -190,7 +190,6 @@ function workerQueueAdapter(
 				};
 			},
 		},
-		getOptions: () => options,
 	};
 }
 

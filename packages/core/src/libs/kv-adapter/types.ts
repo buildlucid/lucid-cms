@@ -1,9 +1,8 @@
 export type KVAdapter<T = undefined> = T extends undefined
 	? () => KVAdapterInstance | Promise<KVAdapterInstance>
-	: (options: T) => KVAdapterInstance<T> | Promise<KVAdapterInstance<T>>;
+	: (options: T) => KVAdapterInstance | Promise<KVAdapterInstance>;
 
-// biome-ignore lint/suspicious/noExplicitAny: generic adapter options
-export type KVAdapterInstance<T = any> = {
+export type KVAdapterInstance = {
 	/** The adapter type */
 	type: "kv-adapter";
 	/** A unique identifier key for the adapter of this type */
@@ -25,8 +24,6 @@ export type KVAdapterInstance<T = any> = {
 		delete: (key: string) => Promise<void>;
 		clear: () => Promise<void>;
 	};
-	/** Get passed adapter options */
-	getOptions?: () => T;
 };
 
 export interface KVSetOptions {

@@ -38,6 +38,7 @@ export type LucidPluginResponse = {
 	lucid: string;
 	lifecycle?: {
 		init?: () => Promise<void>;
+		build?: () => Promise<void>;
 	};
 	recipe: LucidPluginRecipe;
 };

@@ -46,10 +46,9 @@ export type EmailAdapterServiceSend = (
 
 export type EmailAdapter<T = undefined> = T extends undefined
 	? () => EmailAdapterInstance | Promise<EmailAdapterInstance>
-	: (options: T) => EmailAdapterInstance<T> | Promise<EmailAdapterInstance<T>>;
+	: (options: T) => EmailAdapterInstance | Promise<EmailAdapterInstance>;
 
-// biome-ignore lint/suspicious/noExplicitAny: generic adapter options
-export type EmailAdapterInstance<T = any> = {
+export type EmailAdapterInstance = {
 	/** The adapter type */
 	type: "email-adapter";
 	/** A unique identifier key for the adapter of this type */
@@ -67,6 +66,4 @@ export type EmailAdapterInstance<T = any> = {
 	services: {
 		send: EmailAdapterServiceSend;
 	};
-	/** Get passed adapter options */
-	getOptions?: () => T;
 };

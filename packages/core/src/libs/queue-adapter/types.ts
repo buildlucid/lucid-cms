@@ -50,10 +50,9 @@ export type QueueJobOptions = {
 
 export type QueueAdapter<T = undefined> = T extends undefined
 	? () => QueueAdapterInstance | Promise<QueueAdapterInstance>
-	: (options: T) => QueueAdapterInstance<T> | Promise<QueueAdapterInstance<T>>;
+	: (options: T) => QueueAdapterInstance | Promise<QueueAdapterInstance>;
 
-// biome-ignore lint/suspicious/noExplicitAny: generic adapter options
-export type QueueAdapterInstance<T = any> = {
+export type QueueAdapterInstance = {
 	/** The adapter type */
 	type: "queue-adapter";
 	/** A unique identifier key for the adapter of this type */
@@ -90,6 +89,4 @@ export type QueueAdapterInstance<T = any> = {
 			},
 		) => ServiceResponse<QueueBatchJobResponse>;
 	};
-	/** Get passed adapter options */
-	getOptions?: () => T;
 };

@@ -165,13 +165,13 @@ type PassthroughQueueAdapterOptions = {
 /**
  * A passthrough queue adapter that will only mock the queue, and execute the event handlers immediately
  */
-function passthroughQueueAdapter(): QueueAdapterInstance<PassthroughQueueAdapterOptions>;
+function passthroughQueueAdapter(): QueueAdapterInstance;
 function passthroughQueueAdapter(
 	options: PassthroughQueueAdapterOptions,
-): QueueAdapterInstance<PassthroughQueueAdapterOptions>;
+): QueueAdapterInstance;
 function passthroughQueueAdapter(
 	options?: PassthroughQueueAdapterOptions,
-): QueueAdapterInstance<PassthroughQueueAdapterOptions> {
+): QueueAdapterInstance {
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
