@@ -58,10 +58,28 @@ const serveCommand = async () => {
 			process.exit(1);
 		}
 
-		await Promise.all([
-			prerenderMjmlTemplates(configRes.config),
-			copyPublicAssets(configRes.config),
+		const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
+			prerenderMjmlTemplates({
+				config: configRes.config,
+				silent: false,
+			}),
+			copyPublicAssets({
+				config: configRes.config,
+				silent: false,
+			}),
 		]);
+		if (mjmlTemplatesRes.error) {
+			cliLogger.error(
+				mjmlTemplatesRes.error.message ?? "Failed to pre-render MJML templates",
+			);
+			process.exit(1);
+		}
+		if (publicAssetsRes.error) {
+			cliLogger.error(
+				publicAssetsRes.error.message ?? "Failed to copy public assets",
+			);
+			process.exit(1);
+		}
 
 		const serverRes = await configRes.adapter?.cli?.serve({
 			config: configRes.config,

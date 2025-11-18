@@ -74,10 +74,33 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 				return;
 			}
 
-			await Promise.all([
-				prerenderMjmlTemplates(configResult.config),
-				copyPublicAssets(configResult.config),
+			const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
+				prerenderMjmlTemplates({
+					config: configResult.config,
+					silent: false,
+				}),
+				copyPublicAssets({
+					config: configResult.config,
+					silent: false,
+				}),
 			]);
+			if (mjmlTemplatesRes.error) {
+				cliLogger.error(
+					mjmlTemplatesRes.error.message ??
+						"Failed to pre-render MJML templates",
+				);
+				logger.setBuffering(false);
+				rebuilding = false;
+				return;
+			}
+			if (publicAssetsRes.error) {
+				cliLogger.error(
+					publicAssetsRes.error.message ?? "Failed to copy public assets",
+				);
+				logger.setBuffering(false);
+				rebuilding = false;
+				return;
+			}
 
 			process.stdout.write("\x1B[2J\x1B[3J\x1B[H");
 

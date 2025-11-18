@@ -10,6 +10,7 @@ import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../utils/calculate-outdir-size.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
+import handlePluginBuildHooks from "../utils/handle-plugin-build-hooks.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -22,6 +23,7 @@ const buildCommand = async (options?: {
 	const startTime = cliLogger.startTimer();
 	const configPath = getConfigPath(process.cwd());
 	const configRes = await loadConfigFile({ path: configPath });
+	const silent = options?.silent ?? false;
 
 	try {
 		if (options?.cacheSpa) {
@@ -36,7 +38,7 @@ const buildCommand = async (options?: {
 
 		if (!configRes.adapter?.cli?.build) {
 			cliLogger.error("No build handler found in adapter", {
-				silent: options?.silent ?? false,
+				silent,
 			});
 			return;
 		}
@@ -46,7 +48,22 @@ const buildCommand = async (options?: {
 			configPath: configPath,
 		});
 
-		await Promise.all([prerenderMjmlTemplates(configRes.config)]);
+		const [mjmlTemplatesRes] = await Promise.all([
+			prerenderMjmlTemplates({
+				config: configRes.config,
+				silent,
+			}),
+		]);
+		if (mjmlTemplatesRes.error) {
+			cliLogger.error(
+				mjmlTemplatesRes.error.message ?? "Failed to pre-render MJML templates",
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
 
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
@@ -58,7 +75,7 @@ const buildCommand = async (options?: {
 				},
 				logger: {
 					instance: cliLogger,
-					silent: options?.silent ?? false,
+					silent,
 				},
 			}),
 		]);
@@ -67,7 +84,7 @@ const buildCommand = async (options?: {
 				viteBuildRes.error.message ??
 					"There was an error while building the SPA or component plugins",
 				{
-					silent: options?.silent ?? false,
+					silent,
 				},
 			);
 			logger.setBuffering(false);
@@ -78,7 +95,7 @@ const buildCommand = async (options?: {
 			"Loaded config from:",
 			cliLogger.color.green(`./${relativePath}`),
 			{
-				silent: options?.silent ?? false,
+				silent,
 			},
 		);
 
@@ -87,23 +104,34 @@ const buildCommand = async (options?: {
 			configRes.config.compilerOptions.paths.outDir,
 		);
 
-		await copyPublicAssets(configRes.config);
-		cliLogger.info(
-			"Public assets copied to output directory:",
-			cliLogger.color.green(
-				`./${relativeBuildPath}/${constants.directories.public}`,
-			),
-			{
-				silent: options?.silent ?? false,
-			},
-		);
+		const [publicAssetsRes] = await Promise.all([
+			copyPublicAssets({
+				config: configRes.config,
+				silent,
+			}),
+			handlePluginBuildHooks({
+				config: configRes.config,
+				silent,
+			}),
+		]);
+		if (publicAssetsRes.error) {
+			cliLogger.error(
+				publicAssetsRes.error.message ?? "Failed to copy public assets",
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+
 		cliLogger.info(
 			"SPA and component plugins built:",
 			cliLogger.color.green(
 				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.admin}`,
 			),
 			{
-				silent: options?.silent ?? false,
+				silent,
 			},
 		);
 
@@ -128,14 +156,14 @@ const buildCommand = async (options?: {
 			cliLogger.color.yellow(fieldCount),
 			`field${fieldCount === 1 ? "" : "s"}`,
 			{
-				silent: options?.silent ?? false,
+				silent,
 			},
 		);
 		cliLogger.info(
 			cliLogger.color.yellow(configRes.config.plugins.length),
 			`plugin${configRes.config.plugins.length === 1 ? "" : "s"} loaded`,
 			{
-				silent: options?.silent ?? false,
+				silent,
 			},
 		);
 
@@ -156,7 +184,7 @@ const buildCommand = async (options?: {
 			{
 				spaceAfter: true,
 				spaceBefore: true,
-				silent: options?.silent ?? false,
+				silent,
 			},
 		);
 
@@ -166,7 +194,7 @@ const buildCommand = async (options?: {
 		cliLogger.error(
 			error instanceof Error ? error.message : "An unknown error occurred",
 			{
-				silent: options?.silent ?? false,
+				silent,
 			},
 		);
 		logger.setBuffering(false);

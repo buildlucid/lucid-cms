@@ -39,7 +39,8 @@ export type LucidPluginBuildHookResult = {
 };
 
 export type LucidPluginHookInit = () => ServiceResponse<void>;
-export type LucidPluginHookBuild = ServiceFn<[], LucidPluginBuildHookResult>;
+export type LucidPluginHookBuild =
+	() => ServiceResponse<LucidPluginBuildHookResult>;
 
 export type LucidPluginHooks = {
 	init?: LucidPluginHookInit;

@@ -16,3 +16,4 @@ export * from "./utils/services/types.js";
 export * from "./libs/auth-providers/types.js";
 export * from "./libs/permission/types.js";
 export * from "./libs/kv-adapter/types.js";
+export * from "./libs/queue-adapter/types.js";

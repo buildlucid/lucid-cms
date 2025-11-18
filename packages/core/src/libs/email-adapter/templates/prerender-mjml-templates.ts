@@ -7,6 +7,7 @@ import type { Config } from "../../../types.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import type { RenderedTemplates } from "../types.js";
+import cliLogger from "../../cli/logger.js";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -23,6 +24,7 @@ const processTemplatesInDirectory = async (
 	directory: string,
 	renderedTemplates: RenderedTemplates,
 	overwrite = true,
+	silent = false,
 ): Promise<void> => {
 	if (!(await pathExists(directory))) return;
 
@@ -45,6 +47,12 @@ const processTemplatesInDirectory = async (
 				html: htmlOutput.html,
 				lastModified: new Date().toISOString(),
 			};
+
+			cliLogger.info(
+				"Pre-rendered email template:",
+				cliLogger.color.green(templateName),
+				{ silent },
+			);
 		}),
 	);
 };
@@ -55,16 +63,18 @@ const processTemplatesInDirectory = async (
  * The result of this is stored within the configured output directory which is dynamically loaded at runtime and rendered with user data
  * via handlebars. This way, we can avoid bundling MJML which balloons the size of the bundle a lot.
  */
-const prerenderMjmlTemplates = async (
-	config: Config,
-): ServiceResponse<undefined> => {
+const prerenderMjmlTemplates = async (props: {
+	config: Config;
+	silent?: boolean;
+}): ServiceResponse<undefined> => {
 	try {
+		const silent = props.silent ?? false;
 		const renderedTemplates: RenderedTemplates = {};
 
-		await mkdir(config.compilerOptions.paths.outDir, { recursive: true });
+		await mkdir(props.config.compilerOptions.paths.outDir, { recursive: true });
 
 		const projectTemplatePath =
-			config.compilerOptions.paths.emailTemplates ??
+			props.config.compilerOptions.paths.emailTemplates ??
 			path.resolve("./templates");
 		const packageTemplatePath = path.join(currentDir, "../../../templates");
 
@@ -72,15 +82,17 @@ const prerenderMjmlTemplates = async (
 			projectTemplatePath,
 			renderedTemplates,
 			true,
+			silent,
 		);
 		await processTemplatesInDirectory(
 			packageTemplatePath,
 			renderedTemplates,
 			false,
+			silent,
 		);
 
 		const outputPath = path.join(
-			config.compilerOptions.paths.outDir,
+			props.config.compilerOptions.paths.outDir,
 			constants.emailRenderedOutput,
 		);
 		await writeFile(outputPath, JSON.stringify(renderedTemplates, null, 2));

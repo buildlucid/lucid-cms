@@ -3,6 +3,7 @@ import path from "node:path";
 import { getDirName } from "../../../utils/helpers/index.js";
 import constants from "../../../constants/constants.js";
 import type { Config, ServiceResponse } from "../../../types.js";
+import cliLogger from "../logger.js";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -37,15 +38,33 @@ const ensureDir = async (dirPath: string) => {
  * Copies a file from srcFile to destFile
  * - Creates the directory if it doesn't exist
  */
-const copyFileTo = async (srcFile: string, destFile: string) => {
+const copyFileTo = async (
+	srcFile: string,
+	destFile: string,
+	silent: boolean,
+) => {
 	await ensureDir(path.dirname(destFile));
 	await fs.copyFile(srcFile, destFile);
+
+	const relativeOutPath = path.relative(process.cwd(), destFile);
+	const displayPath =
+		relativeOutPath.startsWith(".") || relativeOutPath === ""
+			? relativeOutPath || "."
+			: `./${relativeOutPath}`;
+
+	cliLogger.info("Copied public asset:", cliLogger.color.green(displayPath), {
+		silent,
+	});
 };
 
 /**
  * Copies the contents of srcDir into destDir
  */
-const copyDirectoryContentsInto = async (srcDir: string, destDir: string) => {
+const copyDirectoryContentsInto = async (
+	srcDir: string,
+	destDir: string,
+	silent: boolean,
+) => {
 	await ensureDir(destDir);
 	const entries = await fs.readdir(srcDir, { withFileTypes: true });
 	await Promise.all(
@@ -53,9 +72,9 @@ const copyDirectoryContentsInto = async (srcDir: string, destDir: string) => {
 			const srcPath = path.join(srcDir, entry.name);
 			const destPath = path.join(destDir, entry.name);
 			if (entry.isDirectory()) {
-				await copyDirectoryContentsInto(srcPath, destPath);
+				await copyDirectoryContentsInto(srcPath, destPath, silent);
 			} else if (entry.isFile()) {
-				await copyFileTo(srcPath, destPath);
+				await copyFileTo(srcPath, destPath, silent);
 			}
 		}),
 	);
@@ -64,12 +83,16 @@ const copyDirectoryContentsInto = async (srcDir: string, destDir: string) => {
 /**
  * Copies the public assets from various sources into the output directory
  */
-const copyPublicAssets = async (config: Config): ServiceResponse<undefined> => {
+const copyPublicAssets = async (props: {
+	config: Config;
+	silent?: boolean;
+}): ServiceResponse<undefined> => {
 	try {
+		const silent = props.silent ?? false;
 		const assetsPath = path.join(currentDir, "../../../public");
 
 		const outDir = path.join(
-			config.compilerOptions.paths.outDir,
+			props.config.compilerOptions.paths.outDir,
 			constants.directories.public,
 		);
 
@@ -77,11 +100,12 @@ const copyPublicAssets = async (config: Config): ServiceResponse<undefined> => {
 
 		//* core public assets (lowest prio)
 		if (await pathExists(assetsPath)) {
-			await copyDirectoryContentsInto(assetsPath, outDir);
+			await copyDirectoryContentsInto(assetsPath, outDir, silent);
 		}
 
 		//* config defined additional public assets (medium prio)
-		const additionalPublic = config.compilerOptions.paths.copyPublic ?? [];
+		const additionalPublic =
+			props.config.compilerOptions.paths.copyPublic ?? [];
 		await Promise.all(
 			additionalPublic.map(async (entry) => {
 				const isString = typeof entry === "string";
@@ -96,18 +120,18 @@ const copyPublicAssets = async (config: Config): ServiceResponse<undefined> => {
 				if (await isDirectory(absSource)) {
 					if (output) {
 						const destDir = path.join(outDir, output);
-						await copyDirectoryContentsInto(absSource, destDir);
+						await copyDirectoryContentsInto(absSource, destDir, silent);
 					} else {
 						const destPath = path.join(outDir, path.basename(absSource));
-						await copyDirectoryContentsInto(absSource, destPath);
+						await copyDirectoryContentsInto(absSource, destPath, silent);
 					}
 				} else {
 					if (output) {
 						const destFile = path.join(outDir, output);
-						await copyFileTo(absSource, destFile);
+						await copyFileTo(absSource, destFile, silent);
 					} else {
 						const destFile = path.join(outDir, path.basename(absSource));
-						await copyFileTo(absSource, destFile);
+						await copyFileTo(absSource, destFile, silent);
 					}
 				}
 			}),
@@ -116,7 +140,7 @@ const copyPublicAssets = async (config: Config): ServiceResponse<undefined> => {
 		//* cwd public assets (highest prio)
 		const cwdPublic = path.join(process.cwd(), constants.directories.public);
 		if ((await pathExists(cwdPublic)) && (await isDirectory(cwdPublic))) {
-			await copyDirectoryContentsInto(cwdPublic, outDir);
+			await copyDirectoryContentsInto(cwdPublic, outDir, silent);
 		}
 
 		return {
