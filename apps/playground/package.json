@@ -32,6 +32,7 @@
         "@lucidcms/sqlite-adapter": "*",
         "@lucidcms/plugin-cloudflare-kv": "*",
         "@lucidcms/plugin-redis": "*",
+        "@lucidcms/plugin-cloudflare-queues": "*",
         "better-sqlite3": "^11.9.1",
         "nodemailer": "^6.10.1"
     },

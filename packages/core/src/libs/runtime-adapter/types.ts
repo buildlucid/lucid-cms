@@ -24,6 +24,11 @@ export type BuildHandler = (props: {
 	options: {
 		configPath: string;
 		outputPath: string;
+		outputRelativeConfigPath: string;
+		/**
+		 * Artifacts that plugins have marked as to be compiled. The key being the output, and the value being the input path.
+		 */
+		pluginCompileArtifacts: Record<string, string>;
 	};
 	logger: {
 		instance: CLILogger;

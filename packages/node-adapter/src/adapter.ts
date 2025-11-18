@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { unlink, writeFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import lucid from "@lucidcms/core";
 import {
@@ -115,14 +115,17 @@ const nodeAdapter = (options?: {
 						silent: logger.silent,
 					},
 				);
-				const configOutput = `${options.outputPath}/${constants.CONFIG_FILE}`;
-				const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
 
 				try {
+					const buildInput = {
+						[constants.CONFIG_FILE]: options.configPath,
+						...options.pluginCompileArtifacts,
+					};
+
 					await build({
-						input: options.configPath,
+						input: buildInput,
 						output: {
-							file: configOutput,
+							dir: options.outputPath,
 							format: "esm",
 							minify: true,
 							inlineDynamicImports: true,
@@ -256,7 +259,13 @@ const startServer = async () => {
 
 startServer();`;
 
+					const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
 					await writeFile(entryOutput, entry);
+
+					for (const artifact of Object.values(buildInput)) {
+						if (artifact === options.configPath) continue;
+						await unlink(artifact);
+					}
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error

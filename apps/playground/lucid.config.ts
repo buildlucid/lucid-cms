@@ -20,6 +20,7 @@ import ResendPlugin from "@lucidcms/plugin-resend";
 import S3Plugin from "@lucidcms/plugin-s3";
 import PostgresAdapter from "@lucidcms/postgres-adapter";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
+// import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
 // import RedisPlugin from "@lucidcms/plugin-redis";
 // import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import GitHubAuth from "@lucidcms/auth-github";

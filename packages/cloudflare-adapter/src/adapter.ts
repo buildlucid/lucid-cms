@@ -171,16 +171,11 @@ const cloudflareAdapter = (options?: {
 				);
 
 				try {
-					const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
-
-					const relativePath = relative(options.outputPath, options.configPath);
-					const importPath = relativePath.replace(/\.ts$/, ".js");
-
 					const configIsTs = options.configPath.endsWith(".ts");
 					const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
 
 					const entry = /* ts */ `
-import config from "./${importPath}";
+import config from "./${options.outputRelativeConfigPath}";
 import lucid, { passthroughKVAdapter } from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import emailTemplates from "./email-templates.json" with { type: "json" };
@@ -259,11 +254,16 @@ export default {
 
 					await writeFile(tempEntryFile, entry);
 
+					const buildInput = {
+						[constants.ENTRY_FILE]: tempEntryFile,
+						...options.pluginCompileArtifacts,
+					};
+
 					//* build the entry file
 					await build({
-						input: tempEntryFile,
+						input: buildInput,
 						output: {
-							file: entryOutput,
+							dir: options.outputPath,
 							format: "esm",
 							minify: true,
 							inlineDynamicImports: true,
@@ -292,7 +292,9 @@ export default {
 					});
 
 					//* clean up temporary files
-					await unlink(tempEntryFile);
+					for (const artifact of Object.values(buildInput)) {
+						await unlink(artifact);
+					}
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error

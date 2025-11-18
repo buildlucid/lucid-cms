@@ -13,8 +13,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					data: {
 						artifacts: [
 							{
-								path: "queue.js",
-								content: "",
+								type: "compile",
+								input: {
+									path: "temp-queue-adapter.ts",
+									content: "console.log('queue adapter');",
+								},
+								output: {
+									path: "queue-adapter",
+								},
 							},
 						],
 					},

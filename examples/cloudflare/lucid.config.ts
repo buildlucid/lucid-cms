@@ -6,6 +6,7 @@ import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
 import S3Plugin from "@lucidcms/plugin-s3";
 // import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
+import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
 // Collections
 import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
@@ -102,5 +103,8 @@ export default defineConfig((env) => ({
 		// CloudflareKVPlugin({
 		// 	namespace: env.LUCID_CLOUDFLARE_KV,
 		// }),
+		CloudflareQueuesPlugin({
+			// namespace: env.LUCID_CLOUDFARE_QUEUES,
+		}),
 	],
 }));

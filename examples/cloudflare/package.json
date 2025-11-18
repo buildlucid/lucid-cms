@@ -22,7 +22,8 @@
         "@lucidcms/plugin-pages": "*",
         "@lucidcms/plugin-resend": "*",
         "@lucidcms/plugin-s3": "*",
-        "@lucidcms/plugin-cloudflare-kv": "*"
+        "@lucidcms/plugin-cloudflare-kv": "*",
+        "@lucidcms/plugin-cloudflare-queues": "*"
     },
     "author": "Lucid",
     "license": "MIT",

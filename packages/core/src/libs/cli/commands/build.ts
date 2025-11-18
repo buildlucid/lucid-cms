@@ -10,7 +10,8 @@ import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../utils/calculate-outdir-size.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
-import handlePluginBuildHooks from "../utils/handle-plugin-build-hooks.js";
+import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
+import pluginBuildCompileArtifactsToObject from "../utils/plugin-build-artifacts-to-object.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -43,20 +44,72 @@ const buildCommand = async (options?: {
 			return;
 		}
 
+		//* the path to the config, relative from the CWD
+		const relativeConfigPath = path.relative(process.cwd(), configPath);
+		cliLogger.info(
+			"Loaded config from:",
+			cliLogger.color.green(`./${relativeConfigPath}`),
+			{
+				silent,
+			},
+		);
+
+		//* the path to the config, relative from the output directory
+		const outputRelativeConfigPath = path.relative(
+			configRes.config.compilerOptions.paths.outDir,
+			configPath,
+		);
+		const normalisedOutputRelativePath = outputRelativeConfigPath.replace(
+			/\.ts$/,
+			".js",
+		);
+
 		generateTypes({
 			envSchema: configRes.envSchema,
 			configPath: configPath,
 		});
 
-		const [mjmlTemplatesRes] = await Promise.all([
-			prerenderMjmlTemplates({
-				config: configRes.config,
-				silent,
-			}),
-		]);
+		const [mjmlTemplatesRes, publicAssetsRes, pluginBuildArtifactsRes] =
+			await Promise.all([
+				prerenderMjmlTemplates({
+					config: configRes.config,
+					silent,
+				}),
+				copyPublicAssets({
+					config: configRes.config,
+					silent,
+				}),
+				handlePluginBuildHooks({
+					config: configRes.config,
+					silent,
+					configPath,
+					outputPath: configRes.config.compilerOptions.paths.outDir,
+					outputRelativeConfigPath: normalisedOutputRelativePath,
+				}),
+			]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
 				mjmlTemplatesRes.error.message ?? "Failed to pre-render MJML templates",
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+		if (publicAssetsRes.error) {
+			cliLogger.error(
+				publicAssetsRes.error.message ?? "Failed to copy public assets",
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+		if (pluginBuildArtifactsRes.error) {
+			cliLogger.error(
+				pluginBuildArtifactsRes.error.message ?? "Failed to build the plugins",
 				{
 					silent,
 				},
@@ -72,6 +125,10 @@ const buildCommand = async (options?: {
 				options: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
+					outputRelativeConfigPath: normalisedOutputRelativePath,
+					pluginCompileArtifacts: pluginBuildCompileArtifactsToObject(
+						pluginBuildArtifactsRes.data,
+					),
 				},
 				logger: {
 					instance: cliLogger,
@@ -90,40 +147,11 @@ const buildCommand = async (options?: {
 			logger.setBuffering(false);
 			process.exit(1);
 		}
-		const relativePath = path.relative(process.cwd(), configPath);
-		cliLogger.info(
-			"Loaded config from:",
-			cliLogger.color.green(`./${relativePath}`),
-			{
-				silent,
-			},
-		);
 
 		const relativeBuildPath = path.relative(
 			process.cwd(),
 			configRes.config.compilerOptions.paths.outDir,
 		);
-
-		const [publicAssetsRes] = await Promise.all([
-			copyPublicAssets({
-				config: configRes.config,
-				silent,
-			}),
-			handlePluginBuildHooks({
-				config: configRes.config,
-				silent,
-			}),
-		]);
-		if (publicAssetsRes.error) {
-			cliLogger.error(
-				publicAssetsRes.error.message ?? "Failed to copy public assets",
-				{
-					silent,
-				},
-			);
-			logger.setBuffering(false);
-			process.exit(1);
-		}
 
 		cliLogger.info(
 			"SPA and component plugins built:",
