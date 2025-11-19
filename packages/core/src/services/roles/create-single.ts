@@ -1,7 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { roleServices } from "../index.js";
 
 const createSingle: ServiceFn<
 	[
@@ -16,7 +16,7 @@ const createSingle: ServiceFn<
 	const Roles = Repository.get("roles", context.db, context.config.db);
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
-		services.roles.validatePermissions(context, {
+		roleServices.validatePermissions(context, {
 			permissions: data.permissions,
 		}),
 		Roles.selectSingle({

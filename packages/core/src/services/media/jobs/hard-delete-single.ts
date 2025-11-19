@@ -3,7 +3,7 @@ import { invalidateHttpCacheTags } from "../../../libs/kv-adapter/http-cache.js"
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { mediaServices } from "../../index.js";
 
 const hardDeleteSingleMedia: ServiceFn<
 	[
@@ -14,7 +14,7 @@ const hardDeleteSingleMedia: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = Repository.get("media", context.db, context.config.db);
@@ -78,7 +78,7 @@ const hardDeleteSingleMedia: ServiceFn<
 		mediaStrategyRes.data.services.deleteMultiple(
 			processedImagesRes.data.map((i) => i.key),
 		),
-		services.media.strategies.delete(context, {
+		mediaServices.strategies.deleteObject(context, {
 			key: deleteMediaRes.data.key,
 			size: deleteMediaRes.data.file_size,
 			processedSize: processedImagesRes.data.reduce(

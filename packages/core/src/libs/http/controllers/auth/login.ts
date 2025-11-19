@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/auth.js";
-import services from "../../../../services/index.js";
+import { authServices, userLoginServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -35,7 +35,7 @@ const loginController = factory.createHandlers(
 	async (c) => {
 		const { usernameOrEmail, password } = c.req.valid("json");
 
-		const userRes = await serviceWrapper(services.auth.login, {
+		const userRes = await serviceWrapper(authServices.login, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
@@ -59,8 +59,8 @@ const loginController = factory.createHandlers(
 		if (userRes.error) throw new LucidAPIError(userRes.error);
 
 		const [refreshRes, accessRes] = await Promise.all([
-			services.auth.refreshToken.generateToken(c, userRes.data.id),
-			services.auth.accessToken.generateToken(c, userRes.data.id),
+			authServices.refreshToken.generateToken(c, userRes.data.id),
+			authServices.accessToken.generateToken(c, userRes.data.id),
 		]);
 		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);
 		if (accessRes.error) throw new LucidAPIError(accessRes.error);
@@ -69,7 +69,7 @@ const loginController = factory.createHandlers(
 		const userAgent = c.req.header("user-agent") || null;
 
 		const userLoginTrackRes = await serviceWrapper(
-			services.userLogins.createSingle,
+			userLoginServices.createSingle,
 			{
 				transaction: false,
 				defaultError: {

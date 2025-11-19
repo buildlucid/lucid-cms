@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { userServices } from "../index.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -25,7 +25,7 @@ const deleteSinglePermanently: ServiceFn<
 		};
 	}
 
-	await services.users.checks.checkNotLastUser(context);
+	await userServices.checks.checkNotLastUser(context);
 
 	const getUserRes = await Users.selectSingle({
 		select: ["id"],

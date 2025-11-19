@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -42,17 +42,14 @@ const getMultipleController = factory.createHandlers(
 			controllerSchemas.getMultiple.query.formatted,
 		);
 
-		const linksRes = await serviceWrapper(
-			services.mediaShareLinks.getMultiple,
-			{
-				transaction: false,
-				defaultError: {
-					type: "basic",
-					name: T("route_media_share_links_fetch_error_name"),
-					message: T("route_media_share_links_fetch_error_message"),
-				},
+		const linksRes = await serviceWrapper(mediaShareLinkServices.getMultiple, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: T("route_media_share_links_fetch_error_name"),
+				message: T("route_media_share_links_fetch_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

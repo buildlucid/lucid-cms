@@ -4,7 +4,7 @@ import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { emailServices, userServices, userTokenServices } from "../index.js";
 
 const inviteSingle: ServiceFn<
 	[
@@ -30,7 +30,7 @@ const inviteSingle: ServiceFn<
 				email: data.email,
 			},
 		}),
-		services.users.checks.checkRolesExist(context, {
+		userServices.checks.checkRolesExist(context, {
 			roleIds: data.roleIds,
 		}),
 	]);
@@ -92,14 +92,14 @@ const inviteSingle: ServiceFn<
 		minutes: constants.userInviteTokenExpirationMinutes,
 	}).toISOString();
 
-	const userTokenRes = await services.userTokens.createSingle(context, {
+	const userTokenRes = await userTokenServices.createSingle(context, {
 		userId: newUserRes.data.id,
 		tokenType: constants.userTokens.invitation,
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const sendEmailRes = await services.emails.sendEmail(context, {
+	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: data.email,
 		subject: T("user_invite_email_subject"),

@@ -3,7 +3,7 @@ import type { ImageProcessorOptions } from "../../types/config.js";
 import type { MediaUrlResponse } from "../../types/response.js";
 import { createMediaUrl, generateProcessKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { mediaServices, processedImageServices } from "../index.js";
 
 const processMedia: ServiceFn<
 	[
@@ -22,7 +22,7 @@ const processMedia: ServiceFn<
 	);
 
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	//* fetches the media item, if its not an image return the original url
@@ -106,7 +106,7 @@ const processMedia: ServiceFn<
 	}
 
 	//* process the image
-	const processRes = await services.processedImages.processImage(context, {
+	const processRes = await processedImageServices.processImage(context, {
 		key: data.key,
 		processKey: processKey,
 		options: {

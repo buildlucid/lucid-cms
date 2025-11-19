@@ -2,7 +2,6 @@ import { DatabaseAdapter } from "@lucidcms/core";
 import type {
 	DatabaseConfig,
 	InferredTable,
-	KyselyDB,
 	OnDelete,
 	OnUpdate,
 	InferredColumn,

@@ -4,7 +4,7 @@ import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { LicenseResponse } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import Repository from "../../libs/repositories/index.js";
-import services from "../index.js";
+import { licenseServices } from "../index.js";
 
 const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 	const LicenseFormatter = Formatter.get("license");
@@ -62,7 +62,7 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 		};
 	}
 
-	const verifyRes = await services.license.verifyLicense(context);
+	const verifyRes = await licenseServices.verifyLicense(context);
 	if (verifyRes.error) return verifyRes;
 
 	return {

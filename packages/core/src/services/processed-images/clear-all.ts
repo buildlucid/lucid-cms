@@ -1,11 +1,11 @@
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { mediaServices, optionServices } from "../index.js";
 
 // TODO: push this to a queue
 const clearAll: ServiceFn<[], undefined> = async (context) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const ProcessedImages = Repository.get(
@@ -15,7 +15,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 	);
 
 	const [storageUsedRes, processedImagesRes] = await Promise.all([
-		services.options.getSingle(context, {
+		optionServices.getSingle(context, {
 			name: "media_storage_used",
 		}),
 		ProcessedImages.selectMultiple({
@@ -48,7 +48,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		ProcessedImages.deleteMultiple({
 			where: [],
 		}),
-		services.options.updateSingle(context, {
+		optionServices.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
 		}),

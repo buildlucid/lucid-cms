@@ -1,7 +1,7 @@
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
-import services from "../index.js";
+import { emailServices } from "../index.js";
 
 const sendExternal: ServiceFn<
 	[
@@ -22,7 +22,7 @@ const sendExternal: ServiceFn<
 		email: EmailResponse;
 	}
 > = async (context, data) =>
-	serviceWrapper(services.emails.sendEmail, {
+	serviceWrapper(emailServices.sendEmail, {
 		transaction: true,
 	})(context, {
 		type: "external",

@@ -3,7 +3,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/roles.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { roleServices } from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -45,7 +45,7 @@ const createSingleController = factory.createHandlers(
 	async (c) => {
 		const body = c.req.valid("json");
 
-		const roleId = await serviceWrapper(services.roles.createSingle, {
+		const roleId = await serviceWrapper(roleServices.createSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -68,7 +68,7 @@ const createSingleController = factory.createHandlers(
 		);
 		if (roleId.error) throw new LucidAPIError(roleId.error);
 
-		const role = await serviceWrapper(services.roles.getSingle, {
+		const role = await serviceWrapper(roleServices.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

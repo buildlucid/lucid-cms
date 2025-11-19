@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/auth.js";
-import services from "../../../../services/index.js";
+import { authServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
@@ -22,7 +22,7 @@ const csrfController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	async (c: LucidHonoContext) => {
-		const tokenRes = await services.auth.csrf.generateToken(c);
+		const tokenRes = await authServices.csrf.generateToken(c);
 		if (tokenRes.error) throw new LucidAPIError(tokenRes.error);
 
 		c.status(200);

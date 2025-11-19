@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media-folders.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { mediaFolderServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -41,7 +41,7 @@ const deleteSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 
 		const deleteSingleMediaFolder = await serviceWrapper(
-			services.mediaFolders.deleteSingle,
+			mediaFolderServices.deleteSingle,
 			{
 				transaction: true,
 				defaultError: {

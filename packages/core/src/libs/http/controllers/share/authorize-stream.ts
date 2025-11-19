@@ -5,7 +5,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import {
 	honoOpenAPIParamaters,
@@ -40,7 +40,7 @@ const authorizeStreamController = factory.createHandlers(
 		const { password } = c.req.valid("json");
 
 		const authorizeRes = await serviceWrapper(
-			services.mediaShareLinks.authorizeShare,
+			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
 		)(
 			{

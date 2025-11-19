@@ -1,5 +1,5 @@
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { mediaServices } from "../../index.js";
 
 const rename: ServiceFn<
 	[
@@ -11,7 +11,7 @@ const rename: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const res = await mediaStrategyRes.data.services.rename({

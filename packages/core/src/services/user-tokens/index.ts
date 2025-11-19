@@ -1,7 +1,2 @@
-import createSingle from "./create-single.js";
-import getSingle from "./get-single.js";
-
-export default {
-	createSingle,
-	getSingle,
-};
+export { default as createSingle } from "./create-single.js";
+export { default as getSingle } from "./get-single.js";

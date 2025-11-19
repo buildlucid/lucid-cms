@@ -2,7 +2,7 @@ import z from "zod/v4";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { licenseServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -28,7 +28,7 @@ const verifyLicenseController = factory.createHandlers(
 	validateCSRF,
 	authenticate,
 	async (c) => {
-		const res = await serviceWrapper(services.license.verifyLicense, {
+		const res = await serviceWrapper(licenseServices.verifyLicense, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

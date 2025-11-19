@@ -5,7 +5,7 @@ import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import Repository from "../../libs/repositories/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { mediaServices } from "../index.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 
 const createSingle: ServiceFn<
@@ -45,7 +45,7 @@ const createSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const awaitingSyncRes = await services.media.checks.checkAwaitingSync(
+	const awaitingSyncRes = await mediaServices.checks.checkAwaitingSync(
 		context,
 		{
 			key: data.key,
@@ -53,7 +53,7 @@ const createSingle: ServiceFn<
 	);
 	if (awaitingSyncRes.error) return awaitingSyncRes;
 
-	const syncMediaRes = await services.media.strategies.syncMedia(context, {
+	const syncMediaRes = await mediaServices.strategies.syncMedia(context, {
 		key: data.key,
 		fileName: data.fileName,
 	});

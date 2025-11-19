@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import validate from "../../middleware/validate.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { userServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -39,7 +39,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 		const auth = c.get("auth");
 
 		const unlinkAuthProvider = await serviceWrapper(
-			services.users.unlinkAuthProvider,
+			userServices.unlinkAuthProvider,
 			{
 				transaction: true,
 				defaultError: {

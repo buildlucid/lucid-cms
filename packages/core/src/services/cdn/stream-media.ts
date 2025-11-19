@@ -7,7 +7,7 @@ import {
 	isProcessedImageKey,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { mediaServices, processedImageServices } from "../index.js";
 
 /**
  * Streams the media based on the key.
@@ -39,7 +39,7 @@ const streamMedia: ServiceFn<
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const isProcessedKey = isProcessedImageKey(data.key);
@@ -124,7 +124,7 @@ const streamMedia: ServiceFn<
 	}
 
 	// Process
-	return await services.processedImages.processImage(context, {
+	return await processedImageServices.processImage(context, {
 		key: data.key,
 		processKey: processKey,
 		options: {

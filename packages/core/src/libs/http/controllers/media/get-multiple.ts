@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/media.js";
-import services from "../../../../services/index.js";
+import { mediaServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -47,7 +47,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		);
 
-		const media = await serviceWrapper(services.media.getMultiple, {
+		const media = await serviceWrapper(mediaServices.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

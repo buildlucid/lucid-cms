@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { logger } from "../../../../index.js";
 import { controllerSchemas } from "../../../../schemas/fs.js";
-import services from "../../../../services/index.js";
+import { fsServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -45,7 +45,7 @@ const uploadMediaController = factory.createHandlers(
 		const query = c.req.valid("query");
 		const buffer = await c.req.arrayBuffer();
 
-		const uploadMedia = await serviceWrapper(services.fs.uploadSingle, {
+		const uploadMedia = await serviceWrapper(fsServices.uploadSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

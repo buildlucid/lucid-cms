@@ -4,7 +4,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import services from "../index.js";
+import { documentBrickServices } from "../index.js";
 
 const createMultiple: ServiceFn<
 	[
@@ -31,12 +31,13 @@ const createMultiple: ServiceFn<
 	// -------------------------------------------------------------------------------
 	// validate bricks
 	if (data.skipValidation !== true) {
-		const checkBrickOrderRes =
-			services.documentBricks.checks.checkDuplicateOrder(data.bricks || []);
+		const checkBrickOrderRes = documentBrickServices.checks.checkDuplicateOrder(
+			data.bricks || [],
+		);
 		if (checkBrickOrderRes.error) return checkBrickOrderRes;
 
 		const checkValidateRes =
-			await services.documentBricks.checks.checkValidateBricksFields(context, {
+			await documentBrickServices.checks.checkValidateBricksFields(context, {
 				collection: data.collection,
 				bricks: data.bricks || [],
 				fields: data.fields || [],
@@ -58,7 +59,7 @@ const createMultiple: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// insert rows
-	const insertRes = await services.documentBricks.insertBrickTables(context, {
+	const insertRes = await documentBrickServices.insertBrickTables(context, {
 		tables: sortedTables,
 		collection: data.collection,
 	});

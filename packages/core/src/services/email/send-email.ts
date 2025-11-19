@@ -3,7 +3,6 @@ import Formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { EmailResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
 
 const sendEmail: ServiceFn<
 	[

@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/email.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { emailServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -38,7 +38,7 @@ const deleteSingleController = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const deleteSingle = await serviceWrapper(services.emails.deleteSingle, {
+		const deleteSingle = await serviceWrapper(emailServices.deleteSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

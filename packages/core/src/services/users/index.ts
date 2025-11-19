@@ -1,29 +1,13 @@
-import checks from "./checks/index.js";
-import inviteSingle from "./invite-single.js";
-import createInitialAdmin from "./create-initial-admin.js";
-import getSingle from "./get-single.js";
-import getMultiple from "./get-multiple.js";
-import deleteSingle from "./delete-single.js";
-import deleteSinglePermanently from "./delete-single-permanently.js";
-import updateMultipleRoles from "./update-multiple-roles.js";
-import updateSingle from "./update-single.js";
-import getMultipleFieldMeta from "./get-multiple-field-meta.js";
-import restoreMultiple from "./restore-multiple.js";
-import resendInvitation from "./resend-invitation.js";
-import unlinkAuthProvider from "./unlink-auth-provider.js";
-
-export default {
-	checks,
-	inviteSingle,
-	createInitialAdmin,
-	getSingle,
-	getMultiple,
-	deleteSingle,
-	deleteSinglePermanently,
-	updateMultipleRoles,
-	updateSingle,
-	getMultipleFieldMeta,
-	restoreMultiple,
-	resendInvitation,
-	unlinkAuthProvider,
-};
+export * as checks from "./checks/index.js";
+export { default as inviteSingle } from "./invite-single.js";
+export { default as createInitialAdmin } from "./create-initial-admin.js";
+export { default as getSingle } from "./get-single.js";
+export { default as getMultiple } from "./get-multiple.js";
+export { default as deleteSingle } from "./delete-single.js";
+export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
+export { default as updateMultipleRoles } from "./update-multiple-roles.js";
+export { default as updateSingle } from "./update-single.js";
+export { default as getMultipleFieldMeta } from "./get-multiple-field-meta.js";
+export { default as restoreMultiple } from "./restore-multiple.js";
+export { default as resendInvitation } from "./resend-invitation.js";
+export { default as unlinkAuthProvider } from "./unlink-auth-provider.js";

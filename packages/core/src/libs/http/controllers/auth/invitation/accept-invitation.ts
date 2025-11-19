@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import validate from "../../../middleware/validate.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../../services/index.js";
+import { authServices } from "../../../../../services/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
@@ -41,7 +41,7 @@ const acceptInvitationController = factory.createHandlers(
 		const { password } = c.req.valid("json");
 
 		const acceptInvitation = await serviceWrapper(
-			services.auth.invitation.acceptInvitation,
+			authServices.invitation.acceptInvitation,
 			{
 				transaction: true,
 				defaultError: {

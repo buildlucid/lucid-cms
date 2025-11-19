@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { collectionServices, documentVersionServices } from "../index.js";
 
 const restoreRevision: ServiceFn<
 	[
@@ -13,7 +13,7 @@ const restoreRevision: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = services.collections.getSingleInstance(context, {
+	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -30,7 +30,7 @@ const restoreRevision: ServiceFn<
 		};
 	}
 
-	const response = await services.documentVersions.promoteVersion(context, {
+	const response = await documentVersionServices.promoteVersion(context, {
 		documentId: data.documentId,
 		collectionKey: data.collectionKey,
 		fromVersionId: data.versionId,

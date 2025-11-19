@@ -6,7 +6,7 @@ import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { documentBrickServices } from "../index.js";
 
 const createSingle: ServiceFn<
 	[
@@ -134,7 +134,7 @@ const createSingle: ServiceFn<
 	const bodyData = merge(data, hookResponse.data);
 
 	// Save bricks for the new version
-	const createMultipleBricks = await services.documentBricks.createMultiple(
+	const createMultipleBricks = await documentBrickServices.createMultiple(
 		context,
 		{
 			versionId: newVersionRes.data.id,

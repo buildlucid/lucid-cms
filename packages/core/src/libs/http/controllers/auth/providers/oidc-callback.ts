@@ -2,7 +2,10 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
-import services from "../../../../../services/index.js";
+import {
+	authServices,
+	userLoginServices,
+} from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
 import urlAddPath from "../../../../../utils/helpers/url-add-path.js";
 import {
@@ -34,7 +37,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 		const { code, state } = c.req.valid("query");
 
 		const errorRedirectURLRes = await serviceWrapper(
-			services.auth.providers.errorRedirectUrl,
+			authServices.providers.errorRedirectUrl,
 			{
 				transaction: false,
 				defaultError: {
@@ -67,7 +70,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 		}
 
 		const callbackAuthRes = await serviceWrapper(
-			services.auth.providers.oidcCallback,
+			authServices.providers.oidcCallback,
 			{
 				transaction: true,
 				defaultError: {
@@ -101,11 +104,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 
 		if (callbackAuthRes.data.grantAuthentication) {
 			const [refreshRes, accessRes] = await Promise.all([
-				services.auth.refreshToken.generateToken(
-					c,
-					callbackAuthRes.data.userId,
-				),
-				services.auth.accessToken.generateToken(c, callbackAuthRes.data.userId),
+				authServices.refreshToken.generateToken(c, callbackAuthRes.data.userId),
+				authServices.accessToken.generateToken(c, callbackAuthRes.data.userId),
 			]);
 			if (refreshRes.error) {
 				return c.redirect(
@@ -122,7 +122,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 			const userAgent = c.req.header("user-agent") || null;
 
 			const userLoginTrackRes = await serviceWrapper(
-				services.userLogins.createSingle,
+				userLoginServices.createSingle,
 				{
 					transaction: false,
 					defaultError: {

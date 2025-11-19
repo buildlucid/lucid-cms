@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
-import services from "../../../../../services/index.js";
+import { authServices } from "../../../../../services/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -24,7 +24,7 @@ const getProvidersController = factory.createHandlers(
 	}),
 	async (c: LucidHonoContext) => {
 		const providersRes = await serviceWrapper(
-			services.auth.providers.getProviders,
+			authServices.providers.getProviders,
 			{
 				transaction: false,
 				defaultError: {

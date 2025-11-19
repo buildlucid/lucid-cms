@@ -1,13 +1,5 @@
-import updateMe from "./update-me.js";
-import sendResetPassword from "./send-reset-password.js";
-import resetPassword from "./reset-password.js";
-import checks from "./checks/index.js";
-import getAuthenticatedUser from "./get-authenticated-user.js";
-
-export default {
-	checks,
-	updateMe,
-	sendResetPassword,
-	resetPassword,
-	getAuthenticatedUser,
-};
+export * as checks from "./checks/index.js";
+export { default as updateMe } from "./update-me.js";
+export { default as sendResetPassword } from "./send-reset-password.js";
+export { default as resetPassword } from "./reset-password.js";
+export { default as getAuthenticatedUser } from "./get-authenticated-user.js";

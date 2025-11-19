@@ -1,8 +1,9 @@
 export { LucidAPIError } from "./utils/errors/index.js";
 export { default as formatAPIResponse } from "./libs/http/utils/build-response.js";
 export { default as serviceWrapper } from "./utils/services/service-wrapper.js";
-export { default as services } from "./services/index.js";
-export * from "./utils/open-api/index.js";
+export { default as honoOpenAPIResponse } from "./utils/open-api/hono-openapi-response.js";
+export { default as honoOpenAPIRequestBody } from "./utils/open-api/hono-openapi-request-body.js";
+export { default as honoOpenAPIParamaters } from "./utils/open-api/hono-openapi-paramaters.js";
 
 export { default as authenticateMiddleware } from "./libs/http/middleware/authenticate.js";
 export { default as clientAuthenticationMiddleware } from "./libs/http/middleware/client-authenticate.js";

@@ -1,7 +1,2 @@
-import acceptInvitation from "./accept-invitation.js";
-import validateInvitation from "./validate-invitation.js";
-
-export default {
-	acceptInvitation,
-	validateInvitation,
-};
+export { default as acceptInvitation } from "./accept-invitation.js";
+export { default as validateInvitation } from "./validate-invitation.js";

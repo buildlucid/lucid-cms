@@ -5,7 +5,7 @@ import getMigrationStatus from "../../libs/collection/get-collection-migration-s
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { documentServices, documentVersionServices } from "../index.js";
 
 const upsertSingle: ServiceFn<
 	[
@@ -27,12 +27,9 @@ const upsertSingle: ServiceFn<
 	// Checks
 
 	//* check collection exists
-	const collectionRes = await services.documents.checks.checkCollection(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = await documentServices.checks.checkCollection(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
@@ -103,15 +100,12 @@ const upsertSingle: ServiceFn<
 
 	//* for single collections types, check if a document already exists
 	const checkDocumentCountRes =
-		await services.documents.checks.checkSingleCollectionDocumentCount(
-			context,
-			{
-				collectionKey: data.collectionKey,
-				collectionMode: collectionRes.data.getData.mode,
-				documentId: data.documentId,
-				documentTable: tableNamesRes.data.document,
-			},
-		);
+		await documentServices.checks.checkSingleCollectionDocumentCount(context, {
+			collectionKey: data.collectionKey,
+			collectionMode: collectionRes.data.getData.mode,
+			documentId: data.documentId,
+			documentTable: tableNamesRes.data.document,
+		});
 	if (checkDocumentCountRes.error) return checkDocumentCountRes;
 
 	// ----------------------------------------------
@@ -139,17 +133,14 @@ const upsertSingle: ServiceFn<
 
 	// ----------------------------------------------
 	// Create and manage document versions
-	const createVersionRes = await services.documentVersions.createSingle(
-		context,
-		{
-			documentId: upsertDocRes.data.id,
-			userId: data.userId,
-			publish: data.publish,
-			bricks: data.bricks,
-			fields: data.fields,
-			collection: collectionRes.data,
-		},
-	);
+	const createVersionRes = await documentVersionServices.createSingle(context, {
+		documentId: upsertDocRes.data.id,
+		userId: data.userId,
+		publish: data.publish,
+		bricks: data.bricks,
+		fields: data.fields,
+		collection: collectionRes.data,
+	});
 	if (createVersionRes.error) return createVersionRes;
 
 	return {

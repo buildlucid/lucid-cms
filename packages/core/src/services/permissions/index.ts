@@ -1,5 +1,1 @@
-import getAll from "./get-all.js";
-
-export default {
-	getAll,
-};
+export { default as getAll } from "./get-all.js";

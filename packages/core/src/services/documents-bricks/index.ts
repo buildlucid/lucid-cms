@@ -1,13 +1,5 @@
-import checks from "./checks/index.js";
-import createMultiple from "./create-multiple.js";
-import getMultiple from "./get-multiple.js";
-import insertBrickTables from "./insert-brick-tables.js";
-import deleteMultiple from "./delete-multiple.js";
-
-export default {
-	checks,
-	createMultiple,
-	getMultiple,
-	insertBrickTables,
-	deleteMultiple,
-};
+export * as checks from "./checks/index.js";
+export { default as createMultiple } from "./create-multiple.js";
+export { default as getMultiple } from "./get-multiple.js";
+export { default as insertBrickTables } from "./insert-brick-tables.js";
+export { default as deleteMultiple } from "./delete-multiple.js";

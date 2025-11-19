@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { optionServices } from "../../index.js";
 
 const checkCanUpdateMedia: ServiceFn<
 	[
@@ -37,7 +37,7 @@ const checkCanUpdateMedia: ServiceFn<
 		};
 	}
 
-	const storageUsedRes = await services.options.getSingle(context, {
+	const storageUsedRes = await optionServices.getSingle(context, {
 		name: "media_storage_used",
 	});
 	if (storageUsedRes.error) return storageUsedRes;

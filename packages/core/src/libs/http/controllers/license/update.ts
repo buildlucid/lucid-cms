@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/license.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { licenseServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -37,7 +37,7 @@ const updateLicenseController = factory.createHandlers(
 	async (c) => {
 		const body = c.req.valid("json");
 
-		const updateRes = await serviceWrapper(services.license.updateLicense, {
+		const updateRes = await serviceWrapper(licenseServices.updateLicense, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

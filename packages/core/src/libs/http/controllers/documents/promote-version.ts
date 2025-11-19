@@ -3,7 +3,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { documentVersionServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -53,7 +53,7 @@ const promoteVersionController = factory.createHandlers(
 		);
 
 		const restoreRevisionRes = await serviceWrapper(
-			services.documentVersions.promoteVersion,
+			documentVersionServices.promoteVersion,
 			{
 				transaction: true,
 				defaultError: {

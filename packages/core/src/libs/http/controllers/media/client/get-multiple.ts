@@ -3,7 +3,7 @@ import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/media.js";
-import services from "../../../../../services/index.js";
+import { mediaServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
 import cacheKeys from "../../../../kv-adapter/cache-keys.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
@@ -58,7 +58,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		);
 
-		const media = await serviceWrapper(services.media.getMultiple, {
+		const media = await serviceWrapper(mediaServices.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

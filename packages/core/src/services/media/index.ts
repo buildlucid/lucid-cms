@@ -1,33 +1,14 @@
-import checks from "./checks/index.js";
-import strategies from "./strategies/index.js";
-
-import getSingle from "./get-single.js";
-import deleteSingle from "./delete-single.js";
-import deleteSinglePermanently from "./delete-single-permanently.js";
-import getMultiple from "./get-multiple.js";
-import updateSingle from "./update-single.js";
-import getPresignedUrl from "./get-presigned-url.js";
-import createSingle from "./create-single.js";
-import getMultipleFieldMeta from "./get-multiple-field-meta.js";
-import processMedia from "./process-media.js";
-import moveFolder from "./move-folder.js";
-import deleteBatch from "./delete-batch.js";
-import restoreMultiple from "./restore-multiple.js";
-
-export default {
-	checks,
-	strategies,
-
-	getSingle,
-	deleteSingle,
-	deleteSinglePermanently,
-	getMultiple,
-	updateSingle,
-	getPresignedUrl,
-	createSingle,
-	getMultipleFieldMeta,
-	processMedia,
-	moveFolder,
-	deleteBatch,
-	restoreMultiple,
-};
+export * as checks from "./checks/index.js";
+export * as strategies from "./strategies/index.js";
+export { default as getSingle } from "./get-single.js";
+export { default as deleteSingle } from "./delete-single.js";
+export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
+export { default as getMultiple } from "./get-multiple.js";
+export { default as updateSingle } from "./update-single.js";
+export { default as getPresignedUrl } from "./get-presigned-url.js";
+export { default as createSingle } from "./create-single.js";
+export { default as getMultipleFieldMeta } from "./get-multiple-field-meta.js";
+export { default as processMedia } from "./process-media.js";
+export { default as moveFolder } from "./move-folder.js";
+export { default as deleteBatch } from "./delete-batch.js";
+export { default as restoreMultiple } from "./restore-multiple.js";

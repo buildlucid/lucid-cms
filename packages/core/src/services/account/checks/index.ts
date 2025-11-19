@@ -1,5 +1,1 @@
-import checkUpdatePassword from "./check-update-password.js";
-
-export default {
-	checkUpdatePassword,
-};
+export { default as checkUpdatePassword } from "./check-update-password.js";

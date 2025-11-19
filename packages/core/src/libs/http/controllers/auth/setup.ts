@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/auth.js";
-import services from "../../../../services/index.js";
+import { userServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -37,7 +37,7 @@ const setupController = factory.createHandlers(
 			c.req.valid("json");
 
 		const createAdminRes = await serviceWrapper(
-			services.users.createInitialAdmin,
+			userServices.createInitialAdmin,
 			{
 				transaction: true,
 				defaultError: {

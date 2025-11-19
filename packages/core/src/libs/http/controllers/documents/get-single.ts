@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import services from "../../../../services/index.js";
+import { documentServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -44,7 +44,7 @@ const getSingleController = factory.createHandlers(
 
 		const hasStatus = statusOrId === "draft" || statusOrId === "published";
 
-		const document = await serviceWrapper(services.documents.getSingle, {
+		const document = await serviceWrapper(documentServices.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

@@ -1,15 +1,6 @@
-import createSingle from "./create-single.js";
-import validatePermissions from "./validate-permissions.js";
-import getSingle from "./get-single.js";
-import getMultiple from "./get-multiple.js";
-import deleteSingle from "./delete-single.js";
-import updateSingle from "./update-single.js";
-
-export default {
-	createSingle,
-	validatePermissions,
-	getSingle,
-	getMultiple,
-	deleteSingle,
-	updateSingle,
-};
+export { default as createSingle } from "./create-single.js";
+export { default as validatePermissions } from "./validate-permissions.js";
+export { default as getSingle } from "./get-single.js";
+export { default as getMultiple } from "./get-multiple.js";
+export { default as deleteSingle } from "./delete-single.js";
+export { default as updateSingle } from "./update-single.js";

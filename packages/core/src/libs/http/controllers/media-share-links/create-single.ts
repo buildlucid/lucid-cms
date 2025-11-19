@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -44,17 +44,14 @@ const createSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 
-		const linkRes = await serviceWrapper(
-			services.mediaShareLinks.createSingle,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: T("route_media_share_links_create_error_name"),
-					message: T("route_media_share_links_create_error_message"),
-				},
+		const linkRes = await serviceWrapper(mediaShareLinkServices.createSingle, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: T("route_media_share_links_create_error_name"),
+				message: T("route_media_share_links_create_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

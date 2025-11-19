@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIResponse,
@@ -29,9 +29,9 @@ const logoutController = factory.createHandlers(
 	authenticate,
 	async (c) => {
 		const [clearRefreshRes, clearAccessRes, clearCSRFRes] = await Promise.all([
-			services.auth.refreshToken.clearToken(c),
-			services.auth.accessToken.clearToken(c),
-			services.auth.csrf.clearToken(c),
+			authServices.refreshToken.clearToken(c),
+			authServices.accessToken.clearToken(c),
+			authServices.csrf.clearToken(c),
 		]);
 
 		if (clearRefreshRes.error) throw new LucidAPIError(clearRefreshRes.error);

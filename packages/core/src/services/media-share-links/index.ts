@@ -1,21 +1,9 @@
-import createSingle from "./create-single.js";
-import getMultiple from "./get-multiple.js";
-import updateSingle from "./update-single.js";
-import deleteSingle from "./delete-single.js";
-import deleteMultiple from "./delete-multiple.js";
-import deleteAll from "./delete-all.js";
-import getSingle from "./get-single.js";
-import streamMedia from "./stream-media.js";
-import authorizeShare from "./authorize-share.js";
-
-export default {
-	createSingle,
-	getMultiple,
-	updateSingle,
-	deleteSingle,
-	deleteMultiple,
-	deleteAll,
-	getSingle,
-	streamMedia,
-	authorizeShare,
-};
+export { default as createSingle } from "./create-single.js";
+export { default as getMultiple } from "./get-multiple.js";
+export { default as updateSingle } from "./update-single.js";
+export { default as deleteSingle } from "./delete-single.js";
+export { default as deleteMultiple } from "./delete-multiple.js";
+export { default as deleteAll } from "./delete-all.js";
+export { default as getSingle } from "./get-single.js";
+export { default as streamMedia } from "./stream-media.js";
+export { default as authorizeShare } from "./authorize-share.js";

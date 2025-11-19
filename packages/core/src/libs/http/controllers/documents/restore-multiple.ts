@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { documentServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -42,17 +42,14 @@ const restoreMultipleController = factory.createHandlers(
 		const { collectionKey } = c.req.valid("param");
 		const { ids } = c.req.valid("json");
 
-		const restoreRes = await serviceWrapper(
-			services.documents.restoreMultiple,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: T("route_document_update_error_name"),
-					message: T("route_document_update_error_message"),
-				},
+		const restoreRes = await serviceWrapper(documentServices.restoreMultiple, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: T("route_document_update_error_name"),
+				message: T("route_document_update_error_message"),
 			},
-		)(
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

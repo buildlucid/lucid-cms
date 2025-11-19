@@ -1,5 +1,1 @@
-import getSettings from "./get-settings.js";
-
-export default {
-	getSettings,
-};
+export { default as getSettings } from "./get-settings.js";

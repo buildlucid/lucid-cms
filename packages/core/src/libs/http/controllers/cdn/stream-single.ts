@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
-import services from "../../../../services/index.js";
+import { cdnServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-response.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
@@ -135,7 +135,7 @@ const streamSingleController = factory.createHandlers(
 
 		const range = parseRangeHeader(c.req.header("range"));
 
-		const response = await serviceWrapper(services.cdn.streamMedia, {
+		const response = await serviceWrapper(cdnServices.streamMedia, {
 			transaction: false,
 		})(
 			{
@@ -155,7 +155,7 @@ const streamSingleController = factory.createHandlers(
 
 		if (response.error) {
 			const streamErrorImage = await serviceWrapper(
-				services.cdn.streamErrorImage,
+				cdnServices.streamErrorImage,
 				{
 					transaction: false,
 				},

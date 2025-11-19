@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod/v4";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
-import services from "../../../../../services/index.js";
+import { authServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
@@ -47,7 +47,7 @@ const providerInitiateController = factory.createHandlers(
 		const { invitationToken, redirectPath, actionType } = c.req.valid("json");
 
 		const initiateAuthRes = await serviceWrapper(
-			services.auth.providers.initiate,
+			authServices.providers.initiate,
 			{
 				transaction: true,
 				defaultError: {

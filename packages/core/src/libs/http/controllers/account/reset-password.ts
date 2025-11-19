@@ -3,7 +3,7 @@ import { createFactory } from "hono/factory";
 import validate from "../../middleware/validate.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { accountServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -37,7 +37,7 @@ const resetPasswordController = factory.createHandlers(
 		const { token } = c.req.valid("param");
 		const { password } = c.req.valid("json");
 
-		const resetPassword = await serviceWrapper(services.account.resetPassword, {
+		const resetPassword = await serviceWrapper(accountServices.resetPassword, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

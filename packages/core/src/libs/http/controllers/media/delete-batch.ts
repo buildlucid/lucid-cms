@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { mediaServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -40,7 +40,7 @@ const deleteBatchController = factory.createHandlers(
 	async (c) => {
 		const { folderIds, mediaIds, recursiveMedia } = c.req.valid("json");
 
-		const deleteBatch = await serviceWrapper(services.media.deleteBatch, {
+		const deleteBatch = await serviceWrapper(mediaServices.deleteBatch, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

@@ -6,7 +6,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
 import type { DocumentResponse } from "../../types.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
-import services from "../index.js";
+import { collectionServices, documentBrickServices } from "../index.js";
 
 const getSingle: ServiceFn<
 	[
@@ -23,7 +23,7 @@ const getSingle: ServiceFn<
 	const Document = Repository.get("documents", context.db, context.config.db);
 	const DocumentFormatter = Formatter.get("documents");
 
-	const collectionRes = services.collections.getSingleInstance(context, {
+	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -70,7 +70,7 @@ const getSingle: ServiceFn<
 	}
 
 	if (data.query.include?.includes("bricks")) {
-		const bricksRes = await services.documentBricks.getMultiple(context, {
+		const bricksRes = await documentBrickServices.getMultiple(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
 			//* if fetching a revision, we always default to the draft version so any sub-documents this may query due to the document custom field is always recent info

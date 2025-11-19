@@ -8,7 +8,7 @@ import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import collectionsServices from "../collections/index.js";
+import { getSingleInstance } from "../collections/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 import fetchRelationData from "./helpers/fetch-relation-data.js";
 
@@ -38,7 +38,7 @@ const getMultiple: ServiceFn<
 	);
 	const DocumentBricksFormatter = Formatter.get("document-bricks");
 
-	const collectionRes = collectionsServices.getSingleInstance(context, {
+	const collectionRes = getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

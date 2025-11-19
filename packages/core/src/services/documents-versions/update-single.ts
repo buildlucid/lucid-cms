@@ -7,7 +7,7 @@ import getMigrationStatus from "../../libs/collection/get-collection-migration-s
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { documentBrickServices, documentServices } from "../index.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -33,12 +33,9 @@ const updateSingle: ServiceFn<
 	// Checks
 
 	//* check collection exists
-	const collectionRes = await services.documents.checks.checkCollection(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = await documentServices.checks.checkCollection(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
@@ -126,14 +123,11 @@ const updateSingle: ServiceFn<
 	// Update document
 
 	//* delete all bricks that belong to the document and version
-	const deleteBricksRes = await services.documentBricks.deleteMultiple(
-		context,
-		{
-			versionId: data.versionId,
-			documentId: data.documentId,
-			collectionKey: data.collectionKey,
-		},
-	);
+	const deleteBricksRes = await documentBrickServices.deleteMultiple(context, {
+		versionId: data.versionId,
+		documentId: data.documentId,
+		collectionKey: data.collectionKey,
+	});
 	if (deleteBricksRes.error) return deleteBricksRes;
 
 	//* create new bricks based on the given data
@@ -168,7 +162,7 @@ const updateSingle: ServiceFn<
 	const bodyData = merge(data, hookResponse.data);
 
 	// Save bricks for the new version
-	const createMultipleBricks = await services.documentBricks.createMultiple(
+	const createMultipleBricks = await documentBrickServices.createMultiple(
 		context,
 		{
 			versionId: data.versionId,

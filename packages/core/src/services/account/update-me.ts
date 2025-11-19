@@ -3,7 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { accountServices, emailServices } from "../index.js";
 
 const updateMe: ServiceFn<
 	[
@@ -87,7 +87,7 @@ const updateMe: ServiceFn<
 					],
 				})
 			: undefined,
-		services.account.checks.checkUpdatePassword(context, {
+		accountServices.checks.checkUpdatePassword(context, {
 			encryptedSecret: getUserRes.data.secret,
 			password: getUserRes.data.password,
 			currentPassword: data.currentPassword,
@@ -161,7 +161,7 @@ const updateMe: ServiceFn<
 	if (updateMeRes.error) return updateMeRes;
 
 	if (data.email !== undefined) {
-		const sendEmail = await services.emails.sendEmail(context, {
+		const sendEmail = await emailServices.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
 			to: data.email,

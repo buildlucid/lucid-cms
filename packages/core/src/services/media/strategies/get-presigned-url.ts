@@ -1,5 +1,5 @@
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { mediaServices } from "../../index.js";
 
 const getPresignedUrl: ServiceFn<
 	[
@@ -15,7 +15,7 @@ const getPresignedUrl: ServiceFn<
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const presignedUrlRes = await mediaStrategyRes.data.services.getPresignedUrl(

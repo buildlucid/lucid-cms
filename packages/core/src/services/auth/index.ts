@@ -1,17 +1,7 @@
-import accessToken from "./access-token/index.js";
-import csrf from "./csrf/index.js";
-import invitation from "./invitation/index.js";
-import login from "./login.js";
-import providers from "./providers/index.js";
-import refreshToken from "./refresh-token/index.js";
-import setupRequired from "./setup-required.js";
-
-export default {
-	accessToken,
-	refreshToken,
-	csrf,
-	login,
-	setupRequired,
-	providers,
-	invitation,
-};
+export * as accessToken from "./access-token/index.js";
+export * as refreshToken from "./refresh-token/index.js";
+export * as csrf from "./csrf/index.js";
+export * as invitation from "./invitation/index.js";
+export * as providers from "./providers/index.js";
+export { default as login } from "./login.js";
+export { default as setupRequired } from "./setup-required.js";

@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
@@ -26,12 +26,12 @@ const tokenController = factory.createHandlers(
 	}),
 	validateCSRF,
 	async (c) => {
-		const payloadRes = await services.auth.refreshToken.verifyToken(c);
+		const payloadRes = await authServices.refreshToken.verifyToken(c);
 		if (payloadRes.error) throw new LucidAPIError(payloadRes.error);
 
 		const [refreshRes, accessRes] = await Promise.all([
-			services.auth.refreshToken.generateToken(c, payloadRes.data.user_id),
-			services.auth.accessToken.generateToken(c, payloadRes.data.user_id),
+			authServices.refreshToken.generateToken(c, payloadRes.data.user_id),
+			authServices.accessToken.generateToken(c, payloadRes.data.user_id),
 		]);
 
 		if (refreshRes.error) throw new LucidAPIError(refreshRes.error);

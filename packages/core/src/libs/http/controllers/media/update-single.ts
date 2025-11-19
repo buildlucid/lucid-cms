@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/media.js";
-import services from "../../../../services/index.js";
+import { mediaServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -45,7 +45,7 @@ const updateSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 
-		const updateMedia = await serviceWrapper(services.media.updateSingle, {
+		const updateMedia = await serviceWrapper(mediaServices.updateSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

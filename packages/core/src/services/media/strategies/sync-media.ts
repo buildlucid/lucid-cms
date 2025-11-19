@@ -1,7 +1,7 @@
 import type { MediaType } from "../../../types/response.js";
 import { getFileMetadata } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { mediaServices, optionServices } from "../../index.js";
 
 const syncMedia: ServiceFn<
 	[
@@ -21,13 +21,13 @@ const syncMedia: ServiceFn<
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const mediaMetaRes = await mediaStrategyRes.data.services.getMeta(data.key);
 	if (mediaMetaRes.error) return mediaMetaRes;
 
-	const proposedSizeRes = await services.media.checks.checkCanStoreMedia(
+	const proposedSizeRes = await mediaServices.checks.checkCanStoreMedia(
 		context,
 		{
 			size: mediaMetaRes.data.size,
@@ -44,7 +44,7 @@ const syncMedia: ServiceFn<
 	});
 	if (fileMetaData.error) return fileMetaData;
 
-	const updateStorageRes = await services.options.updateSingle(context, {
+	const updateStorageRes = await optionServices.updateSingle(context, {
 		name: "media_storage_used",
 		valueInt: proposedSizeRes.data.proposedSize,
 	});

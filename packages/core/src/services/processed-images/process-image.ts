@@ -2,7 +2,11 @@ import { PassThrough, type Readable } from "node:stream";
 import Repository from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import {
+	mediaServices,
+	optionServices,
+	processedImageServices,
+} from "../index.js";
 
 const processImage: ServiceFn<
 	[
@@ -20,7 +24,7 @@ const processImage: ServiceFn<
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =
-		await services.media.checks.checkHasMediaStrategy(context);
+		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// get og image
@@ -42,11 +46,11 @@ const processImage: ServiceFn<
 
 	// Optimize image
 	const [imageRes, processedCountRes] = await Promise.all([
-		services.processedImages.optimizeImage(context, {
+		processedImageServices.optimizeImage(context, {
 			stream: mediaRes.data.body,
 			options: data.options,
 		}),
-		services.processedImages.getSingleCount(context, {
+		processedImageServices.getSingleCount(context, {
 			key: data.key,
 		}),
 	]);
@@ -93,7 +97,7 @@ const processImage: ServiceFn<
 	}
 
 	// Check if we can store it
-	const canStoreRes = await services.processedImages.checks.checkCanStore(
+	const canStoreRes = await processedImageServices.checks.checkCanStore(
 		context,
 		{
 			size: imageRes.data.size,
@@ -136,7 +140,7 @@ const processImage: ServiceFn<
 					type: "image",
 				},
 			}),
-			services.options.updateSingle(context, {
+			optionServices.updateSingle(context, {
 				name: "media_storage_used",
 				valueInt: canStoreRes.data.proposedSize,
 			}),

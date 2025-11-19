@@ -5,7 +5,7 @@ import { stream } from "hono/streaming";
 import type { StatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/share.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
@@ -50,7 +50,7 @@ const streamMediaController = factory.createHandlers(
 		const sessionCookie = getCookie(c, cookieName);
 
 		const authorizeRes = await serviceWrapper(
-			services.mediaShareLinks.authorizeShare,
+			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
 		)(
 			{
@@ -80,12 +80,9 @@ const streamMediaController = factory.createHandlers(
 			return c.body(renderPasswordForm());
 		}
 
-		const response = await serviceWrapper(
-			services.mediaShareLinks.streamMedia,
-			{
-				transaction: false,
-			},
-		)(
+		const response = await serviceWrapper(mediaShareLinkServices.streamMedia, {
+			transaction: false,
+		})(
 			{
 				db: c.get("config").db.client,
 				config: c.get("config"),

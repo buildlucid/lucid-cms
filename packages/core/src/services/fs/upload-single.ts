@@ -4,7 +4,7 @@ import constants from "../../constants/constants.js";
 import { keyPaths } from "../../libs/media-adapter/adapters/file-system/helpers.js";
 import type { FileSystemMediaAdapterOptions } from "../../libs/media-adapter/types.js";
 import T from "../../translations/index.js";
-import checks from "./checks/index.js";
+import { validatePresignedToken } from "./checks/index.js";
 
 const uploadSingle: ServiceFn<
 	[
@@ -18,7 +18,7 @@ const uploadSingle: ServiceFn<
 	],
 	boolean
 > = async (context, data) => {
-	const checkPresignedTokenRes = await checks.validatePresignedToken(context, {
+	const checkPresignedTokenRes = await validatePresignedToken(context, {
 		key: data.key,
 		token: data.token,
 		timestamp: data.timestamp,

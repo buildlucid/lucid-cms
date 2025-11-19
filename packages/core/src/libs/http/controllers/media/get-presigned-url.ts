@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/media.js";
-import services from "../../../../services/index.js";
+import { mediaServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -43,7 +43,7 @@ const getPresignedUrlController = factory.createHandlers(
 	async (c) => {
 		const body = c.req.valid("json");
 
-		const presignedUrl = await serviceWrapper(services.media.getPresignedUrl, {
+		const presignedUrl = await serviceWrapper(mediaServices.getPresignedUrl, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

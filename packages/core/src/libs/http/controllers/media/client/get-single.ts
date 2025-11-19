@@ -3,7 +3,7 @@ import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/media.js";
-import services from "../../../../../services/index.js";
+import { mediaServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
 import cacheKeys from "../../../../kv-adapter/cache-keys.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
@@ -14,7 +14,6 @@ import {
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
-import contentLocale from "../../../middleware/content-locale.js";
 import validate from "../../../middleware/validate.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 
@@ -48,7 +47,7 @@ const getSingleController = factory.createHandlers(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const media = await serviceWrapper(services.media.getSingle, {
+		const media = await serviceWrapper(mediaServices.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

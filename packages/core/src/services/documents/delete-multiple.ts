@@ -3,7 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
-import services from "../index.js";
+import { documentServices } from "../index.js";
 
 const deleteMultiple: ServiceFn<
 	[
@@ -22,12 +22,9 @@ const deleteMultiple: ServiceFn<
 		};
 	}
 
-	const collectionRes = await services.documents.checks.checkCollection(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = await documentServices.checks.checkCollection(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.isLocked) {
@@ -117,7 +114,7 @@ const deleteMultiple: ServiceFn<
 	if (hookBeforeRes.error) return hookBeforeRes;
 
 	const nullifyPromises = data.ids.map((id) =>
-		services.documents.nullifyDocumentReferences(context, {
+		documentServices.nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: id,
 		}),

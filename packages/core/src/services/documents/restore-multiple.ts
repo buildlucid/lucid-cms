@@ -2,7 +2,7 @@ import { getTableNames } from "../../libs/collection/schema/live/schema-filters.
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
-import services from "../index.js";
+import { documentServices } from "../index.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -20,12 +20,9 @@ const restoreMultiple: ServiceFn<
 		};
 	}
 
-	const collectionRes = await services.documents.checks.checkCollection(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = await documentServices.checks.checkCollection(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	if (collectionRes.data.getData.config.isLocked) {

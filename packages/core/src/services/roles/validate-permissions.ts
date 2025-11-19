@@ -2,7 +2,7 @@ import T from "../../translations/index.js";
 import type { ErrorResult } from "../../types/errors.js";
 import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { permissionServices } from "../index.js";
 
 const validatePermissions: ServiceFn<
 	[
@@ -21,7 +21,7 @@ const validatePermissions: ServiceFn<
 		};
 	}
 
-	const permissionsRes = await services.permissions.getAll(context);
+	const permissionsRes = await permissionServices.getAll(context);
 	if (permissionsRes.error) return permissionsRes;
 
 	const permErrors: Array<{

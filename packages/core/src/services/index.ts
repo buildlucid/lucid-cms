@@ -1,59 +1,27 @@
-import account from "./account/index.js";
-import auth from "./auth/index.js";
-import cdn from "./cdn/index.js";
-import clientIntegrations from "./client-integrations/index.js";
-import collections from "./collections/index.js";
-import crons from "./crons/index.js";
-import documents from "./documents/index.js";
-import documentBricks from "./documents-bricks/index.js";
-import documentVersions from "./documents-versions/index.js";
-import emails from "./email/index.js";
-import fs from "./fs/index.js";
-import jobs from "./jobs/index.js";
-import license from "./license/index.js";
-import locales from "./locales/index.js";
-import media from "./media/index.js";
-import mediaFolders from "./media-folders/index.js";
-import mediaShareLinks from "./media-share-links/index.js";
-import options from "./options/index.js";
-import permissions from "./permissions/index.js";
-import processedImages from "./processed-images/index.js";
-import roles from "./roles/index.js";
-import seed from "./seed/index.js";
-import settings from "./settings/index.js";
-import sync from "./sync/index.js";
-import userLogins from "./user-logins/index.js";
-import userTokens from "./user-tokens/index.js";
-import users from "./users/index.js";
-
-const services = {
-	auth,
-	account,
-	collections,
-	documents,
-	documentVersions,
-	documentBricks,
-	users,
-	userTokens,
-	userLogins,
-	emails,
-	jobs,
-	roles,
-	permissions,
-	settings,
-	license,
-	options,
-	media,
-	mediaFolders,
-	mediaShareLinks,
-	processedImages,
-	cdn,
-	locales,
-	crons,
-	seed,
-	sync,
-	clientIntegrations,
-	fs,
-};
-
-export default services;
+export * as accountServices from "./account/index.js";
+export * as authServices from "./auth/index.js";
+export * as cdnServices from "./cdn/index.js";
+export * as clientIntegrationServices from "./client-integrations/index.js";
+export * as collectionServices from "./collections/index.js";
+export * as cronServices from "./crons/index.js";
+export * as documentServices from "./documents/index.js";
+export * as documentBrickServices from "./documents-bricks/index.js";
+export * as documentVersionServices from "./documents-versions/index.js";
+export * as emailServices from "./email/index.js";
+export * as fsServices from "./fs/index.js";
+export * as jobServices from "./jobs/index.js";
+export * as licenseServices from "./license/index.js";
+export * as localeServices from "./locales/index.js";
+export * as mediaServices from "./media/index.js";
+export * as mediaFolderServices from "./media-folders/index.js";
+export * as mediaShareLinkServices from "./media-share-links/index.js";
+export * as optionServices from "./options/index.js";
+export * as permissionServices from "./permissions/index.js";
+export * as processedImageServices from "./processed-images/index.js";
+export * as roleServices from "./roles/index.js";
+export * as seedServices from "./seed/index.js";
+export * as settingServices from "./settings/index.js";
+export * as syncServices from "./sync/index.js";
+export * as userLoginServices from "./user-logins/index.js";
+export * as userTokenServices from "./user-tokens/index.js";
+export * as userServices from "./users/index.js";

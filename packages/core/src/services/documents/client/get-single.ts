@@ -10,7 +10,7 @@ import T from "../../../translations/index.js";
 import type { ClientDocumentResponse } from "../../../types/response.js";
 import { groupDocumentFilters } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { collectionServices, documentBrickServices } from "../../index.js";
 
 const getSingle: ServiceFn<
 	[
@@ -25,7 +25,7 @@ const getSingle: ServiceFn<
 	const Documents = Repository.get("documents", context.db, context.config.db);
 	const DocumentsFormatter = Formatter.get("documents");
 
-	const collectionRes = services.collections.getSingleInstance(context, {
+	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -73,7 +73,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const bricksRes = await services.documentBricks.getMultiple(context, {
+	const bricksRes = await documentBrickServices.getMultiple(context, {
 		versionId: documentRes.data.version_id,
 		collectionKey: collectionRes.data.key,
 		versionType: data.status,

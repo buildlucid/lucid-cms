@@ -3,7 +3,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/collections.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { collectionServices } from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -24,7 +24,7 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
-		const collections = await serviceWrapper(services.collections.getAll, {
+		const collectionsRes = await serviceWrapper(collectionServices.getAll, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
@@ -43,12 +43,12 @@ const getAllController = factory.createHandlers(
 				includeDocumentId: true,
 			},
 		);
-		if (collections.error) throw new LucidAPIError(collections.error);
+		if (collectionsRes.error) throw new LucidAPIError(collectionsRes.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: collections.data,
+				data: collectionsRes.data,
 			}),
 		);
 	},

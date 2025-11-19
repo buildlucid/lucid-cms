@@ -2,7 +2,6 @@ import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
 
 const resendSingle: ServiceFn<
 	[

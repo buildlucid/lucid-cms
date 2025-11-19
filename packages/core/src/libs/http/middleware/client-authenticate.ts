@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
-import services from "../../../services/index.js";
+import { clientIntegrationServices } from "../../../services/index.js";
 import T from "../../../translations/index.js";
 import type {
 	LucidClientIntegrationAuth,
@@ -41,7 +41,7 @@ const clientAuthentication = createMiddleware(
 		}
 
 		const verifyApiKey = await serviceWrapper(
-			services.clientIntegrations.verifyApiKey,
+			clientIntegrationServices.verifyApiKey,
 			{
 				transaction: false,
 				defaultError: {

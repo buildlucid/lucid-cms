@@ -1,7 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { controllerSchemas } from "../../../../schemas/media-share-links.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
@@ -25,7 +24,7 @@ const deleteAllController = factory.createHandlers(
 	authenticate,
 	permissions([Permissions.DeleteMedia]),
 	async (c) => {
-		const deleteRes = await serviceWrapper(services.mediaShareLinks.deleteAll, {
+		const deleteRes = await serviceWrapper(mediaShareLinkServices.deleteAll, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

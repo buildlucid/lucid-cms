@@ -3,7 +3,7 @@ import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import executeHooks from "../../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { documentServices } from "../../index.js";
 
 /**
  * Deletes a single document
@@ -18,12 +18,9 @@ const deleteDocument: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = await services.documents.checks.checkCollection(
-		context,
-		{
-			key: data.collectionKey,
-		},
-	);
+	const collectionRes = await documentServices.checks.checkCollection(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	const Documents = Repository.get("documents", context.db, context.config.db);
@@ -103,7 +100,7 @@ const deleteDocument: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
-		services.documents.nullifyDocumentReferences(context, {
+		documentServices.nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),

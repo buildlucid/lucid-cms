@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -37,7 +37,7 @@ const deleteSingleController = factory.createHandlers(
 		const { id, linkId } = c.req.valid("param");
 
 		const deleteRes = await serviceWrapper(
-			services.mediaShareLinks.deleteSingle,
+			mediaShareLinkServices.deleteSingle,
 			{
 				transaction: true,
 				defaultError: {

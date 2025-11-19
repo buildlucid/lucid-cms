@@ -1,7 +1,7 @@
 import type { ServiceFn } from "../../utils/services/types.js";
 import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import Repository from "../../libs/repositories/index.js";
-import services from "../index.js";
+import { licenseServices } from "../index.js";
 
 const updateLicense: ServiceFn<
 	[
@@ -36,7 +36,7 @@ const updateLicense: ServiceFn<
 	if (keyRes.error) return keyRes;
 	if (last4Res.error) return last4Res;
 
-	const verifyRes = await services.license.verifyLicense(context);
+	const verifyRes = await licenseServices.verifyLicense(context);
 	if (verifyRes.error) return verifyRes;
 
 	return {

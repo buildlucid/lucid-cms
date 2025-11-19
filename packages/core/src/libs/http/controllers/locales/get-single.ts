@@ -3,7 +3,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/locales.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { localeServices } from "../../../../services/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -34,7 +34,7 @@ const getSingleController = factory.createHandlers(
 	async (c) => {
 		const { code } = c.req.valid("param");
 
-		const localeRes = await serviceWrapper(services.locales.getSingle, {
+		const localeRes = await serviceWrapper(localeServices.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

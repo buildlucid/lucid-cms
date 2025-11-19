@@ -1,7 +1,2 @@
-import defaultOptions from "./default-options.js";
-import defaultRoles from "./default-roles.js";
-
-export default {
-	defaultOptions,
-	defaultRoles,
-};
+export { default as defaultOptions } from "./default-options.js";
+export { default as defaultRoles } from "./default-roles.js";

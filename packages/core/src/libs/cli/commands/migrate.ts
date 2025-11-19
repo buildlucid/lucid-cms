@@ -1,5 +1,5 @@
 import { confirm } from "@inquirer/prompts";
-import services from "../../../services/index.js";
+import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
@@ -22,14 +22,14 @@ const runSyncTasks = async (
 	const queue = passthroughQueueAdapter();
 
 	const [localesResult, collectionsResult] = await Promise.all([
-		services.sync.syncLocales({
+		syncServices.syncLocales({
 			db: config.db.client,
 			config: config,
 			queue: queue,
 			env: null,
 			kv: kv,
 		}),
-		services.sync.syncCollections({
+		syncServices.syncCollections({
 			db: config.db.client,
 			config: config,
 			queue: queue,

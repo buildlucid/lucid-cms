@@ -1,9 +1,3 @@
-import updateLicense from "./update.js";
-import verifyLicense from "./verify.js";
-import licenseStatus from "./status.js";
-
-export default {
-	updateLicense,
-	verifyLicense,
-	licenseStatus,
-};
+export { default as updateLicense } from "./update.js";
+export { default as verifyLicense } from "./verify.js";
+export { default as licenseStatus } from "./status.js";

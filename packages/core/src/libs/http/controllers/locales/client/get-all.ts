@@ -3,7 +3,7 @@ import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/locales.js";
-import services from "../../../../../services/index.js";
+import { localeServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
@@ -41,7 +41,7 @@ const getAllController = factory.createHandlers(
 		staticKey: cacheKeys.http.static.clientLocales,
 	}),
 	async (c) => {
-		const locales = await serviceWrapper(services.locales.getAll, {
+		const locales = await serviceWrapper(localeServices.getAll, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

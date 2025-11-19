@@ -3,7 +3,7 @@ import T from "../../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../../schemas/media.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../../services/index.js";
+import { mediaServices } from "../../../../../services/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
@@ -41,7 +41,7 @@ const processMediaController = factory.createHandlers(
 	validate("param", controllerSchemas.client.processMedia.params),
 	validate("json", controllerSchemas.client.processMedia.body),
 	async (c) => {
-		const media = await serviceWrapper(services.media.processMedia, {
+		const media = await serviceWrapper(mediaServices.processMedia, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

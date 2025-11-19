@@ -1,11 +1,4 @@
-import errorRedirectUrl from "./error-redirect-url.js";
-import getProviders from "./get-providers.js";
-import initiate from "./initiate.js";
-import oidcCallback from "./oidc-callback.js";
-
-export default {
-	getProviders,
-	initiate,
-	oidcCallback,
-	errorRedirectUrl,
-};
+export { default as errorRedirectUrl } from "./error-redirect-url.js";
+export { default as getProviders } from "./get-providers.js";
+export { default as initiate } from "./initiate.js";
+export { default as oidcCallback } from "./oidc-callback.js";

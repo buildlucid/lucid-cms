@@ -6,7 +6,7 @@ import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { authServices } from "../../index.js";
 
 const verifyToken = async (
 	c: LucidHonoContext,
@@ -111,8 +111,8 @@ const verifyToken = async (
 		};
 	} catch (err) {
 		const [refreshRes, accessRes] = await Promise.all([
-			services.auth.refreshToken.clearToken(c),
-			services.auth.accessToken.clearToken(c),
+			authServices.refreshToken.clearToken(c),
+			authServices.accessToken.clearToken(c),
 		]);
 		if (refreshRes.error) return refreshRes;
 		if (accessRes.error) return accessRes;

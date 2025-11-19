@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { documentVersionServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -41,7 +41,7 @@ const restoreRevisionController = factory.createHandlers(
 		const { collectionKey, id, versionId } = c.req.valid("param");
 
 		const restoreRevisionRes = await serviceWrapper(
-			services.documentVersions.restoreRevision,
+			documentVersionServices.restoreRevision,
 			{
 				transaction: true,
 				defaultError: {

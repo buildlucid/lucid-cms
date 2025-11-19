@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { documentServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -46,7 +46,7 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 		const { collectionKey, id } = c.req.valid("param");
 
 		const deleteSinglePermanently = await serviceWrapper(
-			services.documents.deleteSinglePermanently,
+			documentServices.deleteSinglePermanently,
 			{
 				transaction: true,
 				defaultError: {

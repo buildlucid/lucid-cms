@@ -9,7 +9,7 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { collectionServices, documentBrickServices } from "../index.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -39,7 +39,7 @@ const promoteVersion: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
-	const collectionRes = services.collections.getSingleInstance(context, {
+	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
@@ -295,7 +295,7 @@ const promoteVersion: ServiceFn<
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 
-	const insertRes = await services.documentBricks.insertBrickTables(context, {
+	const insertRes = await documentBrickServices.insertBrickTables(context, {
 		tables: sortedTables,
 		collection: collectionRes.data,
 	});

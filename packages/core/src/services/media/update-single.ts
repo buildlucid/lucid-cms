@@ -6,7 +6,7 @@ import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { mediaServices, processedImageServices } from "../index.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 
 const updateSingle: ServiceFn<
@@ -91,21 +91,18 @@ const updateSingle: ServiceFn<
 	}
 
 	let updateObjectRes: Awaited<
-		ReturnType<typeof services.media.strategies.update>
+		ReturnType<typeof mediaServices.strategies.update>
 	>["data"];
 
 	let renamedKey: string | undefined;
 
 	if (data.key !== undefined && data.fileName !== undefined) {
-		const awaitingSync = await services.media.checks.checkAwaitingSync(
-			context,
-			{
-				key: data.key,
-			},
-		);
+		const awaitingSync = await mediaServices.checks.checkAwaitingSync(context, {
+			key: data.key,
+		});
 		if (awaitingSync.error) return awaitingSync;
 
-		const updateRes = await services.media.strategies.update(context, {
+		const updateRes = await mediaServices.strategies.update(context, {
 			id: mediaRes.data.id,
 			previousSize: mediaRes.data.file_size,
 			previousKey: mediaRes.data.key,
@@ -136,7 +133,7 @@ const updateSingle: ServiceFn<
 				visibility: targetVisibility,
 			});
 
-			const renameRes = await services.media.strategies.rename(context, {
+			const renameRes = await mediaServices.strategies.rename(context, {
 				from: mediaRes.data.key,
 				to: newKey,
 			});
@@ -228,7 +225,7 @@ const updateSingle: ServiceFn<
 				})
 			: Promise.resolve({ error: undefined, data: undefined }),
 		shouldClearProcessed
-			? services.processedImages.clearSingle(context, {
+			? processedImageServices.clearSingle(context, {
 					id: mediaRes.data.id,
 				})
 			: Promise.resolve({ error: undefined, data: undefined }),

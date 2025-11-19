@@ -1,7 +1,2 @@
-import getMultiple from "./get-multiple.js";
-import getSingle from "./get-single.js";
-
-export default {
-	getMultiple,
-	getSingle,
-};
+export { default as getMultiple } from "./get-multiple.js";
+export { default as getSingle } from "./get-single.js";

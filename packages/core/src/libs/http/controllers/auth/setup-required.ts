@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/auth.js";
-import services from "../../../../services/index.js";
+import { authServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -24,7 +24,7 @@ const setupRequiredController = factory.createHandlers(
 		validateResponse: true,
 	}),
 	async (c: LucidHonoContext) => {
-		const setupRequiredRes = await serviceWrapper(services.auth.setupRequired, {
+		const setupRequiredRes = await serviceWrapper(authServices.setupRequired, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

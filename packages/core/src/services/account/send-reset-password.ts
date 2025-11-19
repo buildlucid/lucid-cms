@@ -3,7 +3,7 @@ import constants from "../../constants/constants.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import services from "../index.js";
+import { emailServices, userTokenServices } from "../index.js";
 
 const sendResetPassword: ServiceFn<
 	[
@@ -52,14 +52,14 @@ const sendResetPassword: ServiceFn<
 		minutes: constants.passwordResetTokenExpirationMinutes,
 	}).toISOString();
 
-	const userToken = await services.userTokens.createSingle(context, {
+	const userToken = await userTokenServices.createSingle(context, {
 		userId: userExistsRes.data.id,
 		tokenType: constants.userTokens.passwordReset,
 		expiryDate: expiryDate,
 	});
 	if (userToken.error) return userToken;
 
-	const sendEmail = await services.emails.sendEmail(context, {
+	const sendEmail = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: T("reset_password_email_subject"),

@@ -1,13 +1,5 @@
-import update from "./update.js";
-import deleteObject from "./delete.js";
-import getPresignedUrl from "./get-presigned-url.js";
-import syncMedia from "./sync-media.js";
-import rename from "./rename.js";
-
-export default {
-	update,
-	delete: deleteObject,
-	getPresignedUrl,
-	syncMedia,
-	rename,
-};
+export { default as update } from "./update.js";
+export { default as deleteObject } from "./delete.js";
+export { default as getPresignedUrl } from "./get-presigned-url.js";
+export { default as syncMedia } from "./sync-media.js";
+export { default as rename } from "./rename.js";

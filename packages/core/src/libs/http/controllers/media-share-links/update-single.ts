@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
-import services from "../../../../services/index.js";
+import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -41,7 +41,7 @@ const updateSingleController = factory.createHandlers(
 		const body = c.req.valid("json");
 
 		const updateRes = await serviceWrapper(
-			services.mediaShareLinks.updateSingle,
+			mediaShareLinkServices.updateSingle,
 			{
 				transaction: true,
 				defaultError: {

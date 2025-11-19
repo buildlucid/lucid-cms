@@ -1,6 +1,6 @@
 import Repository from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import services from "../../index.js";
+import { userServices } from "../../index.js";
 
 /**
  * Deletes a single user
@@ -15,7 +15,7 @@ const deleteUser: ServiceFn<
 > = async (context, data) => {
 	const User = Repository.get("users", context.db, context.config.db);
 
-	await services.users.checks.checkNotLastUser(context);
+	await userServices.checks.checkNotLastUser(context);
 
 	const deleteRes = await User.deleteSingle({
 		where: [

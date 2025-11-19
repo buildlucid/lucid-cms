@@ -2,7 +2,7 @@ import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { describeRoute } from "hono-openapi";
-import services from "../../../../services/index.js";
+import { clientIntegrationServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -45,7 +45,7 @@ const updateSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 
 		const updateSingleRes = await serviceWrapper(
-			services.clientIntegrations.updateSingle,
+			clientIntegrationServices.updateSingle,
 			{
 				transaction: true,
 				defaultError: {

@@ -1,5 +1,1 @@
-import uploadSingle from "./upload-single.js";
-
-export default {
-	uploadSingle,
-};
+export { default as uploadSingle } from "./upload-single.js";
