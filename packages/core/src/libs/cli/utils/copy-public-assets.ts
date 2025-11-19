@@ -89,7 +89,7 @@ const copyPublicAssets = async (props: {
 }): ServiceResponse<undefined> => {
 	try {
 		const silent = props.silent ?? false;
-		const assetsPath = path.join(currentDir, "../../../public");
+		const assetsPath = path.join(currentDir, "../../../../public");
 
 		const outDir = path.join(
 			props.config.compilerOptions.paths.outDir,

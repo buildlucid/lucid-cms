@@ -11,7 +11,7 @@ const getBuildPaths = (config: Config, cwd = process.cwd()) => {
 
 	return {
 		//* the input location for the admin SPA. this is where the admin package outputs its vite build
-		adminInput: join(currentDir, "../", constants.directories.admin),
+		adminInput: join(currentDir, "../../../../", constants.directories.admin),
 		//* the output location for the admin SPA
 		adminOutput: join(
 			cwd,

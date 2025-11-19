@@ -76,7 +76,7 @@ const prerenderMjmlTemplates = async (props: {
 		const projectTemplatePath =
 			props.config.compilerOptions.paths.emailTemplates ??
 			path.resolve("./templates");
-		const packageTemplatePath = path.join(currentDir, "../../../templates");
+		const packageTemplatePath = path.join(currentDir, "../../../../templates");
 
 		await processTemplatesInDirectory(
 			projectTemplatePath,

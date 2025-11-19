@@ -11,7 +11,7 @@ import {
 } from "@lucidcms/core/helpers";
 import type { LucidHonoGeneric, RuntimeAdapter } from "@lucidcms/core/types";
 import { Hono } from "hono";
-import { build, type BuildOptions, type RolldownOutput } from "rolldown";
+import { build, type BuildOptions } from "rolldown";
 import {
 	type GetPlatformProxyOptions,
 	getPlatformProxy,
