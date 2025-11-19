@@ -11,7 +11,7 @@ import {
 } from "@lucidcms/core/helpers";
 import type { LucidHonoGeneric, RuntimeAdapter } from "@lucidcms/core/types";
 import { Hono } from "hono";
-import { build } from "rolldown";
+import { build, type BuildOptions, type RolldownOutput } from "rolldown";
 import {
 	type GetPlatformProxyOptions,
 	getPlatformProxy,
@@ -254,22 +254,15 @@ export default {
 
 					await writeFile(tempEntryFile, entry);
 
-					const buildInput = {
-						[constants.ENTRY_FILE]: tempEntryFile,
-						...options.pluginCompileArtifacts,
-					};
-
-					//* build the entry file
-					await build({
-						input: buildInput,
+					const buildOptions: BuildOptions = {
 						output: {
 							dir: options.outputPath,
-							format: "esm",
+							format: "esm" as const,
 							minify: true,
 							inlineDynamicImports: true,
 						},
 						treeshake: true,
-						platform: "node",
+						platform: "node" as const,
 						plugins: [
 							{
 								name: "import-meta-polyfill",
@@ -289,12 +282,34 @@ export default {
 							]),
 						],
 						external: ["sharp", "ws", "better-sqlite3", "file-type"],
-					});
+					};
+
+					//* build the entry file and plugin artifacts
+					await Promise.all([
+						build({
+							input: {
+								[constants.ENTRY_FILE]: tempEntryFile,
+							},
+							...buildOptions,
+						}),
+						...Object.entries(options.pluginCompileArtifacts).map(
+							([key, artifact]) =>
+								build({
+									input: {
+										[key]: artifact,
+									},
+									...buildOptions,
+								}),
+						),
+					]);
 
 					//* clean up temporary files
-					for (const artifact of Object.values(buildInput)) {
-						await unlink(artifact);
-					}
+					await Promise.all([
+						unlink(tempEntryFile),
+						...Object.entries(options.pluginCompileArtifacts).map(
+							([_, artifact]) => unlink(artifact),
+						),
+					]);
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error
