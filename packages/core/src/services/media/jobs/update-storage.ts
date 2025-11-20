@@ -1,17 +1,20 @@
-import Repository from "../../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	ProcessedImagesRepository,
+	OptionsRepository,
+} from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
  * Recalculates and updates the media storage usage option
  */
 const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
-	const Media = Repository.get("media", context.db, context.config.db);
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const Media = new MediaRepository(context.db, context.config.db);
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);
-	const Options = Repository.get("options", context.db, context.config.db);
+	const Options = new OptionsRepository(context.db, context.config.db);
 
 	const [mediaItemsRes, processedImagesRes] = await Promise.all([
 		Media.selectMultiple({

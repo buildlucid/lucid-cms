@@ -2,7 +2,7 @@ import { deleteCookie, getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
-import Repository from "../../../libs/repositories/index.js";
+import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
@@ -16,7 +16,7 @@ const clearToken = async (c: LucidHonoContext): ServiceResponse<undefined> => {
 	}
 	const config = c.get("config");
 
-	const UserTokens = Repository.get("user-tokens", config.db.client, config.db);
+	const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
 	const decode = (await verify(_refresh, config.keys.refreshTokenSecret)) as {
 		id: number;

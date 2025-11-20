@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import extractCollectionKey from "../../libs/collection/helpers/extract-collection-key.js";
 import {
 	getDocumentVersionTableSchema,
@@ -25,8 +25,7 @@ const getMultipleFieldMeta: ServiceFn<
 	],
 	Array<BrickQueryResponse>
 > = async (context, data) => {
-	const DocumentVersions = Repository.get(
-		"document-versions",
+	const DocumentVersions = new DocumentVersionsRepository(
 		context.db,
 		context.config.db,
 	);

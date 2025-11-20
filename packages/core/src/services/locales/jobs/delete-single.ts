@@ -1,5 +1,5 @@
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
-import Repository from "../../../libs/repositories/index.js";
+import { LocalesRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -13,7 +13,7 @@ const deleteLocale: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Locales = Repository.get("locales", context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db, context.config.db);
 
 	const deleteRes = await Locales.deleteSingle({
 		where: [

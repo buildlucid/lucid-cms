@@ -1,6 +1,9 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	MediaFoldersRepository,
+} from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 
@@ -19,9 +22,8 @@ const deleteBatch: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const Media = Repository.get("media", context.db, context.config.db);
-	const MediaFolders = Repository.get(
-		"media-folders",
+	const Media = new MediaRepository(context.db, context.config.db);
+	const MediaFolders = new MediaFoldersRepository(
 		context.db,
 		context.config.db,
 	);

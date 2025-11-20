@@ -1,5 +1,8 @@
 import formatter from "../../libs/formatters/index.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	UserAuthProvidersRepository,
+	UsersRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -20,9 +23,8 @@ const unlinkAuthProvider: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Users = Repository.get("users", context.db, context.config.db);
-	const UserAuthProviders = Repository.get(
-		"user-auth-providers",
+	const Users = new UsersRepository(context.db, context.config.db);
+	const UserAuthProviders = new UserAuthProvidersRepository(
 		context.db,
 		context.config.db,
 	);

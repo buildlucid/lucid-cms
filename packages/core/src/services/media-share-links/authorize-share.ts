@@ -1,5 +1,5 @@
 import formatter from "../../libs/formatters/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import constants from "../../constants/constants.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
@@ -22,8 +22,7 @@ const authorizeShare: ServiceFn<
 		passwordRequired: boolean;
 	}
 > = async (context, data) => {
-	const MediaShareLinks = Repository.get(
-		"media-share-links",
+	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db,
 		context.config.db,
 	);

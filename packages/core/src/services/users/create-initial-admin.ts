@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import formatter from "../../libs/formatters/index.js";
@@ -18,7 +18,7 @@ const createInitialAdmin: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const userCountRes = await Users.count({ where: [] });
 	if (userCountRes.error) return userCountRes;

@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -13,8 +13,7 @@ const updateSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const MediaFolders = Repository.get(
-		"media-folders",
+	const MediaFolders = new MediaFoldersRepository(
 		context.db,
 		context.config.db,
 	);

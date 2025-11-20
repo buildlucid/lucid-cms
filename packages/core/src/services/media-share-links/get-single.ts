@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import { mediaShareLinksFormatter } from "../../libs/formatters/index.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -12,8 +12,7 @@ const getSingle: ServiceFn<
 	],
 	MediaShareLinkResponse
 > = async (context, data) => {
-	const MediaShareLinks = Repository.get(
-		"media-share-links",
+	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db,
 		context.config.db,
 	);

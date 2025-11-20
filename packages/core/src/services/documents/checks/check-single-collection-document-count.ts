@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { LucidDocumentTableName } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -25,7 +25,7 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 		};
 	}
 
-	const Document = Repository.get("documents", context.db, context.config.db);
+	const Document = new DocumentsRepository(context.db, context.config.db);
 
 	const existingDocumentRes = await Document.selectMultiple(
 		{

@@ -1,12 +1,12 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 const defaultOptions: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const Options = Repository.get("options", context.db, context.config.db);
+		const Options = new OptionsRepository(context.db, context.config.db);
 
 		const mediaStorageOptionRes = await Options.selectSingle({
 			select: ["name"],

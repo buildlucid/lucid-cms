@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import formatter, {
 	mediaFoldersFormatter,
 } from "../../libs/formatters/index.js";
@@ -17,8 +17,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const MediaFolders = Repository.get(
-		"media-folders",
+	const MediaFolders = new MediaFoldersRepository(
 		context.db,
 		context.config.db,
 	);

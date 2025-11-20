@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
-import Repository from "../../../libs/repositories/index.js";
+import { AuthStatesRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import urlAddPath from "../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -19,11 +19,7 @@ const authRedirectUrl: ServiceFn<
 		redirectUrl: string;
 	}
 > = async (context, data) => {
-	const AuthStates = Repository.get(
-		"auth-states",
-		context.db,
-		context.config.db,
-	);
+	const AuthStates = new AuthStatesRepository(context.db, context.config.db);
 
 	const baseRedirectUrl = urlAddPath(
 		context.config.host,

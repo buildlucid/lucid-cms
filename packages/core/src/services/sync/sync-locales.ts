@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import logger from "../../libs/logger/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { LocalesRepository } from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -11,7 +11,7 @@ import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 const syncLocales: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
-	const Locales = Repository.get("locales", context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db, context.config.db);
 	const localeCodes = context.config.localization.locales.map(
 		(locale) => locale.code,
 	);

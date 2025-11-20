@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -20,7 +20,7 @@ const getSingle: ServiceFn<
 	],
 	DocumentResponse
 > = async (context, data) => {
-	const Document = Repository.get("documents", context.db, context.config.db);
+	const Document = new DocumentsRepository(context.db, context.config.db);
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,

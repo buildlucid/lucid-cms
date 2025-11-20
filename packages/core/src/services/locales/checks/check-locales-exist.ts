@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { LocalesRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -19,7 +19,7 @@ const checkLocalesExist: ServiceFn<
 		};
 	}
 
-	const Locales = Repository.get("locales", context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db, context.config.db);
 
 	const localesRes = await Locales.selectMultiple({
 		select: ["code"],

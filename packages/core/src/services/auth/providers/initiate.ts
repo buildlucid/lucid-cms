@@ -5,7 +5,11 @@ import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js"
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import formatter from "../../../libs/formatters/index.js";
-import Repository from "../../../libs/repositories/index.js";
+import {
+	UserTokensRepository,
+	AuthStatesRepository,
+	UsersRepository,
+} from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type {
 	AuthStateActionType,
@@ -25,17 +29,9 @@ const initiate: ServiceFn<
 	],
 	InitiateAuthResponse
 > = async (context, data) => {
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
-	const AuthStates = Repository.get(
-		"auth-states",
-		context.db,
-		context.config.db,
-	);
-	const Users = Repository.get("users", context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
+	const AuthStates = new AuthStatesRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	//* check if the provider is enabled and exists
 	const availableProviders = getAvailableProviders(context.config);

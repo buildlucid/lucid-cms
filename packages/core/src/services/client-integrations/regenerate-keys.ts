@@ -1,5 +1,5 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
-import Repository from "../../libs/repositories/index.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
@@ -15,8 +15,7 @@ const regenerateKeys: ServiceFn<
 		apiKey: string;
 	}
 > = async (context, data) => {
-	const ClientIntegrations = Repository.get(
-		"client-integrations",
+	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db,
 		context.config.db,
 	);

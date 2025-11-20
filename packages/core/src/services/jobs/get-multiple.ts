@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { QueueJobsRepository } from "../../libs/repositories/index.js";
 import formatter, { jobsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { JobResponse } from "../../types/response.js";
@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Jobs = Repository.get("queue-jobs", context.db, context.config.db);
+	const Jobs = new QueueJobsRepository(context.db, context.config.db);
 
 	const jobsRes = await Jobs.selectMultipleFiltered({
 		select: [

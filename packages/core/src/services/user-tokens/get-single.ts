@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { UserTokensRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserTokenType } from "../../libs/db-adapter/types.js";
 
@@ -15,11 +15,7 @@ const getSingle: ServiceFn<
 		user_id: number | null;
 	}
 > = async (context, data) => {
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
 
 	const userTokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],

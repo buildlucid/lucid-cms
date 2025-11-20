@@ -2,7 +2,11 @@ import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	MediaTranslationsRepository,
+	MediaAwaitingSyncRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -37,14 +41,12 @@ const updateSingle: ServiceFn<
 	],
 	number | undefined
 > = async (context, data) => {
-	const Media = Repository.get("media", context.db, context.config.db);
-	const MediaTranslations = Repository.get(
-		"media-translations",
+	const Media = new MediaRepository(context.db, context.config.db);
+	const MediaTranslations = new MediaTranslationsRepository(
 		context.db,
 		context.config.db,
 	);
-	const MediaAwaitingSync = Repository.get(
-		"media-awaiting-sync",
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
 		context.db,
 		context.config.db,
 	);

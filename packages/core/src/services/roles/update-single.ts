@@ -1,4 +1,7 @@
-import Repository from "../../libs/repositories/index.js";
+import {
+	RolePermissionsRepository,
+	RolesRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { roleServices } from "../index.js";
@@ -14,7 +17,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Roles = Repository.get("roles", context.db, context.config.db);
+	const Roles = new RolesRepository(context.db, context.config.db);
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		data.permissions !== undefined
@@ -80,8 +83,7 @@ const updateSingle: ServiceFn<
 	if (updateRoleRes.error) return updateRoleRes;
 
 	if (validatePermsRes?.data !== undefined) {
-		const RolePermissions = Repository.get(
-			"role-permissions",
+		const RolePermissions = new RolePermissionsRepository(
 			context.db,
 			context.config.db,
 		);

@@ -3,7 +3,7 @@ import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
-import Repository from "../../../libs/repositories/index.js";
+import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearToken from "./clear-token.js";
@@ -17,7 +17,7 @@ const generateToken = async (
 
 	const config = c.get("config");
 
-	const UserTokens = Repository.get("user-tokens", config.db.client, config.db);
+	const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
 	const now = Date.now();
 	const nonce = randomBytes(8).toString("hex");

@@ -1,6 +1,6 @@
 import { addMilliseconds } from "date-fns";
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import { MediaAwaitingSyncRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -9,8 +9,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 	context,
 ) => {
-	const MediaAwaitingSync = Repository.get(
-		"media-awaiting-sync",
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
 		context.db,
 		context.config.db,
 	);

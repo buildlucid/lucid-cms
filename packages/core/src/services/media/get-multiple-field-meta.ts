@@ -1,5 +1,5 @@
 import type { MediaPropsT } from "../../libs/formatters/media.js";
-import Repository from "../../libs/repositories/index.js";
+import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultipleFieldMeta: ServiceFn<
@@ -10,7 +10,7 @@ const getMultipleFieldMeta: ServiceFn<
 	],
 	MediaPropsT[]
 > = async (context, data) => {
-	const Media = Repository.get("media", context.db, context.config.db);
+	const Media = new MediaRepository(context.db, context.config.db);
 
 	if (data.ids.length === 0) {
 		return {

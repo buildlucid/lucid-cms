@@ -1,7 +1,10 @@
 import constants from "../../../constants/constants.js";
 import { logger } from "../../../index.js";
 import formatter from "../../../libs/formatters/index.js";
-import Repository from "../../../libs/repositories/index.js";
+import {
+	UserTokensRepository,
+	UsersRepository,
+} from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ValidateInvitationResponse } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -17,12 +20,8 @@ const validateInvitation: ServiceFn<
 	],
 	ValidateInvitationResponse
 > = async (context, data) => {
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
-	const Users = Repository.get("users", context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const userTokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],

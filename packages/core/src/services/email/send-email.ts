@@ -1,6 +1,9 @@
 import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	EmailsRepository,
+	EmailTransactionsRepository,
+} from "../../libs/repositories/index.js";
 import type { EmailResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -22,9 +25,8 @@ const sendEmail: ServiceFn<
 		email: EmailResponse;
 	}
 > = async (context, data) => {
-	const Emails = Repository.get("emails", context.db, context.config.db);
-	const EmailTransactions = Repository.get(
-		"email-transactions",
+	const Emails = new EmailsRepository(context.db, context.config.db);
+	const EmailTransactions = new EmailTransactionsRepository(
 		context.db,
 		context.config.db,
 	);

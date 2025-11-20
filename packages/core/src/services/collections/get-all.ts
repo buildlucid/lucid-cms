@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -20,11 +20,7 @@ const getAll: ServiceFn<
 			(collection) => collection.getData.mode === "single",
 		);
 
-		const Documents = Repository.get(
-			"documents",
-			context.db,
-			context.config.db,
-		);
+		const Documents = new DocumentsRepository(context.db, context.config.db);
 
 		await cacheAllSchemas(context, {
 			collectionKeys: singleCollections.map((c) => c.key),

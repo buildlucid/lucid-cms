@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
-import Repository from "../../libs/repositories/index.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import constants from "../../constants/constants.js";
@@ -16,8 +16,7 @@ const verifyApiKey: ServiceFn<
 	],
 	LucidClientIntegrationAuth
 > = async (context, data) => {
-	const ClientIntegrations = Repository.get(
-		"client-integrations",
+	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db,
 		context.config.db,
 	);

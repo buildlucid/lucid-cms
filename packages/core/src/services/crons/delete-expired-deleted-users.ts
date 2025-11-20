@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
@@ -6,7 +6,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
  * Finds all soft-deleted users older than 30 days and queues them for permanent deletion
  */
 const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const compDate = getRetentionDays(context.config.softDelete, "users");
 

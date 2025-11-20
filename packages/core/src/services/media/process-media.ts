@@ -1,4 +1,7 @@
-import Repository from "../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	ProcessedImagesRepository,
+} from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import type { MediaUrlResponse } from "../../types/response.js";
 import { createMediaUrl, generateProcessKey } from "../../utils/media/index.js";
@@ -14,9 +17,8 @@ const processMedia: ServiceFn<
 	],
 	MediaUrlResponse
 > = async (context, data) => {
-	const Media = Repository.get("media", context.db, context.config.db);
-	const ProcessedImage = Repository.get(
-		"processed-images",
+	const Media = new MediaRepository(context.db, context.config.db);
+	const ProcessedImage = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);

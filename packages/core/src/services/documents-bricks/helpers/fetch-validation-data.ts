@@ -1,6 +1,10 @@
 import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
-import Repository from "../../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	UsersRepository,
+	DocumentsRepository,
+} from "../../../libs/repositories/index.js";
 import logger from "../../../libs/logger/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
@@ -234,7 +238,7 @@ const fetchMediaData = async (
 	if (mediaIds.length === 0) return [];
 
 	try {
-		const Media = Repository.get("media", context.db, context.config.db);
+		const Media = new MediaRepository(context.db, context.config.db);
 
 		const mediaRes = await Media.selectMultiple({
 			select: ["id", "file_extension", "width", "height", "type"],
@@ -270,7 +274,7 @@ const fetchUserData = async (
 	if (userIds.length === 0) return [];
 
 	try {
-		const Users = Repository.get("users", context.db, context.config.db);
+		const Users = new UsersRepository(context.db, context.config.db);
 
 		const usersRes = await Users.selectMultiple({
 			select: ["id"],
@@ -351,7 +355,7 @@ const fetchDocumentsFromCollection = async (
 			return [];
 		}
 
-		const Document = Repository.get("documents", context.db, context.config.db);
+		const Document = new DocumentsRepository(context.db, context.config.db);
 
 		const documentIdRes = await Document.selectMultiple(
 			{

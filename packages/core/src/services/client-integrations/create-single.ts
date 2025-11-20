@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -16,8 +16,7 @@ const createSingle: ServiceFn<
 		apiKey: string;
 	}
 > = async (context, data) => {
-	const ClientIntegrations = Repository.get(
-		"client-integrations",
+	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db,
 		context.config.db,
 	);

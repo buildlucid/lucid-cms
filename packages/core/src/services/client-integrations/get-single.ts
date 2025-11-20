@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
@@ -12,8 +12,7 @@ const getSingle: ServiceFn<
 	],
 	ClientIntegrationResponse
 > = async (context, data) => {
-	const ClientIntegrations = Repository.get(
-		"client-integrations",
+	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db,
 		context.config.db,
 	);

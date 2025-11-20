@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { RolesRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/roles.js";
 import formatter, { rolesFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Roles = Repository.get("roles", context.db, context.config.db);
+	const Roles = new RolesRepository(context.db, context.config.db);
 
 	const rolesRes = await Roles.selectMultipleFilteredFixed({
 		queryParams: data.query,

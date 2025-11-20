@@ -5,15 +5,9 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import logger from "../../logger/index.js";
-import Repository from "../../repositories/index.js";
+import { QueueJobsRepository } from "../../repositories/index.js";
 import getJobHandler from "../job-handlers.js";
-import type {
-	QueueAdapter,
-	QueueAdapterInstance,
-	QueueEvent,
-	QueueJobHandlerFn,
-	QueueJobHandlers,
-} from "../types.js";
+import type { QueueAdapterInstance, QueueEvent } from "../types.js";
 
 const ADAPTER_KEY = "passthrough";
 
@@ -28,8 +22,7 @@ const executeJob = async (data: {
 	logScope: string;
 }): ServiceResponse<undefined> => {
 	const handler = getJobHandler(data.event);
-	const QueueJobs = Repository.get(
-		"queue-jobs",
+	const QueueJobs = new QueueJobsRepository(
 		data.serviceContext.db,
 		data.serviceContext.config.db,
 	);
@@ -201,8 +194,7 @@ function passthroughQueueAdapter(
 					const jobId = randomUUID();
 					const now = new Date();
 					const status = "pending";
-					const QueueJobs = Repository.get(
-						"queue-jobs",
+					const QueueJobs = new QueueJobsRepository(
 						params.serviceContext.db,
 						params.serviceContext.config.db,
 					);
@@ -283,8 +275,7 @@ function passthroughQueueAdapter(
 
 					const now = new Date();
 					const status = "pending";
-					const QueueJobs = Repository.get(
-						"queue-jobs",
+					const QueueJobs = new QueueJobsRepository(
 						params.serviceContext.db,
 						params.serviceContext.config.db,
 					);

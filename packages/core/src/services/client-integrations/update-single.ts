@@ -1,5 +1,5 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
-import Repository from "../../libs/repositories/index.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -14,8 +14,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const ClientIntegrations = Repository.get(
-		"client-integrations",
+	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db,
 		context.config.db,
 	);

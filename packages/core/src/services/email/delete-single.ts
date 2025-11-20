@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { EmailsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteSingle: ServiceFn<
@@ -9,7 +9,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Emails = Repository.get("emails", context.db, context.config.db);
+	const Emails = new EmailsRepository(context.db, context.config.db);
 
 	const deleteEmailRes = await Emails.deleteSingle({
 		returning: ["id"],

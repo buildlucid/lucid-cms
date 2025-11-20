@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { LocalesRepository } from "../../libs/repositories/index.js";
 import { localesFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LocalesResponse } from "../../types/response.js";
@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	LocalesResponse
 > = async (context, data) => {
-	const Locales = Repository.get("locales", context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db, context.config.db);
 
 	const configLocale = context.config.localization.locales.find(
 		(locale) => locale.code === data.code,

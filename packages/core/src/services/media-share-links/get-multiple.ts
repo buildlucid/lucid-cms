@@ -1,7 +1,7 @@
 import formatter, {
 	mediaShareLinksFormatter,
 } from "../../libs/formatters/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleShareLinksQueryParams } from "../../schemas/media-share-links.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -18,8 +18,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const MediaShareLinks = Repository.get(
-		"media-share-links",
+	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db,
 		context.config.db,
 	);

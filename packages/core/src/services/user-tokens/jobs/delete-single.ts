@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -12,11 +12,7 @@ const deleteToken: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
 
 	const deleteRes = await UserTokens.deleteSingle({
 		where: [

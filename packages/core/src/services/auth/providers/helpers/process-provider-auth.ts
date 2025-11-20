@@ -1,6 +1,10 @@
 import constants from "../../../../constants/constants.js";
 import formatter from "../../../../libs/formatters/index.js";
-import Repository from "../../../../libs/repositories/index.js";
+import {
+	UsersRepository,
+	UserTokensRepository,
+	UserAuthProvidersRepository,
+} from "../../../../libs/repositories/index.js";
 import T from "../../../../translations/index.js";
 import type { AuthStateActionType } from "../../../../types.js";
 import urlAddPath from "../../../../utils/helpers/url-add-path.js";
@@ -29,17 +33,12 @@ const processProviderAuth: ServiceFn<
 		grantAuthentication: boolean;
 	}
 > = async (context, data) => {
-	const UserAuthProviders = Repository.get(
-		"user-auth-providers",
+	const UserAuthProviders = new UserAuthProvidersRepository(
 		context.db,
 		context.config.db,
 	);
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
-	const Users = Repository.get("users", context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const redirectUrl = urlAddPath(
 		context.config.host,

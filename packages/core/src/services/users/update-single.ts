@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -28,7 +28,7 @@ const updateSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	if (data.auth.id === data.userId) {
 		return {

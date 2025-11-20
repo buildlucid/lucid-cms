@@ -1,5 +1,8 @@
 import mime from "mime-types";
-import Repository from "../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	MediaAwaitingSyncRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -19,9 +22,8 @@ const getPresignedUrl: ServiceFn<
 		headers?: Record<string, string>;
 	}
 > = async (context, data) => {
-	const Media = Repository.get("media", context.db, context.config.db);
-	const MediaAwaitingSync = Repository.get(
-		"media-awaiting-sync",
+	const Media = new MediaRepository(context.db, context.config.db);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
 		context.db,
 		context.config.db,
 	);

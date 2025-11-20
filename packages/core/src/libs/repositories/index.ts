@@ -1,188 +1,25 @@
-import T from "../../translations/index.js";
-import { LucidError } from "../../utils/errors/index.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
-import type { KyselyDB } from "../db-adapter/types.js";
-import ClientIntegrationsRepository from "./client-integrations.js";
-import CollectionMigrationsRepository from "./collection-migrations.js";
-import CollectionsRepository from "./collections.js";
-import DocumentBricksRepository from "./document-bricks.js";
-import DocumentVersionsRepository from "./document-versions.js";
-import DocumentsRepository from "./documents.js";
-import EmailTransactionsRepository from "./email-transactions.js";
-import EmailsRepository from "./emails.js";
-import LocalesRepository from "./locales.js";
-import MediaRepository from "./media.js";
-import MediaAwaitingSyncRepository from "./media-awaiting-sync.js";
-import MediaFoldersRepository from "./media-folders.js";
-import MediaShareLinksRepository from "./media-share-links.js";
-import MediaTranslationsRepository from "./media-translations.js";
-import OptionsRepository from "./options.js";
-import ProcessedImagesRepository from "./processed-images.js";
-import QueueJobsRepository from "./queue-jobs.js";
-import RolePermissionsRepository from "./role-permissions.js";
-import RolesRepository from "./roles.js";
-import UserLoginsRepository from "./user-logins.js";
-import UserRolesRepository from "./user-roles.js";
-import UserAuthProvidersRepository from "./user-auth-providers.js";
-import AuthStatesRepository from "./auth-states.js";
-// Repositories
-import UserTokensRepository from "./user-tokens.js";
-import UsersRepository from "./users.js";
-
-// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
-class Repository {
-	static get<T extends keyof RepositoryClassMap>(
-		repository: T,
-		db: KyselyDB,
-		dbAdapter: DatabaseAdapter,
-	): RepositoryReturnType<T> {
-		switch (repository) {
-			case "user-tokens":
-				return new UserTokensRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "user-logins":
-				return new UserLoginsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "user-auth-providers":
-				return new UserAuthProvidersRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collections":
-				return new CollectionsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "collection-migrations":
-				return new CollectionMigrationsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "documents":
-				return new DocumentsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "document-versions":
-				return new DocumentVersionsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "document-bricks":
-				return new DocumentBricksRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "emails":
-				return new EmailsRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "email-transactions":
-				return new EmailTransactionsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "locales":
-				return new LocalesRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "media":
-				return new MediaRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "media-translations":
-				return new MediaTranslationsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "media-awaiting-sync":
-				return new MediaAwaitingSyncRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "media-folders":
-				return new MediaFoldersRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "media-share-links":
-				return new MediaShareLinksRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "options":
-				return new OptionsRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "processed-images":
-				return new ProcessedImagesRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "role-permissions":
-				return new RolePermissionsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "roles":
-				return new RolesRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "user-roles":
-				return new UserRolesRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "users":
-				return new UsersRepository(db, dbAdapter) as RepositoryReturnType<T>;
-			case "client-integrations":
-				return new ClientIntegrationsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "queue-jobs":
-				return new QueueJobsRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			case "auth-states":
-				return new AuthStatesRepository(
-					db,
-					dbAdapter,
-				) as RepositoryReturnType<T>;
-			default:
-				throw new LucidError({
-					message: T("cannot_find_repository", {
-						name: repository,
-					}),
-				});
-		}
-	}
-}
-
-type RepositoryClassMap = {
-	"user-tokens": UserTokensRepository;
-	"user-logins": UserLoginsRepository;
-	"user-auth-providers": UserAuthProvidersRepository;
-	collections: CollectionsRepository;
-	"collection-migrations": CollectionMigrationsRepository;
-	emails: EmailsRepository;
-	"email-transactions": EmailTransactionsRepository;
-	locales: LocalesRepository;
-	media: MediaRepository;
-	"media-translations": MediaTranslationsRepository;
-	"media-awaiting-sync": MediaAwaitingSyncRepository;
-	"media-folders": MediaFoldersRepository;
-	"media-share-links": MediaShareLinksRepository;
-	options: OptionsRepository;
-	"processed-images": ProcessedImagesRepository;
-	"role-permissions": RolePermissionsRepository;
-	roles: RolesRepository;
-	"user-roles": UserRolesRepository;
-	users: UsersRepository;
-	"client-integrations": ClientIntegrationsRepository;
-	documents: DocumentsRepository;
-	"document-versions": DocumentVersionsRepository;
-	"document-bricks": DocumentBricksRepository;
-	"queue-jobs": QueueJobsRepository;
-	"auth-states": AuthStatesRepository;
-};
-
-type RepositoryReturnType<T extends keyof RepositoryClassMap> =
-	RepositoryClassMap[T];
-
-export default Repository;
+export { default as UserTokensRepository } from "./user-tokens.js";
+export { default as UserLoginsRepository } from "./user-logins.js";
+export { default as UserAuthProvidersRepository } from "./user-auth-providers.js";
+export { default as CollectionsRepository } from "./collections.js";
+export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
+export { default as DocumentsRepository } from "./documents.js";
+export { default as DocumentVersionsRepository } from "./document-versions.js";
+export { default as DocumentBricksRepository } from "./document-bricks.js";
+export { default as EmailsRepository } from "./emails.js";
+export { default as EmailTransactionsRepository } from "./email-transactions.js";
+export { default as LocalesRepository } from "./locales.js";
+export { default as MediaRepository } from "./media.js";
+export { default as MediaTranslationsRepository } from "./media-translations.js";
+export { default as MediaAwaitingSyncRepository } from "./media-awaiting-sync.js";
+export { default as MediaFoldersRepository } from "./media-folders.js";
+export { default as MediaShareLinksRepository } from "./media-share-links.js";
+export { default as OptionsRepository } from "./options.js";
+export { default as ProcessedImagesRepository } from "./processed-images.js";
+export { default as RolePermissionsRepository } from "./role-permissions.js";
+export { default as RolesRepository } from "./roles.js";
+export { default as UserRolesRepository } from "./user-roles.js";
+export { default as UsersRepository } from "./users.js";
+export { default as ClientIntegrationsRepository } from "./client-integrations.js";
+export { default as QueueJobsRepository } from "./queue-jobs.js";
+export { default as AuthStatesRepository } from "./auth-states.js";

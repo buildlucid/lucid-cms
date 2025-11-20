@@ -1,9 +1,8 @@
-import Repository from "../../libs/repositories/index.js";
+import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteAll: ServiceFn<[], undefined> = async (context) => {
-	const MediaShareLinks = Repository.get(
-		"media-share-links",
+	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db,
 		context.config.db,
 	);

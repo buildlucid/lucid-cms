@@ -1,15 +1,11 @@
-import Repository from "../../libs/repositories/index.js";
+import { UserTokensRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
  * Finds all expired tokens and queues them for deletion
  */
 const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
 
 	const expiredTokensRes = await UserTokens.selectMultiple({
 		select: ["id"],

@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserPropT } from "../../libs/formatters/users.js";
 
@@ -10,7 +10,7 @@ const getMultipleFieldMeta: ServiceFn<
 	],
 	UserPropT[]
 > = async (context, data) => {
-	const User = Repository.get("users", context.db, context.config.db);
+	const User = new UsersRepository(context.db, context.config.db);
 
 	if (data.ids.length === 0) {
 		return {

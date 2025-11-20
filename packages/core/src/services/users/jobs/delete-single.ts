@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { userServices } from "../../index.js";
 
@@ -13,7 +13,7 @@ const deleteUser: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const User = Repository.get("users", context.db, context.config.db);
+	const User = new UsersRepository(context.db, context.config.db);
 
 	await userServices.checks.checkNotLastUser(context);
 

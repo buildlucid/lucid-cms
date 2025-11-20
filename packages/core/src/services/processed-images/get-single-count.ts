@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -10,8 +10,7 @@ const getSingleCount: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);

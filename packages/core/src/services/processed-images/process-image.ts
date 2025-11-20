@@ -1,5 +1,5 @@
 import { PassThrough, type Readable } from "node:stream";
-import Repository from "../../libs/repositories/index.js";
+import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -115,8 +115,7 @@ const processImage: ServiceFn<
 		};
 	}
 
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);

@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../types.js";
@@ -32,7 +32,7 @@ const deleteSingle: ServiceFn<
 		};
 	}
 
-	const Documents = Repository.get("documents", context.db, context.config.db);
+	const Documents = new DocumentsRepository(context.db, context.config.db);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;

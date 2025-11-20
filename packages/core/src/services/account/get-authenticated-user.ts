@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types.js";
 import type { LucidAuth } from "../../types/hono.js";
@@ -14,7 +14,7 @@ const getAuthenticatedUser: ServiceFn<
 	],
 	UserResponse
 > = async (context, data) => {
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const userRes = await Users.selectSinglePreset({
 		where: [

@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { RolesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteSingle: ServiceFn<
@@ -9,7 +9,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Roles = Repository.get("roles", context.db, context.config.db);
+	const Roles = new RolesRepository(context.db, context.config.db);
 
 	const deleteRolesRes = await Roles.deleteMultiple({
 		where: [

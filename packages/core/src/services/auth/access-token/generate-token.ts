@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import { sign } from "hono/jwt";
-import Repository from "../../../libs/repositories/index.js";
+import { UsersRepository } from "../../../libs/repositories/index.js";
 import formatter, {
 	userPermissionsFormatter,
 } from "../../../libs/formatters/index.js";
@@ -16,7 +16,7 @@ const generateToken = async (
 	try {
 		const config = c.get("config");
 
-		const Users = Repository.get("users", config.db.client, config.db);
+		const Users = new UsersRepository(config.db.client, config.db);
 		const userRes = await Users.selectAccessTokenUser({
 			where: [
 				{ key: "id", operator: "=", value: userId },

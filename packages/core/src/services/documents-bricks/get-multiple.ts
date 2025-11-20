@@ -3,7 +3,7 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
@@ -31,8 +31,7 @@ const getMultiple: ServiceFn<
 		fields: Array<FieldResponse>;
 	}
 > = async (context, data) => {
-	const DocumentBricks = Repository.get(
-		"document-bricks",
+	const DocumentBricks = new DocumentBricksRepository(
 		context.db,
 		context.config.db,
 	);

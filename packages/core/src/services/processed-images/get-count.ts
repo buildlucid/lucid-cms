@@ -1,10 +1,9 @@
-import Repository from "../../libs/repositories/index.js";
+import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getCount: ServiceFn<[], number> = async (context) => {
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);

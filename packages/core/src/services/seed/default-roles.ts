@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { RolesRepository } from "../../libs/repositories/index.js";
 import formatter from "../../libs/formatters/index.js";
 import constants from "../../constants/constants.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
@@ -10,7 +10,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const Roles = Repository.get("roles", context.db, context.config.db);
+		const Roles = new RolesRepository(context.db, context.config.db);
 
 		const totalRoleCountRes = await Roles.count({
 			where: [],

@@ -1,5 +1,5 @@
 import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
@@ -9,7 +9,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
 const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 	context,
 ) => {
-	const Documents = Repository.get("documents", context.db, context.config.db);
+	const Documents = new DocumentsRepository(context.db, context.config.db);
 	const collectionKeys = context.config.collections.map(
 		(collection) => collection.key,
 	);

@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { LocalesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
@@ -6,7 +6,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
  * Finds all expired locales and queues them for deletion
  */
 const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
-	const Locales = Repository.get("locales", context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db, context.config.db);
 
 	const compDate = getRetentionDays(context.config.softDelete, "locales");
 

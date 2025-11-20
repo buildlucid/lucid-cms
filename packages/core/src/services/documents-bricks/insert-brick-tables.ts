@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidBricksTable } from "../../types.js";
@@ -15,11 +15,7 @@ const insertBrickTables: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Bricks = Repository.get(
-		"document-bricks",
-		context.db,
-		context.config.db,
-	);
+	const Bricks = new DocumentBricksRepository(context.db, context.config.db);
 
 	const idMapping: Record<number, number> = {};
 

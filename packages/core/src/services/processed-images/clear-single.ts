@@ -1,4 +1,7 @@
-import Repository from "../../libs/repositories/index.js";
+import {
+	ProcessedImagesRepository,
+	MediaRepository,
+} from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, optionServices } from "../index.js";
 
@@ -15,12 +18,11 @@ const clearSingle: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);
-	const Media = Repository.get("media", context.db, context.config.db);
+	const Media = new MediaRepository(context.db, context.config.db);
 
 	const mediaRes = await Media.selectSingle({
 		select: ["key"],

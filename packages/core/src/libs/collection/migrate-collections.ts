@@ -1,6 +1,6 @@
 import inferSchema from "../../libs/collection/schema/infer-schema.js";
 import type { CollectionSchema } from "../../libs/collection/schema/types.js";
-import Repository from "../../libs/repositories/index.js";
+import { CollectionMigrationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import buildTableName from "./helpers/build-table-name.js";
 import buildMigrations from "./migration/build-migrations.js";
@@ -26,8 +26,7 @@ const migrateCollections: ServiceFn<
 		inferedSchemas: CollectionSchema[];
 	}
 > = async (context, data) => {
-	const CollectionMigrations = Repository.get(
-		"collection-migrations",
+	const CollectionMigrations = new CollectionMigrationsRepository(
 		context.db,
 		context.config.db,
 	);

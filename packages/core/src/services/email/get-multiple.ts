@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { EmailsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
 import type { GetMultipleQueryParams } from "../../schemas/email.js";
@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Emails = Repository.get("emails", context.db, context.config.db);
+	const Emails = new EmailsRepository(context.db, context.config.db);
 
 	const emailsRes = await Emails.selectMultipleFiltered({
 		select: [

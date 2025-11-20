@@ -1,4 +1,7 @@
-import Repository from "../../libs/repositories/index.js";
+import {
+	RolePermissionsRepository,
+	RolesRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { roleServices } from "../index.js";
@@ -13,7 +16,7 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Roles = Repository.get("roles", context.db, context.config.db);
+	const Roles = new RolesRepository(context.db, context.config.db);
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		roleServices.validatePermissions(context, {
@@ -63,12 +66,10 @@ const createSingle: ServiceFn<
 	if (newRolesRes.error) return newRolesRes;
 
 	if (validatePermsRes.data.length > 0) {
-		const RolePermissions = Repository.get(
-			"role-permissions",
+		const RolePermissions = new RolePermissionsRepository(
 			context.db,
 			context.config.db,
 		);
-
 		const rolePermsRes = await RolePermissions.createMultiple({
 			data: validatePermsRes.data.map((p) => ({
 				role_id: newRolesRes.data.id,

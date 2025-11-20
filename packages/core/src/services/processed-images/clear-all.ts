@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, optionServices } from "../index.js";
 
@@ -8,8 +8,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);

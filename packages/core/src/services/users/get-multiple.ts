@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import formatter, { usersFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types/response.js";
@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const usersRes = await Users.selectMultipleFilteredFixed({
 		queryParams: data.query,

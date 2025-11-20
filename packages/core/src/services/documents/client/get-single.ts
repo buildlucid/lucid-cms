@@ -4,7 +4,7 @@ import {
 } from "../../../libs/collection/schema/live/schema-filters.js";
 import type { DocumentVersionType } from "../../../libs/db-adapter/types.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
-import Repository from "../../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
 import T from "../../../translations/index.js";
 import type { ClientDocumentResponse } from "../../../types/response.js";
@@ -22,7 +22,7 @@ const getSingle: ServiceFn<
 	],
 	ClientDocumentResponse
 > = async (context, data) => {
-	const Documents = Repository.get("documents", context.db, context.config.db);
+	const Documents = new DocumentsRepository(context.db, context.config.db);
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,

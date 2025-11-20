@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -31,7 +31,7 @@ const updateMe: ServiceFn<
 		};
 	}
 
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const getUserRes = await Users.selectSingle({
 		select: ["super_admin", "password", "first_name", "secret"],

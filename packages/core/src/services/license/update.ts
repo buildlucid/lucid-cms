@@ -1,6 +1,6 @@
 import type { ServiceFn } from "../../utils/services/types.js";
 import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import Repository from "../../libs/repositories/index.js";
+import { OptionsRepository } from "../../libs/repositories/index.js";
 import { licenseServices } from "../index.js";
 
 const updateLicense: ServiceFn<
@@ -11,7 +11,7 @@ const updateLicense: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Options = Repository.get("options", context.db, context.config.db);
+	const Options = new OptionsRepository(context.db, context.config.db);
 
 	const plain = data.licenseKey?.trim() || null;
 	const last4 = plain ? plain.slice(-4) : null;

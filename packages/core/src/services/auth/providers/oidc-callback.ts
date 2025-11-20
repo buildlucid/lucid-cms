@@ -1,7 +1,7 @@
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
-import Repository from "../../../libs/repositories/index.js";
+import { AuthStatesRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import processProviderAuth from "./helpers/process-provider-auth.js";
@@ -26,11 +26,7 @@ const oidcCallback: ServiceFn<
 		grantAuthentication: boolean;
 	}
 > = async (context, data) => {
-	const AuthStates = Repository.get(
-		"auth-states",
-		context.db,
-		context.config.db,
-	);
+	const AuthStates = new AuthStatesRepository(context.db, context.config.db);
 
 	//* get provider config
 	const availableProviders = getAvailableProviders(context.config);

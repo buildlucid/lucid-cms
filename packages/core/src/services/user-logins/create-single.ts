@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { UserLoginsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createSingle: ServiceFn<
@@ -13,11 +13,7 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const UserLogins = Repository.get(
-		"user-logins",
-		context.db,
-		context.config.db,
-	);
+	const UserLogins = new UserLoginsRepository(context.db, context.config.db);
 
 	const newLoginRes = await UserLogins.createSingle({
 		data: {

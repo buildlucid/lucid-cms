@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
@@ -24,8 +24,7 @@ const createSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collection.key);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const DocumentVersions = Repository.get(
-		"document-versions",
+	const DocumentVersions = new DocumentVersionsRepository(
 		context.db,
 		context.config.db,
 	);

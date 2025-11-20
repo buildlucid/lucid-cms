@@ -4,7 +4,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import packageJson from "../../../package.json" with { type: "json" };
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
-import Repository from "../../libs/repositories/index.js";
+import { OptionsRepository } from "../../libs/repositories/index.js";
 
 type VerifyAPIError = {
 	status: number;
@@ -36,7 +36,7 @@ const verifyLicense: ServiceFn<
 		errorMessage: string | null;
 	}
 > = async (context) => {
-	const Options = Repository.get("options", context.db, context.config.db);
+	const Options = new OptionsRepository(context.db, context.config.db);
 	const now = getUnixTimeSeconds();
 
 	const licenseKeyRes = await Options.selectSingle({

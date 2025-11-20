@@ -1,6 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
@@ -26,7 +26,7 @@ const sendResetPassword: ServiceFn<
 		};
 	}
 
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const userExistsRes = await Users.selectSingle({
 		select: ["id", "first_name", "last_name", "email"],

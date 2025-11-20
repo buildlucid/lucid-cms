@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import formatter from "../../libs/formatters/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import { seedServices } from "../index.js";
@@ -8,7 +8,7 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const Users = Repository.get("users", context.db, context.config.db);
+		const Users = new UsersRepository(context.db, context.config.db);
 
 		const totalUserCountRes = await Users.count({
 			where: [],

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Worker } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
 import logger from "../../../logger/index.js";
-import Repository from "../../../repositories/index.js";
+import { QueueJobsRepository } from "../../../repositories/index.js";
 import type {
 	QueueAdapterInstance,
 	QueueBatchJobResponse,
@@ -90,8 +90,7 @@ function workerQueueAdapter(
 				const jobId = randomUUID();
 				const now = new Date();
 				const status: QueueJobResponse["status"] = "pending";
-				const QueueJobs = Repository.get(
-					"queue-jobs",
+				const QueueJobs = new QueueJobsRepository(
 					params.serviceContext.db,
 					params.serviceContext.config.db,
 				);
@@ -140,8 +139,7 @@ function workerQueueAdapter(
 
 				const now = new Date();
 				const status: QueueBatchJobResponse["status"] = "pending";
-				const QueueJobs = Repository.get(
-					"queue-jobs",
+				const QueueJobs = new QueueJobsRepository(
 					params.serviceContext.db,
 					params.serviceContext.config.db,
 				);

@@ -1,6 +1,9 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	UserTokensRepository,
+	UsersRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { generateSecret } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -26,12 +29,8 @@ const resetPassword: ServiceFn<
 		};
 	}
 
-	const UserTokens = Repository.get(
-		"user-tokens",
-		context.db,
-		context.config.db,
-	);
-	const Users = Repository.get("users", context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const tokenRes = await userTokenServices.getSingle(context, {
 		token: data.token,

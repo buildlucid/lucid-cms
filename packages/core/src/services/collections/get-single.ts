@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
@@ -41,11 +41,7 @@ const getSingle: ServiceFn<
 	if (migrationStatus.error) return migrationStatus;
 
 	if (collection.getData.mode === "single") {
-		const Documents = Repository.get(
-			"documents",
-			context.db,
-			context.config.db,
-		);
+		const Documents = new DocumentsRepository(context.db, context.config.db);
 
 		const documentRes = await Documents.selectSingle(
 			{

@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import merge from "lodash.merge";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
@@ -23,11 +23,7 @@ const updateSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Version = Repository.get(
-		"document-versions",
-		context.db,
-		context.config.db,
-	);
+	const Version = new DocumentVersionsRepository(context.db, context.config.db);
 
 	// ----------------------------------------------
 	// Checks

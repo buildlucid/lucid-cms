@@ -1,6 +1,9 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	UserRolesRepository,
+	UsersRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -20,7 +23,7 @@ const inviteSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = Repository.get("users", context.db, context.config.db);
+	const Users = new UsersRepository(context.db, context.config.db);
 
 	const [userExistsRes, roleExistsRes] = await Promise.all([
 		Users.selectSingleByEmailUsername({
@@ -121,7 +124,7 @@ const inviteSingle: ServiceFn<
 		};
 	}
 
-	const UserRoles = Repository.get("user-roles", context.db, context.config.db);
+	const UserRoles = new UserRolesRepository(context.db, context.config.db);
 
 	const createMultipleRes = await UserRoles.createMultiple({
 		data: data.roleIds.map((r) => ({

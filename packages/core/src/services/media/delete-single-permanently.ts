@@ -1,6 +1,9 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	ProcessedImagesRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
@@ -18,9 +21,8 @@ const deleteSinglePermanently: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const Media = Repository.get("media", context.db, context.config.db);
-	const ProcessedImages = Repository.get(
-		"processed-images",
+	const Media = new MediaRepository(context.db, context.config.db);
+	const ProcessedImages = new ProcessedImagesRepository(
 		context.db,
 		context.config.db,
 	);

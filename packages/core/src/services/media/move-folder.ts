@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
@@ -14,7 +14,7 @@ const moveFolder: ServiceFn<
 	],
 	number | undefined
 > = async (context, data) => {
-	const Media = Repository.get("media", context.db, context.config.db);
+	const Media = new MediaRepository(context.db, context.config.db);
 
 	const mediaRes = await Media.selectSingle({
 		select: ["id", "folder_id", "is_deleted"],

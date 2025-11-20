@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { OptionsName } from "../../schemas/options.js";
 
@@ -13,7 +13,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Options = Repository.get("options", context.db, context.config.db);
+	const Options = new OptionsRepository(context.db, context.config.db);
 
 	const updateOptionRes = await Options.updateSingle({
 		where: [

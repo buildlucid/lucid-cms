@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import formatter, {
 	documentVersionsFormatter,
 } from "../../libs/formatters/index.js";
@@ -42,8 +42,7 @@ const getMultipleRevisions: ServiceFn<
 		};
 	}
 
-	const VersionsRepo = Repository.get(
-		"document-versions",
+	const VersionsRepo = new DocumentVersionsRepository(
 		context.db,
 		context.config.db,
 	);

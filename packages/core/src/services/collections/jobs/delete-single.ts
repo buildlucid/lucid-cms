@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { CollectionsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -12,11 +12,7 @@ const deleteCollection: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Collections = Repository.get(
-		"collections",
-		context.db,
-		context.config.db,
-	);
+	const Collections = new CollectionsRepository(context.db, context.config.db);
 
 	const deleteRes = await Collections.deleteSingle({
 		where: [

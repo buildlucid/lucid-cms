@@ -7,7 +7,7 @@ import loadConfigFile from "../../../config/load-config-file.js";
 import type { LucidQueueJobs, Select } from "../../../db-adapter/types.js";
 import getKVAdapter from "../../../kv-adapter/get-adapter.js";
 import logger from "../../../logger/index.js";
-import Repository from "../../../repositories/index.js";
+import { QueueJobsRepository } from "../../../repositories/index.js";
 import getJobHandler from "../../job-handlers.js";
 import passthroughQueueAdapter from "../passthrough.js";
 import type { WorkerQueueAdapterOptions } from "./index.js";
@@ -76,7 +76,7 @@ const startConsumer = async () => {
 			bypassImmediateExecution: true,
 		});
 
-		const QueueJobs = Repository.get("queue-jobs", config.db.client, config.db);
+		const QueueJobs = new QueueJobsRepository(config.db.client, config.db);
 
 		/**
 		 * Handles job failure with retry logic

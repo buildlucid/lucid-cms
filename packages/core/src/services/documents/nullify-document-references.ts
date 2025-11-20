@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type {
 	CFConfig,
 	FieldTypes,
@@ -115,8 +115,7 @@ const nullifyDocumentReferences: ServiceFn<
 		};
 	}
 
-	const DocumentBricks = Repository.get(
-		"document-bricks",
+	const DocumentBricks = new DocumentBricksRepository(
 		context.db,
 		context.config.db,
 	);

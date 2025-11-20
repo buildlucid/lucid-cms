@@ -1,5 +1,5 @@
 import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteMultiple: ServiceFn<
@@ -12,11 +12,7 @@ const deleteMultiple: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Bricks = Repository.get(
-		"document-bricks",
-		context.db,
-		context.config.db,
-	);
+	const Bricks = new DocumentBricksRepository(context.db, context.config.db);
 
 	const brickTableSchema = await getBricksTableSchema(
 		context,

@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import Repository from "../../libs/repositories/index.js";
+import { CollectionsRepository } from "../../libs/repositories/index.js";
 import formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -10,11 +10,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
  */
 
 const syncCollections: ServiceFn<[], undefined> = async (context) => {
-	const Collections = Repository.get(
-		"collections",
-		context.db,
-		context.config.db,
-	);
+	const Collections = new CollectionsRepository(context.db, context.config.db);
 	const activeCollections = context.config.collections.map((c) => c.key);
 
 	const collectionsRes = await Collections.selectMultiple({

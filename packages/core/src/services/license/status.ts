@@ -3,11 +3,11 @@ import constants from "../../constants/constants.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { LicenseResponse } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import Repository from "../../libs/repositories/index.js";
+import { OptionsRepository } from "../../libs/repositories/index.js";
 import { licenseServices } from "../index.js";
 
 const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
-	const Options = Repository.get("options", context.db, context.config.db);
+	const Options = new OptionsRepository(context.db, context.config.db);
 
 	const licenseOptionsRes = await Options.selectMultiple({
 		select: ["name", "value_bool", "value_int", "value_text"],

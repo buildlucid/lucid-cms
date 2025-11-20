@@ -1,6 +1,6 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
-import Repository from "../../libs/repositories/index.js";
+import { MediaRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -16,7 +16,7 @@ const restoreMultiple: ServiceFn<
 		return { error: undefined, data: undefined };
 	}
 
-	const Media = Repository.get("media", context.db, context.config.db);
+	const Media = new MediaRepository(context.db, context.config.db);
 
 	const existRes = await Media.selectMultiple({
 		select: ["id"],

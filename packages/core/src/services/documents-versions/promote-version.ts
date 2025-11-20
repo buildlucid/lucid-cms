@@ -1,5 +1,9 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import {
+	DocumentVersionsRepository,
+	DocumentsRepository,
+	DocumentBricksRepository,
+} from "../../libs/repositories/index.js";
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
@@ -24,14 +28,12 @@ const promoteVersion: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Versions = Repository.get(
-		"document-versions",
+	const Versions = new DocumentVersionsRepository(
 		context.db,
 		context.config.db,
 	);
-	const Documents = Repository.get("documents", context.db, context.config.db);
-	const DocumentBricks = Repository.get(
-		"document-bricks",
+	const Documents = new DocumentsRepository(context.db, context.config.db);
+	const DocumentBricks = new DocumentBricksRepository(
 		context.db,
 		context.config.db,
 	);

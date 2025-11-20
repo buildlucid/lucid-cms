@@ -1,4 +1,4 @@
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import { groupDocumentFilters } from "../../utils/helpers/index.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
@@ -32,7 +32,7 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const Document = Repository.get("documents", context.db, context.config.db);
+	const Document = new DocumentsRepository(context.db, context.config.db);
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,

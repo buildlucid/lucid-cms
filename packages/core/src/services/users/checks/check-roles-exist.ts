@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { UserRolesRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -17,7 +17,7 @@ const checkRolesExist: ServiceFn<
 		};
 	}
 
-	const Roles = Repository.get("roles", context.db, context.config.db);
+	const Roles = new UserRolesRepository(context.db, context.config.db);
 	const rolesRes = await Roles.selectMultiple({
 		select: ["id"],
 		where: [

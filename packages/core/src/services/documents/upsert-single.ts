@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Repository from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
@@ -21,7 +21,7 @@ const upsertSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Document = Repository.get("documents", context.db, context.config.db);
+	const Document = new DocumentsRepository(context.db, context.config.db);
 
 	// ----------------------------------------------
 	// Checks

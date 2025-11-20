@@ -1,5 +1,5 @@
 import { getTableNames } from "../../../libs/collection/schema/live/schema-filters.js";
-import Repository from "../../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import executeHooks from "../../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -23,7 +23,7 @@ const deleteDocument: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const Documents = Repository.get("documents", context.db, context.config.db);
+	const Documents = new DocumentsRepository(context.db, context.config.db);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;

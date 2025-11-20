@@ -1,4 +1,4 @@
-import Repository from "../../../libs/repositories/index.js";
+import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 
@@ -17,8 +17,7 @@ const deleteAwaitingSyncMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const MediaAwaitingSync = Repository.get(
-		"media-awaiting-sync",
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
 		context.db,
 		context.config.db,
 	);
