@@ -1,4 +1,4 @@
-import Formatter from "./index.js";
+import formatter from "./index.js";
 import DocumentBricksFormatter from "./document-bricks.js";
 import crypto from "node:crypto";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
@@ -52,294 +52,297 @@ interface IntermediaryFieldValues {
 	locale: string;
 }
 
-export default class DocumentFieldsFormatter {
-	/**
-	 * The entry point for building out the FieldResponse array.
-	 *
-	 * Formats, creates groups, creates nested structure, marries relationMetaData etc.
-	 */
-	formatMultiple = (
-		data: FieldFormatData,
-		meta: FieldFormatMeta,
-	): FieldResponse[] => {
-		return this.buildFieldTree(data, {
-			builder: meta.builder,
-			fieldConfig: meta.builder.fieldTreeNoTab,
-			host: meta.host,
-			localization: meta.localization,
-			collection: meta.collection,
-			brickKey: meta.brickKey,
-			config: meta.config,
-			bricksTableSchema: meta.bricksTableSchema,
-		});
-	};
+/**
+ * The entry point for building out the FieldResponse array.
+ *
+ * Formats, creates groups, creates nested structure, marries relationMetaData etc.
+ */
+const formatMultiple = (
+	data: FieldFormatData,
+	meta: FieldFormatMeta,
+): FieldResponse[] => {
+	return buildFieldTree(data, {
+		builder: meta.builder,
+		fieldConfig: meta.builder.fieldTreeNoTab,
+		host: meta.host,
+		localization: meta.localization,
+		collection: meta.collection,
+		brickKey: meta.brickKey,
+		config: meta.config,
+		bricksTableSchema: meta.bricksTableSchema,
+	});
+};
 
-	/**
-	 *  Recursively build out the FieldResponse based on the nested fieldConfig
-	 */
-	private buildFieldTree = (
-		data: FieldFormatData,
-		meta: FieldFormatMeta & {
-			fieldConfig: CFConfig<FieldTypes>[];
-			repeaterLevel?: number;
-			groupRef?: string;
-		},
-	): FieldResponse[] => {
-		const fieldsRes: FieldResponse[] = [];
+/**
+ *  Recursively build out the FieldResponse based on the nested fieldConfig
+ */
+const buildFieldTree = (
+	data: FieldFormatData,
+	meta: FieldFormatMeta & {
+		fieldConfig: CFConfig<FieldTypes>[];
+		repeaterLevel?: number;
+		groupRef?: string;
+	},
+): FieldResponse[] => {
+	const fieldsRes: FieldResponse[] = [];
 
-		//* loop over fieldConfig (nested field structure - no tabs)
-		for (const config of meta.fieldConfig) {
-			if (config.type === "repeater") {
-				//* recursively build out repeater groups
-				fieldsRes.push({
-					key: config.key,
-					type: config.type,
-					groupRef: meta.groupRef,
-					groups: this.buildGroups(data, {
-						builder: meta.builder,
-						repeaterConfig: config,
-						host: meta.host,
-						localization: meta.localization,
-						collection: meta.collection,
-						brickKey: meta.brickKey,
-						repeaterLevel: meta.repeaterLevel || 0,
-						config: meta.config,
-						bricksTableSchema: meta.bricksTableSchema,
-					}),
-				});
-				continue;
-			}
-
-			const fieldKey = prefixGeneratedColName(config.key);
-
-			//* get all instaces of this field (config.key) accross the data.brickRows (so the value for each locale)
-			const fieldValues: IntermediaryFieldValues[] = data.brickRows.flatMap(
-				(row) => ({
-					value: row[fieldKey],
-					locale: row.locale,
-				}),
-			);
-
-			const fieldValue = this.buildField(
-				{
-					values: fieldValues,
-					relationMetaData: data.relationMetaData,
-				},
-				{
+	//* loop over fieldConfig (nested field structure - no tabs)
+	for (const config of meta.fieldConfig) {
+		if (config.type === "repeater") {
+			//* recursively build out repeater groups
+			fieldsRes.push({
+				key: config.key,
+				type: config.type,
+				groupRef: meta.groupRef,
+				groups: buildGroups(data, {
 					builder: meta.builder,
-					fieldConfig: config,
+					repeaterConfig: config,
 					host: meta.host,
 					localization: meta.localization,
 					collection: meta.collection,
 					brickKey: meta.brickKey,
+					repeaterLevel: meta.repeaterLevel || 0,
 					config: meta.config,
-					groupRef: meta.groupRef,
 					bricksTableSchema: meta.bricksTableSchema,
-				},
-			);
-			if (fieldValue) fieldsRes.push(fieldValue);
+				}),
+			});
+			continue;
 		}
 
-		return fieldsRes;
-	};
+		const fieldKey = prefixGeneratedColName(config.key);
 
-	/**
-	 * Responsible for building a single FieldResponse object.
-	 *
-	 * Adds in empty locale values, formats the value and constructs either translations or values based on the fields config
-	 */
-	private buildField = (
-		data: {
-			values: IntermediaryFieldValues[];
-			relationMetaData: FieldRelationResponse;
-		},
-		meta: FieldFormatMeta & {
-			fieldConfig: CFConfig<FieldTypes>;
-			groupRef?: string;
-		},
-	): FieldResponse | null => {
-		const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
-		if (!cfInstance) return null;
-
-		//* if the field supports translations, use the translations field key
-		if (
-			meta.fieldConfig.type !== "repeater" &&
-			meta.fieldConfig.type !== "tab" &&
-			meta.fieldConfig.config.useTranslations === true &&
-			meta.collection.getData.config.useTranslations === true
-		) {
-			const fieldTranslations: Record<string, FieldResponseValue> = {};
-			const fieldMeta: Record<string, FieldResponseMeta> = {};
-
-			//* populate the translations/meta
-			for (const locale of meta.localization.locales) {
-				const localeValue = data.values.find((v) => v.locale === locale);
-
-				if (localeValue) {
-					fieldTranslations[locale] = cfInstance.formatResponseValue(
-						localeValue.value,
-					);
-					fieldMeta[locale] = cfInstance.formatResponseMeta(
-						this.fetchRelationData(data.relationMetaData, {
-							type: meta.fieldConfig.type,
-							value: localeValue.value,
-							fieldConfig: meta.fieldConfig,
-						}),
-						meta,
-					);
-				} else {
-					fieldTranslations[locale] = null;
-					fieldMeta[locale] = null;
-				}
-			}
-
-			return {
-				key: meta.fieldConfig.key,
-				type: meta.fieldConfig.type,
-				groupRef: meta.groupRef,
-				translations: fieldTranslations,
-				meta: fieldMeta,
-			};
-		}
-
-		//* otherwise use the value key to just store the default locales value
-		const defaultValue = data.values.find(
-			(f) => f.locale === meta.localization.default,
+		//* get all instaces of this field (config.key) accross the data.brickRows (so the value for each locale)
+		const fieldValues: IntermediaryFieldValues[] = data.brickRows.flatMap(
+			(row) => ({
+				value: row[fieldKey],
+				locale: row.locale,
+			}),
 		);
-		if (!defaultValue) return null;
+
+		const fieldValue = buildField(
+			{
+				values: fieldValues,
+				relationMetaData: data.relationMetaData,
+			},
+			{
+				builder: meta.builder,
+				fieldConfig: config,
+				host: meta.host,
+				localization: meta.localization,
+				collection: meta.collection,
+				brickKey: meta.brickKey,
+				config: meta.config,
+				groupRef: meta.groupRef,
+				bricksTableSchema: meta.bricksTableSchema,
+			},
+		);
+		if (fieldValue) fieldsRes.push(fieldValue);
+	}
+
+	return fieldsRes;
+};
+
+/**
+ * Responsible for building a single FieldResponse object.
+ *
+ * Adds in empty locale values, formats the value and constructs either translations or values based on the fields config
+ */
+const buildField = (
+	data: {
+		values: IntermediaryFieldValues[];
+		relationMetaData: FieldRelationResponse;
+	},
+	meta: FieldFormatMeta & {
+		fieldConfig: CFConfig<FieldTypes>;
+		groupRef?: string;
+	},
+): FieldResponse | null => {
+	const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
+	if (!cfInstance) return null;
+
+	//* if the field supports translations, use the translations field key
+	if (
+		meta.fieldConfig.type !== "repeater" &&
+		meta.fieldConfig.type !== "tab" &&
+		meta.fieldConfig.config.useTranslations === true &&
+		meta.collection.getData.config.useTranslations === true
+	) {
+		const fieldTranslations: Record<string, FieldResponseValue> = {};
+		const fieldMeta: Record<string, FieldResponseMeta> = {};
+
+		//* populate the translations/meta
+		for (const locale of meta.localization.locales) {
+			const localeValue = data.values.find((v) => v.locale === locale);
+
+			if (localeValue) {
+				fieldTranslations[locale] = cfInstance.formatResponseValue(
+					localeValue.value,
+				);
+				fieldMeta[locale] = cfInstance.formatResponseMeta(
+					fetchRelationData(data.relationMetaData, {
+						type: meta.fieldConfig.type,
+						value: localeValue.value,
+						fieldConfig: meta.fieldConfig,
+					}),
+					meta,
+				);
+			} else {
+				fieldTranslations[locale] = null;
+				fieldMeta[locale] = null;
+			}
+		}
 
 		return {
 			key: meta.fieldConfig.key,
 			type: meta.fieldConfig.type,
-			value: cfInstance.formatResponseValue(defaultValue.value),
 			groupRef: meta.groupRef,
-			meta: cfInstance.formatResponseMeta(
-				this.fetchRelationData(data.relationMetaData, {
-					type: meta.fieldConfig.type,
-					value: defaultValue.value,
-					fieldConfig: meta.fieldConfig,
-				}),
-				meta,
-			),
+			translations: fieldTranslations,
+			meta: fieldMeta,
 		};
-	};
+	}
 
-	/**
-	 * Responsible for building out groups for a repeater field
-	 */
-	private buildGroups = (
-		data: FieldFormatData,
-		meta: FieldFormatMeta & {
-			repeaterConfig: CFConfig<"repeater">;
-			repeaterLevel: number;
+	//* otherwise use the value key to just store the default locales value
+	const defaultValue = data.values.find(
+		(f) => f.locale === meta.localization.default,
+	);
+	if (!defaultValue) return null;
+
+	return {
+		key: meta.fieldConfig.key,
+		type: meta.fieldConfig.type,
+		value: cfInstance.formatResponseValue(defaultValue.value),
+		groupRef: meta.groupRef,
+		meta: cfInstance.formatResponseMeta(
+			fetchRelationData(data.relationMetaData, {
+				type: meta.fieldConfig.type,
+				value: defaultValue.value,
+				fieldConfig: meta.fieldConfig,
+			}),
+			meta,
+		),
+	};
+};
+
+/**
+ * Responsible for building out groups for a repeater field
+ */
+const buildGroups = (
+	data: FieldFormatData,
+	meta: FieldFormatMeta & {
+		repeaterConfig: CFConfig<"repeater">;
+		repeaterLevel: number;
+	},
+): FieldGroupResponse[] => {
+	const groupsRes: FieldGroupResponse[] = [];
+
+	const repeaterFields = meta.repeaterConfig.fields;
+	if (!repeaterFields) return groupsRes;
+
+	//* using DocumentBricksFormatter.getBrickRepeaterRows, get the target repeater brick table rows and construct groups from them
+	const repeaterTables = DocumentBricksFormatter.getBrickRepeaterRows({
+		bricksQuery: data.bricksQuery,
+		bricksSchema: data.bricksSchema,
+		collectionKey: meta.collection.key,
+		brickKey: meta.brickKey,
+		repeaterKey: meta.repeaterConfig.key,
+		repeaterLevel: meta.repeaterLevel,
+		relationIds: data.brickRows.flatMap((b) => b.id),
+	});
+
+	//* group by the position
+	const groups = Map.groupBy(repeaterTables, (item) => {
+		return item.position;
+	});
+	groups.forEach((localeRows, key) => {
+		//* open state is shared for now - if this is to change in the future, the insert/response format for this needs changing
+		const openState = localeRows[0]?.is_open ?? false;
+		const ref = crypto.randomUUID();
+
+		groupsRes.push({
+			ref: ref,
+			order: key,
+			open: formatter.formatBoolean(openState),
+			fields: buildFieldTree(
+				{
+					brickRows: localeRows,
+					bricksQuery: data.bricksQuery,
+					bricksSchema: data.bricksSchema,
+					relationMetaData: data.relationMetaData,
+				},
+				{
+					builder: meta.builder,
+					host: meta.host,
+					localization: meta.localization,
+					collection: meta.collection,
+					brickKey: meta.brickKey,
+					fieldConfig: repeaterFields,
+					repeaterLevel: meta.repeaterLevel + 1,
+					config: meta.config,
+					groupRef: ref,
+					bricksTableSchema: meta.bricksTableSchema,
+				},
+			),
+		});
+	});
+
+	return groupsRes.sort((a, b) => a.order - b.order);
+};
+
+/**
+ * Returns fields as an object, with the keys being the custom field keys instead of an array of fields
+ */
+const objectifyFields = (
+	fields: FieldResponse[],
+): Record<string, FieldAltResponse> => {
+	return fields.reduce(
+		(acc, field) => {
+			if (!field) return acc;
+
+			acc[field.key] = {
+				...field,
+				groups: field.groups?.map((g) => {
+					return {
+						...g,
+						fields: objectifyFields(g.fields || []),
+					};
+				}),
+			} satisfies FieldAltResponse;
+			return acc;
 		},
-	): FieldGroupResponse[] => {
-		const groupsRes: FieldGroupResponse[] = [];
+		{} as Record<string, FieldAltResponse>,
+	);
+};
 
-		const repeaterFields = meta.repeaterConfig.fields;
-		if (!repeaterFields) return groupsRes;
-
-		//* using DocumentBricksFormatter.getBrickRepeaterRows, get the target repeater brick table rows and construct groups from them
-		const repeaterTables = DocumentBricksFormatter.getBrickRepeaterRows({
-			bricksQuery: data.bricksQuery,
-			bricksSchema: data.bricksSchema,
-			collectionKey: meta.collection.key,
-			brickKey: meta.brickKey,
-			repeaterKey: meta.repeaterConfig.key,
-			repeaterLevel: meta.repeaterLevel,
-			relationIds: data.brickRows.flatMap((b) => b.id),
-		});
-
-		//* group by the position
-		const groups = Map.groupBy(repeaterTables, (item) => {
-			return item.position;
-		});
-		groups.forEach((localeRows, key) => {
-			//* open state is shared for now - if this is to change in the future, the insert/response format for this needs changing
-			const openState = localeRows[0]?.is_open ?? false;
-			const ref = crypto.randomUUID();
-
-			groupsRes.push({
-				ref: ref,
-				order: key,
-				open: Formatter.formatBoolean(openState),
-				fields: this.buildFieldTree(
-					{
-						brickRows: localeRows,
-						bricksQuery: data.bricksQuery,
-						bricksSchema: data.bricksSchema,
-						relationMetaData: data.relationMetaData,
-					},
-					{
-						builder: meta.builder,
-						host: meta.host,
-						localization: meta.localization,
-						collection: meta.collection,
-						brickKey: meta.brickKey,
-						fieldConfig: repeaterFields,
-						repeaterLevel: meta.repeaterLevel + 1,
-						config: meta.config,
-						groupRef: ref,
-						bricksTableSchema: meta.bricksTableSchema,
-					},
-				),
-			});
-		});
-
-		return groupsRes.sort((a, b) => a.order - b.order);
-	};
-
-	/**
-	 * Returns fields as an object, with the keys being the custom field keys instead of an array of fields
-	 */
-	objectifyFields = (
-		fields: FieldResponse[],
-	): Record<string, FieldAltResponse> => {
-		return fields.reduce(
-			(acc, field) => {
-				if (!field) return acc;
-
-				acc[field.key] = {
-					...field,
-					groups: field.groups?.map((g) => {
-						return {
-							...g,
-							fields: this.objectifyFields(g.fields || []),
-						};
-					}),
-				} satisfies FieldAltResponse;
-				return acc;
-			},
-			{} as Record<string, FieldAltResponse>,
-		);
-	};
-
-	/**
-	 * Fetch relation meta data
-	 */
-	private fetchRelationData = <T extends FieldTypes>(
-		relationData: FieldRelationResponse,
-		props: {
-			type: T;
-			value: unknown;
-			fieldConfig: CFConfig<T>;
-		},
-	) => {
-		switch (props.type) {
-			case "document": {
+/**
+ * Fetch relation meta data
+ */
+const fetchRelationData = <T extends FieldTypes>(
+	relationData: FieldRelationResponse,
+	props: {
+		type: T;
+		value: unknown;
+		fieldConfig: CFConfig<T>;
+	},
+) => {
+	switch (props.type) {
+		case "document": {
+			return (
+				relationData.document as Array<BrickQueryResponse> | undefined
+			)?.find((d) => {
 				return (
-					relationData.document as Array<BrickQueryResponse> | undefined
-				)?.find((d) => {
-					return (
-						d.collection_key ===
-							(props.fieldConfig as CFConfig<"document">)?.collection &&
-						d.document_id === props.value
-					);
-				});
-			}
-			default: {
-				return relationData[props.type]?.find((i) => i?.id === props.value);
-			}
+					d.collection_key ===
+						(props.fieldConfig as CFConfig<"document">)?.collection &&
+					d.document_id === props.value
+				);
+			});
 		}
-	};
-}
+		default: {
+			return relationData[props.type]?.find((i) => i?.id === props.value);
+		}
+	}
+};
+
+export default {
+	formatMultiple,
+	objectifyFields,
+};

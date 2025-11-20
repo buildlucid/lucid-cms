@@ -1,6 +1,6 @@
 import type { BooleanInt } from "../../types.js";
 import type { LicenseResponse } from "../../types/response.js";
-import Formatter from "./index.js";
+import formatter from "./index.js";
 
 interface LicensePropsT {
 	last4: string | null;
@@ -9,20 +9,23 @@ interface LicensePropsT {
 	errorMessage: string | null;
 }
 
-export default class LicenseFormatter {
-	formatSingle = (props: {
-		license: LicensePropsT;
-	}): LicenseResponse => {
-		return {
-			key: LicenseFormatter.createLicenseKeyFromLast4(props.license.last4),
-			valid: Formatter.formatBoolean(props.license.valid),
-			lastChecked: props.license.lastChecked,
-			errorMessage: props.license.errorMessage,
-		};
+const formatSingle = (props: {
+	license: LicensePropsT;
+}): LicenseResponse => {
+	return {
+		key: createLicenseKeyFromLast4(props.license.last4),
+		valid: formatter.formatBoolean(props.license.valid),
+		lastChecked: props.license.lastChecked,
+		errorMessage: props.license.errorMessage,
 	};
-	static createLicenseKeyFromLast4 = (key: string | null | undefined) => {
-		if (!key) return null;
+};
 
-		return `******-************-***************-****************-****${key}`;
-	};
-}
+const createLicenseKeyFromLast4 = (key: string | null | undefined) => {
+	if (!key) return null;
+	return `******-************-***************-****************-****${key}`;
+};
+
+export default {
+	formatSingle,
+	createLicenseKeyFromLast4,
+};

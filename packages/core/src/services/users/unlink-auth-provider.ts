@@ -1,4 +1,4 @@
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
@@ -85,7 +85,7 @@ const unlinkAuthProvider: ServiceFn<
 	if (providersCountRes.error) return providersCountRes;
 
 	if (passwordEnabled === false) {
-		const providersCount = Formatter.parseCount(providersCountRes.data?.count);
+		const providersCount = formatter.parseCount(providersCountRes.data?.count);
 		const isLastProvider = providersCount <= 1;
 
 		if (isLastProvider) {

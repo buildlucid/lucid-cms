@@ -3,7 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import Formatter from "../../libs/formatters/index.js";
+import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -35,7 +35,6 @@ const promoteVersion: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const DocumentBricksFormatter = Formatter.get("document-bricks");
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
@@ -278,14 +277,14 @@ const promoteVersion: ServiceFn<
 		documentId: data.documentId,
 		versionId: createVersionRes.data.id,
 		localization: context.config.localization,
-		bricks: DocumentBricksFormatter.formatMultiple({
+		bricks: documentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,
 			relationMetaData: {},
 			collection: collectionRes.data,
 			config: context.config,
 		}),
-		fields: DocumentBricksFormatter.formatDocumentFields({
+		fields: documentBricksFormatter.formatDocumentFields({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,
 			relationMetaData: {},

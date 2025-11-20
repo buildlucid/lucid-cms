@@ -1,5 +1,7 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, {
+	mediaFoldersFormatter,
+} from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MultipleMediaFolderResponse } from "../../types/response.js";
 import type { GetMultipleQueryParams } from "../../schemas/media-folders.js";
@@ -20,7 +22,6 @@ const getMultiple: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const MediaFoldersFormatter = Formatter.get("media-folders");
 
 	const parentFolderId = data.query.filter?.parentFolderId?.value;
 	const parsedId = parentFolderId ? Number(parentFolderId) : undefined;
@@ -46,14 +47,14 @@ const getMultiple: ServiceFn<
 		error: undefined,
 		data: {
 			data: {
-				breadcrumbs: MediaFoldersFormatter.formatBreadcrumbs({
+				breadcrumbs: mediaFoldersFormatter.formatBreadcrumbs({
 					breadcrumbs: breadcrumbsRes?.data ?? [],
 				}),
-				folders: MediaFoldersFormatter.formatMultiple({
+				folders: mediaFoldersFormatter.formatMultiple({
 					folders: foldersRes.data[0],
 				}),
 			},
-			count: Formatter.parseCount(foldersRes.data[1]?.count),
+			count: formatter.parseCount(foldersRes.data[1]?.count),
 		},
 	};
 };

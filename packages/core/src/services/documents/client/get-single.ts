@@ -3,7 +3,7 @@ import {
 	getTableNames,
 } from "../../../libs/collection/schema/live/schema-filters.js";
 import type { DocumentVersionType } from "../../../libs/db-adapter/types.js";
-import Formatter from "../../../libs/formatters/index.js";
+import { documentsFormatter } from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
 import T from "../../../translations/index.js";
@@ -23,7 +23,6 @@ const getSingle: ServiceFn<
 	ClientDocumentResponse
 > = async (context, data) => {
 	const Documents = Repository.get("documents", context.db, context.config.db);
-	const DocumentsFormatter = Formatter.get("documents");
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
@@ -83,7 +82,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: DocumentsFormatter.formatClientSingle({
+		data: documentsFormatter.formatClientSingle({
 			document: documentRes.data,
 			collection: collectionRes.data,
 			bricks: bricksRes.data.bricks,

@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, { userLoginsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserLoginResponse } from "../../types/response.js";
 import type { GetMultipleQueryParams } from "../../schemas/user-logins.js";
@@ -21,7 +21,6 @@ const getMultiple: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const UserLoginsFormatter = Formatter.get("user-logins");
 
 	const userLoginsRes = await UserLogins.selectMultipleFiltered({
 		select: [
@@ -50,10 +49,10 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: UserLoginsFormatter.formatMultiple({
+			data: userLoginsFormatter.formatMultiple({
 				userLogins: userLoginsRes.data[0],
 			}),
-			count: Formatter.parseCount(userLoginsRes.data[1]?.count),
+			count: formatter.parseCount(userLoginsRes.data[1]?.count),
 		},
 	};
 };

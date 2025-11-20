@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, { mediaFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MediaResponse } from "../../types/response.js";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
@@ -17,7 +17,6 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const Media = Repository.get("media", context.db, context.config.db);
-	const MediaFormatter = Formatter.get("media");
 
 	const mediaRes = await Media.selectMultipleFilteredFixed({
 		localeCode: data.localeCode,
@@ -31,12 +30,12 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: MediaFormatter.formatMultiple({
+			data: mediaFormatter.formatMultiple({
 				media: mediaRes.data[0],
 				host: context.config.host,
 				urlStrategy: context.config.media.urlStrategy,
 			}),
-			count: Formatter.parseCount(mediaRes.data[1]?.count),
+			count: formatter.parseCount(mediaRes.data[1]?.count),
 		},
 	};
 };

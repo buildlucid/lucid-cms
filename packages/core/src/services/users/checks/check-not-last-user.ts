@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import Formatter from "../../../libs/formatters/index.js";
+import formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -17,7 +17,7 @@ const checkNotLastUser: ServiceFn<[], undefined> = async (context) => {
 	});
 	if (activeUserCountRes.error) return activeUserCountRes;
 
-	const activeUserCount = Formatter.parseCount(activeUserCountRes.data?.count);
+	const activeUserCount = formatter.parseCount(activeUserCountRes.data?.count);
 	if (activeUserCount <= 1) {
 		return {
 			error: {

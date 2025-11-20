@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { jobsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { JobResponse } from "../../types/response.js";
 
@@ -13,7 +13,6 @@ const getSingle: ServiceFn<
 	JobResponse
 > = async (context, data) => {
 	const Jobs = Repository.get("queue-jobs", context.db, context.config.db);
-	const JobsFormatter = Formatter.get("jobs");
 
 	const jobRes = await Jobs.selectSingle({
 		select: [
@@ -55,7 +54,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: JobsFormatter.formatSingle({
+		data: jobsFormatter.formatSingle({
 			job: jobRes.data,
 		}),
 	};

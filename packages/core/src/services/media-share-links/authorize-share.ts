@@ -1,4 +1,4 @@
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import constants from "../../constants/constants.js";
@@ -57,7 +57,7 @@ const authorizeShare: ServiceFn<
 	}
 
 	//* check if media is soft-deleted
-	const isDeleted = Formatter.formatBoolean(linkRes.data.media_is_deleted);
+	const isDeleted = formatter.formatBoolean(linkRes.data.media_is_deleted);
 	if (isDeleted) {
 		return {
 			error: {

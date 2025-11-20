@@ -1,6 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -43,7 +43,7 @@ const resendInvitation: ServiceFn<
 	});
 	if (userRes.error) return userRes;
 
-	if (Formatter.formatBoolean(userRes.data.invitation_accepted)) {
+	if (formatter.formatBoolean(userRes.data.invitation_accepted)) {
 		return {
 			error: {
 				type: "basic",

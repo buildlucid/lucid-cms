@@ -3,10 +3,10 @@ import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
-import Formatter from "../../../formatters/index.js";
 import { PermissionGroups } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import { permissionsFormatter } from "../../../formatters/index.js";
 
 const factory = createFactory();
 
@@ -22,12 +22,10 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
-		const PermissionsFormatter = Formatter.get("permissions");
-
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: PermissionsFormatter.formatMultiple({
+				data: permissionsFormatter.formatMultiple({
 					permissions: PermissionGroups,
 				}),
 			}),

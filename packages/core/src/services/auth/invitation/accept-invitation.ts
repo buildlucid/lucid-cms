@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
-import Formatter from "../../../libs/formatters/index.js";
+import formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
@@ -84,7 +84,7 @@ const acceptInvitation: ServiceFn<
 	});
 	if (userRes.error) return userRes;
 
-	if (Formatter.formatBoolean(userRes.data?.invitation_accepted)) {
+	if (formatter.formatBoolean(userRes.data?.invitation_accepted)) {
 		return {
 			error: {
 				type: "basic",

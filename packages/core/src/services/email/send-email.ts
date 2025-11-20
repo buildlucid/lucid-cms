@@ -1,5 +1,5 @@
 import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
-import Formatter from "../../libs/formatters/index.js";
+import { emailsFormatter } from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { EmailResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -28,7 +28,6 @@ const sendEmail: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const EmailsFormatter = Formatter.get("emails");
 
 	const [newEmailRes, emailAdapter] = await Promise.all([
 		Emails.createSingle({
@@ -117,7 +116,7 @@ const sendEmail: ServiceFn<
 		error: undefined,
 		data: {
 			jobId: queueRes.data.jobId,
-			email: EmailsFormatter.formatSingle({
+			email: emailsFormatter.formatSingle({
 				email: newEmailRes.data,
 				html: undefined,
 			}),

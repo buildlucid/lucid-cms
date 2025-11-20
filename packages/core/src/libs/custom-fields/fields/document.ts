@@ -3,7 +3,7 @@ import z from "zod/v4";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import Formatter from "../../formatters/index.js";
+import formatter from "../../formatters/index.js";
 import buildTableName from "../../collection/helpers/build-table-name.js";
 import type {
 	CFConfig,
@@ -16,9 +16,10 @@ import type {
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
-
-const DocumentFieldsFormatter = Formatter.get("document-fields");
-const DocumentBricksFormatter = Formatter.get("document-bricks");
+import {
+	documentFieldsFormatter,
+	documentBricksFormatter,
+} from "../../formatters/index.js";
 
 class DocumentCustomField extends CustomField<"document"> {
 	type = "document" as const;
@@ -93,8 +94,8 @@ class DocumentCustomField extends CustomField<"document"> {
 			};
 		}
 
-		const documentFields = DocumentFieldsFormatter.objectifyFields(
-			DocumentBricksFormatter.formatDocumentFields({
+		const documentFields = documentFieldsFormatter.objectifyFields(
+			documentBricksFormatter.formatDocumentFields({
 				bricksQuery: value,
 				bricksSchema: meta.bricksTableSchema,
 				relationMetaData: {},

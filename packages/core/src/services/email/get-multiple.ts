@@ -1,8 +1,8 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { EmailResponse } from "../../types/response.js";
 import type { GetMultipleQueryParams } from "../../schemas/email.js";
+import formatter, { emailsFormatter } from "../../libs/formatters/index.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -16,7 +16,6 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const Emails = Repository.get("emails", context.db, context.config.db);
-	const EmailsFormatter = Formatter.get("emails");
 
 	const emailsRes = await Emails.selectMultipleFiltered({
 		select: [
@@ -45,10 +44,10 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: EmailsFormatter.formatMultiple({
+			data: emailsFormatter.formatMultiple({
 				emails: emailsRes.data[0],
 			}),
-			count: Formatter.parseCount(emailsRes.data[1]?.count),
+			count: formatter.parseCount(emailsRes.data[1]?.count),
 		},
 	};
 };

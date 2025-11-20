@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
@@ -47,7 +47,7 @@ const login: ServiceFn<
 	});
 	if (userRes.error) return userRes;
 
-	if (Formatter.formatBoolean(userRes.data.is_deleted)) {
+	if (formatter.formatBoolean(userRes.data.is_deleted)) {
 		return {
 			error: {
 				type: "authorisation",
@@ -58,7 +58,7 @@ const login: ServiceFn<
 		};
 	}
 
-	if (Formatter.formatBoolean(userRes.data.is_locked)) {
+	if (formatter.formatBoolean(userRes.data.is_locked)) {
 		return {
 			error: {
 				type: "authorisation",

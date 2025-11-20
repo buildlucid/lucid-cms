@@ -1,6 +1,6 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/roles.js";
+import formatter, { rolesFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { RoleResponse } from "../../types/response.js";
 
@@ -16,7 +16,6 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const Roles = Repository.get("roles", context.db, context.config.db);
-	const RolesFormatter = Formatter.get("roles");
 
 	const rolesRes = await Roles.selectMultipleFilteredFixed({
 		queryParams: data.query,
@@ -29,10 +28,10 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: RolesFormatter.formatMultiple({
+			data: rolesFormatter.formatMultiple({
 				roles: rolesRes.data[0],
 			}),
-			count: Formatter.parseCount(rolesRes.data[1]?.count),
+			count: formatter.parseCount(rolesRes.data[1]?.count),
 		},
 	};
 };

@@ -1,5 +1,5 @@
 import T from "../../translations/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { usersFormatter } from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types/response.js";
@@ -18,7 +18,6 @@ const getSingle: ServiceFn<
 	UserResponse
 > = async (context, data) => {
 	const Users = Repository.get("users", context.db, context.config.db);
-	const UsersFormatter = Formatter.get("users");
 
 	const userQueryWhere: QueryBuilderWhere<"lucid_users"> = [
 		{
@@ -49,7 +48,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: UsersFormatter.formatSingle({
+		data: usersFormatter.formatSingle({
 			user: userRes.data,
 			authUser: data.authUser,
 		}),

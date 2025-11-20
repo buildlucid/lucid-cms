@@ -2,7 +2,7 @@ import Repository from "../../libs/repositories/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import constants from "../../constants/constants.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import generateShareToken from "../../utils/share-link/generate-token.js";
 
 const updateSingle: ServiceFn<
@@ -48,7 +48,7 @@ const updateSingle: ServiceFn<
 		data: {
 			name: data.name,
 			description: data.description,
-			expires_at: Formatter.normalizeDate(data.expiresAt),
+			expires_at: formatter.normalizeDate(data.expiresAt),
 			password,
 			token: tokenRefresh,
 			updated_at: new Date().toISOString(),

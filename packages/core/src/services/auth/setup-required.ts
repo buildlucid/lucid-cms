@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import { seedServices } from "../index.js";
 
@@ -15,7 +15,7 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 		});
 		if (totalUserCountRes.error) return totalUserCountRes;
 
-		const userCount = Formatter.parseCount(totalUserCountRes.data?.count);
+		const userCount = formatter.parseCount(totalUserCountRes.data?.count);
 		const setupRequired = userCount === 0;
 
 		if (setupRequired) {

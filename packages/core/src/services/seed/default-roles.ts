@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import constants from "../../constants/constants.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
@@ -20,7 +20,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 		});
 		if (totalRoleCountRes.error) return totalRoleCountRes;
 
-		if (Formatter.parseCount(totalRoleCountRes.data?.count) > 0) {
+		if (formatter.parseCount(totalRoleCountRes.data?.count) > 0) {
 			return {
 				error: undefined,
 				data: undefined,

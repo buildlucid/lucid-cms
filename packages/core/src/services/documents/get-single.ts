@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { documentsFormatter } from "../../libs/formatters/index.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
@@ -21,7 +21,6 @@ const getSingle: ServiceFn<
 	DocumentResponse
 > = async (context, data) => {
 	const Document = Repository.get("documents", context.db, context.config.db);
-	const DocumentFormatter = Formatter.get("documents");
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
@@ -80,7 +79,7 @@ const getSingle: ServiceFn<
 
 		return {
 			error: undefined,
-			data: DocumentFormatter.formatSingle({
+			data: documentsFormatter.formatSingle({
 				document: documentRes.data,
 				collection: collectionRes.data,
 				bricks: bricksRes.data.bricks,
@@ -92,7 +91,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: DocumentFormatter.formatSingle({
+		data: documentsFormatter.formatSingle({
 			document: documentRes.data,
 			collection: collectionRes.data,
 			bricks: [],

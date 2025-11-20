@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { mediaFoldersFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MediaFolderResponse } from "../../types/response.js";
 import buildHierarchy from "./helpers/build-hierachy.js";
@@ -10,7 +10,6 @@ const getHierarchy: ServiceFn<[], MediaFolderResponse[]> = async (context) => {
 		context.db,
 		context.config.db,
 	);
-	const MediaFoldersFormatter = Formatter.get("media-folders");
 
 	const foldersRes = await MediaFolders.selectMultiple({
 		select: [
@@ -32,7 +31,7 @@ const getHierarchy: ServiceFn<[], MediaFolderResponse[]> = async (context) => {
 
 	return {
 		error: undefined,
-		data: MediaFoldersFormatter.formatMultiple({
+		data: mediaFoldersFormatter.formatMultiple({
 			folders: hierarchicalFolders,
 		}),
 	};

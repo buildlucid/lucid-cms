@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { mediaFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { MediaResponse } from "../../types/response.js";
 
@@ -13,7 +13,6 @@ const getSingle: ServiceFn<
 	MediaResponse
 > = async (context, data) => {
 	const Media = Repository.get("media", context.db, context.config.db);
-	const MediaFormatter = Formatter.get("media");
 
 	const mediaRes = await Media.selectSingleById({
 		id: data.id,
@@ -29,7 +28,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: MediaFormatter.formatSingle({
+		data: mediaFormatter.formatSingle({
 			media: mediaRes.data,
 			host: context.config.host,
 			urlStrategy: context.config.media.urlStrategy,

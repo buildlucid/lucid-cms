@@ -1,5 +1,5 @@
-import Formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
+import { mediaShareLinksFormatter } from "../../libs/formatters/index.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -17,7 +17,6 @@ const getSingle: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const formatter = Formatter.get("media-share-links");
 
 	const linkRes = await MediaShareLinks.selectSingle({
 		select: [
@@ -45,7 +44,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: formatter.formatSingle({
+		data: mediaShareLinksFormatter.formatSingle({
 			link: linkRes.data,
 			host: context.config.host,
 		}),

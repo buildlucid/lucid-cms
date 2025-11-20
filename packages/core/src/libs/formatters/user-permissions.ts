@@ -10,29 +10,31 @@ interface UserPermissionRolesPropsT {
 	}[];
 }
 
-export default class UserPermissionsFormatter {
-	formatMultiple = (props: {
-		roles: UserPermissionRolesPropsT[];
-	}): UserPermissionsResponse => {
-		if (!props.roles) {
-			return {
-				roles: [],
-				permissions: [],
-			};
-		}
-
-		const permissionsSet: Set<Permission> = new Set();
-
-		for (const role of props.roles) {
-			if (!role.permissions) continue;
-			for (const permission of role.permissions) {
-				permissionsSet.add(permission.permission as Permission);
-			}
-		}
-
+const formatMultiple = (props: {
+	roles: UserPermissionRolesPropsT[];
+}): UserPermissionsResponse => {
+	if (!props.roles) {
 		return {
-			roles: props.roles.map(({ id, name }) => ({ id, name })),
-			permissions: Array.from(permissionsSet),
+			roles: [],
+			permissions: [],
 		};
+	}
+
+	const permissionsSet: Set<Permission> = new Set();
+
+	for (const role of props.roles) {
+		if (!role.permissions) continue;
+		for (const permission of role.permissions) {
+			permissionsSet.add(permission.permission as Permission);
+		}
+	}
+
+	return {
+		roles: props.roles.map(({ id, name }) => ({ id, name })),
+		permissions: Array.from(permissionsSet),
 	};
-}
+};
+
+export default {
+	formatMultiple,
+};

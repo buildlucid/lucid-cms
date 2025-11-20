@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import constants from "../../constants/constants.js";
 import { decodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
@@ -58,7 +58,7 @@ const verifyApiKey: ServiceFn<
 	});
 	if (clientIntegrationRes.error) return clientIntegrationRes;
 
-	if (!Formatter.formatBoolean(clientIntegrationRes.data.enabled)) {
+	if (!formatter.formatBoolean(clientIntegrationRes.data.enabled)) {
 		return {
 			error: {
 				message: T("client_integration_is_disabled"),

@@ -1,5 +1,5 @@
 import renderHandlebarsTemplate from "../../libs/email-adapter/templates/render-handlebars-template.js";
-import Formatter from "../../libs/formatters/index.js";
+import { emailsFormatter } from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { EmailResponse } from "../../types/response.js";
@@ -15,7 +15,6 @@ const getSingle: ServiceFn<
 	EmailResponse
 > = async (context, data) => {
 	const Emails = Repository.get("emails", context.db, context.config.db);
-	const EmailsFormatter = Formatter.get("emails");
 
 	const emailRes = await Emails.selectSingleById({
 		id: data.id,
@@ -32,7 +31,7 @@ const getSingle: ServiceFn<
 	if (!data.renderTemplate) {
 		return {
 			error: undefined,
-			data: EmailsFormatter.formatSingle({
+			data: emailsFormatter.formatSingle({
 				email: emailRes.data,
 			}),
 		};
@@ -46,7 +45,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: EmailsFormatter.formatSingle({
+		data: emailsFormatter.formatSingle({
 			email: emailRes.data,
 			html: html.data,
 		}),

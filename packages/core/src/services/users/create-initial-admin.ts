@@ -2,7 +2,7 @@ import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
 import constants from "../../constants/constants.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import { scrypt } from "@noble/hashes/scrypt";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -23,7 +23,7 @@ const createInitialAdmin: ServiceFn<
 	const userCountRes = await Users.count({ where: [] });
 	if (userCountRes.error) return userCountRes;
 
-	if (Formatter.parseCount(userCountRes.data?.count) > 0) {
+	if (formatter.parseCount(userCountRes.data?.count) > 0) {
 		return {
 			error: {
 				type: "basic",

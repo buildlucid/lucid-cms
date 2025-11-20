@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { optionsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { OptionsResponse } from "../../types/response.js";
 import type { OptionsName } from "../../schemas/options.js";
@@ -14,7 +14,6 @@ const getMultiple: ServiceFn<
 	OptionsResponse[]
 > = async (context, data) => {
 	const Options = Repository.get("options", context.db, context.config.db);
-	const OptionsFormatter = Formatter.get("options");
 
 	const optionRes = await Options.selectMultiple({
 		select: ["name", "value_bool", "value_int", "value_text"],
@@ -37,7 +36,7 @@ const getMultiple: ServiceFn<
 
 	return {
 		error: undefined,
-		data: OptionsFormatter.formatMultiple({
+		data: optionsFormatter.formatMultiple({
 			options: optionRes.data,
 		}),
 	};

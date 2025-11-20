@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { collectionsFormatter } from "../../libs/formatters/index.js";
 import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { CollectionResponse } from "../../types/response.js";
@@ -14,8 +14,6 @@ const getAll: ServiceFn<
 	CollectionResponse[]
 > = async (context, data) => {
 	const collections = context.config.collections ?? [];
-
-	const CollectionsFormatter = Formatter.get("collections");
 
 	if (data.includeDocumentId === true) {
 		const singleCollections = collections.filter(
@@ -52,7 +50,7 @@ const getAll: ServiceFn<
 
 		return {
 			error: undefined,
-			data: CollectionsFormatter.formatMultiple({
+			data: collectionsFormatter.formatMultiple({
 				collections: collections,
 				include: {
 					bricks: false,
@@ -66,7 +64,7 @@ const getAll: ServiceFn<
 
 	return {
 		error: undefined,
-		data: CollectionsFormatter.formatMultiple({
+		data: collectionsFormatter.formatMultiple({
 			collections: collections,
 			include: {
 				bricks: false,

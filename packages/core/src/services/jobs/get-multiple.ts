@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, { jobsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { JobResponse } from "../../types/response.js";
 import type { GetMultipleQueryParams } from "../../schemas/jobs.js";
@@ -16,7 +16,6 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const Jobs = Repository.get("queue-jobs", context.db, context.config.db);
-	const JobsFormatter = Formatter.get("jobs");
 
 	const jobsRes = await Jobs.selectMultipleFiltered({
 		select: [
@@ -49,10 +48,10 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: JobsFormatter.formatMultiple({
+			data: jobsFormatter.formatMultiple({
 				jobs: jobsRes.data[0],
 			}),
-			count: Formatter.parseCount(jobsRes.data[1]?.count),
+			count: formatter.parseCount(jobsRes.data[1]?.count),
 		},
 	};
 };

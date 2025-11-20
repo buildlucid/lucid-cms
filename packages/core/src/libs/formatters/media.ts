@@ -2,7 +2,7 @@ import type { BooleanInt } from "../../libs/db-adapter/types.js";
 import type { UrlStrategy } from "../../types/config.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
-import Formatter from "./index.js";
+import formatter from "./index.js";
 
 export interface MediaPropsT {
 	id: number;
@@ -32,81 +32,87 @@ export interface MediaPropsT {
 	public: BooleanInt;
 }
 
-export default class MediaFormatter {
-	static objectifyTranslations = (
-		target: "title" | "alt",
-		translations: {
-			title: string | null;
-			alt: string | null;
-			locale_code: string | null;
-		}[],
-		locales: Array<string>,
-	): Record<string, string> => {
-		return locales.reduce<Record<string, string>>(
-			(acc, locale) => ({
-				// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
-				...acc,
-				[locale ?? ""]:
-					translations.find((t) => t.locale_code === locale)?.[target] ?? "",
-			}),
-			{},
-		);
-	};
-	formatMultiple = (props: {
-		media: MediaPropsT[];
-		host: string;
-		urlStrategy: UrlStrategy | undefined;
-	}) => {
-		return props.media.map((m) =>
-			this.formatSingle({
-				media: m,
-				host: props.host,
-				urlStrategy: props.urlStrategy,
-			}),
-		);
-	};
-	formatSingle = (props: {
-		media: MediaPropsT;
-		host: string;
-		urlStrategy: UrlStrategy | undefined;
-	}): MediaResponse => {
-		return {
-			id: props.media.id,
+const objectifyTranslations = (
+	target: "title" | "alt",
+	translations: {
+		title: string | null;
+		alt: string | null;
+		locale_code: string | null;
+	}[],
+	locales: Array<string>,
+): Record<string, string> => {
+	return locales.reduce<Record<string, string>>(
+		(acc, locale) => ({
+			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			...acc,
+			[locale ?? ""]:
+				translations.find((t) => t.locale_code === locale)?.[target] ?? "",
+		}),
+		{},
+	);
+};
+
+const formatMultiple = (props: {
+	media: MediaPropsT[];
+	host: string;
+	urlStrategy: UrlStrategy | undefined;
+}) => {
+	return props.media.map((m) =>
+		formatSingle({
+			media: m,
+			host: props.host,
+			urlStrategy: props.urlStrategy,
+		}),
+	);
+};
+
+const formatSingle = (props: {
+	media: MediaPropsT;
+	host: string;
+	urlStrategy: UrlStrategy | undefined;
+}): MediaResponse => {
+	return {
+		id: props.media.id,
+		key: props.media.key,
+		folderId: props.media.folder_id,
+		url: createMediaUrl({
 			key: props.media.key,
-			folderId: props.media.folder_id,
-			url: createMediaUrl({
-				key: props.media.key,
-				host: props.host,
-				urlStrategy: props.urlStrategy,
-			}),
-			title:
-				props.media.translations?.map((t) => ({
-					value: t.title,
-					localeCode: t.locale_code,
-				})) ?? [],
-			alt:
-				props.media.translations?.map((t) => ({
-					value: t.alt,
-					localeCode: t.locale_code,
-				})) ?? [],
-			type: props.media.type as MediaType,
-			meta: {
-				mimeType: props.media.mime_type,
-				extension: props.media.file_extension,
-				fileSize: props.media.file_size,
-				width: props.media.width,
-				height: props.media.height,
-				blurHash: props.media.blur_hash,
-				averageColor: props.media.average_color,
-				isDark: Formatter.formatBoolean(props.media.is_dark),
-				isLight: Formatter.formatBoolean(props.media.is_light),
-			},
-			public: Formatter.formatBoolean(props.media.public),
-			isDeleted: Formatter.formatBoolean(props.media.is_deleted),
-			isDeletedAt: Formatter.formatDate(props.media.is_deleted_at),
-			deletedBy: props.media.deleted_by,
-			createdAt: Formatter.formatDate(props.media.created_at),
-			updatedAt: Formatter.formatDate(props.media.updated_at),
-		};
+			host: props.host,
+			urlStrategy: props.urlStrategy,
+		}),
+		title:
+			props.media.translations?.map((t) => ({
+				value: t.title,
+				localeCode: t.locale_code,
+			})) ?? [],
+		alt:
+			props.media.translations?.map((t) => ({
+				value: t.alt,
+				localeCode: t.locale_code,
+			})) ?? [],
+		type: props.media.type as MediaType,
+		meta: {
+			mimeType: props.media.mime_type,
+			extension: props.media.file_extension,
+			fileSize: props.media.file_size,
+			width: props.media.width,
+			height: props.media.height,
+			blurHash: props.media.blur_hash,
+			averageColor: props.media.average_color,
+			isDark: formatter.formatBoolean(props.media.is_dark),
+			isLight: formatter.formatBoolean(props.media.is_light),
+		},
+		public: formatter.formatBoolean(props.media.public),
+		isDeleted: formatter.formatBoolean(props.media.is_deleted),
+		isDeletedAt: formatter.formatDate(props.media.is_deleted_at),
+		deletedBy: props.media.deleted_by,
+		createdAt: formatter.formatDate(props.media.created_at),
+		updatedAt: formatter.formatDate(props.media.updated_at),
 	};
-}
+};
+
+export default {
+	formatMultiple,
+	formatSingle,
+	objectifyTranslations,
+};

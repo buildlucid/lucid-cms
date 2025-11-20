@@ -1,7 +1,9 @@
 import constants from "../../../constants/constants.js";
 import { sign } from "hono/jwt";
 import Repository from "../../../libs/repositories/index.js";
-import Formatter from "../../../libs/formatters/index.js";
+import formatter, {
+	userPermissionsFormatter,
+} from "../../../libs/formatters/index.js";
 import { setCookie } from "hono/cookie";
 import { randomBytes } from "node:crypto";
 import type { ServiceResponse } from "../../../utils/services/types.js";
@@ -36,8 +38,7 @@ const generateToken = async (
 		const now = Date.now();
 		const nonce = randomBytes(8).toString("hex");
 
-		const UserPermissionsFormatter = Formatter.get("user-permissions");
-		const { permissions } = UserPermissionsFormatter.formatMultiple({
+		const { permissions } = userPermissionsFormatter.formatMultiple({
 			roles: userRes.data.roles || [],
 		});
 
@@ -47,7 +48,7 @@ const generateToken = async (
 				username: userRes.data.username,
 				email: userRes.data.email,
 				permissions: permissions,
-				superAdmin: Formatter.formatBoolean(userRes.data.super_admin ?? false),
+				superAdmin: formatter.formatBoolean(userRes.data.super_admin ?? false),
 				exp: Math.floor(now / 1000) + constants.accessTokenExpiration,
 				iat: Math.floor(now / 1000),
 				nonce: nonce,

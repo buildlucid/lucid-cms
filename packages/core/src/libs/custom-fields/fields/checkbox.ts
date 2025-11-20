@@ -3,7 +3,7 @@ import z from "zod/v4";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { BooleanInt } from "../../db-adapter/types.js";
-import Formatter from "../../formatters/index.js";
+import formatter from "../../formatters/index.js";
 import CustomField from "../custom-field.js";
 import type {
 	CFConfig,
@@ -65,7 +65,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		};
 	}
 	formatResponseValue(value?: BooleanInt | null) {
-		return Formatter.formatBoolean(
+		return formatter.formatBoolean(
 			Boolean(value) ?? this.config.config.default,
 		) satisfies CFResponse<"checkbox">["value"];
 	}

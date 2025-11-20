@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import { logger } from "../../../index.js";
-import Formatter from "../../../libs/formatters/index.js";
+import formatter from "../../../libs/formatters/index.js";
 import Repository from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ValidateInvitationResponse } from "../../../types.js";
@@ -88,7 +88,7 @@ const validateInvitation: ServiceFn<
 		};
 	}
 
-	if (Formatter.formatBoolean(userRes.data?.invitation_accepted)) {
+	if (formatter.formatBoolean(userRes.data?.invitation_accepted)) {
 		logger.error({
 			message: T("user_invitation_already_accepted_message"),
 		});

@@ -3,7 +3,7 @@ import T from "../../../translations/index.js";
 import type { MediaType, ServiceResponse } from "../../../types.js";
 import { createMediaUrl } from "../../../utils/media/index.js";
 import type { FieldFormatMeta } from "../../formatters/document-fields.js";
-import Formatter from "../../formatters/index.js";
+import formatter from "../../formatters/index.js";
 import MediaFormatter, { type MediaPropsT } from "../../formatters/media.js";
 import CustomField from "../custom-field.js";
 import type {
@@ -87,8 +87,8 @@ class MediaCustomField extends CustomField<"media"> {
 			height: value.height,
 			blurHash: value.blur_hash,
 			averageColor: value.average_color,
-			isDark: Formatter.formatBoolean(value.is_dark),
-			isLight: Formatter.formatBoolean(value.is_light),
+			isDark: formatter.formatBoolean(value.is_dark),
+			isLight: formatter.formatBoolean(value.is_light),
 			title: MediaFormatter.objectifyTranslations(
 				"title",
 				value.translations || [],
@@ -100,8 +100,8 @@ class MediaCustomField extends CustomField<"media"> {
 				meta.localization.locales,
 			),
 			type: value.type as MediaType,
-			public: Formatter.formatBoolean(value.public),
-			isDeleted: Formatter.formatBoolean(value.is_deleted),
+			public: formatter.formatBoolean(value.public),
+			isDeleted: formatter.formatBoolean(value.is_deleted),
 		} satisfies CFResponse<"media">["meta"];
 	}
 	cfSpecificValidation(value: unknown, relationData?: MediaReferenceData[]) {

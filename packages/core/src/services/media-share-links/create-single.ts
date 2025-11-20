@@ -1,7 +1,8 @@
-import crypto from "node:crypto";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, {
+	mediaShareLinksFormatter,
+} from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -25,7 +26,6 @@ const createSingle: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const formatter = Formatter.get("media-share-links");
 
 	const token = generateShareToken();
 
@@ -44,7 +44,7 @@ const createSingle: ServiceFn<
 			media_id: data.mediaId,
 			token: token,
 			password: hashedPassword,
-			expires_at: Formatter.normalizeDate(data.expiresAt) ?? undefined,
+			expires_at: formatter.normalizeDate(data.expiresAt) ?? undefined,
 			name: data.name ?? null,
 			description: data.description ?? null,
 			created_at: new Date().toISOString(),
@@ -71,7 +71,7 @@ const createSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: formatter.formatSingle({
+		data: mediaShareLinksFormatter.formatSingle({
 			link: linkRes.data,
 			host: context.config.host,
 		}),

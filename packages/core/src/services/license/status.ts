@@ -1,4 +1,4 @@
-import Formatter from "../../libs/formatters/index.js";
+import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
 import constants from "../../constants/constants.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { LicenseResponse } from "../../types.js";
@@ -7,7 +7,6 @@ import Repository from "../../libs/repositories/index.js";
 import { licenseServices } from "../index.js";
 
 const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
-	const LicenseFormatter = Formatter.get("license");
 	const Options = Repository.get("options", context.db, context.config.db);
 
 	const licenseOptionsRes = await Options.selectMultiple({
@@ -51,10 +50,10 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 	) {
 		return {
 			error: undefined,
-			data: LicenseFormatter.formatSingle({
+			data: licenseFormatter.formatSingle({
 				license: {
 					last4: licenseKeyLast4Opt?.value_text ?? null,
-					valid: Formatter.formatBoolean(validOpt?.value_bool) ?? false,
+					valid: formatter.formatBoolean(validOpt?.value_bool) ?? false,
 					lastChecked: lastCheckedOpt?.value_int ?? null,
 					errorMessage: errorMsgOpt?.value_text ?? null,
 				},
@@ -67,7 +66,7 @@ const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
 
 	return {
 		error: undefined,
-		data: LicenseFormatter.formatSingle({
+		data: licenseFormatter.formatSingle({
 			license: {
 				last4: verifyRes.data.last4,
 				valid: verifyRes.data.valid,

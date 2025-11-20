@@ -1,4 +1,6 @@
-import Formatter from "../../libs/formatters/index.js";
+import formatter, {
+	mediaShareLinksFormatter,
+} from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import type { GetMultipleShareLinksQueryParams } from "../../schemas/media-share-links.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
@@ -21,7 +23,6 @@ const getMultiple: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const formatter = Formatter.get("media-share-links");
 
 	const linksRes = await MediaShareLinks.selectMultipleFiltered({
 		select: [
@@ -48,11 +49,11 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: formatter.formatMultiple({
+			data: mediaShareLinksFormatter.formatMultiple({
 				links: linksRes.data[0],
 				host: context.config.host,
 			}),
-			count: Formatter.parseCount(linksRes.data[1]?.count),
+			count: formatter.parseCount(linksRes.data[1]?.count),
 		},
 	};
 };

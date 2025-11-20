@@ -1,6 +1,6 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
 
@@ -17,7 +17,6 @@ const getSingle: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const ClientIntegrationFormatter = Formatter.get("client-integrations");
 
 	const integrationsRes = await ClientIntegrations.selectSingle({
 		select: [
@@ -48,7 +47,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: ClientIntegrationFormatter.formatSingle({
+		data: clientIntegrationsFormatter.formatSingle({
 			integration: integrationsRes.data,
 		}),
 	};

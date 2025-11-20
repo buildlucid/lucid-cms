@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import { groupDocumentFilters } from "../../utils/helpers/index.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
@@ -33,7 +33,6 @@ const getMultiple: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const Document = Repository.get("documents", context.db, context.config.db);
-	const DocumentFormatter = Formatter.get("documents");
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,
@@ -92,7 +91,7 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: DocumentFormatter.formatMultiple({
+			data: documentsFormatter.formatMultiple({
 				documents: documentsRes.data?.[0] || [],
 				collection: collectionRes.data,
 				config: context.config,
@@ -101,7 +100,7 @@ const getMultiple: ServiceFn<
 				hasBricks: false,
 				bricksTableSchema: bricksTableSchemaRes.data,
 			}),
-			count: Formatter.parseCount(documentsRes.data?.[1]?.count),
+			count: formatter.parseCount(documentsRes.data?.[1]?.count),
 		},
 	};
 };

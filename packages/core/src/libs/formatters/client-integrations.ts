@@ -1,6 +1,6 @@
 import type { ClientIntegrationResponse } from "../../types/response.js";
 import type { BooleanInt } from "../db-adapter/types.js";
-import Formatter from "./index.js";
+import formatter from "./index.js";
 
 export interface ClientIntegrationQueryRes {
 	id: number;
@@ -12,25 +12,31 @@ export interface ClientIntegrationQueryRes {
 	updated_at: Date | string | null;
 }
 
-export default class ClientIntegrationsFormatter {
-	formatMultiple = (props: { integrations: ClientIntegrationQueryRes[] }) => {
-		return props.integrations.map((i) =>
-			this.formatSingle({
-				integration: i,
-			}),
-		);
+const formatMultiple = (props: {
+	integrations: ClientIntegrationQueryRes[];
+}) => {
+	return props.integrations.map((i) =>
+		formatSingle({
+			integration: i,
+		}),
+	);
+};
+
+const formatSingle = (props: {
+	integration: ClientIntegrationQueryRes;
+}): ClientIntegrationResponse => {
+	return {
+		id: props.integration.id,
+		key: props.integration.key,
+		name: props.integration.name,
+		description: props.integration.description,
+		enabled: formatter.formatBoolean(props.integration.enabled),
+		createdAt: formatter.formatDate(props.integration.created_at),
+		updatedAt: formatter.formatDate(props.integration.updated_at),
 	};
-	formatSingle = (props: {
-		integration: ClientIntegrationQueryRes;
-	}): ClientIntegrationResponse => {
-		return {
-			id: props.integration.id,
-			key: props.integration.key,
-			name: props.integration.name,
-			description: props.integration.description,
-			enabled: Formatter.formatBoolean(props.integration.enabled),
-			createdAt: Formatter.formatDate(props.integration.created_at),
-			updatedAt: Formatter.formatDate(props.integration.updated_at),
-		};
-	};
-}
+};
+
+export default {
+	formatMultiple,
+	formatSingle,
+};

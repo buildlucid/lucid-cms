@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import Repository from "../../libs/repositories/index.js";
@@ -120,7 +120,7 @@ const updateSingle: ServiceFn<
 		data.fileName === undefined &&
 		data.public !== undefined
 	) {
-		const currentPublic = Formatter.formatBoolean(mediaRes.data.public);
+		const currentPublic = formatter.formatBoolean(mediaRes.data.public);
 		if (currentPublic !== data.public) {
 			const targetVisibility = data.public
 				? constants.media.visibilityKeys.public

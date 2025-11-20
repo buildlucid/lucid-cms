@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingleCount: ServiceFn<
@@ -32,7 +32,7 @@ const getSingleCount: ServiceFn<
 
 	return {
 		error: undefined,
-		data: Formatter.parseCount(processedImageCountRes.data?.count),
+		data: formatter.parseCount(processedImageCountRes.data?.count),
 	};
 };
 

@@ -1,6 +1,8 @@
 import T from "../../translations/index.js";
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter, {
+	documentVersionsFormatter,
+} from "../../libs/formatters/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -45,7 +47,6 @@ const getMultipleRevisions: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const VersionsFormatter = Formatter.get("document-versions");
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,
@@ -78,11 +79,11 @@ const getMultipleRevisions: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: VersionsFormatter.formatMultiple({
+			data: documentVersionsFormatter.formatMultiple({
 				versions: revisionsRes.data?.[0] || [],
 				bricksSchema: bricksSchema,
 			}),
-			count: Formatter.parseCount(revisionsRes.data?.[1]?.count),
+			count: formatter.parseCount(revisionsRes.data?.[1]?.count),
 		},
 	};
 };

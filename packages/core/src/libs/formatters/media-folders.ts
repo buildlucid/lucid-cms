@@ -1,4 +1,4 @@
-import Formatter from "./index.js";
+import formatter from "./index.js";
 import type { MediaFolderResponse } from "../../types/response.js";
 
 export interface MediaFolderPropsT {
@@ -23,54 +23,60 @@ export interface MediaFolderWithHierarchyPropsT extends MediaFolderPropsT {
 	label: string;
 }
 
-export default class MediaFoldersFormatter {
-	formatBreadcrumbs = (props: {
-		breadcrumbs: MediaFolderBreadcrumbPropsT[];
-	}) => {
-		return props.breadcrumbs.map((b) => {
-			return {
-				id: b.id,
-				title: b.title,
-				parentFolderId: b.parent_folder_id,
-			};
-		});
-	};
-	formatMultiple = (props: {
-		folders: MediaFolderPropsT[] | MediaFolderWithHierarchyPropsT[];
-	}) => {
-		return props.folders.map((f) =>
-			this.formatSingle({
-				folder: f,
-			}),
-		);
-	};
-	formatSingle = (props: {
-		folder: MediaFolderPropsT | MediaFolderWithHierarchyPropsT;
-	}): MediaFolderResponse => {
-		let meta: MediaFolderResponse["meta"] | undefined;
-		if (
-			"level" in props.folder &&
-			"order" in props.folder &&
-			"label" in props.folder
-		) {
-			meta = {
-				level: props.folder?.level,
-				order: props.folder.order,
-				label: props.folder.label,
-			};
-		}
-
+const formatBreadcrumbs = (props: {
+	breadcrumbs: MediaFolderBreadcrumbPropsT[];
+}) => {
+	return props.breadcrumbs.map((b) => {
 		return {
-			id: props.folder.id,
-			title: props.folder.title,
-			parentFolderId: props.folder.parent_folder_id,
-			folderCount: props.folder.folder_count ?? 0,
-			mediaCount: props.folder.media_count ?? 0,
-			meta: meta,
-			createdBy: props.folder.created_by,
-			updatedBy: props.folder.updated_by,
-			createdAt: Formatter.formatDate(props.folder.created_at),
-			updatedAt: Formatter.formatDate(props.folder.updated_at),
+			id: b.id,
+			title: b.title,
+			parentFolderId: b.parent_folder_id,
 		};
+	});
+};
+
+const formatMultiple = (props: {
+	folders: MediaFolderPropsT[] | MediaFolderWithHierarchyPropsT[];
+}) => {
+	return props.folders.map((f) =>
+		formatSingle({
+			folder: f,
+		}),
+	);
+};
+
+const formatSingle = (props: {
+	folder: MediaFolderPropsT | MediaFolderWithHierarchyPropsT;
+}): MediaFolderResponse => {
+	let meta: MediaFolderResponse["meta"] | undefined;
+	if (
+		"level" in props.folder &&
+		"order" in props.folder &&
+		"label" in props.folder
+	) {
+		meta = {
+			level: props.folder?.level,
+			order: props.folder.order,
+			label: props.folder.label,
+		};
+	}
+
+	return {
+		id: props.folder.id,
+		title: props.folder.title,
+		parentFolderId: props.folder.parent_folder_id,
+		folderCount: props.folder.folder_count ?? 0,
+		mediaCount: props.folder.media_count ?? 0,
+		meta: meta,
+		createdBy: props.folder.created_by,
+		updatedBy: props.folder.updated_by,
+		createdAt: formatter.formatDate(props.folder.created_at),
+		updatedAt: formatter.formatDate(props.folder.updated_at),
 	};
-}
+};
+
+export default {
+	formatBreadcrumbs,
+	formatMultiple,
+	formatSingle,
+};

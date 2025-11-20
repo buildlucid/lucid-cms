@@ -1,6 +1,6 @@
 import type { RoleResponse } from "../../types/response.js";
 import type { Permission } from "../permission/types.js";
-import Formatter from "./index.js";
+import formatter from "./index.js";
 
 interface RolePropsT {
 	id: number;
@@ -15,27 +15,31 @@ interface RolePropsT {
 	}[];
 }
 
-export default class RolesFormatter {
-	formatMultiple = (props: { roles: RolePropsT[] }) => {
-		return props.roles.map((r) =>
-			this.formatSingle({
-				role: r,
-			}),
-		);
+const formatMultiple = (props: { roles: RolePropsT[] }) => {
+	return props.roles.map((r) =>
+		formatSingle({
+			role: r,
+		}),
+	);
+};
+
+const formatSingle = (props: { role: RolePropsT }): RoleResponse => {
+	return {
+		id: props.role.id,
+		name: props.role.name,
+		description: props.role.description,
+		permissions: props.role.permissions?.map((p) => {
+			return {
+				id: p.id,
+				permission: p.permission as Permission,
+			};
+		}),
+		createdAt: formatter.formatDate(props.role.created_at),
+		updatedAt: formatter.formatDate(props.role.updated_at),
 	};
-	formatSingle = (props: { role: RolePropsT }): RoleResponse => {
-		return {
-			id: props.role.id,
-			name: props.role.name,
-			description: props.role.description,
-			permissions: props.role.permissions?.map((p) => {
-				return {
-					id: p.id,
-					permission: p.permission as Permission,
-				};
-			}),
-			createdAt: Formatter.formatDate(props.role.created_at),
-			updatedAt: Formatter.formatDate(props.role.updated_at),
-		};
-	};
-}
+};
+
+export default {
+	formatMultiple,
+	formatSingle,
+};

@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import Formatter from "../../libs/formatters/index.js";
+import formatter from "../../libs/formatters/index.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import logger from "../../libs/logger/index.js";
 import Repository from "../../libs/repositories/index.js";
@@ -41,7 +41,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	const localesToDelete = localesRes.data.filter(
 		(locale) =>
 			!localeCodes.includes(locale.code) &&
-			Formatter.formatBoolean(locale.is_deleted) === false,
+			formatter.formatBoolean(locale.is_deleted) === false,
 	);
 	const localesToDeleteCodes = localesToDelete.map((locale) => locale.code);
 	if (localesToDeleteCodes.length > 0) {
@@ -54,7 +54,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	// Get locals that are in the database as is_deleted but in the config
 	const unDeletedLocales = localesRes.data.filter(
 		(locale) =>
-			Formatter.formatBoolean(locale.is_deleted) &&
+			formatter.formatBoolean(locale.is_deleted) &&
 			localeCodes.includes(locale.code),
 	);
 	const unDeletedLocalesCodes = unDeletedLocales.map((locale) => locale.code);

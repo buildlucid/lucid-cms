@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants.js";
-import Formatter from "../../../../libs/formatters/index.js";
+import formatter from "../../../../libs/formatters/index.js";
 import Repository from "../../../../libs/repositories/index.js";
 import T from "../../../../translations/index.js";
 import type { AuthStateActionType } from "../../../../types.js";
@@ -83,7 +83,7 @@ const processProviderAuth: ServiceFn<
 		if (userAuthProviderRes.error) return userAuthProviderRes;
 
 		//* check if the user is soft deleted
-		if (Formatter.formatBoolean(invitationTokenRes.data.user_is_deleted)) {
+		if (formatter.formatBoolean(invitationTokenRes.data.user_is_deleted)) {
 			return {
 				error: {
 					status: 400,
@@ -94,7 +94,7 @@ const processProviderAuth: ServiceFn<
 		}
 
 		//* check if the user is locked
-		if (Formatter.formatBoolean(invitationTokenRes.data.user_is_locked)) {
+		if (formatter.formatBoolean(invitationTokenRes.data.user_is_locked)) {
 			return {
 				error: {
 					status: 401,
@@ -106,7 +106,7 @@ const processProviderAuth: ServiceFn<
 
 		//* check if the user has accepted an invitation already
 		if (
-			Formatter.formatBoolean(invitationTokenRes.data.user_invitation_accepted)
+			formatter.formatBoolean(invitationTokenRes.data.user_invitation_accepted)
 		) {
 			return {
 				error: {
@@ -206,7 +206,7 @@ const processProviderAuth: ServiceFn<
 		//* check if the target user is deleted
 		if (
 			userAuthProviderRes.data &&
-			Formatter.formatBoolean(userAuthProviderRes.data.user_is_deleted)
+			formatter.formatBoolean(userAuthProviderRes.data.user_is_deleted)
 		) {
 			return {
 				error: {
@@ -221,7 +221,7 @@ const processProviderAuth: ServiceFn<
 		//* check if the target user is locked
 		if (
 			userAuthProviderRes.data &&
-			Formatter.formatBoolean(userAuthProviderRes.data.user_is_locked)
+			formatter.formatBoolean(userAuthProviderRes.data.user_is_locked)
 		) {
 			return {
 				error: {
@@ -311,7 +311,7 @@ const processProviderAuth: ServiceFn<
 	});
 	if (userAuthProviderRes.error) return userAuthProviderRes;
 
-	if (Formatter.formatBoolean(userAuthProviderRes.data.user_is_deleted)) {
+	if (formatter.formatBoolean(userAuthProviderRes.data.user_is_deleted)) {
 		return {
 			error: {
 				status: 404,
@@ -322,7 +322,7 @@ const processProviderAuth: ServiceFn<
 		};
 	}
 
-	if (Formatter.formatBoolean(userAuthProviderRes.data.user_is_locked)) {
+	if (formatter.formatBoolean(userAuthProviderRes.data.user_is_locked)) {
 		return {
 			error: {
 				status: 401,

@@ -3,7 +3,7 @@ import Repository from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserResponse } from "../../types.js";
 import type { LucidAuth } from "../../types/hono.js";
-import Formatter from "../../libs/formatters/index.js";
+import { usersFormatter } from "../../libs/formatters/index.js";
 
 const getAuthenticatedUser: ServiceFn<
 	[
@@ -15,7 +15,6 @@ const getAuthenticatedUser: ServiceFn<
 	UserResponse
 > = async (context, data) => {
 	const Users = Repository.get("users", context.db, context.config.db);
-	const UsersFormatter = Formatter.get("users");
 
 	const userRes = await Users.selectSinglePreset({
 		where: [
@@ -42,7 +41,7 @@ const getAuthenticatedUser: ServiceFn<
 
 	return {
 		error: undefined,
-		data: UsersFormatter.formatSingle({
+		data: usersFormatter.formatSingle({
 			user: userRes.data,
 			authUser: data.authUser,
 		}),

@@ -3,9 +3,9 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
-import Formatter from "../../libs/formatters/index.js";
 import Repository from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import type { BrickResponse, FieldResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getSingleInstance } from "../collections/index.js";
@@ -36,7 +36,6 @@ const getMultiple: ServiceFn<
 		context.db,
 		context.config.db,
 	);
-	const DocumentBricksFormatter = Formatter.get("document-bricks");
 
 	const collectionRes = getSingleInstance(context, {
 		key: data.collectionKey,
@@ -91,14 +90,14 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			bricks: DocumentBricksFormatter.formatMultiple({
+			bricks: documentBricksFormatter.formatMultiple({
 				bricksQuery: bricksQueryRes.data,
 				bricksSchema: bricksTableSchemaRes.data,
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
 			}),
-			fields: DocumentBricksFormatter.formatDocumentFields({
+			fields: documentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
 				bricksSchema: bricksTableSchemaRes.data,
 				relationMetaData: relationDataRes.data,

@@ -1,5 +1,5 @@
 import Repository from "../../libs/repositories/index.js";
-import Formatter from "../../libs/formatters/index.js";
+import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
 
@@ -9,7 +9,6 @@ const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 		context.db,
 		context.config.db,
 	);
-	const ClientIntegrationFormatter = Formatter.get("client-integrations");
 
 	const integrationsRes = await ClientIntegrations.selectMultiple({
 		select: [
@@ -30,7 +29,7 @@ const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 
 	return {
 		error: undefined,
-		data: ClientIntegrationFormatter.formatMultiple({
+		data: clientIntegrationsFormatter.formatMultiple({
 			integrations: integrationsRes.data,
 		}),
 	};
