@@ -26,6 +26,10 @@
             "types": "./dist/types.d.ts",
             "default": "./dist/types.js"
         },
+        "./queue-adapter": {
+            "types": "./dist/libs/queue-adapter/index.d.ts",
+            "default": "./dist/libs/queue-adapter/index.js"
+        },
         "./package.json": "./package.json"
     },
     "scripts": {

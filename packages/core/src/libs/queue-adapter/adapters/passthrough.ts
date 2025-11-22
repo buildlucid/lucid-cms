@@ -1,155 +1,11 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
-import type {
-	ServiceContext,
-	ServiceResponse,
-} from "../../../utils/services/types.js";
 import logger from "../../logger/index.js";
 import { QueueJobsRepository } from "../../repositories/index.js";
-import getJobHandler from "../job-handlers.js";
-import type { QueueAdapterInstance, QueueEvent } from "../types.js";
+import type { QueueAdapterInstance } from "../types.js";
+import executeSingleJob from "../execute-single-job.js";
 
 const ADAPTER_KEY = "passthrough";
-
-/**
- * Executes a single job immediately and updates its status in the database
- */
-const executeJob = async (data: {
-	jobId: string;
-	event: QueueEvent;
-	payload: Record<string, unknown>;
-	serviceContext: ServiceContext;
-	logScope: string;
-}): ServiceResponse<undefined> => {
-	const handler = getJobHandler(data.event);
-	const QueueJobs = new QueueJobsRepository(
-		data.serviceContext.db,
-		data.serviceContext.config.db,
-	);
-
-	if (!handler) {
-		logger.warn({
-			message: "No job handler found for job type",
-			scope: data.logScope,
-			data: { jobId: data.jobId, eventType: data.event },
-		});
-
-		await QueueJobs.updateSingle({
-			data: {
-				status: "failed",
-				error_message: `No job handler found for job type: ${data.event}`,
-				failed_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-			},
-			where: [{ key: "job_id", operator: "=", value: data.jobId }],
-		});
-
-		return {
-			error: { message: `No job handler found for job type: ${data.event}` },
-			data: undefined,
-		};
-	}
-
-	try {
-		logger.debug({
-			message: "Processing job immediately",
-			scope: data.logScope,
-			data: { jobId: data.jobId, eventType: data.event },
-		});
-
-		//* update job to processing status
-		await QueueJobs.updateSingle({
-			data: {
-				status: "processing",
-				attempts: 1,
-				started_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-			},
-			where: [{ key: "job_id", operator: "=", value: data.jobId }],
-		});
-
-		//* execute the handler
-		const handlerResult = await handler(data.serviceContext, data.payload);
-
-		if (handlerResult.error) {
-			//* update job to failed status
-			await QueueJobs.updateSingle({
-				data: {
-					status: "failed",
-					error_message: handlerResult.error.message ?? "Unknown error",
-					failed_at: new Date().toISOString(),
-					updated_at: new Date().toISOString(),
-				},
-				where: [{ key: "job_id", operator: "=", value: data.jobId }],
-			});
-
-			logger.error({
-				message: "Job failed",
-				scope: data.logScope,
-				data: {
-					jobId: data.jobId,
-					eventType: data.event,
-					errorMessage: handlerResult.error.message,
-				},
-			});
-
-			return {
-				error: handlerResult.error,
-				data: undefined,
-			};
-		}
-
-		//* update job to completed status
-		await QueueJobs.updateSingle({
-			data: {
-				status: "completed",
-				completed_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-			},
-			where: [{ key: "job_id", operator: "=", value: data.jobId }],
-		});
-
-		logger.debug({
-			message: "Job completed successfully",
-			scope: data.logScope,
-			data: { jobId: data.jobId, eventType: data.event },
-		});
-
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : "Unknown error";
-
-		//* update job to failed status
-		await QueueJobs.updateSingle({
-			data: {
-				status: "failed",
-				error_message: errorMessage,
-				failed_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-			},
-			where: [{ key: "job_id", operator: "=", value: data.jobId }],
-		});
-
-		logger.error({
-			message: "Job failed with exception",
-			scope: data.logScope,
-			data: {
-				jobId: data.jobId,
-				eventType: data.event,
-				errorMessage,
-			},
-		});
-
-		return {
-			error: { message: errorMessage },
-			data: undefined,
-		};
-	}
-};
 
 type PassthroughQueueAdapterOptions = {
 	bypassImmediateExecution?: boolean;
@@ -231,17 +87,14 @@ function passthroughQueueAdapter(
 					}
 
 					//* execute the event handler immediately
-					const executeResult = await executeJob({
+					const executeResult = await executeSingleJob(params.serviceContext, {
 						jobId: jobId,
 						event: event,
 						payload: params.payload,
-						serviceContext: params.serviceContext,
-						logScope: constants.logScopes.queue,
+						attempts: 0,
+						maxAttempts: 1,
 					});
-
-					if (executeResult.error) {
-						return executeResult;
-					}
+					if (executeResult.error) return executeResult;
 
 					return {
 						error: undefined,
@@ -349,12 +202,12 @@ function passthroughQueueAdapter(
 					const allResults = await Promise.allSettled(
 						jobChunks.flatMap((chunk) =>
 							chunk.map((job) =>
-								executeJob({
+								executeSingleJob(params.serviceContext, {
 									jobId: job.jobId,
 									event,
 									payload: job.payload,
-									serviceContext: params.serviceContext,
-									logScope: constants.logScopes.queue,
+									attempts: 0,
+									maxAttempts: 1,
 								}),
 							),
 						),

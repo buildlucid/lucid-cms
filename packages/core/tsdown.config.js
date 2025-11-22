@@ -8,6 +8,7 @@ export default defineConfig({
         "src/api.ts",
         "src/helpers.ts",
         "src/libs/cli/index.ts",
+        "src/libs/queue-adapter/index.ts",
         "src/libs/queue-adapter/adapters/worker/consumer.ts",
     ],
     external: [...Object.keys(packageJson.dependencies)],

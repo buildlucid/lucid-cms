@@ -1,6 +1,7 @@
 import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types.js";
+import cloudflareQueuesAdapter from "./adapter.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return {
@@ -54,7 +55,15 @@ export default {
 				};
 			},
 		},
-		recipe: (draft) => {},
+		recipe: (draft) => {
+			if (draft.queue?.adapter) {
+				draft.queue.adapter = cloudflareQueuesAdapter(pluginOptions);
+			} else {
+				draft.queue = {
+					adapter: cloudflareQueuesAdapter(pluginOptions),
+				};
+			}
+		},
 	};
 };
 

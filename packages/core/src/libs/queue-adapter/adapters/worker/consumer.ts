@@ -4,11 +4,10 @@ import path from "node:path";
 import constants from "../../../../constants/constants.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
-import type { LucidQueueJobs, Select } from "../../../db-adapter/types.js";
 import getKVAdapter from "../../../kv-adapter/get-adapter.js";
 import logger from "../../../logger/index.js";
 import { QueueJobsRepository } from "../../../repositories/index.js";
-import getJobHandler from "../../job-handlers.js";
+import executeSingleJob from "../../execute-single-job.js";
 import passthroughQueueAdapter from "../passthrough.js";
 import type { WorkerQueueAdapterOptions } from "./index.js";
 import type {
@@ -21,7 +20,6 @@ import processConfig from "../../../config/process-config.js";
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
 const POLL_INTERVAL_INC = 1000;
-const BACKOFF_MULTIPLIER = 2;
 
 const options = workerData.options as WorkerQueueAdapterOptions;
 const runtime = workerData.runtime as {
@@ -78,150 +76,6 @@ const startConsumer = async () => {
 
 		const QueueJobs = new QueueJobsRepository(config.db.client, config.db);
 
-		/**
-		 * Handles job failure with retry logic
-		 */
-		const handleJobFailure = async (
-			job: Select<LucidQueueJobs>,
-			errorMessage: string,
-		) => {
-			const shouldRetry = job.attempts < job.max_attempts;
-
-			if (shouldRetry) {
-				const nextRetryAt = new Date(
-					Date.now() + BACKOFF_MULTIPLIER ** job.attempts * 1000,
-				);
-
-				logger.debug({
-					message: "Job will retry",
-					scope: constants.logScopes.queue,
-					data: {
-						jobId: job.job_id,
-						eventType: job.event_type,
-						nextRetryAt: nextRetryAt.toISOString(),
-					},
-				});
-
-				await QueueJobs.updateSingle({
-					data: {
-						status: "pending",
-						next_retry_at: nextRetryAt.toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: job.job_id }],
-				});
-			} else {
-				logger.error({
-					message: "Job failed permanently",
-					scope: constants.logScopes.queue,
-					data: {
-						jobId: job.job_id,
-						eventType: job.event_type,
-						errorMessage,
-					},
-				});
-
-				await QueueJobs.updateSingle({
-					data: {
-						status: "failed",
-						error_message: errorMessage,
-						failed_at: new Date().toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: job.job_id }],
-				});
-			}
-		};
-		/**
-		 * Processes a job
-		 */
-		const processJob = async (job: Select<LucidQueueJobs>): Promise<void> => {
-			const handler = getJobHandler(job.event_type);
-
-			if (!handler) {
-				logger.warn({
-					message: "No job handler found for job type",
-					scope: constants.logScopes.queue,
-					data: { jobId: job.job_id, eventType: job.event_type },
-				});
-
-				await QueueJobs.updateSingle({
-					data: {
-						status: "failed",
-						error_message: `No job handler found for job type: ${job.event_type}`,
-						failed_at: new Date().toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: job.job_id }],
-				});
-				return;
-			}
-
-			try {
-				logger.debug({
-					message: "Processing job",
-					scope: constants.logScopes.queue,
-					data: { jobId: job.job_id, eventType: job.event_type },
-				});
-
-				//* update job to processing status
-				const updateJobResInitial = await QueueJobs.updateSingle({
-					data: {
-						status: "processing",
-						attempts: job.attempts + 1,
-						started_at: new Date().toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: job.job_id }],
-				});
-				if (updateJobResInitial.error) return;
-
-				//* execute the handler
-				const handlerResult = await handler(
-					{
-						config: config,
-						db: config.db.client,
-						env: env ?? null,
-						// TODO: should handlers be able to push jobs to the queue??
-						//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
-						//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
-						queue: internalQueueAdapter,
-						kv: kvInstance,
-					},
-					job.event_data,
-				);
-				if (handlerResult.error) {
-					await handleJobFailure(
-						job,
-						handlerResult.error.message ?? "Unknown error",
-					);
-					return;
-				}
-
-				//* update job to completed status
-				const updateJobRes = await QueueJobs.updateSingle({
-					data: {
-						status: "completed",
-						completed_at: new Date().toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: job.job_id }],
-				});
-				if (updateJobRes.error) return;
-
-				logger.debug({
-					message: "Job completed successfully",
-					scope: constants.logScopes.queue,
-					data: { jobId: job.job_id, eventType: job.event_type },
-				});
-			} catch (error) {
-				await handleJobFailure(
-					job,
-					error instanceof Error ? error.message : "Unknown error",
-				);
-			}
-		};
-
 		// -----------------------------------------
 		// Polling
 		let pollInterval = MIN_POLL_INTERVAL;
@@ -271,7 +125,29 @@ const startConsumer = async () => {
 					}
 
 					for (const chunk of chunks) {
-						await Promise.allSettled(chunk.map((job) => processJob(job)));
+						await Promise.allSettled(
+							chunk.map((job) =>
+								executeSingleJob(
+									{
+										config: config,
+										db: config.db.client,
+										env: env ?? null,
+										// TODO: should handlers be able to push jobs to the queue??
+										//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
+										//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
+										queue: internalQueueAdapter,
+										kv: kvInstance,
+									},
+									{
+										jobId: job.job_id,
+										event: job.event_type,
+										payload: job.event_data,
+										attempts: job.attempts,
+										maxAttempts: job.max_attempts,
+									},
+								),
+							),
+						);
 					}
 				}
 			} catch (error) {

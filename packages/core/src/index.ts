@@ -12,9 +12,8 @@ export { default as sharpImageProcessor } from "./libs/image-processor/processor
 export { default as passthroughKVAdapter } from "./libs/kv-adapter/adapters/passthrough.js";
 export { default as logger } from "./libs/logger/index.js";
 export { default as fileSystemMediaAdapter } from "./libs/media-adapter/adapters/file-system/index.js";
-export { default as passthroughQueueAdapter } from "./libs/queue-adapter/adapters/passthrough.js";
-export { default as workerQueueAdapter } from "./libs/queue-adapter/adapters/worker/index.js";
 export { LucidError } from "./utils/errors/index.js";
+export * from "./libs/repositories/index.js";
 
 export default {
 	createApp,
