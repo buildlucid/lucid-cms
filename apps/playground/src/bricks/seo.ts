@@ -1,4 +1,4 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { BrickBuilder } from "@lucidcms/core/builders";
 
 const SEOBrick = new BrickBuilder("seo", {
 	details: {

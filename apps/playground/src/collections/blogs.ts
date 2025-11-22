@@ -1,4 +1,4 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { CollectionBuilder } from "@lucidcms/core/builders";
 
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",

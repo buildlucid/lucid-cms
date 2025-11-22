@@ -33,7 +33,7 @@ const executeSingleJob: ServiceFn<
 	if (!handler) {
 		logger.warn({
 			message: "No job handler found for job type",
-			scope: constants.logScopes.queue,
+			scope: constants.logScopes.queueAdapter,
 			data: { jobId: data.jobId, eventType: data.event },
 		});
 
@@ -58,7 +58,7 @@ const executeSingleJob: ServiceFn<
 	try {
 		logger.debug({
 			message: "Processing job",
-			scope: constants.logScopes.queue,
+			scope: constants.logScopes.queueAdapter,
 			data: { jobId: data.jobId, eventType: data.event },
 		});
 
@@ -84,7 +84,7 @@ const executeSingleJob: ServiceFn<
 
 				logger.debug({
 					message: "Job failed, will retry",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 					data: {
 						jobId: data.jobId,
 						eventType: data.event,
@@ -105,7 +105,7 @@ const executeSingleJob: ServiceFn<
 			} else {
 				logger.error({
 					message: "Job failed permanently",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 					data: {
 						jobId: data.jobId,
 						eventType: data.event,
@@ -143,7 +143,7 @@ const executeSingleJob: ServiceFn<
 
 		logger.debug({
 			message: "Job completed successfully",
-			scope: constants.logScopes.queue,
+			scope: constants.logScopes.queueAdapter,
 			data: { jobId: data.jobId, eventType: data.event },
 		});
 
@@ -161,7 +161,7 @@ const executeSingleJob: ServiceFn<
 		if (shouldRetry) {
 			logger.debug({
 				message: "Job failed with exception, will retry",
-				scope: constants.logScopes.queue,
+				scope: constants.logScopes.queueAdapter,
 				data: {
 					jobId: data.jobId,
 					eventType: data.event,
@@ -181,7 +181,7 @@ const executeSingleJob: ServiceFn<
 		} else {
 			logger.error({
 				message: "Job failed permanently with exception",
-				scope: constants.logScopes.queue,
+				scope: constants.logScopes.queueAdapter,
 				data: {
 					jobId: data.jobId,
 					eventType: data.event,

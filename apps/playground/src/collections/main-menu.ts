@@ -1,4 +1,4 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { CollectionBuilder } from "@lucidcms/core/builders";
 
 const MainMenuCollection = new CollectionBuilder("main-menu", {
 	mode: "single",

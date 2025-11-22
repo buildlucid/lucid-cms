@@ -1,4 +1,4 @@
-import { DatabaseAdapter } from "@lucidcms/core";
+import { DatabaseAdapter } from "@lucidcms/core/db-adapter";
 import type {
 	DatabaseConfig,
 	InferredTable,

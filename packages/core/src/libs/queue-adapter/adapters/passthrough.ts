@@ -28,13 +28,13 @@ function passthroughQueueAdapter(
 			init: async () => {
 				logger.debug({
 					message: "The passthrough queue has started",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 				});
 			},
 			destroy: async () => {
 				logger.debug({
 					message: "The passthrough queue has stopped",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 				});
 			},
 		},
@@ -43,7 +43,7 @@ function passthroughQueueAdapter(
 				try {
 					logger.info({
 						message: "Adding job to the passthrough queue",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: { event },
 					});
 
@@ -103,7 +103,7 @@ function passthroughQueueAdapter(
 				} catch (error) {
 					logger.error({
 						message: "Error adding event to the queue",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: {
 							errorMessage:
 								error instanceof Error ? error.message : String(error),
@@ -122,7 +122,7 @@ function passthroughQueueAdapter(
 				try {
 					logger.info({
 						message: "Adding batch jobs to the passthrough queue",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: { event, count: params.payloads.length },
 					});
 
@@ -190,7 +190,7 @@ function passthroughQueueAdapter(
 
 					logger.debug({
 						message: "Processing batch jobs in chunks",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: {
 							totalJobs: jobsData.length,
 							chunkCount: jobChunks.length,
@@ -224,7 +224,7 @@ function passthroughQueueAdapter(
 
 						logger.error({
 							message: "Some batch jobs failed",
-							scope: constants.logScopes.queue,
+							scope: constants.logScopes.queueAdapter,
 							data: {
 								failedCount: failedJobs.length,
 								totalCount: allResults.length,
@@ -241,7 +241,7 @@ function passthroughQueueAdapter(
 
 					logger.debug({
 						message: "All batch jobs completed successfully",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: { count: jobsData.length },
 					});
 
@@ -257,7 +257,7 @@ function passthroughQueueAdapter(
 				} catch (error) {
 					logger.error({
 						message: "Error adding batch events to the queue",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: {
 							errorMessage:
 								error instanceof Error ? error.message : String(error),

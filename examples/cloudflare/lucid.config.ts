@@ -103,8 +103,8 @@ export default defineConfig((env) => ({
 		// CloudflareKVPlugin({
 		// 	namespace: env.LUCID_CLOUDFLARE_KV,
 		// }),
-		CloudflareQueuesPlugin({
-			// namespace: env.LUCID_CLOUDFARE_QUEUES,
-		}),
+		// CloudflareQueuesPlugin({
+		// 	binding: env.LUCID_CLOUDFARE_QUEUES,
+		// }),
 	],
 }));

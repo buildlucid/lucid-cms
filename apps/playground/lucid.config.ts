@@ -1,13 +1,11 @@
-import {
-	fileSystemMediaAdapter,
-	passthroughEmailAdapter,
-	passthroughImageProcessor,
-	z,
-} from "@lucidcms/core";
+import { z } from "@lucidcms/core";
 import {
 	passthroughQueueAdapter,
 	workerQueueAdapter,
 } from "@lucidcms/core/queue-adapter";
+import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
+import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
+import { passthroughImageProcessor } from "@lucidcms/core/image-processor";
 import Database from "better-sqlite3";
 import { describeRoute } from "hono-openapi";
 import transporter from "./src/services/email-transporter.js";

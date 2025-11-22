@@ -1,11 +1,10 @@
-import { DatabaseAdapter } from "@lucidcms/core";
+import { DatabaseAdapter } from "@lucidcms/core/db-adapter";
 import type {
 	DatabaseConfig,
 	InferredTable,
 	InferredColumn,
 	OnUpdate,
 	OnDelete,
-	KyselyDB,
 } from "@lucidcms/core/types";
 import {
 	SqliteDialect,

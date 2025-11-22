@@ -30,6 +30,30 @@
             "types": "./dist/libs/queue-adapter/index.d.ts",
             "default": "./dist/libs/queue-adapter/index.js"
         },
+        "./builders": {
+            "types": "./dist/libs/builders/index.d.ts",
+            "default": "./dist/libs/builders/index.js"
+        },
+        "./db-adapter": {
+            "types": "./dist/libs/db-adapter/index.d.ts",
+            "default": "./dist/libs/db-adapter/index.js"
+        },
+        "./email-adapter": {
+            "types": "./dist/libs/email-adapter/index.d.ts",
+            "default": "./dist/libs/email-adapter/index.js"
+        },
+        "./image-processor": {
+            "types": "./dist/libs/image-processor/index.d.ts",
+            "default": "./dist/libs/image-processor/index.js"
+        },
+        "./kv-adapter": {
+            "types": "./dist/libs/kv-adapter/index.d.ts",
+            "default": "./dist/libs/kv-adapter/index.js"
+        },
+        "./media-adapter": {
+            "types": "./dist/libs/media-adapter/index.d.ts",
+            "default": "./dist/libs/media-adapter/index.js"
+        },
         "./package.json": "./package.json"
     },
     "scripts": {

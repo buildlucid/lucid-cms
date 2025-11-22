@@ -36,7 +36,7 @@ function workerQueueAdapter(
 			init: async (params) => {
 				logger.debug({
 					message: "The worker queue has started",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 				});
 				if (!params.runtimeContext.configEntryPoint) {
 					throw new Error(
@@ -83,7 +83,7 @@ function workerQueueAdapter(
 
 				logger.info({
 					message: "Adding job to the worker queue",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 					data: { event },
 				});
 
@@ -133,7 +133,7 @@ function workerQueueAdapter(
 
 				logger.info({
 					message: "Adding batch jobs to the worker queue",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 					data: { event, count: params.payloads.length },
 				});
 

@@ -24,7 +24,7 @@ const getKVAdapter = async (config: Config): Promise<KVAdapterInstance> => {
 		return await betterSQLiteKVAdapter();
 	} catch (error) {
 		logger.error({
-			scope: constants.logScopes.kv,
+			scope: constants.logScopes.kvAdapter,
 			message:
 				error instanceof Error
 					? error.message

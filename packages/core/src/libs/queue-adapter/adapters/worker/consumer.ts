@@ -97,7 +97,7 @@ const startConsumer = async () => {
 				if (jobsResult.error) {
 					logger.error({
 						message: "Error getting ready jobs",
-						scope: constants.logScopes.queue,
+						scope: constants.logScopes.queueAdapter,
 						data: { error: jobsResult.error },
 					});
 					return;
@@ -105,7 +105,7 @@ const startConsumer = async () => {
 
 				logger.debug({
 					message: "Jobs found",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 					data: { jobs: jobsResult.data.length },
 				});
 
@@ -153,7 +153,7 @@ const startConsumer = async () => {
 			} catch (error) {
 				logger.error({
 					message: "Polling error",
-					scope: constants.logScopes.queue,
+					scope: constants.logScopes.queueAdapter,
 					data: { error },
 				});
 			}
@@ -167,13 +167,13 @@ const startConsumer = async () => {
 
 		logger.debug({
 			message: "Starting queue polling",
-			scope: constants.logScopes.queue,
+			scope: constants.logScopes.queueAdapter,
 		});
 		poll();
 	} catch (error) {
 		logger.error({
 			message: "Consumer startup error",
-			scope: constants.logScopes.queue,
+			scope: constants.logScopes.queueAdapter,
 			data: { error },
 		});
 		process.exit(1);

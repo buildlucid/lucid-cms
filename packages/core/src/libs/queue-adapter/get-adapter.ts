@@ -29,7 +29,7 @@ const getQueueAdapter = async (
 		return workerQueueAdapter();
 	} catch (error) {
 		logger.error({
-			scope: constants.logScopes.queue,
+			scope: constants.logScopes.queueAdapter,
 			message:
 				error instanceof Error
 					? error.message

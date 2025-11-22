@@ -176,7 +176,8 @@ const cloudflareAdapter = (options?: {
 
 					const entry = /* ts */ `
 import config from "./${options.outputRelativeConfigPath}";
-import lucid, { passthroughKVAdapter } from "@lucidcms/core";
+import lucid from "@lucidcms/core";
+import { passthroughKVAdapter } from "@lucidcms/core/kv-adapter";
 import { processConfig } from "@lucidcms/core/helpers";
 import emailTemplates from "./email-templates.json" with { type: "json" };
 import { getRuntimeContext } from "@lucidcms/cloudflare-adapter";
