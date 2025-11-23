@@ -93,8 +93,16 @@ function passthroughQueueAdapter(
 						payload: params.payload,
 						attempts: 0,
 						maxAttempts: 1,
+						setNextRetryAt: false,
 					});
-					if (executeResult.error) return executeResult;
+					if (executeResult.success === false) {
+						return {
+							error: {
+								message: executeResult.message,
+							},
+							data: undefined,
+						};
+					}
 
 					return {
 						error: undefined,

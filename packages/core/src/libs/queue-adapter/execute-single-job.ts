@@ -2,35 +2,120 @@ import constants from "../../constants/constants.js";
 import logger from "../logger/index.js";
 import { QueueJobsRepository } from "../repositories/index.js";
 import getJobHandler from "./job-handlers.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import type { QueueEvent } from "./types.js";
+import { serviceWrapper } from "../../api.js";
 
 const BACKOFF_MULTIPLIER = 2;
 
 /**
+ * Handles the retry logic for a failed job
+ */
+const handleRetryLogic = async (params: {
+	jobId: string;
+	event: QueueEvent;
+	errorMessage: string;
+	attempts: number;
+	maxAttempts: number;
+	setNextRetryAt: boolean;
+	QueueJobs: QueueJobsRepository;
+}): Promise<boolean> => {
+	const shouldRetry = params.attempts + 1 < params.maxAttempts;
+
+	if (shouldRetry) {
+		const updateData: {
+			status: "pending";
+			updated_at: string;
+			next_retry_at?: string;
+		} = {
+			status: "pending",
+			updated_at: new Date().toISOString(),
+		};
+
+		if (params.setNextRetryAt) {
+			const nextRetryAt = new Date(
+				Date.now() + BACKOFF_MULTIPLIER ** params.attempts * 1000,
+			);
+			updateData.next_retry_at = nextRetryAt.toISOString();
+
+			logger.debug({
+				message: "Job failed, will retry",
+				scope: constants.logScopes.queueAdapter,
+				data: {
+					jobId: params.jobId,
+					eventType: params.event,
+					attempts: params.attempts + 1,
+					maxAttempts: params.maxAttempts,
+					nextRetryAt: nextRetryAt.toISOString(),
+				},
+			});
+		} else {
+			logger.debug({
+				message: "Job failed, will retry",
+				scope: constants.logScopes.queueAdapter,
+				data: {
+					jobId: params.jobId,
+					eventType: params.event,
+					attempts: params.attempts + 1,
+					maxAttempts: params.maxAttempts,
+				},
+			});
+		}
+
+		await params.QueueJobs.updateSingle({
+			data: updateData,
+			where: [{ key: "job_id", operator: "=", value: params.jobId }],
+		});
+	} else {
+		logger.error({
+			message: "Job failed permanently",
+			scope: constants.logScopes.queueAdapter,
+			data: {
+				jobId: params.jobId,
+				eventType: params.event,
+				errorMessage: params.errorMessage,
+			},
+		});
+
+		await params.QueueJobs.updateSingle({
+			data: {
+				status: "failed",
+				error_message: params.errorMessage,
+				failed_at: new Date().toISOString(),
+				updated_at: new Date().toISOString(),
+			},
+			where: [{ key: "job_id", operator: "=", value: params.jobId }],
+		});
+	}
+
+	return shouldRetry;
+};
+
+/**
  * Executes a single job and updates its status in the database.
  */
-const executeSingleJob: ServiceFn<
-	[
-		{
-			jobId: string;
-			event: QueueEvent;
-			payload: Record<string, unknown>;
-			attempts: number;
-			maxAttempts: number;
-		},
-	],
-	{
-		shouldRetry: boolean;
-	}
-> = async (serviceContext, data) => {
+const executeSingleJob: (
+	context: ServiceContext,
+	data: {
+		jobId: string;
+		event: QueueEvent;
+		payload: Record<string, unknown>;
+		attempts: number;
+		maxAttempts: number;
+		setNextRetryAt?: boolean;
+	},
+) => Promise<{
+	success: boolean;
+	shouldRetry: boolean;
+	message: string;
+}> = async (context, data) => {
 	const handler = getJobHandler(data.event);
-	const QueueJobs = new QueueJobsRepository(
-		serviceContext.db,
-		serviceContext.config.db,
-	);
+	const QueueJobs = new QueueJobsRepository(context.db, context.config.db);
+	const setNextRetryAt = data.setNextRetryAt ?? true;
 
 	if (!handler) {
+		const errorMessage = `No job handler found for job type: ${data.event}`;
+
 		logger.warn({
 			message: "No job handler found for job type",
 			scope: constants.logScopes.queueAdapter,
@@ -40,7 +125,7 @@ const executeSingleJob: ServiceFn<
 		await QueueJobs.updateSingle({
 			data: {
 				status: "failed",
-				error_message: `No job handler found for job type: ${data.event}`,
+				error_message: errorMessage,
 				failed_at: new Date().toISOString(),
 				updated_at: new Date().toISOString(),
 			},
@@ -48,10 +133,9 @@ const executeSingleJob: ServiceFn<
 		});
 
 		return {
-			error: {
-				message: `No job handler found for job type: ${data.event}`,
-			},
-			data: undefined,
+			success: false,
+			shouldRetry: false,
+			message: errorMessage,
 		};
 	}
 
@@ -72,63 +156,26 @@ const executeSingleJob: ServiceFn<
 			where: [{ key: "job_id", operator: "=", value: data.jobId }],
 		});
 
-		const handlerResult = await handler(serviceContext, data.payload);
+		const handlerResult = await serviceWrapper(handler, {
+			transaction: true,
+		})(context, data.payload);
 
 		if (handlerResult.error) {
-			const shouldRetry = data.attempts + 1 < data.maxAttempts;
-
-			if (shouldRetry) {
-				const nextRetryAt = new Date(
-					Date.now() + BACKOFF_MULTIPLIER ** data.attempts * 1000,
-				);
-
-				logger.debug({
-					message: "Job failed, will retry",
-					scope: constants.logScopes.queueAdapter,
-					data: {
-						jobId: data.jobId,
-						eventType: data.event,
-						attempts: data.attempts + 1,
-						maxAttempts: data.maxAttempts,
-						nextRetryAt: nextRetryAt.toISOString(),
-					},
-				});
-
-				await QueueJobs.updateSingle({
-					data: {
-						status: "pending",
-						next_retry_at: nextRetryAt.toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: data.jobId }],
-				});
-			} else {
-				logger.error({
-					message: "Job failed permanently",
-					scope: constants.logScopes.queueAdapter,
-					data: {
-						jobId: data.jobId,
-						eventType: data.event,
-						errorMessage: handlerResult.error.message,
-					},
-				});
-
-				await QueueJobs.updateSingle({
-					data: {
-						status: "failed",
-						error_message: handlerResult.error.message ?? "Unknown error",
-						failed_at: new Date().toISOString(),
-						updated_at: new Date().toISOString(),
-					},
-					where: [{ key: "job_id", operator: "=", value: data.jobId }],
-				});
-			}
+			const errorMessage = handlerResult.error.message ?? "Unknown error";
+			const shouldRetry = await handleRetryLogic({
+				jobId: data.jobId,
+				event: data.event,
+				errorMessage,
+				attempts: data.attempts,
+				maxAttempts: data.maxAttempts,
+				setNextRetryAt,
+				QueueJobs,
+			});
 
 			return {
-				error: {
-					message: handlerResult.error.message ?? "Unknown error",
-				},
-				data: undefined,
+				success: false,
+				shouldRetry,
+				message: errorMessage,
 			};
 		}
 
@@ -148,63 +195,28 @@ const executeSingleJob: ServiceFn<
 		});
 
 		return {
-			error: undefined,
-			data: {
-				shouldRetry: false,
-			},
+			success: true,
+			shouldRetry: false,
+			message: "Job completed successfully",
 		};
 	} catch (error) {
 		const errorMessage =
 			error instanceof Error ? error.message : "Unknown error";
-		const shouldRetry = data.attempts + 1 < data.maxAttempts;
 
-		if (shouldRetry) {
-			logger.debug({
-				message: "Job failed with exception, will retry",
-				scope: constants.logScopes.queueAdapter,
-				data: {
-					jobId: data.jobId,
-					eventType: data.event,
-					errorMessage,
-					attempts: data.attempts + 1,
-					maxAttempts: data.maxAttempts,
-				},
-			});
-
-			await QueueJobs.updateSingle({
-				data: {
-					status: "pending",
-					updated_at: new Date().toISOString(),
-				},
-				where: [{ key: "job_id", operator: "=", value: data.jobId }],
-			});
-		} else {
-			logger.error({
-				message: "Job failed permanently with exception",
-				scope: constants.logScopes.queueAdapter,
-				data: {
-					jobId: data.jobId,
-					eventType: data.event,
-					errorMessage,
-				},
-			});
-
-			await QueueJobs.updateSingle({
-				data: {
-					status: "failed",
-					error_message: errorMessage,
-					failed_at: new Date().toISOString(),
-					updated_at: new Date().toISOString(),
-				},
-				where: [{ key: "job_id", operator: "=", value: data.jobId }],
-			});
-		}
+		const shouldRetry = await handleRetryLogic({
+			jobId: data.jobId,
+			event: data.event,
+			errorMessage,
+			attempts: data.attempts,
+			maxAttempts: data.maxAttempts,
+			setNextRetryAt,
+			QueueJobs,
+		});
 
 		return {
-			error: {
-				message: errorMessage,
-			},
-			data: undefined,
+			success: false,
+			shouldRetry,
+			message: errorMessage,
 		};
 	}
 };
