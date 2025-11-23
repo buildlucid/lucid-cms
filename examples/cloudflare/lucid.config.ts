@@ -1,6 +1,6 @@
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import { z } from "@lucidcms/core";
-// import type { KVNamespace } from "@cloudflare/workers-types";
+import type { KVNamespace, Queue } from "@cloudflare/workers-types";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
@@ -32,6 +32,7 @@ export const envSchema = z.object({
 	LUCID_S3_SECRET_KEY: z.string(),
 	LUCID_MEDIA_URL: z.string(),
 	// LUCID_CLOUDFLARE_KV: z.custom<KVNamespace>(),
+	LUCID_CLOUDFLARE_QUEUES: z.custom<Queue>(),
 });
 
 export default defineConfig((env) => ({
@@ -101,10 +102,11 @@ export default defineConfig((env) => ({
 			},
 		}),
 		// CloudflareKVPlugin({
-		// 	namespace: env.LUCID_CLOUDFLARE_KV,
+		// 	binding: env.LUCID_CLOUDFLARE_KV,
 		// }),
-		// CloudflareQueuesPlugin({
-		// 	binding: env.LUCID_CLOUDFARE_QUEUES,
-		// }),
+		CloudflareQueuesPlugin({
+			binding: env.LUCID_CLOUDFLARE_QUEUES,
+			consumer: "inline",
+		}),
 	],
 }));

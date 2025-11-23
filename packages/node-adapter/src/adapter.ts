@@ -119,7 +119,7 @@ const nodeAdapter = (options?: {
 				try {
 					const buildInput = {
 						[constants.CONFIG_FILE]: options.configPath,
-						...options.pluginCompileArtifacts,
+						...options.pluginArtifacts.compile,
 					};
 
 					await build({

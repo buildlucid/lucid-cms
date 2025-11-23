@@ -1,6 +1,7 @@
 import type { Config } from "../../../types/config.js";
 import type {
 	LucidPluginBuildArtifactCompile,
+	LucidPluginBuildArtifactCustom,
 	LucidPluginBuildArtifactFile,
 } from "../../../libs/plugins/types.js";
 import cliLogger from "../../cli/logger.js";
@@ -8,20 +9,28 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { ServiceResponse } from "../../../types.js";
 
-export type PluginBuildArtifactResult = Array<
-	| {
-			type: "file";
-			path: string;
-	  }
-	| {
-			type: "compile";
-			path: string;
-			output: string;
-	  }
->;
+export const CORE_ARTIFACT_TYPES = ["file", "compile"];
+
+export type PluginBuildArtifactResultFile = {
+	type: "file";
+	path: string;
+};
+export type PluginBuildArtifactResultCompile = {
+	type: "compile";
+	path: string;
+	output: string;
+};
+export type PluginBuildArtifactResultItem =
+	| PluginBuildArtifactResultFile
+	| PluginBuildArtifactResultCompile
+	| LucidPluginBuildArtifactCustom;
+
+export type PluginBuildArtifactResult = Array<PluginBuildArtifactResultItem>;
 
 /**
  * Responsible for running the plugin build hooks and creating artifacts
+ * @todo imrpove the response type and structure of this. Anything that isnt a core artifact should be returned as is
+ * @todo improve typeing of artifact results, the types should also be from the runtime adapter instead
  */
 const handlePluginBuildHooks = async (props: {
 	config: Config;
@@ -29,10 +38,13 @@ const handlePluginBuildHooks = async (props: {
 	configPath: string;
 	outputPath: string;
 	outputRelativeConfigPath: string;
+	customArtifactTypes?: string[];
 }): ServiceResponse<PluginBuildArtifactResult> => {
 	try {
 		const pluginArtifacts: Array<
-			LucidPluginBuildArtifactFile | LucidPluginBuildArtifactCompile
+			| LucidPluginBuildArtifactFile
+			| LucidPluginBuildArtifactCompile
+			| LucidPluginBuildArtifactCustom
 		> = [];
 		const outDir = props.config.compilerOptions.paths.outDir;
 		const silent = props.silent ?? false;
@@ -73,15 +85,26 @@ const handlePluginBuildHooks = async (props: {
 
 		const results = (await Promise.all(
 			pluginArtifacts.map(async (artifact) => {
+				if (props.customArtifactTypes?.includes(artifact.type)) {
+					return artifact as LucidPluginBuildArtifactCustom;
+				}
+
+				if (!CORE_ARTIFACT_TYPES.includes(artifact.type)) {
+					return undefined;
+				}
+
 				let artifactPathData: { path: string; content: string };
 
 				if (artifact.type === "compile") {
-					artifactPathData = artifact.input;
-				} else {
+					artifactPathData = (artifact as LucidPluginBuildArtifactCompile)
+						.input;
+				} else if (artifact.type === "file") {
 					artifactPathData = {
-						path: artifact.path,
-						content: artifact.content,
+						path: (artifact as LucidPluginBuildArtifactFile).path,
+						content: (artifact as LucidPluginBuildArtifactFile).content,
 					};
+				} else {
+					return undefined;
 				}
 
 				const relativePath = artifactPathData.path.replace(/^[/\\]+/, "");
@@ -100,7 +123,7 @@ const handlePluginBuildHooks = async (props: {
 					return {
 						type: "compile",
 						path: artifactPath,
-						output: artifact.output.path,
+						output: (artifact as LucidPluginBuildArtifactCompile).output.path,
 					};
 				}
 				return {
@@ -108,11 +131,13 @@ const handlePluginBuildHooks = async (props: {
 					path: artifactPath,
 				};
 			}),
-		)) satisfies PluginBuildArtifactResult;
+		)) satisfies (PluginBuildArtifactResultItem | undefined)[];
 
 		return {
 			error: undefined,
-			data: results,
+			data: results.filter(
+				(r): r is PluginBuildArtifactResultItem => r !== undefined,
+			),
 		};
 	} catch (error) {
 		return {

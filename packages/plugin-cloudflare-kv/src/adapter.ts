@@ -9,7 +9,7 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 		key: "cloudflare-kv",
 		command: {
 			get: async <R>(key: string): Promise<R | null> => {
-				const value = await options.namespace.get(key, { type: "text" });
+				const value = await options.binding.get(key, { type: "text" });
 				if (value === null) return null;
 
 				try {
@@ -38,22 +38,20 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 					);
 				}
 
-				await options.namespace.put(key, serialised, {
+				await options.binding.put(key, serialised, {
 					expirationTtl,
 				});
 			},
 			has: async (key: string): Promise<boolean> => {
-				const value = await options.namespace.get(key, { type: "text" });
+				const value = await options.binding.get(key, { type: "text" });
 				return value !== null;
 			},
 			delete: async (key: string): Promise<void> => {
-				await options.namespace.delete(key);
+				await options.binding.delete(key);
 			},
 			clear: async (): Promise<void> => {
-				const keys = await options.namespace.list();
-				await Promise.all(
-					keys.keys.map((k) => options.namespace.delete(k.name)),
-				);
+				const keys = await options.binding.list();
+				await Promise.all(keys.keys.map((k) => options.binding.delete(k.name)));
 			},
 		},
 	};

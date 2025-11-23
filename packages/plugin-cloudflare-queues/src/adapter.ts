@@ -3,7 +3,7 @@ import { logger, QueueJobsRepository } from "@lucidcms/core";
 import { executeSingleJob, logScope } from "@lucidcms/core/queue-adapter";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types.js";
-import { MAX_ATTEMPTS, ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
+import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
 
 const cloudflareQueuesAdapter = (
 	options: PluginOptions,
@@ -55,7 +55,6 @@ const cloudflareQueuesAdapter = (
 							queue_adapter_key: ADAPTER_KEY,
 							priority: params.options?.priority ?? 0,
 							attempts: 0,
-							max_attempts: params.options?.maxAttempts ?? MAX_ATTEMPTS,
 							error_message: null,
 							created_at: now.toISOString(),
 							scheduled_for: params.options?.scheduledFor
@@ -83,10 +82,21 @@ const cloudflareQueuesAdapter = (
 								payload: params.payload,
 								attempts: 0,
 								maxAttempts: 1,
+								setNextRetryAt: false,
 							},
 						);
 
-						if (executeResult.error) return executeResult;
+						if (
+							executeResult.success === false &&
+							executeResult.shouldRetry === false
+						) {
+							return {
+								error: {
+									message: executeResult.message,
+								},
+								data: undefined,
+							};
+						}
 					}
 
 					return {
@@ -140,7 +150,6 @@ const cloudflareQueuesAdapter = (
 							queue_adapter_key: ADAPTER_KEY,
 							priority: params.options?.priority ?? 0,
 							attempts: 0,
-							max_attempts: params.options?.maxAttempts ?? MAX_ATTEMPTS,
 							error_message: null,
 							created_at: now.toISOString(),
 							scheduled_for: params.options?.scheduledFor
@@ -195,6 +204,7 @@ const cloudflareQueuesAdapter = (
 										payload: job.payload,
 										attempts: 0,
 										maxAttempts: 1,
+										setNextRetryAt: false,
 									}),
 								),
 							),

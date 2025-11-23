@@ -4,6 +4,7 @@ import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
 import type RuntimeAdapterSchema from "./schema.js";
 import type { AddressInfo } from "node:net";
+import type { LucidPluginBuildArtifactCustom } from "../plugins/types.js";
 
 export type ServeHandler = (props: {
 	config: Config;
@@ -25,10 +26,17 @@ export type BuildHandler = (props: {
 		configPath: string;
 		outputPath: string;
 		outputRelativeConfigPath: string;
-		/**
-		 * Artifacts that plugins have marked as to be compiled. The key being the output, and the value being the input path.
-		 */
-		pluginCompileArtifacts: Record<string, string>;
+		// TODO: make build artifacts a runtime adapter thing, instead of a plugin thing. That way it can be used elsewhere later if needed.
+		pluginArtifacts: {
+			/**
+			 * Artifacts that plugins have marked as to be compiled. The key being the output, and the value being the input path.
+			 */
+			compile: Record<string, string>;
+			/**
+			 * Custom artifacts that are specific to the runtime adapter.
+			 */
+			custom: Array<LucidPluginBuildArtifactCustom>;
+		};
 	};
 	logger: {
 		instance: CLILogger;

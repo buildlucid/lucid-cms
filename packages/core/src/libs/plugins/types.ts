@@ -19,9 +19,17 @@ export type LucidPluginBuildArtifactCompile = {
 	};
 };
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type LucidPluginBuildArtifactCustom<T = any> = {
+	type: string;
+	custom: T;
+};
+
 export type LucidPluginBuildHookResult = {
 	artifacts?: Array<
-		LucidPluginBuildArtifactFile | LucidPluginBuildArtifactCompile
+		| LucidPluginBuildArtifactFile
+		| LucidPluginBuildArtifactCompile
+		| LucidPluginBuildArtifactCustom
 	>;
 };
 

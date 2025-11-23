@@ -17,6 +17,11 @@ const BuildHandlerSchema = z.custom<BuildHandler>(
 
 const RuntimeAdapterSchema = z.object({
 	key: z.string(),
+	config: z
+		.object({
+			customBuildArtifacts: z.array(z.string()).optional(),
+		})
+		.optional(),
 	lucid: z.string(),
 	getEnvVars: z.custom<() => Promise<Record<string, unknown>>>(
 		(data) => typeof data === "function",

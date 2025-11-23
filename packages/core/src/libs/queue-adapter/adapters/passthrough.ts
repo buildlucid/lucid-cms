@@ -95,7 +95,10 @@ function passthroughQueueAdapter(
 						maxAttempts: 1,
 						setNextRetryAt: false,
 					});
-					if (executeResult.success === false) {
+					if (
+						executeResult.success === false &&
+						executeResult.shouldRetry === false
+					) {
 						return {
 							error: {
 								message: executeResult.message,

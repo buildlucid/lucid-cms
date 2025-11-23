@@ -19,6 +19,7 @@ import {
 } from "wrangler";
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import getRuntimeContext from "./runtime-context.js";
+import getWorkerExportArtifacts from "./utils/get-worker-export-artifacts.js";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
@@ -32,6 +33,9 @@ const cloudflareAdapter = (options?: {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		config: {
+			customBuildArtifacts: ["worker-export"],
+		},
 		getEnvVars: async () => {
 			platformProxy = await getPlatformProxy(options?.platformProxy);
 			return platformProxy.env;
@@ -174,6 +178,11 @@ const cloudflareAdapter = (options?: {
 					const configIsTs = options.configPath.endsWith(".ts");
 					const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
 
+					console.log(options.pluginArtifacts.custom);
+					const workerExportArtifacts = getWorkerExportArtifacts(
+						options.pluginArtifacts.custom,
+					);
+
 					const entry = /* ts */ `
 import config from "./${options.outputRelativeConfigPath}";
 import lucid from "@lucidcms/core";
@@ -181,6 +190,7 @@ import { passthroughKVAdapter } from "@lucidcms/core/kv-adapter";
 import { processConfig } from "@lucidcms/core/helpers";
 import emailTemplates from "./email-templates.json" with { type: "json" };
 import { getRuntimeContext } from "@lucidcms/cloudflare-adapter";
+${workerExportArtifacts.imports}
 
 export default {
 	async fetch(request, env, ctx) {
@@ -251,7 +261,10 @@ export default {
 
 		ctx.waitUntil(runCronService());
 	},
+    ${workerExportArtifacts.exports}
 };`;
+
+					console.log(entry);
 
 					await writeFile(tempEntryFile, entry);
 
@@ -293,7 +306,7 @@ export default {
 							},
 							...buildOptions,
 						}),
-						...Object.entries(options.pluginCompileArtifacts).map(
+						...Object.entries(options.pluginArtifacts.compile).map(
 							([key, artifact]) =>
 								build({
 									input: {
@@ -307,7 +320,7 @@ export default {
 					//* clean up temporary files
 					await Promise.all([
 						unlink(tempEntryFile),
-						...Object.entries(options.pluginCompileArtifacts).map(
+						...Object.entries(options.pluginArtifacts.compile).map(
 							([_, artifact]) => unlink(artifact),
 						),
 					]);
