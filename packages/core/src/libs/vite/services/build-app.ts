@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import getBuildPaths from "../../cli/utils/get-build-paths.js";
+import getBuildPaths from "../../cli/services/get-build-paths.js";
 import fs from "node:fs/promises";
 import type { Config, ServiceResponse } from "../../../types.js";
 import { join } from "node:path";

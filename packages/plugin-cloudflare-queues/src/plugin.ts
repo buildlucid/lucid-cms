@@ -3,6 +3,13 @@ import type { LucidPlugin } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types.js";
 import cloudflareQueuesAdapter from "./adapter.js";
 import { MAX_ATTEMPTS } from "./constants.js";
+import type {
+	CloudflareWorkerEntryArtifact,
+	CloudflareWorkerExportArtifact,
+	CloudflareWorkerImport,
+	CloudflareWorkerExport,
+} from "@lucidcms/cloudflare-adapter/types";
+import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return {
@@ -10,15 +17,38 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		lucid: LUCID_VERSION,
 		hooks: {
 			build: async (props) => {
-				const queueImportsContent = /* ts */ `import config from "./${props.paths.outputRelativeConfigPath}";
-import { processConfig } from "@lucidcms/core/helpers";
-import { passthroughQueueAdapter, logScope, executeSingleJob } from "@lucidcms/core/queue-adapter";
-import { getKVAdapter } from "@lucidcms/core/kv-adapter";
-import { logger } from "@lucidcms/core";
-`;
-
-				const queueExportContent = /* ts */ `async queue(batch, env) {
-const resolved = await processConfig(config(env));
+				const imports: CloudflareWorkerImport[] = [
+					{
+						path: `./${props.paths.outputRelativeConfigPath}`,
+						default: "config",
+					},
+					{
+						path: "@lucidcms/core/helpers",
+						exports: ["processConfig"],
+					},
+					{
+						path: "@lucidcms/core/queue-adapter",
+						exports: [
+							"passthroughQueueAdapter",
+							"logScope",
+							"executeSingleJob",
+						],
+					},
+					{
+						path: "@lucidcms/core/kv-adapter",
+						exports: ["getKVAdapter"],
+					},
+					{
+						path: "@lucidcms/core",
+						exports: ["logger"],
+					},
+				];
+				const exports: CloudflareWorkerExport[] = [
+					{
+						name: "queue",
+						async: true,
+						params: ["batch", "env"],
+						content: /** ts */ `const resolved = await processConfig(config(env));
 const kvInstance = await getKVAdapter(resolved);
 
 const internalQueueAdapter = passthroughQueueAdapter({
@@ -86,8 +116,9 @@ for (const message of batch.messages) {
         });
         message.retry();
     }
-}
-}`;
+}`,
+					},
+				];
 
 				if (pluginOptions.consumer === "separate") {
 					return {
@@ -95,19 +126,13 @@ for (const message of batch.messages) {
 						data: {
 							artifacts: [
 								{
-									type: "compile",
-									input: {
-										path: "temp-queue-consumer.ts",
-										content: /* ts */ `${queueImportsContent}
-    
-    export default {
-        ${queueExportContent}
-    };`,
+									type: "worker-entry",
+									custom: {
+										filename: "queue-consumer",
+										imports,
+										exports,
 									},
-									output: {
-										path: "queue-consumer",
-									},
-								},
+								} satisfies RuntimeBuildArtifactCustom<CloudflareWorkerEntryArtifact>,
 							],
 						},
 					};
@@ -120,10 +145,10 @@ for (const message of batch.messages) {
 							{
 								type: "worker-export",
 								custom: {
-									import: queueImportsContent,
-									export: queueExportContent,
+									imports,
+									exports,
 								},
-							},
+							} satisfies RuntimeBuildArtifactCustom<CloudflareWorkerExportArtifact>,
 						],
 					},
 				};

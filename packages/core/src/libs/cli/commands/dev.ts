@@ -9,10 +9,10 @@ import logger from "../../logger/index.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
-import copyPublicAssets from "../utils/copy-public-assets.js";
-import validateEnvVars from "../utils/validate-env-vars.js";
+import copyPublicAssets from "../services/copy-public-assets.js";
+import validateEnvVars from "../services/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
-import updateAvailable from "../utils/update-available.js";
+import updateAvailable from "../services/update-available.js";
 
 const devCommand = async (options?: { watch?: string | boolean }) => {
 	const configPath = getConfigPath(process.cwd());

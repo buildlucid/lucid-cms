@@ -41,7 +41,13 @@ const processBuildArtifacts = async (props: {
 			let artifactPathData: { path: string; content: string };
 
 			if (artifact.type === "compile") {
-				artifactPathData = (artifact as RuntimeBuildArtifactCompile).input;
+				const compileArtifact = artifact as RuntimeBuildArtifactCompile;
+				const dirname = path.dirname(compileArtifact.path);
+				const filename = path.basename(compileArtifact.path);
+				artifactPathData = {
+					path: path.join(dirname, `temp-${filename}`),
+					content: compileArtifact.content,
+				};
 			} else if (artifact.type === "file") {
 				artifactPathData = {
 					path: (artifact as RuntimeBuildArtifactFile).path,
@@ -65,7 +71,11 @@ const processBuildArtifacts = async (props: {
 
 			if (artifact.type === "compile") {
 				const compileArtifact = artifact as RuntimeBuildArtifactCompile;
-				result.compile[compileArtifact.output.path] = artifactPath;
+				const ext = path.extname(compileArtifact.path);
+				const nameWithoutExt = path.basename(compileArtifact.path, ext);
+				const dir = path.dirname(compileArtifact.path);
+				const key = path.join(dir, nameWithoutExt);
+				result.compile[key] = artifactPath;
 			}
 		}),
 	);

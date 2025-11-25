@@ -8,10 +8,10 @@ import logger from "../../logger/index.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
-import calculateOutDirSize from "../utils/calculate-outdir-size.js";
-import copyPublicAssets from "../utils/copy-public-assets.js";
+import calculateOutDirSize from "../services/calculate-outdir-size.js";
+import copyPublicAssets from "../services/copy-public-assets.js";
 import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
-import processBuildArtifacts from "../utils/process-build-artifacts.js";
+import processBuildArtifacts from "../services/process-build-artifacts.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.

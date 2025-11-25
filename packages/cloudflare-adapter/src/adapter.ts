@@ -1,17 +1,11 @@
 import { readFileSync } from "node:fs";
-import { unlink, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import lucid from "@lucidcms/core";
-import {
-	getBuildPaths,
-	stripAdapterExportPlugin,
-	stripImportsPlugin,
-} from "@lucidcms/core/helpers";
+import { getBuildPaths } from "@lucidcms/core/helpers";
 import type { LucidHonoGeneric, RuntimeAdapter } from "@lucidcms/core/types";
 import { Hono } from "hono";
-import { build, type BuildOptions } from "rolldown";
 import {
 	type GetPlatformProxyOptions,
 	getPlatformProxy,
@@ -19,7 +13,11 @@ import {
 } from "wrangler";
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import getRuntimeContext from "./runtime-context.js";
-import getWorkerExportArtifacts from "./utils/get-worker-export-artifacts.js";
+import prepareMainWorkerEntry from "./services/prepare-worker-entry.js";
+import prepareAdditionalWorkerEntries from "./services/prepare-additional-worker-entries.js";
+import writeWorkerEntries from "./services/write-worker-entries.js";
+import buildWorkerEntries from "./services/build-worker-entries.js";
+import cleanupTempFiles from "./services/cleanup-temp-files.js";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
@@ -34,7 +32,7 @@ const cloudflareAdapter = (options?: {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		config: {
-			customBuildArtifacts: ["worker-export"],
+			customBuildArtifacts: ["worker-export", "worker-entry"],
 		},
 		getEnvVars: async () => {
 			platformProxy = await getPlatformProxy(options?.platformProxy);
@@ -176,157 +174,50 @@ const cloudflareAdapter = (options?: {
 
 				try {
 					const configIsTs = options.configPath.endsWith(".ts");
-					const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
+					const extension = configIsTs ? "ts" : "js";
 
-					console.log(options.buildArtifacts.custom);
-					const workerExportArtifacts = getWorkerExportArtifacts(
+					const mainWorkerEntry = prepareMainWorkerEntry(
+						options.outputRelativeConfigPath,
+						options.buildArtifacts.custom,
+					);
+					const additionalWorkerEntries = prepareAdditionalWorkerEntries(
 						options.buildArtifacts.custom,
 					);
 
-					const entry = /* ts */ `
-import config from "./${options.outputRelativeConfigPath}";
-import lucid from "@lucidcms/core";
-import { passthroughKVAdapter } from "@lucidcms/core/kv-adapter";
-import { processConfig } from "@lucidcms/core/helpers";
-import emailTemplates from "./email-templates.json" with { type: "json" };
-import { getRuntimeContext } from "@lucidcms/cloudflare-adapter";
-${workerExportArtifacts.imports}
-
-export default {
-	async fetch(request, env, ctx) {
-		const resolved = await processConfig(
-			config(env, {
-				emailTemplates: emailTemplates,
-			}),
-		);
-
-		const { app } = await lucid.createApp({
-			config: resolved,
-			env: env,
-			runtimeContext: getRuntimeContext({
-				server: "cloudflare",
-				compiled: true,
-			}),
-			hono: {
-				middleware: [
-					async (app, config) => {
-						app.use("*", async (c, next) => {
-							c.env = Object.assign(c.env, env);
-							c.set("cf", env.cf);
-							c.set("caches", env.caches);
-							c.set("ctx", {
-								waitUntil: ctx.waitUntil,
-								passThroughOnException: ctx.passThroughOnException,
-							});
-							await next();
-						});
-					},
-				],
-				extensions: [
-					async (app, config) => {
-						app.get("/admin/*", async (c) => {
-							const url = new URL(c.req.url);
-
-							const indexRequestUrl = url.origin + "/admin/index.html";
-							const indexRequest = new Request(indexRequestUrl);
-							const indexAsset = await c.env.ASSETS.fetch(indexRequest);
-							return new Response(indexAsset.body, {
-								status: indexAsset.status,
-								headers: indexAsset.headers,
-							});
-						});
-					},
-				],
-			},
-		});
-
-		return app.fetch(request, env, ctx);
-	},
-	async scheduled(controller, env, ctx) {
-		const runCronService = async () => {
-			const resolved = await processConfig(config(env));
-			const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
-
-			const cronJobSetup = await lucid.setupCronJobs({
-				createQueue: true,
-			});
-			await cronJobSetup.register({
-				config: resolved,
-				db: resolved.db.client,
-				queue: cronJobSetup.queue,
-				env: env,
-				kv: kv,
-			});
-		};
-
-		ctx.waitUntil(runCronService());
-	},
-    ${workerExportArtifacts.exports}
-};`;
-
-					await writeFile(tempEntryFile, entry);
-
-					const buildOptions: BuildOptions = {
-						output: {
-							dir: options.outputPath,
-							format: "esm" as const,
-							minify: true,
-							inlineDynamicImports: true,
+					const allEntries = [
+						{
+							key: constants.ENTRY_FILE,
+							filepath: `${options.outputPath}/temp-entry.${extension}`,
+							...mainWorkerEntry,
 						},
-						treeshake: true,
-						platform: "node" as const,
-						plugins: [
-							{
-								name: "import-meta-polyfill",
-								renderChunk(code: string) {
-									return code.replace(
-										/import\.meta\.url/g,
-										'"file:///server.js"',
-									);
-								},
-							},
-							stripAdapterExportPlugin("cloudflareAdapter"),
-							stripImportsPlugin("cloudflare-adapter", [
-								"wrangler",
-								"@hono/node-server",
-								"@hono/node-server/serve-static",
-								"rolldown",
-							]),
-						],
-						external: ["sharp", "ws", "better-sqlite3", "file-type"],
-					};
+						...additionalWorkerEntries.map((entry) => ({
+							...entry,
+							filepath: `${options.outputPath}/${entry.key}.${extension}`,
+						})),
+					];
 
-					//* build the entry file and plugin artifacts
-					await Promise.all([
-						build({
-							input: {
-								[constants.ENTRY_FILE]: tempEntryFile,
-							},
-							...buildOptions,
-						}),
-						...Object.entries(options.buildArtifacts.compile).map(
-							([key, artifact]) =>
-								build({
-									input: {
-										[key]: artifact,
-									},
-									...buildOptions,
-								}),
-						),
-					]);
+					const tempFiles = await writeWorkerEntries(allEntries);
 
-					//* clean up temporary files
-					await Promise.all([
-						unlink(tempEntryFile),
-						...Object.entries(options.buildArtifacts.compile).map(
-							([_, artifact]) => unlink(artifact),
-						),
+					await buildWorkerEntries(
+						{
+							...allEntries.reduce<Record<string, string>>((acc, entry) => {
+								acc[entry.key] = entry.filepath;
+								return acc;
+							}, {}),
+							...options.buildArtifacts.compile,
+						},
+						options.outputPath,
+					);
+
+					await cleanupTempFiles([
+						...tempFiles,
+						...Object.values(options.buildArtifacts.compile),
 					]);
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error
 							? error.message
-							: "An error occured building via the Cloudflare Worker Adapter",
+							: "An error occurred building via the Cloudflare Worker Adapter",
 						{
 							silent: logger.silent,
 						},

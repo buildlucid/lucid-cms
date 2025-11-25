@@ -4,7 +4,7 @@ import loadConfigFile from "../../config/load-config-file.js";
 import getKVAdapter from "../../kv-adapter/get-adapter.js";
 import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
-import validateEnvVars from "../utils/validate-env-vars.js";
+import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateResetCommand = (props?: {
 	config?: Config;

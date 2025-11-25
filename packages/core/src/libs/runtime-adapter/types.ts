@@ -13,13 +13,8 @@ export type RuntimeBuildArtifactFile = {
 
 export type RuntimeBuildArtifactCompile = {
 	type: "compile";
-	input: {
-		path: string;
-		content: string;
-	};
-	output: {
-		path: string;
-	};
+	path: string;
+	content: string;
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>

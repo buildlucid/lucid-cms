@@ -3,13 +3,13 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
-import copyPublicAssets from "../utils/copy-public-assets.js";
-import validateEnvVars from "../utils/validate-env-vars.js";
+import copyPublicAssets from "../services/copy-public-assets.js";
+import validateEnvVars from "../services/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
 import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import constants from "../../../constants/constants.js";
-import updateAvailable from "../utils/update-available.js";
+import updateAvailable from "../services/update-available.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
