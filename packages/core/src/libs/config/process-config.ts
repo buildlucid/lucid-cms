@@ -34,6 +34,10 @@ const processConfig = async (
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
 		for (const pluginDef of configRes.plugins) {
+			checks.checkPluginVersion({
+				key: pluginDef.key,
+				requiredVersions: pluginDef.lucid,
+			});
 			if (pluginDef.hooks?.init) {
 				const res = await pluginDef.hooks.init();
 				if (res.error) {
@@ -44,11 +48,6 @@ const processConfig = async (
 					});
 				}
 			}
-
-			checks.checkPluginVersion({
-				key: pluginDef.key,
-				requiredVersions: pluginDef.lucid,
-			});
 
 			configRes = produce(configRes, pluginDef.recipe);
 		}

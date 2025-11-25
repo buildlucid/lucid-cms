@@ -77,12 +77,14 @@ const cloudflareAdapter = (options?: {
 					await next();
 				});
 
+				const runtimeContext = getRuntimeContext({
+					server: "cloudflare",
+					compiled: false,
+				});
+
 				const { app, destroy, issues } = await lucid.createApp({
 					config,
-					runtimeContext: getRuntimeContext({
-						server: "node",
-						compiled: false,
-					}),
+					runtimeContext: runtimeContext,
 					env: platformProxy?.env,
 					app: cloudflareApp,
 					hono: {
@@ -168,6 +170,7 @@ const cloudflareAdapter = (options?: {
 							});
 						});
 					},
+					runtimeContext: runtimeContext,
 				};
 			},
 			build: async ({
@@ -259,6 +262,13 @@ const cloudflareAdapter = (options?: {
 							(file) => unlink(file),
 						),
 					);
+
+					return {
+						runtimeContext: getRuntimeContext({
+							server: "cloudflare",
+							compiled: true,
+						}),
+					};
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error

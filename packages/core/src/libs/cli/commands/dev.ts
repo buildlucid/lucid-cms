@@ -13,6 +13,7 @@ import copyPublicAssets from "../services/copy-public-assets.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
 import updateAvailable from "../services/update-available.js";
+import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 
 const devCommand = async (options?: { watch?: string | boolean }) => {
 	const configPath = getConfigPath(process.cwd());
@@ -35,6 +36,13 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			await serverDestroy?.();
 
 			const configResult = await loadConfigFile({ path: configPath });
+
+			if (!configResult.adapter) {
+				cliLogger.error("No runtime adapter found");
+				logger.setBuffering(false);
+				rebuilding = false;
+				return;
+			}
 
 			const envValid = await validateEnvVars({
 				envSchema: configResult.envSchema,
@@ -63,8 +71,6 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 				logger.setBuffering(false);
 				process.exit(2);
 			}
-
-			isInitialRun = false;
 
 			const viteBuildRes = await vite.buildApp(configResult.config);
 			if (viteBuildRes.error) {
@@ -104,7 +110,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			process.stdout.write("\x1B[2J\x1B[3J\x1B[H");
 
-			const serverRes = await configResult.adapter?.cli?.serve({
+			const serverRes = await configResult.adapter.cli.serve({
 				config: configResult.config,
 				logger: {
 					instance: cliLogger,
@@ -150,15 +156,25 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 					logger.setBuffering(false);
 				},
 			});
-
 			serverDestroy = serverRes?.destroy;
+
+			if (isInitialRun) {
+				await checkAllPluginsCompatibility({
+					runtimeContext: serverRes.runtimeContext,
+					config: configResult.config,
+				});
+			}
+
 			await serverRes?.onComplete?.();
+			isInitialRun = false;
 		} catch (error) {
-			cliLogger.error("Failed to start the server");
+			await serverDestroy?.();
 			if (error instanceof Error) {
 				cliLogger.errorInstance(error);
 			}
+			cliLogger.error("Failed to start the server");
 			logger.setBuffering(false);
+			process.exit(1);
 		} finally {
 			rebuilding = false;
 		}

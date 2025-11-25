@@ -41,11 +41,13 @@ const nodeAdapter = (options?: {
 					silent: logger.silent,
 				});
 
+				const runtimeContext = getRuntimeContext({
+					compiled: false,
+				});
+
 				const { app, destroy, issues } = await lucid.createApp({
 					config,
-					runtimeContext: getRuntimeContext({
-						compiled: false,
-					}),
+					runtimeContext: runtimeContext,
 					env: process.env,
 				});
 
@@ -105,6 +107,7 @@ const nodeAdapter = (options?: {
 							});
 						});
 					},
+					runtimeContext: runtimeContext,
 				};
 			},
 			build: async ({
@@ -272,6 +275,12 @@ startServer();`;
 						if (artifact === configPath) continue;
 						await unlink(artifact);
 					}
+
+					return {
+						runtimeContext: getRuntimeContext({
+							compiled: true,
+						}),
+					};
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error

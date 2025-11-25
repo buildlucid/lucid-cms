@@ -29,12 +29,10 @@ const RuntimeAdapterSchema = z.object({
 			message: "Expected a getEnvVars function",
 		},
 	),
-	cli: z
-		.object({
-			serve: ServeHandlerSchema,
-			build: BuildHandlerSchema,
-		})
-		.optional(),
+	cli: z.object({
+		serve: ServeHandlerSchema,
+		build: BuildHandlerSchema,
+	}),
 });
 
 export default RuntimeAdapterSchema;

@@ -40,6 +40,7 @@ export type ServeHandler = (props: {
 }) => Promise<{
 	destroy: () => Promise<void>;
 	onComplete?: () => Promise<void> | void;
+	runtimeContext: AdapterRuntimeContext;
 }>;
 
 export type RuntimeBuildArtifacts = {
@@ -63,8 +64,10 @@ export type BuildHandler = (props: {
 		instance: CLILogger;
 		silent: boolean;
 	};
-}) => Promise<void | {
+}) => Promise<{
 	onComplete?: () => Promise<void> | void;
+	/** This should match the runtime context that the runtime adpater would set for the built output when running your Lucid CMS instance */
+	runtimeContext: AdapterRuntimeContext;
 }>;
 
 export type AdapterKeys = {

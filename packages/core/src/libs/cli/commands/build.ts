@@ -12,6 +12,7 @@ import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
 import processBuildArtifacts from "../services/process-build-artifacts.js";
+import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -151,6 +152,11 @@ const buildCommand = async (options?: {
 			process.exit(1);
 		}
 
+		await checkAllPluginsCompatibility({
+			runtimeContext: runtimeBuildRes.runtimeContext,
+			config: configRes.config,
+		});
+
 		const relativeBuildPath = path.relative(
 			process.cwd(),
 			configRes.config.compilerOptions.paths.outDir,
@@ -222,12 +228,10 @@ const buildCommand = async (options?: {
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		cliLogger.error(
-			error instanceof Error ? error.message : "An unknown error occurred",
-			{
-				silent,
-			},
-		);
+		if (error instanceof Error) {
+			cliLogger.errorInstance(error);
+		}
+		cliLogger.error("Failed to build the application");
 		logger.setBuffering(false);
 		process.exit(1);
 	}

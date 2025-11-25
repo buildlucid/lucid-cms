@@ -10,6 +10,7 @@ import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import constants from "../../../constants/constants.js";
 import updateAvailable from "../services/update-available.js";
+import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 
 /**
  * The CLI serve command. Directly starts the dev server
@@ -20,10 +21,29 @@ const serveCommand = async () => {
 	let destroy: (() => Promise<void>) | undefined;
 	const coreUpdateAvailable = updateAvailable();
 
+	const shutdown = async () => {
+		try {
+			await destroy?.();
+		} catch (error) {
+			cliLogger.error("Error during shutdown");
+			if (error instanceof Error) {
+				cliLogger.errorInstance(error);
+			}
+		}
+		logger.setBuffering(false);
+		process.exit(0);
+	};
+
 	try {
 		const configRes = await loadConfigFile({
 			path: configPath,
 		});
+
+		if (!configRes.adapter) {
+			cliLogger.error("No runtime adapter found");
+			logger.setBuffering(false);
+			process.exit(1);
+		}
 
 		const envValid = await validateEnvVars({
 			envSchema: configRes.envSchema,
@@ -81,7 +101,7 @@ const serveCommand = async () => {
 			process.exit(1);
 		}
 
-		const serverRes = await configRes.adapter?.cli?.serve({
+		const serverRes = await configRes.adapter.cli.serve({
 			config: configRes.config,
 			logger: {
 				instance: cliLogger,
@@ -129,28 +149,21 @@ const serveCommand = async () => {
 		});
 		destroy = serverRes?.destroy;
 
+		await checkAllPluginsCompatibility({
+			runtimeContext: serverRes.runtimeContext,
+			config: configRes.config,
+		});
+
 		await serverRes?.onComplete?.();
 	} catch (error) {
-		cliLogger.error("Failed to start the server");
+		await destroy?.();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}
+		cliLogger.error("Failed to start the server");
 		logger.setBuffering(false);
 		process.exit(1);
 	}
-
-	const shutdown = async () => {
-		try {
-			await destroy?.();
-		} catch (error) {
-			cliLogger.error("Error during shutdown");
-			if (error instanceof Error) {
-				cliLogger.errorInstance(error);
-			}
-		}
-		logger.setBuffering(false);
-		process.exit(0);
-	};
 
 	process.on("SIGINT", shutdown);
 	process.on("SIGTERM", shutdown);
