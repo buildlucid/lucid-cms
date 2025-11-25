@@ -4,7 +4,11 @@ import type {
 	CloudflareWorkerExport,
 	CloudflareWorkerExportArtifact,
 } from "../types.js";
+import constants from "../constants.js";
 
+/**
+ * Prepares the main worker entry file and add additional imports/exports from custom artifacts
+ */
 const prepareMainWorkerEntry = (
 	configPath: string,
 	customArtifacts: RuntimeBuildArtifactCustom[],
@@ -118,7 +122,7 @@ ctx.waitUntil(runCronService());`,
 
 	//* merge in worker-export artifacts
 	for (const artifact of customArtifacts) {
-		if (artifact.type === "worker-export") {
+		if (artifact.type === constants.WORKER_EXPORT_ARTIFACT_TYPE) {
 			const custom = artifact.custom as CloudflareWorkerExportArtifact;
 			imports.push(...custom.imports);
 			exports.push(...custom.exports);

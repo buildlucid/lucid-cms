@@ -1,9 +1,14 @@
 import { readFileSync } from "node:fs";
+import { unlink } from "node:fs/promises";
 import { relative } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import lucid from "@lucidcms/core";
-import { getBuildPaths } from "@lucidcms/core/helpers";
+import {
+	getBuildPaths,
+	stripAdapterExportPlugin,
+	stripImportsPlugin,
+} from "@lucidcms/core/helpers";
 import type { LucidHonoGeneric, RuntimeAdapter } from "@lucidcms/core/types";
 import { Hono } from "hono";
 import {
@@ -16,8 +21,7 @@ import getRuntimeContext from "./runtime-context.js";
 import prepareMainWorkerEntry from "./services/prepare-worker-entry.js";
 import prepareAdditionalWorkerEntries from "./services/prepare-additional-worker-entries.js";
 import writeWorkerEntries from "./services/write-worker-entries.js";
-import buildWorkerEntries from "./services/build-worker-entries.js";
-import cleanupTempFiles from "./services/cleanup-temp-files.js";
+import { build } from "rolldown";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;
@@ -32,7 +36,10 @@ const cloudflareAdapter = (options?: {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		config: {
-			customBuildArtifacts: ["worker-export", "worker-entry"],
+			customBuildArtifacts: [
+				constants.WORKER_EXPORT_ARTIFACT_TYPE,
+				constants.WORKER_ENTRY_ARTIFACT_TYPE,
+			],
 		},
 		getEnvVars: async () => {
 			platformProxy = await getPlatformProxy(options?.platformProxy);
@@ -163,7 +170,13 @@ const cloudflareAdapter = (options?: {
 					},
 				};
 			},
-			build: async ({ options, logger }) => {
+			build: async ({
+				configPath,
+				outputPath,
+				outputRelativeConfigPath,
+				buildArtifacts,
+				logger,
+			}) => {
 				logger.instance.info(
 					"Using:",
 					logger.instance.color.blue("Cloudflare Worker Adapter"),
@@ -173,46 +186,79 @@ const cloudflareAdapter = (options?: {
 				);
 
 				try {
-					const configIsTs = options.configPath.endsWith(".ts");
+					const configIsTs = configPath.endsWith(".ts");
 					const extension = configIsTs ? "ts" : "js";
 
 					const mainWorkerEntry = prepareMainWorkerEntry(
-						options.outputRelativeConfigPath,
-						options.buildArtifacts.custom,
+						outputRelativeConfigPath,
+						buildArtifacts.custom,
 					);
 					const additionalWorkerEntries = prepareAdditionalWorkerEntries(
-						options.buildArtifacts.custom,
+						buildArtifacts.custom,
 					);
 
 					const allEntries = [
 						{
 							key: constants.ENTRY_FILE,
-							filepath: `${options.outputPath}/temp-entry.${extension}`,
+							filepath: `${outputPath}/temp-entry.${extension}`,
 							...mainWorkerEntry,
 						},
 						...additionalWorkerEntries.map((entry) => ({
 							...entry,
-							filepath: `${options.outputPath}/${entry.key}.${extension}`,
+							filepath: `${outputPath}/${entry.key}.${extension}`,
 						})),
 					];
 
 					const tempFiles = await writeWorkerEntries(allEntries);
 
-					await buildWorkerEntries(
-						{
+					//* build files
+					await Promise.all(
+						Object.entries({
 							...allEntries.reduce<Record<string, string>>((acc, entry) => {
 								acc[entry.key] = entry.filepath;
 								return acc;
 							}, {}),
-							...options.buildArtifacts.compile,
-						},
-						options.outputPath,
+							...buildArtifacts.compile,
+						}).map(([key, inputPath]) =>
+							build({
+								input: { [key]: inputPath },
+								output: {
+									dir: outputPath,
+									format: "esm" as const,
+									minify: true,
+									inlineDynamicImports: true,
+								},
+								treeshake: true,
+								platform: "node" as const,
+								plugins: [
+									{
+										name: "import-meta-polyfill",
+										renderChunk(code: string) {
+											return code.replace(
+												/import\.meta\.url/g,
+												'"file:///server.js"',
+											);
+										},
+									},
+									stripAdapterExportPlugin("cloudflareAdapter"),
+									stripImportsPlugin("cloudflare-adapter", [
+										"wrangler",
+										"@hono/node-server",
+										"@hono/node-server/serve-static",
+										"rolldown",
+									]),
+								],
+								external: ["sharp", "ws", "better-sqlite3", "file-type"],
+							}),
+						),
 					);
 
-					await cleanupTempFiles([
-						...tempFiles,
-						...Object.values(options.buildArtifacts.compile),
-					]);
+					//* cleanup temp files
+					await Promise.all(
+						[...tempFiles, ...Object.values(buildArtifacts.compile)].map(
+							(file) => unlink(file),
+						),
+					);
 				} catch (error) {
 					logger.instance.error(
 						error instanceof Error

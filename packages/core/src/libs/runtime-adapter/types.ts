@@ -55,12 +55,10 @@ export type RuntimeBuildArtifacts = {
 
 export type BuildHandler = (props: {
 	config: Config;
-	options: {
-		configPath: string;
-		outputPath: string;
-		outputRelativeConfigPath: string;
-		buildArtifacts: RuntimeBuildArtifacts;
-	};
+	configPath: string;
+	outputPath: string;
+	outputRelativeConfigPath: string;
+	buildArtifacts: RuntimeBuildArtifacts;
 	logger: {
 		instance: CLILogger;
 		silent: boolean;

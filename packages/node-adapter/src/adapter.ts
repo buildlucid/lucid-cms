@@ -107,7 +107,13 @@ const nodeAdapter = (options?: {
 					},
 				};
 			},
-			build: async ({ options, logger }) => {
+			build: async ({
+				configPath,
+				outputPath,
+				outputRelativeConfigPath,
+				buildArtifacts,
+				logger,
+			}) => {
 				logger.instance.info(
 					"Using:",
 					logger.instance.color.blue("Node Runtime Adapter"),
@@ -118,14 +124,14 @@ const nodeAdapter = (options?: {
 
 				try {
 					const buildInput = {
-						[constants.CONFIG_FILE]: options.configPath,
-						...options.buildArtifacts.compile,
+						[constants.CONFIG_FILE]: configPath,
+						...buildArtifacts.compile,
 					};
 
 					await build({
 						input: buildInput,
 						output: {
-							dir: options.outputPath,
+							dir: outputPath,
 							format: "esm",
 							minify: true,
 							inlineDynamicImports: true,
@@ -259,11 +265,11 @@ const startServer = async () => {
 
 startServer();`;
 
-					const entryOutput = `${options.outputPath}/${constants.ENTRY_FILE}`;
+					const entryOutput = `${outputPath}/${constants.ENTRY_FILE}`;
 					await writeFile(entryOutput, entry);
 
 					for (const artifact of Object.values(buildInput)) {
-						if (artifact === options.configPath) continue;
+						if (artifact === configPath) continue;
 						await unlink(artifact);
 					}
 				} catch (error) {

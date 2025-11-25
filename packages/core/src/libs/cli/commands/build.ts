@@ -129,12 +129,10 @@ const buildCommand = async (options?: {
 			vite.buildApp(configRes.config),
 			configRes.adapter.cli.build({
 				config: configRes.config,
-				options: {
-					configPath,
-					outputPath: configRes.config.compilerOptions.paths.outDir,
-					outputRelativeConfigPath: normalisedOutputRelativePath,
-					buildArtifacts: processedArtifacts,
-				},
+				configPath,
+				outputPath: configRes.config.compilerOptions.paths.outDir,
+				outputRelativeConfigPath: normalisedOutputRelativePath,
+				buildArtifacts: processedArtifacts,
 				logger: {
 					instance: cliLogger,
 					silent,
