@@ -10,11 +10,8 @@ import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../utils/calculate-outdir-size.js";
 import copyPublicAssets from "../utils/copy-public-assets.js";
-import handlePluginBuildHooks, {
-	CORE_ARTIFACT_TYPES,
-} from "../../plugins/hooks/handle-build.js";
-import type { LucidPluginBuildArtifactCustom } from "../../plugins/types.js";
-import pluginBuildCompileArtifactsToObject from "../utils/plugin-build-artifacts-to-object.js";
+import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
+import processBuildArtifacts from "../utils/process-build-artifacts.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -88,7 +85,6 @@ const buildCommand = async (options?: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
 					outputRelativeConfigPath: normalisedOutputRelativePath,
-					customArtifactTypes: configRes.adapter.config?.customBuildArtifacts,
 				}),
 			]);
 		if (mjmlTemplatesRes.error) {
@@ -122,6 +118,13 @@ const buildCommand = async (options?: {
 			process.exit(1);
 		}
 
+		const processedArtifacts = await processBuildArtifacts({
+			artifacts: pluginBuildArtifactsRes.data,
+			outDir: configRes.config.compilerOptions.paths.outDir,
+			silent,
+			customArtifactTypes: configRes.adapter.config?.customBuildArtifacts,
+		});
+
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
 			configRes.adapter.cli.build({
@@ -130,16 +133,7 @@ const buildCommand = async (options?: {
 					configPath,
 					outputPath: configRes.config.compilerOptions.paths.outDir,
 					outputRelativeConfigPath: normalisedOutputRelativePath,
-					// TODO: make buildArtifacts, have a better way of returning custom ones
-					pluginArtifacts: {
-						compile: pluginBuildCompileArtifactsToObject(
-							pluginBuildArtifactsRes.data,
-						),
-						custom: pluginBuildArtifactsRes.data.filter(
-							(a): a is LucidPluginBuildArtifactCustom =>
-								!CORE_ARTIFACT_TYPES.includes(a.type),
-						),
-					},
+					buildArtifacts: processedArtifacts,
 				},
 				logger: {
 					instance: cliLogger,

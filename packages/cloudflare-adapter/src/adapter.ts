@@ -178,9 +178,9 @@ const cloudflareAdapter = (options?: {
 					const configIsTs = options.configPath.endsWith(".ts");
 					const tempEntryFile = `${options.outputPath}/temp-entry.${configIsTs ? "ts" : "js"}`;
 
-					console.log(options.pluginArtifacts.custom);
+					console.log(options.buildArtifacts.custom);
 					const workerExportArtifacts = getWorkerExportArtifacts(
-						options.pluginArtifacts.custom,
+						options.buildArtifacts.custom,
 					);
 
 					const entry = /* ts */ `
@@ -264,8 +264,6 @@ export default {
     ${workerExportArtifacts.exports}
 };`;
 
-					console.log(entry);
-
 					await writeFile(tempEntryFile, entry);
 
 					const buildOptions: BuildOptions = {
@@ -306,7 +304,7 @@ export default {
 							},
 							...buildOptions,
 						}),
-						...Object.entries(options.pluginArtifacts.compile).map(
+						...Object.entries(options.buildArtifacts.compile).map(
 							([key, artifact]) =>
 								build({
 									input: {
@@ -320,7 +318,7 @@ export default {
 					//* clean up temporary files
 					await Promise.all([
 						unlink(tempEntryFile),
-						...Object.entries(options.pluginArtifacts.compile).map(
+						...Object.entries(options.buildArtifacts.compile).map(
 							([_, artifact]) => unlink(artifact),
 						),
 					]);

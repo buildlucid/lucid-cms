@@ -4,7 +4,34 @@ import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
 import type RuntimeAdapterSchema from "./schema.js";
 import type { AddressInfo } from "node:net";
-import type { LucidPluginBuildArtifactCustom } from "../plugins/types.js";
+
+export type RuntimeBuildArtifactFile = {
+	type: "file";
+	path: string;
+	content: string;
+};
+
+export type RuntimeBuildArtifactCompile = {
+	type: "compile";
+	input: {
+		path: string;
+		content: string;
+	};
+	output: {
+		path: string;
+	};
+};
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type RuntimeBuildArtifactCustom<T = any> = {
+	type: string;
+	custom: T;
+};
+
+export type RuntimeBuildArtifact =
+	| RuntimeBuildArtifactFile
+	| RuntimeBuildArtifactCompile
+	| RuntimeBuildArtifactCustom;
 
 export type ServeHandler = (props: {
 	config: Config;
@@ -20,23 +47,24 @@ export type ServeHandler = (props: {
 	onComplete?: () => Promise<void> | void;
 }>;
 
+export type RuntimeBuildArtifacts = {
+	/**
+	 * Artifacts that plugins have marked as to be compiled. The key being the output, and the value being the input path.
+	 */
+	compile: Record<string, string>;
+	/**
+	 * Custom artifacts that are specific to the runtime adapter.
+	 */
+	custom: Array<RuntimeBuildArtifactCustom>;
+};
+
 export type BuildHandler = (props: {
 	config: Config;
 	options: {
 		configPath: string;
 		outputPath: string;
 		outputRelativeConfigPath: string;
-		// TODO: make build artifacts a runtime adapter thing, instead of a plugin thing. That way it can be used elsewhere later if needed.
-		pluginArtifacts: {
-			/**
-			 * Artifacts that plugins have marked as to be compiled. The key being the output, and the value being the input path.
-			 */
-			compile: Record<string, string>;
-			/**
-			 * Custom artifacts that are specific to the runtime adapter.
-			 */
-			custom: Array<LucidPluginBuildArtifactCustom>;
-		};
+		buildArtifacts: RuntimeBuildArtifacts;
 	};
 	logger: {
 		instance: CLILogger;

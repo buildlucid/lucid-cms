@@ -1,9 +1,9 @@
-import type { LucidPluginBuildArtifactCustom } from "@lucidcms/core/types";
+import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
 
 // TODO: improve structure of these worker export artifacts. specifically around imports. currently there is no depupeing.
 // TODO: artifacts here need to be filtered for the worker-export one specifically.
 const getWorkerExportArtifacts = (
-	artifacts: LucidPluginBuildArtifactCustom[],
+	artifacts: RuntimeBuildArtifactCustom[],
 ): { imports: string; exports: string } => {
 	const imports: string[] = [];
 	const exports: string[] = [];

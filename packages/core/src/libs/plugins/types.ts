@@ -1,35 +1,17 @@
 import type { WritableDraft } from "immer";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type { Config } from "../../types/config.js";
-
-export type LucidPluginBuildArtifactFile = {
-	type: "file";
-	path: string;
-	content: string;
-};
-
-export type LucidPluginBuildArtifactCompile = {
-	type: "compile";
-	input: {
-		path: string;
-		content: string;
-	};
-	output: {
-		path: string;
-	};
-};
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export type LucidPluginBuildArtifactCustom<T = any> = {
-	type: string;
-	custom: T;
-};
+import type {
+	RuntimeBuildArtifactCompile,
+	RuntimeBuildArtifactCustom,
+	RuntimeBuildArtifactFile,
+} from "../runtime-adapter/types.js";
 
 export type LucidPluginBuildHookResult = {
 	artifacts?: Array<
-		| LucidPluginBuildArtifactFile
-		| LucidPluginBuildArtifactCompile
-		| LucidPluginBuildArtifactCustom
+		| RuntimeBuildArtifactFile
+		| RuntimeBuildArtifactCompile
+		| RuntimeBuildArtifactCustom
 	>;
 };
 
