@@ -24,8 +24,8 @@ const buildCommand = async (options?: {
 	logger.setBuffering(true);
 	const startTime = cliLogger.startTimer();
 	const configPath = getConfigPath(process.cwd());
-	const configRes = await loadConfigFile({ path: configPath });
 	const silent = options?.silent ?? false;
+	const configRes = await loadConfigFile({ path: configPath, silent });
 
 	try {
 		if (options?.cacheSpa) {

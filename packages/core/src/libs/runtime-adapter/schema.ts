@@ -1,5 +1,6 @@
 import z from "zod/v4";
 import type { BuildHandler, ServeHandler } from "./types.js";
+import type { CLILogger } from "../cli/logger.js";
 
 const ServeHandlerSchema = z.custom<ServeHandler>(
 	(data) => typeof data === "function",
@@ -23,12 +24,16 @@ const RuntimeAdapterSchema = z.object({
 		})
 		.optional(),
 	lucid: z.string(),
-	getEnvVars: z.custom<() => Promise<Record<string, unknown>>>(
-		(data) => typeof data === "function",
-		{
-			message: "Expected a getEnvVars function",
-		},
-	),
+	getEnvVars: z.custom<
+		(props: {
+			logger: {
+				instance: CLILogger;
+				silent: boolean;
+			};
+		}) => Promise<Record<string, unknown>>
+	>((data) => typeof data === "function", {
+		message: "Expected a getEnvVars function",
+	}),
 	cli: z.object({
 		serve: ServeHandlerSchema,
 		build: BuildHandlerSchema,

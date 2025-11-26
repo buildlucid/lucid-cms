@@ -10,6 +10,7 @@ import type {
 } from "../runtime-adapter/types.js";
 import getConfigPath from "./get-config-path.js";
 import processConfig from "./process-config.js";
+import cliLogger from "../cli/logger.js";
 
 export type LoadConfigResult = {
 	config: Config;
@@ -20,6 +21,7 @@ export type LoadConfigResult = {
 
 export const loadConfigFile = async (props?: {
 	path?: string;
+	silent?: boolean;
 }): Promise<LoadConfigResult> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
@@ -37,7 +39,12 @@ export const loadConfigFile = async (props?: {
 
 	let env: EnvironmentVariables | undefined;
 	if (configModule.adapter?.getEnvVars) {
-		env = await configModule.adapter?.getEnvVars();
+		env = await configModule.adapter?.getEnvVars({
+			logger: {
+				instance: cliLogger,
+				silent: props?.silent ?? false,
+			},
+		});
 	}
 
 	const configdefault = configModule.default(env || {});

@@ -41,7 +41,24 @@ const cloudflareAdapter = (options?: {
 				constants.WORKER_ENTRY_ARTIFACT_TYPE,
 			],
 		},
-		getEnvVars: async () => {
+		getEnvVars: async ({ logger }) => {
+			if (options?.platformProxy?.environment) {
+				logger.instance.info(
+					"Loading Cloudflare bindings from the",
+					logger.instance.color.blue(options?.platformProxy?.environment),
+					"environment",
+					{
+						silent: logger.silent,
+					},
+				);
+			} else {
+				logger.instance.info(
+					"Loading Cloudflare bindings from wrangler default configuration. If using env-specific bindings (KV, Queues), configure via platformProxy.environment option.",
+					{
+						silent: logger.silent,
+					},
+				);
+			}
 			platformProxy = await getPlatformProxy(options?.platformProxy);
 			return platformProxy.env;
 		},
@@ -156,6 +173,7 @@ const cloudflareAdapter = (options?: {
 						},
 					);
 					await destroy?.();
+					await platformProxy?.dispose();
 				});
 
 				return {

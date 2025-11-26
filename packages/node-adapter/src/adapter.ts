@@ -20,11 +20,37 @@ const nodeAdapter = (options?: {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
-		getEnvVars: async () => {
+		getEnvVars: async ({ logger }) => {
 			try {
 				const { config } = await import("dotenv");
-				config();
-			} catch {}
+				const result = config();
+
+				if (result.parsed) {
+					const envFile = process.env.DOTENV_CONFIG_PATH || ".env";
+					logger.instance.info(
+						"Loading environment variables from",
+						logger.instance.color.blue(envFile),
+						"file",
+						{
+							silent: logger.silent,
+						},
+					);
+				} else if (result.error) {
+					logger.instance.warn(
+						"No .env file found, using system environment variables",
+						{
+							silent: logger.silent,
+						},
+					);
+				}
+			} catch {
+				logger.instance.warn(
+					"dotenv not installed, using system environment variables",
+					{
+						silent: logger.silent,
+					},
+				);
+			}
 
 			return process.env as Record<string, unknown>;
 		},

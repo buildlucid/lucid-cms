@@ -12,7 +12,11 @@ import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
 import NewsCollection from "./src/collections/news.js";
 
-export const adapter = cloudflareAdapter();
+export const adapter = cloudflareAdapter({
+	platformProxy: {
+		environment: "dev",
+	},
+});
 
 export const envSchema = z.object({
 	LUCID_HOST: z.string(),
