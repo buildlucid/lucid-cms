@@ -49,10 +49,7 @@ function workerQueueAdapter(
 					params.runtimeContext.configEntryPoint,
 				);
 
-				const workerUrl = new URL(
-					"./libs/queue-adapter/adapters/worker/consumer.js",
-					import.meta.url,
-				);
+				const workerUrl = new URL("./consumer.js", import.meta.url);
 				worker = new Worker(workerUrl, {
 					workerData: {
 						options: {
