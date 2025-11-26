@@ -1,6 +1,6 @@
+import type { KVNamespace, Queue } from "@cloudflare/workers-types";
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import { z } from "@lucidcms/core";
-import type { KVNamespace, Queue } from "@cloudflare/workers-types";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
@@ -62,11 +62,6 @@ export default defineConfig((env) => ({
 		defaultLocale: "en",
 	},
 	disableOpenAPI: true,
-	media: {
-		urlStrategy: (media) => {
-			return `${env.LUCID_MEDIA_URL}/${env.LUCID_S3_BUCKET}/${media.key}`;
-		},
-	},
 	email: {
 		from: {
 			email: env.LUCID_RESEND_FROM_EMAIL,
