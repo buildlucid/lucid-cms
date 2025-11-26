@@ -157,7 +157,7 @@ const executeSingleJob: (
 		});
 
 		const handlerResult = await serviceWrapper(handler, {
-			transaction: true,
+			transaction: false, //* jobs should handle cleanup themselves
 		})(context, data.payload);
 
 		if (handlerResult.error) {

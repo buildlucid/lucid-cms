@@ -6,7 +6,11 @@ import type {
 } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types.js";
 import cloudflareQueuesAdapter from "./adapter.js";
-import { MAX_ATTEMPTS, SUPPORTED_RUNTIME_ADAPTER_KEY } from "./constants.js";
+import {
+	MAX_RETRIES,
+	SUPPORTED_RUNTIME_ADAPTER_KEY,
+	BASE_DELAY_SECONDS,
+} from "./constants.js";
 import type {
 	CloudflareWorkerEntryArtifact,
 	CloudflareWorkerExportArtifact,
@@ -76,6 +80,10 @@ for (const message of batch.messages) {
             data: { jobId, event },
         });
 
+        const calculateExponentialBackoff = (attempts, baseDelaySeconds) => {
+            return baseDelaySeconds * (2 ** (attempts - 1));
+        };
+
         const result = await executeSingleJob(
             {
                 config: resolved,
@@ -88,8 +96,8 @@ for (const message of batch.messages) {
                 jobId,
                 event,
                 payload,
-                attempts: message.attempts,
-                maxAttempts: ${pluginOptions.maxAttempts ?? MAX_ATTEMPTS},
+                attempts: message.attempts - 1, // starts at 1
+                maxAttempts: ${pluginOptions.maxRetries ?? MAX_RETRIES},
                 setNextRetryAt: false,
             },
         );
@@ -107,7 +115,9 @@ for (const message of batch.messages) {
                 scope: logScope,
                 data: { jobId, event, message: result.message },
             });
-            message.retry();
+            message.retry({
+                delaySeconds: calculateExponentialBackoff(message.attempts, ${pluginOptions.baseDelaySeconds ?? BASE_DELAY_SECONDS}),
+            });
         } else {
             logger.error({
                 message: "Job failed permanently",

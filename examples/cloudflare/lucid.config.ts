@@ -46,6 +46,9 @@ export default defineConfig((env) => ({
 		authToken: env.LUCID_TURSO_AUTH_TOKEN,
 		// url: "http://127.0.0.1:8081",
 	}),
+	logger: {
+		level: "debug",
+	},
 	keys: {
 		encryptionKey: env.LUCID_ENCRYPTION_KEY,
 		cookieSecret: env.LUCID_COOKIE_SECRET,

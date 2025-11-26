@@ -102,7 +102,7 @@ export const EmailsList: Component<{
 						icon: <FaSolidEnvelope />,
 					},
 					{
-						label: T()("sent_count"),
+						label: T()("attempt_count"),
 						key: "attemptCount",
 						icon: <FaSolidPaperPlane />,
 						sortable: true,

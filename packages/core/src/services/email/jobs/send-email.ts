@@ -63,7 +63,29 @@ const sendEmail: ServiceFn<
 		template: emailRes.data.template,
 		data: emailRes.data.data,
 	});
-	if (html.error) return html;
+	if (html.error) {
+		await Promise.all([
+			Emails.updateSingle({
+				where: [{ key: "id", operator: "=", value: emailRes.data.id }],
+				data: {
+					current_status: "failed",
+					attempt_count: (emailRes.data.attempt_count ?? 0) + 1,
+					last_attempted_at: new Date().toISOString(),
+					updated_at: new Date().toISOString(),
+				},
+			}),
+			EmailTransactions.updateSingle({
+				where: [{ key: "id", operator: "=", value: data.transactionId }],
+				data: {
+					delivery_status: "failed",
+					message: html.error.message,
+					updated_at: new Date().toISOString(),
+				},
+			}),
+		]);
+
+		return html;
+	}
 
 	let result: EmailStrategyResponse | undefined;
 	if (emailAdapter.simulated) {

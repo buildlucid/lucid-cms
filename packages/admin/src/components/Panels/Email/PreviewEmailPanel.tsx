@@ -95,7 +95,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 								value: email.data?.data.type ?? undefined,
 							},
 							{
-								label: T()("sent_count"),
+								label: T()("attempt_count"),
 								value: email.data?.data.attemptCount ?? 0,
 							},
 							{
