@@ -5,7 +5,7 @@ import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
 import S3Plugin from "@lucidcms/plugin-s3";
-// import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
+import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
 // Collections
 import PageCollection from "./src/collections/pages.js";
@@ -31,7 +31,7 @@ export const envSchema = z.object({
 	LUCID_S3_ACCESS_KEY: z.string(),
 	LUCID_S3_SECRET_KEY: z.string(),
 	LUCID_MEDIA_URL: z.string(),
-	// LUCID_CLOUDFLARE_KV: z.custom<KVNamespace>(),
+	LUCID_CLOUDFLARE_KV: z.custom<KVNamespace>(),
 	LUCID_CLOUDFLARE_QUEUES: z.custom<Queue>(),
 });
 
@@ -101,12 +101,11 @@ export default defineConfig((env) => ({
 				secretAccessKey: env.LUCID_S3_SECRET_KEY,
 			},
 		}),
-		// CloudflareKVPlugin({
-		// 	binding: env.LUCID_CLOUDFLARE_KV,
-		// }),
+		CloudflareKVPlugin({
+			binding: env.LUCID_CLOUDFLARE_KV,
+		}),
 		CloudflareQueuesPlugin({
 			binding: env.LUCID_CLOUDFLARE_QUEUES,
-			consumer: "inline",
 		}),
 	],
 }));
