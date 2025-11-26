@@ -45,13 +45,21 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						path: "@lucidcms/core",
 						exports: ["logger"],
 					},
+					{
+						path: "./email-templates.json",
+						default: "emailTemplates",
+					},
 				];
 				const exports: CloudflareWorkerExport[] = [
 					{
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `const resolved = await processConfig(config(env));
+						content: /** ts */ `const resolved = await processConfig(
+    config(env, {
+        emailTemplates: emailTemplates,
+    }),
+);
 const kvInstance = await getKVAdapter(resolved);
 
 const internalQueueAdapter = passthroughQueueAdapter({
