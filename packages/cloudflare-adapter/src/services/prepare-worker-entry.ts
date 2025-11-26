@@ -101,7 +101,11 @@ return app.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: /** ts */ `const runCronService = async () => {
-    const resolved = await processConfig(config(env));
+    const resolved = await processConfig(
+        config(env, {
+            emailTemplates: emailTemplates,
+        }),
+    );
     const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
 
     const cronJobSetup = await lucid.setupCronJobs({
