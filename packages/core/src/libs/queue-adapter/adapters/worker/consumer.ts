@@ -41,7 +41,7 @@ const getConfig = async (): Promise<{
 }> => {
 	try {
 		const configPath = getConfigPath(process.cwd());
-		const result = await loadConfigFile({ path: configPath });
+		const result = await loadConfigFile({ path: configPath, silent: true });
 		return {
 			config: result.config,
 			env: result.env,
