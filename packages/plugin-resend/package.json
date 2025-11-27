@@ -40,11 +40,11 @@
 	"dependencies": {
 		"svix": "^1.75.0"
 	},
-	"volta": {
-		"node": "22.15.0"
-	},
-	"engines": {
-		"node": ">=22.0.0 <23.0.0"
-	},
+    "volta": {
+        "node": "24.11.1"
+    },
+    "engines": {
+        "node": "^24.0.0"
+    },
 	"license": "MIT"
 }

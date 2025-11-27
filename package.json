@@ -30,6 +30,9 @@
         "examples/*"
     ],
     "volta": {
-        "node": "22.15.0"
+        "node": "24.11.1"
+    },
+    "engines": {
+        "node": "^24.0.0"
     }
 }

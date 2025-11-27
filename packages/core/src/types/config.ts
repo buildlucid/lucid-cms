@@ -53,7 +53,7 @@ export type UrlStrategy = (media: { key: string }) => string;
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
-	/** A Postgres, SQLite or LibSQL database adapter instance. These can be imported from `@lucidcms/core/adapters`. */
+	/** A Postgres, SQLite or LibSQL database adapter instance. */
 	db: DatabaseAdapter;
 	/** KV storage settings. */
 	kv?: {
@@ -204,7 +204,7 @@ export interface LucidConfig {
 	};
 	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
 	hooks?: Array<AllHooks>;
-	/** A list of collections instances to register. These can be imported from `@lucidcms/core`. */
+	/** A list of collections instances to register. These can be imported from `@lucidcms/core/builders`. */
 	collections?: CollectionBuilder[];
 	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
 	plugins?: LucidPluginResponse[];
