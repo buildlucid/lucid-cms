@@ -12,7 +12,6 @@ import { useNavigate, useLocation } from "@solidjs/router";
 import api from "@/services/api";
 import { NavigationSidebar, Wrapper } from "@/components/Groups/Layout";
 import spawnToast from "@/utils/spawn-toast";
-import Alert from "@/components/Blocks/Alert";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
 
 const MainLayout: Component<{
@@ -48,16 +47,6 @@ const MainLayout: Component<{
 		);
 	});
 
-	const showLicenseAlert = createMemo(() => {
-		return license.data?.data.valid === false;
-	});
-	const isCollectionBuilderRoute = createMemo(() => {
-		return (
-			location.pathname.startsWith("/admin/collections/") &&
-			location.pathname.split("/").length > 4
-		);
-	});
-
 	// ------------------------------------------------------
 	// Effects
 	createEffect(() => {
@@ -83,18 +72,6 @@ const MainLayout: Component<{
 			<main class="flex flex-col mt-4 pr-4 w-full min-w-[calc(100vw-236px)]">
 				<Switch>
 					<Match when={isSuccess()}>
-						<Alert
-							style="layout"
-							class="pb-4 -mt-4"
-							roundedBottom={!isCollectionBuilderRoute()}
-							alerts={[
-								{
-									type: "warning",
-									message: T()("license_invalid_message"),
-									show: showLicenseAlert(),
-								},
-							]}
-						/>
 						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>
 					</Match>
 					<Match when={isLoading()}>

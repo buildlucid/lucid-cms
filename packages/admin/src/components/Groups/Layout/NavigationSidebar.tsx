@@ -50,9 +50,15 @@ export const NavigationSidebar: Component = () => {
 	const collections = api.collections.useGetAll({
 		queryParams: {},
 	});
+	const license = api.license.useGetStatus({
+		queryParams: {},
+	});
 
 	// ----------------------------------
 	// Memos
+	const showLicenseAlert = createMemo(() => {
+		return license.data?.data.valid === false;
+	});
 	const collectionsIsLoading = createMemo(() => {
 		return collections.isLoading;
 	});
@@ -249,9 +255,16 @@ export const NavigationSidebar: Component = () => {
 							</li>
 						</Show>
 					</ul>
-					<small class="text-xs leading-none bg-background-base rounded-md px-2 py-2 block text-center mt-4">
-						v{packageJson.version}
-					</small>
+					<div class="mt-4 flex flex-col gap-2">
+						<Show when={showLicenseAlert()}>
+							<div class="bg-warning-base/10 border border-warning-base/20 rounded-md px-2 py-2 text-center">
+								<p class="text-xs">{T()("license_invalid_message")}</p>
+							</div>
+						</Show>
+						<small class="text-xs leading-none bg-background-base rounded-md px-2 py-2 block text-center">
+							v{packageJson.version}
+						</small>
+					</div>
 				</div>
 			</div>
 		</nav>
