@@ -108,10 +108,16 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 							},
 						]}
 					/>
-					<Show when={job.data?.data.errorMessage}>
-						<SectionHeading title={T()("error_message")} />
-						<div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-							<p class="text-sm text-red-900">{job.data?.data.errorMessage}</p>
+					<Show
+						when={
+							job.data?.data.status === "failed" && job.data?.data.errorMessage
+						}
+					>
+						<div class="mb-4 p-4 bg-error-base/10 border border-error-base/20 rounded-md -mt-2.5">
+							<h3 class="text-sm font-medium text-title mb-1">
+								{T()("failed_with_message")}
+							</h3>
+							<p class="text-sm text-body">{job.data?.data.errorMessage}</p>
 						</div>
 					</Show>
 					<Show when={job.data?.data.eventData}>
