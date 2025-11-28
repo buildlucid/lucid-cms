@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createSignal } from "solid-js";
+import { type Component, createMemo, createSignal } from "solid-js";
 import type { ValueT, SelectProps } from "@/components/Groups/Form/Select";
 import type { ErrorResult, FieldError } from "@types";
 import api from "@/services/api";
@@ -24,11 +24,18 @@ const UserSearchSelect: Component<UserSearchSelectProps> = (props) => {
 	const [getSearchQuery, setSearchQuery] = createSignal<string>("");
 
 	// ----------------------------------
+	// Memos
+	const usernameFilter = createMemo(() => {
+		const query = getSearchQuery();
+		return query !== "" ? query : undefined;
+	});
+
+	// ----------------------------------
 	// Queries
 	const users = api.users.useGetMultiple({
 		queryParams: {
 			filters: {
-				username: getSearchQuery() !== "" ? getSearchQuery : undefined,
+				username: usernameFilter,
 				isDeleted: 0,
 			},
 		},

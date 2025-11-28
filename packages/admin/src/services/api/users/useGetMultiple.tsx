@@ -10,7 +10,7 @@ interface QueryParams {
 		firstName?: Accessor<string>;
 		lastName?: Accessor<string>;
 		email?: Accessor<string>;
-		username?: Accessor<string>;
+		username?: Accessor<string | undefined>;
 		id?: Accessor<number | number[]>;
 		isDeleted?: Accessor<1 | 0> | 1 | 0;
 	};
