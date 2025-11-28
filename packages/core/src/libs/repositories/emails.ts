@@ -127,7 +127,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 								"lucid_email_transactions.email_id",
 								"=",
 								"lucid_emails.id",
-							),
+							)
+							.orderBy("lucid_email_transactions.created_at", "desc"),
 					)
 					.as("transactions"),
 			])
