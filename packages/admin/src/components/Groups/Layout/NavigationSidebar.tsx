@@ -87,7 +87,7 @@ export const NavigationSidebar: Component = () => {
 			{/* Primary */}
 			<div class="w-[220px] h-full flex justify-between flex-col overflow-y-auto scrollbar">
 				<div class="pt-6 px-4">
-					<div class="flex items-center">
+					<div class="flex items-center pl-2">
 						<img src={LogoIcon} alt="Lucid CMS Logo" class="h-6" />
 					</div>
 					<ul class="py-6">
