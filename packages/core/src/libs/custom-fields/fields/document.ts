@@ -3,7 +3,6 @@ import z from "zod/v4";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
-import formatter from "../../formatters/index.js";
 import buildTableName from "../../collection/helpers/build-table-name.js";
 import type {
 	CFConfig,
@@ -13,13 +12,13 @@ import type {
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
 import {
 	documentFieldsFormatter,
 	documentBricksFormatter,
 } from "../../formatters/index.js";
+import type { FieldRefParams } from "../types.js";
 
 class DocumentCustomField extends CustomField<"document"> {
 	type = "document" as const;
@@ -77,19 +76,19 @@ class DocumentCustomField extends CustomField<"document"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"document">["value"];
 	}
-	formatResponseMeta(
+	static formatRef(
 		value: BrickQueryResponse | undefined | null,
-		meta: FieldFormatMeta,
+		params: FieldRefParams,
 	) {
 		if (value === null || value === undefined) return null;
 
-		const collection = meta.config.collections.find(
-			(c) => c.key === this.props.collection,
+		const collection = params.config.collections.find(
+			(c) => c.key === params.collection.key,
 		);
 		if (!collection || !value) {
 			return {
-				id: value?.document_id ?? null,
-				collectionKey: value?.collection_key ?? null,
+				id: value.document_id,
+				collectionKey: value.collection_key,
 				fields: null,
 			};
 		}
@@ -97,18 +96,18 @@ class DocumentCustomField extends CustomField<"document"> {
 		const documentFields = documentFieldsFormatter.objectifyFields(
 			documentBricksFormatter.formatDocumentFields({
 				bricksQuery: value,
-				bricksSchema: meta.bricksTableSchema,
+				bricksSchema: params.bricksTableSchema,
 				relationMetaData: {},
 				collection: collection,
-				config: meta.config,
+				config: params.config,
 			}),
 		);
 
 		return {
-			id: value?.id ?? null,
-			collectionKey: value?.collection_key ?? null,
+			id: value.id,
+			collectionKey: value.collection_key,
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
-		} satisfies CFResponse<"document">["meta"];
+		} satisfies CFResponse<"document">["ref"];
 	}
 	cfSpecificValidation(value: unknown, relationData?: DocumentReferenceData[]) {
 		const valueSchema = z.number();

@@ -2,31 +2,29 @@ import T from "../../translations/index.js";
 import type {
 	CFConfig,
 	FieldTypes,
-	CFColumn,
 	CFProps,
 	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidateResponse,
 } from "./types.js";
 import zodSafeParse from "./utils/zod-safe-parse.js";
-import type { FieldFormatMeta } from "../formatters/document-fields.js";
-import type { SchemaDefinition, GetSchemaDefinitionProps } from "./types.js";
+import type {
+	SchemaDefinition,
+	GetSchemaDefinitionProps,
+	FieldRefParams,
+} from "./types.js";
 import type { ServiceResponse } from "../../types.js";
 
 abstract class CustomField<T extends FieldTypes> {
 	repeater: string | null = null;
 
 	abstract type: T;
-	abstract column: CFColumn<T>;
 	abstract key: string;
 	abstract props?: CFProps<T>;
 	abstract config: CFConfig<T>;
 
 	abstract formatResponseValue(value: unknown): CFResponse<T>["value"];
-	abstract formatResponseMeta(
-		value: unknown,
-		meta: FieldFormatMeta,
-	): CFResponse<T>["meta"] | null;
+
 	abstract cfSpecificValidation(
 		value: unknown,
 		relationData?: unknown,
@@ -47,6 +45,12 @@ abstract class CustomField<T extends FieldTypes> {
 	): Awaited<ServiceResponse<SchemaDefinition>>;
 
 	// Methods
+	static formatRef(
+		value: unknown,
+		params: FieldRefParams,
+	): CFResponse<FieldTypes>["ref"] | null {
+		return null;
+	}
 	public validate(props: {
 		type: FieldTypes;
 		value: unknown;

@@ -15,7 +15,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class SelectCustomField extends CustomField<"select"> {
 	type = "select" as const;
-	column = "text_value" as const;
 	config;
 	key;
 	props;
@@ -62,9 +61,6 @@ class SelectCustomField extends CustomField<"select"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"select">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"select">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.string();

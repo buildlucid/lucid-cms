@@ -5,8 +5,15 @@ import {
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import { documentBricksFormatter } from "../../libs/formatters/index.js";
-import type { BrickResponse, FieldResponse } from "../../types/response.js";
+import {
+	documentBricksFormatter,
+	documentsFormatter,
+} from "../../libs/formatters/index.js";
+import type {
+	BrickResponse,
+	FieldResponse,
+	DocumentResponse,
+} from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getSingleInstance } from "../collections/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
@@ -29,6 +36,7 @@ const getMultiple: ServiceFn<
 	{
 		bricks: Array<BrickResponse>;
 		fields: Array<FieldResponse>;
+		refs: DocumentResponse["refs"];
 	}
 > = async (context, data) => {
 	const DocumentBricks = new DocumentBricksRepository(
@@ -102,6 +110,12 @@ const getMultiple: ServiceFn<
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
+			}),
+			refs: documentsFormatter.formatRefs({
+				collection: collectionRes.data,
+				config: context.config,
+				bricksTableSchema: bricksTableSchemaRes.data,
+				data: relationDataRes.data,
 			}),
 		},
 	};

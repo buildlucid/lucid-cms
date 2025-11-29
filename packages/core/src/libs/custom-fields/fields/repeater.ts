@@ -11,7 +11,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class RepeaterCustomField extends CustomField<"repeater"> {
 	type = "repeater" as const;
-	column = null;
 	config;
 	key;
 	props;
@@ -44,9 +43,6 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	}
 	formatResponseValue() {
 		return null satisfies CFResponse<"repeater">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"repeater">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		if (

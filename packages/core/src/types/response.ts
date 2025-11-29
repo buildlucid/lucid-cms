@@ -7,7 +7,7 @@ import type {
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type {
 	CFConfig,
-	FieldResponseMeta,
+	FieldRefs,
 	FieldResponseValue,
 	FieldTypes,
 } from "../libs/custom-fields/types.js";
@@ -313,7 +313,6 @@ export interface FieldResponse {
 	groupRef?: string;
 	translations?: Record<string, FieldResponseValue>;
 	value?: FieldResponseValue;
-	meta?: Record<string, FieldResponseMeta> | FieldResponseMeta;
 	groups?: Array<FieldGroupResponse>;
 }
 export interface FieldAltResponse {
@@ -322,7 +321,6 @@ export interface FieldAltResponse {
 	groupRef?: string;
 	translations?: Record<string, FieldResponseValue>;
 	value?: FieldResponseValue;
-	meta?: Record<string, FieldResponseMeta> | FieldResponseMeta;
 	groups?: Array<FieldGroupAltResponse>;
 }
 export interface FieldGroupResponse {
@@ -399,6 +397,7 @@ export interface DocumentResponse {
 
 	bricks?: Array<BrickResponse> | null;
 	fields?: Array<FieldResponse> | null;
+	refs?: Partial<Record<FieldTypes, FieldRefs[]>> | null;
 }
 export interface ClientDocumentResponse {
 	id: number;
@@ -437,6 +436,7 @@ export interface ClientDocumentResponse {
 
 	bricks?: Array<BrickAltResponse> | null;
 	fields?: Record<string, FieldAltResponse> | null;
+	refs?: Partial<Record<FieldTypes, FieldRefs[]>> | null;
 }
 
 export interface ResponseBody<D = unknown> {

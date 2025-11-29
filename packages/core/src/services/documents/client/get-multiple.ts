@@ -80,7 +80,6 @@ const getMultiple: ServiceFn<
 	const relationIdRes = await extractRelatedEntityIds(context, {
 		brickSchema: bricksTableSchemaRes.data,
 		responses: documentsRes.data?.[0] ?? [],
-		excludeTypes: ["document"],
 	});
 	if (relationIdRes.error) return relationIdRes;
 

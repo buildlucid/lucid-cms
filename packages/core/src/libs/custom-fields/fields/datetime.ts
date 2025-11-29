@@ -15,7 +15,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class DatetimeCustomField extends CustomField<"datetime"> {
 	type = "datetime" as const;
-	column = "text_value" as const;
 	config;
 	key;
 	props;
@@ -62,9 +61,6 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"datetime">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"datetime">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.union([z.string(), z.number(), z.date()]);

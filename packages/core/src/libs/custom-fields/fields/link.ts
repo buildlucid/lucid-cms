@@ -15,7 +15,6 @@ import keyToTitle from "../utils/key-to-title.js";
 
 class LinkCustomField extends CustomField<"link"> {
 	type = "link" as const;
-	column = "text_value" as const;
 	config;
 	key;
 	props;
@@ -68,9 +67,6 @@ class LinkCustomField extends CustomField<"link"> {
 			label: value?.label ?? this.config.config.default.label ?? null,
 			target: value?.target ?? this.config.config.default.target ?? null,
 		} satisfies CFResponse<"link">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"link">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.object({

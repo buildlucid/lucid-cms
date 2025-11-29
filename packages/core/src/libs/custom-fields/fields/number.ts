@@ -13,7 +13,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class NumberCustomField extends CustomField<"number"> {
 	type = "number" as const;
-	column = "int_value" as const;
 	config;
 	key;
 	props;
@@ -60,9 +59,6 @@ class NumberCustomField extends CustomField<"number"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"number">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"number">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.number();

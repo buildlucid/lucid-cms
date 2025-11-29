@@ -11,6 +11,8 @@ import {
 	fieldResponseSchema,
 } from "./collection-fields.js";
 import { documentVersionResponseSchema } from "./document-versions.js";
+import { mediaResponseSchema } from "./media.js";
+import { userResponseSchema } from "./users.js";
 import type { ControllerSchema } from "../types.js";
 
 const documentResponseUserSchema = z.object({
@@ -95,6 +97,7 @@ const documentResponseBaseSchema = z.object({
 const documentResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickResponseSchema).nullable().optional(),
 	fields: z.array(fieldResponseSchema).nullable().optional(),
+	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
 });
 const documentClientResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickClientResponseSchema).nullable().optional(),
@@ -102,6 +105,7 @@ const documentClientResponseSchema = documentResponseBaseSchema.extend({
 		.record(z.string(), z.array(fieldClientResponseSchema))
 		.nullable()
 		.optional(),
+	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
 });
 
 export const controllerSchemas = {

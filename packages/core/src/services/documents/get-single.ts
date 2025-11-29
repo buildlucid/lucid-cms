@@ -85,6 +85,7 @@ const getSingle: ServiceFn<
 				bricks: bricksRes.data.bricks,
 				fields: bricksRes.data.fields,
 				config: context.config,
+				refs: bricksRes.data.refs,
 			}),
 		};
 	}

@@ -13,7 +13,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class ColorCustomField extends CustomField<"color"> {
 	type = "color" as const;
-	column = "text_value" as const;
 	config;
 	key;
 	props;
@@ -60,9 +59,6 @@ class ColorCustomField extends CustomField<"color"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"color">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"color">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		// TODO: down the line, add validation for different color formats - currently accepts any value

@@ -2,7 +2,6 @@ import z from "zod/v4";
 import T from "../../../translations/index.js";
 import type { MediaType, ServiceResponse } from "../../../types.js";
 import { createMediaUrl } from "../../../utils/media/index.js";
-import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import formatter from "../../formatters/index.js";
 import MediaFormatter, { type MediaPropsT } from "../../formatters/media.js";
 import CustomField from "../custom-field.js";
@@ -10,6 +9,7 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	FieldRefParams,
 	GetSchemaDefinitionProps,
 	MediaReferenceData,
 	SchemaDefinition,
@@ -19,7 +19,6 @@ import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class MediaCustomField extends CustomField<"media"> {
 	type = "media" as const;
-	column = "media_id" as const;
 	config;
 	key;
 	props;
@@ -67,17 +66,17 @@ class MediaCustomField extends CustomField<"media"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"media">["value"];
 	}
-	formatResponseMeta(
+	static formatRef(
 		value: MediaPropsT | undefined | null,
-		meta: FieldFormatMeta,
+		params: FieldRefParams,
 	) {
 		if (value === null || value === undefined) return null;
 		return {
-			id: value.id ?? null,
+			id: value.id,
 			url: createMediaUrl({
 				key: value.key,
-				host: meta.host,
-				urlStrategy: meta.config.media?.urlStrategy,
+				host: params.config.host,
+				urlStrategy: params.config.media?.urlStrategy,
 			}),
 			key: value.key,
 			mimeType: value.mime_type,
@@ -92,17 +91,17 @@ class MediaCustomField extends CustomField<"media"> {
 			title: MediaFormatter.objectifyTranslations(
 				"title",
 				value.translations || [],
-				meta.localization.locales,
+				params.localization.locales,
 			),
 			alt: MediaFormatter.objectifyTranslations(
 				"alt",
 				value.translations || [],
-				meta.localization.locales,
+				params.localization.locales,
 			),
 			type: value.type as MediaType,
 			public: formatter.formatBoolean(value.public),
 			isDeleted: formatter.formatBoolean(value.is_deleted),
-		} satisfies CFResponse<"media">["meta"];
+		} satisfies CFResponse<"media">["ref"];
 	}
 	cfSpecificValidation(value: unknown, relationData?: MediaReferenceData[]) {
 		const valueSchema = z.number();

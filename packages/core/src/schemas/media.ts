@@ -2,7 +2,7 @@ import z from "zod/v4";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
-const mediaResponseSchema = z.object({
+export const mediaResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 1 }),
 	key: z.string().meta({
 		description: "Media key",

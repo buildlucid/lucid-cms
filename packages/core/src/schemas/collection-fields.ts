@@ -297,7 +297,6 @@ export const fieldResponseBaseSchema = z.object({
 			example: "Welcome to our website",
 		})
 		.optional(),
-	meta: z.union([z.record(z.any(), z.any()), z.any()]).optional(),
 });
 export const fieldResponseSchema = fieldResponseBaseSchema.extend({
 	get groups() {

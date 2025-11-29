@@ -8,11 +8,18 @@ import type {
 	ClientDocumentResponse,
 	BrickAltResponse,
 	LucidBrickTableName,
+	FieldTypes,
+	FieldRefs,
+	FieldRefParams,
 } from "../../types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import { documentBricksFormatter, documentFieldsFormatter } from "./index.js";
+import customFieldMap from "../custom-fields/custom-field-map.js";
+import type { BrickQueryResponse } from "../repositories/document-bricks.js";
+import type { MediaPropsT } from "./media.js";
+import type { UserPropT } from "./users.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
@@ -45,12 +52,20 @@ const formatMultiple = (props: {
 			});
 		}
 
+		const refs = formatRefs({
+			data: props.relationData,
+			collection: props.collection,
+			config: props.config,
+			bricksTableSchema: props.bricksTableSchema,
+		});
+
 		return formatSingle({
 			document: d,
 			collection: props.collection,
 			config: props.config,
 			fields: fields,
 			bricks: bricks || undefined,
+			refs: refs,
 		});
 	});
 };
@@ -60,6 +75,7 @@ const formatSingle = (props: {
 	collection: CollectionBuilder;
 	bricks?: BrickResponse[];
 	fields?: FieldResponse[] | null;
+	refs?: DocumentResponse["refs"];
 	config: Config;
 }): DocumentResponse => {
 	return {
@@ -72,6 +88,7 @@ const formatSingle = (props: {
 		}),
 		bricks: props.bricks ?? null,
 		fields: props.fields ?? null,
+		refs: props.refs ?? null,
 		isDeleted: formatter.formatBoolean(props.document.is_deleted),
 		createdBy: props.document.cb_user_id
 			? {
@@ -155,12 +172,20 @@ const formatClientMultiple = (props: {
 			});
 		}
 
+		const refs = formatRefs({
+			data: props.relationData,
+			collection: props.collection,
+			config: props.config,
+			bricksTableSchema: props.bricksTableSchema,
+		});
+
 		return formatClientSingle({
 			document: d,
 			collection: props.collection,
 			config: props.config,
 			fields: fields,
 			bricks: bricks || undefined,
+			refs: refs,
 		});
 	});
 };
@@ -170,6 +195,7 @@ const formatClientSingle = (props: {
 	collection: CollectionBuilder;
 	bricks?: BrickResponse[];
 	fields?: FieldResponse[] | null;
+	refs?: DocumentResponse["refs"];
 	config: Config;
 }): ClientDocumentResponse => {
 	const res = formatSingle({
@@ -178,6 +204,7 @@ const formatClientSingle = (props: {
 		bricks: props.bricks,
 		fields: props.fields,
 		config: props.config,
+		refs: props.refs,
 	});
 
 	return {
@@ -193,7 +220,44 @@ const formatClientSingle = (props: {
 		fields: res.fields
 			? documentFieldsFormatter.objectifyFields(res.fields)
 			: null,
+		refs: res.refs ?? null,
 	} satisfies ClientDocumentResponse;
+};
+
+const formatRefs = (props: {
+	data?: FieldRelationResponse;
+	collection: CollectionBuilder;
+	config: Config;
+	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+}): Partial<Record<FieldTypes, FieldRefs[]>> | null => {
+	const refs: Partial<Record<FieldTypes, FieldRefs[]>> = {};
+	if (!props.data) return null;
+
+	const localization = {
+		locales: props.config.localization.locales.map((l) => l.code),
+		default: props.config.localization.defaultLocale,
+	} satisfies FieldRefParams["localization"];
+
+	for (const [type, data] of Object.entries(props.data)) {
+		const key = type as FieldTypes;
+		const customField = customFieldMap[key];
+		if (!customField) continue;
+
+		refs[key] = data
+			.map((d) => {
+				if (d === null || d === undefined) return null;
+				// @ts-expect-error
+				return customField.formatRef(d, {
+					collection: props.collection,
+					config: props.config,
+					bricksTableSchema: props.bricksTableSchema,
+					localization: localization,
+				});
+			})
+			.filter((d) => d !== null);
+	}
+
+	return refs;
 };
 
 export default {
@@ -201,4 +265,5 @@ export default {
 	formatSingle,
 	formatClientMultiple,
 	formatClientSingle,
+	formatRefs,
 };

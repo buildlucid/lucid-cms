@@ -10,7 +10,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class TabCustomField extends CustomField<"tab"> {
 	type = "tab" as const;
-	column = null;
 	config;
 	key: string;
 	props?: CFProps<"tab">;
@@ -39,9 +38,6 @@ class TabCustomField extends CustomField<"tab"> {
 	}
 	formatResponseValue() {
 		return null satisfies CFResponse<"tab">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"tab">["meta"];
 	}
 	cfSpecificValidation() {
 		return {

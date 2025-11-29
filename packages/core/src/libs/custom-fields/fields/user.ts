@@ -11,13 +11,11 @@ import type {
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type { FieldFormatMeta } from "../../formatters/document-fields.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { UserPropT } from "../../formatters/users.js";
 
 class UserCustomField extends CustomField<"user"> {
 	type = "user" as const;
-	column = "user_id" as const;
 	config;
 	key;
 	props;
@@ -65,17 +63,15 @@ class UserCustomField extends CustomField<"user"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"user">["value"];
 	}
-	formatResponseMeta(
-		value: UserPropT | undefined | null,
-		meta: FieldFormatMeta,
-	) {
+	static formatRef(value: UserPropT | undefined | null) {
 		if (value === null || value === undefined) return null;
 		return {
-			email: value?.email ?? null,
-			username: value?.username ?? null,
-			firstName: value?.first_name ?? null,
-			lastName: value?.last_name ?? null,
-		} satisfies CFResponse<"user">["meta"];
+			id: value.id ?? null,
+			email: value.email,
+			username: value.username,
+			firstName: value.first_name,
+			lastName: value.last_name,
+		} satisfies CFResponse<"user">["ref"];
 	}
 	cfSpecificValidation(value: unknown, relationData?: UserReferenceData[]) {
 		const valueSchema = z.number();

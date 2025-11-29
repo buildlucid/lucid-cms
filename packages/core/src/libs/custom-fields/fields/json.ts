@@ -13,7 +13,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class JsonCustomField extends CustomField<"json"> {
 	type = "json" as const;
-	column = "json_value" as const;
 	config;
 	key;
 	props;
@@ -60,9 +59,6 @@ class JsonCustomField extends CustomField<"json"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"json">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"json">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.record(

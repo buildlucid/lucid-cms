@@ -7,7 +7,6 @@ import type {
 	CFConfig,
 	FieldGroupResponse,
 	FieldResponse,
-	FieldResponseMeta,
 	FieldResponseValue,
 	FieldTypes,
 	LucidBricksTable,
@@ -168,7 +167,6 @@ const buildField = (
 		meta.collection.getData.config.useTranslations === true
 	) {
 		const fieldTranslations: Record<string, FieldResponseValue> = {};
-		const fieldMeta: Record<string, FieldResponseMeta> = {};
 
 		//* populate the translations/meta
 		for (const locale of meta.localization.locales) {
@@ -178,17 +176,8 @@ const buildField = (
 				fieldTranslations[locale] = cfInstance.formatResponseValue(
 					localeValue.value,
 				);
-				fieldMeta[locale] = cfInstance.formatResponseMeta(
-					fetchRelationData(data.relationMetaData, {
-						type: meta.fieldConfig.type,
-						value: localeValue.value,
-						fieldConfig: meta.fieldConfig,
-					}),
-					meta,
-				);
 			} else {
 				fieldTranslations[locale] = null;
-				fieldMeta[locale] = null;
 			}
 		}
 
@@ -197,7 +186,6 @@ const buildField = (
 			type: meta.fieldConfig.type,
 			groupRef: meta.groupRef,
 			translations: fieldTranslations,
-			meta: fieldMeta,
 		};
 	}
 
@@ -212,14 +200,6 @@ const buildField = (
 		type: meta.fieldConfig.type,
 		value: cfInstance.formatResponseValue(defaultValue.value),
 		groupRef: meta.groupRef,
-		meta: cfInstance.formatResponseMeta(
-			fetchRelationData(data.relationMetaData, {
-				type: meta.fieldConfig.type,
-				value: defaultValue.value,
-				fieldConfig: meta.fieldConfig,
-			}),
-			meta,
-		),
 	};
 };
 
@@ -311,35 +291,6 @@ const objectifyFields = (
 		},
 		{} as Record<string, FieldAltResponse>,
 	);
-};
-
-/**
- * Fetch relation meta data
- */
-const fetchRelationData = <T extends FieldTypes>(
-	relationData: FieldRelationResponse,
-	props: {
-		type: T;
-		value: unknown;
-		fieldConfig: CFConfig<T>;
-	},
-) => {
-	switch (props.type) {
-		case "document": {
-			return (
-				relationData.document as Array<BrickQueryResponse> | undefined
-			)?.find((d) => {
-				return (
-					d.collection_key ===
-						(props.fieldConfig as CFConfig<"document">)?.collection &&
-					d.document_id === props.value
-				);
-			});
-		}
-		default: {
-			return relationData[props.type]?.find((i) => i?.id === props.value);
-		}
-	}
 };
 
 export default {

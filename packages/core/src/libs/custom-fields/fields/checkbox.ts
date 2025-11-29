@@ -17,7 +17,6 @@ import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class CheckboxCustomField extends CustomField<"checkbox"> {
 	type = "checkbox" as const;
-	column = "bool_value" as const;
 	config;
 	key;
 	props;
@@ -68,9 +67,6 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		return formatter.formatBoolean(
 			Boolean(value) ?? this.config.config.default,
 		) satisfies CFResponse<"checkbox">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"checkbox">["meta"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.union([z.literal(1), z.literal(0), z.boolean()]);

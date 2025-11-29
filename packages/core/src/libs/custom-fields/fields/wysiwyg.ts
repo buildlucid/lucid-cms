@@ -13,7 +13,6 @@ import type { ServiceResponse } from "../../../types.js";
 
 class WysiwygCustomField extends CustomField<"wysiwyg"> {
 	type = "wysiwyg" as const;
-	column = "text_value" as const;
 	config;
 	key;
 	props;
@@ -60,9 +59,6 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"wysiwyg">["value"];
-	}
-	formatResponseMeta() {
-		return null satisfies CFResponse<"wysiwyg">["meta"];
 	}
 	cfSpecificValidation(value: string) {
 		const valueSchema = z.string();

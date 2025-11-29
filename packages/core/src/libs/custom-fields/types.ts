@@ -3,7 +3,14 @@ import type { ZodType } from "zod/v4";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
 import type { LocaleValue } from "../../types/shared.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
-import type { OnDelete, OnUpdate } from "../db-adapter/types.js";
+import type {
+	LucidBrickTableName,
+	OnDelete,
+	OnUpdate,
+} from "../db-adapter/types.js";
+import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type { CollectionBuilder } from "../builders/index.js";
+import type { Config } from "../../types/config.js";
 
 // -----------------------------------------------
 // Custom Field
@@ -11,153 +18,130 @@ export type CustomFieldMap = {
 	tab: {
 		props: TabFieldProps;
 		config: TabFieldConfig;
-		column: null;
 		response: {
 			value: TabResValue;
-			meta: TabResMeta;
+			ref: TabRef;
 		};
 	};
 	text: {
 		props: TextFieldProps;
 		config: TextFieldConfig;
-		column: "text_value";
 		response: {
 			value: TextResValue;
-			meta: TextResMeta;
+			ref: TextRef;
 		};
 	};
 	wysiwyg: {
 		props: WysiwygFieldProps;
 		config: WysiwygFieldConfig;
-		column: "text_value";
 		response: {
 			value: WysiwygResValue;
-			meta: WysiwygResMeta;
+			ref: WysiwygRef;
 		};
 	};
 	media: {
 		props: MediaFieldProps;
 		config: MediaFieldConfig;
-		column: "media_id";
 		response: {
 			value: MediaResValue;
-			meta: MediaResMeta;
+			ref: MediaRef;
 		};
 	};
 	document: {
 		props: DocumentFieldProps;
 		config: DocumentFieldConfig;
-		column: "document_id";
 		response: {
 			value: DocumentResValue;
-			meta: DocumentResMeta;
+			ref: DocumentRef;
 		};
 	};
 	repeater: {
 		props: RepeaterFieldProps;
 		config: RepeaterFieldConfig;
-		column: null;
 		response: {
 			value: RepeaterResValue;
-			meta: RepeaterResMeta;
+			ref: RepeaterRef;
 		};
 	};
 	number: {
 		props: NumberFieldProps;
 		config: NumberFieldConfig;
-		column: "int_value";
 		response: {
 			value: NumberResValue;
-			meta: NumberResMeta;
+			ref: NumberRef;
 		};
 	};
 	checkbox: {
 		props: CheckboxFieldProps;
 		config: CheckboxFieldConfig;
-		column: "bool_value";
 		response: {
 			value: CheckboxResValue;
-			meta: CheckboxResMeta;
+			ref: CheckboxRef;
 		};
 	};
 	select: {
 		props: SelectFieldProps;
 		config: SelectFieldConfig;
-		column: "text_value";
 		response: {
 			value: SelectReValue;
-			meta: SelectResMeta;
+			ref: SelectRef;
 		};
 	};
 	textarea: {
 		props: TextareaFieldProps;
 		config: TextareaFieldConfig;
-		column: "text_value";
 		response: {
 			value: TextareaResValue;
-			meta: TextareaResMeta;
+			ref: TextareaRef;
 		};
 	};
 	json: {
 		props: JsonFieldProps;
 		config: JsonFieldConfig;
-		column: "json_value";
 		response: {
 			value: JsonResValue;
-			meta: JsonResMeta;
+			ref: JsonRef;
 		};
 	};
 	color: {
 		props: ColorFieldProps;
 		config: ColorFieldConfig;
-		column: "text_value";
 		response: {
 			value: ColorResValue;
-			meta: ColorResMeta;
+			ref: ColorRef;
 		};
 	};
 	datetime: {
 		props: DatetimeFieldProps;
 		config: DatetimeFieldConfig;
-		column: "text_value";
 		response: {
 			value: DatetimeResValue;
-			meta: DatetimeResMeta;
+			ref: DatetimeRef;
 		};
 	};
 	link: {
 		props: LinkFieldProps;
 		config: LinkFieldConfig;
-		column: "text_value";
 		response: {
 			value: LinkResValue;
-			meta: LinkResMeta;
+			ref: LinkRef;
 		};
 	};
 	user: {
 		props: UserFieldProps;
 		config: UserFieldConfig;
-		column: "user_id";
 		response: {
 			value: UserResValue;
-			meta: UserResMeta;
+			ref: UserRef;
 		};
 	};
 };
 export type FieldTypes = keyof CustomFieldMap;
-export type FieldColumns =
-	| "text_value"
-	| "media_id"
-	| "int_value"
-	| "bool_value"
-	| "json_value"
-	| "user_id";
 
 // -----------------------------------------------
 // Generic Types
 export type CFConfig<T extends FieldTypes> = CustomFieldMap[T]["config"];
 export type CFProps<T extends FieldTypes> = CustomFieldMap[T]["props"];
-export type CFColumn<T extends FieldTypes> = CustomFieldMap[T]["column"];
 export type CFResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];
 
 // -----------------------------------------------
@@ -509,12 +493,12 @@ export type FieldResponseValue =
 	| undefined;
 
 // -----------------------------------------------
-// Response Meta
+// Response Refs
 
-export type TabResMeta = null;
-export type TextResMeta = null;
-export type WysiwygResMeta = null;
-export type MediaResMeta = {
+export type TabRef = null;
+export type TextRef = null;
+export type WysiwygRef = null;
+export type MediaRef = {
 	id: number;
 	url: string;
 	key: string;
@@ -533,43 +517,44 @@ export type MediaResMeta = {
 	isDeleted: boolean;
 	public: boolean;
 } | null;
-export type DocumentResMeta = {
-	id: number | null;
-	collectionKey?: string | null;
+export type DocumentRef = {
+	id: number;
+	collectionKey: string;
 	fields: Record<string, FieldAltResponse> | null;
 };
-export type RepeaterResMeta = null;
-export type NumberResMeta = null;
-export type CheckboxResMeta = null;
-export type SelectResMeta = null;
-export type TextareaResMeta = null;
-export type JsonResMeta = null;
-export type ColorResMeta = null;
-export type DatetimeResMeta = null;
-export type LinkResMeta = null;
-export type UserResMeta = {
-	username: string | null;
-	email: string | null;
+export type RepeaterRef = null;
+export type NumberRef = null;
+export type CheckboxRef = null;
+export type SelectRef = null;
+export type TextareaRef = null;
+export type JsonRef = null;
+export type ColorRef = null;
+export type DatetimeRef = null;
+export type LinkRef = null;
+export type UserRef = {
+	id: number;
+	username: string;
+	email: string;
 	firstName: string | null;
 	lastName: string | null;
 } | null;
 
-export type FieldResponseMeta =
-	| TabResMeta
-	| TextResMeta
-	| WysiwygResMeta
-	| MediaResMeta
-	| RepeaterResMeta
-	| NumberResMeta
-	| CheckboxResMeta
-	| SelectResMeta
-	| TextareaResMeta
-	| JsonResMeta
-	| ColorResMeta
-	| DatetimeResMeta
-	| LinkResMeta
-	| UserResMeta
-	| DocumentResMeta
+export type FieldRefs =
+	| TabRef
+	| TextRef
+	| WysiwygRef
+	| MediaRef
+	| RepeaterRef
+	| NumberRef
+	| CheckboxRef
+	| SelectRef
+	| TextareaRef
+	| JsonRef
+	| ColorRef
+	| DatetimeRef
+	| LinkRef
+	| UserRef
+	| DocumentRef
 	| undefined;
 
 // -----------------------------------------------
@@ -633,4 +618,14 @@ export type SchemaDefinition = {
 	// 	columns: string[];
 	// 	type?: "unique" | "index";
 	// }[];
+};
+
+export type FieldRefParams = {
+	collection: CollectionBuilder;
+	localization: {
+		locales: string[];
+		default: string;
+	};
+	config: Config;
+	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 };
