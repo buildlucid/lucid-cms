@@ -12,10 +12,7 @@ import helpers from "@/utils/helpers";
 interface GroupBodyProps {
 	state: {
 		brickIndex: number;
-		// fields: FieldResponse[];
 		fieldConfig: CFConfig<"repeater">;
-		// ref: string;
-		// groupOpen: boolean | null;
 		group: FieldGroupResponse;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;

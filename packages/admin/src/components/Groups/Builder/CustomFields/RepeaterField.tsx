@@ -15,6 +15,7 @@ import helpers from "@/utils/helpers";
 import { GroupBody } from "@/components/Groups/Builder";
 import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
+import { FaSolidPlus } from "solid-icons/fa";
 
 interface RepeaterFieldProps {
 	state: {
@@ -81,7 +82,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			})}
 		>
 			<p
-				class={"block text-sm transition-colors duration-200 ease-in-out mb-2"}
+				class={
+					"block text-sm transition-colors duration-200 ease-in-out mb-1.5 text-title"
+				}
 			>
 				{helpers.getLocaleValue({
 					value: fieldConfig().details?.label,
@@ -112,9 +115,6 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 											fieldConfig: fieldConfig(),
 											dragDropKey: dragDropKey(),
 											group: g(),
-											// fields: g.fields,
-											// ref: g.ref,
-											// groupOpen: g.open,
 											dragDrop: dragDrop,
 											repeaterKey: fieldConfig().key,
 											groupIndex: i,
@@ -131,7 +131,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					</DragDrop>
 				</Match>
 				<Match when={groups().length === 0}>
-					<div class="w-full border-border bg-input-base border p-4 md:p-6 rounded-md flex items-center flex-col justify-center text-center">
+					<div class="w-full border-border border-dashed border p-4 md:p-6 min-h-32 rounded-md flex items-center flex-col justify-center text-center">
 						<span class="text-sm text-unfocused capitalize">
 							{T()("no_entries")}
 						</span>
@@ -139,7 +139,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 				</Match>
 			</Switch>
 			{/* Repeater Footer */}
-			<div class="w-full flex justify-between items-center mt-4">
+			<div class="w-full flex justify-between items-center mt-2.5">
 				<Button
 					type="button"
 					theme="secondary"

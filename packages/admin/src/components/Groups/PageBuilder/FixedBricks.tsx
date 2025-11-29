@@ -1,12 +1,8 @@
-import { type Component, createMemo, For, createSignal, Index } from "solid-js";
+import { type Component, createMemo, Index } from "solid-js";
 import type { CollectionBrickConfig, CollectionResponse } from "@types";
-import classNames from "classnames";
-import { FaSolidCircleChevronUp, FaSolidShield } from "solid-icons/fa";
+import { FaSolidShield } from "solid-icons/fa";
 import brickStore, { type BrickData } from "@/store/brickStore";
-import {
-	BrickImagePreviewButton,
-	BrickBody,
-} from "@/components/Groups/Builder";
+import { BrickBody } from "@/components/Groups/Builder";
 import helpers from "@/utils/helpers";
 
 interface FixedBricksProps {

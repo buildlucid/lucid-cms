@@ -112,9 +112,9 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden relative">
 					<Show when={!revisionState.revisionDocument()}>
 						<div class="absolute inset-0 flex items-center justify-center bg-black/80 flex-col z-20">
-							<div class="w-full max-w-xl px-4 md:p-6 text-center flex flex-col items-center bg-background-base border border-border rounded-md">
-								<h2 class="mb-2.5">{T()("no_revisions_found")}</h2>
-								<p class="mb-5">{T()("no_revisions_found_message")}</p>
+							<div class="w-full max-w-xl px-4 md:p-6 text-center flex flex-col items-center bg-card-base border border-border rounded-md">
+								<h2 class="mb-2">{T()("no_revisions_found")}</h2>
+								<p class="mb-5 text-sm">{T()("no_revisions_found_message")}</p>
 								<Link
 									href={getDocumentRoute("edit", {
 										collectionKey: revisionState.collectionKey(),

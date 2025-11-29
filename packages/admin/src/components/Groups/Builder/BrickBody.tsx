@@ -107,7 +107,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 				class={classNames({
 					"p-4 pt-0": props.options.padding === "16",
 					"p-6": props.options.padding === "24",
-					"pt-4!": props.options.bleedTop,
+					"pt-4!": props.options.bleedTop && allTabs().length > 0,
 					"flex flex-col gap-4": allTabs().length === 0,
 				})}
 			>
