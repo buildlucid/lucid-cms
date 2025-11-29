@@ -182,7 +182,7 @@ export function useDocumentUIState(props: {
 	 * Determines if the revision navigation should show
 	 */
 	const showRevisionNavigation = createMemo(() => {
-		if (props.mode === "create") return false;
+		// if (props.mode === "create") return false;
 		return props.collection()?.config.useRevisions ?? false;
 	});
 

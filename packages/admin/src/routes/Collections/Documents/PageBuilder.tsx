@@ -1,8 +1,7 @@
 import T from "@/translations";
 import { type Component, Switch, Match, createEffect, on } from "solid-js";
 import {
-	Header,
-	ActionBar,
+	PageBuilderHeaderBar,
 	Modals,
 	BuilderBricks,
 	CollectionPseudoBrick,
@@ -100,7 +99,7 @@ const CollectionsDocumentsEditRoute: Component<
 				</div>
 			</Match>
 			<Match when={uiState.isSuccess()}>
-				<Header
+				<PageBuilderHeaderBar
 					mode={props.mode}
 					version={props.version}
 					state={{
@@ -109,36 +108,28 @@ const CollectionsDocumentsEditRoute: Component<
 						collectionName: docState.collectionName,
 						collectionSingularName: docState.collectionSingularName,
 						documentID: docState.documentId,
-						canNavigateToPublished: uiState.canNavigateToPublished,
-						showRevisionNavigation: uiState.showRevisionNavigation,
-					}}
-				/>
-				<ActionBar
-					mode={props.mode}
-					version={props.version}
-					state={{
-						collection: docState.collection,
 						document: docState.document,
 						ui: uiState,
 						autoSave: autoSave,
+						canNavigateToPublished: uiState.canNavigateToPublished,
+						showRevisionNavigation: uiState.showRevisionNavigation,
 					}}
 					actions={{
 						upsertDocumentAction: mutations.upsertDocumentAction,
 						publishDocumentAction: mutations.publishDocumentAction,
 					}}
 				/>
-
 				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden">
 					<Alert
 						style="layout"
 						alerts={[
 							{
-								type: "info",
+								type: "warning",
 								message: T()("locked_document_message"),
 								show: uiState.isBuilderLocked(),
 							},
 							{
-								type: "info",
+								type: "warning",
 								message: T()("collection_needs_migrating_message"),
 								show: uiState.collectionNeedsMigrating(),
 							},
@@ -173,7 +164,6 @@ const CollectionsDocumentsEditRoute: Component<
 						</div>
 					</div>
 				</div>
-
 				<Modals
 					hooks={{
 						mutations: mutations,

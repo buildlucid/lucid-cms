@@ -15,12 +15,11 @@ import Link from "@/components/Partials/Link";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useRevisionMutations } from "@/hooks/document/useRevisionMutations";
 import {
-	ActionBar,
-	Header,
 	RevisionsSidebar,
 	CollectionPseudoBrick,
 	FixedBricks,
 	BuilderBricks,
+	PageBuilderHeaderBar,
 } from "@/components/Groups/PageBuilder";
 
 const CollectionsDocumentsRevisionsRoute: Component = (props) => {
@@ -92,7 +91,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				</div>
 			</Match>
 			<Match when={revisionState.documentIsSuccess()}>
-				<Header
+				<PageBuilderHeaderBar
 					mode={"revisions"}
 					state={{
 						collection: revisionState.collection,
@@ -100,25 +99,16 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 						collectionName: revisionState.collectionName,
 						collectionSingularName: revisionState.collectionSingularName,
 						documentID: revisionState.documentId,
-
+						document: revisionState.document,
+						ui: uiState,
 						canNavigateToPublished: uiState.canNavigateToPublished,
 						showRevisionNavigation: uiState.showRevisionNavigation,
-					}}
-				/>
-
-				<ActionBar
-					mode="revisions"
-					state={{
-						collection: revisionState.collection,
-						document: revisionState.document,
 						selectedRevision: revisionState.documentId,
-						ui: uiState,
 					}}
 					actions={{
 						restoreRevisionAction: mutations.restoreRevisionAction,
 					}}
 				/>
-
 				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden relative">
 					<Show when={!revisionState.revisionDocument()}>
 						<div class="absolute inset-0 flex items-center justify-center bg-black/60 flex-col z-20">
@@ -144,12 +134,12 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 							style="layout"
 							alerts={[
 								{
-									type: "info",
+									type: "warning",
 									message: T()("locked_document_message"),
 									show: true,
 								},
 								{
-									type: "info",
+									type: "warning",
 									message: T()("collection_needs_migrating_message"),
 									show: uiState.collectionNeedsMigrating(),
 								},
