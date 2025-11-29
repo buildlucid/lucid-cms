@@ -1,11 +1,11 @@
 import {
 	type Component,
-	For,
 	createMemo,
 	createSignal,
 	onMount,
 	Show,
 	createEffect,
+	Index,
 } from "solid-js";
 import type { CFConfig, FieldError, FieldTypes } from "@types";
 import type { BrickData } from "@/store/brickStore";
@@ -113,32 +113,32 @@ export const BrickBody: Component<BrickProps> = (props) => {
 				{/* Tabs */}
 				<Show when={allTabs().length > 0}>
 					<div class="border-b border-border mb-6 flex flex-wrap">
-						<For each={allTabs()}>
-							{(tab) => (
+						<Index each={allTabs()}>
+							{(tab, index) => (
 								<TabField
-									tab={tab}
+									tab={tab()}
 									setActiveTab={setActiveTab}
 									getActiveTab={getActiveTab}
 								/>
 							)}
-						</For>
+						</Index>
 					</div>
 				</Show>
 				{/* Body */}
-				<For each={props.state.configFields}>
+				<Index each={props.state.configFields}>
 					{(config) => (
 						<DynamicField
 							state={{
 								fields: props.state.brick.fields,
 								brickIndex: props.state.brickIndex,
-								fieldConfig: config,
+								fieldConfig: config(),
 								activeTab: getActiveTab(),
 								fieldErrors: props.state.fieldErrors,
 								missingFieldColumns: props.state.missingFieldColumns,
 							}}
 						/>
 					)}
-				</For>
+				</Index>
 			</div>
 		</div>
 	);

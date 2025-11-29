@@ -1,6 +1,13 @@
 import T from "@/translations/index";
 import classNames from "classnames";
-import { type Component, For, createMemo, Show, Switch, Match } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	Show,
+	Switch,
+	Match,
+	Index,
+} from "solid-js";
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import brickStore from "@/store/brickStore";
@@ -97,19 +104,20 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 						}}
 					>
 						{({ dragDrop }) => (
-							<For each={groups()}>
+							<Index each={groups()}>
 								{(g, i) => (
 									<GroupBody
 										state={{
 											brickIndex: brickIndex(),
 											fieldConfig: fieldConfig(),
 											dragDropKey: dragDropKey(),
-											fields: g.fields,
-											ref: g.ref,
-											groupOpen: g.open,
+											group: g(),
+											// fields: g.fields,
+											// ref: g.ref,
+											// groupOpen: g.open,
 											dragDrop: dragDrop,
 											repeaterKey: fieldConfig().key,
-											groupIndex: i(),
+											groupIndex: i,
 											repeaterDepth: props.state.repeaterDepth,
 											parentRepeaterKey: props.state.parentRepeaterKey,
 											parentRef: props.state.groupRef,
@@ -118,7 +126,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 										}}
 									/>
 								)}
-							</For>
+							</Index>
 						)}
 					</DragDrop>
 				</Match>

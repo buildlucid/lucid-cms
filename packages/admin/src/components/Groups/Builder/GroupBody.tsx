@@ -1,7 +1,7 @@
 import T from "@/translations/index";
-import { type Component, For, createMemo, createSignal } from "solid-js";
+import { type Component, Index, createMemo, createSignal } from "solid-js";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
-import type { CFConfig, FieldResponse, GroupError } from "@types";
+import type { CFConfig, FieldGroupResponse, GroupError } from "@types";
 import classNames from "classnames";
 import { FaSolidGripLines, FaSolidCircleChevronUp } from "solid-icons/fa";
 import brickStore from "@/store/brickStore";
@@ -12,10 +12,11 @@ import helpers from "@/utils/helpers";
 interface GroupBodyProps {
 	state: {
 		brickIndex: number;
-		fields: FieldResponse[];
+		// fields: FieldResponse[];
 		fieldConfig: CFConfig<"repeater">;
-		ref: string;
-		groupOpen: boolean | null;
+		// ref: string;
+		// groupOpen: boolean | null;
+		group: FieldGroupResponse;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
 		dragDropKey: string;
@@ -31,11 +32,11 @@ interface GroupBodyProps {
 export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// State
-	const [getGroupOpen, setGroupOpen] = createSignal(!!props.state.groupOpen);
+	const [getGroupOpen, setGroupOpen] = createSignal(!!props.state.group.open);
 
 	// -------------------------------
 	// Memos
-	const ref = createMemo(() => props.state.ref);
+	const ref = createMemo(() => props.state.group.ref);
 	const brickIndex = createMemo(() => props.state.brickIndex);
 	const parentRef = createMemo(() => props.state.parentRef);
 	const parentRepeaterKey = createMemo(() => props.state.parentRepeaterKey);
@@ -43,14 +44,14 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const configChildrenFields = createMemo(() => props.state.fieldConfig.fields);
 	const nextRepeaterDepth = createMemo(() => props.state.repeaterDepth + 1);
 	const groupFields = createMemo(() => {
-		return props.state.fields;
+		return props.state.group.fields;
 	});
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
 	const groupError = createMemo(() => {
 		return props.state.groupErrors.find((g) => {
-			return g.ref === props.state.ref;
+			return g.ref === props.state.group.ref;
 		});
 	});
 	const fieldErrors = createMemo(() => {
@@ -76,7 +77,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	return (
 		<div
 			style={{
-				"view-transition-name": `group-item-${props.state.ref}`,
+				"view-transition-name": `group-item-${props.state.group.ref}`,
 			}}
 			data-dragkey={props.state.dragDropKey}
 			class={classNames("w-full mb-2.5 last:mb-0", {
@@ -191,12 +192,12 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				aria-labelledby={`accordion-header-${ref()}`}
 			>
 				<div class="p-4">
-					<For each={configChildrenFields()}>
-						{(config) => (
+					<Index each={configChildrenFields()}>
+						{(config, index) => (
 							<DynamicField
 								state={{
 									brickIndex: brickIndex(),
-									fieldConfig: config,
+									fieldConfig: config(),
 									fields: groupFields(),
 									groupRef: ref(),
 									repeaterKey: repeaterKey(),
@@ -206,7 +207,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 								}}
 							/>
 						)}
-					</For>
+					</Index>
 				</div>
 			</div>
 		</div>

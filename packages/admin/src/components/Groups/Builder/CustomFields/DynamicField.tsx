@@ -17,7 +17,14 @@ import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import type { CFConfig, FieldError, FieldResponse, FieldTypes } from "@types";
 import classNames from "classnames";
-import { type Component, For, Match, Show, Switch, createMemo } from "solid-js";
+import {
+	type Component,
+	Index,
+	Match,
+	Show,
+	Switch,
+	createMemo,
+} from "solid-js";
 
 interface DynamicFieldProps {
 	state: {
@@ -135,12 +142,12 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								"invisible h-0 opacity-0": !activeTab(),
 							})}
 						>
-							<For each={(fieldConfig() as CFConfig<"tab">).fields}>
+							<Index each={(fieldConfig() as CFConfig<"tab">).fields}>
 								{(config) => (
 									<DynamicField
 										state={{
 											brickIndex: props.state.brickIndex,
-											fieldConfig: config,
+											fieldConfig: config(),
 											fields: props.state.fields,
 											activeTab: props.state.activeTab,
 											groupRef: props.state.groupRef,
@@ -151,7 +158,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 										}}
 									/>
 								)}
-							</For>
+							</Index>
 						</div>
 					</Match>
 					<Match when={fieldConfig().type === "repeater"}>
