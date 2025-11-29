@@ -108,13 +108,14 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					"p-4 pt-0": props.options.padding === "16",
 					"p-6": props.options.padding === "24",
 					"pt-4!": props.options.bleedTop,
+					"flex flex-col gap-4": allTabs().length === 0,
 				})}
 			>
 				{/* Tabs */}
 				<Show when={allTabs().length > 0}>
 					<div class="border-b border-border mb-6 flex flex-wrap">
 						<Index each={allTabs()}>
-							{(tab, index) => (
+							{(tab) => (
 								<TabField
 									tab={tab()}
 									setActiveTab={setActiveTab}

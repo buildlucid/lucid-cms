@@ -1,4 +1,4 @@
-import { type Component, createMemo, For, createSignal } from "solid-js";
+import { type Component, createMemo, For, createSignal, Index } from "solid-js";
 import type { CollectionBrickConfig, CollectionResponse } from "@types";
 import classNames from "classnames";
 import { FaSolidCircleChevronUp, FaSolidShield } from "solid-icons/fa";
@@ -29,17 +29,17 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 	// Render
 	return (
 		<ul>
-			<For each={fixedBricks()}>
+			<Index each={fixedBricks()}>
 				{(brick) => (
 					<FixedBrickRow
-						brick={brick}
+						brick={brick()}
 						brickConfig={props.brickConfig}
 						collectionMigrationStatus={props.collectionMigrationStatus}
 						collectionKey={props.collectionKey}
 						documentId={props.documentId}
 					/>
 				)}
-			</For>
+			</Index>
 		</ul>
 	);
 };
@@ -53,10 +53,6 @@ interface FixedBrickRowProps {
 }
 
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
-	// -------------------------------
-	// State
-	const [getBrickOpen, setBrickOpen] = createSignal(!!props.brick.open);
-
 	// ------------------------------
 	// Memos
 	const config = createMemo(() => {
@@ -81,35 +77,14 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 	});
 
 	// -------------------------------
-	// Functions
-	const toggleDropdown = () => {
-		setBrickOpen(!getBrickOpen());
-		brickStore.get.toggleBrickOpen(brickIndex());
-	};
-
+	// Render
 	return (
-		<li class="w-full border-b border-border focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base">
+		<li class="w-full border-b border-border">
 			{/* Header */}
 			<div
-				class={classNames(
-					"flex justify-between cursor-pointer pt-4 md:pt-6 px-4 md:px-6 focus:outline-hidden",
-					{
-						"pb-0": getBrickOpen(),
-						"pb-4 md:pb-6": !getBrickOpen(),
-					},
-				)}
-				onClick={toggleDropdown}
-				onKeyDown={(e) => {
-					if (e.key === "Enter") {
-						toggleDropdown();
-					}
-				}}
-				id={`fixed-brick-${props.brick.key}`}
-				aria-expanded={getBrickOpen()}
-				aria-controls={`fixed-brick-content-${props.brick.key}`}
-				// biome-ignore lint/a11y/useSemanticElements: <explanation>
-				role="button"
-				tabIndex="0"
+				class={
+					"flex justify-between pt-4 md:pt-6 px-4 md:px-6 focus:outline-hidden"
+				}
 			>
 				<div class="flex items-center">
 					<FaSolidShield class="text-white text-lg mr-2.5" />
@@ -120,30 +95,14 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 						})}
 					</h2>
 				</div>
-				<div class="flex gap-2">
-					<BrickImagePreviewButton brickConfig={config()} />
-					<button
-						type="button"
-						tabIndex="-1"
-						class={classNames(
-							"text-2xl text-icon-base hover:text-icon-hover transition-all duration-200",
-							{
-								"transform rotate-180": getBrickOpen(),
-							},
-						)}
-					>
-						<FaSolidCircleChevronUp size={16} />
-					</button>
-				</div>
 			</div>
 			{/* Body */}
 			<BrickBody
 				state={{
-					open: getBrickOpen(),
+					open: true,
 					brick: props.brick,
 					brickIndex: brickIndex(),
 					configFields: config()?.fields || [],
-					labelledby: `fixed-brick-${props.brick.key}`,
 					fieldErrors: fieldErrors(),
 					missingFieldColumns: missingFieldColumns(),
 					collectionKey: props.collectionKey,

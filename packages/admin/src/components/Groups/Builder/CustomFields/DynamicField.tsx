@@ -117,7 +117,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classNames("w-full mb-4 last:mb-0 relative", {
+			class={classNames("w-full relative", {
 				"mb-0!": !activeTab(),
 				"invisible h-0 opacity-0 mb-0!":
 					fieldConfig().type !== "tab"
@@ -137,10 +137,13 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 				<Switch>
 					<Match when={fieldConfig().type === "tab"}>
 						<div
-							class={classNames("transition-opacity duration-200 ease-in-out", {
-								"visible h-full opacity-100": activeTab(),
-								"invisible h-0 opacity-0": !activeTab(),
-							})}
+							class={classNames(
+								"transition-opacity duration-200 ease-in-out flex flex-col gap-4",
+								{
+									"visible h-full opacity-100": activeTab(),
+									"invisible h-0 opacity-0": !activeTab(),
+								},
+							)}
 						>
 							<Index each={(fieldConfig() as CFConfig<"tab">).fields}>
 								{(config) => (
@@ -175,7 +178,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							}}
 						/>
 					</Match>
-
 					<Match when={fieldConfig().type === "text"}>
 						<InputField
 							type="text"
