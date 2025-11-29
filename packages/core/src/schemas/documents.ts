@@ -11,8 +11,6 @@ import {
 	fieldResponseSchema,
 } from "./collection-fields.js";
 import { documentVersionResponseSchema } from "./document-versions.js";
-import { mediaResponseSchema } from "./media.js";
-import { userResponseSchema } from "./users.js";
 import type { ControllerSchema } from "../types.js";
 
 const documentResponseUserSchema = z.object({

@@ -67,6 +67,7 @@ const CollectionsDocumentsEditRoute: Component<
 			docState.collection()?.config.useTranslations || false,
 		);
 		brickStore.get.setBricks(docState.document(), docState.collection());
+		brickStore.get.setRefs(docState.document());
 		brickStore.set("locked", uiState.isBuilderLocked());
 	};
 

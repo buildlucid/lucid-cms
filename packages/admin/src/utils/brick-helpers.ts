@@ -3,10 +3,13 @@ import type {
 	CFConfig,
 	FieldTypes,
 	FieldResponse,
-	FieldResponseMeta,
 	FieldError,
 	BrickError,
 	FieldAltResponse,
+	FieldRefs,
+	MediaRef,
+	DocumentRef,
+	UserRef,
 } from "@types";
 
 const findFieldRecursive = (props: {
@@ -111,24 +114,32 @@ const getFieldValue = <T>(props: {
 	return props.fieldData.value as T;
 };
 
-const getFieldMeta = <T extends FieldResponseMeta>(props: {
-	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
-	fieldData?: FieldResponse;
-	contentLocale: string;
-	collectionTranslations?: boolean;
-}) => {
-	if (!props.fieldData) return undefined;
+/**
+ * Returns the ref for a given field value and type
+ */
+const getFieldRef = <T extends FieldRefs>(props: {
+	fieldType: "media" | "document" | "user";
+	fieldValue: number | null | undefined;
+	collection?: string;
+}): T | undefined => {
+	if (props.fieldValue === null || props.fieldValue === undefined)
+		return undefined;
 
-	const collectionTranslations =
-		props.collectionTranslations ?? brickStore.get.collectionTranslations;
+	const refs = brickStore.get.refs[props.fieldType] as T[] | undefined;
+	if (!refs) return undefined;
 
-	if (
-		props.fieldConfig.config.useTranslations === true &&
-		collectionTranslations === true
-	) {
-		return (props.fieldData.meta as Record<string, T>)?.[props.contentLocale];
-	}
-	return props.fieldData.meta as T;
+	return refs.find((ref) => {
+		if (!ref) return false;
+
+		if (props.fieldType === "document" && props.collection) {
+			return (
+				ref.id === props.fieldValue &&
+				(ref as DocumentRef).collectionKey === props.collection
+			);
+		}
+
+		return ref.id === props.fieldValue;
+	}) as T | undefined;
 };
 
 /**
@@ -196,7 +207,7 @@ const brickHelpers = {
 	getUpsertBricks,
 	customFieldId,
 	getFieldValue,
-	getFieldMeta,
+	getFieldRef,
 	hasErrorsOnOtherLocale,
 	objectifyFields,
 };

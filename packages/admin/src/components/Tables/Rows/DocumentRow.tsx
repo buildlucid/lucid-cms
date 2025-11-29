@@ -5,7 +5,7 @@ import type {
 	DocumentResponse,
 	CollectionResponse,
 	CFConfig,
-	UserResMeta,
+	UserRef,
 	FieldTypes,
 } from "@types";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
@@ -106,13 +106,17 @@ const DocumentDynamicColumns: Component<{
 			collectionTranslations: props.collectionTranslations,
 		});
 	});
-	const fieldMeta = createMemo(() => {
-		return brickHelpers.getFieldMeta({
-			fieldData: fieldData(),
-			fieldConfig: props.field,
-			contentLocale: contentLocale(),
-			collectionTranslations: props.collectionTranslations,
-		});
+	const fieldRef = createMemo(() => {
+		// Only get ref for user fields (could extend to media/document if needed)
+		if (props.field.type !== "user") return undefined;
+
+		const value = fieldValue() as number | null | undefined;
+		if (value === null || value === undefined) return undefined;
+
+		const refs = props.document.refs?.user as UserRef[] | undefined;
+		if (!refs) return undefined;
+
+		return refs.find((ref) => ref?.id === value);
 	});
 
 	// ----------------------------------
@@ -154,7 +158,7 @@ const DocumentDynamicColumns: Component<{
 			</Match>
 			<Match when={fieldData()?.type === "user"}>
 				<AuthorCol
-					user={fieldMeta() as UserResMeta}
+					user={fieldRef() as UserRef}
 					options={{ include: props?.include[props.index] }}
 				/>
 			</Match>

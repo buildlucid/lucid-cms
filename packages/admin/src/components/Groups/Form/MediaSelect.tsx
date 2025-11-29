@@ -1,11 +1,13 @@
-import type {
-	ErrorResult,
-	FieldError,
-	MediaResMeta,
-	MediaResponse,
-} from "@types";
+import type { ErrorResult, FieldError, MediaRef, MediaResponse } from "@types";
 import classNames from "classnames";
-import { type Component, createMemo, Match, Show, Switch } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import Button from "@/components/Partials/Button";
@@ -19,11 +21,8 @@ import helpers from "@/utils/helpers";
 interface MediaSelectProps {
 	id: string;
 	value: number | undefined;
-	meta: NonNullable<MediaResMeta> | undefined;
-	onChange: (
-		_value: number | null,
-		_meta: NonNullable<MediaResMeta> | null,
-	) => void;
+	ref: Accessor<MediaRef | undefined>;
+	onChange: (_value: number | null, _ref: MediaRef | null) => void;
 	extensions?: string[];
 	type?: string;
 	copy?: {
@@ -130,15 +129,17 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							<div class="p-2 flex items-center justify-center relative">
 								<div class="w-full max-w-xs rounded-md overflow-hidden border border-border">
 									<Show
-										when={props.meta?.isDeleted || props.meta?.public === false}
+										when={
+											props.ref()?.isDeleted || props.ref()?.public === false
+										}
 									>
 										<div class="absolute top-2 right-2 z-10 gap-2 flex items-center">
-											<Show when={props.meta?.isDeleted}>
+											<Show when={props.ref()?.isDeleted}>
 												<Pill theme="red" tooltip={T()("deleted_pill_tooltip")}>
 													{T()("deleted")}
 												</Pill>
 											</Show>
-											<Show when={!props.meta?.public}>
+											<Show when={!props.ref()?.public}>
 												<Pill theme="red" tooltip={T()("private_pill_tooltip")}>
 													{T()("private")}
 												</Pill>
@@ -148,16 +149,16 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									<AspectRatio
 										ratio="16:9"
 										innerClass={classNames({
-											"opacity-50": props.meta?.isDeleted,
+											"opacity-50": props.ref()?.isDeleted,
 										})}
 									>
 										<MediaPreview
 											media={{
-												url: props.meta?.url || "",
-												type: props.meta?.type || "image",
+												url: props.ref()?.url || "",
+												type: props.ref()?.type || "image",
 											}}
 											alt={helpers.getRecordTranslation(
-												props.meta?.alt,
+												props.ref()?.alt,
 												contentLocale(),
 											)}
 											richPreview={true}

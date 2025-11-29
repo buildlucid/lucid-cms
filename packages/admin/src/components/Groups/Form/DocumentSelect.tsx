@@ -1,12 +1,12 @@
 import T from "@/translations";
-import { type Component, For, Match, Switch } from "solid-js";
+import { type Accessor, type Component, For, Match, Switch } from "solid-js";
 import classNames from "classnames";
 import { FaSolidXmark, FaSolidPen } from "solid-icons/fa";
 import type {
 	ErrorResult,
 	FieldError,
 	DocumentResponse,
-	DocumentResMeta,
+	DocumentRef,
 } from "@types";
 import documentSelectStore from "@/store/forms/documentSelectStore";
 import Button from "@/components/Partials/Button";
@@ -17,8 +17,8 @@ interface DocumentSelectProps {
 	id: string;
 	collection: string;
 	value: number | undefined;
-	onChange: (value: number | null, meta: DocumentResMeta | null) => void;
-	meta: DocumentResMeta | undefined;
+	onChange: (value: number | null, ref: DocumentRef | null) => void;
+	ref: Accessor<DocumentRef | undefined>;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -83,7 +83,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 					</Match>
 					<Match when={typeof props.value === "number"}>
 						{/* <div class="border border-border rounded-md p-4 bg-card-base mb-2.5">
-							<For each={Object.values(props.meta?.fields || {})}>
+							<For each={Object.values(props.ref()?.fields || {})}>
 								{(field, i) => {
 									if (field.type === "tab") return null;
 									if (field.type === "repeater") return null;

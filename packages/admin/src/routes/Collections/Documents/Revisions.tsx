@@ -55,6 +55,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 			"collectionTranslations",
 			revisionState.collection()?.config.useTranslations || false,
 		);
+		brickStore.get.setRefs(revisionState.document());
 		brickStore.get.setBricks(
 			revisionState.document(),
 			revisionState.collection(),

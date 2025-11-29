@@ -5,12 +5,7 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type {
-	CFConfig,
-	FieldResponse,
-	FieldError,
-	DocumentResMeta,
-} from "@types";
+import type { CFConfig, FieldResponse, FieldError, DocumentRef } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -35,9 +30,6 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 	// -------------------------------
 	// State
 	const [getValue, setValue] = createSignal<number | undefined>();
-	const [getMeta, setMeta] = createSignal<
-		NonNullable<DocumentResMeta> | undefined
-	>();
 
 	// -------------------------------
 	// Memos
@@ -51,11 +43,11 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			contentLocale: props.state.contentLocale,
 		});
 	});
-	const fieldMeta = createMemo(() => {
-		return brickHelpers.getFieldMeta<NonNullable<DocumentResMeta>>({
-			fieldData: fieldData(),
-			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+	const fieldRef = createMemo(() => {
+		return brickHelpers.getFieldRef<DocumentRef>({
+			fieldType: "document",
+			fieldValue: fieldValue(),
+			collection: props.state.fieldConfig.collection,
 		});
 	});
 	const isDisabled = createMemo(
@@ -66,7 +58,6 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		setValue(fieldValue());
-		setMeta(fieldMeta());
 	});
 
 	// -------------------------------
@@ -80,9 +71,10 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			})}
 			collection={props.state.fieldConfig.collection}
 			value={getValue()}
-			meta={getMeta()}
-			onChange={(value, meta) => {
+			ref={fieldRef}
+			onChange={(value, ref) => {
 				batch(() => {
+					if (ref) brickStore.get.addRef("document", ref);
 					brickStore.get.setFieldValue({
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
@@ -90,11 +82,9 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: !value ? null : Number(value),
-						meta: meta,
 						contentLocale: props.state.contentLocale,
 					});
 					setValue(value ?? undefined);
-					setMeta(meta ?? undefined);
 				});
 			}}
 			copy={{

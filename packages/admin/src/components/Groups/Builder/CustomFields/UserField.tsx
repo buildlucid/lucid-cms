@@ -5,7 +5,7 @@ import {
 	createMemo,
 	createEffect,
 } from "solid-js";
-import type { CFConfig, FieldResponse, FieldError } from "@types";
+import type { CFConfig, FieldResponse, FieldError, UserRef } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -43,6 +43,12 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			contentLocale: props.state.contentLocale,
 		});
 	});
+	// const fieldRef = createMemo(() => {
+	// 	return brickHelpers.getFieldRef<UserRef>({
+	// 		fieldType: "user",
+	// 		fieldValue: fieldValue(),
+	// 	});
+	// });
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);

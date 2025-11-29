@@ -7,11 +7,14 @@ import type {
 	DocumentResponse,
 	CollectionResponse,
 	FieldResponseValue,
-	FieldResponseMeta,
+	FieldRefs,
 	CFConfig,
 	CollectionBrickConfig,
 	FieldTypes,
 	BrickError,
+	DocumentRef,
+	MediaRef,
+	UserRef,
 } from "@types";
 import type { FocusState } from "@/hooks/useFocusPreservation";
 
@@ -31,6 +34,7 @@ type BrickStoreT = {
 	documentMutated: boolean;
 	autoSaveCounter: number;
 	locked: boolean;
+	refs: Partial<Record<FieldTypes, FieldRefs[]>>;
 	imagePreview: {
 		open: boolean;
 		data:
@@ -65,7 +69,6 @@ type BrickStoreT = {
 		repeaterKey?: string;
 		ref?: string;
 		value: FieldResponseValue;
-		meta?: FieldResponseMeta;
 		contentLocale: string;
 	}) => void;
 	addField: (params: {
@@ -105,6 +108,8 @@ type BrickStoreT = {
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 	}) => void;
+	setRefs: (document?: DocumentResponse) => void;
+	addRef: (fieldType: "media" | "document" | "user", ref: FieldRefs) => void;
 };
 
 const [get, set] = createStore<BrickStoreT>({
@@ -115,6 +120,7 @@ const [get, set] = createStore<BrickStoreT>({
 	documentMutated: false,
 	autoSaveCounter: 0,
 	collectionTranslations: false,
+	refs: {},
 	imagePreview: {
 		open: false,
 		data: undefined,
@@ -127,10 +133,14 @@ const [get, set] = createStore<BrickStoreT>({
 		set("documentMutated", false);
 		set("autoSaveCounter", 0);
 		set("collectionTranslations", false);
+		set("refs", {});
 		set("focusState", null);
 	},
 	// Bricks
 	setBricks(document, collection) {
+		// Set the refs from the document
+		set("refs", document?.refs || {});
+
 		set(
 			"bricks",
 			produce((draft) => {
@@ -243,15 +253,10 @@ const [get, set] = createStore<BrickStoreT>({
 					get.collectionTranslations === true
 				) {
 					if (!field.translations) field.translations = {};
-					if (!field.meta) field.meta = {};
 
 					field.translations[params.contentLocale] = params.value;
-					(field.meta as Record<string, FieldResponseMeta>)[
-						params.contentLocale
-					] = params.meta || undefined;
 				} else {
 					field.value = params.value;
-					field.meta = params.meta || undefined;
 				}
 			}),
 		);
@@ -459,6 +464,46 @@ const [get, set] = createStore<BrickStoreT>({
 			}),
 		);
 		set("documentMutated", true);
+	},
+	setRefs(document) {
+		set("refs", document?.refs || {});
+	},
+	addRef(fieldType, ref) {
+		set(
+			"refs",
+			produce((draft) => {
+				if (!draft[fieldType]) {
+					draft[fieldType] = [];
+				}
+
+				const refs = draft[fieldType];
+
+				const existingIndex = refs.findIndex((existing) => {
+					if (!existing || !ref) return false;
+
+					if (fieldType === "document") {
+						const existingDoc = existing as DocumentRef;
+						const refDoc = ref as DocumentRef;
+						if (!existingDoc || !refDoc) return false;
+						return (
+							existingDoc.collectionKey === refDoc.collectionKey &&
+							existingDoc.id === refDoc.id
+						);
+					}
+
+					const existingItem = existing;
+					const refItem = ref;
+					if (!existingItem || !refItem) return false;
+					return existingItem.id === refItem.id;
+				});
+
+				if (existingIndex !== -1) {
+					refs[existingIndex] = ref;
+				} else {
+					refs.push(ref);
+				}
+			}),
+		);
 	},
 });
 

@@ -1,10 +1,10 @@
 import { type Component, Switch, Match } from "solid-js";
-import type { UserResMeta } from "@types";
+import type { UserRef } from "@types";
 import { Td } from "@/components/Groups/Table";
 import UserDisplay from "@/components/Partials/UserDisplay";
 
 interface AuthorColProps {
-	user: UserResMeta;
+	user: UserRef;
 	options?: {
 		include?: boolean;
 		padding?: "16" | "24";

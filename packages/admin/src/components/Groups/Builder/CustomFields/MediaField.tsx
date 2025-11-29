@@ -5,7 +5,7 @@ import {
 	batch,
 	createEffect,
 } from "solid-js";
-import type { CFConfig, MediaResMeta, FieldResponse, FieldError } from "@types";
+import type { CFConfig, MediaRef, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -30,9 +30,6 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	// -------------------------------
 	// State
 	const [getValue, setValue] = createSignal<number | undefined>();
-	const [getMeta, setMeta] = createSignal<
-		NonNullable<MediaResMeta> | undefined
-	>();
 
 	// -------------------------------
 	// Memos
@@ -46,11 +43,10 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			contentLocale: props.state.contentLocale,
 		});
 	});
-	const fieldMeta = createMemo(() => {
-		return brickHelpers.getFieldMeta<NonNullable<MediaResMeta>>({
-			fieldData: fieldData(),
-			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+	const fieldRef = createMemo(() => {
+		return brickHelpers.getFieldRef<MediaRef>({
+			fieldType: "media",
+			fieldValue: fieldValue(),
 		});
 	});
 	const isDisabled = createMemo(
@@ -61,7 +57,6 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		setValue(fieldValue());
-		setMeta(fieldMeta());
 	});
 
 	// -------------------------------
@@ -74,9 +69,10 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 				groupRef: props.state.groupRef,
 			})}
 			value={getValue()}
-			meta={getMeta()}
-			onChange={(value, meta) => {
+			ref={fieldRef}
+			onChange={(value, ref) => {
 				batch(() => {
+					if (ref) brickStore.get.addRef("media", ref);
 					brickStore.get.setFieldValue({
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
@@ -84,11 +80,9 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: value,
-						meta: meta,
 						contentLocale: props.state.contentLocale,
 					});
 					setValue(value ?? undefined);
-					setMeta(meta ?? undefined);
 				});
 			}}
 			copy={{
