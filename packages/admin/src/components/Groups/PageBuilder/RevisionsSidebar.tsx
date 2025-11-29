@@ -32,7 +32,7 @@ export const RevisionsSidebar: Component<{
 	return (
 		<aside
 			class={
-				"w-full lg:max-w-[300px] flex flex-col justify-between bg-card-base border-b lg:border-b-0 lg:border-l border-border"
+				"w-full lg:max-w-[300px] flex flex-col justify-between bg-background-base border-b lg:border-b-0 lg:border-l border-border"
 			}
 		>
 			<div>

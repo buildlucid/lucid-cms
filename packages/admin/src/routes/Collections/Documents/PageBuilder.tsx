@@ -121,7 +121,7 @@ const CollectionsDocumentsEditRoute: Component<
 				/>
 				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden">
 					<Alert
-						style="layout"
+						style="pill"
 						alerts={[
 							{
 								type: "warning",
@@ -135,7 +135,7 @@ const CollectionsDocumentsEditRoute: Component<
 							},
 						]}
 					/>
-					<div class="w-full flex grow">
+					<div class="w-full flex grow h-full">
 						<div class="w-full flex flex-col">
 							<CollectionPseudoBrick
 								fields={docState.collection()?.fields || []}

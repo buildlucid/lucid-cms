@@ -8,7 +8,7 @@ import {
 } from "solid-icons/fa";
 
 interface AlertProps {
-	style: "layout" | "block";
+	style: "layout" | "block" | "pill";
 	class?: string;
 	roundedBottom?: boolean;
 	alerts: Array<{
@@ -31,9 +31,10 @@ const Alert: Component<AlertProps> = (props) => {
 		<Show when={showAlerts()}>
 			<div
 				class={classNames(
-					"w-full",
 					{
-						"mb-4 last:mb-0": props.style === "block",
+						"w-full mb-4 last:mb-0": props.style === "block",
+						"fixed bottom-6 left-[220px] right-0 z-50 flex justify-center gap-4 pointer-events-none px-4":
+							props.style === "pill",
 					},
 					props.class,
 				)}
@@ -46,13 +47,17 @@ const Alert: Component<AlertProps> = (props) => {
 									"mb-2 last:mb-0 bg-background-base border rounded-md p-4":
 										props.style === "block",
 									"border-b md:px-6 px-4 py-4": props.style === "layout",
+									"rounded-full px-4 py-2 shadow-lg pointer-events-auto":
+										props.style === "pill",
 									"bg-warning-base text-warning-contrast":
-										type === "warning" && props.style === "layout",
+										type === "warning" &&
+										(props.style === "layout" || props.style === "pill"),
 									"bg-error-base text-error-contrast":
-										type === "error" && props.style === "layout",
+										type === "error" &&
+										(props.style === "layout" || props.style === "pill"),
 									"bg-primary-base text-primary-contrast":
 										(type === "success" || type === "info") &&
-										props.style === "layout",
+										(props.style === "layout" || props.style === "pill"),
 									"rounded-b-md": props.roundedBottom,
 								})}
 							>
@@ -70,11 +75,13 @@ const Alert: Component<AlertProps> = (props) => {
 
 											"bg-primary-contrast text-primary-base":
 												(type === "success" || type === "info") &&
-												props.style === "layout",
+												(props.style === "layout" || props.style === "pill"),
 											"bg-error-contrast text-error-base":
-												type === "error" && props.style === "layout",
+												type === "error" &&
+												(props.style === "layout" || props.style === "pill"),
 											"bg-warning-contrast text-warning-base":
-												type === "warning" && props.style === "layout",
+												type === "warning" &&
+												(props.style === "layout" || props.style === "pill"),
 										},
 									)}
 								>

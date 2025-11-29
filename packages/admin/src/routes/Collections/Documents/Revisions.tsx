@@ -111,8 +111,8 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				/>
 				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden relative">
 					<Show when={!revisionState.revisionDocument()}>
-						<div class="absolute inset-0 flex items-center justify-center bg-black/60 flex-col z-20">
-							<div class="w-full max-w-xl px-4 py-4 text-center flex flex-col items-center">
+						<div class="absolute inset-0 flex items-center justify-center bg-black/80 flex-col z-20">
+							<div class="w-full max-w-xl px-4 md:p-6 text-center flex flex-col items-center bg-background-base border border-border rounded-md">
 								<h2 class="mb-2.5">{T()("no_revisions_found")}</h2>
 								<p class="mb-5">{T()("no_revisions_found_message")}</p>
 								<Link
@@ -121,7 +121,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 										useDrafts: revisionState.collection()?.config.useDrafts,
 										documentId: revisionState.documentId(),
 									})}
-									theme="primary"
+									theme="border-outline"
 									size="medium"
 								>
 									{T()("back_to_document")}
@@ -131,12 +131,12 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 					</Show>
 					<div class="flex flex-col h-full">
 						<Alert
-							style="layout"
+							style="pill"
 							alerts={[
 								{
 									type: "warning",
 									message: T()("locked_document_message"),
-									show: true,
+									show: !!revisionState.revisionDocument(),
 								},
 								{
 									type: "warning",

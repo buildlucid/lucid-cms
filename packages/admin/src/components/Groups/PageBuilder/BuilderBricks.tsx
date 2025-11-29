@@ -54,7 +54,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 	// Render
 	return (
 		<Show when={props.brickConfig.length > 0}>
-			<div class="p-6">
+			<div class="p-6 h-full">
 				<div class="flex justify-between mb-4">
 					<div class="flex items-center">
 						<FaSolidLayerGroup class="text-white text-xl mr-2.5" />
@@ -74,7 +74,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 				</div>
 				<Switch>
 					<Match when={builderBricks().length === 0}>
-						<div class="p-4 md:p-6 border border-dashed border-border rounded-md min-h-60 flex items-center justify-center">
+						<div class="p-4 md:p-6 border border-dashed border-border rounded-md min-h-80 grow h-[calc(100%-52px)] flex items-center justify-center">
 							<div class="max-w-sm text-center mx-auto">
 								<h3 class="mb-1">{T()("builder_area_title")}</h3>
 								<p class="text-sm">{T()("builder_area_empty")}</p>
