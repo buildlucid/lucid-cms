@@ -103,15 +103,7 @@ export function useRevisionsState() {
 		if (versionId() !== undefined) return false;
 		if (collectionQuery.isFetched === false) return false;
 
-		return (
-			contentLocale() !== undefined &&
-			documentId() !== undefined &&
-			collection()?.config.useDrafts !== undefined
-		);
-	});
-
-	const fallbackVersionType = createMemo(() => {
-		return collection()?.config.useDrafts ? "draft" : "published";
+		return contentLocale() !== undefined && documentId() !== undefined;
 	});
 
 	const fallbackDocumentQuery = api.documents.useGetSingle({
@@ -119,7 +111,7 @@ export function useRevisionsState() {
 			location: {
 				collectionKey: collectionKey,
 				id: documentId,
-				version: fallbackVersionType,
+				version: "latest",
 			},
 			include: {
 				bricks: true,

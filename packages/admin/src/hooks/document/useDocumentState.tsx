@@ -8,7 +8,7 @@ import api from "@/services/api";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";
-	version: "draft" | "published";
+	version: "latest" | string;
 }) {
 	const params = useParams();
 	const navigate = useNavigate();

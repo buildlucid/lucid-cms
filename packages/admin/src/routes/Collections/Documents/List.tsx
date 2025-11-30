@@ -5,7 +5,6 @@ import {
 	createMemo,
 	createEffect,
 	createSignal,
-	Show,
 } from "solid-js";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -24,8 +23,6 @@ import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
 import { DocumentsList } from "@/components/Groups/Content";
 import Alert from "@/components/Blocks/Alert";
-import { Switch } from "@/components/Groups/Form";
-import type { DocumentVersionType } from "@types";
 import { useQueryClient } from "@tanstack/solid-query";
 
 const CollectionsDocumentsListRoute: Component = () => {
@@ -37,8 +34,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const searchParams = useSearchParamsLocation(undefined, {
 		manualSettled: true,
 	});
-	const [getStatus, setStatus] =
-		createSignal<Exclude<DocumentVersionType, "revision">>("draft");
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 
 	// ----------------------------------
@@ -86,7 +81,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (collection.isSuccess) {
-			setStatus(collection.data.data.config.useDrafts ? "draft" : "published");
 			if (collection.data.data.mode === "single") {
 				navigate("/admin/collections");
 			}
@@ -143,7 +137,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey(),
-									useDrafts: collection.data?.data.config.useDrafts,
 								}),
 								permission: userStore.get.hasPermission(["create_content"])
 									.some,
@@ -211,24 +204,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 											}
 										}
 									})}
-									custom={
-										<Show when={collection.data?.data.config.useDrafts}>
-											<Switch
-												id="status"
-												value={getStatus() === "published"}
-												onChange={(value) => {
-													setStatus(value ? "published" : "draft");
-												}}
-												name={"status"}
-												copy={{
-													true: T()("published"),
-													false: T()("draft"),
-												}}
-												noMargin
-												inline
-											/>
-										</Show>
-									}
 									perPage={[]}
 								/>
 							),
@@ -244,7 +219,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 					searchParams: searchParams,
 					isLoading: collection.isFetching,
 					collectionIsSuccess: collectionIsSuccess,
-					status: getStatus,
 					showingDeleted: showingDeleted,
 				}}
 			/>

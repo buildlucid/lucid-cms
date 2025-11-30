@@ -153,12 +153,10 @@ export const NavigationSidebar: Component = () => {
 														collection.documentId
 															? getDocumentRoute("edit", {
 																	collectionKey: collection.key,
-																	useDrafts: collection.config.useDrafts,
 																	documentId: collection.documentId,
 																})
 															: getDocumentRoute("create", {
 																	collectionKey: collection.key,
-																	useDrafts: collection.config.useDrafts,
 																})
 													}
 													icon="collection-single"

@@ -33,16 +33,6 @@ interface DocumentRowProps extends TableRowProps {
 
 const DocumentRow: Component<DocumentRowProps> = (props) => {
 	// ----------------------------------
-	// Memos
-	const isPublished = createMemo(() => {
-		if (props.document.status === "published") return true;
-		if (props.collection.config.useDrafts) {
-			return typeof props.document.version?.published?.id === "number";
-		}
-		return true; // if not using drafts and a row exists, it is published
-	});
-
-	// ----------------------------------
 	// Render
 	return (
 		<Tr
@@ -70,11 +60,6 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 					);
 				}}
 			</For>
-			<PillCol
-				text={isPublished() ? T()("published") : T()("draft")}
-				theme={isPublished() ? "primary" : "grey"}
-				options={{ include: props?.include[props.fieldInclude.length] }}
-			/>
 			<DateCol
 				date={props.document.updatedAt}
 				options={{ include: props?.include[props.fieldInclude.length] }}

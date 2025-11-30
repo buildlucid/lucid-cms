@@ -22,8 +22,8 @@ export function useRevisionMutations(props: {
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
-					useDrafts: props.collection()?.config.useDrafts,
 					documentId: props.documentId(),
+					status: "latest",
 				}),
 			);
 		},

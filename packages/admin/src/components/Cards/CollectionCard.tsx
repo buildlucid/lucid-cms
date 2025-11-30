@@ -26,12 +26,10 @@ const CollectionCard: Component<{
 			if (props.collection.documentId)
 				return getDocumentRoute("edit", {
 					collectionKey: props.collection.key,
-					useDrafts: props.collection.config.useDrafts,
 					documentId: props.collection.documentId,
 				});
 			return getDocumentRoute("create", {
 				collectionKey: props.collection.key,
-				useDrafts: props.collection.config.useDrafts,
 			});
 		}
 		return `/admin/collections/${props.collection.key}`;

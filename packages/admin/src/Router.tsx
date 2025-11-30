@@ -62,43 +62,21 @@ const AppRouter: Component = () => {
 				/>
 				{/* Page builder */}
 				<Route
-					path="/collections/:collectionKey/draft/create"
+					path="/collections/:collectionKey/latest/create"
 					component={() => (
 						<PermissionGuard permission={"read_content"}>
 							<CollectionDocumentPageBuilderRoute
 								mode="create"
-								version="draft"
+								version="latest"
 							/>
 						</PermissionGuard>
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/published/create"
+					path="/collections/:collectionKey/:versionType/:documentId"
 					component={() => (
 						<PermissionGuard permission={"read_content"}>
-							<CollectionDocumentPageBuilderRoute
-								mode="create"
-								version="published"
-							/>
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/collections/:collectionKey/draft/:documentId"
-					component={() => (
-						<PermissionGuard permission={"read_content"}>
-							<CollectionDocumentPageBuilderRoute mode="edit" version="draft" />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/collections/:collectionKey/published/:documentId"
-					component={() => (
-						<PermissionGuard permission={"read_content"}>
-							<CollectionDocumentPageBuilderRoute
-								mode="edit"
-								version="published"
-							/>
+							<CollectionDocumentPageBuilderRoute mode="edit" />
 						</PermissionGuard>
 					)}
 				/>

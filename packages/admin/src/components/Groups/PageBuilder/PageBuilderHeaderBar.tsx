@@ -25,7 +25,7 @@ import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations
 
 export const PageBuilderHeaderBar: Component<{
 	mode: "create" | "edit" | "revisions";
-	version?: "draft" | "published";
+	version?: "latest" | string;
 	state: {
 		collection: Accessor<CollectionResponse | undefined>;
 		collectionKey: Accessor<string>;
@@ -35,7 +35,6 @@ export const PageBuilderHeaderBar: Component<{
 		document: Accessor<DocumentResponse | undefined>;
 		ui: UseDocumentUIState;
 		autoSave?: UseDocumentAutoSave;
-		canNavigateToPublished: UseDocumentUIState["canNavigateToPublished"];
 		showRevisionNavigation: UseDocumentUIState["showRevisionNavigation"];
 		selectedRevision?: UseRevisionsState["documentId"];
 	};
@@ -57,13 +56,11 @@ export const PageBuilderHeaderBar: Component<{
 
 	// ----------------------------------
 	// Derived
-	const useDrafts = () => props.state.collection()?.config.useDrafts;
-
 	const draftLink = () =>
 		getDocumentRoute("edit", {
 			collectionKey: props.state.collectionKey(),
-			useDrafts: useDrafts(),
 			documentId: props.state.documentID(),
+			status: props.version,
 		});
 
 	const publishedLink = () =>
@@ -131,7 +128,7 @@ export const PageBuilderHeaderBar: Component<{
 								disabled:
 									props.mode === "create" ||
 									props.state.documentID() === undefined,
-								show: useDrafts(),
+								show: props.version === "latest",
 								onClick: () => {
 									if (
 										props.mode === "create" ||
@@ -140,17 +137,6 @@ export const PageBuilderHeaderBar: Component<{
 										return;
 									}
 									navigate(draftLink());
-								},
-							},
-							{
-								label: T()("published"),
-								active: props.version === "published",
-								disabled: !props.state.canNavigateToPublished(),
-								onClick: () => {
-									if (!props.state.canNavigateToPublished()) {
-										return;
-									}
-									navigate(publishedLink());
 								},
 							},
 							{

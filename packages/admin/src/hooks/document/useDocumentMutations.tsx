@@ -19,7 +19,7 @@ export function useDocumentMutations(props: {
 	collectionKey: () => string;
 	documentId: () => number | undefined;
 	collectionSingularName: () => string;
-	version: "draft" | "published";
+	version: "latest" | string;
 	mode: "create" | "edit" | "revisions";
 	document?: () => DocumentResponse | undefined;
 }) {
@@ -34,9 +34,8 @@ export function useDocumentMutations(props: {
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
-					useDrafts: props.collection()?.config.useDrafts,
 					documentId: data.data.id,
-					statusOverride: props.version,
+					status: props.version,
 				}),
 			);
 			queryClient.invalidateQueries({

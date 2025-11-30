@@ -19,7 +19,7 @@ export function useDocumentUIState(props: {
 	documentQuery: ReturnType<typeof api.documents.useGetSingle>;
 	document: Accessor<DocumentResponse | undefined>;
 	mode: "create" | "edit" | "revisions";
-	version: "draft" | "published";
+	version: "latest" | string;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
@@ -146,11 +146,9 @@ export function useDocumentUIState(props: {
 			return true;
 		}
 
-		// lock published version, if in edit mode and the collection supports drafts
-		if (props.version === "published") {
-			if (props.mode === "edit") {
-				return props.collection()?.config.useDrafts ?? false;
-			}
+		// lock version, if not the latest version
+		if (props.version !== "latest") {
+			return true;
 		}
 
 		// builder not locked
@@ -168,17 +166,6 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
-	 * Determines if users should be able to navigate to the published version
-	 */
-	const canNavigateToPublished = createMemo(() => {
-		if (props.collection()?.config.useDrafts) {
-			return isPublished();
-		}
-		if (props.mode === "revisions") return true;
-		return isPublished();
-	});
-
-	/**
 	 * Determines if the revision navigation should show
 	 */
 	const showRevisionNavigation = createMemo(() => {
@@ -193,12 +180,8 @@ export function useDocumentUIState(props: {
 		if (isBuilderLocked()) return false;
 
 		if (props.mode === "create") return true;
-		if (props.version === "draft") return true;
-		if (
-			props.version === "published" &&
-			props.collection()?.config.useDrafts === false
-		)
-			return true;
+		if (props.version === "latest") return true;
+
 		return false;
 	});
 
@@ -207,7 +190,7 @@ export function useDocumentUIState(props: {
 	 */
 	const showPublishButton = createMemo(() => {
 		if (props.mode === "create" || isBuilderLocked()) return false;
-		if (props.version === "published") return false;
+		if (props.version !== "latest") return false;
 		return true;
 	});
 
@@ -235,11 +218,7 @@ export function useDocumentUIState(props: {
 	const hasAutoSavePermission = createMemo(() => {
 		if (props.mode === "create") return false;
 		if (props.mode === "revisions") return false;
-		if (
-			props.version === "published" &&
-			props.collection()?.config.useDrafts === true
-		)
-			return false;
+		if (props.version !== "latest") return false;
 		if (props.document()?.isDeleted) return false;
 
 		return (
@@ -296,7 +275,6 @@ export function useDocumentUIState(props: {
 		canPublishDocument,
 		isBuilderLocked,
 		isPublished,
-		canNavigateToPublished,
 		showRevisionNavigation,
 		showUpsertButton,
 		hasSavePermission,

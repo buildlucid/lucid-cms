@@ -39,7 +39,6 @@ export const DocumentsList: Component<{
 		displayInListing: Accessor<CFConfig<FieldTypes>[]>;
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
-		status: Accessor<Exclude<DocumentVersionType, "revision">>;
 		showingDeleted: Accessor<boolean>;
 	};
 }> = (props) => {
@@ -66,7 +65,6 @@ export const DocumentsList: Component<{
 		navigate(
 			getDocumentRoute("create", {
 				collectionKey: collectionKey(),
-				useDrafts: props.state.collection?.config.useDrafts,
 			}),
 		);
 	};
@@ -141,7 +139,7 @@ export const DocumentsList: Component<{
 			queryString: props.state.searchParams.getQueryString,
 			location: {
 				collectionKey: collectionKey,
-				versionType: props.state.status,
+				versionType: "latest",
 			},
 			filters: {
 				isDeleted: isDeletedFilter,
@@ -196,11 +194,6 @@ export const DocumentsList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					...getTableHeadColumns(),
-					{
-						label: T()("status"),
-						key: "status",
-						icon: <FaSolidSatelliteDish />,
-					},
 					{
 						label: T()("updated_at"),
 						key: "updated_at",
@@ -269,26 +262,10 @@ export const DocumentsList: Component<{
 										label: T()("edit"),
 										type: "button",
 										onClick: () => {
-											if (props.state.status() === "published") {
-												// use drafts are enabled, but there is no draft version for this document
-												if (
-													props.state.collection?.config.useDrafts &&
-													typeof doc().version?.draft?.id !== "number"
-												) {
-													// show promote to draft dialog
-													setPublishedVersionId(doc().versionId as number);
-													setDocumentId(doc().id);
-													rowTarget.setTargetId(doc().id);
-													rowTarget.setTrigger("promote", true);
-													return;
-												}
-											}
 											navigate(
 												getDocumentRoute("edit", {
 													collectionKey: props.state.collection?.key as string,
-													useDrafts: props.state.collection?.config.useDrafts,
 													documentId: doc().id,
-													statusOverride: props.state.status(),
 												}),
 											);
 										},
@@ -296,23 +273,23 @@ export const DocumentsList: Component<{
 											.some,
 										hide: props.state.showingDeleted(),
 									},
-									{
-										label: T()("publish"),
-										type: "button",
-										onClick: () => {
-											setDraftVersionId(doc().versionId as number);
-											setDocumentId(doc().id);
-											rowTarget.setTargetId(doc().id);
-											rowTarget.setTrigger("publish", true);
-										},
-										permission: userStore.get.hasPermission(["publish_content"])
-											.all,
-										hide:
-											props.state.collection?.config.useDrafts !== true ||
-											props.state.status() !== "draft" ||
-											props.state.showingDeleted(),
-										actionExclude: true,
-									},
+									// {
+									// 	label: T()("publish"),
+									// 	type: "button",
+									// 	onClick: () => {
+									// 		setDraftVersionId(doc().versionId as number);
+									// 		setDocumentId(doc().id);
+									// 		rowTarget.setTargetId(doc().id);
+									// 		rowTarget.setTrigger("publish", true);
+									// 	},
+									// 	permission: userStore.get.hasPermission(["publish_content"])
+									// 		.all,
+									// 	hide:
+									// 		props.state.collection?.config.useDrafts !== true ||
+									// 		props.state.status() !== "draft" ||
+									// 		props.state.showingDeleted(),
+									// 	actionExclude: true,
+									// },
 									{
 										label: T()("restore"),
 										type: "button",
@@ -366,7 +343,8 @@ export const DocumentsList: Component<{
 				}}
 				collection={props.state.collection as CollectionResponse}
 			/>
-			<PromoteToDraft
+			{/* TODO: add support to selec the target environment */}
+			{/* <PromoteToDraft
 				id={rowTarget.getTargetId}
 				publishedVersionId={getPublishedVersionId}
 				collection={props.state.collection as CollectionResponse}
@@ -381,15 +359,13 @@ export const DocumentsList: Component<{
 						navigate(
 							getDocumentRoute("edit", {
 								collectionKey: props.state.collection?.key as string,
-								useDrafts: props.state.collection?.config.useDrafts,
 								documentId: getDocumentId(),
-								statusOverride: "draft",
 							}),
 						);
 					},
 				}}
-			/>
-			<PublishDocument
+			/> */}
+			{/* <PublishDocument
 				id={rowTarget.getTargetId}
 				draftVersionId={getDraftVersionId}
 				collection={props.state.collection as CollectionResponse}
@@ -404,14 +380,13 @@ export const DocumentsList: Component<{
 						navigate(
 							getDocumentRoute("edit", {
 								collectionKey: props.state.collection?.key as string,
-								useDrafts: props.state.collection?.config.useDrafts,
 								documentId: getDocumentId(),
-								statusOverride: "published",
+								status: "latest",
 							}),
 						);
 					},
 				}}
-			/>
+			/> */}
 			<RestoreDocument
 				id={rowTarget.getTargetId}
 				collection={props.state.collection}

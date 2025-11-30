@@ -41,7 +41,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 		document: revisionState.document,
 		collection: revisionState.collection,
 		mode: "revisions",
-		version: "draft",
+		version: "latest",
 		selectedRevision: revisionState.documentId,
 		restoreRevisionAction: mutations.restoreRevisionAction,
 	});
@@ -101,7 +101,6 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 						documentID: revisionState.documentId,
 						document: revisionState.document,
 						ui: uiState,
-						canNavigateToPublished: uiState.canNavigateToPublished,
 						showRevisionNavigation: uiState.showRevisionNavigation,
 						selectedRevision: revisionState.documentId,
 					}}
@@ -118,7 +117,6 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 								<Link
 									href={getDocumentRoute("edit", {
 										collectionKey: revisionState.collectionKey(),
-										useDrafts: revisionState.collection()?.config.useDrafts,
 										documentId: revisionState.documentId(),
 									})}
 									theme="border-outline"

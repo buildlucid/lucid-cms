@@ -1,5 +1,13 @@
 import T from "@/translations";
-import { type Component, Switch, Match, createEffect, on } from "solid-js";
+import {
+	type Component,
+	Switch,
+	Match,
+	createEffect,
+	on,
+	createMemo,
+} from "solid-js";
+import { useParams } from "@solidjs/router";
 import {
 	PageBuilderHeaderBar,
 	Modals,
@@ -16,7 +24,7 @@ import brickStore from "@/store/brickStore";
 
 interface CollectionsDocumentsEditRouteProps {
 	mode: "create" | "edit";
-	version: "draft" | "published";
+	version?: "latest";
 }
 
 const CollectionsDocumentsEditRoute: Component<
@@ -24,14 +32,20 @@ const CollectionsDocumentsEditRoute: Component<
 > = (props) => {
 	// ----------------------------------
 	// Hooks & State
-	const docState = useDocumentState(props);
+	const params = useParams();
+	const versionType = createMemo(() => props.version || params.versionType);
+
+	const docState = useDocumentState({
+		mode: props.mode,
+		version: versionType(),
+	});
 
 	const mutations = useDocumentMutations({
 		collection: docState.collection,
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		collectionSingularName: docState.collectionSingularName,
-		version: props.version,
+		version: versionType(),
 		mode: props.mode,
 		document: docState.document,
 	});
@@ -42,7 +56,7 @@ const CollectionsDocumentsEditRoute: Component<
 		document: docState.document,
 		documentQuery: docState.documentQuery,
 		mode: props.mode,
-		version: props.version,
+		version: versionType(),
 		createDocumentMutation: mutations.createDocumentMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
@@ -101,7 +115,7 @@ const CollectionsDocumentsEditRoute: Component<
 			<Match when={uiState.isSuccess()}>
 				<PageBuilderHeaderBar
 					mode={props.mode}
-					version={props.version}
+					version={versionType()}
 					state={{
 						collection: docState.collection,
 						collectionKey: docState.collectionKey,
@@ -111,7 +125,6 @@ const CollectionsDocumentsEditRoute: Component<
 						document: docState.document,
 						ui: uiState,
 						autoSave: autoSave,
-						canNavigateToPublished: uiState.canNavigateToPublished,
 						showRevisionNavigation: uiState.showRevisionNavigation,
 					}}
 					actions={{

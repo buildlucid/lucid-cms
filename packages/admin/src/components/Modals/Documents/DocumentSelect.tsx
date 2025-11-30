@@ -58,8 +58,6 @@ const DocumentSelectContent: Component = () => {
 			perPage: 20,
 		},
 	});
-	const [getStatus, setStatus] =
-		createSignal<Exclude<DocumentVersionType, "revision">>("draft");
 
 	// ----------------------------------
 	// Memos
@@ -83,7 +81,7 @@ const DocumentSelectContent: Component = () => {
 			queryString: searchParams.getQueryString,
 			location: {
 				collectionKey: collectionKey,
-				versionType: getStatus,
+				versionType: "latest",
 			},
 			filters: {
 				isDeleted: 0,
@@ -123,7 +121,6 @@ const DocumentSelectContent: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (collection.isSuccess) {
-			setStatus(collection.data.data.config.useDrafts ? "draft" : "published");
 			const filterConfig: FilterSchema = {};
 			for (const field of getCollectionFieldFilters()) {
 				switch (field.type) {
@@ -196,21 +193,6 @@ const DocumentSelectContent: Component = () => {
 							})}
 							searchParams={searchParams}
 						/>
-						<Show when={collection.data?.data.config.useDrafts}>
-							<Switch
-								id="status"
-								value={getStatus() === "published"}
-								onChange={(value) => {
-									setStatus(value ? "published" : "draft");
-								}}
-								name={"status"}
-								copy={{
-									true: T()("published"),
-									false: T()("draft"),
-								}}
-								noMargin
-							/>
-						</Show>
 					</div>
 					<div>
 						<PerPage options={[10, 20, 40]} searchParams={searchParams} />
