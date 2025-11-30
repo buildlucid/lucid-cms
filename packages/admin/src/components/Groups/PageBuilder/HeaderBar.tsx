@@ -3,7 +3,7 @@ import { type Component, Show, createMemo } from "solid-js";
 import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Button from "@/components/Partials/Button";
-import { PillNavigation } from "@/components/Partials/PillNavigation";
+import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import DateText from "@/components/Partials/DateText";
 import {
@@ -18,12 +18,12 @@ import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { CollectionResponse, DocumentResponse } from "@types";
 import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import { useNavigate } from "@solidjs/router";
 import type { Accessor } from "solid-js";
 import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
 import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
+import helpers from "@/utils/helpers";
 
-export const PageBuilderHeaderBar: Component<{
+export const HeaderBar: Component<{
 	mode: "create" | "edit" | "revisions";
 	version?: "latest" | string;
 	state: {
@@ -45,33 +45,68 @@ export const PageBuilderHeaderBar: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------
-	// Hooks
-	const navigate = useNavigate();
-
-	// ----------------------------------
 	// Memos
 	const defaultLocale = createMemo(() => {
 		return contentLocaleStore.get.locales.find((locale) => locale.isDefault);
 	});
 
-	// ----------------------------------
-	// Derived
-	const draftLink = () =>
-		getDocumentRoute("edit", {
-			collectionKey: props.state.collectionKey(),
-			documentId: props.state.documentID(),
-			status: props.version,
+	const viewOptions = createMemo(() => {
+		const options: ViewSelectorOption[] = [
+			{
+				label: "Latest",
+				disabled: false,
+				type: "latest",
+				location: getDocumentRoute("edit", {
+					collectionKey: props.state.collectionKey(),
+					documentId: props.state.documentID(),
+					status: props.version,
+				}),
+			},
+		];
+
+		for (const environment of props.state.collection()?.config.environments ??
+			[]) {
+			const isPublished = !!props.state.document()?.version[environment.key];
+
+			options.push({
+				label: helpers.getLocaleValue({ value: environment.name }),
+				disabled: !isPublished,
+				type: "environment",
+				location: getDocumentRoute("edit", {
+					collectionKey: props.state.collectionKey(),
+					documentId: props.state.documentID(),
+					status: environment.key,
+				}),
+				status: {
+					isPublished: isPublished,
+				},
+			});
+		}
+
+		options.push({
+			label: T()("revisions"),
+			disabled: props.state.documentID() === undefined,
+			type: "revision",
+			location:
+				props.state.documentID() !== undefined
+					? `/admin/collections/${props.state.collectionKey()}/revision/${props.state.documentID()}/latest`
+					: "#",
 		});
 
-	const publishedLink = () =>
-		props.state.documentID() !== undefined
-			? `/admin/collections/${props.state.collectionKey()}/published/${props.state.documentID()}`
-			: "#";
+		return options;
+	});
 
-	const revisionsLink = () =>
-		props.state.documentID() !== undefined
-			? `/admin/collections/${props.state.collectionKey()}/revisions/${props.state.documentID()}/latest`
-			: "#";
+	const showViewSelector = createMemo(() => {
+		const collection = props.state.collection();
+		if (!collection) return false;
+
+		const environments = collection.config.environments ?? [];
+
+		return (
+			props.mode !== "create" &&
+			(collection.config.useRevisions || environments.length > 0)
+		);
+	});
 
 	// ----------------------------------
 	// Render
@@ -91,7 +126,11 @@ export const PageBuilderHeaderBar: Component<{
 									label: props.state.collectionName(),
 								},
 								{
-									link: draftLink(),
+									link: getDocumentRoute("edit", {
+										collectionKey: props.state.collectionKey(),
+										documentId: props.state.documentID(),
+										status: props.version,
+									}),
 									label:
 										props.mode === "create"
 											? T()("create")
@@ -120,39 +159,32 @@ export const PageBuilderHeaderBar: Component<{
 			</div>
 			<div class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex items-center justify-between gap-2.5 ">
 				<div class="flex items-center gap-2.5">
-					<PillNavigation
-						items={[
-							{
-								label: T()("draft"),
-								active: props.version === "draft",
-								disabled:
-									props.mode === "create" ||
-									props.state.documentID() === undefined,
-								show: props.version === "latest",
-								onClick: () => {
-									if (
-										props.mode === "create" ||
-										props.state.documentID() === undefined
-									) {
-										return;
-									}
-									navigate(draftLink());
-								},
-							},
-							{
-								label: T()("revisions"),
-								active: props.mode === "revisions",
-								disabled: props.state.documentID() === undefined,
-								show: props.state.showRevisionNavigation(),
-								onClick: () => {
-									if (props.state.documentID() === undefined) {
-										return;
-									}
-									navigate(revisionsLink());
-								},
-							},
-						]}
-					/>
+					<div class="flex flex-col gap-1">
+						<div class="flex items-center gap-2">
+							<Show when={props.mode === "create"}>
+								<h2 class="text-base font-medium text-title">
+									{T()("create_document", {
+										collectionSingle: props.state.collectionSingularName(),
+									})}
+								</h2>
+							</Show>
+							<Show when={props.mode !== "create"}>
+								<h2 class="text-base font-medium text-title">
+									{props.state.collectionName()}
+								</h2>
+							</Show>
+							<Show when={showViewSelector()}>
+								<ViewSelector options={viewOptions()} />
+							</Show>
+						</div>
+						<Show when={props.state.collection()?.details.summary}>
+							<p class="text-sm text-body">
+								{helpers.getLocaleValue({
+									value: props.state.collection()?.details.summary,
+								})}
+							</p>
+						</Show>
+					</div>
 				</div>
 				<div class="flex items-center gap-2.5 justify-end">
 					<div class="flex items-center gap-2.5 w-full justify-between">

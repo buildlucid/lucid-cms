@@ -5,7 +5,7 @@ import classNames from "classnames";
 
 export const Breadcrumbs: Component<{
 	breadcrumbs?: {
-		link: string;
+		link?: string;
 		label: string;
 		include?: boolean;
 	}[];
@@ -29,18 +29,25 @@ export const Breadcrumbs: Component<{
 						{(breadcrumb, i) => (
 							<Show when={breadcrumb.include !== false}>
 								<li class="flex items-center">
-									<A
-										href={breadcrumb.link}
-										class="flex items-center text-title hover:text-primaryDark text-sm"
-									>
-										{breadcrumb.label}
-									</A>
+									<Show when={breadcrumb.link}>
+										<A
+											href={breadcrumb.link || ""}
+											class="flex items-center text-body hover:text-primaryDark text-sm"
+										>
+											{breadcrumb.label}
+										</A>
+									</Show>
+									<Show when={!breadcrumb.link}>
+										<span class="flex items-center text-body hover:text-primaryDark text-sm">
+											{breadcrumb.label}
+										</span>
+									</Show>
 									<Show
 										when={
 											props.breadcrumbs && i() < props.breadcrumbs.length - 1
 										}
 									>
-										<FaSolidCaretRight class="mx-2.5 text-sm" />
+										<FaSolidCaretRight class="mx-2 text-sm" />
 									</Show>
 								</li>
 							</Show>

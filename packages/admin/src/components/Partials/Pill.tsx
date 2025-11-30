@@ -19,8 +19,9 @@ const Pill: Component<PillProps> = (props) => {
 				{
 					"bg-primary-base text-primary-contrast": props.theme === "primary",
 					"bg-input-base text-title": props.theme === "grey",
-					"bg-error-base text-white": props.theme === "red",
-					"bg-warning-base text-title": props.theme === "warning",
+					"bg-error-base text-error-contrast": props.theme === "red",
+					"bg-warning-base/10 border border-warning-base/20 text-body":
+						props.theme === "warning",
 					"bg-secondary-base text-secondary-contrast":
 						props.theme === "secondary",
 				},

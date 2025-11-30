@@ -175,7 +175,7 @@ export function useRevisionsState() {
 			const latestVersion = revisionVersionsQuery.data?.data[0];
 			if (latestVersion) {
 				navigate(
-					`/admin/collections/${collectionKey()}/revisions/${documentId()}/${latestVersion.id}`,
+					`/admin/collections/${collectionKey()}/revision/${documentId()}/${latestVersion.id}`,
 				);
 			}
 		}

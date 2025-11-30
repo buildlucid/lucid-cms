@@ -1,4 +1,4 @@
-export { PageBuilderHeaderBar } from "./PageBuilderHeaderBar";
+export { HeaderBar } from "./HeaderBar";
 export { Modals } from "./Modals";
 export { FixedBricks } from "./FixedBricks";
 export { BuilderBricks } from "./BuilderBricks";

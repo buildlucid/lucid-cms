@@ -19,10 +19,10 @@ import {
 	CollectionPseudoBrick,
 	FixedBricks,
 	BuilderBricks,
-	PageBuilderHeaderBar,
+	HeaderBar,
 } from "@/components/Groups/PageBuilder";
 
-const CollectionsDocumentsRevisionsRoute: Component = (props) => {
+const CollectionsDocumentsRevisionsRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const revisionState = useRevisionsState();
@@ -91,7 +91,7 @@ const CollectionsDocumentsRevisionsRoute: Component = (props) => {
 				</div>
 			</Match>
 			<Match when={revisionState.documentIsSuccess()}>
-				<PageBuilderHeaderBar
+				<HeaderBar
 					mode={"revisions"}
 					state={{
 						collection: revisionState.collection,

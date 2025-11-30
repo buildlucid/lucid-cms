@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { useParams } from "@solidjs/router";
 import {
-	PageBuilderHeaderBar,
+	HeaderBar,
 	Modals,
 	BuilderBricks,
 	CollectionPseudoBrick,
@@ -37,7 +37,7 @@ const CollectionsDocumentsEditRoute: Component<
 
 	const docState = useDocumentState({
 		mode: props.mode,
-		version: versionType(),
+		version: versionType,
 	});
 
 	const mutations = useDocumentMutations({
@@ -113,7 +113,7 @@ const CollectionsDocumentsEditRoute: Component<
 				</div>
 			</Match>
 			<Match when={uiState.isSuccess()}>
-				<PageBuilderHeaderBar
+				<HeaderBar
 					mode={props.mode}
 					version={versionType()}
 					state={{

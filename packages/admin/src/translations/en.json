@@ -1,4 +1,7 @@
 {
+	"not_released": "Not Released",
+	"environments": "Environments",
+	"latest_revision": "Latest Revision",
 	"failed_with_message": "Failed With Message",
 	"link": "Link",
 	"logins": "Logins",

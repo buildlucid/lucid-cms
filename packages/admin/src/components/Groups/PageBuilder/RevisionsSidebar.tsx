@@ -86,7 +86,7 @@ export const RevisionsSidebar: Component<{
 								)}
 								onClick={() => {
 									navigate(
-										`/admin/collections/${props.state.collectionKey()}/revisions/${props.state.documentId()}/${revision.id}`,
+										`/admin/collections/${props.state.collectionKey()}/revision/${props.state.documentId()}/${revision.id}`,
 									);
 								}}
 							>

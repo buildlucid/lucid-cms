@@ -1,14 +1,15 @@
 import T from "@/translations";
 import { useParams, useNavigate } from "@solidjs/router";
-import { createMemo } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 import { useQueryClient } from "@tanstack/solid-query";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import helpers from "@/utils/helpers";
 import api from "@/services/api";
+import type { DocumentVersionType } from "@types";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";
-	version: "latest" | string;
+	version: Accessor<DocumentVersionType>;
 }) {
 	const params = useParams();
 	const navigate = useNavigate();

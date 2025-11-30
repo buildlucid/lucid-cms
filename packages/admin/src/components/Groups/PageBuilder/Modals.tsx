@@ -37,7 +37,7 @@ export const Modals: Component<{
 			<LinkSelectModal />
 			<BrickImagePreview />
 			<DeleteDocument
-				id={props.hooks.state.documentQuery?.data?.data.id}
+				id={props.hooks.state.document()?.id}
 				state={{
 					open: props.hooks.uiState.getDeleteOpen(),
 					setOpen: props.hooks.uiState.setDeleteOpen,
