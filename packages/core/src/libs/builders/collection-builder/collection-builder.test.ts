@@ -112,6 +112,7 @@ test("collection config is correct along with field includes and filters", async
 				"user_test",
 				"media_test",
 			],
+			environments: [],
 		},
 	});
 });
