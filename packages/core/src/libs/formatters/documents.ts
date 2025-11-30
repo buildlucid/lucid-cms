@@ -85,6 +85,7 @@ const formatSingle = (props: {
 		versionId: props.document.version_id ?? null,
 		version: formatVersion({
 			document: props.document,
+			collection: props.collection,
 		}),
 		bricks: props.bricks ?? null,
 		fields: props.fields ?? null,
@@ -115,30 +116,30 @@ const formatSingle = (props: {
 
 const formatVersion = (props: {
 	document: DocumentQueryResponse;
+	collection: CollectionBuilder;
 }): DocumentResponse["version"] => {
-	const draftVersion = props.document.versions?.find((v) => v.type === "draft");
-	const publishedVersion = props.document.versions?.find(
-		(v) => v.type === "published",
-	);
-
-	return {
-		draft: draftVersion?.id
-			? {
-					id: draftVersion.id,
-					promotedFrom: draftVersion.promoted_from,
-					createdAt: formatter.formatDate(draftVersion.created_at),
-					createdBy: draftVersion.created_by,
-				}
-			: null,
-		published: publishedVersion?.id
-			? {
-					id: publishedVersion.id,
-					promotedFrom: publishedVersion.promoted_from,
-					createdAt: formatter.formatDate(publishedVersion.created_at),
-					createdBy: publishedVersion.created_by,
-				}
-			: null,
+	const versions: DocumentResponse["version"] = {
+		latest: null,
 	};
+
+	if (props.collection.getData.config.environments) {
+		for (const env of props.collection.getData.config.environments) {
+			versions[env.key] = null;
+		}
+	}
+
+	if (props.document.versions) {
+		for (const version of props.document.versions) {
+			versions[version.type] = {
+				id: version.id,
+				promotedFrom: version.promoted_from,
+				createdAt: formatter.formatDate(version.created_at),
+				createdBy: version.created_by,
+			};
+		}
+	}
+
+	return versions;
 };
 
 const formatClientMultiple = (props: {

@@ -31,11 +31,14 @@ export type CollectionData = {
 	};
 	config: {
 		isLocked: boolean;
-		useDrafts: boolean;
 		useRevisions: boolean;
 		useTranslations: boolean;
 		useAutoSave: boolean;
 		displayInListing: string[];
+		environments: {
+			key: string;
+			name: LocaleValue;
+		}[];
 	};
 };
 

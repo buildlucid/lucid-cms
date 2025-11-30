@@ -60,10 +60,6 @@ const collectionResponseSchema = z.object({
 			description: "Whether the collection supports translations",
 			example: true,
 		}),
-		useDrafts: z.boolean().meta({
-			description: "Whether the collection supports draft documents",
-			example: true,
-		}),
 		useRevisions: z.boolean().meta({
 			description: "Whether the collection supports document revisions",
 			example: true,
@@ -76,6 +72,18 @@ const collectionResponseSchema = z.object({
 			description: "Field keys to display in the document listing columns",
 			example: ["pageTitle", "author", "fullSlug", "slug"],
 		}),
+		environments: z.array(
+			z.object({
+				key: z.string().meta({
+					description: "The environment key",
+					example: "production",
+				}),
+				name: z.any().meta({
+					description: "Display name for the environment",
+					example: { en: "Production" },
+				}),
+			}),
+		),
 	}),
 	migrationStatus: migrationStatusSchema.nullable(),
 	get fixedBricks() {

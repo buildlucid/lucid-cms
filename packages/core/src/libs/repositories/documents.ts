@@ -273,12 +273,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									`${dynamicConfig.tableName}.id`,
 								)
 								.where((eb) =>
-									eb.or([
-										// @ts-expect-error
-										eb(`${props.tables.versions}.type`, "=", "draft"),
-										// @ts-expect-error
-										eb(`${props.tables.versions}.type`, "=", "published"),
-									]),
+									// @ts-expect-error
+									eb(`${props.tables.versions}.type`, "!=", "revision"),
 								),
 						)
 						.as("versions"),
@@ -435,12 +431,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										`${dynamicConfig.tableName}.id`,
 									)
 									.where((eb) =>
-										eb.or([
-											// @ts-expect-error
-											eb(`${props.tables.versions}.type`, "=", "draft"),
-											// @ts-expect-error
-											eb(`${props.tables.versions}.type`, "=", "published"),
-										]),
+										// @ts-expect-error
+										eb(`${props.tables.versions}.type`, "!=", "revision"),
 									),
 							)
 							.as("versions"),
@@ -612,12 +604,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										`${dynamicConfig.tableName}.id`,
 									)
 									.where((eb) =>
-										eb.or([
-											// @ts-expect-error
-											eb(`${props.tables.versions}.type`, "=", "draft"),
-											// @ts-expect-error
-											eb(`${props.tables.versions}.type`, "=", "published"),
-										]),
+										// @ts-expect-error
+										eb(`${props.tables.versions}.type`, "!=", "revision"),
 									),
 							)
 							.as("versions"),

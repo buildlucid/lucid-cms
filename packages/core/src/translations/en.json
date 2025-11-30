@@ -251,7 +251,6 @@
 	"route_not_found": "Route Not Found",
 	"route_not_found_message": "The route you are trying to access does not exist.",
 	"cannot_promote_revision_message": "You cannot promote a revision to a new version type. Please use the restore revision endpoint instead.",
-	"cannot_promote_to_draft_message": "You cannot promote to a draft as the collection is not configured to use drafts.",
 	"page_not_found": "The page you are trying to access does not exist.",
 	"validation_error_message": "Please ensure the data you have provided is correct.",
 	"authorization_error_message": "Please ensure you are logged in and have the correct permissions.",

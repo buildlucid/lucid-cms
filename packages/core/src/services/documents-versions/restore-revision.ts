@@ -34,9 +34,7 @@ const restoreRevision: ServiceFn<
 		documentId: data.documentId,
 		collectionKey: data.collectionKey,
 		fromVersionId: data.versionId,
-		toVersionType: collectionRes.data.getData.config.useDrafts
-			? "draft"
-			: "published",
+		toVersionType: "latest",
 		userId: data.userId,
 		skipRevisionCheck: true,
 	});

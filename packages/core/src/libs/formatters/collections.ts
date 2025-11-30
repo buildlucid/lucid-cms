@@ -52,11 +52,11 @@ const formatSingle = (props: {
 		},
 		config: {
 			useTranslations: collectionData.config.useTranslations,
-			useDrafts: collectionData.config.useDrafts,
 			useRevisions: collectionData.config.useRevisions,
 			isLocked: collectionData.config.isLocked,
 			displayInListing: props.collection.displayInListing,
 			useAutoSave: collectionData.config.useAutoSave,
+			environments: collectionData.config.environments,
 		},
 		migrationStatus: props.migrationStatus ?? null,
 		fixedBricks: props.include?.bricks

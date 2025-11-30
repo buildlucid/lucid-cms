@@ -12,9 +12,14 @@ const NewsCollection = new CollectionBuilder("news", {
 	},
 	config: {
 		useTranslations: true,
-		useDrafts: true,
 		useRevisions: true,
 		useAutoSave: false,
+		environments: [
+			{
+				key: "production",
+				name: "Production",
+			},
+		],
 	},
 	bricks: {
 		fixed: [SeoBrick],

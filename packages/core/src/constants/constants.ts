@@ -50,10 +50,10 @@ export default Object.freeze({
 	},
 	collectionBuilder: {
 		isLocked: false,
-		useDrafts: false,
 		useRevisions: false,
 		useTranslations: false,
 		useAutoSave: false,
+		protectedEnvironments: ["latest", "revision"],
 	},
 	customFields: {
 		link: {

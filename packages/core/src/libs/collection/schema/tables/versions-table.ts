@@ -67,7 +67,7 @@ const createVersionsTable = (props: {
 						name: "type",
 						source: "core",
 						type: props.db.getDataType("text"),
-						default: "draft",
+						default: "latest",
 						nullable: false,
 					},
 					{

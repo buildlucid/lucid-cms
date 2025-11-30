@@ -8,7 +8,7 @@
 	"an_unknown_error_occurred_checking_for_duplicate_slugs": "An error occurred while checking for duplicate slugs.",
 	"an_unknown_error_occurred_checking_for_circular_parents": "An error occurred while checking for circular parents.",
 	"circular_parents_error_message": "The selected page is either a child/grandchild of this one. Please select a different parent page.",
-	"parent_page_not_found_or_doesnt_have_a_published_version": "The parent page document of the same version (draft/published) was not found, or doesnt have a slug.",
+	"parent_page_not_found_or_doesnt_have_a_published_version": "The parent page document of the same environment was not found, or doesnt have a slug.",
 	"an_unknown_error_occurred_getting_parent_fields": "An error occurred while getting the parent page fields.",
 	"an_unknown_error_occurred_getting_descendant_fields": "An error occurred while getting the descendant page fields.",
 	"an_unknown_error_occurred_updating_fullslug_fields": "An error occurred while updating the fullSlug children fields.",

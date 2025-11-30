@@ -15,7 +15,7 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
-import { permissionCheck } from "../../middleware/permissions.js";
+import permissions from "../../middleware/permissions.js";
 import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
@@ -40,14 +40,12 @@ const updateVersionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.UpdateContent]),
 	validate("json", controllerSchemas.updateVersion.body),
 	validate("param", controllerSchemas.updateVersion.params),
 	async (c) => {
 		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
-
-		//* manually run permissions middleware based on the publish flag
-		permissionCheck(c, [Permissions.CreateContent]);
 
 		const documentId = await serviceWrapper(
 			documentVersionServices.updateSingle,

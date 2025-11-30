@@ -42,7 +42,7 @@ const getSingleController = factory.createHandlers(
 			controllerSchemas.getSingle.query.formatted,
 		);
 
-		const hasStatus = statusOrId === "draft" || statusOrId === "published";
+		const isVersionId = !Number.isNaN(Number(statusOrId));
 
 		const document = await serviceWrapper(documentServices.getSingle, {
 			transaction: false,
@@ -61,8 +61,8 @@ const getSingleController = factory.createHandlers(
 			},
 			{
 				id: Number.parseInt(id),
-				status: hasStatus ? (statusOrId as DocumentVersionType) : undefined,
-				versionId: !hasStatus ? Number.parseInt(statusOrId) : undefined,
+				status: !isVersionId ? (statusOrId as DocumentVersionType) : undefined,
+				versionId: isVersionId ? Number.parseInt(statusOrId) : undefined,
 				collectionKey,
 				query: formattedQuery,
 			},

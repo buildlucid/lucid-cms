@@ -30,8 +30,13 @@ const beforeDeleteHandler =
 			};
 		}
 
-		// Process both draft and published versions
-		const versionTypes: ("draft" | "published")[] = ["draft", "published"];
+		// Process both latest and all configured environments
+		const versionTypes = [
+			"latest",
+			...(data.meta.collection.getData.config.environments?.map(
+				(env) => env.key,
+			) || []),
+		];
 
 		for (const versionType of versionTypes) {
 			const descendantsRes = await getDescendantFields(context, {

@@ -12,7 +12,6 @@ const upsertSingle: ServiceFn<
 		{
 			collectionKey: string;
 			userId: number;
-			publish: boolean;
 
 			documentId?: number;
 			bricks?: Array<BrickInputSchema>;
@@ -136,7 +135,6 @@ const upsertSingle: ServiceFn<
 	const createVersionRes = await documentVersionServices.createSingle(context, {
 		documentId: upsertDocRes.data.id,
 		userId: data.userId,
-		publish: data.publish,
 		bricks: data.bricks,
 		fields: data.fields,
 		collection: collectionRes.data,

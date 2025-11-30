@@ -276,11 +276,14 @@ export interface CollectionResponse {
 	};
 	config: {
 		useTranslations: boolean;
-		useDrafts: boolean;
 		useRevisions: boolean;
 		isLocked: boolean;
 		displayInListing: string[];
 		useAutoSave: boolean;
+		environments: {
+			key: string;
+			name: LocaleValue;
+		}[];
 	};
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;
@@ -363,20 +366,15 @@ export interface DocumentResponse {
 	collectionKey: string;
 	status: DocumentVersionType | null;
 	versionId: number | null;
-	version: {
-		draft: {
-			id: number | null;
+	version: Record<
+		string,
+		{
+			id: number;
 			promotedFrom: number | null;
 			createdAt: string | null;
 			createdBy: number | null;
-		} | null;
-		published: {
-			id: number | null;
-			promotedFrom: number | null;
-			createdAt: string | null;
-			createdBy: number | null;
-		} | null;
-	};
+		} | null
+	>;
 	isDeleted: boolean;
 	createdBy: {
 		id: number;
@@ -403,20 +401,15 @@ export interface ClientDocumentResponse {
 	id: number;
 	collectionKey: string | null;
 	status: DocumentVersionType | null;
-	version: {
-		draft: {
-			id: number | null;
+	version: Record<
+		string,
+		{
+			id: number;
 			promotedFrom: number | null;
 			createdAt: string | null;
 			createdBy: number | null;
-		} | null;
-		published: {
-			id: number | null;
-			promotedFrom: number | null;
-			createdAt: string | null;
-			createdBy: number | null;
-		} | null;
-	};
+		} | null
+	>;
 	createdBy: {
 		id: number;
 		email: string | null;

@@ -13,9 +13,14 @@ const PageCollection = new CollectionBuilder("page", {
 	},
 	config: {
 		useTranslations: true,
-		useDrafts: true,
 		useRevisions: true,
 		useAutoSave: true,
+		environments: [
+			{
+				key: "production",
+				name: "Production",
+			},
+		],
 	},
 	bricks: {
 		fixed: [SeoBrick],

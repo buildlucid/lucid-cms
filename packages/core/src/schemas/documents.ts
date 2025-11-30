@@ -64,18 +64,15 @@ const documentResponseBaseSchema = z.object({
 		description: "The key of the collection this document belongs to",
 		example: "page",
 	}),
-	status: z.enum(["draft", "published", "revision"]).nullable().meta({
+	status: z.string().nullable().meta({
 		description: "The current status of the document",
-		example: "published",
+		example: "latest",
 	}),
 	versionId: z.number().nullable().meta({
 		description: "The current version ID",
 		example: 1,
 	}),
-	version: z.object({
-		draft: documentResponseVersionSchema.nullable(),
-		published: documentResponseVersionSchema.nullable(),
-	}),
+	version: z.record(z.string(), documentResponseVersionSchema.nullable()),
 	isDeleted: z.boolean().meta({
 		description: "Whether the document has been deleted",
 		example: false,
@@ -109,10 +106,6 @@ const documentClientResponseSchema = documentResponseBaseSchema.extend({
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			publish: z.boolean().meta({
-				description: "Whether it should be published or be a draft.",
-				example: false,
-			}),
 			bricks: z
 				.array(brickInputSchema)
 				.meta({
@@ -145,10 +138,6 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createVersion: {
 		body: z.object({
-			publish: z.boolean().meta({
-				description: "Whether it should be published or be a draft.",
-				example: false,
-			}),
 			bricks: z
 				.array(brickInputSchema)
 				.meta({
@@ -441,9 +430,9 @@ export const controllerSchemas = {
 				description: "The collection key",
 				example: "page",
 			}),
-			status: z.enum(["published", "draft"]).meta({
+			status: z.string().meta({
 				description: "The status version type",
-				example: "draft",
+				example: "latest",
 			}),
 		}),
 		body: undefined,
@@ -465,13 +454,12 @@ export const controllerSchemas = {
 			}),
 			statusOrId: z
 				.union([
-					z.literal("published"),
-					z.literal("draft"),
-					z.string(), // version id
+					z.literal("latest"),
+					z.string(), // version id or custom environment key
 				])
 				.meta({
 					description: "The status (version type), or a version ID",
-					example: "draft",
+					example: "latest",
 				}),
 			collectionKey: z.string().meta({
 				description: "The collection key",
@@ -483,10 +471,17 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	promoteVersion: {
 		body: z.object({
-			versionType: z.enum(["draft", "published"]).meta({
-				description: "The version type you want to promote it to",
-				example: "published",
-			}),
+			versionType: z
+				.string()
+				.refine((val) => val !== "revision", {
+					message:
+						"Cannot promote to revision - use 'latest' or a valid environment key",
+				})
+				.meta({
+					description:
+						"The version type you want to promote to - either 'latest' or a valid environment key (e.g., 'production', 'qa') from the collection config",
+					example: "production",
+				}),
 		}),
 		query: {
 			string: undefined,
@@ -598,9 +593,9 @@ export const controllerSchemas = {
 					description: "The collection key",
 					example: "page",
 				}),
-				status: z.enum(["published", "draft"]).meta({
+				status: z.string().meta({
 					description: "The status version type",
-					example: "draft",
+					example: "latest",
 				}),
 			}),
 			body: undefined,
@@ -697,9 +692,9 @@ export const controllerSchemas = {
 					description: "The collection key",
 					example: "page",
 				}),
-				status: z.enum(["published", "draft"]).meta({
+				status: z.string().meta({
 					description: "The status version type",
-					example: "draft",
+					example: "latest",
 				}),
 			}),
 			body: undefined,

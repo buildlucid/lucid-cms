@@ -8,13 +8,15 @@ import type CollectionBuilder from "../../libs/builders/collection-builder/index
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentBrickServices } from "../index.js";
 
+/**
+ * Creates a new version. This is always for the "latest" version type
+ */
 const createSingle: ServiceFn<
 	[
 		{
 			documentId: number;
 			collection: CollectionBuilder;
 			userId: number;
-			publish: boolean;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 		},
@@ -29,10 +31,10 @@ const createSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const versionType = data.publish ? "published" : "draft";
+	const versionType = "latest";
 
 	if (data.collection.getData.config.useRevisions) {
-		//* make the current published|draft version a revision
+		//* make the current latest version a revision
 		const updateRes = await DocumentVersions.updateSingle(
 			{
 				where: [
@@ -58,7 +60,7 @@ const createSingle: ServiceFn<
 		);
 		if (updateRes.error) return updateRes;
 	} else {
-		//* delete the current published|draft version
+		//* delete the current latest version
 		const deleteRes = await DocumentVersions.deleteSingle(
 			{
 				where: [
@@ -81,7 +83,7 @@ const createSingle: ServiceFn<
 		if (deleteRes.error) return deleteRes;
 	}
 
-	// Create new version (draft or published based on the publish value)
+	// Create new latest version
 	const newVersionRes = await DocumentVersions.createSingle(
 		{
 			data: {

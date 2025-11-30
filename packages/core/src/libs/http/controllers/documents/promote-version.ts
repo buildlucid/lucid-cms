@@ -14,7 +14,7 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
-import { permissionCheck } from "../../middleware/permissions.js";
+import permissions from "../../middleware/permissions.js";
 import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
@@ -38,19 +38,12 @@ const promoteVersionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.PublishContent]),
 	validate("json", controllerSchemas.promoteVersion.body),
 	validate("param", controllerSchemas.promoteVersion.params),
 	async (c) => {
 		const { versionType } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
-
-		//* manually run permissions middleware based on version type
-		permissionCheck(
-			c,
-			versionType === "published"
-				? [Permissions.PublishContent]
-				: [Permissions.UpdateContent],
-		);
 
 		const restoreRevisionRes = await serviceWrapper(
 			documentVersionServices.promoteVersion,

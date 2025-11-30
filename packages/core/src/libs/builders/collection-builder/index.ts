@@ -141,9 +141,6 @@ class CollectionBuilder extends FieldBuilder {
 			config: {
 				isLocked:
 					this.config.config?.isLocked ?? constants.collectionBuilder.isLocked,
-				useDrafts:
-					this.config.config?.useDrafts ??
-					constants.collectionBuilder.useDrafts,
 				useRevisions:
 					this.config.config?.useRevisions ??
 					constants.collectionBuilder.useRevisions,
@@ -154,6 +151,7 @@ class CollectionBuilder extends FieldBuilder {
 					this.config.config?.useAutoSave ??
 					constants.collectionBuilder.useAutoSave,
 				displayInListing: this.displayInListing,
+				environments: this.config.config?.environments ?? [],
 			},
 		};
 	}

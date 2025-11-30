@@ -37,7 +37,7 @@ export type DefaultValueType<T> = T extends object
 		: { [K in keyof T]: T[K] }
 	: T;
 
-export type DocumentVersionType = "draft" | "published" | "revision";
+export type DocumentVersionType = "latest" | "revision" | string;
 
 export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
 export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";

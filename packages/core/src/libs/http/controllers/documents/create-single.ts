@@ -15,7 +15,7 @@ import {
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
-import { permissionCheck } from "../../middleware/permissions.js";
+import permissions from "../../middleware/permissions.js";
 import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
@@ -39,17 +39,12 @@ const createSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.CreateContent]),
 	validate("json", controllerSchemas.createSingle.body),
 	validate("param", controllerSchemas.createSingle.params),
 	async (c) => {
-		const { publish, bricks, fields } = c.req.valid("json");
+		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey } = c.req.valid("param");
-
-		//* manually run permissions middleware based on the publish flag
-		permissionCheck(
-			c,
-			publish ? [Permissions.PublishContent] : [Permissions.CreateContent],
-		);
 
 		const documentId = await serviceWrapper(documentServices.upsertSingle, {
 			transaction: true,
@@ -68,7 +63,6 @@ const createSingleController = factory.createHandlers(
 			},
 			{
 				collectionKey,
-				publish,
 				userId: c.get("auth").id,
 				bricks,
 				fields,

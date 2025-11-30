@@ -11,7 +11,6 @@ const SimpleCollection = new CollectionBuilder("simple", {
 	},
 	config: {
 		useTranslations: true,
-		useDrafts: true,
 		useRevisions: true,
 	},
 	bricks: {

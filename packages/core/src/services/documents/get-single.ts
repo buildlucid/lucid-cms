@@ -72,8 +72,8 @@ const getSingle: ServiceFn<
 		const bricksRes = await documentBrickServices.getMultiple(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
-			//* if fetching a revision, we always default to the draft version so any sub-documents this may query due to the document custom field is always recent info
-			versionType: versionType !== "revision" ? versionType : "draft",
+			//* if fetching a revision, we always default to the latest version so any sub-documents this may query due to the document custom field is always recent info
+			versionType: versionType !== "revision" ? versionType : "latest",
 		});
 		if (bricksRes.error) return bricksRes;
 

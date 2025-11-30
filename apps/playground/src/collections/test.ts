@@ -12,7 +12,6 @@ const TestCollection = new CollectionBuilder("test", {
 	},
 	config: {
 		useTranslations: false,
-		useDrafts: true,
 		useRevisions: true,
 		isLocked: false,
 	},

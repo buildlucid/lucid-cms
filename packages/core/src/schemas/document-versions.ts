@@ -1,9 +1,9 @@
 import z from "zod/v4";
 
 export const versionTypesSchema = z.union([
-	z.literal("draft"),
+	z.literal("latest"),
 	z.literal("revision"),
-	z.literal("published"),
+	z.string(),
 ]);
 
 export const documentVersionResponseSchema = z.object({
@@ -11,10 +11,12 @@ export const documentVersionResponseSchema = z.object({
 		description: "The document version ID",
 		example: 1,
 	}),
-	versionType: z.enum(["published", "draft", "revision"]).meta({
-		description: "The version type",
-		example: "draft",
-	}),
+	versionType: z
+		.union([z.literal("latest"), z.literal("revision"), z.string()])
+		.meta({
+			description: "The version type",
+			example: "latest",
+		}),
 	promotedFrom: z.number().nullable().meta({
 		description: "ID of the version this was promoted from, if applicable",
 		example: 122,

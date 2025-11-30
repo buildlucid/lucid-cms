@@ -36,7 +36,6 @@ describe("brick table construction", () => {
 			},
 			config: {
 				useTranslations: true,
-				useDrafts: true,
 				useRevisions: true,
 			},
 			bricks: {
@@ -315,7 +314,6 @@ describe("brick table construction", () => {
 			},
 			config: {
 				useTranslations: true,
-				useDrafts: true,
 				useRevisions: true,
 			},
 			bricks: {

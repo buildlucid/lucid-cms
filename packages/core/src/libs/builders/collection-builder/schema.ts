@@ -24,10 +24,6 @@ const CollectionConfigSchema = z.object({
 				.boolean()
 				.default(constants.collectionBuilder.useTranslations)
 				.optional(),
-			useDrafts: z
-				.boolean()
-				.default(constants.collectionBuilder.useDrafts)
-				.optional(),
 			useRevisions: z
 				.boolean()
 				.default(constants.collectionBuilder.useRevisions)
@@ -35,6 +31,30 @@ const CollectionConfigSchema = z.object({
 			useAutoSave: z
 				.boolean()
 				.default(constants.collectionBuilder.useAutoSave)
+				.optional(),
+			environments: z
+				.array(
+					z.object({
+						key: z
+							.string()
+							.min(1)
+							.max(50)
+							.regex(/^[a-z0-9-_]+$/, {
+								message:
+									"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
+							})
+							.refine(
+								(val) =>
+									!constants.collectionBuilder.protectedEnvironments.includes(
+										val,
+									),
+								{
+									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
+								},
+							),
+						name: stringTranslations,
+					}),
+				)
 				.optional(),
 		})
 		.optional(),

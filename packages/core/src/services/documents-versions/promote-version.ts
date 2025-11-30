@@ -19,7 +19,7 @@ const promoteVersion: ServiceFn<
 	[
 		{
 			fromVersionId: number;
-			toVersionType: "draft" | "published";
+			toVersionType: "latest" | string;
 			collectionKey: string;
 			documentId: number;
 			userId: number;
@@ -146,19 +146,6 @@ const promoteVersion: ServiceFn<
 				type: "basic",
 				status: 400,
 				message: T("cannot_promote_revision_message"),
-			},
-			data: undefined,
-		};
-	}
-	if (
-		collectionRes.data.getData.config.useDrafts !== true &&
-		data.toVersionType === "draft"
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: T("cannot_promote_to_draft_message"),
-				status: 400,
 			},
 			data: undefined,
 		};

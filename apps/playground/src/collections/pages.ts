@@ -15,9 +15,22 @@ const PageCollection = new CollectionBuilder("page", {
 	},
 	config: {
 		useTranslations: true,
-		useDrafts: true,
 		useRevisions: true,
 		useAutoSave: true,
+		environments: [
+			{
+				key: "staging",
+				name: {
+					en: "Staging",
+				},
+			},
+			{
+				key: "production",
+				name: {
+					en: "Production",
+				},
+			},
+		],
 	},
 	hooks: [
 		{

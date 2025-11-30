@@ -62,7 +62,7 @@ const getMultiple: ServiceFn<
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,
-			relationVersionType: data.status !== "revision" ? data.status : "draft",
+			relationVersionType: data.status !== "revision" ? data.status : "latest",
 			tables: {
 				versions: tableNameRes.data.version,
 				documentFields: tableNameRes.data.documentFields,
@@ -83,7 +83,7 @@ const getMultiple: ServiceFn<
 
 	const relationDataRes = await fetchRelationData(context, {
 		values: relationIdRes.data,
-		versionType: data.status !== "revision" ? data.status : "draft",
+		versionType: data.status !== "revision" ? data.status : "latest",
 	});
 	if (relationDataRes.error) return relationDataRes;
 

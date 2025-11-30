@@ -99,7 +99,6 @@ test("collection config is correct along with field includes and filters", async
 		},
 		config: {
 			isLocked: false,
-			useDrafts: false,
 			useRevisions: false,
 			useTranslations: true,
 			useAutoSave: false,
