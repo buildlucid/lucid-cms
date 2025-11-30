@@ -34,7 +34,7 @@ export default {
                     contrast: "#E3E3E3",
                 },
                 input: {
-                    base: "#212121",
+                    base: "#181818",
                     contrast: "#E3E3E3",
                 },
                 icon: {
