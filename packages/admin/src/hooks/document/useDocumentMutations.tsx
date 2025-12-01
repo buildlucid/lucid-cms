@@ -6,12 +6,13 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import { useFocusPreservation } from "@/hooks/useFocusPreservation";
-import type { Accessor } from "solid-js";
+import { createSignal, type Accessor } from "solid-js";
 import type {
 	BrickError,
 	CollectionResponse,
 	DocumentResponse,
 	FieldError,
+	DocumentVersionType,
 } from "@types";
 
 export function useDocumentMutations(props: {
@@ -19,13 +20,15 @@ export function useDocumentMutations(props: {
 	collectionKey: () => string;
 	documentId: () => number | undefined;
 	collectionSingularName: () => string;
-	version: "latest" | string;
+	version: Accessor<"latest" | string>;
 	mode: "create" | "edit" | "revisions";
 	document?: () => DocumentResponse | undefined;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { captureFocus, restoreFocus } = useFocusPreservation();
+	const [releaseVersionType, setReleaseVersionType] =
+		createSignal<DocumentVersionType>();
 
 	const createDocumentMutation = api.documents.useCreateSingle({
 		onSuccess: (data) => {
@@ -35,7 +38,7 @@ export function useDocumentMutations(props: {
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
 					documentId: data.data.id,
-					status: props.version,
+					status: props.version(),
 				}),
 			);
 			queryClient.invalidateQueries({
@@ -115,7 +118,7 @@ export function useDocumentMutations(props: {
 			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: props.collectionSingularName,
-		getVersionType: () => "published",
+		getVersionType: releaseVersionType,
 	});
 
 	const autoSaveDocument = async (versionId: number) => {
@@ -135,7 +138,6 @@ export function useDocumentMutations(props: {
 			createDocumentMutation.action.mutate({
 				collectionKey: props.collectionKey(),
 				body: {
-					publish: props.version === "published",
 					bricks: brickHelpers.getUpsertBricks(),
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
 				},
@@ -145,7 +147,6 @@ export function useDocumentMutations(props: {
 				collectionKey: props.collectionKey(),
 				documentId: props.documentId() as number,
 				body: {
-					publish: props.version === "published",
 					bricks: brickHelpers.getUpsertBricks(),
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
 				},
@@ -154,19 +155,21 @@ export function useDocumentMutations(props: {
 	};
 
 	const publishDocumentAction = async (
-		docData: DocumentResponse | undefined,
+		targetVersionType: DocumentVersionType,
 	) => {
-		if (!docData?.version?.draft?.id) {
-			console.error("No draft version ID found.");
+		const versionId = props.document?.()?.versionId;
+		if (!versionId) {
+			console.error("No version ID found.");
 			return;
 		}
+		setReleaseVersionType(targetVersionType);
 
 		promoteToPublishedMutation.action.mutate({
 			collectionKey: props.collectionKey(),
 			id: props.documentId() as number,
-			versionId: docData.version.draft.id,
+			versionId: versionId,
 			body: {
-				versionType: "published",
+				versionType: targetVersionType,
 			},
 		});
 	};

@@ -41,7 +41,7 @@ const CollectionsDocumentsRevisionsRoute: Component = () => {
 		document: revisionState.document,
 		collection: revisionState.collection,
 		mode: "revisions",
-		version: "latest",
+		version: () => "latest",
 		selectedRevision: revisionState.documentId,
 		restoreRevisionAction: mutations.restoreRevisionAction,
 	});

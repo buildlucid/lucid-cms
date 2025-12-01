@@ -1,5 +1,5 @@
 import { DropdownMenu } from "@kobalte/core";
-import { type Component, createMemo, For, Show } from "solid-js";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import { FaSolidChevronRight } from "solid-icons/fa";
 import classNames from "classnames";
 import { useLocation, useNavigate } from "@solidjs/router";
@@ -17,35 +17,39 @@ export interface ViewSelectorOption {
 	};
 }
 
-interface ViewSelectorProps {
-	options: ViewSelectorOption[];
-}
-
-export const ViewSelector: Component<ViewSelectorProps> = (props) => {
+export const ViewSelector: Component<{
+	options: Accessor<ViewSelectorOption[]>;
+}> = (props) => {
 	// ----------------------------------
 	// Hooks & State
 	const navigate = useNavigate();
 	const location = useLocation();
 
+	// ----------------------------------
+	// Memos
 	const environments = createMemo(() =>
-		props.options.filter(
-			(o) => o.type === "latest" || o.type === "environment",
-		),
+		props
+			.options()
+			.filter((o) => o.type === "latest" || o.type === "environment"),
 	);
 	const revisions = createMemo(() =>
-		props.options.filter((o) => o.type === "revision"),
+		props.options().filter((o) => o.type === "revision"),
 	);
+	const currentOption = createMemo(() => {
+		const currentPath = location.pathname;
 
-	const isCurrent = (option: ViewSelectorOption) => {
-		if (option.type === "revision" && location.pathname.includes("revision")) {
-			return true;
-		}
-		return option.location !== "#" && location.pathname === option.location;
-	};
+		return props.options().find((option) => {
+			if (currentPath === option.location) {
+				return true;
+			}
 
-	const currentOption = createMemo(
-		() => props.options.find((o) => isCurrent(o)) || props.options[0],
-	);
+			if (option.type === "revision" && currentPath.includes("revision")) {
+				return true;
+			}
+
+			return false;
+		});
+	});
 
 	// ----------------------------------
 	// Render
@@ -88,8 +92,8 @@ export const ViewSelector: Component<ViewSelectorProps> = (props) => {
 										"flex items-center justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
 										{
 											"bg-dropdown-hover text-dropdown-contrast":
-												isCurrent(item),
-											"ursor-not-allowed": item.disabled,
+												currentOption()?.location === item.location,
+											"cursor-not-allowed": item.disabled,
 										},
 									)}
 									disabled={item.disabled}
@@ -106,7 +110,7 @@ export const ViewSelector: Component<ViewSelectorProps> = (props) => {
 									>
 										{item.label}
 									</span>
-									<Show when={isCurrent(item)}>
+									<Show when={currentOption()?.location === item.location}>
 										<div class="w-1.5 h-1.5 rounded-full bg-primary-base" />
 									</Show>
 									<Show when={item.status?.isPublished === false}>
@@ -124,7 +128,7 @@ export const ViewSelector: Component<ViewSelectorProps> = (props) => {
 										"flex items-center justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
 										{
 											"bg-dropdown-hover text-dropdown-contrast":
-												isCurrent(item),
+												currentOption()?.location === item.location,
 											"opacity-50 cursor-not-allowed": item.disabled,
 										},
 									)}
@@ -136,7 +140,7 @@ export const ViewSelector: Component<ViewSelectorProps> = (props) => {
 									}}
 								>
 									<span class="line-clamp-1 mr-2.5">{item.label}</span>
-									<Show when={isCurrent(item)}>
+									<Show when={currentOption()?.location === item.location}>
 										<div class="w-1.5 h-1.5 rounded-full bg-primary-base" />
 									</Show>
 								</DropdownMenu.Item>

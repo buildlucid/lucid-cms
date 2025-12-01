@@ -45,7 +45,7 @@ const CollectionsDocumentsEditRoute: Component<
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		collectionSingularName: docState.collectionSingularName,
-		version: versionType(),
+		version: versionType,
 		mode: props.mode,
 		document: docState.document,
 	});
@@ -56,10 +56,11 @@ const CollectionsDocumentsEditRoute: Component<
 		document: docState.document,
 		documentQuery: docState.documentQuery,
 		mode: props.mode,
-		version: versionType(),
+		version: versionType,
 		createDocumentMutation: mutations.createDocumentMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
+		promoteToPublishedMutation: mutations.promoteToPublishedMutation,
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -115,7 +116,7 @@ const CollectionsDocumentsEditRoute: Component<
 			<Match when={uiState.isSuccess()}>
 				<HeaderBar
 					mode={props.mode}
-					version={versionType()}
+					version={versionType}
 					state={{
 						collection: docState.collection,
 						collectionKey: docState.collectionKey,

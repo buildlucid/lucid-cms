@@ -4,12 +4,12 @@ import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Button from "@/components/Partials/Button";
 import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
+import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
+import { DocumentActions } from "./DocumentActions";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import DateText from "@/components/Partials/DateText";
 import {
 	FaSolidLanguage,
-	FaSolidTrash,
-	FaSolidFloppyDisk,
 	FaSolidClock,
 	FaSolidCalendarPlus,
 } from "solid-icons/fa";
@@ -22,10 +22,11 @@ import type { Accessor } from "solid-js";
 import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
 import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
 import helpers from "@/utils/helpers";
+import { useNavigate } from "@solidjs/router";
 
 export const HeaderBar: Component<{
 	mode: "create" | "edit" | "revisions";
-	version?: "latest" | string;
+	version?: Accessor<"latest" | string>;
 	state: {
 		collection: Accessor<CollectionResponse | undefined>;
 		collectionKey: Accessor<string>;
@@ -45,11 +46,14 @@ export const HeaderBar: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------
+	// State / Hooks
+	const navigate = useNavigate();
+
+	// ----------------------------------
 	// Memos
 	const defaultLocale = createMemo(() => {
 		return contentLocaleStore.get.locales.find((locale) => locale.isDefault);
 	});
-
 	const viewOptions = createMemo(() => {
 		const options: ViewSelectorOption[] = [
 			{
@@ -59,7 +63,6 @@ export const HeaderBar: Component<{
 				location: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
-					status: props.version,
 				}),
 			},
 		];
@@ -95,7 +98,37 @@ export const HeaderBar: Component<{
 
 		return options;
 	});
+	const releaseOptions = createMemo<ReleaseTriggerOption[]>(() => {
+		if (props.state.ui.showPublishButton?.() === false) return [];
+		const collection = props.state.collection();
+		const document = props.state.document();
+		if (!collection || !document) return [];
 
+		const environments = collection.config.environments ?? [];
+
+		return environments.map((environment) => {
+			const label =
+				helpers.getLocaleValue({ value: environment.name }) || environment.key;
+			// TODO: re-able this when we have a way to determine if auto-saved versions match the environment. Currently if you auto-save, what we have bellow would return true still, despite the content now being out of sync.
+			// const isPromoted =
+			// 	props.state.document()?.version[environment.key]?.promotedFrom ===
+			// 	props.state.document()?.versionId;
+			return {
+				label,
+				value: environment.key as ReleaseTriggerOption["value"],
+				route: getDocumentRoute("edit", {
+					collectionKey: props.state.collectionKey(),
+					documentId: props.state.documentID(),
+					status: environment.key,
+				}),
+				// disabled: isPromoted,
+				status: {
+					isReleased: !!document.version?.[environment.key],
+					// upToDate: isPromoted,
+				},
+			};
+		});
+	});
 	const showViewSelector = createMemo(() => {
 		const collection = props.state.collection();
 		if (!collection) return false;
@@ -129,7 +162,7 @@ export const HeaderBar: Component<{
 									link: getDocumentRoute("edit", {
 										collectionKey: props.state.collectionKey(),
 										documentId: props.state.documentID(),
-										status: props.version,
+										status: props.version?.(),
 									}),
 									label:
 										props.mode === "create"
@@ -174,7 +207,7 @@ export const HeaderBar: Component<{
 								</h2>
 							</Show>
 							<Show when={showViewSelector()}>
-								<ViewSelector options={viewOptions()} />
+								<ViewSelector options={viewOptions} />
 							</Show>
 						</div>
 						<Show when={props.state.collection()?.details.summary}>
@@ -211,36 +244,27 @@ export const HeaderBar: Component<{
 					</div>
 					<div class="flex items-center gap-2.5">
 						<Show when={props.state.ui.showUpsertButton?.()}>
-							<Button
-								type="button"
-								theme="secondary"
-								size="small"
-								onClick={() => {
+							<ReleaseTrigger
+								options={releaseOptions}
+								onSelect={(option) => {
+									props.state.autoSave?.debouncedAutoSave.clear();
+									props.actions?.publishDocumentAction?.(option.value);
+									navigate(option.route);
+								}}
+								onSave={() => {
 									props.state.autoSave?.debouncedAutoSave.clear();
 									props.actions?.upsertDocumentAction?.();
 								}}
-								disabled={props.state.ui.canSaveDocument?.()}
-								permission={props.state.ui.hasSavePermission?.()}
-							>
-								{T()("save")}
-							</Button>
-						</Show>
-						<Show when={props.state.ui.showPublishButton?.()}>
-							<Button
-								type="button"
-								theme="secondary"
-								size="small"
-								onClick={() => {
-									props.state.autoSave?.debouncedAutoSave.clear();
-									props.actions?.publishDocumentAction?.(
-										props.state.document(),
-									);
-								}}
+								saveDisabled={props.state.ui.canSaveDocument?.()}
+								savePermission={props.state.ui.hasSavePermission?.()}
 								disabled={!props.state.ui.canPublishDocument?.()}
 								permission={props.state.ui.hasPublishPermission?.()}
-							>
-								{T()("publish")}
-							</Button>
+								loading={
+									props.state.ui.isSaving?.() ||
+									props.state.ui.isAutoSaving?.() ||
+									props.state.ui.isPromotingToPublished?.()
+								}
+							/>
 						</Show>
 						{/* Restore revision */}
 						<Show when={props.state.ui.showRestoreRevisionButton?.()}>
@@ -256,26 +280,13 @@ export const HeaderBar: Component<{
 							</Button>
 						</Show>
 						<Show when={props.state.ui.showDeleteButton?.()}>
-							<Button
-								theme="border-outline"
-								size="icon"
-								type="button"
-								onClick={() => props.state.ui?.setDeleteOpen?.(true)}
-								permission={props.state.ui.hasDeletePermission?.()}
-							>
-								<span class="sr-only">{T()("delete")}</span>
-								<FaSolidTrash />
-							</Button>
+							<DocumentActions
+								onDelete={() => props.state.ui?.setDeleteOpen?.(true)}
+								deletePermission={props.state.ui.hasDeletePermission?.()}
+							/>
 						</Show>
 					</div>
 				</div>
-
-				{/* <Show when={props.state.ui.isSaving()}>
-					<div class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center rounded-b-xl gap-2.5">
-						<Spinner size="sm" />
-						<span class="text-body">{T()("saving")}</span>
-					</div>
-				</Show> */}
 			</div>
 		</>
 	);

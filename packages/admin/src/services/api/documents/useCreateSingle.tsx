@@ -7,7 +7,6 @@ import type { ResponseBody, ErrorResponse, FieldResponse } from "@types";
 export interface Params {
 	collectionKey: string;
 	body: {
-		publish: boolean;
 		bricks: Array<BrickData>;
 		fields: Array<FieldResponse>;
 	};

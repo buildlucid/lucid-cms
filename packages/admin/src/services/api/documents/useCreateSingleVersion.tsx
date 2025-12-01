@@ -8,7 +8,6 @@ export interface Params {
 	collectionKey: string;
 	documentId: number;
 	body: {
-		publish: boolean;
 		bricks?: Array<BrickData>;
 		fields?: Array<FieldResponse>;
 	};

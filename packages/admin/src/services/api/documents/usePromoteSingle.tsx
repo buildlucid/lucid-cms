@@ -2,6 +2,7 @@ import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { DocumentVersionType, ResponseBody, ErrorResponse } from "@types";
+import type { Accessor } from "solid-js";
 
 export interface Params {
 	id: number;
@@ -27,7 +28,7 @@ interface UsePromoteSingleProps {
 	onSuccess?: () => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
 	getCollectionName: () => string;
-	getVersionType: () => Exclude<DocumentVersionType, "revision">;
+	getVersionType: Accessor<DocumentVersionType | undefined>;
 }
 
 const usePromoteSingle = (props: UsePromoteSingleProps) => {

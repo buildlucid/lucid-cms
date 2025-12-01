@@ -19,7 +19,7 @@ export function useDocumentUIState(props: {
 	documentQuery: ReturnType<typeof api.documents.useGetSingle>;
 	document: Accessor<DocumentResponse | undefined>;
 	mode: "create" | "edit" | "revisions";
-	version: "latest" | string;
+	version: Accessor<"latest" | string>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
@@ -27,7 +27,9 @@ export function useDocumentUIState(props: {
 	updateSingleVersionMutation?: ReturnType<
 		typeof api.documents.useUpdateSingleVersion
 	>;
-
+	promoteToPublishedMutation?: ReturnType<
+		typeof api.documents.usePromoteSingle
+	>;
 	selectedRevision?: Accessor<number | undefined>;
 	restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
 }) {
@@ -68,6 +70,13 @@ export function useDocumentUIState(props: {
 	 */
 	const isAutoSaving = createMemo(() => {
 		return props.updateSingleVersionMutation?.action.isPending || false;
+	});
+
+	/**
+	 * Checks if the promote to published mutation is currently running
+	 */
+	const isPromotingToPublished = createMemo(() => {
+		return props.promoteToPublishedMutation?.action.isPending || false;
 	});
 
 	/**
@@ -119,13 +128,6 @@ export function useDocumentUIState(props: {
 	 * Determines if you can publish the document
 	 */
 	const canPublishDocument = createMemo(() => {
-		// If published promotedFrom is equal to the current draft versionId, then its already published
-		if (
-			props.document()?.version.published?.promotedFrom ===
-			props.document()?.versionId
-		)
-			return false;
-
 		// Fallback, if the document has been mutated and not saved
 		return !brickStore.get.documentMutated && !isSaving() && !mutateErrors();
 	});
@@ -147,7 +149,7 @@ export function useDocumentUIState(props: {
 		}
 
 		// lock version, if not the latest version
-		if (props.version !== "latest") {
+		if (props.version() !== "latest") {
 			return true;
 		}
 
@@ -180,7 +182,7 @@ export function useDocumentUIState(props: {
 		if (isBuilderLocked()) return false;
 
 		if (props.mode === "create") return true;
-		if (props.version === "latest") return true;
+		if (props.version() === "latest") return true;
 
 		return false;
 	});
@@ -190,7 +192,7 @@ export function useDocumentUIState(props: {
 	 */
 	const showPublishButton = createMemo(() => {
 		if (props.mode === "create" || isBuilderLocked()) return false;
-		if (props.version !== "latest") return false;
+		if (props.version() !== "latest") return false;
 		return true;
 	});
 
@@ -218,7 +220,7 @@ export function useDocumentUIState(props: {
 	const hasAutoSavePermission = createMemo(() => {
 		if (props.mode === "create") return false;
 		if (props.mode === "revisions") return false;
-		if (props.version !== "latest") return false;
+		if (props.version() !== "latest") return false;
 		if (props.document()?.isDeleted) return false;
 
 		return (
@@ -287,6 +289,7 @@ export function useDocumentUIState(props: {
 		collectionNeedsMigrating,
 		useAutoSave,
 		hasAutoSavePermission,
+		isPromotingToPublished,
 	};
 }
 export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;
