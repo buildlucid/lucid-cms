@@ -197,7 +197,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				"view-transition-name": `brick-item-${props.brick.ref}`,
 			}}
 			class={classNames(
-				"drag-item w-full bg-card-base/40 border border-border rounded-md mb-4 last:mb-0 focus-within:outline-hidden focus-within:ring-1 ring-inset ring-primary-base",
+				"drag-item w-full bg-card-base border border-border rounded-md mb-4 last:mb-0 ring-inset ring-primary-base",
 				{
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.brick.ref,
 					"ring-1 ring-inset":

@@ -24,7 +24,7 @@ export default {
                     hover: "#171717",
                 },
                 card: {
-                    base: "#171717",
+                    base: "#0F0F0F",
                     hover: "#242424",
                     contrast: "#a1a1a1",
                 },

@@ -19,6 +19,7 @@ interface CheckboxInputProps {
 	errors?: ErrorResult | FieldError;
 	noMargin?: boolean;
 	class?: string;
+	fullWidth?: boolean;
 }
 
 export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
@@ -28,8 +29,9 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classnames("relative w-full", props.class, {
+			class={classnames("relative", props.class, {
 				"mb-3 last:mb-0": props.noMargin !== true,
+				"w-full": props.fullWidth !== false,
 			})}
 		>
 			<div class="flex items-center justify-between">

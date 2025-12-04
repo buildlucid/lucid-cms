@@ -110,8 +110,8 @@ export const MediaFolderCard: Component<{
 						}
 					}}
 					copy={{}}
-					theme="fit"
 					noMargin={true}
+					fullWidth={false}
 				/>
 			</Show>
 			<div class="w-full flex flex-col -mt-px">
