@@ -16,7 +16,7 @@ const PageCollection = new CollectionBuilder("page", {
 	config: {
 		useTranslations: true,
 		useRevisions: true,
-		// useAutoSave: true,
+		useAutoSave: true,
 		environments: [
 			{
 				key: "staging",

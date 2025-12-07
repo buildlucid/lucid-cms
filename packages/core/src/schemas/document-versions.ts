@@ -21,6 +21,10 @@ export const documentVersionResponseSchema = z.object({
 		description: "ID of the version this was promoted from, if applicable",
 		example: 122,
 	}),
+	contentId: z.string().nullable().meta({
+		description: "The content ID of the version",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+	}),
 	createdAt: z.string().nullable().meta({
 		description: "Timestamp when this version was created",
 		example: "2025-04-20T14:30:00Z",

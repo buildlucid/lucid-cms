@@ -64,7 +64,7 @@ export const DocumentActions: Component<{
 								{
 									"opacity-50 cursor-not-allowed":
 										props.deletePermission === false || isDisabled(),
-									"text-title hover:text-error-contrast hover:bg-error-hover":
+									"hover:text-error-contrast hover:bg-error-hover":
 										props.deletePermission !== false && !isDisabled(),
 								},
 							)}

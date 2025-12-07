@@ -82,6 +82,12 @@ const createVersionsTable = (props: {
 						},
 					},
 					{
+						name: "content_id",
+						source: "core",
+						type: props.db.getDataType("text"),
+						nullable: false,
+					},
+					{
 						name: "created_by",
 						source: "core",
 						type: props.db.getDataType("integer"),

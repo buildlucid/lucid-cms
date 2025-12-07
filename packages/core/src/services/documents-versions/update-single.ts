@@ -8,6 +8,7 @@ import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentBrickServices, documentServices } from "../index.js";
+import { randomUUID } from "node:crypto";
 
 const updateSingle: ServiceFn<
 	[
@@ -202,6 +203,7 @@ const updateSingle: ServiceFn<
 		{
 			where: [{ key: "id", operator: "=", value: data.versionId }],
 			data: {
+				content_id: randomUUID(),
 				updated_by: data.userId,
 				updated_at: new Date().toISOString(),
 			},

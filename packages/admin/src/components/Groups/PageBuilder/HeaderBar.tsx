@@ -82,6 +82,9 @@ export const HeaderBar: Component<{
 				}),
 				status: {
 					isPublished: isPublished,
+					upToDate:
+						props.state.document()?.version[environment.key]?.contentId ===
+						props.state.document()?.version.latest?.contentId,
 				},
 			});
 		}
@@ -109,10 +112,11 @@ export const HeaderBar: Component<{
 		return environments.map((environment) => {
 			const label =
 				helpers.getLocaleValue({ value: environment.name }) || environment.key;
-			// TODO: re-able this when we have a way to determine if auto-saved versions match the environment. Currently if you auto-save, what we have bellow would return true still, despite the content now being out of sync.
-			// const isPromoted =
-			// 	props.state.document()?.version[environment.key]?.promotedFrom ===
-			// 	props.state.document()?.versionId;
+
+			const isPromoted =
+				props.state.document()?.version[environment.key]?.contentId ===
+				props.state.document()?.version.latest?.contentId;
+
 			return {
 				label,
 				value: environment.key as ReleaseTriggerOption["value"],
@@ -121,10 +125,10 @@ export const HeaderBar: Component<{
 					documentId: props.state.documentID(),
 					status: environment.key,
 				}),
-				// disabled: isPromoted,
+				disabled: isPromoted,
 				status: {
 					isReleased: !!document.version?.[environment.key],
-					// upToDate: isPromoted,
+					upToDate: isPromoted,
 				},
 			};
 		});

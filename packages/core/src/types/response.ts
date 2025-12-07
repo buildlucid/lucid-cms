@@ -343,6 +343,7 @@ export interface DocumentVersionResponse {
 	id: number;
 	versionType: DocumentVersionType;
 	promotedFrom: number | null;
+	contentId: string;
 	createdAt: string | null;
 	createdBy: number | null;
 	document: {
@@ -371,6 +372,7 @@ export interface DocumentResponse {
 		{
 			id: number;
 			promotedFrom: number | null;
+			contentId: string;
 			createdAt: string | null;
 			createdBy: number | null;
 		} | null
@@ -406,6 +408,7 @@ export interface ClientDocumentResponse {
 		{
 			id: number;
 			promotedFrom: number | null;
+			contentId: string;
 			createdAt: string | null;
 			createdBy: number | null;
 		} | null

@@ -5,7 +5,6 @@ import classNames from "classnames";
 import { useLocation, useNavigate } from "@solidjs/router";
 import T from "@/translations";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import Pill from "@/components/Partials/Pill";
 
 export interface ViewSelectorOption {
 	label: string;
@@ -14,6 +13,7 @@ export interface ViewSelectorOption {
 	location: string;
 	status?: {
 		isPublished?: boolean;
+		upToDate?: boolean;
 	};
 }
 
@@ -59,10 +59,13 @@ export const ViewSelector: Component<{
 				<span
 					class={classNames("size-3 rounded-full border block", {
 						"bg-primary-base/40 border-primary-base/60":
-							currentOption()?.type === "latest",
+							currentOption()?.type === "latest" ||
+							(currentOption()?.type === "environment" &&
+								currentOption()?.status?.upToDate === true),
 						"bg-warning-base/40 border-warning-base/60":
-							currentOption()?.type === "environment" ||
-							currentOption()?.type === "revision",
+							currentOption()?.type === "revision" ||
+							(currentOption()?.type === "environment" &&
+								currentOption()?.status?.upToDate === false),
 					})}
 				/>
 				<span class="group-hover:text-body transition-colors duration-200 inline-block">
@@ -89,11 +92,11 @@ export const ViewSelector: Component<{
 							<li>
 								<DropdownMenu.Item
 									class={classNames(
-										"flex items-center justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
+										"flex items-center justify-between hover:bg-dropdown-hover hover:text-dropdown-contrast px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
 										{
 											"bg-dropdown-hover text-dropdown-contrast":
 												currentOption()?.location === item.location,
-											"cursor-not-allowed": item.disabled,
+											"hover:bg-dropdown-base! hover:text-body!": item.disabled,
 										},
 									)}
 									disabled={item.disabled}
@@ -110,12 +113,31 @@ export const ViewSelector: Component<{
 									>
 										{item.label}
 									</span>
-									<Show when={currentOption()?.location === item.location}>
-										<div class="w-1.5 h-1.5 rounded-full bg-primary-base" />
-									</Show>
-									<Show when={item.status?.isPublished === false}>
-										<Pill theme="warning">{T()("not_released")}</Pill>
-									</Show>
+									<span
+										class={classNames("w-2.5 h-2.5 rounded-full border", {
+											"bg-primary-base/40 border-primary-base/60":
+												item.type === "latest" ||
+												(item.type === "environment" &&
+													item.status?.isPublished === true &&
+													item.status?.upToDate === true),
+											"bg-warning-base/40 border-warning-base/60":
+												item.type === "environment" &&
+												item.status?.isPublished === true &&
+												item.status?.upToDate === false,
+											"bg-error-base/40 border-error-base/60":
+												item.type === "environment" &&
+												item.status?.isPublished === false,
+										})}
+										title={
+											item.type === "environment"
+												? item.status?.isPublished === false
+													? T()("not_released")
+													: item.status?.upToDate
+														? T()("released_up_to_date")
+														: T()("released_out_of_date")
+												: undefined
+										}
+									/>
 								</DropdownMenu.Item>
 							</li>
 						)}
@@ -125,7 +147,7 @@ export const ViewSelector: Component<{
 							<li>
 								<DropdownMenu.Item
 									class={classNames(
-										"flex items-center justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
+										"flex items-center justify-between hover:bg-dropdown-hover hover:text-dropdown-contrast px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
 										{
 											"bg-dropdown-hover text-dropdown-contrast":
 												currentOption()?.location === item.location,
@@ -140,9 +162,7 @@ export const ViewSelector: Component<{
 									}}
 								>
 									<span class="line-clamp-1 mr-2.5">{item.label}</span>
-									<Show when={currentOption()?.location === item.location}>
-										<div class="w-1.5 h-1.5 rounded-full bg-primary-base" />
-									</Show>
+									<span class="w-2.5 h-2.5 rounded-full border bg-warning-base/40 border-warning-base/60" />
 								</DropdownMenu.Item>
 							</li>
 						)}

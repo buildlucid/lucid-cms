@@ -7,6 +7,7 @@ import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentBrickServices } from "../index.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * Creates a new version. This is always for the "latest" version type
@@ -90,6 +91,7 @@ const createSingle: ServiceFn<
 				collection_key: data.collection.key,
 				document_id: data.documentId,
 				type: versionType,
+				content_id: randomUUID(),
 				created_by: data.userId,
 				updated_by: data.userId,
 			},

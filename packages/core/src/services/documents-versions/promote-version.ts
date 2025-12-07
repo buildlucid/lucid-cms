@@ -75,7 +75,7 @@ const promoteVersion: ServiceFn<
 	const [versionRes, bricksQueryRes] = await Promise.all([
 		Versions.selectSingle(
 			{
-				select: ["id", "type", "document_id"],
+				select: ["id", "type", "document_id", "content_id"],
 				where: [
 					{
 						key: "id",
@@ -239,6 +239,7 @@ const promoteVersion: ServiceFn<
 					collection_key: data.collectionKey,
 					type: data.toVersionType,
 					promoted_from: data.fromVersionId,
+					content_id: versionRes.data.content_id,
 					created_by: data.userId,
 					updated_by: data.userId,
 				},

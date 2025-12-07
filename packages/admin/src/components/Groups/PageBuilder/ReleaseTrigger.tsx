@@ -1,10 +1,10 @@
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
-import { DropdownMenu } from "@kobalte/core";
+import { DropdownMenu, Tooltip } from "@kobalte/core";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import classNames from "classnames";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import Pill from "@/components/Partials/Pill";
+import TooltipContent from "@/components/Partials/TooltipContent";
 import spawnToast from "@/utils/spawn-toast";
 import type { DocumentVersionType } from "@types";
 import { FaSolidChevronDown } from "solid-icons/fa";
@@ -124,7 +124,7 @@ export const ReleaseTrigger: Component<{
 											class={classNames(
 												"flex items-center gap-3 justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors text-left hover:bg-dropdown-hover hover:text-dropdown-contrast",
 												{
-													"opacity-50 cursor-not-allowed":
+													"hover:bg-dropdown-base! hover:text-body!":
 														option.disabled === true || isDisabled(),
 												},
 											)}
@@ -134,15 +134,35 @@ export const ReleaseTrigger: Component<{
 												props.onSelect(option);
 											}}
 										>
-											<span class="line-clamp-1">
+											<span
+												class={classNames("line-clamp-1", {
+													"opacity-60":
+														option.disabled === true || isDisabled(),
+												})}
+											>
 												{T()("release_to")} {option.label}
 											</span>
-											<Show when={option.status?.isReleased === false}>
-												<Pill theme="warning">{T()("not_released")}</Pill>
-											</Show>
-											<Show when={option.status?.upToDate === true}>
-												<Pill theme="warning">{T()("released")}</Pill>
-											</Show>
+											<span
+												class={classNames("w-2.5 h-2.5 rounded-full border", {
+													"bg-primary-base/40 border-primary-base/60":
+														option.status?.isReleased === true &&
+														option.status?.upToDate === true,
+													"bg-warning-base/40 border-warning-base/60":
+														option.status?.isReleased === true &&
+														option.status?.upToDate === false,
+													"bg-error-base/40 border-error-base/60":
+														option.status?.isReleased === false,
+												})}
+												title={
+													option.status?.isReleased === true &&
+													option.status?.upToDate === true
+														? T()("released_up_to_date")
+														: option.status?.isReleased === true &&
+																option.status?.upToDate === false
+															? T()("released_out_of_date")
+															: T()("not_released")
+												}
+											/>
 										</DropdownMenu.Item>
 									</li>
 								)}
