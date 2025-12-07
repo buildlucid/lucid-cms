@@ -1,10 +1,9 @@
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
-import { DropdownMenu, Tooltip } from "@kobalte/core";
+import { DropdownMenu } from "@kobalte/core";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import classNames from "classnames";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import TooltipContent from "@/components/Partials/TooltipContent";
 import spawnToast from "@/utils/spawn-toast";
 import type { DocumentVersionType } from "@types";
 import { FaSolidChevronDown } from "solid-icons/fa";

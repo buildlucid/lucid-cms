@@ -250,9 +250,9 @@ export const HeaderBar: Component<{
 						<Show when={props.state.ui.showUpsertButton?.()}>
 							<ReleaseTrigger
 								options={releaseOptions}
-								onSelect={(option) => {
+								onSelect={async (option) => {
 									props.state.autoSave?.debouncedAutoSave.clear();
-									props.actions?.publishDocumentAction?.(option.value);
+									await props.actions?.publishDocumentAction?.(option.value);
 									navigate(option.route);
 								}}
 								onSave={() => {

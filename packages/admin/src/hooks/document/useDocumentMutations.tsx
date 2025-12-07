@@ -164,7 +164,7 @@ export function useDocumentMutations(props: {
 		}
 		setReleaseVersionType(targetVersionType);
 
-		promoteToPublishedMutation.action.mutate({
+		await promoteToPublishedMutation.action.mutateAsync({
 			collectionKey: props.collectionKey(),
 			id: props.documentId() as number,
 			versionId: versionId,
