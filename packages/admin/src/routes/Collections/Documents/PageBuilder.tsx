@@ -19,6 +19,7 @@ import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
+import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import Alert from "@/components/Blocks/Alert";
 import brickStore from "@/store/brickStore";
 import userPreferencesStore from "@/store/userPreferencesStore";
@@ -35,6 +36,17 @@ const CollectionsDocumentsEditRoute: Component<
 	// Hooks & State
 	const params = useParams();
 	const versionType = createMemo(() => props.version || params.versionType);
+	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
+
+	const shouldBlockNavigation = createMemo(() => {
+		if (versionType() !== "latest") return false;
+		return isDocumentMutated();
+	});
+	const navigationGuard = useNavigationGuard(shouldBlockNavigation);
+
+	const autoSaveUserEnabled = createMemo(
+		() => userPreferencesStore.get.autoSaveEnabled,
+	);
 
 	const docState = useDocumentState({
 		mode: props.mode,
@@ -62,11 +74,8 @@ const CollectionsDocumentsEditRoute: Component<
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		promoteToPublishedMutation: mutations.promoteToPublishedMutation,
+		autoSaveUserEnabled: autoSaveUserEnabled,
 	});
-
-	const autoSaveUserEnabled = createMemo(
-		() => userPreferencesStore.get.autoSaveEnabled,
-	);
 
 	const autoSave = useDocumentAutoSave({
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
@@ -89,6 +98,7 @@ const CollectionsDocumentsEditRoute: Component<
 		brickStore.get.setBricks(docState.document(), docState.collection());
 		brickStore.get.setRefs(docState.document());
 		brickStore.set("locked", uiState.isBuilderLocked());
+		brickStore.get.captureInitialSnapshot();
 	};
 
 	createEffect(
@@ -134,6 +144,7 @@ const CollectionsDocumentsEditRoute: Component<
 						autoSave: autoSave,
 						autoSaveUserEnabled: autoSaveUserEnabled,
 						showRevisionNavigation: uiState.showRevisionNavigation,
+						isDocumentMutated: isDocumentMutated,
 					}}
 					actions={{
 						upsertDocumentAction: mutations.upsertDocumentAction,
@@ -190,6 +201,7 @@ const CollectionsDocumentsEditRoute: Component<
 						mutations: mutations,
 						state: docState,
 						uiState: uiState,
+						navigationGuard: navigationGuard,
 					}}
 				/>
 			</Match>

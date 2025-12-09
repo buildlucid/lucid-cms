@@ -1,5 +1,6 @@
 import { createStore, produce } from "solid-js/store";
 import { nanoid } from "nanoid";
+import equal from "fast-deep-equal/es6";
 import brickHelpers from "@/utils/brick-helpers";
 import type {
 	FieldError,
@@ -13,8 +14,6 @@ import type {
 	FieldTypes,
 	BrickError,
 	DocumentRef,
-	MediaRef,
-	UserRef,
 } from "@types";
 import type { FocusState } from "@/hooks/useFocusPreservation";
 
@@ -27,11 +26,19 @@ export interface BrickData {
 	fields: Array<FieldResponse>;
 }
 
+interface BrickSnapshot {
+	ref: string;
+	key: string;
+	order: number;
+	type: "builder" | "fixed" | "collection-fields";
+	fields: Array<FieldResponse>;
+}
+
 type BrickStoreT = {
 	bricks: Array<BrickData>;
 	fieldsErrors: Array<FieldError>;
 	brickErrors: Array<BrickError>;
-	documentMutated: boolean;
+	initialSnapshot: BrickSnapshot[] | null;
 	autoSaveCounter: number;
 	skipAutoSave: boolean;
 	locked: boolean;
@@ -48,12 +55,12 @@ type BrickStoreT = {
 	};
 	collectionTranslations: boolean;
 	focusState: FocusState | null;
-	// functions
 	reset: () => void;
 	setBricks: (
 		document?: DocumentResponse,
 		collection?: CollectionResponse,
 	) => void;
+	captureInitialSnapshot: () => void;
 	addBrick: (props: {
 		brickConfig: CollectionBrickConfig;
 	}) => void;
@@ -117,8 +124,8 @@ const [get, set] = createStore<BrickStoreT>({
 	bricks: [],
 	fieldsErrors: [],
 	brickErrors: [],
+	initialSnapshot: null,
 	locked: false,
-	documentMutated: false,
 	autoSaveCounter: 0,
 	skipAutoSave: true,
 	collectionTranslations: false,
@@ -132,12 +139,15 @@ const [get, set] = createStore<BrickStoreT>({
 		set("bricks", []);
 		set("fieldsErrors", []);
 		set("brickErrors", []);
-		set("documentMutated", false);
+		set("initialSnapshot", null);
 		set("autoSaveCounter", 0);
 		set("skipAutoSave", true);
 		set("collectionTranslations", false);
 		set("refs", {});
 		set("focusState", null);
+	},
+	captureInitialSnapshot() {
+		set("initialSnapshot", createBricksSnapshot(get.bricks));
 	},
 	// Bricks
 	setBricks(document, collection) {
@@ -198,7 +208,6 @@ const [get, set] = createStore<BrickStoreT>({
 				});
 			}),
 		);
-		set("documentMutated", true);
 	},
 	removeBrick(brickIndex) {
 		set(
@@ -208,7 +217,6 @@ const [get, set] = createStore<BrickStoreT>({
 				draft.splice(brickIndex, 1);
 			}),
 		);
-		set("documentMutated", true);
 	},
 	toggleBrickOpen(brickIndex) {
 		set(
@@ -217,7 +225,6 @@ const [get, set] = createStore<BrickStoreT>({
 				draft[brickIndex].open = draft[brickIndex].open !== true;
 			}),
 		);
-		set("documentMutated", true);
 	},
 	swapBrickOrder(props) {
 		set(
@@ -235,7 +242,6 @@ const [get, set] = createStore<BrickStoreT>({
 				draft.sort((a, b) => a.order - b.order);
 			}),
 		);
-		set("documentMutated", true);
 	},
 	// Fields
 	setFieldValue(params) {
@@ -263,7 +269,6 @@ const [get, set] = createStore<BrickStoreT>({
 				}
 			}),
 		);
-		set("documentMutated", true);
 		set("autoSaveCounter", (prev) => prev + 1);
 	},
 	addField(params) {
@@ -383,7 +388,6 @@ const [get, set] = createStore<BrickStoreT>({
 				});
 			}),
 		);
-		set("documentMutated", true);
 	},
 	removeRepeaterGroup(params) {
 		set(
@@ -409,7 +413,6 @@ const [get, set] = createStore<BrickStoreT>({
 				field.groups.splice(targetGroupIndex, 1);
 			}),
 		);
-		set("documentMutated", true);
 	},
 	swapGroupOrder(params) {
 		set(
@@ -444,7 +447,6 @@ const [get, set] = createStore<BrickStoreT>({
 				field.groups.sort((a, b) => a.order - b.order);
 			}),
 		);
-		set("documentMutated", true);
 	},
 	toggleGroupOpen: (props) => {
 		set(
@@ -466,7 +468,6 @@ const [get, set] = createStore<BrickStoreT>({
 				group.open = group.open !== true;
 			}),
 		);
-		set("documentMutated", true);
 	},
 	setRefs(document) {
 		set("refs", document?.refs || {});
@@ -510,9 +511,29 @@ const [get, set] = createStore<BrickStoreT>({
 	},
 });
 
+const createBrickSnapshot = (brick: BrickData): BrickSnapshot => ({
+	ref: brick.ref,
+	key: brick.key,
+	order: brick.order,
+	type: brick.type,
+	fields: JSON.parse(JSON.stringify(brick.fields)),
+});
+
+const createBricksSnapshot = (bricks: BrickData[]): BrickSnapshot[] =>
+	bricks.map(createBrickSnapshot);
+
+const getDocumentMutated = (): boolean => {
+	if (get.initialSnapshot === null) {
+		return get.bricks.some((b) => b.type === "builder" || b.fields.length > 0);
+	}
+	const currentSnapshot = createBricksSnapshot(get.bricks);
+	return !equal(currentSnapshot, get.initialSnapshot);
+};
+
 const brickStore = {
 	get,
 	set,
+	getDocumentMutated,
 };
 
 export default brickStore;

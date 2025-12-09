@@ -63,7 +63,7 @@ export function useDocumentMutations(props: {
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
-			brickStore.set("documentMutated", false);
+			brickStore.get.captureInitialSnapshot();
 		},
 		onError: (errors) => {
 			brickStore.set(
@@ -74,7 +74,6 @@ export function useDocumentMutations(props: {
 				"brickErrors",
 				getBodyError<BrickError[]>("bricks", errors) || [],
 			);
-			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: props.collectionSingularName,
 	});
@@ -87,7 +86,7 @@ export function useDocumentMutations(props: {
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
-			brickStore.set("documentMutated", false);
+			brickStore.get.captureInitialSnapshot();
 
 			restoreFocus(brickStore.get.focusState);
 			brickStore.set("focusState", null);
@@ -97,7 +96,6 @@ export function useDocumentMutations(props: {
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
 			);
-			brickStore.set("documentMutated", false);
 
 			restoreFocus(brickStore.get.focusState);
 			brickStore.set("focusState", null);
@@ -108,14 +106,13 @@ export function useDocumentMutations(props: {
 	const promoteToPublishedMutation = api.documents.usePromoteSingle({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
-			brickStore.set("documentMutated", false);
+			brickStore.get.captureInitialSnapshot();
 		},
 		onError: (errors) => {
 			brickStore.set(
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
 			);
-			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: props.collectionSingularName,
 		getVersionType: releaseVersionType,

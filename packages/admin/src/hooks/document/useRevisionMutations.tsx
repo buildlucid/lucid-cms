@@ -17,7 +17,6 @@ export function useRevisionMutations(props: {
 	const restoreRevision = api.documents.useRestoreRevision({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
-			brickStore.set("documentMutated", false);
 
 			navigate(
 				getDocumentRoute("edit", {
@@ -29,7 +28,6 @@ export function useRevisionMutations(props: {
 		},
 		onError: () => {
 			brickStore.set("fieldsErrors", []);
-			brickStore.set("documentMutated", false);
 		},
 		getCollectionName: props.collectionSingularName,
 	});

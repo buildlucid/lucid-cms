@@ -32,6 +32,7 @@ export function useDocumentUIState(props: {
 	>;
 	selectedRevision?: Accessor<number | undefined>;
 	restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
+	autoSaveUserEnabled?: Accessor<boolean>;
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
@@ -108,20 +109,27 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
-	 * Determines if the auto save is enabled
+	 * Determines if the auto save is enabled on the collection
 	 */
 	const useAutoSave = createMemo(() => {
 		return props.collection()?.config.useAutoSave;
 	});
 
 	/**
-	 * Determines if you can save the document
-	 * - dont disabled the save button when auto-save is enabled. This allows users to create revisions.
+	 * Determines if auto-save is actively running (both collection config AND user preference enabled)
 	 */
-	const canSaveDocument = createMemo(() => {
-		if (useAutoSave()) return false;
+	const isAutoSaveActive = createMemo(() => {
+		return useAutoSave() && props.autoSaveUserEnabled?.();
+	});
 
-		return !brickStore.get.documentMutated && !isSaving();
+	/**
+	 * Determines if the save button should be disabled
+	 */
+	const saveDisabled = createMemo(() => {
+		if (isAutoSaveActive()) {
+			return isSaving() || isAutoSaving() || brickStore.getDocumentMutated();
+		}
+		return !brickStore.getDocumentMutated() || isSaving();
 	});
 
 	/**
@@ -129,7 +137,7 @@ export function useDocumentUIState(props: {
 	 */
 	const canPublishDocument = createMemo(() => {
 		// Fallback, if the document has been mutated and not saved
-		return !brickStore.get.documentMutated && !isSaving() && !mutateErrors();
+		return !brickStore.getDocumentMutated() && !isSaving() && !mutateErrors();
 	});
 
 	/**
@@ -273,7 +281,7 @@ export function useDocumentUIState(props: {
 		isSaving,
 		isAutoSaving,
 		brickTranslationErrors,
-		canSaveDocument,
+		saveDisabled,
 		canPublishDocument,
 		isBuilderLocked,
 		isPublished,
@@ -290,6 +298,7 @@ export function useDocumentUIState(props: {
 		useAutoSave,
 		hasAutoSavePermission,
 		isPromotingToPublished,
+		isAutoSaveActive,
 	};
 }
 export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;

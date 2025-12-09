@@ -61,7 +61,7 @@ export const SimplifiedPagination: Component<{
 			<Show when={lastPage() > 1}>
 				<div class="flex border border-border rounded-md overflow-hidden w-full">
 					<button
-						class="h-9 w-1/2 flex items-center justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50"
+						class="h-9 w-1/2 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50"
 						onClick={() => handlePageChange(page() - 1)}
 						disabled={page() === 1}
 						type="button"
@@ -70,7 +70,7 @@ export const SimplifiedPagination: Component<{
 						<FaSolidChevronLeft />
 					</button>
 					<button
-						class="h-9 w-1/2 flex items-center border-l border-border justify-center text-title hover:bg-primary-base hover:text-primary-contrast duration-200 transition-colors disabled:opacity-50"
+						class="h-9 w-1/2 flex items-center border-l border-border justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50"
 						onClick={() => handlePageChange(page() + 1)}
 						disabled={page() === lastPage()}
 						type="button"

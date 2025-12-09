@@ -1,6 +1,5 @@
 import { DropdownMenu } from "@kobalte/core";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
-import { FaSolidChevronRight } from "solid-icons/fa";
 import classNames from "classnames";
 import { useLocation, useNavigate } from "@solidjs/router";
 import T from "@/translations";
@@ -19,6 +18,7 @@ export interface ViewSelectorOption {
 
 export const ViewSelector: Component<{
 	options: Accessor<ViewSelectorOption[]>;
+	isDocumentMutated?: Accessor<boolean>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks & State
@@ -59,11 +59,14 @@ export const ViewSelector: Component<{
 				<span
 					class={classNames("size-3 rounded-full border block", {
 						"bg-primary-base/40 border-primary-base/60":
-							currentOption()?.type === "latest" ||
+							(currentOption()?.type === "latest" &&
+								!props.isDocumentMutated?.()) ||
 							(currentOption()?.type === "environment" &&
 								currentOption()?.status?.upToDate === true),
 						"bg-warning-base/40 border-warning-base/60":
 							currentOption()?.type === "revision" ||
+							(currentOption()?.type === "latest" &&
+								props.isDocumentMutated?.()) ||
 							(currentOption()?.type === "environment" &&
 								currentOption()?.status?.upToDate === false),
 					})}
@@ -116,26 +119,33 @@ export const ViewSelector: Component<{
 									<span
 										class={classNames("w-2.5 h-2.5 rounded-full border", {
 											"bg-primary-base/40 border-primary-base/60":
-												item.type === "latest" ||
+												(item.type === "latest" &&
+													!props.isDocumentMutated?.()) ||
 												(item.type === "environment" &&
 													item.status?.isPublished === true &&
 													item.status?.upToDate === true),
 											"bg-warning-base/40 border-warning-base/60":
-												item.type === "environment" &&
-												item.status?.isPublished === true &&
-												item.status?.upToDate === false,
+												(item.type === "latest" &&
+													props.isDocumentMutated?.()) ||
+												(item.type === "environment" &&
+													item.status?.isPublished === true &&
+													item.status?.upToDate === false),
 											"bg-error-base/40 border-error-base/60":
 												item.type === "environment" &&
 												item.status?.isPublished === false,
 										})}
 										title={
-											item.type === "environment"
-												? item.status?.isPublished === false
-													? T()("not_released")
-													: item.status?.upToDate
-														? T()("released_up_to_date")
-														: T()("released_out_of_date")
-												: undefined
+											item.type === "latest"
+												? props.isDocumentMutated?.()
+													? T()("unsaved")
+													: undefined
+												: item.type === "environment"
+													? item.status?.isPublished === false
+														? T()("not_released")
+														: item.status?.upToDate
+															? T()("released_up_to_date")
+															: T()("released_out_of_date")
+													: undefined
 										}
 									/>
 								</DropdownMenu.Item>

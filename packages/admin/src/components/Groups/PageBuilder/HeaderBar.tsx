@@ -43,6 +43,7 @@ export const HeaderBar: Component<{
 		autoSaveUserEnabled?: Accessor<boolean>;
 		showRevisionNavigation: UseDocumentUIState["showRevisionNavigation"];
 		selectedRevision?: UseRevisionsState["documentId"];
+		isDocumentMutated?: Accessor<boolean>;
 	};
 	actions: {
 		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
@@ -260,7 +261,10 @@ export const HeaderBar: Component<{
 								</h2>
 							</Show>
 							<Show when={showViewSelector()}>
-								<ViewSelector options={viewOptions} />
+								<ViewSelector
+									options={viewOptions}
+									isDocumentMutated={props.state.isDocumentMutated}
+								/>
 							</Show>
 						</div>
 						<Show when={props.state.collection()?.details.summary}>
@@ -308,7 +312,7 @@ export const HeaderBar: Component<{
 									props.state.autoSave?.debouncedAutoSave.clear();
 									props.actions?.upsertDocumentAction?.();
 								}}
-								saveDisabled={props.state.ui.canSaveDocument?.()}
+								saveDisabled={props.state.ui.saveDisabled?.()}
 								savePermission={props.state.ui.hasSavePermission?.()}
 								disabled={!props.state.ui.canPublishDocument?.()}
 								permission={props.state.ui.hasPublishPermission?.()}

@@ -33,7 +33,7 @@ export function useDocumentAutoSave(props: {
 	}, 800);
 
 	createEffect(() => {
-		if (!brickStore.get.documentMutated) return;
+		if (!brickStore.getDocumentMutated()) return;
 		if (brickStore.get.autoSaveCounter === 0) return;
 		if (!props.hasAutoSavePermission()) return;
 		if (!props.autoSaveUserEnabled()) return;
