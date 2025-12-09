@@ -7,11 +7,14 @@ import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
 import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
 import { DocumentActions } from "./DocumentActions";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import userPreferencesStore from "@/store/userPreferencesStore";
 import DateText from "@/components/Partials/DateText";
+import Spinner from "@/components/Partials/Spinner";
 import {
 	FaSolidLanguage,
 	FaSolidClock,
 	FaSolidCalendarPlus,
+	FaSolidRotate,
 } from "solid-icons/fa";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
@@ -23,6 +26,7 @@ import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
 import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
 import helpers from "@/utils/helpers";
 import { useNavigate } from "@solidjs/router";
+import classNames from "classnames";
 
 export const HeaderBar: Component<{
 	mode: "create" | "edit" | "revisions";
@@ -36,6 +40,7 @@ export const HeaderBar: Component<{
 		document: Accessor<DocumentResponse | undefined>;
 		ui: UseDocumentUIState;
 		autoSave?: UseDocumentAutoSave;
+		autoSaveUserEnabled?: Accessor<boolean>;
 		showRevisionNavigation: UseDocumentUIState["showRevisionNavigation"];
 		selectedRevision?: UseRevisionsState["documentId"];
 	};
@@ -145,6 +150,20 @@ export const HeaderBar: Component<{
 		);
 	});
 
+	const showAutoSaveToggle = createMemo(() => {
+		if (props.mode === "create") return false;
+		if (props.mode === "revisions") return false;
+		return props.state.collection()?.config.useAutoSave === true;
+	});
+
+	const isSavingOrAutoSaving = createMemo(() => {
+		return (
+			props.state.ui.isSaving?.() ||
+			props.state.ui.isAutoSaving?.() ||
+			props.state.ui.isPromotingToPublished?.()
+		);
+	});
+
 	// ----------------------------------
 	// Render
 	return (
@@ -190,11 +209,41 @@ export const HeaderBar: Component<{
 								<FaSolidClock size={12} />
 								<DateText date={props.state.document()?.updatedAt} />
 							</div>
+							<Show when={showAutoSaveToggle()}>
+								<button
+									type="button"
+									onClick={() => userPreferencesStore.get.toggleAutoSave()}
+									class={classNames(
+										"flex items-center justify-center w-6 h-6 rounded transition-colors",
+										{
+											"text-primary-base hover:text-primary-hover":
+												props.state.autoSaveUserEnabled?.(),
+											"text-body/40 hover:text-body":
+												!props.state.autoSaveUserEnabled?.(),
+										},
+									)}
+									title={
+										props.state.autoSaveUserEnabled?.()
+											? `${T()("auto_save")} - ${T()("enabled")}`
+											: `${T()("auto_save")} - ${T()("disabled")}`
+									}
+								>
+									<FaSolidRotate size={12} />
+								</button>
+							</Show>
 						</div>
 					</Show>
 				</div>
 			</div>
-			<div class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex items-center justify-between gap-2.5 ">
+			<div class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex items-center justify-between gap-2.5">
+				<Show when={isSavingOrAutoSaving()}>
+					<div class="absolute inset-2 z-50 bg-white/5 rounded-md flex items-center justify-center pointer-events-auto animate-pulse">
+						<div class="flex items-center gap-2.5">
+							<Spinner size="sm" />
+							<span class="sr-only">{T()("saving")}</span>
+						</div>
+					</div>
+				</Show>
 				<div class="flex items-center gap-2.5">
 					<div class="flex flex-col gap-1">
 						<div class="flex items-center gap-2">

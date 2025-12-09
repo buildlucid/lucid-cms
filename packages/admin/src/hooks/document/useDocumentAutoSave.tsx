@@ -12,6 +12,7 @@ export function useDocumentAutoSave(props: {
 	document: Accessor<DocumentResponse | undefined>;
 	collection: Accessor<CollectionResponse | undefined>;
 	hasAutoSavePermission: Accessor<boolean | undefined>;
+	autoSaveUserEnabled: Accessor<boolean>;
 }) {
 	const debouncedAutoSave = debounce(() => {
 		const collectionKey = props.collection()?.key;
@@ -29,12 +30,18 @@ export function useDocumentAutoSave(props: {
 				fields: brickHelpers.getCollectionPseudoBrickFields(),
 			},
 		});
-	}, 500);
+	}, 800);
 
 	createEffect(() => {
 		if (!brickStore.get.documentMutated) return;
 		if (brickStore.get.autoSaveCounter === 0) return;
 		if (!props.hasAutoSavePermission()) return;
+		if (!props.autoSaveUserEnabled()) return;
+
+		if (brickStore.get.skipAutoSave) {
+			brickStore.set("skipAutoSave", false);
+			return;
+		}
 
 		debouncedAutoSave();
 	});

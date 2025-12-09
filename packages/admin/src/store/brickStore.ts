@@ -33,6 +33,7 @@ type BrickStoreT = {
 	brickErrors: Array<BrickError>;
 	documentMutated: boolean;
 	autoSaveCounter: number;
+	skipAutoSave: boolean;
 	locked: boolean;
 	refs: Partial<Record<FieldTypes, FieldRefs[]>>;
 	imagePreview: {
@@ -119,6 +120,7 @@ const [get, set] = createStore<BrickStoreT>({
 	locked: false,
 	documentMutated: false,
 	autoSaveCounter: 0,
+	skipAutoSave: true,
 	collectionTranslations: false,
 	refs: {},
 	imagePreview: {
@@ -132,6 +134,7 @@ const [get, set] = createStore<BrickStoreT>({
 		set("brickErrors", []);
 		set("documentMutated", false);
 		set("autoSaveCounter", 0);
+		set("skipAutoSave", true);
 		set("collectionTranslations", false);
 		set("refs", {});
 		set("focusState", null);

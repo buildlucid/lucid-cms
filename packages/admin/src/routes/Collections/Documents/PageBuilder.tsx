@@ -21,6 +21,7 @@ import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import Alert from "@/components/Blocks/Alert";
 import brickStore from "@/store/brickStore";
+import userPreferencesStore from "@/store/userPreferencesStore";
 
 interface CollectionsDocumentsEditRouteProps {
 	mode: "create" | "edit";
@@ -63,11 +64,16 @@ const CollectionsDocumentsEditRoute: Component<
 		promoteToPublishedMutation: mutations.promoteToPublishedMutation,
 	});
 
+	const autoSaveUserEnabled = createMemo(
+		() => userPreferencesStore.get.autoSaveEnabled,
+	);
+
 	const autoSave = useDocumentAutoSave({
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		document: docState.document,
 		collection: docState.collection,
 		hasAutoSavePermission: uiState.hasAutoSavePermission,
+		autoSaveUserEnabled: autoSaveUserEnabled,
 	});
 
 	// ------------------------------------------
@@ -126,6 +132,7 @@ const CollectionsDocumentsEditRoute: Component<
 						document: docState.document,
 						ui: uiState,
 						autoSave: autoSave,
+						autoSaveUserEnabled: autoSaveUserEnabled,
 						showRevisionNavigation: uiState.showRevisionNavigation,
 					}}
 					actions={{
