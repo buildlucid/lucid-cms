@@ -77,31 +77,46 @@ export const RevisionsSidebar: Component<{
 						{(revision) => (
 							<button
 								type="button"
-								class={classNames(
-									"bg-card-base border-border border text-left rounded-md mb-2.5 last:mb-0 flex flex-col p-4 focus-visible:ring-1 focus:ring-primary-base duration-200 transition-colors hover:border-primary-base",
-									{
-										"border-primary-base":
-											revision.id === props.state.versionId(),
-									},
-								)}
+								class={
+									"group w-full bg-card-base border border-border text-left rounded-md mb-2.5 last:mb-0 px-4 py-3 flex items-start gap-3 focus-visible:ring-1 focus:ring-primary-base outline-none duration-200 transition-colors hover:bg-card-hover"
+								}
 								onClick={() => {
 									navigate(
 										`/admin/collections/${props.state.collectionKey()}/revision/${props.state.documentId()}/${revision.id}`,
 									);
 								}}
 							>
-								<h3 class="mb-0.5 text-base">
-									{T()("revision")} #{revision.id}
-								</h3>
-								<DateText date={revision.createdAt} />
-								<div class="mt-2.5 flex gap-2.5">
-									<Pill theme="grey">
-										Bricks {revision.bricks?.builder?.length ?? 0}
-									</Pill>
-									<Pill theme="grey">
-										Fixed {revision.bricks?.fixed?.length ?? 0}
-									</Pill>
+								<div class="flex-1 flex flex-col gap-2">
+									<div class="flex items-start justify-between gap-2">
+										<div class="min-w-0">
+											<h3 class="text-sm font-medium text-title">
+												{T()("revision")} #{revision.id}
+											</h3>
+											<DateText
+												date={revision.createdAt}
+												class="text-body text-xs!"
+											/>
+										</div>
+									</div>
+									<div class="flex flex-wrap items-center gap-2 text-xs text-body">
+										<Pill theme="outline">
+											Builder {revision.bricks?.builder?.length ?? 0}
+										</Pill>
+										<Pill theme="outline">
+											Fixed {revision.bricks?.fixed?.length ?? 0}
+										</Pill>
+									</div>
 								</div>
+								<span
+									class={classNames(
+										"mt-1.5 h-2.5 w-2.5 rounded-full border border-border/80 bg-input-base/80 shrink-0 transition-colors duration-200",
+										{
+											"bg-primary-base/40 border-primary-base/60":
+												revision.id === props.state.versionId(),
+										},
+									)}
+									aria-hidden="true"
+								/>
 							</button>
 						)}
 					</For>

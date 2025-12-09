@@ -1,8 +1,10 @@
 import { type Component, createMemo } from "solid-js";
 import dateHelpers from "@/utils/date-helpers";
+import classNames from "classnames";
 
 interface DateTextProps {
 	date?: string | null;
+	class?: string;
 }
 
 const DateText: Component<DateTextProps> = (props) => {
@@ -20,7 +22,10 @@ const DateText: Component<DateTextProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<span class="whitespace-nowrap text-sm" title={fullDate() || ""}>
+		<span
+			class={classNames("whitespace-nowrap text-sm", props.class)}
+			title={fullDate() || ""}
+		>
 			{date() || "-"}
 		</span>
 	);
