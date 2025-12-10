@@ -22,14 +22,12 @@ import type { CollectionResponse, DocumentResponse } from "@types";
 import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import type { Accessor } from "solid-js";
-import type { UseRevisionsState } from "@/hooks/document/useRevisionsState";
-import type { UseRevisionMutations } from "@/hooks/document/useRevisionMutations";
 import helpers from "@/utils/helpers";
 import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
 
 export const HeaderBar: Component<{
-	mode: "create" | "edit" | "revisions";
+	mode: "create" | "edit" | undefined;
 	version?: Accessor<"latest" | string>;
 	state: {
 		collection: Accessor<CollectionResponse | undefined>;
@@ -42,13 +40,11 @@ export const HeaderBar: Component<{
 		autoSave?: UseDocumentAutoSave;
 		autoSaveUserEnabled?: Accessor<boolean>;
 		showRevisionNavigation: UseDocumentUIState["showRevisionNavigation"];
-		selectedRevision?: UseRevisionsState["documentId"];
 		isDocumentMutated?: Accessor<boolean>;
 	};
 	actions: {
 		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
 		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
-		restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -95,15 +91,17 @@ export const HeaderBar: Component<{
 			});
 		}
 
-		options.push({
-			label: T()("revisions"),
-			disabled: props.state.documentID() === undefined,
-			type: "revision",
-			location:
-				props.state.documentID() !== undefined
-					? `/admin/collections/${props.state.collectionKey()}/revision/${props.state.documentID()}/latest`
-					: "#",
-		});
+		if (props.state.showRevisionNavigation()) {
+			options.push({
+				label: T()("revision_history"),
+				disabled: props.state.documentID() === undefined,
+				type: "link",
+				location:
+					props.state.documentID() !== undefined
+						? `/admin/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
+						: "#",
+			});
+		}
 
 		return options;
 	});
@@ -152,9 +150,10 @@ export const HeaderBar: Component<{
 	});
 
 	const showAutoSaveToggle = createMemo(() => {
-		if (props.mode === "create") return false;
-		if (props.mode === "revisions") return false;
-		return props.state.collection()?.config.useAutoSave === true;
+		return (
+			props.state.collection()?.config.useAutoSave === true &&
+			props.mode === "edit"
+		);
 	});
 
 	const isSavingOrAutoSaving = createMemo(() => {
@@ -200,7 +199,7 @@ export const HeaderBar: Component<{
 							}}
 						/>
 					</div>
-					<Show when={props.mode !== "create"}>
+					<Show when={props.mode === "edit"}>
 						<div class="flex items-center gap-3 shrink-0">
 							<div class="flex items-center gap-1.5 text-body">
 								<FaSolidCalendarPlus size={12} />
@@ -278,25 +277,27 @@ export const HeaderBar: Component<{
 				</div>
 				<div class="flex items-center gap-2.5 justify-end">
 					<div class="flex items-center gap-2.5 w-full justify-between">
-						<Show when={props.state.collection()?.config.useTranslations}>
-							<div class="w-54">
-								<ContentLocaleSelect
-									hasError={props.state.ui.brickTranslationErrors?.()}
-								/>
-							</div>
-						</Show>
-						<Show
-							when={
-								props.state.collection()?.config.useTranslations !== true &&
-								defaultLocale()
-							}
-						>
-							<div class="flex items-center">
-								<FaSolidLanguage size={20} />
-								<span class="ml-2.5 text-base font-medium text-body">
-									{defaultLocale()?.name} ({defaultLocale()?.code})
-								</span>
-							</div>
+						<Show when={props.mode === "edit"}>
+							<Show when={props.state.collection()?.config.useTranslations}>
+								<div class="w-54">
+									<ContentLocaleSelect
+										hasError={props.state.ui.brickTranslationErrors?.()}
+									/>
+								</div>
+							</Show>
+							<Show
+								when={
+									props.state.collection()?.config.useTranslations !== true &&
+									defaultLocale()
+								}
+							>
+								<div class="flex items-center">
+									<FaSolidLanguage size={20} />
+									<span class="ml-2.5 text-base font-medium text-body">
+										{defaultLocale()?.name} ({defaultLocale()?.code})
+									</span>
+								</div>
+							</Show>
 						</Show>
 					</div>
 					<div class="flex items-center gap-2.5">
@@ -322,19 +323,6 @@ export const HeaderBar: Component<{
 									props.state.ui.isPromotingToPublished?.()
 								}
 							/>
-						</Show>
-						{/* Restore revision */}
-						<Show when={props.state.ui.showRestoreRevisionButton?.()}>
-							<Button
-								type="button"
-								theme="secondary"
-								size="small"
-								onClick={props.actions?.restoreRevisionAction}
-								disabled={props.state.selectedRevision?.() === undefined}
-								permission={props.state.ui.hasRestorePermission?.()}
-							>
-								{T()("restore_revision")}
-							</Button>
 						</Show>
 						<Show when={props.state.ui.showDeleteButton?.()}>
 							<DocumentActions

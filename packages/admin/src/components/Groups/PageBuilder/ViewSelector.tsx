@@ -4,11 +4,12 @@ import classNames from "classnames";
 import { useLocation, useNavigate } from "@solidjs/router";
 import T from "@/translations";
 import DropdownContent from "@/components/Partials/DropdownContent";
+import { FaSolidLink } from "solid-icons/fa";
 
 export interface ViewSelectorOption {
 	label: string;
 	disabled: boolean;
-	type: "latest" | "environment" | "revision";
+	type: "latest" | "environment" | "link";
 	location: string;
 	status?: {
 		isPublished?: boolean;
@@ -32,23 +33,13 @@ export const ViewSelector: Component<{
 			.options()
 			.filter((o) => o.type === "latest" || o.type === "environment"),
 	);
-	const revisions = createMemo(() =>
-		props.options().filter((o) => o.type === "revision"),
+	const linkOptions = createMemo(() =>
+		props.options().filter((o) => o.type === "link"),
 	);
 	const currentOption = createMemo(() => {
-		const currentPath = location.pathname;
-
-		return props.options().find((option) => {
-			if (currentPath === option.location) {
-				return true;
-			}
-
-			if (option.type === "revision" && currentPath.includes("revision")) {
-				return true;
-			}
-
-			return false;
-		});
+		return props
+			.options()
+			.find((option) => location.pathname.includes(option.location));
 	});
 
 	// ----------------------------------
@@ -64,11 +55,12 @@ export const ViewSelector: Component<{
 							(currentOption()?.type === "environment" &&
 								currentOption()?.status?.upToDate === true),
 						"bg-warning-base/40 border-warning-base/60":
-							currentOption()?.type === "revision" ||
 							(currentOption()?.type === "latest" &&
 								props.isDocumentMutated?.()) ||
 							(currentOption()?.type === "environment" &&
 								currentOption()?.status?.upToDate === false),
+						"bg-info-base/40 border-info-base/60":
+							currentOption()?.type === "link",
 					})}
 				/>
 				<span class="group-hover:text-body transition-colors duration-200 inline-block">
@@ -76,9 +68,7 @@ export const ViewSelector: Component<{
 					<Show when={currentOption()?.type === "environment"}>
 						{T()("view")}{" "}
 					</Show>
-					<Show when={currentOption()?.type === "revision"}>
-						{T()("view")}{" "}
-					</Show>
+					<Show when={currentOption()?.type === "link"}>{T()("view")} </Show>
 					{currentOption()?.label}
 				</span>
 			</DropdownMenu.Trigger>
@@ -89,7 +79,7 @@ export const ViewSelector: Component<{
 					class: "w-[260px] z-60 p-1.5!",
 				}}
 			>
-				<ul class="flex flex-col gap-y-0.5 mb-1">
+				<ul class="flex flex-col gap-y-0.5">
 					<For each={environments()}>
 						{(item) => (
 							<li>
@@ -152,9 +142,13 @@ export const ViewSelector: Component<{
 							</li>
 						)}
 					</For>
-					<For each={revisions()}>
-						{(item) => (
-							<li>
+					<For each={linkOptions()}>
+						{(item, index) => (
+							<li
+								class={classNames({
+									"border-t border-border pt-1 mt-1": index() === 0,
+								})}
+							>
 								<DropdownMenu.Item
 									class={classNames(
 										"flex items-center justify-between hover:bg-dropdown-hover hover:text-dropdown-contrast px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
@@ -171,8 +165,10 @@ export const ViewSelector: Component<{
 										}
 									}}
 								>
-									<span class="line-clamp-1 mr-2.5">{item.label}</span>
-									<span class="w-2.5 h-2.5 rounded-full border bg-warning-base/40 border-warning-base/60" />
+									<span class="line-clamp-1 flex items-center gap-2">
+										{item.label}
+									</span>
+									<FaSolidLink size={14} />
 								</DropdownMenu.Item>
 							</li>
 						)}

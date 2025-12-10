@@ -11,14 +11,13 @@ import type {
 	DocumentResponse,
 	FieldError,
 } from "@types";
-import type { UseRevisionMutations } from "./useRevisionMutations";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
 	collection: Accessor<CollectionResponse | undefined>;
 	documentQuery: ReturnType<typeof api.documents.useGetSingle>;
 	document: Accessor<DocumentResponse | undefined>;
-	mode: "create" | "edit" | "revisions";
+	mode: "create" | "edit" | "history";
 	version: Accessor<"latest" | string>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	createSingleVersionMutation?: ReturnType<
@@ -30,8 +29,6 @@ export function useDocumentUIState(props: {
 	promoteToPublishedMutation?: ReturnType<
 		typeof api.documents.usePromoteSingle
 	>;
-	selectedRevision?: Accessor<number | undefined>;
-	restoreRevisionAction?: UseRevisionMutations["restoreRevisionAction"];
 	autoSaveUserEnabled?: Accessor<boolean>;
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
@@ -144,7 +141,7 @@ export function useDocumentUIState(props: {
 	 * Determines if the builder should be locked
 	 */
 	const isBuilderLocked = createMemo(() => {
-		if (props.mode === "revisions") return true;
+		if (props.mode === "history") return true;
 
 		// lock builder if collection is locked
 		if (props.collection()?.config.isLocked === true) {
@@ -227,7 +224,7 @@ export function useDocumentUIState(props: {
 	 */
 	const hasAutoSavePermission = createMemo(() => {
 		if (props.mode === "create") return false;
-		if (props.mode === "revisions") return false;
+		if (props.mode === "history") return false;
 		if (props.version() !== "latest") return false;
 		if (props.document()?.isDeleted) return false;
 
@@ -249,24 +246,6 @@ export function useDocumentUIState(props: {
 	 */
 	const hasDeletePermission = createMemo(() => {
 		return userStore.get.hasPermission(["delete_content"]).all;
-	});
-
-	/**
-	 * Determines if the restore reviision button should be visible
-	 */
-	const showRestoreRevisionButton = createMemo(() => {
-		if (props.document()?.isDeleted) return false;
-		if (props.mode !== "revisions") return false;
-		if (props.selectedRevision?.() === undefined) return false;
-		if (!props.restoreRevisionAction) return false;
-		return true;
-	});
-
-	/**
-	 * Determines if the user has permission to restore documents
-	 */
-	const hasRestorePermission = createMemo(() => {
-		return userStore.get.hasPermission(["restore_content"]).all;
 	});
 
 	// ------------------------------------------
@@ -292,8 +271,6 @@ export function useDocumentUIState(props: {
 		showPublishButton,
 		showDeleteButton,
 		hasDeletePermission,
-		showRestoreRevisionButton,
-		hasRestorePermission,
 		collectionNeedsMigrating,
 		useAutoSave,
 		hasAutoSavePermission,

@@ -735,5 +735,6 @@
 	"invalid_invitation_token": "Invalid invitation token",
 	"invalid_invitation_token_description": "The invitation link is invalid or has expired. Please request a new invitation.",
 	"sign_in_with_provider": "Sign in with a provider",
-	"accept_with_password": "Accept with password"
+	"accept_with_password": "Accept with password",
+	"load_more": "Load More"
 }

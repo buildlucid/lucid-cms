@@ -50,6 +50,10 @@ export default {
                     base: "#FFC107",
                     contrast: "#000000",
                 },
+                info: {
+                    base: "#007BFF",
+                    contrast: "#FFFFFF",
+                },
                 border: {
                     DEFAULT: 'rgba(255, 255, 255, 0.1)',
                 },

@@ -6,14 +6,9 @@ import {
 	createMemo,
 	createSignal,
 } from "solid-js";
-import { FaSolidCalendar, FaSolidSatelliteDish } from "solid-icons/fa";
+import { FaSolidCalendar } from "solid-icons/fa";
 import { useParams, useNavigate } from "@solidjs/router";
-import type {
-	CollectionResponse,
-	CFConfig,
-	FieldTypes,
-	DocumentVersionType,
-} from "@types";
+import type { CollectionResponse, CFConfig, FieldTypes } from "@types";
 import userStore from "@/store/userStore";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
@@ -24,8 +19,6 @@ import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
-import PromoteToDraft from "@/components/Modals/Documents/PromoteToDraft";
-import PublishDocument from "@/components/Modals/Documents/PublishDocument";
 import { Table } from "@/components/Groups/Table";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
@@ -55,9 +48,6 @@ export const DocumentsList: Component<{
 			deletePermanently: false,
 		},
 	});
-	const [getDocumentId, setDocumentId] = createSignal<number>();
-	const [getPublishedVersionId, setPublishedVersionId] = createSignal<number>();
-	const [getDraftVersionId, setDraftVersionId] = createSignal<number>();
 
 	// ----------------------------------
 	// Functions
@@ -273,23 +263,6 @@ export const DocumentsList: Component<{
 											.some,
 										hide: props.state.showingDeleted(),
 									},
-									// {
-									// 	label: T()("publish"),
-									// 	type: "button",
-									// 	onClick: () => {
-									// 		setDraftVersionId(doc().versionId as number);
-									// 		setDocumentId(doc().id);
-									// 		rowTarget.setTargetId(doc().id);
-									// 		rowTarget.setTrigger("publish", true);
-									// 	},
-									// 	permission: userStore.get.hasPermission(["publish_content"])
-									// 		.all,
-									// 	hide:
-									// 		props.state.collection?.config.useDrafts !== true ||
-									// 		props.state.status() !== "draft" ||
-									// 		props.state.showingDeleted(),
-									// 	actionExclude: true,
-									// },
 									{
 										label: T()("restore"),
 										type: "button",

@@ -132,6 +132,23 @@
 		scrollbar-width: none;
 	}
 
+	.dotted-background {
+		position: relative;
+		&::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 0;
+			background-color: #0a0a0a;
+			opacity: 0.2;
+			background-image: radial-gradient(#a1a1a1 1px, #0a0a0a 1px);
+			background-size: 14px 14px;
+		}
+	}
+
 	/* Wysiwyg */
 	.ql-toolbar {
 		@apply border-border! rounded-t-md!;

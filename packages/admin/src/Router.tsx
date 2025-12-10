@@ -31,8 +31,8 @@ const CollectionsDocumentsListRoute = lazy(
 const CollectionDocumentPageBuilderRoute = lazy(
 	() => import("./routes/Collections/Documents/PageBuilder"),
 );
-const CollectionsDocumentsRevisionsRoute = lazy(
-	() => import("./routes/Collections/Documents/Revisions"),
+const CollectionsDocumentsHistoryRoute = lazy(
+	() => import("./routes/Collections/Documents/History"),
 );
 
 const AppRouter: Component = () => {
@@ -81,10 +81,10 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/revision/:documentId/:versionId"
+					path="/collections/:collectionKey/:documentId/history"
 					component={() => (
 						<PermissionGuard permission={"read_content"}>
-							<CollectionsDocumentsRevisionsRoute />
+							<CollectionsDocumentsHistoryRoute />
 						</PermissionGuard>
 					)}
 				/>
