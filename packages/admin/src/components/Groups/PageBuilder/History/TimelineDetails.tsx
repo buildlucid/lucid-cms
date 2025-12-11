@@ -50,7 +50,7 @@ const TimelineDetails: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<div class="space-y-5">
+		<div class="space-y-5 bg-card-base p-6 mt-6 mr-6 rounded-lg border border-border">
 			<div>
 				<div class="flex items-center gap-2 mb-1">
 					<Show when={props.item.type === "latest"}>

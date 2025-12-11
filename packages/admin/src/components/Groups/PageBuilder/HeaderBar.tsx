@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, Show, createMemo } from "solid-js";
+import { type Component, Show, createMemo, onMount, onCleanup } from "solid-js";
 import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Button from "@/components/Partials/Button";
@@ -50,6 +50,7 @@ export const HeaderBar: Component<{
 	// ----------------------------------
 	// State / Hooks
 	const navigate = useNavigate();
+	let stickyBarRef: HTMLDivElement | undefined;
 
 	// ----------------------------------
 	// Memos
@@ -148,20 +149,45 @@ export const HeaderBar: Component<{
 			(collection.config.useRevisions || environments.length > 0)
 		);
 	});
-
 	const showAutoSaveToggle = createMemo(() => {
 		return (
 			props.state.collection()?.config.useAutoSave === true &&
 			props.mode === "edit"
 		);
 	});
-
 	const isSavingOrAutoSaving = createMemo(() => {
 		return (
 			props.state.ui.isSaving?.() ||
 			props.state.ui.isAutoSaving?.() ||
 			props.state.ui.isPromotingToPublished?.()
 		);
+	});
+
+	// ----------------------------------
+	// Effects
+	onMount(() => {
+		if (!stickyBarRef) return;
+
+		const updateHeight = () => {
+			if (stickyBarRef) {
+				const height = stickyBarRef.offsetHeight;
+				document.documentElement.style.setProperty(
+					"--document-header-bar-height",
+					`${height}px`,
+				);
+			}
+		};
+
+		const resizeObserver = new ResizeObserver(updateHeight);
+		resizeObserver.observe(stickyBarRef);
+		updateHeight();
+
+		onCleanup(() => {
+			resizeObserver.disconnect();
+			document.documentElement.style.removeProperty(
+				"--document-header-bar-height",
+			);
+		});
 	});
 
 	// ----------------------------------
@@ -235,7 +261,10 @@ export const HeaderBar: Component<{
 					</Show>
 				</div>
 			</div>
-			<div class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex items-center justify-between gap-2.5">
+			<div
+				ref={stickyBarRef}
+				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex items-center justify-between gap-2.5"
+			>
 				<Show when={isSavingOrAutoSaving()}>
 					<div class="absolute inset-2 z-50 bg-white/5 rounded-md flex items-center justify-center pointer-events-auto animate-pulse">
 						<div class="flex items-center gap-2.5">

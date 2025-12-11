@@ -46,8 +46,8 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 					}}
 					actions={{}}
 				/>
-				<div class="mt-2 bg-background-base dotted-background rounded-t-xl border border-border flex-grow overflow-hidden">
-					<div class="w-[calc(calc(100%-220px)/2)] p-6 pl-20 relative before:absolute before:left-20 before:top-0 before:bottom-0 before:w-0.5 before:bg-secondary-base/20 before:z-0 before:-translate-x-1/2">
+				<div class="flex flex-row items-start mt-2 bg-background-base dotted-background rounded-t-xl border border-border ">
+					<div class="w-182 p-6 pl-20 relative before:absolute before:left-20 before:top-0 before:bottom-0 before:w-0.5 before:bg-secondary-base/20 before:z-0 before:-translate-x-1/2">
 						<For each={state.timelineData()}>
 							{(group) => (
 								<div class="mb-6 last:mb-0 ml-4">
@@ -83,9 +83,10 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 							</div>
 						</Show>
 					</div>
-				</div>
-				<div class="fixed z-100 top-28 right-8 bottom-4 w-[calc(calc(100%-220px)/2)] border border-border rounded-xl bg-card-base overflow-y-auto">
-					<div class="p-5">
+					<div
+						class="w-full z-10 sticky top-0"
+						style={{ top: "var(--document-header-bar-height, 100px)" }}
+					>
 						<Show when={state.selectedItem()}>
 							{(item) => (
 								<TimelineDetails
