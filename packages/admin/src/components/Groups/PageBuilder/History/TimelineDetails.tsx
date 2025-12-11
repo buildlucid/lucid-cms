@@ -91,15 +91,15 @@ const TimelineDetails: Component<{
 	return (
 		<aside class="mt-6 mr-6 space-y-4">
 			{/* hero */}
-			<div class="relative overflow-hidden rounded-xl border border-border bg-background-base p-5 shadow-sm">
+			<div class="relative overflow-hidden rounded-md border border-border bg-card-base p-4">
 				<span
-					class={classNames("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", {
+					class={classNames("absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r", {
 						// TODO: if an environment is promoted from latest and has the same content id, have it use the primary gradient
-						"from-primary-base/70 to-primary-base/30":
+						"from-primary-base/60 to-primary-base/20":
 							props.item.type === "latest",
-						"from-warning-base/70 to-warning-base/30":
+						"from-warning-base/60 to-warning-base/20":
 							props.item.type === "environment",
-						"from-info-base/70 to-info-base/30": props.item.type === "revision",
+						"from-info-base/60 to-info-base/20": props.item.type === "revision",
 					})}
 				/>
 				<div class="flex items-start justify-between gap-4">

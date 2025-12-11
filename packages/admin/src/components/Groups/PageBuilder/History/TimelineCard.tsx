@@ -5,10 +5,7 @@ import type {
 	UseHistoryState,
 } from "@/hooks/document/useHistoryState";
 import DateText from "@/components/Partials/DateText";
-import Pill from "@/components/Partials/Pill";
 import classNames from "classnames";
-import { useNavigate } from "@solidjs/router";
-import { getDocumentRoute } from "@/utils/route-helpers";
 
 const TimelineCardWrapper: Component<{
 	item: TimelineItem;
@@ -16,24 +13,8 @@ const TimelineCardWrapper: Component<{
 	level: number;
 }> = (props) => {
 	// ----------------------------------
-	// State & Hooks
-	const navigate = useNavigate();
-
-	// ----------------------------------
 	// Memos
 	const isSelected = createMemo(() => props.state.isItemSelected(props.item));
-
-	// ----------------------------------
-	// Handlers
-	const navigateToRevision = (item: TimelineItem) => {
-		navigate(
-			getDocumentRoute("edit", {
-				collectionKey: props.state.collectionKey(),
-				documentId: props.state.documentId(),
-				status: item.version,
-			}),
-		);
-	};
 
 	// ----------------------------------
 	// Render
@@ -46,7 +27,6 @@ const TimelineCardWrapper: Component<{
 						item={props.item}
 						isSelected={isSelected()}
 						onClick={() => props.state.handleSelectItem(props.item)}
-						navigate={navigateToRevision}
 					/>
 				</Match>
 				<Match when={props.item.type === "revision"}>
@@ -54,7 +34,6 @@ const TimelineCardWrapper: Component<{
 						item={props.item}
 						isSelected={isSelected()}
 						onClick={() => props.state.handleSelectItem(props.item)}
-						navigate={navigateToRevision}
 					/>
 				</Match>
 				<Match when={props.item.type === "environment"}>
@@ -62,7 +41,6 @@ const TimelineCardWrapper: Component<{
 						item={props.item}
 						isSelected={isSelected()}
 						onClick={() => props.state.handleSelectItem(props.item)}
-						navigate={navigateToRevision}
 					/>
 				</Match>
 			</Switch>
@@ -95,7 +73,6 @@ const TimelineCard: Component<{
 	item: TimelineItem;
 	isSelected: boolean;
 	onClick: () => void;
-	navigate?: (item: TimelineItem) => void;
 }> = (props) => {
 	// ----------------------------------
 	// Render
@@ -103,138 +80,60 @@ const TimelineCard: Component<{
 		<div class="relative">
 			<span
 				class={classNames(
-					"absolute -left-4 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border -translate-x-1/2",
+					"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors duration-200",
 					{
-						"border-primary-base bg-primary-base": props.isSelected,
-						"border-secondary-base bg-background-base": !props.isSelected,
+						"border-primary-base/70 bg-primary-base/10": props.isSelected,
+						"border-secondary-base/60 bg-background-base": !props.isSelected,
 					},
 				)}
 			/>
-			<Switch>
-				<Match when={props.item.type === "latest"}>
-					<button
-						type="button"
-						class="group flex max-w-72 w-full text-left bg-card-base/95 border border-border/60 rounded-lg px-4 py-2.5 transition-colors duration-200 outline-none hover:bg-card-hover/80 focus-visible:ring-1 focus:ring-primary-base"
-						onClick={props.onClick}
-					>
-						<div class="flex items-center justify-between gap-2 w-full">
-							<div class="flex items-center gap-2 min-w-0 flex-1">
-								<Pill theme="secondary" class="text-[10px] capitalize">
-									{props.item.version}
-								</Pill>
-								<DateText
-									date={props.item.createdAt}
-									class="text-body text-xs"
-								/>
-							</div>
-							<div class="flex items-center gap-1 flex-shrink-0">
-								<Show when={props.navigate}>
-									<button
-										type="button"
-										class="inline-flex items-center justify-center rounded-md p-1.5 text-[10px] text-body/80 bg-background-base/60 border border-border/60 hover:bg-background-hover hover:text-secondary-base transition-colors"
-										onClick={(e) => {
-											e.stopPropagation();
-											props.navigate?.(props.item);
-										}}
-										title={T()("view")}
-									>
-										<svg
-											class="w-3 h-3"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											aria-hidden="true"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-											/>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-											/>
-										</svg>
-									</button>
-								</Show>
-							</div>
+			<span
+				class={classNames(
+					"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full transition-colors duration-200",
+					{
+						"bg-primary-base": props.isSelected,
+						"bg-secondary-base": !props.isSelected,
+					},
+				)}
+			/>
+			<button
+				type="button"
+				class="group relative flex max-w-72 w-full text-left overflow-hidden rounded-md border border-border p-4 transition-colors duration-200 outline-none bg-card-base hover:bg-card-hover focus-visible:ring-1 focus-visible:ring-primary-base"
+				onClick={props.onClick}
+			>
+				<span
+					class={classNames("absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r", {
+						"from-primary-base/60 to-primary-base/20":
+							props.item.type === "latest",
+						"from-warning-base/60 to-warning-base/20":
+							props.item.type === "environment",
+						"from-info-base/60 to-info-base/20": props.item.type === "revision",
+					})}
+				/>
+
+				<div class="flex items-start justify-between gap-3 w-full">
+					<div class="min-w-0 flex-1">
+						<h3 class="text-sm font-semibold text-title truncate">
+							<Switch>
+								<Match when={props.item.type === "latest"}>
+									{T()("latest_revision")}
+								</Match>
+								<Match when={props.item.type === "environment"}>
+									{T()("environment_version", {
+										version: `${props.item.version?.charAt(0).toUpperCase()}${props.item.version?.slice(1)}`,
+									})}
+								</Match>
+								<Match when={props.item.type === "revision"}>
+									{T()("revision")} #{props.item.id}
+								</Match>
+							</Switch>
+						</h3>
+						<div class="mt-1 flex items-center gap-2 text-sm text-body">
+							<DateText date={props.item.createdAt} class="text-body" />
 						</div>
-					</button>
-				</Match>
-				<Match when={props.item.type === "revision"}>
-					<button
-						type="button"
-						class="group relative flex max-w-72 w-full text-left bg-card-base/95 border border-border/60 rounded-lg px-4 py-3 transition-colors duration-200 outline-none hover:bg-card-hover/80 focus-visible:ring-1 focus:ring-primary-base"
-						onClick={props.onClick}
-					>
-						<div class="flex flex-col gap-1 w-full">
-							<div class="flex items-start justify-between gap-2">
-								<div class="min-w-0 flex-1">
-									<h3 class="text-sm font-medium text-title">
-										{T()("revision")} #{props.item.id}
-									</h3>
-								</div>
-							</div>
-						</div>
-					</button>
-				</Match>
-				<Match when={props.item.type === "environment"}>
-					<button
-						type="button"
-						class="group flex max-w-72 w-full text-left bg-card-base/95 border border-border/60 rounded-lg px-4 py-2.5 transition-colors duration-200 outline-none hover:bg-card-hover/80 focus-visible:ring-1 focus:ring-primary-base"
-						onClick={props.onClick}
-					>
-						<div class="flex items-center justify-between gap-2 w-full">
-							<div class="flex items-center gap-2 min-w-0 flex-1">
-								<Pill theme="secondary" class="text-[10px] capitalize">
-									{props.item.version}
-								</Pill>
-								<DateText
-									date={props.item.createdAt}
-									class="text-body text-xs"
-								/>
-							</div>
-							<div class="flex items-center gap-1 flex-shrink-0">
-								<Show when={props.navigate}>
-									<button
-										type="button"
-										class="inline-flex items-center justify-center rounded-md p-1.5 text-[10px] text-body/80 bg-background-base/60 border border-border/60 hover:bg-background-hover hover:text-secondary-base transition-colors"
-										onClick={(e) => {
-											e.stopPropagation();
-											props.navigate?.(props.item);
-										}}
-										title={T()("view")}
-									>
-										<svg
-											class="w-3 h-3"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											aria-hidden="true"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-											/>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-											/>
-										</svg>
-									</button>
-								</Show>
-							</div>
-						</div>
-					</button>
-				</Match>
-			</Switch>
+					</div>
+				</div>
+			</button>
 		</div>
 	);
 };
