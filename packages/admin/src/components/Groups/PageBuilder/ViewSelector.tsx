@@ -131,7 +131,7 @@ export const ViewSelector: Component<{
 													: undefined
 												: item.type === "environment"
 													? item.status?.isPublished === false
-														? T()("not_released")
+														? T()("unreleased")
 														: item.status?.upToDate
 															? T()("released_up_to_date")
 															: T()("released_out_of_date")

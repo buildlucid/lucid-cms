@@ -9,6 +9,12 @@ const BlogCollection = new CollectionBuilder("blog", {
 	},
 	config: {
 		useTranslations: true,
+		environments: [
+			{
+				key: "staging",
+				name: "Staging",
+			},
+		],
 	},
 })
 	.addText("page_title", {

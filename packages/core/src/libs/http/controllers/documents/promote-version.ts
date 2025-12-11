@@ -42,7 +42,7 @@ const promoteVersionController = factory.createHandlers(
 	validate("json", controllerSchemas.promoteVersion.body),
 	validate("param", controllerSchemas.promoteVersion.params),
 	async (c) => {
-		const { versionType } = c.req.valid("json");
+		const { versionType, bypassRevision } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
 
 		const restoreRevisionRes = await serviceWrapper(
@@ -69,6 +69,7 @@ const promoteVersionController = factory.createHandlers(
 				documentId: Number.parseInt(id),
 				collectionKey,
 				toVersionType: versionType,
+				createRevision: bypassRevision === true ? false : undefined,
 			},
 		);
 		if (restoreRevisionRes.error)

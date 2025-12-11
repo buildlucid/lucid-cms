@@ -24,6 +24,8 @@ const promoteVersion: ServiceFn<
 			documentId: number;
 			userId: number;
 			skipRevisionCheck?: boolean;
+			/** If set to false, a revision will not be created even if the collection supports revisions. */
+			createRevision?: boolean;
 		},
 	],
 	undefined
@@ -164,8 +166,12 @@ const promoteVersion: ServiceFn<
 
 	//-------------------------------------------------------------------------------
 	// Mutate/create revisions and update the document
+	const shouldCreateRevision =
+		collectionRes.data.getData.config.useRevisions &&
+		data.createRevision !== false;
+
 	const [, upsertDocumentRes, createVersionRes] = await Promise.all([
-		collectionRes.data.getData.config.useRevisions
+		shouldCreateRevision
 			? Versions.updateSingle(
 					{
 						where: [

@@ -159,7 +159,7 @@ export const ReleaseTrigger: Component<{
 														: option.status?.isReleased === true &&
 																option.status?.upToDate === false
 															? T()("released_out_of_date")
-															: T()("not_released")
+															: T()("unreleased")
 												}
 											/>
 										</DropdownMenu.Item>

@@ -10,6 +10,7 @@ export interface Params {
 	versionId: number;
 	body: {
 		versionType: Exclude<DocumentVersionType, "revision">;
+		bypassRevision?: boolean;
 	};
 }
 

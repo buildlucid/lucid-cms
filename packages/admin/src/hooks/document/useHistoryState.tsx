@@ -173,11 +173,13 @@ export function useHistoryState() {
 		const documentData = document();
 		const revisions = accumulatedRevisions();
 		const allItems: TimelineItem[] = [];
+		const latestContentId = documentData?.version?.latest?.contentId ?? null;
+		let latestItem: TimelineItem | undefined;
 
 		//* add latest version
 		if (documentData?.version?.latest) {
 			const latest = documentData.version.latest;
-			allItems.push({
+			latestItem = {
 				type: "latest",
 				id: latest.id,
 				version: "latest",
@@ -185,7 +187,8 @@ export function useHistoryState() {
 				createdBy: latest.createdBy,
 				promotedFrom: latest.promotedFrom,
 				contentId: latest.contentId,
-			});
+			};
+			allItems.push(latestItem);
 		}
 
 		//* add revisions
@@ -205,8 +208,11 @@ export function useHistoryState() {
 		//* collect environment versions
 		const environmentVersions: TimelineItem[] = [];
 		if (documentData?.version) {
+			let unreleasedEnvCounter = 0;
 			for (const [key, version] of Object.entries(documentData.version)) {
-				if (key !== "latest" && version) {
+				if (key === "latest") continue;
+
+				if (version) {
 					environmentVersions.push({
 						type: "environment",
 						id: version.id,
@@ -215,7 +221,28 @@ export function useHistoryState() {
 						createdBy: version.createdBy,
 						promotedFrom: version.promotedFrom,
 						contentId: version.contentId,
+						releaseStatus: "released",
+						upToDate:
+							latestContentId !== null && version.contentId === latestContentId,
 					});
+				}
+
+				if (version === null) {
+					if (latestItem) {
+						if (!latestItem.environmentVersions)
+							latestItem.environmentVersions = [];
+						latestItem.environmentVersions.push({
+							type: "environment",
+							id: -1 * (1000 + unreleasedEnvCounter++),
+							version: key,
+							createdAt: null,
+							createdBy: null,
+							promotedFrom: null,
+							contentId: null,
+							releaseStatus: "not_released",
+							upToDate: false,
+						});
+					}
 				}
 			}
 		}
@@ -225,7 +252,7 @@ export function useHistoryState() {
 		const idMap = new Map<number, TimelineItem>();
 
 		for (const item of allItems) {
-			contentIdMap.set(item.contentId, item);
+			if (item.contentId) contentIdMap.set(item.contentId, item);
 			idMap.set(item.id, item);
 		}
 
@@ -249,6 +276,27 @@ export function useHistoryState() {
 			} else {
 				allItems.push(envVersion);
 			}
+		}
+
+		//* ensure unreleased env cards are always last within environmentVersions
+		for (const item of allItems) {
+			if (!item.environmentVersions || item.environmentVersions.length === 0)
+				continue;
+
+			const decorated = item.environmentVersions.map((v, idx) => ({ v, idx }));
+			decorated.sort((a, b) => {
+				const aIsUnreleased =
+					a.v.type === "environment" && a.v.releaseStatus === "not_released";
+				const bIsUnreleased =
+					b.v.type === "environment" && b.v.releaseStatus === "not_released";
+
+				if (aIsUnreleased !== bIsUnreleased) {
+					return aIsUnreleased ? 1 : -1;
+				}
+				return a.idx - b.idx;
+			});
+
+			item.environmentVersions = decorated.map((d) => d.v);
 		}
 
 		//* sort all items by date
@@ -375,7 +423,9 @@ export type TimelineItem = {
 	createdAt: string | null;
 	createdBy: number | null;
 	promotedFrom: number | null;
-	contentId: string;
+	contentId: string | null;
+	releaseStatus?: "released" | "not_released";
+	upToDate?: boolean;
 	bricks?: DocumentVersionResponse["bricks"];
 	environmentVersions?: TimelineItem[];
 };

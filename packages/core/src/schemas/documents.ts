@@ -486,6 +486,11 @@ export const controllerSchemas = {
 						"The version type you want to promote to - either 'latest' or a valid environment key (e.g., 'production', 'qa') from the collection config",
 					example: "production",
 				}),
+			bypassRevision: z.boolean().optional().meta({
+				description:
+					"When true, the promote action will NOT create a revision even if revisions are enabled for the collection.",
+				example: true,
+			}),
 		}),
 		query: {
 			string: undefined,

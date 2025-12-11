@@ -167,6 +167,7 @@ export function useDocumentMutations(props: {
 			versionId: versionId,
 			body: {
 				versionType: targetVersionType,
+				bypassRevision: targetVersionType !== "latest",
 			},
 		});
 	};

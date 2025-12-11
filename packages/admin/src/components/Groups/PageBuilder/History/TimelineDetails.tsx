@@ -59,19 +59,30 @@ const TimelineDetails: Component<{
 	const environments = createMemo(() => {
 		return props.collection()?.config?.environments ?? [];
 	});
+	const isUnreleasedEnvironment = createMemo(() => {
+		return (
+			props.item.type === "environment" &&
+			props.item.releaseStatus === "not_released"
+		);
+	});
+	const isEnvironmentUpToDate = createMemo(() => {
+		return (
+			props.item.type === "environment" &&
+			props.item.releaseStatus === "released" &&
+			props.item.upToDate === true
+		);
+	});
 
 	// ----------------------------------
 	// Handlers
 	const getTitle = () => {
 		switch (props.item.type) {
 			case "latest":
-				return T()("latest_revision");
+				return T()("latest");
 			case "environment":
-				return T()("environment_version", {
-					version: `${props.item.version?.charAt(0).toUpperCase()}${props.item.version?.slice(1)}`,
-				});
+				return props.item.version;
 			default:
-				return `${T()("revision")} #${props.item.id}`;
+				return T()("revision");
 		}
 	};
 
@@ -94,39 +105,58 @@ const TimelineDetails: Component<{
 			<div class="relative overflow-hidden rounded-md border border-border bg-card-base p-4">
 				<span
 					class={classNames("absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r", {
-						// TODO: if an environment is promoted from latest and has the same content id, have it use the primary gradient
 						"from-primary-base/60 to-primary-base/20":
-							props.item.type === "latest",
+							props.item.type === "latest" || isEnvironmentUpToDate(),
 						"from-warning-base/60 to-warning-base/20":
-							props.item.type === "environment",
+							props.item.type === "environment" &&
+							!isUnreleasedEnvironment() &&
+							!isEnvironmentUpToDate(),
+						"from-error-base/60 to-error-base/20": isUnreleasedEnvironment(),
 						"from-info-base/60 to-info-base/20": props.item.type === "revision",
 					})}
 				/>
 				<div class="flex items-start justify-between gap-4">
 					<div>
-						<div class="mb-1 flex items-center gap-2">
-							<h3 class="text-title truncate text-sm">{getTitle()}</h3>
+						<h3 class="text-title truncate text-sm mb-2 capitalize">
+							{getTitle()}
+						</h3>
+						<div class="flex items-center gap-2">
 							<Pill theme="outline" class="text-sm">
 								#{props.item.id}
 							</Pill>
-						</div>
-						<div class="text-body flex items-center gap-2">
-							<span class="text-unfocused text-sm">{T()("created_at")}:</span>
-							<DateText date={props.item.createdAt} />
+							<Show when={props.item.type === "environment"}>
+								<Pill
+									theme={
+										isUnreleasedEnvironment()
+											? "error-opaque"
+											: isEnvironmentUpToDate()
+												? "primary-opaque"
+												: "warning-opaque"
+									}
+								>
+									{isUnreleasedEnvironment()
+										? "Unreleased"
+										: isEnvironmentUpToDate()
+											? "Synced"
+											: "Out of sync"}
+								</Pill>
+							</Show>
 						</div>
 					</div>
 					<div class="flex items-center gap-2 flex-shrink-0">
-						<Link
-							theme="border-outline"
-							size="icon"
-							href={getDocumentRoute("edit", {
-								collectionKey: props.collection()?.key ?? "",
-								documentId: props.document()?.id,
-								status: props.item.version,
-							})}
-						>
-							<FaSolidEye />
-						</Link>
+						<Show when={!isUnreleasedEnvironment()}>
+							<Link
+								theme="border-outline"
+								size="icon"
+								href={getDocumentRoute("edit", {
+									collectionKey: props.collection()?.key ?? "",
+									documentId: props.document()?.id,
+									status: props.item.version,
+								})}
+							>
+								<FaSolidEye />
+							</Link>
+						</Show>
 						<Show when={props.item.type === "revision"}>
 							<Button
 								theme="danger-outline"
@@ -139,18 +169,20 @@ const TimelineDetails: Component<{
 					</div>
 				</div>
 				<div class="mt-4 flex flex-wrap gap-2">
-					<Link
-						theme="secondary"
-						size="small"
-						classes="flex-1"
-						href={getDocumentRoute("edit", {
-							collectionKey: props.collection()?.key ?? "",
-							documentId: props.document()?.id,
-							status: props.item.version,
-						})}
-					>
-						{T()("view")}
-					</Link>
+					<Show when={!isUnreleasedEnvironment()}>
+						<Link
+							theme="secondary"
+							size="small"
+							classes="flex-1"
+							href={getDocumentRoute("edit", {
+								collectionKey: props.collection()?.key ?? "",
+								documentId: props.document()?.id,
+								status: props.item.version,
+							})}
+						>
+							{T()("view")}
+						</Link>
+					</Show>
 					<Show when={props.item.type === "revision"}>
 						<Button
 							theme="border-outline"
@@ -167,6 +199,7 @@ const TimelineDetails: Component<{
 							size="small"
 							classes="flex-1"
 							onClick={props.onPromote}
+							disabled={isUnreleasedEnvironment()}
 						>
 							{T()("promote_to_environment")}
 						</Button>

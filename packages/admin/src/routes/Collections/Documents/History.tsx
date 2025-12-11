@@ -46,7 +46,7 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 					}}
 					actions={{}}
 				/>
-				<div class="flex flex-row items-start mt-2 bg-background-base dotted-background rounded-t-xl border border-border ">
+				<div class="flex flex-row items-start mt-2 bg-background-base dotted-background rounded-t-xl border border-border flex-grow">
 					<div class="w-182 p-6 pl-20 relative before:absolute before:left-20 before:top-0 before:bottom-0 before:w-0.5 before:bg-secondary-base/20 before:z-0 before:-translate-x-1/2">
 						<For each={state.timelineData()}>
 							{(group) => (

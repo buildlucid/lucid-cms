@@ -7,6 +7,7 @@ export interface PillProps {
 		| "primary-opaque"
 		| "grey"
 		| "red"
+		| "error-opaque"
 		| "warning"
 		| "warning-opaque"
 		| "secondary"
@@ -30,6 +31,8 @@ const Pill: Component<PillProps> = (props) => {
 						props.theme === "primary-opaque",
 					"bg-input-base text-title": props.theme === "grey",
 					"bg-error-base text-error-contrast": props.theme === "red",
+					"bg-error-base/10 border border-error-base/20 text-body":
+						props.theme === "error-opaque",
 					"bg-warning-base text-warning-contrast": props.theme === "warning",
 					"bg-warning-base/10 border border-warning-base/20 text-body":
 						props.theme === "warning-opaque",
