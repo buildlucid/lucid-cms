@@ -2,7 +2,15 @@ import classNames from "classnames";
 import type { Component, JSXElement } from "solid-js";
 
 export interface PillProps {
-	theme: "primary" | "grey" | "red" | "warning" | "secondary" | "outline";
+	theme:
+		| "primary"
+		| "primary-opaque"
+		| "grey"
+		| "red"
+		| "warning"
+		| "warning-opaque"
+		| "secondary"
+		| "outline";
 	children: JSXElement;
 	class?: string;
 	tooltip?: string;
@@ -18,10 +26,13 @@ const Pill: Component<PillProps> = (props) => {
 				props.class,
 				{
 					"bg-primary-base text-primary-contrast": props.theme === "primary",
+					"bg-primary-base/20 text-body border border-primary-base/30":
+						props.theme === "primary-opaque",
 					"bg-input-base text-title": props.theme === "grey",
 					"bg-error-base text-error-contrast": props.theme === "red",
+					"bg-warning-base text-warning-contrast": props.theme === "warning",
 					"bg-warning-base/10 border border-warning-base/20 text-body":
-						props.theme === "warning",
+						props.theme === "warning-opaque",
 					"bg-secondary-base text-secondary-contrast":
 						props.theme === "secondary",
 					"bg-input-base border border-border text-title":

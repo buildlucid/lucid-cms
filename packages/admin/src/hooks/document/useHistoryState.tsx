@@ -2,10 +2,10 @@ import { useParams } from "@solidjs/router";
 import { createMemo, createSignal, createEffect } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import api from "@/services/api";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import helpers from "@/utils/helpers";
 import T from "@/translations";
 import type { DocumentVersionResponse } from "@types";
+import useSearchParamsState from "../useSearchParamsState";
 
 const PER_PAGE = 20;
 
@@ -35,7 +35,7 @@ const getDateGroupKey = (dateStr: string | null): string => {
 
 export function useHistoryState() {
 	const params = useParams();
-	const searchParams = useSearchParamsLocation(
+	const searchParams = useSearchParamsState(
 		{
 			sorts: {
 				createdAt: "desc",

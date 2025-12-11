@@ -96,6 +96,7 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 									onRestore={state.handleRestoreRevision}
 									onPromote={state.handlePromoteToEnvironment}
 									collection={state.collection}
+									document={state.document}
 								/>
 							)}
 						</Show>
