@@ -52,6 +52,10 @@ export function useHistoryState() {
 	const [accumulatedRevisions, setAccumulatedRevisions] = createSignal<
 		DocumentVersionResponse[]
 	>([]);
+	const [revisionName, setRevisionName] = createSignal("");
+	const [selectedItem, setSelectedItem] = createSignal<TimelineItem | null>(
+		null,
+	);
 
 	// ------------------------------------------
 	// Memos
@@ -165,6 +169,123 @@ export function useHistoryState() {
 	});
 	const document = createMemo(() => documentQuery.data?.data);
 
+	const timelineData = createMemo((): TimelineGroup[] => {
+		const documentData = document();
+		const revisions = accumulatedRevisions();
+		const allItems: TimelineItem[] = [];
+
+		//* add latest version
+		if (documentData?.version?.latest) {
+			const latest = documentData.version.latest;
+			allItems.push({
+				type: "latest",
+				id: latest.id,
+				version: "latest",
+				createdAt: latest.createdAt,
+				createdBy: latest.createdBy,
+				promotedFrom: latest.promotedFrom,
+				contentId: latest.contentId,
+			});
+		}
+
+		//* add revisions
+		for (const revision of revisions) {
+			allItems.push({
+				type: "revision",
+				version: "revision",
+				id: revision.id,
+				createdAt: revision.createdAt,
+				createdBy: revision.createdBy,
+				promotedFrom: revision.promotedFrom,
+				contentId: revision.contentId,
+				bricks: revision.bricks,
+			});
+		}
+
+		//* collect environment versions
+		const environmentVersions: TimelineItem[] = [];
+		if (documentData?.version) {
+			for (const [key, version] of Object.entries(documentData.version)) {
+				if (key !== "latest" && version) {
+					environmentVersions.push({
+						type: "environment",
+						id: version.id,
+						version: key,
+						createdAt: version.createdAt,
+						createdBy: version.createdBy,
+						promotedFrom: version.promotedFrom,
+						contentId: version.contentId,
+					});
+				}
+			}
+		}
+
+		//* link environment versions to their source
+		const contentIdMap = new Map<string, TimelineItem>();
+		const idMap = new Map<number, TimelineItem>();
+
+		for (const item of allItems) {
+			contentIdMap.set(item.contentId, item);
+			idMap.set(item.id, item);
+		}
+
+		//* attach environment versions to their sources
+		for (const envVersion of environmentVersions) {
+			let sourceItem: TimelineItem | undefined;
+
+			if (envVersion.promotedFrom) {
+				sourceItem = idMap.get(envVersion.promotedFrom);
+			}
+
+			if (!sourceItem && envVersion.contentId) {
+				sourceItem = contentIdMap.get(envVersion.contentId);
+			}
+
+			if (sourceItem) {
+				if (!sourceItem.environmentVersions) {
+					sourceItem.environmentVersions = [];
+				}
+				sourceItem.environmentVersions.push(envVersion);
+			} else {
+				allItems.push(envVersion);
+			}
+		}
+
+		//* sort all items by date
+		allItems.sort((a, b) => {
+			if (!a.createdAt) return 1;
+			if (!b.createdAt) return -1;
+			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+		});
+
+		//* group by date
+		const groups: Map<string, TimelineItem[]> = new Map();
+
+		for (const item of allItems) {
+			const dateKey = getDateGroupKey(item.createdAt);
+			const existing = groups.get(dateKey) || [];
+			groups.set(dateKey, [...existing, item]);
+		}
+
+		return Array.from(groups.entries()).map(([dateLabel, items]) => ({
+			dateLabel,
+			items,
+		}));
+	});
+
+	const isItemSelected = (item: TimelineItem): boolean => {
+		const selected = selectedItem();
+		if (!selected) return false;
+		return selected.id === item.id && selected.type === item.type;
+	};
+
+	createEffect(() => {
+		const data = timelineData();
+		if (data.length > 0 && data[0].items.length > 0 && !selectedItem()) {
+			setSelectedItem(data[0].items[0]);
+		}
+	});
+
 	// ------------------------------------------
 	// Effects
 	createEffect(() => {
@@ -197,6 +318,18 @@ export function useHistoryState() {
 			});
 		}
 	};
+	const handleSelectItem = (item: TimelineItem) => {
+		setSelectedItem(item);
+		setRevisionName("");
+	};
+	const handleRestoreRevision = () => {
+		// TODO: Implement restore revision functionality
+		console.log("Restore revision:", selectedItem());
+	};
+	const handlePromoteToEnvironment = () => {
+		// TODO: Implement promote to environment functionality
+		console.log("Promote to environment:", selectedItem());
+	};
 
 	// ------------------------------------------
 	// Return
@@ -220,7 +353,34 @@ export function useHistoryState() {
 		hasMore,
 		loadMore,
 		meta,
+		revisionName,
+		selectedItem,
+		handleSelectItem,
+		handleRestoreRevision,
+		handlePromoteToEnvironment,
+		isItemSelected,
+		timelineData,
+		setRevisionName,
 	};
 }
 
 export type UseHistoryState = ReturnType<typeof useHistoryState>;
+
+export type TimelineCardType = "latest" | "revision" | "environment";
+
+export type TimelineItem = {
+	type: TimelineCardType;
+	id: number;
+	version: string;
+	createdAt: string | null;
+	createdBy: number | null;
+	promotedFrom: number | null;
+	contentId: string;
+	bricks?: DocumentVersionResponse["bricks"];
+	environmentVersions?: TimelineItem[];
+};
+
+export type TimelineGroup = {
+	dateLabel: string;
+	items: TimelineItem[];
+};
