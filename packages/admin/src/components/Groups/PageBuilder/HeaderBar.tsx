@@ -62,7 +62,7 @@ export const HeaderBar: Component<{
 	const viewOptions = createMemo(() => {
 		const options: ViewSelectorOption[] = [
 			{
-				label: "Latest",
+				label: T()("latest"),
 				disabled: false,
 				type: "latest",
 				location: getDocumentRoute("edit", {
@@ -77,7 +77,7 @@ export const HeaderBar: Component<{
 			props.state.documentID() !== undefined
 		) {
 			options.push({
-				label: `Revision #${props.versionId?.()}`,
+				label: `${T()("revision")} #${props.versionId?.()}`,
 				disabled: false,
 				type: "link",
 				hideInDropdown: true,

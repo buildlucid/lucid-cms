@@ -50,7 +50,7 @@ const TimelineDetails: Component<{
 					})}
 				/>
 				<div class="flex items-start justify-between gap-4">
-					<h3 class="text-title truncate text-sm mb-2 capitalize">
+					<h3 class="text-title truncate text-base mb-2 capitalize">
 						<Switch>
 							<Match when={props.item.type === "latest"}>{T()("latest")}</Match>
 							<Match when={props.item.type === "environment"}>

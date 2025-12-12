@@ -14,8 +14,19 @@ const getDateGroupKey = (dateStr: string | null): string => {
 
 	const date = new Date(dateStr);
 	const now = new Date();
-	const diffTime = now.getTime() - date.getTime();
-	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+	const getStartOfDay = (source: Date) =>
+		new Date(
+			source.getFullYear(),
+			source.getMonth(),
+			source.getDate(),
+		).getTime();
+	const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
+	const diffDays = Math.max(
+		0,
+		Math.round(
+			(getStartOfDay(now) - getStartOfDay(date)) / MILLISECONDS_IN_DAY,
+		),
+	);
 
 	if (diffDays === 0) {
 		return "Today";
