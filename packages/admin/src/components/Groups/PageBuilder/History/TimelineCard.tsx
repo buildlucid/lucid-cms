@@ -92,11 +92,11 @@ const TimelineCard: Component<{
 	const isUnreleasedEnvironment = createMemo(() => {
 		return props.item.type === "environment" && !props.item.isReleased;
 	});
-	const isEnvironmentUpToDate = createMemo(() => {
+	const isEnvironmentInSyncWithPromoted = createMemo(() => {
 		return (
 			props.item.type === "environment" &&
 			props.item.isReleased &&
-			props.item.upToDate
+			props.item.inSyncWithPromotedFrom
 		);
 	});
 
@@ -154,11 +154,12 @@ const TimelineCard: Component<{
 							"absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r",
 							{
 								"from-primary-base/60 to-primary-base/20":
-									props.item.type === "latest" || isEnvironmentUpToDate(),
+									props.item.type === "latest" ||
+									isEnvironmentInSyncWithPromoted(),
 								"from-warning-base/60 to-warning-base/20":
 									props.item.type === "environment" &&
 									!isUnreleasedEnvironment() &&
-									!isEnvironmentUpToDate(),
+									!isEnvironmentInSyncWithPromoted(),
 								"from-error-base/60 to-error-base/20":
 									isUnreleasedEnvironment(),
 							},

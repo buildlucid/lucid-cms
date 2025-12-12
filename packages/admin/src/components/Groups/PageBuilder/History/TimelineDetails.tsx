@@ -26,11 +26,11 @@ const TimelineDetails: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// Memos
-	const isEnvironmentUpToDate = createMemo(() => {
+	const isEnvironmentInSyncWithPromoted = createMemo(() => {
 		return (
 			props.item.type === "environment" &&
 			props.item.isReleased &&
-			props.item.upToDate
+			props.item.inSyncWithPromotedFrom
 		);
 	});
 
@@ -43,9 +43,10 @@ const TimelineDetails: Component<{
 				<span
 					class={classNames("absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r", {
 						"from-primary-base/60 to-primary-base/20":
-							props.item.type === "latest" || isEnvironmentUpToDate(),
+							props.item.type === "latest" || isEnvironmentInSyncWithPromoted(),
 						"from-warning-base/60 to-warning-base/20":
-							props.item.type === "environment" && !isEnvironmentUpToDate(),
+							props.item.type === "environment" &&
+							!isEnvironmentInSyncWithPromoted(),
 						"from-info-base/60 to-info-base/20": props.item.type === "revision",
 					})}
 				/>
@@ -89,6 +90,30 @@ const TimelineDetails: Component<{
 					theme="contained"
 					items={[
 						{
+							label: T()("status"),
+							value: (
+								<div class="flex items-center gap-2">
+									<Switch>
+										<Match when={props.item.inSyncWithPromotedFrom}>
+											<Pill theme="primary-opaque">{T()("in_sync")}</Pill>
+										</Match>
+										<Match when={!props.item.inSyncWithPromotedFrom}>
+											<Pill theme="warning-opaque">{T()("out_of_sync")}</Pill>
+										</Match>
+									</Switch>
+									<Switch>
+										<Match when={props.item.promotedFromLatest}>
+											<Pill theme="primary-opaque">{T()("latest")}</Pill>
+										</Match>
+										<Match when={!props.item.promotedFromLatest}>
+											<Pill theme="warning-opaque">{T()("not_latest")}</Pill>
+										</Match>
+									</Switch>
+								</div>
+							),
+							show: props.item.type === "environment",
+						},
+						{
 							label: T()("type"),
 							value: (
 								<Switch>
@@ -104,6 +129,7 @@ const TimelineDetails: Component<{
 								</Switch>
 							),
 						},
+
 						{
 							label: T()("version_id"),
 							value: `#${props.item.id}`,
@@ -114,7 +140,7 @@ const TimelineDetails: Component<{
 						},
 						{
 							label: T()("promoted_from"),
-							value: `${T()("revision")} #${props.item.promotedFrom}`,
+							value: props.item.promotedFrom,
 							show: !!props.item.promotedFrom,
 						},
 						{
@@ -127,6 +153,7 @@ const TimelineDetails: Component<{
 							show: !!props.item.contentId,
 							stacked: true,
 						},
+
 						{
 							label: T()("bricks"),
 							value: (

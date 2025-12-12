@@ -1,4 +1,8 @@
 {
+	"in_sync": "In sync",
+	"out_of_sync": "Out of sync",
+	"not_latest": "Not latest",
+	"latest": "Latest",
 	"unreleased": "Unreleased",
 	"promote_to_environment": "Promote to Environment",
 	"environment": "Environment",
@@ -10,7 +14,6 @@
 	"revision_name_description": "Give this revision a human-friendly label for later.",
 	"revision_name_placeholder": "Enter a name for this revision…",
 	"revision_content_summary_description": "Quick snapshot of what’s inside this revision.",
-	"latest": "Latest",
 	"delete_document": "Delete Document",
 	"release_to": "Release to",
 	"released_up_to_date": "Up to date with latest",

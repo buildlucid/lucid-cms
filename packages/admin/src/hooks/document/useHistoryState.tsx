@@ -6,6 +6,7 @@ import helpers from "@/utils/helpers";
 import T from "@/translations";
 import type { DocumentVersionResponse } from "@types";
 import useSearchParamsState from "../useSearchParamsState";
+import type { DocumentResponse } from "../../../../core/dist/types/response";
 
 const PER_PAGE = 20;
 
@@ -187,6 +188,16 @@ export function useHistoryState() {
 		const latestContentId = documentData?.version?.latest?.contentId ?? null;
 		let latestItem: TimelineItem | undefined;
 
+		const isInSyncWithPromotedFrom = (
+			item:
+				| DocumentVersionResponse
+				| NonNullable<DocumentResponse["version"]["latest"]>,
+		): boolean => {
+			const promotedFromItem = allItems.find((i) => i.id === item.promotedFrom);
+			if (!promotedFromItem) return false;
+			return promotedFromItem.contentId === item.contentId;
+		};
+
 		//* add latest version
 		if (documentData?.version?.latest) {
 			const latest = documentData.version.latest;
@@ -199,7 +210,8 @@ export function useHistoryState() {
 				promotedFrom: latest.promotedFrom,
 				contentId: latest.contentId,
 				isReleased: true,
-				upToDate: true,
+				promotedFromLatest: true,
+				inSyncWithPromotedFrom: isInSyncWithPromotedFrom(latest),
 			};
 			allItems.push(latestItem);
 		}
@@ -216,7 +228,9 @@ export function useHistoryState() {
 				contentId: revision.contentId,
 				bricks: revision.bricks,
 				isReleased: false,
-				upToDate: false,
+				promotedFromLatest:
+					documentData?.version?.latest?.id === revision.promotedFrom,
+				inSyncWithPromotedFrom: isInSyncWithPromotedFrom(revision),
 			});
 		}
 
@@ -237,8 +251,9 @@ export function useHistoryState() {
 						promotedFrom: version.promotedFrom,
 						contentId: version.contentId,
 						isReleased: true,
-						upToDate:
-							latestContentId !== null && version.contentId === latestContentId,
+						promotedFromLatest:
+							documentData?.version?.latest?.id === version.promotedFrom,
+						inSyncWithPromotedFrom: isInSyncWithPromotedFrom(version),
 					});
 				}
 
@@ -255,7 +270,8 @@ export function useHistoryState() {
 							promotedFrom: null,
 							contentId: null,
 							isReleased: false,
-							upToDate: false,
+							promotedFromLatest: false,
+							inSyncWithPromotedFrom: false,
 						});
 					}
 				}
@@ -438,7 +454,8 @@ export type TimelineItem = {
 	promotedFrom: number | null;
 	contentId: string | null;
 	isReleased: boolean;
-	upToDate: boolean;
+	inSyncWithPromotedFrom: boolean;
+	promotedFromLatest: boolean;
 	bricks?: DocumentVersionResponse["bricks"];
 	environmentVersions?: TimelineItem[];
 };
