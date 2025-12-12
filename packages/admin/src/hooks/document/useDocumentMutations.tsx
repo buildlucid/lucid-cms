@@ -191,14 +191,14 @@ export function useDocumentMutations(props: {
 		});
 	};
 
-	const restoreRevisionAction = () => {
-		const versionId = props.versionId();
+	const restoreRevisionAction = async (versionIdOverride?: number) => {
+		const versionId = versionIdOverride ?? props.versionId();
 		if (versionId === undefined) {
 			console.error("No version ID found.");
 			return;
 		}
 
-		restoreRevision.action.mutate({
+		return await restoreRevision.action.mutateAsync({
 			collectionKey: props.collectionKey(),
 			id: props.documentId() as number,
 			versionId: versionId,

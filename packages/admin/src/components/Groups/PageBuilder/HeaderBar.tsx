@@ -355,8 +355,8 @@ export const HeaderBar: Component<{
 								options={releaseOptions}
 								onSelect={async (option) => {
 									props.state.autoSave?.debouncedAutoSave.clear();
-									await props.actions?.publishDocumentAction?.(option.value);
-									navigate(option.route);
+									props.state.ui.setReleaseEnvironmentTarget(option.value);
+									props.state.ui.setReleaseEnvironmentOpen(true);
 								}}
 								onSave={() => {
 									props.state.autoSave?.debouncedAutoSave.clear();
@@ -378,7 +378,12 @@ export const HeaderBar: Component<{
 								type="button"
 								theme="secondary"
 								size="small"
-								onClick={props.actions?.restoreRevisionAction}
+								onClick={() => {
+									const versionId = props.versionId?.();
+									if (!versionId) return;
+									props.state.ui.setRestoreRevisionVersionId(versionId);
+									props.state.ui.setRestoreRevisionOpen(true);
+								}}
 								permission={props.state.ui.hasRestorePermission?.()}
 							>
 								{T()("restore_revision")}

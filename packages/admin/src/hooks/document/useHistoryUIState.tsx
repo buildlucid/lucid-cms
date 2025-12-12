@@ -1,6 +1,6 @@
 import { createMemo, createSignal, type Accessor } from "solid-js";
 import type api from "@/services/api";
-import type { CollectionResponse } from "@types";
+import type { CollectionResponse, DocumentVersionType } from "@types";
 import type { UseDocumentUIState } from "./useDocumentUIState";
 
 export function useHistoryUIState(props: {
@@ -8,6 +8,14 @@ export function useHistoryUIState(props: {
 	collection: Accessor<CollectionResponse | undefined>;
 }): UseDocumentUIState {
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
+	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
+		createSignal<number | null>(null);
+
+	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
+		createSignal(false);
+	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
+		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
 
 	/**
 	 * Checks if services requests are loading or not
@@ -142,6 +150,14 @@ export function useHistoryUIState(props: {
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
+		getRestoreRevisionOpen,
+		setRestoreRevisionOpen,
+		getRestoreRevisionVersionId,
+		setRestoreRevisionVersionId,
+		getReleaseEnvironmentOpen,
+		setReleaseEnvironmentOpen,
+		getReleaseEnvironmentTarget,
+		setReleaseEnvironmentTarget,
 		isLoading,
 		isSuccess,
 		isSaving,

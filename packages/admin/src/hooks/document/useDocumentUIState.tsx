@@ -10,6 +10,7 @@ import type {
 	CollectionResponse,
 	DocumentResponse,
 	FieldError,
+	DocumentVersionType,
 } from "@types";
 import userPreferencesStore from "@/store/userPreferencesStore";
 
@@ -34,6 +35,14 @@ export function useDocumentUIState(props: {
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
+	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
+		createSignal<number | null>(null);
+
+	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
+		createSignal(false);
+	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
+		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
 
 	/**
 	 * Checkss if services requests are loading or not
@@ -279,6 +288,14 @@ export function useDocumentUIState(props: {
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
+		getRestoreRevisionOpen,
+		setRestoreRevisionOpen,
+		getRestoreRevisionVersionId,
+		setRestoreRevisionVersionId,
+		getReleaseEnvironmentOpen,
+		setReleaseEnvironmentOpen,
+		getReleaseEnvironmentTarget,
+		setReleaseEnvironmentTarget,
 		isLoading,
 		isSuccess,
 		isSaving,
