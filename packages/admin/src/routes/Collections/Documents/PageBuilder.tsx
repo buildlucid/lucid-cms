@@ -6,6 +6,7 @@ import {
 	createEffect,
 	on,
 	createMemo,
+	onCleanup,
 } from "solid-js";
 import { useParams } from "@solidjs/router";
 import {
@@ -108,6 +109,10 @@ const CollectionsDocumentsEditRoute: Component<{
 			},
 		),
 	);
+
+	onCleanup(() => {
+		brickStore.get.reset();
+	});
 
 	// ----------------------------------
 	// Render

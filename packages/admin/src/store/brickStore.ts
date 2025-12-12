@@ -1,4 +1,4 @@
-import { createStore, produce } from "solid-js/store";
+import { createStore, produce, unwrap } from "solid-js/store";
 import { nanoid } from "nanoid";
 import equal from "fast-deep-equal/es6";
 import brickHelpers from "@/utils/brick-helpers";
@@ -151,8 +151,8 @@ const [get, set] = createStore<BrickStoreT>({
 	},
 	// Bricks
 	setBricks(document, collection) {
-		// Set the refs from the document
-		set("refs", document?.refs || {});
+		const bricks = structuredClone(unwrap(document?.bricks));
+		const fields = structuredClone(unwrap(document?.fields));
 
 		set(
 			"bricks",
@@ -164,10 +164,10 @@ const [get, set] = createStore<BrickStoreT>({
 					order: -1,
 					type: "collection-fields",
 					open: false,
-					fields: document?.fields || [],
+					fields: fields || [],
 				});
 
-				for (const brick of document?.bricks || []) {
+				for (const brick of bricks || []) {
 					draft.push(brick);
 				}
 
@@ -470,7 +470,8 @@ const [get, set] = createStore<BrickStoreT>({
 		);
 	},
 	setRefs(document) {
-		set("refs", document?.refs || {});
+		const refs = structuredClone(unwrap(document?.refs));
+		set("refs", refs || {});
 	},
 	addRef(fieldType, ref) {
 		set(

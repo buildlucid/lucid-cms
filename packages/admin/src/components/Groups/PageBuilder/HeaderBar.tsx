@@ -329,11 +329,11 @@ export const HeaderBar: Component<{
 						props.state.ui.showUpsertButton?.() ||
 						props.state.ui.showDeleteButton?.() ||
 						props.state.ui.showRestoreRevisionButton?.() ||
-						props.mode === "edit"
+						props.mode !== undefined
 					}
 				>
 					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full lg:w-auto">
-						<Show when={props.mode === "edit"}>
+						<Show when={props.mode !== undefined}>
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show when={props.state.collection()?.config.useTranslations}>
 									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
