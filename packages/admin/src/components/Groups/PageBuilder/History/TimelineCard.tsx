@@ -136,8 +136,9 @@ const TimelineCard: Component<{
 				/>
 				<button
 					type="button"
+					max-w-72
 					class={classNames(
-						"group relative flex  w-full text-left overflow-hidden rounded-md border border-border p-4 transition-colors duration-200 outline-none bg-card-base focus-visible:ring-1 focus-visible:ring-primary-base",
+						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors duration-200 outline-none bg-card-base focus-visible:ring-1 focus-visible:ring-primary-base",
 						{
 							"hover:bg-card-hover": !isUnreleasedEnvironment(),
 							"opacity-70 cursor-not-allowed": isUnreleasedEnvironment(),

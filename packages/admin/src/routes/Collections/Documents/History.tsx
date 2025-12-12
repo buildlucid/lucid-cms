@@ -46,13 +46,13 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 					}}
 					actions={{}}
 				/>
-				<div class="flex flex-row gap-10 items-start mt-2 bg-background-base dotted-background rounded-t-xl border border-border flex-grow">
-					<div class="w-182 p-6 pl-20 relative before:absolute before:left-20 before:top-0 before:bottom-0 before:w-0.5 before:bg-secondary-base/20 before:z-0 before:-translate-x-1/2">
+				<div class="flex flex-col lg:flex-row gap-10 items-start mt-2 bg-background-base dotted-background rounded-t-xl border border-border flex-grow">
+					<div class="w-full lg:w-182 p-6 pl-12 md:pl-20 relative before:absolute before:left-12 md:before:left-20 before:top-0 before:bottom-0 before:w-0.5 before:bg-secondary-base/20 before:z-0 before:-translate-x-1/2">
 						<For each={state.timelineData()}>
 							{(group) => (
 								<div class="mb-6 last:mb-0 ml-4">
 									<div class="mb-4">
-										<span class="inline-block px-2 py-1 text-xs font-medium text-secondary-contrast bg-secondary-base rounded-full -ml-4 -translate-x-1/2">
+										<span class="inline-block px-2 py-1 text-xs font-medium text-secondary-contrast bg-secondary-base rounded-full -ml-8 md:-ml-4 md:-translate-x-1/2">
 											{group.dateLabel}
 										</span>
 									</div>

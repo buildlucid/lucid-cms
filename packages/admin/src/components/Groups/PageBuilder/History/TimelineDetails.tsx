@@ -37,7 +37,7 @@ const TimelineDetails: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<aside class="mt-6 mr-6 space-y-4">
+		<aside class="mt-4 lg:mt-6 mx-4 md:mx-6 lg:mx-0 lg:mr-6 mb-4 md:mb-6 lg:mb-0 space-y-4">
 			{/* hero */}
 			<section class="relative overflow-hidden rounded-md border border-border bg-card-base p-4">
 				<span
@@ -71,7 +71,7 @@ const TimelineDetails: Component<{
 					<Link
 						theme="border-outline"
 						size="small"
-						classes="flex-1"
+						classes="w-full md:flex-1"
 						href={getDocumentRoute("edit", {
 							collectionKey: props.collection()?.key ?? "",
 							documentId: props.document()?.id,

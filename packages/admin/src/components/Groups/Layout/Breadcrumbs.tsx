@@ -1,4 +1,4 @@
-import { type Component, Show, For } from "solid-js";
+import { type Component, Show, For, createMemo } from "solid-js";
 import { FaSolidCaretRight } from "solid-icons/fa";
 import { A } from "@solidjs/router";
 import classNames from "classnames";
@@ -15,16 +15,46 @@ export const Breadcrumbs: Component<{
 	};
 }> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const includedBreadcrumbs = createMemo(() => {
+		return (props.breadcrumbs ?? []).filter((b) => b.include !== false);
+	});
+	const lastBreadcrumb = createMemo(() => {
+		const crumbs = includedBreadcrumbs();
+		return crumbs.length ? crumbs[crumbs.length - 1] : undefined;
+	});
+
+	// ----------------------------------------
 	// Render
 	return (
 		<Show when={props.breadcrumbs}>
 			<nav
-				class={classNames({
+				class={classNames("block", {
 					"border-b border-border": props.options?.noBorder !== true,
 					"px-4 md:px-6 py-4": props.options?.noPadding !== true,
 				})}
 			>
-				<ul class="flex items-center">
+				<div class="block lg:hidden">
+					<Show when={lastBreadcrumb()}>
+						{(breadcrumb) => (
+							<Show when={breadcrumb().link}>
+								<A
+									href={breadcrumb().link || ""}
+									class="flex items-center text-body hover:text-primaryDark text-sm"
+								>
+									{breadcrumb().label}
+								</A>
+							</Show>
+						)}
+					</Show>
+					<Show when={lastBreadcrumb() && !lastBreadcrumb()?.link}>
+						<span class="flex items-center text-body hover:text-primaryDark text-sm">
+							{lastBreadcrumb()?.label}
+						</span>
+					</Show>
+				</div>
+
+				<ul class="hidden lg:flex items-center">
 					<For each={props.breadcrumbs}>
 						{(breadcrumb, i) => (
 							<Show when={breadcrumb.include !== false}>

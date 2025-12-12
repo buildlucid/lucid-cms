@@ -22,7 +22,6 @@ import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import type { Accessor } from "solid-js";
 import helpers from "@/utils/helpers";
-import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
 import Button from "@/components/Partials/Button";
 
@@ -51,7 +50,6 @@ export const HeaderBar: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
-	const navigate = useNavigate();
 	let stickyBarRef: HTMLDivElement | undefined;
 
 	// ----------------------------------
@@ -215,7 +213,7 @@ export const HeaderBar: Component<{
 	return (
 		<>
 			<div class="w-full -mt-4 px-4 md:px-6 pt-6 bg-background-base border-x border-border">
-				<div class="flex items-center justify-between gap-3 w-full text-sm">
+				<div class="flex md:items-center md:justify-between gap-3 w-full text-sm">
 					<div class="flex-1 min-w-0">
 						<LayoutBreadcrumbs
 							breadcrumbs={[
@@ -246,14 +244,16 @@ export const HeaderBar: Component<{
 						/>
 					</div>
 					<Show when={props.mode === "edit"}>
-						<div class="flex items-center gap-3 shrink-0">
-							<div class="flex items-center gap-1.5 text-body">
-								<FaSolidCalendarPlus size={12} />
-								<DateText date={props.state.document()?.createdAt} />
-							</div>
-							<div class="flex items-center gap-1.5 text-body">
-								<FaSolidClock size={12} />
-								<DateText date={props.state.document()?.updatedAt} />
+						<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 shrink-0 text-xs md:text-sm">
+							<div class="hidden lg:flex items-center gap-x-3 gap-y-1.5 flex-wrap">
+								<div class="flex items-center gap-1.5 text-body">
+									<FaSolidCalendarPlus size={12} />
+									<DateText date={props.state.document()?.createdAt} />
+								</div>
+								<div class="flex items-center gap-1.5 text-body">
+									<FaSolidClock size={12} />
+									<DateText date={props.state.document()?.updatedAt} />
+								</div>
 							</div>
 							<Show when={showAutoSaveToggle()}>
 								<button
@@ -283,7 +283,7 @@ export const HeaderBar: Component<{
 			</div>
 			<div
 				ref={stickyBarRef}
-				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex items-center justify-between gap-2.5"
+				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2.5"
 			>
 				<Show when={isSavingOrAutoSaving()}>
 					<div class="absolute inset-2 z-50 bg-white/5 rounded-md flex items-center justify-center pointer-events-auto animate-pulse">
@@ -293,9 +293,9 @@ export const HeaderBar: Component<{
 						</div>
 					</div>
 				</Show>
-				<div class="flex items-center gap-2.5">
+				<div class="flex items-center gap-2.5 w-full lg:w-auto">
 					<div class="flex flex-col gap-1">
-						<div class="flex items-center gap-2">
+						<div class="flex flex-wrap items-center gap-2">
 							<Show when={props.mode === "create"}>
 								<h2 class="text-base font-medium text-title">
 									{T()("create_document", {
@@ -324,79 +324,88 @@ export const HeaderBar: Component<{
 						</Show>
 					</div>
 				</div>
-				<div class="flex items-center gap-2.5 justify-end">
-					<div class="flex items-center gap-2.5 w-full justify-between">
+				<Show
+					when={
+						props.state.ui.showUpsertButton?.() ||
+						props.state.ui.showDeleteButton?.() ||
+						props.state.ui.showRestoreRevisionButton?.() ||
+						props.mode === "edit"
+					}
+				>
+					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full lg:w-auto">
 						<Show when={props.mode === "edit"}>
-							<Show when={props.state.collection()?.config.useTranslations}>
-								<div class="w-54">
-									<ContentLocaleSelect
-										hasError={props.state.ui.brickTranslationErrors?.()}
-									/>
-								</div>
+							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
+								<Show when={props.state.collection()?.config.useTranslations}>
+									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
+										<ContentLocaleSelect
+											hasError={props.state.ui.brickTranslationErrors?.()}
+										/>
+									</div>
+								</Show>
+								<Show
+									when={
+										props.state.collection()?.config.useTranslations !== true &&
+										defaultLocale()
+									}
+								>
+									<div class="flex items-center">
+										<FaSolidLanguage size={20} />
+										<span class="ml-2.5 text-base font-medium text-body">
+											{defaultLocale()?.name} ({defaultLocale()?.code})
+										</span>
+									</div>
+								</Show>
+							</div>
+						</Show>
+						<div class="flex items-center gap-2.5 w-auto ml-auto">
+							<Show when={props.state.ui.showUpsertButton?.()}>
+								<ReleaseTrigger
+									options={releaseOptions}
+									onSelect={async (option) => {
+										props.state.autoSave?.debouncedAutoSave.clear();
+										props.state.ui.setReleaseEnvironmentTarget(option.value);
+										props.state.ui.setReleaseEnvironmentOpen(true);
+									}}
+									onSave={() => {
+										props.state.autoSave?.debouncedAutoSave.clear();
+										props.actions?.upsertDocumentAction?.();
+									}}
+									saveDisabled={props.state.ui.saveDisabled?.()}
+									savePermission={props.state.ui.hasSavePermission?.()}
+									disabled={!props.state.ui.canPublishDocument?.()}
+									permission={props.state.ui.hasPublishPermission?.()}
+									loading={
+										props.state.ui.isSaving?.() ||
+										props.state.ui.isAutoSaving?.() ||
+										props.state.ui.isPromotingToPublished?.()
+									}
+								/>
 							</Show>
-							<Show
-								when={
-									props.state.collection()?.config.useTranslations !== true &&
-									defaultLocale()
-								}
-							>
-								<div class="flex items-center">
-									<FaSolidLanguage size={20} />
-									<span class="ml-2.5 text-base font-medium text-body">
-										{defaultLocale()?.name} ({defaultLocale()?.code})
-									</span>
-								</div>
+							<Show when={props.state.ui.showRestoreRevisionButton?.()}>
+								<Button
+									type="button"
+									theme="secondary"
+									size="small"
+									onClick={() => {
+										const versionId = props.versionId?.();
+										if (!versionId) return;
+										props.state.ui.setRestoreRevisionVersionId(versionId);
+										props.state.ui.setRestoreRevisionOpen(true);
+									}}
+									permission={props.state.ui.hasRestorePermission?.()}
+								>
+									{T()("restore_revision")}
+								</Button>
 							</Show>
-						</Show>
+							<Show when={props.state.ui.showDeleteButton?.()}>
+								<DocumentActions
+									onDelete={() => props.state.ui?.setDeleteOpen?.(true)}
+									deletePermission={props.state.ui.hasDeletePermission?.()}
+								/>
+							</Show>
+						</div>
 					</div>
-					<div class="flex items-center gap-2.5">
-						<Show when={props.state.ui.showUpsertButton?.()}>
-							<ReleaseTrigger
-								options={releaseOptions}
-								onSelect={async (option) => {
-									props.state.autoSave?.debouncedAutoSave.clear();
-									props.state.ui.setReleaseEnvironmentTarget(option.value);
-									props.state.ui.setReleaseEnvironmentOpen(true);
-								}}
-								onSave={() => {
-									props.state.autoSave?.debouncedAutoSave.clear();
-									props.actions?.upsertDocumentAction?.();
-								}}
-								saveDisabled={props.state.ui.saveDisabled?.()}
-								savePermission={props.state.ui.hasSavePermission?.()}
-								disabled={!props.state.ui.canPublishDocument?.()}
-								permission={props.state.ui.hasPublishPermission?.()}
-								loading={
-									props.state.ui.isSaving?.() ||
-									props.state.ui.isAutoSaving?.() ||
-									props.state.ui.isPromotingToPublished?.()
-								}
-							/>
-						</Show>
-						<Show when={props.state.ui.showRestoreRevisionButton?.()}>
-							<Button
-								type="button"
-								theme="secondary"
-								size="small"
-								onClick={() => {
-									const versionId = props.versionId?.();
-									if (!versionId) return;
-									props.state.ui.setRestoreRevisionVersionId(versionId);
-									props.state.ui.setRestoreRevisionOpen(true);
-								}}
-								permission={props.state.ui.hasRestorePermission?.()}
-							>
-								{T()("restore_revision")}
-							</Button>
-						</Show>
-						<Show when={props.state.ui.showDeleteButton?.()}>
-							<DocumentActions
-								onDelete={() => props.state.ui?.setDeleteOpen?.(true)}
-								deletePermission={props.state.ui.hasDeletePermission?.()}
-							/>
-						</Show>
-					</div>
-				</div>
+				</Show>
 			</div>
 		</>
 	);
