@@ -8,7 +8,6 @@ export function useHistoryUIState(props: {
 	collection: Accessor<CollectionResponse | undefined>;
 }): UseDocumentUIState {
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
-	const [getPanelOpen, setPanelOpen] = createSignal(false);
 
 	/**
 	 * Checks if services requests are loading or not
@@ -123,13 +122,26 @@ export function useHistoryUIState(props: {
 	 */
 	const hasDeletePermission = createMemo(() => false);
 
+	/**
+	 * Determines if the restore revision button should be visible - always false for history
+	 */
+	const showRestoreRevisionButton = createMemo(() => false);
+
+	/**
+	 * Determines if the user has permission to restore documents - always false for history
+	 */
+	const hasRestorePermission = createMemo(() => false);
+
+	/**
+	 * Determines if the auto save user is enabled - always false for history
+	 */
+	const autoSaveUserEnabled = createMemo(() => false);
+
 	// ------------------------------------------
 	// Return
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
-		getPanelOpen,
-		setPanelOpen,
 		isLoading,
 		isSuccess,
 		isSaving,
@@ -151,6 +163,9 @@ export function useHistoryUIState(props: {
 		hasAutoSavePermission,
 		isPromotingToPublished,
 		isAutoSaveActive,
+		showRestoreRevisionButton,
+		hasRestorePermission,
+		autoSaveUserEnabled,
 	};
 }
 

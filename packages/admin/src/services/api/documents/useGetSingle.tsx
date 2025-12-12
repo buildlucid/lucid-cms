@@ -12,7 +12,10 @@ interface QueryParams {
 	location: {
 		collectionKey?: Accessor<string | undefined> | string;
 		id?: Accessor<number | undefined> | number;
-		version: Accessor<DocumentVersionType | undefined> | DocumentVersionType;
+		version:
+			| Accessor<DocumentVersionType | undefined | number>
+			| DocumentVersionType
+			| number;
 	};
 	include: {
 		bricks: Accessor<boolean | undefined> | boolean;

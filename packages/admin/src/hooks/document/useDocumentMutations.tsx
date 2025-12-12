@@ -23,6 +23,7 @@ export function useDocumentMutations(props: {
 	version: Accessor<"latest" | string>;
 	mode: "create" | "edit" | "revisions";
 	document?: () => DocumentResponse | undefined;
+	versionId: () => number | undefined;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -130,6 +131,24 @@ export function useDocumentMutations(props: {
 		});
 	};
 
+	const restoreRevision = api.documents.useRestoreRevision({
+		onSuccess: () => {
+			brickStore.set("fieldsErrors", []);
+
+			navigate(
+				getDocumentRoute("edit", {
+					collectionKey: props.collectionKey(),
+					documentId: props.documentId(),
+					status: "latest",
+				}),
+			);
+		},
+		onError: () => {
+			brickStore.set("fieldsErrors", []);
+		},
+		getCollectionName: props.collectionSingularName,
+	});
+
 	const upsertDocumentAction = async () => {
 		if (props.mode === "create") {
 			createDocumentMutation.action.mutate({
@@ -172,6 +191,20 @@ export function useDocumentMutations(props: {
 		});
 	};
 
+	const restoreRevisionAction = () => {
+		const versionId = props.versionId();
+		if (versionId === undefined) {
+			console.error("No version ID found.");
+			return;
+		}
+
+		restoreRevision.action.mutate({
+			collectionKey: props.collectionKey(),
+			id: props.documentId() as number,
+			versionId: versionId,
+		});
+	};
+
 	return {
 		createDocumentMutation,
 		createSingleVersionMutation,
@@ -180,6 +213,8 @@ export function useDocumentMutations(props: {
 		upsertDocumentAction,
 		publishDocumentAction,
 		autoSaveDocument,
+		restoreRevision,
+		restoreRevisionAction,
 	};
 }
 

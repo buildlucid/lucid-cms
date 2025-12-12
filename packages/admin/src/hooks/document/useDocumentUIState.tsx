@@ -11,6 +11,7 @@ import type {
 	DocumentResponse,
 	FieldError,
 } from "@types";
+import userPreferencesStore from "@/store/userPreferencesStore";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
@@ -19,6 +20,7 @@ export function useDocumentUIState(props: {
 	document: Accessor<DocumentResponse | undefined>;
 	mode: "create" | "edit" | "history";
 	version: Accessor<"latest" | string>;
+	versionId: Accessor<number | undefined>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
@@ -29,11 +31,9 @@ export function useDocumentUIState(props: {
 	promoteToPublishedMutation?: ReturnType<
 		typeof api.documents.usePromoteSingle
 	>;
-	autoSaveUserEnabled?: Accessor<boolean>;
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
-	const [getPanelOpen, setPanelOpen] = createSignal(false);
 
 	/**
 	 * Checkss if services requests are loading or not
@@ -113,10 +113,17 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
+	 * Determines if the auto save is enabled on the user
+	 */
+	const autoSaveUserEnabled = createMemo(
+		() => userPreferencesStore.get.autoSaveEnabled,
+	);
+
+	/**
 	 * Determines if auto-save is actively running (both collection config AND user preference enabled)
 	 */
 	const isAutoSaveActive = createMemo(() => {
-		return useAutoSave() && props.autoSaveUserEnabled?.();
+		return useAutoSave() && autoSaveUserEnabled();
 	});
 
 	/**
@@ -248,13 +255,30 @@ export function useDocumentUIState(props: {
 		return userStore.get.hasPermission(["delete_content"]).all;
 	});
 
+	/**
+	 * Determines if the restore reviision button should be visible
+	 */
+	const showRestoreRevisionButton = createMemo(() => {
+		if (props.mode === "create") return false;
+		if (props.mode === "history") return false;
+		if (props.version() !== "revision") return false;
+		if (props.collection()?.config.useRevisions === false) return false;
+		if (props.versionId() === undefined) return false;
+		return true;
+	});
+
+	/**
+	 * Determines if the user has permission to restore documents
+	 */
+	const hasRestorePermission = createMemo(() => {
+		return userStore.get.hasPermission(["restore_content"]).all;
+	});
+
 	// ------------------------------------------
 	// Return
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
-		getPanelOpen,
-		setPanelOpen,
 		isLoading,
 		isSuccess,
 		isSaving,
@@ -276,6 +300,9 @@ export function useDocumentUIState(props: {
 		hasAutoSavePermission,
 		isPromotingToPublished,
 		isAutoSaveActive,
+		showRestoreRevisionButton,
+		hasRestorePermission,
+		autoSaveUserEnabled,
 	};
 }
 export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;

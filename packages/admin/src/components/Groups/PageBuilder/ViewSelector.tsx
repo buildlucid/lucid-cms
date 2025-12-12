@@ -11,6 +11,7 @@ export interface ViewSelectorOption {
 	disabled: boolean;
 	type: "latest" | "environment" | "link";
 	location: string;
+	hideInDropdown?: boolean;
 	status?: {
 		isPublished?: boolean;
 		upToDate?: boolean;
@@ -31,10 +32,16 @@ export const ViewSelector: Component<{
 	const environments = createMemo(() =>
 		props
 			.options()
-			.filter((o) => o.type === "latest" || o.type === "environment"),
+			.filter(
+				(o) =>
+					(o.type === "latest" || o.type === "environment") &&
+					o.hideInDropdown !== true,
+			),
 	);
 	const linkOptions = createMemo(() =>
-		props.options().filter((o) => o.type === "link"),
+		props
+			.options()
+			.filter((o) => o.type === "link" && o.hideInDropdown !== true),
 	);
 	const currentOption = createMemo(() => {
 		return props

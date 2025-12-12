@@ -187,6 +187,8 @@ export function useHistoryState() {
 				createdBy: latest.createdBy,
 				promotedFrom: latest.promotedFrom,
 				contentId: latest.contentId,
+				isReleased: true,
+				upToDate: true,
 			};
 			allItems.push(latestItem);
 		}
@@ -202,6 +204,8 @@ export function useHistoryState() {
 				promotedFrom: revision.promotedFrom,
 				contentId: revision.contentId,
 				bricks: revision.bricks,
+				isReleased: false,
+				upToDate: false,
 			});
 		}
 
@@ -221,7 +225,7 @@ export function useHistoryState() {
 						createdBy: version.createdBy,
 						promotedFrom: version.promotedFrom,
 						contentId: version.contentId,
-						releaseStatus: "released",
+						isReleased: true,
 						upToDate:
 							latestContentId !== null && version.contentId === latestContentId,
 					});
@@ -239,7 +243,7 @@ export function useHistoryState() {
 							createdBy: null,
 							promotedFrom: null,
 							contentId: null,
-							releaseStatus: "not_released",
+							isReleased: false,
 							upToDate: false,
 						});
 					}
@@ -285,10 +289,8 @@ export function useHistoryState() {
 
 			const decorated = item.environmentVersions.map((v, idx) => ({ v, idx }));
 			decorated.sort((a, b) => {
-				const aIsUnreleased =
-					a.v.type === "environment" && a.v.releaseStatus === "not_released";
-				const bIsUnreleased =
-					b.v.type === "environment" && b.v.releaseStatus === "not_released";
+				const aIsUnreleased = a.v.type === "environment" && !a.v.isReleased;
+				const bIsUnreleased = b.v.type === "environment" && !b.v.isReleased;
 
 				if (aIsUnreleased !== bIsUnreleased) {
 					return aIsUnreleased ? 1 : -1;
@@ -424,8 +426,8 @@ export type TimelineItem = {
 	createdBy: number | null;
 	promotedFrom: number | null;
 	contentId: string | null;
-	releaseStatus?: "released" | "not_released";
-	upToDate?: boolean;
+	isReleased: boolean;
+	upToDate: boolean;
 	bricks?: DocumentVersionResponse["bricks"];
 	environmentVersions?: TimelineItem[];
 };

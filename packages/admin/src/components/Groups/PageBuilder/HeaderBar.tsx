@@ -2,7 +2,6 @@ import T from "@/translations";
 import { type Component, Show, createMemo, onMount, onCleanup } from "solid-js";
 import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
-import Button from "@/components/Partials/Button";
 import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
 import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
 import { DocumentActions } from "./DocumentActions";
@@ -25,10 +24,12 @@ import type { Accessor } from "solid-js";
 import helpers from "@/utils/helpers";
 import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
+import Button from "@/components/Partials/Button";
 
 export const HeaderBar: Component<{
 	mode: "create" | "edit" | undefined;
 	version?: Accessor<"latest" | string>;
+	versionId?: Accessor<number | undefined>;
 	state: {
 		collection: Accessor<CollectionResponse | undefined>;
 		collectionKey: Accessor<string>;
@@ -45,6 +46,7 @@ export const HeaderBar: Component<{
 	actions: {
 		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
 		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
+		restoreRevisionAction?: UseDocumentMutations["restoreRevisionAction"];
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -69,6 +71,24 @@ export const HeaderBar: Component<{
 				}),
 			},
 		];
+
+		if (
+			props.version?.() === "revision" &&
+			props.state.documentID() !== undefined
+		) {
+			options.push({
+				label: `Revision #${props.versionId?.()}`,
+				disabled: false,
+				type: "link",
+				hideInDropdown: true,
+				location: getDocumentRoute("edit", {
+					collectionKey: props.state.collectionKey(),
+					documentId: props.state.documentID(),
+					status: "revision",
+					versionId: props.versionId?.(),
+				}),
+			});
+		}
 
 		for (const environment of props.state.collection()?.config.environments ??
 			[]) {
@@ -352,6 +372,17 @@ export const HeaderBar: Component<{
 									props.state.ui.isPromotingToPublished?.()
 								}
 							/>
+						</Show>
+						<Show when={props.state.ui.showRestoreRevisionButton?.()}>
+							<Button
+								type="button"
+								theme="secondary"
+								size="small"
+								onClick={props.actions?.restoreRevisionAction}
+								permission={props.state.ui.hasRestorePermission?.()}
+							>
+								{T()("restore_revision")}
+							</Button>
 						</Show>
 						<Show when={props.state.ui.showDeleteButton?.()}>
 							<DocumentActions

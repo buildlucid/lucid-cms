@@ -22,35 +22,23 @@ import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import Alert from "@/components/Blocks/Alert";
 import brickStore from "@/store/brickStore";
-import userPreferencesStore from "@/store/userPreferencesStore";
 
-interface CollectionsDocumentsEditRouteProps {
+const CollectionsDocumentsEditRoute: Component<{
 	mode: "create" | "edit";
-	version?: "latest";
-}
-
-const CollectionsDocumentsEditRoute: Component<
-	CollectionsDocumentsEditRouteProps
-> = (props) => {
+	version?: "latest" | "revision";
+}> = (props) => {
 	// ----------------------------------
 	// Hooks & State
 	const params = useParams();
 	const versionType = createMemo(() => props.version || params.versionType);
-	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
-
-	const shouldBlockNavigation = createMemo(() => {
-		if (versionType() !== "latest") return false;
-		return isDocumentMutated();
-	});
-	const navigationGuard = useNavigationGuard(shouldBlockNavigation);
-
-	const autoSaveUserEnabled = createMemo(
-		() => userPreferencesStore.get.autoSaveEnabled,
+	const versionId = createMemo(
+		() => Number.parseInt(params.versionId) || undefined,
 	);
 
 	const docState = useDocumentState({
 		mode: props.mode,
 		version: versionType,
+		versionId: versionId,
 	});
 
 	const mutations = useDocumentMutations({
@@ -61,6 +49,7 @@ const CollectionsDocumentsEditRoute: Component<
 		version: versionType,
 		mode: props.mode,
 		document: docState.document,
+		versionId: versionId,
 	});
 
 	const uiState = useDocumentUIState({
@@ -70,11 +59,11 @@ const CollectionsDocumentsEditRoute: Component<
 		documentQuery: docState.documentQuery,
 		mode: props.mode,
 		version: versionType,
+		versionId: versionId,
 		createDocumentMutation: mutations.createDocumentMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		promoteToPublishedMutation: mutations.promoteToPublishedMutation,
-		autoSaveUserEnabled: autoSaveUserEnabled,
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -82,8 +71,10 @@ const CollectionsDocumentsEditRoute: Component<
 		document: docState.document,
 		collection: docState.collection,
 		hasAutoSavePermission: uiState.hasAutoSavePermission,
-		autoSaveUserEnabled: autoSaveUserEnabled,
+		autoSaveUserEnabled: uiState.autoSaveUserEnabled,
 	});
+
+	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
 
 	// ------------------------------------------
 	// Setup document state
@@ -133,6 +124,7 @@ const CollectionsDocumentsEditRoute: Component<
 				<HeaderBar
 					mode={props.mode}
 					version={versionType}
+					versionId={versionId}
 					state={{
 						collection: docState.collection,
 						collectionKey: docState.collectionKey,
@@ -142,13 +134,14 @@ const CollectionsDocumentsEditRoute: Component<
 						document: docState.document,
 						ui: uiState,
 						autoSave: autoSave,
-						autoSaveUserEnabled: autoSaveUserEnabled,
+						autoSaveUserEnabled: uiState.autoSaveUserEnabled,
 						showRevisionNavigation: uiState.showRevisionNavigation,
-						isDocumentMutated: isDocumentMutated,
+						isDocumentMutated: docState.isDocumentMutated,
 					}}
 					actions={{
 						upsertDocumentAction: mutations.upsertDocumentAction,
 						publishDocumentAction: mutations.publishDocumentAction,
+						restoreRevisionAction: mutations.restoreRevisionAction,
 					}}
 				/>
 				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden">

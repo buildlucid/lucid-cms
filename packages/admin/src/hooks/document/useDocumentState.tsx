@@ -6,10 +6,12 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import helpers from "@/utils/helpers";
 import api from "@/services/api";
 import type { DocumentVersionType } from "@types";
+import brickStore from "@/store/brickStore";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";
 	version: Accessor<DocumentVersionType>;
+	versionId: Accessor<number | undefined>;
 }) {
 	const params = useParams();
 	const navigate = useNavigate();
@@ -24,6 +26,10 @@ export function useDocumentState(props: {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const canFetchDocument = createMemo(() => {
 		return contentLocale() !== undefined && documentId() !== undefined;
+	});
+	const versionUrlParam = createMemo(() => {
+		if (props.version() === "revision") return props.versionId();
+		return props.version();
 	});
 
 	// ------------------------------------------
@@ -42,7 +48,7 @@ export function useDocumentState(props: {
 			location: {
 				collectionKey: collectionKey,
 				id: documentId,
-				version: props.version,
+				version: versionUrlParam,
 			},
 			include: {
 				bricks: true,
@@ -67,6 +73,11 @@ export function useDocumentState(props: {
 			}) || T()("collection"),
 	);
 	const document = createMemo(() => documentQuery.data?.data);
+	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
+	const shouldBlockNavigation = createMemo(() => {
+		if (props.version() !== "latest") return false;
+		return isDocumentMutated();
+	});
 
 	// ------------------------------------------
 	// Return
@@ -82,6 +93,8 @@ export function useDocumentState(props: {
 		queryClient,
 		collection,
 		document,
+		isDocumentMutated,
+		shouldBlockNavigation,
 	};
 }
 

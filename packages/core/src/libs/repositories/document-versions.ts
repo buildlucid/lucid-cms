@@ -221,6 +221,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					`${dynamicConfig.tableName}.created_by`,
 					`${dynamicConfig.tableName}.document_id`,
 					`${dynamicConfig.tableName}.collection_key`,
+					`${dynamicConfig.tableName}.content_id`,
 					`${props.tables.document}.created_by as document_created_by`,
 					`${props.tables.document}.created_at as document_created_at`,
 					`${props.tables.document}.updated_by as document_updated_by`,

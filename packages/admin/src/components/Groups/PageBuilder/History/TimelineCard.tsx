@@ -6,7 +6,6 @@ import type {
 	TimelineCardType,
 } from "@/hooks/document/useHistoryState";
 import DateText from "@/components/Partials/DateText";
-import Pill from "@/components/Partials/Pill";
 import classNames from "classnames";
 
 const TimelineCardWrapper: Component<{
@@ -28,7 +27,6 @@ const TimelineCardWrapper: Component<{
 				"mb-3 last:mb-0": props.level > 0,
 			})}
 		>
-			{/* latest / revision */}
 			<Switch>
 				<Match when={props.item.type === "latest"}>
 					<TimelineCard
@@ -56,8 +54,6 @@ const TimelineCardWrapper: Component<{
 					/>
 				</Match>
 			</Switch>
-
-			{/* envionments */}
 			<Show
 				when={
 					props.item.environmentVersions &&
@@ -94,33 +90,14 @@ const TimelineCard: Component<{
 	// ----------------------------------
 	// Memos
 	const isUnreleasedEnvironment = createMemo(() => {
-		return (
-			props.item.type === "environment" &&
-			props.item.releaseStatus === "not_released"
-		);
+		return props.item.type === "environment" && !props.item.isReleased;
 	});
 	const isEnvironmentUpToDate = createMemo(() => {
 		return (
 			props.item.type === "environment" &&
-			props.item.releaseStatus === "released" &&
-			props.item.upToDate === true
+			props.item.isReleased &&
+			props.item.upToDate
 		);
-	});
-	const showOutOfSyncPill = createMemo(() => {
-		if (props.item.type !== "environment") return false;
-		if (props.item.releaseStatus !== "released") return false;
-		if (props.item.upToDate === true) return false;
-
-		if (!props.parentType) return true;
-		if (props.parentType === "latest") return true;
-		return false;
-	});
-	const environmentStatusLabel = createMemo(() => {
-		if (props.item.type !== "environment") return null;
-		if (isUnreleasedEnvironment()) return "Unreleased";
-		if (isEnvironmentUpToDate()) return "Synced";
-		if (showOutOfSyncPill()) return "Out of sync";
-		return null;
 	});
 
 	// ----------------------------------
@@ -203,23 +180,6 @@ const TimelineCard: Component<{
 										</Match>
 									</Switch>
 								</h3>
-								<Show when={props.item.type === "environment"}>
-									<Show when={environmentStatusLabel()}>
-										{(label) => (
-											<Pill
-												theme={
-													isUnreleasedEnvironment()
-														? "error-opaque"
-														: isEnvironmentUpToDate()
-															? "primary-opaque"
-															: "warning-opaque"
-												}
-											>
-												{label()}
-											</Pill>
-										)}
-									</Show>
-								</Show>
 							</div>
 							<div class="mt-1 flex items-center gap-2 text-sm text-body">
 								<DateText date={props.item.createdAt} class="text-body" />

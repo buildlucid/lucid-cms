@@ -81,6 +81,17 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
+					path="/collections/:collectionKey/revision/:documentId/:versionId"
+					component={() => (
+						<PermissionGuard permission={"read_content"}>
+							<CollectionDocumentPageBuilderRoute
+								mode="edit"
+								version="revision"
+							/>
+						</PermissionGuard>
+					)}
+				/>
+				<Route
 					path="/collections/:collectionKey/:documentId/history"
 					component={() => (
 						<PermissionGuard permission={"read_content"}>
