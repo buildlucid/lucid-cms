@@ -35,6 +35,7 @@ export function useDocumentMutations(props: {
 		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
+			brickStore.get.captureInitialSnapshot();
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
