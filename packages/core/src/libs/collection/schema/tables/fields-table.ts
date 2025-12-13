@@ -205,6 +205,7 @@ const createFieldTables = (props: {
 				brick: props.brick,
 				repeaterKeys: repeaterKeys,
 				parentTable: tableNameRes.data,
+				brickTable: props.brickTable ?? tableNameRes.data,
 			});
 			if (repeaterTableRes.error) return repeaterTableRes;
 
