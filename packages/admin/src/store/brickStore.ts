@@ -1,3 +1,4 @@
+import { batch } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 import { nanoid } from "nanoid";
 import equal from "fast-deep-equal/es6";
@@ -34,7 +35,7 @@ interface BrickSnapshot {
 	fields: Array<FieldResponse>;
 }
 
-type BrickStoreT = {
+const [get, set] = createStore<{
 	bricks: Array<BrickData>;
 	fieldsErrors: Array<FieldError>;
 	brickErrors: Array<BrickError>;
@@ -118,9 +119,7 @@ type BrickStoreT = {
 	}) => void;
 	setRefs: (document?: DocumentResponse) => void;
 	addRef: (fieldType: "media" | "document" | "user", ref: FieldRefs) => void;
-};
-
-const [get, set] = createStore<BrickStoreT>({
+}>({
 	bricks: [],
 	fieldsErrors: [],
 	brickErrors: [],
@@ -136,15 +135,17 @@ const [get, set] = createStore<BrickStoreT>({
 	},
 	focusState: null,
 	reset() {
-		set("bricks", []);
-		set("fieldsErrors", []);
-		set("brickErrors", []);
-		set("initialSnapshot", null);
-		set("autoSaveCounter", 0);
-		set("skipAutoSave", true);
-		set("collectionTranslations", false);
-		set("refs", {});
-		set("focusState", null);
+		batch(() => {
+			set("bricks", []);
+			set("fieldsErrors", []);
+			set("brickErrors", []);
+			set("initialSnapshot", null);
+			set("autoSaveCounter", 0);
+			set("skipAutoSave", true);
+			set("collectionTranslations", false);
+			set("refs", {});
+			set("focusState", null);
+		});
 	},
 	captureInitialSnapshot() {
 		set("initialSnapshot", createBricksSnapshot(get.bricks));
@@ -247,9 +248,11 @@ const [get, set] = createStore<BrickStoreT>({
 	setFieldValue(params) {
 		set(
 			"bricks",
-			produce((draft) => {
+			params.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
 				const field = brickHelpers.findFieldRecursive({
-					fields: draft[params.brickIndex].fields,
+					fields: fieldsDraft,
 					targetKey: params.key,
 					groupRef: params.ref,
 					repeaterKey: params.repeaterKey,
@@ -262,7 +265,6 @@ const [get, set] = createStore<BrickStoreT>({
 					get.collectionTranslations === true
 				) {
 					if (!field.translations) field.translations = {};
-
 					field.translations[params.contentLocale] = params.value;
 				} else {
 					field.value = params.value;
@@ -292,23 +294,30 @@ const [get, set] = createStore<BrickStoreT>({
 			}
 		}
 
-		brickStore.set(
+		// Field belongs on the brick level
+		if (params.ref === undefined) {
+			set(
+				"bricks",
+				params.brickIndex,
+				"fields",
+				produce((fieldsDraft) => {
+					fieldsDraft.push(newField);
+				}),
+			);
+			return newField;
+		}
+
+		const repeaterKey = params.repeaterKey;
+		if (repeaterKey === undefined) return newField;
+
+		set(
 			"bricks",
-			produce((draft) => {
-				const brick = draft[params.brickIndex];
-				if (!brick) return;
-
-				// Field belongs on the brick level
-				if (params.ref === undefined) {
-					brick.fields.push(newField);
-					return;
-				}
-
-				if (params.repeaterKey === undefined) return;
-
+			params.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
 				const repeaterField = brickHelpers.findFieldRecursive({
-					fields: brick.fields,
-					targetKey: params.repeaterKey,
+					fields: fieldsDraft,
+					targetKey: repeaterKey,
 					groupRef: params.ref,
 				});
 				if (!repeaterField) return;
@@ -326,9 +335,11 @@ const [get, set] = createStore<BrickStoreT>({
 	addRepeaterGroup(params) {
 		set(
 			"bricks",
-			produce((draft) => {
+			params.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
 				const field = brickHelpers.findFieldRecursive({
-					fields: draft[params.brickIndex].fields,
+					fields: fieldsDraft,
 					targetKey: params.key,
 					groupRef: params.ref,
 					repeaterKey: params.parentRepeaterKey,
@@ -392,11 +403,12 @@ const [get, set] = createStore<BrickStoreT>({
 	removeRepeaterGroup(params) {
 		set(
 			"bricks",
-			produce((draft) => {
+			params.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
 				const field = brickHelpers.findFieldRecursive({
-					fields: draft[params.brickIndex].fields,
+					fields: fieldsDraft,
 					targetKey: params.repeaterKey,
-
 					groupRef: params.ref,
 					repeaterKey: params.parentRepeaterKey,
 				});
@@ -417,9 +429,11 @@ const [get, set] = createStore<BrickStoreT>({
 	swapGroupOrder(params) {
 		set(
 			"bricks",
-			produce((draft) => {
+			params.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
 				const field = brickHelpers.findFieldRecursive({
-					fields: draft[params.brickIndex].fields,
+					fields: fieldsDraft,
 					targetKey: params.repeaterKey,
 					groupRef: params.ref,
 					repeaterKey: params.parentRepeaterKey,
@@ -451,11 +465,12 @@ const [get, set] = createStore<BrickStoreT>({
 	toggleGroupOpen: (props) => {
 		set(
 			"bricks",
-			produce((draft) => {
+			props.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
 				const field = brickHelpers.findFieldRecursive({
-					fields: draft[props.brickIndex].fields,
+					fields: fieldsDraft,
 					targetKey: props.repeaterKey,
-
 					groupRef: props.parentRef,
 					repeaterKey: props.parentRepeaterKey,
 				});

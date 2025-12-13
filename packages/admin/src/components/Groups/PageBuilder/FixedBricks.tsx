@@ -1,4 +1,4 @@
-import { type Component, createMemo, Index } from "solid-js";
+import { type Accessor, type Component, createMemo, For } from "solid-js";
 import type { CollectionBrickConfig, CollectionResponse } from "@types";
 import { FaSolidShield } from "solid-icons/fa";
 import brickStore, { type BrickData } from "@/store/brickStore";
@@ -15,6 +15,16 @@ interface FixedBricksProps {
 export const FixedBricks: Component<FixedBricksProps> = (props) => {
 	// ------------------------------
 	// Memos
+	const configByKey = createMemo(() => {
+		return new Map(props.brickConfig.map((b) => [b.key, b]));
+	});
+	const brickIndexByRef = createMemo(() => {
+		const map = new Map<string, number>();
+		for (let i = 0; i < brickStore.get.bricks.length; i++) {
+			map.set(brickStore.get.bricks[i].ref, i);
+		}
+		return map;
+	});
 	const fixedBricks = createMemo(() =>
 		brickStore.get.bricks
 			.filter((brick) => brick.type === "fixed")
@@ -25,24 +35,26 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 	// Render
 	return (
 		<ul>
-			<Index each={fixedBricks()}>
+			<For each={fixedBricks()}>
 				{(brick) => (
 					<FixedBrickRow
-						brick={brick()}
-						brickConfig={props.brickConfig}
+						brick={brick}
+						configByKey={configByKey}
+						brickIndexByRef={brickIndexByRef}
 						collectionMigrationStatus={props.collectionMigrationStatus}
 						collectionKey={props.collectionKey}
 						documentId={props.documentId}
 					/>
 				)}
-			</Index>
+			</For>
 		</ul>
 	);
 };
 
 interface FixedBrickRowProps {
 	brick: BrickData;
-	brickConfig: CollectionBrickConfig[];
+	configByKey: Accessor<Map<string, CollectionBrickConfig>>;
+	brickIndexByRef: Accessor<Map<string, number>>;
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
@@ -52,12 +64,10 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 	// ------------------------------
 	// Memos
 	const config = createMemo(() => {
-		return props.brickConfig.find((brick) => brick.key === props.brick.key);
+		return props.configByKey().get(props.brick.key);
 	});
 	const brickIndex = createMemo(() => {
-		return brickStore.get.bricks.findIndex(
-			(brick) => brick.ref === props.brick.ref,
-		);
+		return props.brickIndexByRef().get(props.brick.ref) ?? -1;
 	});
 	const fieldErrors = createMemo(() => {
 		return (

@@ -1,5 +1,6 @@
 import T from "@/translations";
 import {
+	type Accessor,
 	type Component,
 	createMemo,
 	For,
@@ -41,6 +42,16 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 
 	// ------------------------------
 	// Memos
+	const configByKey = createMemo(() => {
+		return new Map(props.brickConfig.map((b) => [b.key, b]));
+	});
+	const brickIndexByRef = createMemo(() => {
+		const map = new Map<string, number>();
+		for (let i = 0; i < brickStore.get.bricks.length; i++) {
+			map.set(brickStore.get.bricks[i].ref, i);
+		}
+		return map;
+	});
 	const builderBricks = createMemo(() =>
 		brickStore.get.bricks
 			.filter((brick) => brick.type === "builder")
@@ -109,7 +120,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 										{(brick) => (
 											<BuilderBrickRow
 												brick={brick}
-												brickConfig={props.brickConfig}
+												configByKey={configByKey}
+												brickIndexByRef={brickIndexByRef}
 												collectionMigrationStatus={
 													props.collectionMigrationStatus
 												}
@@ -141,7 +153,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 
 interface BuilderBrickRowProps {
 	brick: BrickData;
-	brickConfig: CollectionBrickConfig[];
+	configByKey: Accessor<Map<string, CollectionBrickConfig>>;
+	brickIndexByRef: Accessor<Map<string, number>>;
 	collectionMigrationStatus: CollectionResponse["migrationStatus"];
 	dragDrop: DragDropCBT;
 	collectionKey?: string;
@@ -158,12 +171,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 	// ------------------------------
 	// Memos
 	const config = createMemo(() => {
-		return props.brickConfig.find((brick) => brick.key === props.brick.key);
+		return props.configByKey().get(props.brick.key);
 	});
 	const brickIndex = createMemo(() => {
-		return brickStore.get.bricks.findIndex(
-			(brick) => brick.ref === props.brick.ref,
-		);
+		return props.brickIndexByRef().get(props.brick.ref) ?? -1;
 	});
 	const isDisabled = createMemo(() => {
 		return brickStore.get.locked;

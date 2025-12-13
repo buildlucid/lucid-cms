@@ -16,15 +16,19 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	// ------------------------------
 	// Memos
 	const collectionPseudoBrick = createMemo(() => {
-		const bricks = brickStore.get.bricks.filter(
-			(b) => b.type === "collection-fields",
-		);
-		return bricks.length > 0 ? bricks[0] : undefined;
+		return brickStore.get.bricks.find((b) => b.type === "collection-fields");
+	});
+	const brickIndexByRef = createMemo(() => {
+		const map = new Map<string, number>();
+		for (let i = 0; i < brickStore.get.bricks.length; i++) {
+			map.set(brickStore.get.bricks[i].ref, i);
+		}
+		return map;
 	});
 	const brickIndex = createMemo(() => {
-		return brickStore.get.bricks.findIndex(
-			(brick) => brick.ref === collectionPseudoBrick()?.ref,
-		);
+		const ref = collectionPseudoBrick()?.ref;
+		if (!ref) return -1;
+		return brickIndexByRef().get(ref) ?? -1;
 	});
 	const fieldErrors = createMemo(() => {
 		return brickStore.get.fieldsErrors;

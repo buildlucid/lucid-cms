@@ -7,6 +7,7 @@ import {
 	on,
 	createMemo,
 	onCleanup,
+	batch,
 } from "solid-js";
 import { useParams } from "@solidjs/router";
 import {
@@ -82,15 +83,17 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	// TODO: attempt to merge brick state in when the document ID and collection key are the same. Hopefully cut down on re-renders from nuking the brick store
 	const setDocumentState = () => {
-		brickStore.get.reset();
-		brickStore.set(
-			"collectionTranslations",
-			docState.collection()?.config.useTranslations || false,
-		);
-		brickStore.get.setBricks(docState.document(), docState.collection());
-		brickStore.get.setRefs(docState.document());
-		brickStore.set("locked", uiState.isBuilderLocked());
-		brickStore.get.captureInitialSnapshot();
+		batch(() => {
+			brickStore.get.reset();
+			brickStore.set(
+				"collectionTranslations",
+				docState.collection()?.config.useTranslations || false,
+			);
+			brickStore.get.setBricks(docState.document(), docState.collection());
+			brickStore.get.setRefs(docState.document());
+			brickStore.set("locked", uiState.isBuilderLocked());
+			brickStore.get.captureInitialSnapshot();
+		});
 	};
 
 	createEffect(
