@@ -37,11 +37,13 @@ export const UserField: Component<UserFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<number>({
-			fieldData: fieldData(),
-			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
-		});
+		return (
+			brickHelpers.getFieldValue<number>({
+				fieldData: fieldData(),
+				fieldConfig: props.state.fieldConfig,
+				contentLocale: props.state.contentLocale,
+			}) ?? undefined
+		);
 	});
 	// const fieldRef = createMemo(() => {
 	// 	return brickHelpers.getFieldRef<UserRef>({
@@ -77,10 +79,10 @@ export const UserField: Component<UserFieldProps> = (props) => {
 						key: props.state.fieldConfig.key,
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
-						value: value === undefined ? undefined : Number(value),
+						value: value,
 						contentLocale: props.state.contentLocale,
 					});
-					setValue(value as number | undefined);
+					setValue(value === undefined ? undefined : Number(value));
 				});
 			}}
 			copy={{
