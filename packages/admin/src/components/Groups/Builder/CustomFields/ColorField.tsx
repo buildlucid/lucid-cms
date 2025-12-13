@@ -1,10 +1,4 @@
-import {
-	type Component,
-	createSignal,
-	createEffect,
-	batch,
-	createMemo,
-} from "solid-js";
+import { type Component, createMemo } from "solid-js";
 import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -28,10 +22,6 @@ interface ColorFieldProps {
 
 export const ColorField: Component<ColorFieldProps> = (props) => {
 	// -------------------------------
-	// State
-	const [getValue, setValue] = createSignal("");
-
-	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
@@ -48,12 +38,6 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 	);
 
 	// -------------------------------
-	// Effects
-	createEffect(() => {
-		setValue(fieldValue() || "");
-	});
-
-	// -------------------------------
 	// Render
 	return (
 		<div>
@@ -63,19 +47,16 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 					brickIndex: props.state.brickIndex,
 					groupRef: props.state.groupRef,
 				})}
-				value={getValue()}
+				value={fieldValue() ?? ""}
 				onChange={(value) => {
-					batch(() => {
-						brickStore.get.setFieldValue({
-							brickIndex: props.state.brickIndex,
-							fieldConfig: props.state.fieldConfig,
-							key: props.state.fieldConfig.key,
-							ref: props.state.groupRef,
-							repeaterKey: props.state.repeaterKey,
-							value: value,
-							contentLocale: props.state.contentLocale,
-						});
-						setValue(value);
+					brickStore.get.setFieldValue({
+						brickIndex: props.state.brickIndex,
+						fieldConfig: props.state.fieldConfig,
+						key: props.state.fieldConfig.key,
+						ref: props.state.groupRef,
+						repeaterKey: props.state.repeaterKey,
+						value: value,
+						contentLocale: props.state.contentLocale,
 					});
 				}}
 				name={props.state.fieldConfig.key}

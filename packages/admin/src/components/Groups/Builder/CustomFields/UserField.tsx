@@ -1,11 +1,5 @@
-import {
-	type Component,
-	createSignal,
-	batch,
-	createMemo,
-	createEffect,
-} from "solid-js";
-import type { CFConfig, FieldResponse, FieldError, UserRef } from "@types";
+import { type Component, createMemo } from "solid-js";
+import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -27,10 +21,6 @@ interface UserFieldProps {
 }
 
 export const UserField: Component<UserFieldProps> = (props) => {
-	// -------------------------------
-	// State
-	const [getValue, setValue] = createSignal<number>();
-
 	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
@@ -56,12 +46,6 @@ export const UserField: Component<UserFieldProps> = (props) => {
 	);
 
 	// -------------------------------
-	// Effects
-	createEffect(() => {
-		setValue(fieldValue());
-	});
-
-	// -------------------------------
 	// Render
 	return (
 		<UserSearchSelect
@@ -70,19 +54,16 @@ export const UserField: Component<UserFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			value={getValue()}
+			value={fieldValue()}
 			setValue={(value) => {
-				batch(() => {
-					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
-						fieldConfig: props.state.fieldConfig,
-						key: props.state.fieldConfig.key,
-						ref: props.state.groupRef,
-						repeaterKey: props.state.repeaterKey,
-						value: value,
-						contentLocale: props.state.contentLocale,
-					});
-					setValue(value === undefined ? undefined : Number(value));
+				brickStore.get.setFieldValue({
+					brickIndex: props.state.brickIndex,
+					fieldConfig: props.state.fieldConfig,
+					key: props.state.fieldConfig.key,
+					ref: props.state.groupRef,
+					repeaterKey: props.state.repeaterKey,
+					value: value === undefined ? undefined : Number(value),
+					contentLocale: props.state.contentLocale,
 				});
 			}}
 			copy={{

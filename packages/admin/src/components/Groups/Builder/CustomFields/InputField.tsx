@@ -1,10 +1,4 @@
-import {
-	type Component,
-	createSignal,
-	batch,
-	createMemo,
-	createEffect,
-} from "solid-js";
+import { type Component, createMemo } from "solid-js";
 import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -29,40 +23,24 @@ interface InputFieldProps {
 
 export const InputField: Component<InputFieldProps> = (props) => {
 	// -------------------------------
-	// State
-	const [getValue, setValue] = createSignal("");
-
-	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<string | number>({
+		const value = brickHelpers.getFieldValue<string | number>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
 		});
+		if (typeof value === "number") {
+			return value.toString();
+		}
+		return value ?? "";
 	});
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
-
-	// -------------------------------
-	// Effects
-	createEffect(() => {
-		const value = fieldValue();
-		switch (props.type) {
-			case "number": {
-				setValue(typeof value !== "number" ? "" : value.toString());
-				break;
-			}
-			default: {
-				setValue(typeof value !== "string" ? "" : value);
-				break;
-			}
-		}
-	});
 
 	// -------------------------------
 	// Render
@@ -73,19 +51,16 @@ export const InputField: Component<InputFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			value={getValue()}
+			value={fieldValue()}
 			onChange={(value) => {
-				batch(() => {
-					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
-						fieldConfig: props.state.fieldConfig,
-						key: props.state.fieldConfig.key,
-						ref: props.state.groupRef,
-						repeaterKey: props.state.repeaterKey,
-						value: props.type === "number" ? Number(value) : value,
-						contentLocale: props.state.contentLocale,
-					});
-					setValue(value);
+				brickStore.get.setFieldValue({
+					brickIndex: props.state.brickIndex,
+					fieldConfig: props.state.fieldConfig,
+					key: props.state.fieldConfig.key,
+					ref: props.state.groupRef,
+					repeaterKey: props.state.repeaterKey,
+					value: props.type === "number" ? Number(value) : value,
+					contentLocale: props.state.contentLocale,
 				});
 			}}
 			name={props.state.fieldConfig.key}

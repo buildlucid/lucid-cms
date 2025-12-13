@@ -1,11 +1,5 @@
 import T from "@/translations";
-import {
-	type Component,
-	createSignal,
-	createMemo,
-	batch,
-	createEffect,
-} from "solid-js";
+import { type Component, createMemo } from "solid-js";
 import type { CFConfig, FieldResponse, FieldError } from "@types";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -29,10 +23,6 @@ interface SelectFieldProps {
 
 export const SelectField: Component<SelectFieldProps> = (props) => {
 	// -------------------------------
-	// State
-	const [getValue, setValue] = createSignal<string | number | null>(null);
-
-	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
@@ -49,12 +39,6 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 	);
 
 	// -------------------------------
-	// Effects
-	createEffect(() => {
-		setValue(fieldValue() || null);
-	});
-
-	// -------------------------------
 	// Render
 	return (
 		<Select
@@ -63,7 +47,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			value={getValue() || undefined}
+			value={fieldValue() ?? undefined}
 			options={
 				props.state.fieldConfig.options.map((o, i) => {
 					return {
@@ -78,17 +62,15 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 				}) || []
 			}
 			onChange={(value) => {
-				batch(() => {
-					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
-						fieldConfig: props.state.fieldConfig,
-						key: props.state.fieldConfig.key,
-						ref: props.state.groupRef,
-						repeaterKey: props.state.repeaterKey,
-						value: value || null,
-						contentLocale: props.state.contentLocale,
-					});
-					setValue(value || null);
+				brickStore.get.setFieldValue({
+					brickIndex: props.state.brickIndex,
+					fieldConfig: props.state.fieldConfig,
+					key: props.state.fieldConfig.key,
+					ref: props.state.groupRef,
+					repeaterKey: props.state.repeaterKey,
+					// store uses null, Select uses undefined for "clear"
+					value: value === undefined ? null : value,
+					contentLocale: props.state.contentLocale,
 				});
 			}}
 			name={props.state.fieldConfig.key}
