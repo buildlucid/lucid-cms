@@ -51,6 +51,7 @@ export default {
                     contrast: "#000000",
                 },
                 info: {
+                    faded: "#ABABAB",
                     base: "#007BFF",
                     contrast: "#FFFFFF",
                 },

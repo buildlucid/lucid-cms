@@ -8,7 +8,6 @@ import helpers from "@/utils/helpers";
 import { GroupBody } from "@/components/Groups/Builder";
 import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
-import { FaSolidPlus } from "solid-icons/fa";
 
 interface RepeaterFieldProps {
 	state: {
@@ -69,93 +68,88 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("mb-2.5 last:mb-0 w-full", {
-				"mt-5": props.state.repeaterDepth > 0,
-			})}
-		>
-			<p
-				class={
-					"block text-sm transition-colors duration-200 ease-in-out mb-1.5 text-title"
-				}
-			>
-				{helpers.getLocaleValue({
-					value: fieldConfig().details?.label,
-				})}
-			</p>
-			{/* Repeater Body */}
-			<Switch>
-				<Match when={groups().length > 0}>
-					<DragDrop
-						sortOrder={(ref, targetRef) => {
-							brickStore.get.swapGroupOrder({
-								brickIndex: props.state.brickIndex,
-								repeaterKey: fieldConfig().key,
-								selectedRef: ref,
-								targetRef: targetRef,
-
-								ref: props.state.groupRef,
-								parentRepeaterKey: props.state.parentRepeaterKey,
-							});
-						}}
-					>
-						{({ dragDrop }) => (
-							<For each={groups()}>
-								{(g, i) => (
-									<GroupBody
-										state={{
-											brickIndex: brickIndex(),
-											fieldConfig: fieldConfig(),
-											dragDropKey: dragDropKey(),
-											group: g,
-											dragDrop: dragDrop,
-											repeaterKey: fieldConfig().key,
-											groupIndex: i(),
-											repeaterDepth: props.state.repeaterDepth,
-											parentRepeaterKey: props.state.parentRepeaterKey,
-											parentRef: props.state.groupRef,
-											groupErrors: groupErrors(),
-											missingFieldColumns: missingFieldColumns(),
-										}}
-									/>
-								)}
-							</For>
-						)}
-					</DragDrop>
-				</Match>
-				<Match when={groups().length === 0}>
-					<div class="w-full border-border border-dashed border p-4 md:p-6 min-h-32 rounded-md flex items-center flex-col justify-center text-center">
-						<span class="text-sm text-unfocused capitalize">
-							{T()("no_entries")}
-						</span>
-					</div>
-				</Match>
-			</Switch>
-			{/* Repeater Footer */}
-			<div class="w-full flex justify-between items-center mt-2.5">
-				<Button
-					type="button"
-					theme="secondary"
-					size="small"
-					onClick={addGroup}
-					disabled={isDisabled()}
-				>
-					{T()("add_entry")}
-				</Button>
-				<Show when={fieldConfig().validation?.maxGroups !== undefined}>
-					<span
-						class={classNames(
-							"text-body text-sm font-body font-normal mr-[25px]",
-							{
+		<div class={"mb-2.5 last:mb-0 w-full"}>
+			<div class={"w-full"}>
+				<div class="w-full flex items-center justify-between gap-3 mb-1.5">
+					<p class="block text-sm transition-colors duration-200 ease-in-out text-title">
+						{helpers.getLocaleValue({
+							value: fieldConfig().details?.label,
+						})}
+					</p>
+					<Show when={fieldConfig().validation?.maxGroups !== undefined}>
+						<span
+							class={classNames("text-body text-sm", {
 								"text-error-base": !canAddGroup(),
-							},
-						)}
+							})}
+						>
+							{groups().length}
+							{"/"}
+							{fieldConfig().validation?.maxGroups}
+						</span>
+					</Show>
+				</div>
+				{/* Repeater Body */}
+				<Switch>
+					<Match when={groups().length > 0}>
+						<DragDrop
+							sortOrder={(ref, targetRef) => {
+								brickStore.get.swapGroupOrder({
+									brickIndex: props.state.brickIndex,
+									repeaterKey: fieldConfig().key,
+									selectedRef: ref,
+									targetRef: targetRef,
+
+									ref: props.state.groupRef,
+									parentRepeaterKey: props.state.parentRepeaterKey,
+								});
+							}}
+						>
+							{({ dragDrop }) => (
+								<div class="w-full border border-border rounded-md overflow-hidden divide-y divide-border">
+									<For each={groups()}>
+										{(g, i) => (
+											<GroupBody
+												state={{
+													brickIndex: brickIndex(),
+													fieldConfig: fieldConfig(),
+													dragDropKey: dragDropKey(),
+													group: g,
+													dragDrop: dragDrop,
+													repeaterKey: fieldConfig().key,
+													groupIndex: i(),
+													repeaterDepth: props.state.repeaterDepth,
+													parentRepeaterKey: props.state.parentRepeaterKey,
+													parentRef: props.state.groupRef,
+													groupErrors: groupErrors(),
+													missingFieldColumns: missingFieldColumns(),
+												}}
+											/>
+										)}
+									</For>
+								</div>
+							)}
+						</DragDrop>
+					</Match>
+					<Match when={groups().length === 0}>
+						<div class="w-full dotted-background border-border border p-4 md:p-6 min-h-32 rounded-md flex items-center flex-col justify-center text-center">
+							<span class="text-sm text-unfocused capitalize">
+								{T()("no_entries")}
+							</span>
+						</div>
+					</Match>
+				</Switch>
+				{/* Repeater Footer */}
+				<div class="w-full flex justify-between items-center mt-3">
+					<Button
+						type="button"
+						theme="secondary"
+						size="small"
+						onClick={addGroup}
+						disabled={isDisabled()}
 					>
-						{groups().length}
-						{"/"}
-						{fieldConfig().validation?.maxGroups}
-					</span>
-				</Show>
+						{T()("add_entry")}
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

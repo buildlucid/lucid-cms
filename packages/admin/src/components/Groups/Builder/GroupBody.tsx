@@ -1,13 +1,21 @@
 import T from "@/translations/index";
-import { type Component, Index, createMemo, createSignal } from "solid-js";
+import {
+	type Component,
+	Index,
+	Show,
+	createMemo,
+	createSignal,
+} from "solid-js";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
 import type { CFConfig, FieldGroupResponse, GroupError } from "@types";
 import classNames from "classnames";
-import { FaSolidGripLines, FaSolidCircleChevronUp } from "solid-icons/fa";
+import { FaSolidGripLines, FaSolidChevronUp } from "solid-icons/fa";
 import brickStore from "@/store/brickStore";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import helpers from "@/utils/helpers";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import brickHelpers from "@/utils/brick-helpers";
 
 interface GroupBodyProps {
 	state: {
@@ -43,6 +51,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const groupFields = createMemo(() => {
 		return props.state.group.fields;
 	});
+	const contentLocale = createMemo(
+		() => contentLocaleStore.get.contentLocale ?? "",
+	);
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
@@ -55,6 +66,33 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		return groupError()?.fields;
 	});
 	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
+	const titlePreview = createMemo(() => {
+		const configs = configChildrenFields() || [];
+		const firstTextConfig = configs.find(
+			// include textarea as it's also "text input" content
+			(f) => f.type === "text" || f.type === "textarea",
+		) as CFConfig<"text"> | CFConfig<"textarea"> | undefined;
+
+		if (!firstTextConfig) return "";
+
+		const data = groupFields()?.find((f) => f.key === firstTextConfig.key);
+		if (!data) return "";
+
+		const value = brickHelpers.getFieldValue<string>({
+			fieldData: data,
+			// biome-ignore lint/suspicious/noExplicitAny: shared helper expects a compatible fieldConfig
+			fieldConfig: firstTextConfig as any,
+			contentLocale: contentLocale(),
+		});
+
+		if (typeof value !== "string") return "";
+
+		const trimmed = value.trim();
+		if (!trimmed) return "";
+
+		// keep headers tidy (especially when nested)
+		return trimmed.length > 60 ? `${trimmed.slice(0, 60)}…` : trimmed;
+	});
 
 	// -------------------------------
 	// Functions
@@ -77,7 +115,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				"view-transition-name": `group-item-${props.state.group.ref}`,
 			}}
 			data-dragkey={props.state.dragDropKey}
-			class={classNames("w-full mb-2.5 last:mb-0", {
+			class={classNames("w-full", {
 				"opacity-60": props.state.dragDrop.getDragging()?.ref === ref(),
 			})}
 			onDragStart={(e) =>
@@ -98,10 +136,10 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			{/* Group Header */}
 			<div
 				class={classNames(
-					"w-full bg-input-base focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer p-2.5 rounded-md border border-border flex justify-between items-center",
+					"w-full bg-input-base focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
 					{
-						"border-b-0 rounded-b-none": getGroupOpen(),
-						"ring-1 ring-inset":
+						"bg-input-hover": getGroupOpen(),
+						"ring-1 ring-inset ring-primary-base":
 							props.state.dragDrop.getDraggingTarget()?.ref === ref(),
 					},
 				)}
@@ -118,10 +156,10 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				role="button"
 				tabIndex="0"
 			>
-				<div class="flex items-center">
+				<div class="flex items-center min-w-0 gap-2">
 					<button
 						type="button"
-						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-faded hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.state.dragDrop.onDragStart(e, {
 								ref: ref(),
@@ -140,14 +178,23 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						draggable={isDisabled() === false}
 						disabled={isDisabled()}
 					>
-						<FaSolidGripLines class="w-4" />
+						<FaSolidGripLines size={14} />
 					</button>
-					<h3 class="text-sm text-body">
-						{helpers.getLocaleValue({
-							value: props.state.fieldConfig.details?.label,
-						})}
-						-{props.state.groupIndex + 1}
-					</h3>
+					<div class="min-w-0 flex items-center gap-2">
+						<span class="text-xs text-unfocused font-medium shrink-0 px-2 py-0.5 rounded-md border border-border bg-background-base">
+							{props.state.groupIndex + 1}
+						</span>
+						<h3 class="text-sm text-body font-medium truncate">
+							{helpers.getLocaleValue({
+								value: props.state.fieldConfig.details?.label,
+							})}
+						</h3>
+						<Show when={titlePreview()}>
+							<span class="text-sm font-medium text-unfocused truncate min-w-0 max-w-[42ch]">
+								- {titlePreview()}
+							</span>
+						</Show>
+					</div>
 				</div>
 				<div class="flex gap-2">
 					<DeleteDebounceButton
@@ -165,32 +212,31 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					<button
 						type="button"
 						class={classNames(
-							"text-2xl text-icon-base hover:text-icon-hover transition-all duration-200",
+							"text-2xl text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
 								"transform rotate-180": getGroupOpen(),
 							},
 						)}
 						tabIndex="-1"
 					>
-						<FaSolidCircleChevronUp size={16} />
+						<FaSolidChevronUp size={14} />
 					</button>
 				</div>
 			</div>
 			{/* Group Body */}
 			<div
 				class={classNames(
-					"border-border bg-[#181818] transform-gpu origin-top border-x border-b mb-2.5 last:mb-0 rounded-b-md overflow-hidden w-full duration-200 transition-all",
+					"bg-background-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
-						"bg-background-base": props.state.repeaterDepth % 2 !== 0,
 						"scale-y-100 h-auto opacity-100 visible": getGroupOpen(),
 						"scale-y-0 h-0 opacity-0 invisible": !getGroupOpen(),
 					},
 				)}
 				aria-labelledby={`accordion-header-${ref()}`}
 			>
-				<div class="p-4">
+				<div class="border-t border-border p-3 md:p-4 gap-4 flex flex-col">
 					<Index each={configChildrenFields()}>
-						{(config, index) => (
+						{(config) => (
 							<DynamicField
 								state={{
 									brickIndex: brickIndex(),

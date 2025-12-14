@@ -1,7 +1,7 @@
 import { type Component, Show } from "solid-js";
 import type { CollectionBrickConfig } from "@types";
 import brickStore from "@/store/brickStore";
-import { FaSolidEye } from "solid-icons/fa";
+import { FaSolidEye, FaSolidInfo } from "solid-icons/fa";
 import helpers from "@/utils/helpers";
 
 interface BrickImagePreviewButtonProps {
@@ -19,7 +19,7 @@ export const BrickImagePreviewButton: Component<
 				type="button"
 				tabIndex="-1"
 				class={
-					"text-2xl text-icon-base hover:text-icon-hover transition-all duration-200"
+					"text-2xl text-icon-faded hover:text-icon-hover transition-all duration-200"
 				}
 				onClick={(e) => {
 					e.stopPropagation();
@@ -39,7 +39,7 @@ export const BrickImagePreviewButton: Component<
 					});
 				}}
 			>
-				<FaSolidEye size={16} />
+				<FaSolidInfo size={14} />
 			</button>
 		</Show>
 	);

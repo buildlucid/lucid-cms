@@ -36,11 +36,19 @@ const BannerBrick = new BrickBuilder("banner", {
 			maxGroups: 3,
 		},
 	})
+	.addText("call_to_action_title", {
+		details: {
+			label: "Link Text",
+		},
+	})
 	.addLink("link", {
 		details: {
 			label: "Link",
 		},
 	})
+	.addRepeater("nested_repeater")
+	.addText("nested_title")
+	.endRepeater()
 	.endRepeater()
 	.addTab("config_tab", {
 		details: {

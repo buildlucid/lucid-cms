@@ -2,7 +2,7 @@ import T from "@/translations/index";
 import classNames from "classnames";
 import { type Component, createSignal } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
-import { FaSolidTrashCan } from "solid-icons/fa";
+import { FaRegularTrashCan, FaSolidTrashCan } from "solid-icons/fa";
 
 interface DeleteButtonProps {
 	disabled?: boolean;
@@ -28,7 +28,7 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 			class={classNames(
 				"transition-all duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed",
 				{
-					"text-icon-base hover:text-error-base": getConfirmRemove() === 0,
+					"text-icon-faded hover:text-error-base": getConfirmRemove() === 0,
 					"text-error-hover animate-pulse": getConfirmRemove() === 1,
 				},
 			)}
@@ -45,7 +45,7 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 			}
 			disabled={props.disabled}
 		>
-			<FaSolidTrashCan class="w-4" />
+			<FaRegularTrashCan size={14} />
 		</button>
 	);
 };

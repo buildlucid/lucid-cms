@@ -11,7 +11,7 @@ import {
 } from "solid-js";
 import type { CollectionBrickConfig, CollectionResponse } from "@types";
 import {
-	FaSolidCircleChevronUp,
+	FaSolidChevronUp,
 	FaSolidGripLines,
 	FaSolidLayerGroup,
 } from "solid-icons/fa";
@@ -233,7 +233,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			{/* Header */}
 			<div
 				class={classNames(
-					"flex items-center justify-between cursor-pointer px-4 py-2.5 rounded-md focus:outline-hidden",
+					"flex items-center justify-between cursor-pointer px-4 py-3 rounded-md focus:outline-hidden",
 				)}
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
@@ -250,7 +250,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				<div class="flex items-center">
 					<button
 						type="button"
-						class="text-icon-base mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-faded mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								ref: props.brick.ref,
@@ -269,7 +269,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						aria-label={T()("change_order")}
 						disabled={isDisabled()}
 					>
-						<FaSolidGripLines class="w-4" />
+						<FaSolidGripLines size={14} />
 					</button>
 					<h3>
 						{helpers.getLocaleValue({
@@ -290,13 +290,13 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						type="button"
 						tabIndex="-1"
 						class={classNames(
-							"text-2xl text-icon-base hover:text-icon-hover transition-all duration-200",
+							"text-2xl text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
 								"transform rotate-180": getBrickOpen(),
 							},
 						)}
 					>
-						<FaSolidCircleChevronUp size={16} />
+						<FaSolidChevronUp size={14} />
 					</button>
 				</div>
 			</div>
