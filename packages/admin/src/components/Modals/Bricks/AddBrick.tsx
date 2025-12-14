@@ -101,7 +101,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 								<li class="w-full">
 									<button
 										class={classNames(
-											"flex items-center font-medium w-full p-2.5 rounded-md transition-colors duration-200",
+											"flex items-center font-medium w-full p-2.5 rounded-md transition-colors duration-200 hover:text-title text-sm",
 											{
 												"bg-card-base":
 													brickConfig.key === getHighlightedBrick(),
@@ -122,7 +122,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 										<img
 											src={brickIcon}
 											alt={brickConfig.key}
-											class="w-6 mr-2.5"
+											class="w-4 mr-2.5"
 											loading="lazy"
 										/>
 										{helpers.getLocaleValue({
@@ -137,7 +137,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 				</div>
 				{/* Preview */}
 				<div class="w-[60%] p-4 h-full pl-0">
-					<div class="border border-border h-full rounded-md flex items-center justify-center relative">
+					<div class="border border-border bg-card-base h-full rounded-md flex items-center justify-center relative">
 						<div class="w-[80%]">
 							<BrickPreview
 								data={{

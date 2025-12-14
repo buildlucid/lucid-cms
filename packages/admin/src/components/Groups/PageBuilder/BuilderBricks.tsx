@@ -69,7 +69,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 				<div class="flex justify-between mb-4">
 					<div class="flex items-center">
 						<FaSolidLayerGroup class="text-white text-xl mr-2.5" />
-						<h2>{T()("builder_area")}:</h2>
+						<h2>{T()("builder_area")}</h2>
 					</div>
 					<Button
 						type="button"
