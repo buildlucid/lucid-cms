@@ -148,6 +148,38 @@
 			background-size: 14px 14px;
 		}
 	}
+	.rectangle-background {
+		position: relative;
+		&::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 0;
+			background-color: #0a0a0a;
+			opacity: 0.15;
+			background-image: repeating-linear-gradient(
+					45deg,
+					#a1a1a1 25%,
+					transparent 25%,
+					transparent 75%,
+					#a1a1a1 75%,
+					#a1a1a1
+				),
+				repeating-linear-gradient(
+					45deg,
+					#a1a1a1 25%,
+					#0a0a0a 25%,
+					#0a0a0a 75%,
+					#a1a1a1 75%,
+					#a1a1a1
+				);
+			background-position: 0 0, 10px 10px;
+			background-size: 20px 20px;
+		}
+	}
 
 	/* Wysiwyg */
 	.ql-toolbar {

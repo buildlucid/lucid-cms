@@ -59,8 +59,17 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 			}}
 		>
 			{/* Image */}
-			<AspectRatio ratio="16:9" innerClass={"overflow-hidden"}>
-				<MediaPreview media={props.media} alt={alt() || title() || ""} />
+			<AspectRatio
+				ratio="16:9"
+				innerClass={classNames("overflow-hidden", {
+					"dotted-background": props.media.type === "image",
+				})}
+			>
+				<MediaPreview
+					media={props.media}
+					alt={alt() || title() || ""}
+					imageFit={props.media.type === "image" ? "contain" : undefined}
+				/>
 			</AspectRatio>
 			{/* Content */}
 			<div class="p-2 border-t border-border">

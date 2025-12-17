@@ -7,6 +7,7 @@ interface ImageProps {
 	alt?: string;
 	loading?: "lazy" | "eager";
 	classes?: string;
+	fit?: "cover" | "contain";
 }
 
 const Image: Component<ImageProps> = (props) => {
@@ -15,7 +16,11 @@ const Image: Component<ImageProps> = (props) => {
 	return (
 		<KImage.Root>
 			<KImage.Img
-				class={classNames("object-cover block w-full h-full", props.classes)}
+				class={classNames(
+					"block w-full h-full",
+					props.fit === "contain" ? "object-contain" : "object-cover",
+					props.classes,
+				)}
 				src={props.src}
 				loading={props.loading}
 				alt={props.alt}

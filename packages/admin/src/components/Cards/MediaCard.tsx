@@ -85,7 +85,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			// @ts-expect-error
 			use:draggable
 			class={classNames(
-				"bg-card-base border-border border rounded-md group overflow-hidden relative",
+				"bg-card-base hover:bg-card-hover border-border border rounded-md group overflow-hidden relative transition-colors duration-200",
 				{
 					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),
 				},
@@ -104,7 +104,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyPress={() => {}}
 		>
 			<Show when={hasUpdatePermission() && !props.showingDeleted?.()}>
-				<div class="absolute top-3 left-3 z-10">
+				<div class="absolute top-3 left-3 z-30">
 					<Checkbox
 						value={isSelected()}
 						onChange={() => {
@@ -119,7 +119,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					/>
 				</div>
 			</Show>
-			<div class="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100">
+			<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
 				<ActionDropdown
 					actions={[
 						{
@@ -225,8 +225,17 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				/>
 			</div>
 			{/* Image */}
-			<AspectRatio ratio="16:9" innerClass={"overflow-hidden"}>
-				<MediaPreview media={props.media} alt={alt() || title() || ""} />
+			<AspectRatio
+				ratio="16:9"
+				innerClass={classNames("overflow-hidden z-0 bg-card-hover", {
+					"rectangle-background": props.media.type === "image",
+				})}
+			>
+				<MediaPreview
+					media={props.media}
+					alt={alt() || title() || ""}
+					imageFit={props.media.type === "image" ? "contain" : undefined}
+				/>
 			</AspectRatio>
 			{/* Content */}
 			<div class="p-3 border-t border-border">

@@ -17,6 +17,7 @@ interface MediaPreviewProps {
 	};
 	richPreview?: boolean;
 	alt: string | null;
+	imageFit?: "cover" | "contain";
 }
 
 const MediaPreview: Component<MediaPreviewProps> = (props) => {
@@ -26,28 +27,21 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 		<Switch>
 			<Match when={props.media.type === "image"}>
 				<Image
-					classes={
-						"rounded-t-md group-hover:scale-110 transition duration-100 backface-hidden"
-					}
+					classes={"rounded-t-md backface-hidden p-2 z-10 relative"}
+					fit={props.imageFit}
 					src={`${props.media.url}?preset=thumbnail&format=webp`}
 					alt={props.alt || ""}
 					loading="lazy"
 				/>
 			</Match>
 			<Match when={props.media.type === "archive"}>
-				<div class="w-full h-full bg-input-base flex justify-center items-center group-hover:scale-110 transition duration-100">
+				<div class="w-full h-full bg-input-base flex justify-center items-center">
 					<FaSolidFileZipper size={40} class="text-icon-base opacity-40" />
 				</div>
 			</Match>
 			<Match when={props.media.type === "audio"}>
 				<div
-					class={classNames(
-						"w-full h-full bg-input-base flex justify-center items-center",
-						{
-							"group-hover:scale-110 transition duration-100":
-								!props.richPreview,
-						},
-					)}
+					class={"w-full h-full bg-input-base flex justify-center items-center"}
 				>
 					<Switch>
 						<Match when={props.richPreview}>
@@ -62,20 +56,14 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 			</Match>
 			<Match when={props.media.type === "video"}>
 				<div
-					class={classNames(
-						"w-full h-full bg-input-base flex justify-center items-center",
-						{
-							"group-hover:scale-110 transition duration-100":
-								!props.richPreview,
-						},
-					)}
+					class={"w-full h-full bg-input-base flex justify-center items-center"}
 				>
 					<Switch>
 						<Match when={props.richPreview}>
 							{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 							<video
 								src={props.media.url}
-								class="w-full h-full object-contain"
+								class="w-full h-full object-contain z-10 relative"
 								controls
 								preload="auto"
 							/>

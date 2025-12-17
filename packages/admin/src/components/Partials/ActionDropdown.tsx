@@ -42,7 +42,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// Classes
 	const liItemClasses =
-		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 text-title fill-dropdown-contrast";
+		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast";
 
 	// ----------------------------------------
 	// Render

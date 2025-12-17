@@ -283,27 +283,20 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				}
 			>
 				<Match when={props.data.type === "image"}>
-					<div class="w-full h-[calc(100%-49px)] relative z-10 p-4">
+					<div class="w-full h-[calc(100%-49px)] relative z-10 p-4 rectangle-background">
 						<img
 							src={props.data.url}
 							alt={props.data.name}
-							class="w-full h-full object-contain"
+							class="w-full h-full object-contain z-10 relative"
 						/>
 					</div>
-					{/* BG */}
-					<span
-						class="absolute inset-0 z-0 bg-cover bg-center w-full h-full blur-md scale-110 after:block after:absolute after:inset-0 after:bg-black after:opacity-30 after:z-10"
-						style={{
-							"background-image": `url(${props.data.url})`,
-						}}
-					/>
 				</Match>
 				<Match when={props.data.type === "video"}>
-					<div class="w-full h-[calc(100%-49px)] relative z-10 bg-input-base">
+					<div class="w-full h-[calc(100%-49px)] relative z-10 bg-input-base rectangle-background">
 						{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 						<video
 							src={props.data.url}
-							class="w-full h-full object-contain"
+							class="w-full h-full object-contain z-10 relative"
 							controls
 							preload="auto"
 						/>

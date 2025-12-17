@@ -125,15 +125,15 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						</Button>
 					</Match>
 					<Match when={typeof props.value === "number"}>
-						<div class="w-full border border-border rounded-md bg-input-base">
+						<div class="w-full border border-border rounded-md bg-input-base rectangle-background">
 							<div class="p-2 flex items-center justify-center relative">
-								<div class="w-full max-w-xs rounded-md overflow-hidden border border-border">
+								<div class="w-full max-w-md max-h-80">
 									<Show
 										when={
 											props.ref()?.isDeleted || props.ref()?.public === false
 										}
 									>
-										<div class="absolute top-2 right-2 z-10 gap-2 flex items-center">
+										<div class="absolute top-2 right-2 z-20 gap-2 flex items-center">
 											<Show when={props.ref()?.isDeleted}>
 												<Pill theme="red" tooltip={T()("deleted_pill_tooltip")}>
 													{T()("deleted")}
@@ -146,27 +146,21 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											</Show>
 										</div>
 									</Show>
-									<AspectRatio
-										ratio="16:9"
-										innerClass={classNames({
-											"opacity-50": props.ref()?.isDeleted,
-										})}
-									>
-										<MediaPreview
-											media={{
-												url: props.ref()?.url || "",
-												type: props.ref()?.type || "image",
-											}}
-											alt={helpers.getRecordTranslation(
-												props.ref()?.alt,
-												contentLocale(),
-											)}
-											richPreview={true}
-										/>
-									</AspectRatio>
+
+									<MediaPreview
+										media={{
+											url: props.ref()?.url || "",
+											type: props.ref()?.type || "image",
+										}}
+										alt={helpers.getRecordTranslation(
+											props.ref()?.alt,
+											contentLocale(),
+										)}
+										richPreview={true}
+									/>
 								</div>
 							</div>
-							<div class="grid grid-cols-2 gap-2 p-2 bg-card-base border-t border-border">
+							<div class="grid grid-cols-2 gap-2 p-2 bg-card-base z-10 relative border-t border-border">
 								<Button
 									type="button"
 									theme="border-outline"
