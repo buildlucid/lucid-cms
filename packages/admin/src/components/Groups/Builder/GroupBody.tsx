@@ -184,7 +184,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						<span class="text-xs text-unfocused font-medium shrink-0 px-2 py-0.5 rounded-md border border-border bg-background-base">
 							{props.state.groupIndex + 1}
 						</span>
-						<h3 class="text-sm text-body font-medium truncate">
+						<h3 class="text-sm text-title font-medium truncate">
 							{helpers.getLocaleValue({
 								value: props.state.fieldConfig.details?.label,
 							})}

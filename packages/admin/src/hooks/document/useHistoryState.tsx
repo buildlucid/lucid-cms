@@ -234,6 +234,9 @@ export function useHistoryState() {
 			});
 		}
 
+		//* track which timeline item ids are currently loaded (latest + fetched revisions)
+		const loadedItemIds = new Set(allItems.map((i) => i.id));
+
 		//* collect environment versions
 		const environmentVersions: TimelineItem[] = [];
 		if (documentData?.version) {
@@ -242,6 +245,12 @@ export function useHistoryState() {
 				if (key === "latest") continue;
 
 				if (version) {
+					if (
+						!version.promotedFrom ||
+						!loadedItemIds.has(version.promotedFrom)
+					) {
+						continue;
+					}
 					environmentVersions.push({
 						type: "environment",
 						id: version.id,
@@ -304,8 +313,6 @@ export function useHistoryState() {
 					sourceItem.environmentVersions = [];
 				}
 				sourceItem.environmentVersions.push(envVersion);
-			} else {
-				allItems.push(envVersion);
 			}
 		}
 
