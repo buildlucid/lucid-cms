@@ -12,6 +12,7 @@ import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import brickHelpers from "@/utils/brick-helpers";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import { Tr } from "@/components/Groups/Table";
+import type { TableTheme } from "@/components/Groups/Table/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import AuthorCol from "@/components/Tables/Columns/AuthorCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
@@ -29,6 +30,7 @@ interface DocumentRowProps extends TableRowProps {
 		onClick?: () => void;
 	};
 	current?: boolean;
+	theme?: TableTheme;
 }
 
 const DocumentRow: Component<DocumentRowProps> = (props) => {
@@ -43,6 +45,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 			actions={props.actions}
 			onClick={props.callbacks?.onClick}
 			current={props.current}
+			theme={props.theme}
 		>
 			<For each={props.fieldInclude}>
 				{(field, i) => {

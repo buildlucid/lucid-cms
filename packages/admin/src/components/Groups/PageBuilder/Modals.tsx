@@ -1,8 +1,8 @@
 import { Show, type Component, createMemo } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import NavigationGuard from "@/components/Modals/NavigationGuard";
-import MediaSelectModal from "@/components/Modals/Media/MediaSelect";
-import DocumentSelectModal from "@/components/Modals/Documents/DocumentSelect";
+import MediaSelectModal from "@/components/Panels/Media/MediaSelect";
+import DocumentSelectModal from "@/components/Panels/Documents/DocumentSelect";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import BrickImagePreview from "@/components/Modals/Bricks/ImagePreview";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";

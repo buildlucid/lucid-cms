@@ -9,7 +9,6 @@ import {
 	Switch,
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
-import AspectRatio from "@/components/Partials/AspectRatio";
 import Button from "@/components/Partials/Button";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
