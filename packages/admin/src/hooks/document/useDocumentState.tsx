@@ -7,6 +7,7 @@ import helpers from "@/utils/helpers";
 import api from "@/services/api";
 import type { DocumentVersionType } from "@types";
 import brickStore from "@/store/brickStore";
+import objectHash from "object-hash";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";
@@ -72,7 +73,12 @@ export function useDocumentState(props: {
 				value: collection()?.details.singularName,
 			}) || T()("collection"),
 	);
-	const document = createMemo(() => documentQuery.data?.data);
+	const document = createMemo(() => documentQuery.data?.data, undefined, {
+		equals: (prev, next) => {
+			if (!prev || !next) return prev === next;
+			return objectHash(prev) === objectHash(next);
+		},
+	});
 	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
 	const shouldBlockNavigation = createMemo(() => {
 		if (props.version() !== "latest") return false;

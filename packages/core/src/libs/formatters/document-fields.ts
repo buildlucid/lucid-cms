@@ -236,7 +236,13 @@ const buildGroups = (
 	groups.forEach((localeRows, key) => {
 		//* open state is shared for now - if this is to change in the future, the insert/response format for this needs changing
 		const openState = localeRows[0]?.is_open ?? false;
-		const ref = crypto.randomUUID();
+		const ref = generateGroupRef(
+			meta.collection.key,
+			meta.brickKey,
+			meta.repeaterConfig.key,
+			key,
+			meta.repeaterLevel,
+		);
 
 		groupsRes.push({
 			ref: ref,
@@ -291,6 +297,25 @@ const objectifyFields = (
 		},
 		{} as Record<string, FieldAltResponse>,
 	);
+};
+
+/**
+ * Generates a unique deterministic reference for a group
+ */
+const generateGroupRef = (
+	collectionKey: string,
+	brickKey: string | undefined,
+	repeaterKey: string,
+	position: number,
+	repeaterLevel: number,
+): string => {
+	return crypto
+		.createHash("sha256")
+		.update(
+			`${collectionKey}-${brickKey || "document"}-${repeaterKey}-${position}-${repeaterLevel}`,
+		)
+		.digest("hex")
+		.substring(0, 36);
 };
 
 export default {

@@ -8,6 +8,7 @@ import {
 	createMemo,
 	onCleanup,
 	batch,
+	createSignal,
 } from "solid-js";
 import { useParams } from "@solidjs/router";
 import {
@@ -32,6 +33,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	// ----------------------------------
 	// Hooks & State
 	const params = useParams();
+	const [getStateLoading, setStateLoading] = createSignal(true);
 	const versionType = createMemo(() => props.version || params.versionType);
 	const versionId = createMemo(
 		() => Number.parseInt(params.versionId) || undefined,
@@ -84,6 +86,8 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	// TODO: attempt to merge brick state in when the document ID and collection key are the same. Hopefully cut down on re-renders from nuking the brick store
 	const setDocumentState = () => {
+		setStateLoading(true);
+
 		batch(() => {
 			brickStore.get.reset();
 			brickStore.set(
@@ -99,6 +103,8 @@ const CollectionsDocumentsEditRoute: Component<{
 		snapshotTimeout = setTimeout(() => {
 			brickStore.get.captureInitialSnapshot();
 		}, 0);
+
+		setStateLoading(false);
 	};
 
 	createEffect(
@@ -109,14 +115,14 @@ const CollectionsDocumentsEditRoute: Component<{
 			},
 		),
 	);
-	createEffect(
-		on(
-			() => docState.collectionQuery.isFetchedAfterMount,
-			() => {
-				setDocumentState();
-			},
-		),
-	);
+	// createEffect(
+	// 	on(
+	// 		() => docState.collectionQuery.isFetchedAfterMount,
+	// 		() => {
+	// 			setDocumentState();
+	// 		},
+	// 	),
+	// );
 
 	onCleanup(() => {
 		brickStore.get.reset();
@@ -126,7 +132,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	// Render
 	return (
 		<Switch>
-			<Match when={uiState.isLoading()}>
+			<Match when={uiState.isLoading() || getStateLoading()}>
 				<span class="absolute top-0 left-[220px] right-4 h-32 bg-background-hover z-5" />
 				<div class="fixed top-4 left-[220px] bottom-4 right-4 flex flex-col z-10">
 					<span class="h-32 w-full skeleton block mb-4" />

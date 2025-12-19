@@ -55,7 +55,7 @@ const formatMultiple = (props: {
 			if (!brickBuilder) continue;
 
 			brickResponses.push({
-				ref: crypto.randomUUID(),
+				ref: generateBrickRef(props.collection.key, brickKey, firstRow.id),
 				key: brickKey,
 				order: firstRow.position,
 				open: formatter.formatBoolean(firstRow.is_open),
@@ -185,6 +185,21 @@ const getBrickRepeaterRows = (props: {
 		);
 	}
 	return [];
+};
+
+/**
+ * Generates a unique deterministic reference for a brick
+ */
+const generateBrickRef = (
+	collectionKey: string,
+	brickKey: string,
+	brickInstanceId: number | string,
+): string => {
+	return crypto
+		.createHash("sha256")
+		.update(`${collectionKey}-${brickKey}-${brickInstanceId}`)
+		.digest("hex")
+		.substring(0, 36);
 };
 
 export default {
