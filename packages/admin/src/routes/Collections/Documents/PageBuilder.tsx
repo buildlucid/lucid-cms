@@ -133,10 +133,14 @@ const CollectionsDocumentsEditRoute: Component<{
 	return (
 		<Switch>
 			<Match when={uiState.isLoading() || getStateLoading()}>
-				<span class="absolute top-0 left-[220px] right-4 h-32 bg-background-hover z-5" />
-				<div class="fixed top-4 left-[220px] bottom-4 right-4 flex flex-col z-10">
-					<span class="h-32 w-full skeleton block mb-4" />
-					<span class="h-full w-full skeleton block" />
+				<div class="-mt-4 relative bg-background-base rounded-b-xl border border-border h-36">
+					<span class="absolute inset-4 bg-background-hover z-5 skeleton" />
+				</div>
+				<div class="mt-2 bg-background-base rounded-t-xl border border-border flex-grow overflow-hidden relative">
+					<div class="absolute top-4 left-4 bottom-4 right-4 flex flex-col z-10">
+						<span class="h-62 w-full skeleton block mb-4" />
+						<span class="h-full w-full skeleton block" />
+					</div>
 				</div>
 			</Match>
 			<Match when={uiState.isSuccess()}>
