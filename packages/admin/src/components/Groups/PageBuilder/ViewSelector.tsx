@@ -153,7 +153,7 @@ export const ViewSelector: Component<{
 						{(item, index) => (
 							<li
 								class={classNames({
-									"border-t border-border pt-1 mt-1": index() === 0,
+									"border-t border-border pt-1 mt-0.5": index() === 0,
 								})}
 							>
 								<DropdownMenu.Item

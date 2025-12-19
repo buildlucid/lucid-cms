@@ -36,6 +36,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	const versionId = createMemo(
 		() => Number.parseInt(params.versionId) || undefined,
 	);
+	let snapshotTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	const docState = useDocumentState({
 		mode: props.mode,
@@ -92,8 +93,12 @@ const CollectionsDocumentsEditRoute: Component<{
 			brickStore.get.setBricks(docState.document(), docState.collection());
 			brickStore.get.setRefs(docState.document());
 			brickStore.set("locked", uiState.isBuilderLocked());
-			brickStore.get.captureInitialSnapshot();
 		});
+
+		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
+		snapshotTimeout = setTimeout(() => {
+			brickStore.get.captureInitialSnapshot();
+		}, 0);
 	};
 
 	createEffect(
