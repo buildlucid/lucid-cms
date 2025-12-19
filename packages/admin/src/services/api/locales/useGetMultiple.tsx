@@ -1,5 +1,5 @@
 import { createEffect, createMemo, type Accessor } from "solid-js";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -16,7 +16,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
-	const query = createQuery(() => ({
+	const query = useQuery(() => ({
 		queryKey: ["locales.getAll", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<LocalesResponse[]>>({

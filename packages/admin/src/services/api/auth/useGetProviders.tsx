@@ -1,4 +1,4 @@
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import type { ResponseBody, AuthProvidersResponse } from "@types";
 
@@ -6,7 +6,7 @@ import type { ResponseBody, AuthProvidersResponse } from "@types";
 interface QueryParams {}
 
 const useGetProviders = (params: QueryHook<QueryParams>) => {
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["auth.getProviders", params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AuthProvidersResponse>>({

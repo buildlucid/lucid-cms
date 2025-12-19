@@ -1,5 +1,5 @@
 import { createMemo, type Accessor } from "solid-js";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody, LicenseResponse } from "@types";
@@ -14,7 +14,7 @@ const useGetStatus = (params: QueryHook<QueryParams>) => {
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["license.getStatus", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<LicenseResponse>>({

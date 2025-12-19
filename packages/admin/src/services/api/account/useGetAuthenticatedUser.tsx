@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, UserResponse } from "@types";
 import { createEffect, createMemo } from "solid-js";
 import userStore from "@/store/userStore";
@@ -23,7 +23,7 @@ const useGetAuthenticatedUser = (
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
-	const query = createQuery(() => ({
+	const query = useQuery(() => ({
 		queryKey: ["users.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<UserResponse>>({

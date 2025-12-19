@@ -1,4 +1,4 @@
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import type { MediaShareLinkResponse, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
@@ -19,7 +19,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 
 	// -----------------------------
 	// Query
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["mediaShareLinks.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaShareLinkResponse>>({

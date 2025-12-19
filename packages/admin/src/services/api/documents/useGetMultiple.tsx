@@ -1,5 +1,5 @@
 import { createMemo, type Accessor } from "solid-js";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type {
@@ -34,7 +34,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 
 	// -----------------------------
 	// Query
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["documents.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<DocumentResponse[]>>({

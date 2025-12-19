@@ -1,5 +1,5 @@
 import { createMemo } from "solid-js";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody } from "@types";
@@ -19,7 +19,7 @@ const useSetupRequired = (params?: QueryHook<QueryParams>) => {
 
 	// -----------------------------
 	// Query
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["auth.setupRequired", queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<SetupRequiredResponse>>({

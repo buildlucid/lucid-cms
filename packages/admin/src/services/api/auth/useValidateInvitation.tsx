@@ -1,5 +1,5 @@
 import { createMemo } from "solid-js";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody, ValidateInvitationResponse } from "@types";
@@ -16,7 +16,7 @@ const useValidateInvitation = (params: QueryHook<QueryParams>) => {
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["auth.validateInvitation", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ValidateInvitationResponse>>({

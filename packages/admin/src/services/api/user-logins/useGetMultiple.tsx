@@ -1,4 +1,4 @@
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -22,7 +22,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 
 	// -----------------------------
 	// Query
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["userLogins.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<UserLoginResponse[]>>({

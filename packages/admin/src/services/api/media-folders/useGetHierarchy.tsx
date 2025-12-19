@@ -1,4 +1,4 @@
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -15,7 +15,7 @@ const useGetHierarchy = (params?: QueryHook<QueryParams>) => {
 
 	// -----------------------------
 	// Query
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["mediaFolders.getHierarchy", queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaFolderResponse[]>>({

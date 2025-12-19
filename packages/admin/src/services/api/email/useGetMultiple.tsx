@@ -1,5 +1,5 @@
 import { createMemo, type Accessor } from "solid-js";
-import { createQuery } from "@tanstack/solid-query";
+import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody, EmailResponse } from "@types";
@@ -24,7 +24,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 
 	// -----------------------------
 	// Query
-	return createQuery(() => ({
+	return useQuery(() => ({
 		queryKey: ["email.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<EmailResponse[]>>({
