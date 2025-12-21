@@ -6,7 +6,7 @@ const checkDuplicateFieldKeys = (
 	fieldsKeys: string[],
 ) => {
 	const duplicateKeys = fieldsKeys.filter((key, index, array) => {
-		return array.findIndex((k) => k === key) !== index;
+		return array.indexOf(key) !== index;
 	});
 
 	if (duplicateKeys.length > 0) {

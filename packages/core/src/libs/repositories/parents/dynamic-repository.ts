@@ -34,7 +34,6 @@ abstract class DynamicRepository<
 			// @ts-expect-error
 			.select(props.select);
 
-		// @ts-expect-error
 		query = queryBuilder.select(query, props.where);
 
 		const exec = await this.executeQuery(
@@ -72,7 +71,6 @@ abstract class DynamicRepository<
 			.select(props.select);
 
 		if (props.where) {
-			// @ts-expect-error
 			query = queryBuilder.select(query, props.where);
 		}
 
@@ -228,8 +226,8 @@ abstract class DynamicRepository<
 	) {
 		let query = this.db
 			.updateTable(dynamicConfig.tableName)
+			// @ts-expect-error
 			.set(
-				// @ts-expect-error
 				this.formatData(props.data, {
 					type: "update",
 					dynamicColumns: dynamicConfig.columns,
@@ -242,9 +240,9 @@ abstract class DynamicRepository<
 				// @ts-expect-error
 				(qb) => qb.returning(props.returning),
 			)
+			// @ts-expect-error
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
-		// @ts-expect-error
 		query = queryBuilder.update(query, props.where);
 
 		const exec = await this.executeQuery(
@@ -279,8 +277,8 @@ abstract class DynamicRepository<
 	) {
 		let query = this.db
 			.updateTable(dynamicConfig.tableName)
+			// @ts-expect-error
 			.set(
-				// @ts-expect-error
 				props.data.map((data) => {
 					return this.formatData(data, {
 						type: "update",
@@ -295,9 +293,9 @@ abstract class DynamicRepository<
 				// @ts-expect-error
 				(qb) => qb.returning(props.returning),
 			)
+			// @ts-expect-error
 			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
 
-		// @ts-expect-error
 		query = queryBuilder.update(query, props.where);
 
 		const exec = await this.executeQuery(

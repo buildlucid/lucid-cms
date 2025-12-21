@@ -157,6 +157,7 @@ export const Select: Component<SelectProps> = (props) => {
 					}}
 				>
 					<Show when={props.search !== undefined}>
+						{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
 						<div
 							class="mb-1.5 sticky top-0"
 							onKeyDown={(e) => {

@@ -80,7 +80,7 @@ const validateBricks = (props: {
 	const errors: BrickError[] = [];
 
 	for (const brick of props.bricks) {
-		let instance = undefined;
+		let instance ;
 
 		switch (brick.type) {
 			case "builder": {

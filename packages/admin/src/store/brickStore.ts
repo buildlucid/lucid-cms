@@ -62,15 +62,10 @@ const [get, set] = createStore<{
 		collection?: CollectionResponse,
 	) => void;
 	captureInitialSnapshot: () => void;
-	addBrick: (props: {
-		brickConfig: CollectionBrickConfig;
-	}) => void;
+	addBrick: (props: { brickConfig: CollectionBrickConfig }) => void;
 	removeBrick: (brickIndex: number) => void;
 	toggleBrickOpen: (brickIndex: number) => void;
-	swapBrickOrder: (props: {
-		brickRef: string;
-		targetBrickRef: string;
-	}) => void;
+	swapBrickOrder: (props: { brickRef: string; targetBrickRef: string }) => void;
 	setFieldValue: (params: {
 		brickIndex: number;
 		key: string;

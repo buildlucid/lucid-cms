@@ -77,7 +77,9 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 						});
 						setValue(value);
 					});
-				} catch (err) {}
+				} catch (err) {
+					console.log(err);
+				}
 			}}
 			name={props.state.fieldConfig.key}
 			copy={{

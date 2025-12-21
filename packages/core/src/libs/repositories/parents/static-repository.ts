@@ -78,6 +78,7 @@ abstract class StaticRepository<
 	) {
 		// @ts-expect-error
 		let query = this.db.selectFrom(this.tableName).select(props.select);
+
 		// @ts-expect-error
 		query = queryBuilder.select(query, props.where);
 

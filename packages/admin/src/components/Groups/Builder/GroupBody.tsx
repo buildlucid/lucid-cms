@@ -110,6 +110,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: <explanation
 		<div
 			style={{
 				"view-transition-name": `group-item-${props.state.group.ref}`,
@@ -134,6 +135,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			onDragOver={(e) => props.state.dragDrop.onDragOver(e)}
 		>
 			{/* Group Header */}
+			{/** biome-ignore lint/a11y/useSemanticElements: <explanation */}
 			<div
 				class={classNames(
 					"w-full bg-input-base focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
@@ -152,7 +154,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				id={`accordion-header-${ref()}`}
 				aria-expanded={getGroupOpen()}
 				aria-controls={`accordion-content-${ref()}`}
-				// biome-ignore lint/a11y/useSemanticElements: <explanation>
 				role="button"
 				tabIndex="0"
 			>
@@ -232,7 +233,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						"scale-y-0 h-0 opacity-0 invisible": !getGroupOpen(),
 					},
 				)}
-				aria-labelledby={`accordion-header-${ref()}`}
 			>
 				<div class="border-t border-border p-3 md:p-4 gap-4 flex flex-col">
 					<Index each={configChildrenFields()}>

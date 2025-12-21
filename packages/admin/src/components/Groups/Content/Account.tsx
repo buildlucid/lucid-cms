@@ -14,8 +14,6 @@ import InfoRow from "@/components/Blocks/InfoRow";
 import UpdateAccountForm from "@/components/Forms/Account/UpdateAccountForm";
 import { Select } from "@/components/Groups/Form";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
-import Spinner from "@/components/Partials/Spinner";
-import Alert from "@/components/Blocks/Alert";
 import Button from "@/components/Partials/Button";
 import api from "@/services/api";
 import spawnToast from "@/utils/spawn-toast";

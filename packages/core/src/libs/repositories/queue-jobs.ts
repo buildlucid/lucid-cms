@@ -115,7 +115,8 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 					]),
 				]),
 			)
-			.orderBy(["priority desc", "created_at asc"])
+			.orderBy("priority", "desc")
+			.orderBy("created_at", "asc")
 			.limit(props.data.limit);
 
 		const exec = await this.executeQuery(() => query.execute(), {

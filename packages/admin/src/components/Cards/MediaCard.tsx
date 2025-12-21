@@ -52,6 +52,7 @@ export const MediaCardLoading: Component = () => {
 const MediaCard: Component<MediaCardProps> = (props) => {
 	// ----------------------------------
 	// Hooks
+	// biome-ignore lint/correctness/noUnusedVariables: it is being used
 	const draggable = createDraggable(`media:${props.media.id}`);
 
 	// ----------------------------------

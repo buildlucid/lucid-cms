@@ -148,6 +148,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					}
 				}}
 			/>
+			{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
 			<div
 				class={classNames(
 					"w-full border-border border h-80 rounded-md relative overflow-hidden",

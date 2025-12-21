@@ -9,9 +9,7 @@ interface LicensePropsT {
 	errorMessage: string | null;
 }
 
-const formatSingle = (props: {
-	license: LicensePropsT;
-}): LicenseResponse => {
+const formatSingle = (props: { license: LicensePropsT }): LicenseResponse => {
 	return {
 		key: createLicenseKeyFromLast4(props.license.last4),
 		valid: formatter.formatBoolean(props.license.valid),

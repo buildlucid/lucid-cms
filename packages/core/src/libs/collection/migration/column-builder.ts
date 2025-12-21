@@ -78,7 +78,6 @@ export const dropColumn = <
 >(
 	query: T,
 	operation: RemoveColumnOperation,
-	db: DatabaseAdapter,
 ): T => {
 	return query.dropColumn(operation.columnName) as T;
 };

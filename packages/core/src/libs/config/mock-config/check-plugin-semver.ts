@@ -5,7 +5,7 @@ import testingConstants from "../../../constants/testing-constants.js";
 
 export const adapter = nodeAdapter();
 
-export default defineConfig((env) => ({
+export default defineConfig(() => ({
 	host: "http://localhost:6543",
 	logger: {
 		level: "silent",
@@ -24,7 +24,7 @@ export default defineConfig((env) => ({
 		{
 			key: "plugin-testing",
 			lucid: "100.0.0",
-			recipe: (draft) => {},
+			recipe: () => {},
 		},
 	],
 }));

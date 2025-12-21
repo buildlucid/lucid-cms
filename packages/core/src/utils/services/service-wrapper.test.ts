@@ -441,7 +441,7 @@ test("service wrapper schema validation", async () => {
 	const testService: ServiceFn<
 		[Record<string, string>],
 		Record<string, string>
-	> = async (service, data) => {
+	> = async (_, data) => {
 		return {
 			error: undefined,
 			data: data,

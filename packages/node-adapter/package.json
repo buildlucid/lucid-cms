@@ -5,10 +5,10 @@
 	"description": "The official Node adapter for Lucid CMS",
 	"type": "module",
 	"types": "./dist/index.d.ts",
-	"module": "dist/index.js",
+	"module": "dist/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
+			"import": "./dist/index.mjs",
 			"types": "./dist/index.d.ts"
 		}
 	},
@@ -29,25 +29,25 @@
 	},
 	"keywords": ["CMS", "Lucid CMS", "Lucid", "Node", "Environment Adapter"],
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
+		"@biomejs/biome": "^2.3.10",
 		"@lucidcms/config": "*",
 		"@lucidcms/core": "*",
-		"@types/node": "^22.15.2",
-		"tsdown": "^0.15.7",
-		"typescript": "^5.8.3"
+		"@types/node": "^24.10.4",
+		"tsdown": "^0.18.2",
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.14.4",
+		"@hono/node-server": "^1.19.7",
 		"@types/node-cron": "^3.0.11",
-		"dotenv": "^16.5.0",
-		"rolldown": "^1.0.0-beta.43",
-		"rollup-plugin-node-externals": "^8.1.1",
+		"dotenv": "^17.2.3",
+		"rolldown": "^1.0.0-beta.55",
+		"rollup-plugin-node-externals": "^8.1.2",
 		"node-cron": "^4.2.1"
 	},
 	"peerDependencies": {
 		"@lucidcms/core": "^0.12.0-alpha.1",
-		"hono": "^4.7.11",
-		"hono-openapi": "^0.4.8"
+		"hono": "^4.11.1",
+        "hono-openapi": "^0.4.8"
 	},
     "volta": {
         "node": "24.11.1"

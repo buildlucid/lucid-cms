@@ -92,6 +92,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
+		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: <explanation
 		<div
 			class={classNames(
 				"transform-gpu origin-top duration-200 transition-all",

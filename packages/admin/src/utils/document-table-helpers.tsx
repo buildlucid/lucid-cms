@@ -42,9 +42,7 @@ export const collectionFieldFilters = (collection?: CollectionResponse) => {
  * _${fieldKey}
  * ${brickKey}.${repeaterKey}._${fieldKey}
  */
-export const formatFieldFilters = (props: {
-	fieldKey: string;
-}) => {
+export const formatFieldFilters = (props: { fieldKey: string }) => {
 	return `_${props.fieldKey}`;
 };
 

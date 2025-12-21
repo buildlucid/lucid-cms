@@ -1,53 +1,61 @@
 {
-	"name": "@lucidcms/sqlite-adapter",
-	"version": "1.0.2",
-	"private": false,
-	"description": "The official SQLite adapter for Lucid CMS",
-	"type": "module",
-	"types": "./dist/index.d.ts",
-	"module": "dist/index.js",
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"scripts": {
-		"build": "tsc && tsdown",
-		"dev": "tsdown --watch",
-		"format": "biome format ./src",
-		"format:fix": "biome format --write ./src",
-		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src"
-	},
-	"files": ["dist"],
-	"author": "Lucid",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/buildlucid/lucid-cms.git",
-		"directory": "packages/sqlite-adapter"
-	},
-	"keywords": ["CMS", "Lucid CMS", "Lucid", "SQLite", "DB Adapter"],
-	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
-		"@lucidcms/config": "*",
-		"@lucidcms/core": "*",
-		"@types/node": "^22.15.2",
-		"tsdown": "^0.15.7",
-		"typescript": "^5.8.3"
-	},
-	"dependencies": {
-		"better-sqlite3": "^11.9.1",
-		"kysely": "0.27.4"
-	},
-	"peerDependencies": {
-		"@lucidcms/core": "^0.12.0-alpha.1"
-	},
+    "name": "@lucidcms/sqlite-adapter",
+    "version": "1.0.2",
+    "private": false,
+    "description": "The official SQLite adapter for Lucid CMS",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "module": "dist/index.mjs",
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "build": "tsc && tsdown",
+        "dev": "tsdown --watch",
+        "format": "biome format ./src",
+        "format:fix": "biome format --write ./src",
+        "lint": "biome lint ./src",
+        "lint:fix": "biome lint --write ./src"
+    },
+    "files": [
+        "dist"
+    ],
+    "author": "Lucid",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/buildlucid/lucid-cms.git",
+        "directory": "packages/sqlite-adapter"
+    },
+    "keywords": [
+        "CMS",
+        "Lucid CMS",
+        "Lucid",
+        "SQLite",
+        "DB Adapter"
+    ],
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.10",
+        "@lucidcms/config": "*",
+        "@lucidcms/core": "*",
+        "@types/node": "^24.10.4",
+        "tsdown": "^0.18.2",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "better-sqlite3": "^12.5.0",
+        "kysely": "0.28.9"
+    },
+    "peerDependencies": {
+        "@lucidcms/core": "^0.12.0-alpha.1"
+    },
     "volta": {
         "node": "24.11.1"
     },
     "engines": {
         "node": "^24.0.0"
     },
-	"license": "MIT"
+    "license": "MIT"
 }

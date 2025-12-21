@@ -6,7 +6,7 @@ const objectToFormData = <T = Record<string, string | File>>(
 	const formData = new FormData();
 
 	for (const key in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, key)) {
+		if (Object.hasOwn(obj, key)) {
 			const value = obj[key];
 			if (value instanceof File) {
 				formData.append(key, value);

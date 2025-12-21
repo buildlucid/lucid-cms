@@ -98,6 +98,8 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 
 		const unionQueries = props.unions.map(
 			({ tables, ids, documentFieldSchema }) => {
+				const { table, ref } = this.db.dynamic;
+
 				return (
 					this.db
 						.selectFrom(tables.version)
@@ -124,20 +126,20 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 							this.dbAdapter
 								.jsonArrayFrom(
 									this.db
-										.selectFrom(tables.documentFields)
+										.selectFrom(table(tables.documentFields).as("df"))
 										.whereRef(
-											`${tables.documentFields}.document_id`,
+											ref("df.document_id"),
 											"=",
 											`${tables.version}.document_id`,
 										)
 										.whereRef(
-											`${tables.documentFields}.document_version_id`,
+											ref("df.document_version_id"),
 											"=",
 											`${tables.version}.id`,
 										)
 										.select(
-											documentFieldSchema.columns.map(
-												(column) => `${tables.documentFields}.${column.name}`,
+											documentFieldSchema.columns.map((column) =>
+												ref(`df.${column.name}`),
 											),
 										),
 								)
@@ -202,6 +204,8 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		dynamicConfig: DynamicConfig<LucidVersionTableName>,
 	) {
 		const queryFn = async () => {
+			const { table, ref } = this.db.dynamic;
+
 			let query = this.db
 				.selectFrom(dynamicConfig.tableName)
 				.innerJoin(props.tables.document, (join) =>
@@ -242,17 +246,17 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					this.dbAdapter
 						.jsonArrayFrom(
 							this.db
-								.selectFrom(brick.name)
+								.selectFrom(table(brick.name).as("b"))
 								.whereRef(
-									`${brick.name}.document_version_id`,
+									ref("b.document_version_id"),
 									"=",
 									`${dynamicConfig.tableName}.id`,
 								)
 								.select([
-									`${brick.name}.id`,
-									`${brick.name}.locale`,
-									`${brick.name}.brick_instance_id`,
-									`${brick.name}.brick_type`,
+									ref("b.id"),
+									ref("b.locale"),
+									ref("b.brick_instance_id"),
+									ref("b.brick_type"),
 								]),
 						)
 						.as(brick.name),

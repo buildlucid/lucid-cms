@@ -38,7 +38,7 @@ const resolveObject = (obj?: Record<string, QueryParamsValueT>) => {
 
 	const result: Record<string, QueryParamsValueT> = {};
 	for (const key in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, key)) {
+		if (Object.hasOwn(obj, key)) {
 			result[key] = helpers.resolveValue(obj[key]);
 		}
 	}

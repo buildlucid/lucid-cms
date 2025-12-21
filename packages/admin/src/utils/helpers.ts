@@ -3,7 +3,7 @@ import equal from "fast-deep-equal/es6";
 import type { UserResponse, MediaResponse, LocaleValue } from "@types";
 import { getLocale } from "@/translations";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: <explanation
 type GenericObject = Record<string, any>;
 
 const deepMerge = (obj1: GenericObject, obj2: GenericObject): GenericObject => {

@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Component, createSignal, createMemo, Show } from "solid-js";
+import { type Component, createSignal, createMemo } from "solid-js";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import api from "@/services/api";

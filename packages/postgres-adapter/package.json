@@ -5,10 +5,10 @@
 	"description": "The official Postgres adapter for Lucid CMS",
 	"type": "module",
 	"types": "./dist/index.d.ts",
-	"module": "dist/index.js",
+	"module": "dist/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
+			"import": "./dist/index.mjs",
 			"types": "./dist/index.d.ts"
 		}
 	},
@@ -29,17 +29,16 @@
 	},
 	"keywords": ["CMS", "Lucid CMS", "Lucid", "Postgres", "DB Adapter"],
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
+		"@biomejs/biome": "^2.3.10",
 		"@lucidcms/config": "*",
 		"@lucidcms/core": "*",
-		"@types/node": "^22.15.2",
-		"@types/pg": "^8.11.14",
-		"tsdown": "^0.15.7",
-		"typescript": "^5.8.3"
+		"@types/node": "^24.10.4",
+		"tsdown": "^0.18.2",
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"kysely": "0.27.4",
-		"kysely-postgres-js": "^2.0.0",
+		"kysely": "0.28.9",
+		"kysely-postgres-js": "^3.0.0",
 		"postgres": "^3.4.7"
 	},
 	"peerDependencies": {

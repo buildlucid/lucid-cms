@@ -4,10 +4,10 @@
     "description": "The official Microsoft authentication provider plugin for Lucid CMS",
     "type": "module",
     "types": "./dist/index.d.ts",
-    "module": "dist/index.js",
+    "module": "dist/index.mjs",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
+            "import": "./dist/index.mjs",
             "types": "./dist/index.d.ts"
         }
     },
@@ -39,12 +39,12 @@
         "Plugin"
     ],
     "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
+        "@biomejs/biome": "^2.3.10",
         "@lucidcms/config": "*",
         "@lucidcms/core": "*",
-        "@types/node": "^22.15.2",
-        "tsdown": "^0.15.7",
-        "typescript": "^5.8.3"
+        "@types/node": "^24.10.4",
+        "tsdown": "^0.18.2",
+        "typescript": "^5.9.3"
     },
     "peerDependencies": {
         "@lucidcms/core": "^0.12.0-alpha.1"

@@ -231,6 +231,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			{/* Header */}
+			{/** biome-ignore lint/a11y/useSemanticElements: <explanation */}
 			<div
 				class={classNames(
 					"flex items-center justify-between cursor-pointer px-4 py-3 rounded-md focus:outline-hidden",
@@ -243,7 +244,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				}}
 				aria-expanded={getBrickOpen()}
 				aria-controls={`bulder-brick-content-${props.brick.key}`}
-				// biome-ignore lint/a11y/useSemanticElements: <explanation>
 				role="button"
 				tabIndex="0"
 			>

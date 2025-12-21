@@ -33,14 +33,14 @@
         "@lucidcms/plugin-cloudflare-kv": "*",
         "@lucidcms/plugin-redis": "*",
         "@lucidcms/plugin-cloudflare-queues": "*",
-        "better-sqlite3": "^11.9.1",
-        "nodemailer": "^6.10.1"
+        "better-sqlite3": "^12.5.0",
+        "nodemailer": "^7.0.11"
     },
     "author": "",
     "license": "ISC",
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.13",
-        "typescript": "^5.8.3"
+        "typescript": "^5.9.3"
     },
     "volta": {
         "node": "24.11.1"

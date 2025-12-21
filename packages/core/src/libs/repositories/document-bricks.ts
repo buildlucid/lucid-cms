@@ -76,17 +76,15 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		},
 		dynamicConfig: DynamicConfig<LucidVersionTableName>,
 	) {
+		const { table, ref } = this.db.dynamic;
+
 		let query = this.db
-			.selectFrom(dynamicConfig.tableName)
-			.where("id", "=", props.versionId)
-			.selectAll();
+			.selectFrom(table(dynamicConfig.tableName).as("v"))
+			.where(ref("v.id"), "=", props.versionId)
+			.selectAll("v");
 
 		if (props.documentId) {
-			query = query.where(
-				`${dynamicConfig.tableName}.document_id`,
-				"=",
-				props.documentId,
-			);
+			query = query.where(ref("v.document_id"), "=", props.documentId);
 		}
 
 		for (const brick of props.bricksSchema) {
@@ -94,9 +92,9 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 				this.dbAdapter
 					.jsonArrayFrom(
 						this.db
-							.selectFrom(brick.name)
-							.where("document_version_id", "=", props.versionId)
-							.select(brick.columns.map((c) => `${brick.name}.${c.name}`)),
+							.selectFrom(table(brick.name).as("b"))
+							.where(ref("b.document_version_id"), "=", props.versionId)
+							.select(brick.columns.map((c) => ref(`b.${c.name}`))),
 					)
 					.as(brick.name),
 			);
@@ -134,7 +132,9 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			};
 		}
 
-		let query = this.db.updateTable(dynamicConfig.tableName);
+		const { table, ref } = this.db.dynamic;
+
+		let query = this.db.updateTable(table(dynamicConfig.tableName).as("t"));
 
 		const updateObj: Record<string, null> = {};
 		for (const col of props.columns) {
@@ -146,7 +146,7 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			const conditions = [];
 
 			for (const column of props.columns) {
-				conditions.push(eb(column as string, "=", props.documentId));
+				conditions.push(eb(ref(`t.${String(column)}`), "=", props.documentId));
 			}
 			return eb.or(conditions);
 		});

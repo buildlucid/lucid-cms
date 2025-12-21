@@ -34,6 +34,7 @@ const getTablePriority = (
 
 	const hasExternalReferences = table.columns.some((column) => {
 		if (!column.foreignKey) return false;
+		return true;
 	});
 	if (hasExternalReferences) {
 		basePriority -= EXTERNAL_REFERENCE_PRIORITY;

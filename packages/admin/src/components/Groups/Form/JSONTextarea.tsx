@@ -55,9 +55,9 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 			const column = message.match(/column (\d+)/);
 			setJsonError({
 				hasError: true,
-				line: line ? Number.parseInt(line[1]) : 0,
-				column: column ? Number.parseInt(column[1]) : 0,
-				position: position ? Number.parseInt(position[1]) : 0,
+				line: line ? Number.parseInt(line[1], 10) : 0,
+				column: column ? Number.parseInt(column[1], 10) : 0,
+				position: position ? Number.parseInt(position[1], 10) : 0,
 			});
 		}
 	};

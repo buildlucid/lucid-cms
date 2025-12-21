@@ -46,8 +46,12 @@ const buildMigrations: ServiceFn<
 						case "remove": {
 							return removeTableQuery(context, { migration: plan });
 						}
+						default: {
+							return null;
+						}
 					}
-				});
+				})
+				.filter((result) => result !== null);
 			if (batch.length === 0) continue;
 
 			const batchRes = await Promise.all(batch);

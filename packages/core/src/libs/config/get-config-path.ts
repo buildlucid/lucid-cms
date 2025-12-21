@@ -4,7 +4,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const getConfigPath = (cwd: string, filename?: string): string => {
-	let configPath: string | undefined = undefined;
+	let configPath: string | undefined ;
 	const root = path.parse(cwd).root;
 	const configFileName = filename ?? constants.config.filename;
 	const configExtensions = constants.config.extensions;

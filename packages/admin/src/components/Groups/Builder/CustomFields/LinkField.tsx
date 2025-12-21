@@ -58,43 +58,41 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<>
-			<LinkSelect
-				id={brickHelpers.customFieldId({
-					key: props.state.fieldConfig.key,
-					brickIndex: props.state.brickIndex,
-					groupRef: props.state.groupRef,
-				})}
-				value={getValue()}
-				onChange={(value) => {
-					batch(() => {
-						brickStore.get.setFieldValue({
-							brickIndex: props.state.brickIndex,
-							fieldConfig: props.state.fieldConfig,
-							key: props.state.fieldConfig.key,
-							ref: props.state.groupRef,
-							repeaterKey: props.state.repeaterKey,
-							value: value,
-							contentLocale: props.state.contentLocale,
-						});
-						setValue(value);
+		<LinkSelect
+			id={brickHelpers.customFieldId({
+				key: props.state.fieldConfig.key,
+				brickIndex: props.state.brickIndex,
+				groupRef: props.state.groupRef,
+			})}
+			value={getValue()}
+			onChange={(value) => {
+				batch(() => {
+					brickStore.get.setFieldValue({
+						brickIndex: props.state.brickIndex,
+						fieldConfig: props.state.fieldConfig,
+						key: props.state.fieldConfig.key,
+						ref: props.state.groupRef,
+						repeaterKey: props.state.repeaterKey,
+						value: value,
+						contentLocale: props.state.contentLocale,
 					});
-				}}
-				copy={{
-					label: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.label,
-					}),
-					describedBy: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.summary,
-					}),
-				}}
-				altLocaleError={props.state.altLocaleError}
-				localised={props.state.localised}
-				disabled={isDisabled()}
-				errors={props.state.fieldError}
-				required={props.state.fieldConfig.validation?.required || false}
-				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			/>
-		</>
+					setValue(value);
+				});
+			}}
+			copy={{
+				label: helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.label,
+				}),
+				describedBy: helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.summary,
+				}),
+			}}
+			altLocaleError={props.state.altLocaleError}
+			localised={props.state.localised}
+			disabled={isDisabled()}
+			errors={props.state.fieldError}
+			required={props.state.fieldConfig.validation?.required || false}
+			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+		/>
 	);
 };

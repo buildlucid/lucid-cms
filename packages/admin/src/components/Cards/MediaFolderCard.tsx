@@ -1,4 +1,3 @@
-import { A } from "@solidjs/router";
 import type { MediaFolderResponse } from "@types";
 import { FaSolidFolder } from "solid-icons/fa";
 import { type Accessor, createMemo, Show, type Component } from "solid-js";
@@ -32,6 +31,7 @@ export const MediaFolderCard: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// Hooks
+	// biome-ignore lint/correctness/noUnusedVariables: it is being used
 	const draggable = createDraggable(`folder:${props.folder.id}`);
 	const droppable = createDroppable(`folder:${props.folder.id}`);
 

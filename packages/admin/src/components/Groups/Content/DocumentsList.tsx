@@ -1,11 +1,5 @@
 import T from "@/translations";
-import {
-	type Component,
-	type Accessor,
-	Index,
-	createMemo,
-	createSignal,
-} from "solid-js";
+import { type Component, type Accessor, Index, createMemo } from "solid-js";
 import { FaSolidCalendar } from "solid-icons/fa";
 import { useParams, useNavigate } from "@solidjs/router";
 import type { CollectionResponse, CFConfig, FieldTypes } from "@types";

@@ -12,7 +12,7 @@ const changeKeyVisibility = (data: {
 	if (current === data.visibility) return data.key;
 	const withoutPrefix = data.key.replace(
 		new RegExp(
-			`^(${constants.media.visibilityKeys.public}|${constants.media.visibilityKeys.private})\/`,
+			`^(${constants.media.visibilityKeys.public}|${constants.media.visibilityKeys.private})/`,
 		),
 		"",
 	);

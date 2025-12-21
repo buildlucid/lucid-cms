@@ -28,6 +28,7 @@ import type {
 import queryBuilder from "../query-builder/index.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
+import type { ComparisonOperatorExpression } from "kysely";
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join
@@ -731,34 +732,24 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			return query;
 		}
 
+		const { table, ref } = this.db.dynamic;
+
 		return query.where((eb) => {
 			const filterConditions = brickFilters.map((brickFilter) => {
-				return eb.exists(
-					eb
-						// @ts-expect-error
-						.selectFrom(brickFilter.table)
-						.whereRef(
-							// @ts-expect-error
-							`${brickFilter.table}.document_id`,
-							"=",
-							`${documentTableName}.id`,
-						)
-						.where((innerEb) => {
-							return innerEb.and(
-								brickFilter.filters.map((filter) => {
-									return innerEb(
-										// @ts-expect-error
-										`${brickFilter.table}.${filter.column}`,
-										filter.operator,
-										filter.value,
-									);
-								}),
-							);
-						})
-						.select(sql.lit(1).as("exists")),
-				);
-			});
+				let subQuery = this.db
+					.selectFrom(table(brickFilter.table).as("bf"))
+					.whereRef(ref("bf.document_id"), "=", ref(`${documentTableName}.id`));
 
+				for (const filter of brickFilter.filters) {
+					subQuery = subQuery.where(
+						ref(`bf.${filter.column}`),
+						filter.operator as ComparisonOperatorExpression,
+						filter.value,
+					);
+				}
+
+				return eb.exists(subQuery.select(sql.lit(1).as("exists")));
+			});
 			return eb.and(filterConditions);
 		});
 	}

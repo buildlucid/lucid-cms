@@ -34,9 +34,7 @@ interface EmailPropT {
 	}[];
 }
 
-const formatMultiple = (props: {
-	emails: EmailPropT[];
-}) => {
+const formatMultiple = (props: { emails: EmailPropT[] }) => {
 	return props.emails.map((e) =>
 		formatSingle({
 			email: e,

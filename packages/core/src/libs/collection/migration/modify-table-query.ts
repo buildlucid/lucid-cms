@@ -46,7 +46,7 @@ const modifyTableQuery: ServiceFn<
 						});
 						break;
 					case "remove":
-						query = dropColumn(query, operation, context.config.db);
+						query = dropColumn(query, operation);
 						altered = true;
 						logger.debug({
 							message: `Operation of type 'remove' ran on column '${operation.columnName}' for table '${data.migration.tableName}'`,
@@ -91,7 +91,7 @@ const modifyTableQuery: ServiceFn<
 					});
 					break;
 				case "remove":
-					query = dropColumn(query, operation, context.config.db);
+					query = dropColumn(query, operation);
 					altered = true;
 					logger.debug({
 						message: `Operation of type 'remove' ran on column '${operation.columnName}' for table '${data.migration.tableName}'`,

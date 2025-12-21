@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@config '../tailwind.config.js';
+@config "../tailwind.config.js";
 
 @font-face {
 	font-family: "Inter";
@@ -114,7 +114,8 @@
 	}
 
 	.blur-background {
-		background: radial-gradient(
+		background:
+			radial-gradient(
 				900px 600px at 5% 0%,
 				rgba(193, 254, 119, 0.07),
 				transparent 60%
@@ -160,7 +161,8 @@
 			z-index: 0;
 			background-color: #0a0a0a;
 			opacity: 0.15;
-			background-image: repeating-linear-gradient(
+			background-image:
+				repeating-linear-gradient(
 					45deg,
 					#a1a1a1 25%,
 					transparent 25%,
@@ -176,7 +178,9 @@
 					#a1a1a1 75%,
 					#a1a1a1
 				);
-			background-position: 0 0, 10px 10px;
+			background-position:
+				0 0,
+				10px 10px;
 			background-size: 20px 20px;
 		}
 	}
