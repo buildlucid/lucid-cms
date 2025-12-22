@@ -8,7 +8,7 @@ const validate = <T extends ZodType, Target extends keyof ValidationTargets>(
 	target: Target,
 	schema: T,
 ) =>
-	zv(target, schema, (result, c) => {
+	zv(target, schema, (result) => {
 		if (!result.success) {
 			throw new LucidAPIError({
 				type: "validation",

@@ -4,7 +4,7 @@ import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { ResponseBody, SettingsResponse } from "@types";
 
-// biome-ignore lint/suspicious/noEmptyInterface: <explanation>
+// biome-ignore lint/suspicious/noEmptyInterface: explanation
 interface QueryParams {}
 
 const useGetSettings = (params?: QueryHook<QueryParams>) => {

@@ -63,7 +63,7 @@ const getMultipleRevisionsController = factory.createHandlers(
 			},
 			{
 				collectionKey,
-				documentId: Number.parseInt(id),
+				documentId: Number.parseInt(id, 10),
 				query: formattedQuery,
 			},
 		);

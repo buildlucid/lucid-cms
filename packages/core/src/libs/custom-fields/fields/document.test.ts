@@ -41,7 +41,7 @@ test("successfully validate field - document", async () => {
 			type: "document",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("standard_doc")!,
 		validationData: {
 			media: [],
@@ -67,7 +67,7 @@ test("successfully validate field - document", async () => {
 			type: "document",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("required_doc")!,
 		validationData: {
 			media: [],
@@ -95,7 +95,7 @@ test("fail to validate field - document", async () => {
 			type: "document",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("required_doc")!,
 		validationData: {
 			media: [],
@@ -122,7 +122,7 @@ test("fail to validate field - document", async () => {
 			type: "document",
 			value: null,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("required_doc")!,
 		validationData: {
 			media: [],
@@ -149,7 +149,7 @@ test("fail to validate field - document", async () => {
 			type: "document",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("wrong_collection")!,
 		validationData: {
 			media: [],

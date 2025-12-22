@@ -3,7 +3,6 @@ import classNames from "classnames";
 import {
 	FaSolidPhotoFilm,
 	FaSolidUsers,
-	FaSolidGear,
 	FaSolidHouse,
 	FaSolidUserLock,
 	FaSolidEnvelope,

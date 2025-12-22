@@ -103,7 +103,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 					"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
 				})}
 			>
-				{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
+				{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 				<div
 					ref={quillElement}
 					onFocus={() => setInputFocus(true)}

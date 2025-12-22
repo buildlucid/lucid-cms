@@ -4,9 +4,8 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import api from "@/services/api";
 import helpers from "@/utils/helpers";
 import T from "@/translations";
-import type { DocumentVersionResponse } from "@types";
+import type { DocumentVersionResponse, DocumentResponse } from "@types";
 import useSearchParamsState from "../useSearchParamsState";
-import type { DocumentResponse } from "../../../../core/dist/types/response";
 
 const PER_PAGE = 20;
 
@@ -72,8 +71,8 @@ export function useHistoryState() {
 	// ------------------------------------------
 	// Memos
 	const collectionKey = createMemo(() => params.collectionKey);
-	const documentId = createMemo(
-		() => Number.parseInt(params.documentId) || undefined,
+	const documentId = createMemo(() =>
+		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const canFetchRevisions = createMemo(() => {
@@ -185,7 +184,6 @@ export function useHistoryState() {
 		const documentData = document();
 		const revisions = accumulatedRevisions();
 		const allItems: TimelineItem[] = [];
-		const latestContentId = documentData?.version?.latest?.contentId ?? null;
 		let latestItem: TimelineItem | undefined;
 
 		const isInSyncWithPromotedFrom = (

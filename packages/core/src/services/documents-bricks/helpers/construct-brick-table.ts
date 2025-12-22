@@ -66,7 +66,7 @@ const constructBrickTable = (
 
 	let tableName: LucidBrickTableName;
 	if (params.brickKeyTableNameMap.has(mapKey)) {
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		tableName = params.brickKeyTableNameMap.get(mapKey)!;
 	} else {
 		const brickTableNameRes = buildTableName<LucidBrickTableName>(params.type, {

@@ -417,7 +417,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								eb
 									.selectFrom(props.tables.versions)
 									// @ts-expect-error
-									.select((eb) => [
+									.select(() => [
 										`${props.tables.versions}.id`,
 										`${props.tables.versions}.type`,
 										`${props.tables.versions}.promoted_from`,
@@ -479,7 +479,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${props.tables.versions}.document_id`,
 					`${dynamicConfig.tableName}.id`,
 				)
-				.select((eb) =>
+				.select(() =>
 					sql`count(distinct ${sql.ref(`${dynamicConfig.tableName}.id`)})`.as(
 						"count",
 					),
@@ -591,7 +591,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								eb
 									.selectFrom(props.tables.versions)
 									// @ts-expect-error
-									.select((eb) => [
+									.select(() => [
 										`${props.tables.versions}.id`,
 										`${props.tables.versions}.type`,
 										`${props.tables.versions}.promoted_from`,

@@ -54,7 +54,7 @@ export const Color: Component<{
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
 				/>
 				<div class="relative">
-					{/** biome-ignore lint/a11y/useSemanticElements: <explanation */}
+					{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
 					<div
 						class="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-border cursor-pointer"
 						style={{ "background-color": props.value }}

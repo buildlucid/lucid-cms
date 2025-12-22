@@ -53,7 +53,7 @@ const getSingleController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				id: Number.parseInt(id),
+				id: Number.parseInt(id, 10),
 			},
 		);
 		if (getSingleRes.error) throw new LucidAPIError(getSingleRes.error);

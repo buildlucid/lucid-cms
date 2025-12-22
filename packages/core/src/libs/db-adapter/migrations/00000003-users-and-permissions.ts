@@ -331,7 +331,7 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.column("state")
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 export default Migration00000003;

@@ -17,7 +17,7 @@ test("collection config is correct along with field includes and filters", async
 		hooks: [
 			{
 				event: "beforeUpsert",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,
@@ -26,7 +26,7 @@ test("collection config is correct along with field includes and filters", async
 			},
 			{
 				event: "beforeDelete",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,
@@ -35,7 +35,7 @@ test("collection config is correct along with field includes and filters", async
 			},
 			{
 				event: "afterDelete",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,
@@ -44,7 +44,7 @@ test("collection config is correct along with field includes and filters", async
 			},
 			{
 				event: "afterUpsert",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,

@@ -38,7 +38,7 @@ test("successfully validate field - text", async () => {
 			type: "text",
 			value: "Standard text",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextCollection.fields.get("standard_text")!,
 		validationData: {
 			media: [],
@@ -59,7 +59,7 @@ test("successfully validate field - text", async () => {
 			type: "text",
 			value: "Required text",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextCollection.fields.get("required_text")!,
 		validationData: {
 			media: [],
@@ -80,7 +80,7 @@ test("successfully validate field - text", async () => {
 			type: "text",
 			value: "Min length text",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextCollection.fields.get("min_length_text")!,
 		validationData: {
 			media: [],
@@ -103,7 +103,7 @@ test("fail to validate field - text", async () => {
 			type: "text",
 			value: 100,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextCollection.fields.get("standard_text")!,
 		validationData: {
 			media: [],
@@ -131,7 +131,7 @@ test("fail to validate field - text", async () => {
 				type: "text",
 				value: undefined,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: TextCollection.fields.get("required_text")!,
 			validationData: {
 				media: [],
@@ -149,7 +149,7 @@ test("fail to validate field - text", async () => {
 				type: "text",
 				value: null,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: TextCollection.fields.get("required_text")!,
 			validationData: {
 				media: [],
@@ -167,7 +167,7 @@ test("fail to validate field - text", async () => {
 				type: "text",
 				value: "",
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: TextCollection.fields.get("required_text")!,
 			validationData: {
 				media: [],
@@ -211,7 +211,7 @@ test("fail to validate field - text", async () => {
 			type: "text",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextCollection.fields.get("min_length_text")!,
 		validationData: {
 			media: [],

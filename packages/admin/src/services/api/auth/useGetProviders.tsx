@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/solid-query";
 import request from "@/utils/request";
 import type { ResponseBody, AuthProvidersResponse } from "@types";
 
-// biome-ignore lint/suspicious/noEmptyInterface: <explanation>
+// biome-ignore lint/suspicious/noEmptyInterface: explanation
 interface QueryParams {}
 
 const useGetProviders = (params: QueryHook<QueryParams>) => {

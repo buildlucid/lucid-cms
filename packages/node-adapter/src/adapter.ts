@@ -136,13 +136,7 @@ const nodeAdapter = (options?: {
 					runtimeContext: runtimeContext,
 				};
 			},
-			build: async ({
-				configPath,
-				outputPath,
-				outputRelativeConfigPath,
-				buildArtifacts,
-				logger,
-			}) => {
+			build: async ({ configPath, outputPath, buildArtifacts, logger }) => {
 				logger.instance.info(
 					"Using:",
 					logger.instance.color.blue("Node Runtime Adapter"),

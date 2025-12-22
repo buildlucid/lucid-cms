@@ -43,7 +43,7 @@ const objectifyTranslations = (
 ): Record<string, string> => {
 	return locales.reduce<Record<string, string>>(
 		(acc, locale) => ({
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: explanation
 			...acc,
 			[locale ?? ""]:
 				translations.find((t) => t.locale_code === locale)?.[target] ?? "",

@@ -38,7 +38,7 @@ test("successfully validate field - number", async () => {
 			type: "number",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NumberCollection.fields.get("standard_number")!,
 		validationData: {
 			media: [],
@@ -59,7 +59,7 @@ test("successfully validate field - number", async () => {
 			type: "number",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NumberCollection.fields.get("required_number")!,
 		validationData: {
 			media: [],
@@ -80,7 +80,7 @@ test("successfully validate field - number", async () => {
 			type: "number",
 			value: 5,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NumberCollection.fields.get("min_number")!,
 		validationData: {
 			media: [],
@@ -103,7 +103,7 @@ test("fail to validate field - number", async () => {
 			type: "number",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NumberCollection.fields.get("standard_number")!,
 		validationData: {
 			media: [],
@@ -130,7 +130,7 @@ test("fail to validate field - number", async () => {
 			type: "number",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NumberCollection.fields.get("required_number")!,
 		validationData: {
 			media: [],
@@ -157,7 +157,7 @@ test("fail to validate field - number", async () => {
 			type: "number",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NumberCollection.fields.get("min_number")!,
 		validationData: {
 			media: [],

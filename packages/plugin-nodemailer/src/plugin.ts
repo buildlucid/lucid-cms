@@ -22,7 +22,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 				},
 				services: {
-					send: async (email, meta) => {
+					send: async (email) => {
 						try {
 							if (draft.email.simulate) {
 								return {

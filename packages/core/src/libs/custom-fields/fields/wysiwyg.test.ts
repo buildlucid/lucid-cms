@@ -38,7 +38,7 @@ test("successfully validate field - wysiwyg", async () => {
 			type: "wysiwyg",
 			value: "<h1>Heading</h1><p>Body</p>",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
 		validationData: {
 			media: [],
@@ -59,7 +59,7 @@ test("successfully validate field - wysiwyg", async () => {
 			type: "wysiwyg",
 			value: "<h1>Heading</h1><p>Body</p>",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("required_wysiwyg")!,
 		validationData: {
 			media: [],
@@ -80,7 +80,7 @@ test("successfully validate field - wysiwyg", async () => {
 			type: "wysiwyg",
 			value: "<h1>Heading</h1><p>Body</p>",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
 		validationData: {
 			media: [],
@@ -103,7 +103,7 @@ test("fail to validate field - wysiwyg", async () => {
 			type: "wysiwyg",
 			value: 100,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
 		validationData: {
 			media: [],
@@ -131,7 +131,7 @@ test("fail to validate field - wysiwyg", async () => {
 				type: "wysiwyg",
 				value: undefined,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: WysiwygCollection.fields.get("required_wysiwyg")!,
 			validationData: {
 				media: [],
@@ -149,7 +149,7 @@ test("fail to validate field - wysiwyg", async () => {
 				type: "wysiwyg",
 				value: null,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: WysiwygCollection.fields.get("required_wysiwyg")!,
 			validationData: {
 				media: [],
@@ -186,7 +186,7 @@ test("fail to validate field - wysiwyg", async () => {
 			type: "wysiwyg",
 			value: "Hi",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
 		validationData: {
 			media: [],

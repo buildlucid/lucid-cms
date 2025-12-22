@@ -32,7 +32,7 @@ test("successfully validate field - checkbox", async () => {
 			type: "checkbox",
 			value: 0,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: CheckboxCollection.fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
@@ -53,7 +53,7 @@ test("successfully validate field - checkbox", async () => {
 			type: "checkbox",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: CheckboxCollection.fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
@@ -76,7 +76,7 @@ test("fail to validate field - checkbox", async () => {
 			type: "checkbox",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: CheckboxCollection.fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
@@ -103,7 +103,7 @@ test("fail to validate field - checkbox", async () => {
 			type: "checkbox",
 			value: 0,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: CheckboxCollection.fields.get("required_chekbox")!,
 		validationData: {
 			media: [],

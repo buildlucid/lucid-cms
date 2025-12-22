@@ -59,6 +59,7 @@ const nullifyDocumentReferences: ServiceFn<
 					schema.key.repeater?.[props.depth - 1] === props.repeaterKey
 				);
 			}
+			return undefined;
 		});
 		if (!targetSchema) return;
 		const tableName = targetSchema.name;

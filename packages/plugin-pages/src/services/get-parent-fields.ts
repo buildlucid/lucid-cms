@@ -89,7 +89,7 @@ const getParentFields: ServiceFn<
 			error: undefined,
 			data: parentFields as unknown as Array<ParentPageQueryResponse>,
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: {
 				type: "basic",

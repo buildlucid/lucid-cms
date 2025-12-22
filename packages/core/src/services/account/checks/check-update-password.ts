@@ -26,8 +26,8 @@ const checkUpdatePassword: ServiceFn<
 		encryptSecret: string | undefined;
 	}
 > = async (_, data) => {
-	let newPassword ;
-	let triggerPasswordReset ;
+	let newPassword: string | undefined;
+	let triggerPasswordReset: boolean | undefined;
 
 	// if current password is undefined/empty, and new password is passed
 	if (

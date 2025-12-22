@@ -75,7 +75,7 @@ const getDocumentVersionFields: ServiceFn<
 			error: undefined,
 			data: fields as unknown as VersionFieldsQueryResponse[],
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: {
 				type: "basic",

@@ -61,14 +61,14 @@ const buildPage = (query: unknown) => {
 	const queryObject = query as Record<string, string>;
 	const page = queryObject.page;
 	if (!page) return constants.query.page;
-	return Number.parseInt(page);
+	return Number.parseInt(page, 10);
 };
 
 const buildPerPage = (query: unknown) => {
 	const queryObject = query as Record<string, string>;
 	const perPage = queryObject.perPage;
 	if (!perPage) return constants.query.perPage;
-	return Number.parseInt(perPage);
+	return Number.parseInt(perPage, 10);
 };
 
 const buildInclude = (query: unknown) => {

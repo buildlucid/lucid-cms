@@ -26,7 +26,7 @@ export type QueryResult<T, V extends boolean = false> = V extends true
 
 export type ValidationConfig<V extends boolean = false> = {
 	enabled?: V;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	schema?: ZodObject<any>;
 	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 };
@@ -50,7 +50,7 @@ export type ExecuteMeta = {
 
 export type DynamicConfig<Pattern extends keyof LucidDB> = {
 	tableName: Pattern;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	schema?: ZodObject<any>;
 	columns?: Record<string, ColumnDataType>;
 };

@@ -23,7 +23,7 @@ export type QueueEvent<T extends string = string> =
 
 export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: explanation
 export type QueueJobHandlerFn<D = any, R = any> = ServiceFn<[D], R>;
 
 export type QueueJobHandlers = Record<QueueEvent, QueueJobHandlerFn>;

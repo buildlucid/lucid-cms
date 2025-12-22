@@ -20,9 +20,9 @@ export function useDocumentState(props: {
 
 	// ------------------------------------------
 	// Memos
-	const collectionKey = createMemo(() => params.collectionKey);
-	const documentId = createMemo(
-		() => Number.parseInt(params.documentId) || undefined,
+	const collectionKey = createMemo(() => params.collectionKey || "");
+	const documentId = createMemo(() =>
+		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const canFetchDocument = createMemo(() => {

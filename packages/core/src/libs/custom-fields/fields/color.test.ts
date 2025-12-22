@@ -32,7 +32,7 @@ test("successfully validate field - color", async () => {
 			type: "color",
 			value: "#000000",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: ColorCollection.fields.get("standard_color")!,
 		validationData: {
 			media: [],
@@ -53,7 +53,7 @@ test("successfully validate field - color", async () => {
 			type: "color",
 			value: "#000000",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
@@ -76,7 +76,7 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: 0,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: ColorCollection.fields.get("standard_color")!,
 		validationData: {
 			media: [],
@@ -103,7 +103,7 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
@@ -130,7 +130,7 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: null,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
@@ -157,7 +157,7 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],

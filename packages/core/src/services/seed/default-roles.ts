@@ -45,7 +45,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 			error: undefined,
 			data: undefined,
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: {
 				type: "basic",

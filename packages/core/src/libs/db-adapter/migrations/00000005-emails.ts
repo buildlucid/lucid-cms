@@ -105,7 +105,7 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				.column("external_message_id")
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 export default Migration00000005;

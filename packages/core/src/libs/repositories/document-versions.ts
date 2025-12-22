@@ -122,7 +122,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 							`${tables.version}.created_at`,
 							`${tables.version}.updated_at`,
 						])
-						.select((eb) => [
+						.select(() => [
 							this.dbAdapter
 								.jsonArrayFrom(
 									this.db

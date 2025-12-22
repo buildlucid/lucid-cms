@@ -25,10 +25,10 @@ export type Hook<
 	},
 	P extends string,
 	Target extends keyof ValidationTargets = keyof ValidationTargets,
-	// biome-ignore lint/complexity/noBannedTypes: <explanation>
+	// biome-ignore lint/complexity/noBannedTypes: explanation
 	O = {},
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	Schema extends ZodType = any,
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
+	_Schema extends ZodType = any,
 > = (
 	result: (
 		| { success: true; data: T }
@@ -41,7 +41,7 @@ export type Hook<
 	| Response
 	| void
 	| TypedResponse<O>
-	// biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
+	// biome-ignore lint/suspicious/noConfusingVoidType: explanation
 	| Promise<Response | void | TypedResponse<O>>;
 
 type HasUndefined<T> = undefined extends T ? true : false;
@@ -74,13 +74,13 @@ export const zValidator = <
 >(
 	target: Target,
 	schema: T,
-	// biome-ignore lint/complexity/noBannedTypes: <explanation>
+	// biome-ignore lint/complexity/noBannedTypes: explanation
 	hook?: Hook<InferredValue, E, P, Target, {}, T>,
 	options?: {
 		validationFunction: (
 			schema: T,
 			value: ValidationTargets[Target],
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: explanation
 		) => ZodSafeParseResult<any> | Promise<ZodSafeParseResult<any>>;
 	},
 ): MiddlewareHandler<E, P, V> =>

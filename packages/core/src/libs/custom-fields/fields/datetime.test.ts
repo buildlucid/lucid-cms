@@ -33,7 +33,7 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: "2024-06-15T14:14:21.704Z",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -54,7 +54,7 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: 1676103221704,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -75,7 +75,7 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: new Date("2024-06-15T14:14:21.704Z"),
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -96,7 +96,7 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: "2024-06-15T14:14:21.704Z",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("required_datetime")!,
 		validationData: {
 			media: [],
@@ -119,7 +119,7 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: true,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -146,7 +146,7 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: "string",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -173,7 +173,7 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: "20024-06-15T14:14:21.704",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
@@ -200,7 +200,7 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DateTimeCollection.fields.get("required_datetime")!,
 		validationData: {
 			media: [],

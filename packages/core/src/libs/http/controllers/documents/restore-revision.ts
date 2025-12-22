@@ -59,9 +59,9 @@ const restoreRevisionController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				versionId: Number.parseInt(versionId),
+				versionId: Number.parseInt(versionId, 10),
 				userId: c.get("auth").id,
-				documentId: Number.parseInt(id),
+				documentId: Number.parseInt(id, 10),
 				collectionKey,
 			},
 		);

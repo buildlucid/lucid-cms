@@ -30,7 +30,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 			error: undefined,
 			data: decode,
 		};
-	} catch (err) {
+	} catch (_err) {
 		return {
 			error: {
 				type: "authorisation",

@@ -7,9 +7,7 @@ import type {
 	BrickError,
 	FieldAltResponse,
 	FieldRefs,
-	MediaRef,
 	DocumentRef,
-	UserRef,
 } from "@types";
 
 const findFieldRecursive = (props: {

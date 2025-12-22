@@ -1,4 +1,3 @@
-import { sql } from "kysely";
 import z from "zod/v4";
 import { optionsNameSchema } from "../../schemas/options.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";

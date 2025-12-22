@@ -17,9 +17,6 @@ import type { FieldRelationResponse } from "../../services/documents-bricks/help
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import { documentBricksFormatter, documentFieldsFormatter } from "./index.js";
 import customFieldMap from "../custom-fields/custom-field-map.js";
-import type { BrickQueryResponse } from "../repositories/document-bricks.js";
-import type { MediaPropsT } from "./media.js";
-import type { UserPropT } from "./users.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];

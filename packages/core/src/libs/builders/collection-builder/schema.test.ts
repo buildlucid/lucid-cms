@@ -16,7 +16,7 @@ test("collection builder config passes schema validation", async () => {
 		hooks: [
 			{
 				event: "beforeUpsert",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,
@@ -25,7 +25,7 @@ test("collection builder config passes schema validation", async () => {
 			},
 			{
 				event: "beforeDelete",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,
@@ -34,7 +34,7 @@ test("collection builder config passes schema validation", async () => {
 			},
 			{
 				event: "afterDelete",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,
@@ -43,7 +43,7 @@ test("collection builder config passes schema validation", async () => {
 			},
 			{
 				event: "afterUpsert",
-				handler: async (props) => {
+				handler: async () => {
 					return {
 						error: undefined,
 						data: undefined,

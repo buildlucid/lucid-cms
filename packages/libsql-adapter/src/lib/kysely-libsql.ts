@@ -55,7 +55,7 @@ export class LibsqlDialect implements Dialect {
 
 		return new LibsqlDriver(client, closeClient);
 	}
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	createIntrospector(db: Kysely<any>): DatabaseIntrospector {
 		return new SqliteIntrospector(db);
 	}
@@ -148,7 +148,7 @@ export class LibsqlConnection implements DatabaseConnection {
 		this.#transaction = undefined;
 	}
 
-	// biome-ignore lint/correctness/useYield: <explanation>
+	// biome-ignore lint/correctness/useYield: explanation
 	async *streamQuery<R>(
 		_compiledQuery: CompiledQuery,
 		_chunkSize: number,

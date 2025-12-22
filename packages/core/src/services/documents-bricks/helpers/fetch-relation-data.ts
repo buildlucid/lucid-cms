@@ -5,7 +5,6 @@ import type {
 	DocumentVersionType,
 	FieldTypes,
 	LucidDocumentTableName,
-	LucidErrorData,
 	ServiceFn,
 } from "../../../types.js";
 import type { FieldRelationValues } from "./extract-related-entity-ids.js";
@@ -36,7 +35,7 @@ const fetchRelationData: ServiceFn<
 	const fetchPromises = [];
 
 	let firstError = false;
-	let responseError: LucidErrorData;
+	// let responseError: LucidErrorData;
 
 	if (data.values.media) {
 		const mediaIds: number[] = data.values.media
@@ -51,7 +50,7 @@ const fetchRelationData: ServiceFn<
 				.then((res) => {
 					if (res.error && !firstError) {
 						firstError = true;
-						responseError = res.error;
+						// responseError = res.error;
 						return;
 					}
 
@@ -75,7 +74,7 @@ const fetchRelationData: ServiceFn<
 				.then((res) => {
 					if (res.error && !firstError) {
 						firstError = true;
-						responseError = res.error;
+						// responseError = res.error;
 						return;
 					}
 
@@ -99,7 +98,7 @@ const fetchRelationData: ServiceFn<
 				.then((res) => {
 					if (res.error && !firstError) {
 						firstError = true;
-						responseError = res.error;
+						// responseError = res.error;
 						return;
 					}
 

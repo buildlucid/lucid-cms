@@ -57,14 +57,14 @@ class LucidAPIError extends Error {
 			for (const key of item.path) {
 				if (typeof key === "number") {
 					// @ts-expect-error
-					// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+					// biome-ignore lint/suspicious/noAssignInExpressions: explanation
 					current = current.children || (current.children = []);
 					// @ts-expect-error
-					// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+					// biome-ignore lint/suspicious/noAssignInExpressions: explanation
 					current = current[key] || (current[key] = {});
 				} else {
 					// @ts-expect-error
-					// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+					// biome-ignore lint/suspicious/noAssignInExpressions: explanation
 					current = current[key] || (current[key] = {});
 				}
 			}

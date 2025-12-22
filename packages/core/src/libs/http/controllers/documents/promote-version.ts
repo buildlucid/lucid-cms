@@ -1,4 +1,3 @@
-import z from "zod/v4";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
@@ -64,9 +63,9 @@ const promoteVersionController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				fromVersionId: Number.parseInt(versionId),
+				fromVersionId: Number.parseInt(versionId, 10),
 				userId: c.get("auth").id,
-				documentId: Number.parseInt(id),
+				documentId: Number.parseInt(id, 10),
 				collectionKey,
 				toVersionType: versionType,
 				createRevision: bypassRevision === true ? false : undefined,

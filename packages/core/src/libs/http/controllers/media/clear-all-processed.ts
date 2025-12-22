@@ -1,6 +1,5 @@
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../schemas/media.js";
 import { describeRoute } from "hono-openapi";
 import { processedImageServices } from "../../../../services/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";

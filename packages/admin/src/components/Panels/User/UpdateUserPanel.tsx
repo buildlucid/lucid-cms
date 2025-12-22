@@ -15,7 +15,6 @@ import userStore from "@/store/userStore";
 import helpers from "@/utils/helpers";
 import { Panel } from "@/components/Groups/Panel";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
-import Spinner from "@/components/Partials/Spinner";
 import type { UserResponse } from "@types";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import SectionHeading from "@/components/Blocks/SectionHeading";
@@ -183,36 +182,34 @@ const UpdateUserPanel: Component<{
 						errors={getBodyError("roleIds", updateUser.errors)}
 					/>
 					<Show when={userStore.get.user?.superAdmin}>
-						<>
-							<Switch
-								id="superAdmin"
-								value={getIsSuperAdmin()}
-								onChange={setIsSuperAdmin}
-								name={"superAdmin"}
-								theme="relaxed"
-								copy={{
-									true: T()("yes"),
-									false: T()("no"),
-									label: T()("is_super_admin"),
-								}}
-								errors={getBodyError("superAdmin", updateUser.errors)}
-								hideOptionalText={true}
-							/>
-							<Switch
-								id="isLocked"
-								value={getIsLocked()}
-								onChange={setIsLocked}
-								name={"isLocked"}
-								theme="relaxed"
-								copy={{
-									true: T()("locked"),
-									false: T()("unlocked"),
-									label: T()("is_locked"),
-								}}
-								errors={getBodyError("isLocked", updateUser.errors)}
-								hideOptionalText={true}
-							/>
-						</>
+						<Switch
+							id="superAdmin"
+							value={getIsSuperAdmin()}
+							onChange={setIsSuperAdmin}
+							name={"superAdmin"}
+							theme="relaxed"
+							copy={{
+								true: T()("yes"),
+								false: T()("no"),
+								label: T()("is_super_admin"),
+							}}
+							errors={getBodyError("superAdmin", updateUser.errors)}
+							hideOptionalText={true}
+						/>
+						<Switch
+							id="isLocked"
+							value={getIsLocked()}
+							onChange={setIsLocked}
+							name={"isLocked"}
+							theme="relaxed"
+							copy={{
+								true: T()("locked"),
+								false: T()("unlocked"),
+								label: T()("is_locked"),
+							}}
+							errors={getBodyError("isLocked", updateUser.errors)}
+							hideOptionalText={true}
+						/>
 					</Show>
 					<Show when={userStore.get.user?.superAdmin}>
 						<SectionHeading title={T()("auth_providers")} />

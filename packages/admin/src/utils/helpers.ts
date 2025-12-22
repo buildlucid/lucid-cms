@@ -3,14 +3,14 @@ import equal from "fast-deep-equal/es6";
 import type { UserResponse, MediaResponse, LocaleValue } from "@types";
 import { getLocale } from "@/translations";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation
+// biome-ignore lint/suspicious/noExplicitAny: explanation
 type GenericObject = Record<string, any>;
 
 const deepMerge = (obj1: GenericObject, obj2: GenericObject): GenericObject => {
 	const result: GenericObject = { ...obj1 };
 
 	for (const key in obj2) {
-		if (Object.prototype.hasOwnProperty.call(obj2, key)) {
+		if (Object.hasOwn(obj2, key)) {
 			if (
 				typeof obj2[key] === "object" &&
 				obj2[key] !== null &&
@@ -33,7 +33,7 @@ const deepDiff = <T>(obj1: T, obj2: T): Partial<T> => {
 	const result: Partial<T> = {};
 
 	for (const key in obj1) {
-		if (Object.prototype.hasOwnProperty.call(obj1, key)) {
+		if (Object.hasOwn(obj1, key)) {
 			if (Array.isArray(obj1[key])) {
 				if (!equal(obj1[key], obj2[key])) {
 					result[key] = obj2[key];
@@ -41,7 +41,7 @@ const deepDiff = <T>(obj1: T, obj2: T): Partial<T> => {
 			} else if (typeof obj1[key] === "object" && obj1[key] !== null) {
 				const diff = deepDiff(obj1[key], obj2[key]);
 				if (Object.keys(diff).length > 0) {
-					// @ts-ignore
+					// @ts-expect-error
 					result[key] = diff;
 				}
 			} else {
@@ -54,10 +54,7 @@ const deepDiff = <T>(obj1: T, obj2: T): Partial<T> => {
 
 	// go through obj2 and find keys that are not in obj1
 	for (const key in obj2) {
-		if (
-			Object.prototype.hasOwnProperty.call(obj2, key) &&
-			!Object.prototype.hasOwnProperty.call(obj1, key)
-		) {
+		if (Object.hasOwn(obj2, key) && !Object.hasOwn(obj1, key)) {
 			result[key] = obj2[key];
 		}
 	}
@@ -76,7 +73,7 @@ const updateData = <T>(obj1: T, obj2: T) => {
 // ---------------------------------------------
 // Resolve signals and return the value
 const resolveValue = <T>(value: Accessor<T> | T): T =>
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	typeof value === "function" ? (value as any)() : value;
 
 // ---------------------------------------------

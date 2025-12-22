@@ -9,7 +9,7 @@ const replaceTemplateVariables = (
 		return template;
 	}
 
-	return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+	return template.replace(/\{\{(\w+)\}\}/g, (_match, key) => {
 		const value = data[key];
 
 		if (value === null || value === undefined) {

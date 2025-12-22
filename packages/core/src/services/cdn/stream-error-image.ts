@@ -46,7 +46,7 @@ const streamErrorImage: ServiceFn<
 				contentType: contentType || "image/jpeg",
 			},
 		};
-	} catch (err) {
+	} catch (_err) {
 		return {
 			error: {
 				type: "basic",

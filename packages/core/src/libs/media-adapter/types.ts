@@ -69,7 +69,7 @@ export type MediaAdapter<T = undefined> = T extends undefined
 	? () => MediaAdapterInstance | Promise<MediaAdapterInstance>
 	: (options: T) => MediaAdapterInstance<T> | Promise<MediaAdapterInstance<T>>;
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: explanation
 export type MediaAdapterInstance<T = any> = {
 	/** The adapter type */
 	type: "media-adapter";

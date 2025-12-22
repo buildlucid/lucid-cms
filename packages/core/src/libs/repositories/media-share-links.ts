@@ -56,9 +56,7 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 
 	// ----------------------------------------
 	// queries
-	async selectSingleWithMediaByToken<V extends boolean = false>(props: {
-		token: string;
-	}) {
+	async selectSingleWithMediaByToken(props: { token: string }) {
 		const exec = await this.executeQuery(
 			async () => {
 				const query = this.db

@@ -95,7 +95,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.column("created_at")
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 

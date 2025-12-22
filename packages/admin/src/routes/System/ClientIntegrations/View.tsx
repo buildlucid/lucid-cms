@@ -21,7 +21,7 @@ import ErrorBlock from "@/components/Partials/ErrorBlock";
 import ClientIntegrationRow from "@/components/Partials/ClientIntegrationRow";
 import { Standard } from "@/components/Groups/Headers";
 
-const SystemClientIntegrationsRoute: Component = (props) => {
+const SystemClientIntegrationsRoute: Component = () => {
 	// ----------------------------------------
 	// State / Hooks
 	const rowTarget = useRowTarget({

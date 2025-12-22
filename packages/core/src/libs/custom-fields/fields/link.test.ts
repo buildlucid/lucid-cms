@@ -37,7 +37,7 @@ test("successfully validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -62,7 +62,7 @@ test("successfully validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: LinkCollection.fields.get("required_link")!,
 		validationData: {
 			media: [],
@@ -89,7 +89,7 @@ test("fail to validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -120,7 +120,7 @@ test("fail to validate field - link", async () => {
 				label: "Link 1",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -153,7 +153,7 @@ test("fail to validate field - link", async () => {
 				label: false, // invalid
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
@@ -180,7 +180,7 @@ test("fail to validate field - link", async () => {
 			type: "link",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: LinkCollection.fields.get("required_link")!,
 		validationData: {
 			media: [],

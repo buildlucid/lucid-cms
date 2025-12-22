@@ -40,7 +40,7 @@ const webhook: ServiceFn<
 
 	try {
 		wh.verify(data.rawBody, data.headers);
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: {
 				type: "authorisation",

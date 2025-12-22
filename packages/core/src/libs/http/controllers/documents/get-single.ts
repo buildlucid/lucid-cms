@@ -60,9 +60,9 @@ const getSingleController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				id: Number.parseInt(id),
+				id: Number.parseInt(id, 10),
 				status: !isVersionId ? (statusOrId as DocumentVersionType) : undefined,
-				versionId: isVersionId ? Number.parseInt(statusOrId) : undefined,
+				versionId: isVersionId ? Number.parseInt(statusOrId, 10) : undefined,
 				collectionKey,
 				query: formattedQuery,
 			},

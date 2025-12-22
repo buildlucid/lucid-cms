@@ -19,7 +19,7 @@ const formatDefaultValue = (
 				return JSON.parse(withoutTypeCast.slice(1, -1));
 			}
 			return JSON.parse(withoutTypeCast);
-		} catch (e) {
+		} catch (_e) {
 			return null;
 		}
 	}

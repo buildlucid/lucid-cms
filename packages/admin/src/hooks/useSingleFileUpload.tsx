@@ -83,7 +83,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			ctx.drawImage(img, 0, 0);
 
 			// Get image data for processing
-			const imageData = ctx.getImageData(0, 0, img.width, img.height);
+			// const imageData = ctx.getImageData(0, 0, img.width, img.height);
 
 			// Generate BlurHash (resize to smaller dimensions for performance)
 			const blurHashSize = 64;

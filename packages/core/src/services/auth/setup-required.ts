@@ -34,7 +34,7 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 				setupRequired,
 			},
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: {
 				type: "basic",

@@ -148,7 +148,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					}
 				}}
 			/>
-			{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
+			{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 			<div
 				class={classNames(
 					"w-full border-border border h-80 rounded-md relative overflow-hidden",
@@ -294,7 +294,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				</Match>
 				<Match when={props.data.type === "video"}>
 					<div class="w-full h-[calc(100%-49px)] relative z-10 bg-input-base rectangle-background">
-						{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+						{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 						<video
 							src={props.data.url}
 							class="w-full h-full object-contain z-10 relative"
@@ -305,7 +305,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				</Match>
 				<Match when={props.data.type === "audio"}>
 					<div class="w-full h-[calc(100%-49px)] relative z-10 bg-input-base flex justify-center items-center">
-						{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+						{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 						<audio src={props.data.url} class="w-2/3" controls />
 					</div>
 				</Match>

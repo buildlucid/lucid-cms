@@ -28,7 +28,7 @@ const formatSingle = (props: {
 	host: string;
 }): MediaShareLinkResponse => {
 	const hasExpired = props.link.expires_at
-		? new Date(props.link.expires_at).getTime() < new Date().getTime()
+		? new Date(props.link.expires_at).getTime() < Date.now()
 		: false;
 
 	return {

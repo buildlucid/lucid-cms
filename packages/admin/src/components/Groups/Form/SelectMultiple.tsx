@@ -40,7 +40,7 @@ interface SelectMultipleProps {
 
 export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 	const [open, setOpen] = createSignal(false);
-	const [inputFocus, setInputFocus] = createSignal(false);
+	const [_inputFocus, setInputFocus] = createSignal(false);
 
 	// ----------------------------------------
 	// Functions

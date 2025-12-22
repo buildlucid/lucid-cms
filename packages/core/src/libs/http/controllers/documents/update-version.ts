@@ -68,8 +68,8 @@ const updateVersionController = factory.createHandlers(
 			{
 				collectionKey,
 				userId: c.get("auth").id,
-				documentId: Number.parseInt(id),
-				versionId: Number.parseInt(versionId),
+				documentId: Number.parseInt(id, 10),
+				versionId: Number.parseInt(versionId, 10),
 				bricks,
 				fields,
 			},

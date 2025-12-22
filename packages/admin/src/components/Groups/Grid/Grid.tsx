@@ -12,8 +12,6 @@ import classNames from "classnames";
 import NoEntriesBlock, {
 	type NoEntriesBlockProps,
 } from "@/components/Partials/NoEntriesBlock";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
-import T from "@/translations";
 
 export const Grid: Component<{
 	state?: {
@@ -52,63 +50,61 @@ export const Grid: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<>
-			<div
-				class={classNames(props.class, {
-					"flex-1 flex items-center justify-center":
-						isEmpty() && props.options?.growWhenEmpty,
-				})}
-			>
-				<Switch>
-					<Match when={isEmpty()}>
-						<NoEntriesBlock
-							copy={{
-								title: props.copy?.empty?.title,
-								description: props.copy?.empty?.description,
-								button: props.copy?.empty?.button,
-							}}
-							callbacks={{
-								action: props.callback?.createEntry,
-							}}
-						/>
-					</Match>
-					<Match when={!isEmpty()}>
-						<Show when={props.slots?.topRow}>{props.slots?.topRow}</Show>
-						<ul
-							class={classNames(
-								"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
-							)}
-						>
-							<Switch fallback={props.children}>
-								<Match when={props.state?.isLoading}>
-									<Switch>
-										<Match when={props.slots?.loadingCard}>
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-											{props.slots?.loadingCard}
-										</Match>
-										<Match when={!props.slots?.loadingCard}>
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-											<SkeletonCard size="medium" />
-										</Match>
-									</Switch>
-								</Match>
-							</Switch>
-						</ul>
-					</Match>
-				</Switch>
-			</div>
-		</>
+		<div
+			class={classNames(props.class, {
+				"flex-1 flex items-center justify-center":
+					isEmpty() && props.options?.growWhenEmpty,
+			})}
+		>
+			<Switch>
+				<Match when={isEmpty()}>
+					<NoEntriesBlock
+						copy={{
+							title: props.copy?.empty?.title,
+							description: props.copy?.empty?.description,
+							button: props.copy?.empty?.button,
+						}}
+						callbacks={{
+							action: props.callback?.createEntry,
+						}}
+					/>
+				</Match>
+				<Match when={!isEmpty()}>
+					<Show when={props.slots?.topRow}>{props.slots?.topRow}</Show>
+					<ul
+						class={classNames(
+							"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
+						)}
+					>
+						<Switch fallback={props.children}>
+							<Match when={props.state?.isLoading}>
+								<Switch>
+									<Match when={props.slots?.loadingCard}>
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+										{props.slots?.loadingCard}
+									</Match>
+									<Match when={!props.slots?.loadingCard}>
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+										<SkeletonCard size="medium" />
+									</Match>
+								</Switch>
+							</Match>
+						</Switch>
+					</ul>
+				</Match>
+			</Switch>
+		</div>
 	);
 };

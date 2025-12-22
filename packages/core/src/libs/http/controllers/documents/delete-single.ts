@@ -1,4 +1,3 @@
-import z from "zod/v4";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/documents.js";
@@ -57,7 +56,7 @@ const deleteSingleController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				id: Number.parseInt(id),
+				id: Number.parseInt(id, 10),
 				collectionKey,
 				userId: c.get("auth").id,
 			},

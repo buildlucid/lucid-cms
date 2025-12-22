@@ -63,7 +63,7 @@ const updateSingleController = factory.createHandlers(
 				kv: c.get("kv"),
 			},
 			{
-				id: Number.parseInt(id),
+				id: Number.parseInt(id, 10),
 				name,
 				description,
 				enabled,

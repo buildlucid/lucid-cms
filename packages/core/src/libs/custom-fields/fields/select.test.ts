@@ -52,7 +52,7 @@ test("successfully validate field - select", async () => {
 			type: "select",
 			value: "option-1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: SelectCollection.fields.get("standard_select")!,
 		validationData: {
 			media: [],
@@ -73,7 +73,7 @@ test("successfully validate field - select", async () => {
 			type: "select",
 			value: "option-1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: SelectCollection.fields.get("required_select")!,
 		validationData: {
 			media: [],
@@ -97,7 +97,7 @@ test("fail to validate field - select", async () => {
 				type: "select",
 				value: "option-10",
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: SelectCollection.fields.get("standard_select")!,
 			validationData: {
 				media: [],
@@ -115,7 +115,7 @@ test("fail to validate field - select", async () => {
 				type: "select",
 				value: 1,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: SelectCollection.fields.get("standard_select")!,
 			validationData: {
 				media: [],
@@ -152,7 +152,7 @@ test("fail to validate field - select", async () => {
 			type: "select",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: SelectCollection.fields.get("required_select")!,
 		validationData: {
 			media: [],

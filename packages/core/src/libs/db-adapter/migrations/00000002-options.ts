@@ -15,7 +15,7 @@ const Migration00000002: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("value_bool", adapter.getDataType("boolean"))
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 export default Migration00000002;

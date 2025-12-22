@@ -31,7 +31,7 @@ const customFieldMap = {
 	textarea: TextareaCustomField,
 	user: UserCustomField,
 	wysiwyg: WysiwygCustomField,
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 } satisfies Record<FieldTypes, any>; // used to verify the field types are correct
 
 export default customFieldMap;

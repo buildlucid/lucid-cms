@@ -1,4 +1,3 @@
-import z from "zod/v4";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { controllerSchemas } from "../../../../schemas/media.js";

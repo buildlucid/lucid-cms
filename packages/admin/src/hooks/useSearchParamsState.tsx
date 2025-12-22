@@ -156,7 +156,7 @@ const useSearchParamsState = (
 		setQueryString(searchParams.toString());
 	};
 	const updateHasFiltersApplied = () => {
-		for (const [key, value] of getFilters()) {
+		for (const [_key, value] of getFilters()) {
 			if (value !== undefined) {
 				setHasFiltersApplied(true);
 				break;

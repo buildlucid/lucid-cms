@@ -1,5 +1,3 @@
-import T from "../../translations/index.js";
-import { LucidError } from "../../utils/errors/index.js";
 import type { BooleanInt } from "../db-adapter/types.js";
 // formatters
 export { default as usersFormatter } from "./users.js";
@@ -35,7 +33,7 @@ const parseJSON = <T>(json: string | null | undefined): T | null => {
 	if (!json) return null;
 	try {
 		return JSON.parse(json);
-	} catch (error) {
+	} catch (_error) {
 		return null;
 	}
 };
@@ -44,14 +42,14 @@ const stringifyJSON = (json: Record<string, unknown> | null): string | null => {
 	try {
 		if (!json) return null;
 		return JSON.stringify(json);
-	} catch (error) {
+	} catch (_error) {
 		return null;
 	}
 };
 
 const parseCount = (count: string | number | undefined) => {
 	if (typeof count === "number") return count;
-	return Number.parseInt(count || "0") || 0;
+	return Number.parseInt(count || "0", 10) || 0;
 };
 
 /** Used to normalize user input date to a ISO string */

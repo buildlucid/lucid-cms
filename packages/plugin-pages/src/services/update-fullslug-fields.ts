@@ -65,7 +65,7 @@ const updateFullSlugFields: ServiceFn<
 			error: undefined,
 			data: undefined,
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: {
 				type: "basic",

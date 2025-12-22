@@ -32,7 +32,7 @@ test("successfully validate field - user", async () => {
 			type: "user",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: UserCollection.fields.get("standard_user")!,
 		validationData: {
 			media: [],
@@ -61,7 +61,7 @@ test("successfully validate field - user", async () => {
 			type: "user",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: UserCollection.fields.get("required_user")!,
 		validationData: {
 			media: [],
@@ -93,7 +93,7 @@ test("fail to validate field - user", async () => {
 				type: "user",
 				value: 1,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: UserCollection.fields.get("required_user")!,
 			validationData: {
 				media: [],
@@ -111,7 +111,7 @@ test("fail to validate field - user", async () => {
 				type: "user",
 				value: null,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: UserCollection.fields.get("required_user")!,
 			validationData: {
 				media: [],

@@ -105,7 +105,7 @@ const verifyToken = async (
 				user_id: tokenRes.data.user_id,
 			},
 		};
-	} catch (err) {
+	} catch (_err) {
 		const [refreshRes, accessRes] = await Promise.all([
 			authServices.refreshToken.clearToken(c),
 			authServices.accessToken.clearToken(c),

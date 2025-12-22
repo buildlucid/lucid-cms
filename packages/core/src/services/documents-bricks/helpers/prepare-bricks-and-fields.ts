@@ -17,7 +17,7 @@ const processFields = (props: {
 	return props.fields
 		.filter((field) => props.customFields.has(field.key))
 		.map((field) => {
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
+			// biome-ignore lint/style/noNonNullAssertion: explanation
 			const cfInstance = props.customFields.get(field.key)!;
 			const processedField = { ...field };
 

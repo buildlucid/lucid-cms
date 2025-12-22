@@ -5,7 +5,7 @@ import brickStore from "@/store/brickStore";
 import { Dialog } from "@kobalte/core";
 import { FaSolidXmark } from "solid-icons/fa";
 
-const BrickImagePreview: Component = (props) => {
+const BrickImagePreview: Component = () => {
 	// ----------------------------------
 	// Memos
 	const open = createMemo(() => brickStore.get.imagePreview.open);

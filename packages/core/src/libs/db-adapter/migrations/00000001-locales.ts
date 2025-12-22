@@ -39,7 +39,7 @@ const Migration00000001: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 

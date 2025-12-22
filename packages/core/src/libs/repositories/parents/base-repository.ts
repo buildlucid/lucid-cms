@@ -36,7 +36,7 @@ abstract class BaseRepository<
 	 * A Zod schema for the table.
 	 */
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	protected abstract tableSchema: ZodObject<any>;
 	/**
 	 * The column data types for the table. Repositories need to keep these in sync with the migrations and the database.
@@ -81,7 +81,7 @@ abstract class BaseRepository<
 				: value;
 		}
 
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: explanation
 		return formatted as any;
 	}
 	/**
@@ -139,7 +139,7 @@ abstract class BaseRepository<
 	/**
 	 * Merges the given schema with the tableSchema
 	 */
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	protected mergeSchema(schema?: ZodObject<any>) {
 		if (!schema) return this.tableSchema;
 		return this.tableSchema.merge(schema.shape);

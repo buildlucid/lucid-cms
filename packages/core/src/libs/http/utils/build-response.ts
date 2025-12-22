@@ -29,7 +29,7 @@ const getPath = (c: Context) => {
 	try {
 		const url = constructBaseUrl(c);
 		return url.toString().split("?")[0] || "";
-	} catch (error) {
+	} catch (_error) {
 		return c.req.url || "";
 	}
 };

@@ -255,7 +255,7 @@ const fetchMediaData = async (
 		});
 
 		return mediaRes.error ? [] : mediaRes.data;
-	} catch (err) {
+	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
 			message: T("error_fetching_media_for_validation"),
@@ -291,7 +291,7 @@ const fetchUserData = async (
 		});
 
 		return usersRes.error ? [] : usersRes.data;
-	} catch (err) {
+	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
 			message: T("error_fetching_users_for_validation"),
@@ -322,7 +322,7 @@ const fetchDocumentData = async (
 		const results = await Promise.all(promises);
 		for (const documents of results) allDocuments.push(...documents);
 		return allDocuments;
-	} catch (err) {
+	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
 			message: T("error_fetching_documents_for_validation"),
@@ -389,7 +389,7 @@ const fetchDocumentsFromCollection = async (
 			id: doc.id,
 			collection_key: collectionKey,
 		}));
-	} catch (err) {
+	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
 			message: T("error_fetching_documents_from_collection", {

@@ -30,7 +30,7 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 				"flex items-center justify-center p-4 md:p-6",
 				props.class,
 				{
-					"flex-grow": props.options?.grow,
+					grow: props.options?.grow,
 				},
 			)}
 		>

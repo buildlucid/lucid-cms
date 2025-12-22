@@ -115,60 +115,58 @@ export const NavigationSidebar: Component = () => {
 
 						{/* Collections */}
 						<Show when={canReadDocuments()}>
-							<>
-								<div class="w-full mt-4 mb-2">
-									<span class="text-xs">{T()("collections")}</span>
-								</div>
-								<Switch>
-									<Match when={collectionsIsLoading()}>
-										<span class="skeleton block h-8 w-full mb-1" />
-										<span class="skeleton block h-8 w-full mb-1" />
-										<span class="skeleton block h-8 w-full mb-1" />
-									</Match>
-									<Match when={collectionsIsError()}>
-										<div class="bg-background-base rounded-md p-2">
-											<p class="text-xs text-center">
-												{T()("error_loading_collections")}
-											</p>
-										</div>
-									</Match>
-									<Match when={true}>
-										<For each={multiCollections()}>
-											{(collection) => (
-												<IconLinkFull
-													type="link"
-													href={`/admin/collections/${collection.key}`}
-													icon="collection-multiple"
-													title={helpers.getLocaleValue({
-														value: collection.details.name,
-													})}
-												/>
-											)}
-										</For>
-										<For each={singleCollections()}>
-											{(collection) => (
-												<IconLinkFull
-													type="link"
-													href={
-														collection.documentId
-															? getDocumentRoute("edit", {
-																	collectionKey: collection.key,
-																	documentId: collection.documentId,
-																})
-															: getDocumentRoute("create", {
-																	collectionKey: collection.key,
-																})
-													}
-													icon="collection-single"
-													title={helpers.getLocaleValue({
-														value: collection.details.name,
-													})}
-												/>
-											)}
-										</For>
-									</Match>
-								</Switch>
-							</>
+							<div class="w-full mt-4 mb-2">
+								<span class="text-xs">{T()("collections")}</span>
+							</div>
+							<Switch>
+								<Match when={collectionsIsLoading()}>
+									<span class="skeleton block h-8 w-full mb-1" />
+									<span class="skeleton block h-8 w-full mb-1" />
+									<span class="skeleton block h-8 w-full mb-1" />
+								</Match>
+								<Match when={collectionsIsError()}>
+									<div class="bg-background-base rounded-md p-2">
+										<p class="text-xs text-center">
+											{T()("error_loading_collections")}
+										</p>
+									</div>
+								</Match>
+								<Match when={true}>
+									<For each={multiCollections()}>
+										{(collection) => (
+											<IconLinkFull
+												type="link"
+												href={`/admin/collections/${collection.key}`}
+												icon="collection-multiple"
+												title={helpers.getLocaleValue({
+													value: collection.details.name,
+												})}
+											/>
+										)}
+									</For>
+									<For each={singleCollections()}>
+										{(collection) => (
+											<IconLinkFull
+												type="link"
+												href={
+													collection.documentId
+														? getDocumentRoute("edit", {
+																collectionKey: collection.key,
+																documentId: collection.documentId,
+															})
+														: getDocumentRoute("create", {
+																collectionKey: collection.key,
+															})
+												}
+												icon="collection-single"
+												title={helpers.getLocaleValue({
+													value: collection.details.name,
+												})}
+											/>
+										)}
+									</For>
+								</Match>
+							</Switch>
 						</Show>
 
 						{/* Access & Permissions */}

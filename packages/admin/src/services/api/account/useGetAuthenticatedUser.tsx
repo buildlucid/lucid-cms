@@ -7,7 +7,7 @@ import getLoginRedirectURL from "@/utils/login-route";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
-// biome-ignore lint/suspicious/noEmptyInterface: <explanation>
+// biome-ignore lint/suspicious/noEmptyInterface: explanation
 interface QueryParams {}
 
 const useGetAuthenticatedUser = (

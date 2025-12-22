@@ -17,7 +17,7 @@ export type RuntimeBuildArtifactCompile = {
 	content: string;
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: explanation
 export type RuntimeBuildArtifactCustom<T = any> = {
 	type: string;
 	custom: T;
@@ -150,6 +150,6 @@ type NetAddrInfo = {
 			 */
 			addressType: AddressType;
 	  }
-	// biome-ignore lint/complexity/noBannedTypes: <explanation>
+	// biome-ignore lint/complexity/noBannedTypes: explanation
 	| {}
 );

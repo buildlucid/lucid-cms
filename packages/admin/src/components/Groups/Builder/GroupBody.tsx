@@ -110,7 +110,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: <explanation
+		// biome-ignore lint/a11y/noStaticElementInteractions: explanation
 		<div
 			style={{
 				"view-transition-name": `group-item-${props.state.group.ref}`,
@@ -135,7 +135,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			onDragOver={(e) => props.state.dragDrop.onDragOver(e)}
 		>
 			{/* Group Header */}
-			{/** biome-ignore lint/a11y/useSemanticElements: <explanation */}
+			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
 			<div
 				class={classNames(
 					"w-full bg-input-base focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",

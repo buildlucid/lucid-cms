@@ -1,5 +1,4 @@
 import type { Component } from "solid-js";
-import classNames from "classnames";
 import { Td } from "@/components/Groups/Table";
 import spawnToast from "@/utils/spawn-toast";
 import T from "@/translations";

@@ -25,7 +25,7 @@ const updateSingle: ServiceFn<
 	);
 
 	let password: string | null | undefined;
-	let tokenRefresh: string | undefined ;
+	let tokenRefresh: string | undefined;
 	if (data.password === null) {
 		password = null;
 	} else if (typeof data.password === "string") {

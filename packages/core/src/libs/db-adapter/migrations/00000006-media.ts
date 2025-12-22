@@ -187,7 +187,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.column("media_key")
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 export default Migration00000006;

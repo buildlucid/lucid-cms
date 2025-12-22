@@ -50,7 +50,7 @@ test("localeCode is correctly included or omitted based on translation support",
 				fr: "valid text",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
@@ -73,7 +73,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
@@ -96,7 +96,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
@@ -119,7 +119,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: NonTranslatedCollection.fields.get("text_field")!,
 		validationData,
 		meta: {
@@ -142,7 +142,7 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TranslatedCollection.fields.get("non_translatable_field")!,
 		validationData,
 		meta: {

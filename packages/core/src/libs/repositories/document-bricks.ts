@@ -1,7 +1,6 @@
 import z from "zod/v4";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type {
-	DocumentVersionType,
 	LucidBrickTableName,
 	LucidBricksTable,
 	LucidVersionTable,

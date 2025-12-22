@@ -8,7 +8,6 @@ import {
 } from "solid-icons/fa";
 import type { MediaResponse } from "@types";
 import Image from "@/components/Partials/Image";
-import classNames from "classnames";
 
 interface MediaPreviewProps {
 	media: {
@@ -45,7 +44,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 				>
 					<Switch>
 						<Match when={props.richPreview}>
-							{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 							<audio src={props.media.url} class="w-2/3" controls />
 						</Match>
 						<Match when={!props.richPreview}>
@@ -60,7 +59,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 				>
 					<Switch>
 						<Match when={props.richPreview}>
-							{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 							<video
 								src={props.media.url}
 								class="w-full h-full object-contain z-10 relative"

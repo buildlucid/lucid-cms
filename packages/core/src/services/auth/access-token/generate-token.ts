@@ -68,7 +68,7 @@ const generateToken = async (
 			error: undefined,
 			data: undefined,
 		};
-	} catch (err) {
+	} catch (_err) {
 		return {
 			error: {
 				type: "authorisation",

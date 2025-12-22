@@ -46,8 +46,8 @@ abstract class CustomField<T extends FieldTypes> {
 
 	// Methods
 	static formatRef(
-		value: unknown,
-		params: FieldRefParams,
+		_value: unknown,
+		_params: FieldRefParams,
 	): CFResponse<FieldTypes>["ref"] | null {
 		return null;
 	}

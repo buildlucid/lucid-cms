@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import logger from "../logger/index.js";
 import { QueueJobsRepository } from "../repositories/index.js";
 import getJobHandler from "./job-handlers.js";
-import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { QueueEvent } from "./types.js";
 import { serviceWrapper } from "../../api.js";
 

@@ -38,7 +38,7 @@ test("successfully validate field - textarea", async () => {
 			type: "textarea",
 			value: "Standard textarea",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextareaCollection.fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
@@ -59,7 +59,7 @@ test("successfully validate field - textarea", async () => {
 			type: "textarea",
 			value: "Required textarea",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextareaCollection.fields.get("required_textarea")!,
 		validationData: {
 			media: [],
@@ -80,7 +80,7 @@ test("successfully validate field - textarea", async () => {
 			type: "textarea",
 			value: "Min length textarea",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextareaCollection.fields.get("min_length_textarea")!,
 		validationData: {
 			media: [],
@@ -103,7 +103,7 @@ test("fail to validate field - textarea", async () => {
 			type: "textarea",
 			value: 100,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextareaCollection.fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
@@ -130,7 +130,7 @@ test("fail to validate field - textarea", async () => {
 			type: "textarea",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextareaCollection.fields.get("required_textarea")!,
 		validationData: {
 			media: [],
@@ -157,7 +157,7 @@ test("fail to validate field - textarea", async () => {
 			type: "textarea",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: TextareaCollection.fields.get("min_length_textarea")!,
 		validationData: {
 			media: [],

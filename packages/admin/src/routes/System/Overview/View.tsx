@@ -1,4 +1,4 @@
-import { type Component, createMemo, createSignal, Show } from "solid-js";
+import { type Component, createMemo, createSignal } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
 import { Standard } from "@/components/Groups/Headers";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
@@ -14,7 +14,7 @@ import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-const SystemOverviewRoute: Component = (props) => {
+const SystemOverviewRoute: Component = () => {
 	// ----------------------------------------
 	// State / Hooks
 	const [getOpenClearAllProcessedImages, setOpenClearAllProcessedImages] =

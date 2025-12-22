@@ -1,5 +1,5 @@
 import T from "@/translations";
-import { type Accessor, type Component, For, Match, Switch } from "solid-js";
+import { type Accessor, type Component, Match, Switch } from "solid-js";
 import classNames from "classnames";
 import { FaSolidXmark, FaSolidPen } from "solid-icons/fa";
 import type {
