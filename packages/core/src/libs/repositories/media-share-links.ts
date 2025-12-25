@@ -20,7 +20,10 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 		updated_by: z.number().nullable(),
 		created_by: z.number().nullable(),
 
-		media_is_deleted: z.number().nullable().optional(),
+		media_is_deleted: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		media_key: z.string().nullable().optional(),
 	});
 	columnFormats = {
