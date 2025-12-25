@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type z from "zod";
 import type BrickBuilder from "../brick-builder/index.js";
 import type { FieldTypes, CFConfig } from "../../custom-fields/types.js";
 import type CollectionConfigSchema from "./schema.js";

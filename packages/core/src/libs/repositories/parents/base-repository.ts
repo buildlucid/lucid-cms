@@ -2,7 +2,7 @@ import T from "../../../translations/index.js";
 import logger from "../../logger/index.js";
 import constants from "../../../constants/constants.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
-import z, { type ZodType, type ZodObject } from "zod/v4";
+import z, { type ZodType, type ZodObject } from "zod";
 import type {
 	ColumnDataType,
 	ComparisonOperatorExpression,

@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type z from "zod";
 import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
 import type {
 	CollectionBrickConfig,

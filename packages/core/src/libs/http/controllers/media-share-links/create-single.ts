@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import z from "zod/v4";
+import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";

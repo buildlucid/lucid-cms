@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
 import tidyZodError from "../../../utils/errors/tidy-zod-errors.js";
-import type z from "zod/v4";
+import type z from "zod";
 import type { CustomFieldValidateResponse } from "../types.js";
 
 /**

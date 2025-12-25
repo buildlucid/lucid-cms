@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { controllerSchemas } from "../../../../schemas/auth.js";
 import { authServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";

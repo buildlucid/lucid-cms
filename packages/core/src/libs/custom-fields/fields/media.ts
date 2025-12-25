@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import T from "../../../translations/index.js";
 import type { MediaType, ServiceResponse } from "../../../types.js";
 import { createMediaUrl } from "../../../utils/media/index.js";

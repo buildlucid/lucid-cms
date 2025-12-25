@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import T from "../translations/index.js";
 import { userResponseSchema } from "./users.js";
 import type { ControllerSchema } from "../types.js";

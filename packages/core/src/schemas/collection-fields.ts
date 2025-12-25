@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import { stringTranslations } from "./locales.js";
 
 export const fieldInputSchema = z.object({

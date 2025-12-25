@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import type { BuildHandler, ServeHandler } from "./types.js";
 import type { CLILogger } from "../cli/logger.js";
 

@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import validate from "../../middleware/validate.js";

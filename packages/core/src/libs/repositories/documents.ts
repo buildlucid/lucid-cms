@@ -1,5 +1,5 @@
 import { type SelectQueryBuilder, sql } from "kysely";
-import z from "zod/v4";
+import z from "zod";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type {
 	ClientGetSingleQueryParams,

@@ -1,6 +1,6 @@
 import boxen from "boxen";
 import picocolors from "picocolors";
-import { ZodError } from "zod/v4";
+import { ZodError } from "zod";
 import tidyZodError from "../../utils/errors/tidy-zod-errors.js";
 
 const symbols = {

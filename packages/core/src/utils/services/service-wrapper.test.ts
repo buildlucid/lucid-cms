@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, test } from "vitest";
-import z from "zod/v4";
+import z from "zod";
 import passthroughKVAdapter from "../../libs/kv-adapter/adapters/passthrough.js";
 import passthroughQueueAdapter from "../../libs/queue-adapter/adapters/passthrough.js";
 import getTestConfig from "../test-helpers/get-test-config.js";

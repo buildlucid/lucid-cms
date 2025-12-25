@@ -1,5 +1,5 @@
 import merge from "lodash.merge";
-import z from "zod/v4";
+import z from "zod";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
 import type { BooleanInt } from "../../db-adapter/types.js";

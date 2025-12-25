@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
 import type { ControllerSchema } from "../types.js";

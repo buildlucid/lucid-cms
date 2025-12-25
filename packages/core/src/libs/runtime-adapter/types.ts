@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";

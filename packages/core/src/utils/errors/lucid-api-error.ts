@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type z from "zod";
 import constants from "../../constants/constants.js";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
 import errorTypeDefaults from "./error-type-defaults.js";

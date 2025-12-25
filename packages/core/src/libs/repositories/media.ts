@@ -1,5 +1,5 @@
 import { sql } from "kysely";
-import z from "zod/v4";
+import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type { KyselyDB } from "../db-adapter/types.js";

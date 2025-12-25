@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 
 export const optionsNameSchema = z.union([
 	z.literal("media_storage_used"),

@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type {
 	Insert,

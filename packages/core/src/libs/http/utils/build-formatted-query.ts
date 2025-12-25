@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import z, { type ZodType } from "zod/v4";
+import z, { type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import type {

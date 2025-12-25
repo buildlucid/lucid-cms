@@ -1,4 +1,4 @@
-import type { z } from "zod/v4";
+import type { z } from "zod";
 import type { LogLevelSchema } from "./schema.js";
 
 export type LogLevel = z.infer<typeof LogLevelSchema>;

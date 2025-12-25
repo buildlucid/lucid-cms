@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type z from "zod";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type {
 	AuthProviderConfigSchema,

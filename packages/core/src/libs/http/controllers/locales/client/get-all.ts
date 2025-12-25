@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import z from "zod/v4";
+import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/locales.js";
 import { localeServices } from "../../../../../services/index.js";

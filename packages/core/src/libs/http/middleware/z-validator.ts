@@ -15,7 +15,7 @@ import type {
 	input,
 	output,
 	infer as zInfer,
-} from "zod/v4";
+} from "zod";
 import type { LucidHonoVariables } from "../../../types/hono.js";
 
 export type Hook<

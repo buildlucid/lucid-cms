@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import z from "zod/v4";
+import z from "zod";
 import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
 import keyToTitle from "../utils/key-to-title.js";

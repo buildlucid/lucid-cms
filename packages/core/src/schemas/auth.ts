@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 import T from "../translations/index.js";
 import type { ControllerSchema } from "../types.js";

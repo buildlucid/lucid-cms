@@ -1,4 +1,4 @@
-import type { ZodType } from "zod/v4";
+import type { ZodType } from "zod";
 import generateEnvTypes from "./env-type.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
 import { join, relative } from "node:path";

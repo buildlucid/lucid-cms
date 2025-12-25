@@ -1,5 +1,5 @@
 import { sql } from "kysely";
-import z from "zod/v4";
+import z from "zod";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
-import type { ZodType } from "zod/v4";
+import type { ZodType } from "zod";
 import type { Config } from "../../types/config.js";
 import type {
 	AdapterDefineConfig,

@@ -1,6 +1,6 @@
 import type { DescribeRouteOptions } from "hono-openapi";
 import type { OpenAPIV3 } from "openapi-types";
-import z, { type ZodType } from "zod/v4";
+import z, { type ZodType } from "zod";
 import T from "../../translations/index.js";
 
 /**

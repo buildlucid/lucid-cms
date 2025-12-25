@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type z from "zod";
 import type { GenerateTypesResult } from "./types.js";
 import constants from "../../constants/constants.js";
 
@@ -16,7 +16,7 @@ const generateEnvTypes = async (props: {
 			: "interface EnvironmentVariables extends Record<string, unknown> {}",
 		imports: props.schema
 			? `import type { envSchema } from "${props.configRelativePath}";
-import type { z } from "zod/v4";`
+import type { z } from "zod";`
 			: undefined,
 	};
 };

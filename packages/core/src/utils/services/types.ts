@@ -1,4 +1,4 @@
-import type { ZodType } from "zod/v4";
+import type { ZodType } from "zod";
 import type { KyselyDB } from "../../libs/db-adapter/types.js";
 import type { KVAdapterInstance } from "../../libs/kv-adapter/types.js";
 import type { QueueAdapterInstance } from "../../libs/queue-adapter/types.js";

@@ -1,5 +1,5 @@
 import type { ColumnDataType } from "kysely";
-import type { ZodType } from "zod/v4";
+import type { ZodType } from "zod";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
 import type { LocaleValue } from "../../types/shared.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";

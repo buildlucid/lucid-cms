@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import CustomField from "../custom-field.js";
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";

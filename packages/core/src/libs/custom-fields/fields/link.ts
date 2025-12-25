@@ -1,5 +1,5 @@
 import T from "../../../translations/index.js";
-import z from "zod/v4";
+import z from "zod";
 import CustomField from "../custom-field.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 import constants from "../../../constants/constants.js";
