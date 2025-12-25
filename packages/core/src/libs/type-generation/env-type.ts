@@ -16,7 +16,7 @@ const generateEnvTypes = async (props: {
 			: "interface EnvironmentVariables extends Record<string, unknown> {}",
 		imports: props.schema
 			? `import type { envSchema } from "${props.configRelativePath}";
-import type { z } from "zod";`
+import type { z } from "@lucidcms/core";`
 			: undefined,
 	};
 };
