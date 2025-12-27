@@ -36,7 +36,6 @@ const providerInitiateController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.providerInitiate.body,
 		),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	softAuthenticate,

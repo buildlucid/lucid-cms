@@ -35,7 +35,6 @@ const getMultipleController = factory.createHandlers(
 				authorization: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	clientAuthentication,
 	validate("param", controllerSchemas.client.getMultiple.params),

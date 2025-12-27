@@ -22,7 +22,6 @@ const verifyLicenseController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			headers: { csrf: true },
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

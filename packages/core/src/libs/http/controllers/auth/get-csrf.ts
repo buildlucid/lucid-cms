@@ -19,7 +19,6 @@ const csrfController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getCSRF.response),
 		}),
-		validateResponse: true,
 	}),
 	async (c: LucidHonoContext) => {
 		const tokenRes = await authServices.csrf.generateToken(c);

@@ -27,7 +27,6 @@ const deleteSingleController = factory.createHandlers(
 			params: controllerSchemas.deleteSingle.params,
 			headers: { csrf: true },
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -28,7 +28,6 @@ const inviteSingleController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -31,7 +31,6 @@ const getMultipleController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			query: controllerSchemas.getMultiple.query.string,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	permissions([Permissions.ReadEmail]),

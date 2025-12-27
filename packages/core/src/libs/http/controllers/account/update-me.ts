@@ -28,7 +28,6 @@ const updateMeController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateMe.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

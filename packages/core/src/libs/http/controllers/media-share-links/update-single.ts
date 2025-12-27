@@ -29,7 +29,6 @@ const updateSingleController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

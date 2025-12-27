@@ -31,7 +31,6 @@ const authorizeStreamController = factory.createHandlers(
 			params: controllerSchemas.authorizeStream.params,
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.authorizeStream.body),
-		validateResponse: false,
 	}),
 	validate("param", controllerSchemas.authorizeStream.params),
 	validate("json", controllerSchemas.authorizeStream.body),

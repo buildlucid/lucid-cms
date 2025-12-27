@@ -34,7 +34,6 @@ const getPresignedUrlController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.getPresignedUrl.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

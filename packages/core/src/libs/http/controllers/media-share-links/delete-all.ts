@@ -18,7 +18,6 @@ const deleteAllController = factory.createHandlers(
 		tags: ["media-share-links"],
 		summary: "Delete All Media Share Links",
 		responses: honoOpenAPIResponse({ noProperties: true }),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -28,7 +28,6 @@ const loginController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.login.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	validate("json", controllerSchemas.login.body),

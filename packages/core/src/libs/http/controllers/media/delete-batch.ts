@@ -31,7 +31,6 @@ const deleteBatchController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

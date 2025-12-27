@@ -30,7 +30,6 @@ const getSingleController = factory.createHandlers(
 			params: controllerSchemas.getSingle.params,
 			query: controllerSchemas.getSingle.query.string,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	validate("param", controllerSchemas.getSingle.params),

@@ -34,7 +34,6 @@ const getSingleController = factory.createHandlers(
 				authorization: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	clientAuthentication,
 	validate("param", controllerSchemas.client.getSingle.params),

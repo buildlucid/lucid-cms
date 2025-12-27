@@ -36,7 +36,6 @@ const updateVersionController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -20,7 +20,6 @@ const statusController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.status.response),
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	async (c) => {

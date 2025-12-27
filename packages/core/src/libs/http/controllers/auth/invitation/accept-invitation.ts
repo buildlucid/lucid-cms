@@ -31,7 +31,6 @@ const acceptInvitationController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.acceptInvitation.body,
 		),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	validate("param", controllerSchemas.acceptInvitation.params),

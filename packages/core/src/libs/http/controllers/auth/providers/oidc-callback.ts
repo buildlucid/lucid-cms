@@ -28,7 +28,6 @@ const providerOIDCCallbackController = factory.createHandlers(
 			params: controllerSchemas.providerOIDCCallback.params,
 			query: controllerSchemas.providerOIDCCallback.query.string,
 		}),
-		validateResponse: true,
 	}),
 	validate("param", controllerSchemas.providerOIDCCallback.params),
 	validate("query", controllerSchemas.providerOIDCCallback.query.string),

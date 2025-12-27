@@ -98,7 +98,8 @@ const honoOpenAPIResponse = (config?: {
 }) => {
 	const response: Record<
 		string,
-		OpenAPIV3.ResponseObject | OpenAPIV3.ReferenceObject
+		| Omit<OpenAPIV3.ResponseObject, "headers" | "context" | "links">
+		| OpenAPIV3.ReferenceObject
 	> = {};
 
 	if (config?.schema) {

@@ -24,7 +24,6 @@ const webhookController = (pluginOptions: PluginOptions) =>
 			responses: honoOpenAPIResponse({
 				noProperties: true,
 			}),
-			validateResponse: true,
 		}),
 		// validate("json", controllerSchemas.webhook.body),
 		async (c: LucidHonoContext) => {

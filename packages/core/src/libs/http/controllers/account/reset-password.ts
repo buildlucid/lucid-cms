@@ -28,7 +28,6 @@ const resetPasswordController = factory.createHandlers(
 			params: controllerSchemas.resetPassword.params,
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.resetPassword.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	validate("param", controllerSchemas.resetPassword.params),

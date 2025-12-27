@@ -31,7 +31,6 @@ const restoreMultipleController = factory.createHandlers(
 			params: controllerSchemas.restoreMultiple.params,
 			headers: { csrf: true },
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

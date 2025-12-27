@@ -33,7 +33,6 @@ const moveFolderController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.moveFolder.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

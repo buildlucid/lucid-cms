@@ -33,7 +33,6 @@ const regenerateKeysController = factory.createHandlers(
 			},
 			params: controllerSchemas.regenerateKeys.params,
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -33,7 +33,6 @@ const createSingleController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

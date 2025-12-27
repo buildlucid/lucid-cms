@@ -27,7 +27,6 @@ const getSingleController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.getSingle.params,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	validate("param", controllerSchemas.getSingle.params),

@@ -35,7 +35,6 @@ const processMediaController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.client.processMedia.body,
 		),
-		validateResponse: true,
 	}),
 	clientAuthentication,
 	validate("param", controllerSchemas.client.processMedia.params),

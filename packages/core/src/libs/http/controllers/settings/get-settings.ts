@@ -20,7 +20,6 @@ const getSettingsController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	async (c) => {

@@ -20,7 +20,6 @@ const getAllController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.hierarchy.response),
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	async (c) => {

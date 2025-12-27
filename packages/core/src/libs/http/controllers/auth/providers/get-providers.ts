@@ -20,7 +20,6 @@ const getProvidersController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getProviders.response),
 		}),
-		validateResponse: true,
 	}),
 	async (c: LucidHonoContext) => {
 		const providersRes = await serviceWrapper(

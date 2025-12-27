@@ -101,6 +101,7 @@
         "typescript": "^5.9.3"
     },
     "dependencies": {
+        "@hono/standard-validator": "^0.2.1",
         "@inquirer/prompts": "^8.1.0",
         "@noble/hashes": "^2.0.1",
         "@scalar/hono-api-reference": "^0.9.30",
@@ -111,7 +112,7 @@
         "date-fns": "^4.1.0",
         "file-type": "^21.1.1",
         "hono": "^4.11.1",
-        "hono-openapi": "^0.4.8",
+        "hono-openapi": "^1.1.2",
         "immer": "^11.1.0",
         "jiti": "^2.6.1",
         "kysely": "0.28.9",

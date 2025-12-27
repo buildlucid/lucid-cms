@@ -29,7 +29,6 @@ const getSingleController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.getSingle.params,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	permissions([Permissions.ReadEmail]),

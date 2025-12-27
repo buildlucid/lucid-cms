@@ -21,7 +21,6 @@ const getAllController = factory.createHandlers(
 			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 			paginated: true,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	async (c) => {

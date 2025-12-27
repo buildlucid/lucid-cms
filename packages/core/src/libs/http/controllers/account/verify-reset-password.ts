@@ -23,7 +23,6 @@ const verifyResetPasswordController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.verifyResetPassword.params,
 		}),
-		validateResponse: true,
 	}),
 	validate("param", controllerSchemas.verifyResetPassword.params),
 	async (c) => {

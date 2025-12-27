@@ -34,7 +34,6 @@ const updateSingleController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -124,7 +124,6 @@ const streamSingleController = factory.createHandlers(
 			},
 			default: defaultErrorResponse,
 		},
-		validateResponse: true,
 	}),
 	validate("param", controllerSchemas.streamSingle.params),
 	authorizePrivateMedia,

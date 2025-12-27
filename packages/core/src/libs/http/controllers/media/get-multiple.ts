@@ -33,7 +33,6 @@ const getMultipleController = factory.createHandlers(
 				contentLocale: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	contentLocale,

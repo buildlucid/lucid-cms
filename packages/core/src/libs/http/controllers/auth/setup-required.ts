@@ -21,7 +21,6 @@ const setupRequiredController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.setupRequired.response),
 		}),
-		validateResponse: true,
 	}),
 	async (c: LucidHonoContext) => {
 		const setupRequiredRes = await serviceWrapper(authServices.setupRequired, {

@@ -27,7 +27,6 @@ const validateInvitationController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.validateInvitation.params,
 		}),
-		validateResponse: true,
 	}),
 	validate("param", controllerSchemas.validateInvitation.params),
 	async (c) => {

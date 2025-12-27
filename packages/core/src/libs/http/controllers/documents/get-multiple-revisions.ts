@@ -30,7 +30,6 @@ const getMultipleRevisionsController = factory.createHandlers(
 			params: controllerSchemas.getMultipleRevisions.params,
 			query: controllerSchemas.getMultipleRevisions.query.string,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	validate("param", controllerSchemas.getMultipleRevisions.params),

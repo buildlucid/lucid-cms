@@ -23,7 +23,6 @@ const logoutController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

@@ -21,7 +21,6 @@ const getMeController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	async (c: LucidHonoContext) => {

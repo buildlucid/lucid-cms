@@ -27,7 +27,6 @@ const deleteMultipleController = factory.createHandlers(
 			params: controllerSchemas.deleteMultiple.params,
 			headers: { csrf: true },
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

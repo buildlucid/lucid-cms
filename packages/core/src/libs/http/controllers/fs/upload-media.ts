@@ -26,7 +26,6 @@ const uploadMediaController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		validateResponse: true,
 	}),
 	validate("query", controllerSchemas.upload.query.string),
 	async (c) => {

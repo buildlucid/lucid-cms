@@ -38,7 +38,6 @@ const streamMediaController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.streamMedia.params,
 		}),
-		validateResponse: false,
 	}),
 	validate("param", controllerSchemas.streamMedia.params),
 	async (c) => {

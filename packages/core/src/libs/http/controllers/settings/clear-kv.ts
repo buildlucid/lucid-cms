@@ -18,7 +18,6 @@ const clearKVController = factory.createHandlers(
 		summary: "Clear KV",
 		responses: honoOpenAPIResponse({ noProperties: true }),
 		parameters: honoOpenAPIParamaters({ headers: { csrf: true } }),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

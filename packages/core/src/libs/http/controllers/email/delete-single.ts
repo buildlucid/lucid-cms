@@ -30,7 +30,6 @@ const deleteSingleController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	permissions([Permissions.DeleteEmail]),

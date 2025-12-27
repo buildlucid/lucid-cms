@@ -33,7 +33,6 @@ const updateSingleController = factory.createHandlers(
 			},
 			params: controllerSchemas.updateSingle.params,
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

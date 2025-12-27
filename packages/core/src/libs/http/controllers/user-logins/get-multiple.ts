@@ -30,7 +30,6 @@ const getMultipleController = factory.createHandlers(
 			query: controllerSchemas.getMultiple.query.string,
 			params: controllerSchemas.getMultiple.params,
 		}),
-		validateResponse: true,
 	}),
 	authenticate,
 	validate("query", controllerSchemas.getMultiple.query.string),

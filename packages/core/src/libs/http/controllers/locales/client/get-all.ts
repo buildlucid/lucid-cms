@@ -32,7 +32,6 @@ const getAllController = factory.createHandlers(
 				authorization: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	clientAuthentication,
 	cache({

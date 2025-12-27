@@ -32,7 +32,6 @@ const deleteSingleController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

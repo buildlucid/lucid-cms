@@ -28,7 +28,6 @@ const updateLicenseController = factory.createHandlers(
 			headers: { csrf: true },
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.update.body),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	authenticate,

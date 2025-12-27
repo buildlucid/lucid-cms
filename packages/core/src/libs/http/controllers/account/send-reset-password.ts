@@ -34,7 +34,6 @@ const sendResetPasswordController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(
 			controllerSchemas.sendResetPassword.body,
 		),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	validate("json", controllerSchemas.sendResetPassword.body),

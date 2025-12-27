@@ -22,7 +22,6 @@ const tokenController = factory.createHandlers(
 				csrf: true,
 			},
 		}),
-		validateResponse: true,
 	}),
 	validateCSRF,
 	async (c) => {

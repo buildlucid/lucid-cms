@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import type { StatusCode } from "hono/utils/http-status";
-import { openAPISpecs } from "hono-openapi";
+import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import T from "../../translations/index.js";
@@ -162,7 +162,7 @@ const createApp = async (props: {
 	if (!props.config.disableOpenAPI) {
 		app.get(
 			"/openapi",
-			openAPISpecs(app, {
+			openAPIRouteHandler(app, {
 				documentation: {
 					openapi: "3.0.0",
 					info: {
