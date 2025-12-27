@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import buildFullSlugFromSlugs from "./build-fullslug-from-slugs.js";
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
+import buildFullSlugFromSlugs from "./build-fullslug-from-slugs.js";
 
 const descendants: Array<DescendantFieldsResponse> = [
 	{

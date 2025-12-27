@@ -1,6 +1,6 @@
-import { type Component, Show } from "solid-js";
-import classNames from "classnames";
 import { Alert } from "@kobalte/core";
+import classNames from "classnames";
+import { type Component, Show } from "solid-js";
 
 interface ErrorMessageProps {
 	message?: string;

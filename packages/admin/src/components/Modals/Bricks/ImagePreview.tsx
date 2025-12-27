@@ -1,9 +1,9 @@
-import { type Component, Show, createMemo } from "solid-js";
+import { Dialog } from "@kobalte/core";
+import { FaSolidXmark } from "solid-icons/fa";
+import { type Component, createMemo, Show } from "solid-js";
 import { Modal } from "@/components/Groups/Modal";
 import BrickPreview from "@/components/Partials/BrickPreview";
 import brickStore from "@/store/brickStore";
-import { Dialog } from "@kobalte/core";
-import { FaSolidXmark } from "solid-icons/fa";
 
 const BrickImagePreview: Component = () => {
 	// ----------------------------------

@@ -1,15 +1,15 @@
+import type { CFConfig, FieldError, FieldResponse } from "@types";
 import {
+	batch,
 	type Component,
-	createSignal,
 	createEffect,
 	createMemo,
-	batch,
+	createSignal,
 } from "solid-js";
-import type { CFConfig, FieldResponse, FieldError } from "@types";
+import { JSONTextarea } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { JSONTextarea } from "@/components/Groups/Form";
 
 interface JSONFieldProps {
 	state: {

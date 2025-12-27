@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
 import mime from "mime-types";
-import getMediaType from "./get-media-type.js";
-import type { ServiceResponse } from "../services/types.js";
+import T from "../../translations/index.js";
 import type { MediaType } from "../../types.js";
+import type { ServiceResponse } from "../services/types.js";
+import getMediaType from "./get-media-type.js";
 
 export type FileMetadata = {
 	mimeType: string;

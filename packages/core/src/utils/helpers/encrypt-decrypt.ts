@@ -1,5 +1,5 @@
-import T from "../../translations/index.js";
 import crypto from "node:crypto";
+import T from "../../translations/index.js";
 import LucidError from "../errors/lucid-error.js";
 
 const encryptionKeyToHex = (encryptionKey: string) =>

@@ -1,8 +1,8 @@
+import { logger } from "../../../index.js";
 import type {
 	AdapterKeys,
 	RuntimeSupport,
 } from "../../runtime-adapter/types.js";
-import { logger } from "../../../index.js";
 
 const featureSupportChecks = (
 	adapterKeys: AdapterKeys,

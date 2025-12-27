@@ -1,29 +1,29 @@
-import T from "@/translations";
-import { useParams, useNavigate } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
 import {
 	type Component,
-	createMemo,
 	createEffect,
+	createMemo,
 	createSignal,
 } from "solid-js";
-import api from "@/services/api";
-import userStore from "@/store/userStore";
-import helpers from "@/utils/helpers";
+import Alert from "@/components/Blocks/Alert";
+import { DocumentsList } from "@/components/Groups/Content";
+import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
+import { QueryRow } from "@/components/Groups/Query";
 import useSearchParamsLocation, {
 	type FilterSchema,
 } from "@/hooks/useSearchParamsLocation";
-import { QueryRow } from "@/components/Groups/Query";
-import { getDocumentRoute } from "@/utils/route-helpers";
+import api from "@/services/api";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
 	formatFieldFilters,
 } from "@/utils/document-table-helpers";
-import { Wrapper } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
-import { DocumentsList } from "@/components/Groups/Content";
-import Alert from "@/components/Blocks/Alert";
-import { useQueryClient } from "@tanstack/solid-query";
+import helpers from "@/utils/helpers";
+import { getDocumentRoute } from "@/utils/route-helpers";
 
 const CollectionsDocumentsListRoute: Component = () => {
 	// ----------------------------------

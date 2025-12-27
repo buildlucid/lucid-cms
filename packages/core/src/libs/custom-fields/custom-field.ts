@@ -1,19 +1,17 @@
 import T from "../../translations/index.js";
+import type { ServiceResponse } from "../../types.js";
 import type {
 	CFConfig,
-	FieldTypes,
 	CFProps,
 	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidateResponse,
+	FieldRefParams,
+	FieldTypes,
+	GetSchemaDefinitionProps,
+	SchemaDefinition,
 } from "./types.js";
 import zodSafeParse from "./utils/zod-safe-parse.js";
-import type {
-	SchemaDefinition,
-	GetSchemaDefinitionProps,
-	FieldRefParams,
-} from "./types.js";
-import type { ServiceResponse } from "../../types.js";
 
 abstract class CustomField<T extends FieldTypes> {
 	repeater: string | null = null;

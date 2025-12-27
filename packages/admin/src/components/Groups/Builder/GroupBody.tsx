@@ -1,21 +1,21 @@
-import T from "@/translations/index";
-import {
-	type Component,
-	Index,
-	Show,
-	createMemo,
-	createSignal,
-} from "solid-js";
-import type { DragDropCBT } from "@/components/Partials/DragDrop";
 import type { CFConfig, FieldGroupResponse, GroupError } from "@types";
 import classNames from "classnames";
-import { FaSolidGripLines, FaSolidChevronUp } from "solid-icons/fa";
-import brickStore from "@/store/brickStore";
+import { FaSolidChevronUp, FaSolidGripLines } from "solid-icons/fa";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	Index,
+	Show,
+} from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
-import helpers from "@/utils/helpers";
+import type { DragDropCBT } from "@/components/Partials/DragDrop";
+import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations/index";
 import brickHelpers from "@/utils/brick-helpers";
+import helpers from "@/utils/helpers";
 
 interface GroupBodyProps {
 	state: {

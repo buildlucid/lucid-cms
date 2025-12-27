@@ -1,10 +1,10 @@
-import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";
 import type {
 	Config,
 	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
+import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";
 import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 
 /**

@@ -1,5 +1,5 @@
-import T from "../translations/index.js";
 import { PermissionGroups } from "../libs/permission/definitions.js";
+import T from "../translations/index.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,

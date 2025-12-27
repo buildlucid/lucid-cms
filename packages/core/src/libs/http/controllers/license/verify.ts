@@ -1,13 +1,13 @@
-import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { licenseServices } from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 

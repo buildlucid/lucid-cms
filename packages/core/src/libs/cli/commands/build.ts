@@ -5,14 +5,14 @@ import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
+import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
-import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
 import processBuildArtifacts from "../services/process-build-artifacts.js";
-import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.

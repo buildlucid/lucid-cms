@@ -1,5 +1,5 @@
-import type { Component } from "solid-js";
 import classNames from "classnames";
+import type { Component } from "solid-js";
 import { Td } from "@/components/Groups/Table";
 
 interface TextColProps {

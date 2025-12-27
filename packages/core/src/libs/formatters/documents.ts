@@ -1,22 +1,24 @@
-import formatter from "./index.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 import type {
+	BrickAltResponse,
+	BrickResponse,
+	ClientDocumentResponse,
 	Config,
 	DocumentResponse,
-	BrickResponse,
-	FieldResponse,
-	ClientDocumentResponse,
-	BrickAltResponse,
-	LucidBrickTableName,
-	FieldTypes,
-	FieldRefs,
 	FieldRefParams,
+	FieldRefs,
+	FieldResponse,
+	FieldTypes,
+	LucidBrickTableName,
 } from "../../types.js";
-import type { DocumentQueryResponse } from "../repositories/documents.js";
-import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
-import { documentBricksFormatter, documentFieldsFormatter } from "./index.js";
 import customFieldMap from "../custom-fields/custom-field-map.js";
+import type { DocumentQueryResponse } from "../repositories/documents.js";
+import formatter, {
+	documentBricksFormatter,
+	documentFieldsFormatter,
+} from "./index.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];

@@ -1,14 +1,14 @@
-import brickStore from "@/store/brickStore";
 import type {
-	CFConfig,
-	FieldTypes,
-	FieldResponse,
-	FieldError,
 	BrickError,
-	FieldAltResponse,
-	FieldRefs,
+	CFConfig,
 	DocumentRef,
+	FieldAltResponse,
+	FieldError,
+	FieldRefs,
+	FieldResponse,
+	FieldTypes,
 } from "@types";
+import brickStore from "@/store/brickStore";
 
 const findFieldRecursive = (props: {
 	fields: FieldResponse[];

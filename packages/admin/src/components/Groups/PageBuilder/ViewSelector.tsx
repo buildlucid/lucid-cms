@@ -1,10 +1,10 @@
 import { DropdownMenu } from "@kobalte/core";
-import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
-import classNames from "classnames";
 import { useLocation, useNavigate } from "@solidjs/router";
-import T from "@/translations";
-import DropdownContent from "@/components/Partials/DropdownContent";
+import classNames from "classnames";
 import { FaSolidLink } from "solid-icons/fa";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import DropdownContent from "@/components/Partials/DropdownContent";
+import T from "@/translations";
 
 export interface ViewSelectorOption {
 	label: string;

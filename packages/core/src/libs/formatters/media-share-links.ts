@@ -1,6 +1,6 @@
-import formatter from "./index.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
 import { createShareLinkUrl } from "../../utils/media/index.js";
+import formatter from "./index.js";
 
 export interface MediaShareLinkPropsT {
 	id: number;

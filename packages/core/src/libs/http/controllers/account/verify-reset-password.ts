@@ -1,16 +1,16 @@
-import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import validate from "../../middleware/validate.js";
-import { controllerSchemas } from "../../../../schemas/account.js";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../constants/constants.js";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import { userTokenServices } from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
-import constants from "../../../../constants/constants.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import validate from "../../middleware/validate.js";
 
 const factory = createFactory();
 

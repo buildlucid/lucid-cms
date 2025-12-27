@@ -1,4 +1,3 @@
-import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
 import type {
 	Config,
 	FieldInputSchema,
@@ -6,6 +5,7 @@ import type {
 } from "@lucidcms/core/types";
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
 import type { CollectionConfig } from "../types/types.js";
+import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
 
 /**
  *  Constructs the fullSlug for the child documents

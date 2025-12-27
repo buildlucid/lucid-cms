@@ -1,5 +1,5 @@
-import { type Component, Switch, Match } from "solid-js";
 import type { UserRef } from "@types";
+import { type Component, Match, Switch } from "solid-js";
 import { Td } from "@/components/Groups/Table";
 import UserDisplay from "@/components/Partials/UserDisplay";
 

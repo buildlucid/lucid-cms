@@ -1,12 +1,12 @@
+import classNames from "classnames";
 import {
 	type Component,
 	For,
+	type JSXElement,
 	Match,
 	Show,
 	Switch,
-	type JSXElement,
 } from "solid-js";
-import classNames from "classnames";
 import Pill from "@/components/Partials/Pill";
 
 interface DetailsListProps {

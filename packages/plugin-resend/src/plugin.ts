@@ -1,14 +1,14 @@
-import T from "./translations/index.js";
-import {
-	PLUGIN_KEY,
-	LUCID_VERSION,
-	WEBHOOK_ENABLED,
-	PLUGIN_IDENTIFIER,
-} from "./constants.js";
-import isValidData from "./utils/is-valid-data.js";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
-import type { PluginOptions } from "./types/types.js";
+import {
+	LUCID_VERSION,
+	PLUGIN_IDENTIFIER,
+	PLUGIN_KEY,
+	WEBHOOK_ENABLED,
+} from "./constants.js";
 import routes from "./routes/index.js";
+import T from "./translations/index.js";
+import type { PluginOptions } from "./types/types.js";
+import isValidData from "./utils/is-valid-data.js";
 
 type ResendEmailResponse = {
 	id: string;

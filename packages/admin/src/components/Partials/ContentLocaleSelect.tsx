@@ -1,10 +1,10 @@
-import { type Component, Match, Switch, createMemo } from "solid-js";
-import contentLocaleStore from "@/store/contentLocaleStore";
+import { type Component, createMemo, Match, Switch } from "solid-js";
 import { Select } from "@/components/Groups/Form";
 import useKeyboardShortcuts, {
-	shortcutText,
 	inModal,
+	shortcutText,
 } from "@/hooks/useKeyboardShortcuts";
+import contentLocaleStore from "@/store/contentLocaleStore";
 
 interface ContentLocaleSelectProps {
 	value?: string | undefined;

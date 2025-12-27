@@ -1,19 +1,19 @@
-import {
-	type Component,
-	createMemo,
-	createSignal,
-	onMount,
-	Show,
-	createEffect,
-	Index,
-} from "solid-js";
 import type { CFConfig, FieldError, FieldTypes } from "@types";
-import type { BrickData } from "@/store/brickStore";
 import classNames from "classnames";
 import {
-	TabField,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Index,
+	onMount,
+	Show,
+} from "solid-js";
+import {
 	DynamicField,
+	TabField,
 } from "@/components/Groups/Builder/CustomFields";
+import type { BrickData } from "@/store/brickStore";
 import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BrickProps {

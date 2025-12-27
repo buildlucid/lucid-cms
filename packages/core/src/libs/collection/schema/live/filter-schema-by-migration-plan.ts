@@ -1,6 +1,5 @@
-import type { CollectionSchema } from "../types.js";
 import type { MigrationPlan } from "../../migration/types.js";
-import type { CollectionSchemaTable } from "../types.js";
+import type { CollectionSchema, CollectionSchemaTable } from "../types.js";
 
 /**
  * Remove tables/columns from the live schema that haven't been migrated yet

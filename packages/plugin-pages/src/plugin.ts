@@ -1,15 +1,15 @@
-import T from "./translations/index.js";
-import type { LucidPlugin } from "@lucidcms/core/types";
-import type { PluginOptions } from "./types/types.js";
-import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
 import { logger } from "@lucidcms/core";
-import { registerFields, pluginOptions } from "./services/index.js";
+import type { LucidPlugin } from "@lucidcms/core/types";
+import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import {
-	beforeUpsertHandler,
 	afterUpsertHandler,
 	beforeDeleteHandler,
+	beforeUpsertHandler,
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
+import { pluginOptions, registerFields } from "./services/index.js";
+import T from "./translations/index.js";
+import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	const options = pluginOptions(plugin);

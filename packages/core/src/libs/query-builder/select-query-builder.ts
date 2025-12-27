@@ -1,6 +1,6 @@
-import type { QueryBuilderWhere } from "./index.js";
 import type { SelectQueryBuilder } from "kysely";
 import type { LucidDB } from "../db-adapter/types.js";
+import type { QueryBuilderWhere } from "./index.js";
 
 const selectQueryBuilder = <Table extends keyof LucidDB, O>(
 	query: SelectQueryBuilder<LucidDB, Table, O>,

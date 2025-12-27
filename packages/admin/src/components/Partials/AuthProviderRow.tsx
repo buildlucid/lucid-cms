@@ -1,10 +1,10 @@
+import type { AuthProvidersResponse, UserResponse } from "@types";
+import { FaSolidCircleUser } from "solid-icons/fa";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, onCleanup, Show } from "solid-js";
-import { FaSolidCircleUser } from "solid-icons/fa";
-import type { AuthProvidersResponse, UserResponse } from "@types";
 import Button from "@/components/Partials/Button";
-import dateHelpers from "@/utils/date-helpers";
 import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
 
 const AuthProviderRow: Component<{
 	provider: AuthProvidersResponse["providers"][number];

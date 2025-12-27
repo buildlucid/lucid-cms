@@ -1,3 +1,4 @@
+import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
 import type {
@@ -6,7 +7,6 @@ import type {
 	LucidBrickTableName,
 	ServiceFn,
 } from "../../../types.js";
-import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
 
 export type FieldRelationValues = Partial<
 	Record<

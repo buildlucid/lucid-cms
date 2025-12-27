@@ -7,8 +7,8 @@ import type {
 	LucidDocumentTableName,
 	ServiceFn,
 } from "../../../types.js";
-import type { FieldRelationValues } from "./extract-related-entity-ids.js";
 import { documentServices, mediaServices, userServices } from "../../index.js";
+import type { FieldRelationValues } from "./extract-related-entity-ids.js";
 
 export type FieldRelationResponse = Partial<
 	Record<

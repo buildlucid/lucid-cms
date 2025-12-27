@@ -2,11 +2,11 @@ import { createSignal, onMount } from "solid-js";
 import {
 	DEFAULT_PAGE,
 	DEFAULT_PER_PAGE,
-	type SearchParamsSchema,
 	type FilterMap,
-	type SortMap,
 	type FilterValues,
 	type SearchParamsResponse,
+	type SearchParamsSchema,
+	type SortMap,
 } from "./useSearchParamsLocation";
 
 const useSearchParamsState = (

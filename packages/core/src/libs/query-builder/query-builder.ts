@@ -1,11 +1,11 @@
-import getTableKeyValue from "./utils/get-table-key-value.js";
-import getFilterOperator from "./utils/get-filter-operator.js";
-import type { QueryParams } from "../../types/query-params.js";
 import type {
-	SelectQueryBuilder,
-	ReferenceExpression,
 	ComparisonOperatorExpression,
+	ReferenceExpression,
+	SelectQueryBuilder,
 } from "kysely";
+import type { QueryParams } from "../../types/query-params.js";
+import getFilterOperator from "./utils/get-filter-operator.js";
+import getTableKeyValue from "./utils/get-table-key-value.js";
 
 const queryBuilder = <DB, Table extends keyof DB, O>(
 	query: {

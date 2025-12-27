@@ -1,9 +1,9 @@
+import type { AddressInfo } from "node:net";
 import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
 import type RuntimeAdapterSchema from "./schema.js";
-import type { AddressInfo } from "node:net";
 
 export type RuntimeBuildArtifactFile = {
 	type: "file";

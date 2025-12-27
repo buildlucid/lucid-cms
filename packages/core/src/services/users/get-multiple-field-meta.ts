@@ -1,6 +1,6 @@
+import type { UserPropT } from "../../libs/formatters/users.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { UserPropT } from "../../libs/formatters/users.js";
 
 const getMultipleFieldMeta: ServiceFn<
 	[

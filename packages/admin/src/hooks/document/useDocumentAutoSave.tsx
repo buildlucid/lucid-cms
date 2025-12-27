@@ -1,9 +1,9 @@
-import brickStore from "@/store/brickStore";
-import brickHelpers from "@/utils/brick-helpers";
 import { debounce } from "@solid-primitives/scheduled";
 import type { CollectionResponse, DocumentResponse } from "@types";
-import type api from "@/services/api";
 import { type Accessor, createEffect, onCleanup } from "solid-js";
+import type api from "@/services/api";
+import brickStore from "@/store/brickStore";
+import brickHelpers from "@/utils/brick-helpers";
 
 export function useDocumentAutoSave(props: {
 	updateSingleVersionMutation: ReturnType<

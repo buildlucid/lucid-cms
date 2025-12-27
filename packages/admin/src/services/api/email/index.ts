@@ -1,6 +1,6 @@
+import useDeleteSingle from "./useDeleteSingle";
 import useGetMultiple from "./useGetMultiple";
 import useGetSingle from "./useGetSingle";
-import useDeleteSingle from "./useDeleteSingle";
 import useResendSingle from "./useResendSingle";
 
 const exportObject = {

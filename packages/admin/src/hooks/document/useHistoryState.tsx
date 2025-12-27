@@ -1,10 +1,10 @@
 import { useParams } from "@solidjs/router";
-import { createMemo, createSignal, createEffect } from "solid-js";
-import contentLocaleStore from "@/store/contentLocaleStore";
+import type { DocumentResponse, DocumentVersionResponse } from "@types";
+import { createEffect, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
-import helpers from "@/utils/helpers";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
-import type { DocumentVersionResponse, DocumentResponse } from "@types";
+import helpers from "@/utils/helpers";
 import useSearchParamsState from "../useSearchParamsState";
 
 const PER_PAGE = 20;

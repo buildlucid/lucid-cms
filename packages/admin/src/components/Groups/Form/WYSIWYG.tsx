@@ -1,15 +1,15 @@
-import {
-	type Component,
-	createSignal,
-	onMount,
-	onCleanup,
-	createEffect,
-} from "solid-js";
 import classnames from "classnames";
 import Quill from "quill";
+import {
+	type Component,
+	createEffect,
+	createSignal,
+	onCleanup,
+	onMount,
+} from "solid-js";
 import "quill/dist/quill.snow.css";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 import type { ErrorResult, FieldError } from "@types";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 
 interface WYSIWYGProps {
 	id: string;

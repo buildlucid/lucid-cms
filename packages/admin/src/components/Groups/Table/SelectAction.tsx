@@ -1,14 +1,14 @@
-import T from "@/translations";
 import {
 	type Accessor,
+	type Component,
 	createMemo,
+	createSignal,
 	type Setter,
 	Show,
-	type Component,
-	createSignal,
 } from "solid-js";
-import Button from "@/components/Partials/Button";
 import { Confirmation } from "@/components/Groups/Modal";
+import Button from "@/components/Partials/Button";
+import T from "@/translations";
 
 interface SelectActionProps {
 	selectedCount: Accessor<number>;

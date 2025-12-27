@@ -1,8 +1,8 @@
-import { createMemo } from "solid-js";
 import { useQuery } from "@tanstack/solid-query";
+import type { ResponseBody } from "@types";
+import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody } from "@types";
 
 // biome-ignore lint/suspicious/noEmptyInterface: explanation
 interface QueryParams {}

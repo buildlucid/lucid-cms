@@ -1,7 +1,7 @@
+import type { ServiceFn } from "../../../types.js";
 import createTableQuery from "./create-table-query.js";
 import modifyTableQuery from "./modify-table-query.js";
 import removeTableQuery from "./remove-table-query.js";
-import type { ServiceFn } from "../../../types.js";
 import type { MigrationPlan } from "./types.js";
 
 /**

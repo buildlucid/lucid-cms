@@ -1,16 +1,16 @@
 import type { ColumnDataType } from "kysely";
 import type { ZodType } from "zod";
+import type { Config } from "../../types/config.js";
 import type { FieldAltResponse, MediaType } from "../../types/response.js";
 import type { LocaleValue } from "../../types/shared.js";
+import type { CollectionBuilder } from "../builders/index.js";
+import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type {
 	LucidBrickTableName,
 	OnDelete,
 	OnUpdate,
 } from "../db-adapter/types.js";
-import type { CollectionSchemaTable } from "../collection/schema/types.js";
-import type { CollectionBuilder } from "../builders/index.js";
-import type { Config } from "../../types/config.js";
 
 // -----------------------------------------------
 // Custom Field

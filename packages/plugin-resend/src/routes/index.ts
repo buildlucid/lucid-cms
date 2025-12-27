@@ -1,6 +1,6 @@
+import type { LucidHonoGeneric } from "@lucidcms/core/types";
 import { Hono } from "hono";
 import webhookController from "../controllers/webhook.js";
-import type { LucidHonoGeneric } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types/types.js";
 
 const routes =

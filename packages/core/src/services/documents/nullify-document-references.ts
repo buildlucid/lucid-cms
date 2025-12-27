@@ -1,3 +1,9 @@
+import { prefixGeneratedColName } from "../../helpers.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import type {
+	CollectionSchemaTable,
+	TableType,
+} from "../../libs/collection/schema/types.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type {
 	CFConfig,
@@ -7,12 +13,6 @@ import type {
 	ServiceFn,
 	TabFieldConfig,
 } from "../../types.js";
-import { prefixGeneratedColName } from "../../helpers.js";
-import type {
-	CollectionSchemaTable,
-	TableType,
-} from "../../libs/collection/schema/types.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
 
 /**
  * Goes through all bricks and repeaters in the collection and nullifies references to the target document.

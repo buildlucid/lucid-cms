@@ -1,5 +1,5 @@
 import createConsoleTransport from "./console-transporter.js";
-import type { LogLevel, LogData, LogTransport, LucidLogger } from "./types.js";
+import type { LogData, LogLevel, LogTransport, LucidLogger } from "./types.js";
 
 const LOG_LEVELS: Record<LogLevel, number> = {
 	silent: -1,

@@ -4,9 +4,9 @@ import deleteMultiple from "./services/delete-multiple.js";
 import deletSingle from "./services/delete-single.js";
 import getMetadata from "./services/get-metadata.js";
 import getPresignedUrl from "./services/get-presigned-url.js";
+import rename from "./services/rename.js";
 import stream from "./services/steam.js";
 import uploadSingle from "./services/upload-single.js";
-import rename from "./services/rename.js";
 import type { PluginOptions } from "./types/types.js";
 
 const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {

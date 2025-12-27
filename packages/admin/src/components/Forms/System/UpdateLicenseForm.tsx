@@ -1,11 +1,11 @@
-import T from "@/translations";
 import { type Component, createMemo, createSignal } from "solid-js";
 import { Form, Input } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
-import { getBodyError } from "@/utils/error-helpers";
-import helpers from "@/utils/helpers";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
+import helpers from "@/utils/helpers";
 
 const UpdateLicenseForm: Component<{
 	licenseKey: string;

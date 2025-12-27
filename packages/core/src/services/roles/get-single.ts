@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
-import { RolesRepository } from "../../libs/repositories/index.js";
 import { rolesFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import { RolesRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { RoleResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
 	[

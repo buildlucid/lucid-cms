@@ -1,18 +1,18 @@
-import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import validate from "../../middleware/validate.js";
-import { controllerSchemas } from "../../../../schemas/account.js";
 import { describeRoute } from "hono-openapi";
+import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
 	honoOpenAPIRequestBody,
+	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
+import validate from "../../middleware/validate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
 

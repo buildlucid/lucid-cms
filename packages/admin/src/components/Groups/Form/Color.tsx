@@ -1,7 +1,7 @@
-import { type Component, createSignal, For, Show } from "solid-js";
-import classnames from "classnames";
 import type { ErrorResult, FieldError } from "@types";
-import { ErrorMessage, Label, DescribedBy } from "@/components/Groups/Form";
+import classnames from "classnames";
+import { type Component, createSignal, For, Show } from "solid-js";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 
 export const Color: Component<{
 	id: string;

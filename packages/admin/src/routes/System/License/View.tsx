@@ -1,8 +1,8 @@
-import T from "@/translations";
 import type { Component } from "solid-js";
-import { Wrapper } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
 import { License as LicenseContent } from "@/components/Groups/Content";
+import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
+import T from "@/translations";
 
 const SystemLicenseRoute: Component = () => {
 	// ----------------------------------------

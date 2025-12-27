@@ -1,7 +1,7 @@
-import { addColumn } from "./column-builder.js";
-import logger from "../../../libs/logger/index.js";
 import constants from "../../../constants/constants.js";
+import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
+import { addColumn } from "./column-builder.js";
 import type { TableMigration } from "./types.js";
 
 const createTableQuery: ServiceFn<

@@ -1,4 +1,6 @@
-import T from "@/translations";
+import { useNavigate } from "@solidjs/router";
+import classNames from "classnames";
+import { FaSolidPlus, FaSolidTrash } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
@@ -6,13 +8,11 @@ import {
 	type JSXElement,
 	Show,
 } from "solid-js";
-import classNames from "classnames";
-import { FaSolidPlus, FaSolidTrash } from "solid-icons/fa";
-import Link from "@/components/Partials/Link";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
+import Link from "@/components/Partials/Link";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
-import { useNavigate } from "@solidjs/router";
+import T from "@/translations";
 
 export const Standard: Component<{
 	copy?: {

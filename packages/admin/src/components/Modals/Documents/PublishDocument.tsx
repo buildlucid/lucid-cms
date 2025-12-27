@@ -1,9 +1,9 @@
-import T from "@/translations";
-import { type Component, type Accessor, createMemo } from "solid-js";
-import { Confirmation } from "@/components/Groups/Modal";
-import helpers from "@/utils/helpers";
 import type { CollectionResponse } from "@types";
+import { type Accessor, type Component, createMemo } from "solid-js";
+import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 interface PublishDocumentProps {
 	id: Accessor<number | undefined> | number | undefined;

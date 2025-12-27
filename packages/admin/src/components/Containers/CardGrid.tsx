@@ -1,5 +1,5 @@
-import { type Component, type JSXElement, For, Switch, Match } from "solid-js";
 import classNames from "classnames";
+import { type Component, For, type JSXElement, Match, Switch } from "solid-js";
 import SkeletonCard from "@/components/Cards/SkeletonCard";
 
 interface CardGridProps {

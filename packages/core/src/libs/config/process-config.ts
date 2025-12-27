@@ -1,15 +1,15 @@
+import { produce } from "immer";
+import defaultConfig from "../../constants/default-config.js";
+import T from "../../translations/index.js";
+import type { Config, LucidConfig } from "../../types/config.js";
+import LucidError from "../../utils/errors/lucid-error.js";
+import BrickConfigSchema from "../builders/brick-builder/schema.js";
+import CollectionConfigSchema from "../builders/collection-builder/schema.js";
+import CustomFieldSchema from "../custom-fields/schema.js";
+import { initializeLogger } from "../logger/index.js";
 import checks from "./checks/index.js";
 import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
-import defaultConfig from "../../constants/default-config.js";
-import CollectionConfigSchema from "../builders/collection-builder/schema.js";
-import BrickConfigSchema from "../builders/brick-builder/schema.js";
-import CustomFieldSchema from "../custom-fields/schema.js";
-import { initializeLogger } from "../logger/index.js";
-import type { Config, LucidConfig } from "../../types/config.js";
-import { produce } from "immer";
-import LucidError from "../../utils/errors/lucid-error.js";
-import T from "../../translations/index.js";
 
 let cachedConfig: Config | undefined;
 

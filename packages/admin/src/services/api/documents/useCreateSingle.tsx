@@ -1,8 +1,8 @@
+import type { ErrorResponse, FieldResponse, ResponseBody } from "@types";
+import type { BrickData } from "@/store/brickStore";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { BrickData } from "@/store/brickStore";
-import type { ResponseBody, ErrorResponse, FieldResponse } from "@types";
 
 export interface Params {
 	collectionKey: string;

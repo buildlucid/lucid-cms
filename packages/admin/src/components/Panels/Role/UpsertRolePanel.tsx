@@ -1,4 +1,3 @@
-import T from "@/translations";
 import {
 	type Accessor,
 	type Component,
@@ -7,13 +6,14 @@ import {
 	createSignal,
 	For,
 } from "solid-js";
-import api from "@/services/api";
-import helpers from "@/utils/helpers";
-import { getBodyError } from "@/utils/error-helpers";
-import { Panel } from "@/components/Groups/Panel";
 import SectionHeading from "@/components/Blocks/SectionHeading";
-import { Checkbox, Input } from "@/components/Groups/Form";
 import InputGrid from "@/components/Containers/InputGrid";
+import { Checkbox, Input } from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
+import api from "@/services/api";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
+import helpers from "@/utils/helpers";
 
 interface UpsertRolePanelProps {
 	id?: Accessor<number | undefined>;

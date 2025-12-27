@@ -1,11 +1,11 @@
-import T from "@/translations";
-import type { Component } from "solid-js";
-import type useRowTarget from "@/hooks/useRowTarget";
-import type { TableRowProps } from "@/types/components";
 import type { RoleResponse } from "@types";
-import userStore from "@/store/userStore";
+import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import type useRowTarget from "@/hooks/useRowTarget";
+import userStore from "@/store/userStore";
+import T from "@/translations";
+import type { TableRowProps } from "@/types/components";
 import DateCol from "../Columns/DateCol";
 
 interface RoleRowProps extends TableRowProps {

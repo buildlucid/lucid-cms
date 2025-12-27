@@ -1,6 +1,6 @@
-import { type Component, Switch, Match } from "solid-js";
-import { Td, Th } from "@/components/Groups/Table";
+import { type Component, Match, Switch } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
+import { Td, Th } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
 
 interface SelectColProps {

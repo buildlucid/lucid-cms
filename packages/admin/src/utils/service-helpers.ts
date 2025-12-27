@@ -1,11 +1,11 @@
+import { useMutation, useQueryClient } from "@tanstack/solid-query";
+import type { ErrorResponse } from "@types";
 import type { Accessor } from "solid-js";
 import { createSignal, onCleanup } from "solid-js";
-import { useMutation, useQueryClient } from "@tanstack/solid-query";
-import helpers from "@/utils/helpers";
 import { validateSetError } from "@/utils/error-handling";
-import spawnToast from "@/utils/spawn-toast";
-import type { ErrorResponse } from "@types";
+import helpers from "@/utils/helpers";
 import type { QueryBuilderProps } from "@/utils/query-builder";
+import spawnToast from "@/utils/spawn-toast";
 
 type QueryParamsValueT = Accessor<unknown> | unknown;
 

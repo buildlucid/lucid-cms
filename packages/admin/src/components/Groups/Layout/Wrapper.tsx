@@ -1,5 +1,5 @@
-import type { Component, JSXElement } from "solid-js";
 import classNames from "classnames";
+import type { Component, JSXElement } from "solid-js";
 
 export const Wrapper: Component<{
 	slots?: {

@@ -6,14 +6,14 @@ import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
+import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
+import updateAvailable from "../services/update-available.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
-import updateAvailable from "../services/update-available.js";
-import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 
 const devCommand = async (options?: { watch?: string | boolean }) => {
 	const configPath = getConfigPath(process.cwd());

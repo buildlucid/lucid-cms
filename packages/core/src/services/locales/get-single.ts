@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
-import { LocalesRepository } from "../../libs/repositories/index.js";
 import { localesFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import { LocalesRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { LocalesResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
 	[

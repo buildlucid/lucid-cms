@@ -1,9 +1,9 @@
 import constants from "../../../../constants/constants.js";
 import formatter from "../../../../libs/formatters/index.js";
 import {
+	UserAuthProvidersRepository,
 	UsersRepository,
 	UserTokensRepository,
-	UserAuthProvidersRepository,
 } from "../../../../libs/repositories/index.js";
 import T from "../../../../translations/index.js";
 import type { AuthStateActionType } from "../../../../types.js";

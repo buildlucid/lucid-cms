@@ -1,11 +1,11 @@
-import type { ZodType } from "zod";
-import generateEnvTypes from "./env-type.js";
-import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
-import { join, relative } from "node:path";
-import constants from "../../constants/constants.js";
-import type { GenerateTypesResult } from "./types.js";
 import { writeFile } from "node:fs/promises";
+import { join, relative } from "node:path";
+import type { ZodType } from "zod";
+import constants from "../../constants/constants.js";
 import { logger } from "../../index.js";
+import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
+import generateEnvTypes from "./env-type.js";
+import type { GenerateTypesResult } from "./types.js";
 
 const generateTypes = async (props: {
 	envSchema?: ZodType;

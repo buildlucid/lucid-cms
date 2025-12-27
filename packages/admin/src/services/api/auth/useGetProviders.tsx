@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/solid-query";
+import type { AuthProvidersResponse, ResponseBody } from "@types";
 import request from "@/utils/request";
-import type { ResponseBody, AuthProvidersResponse } from "@types";
 
 // biome-ignore lint/suspicious/noEmptyInterface: explanation
 interface QueryParams {}

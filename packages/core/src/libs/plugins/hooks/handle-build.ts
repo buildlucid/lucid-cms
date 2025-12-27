@@ -1,7 +1,7 @@
-import type { Config } from "../../../types/config.js";
 import type { RuntimeBuildArtifact } from "../../../libs/runtime-adapter/types.js";
-import cliLogger from "../../cli/logger.js";
+import type { Config } from "../../../types/config.js";
 import type { ServiceResponse } from "../../../types.js";
+import cliLogger from "../../cli/logger.js";
 
 /**
  * Responsible for running the plugin build hooks and collecting artifacts

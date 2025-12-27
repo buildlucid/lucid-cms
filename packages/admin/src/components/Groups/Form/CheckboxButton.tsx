@@ -1,6 +1,6 @@
-import type { Component } from "solid-js";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
+import type { Component } from "solid-js";
 
 interface CheckboxButtonProps {
 	id: string;

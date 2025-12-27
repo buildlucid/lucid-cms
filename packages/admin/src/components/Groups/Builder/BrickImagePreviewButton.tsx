@@ -1,7 +1,7 @@
-import { type Component, Show } from "solid-js";
 import type { CollectionBrickConfig } from "@types";
-import brickStore from "@/store/brickStore";
 import { FaSolidInfo } from "solid-icons/fa";
+import { type Component, Show } from "solid-js";
+import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
 
 interface BrickImagePreviewButtonProps {

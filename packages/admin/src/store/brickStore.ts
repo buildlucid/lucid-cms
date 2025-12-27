@@ -1,22 +1,22 @@
-import { batch } from "solid-js";
-import { createStore, produce, unwrap } from "solid-js/store";
-import { nanoid } from "nanoid";
-import equal from "fast-deep-equal/es6";
-import brickHelpers from "@/utils/brick-helpers";
 import type {
-	FieldError,
-	FieldResponse,
-	DocumentResponse,
-	CollectionResponse,
-	FieldResponseValue,
-	FieldRefs,
+	BrickError,
 	CFConfig,
 	CollectionBrickConfig,
-	FieldTypes,
-	BrickError,
+	CollectionResponse,
 	DocumentRef,
+	DocumentResponse,
+	FieldError,
+	FieldRefs,
+	FieldResponse,
+	FieldResponseValue,
+	FieldTypes,
 } from "@types";
+import equal from "fast-deep-equal/es6";
+import { nanoid } from "nanoid";
+import { batch } from "solid-js";
+import { createStore, produce, unwrap } from "solid-js/store";
 import type { FocusState } from "@/hooks/useFocusPreservation";
+import brickHelpers from "@/utils/brick-helpers";
 
 export interface BrickData {
 	ref: string;

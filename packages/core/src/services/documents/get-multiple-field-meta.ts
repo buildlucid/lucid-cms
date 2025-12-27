@@ -1,16 +1,16 @@
-import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import extractCollectionKey from "../../libs/collection/helpers/extract-collection-key.js";
-import {
-	getDocumentVersionTableSchema,
-	getDocumentFieldsTableSchema,
-} from "../../libs/collection/schema/live/schema-filters.js";
 import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import {
+	getDocumentFieldsTableSchema,
+	getDocumentVersionTableSchema,
+} from "../../libs/collection/schema/live/schema-filters.js";
+import type { BrickQueryResponse } from "../../libs/repositories/document-bricks.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type {
 	DocumentVersionType,
 	LucidDocumentTableName,
 } from "../../types.js";
-import type { BrickQueryResponse } from "../../libs/repositories/document-bricks.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 
 const getMultipleFieldMeta: ServiceFn<

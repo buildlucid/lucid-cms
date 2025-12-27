@@ -1,6 +1,6 @@
-import type { ZodObject } from "zod";
-import type { LucidErrorData, LucidDB } from "../../types.js";
 import type { ColumnDataType } from "kysely";
+import type { ZodObject } from "zod";
+import type { LucidDB, LucidErrorData } from "../../types.js";
 
 export type QueryErrorResult = {
 	error: LucidErrorData;

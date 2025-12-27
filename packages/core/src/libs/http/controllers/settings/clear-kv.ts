@@ -4,10 +4,10 @@ import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
-import authenticate from "../../middleware/authenticate.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
-import permissions from "../../middleware/permissions.js";
 import { Permissions } from "../../../permission/definitions.js";
+import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
 

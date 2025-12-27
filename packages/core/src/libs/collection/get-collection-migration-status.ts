@@ -1,11 +1,11 @@
-import migrateCollections from "./migrate-collections.js";
+import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";
+import migrateCollections from "./migrate-collections.js";
 import {
 	getCachedMigrationResult,
 	setCachedMigrationResult,
 } from "./migration/cache.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 
 export type MigrationStatus = {
 	requiresMigration: boolean;

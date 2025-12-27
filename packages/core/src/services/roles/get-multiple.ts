@@ -1,8 +1,8 @@
+import formatter, { rolesFormatter } from "../../libs/formatters/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/roles.js";
-import formatter, { rolesFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import type { RoleResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
 	[

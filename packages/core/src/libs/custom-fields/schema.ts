@@ -1,6 +1,6 @@
 import z from "zod";
-import { stringTranslations } from "../../schemas/locales.js";
 import constants from "../../constants/constants.js";
+import { stringTranslations } from "../../schemas/locales.js";
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const CustomFieldSchema = z.object({

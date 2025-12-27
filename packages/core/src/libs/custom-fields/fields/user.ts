@@ -1,18 +1,18 @@
-import T from "../../../translations/index.js";
 import z from "zod";
+import T from "../../../translations/index.js";
+import type { ServiceResponse } from "../../../types.js";
+import type { UserPropT } from "../../formatters/users.js";
 import CustomField from "../custom-field.js";
-import keyToTitle from "../utils/key-to-title.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	UserReferenceData,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
+	UserReferenceData,
 } from "../types.js";
-import type { ServiceResponse } from "../../../types.js";
-import type { UserPropT } from "../../formatters/users.js";
+import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class UserCustomField extends CustomField<"user"> {
 	type = "user" as const;

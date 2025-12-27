@@ -1,14 +1,14 @@
-import { type Component, Show, createSignal, createMemo } from "solid-js";
-import classnames from "classnames";
-import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
 import type { ErrorResult, FieldError } from "@types";
+import classnames from "classnames";
+import classNames from "classnames";
+import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import {
-	Label,
-	Tooltip,
 	DescribedBy,
 	ErrorMessage,
+	Label,
+	Tooltip,
 } from "@/components/Groups/Form";
-import classNames from "classnames";
 
 export const InputFull: Component<{
 	id: string;

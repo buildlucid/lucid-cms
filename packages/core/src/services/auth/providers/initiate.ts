@@ -6,9 +6,9 @@ import getAvailableProviders from "../../../libs/auth-providers/get-available-pr
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import formatter from "../../../libs/formatters/index.js";
 import {
-	UserTokensRepository,
 	AuthStatesRepository,
 	UsersRepository,
+	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type {

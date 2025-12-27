@@ -1,6 +1,6 @@
 import z from "zod";
-import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 export const queueJobStatusSchema = z.union([
 	z.literal("pending"),

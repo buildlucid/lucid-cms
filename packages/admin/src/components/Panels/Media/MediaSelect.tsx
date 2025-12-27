@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { type Component, createMemo, createSignal, For } from "solid-js";
 import MediaBasicCard, {
 	MediaBasicCardLoading,
@@ -13,7 +14,6 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import mediaSelectStore from "@/store/forms/mediaSelectStore";
 import T from "@/translations";
-import classNames from "classnames";
 
 const MediaSelectPanel: Component = () => {
 	const open = createMemo(() => mediaSelectStore.get.open);

@@ -1,6 +1,6 @@
-import type { Component, JSXElement } from "solid-js";
-import classNames from "classnames";
 import { Dialog } from "@kobalte/core";
+import classNames from "classnames";
+import type { Component, JSXElement } from "solid-js";
 
 interface ModalProps {
 	state: {

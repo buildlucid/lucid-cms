@@ -1,7 +1,7 @@
-import formatter from "./index.js";
 import type { LocalesResponse } from "../../types/response.js";
-import type { LucidLocales, Select } from "../db-adapter/types.js";
 import type { Config } from "../../types.js";
+import type { LucidLocales, Select } from "../db-adapter/types.js";
+import formatter from "./index.js";
 
 const formatMultiple = (props: {
 	locales: Select<LucidLocales>[];

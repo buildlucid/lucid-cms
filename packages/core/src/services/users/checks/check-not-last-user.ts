@@ -1,6 +1,6 @@
-import T from "../../../translations/index.js";
 import formatter from "../../../libs/formatters/index.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkNotLastUser: ServiceFn<[], undefined> = async (context) => {

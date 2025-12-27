@@ -1,3 +1,4 @@
+import type { ComparisonOperatorExpression } from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
 import z from "zod";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
@@ -28,7 +29,6 @@ import type {
 import queryBuilder from "../query-builder/index.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
-import type { ComparisonOperatorExpression } from "kysely";
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join

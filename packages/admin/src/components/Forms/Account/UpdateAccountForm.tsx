@@ -1,9 +1,9 @@
+import { type Component, createMemo, createSignal } from "solid-js";
+import { Form, Input } from "@/components/Groups/Form";
+import api from "@/services/api";
 import T from "@/translations";
-import { type Component, createSignal, createMemo } from "solid-js";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
-import api from "@/services/api";
-import { Form, Input } from "@/components/Groups/Form";
 
 interface UpdateAccountFormProps {
 	firstName: string | undefined;

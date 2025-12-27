@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
-import T from "../../../translations/index.js";
 import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
+import T from "../../../translations/index.js";
 import CustomFieldSchema from "../schema.js";
 import MediaCustomField from "./media.js";
 

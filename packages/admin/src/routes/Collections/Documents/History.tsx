@@ -1,11 +1,11 @@
-import T from "@/translations";
-import { type Component, For, Show, Switch, Match } from "solid-js";
-import { useHistoryState } from "@/hooks/document/useHistoryState";
-import { useHistoryUIState } from "@/hooks/document/useHistoryUIState";
+import { type Component, For, Match, Show, Switch } from "solid-js";
 import { HeaderBar } from "@/components/Groups/PageBuilder";
-import Button from "@/components/Partials/Button";
 import TimelineCardWrapper from "@/components/Groups/PageBuilder/History/TimelineCard";
 import TimelineDetails from "@/components/Groups/PageBuilder/History/TimelineDetails";
+import Button from "@/components/Partials/Button";
+import { useHistoryState } from "@/hooks/document/useHistoryState";
+import { useHistoryUIState } from "@/hooks/document/useHistoryUIState";
+import T from "@/translations";
 
 const CollectionsDocumentsHistoryRoute: Component = () => {
 	// ----------------------------------

@@ -1,15 +1,15 @@
+import type { CFConfig, FieldError, FieldResponse, MediaRef } from "@types";
 import {
-	type Component,
-	createSignal,
-	createMemo,
 	batch,
+	type Component,
 	createEffect,
+	createMemo,
+	createSignal,
 } from "solid-js";
-import type { CFConfig, MediaRef, FieldResponse, FieldError } from "@types";
+import { MediaSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { MediaSelect } from "@/components/Groups/Form";
 
 interface MediaFieldProps {
 	state: {

@@ -1,9 +1,9 @@
-import type { Component } from "solid-js";
-import type { TableRowProps } from "@/types/components";
 import type { UserLoginResponse } from "@types";
+import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import type { TableRowProps } from "@/types/components";
 import DateCol from "../Columns/DateCol";
 
 interface UserLoginRowProps extends TableRowProps {

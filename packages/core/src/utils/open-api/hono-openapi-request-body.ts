@@ -1,5 +1,5 @@
-import z, { type ZodType } from "zod";
 import type { OpenAPIV3 } from "openapi-types";
+import z, { type ZodType } from "zod";
 
 const honoOpenAPIRequestBody = (
 	schema: ZodType,

@@ -1,9 +1,9 @@
-import { DocumentsRepository } from "../../libs/repositories/index.js";
-import { collectionsFormatter } from "../../libs/formatters/index.js";
 import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { CollectionResponse } from "../../types/response.js";
 import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import { collectionsFormatter } from "../../libs/formatters/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
+import type { CollectionResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<
 	[

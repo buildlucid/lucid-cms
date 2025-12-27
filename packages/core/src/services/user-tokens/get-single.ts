@@ -1,7 +1,7 @@
-import T from "../../translations/index.js";
-import { UserTokensRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import type { UserTokenType } from "../../libs/db-adapter/types.js";
+import { UserTokensRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
 	[

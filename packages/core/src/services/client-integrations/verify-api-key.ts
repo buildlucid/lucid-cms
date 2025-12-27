@@ -1,12 +1,12 @@
-import T from "../../translations/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
-import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
-import formatter from "../../libs/formatters/index.js";
-import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import constants from "../../constants/constants.js";
-import { decodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import formatter from "../../libs/formatters/index.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { LucidClientIntegrationAuth } from "../../types/hono.js";
+import { decodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
+import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const verifyApiKey: ServiceFn<
 	[

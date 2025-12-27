@@ -1,6 +1,6 @@
 import type {
-	TableType,
 	CollectionSchemaTable,
+	TableType,
 } from "../../../libs/collection/schema/types.js";
 import type { InferredTable, ServiceResponse } from "../../../types.js";
 import inferTableType from "./infer-table-type.js";

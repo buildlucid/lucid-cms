@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import BrickBuilder from "./index.js";
 import FieldBuilder from "../field-builder/index.js";
+import BrickBuilder from "./index.js";
 
 test("all brick fields are added", async () => {
 	const brick = new BrickBuilder("brick")

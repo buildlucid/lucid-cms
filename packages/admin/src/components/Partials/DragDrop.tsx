@@ -1,8 +1,8 @@
 import {
-	type Component,
-	type JSXElement,
 	type Accessor,
+	type Component,
 	createSignal,
+	type JSXElement,
 	onMount,
 } from "solid-js";
 

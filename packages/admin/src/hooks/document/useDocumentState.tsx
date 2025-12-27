@@ -1,13 +1,13 @@
-import T from "@/translations";
-import { useParams, useNavigate } from "@solidjs/router";
-import { type Accessor, createMemo } from "solid-js";
+import { useNavigate, useParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import helpers from "@/utils/helpers";
-import api from "@/services/api";
 import type { DocumentVersionType } from "@types";
-import brickStore from "@/store/brickStore";
 import objectHash from "object-hash";
+import { type Accessor, createMemo } from "solid-js";
+import api from "@/services/api";
+import brickStore from "@/store/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";

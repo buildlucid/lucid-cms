@@ -1,14 +1,14 @@
-import T from "@/translations";
 import {
 	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
-	createEffect,
 } from "solid-js";
-import { Panel } from "@/components/Groups/Panel";
 import { Input, Select } from "@/components/Groups/Form";
+import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
+import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
 const CreateMediaFolderPanel: Component<{

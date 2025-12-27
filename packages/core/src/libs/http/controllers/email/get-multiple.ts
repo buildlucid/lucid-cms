@@ -1,21 +1,21 @@
-import z from "zod";
-import T from "../../../../translations/index.js";
 import { createFactory } from "hono/factory";
-import { controllerSchemas } from "../../../../schemas/email.js";
 import { describeRoute } from "hono-openapi";
+import z from "zod";
+import { controllerSchemas } from "../../../../schemas/email.js";
 import { emailServices } from "../../../../services/index.js";
-import formatAPIResponse from "../../utils/build-response.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
-import permissions from "../../middleware/permissions.js";
-import { Permissions } from "../../../permission/definitions.js";
+import formatAPIResponse from "../../utils/build-response.js";
 
 const factory = createFactory();
 

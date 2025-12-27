@@ -1,7 +1,7 @@
-import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
+import type { Accessor, Component } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
+import T from "@/translations";
 
 interface TriggerPasswordResetProps {
 	id: Accessor<number | undefined>;

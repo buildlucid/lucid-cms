@@ -1,7 +1,7 @@
-import T from "@/translations";
-import { type Component, type JSX, createMemo } from "solid-js";
-import classnames from "classnames";
 import { A } from "@solidjs/router";
+import classnames from "classnames";
+import { type Component, createMemo, type JSX } from "solid-js";
+import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
 interface LinkProps extends JSX.HTMLAttributes<HTMLAnchorElement> {

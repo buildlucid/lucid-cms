@@ -1,13 +1,13 @@
-import T from "@/translations/index";
-import classNames from "classnames";
-import { type Component, createMemo, Show, Switch, Match, For } from "solid-js";
 import type { CFConfig, FieldError, FieldResponse } from "@types";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import brickStore from "@/store/brickStore";
-import helpers from "@/utils/helpers";
+import classNames from "classnames";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
+import brickStore from "@/store/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations/index";
+import helpers from "@/utils/helpers";
 
 interface RepeaterFieldProps {
 	state: {

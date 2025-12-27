@@ -1,9 +1,9 @@
+export { default as authorizeShare } from "./authorize-share.js";
 export { default as createSingle } from "./create-single.js";
-export { default as getMultiple } from "./get-multiple.js";
-export { default as updateSingle } from "./update-single.js";
-export { default as deleteSingle } from "./delete-single.js";
-export { default as deleteMultiple } from "./delete-multiple.js";
 export { default as deleteAll } from "./delete-all.js";
+export { default as deleteMultiple } from "./delete-multiple.js";
+export { default as deleteSingle } from "./delete-single.js";
+export { default as getMultiple } from "./get-multiple.js";
 export { default as getSingle } from "./get-single.js";
 export { default as streamMedia } from "./stream-media.js";
-export { default as authorizeShare } from "./authorize-share.js";
+export { default as updateSingle } from "./update-single.js";

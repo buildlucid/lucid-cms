@@ -1,20 +1,20 @@
-import { Show, type Component, createMemo } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import NavigationGuard from "@/components/Modals/NavigationGuard";
-import MediaSelectModal from "@/components/Panels/Media/MediaSelect";
-import DocumentSelectModal from "@/components/Panels/Documents/DocumentSelect";
-import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
+import type { CollectionResponse } from "@types";
+import { type Component, createMemo, Show } from "solid-js";
 import BrickImagePreview from "@/components/Modals/Bricks/ImagePreview";
+import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment";
 import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
+import NavigationGuard from "@/components/Modals/NavigationGuard";
+import DocumentSelectModal from "@/components/Panels/Documents/DocumentSelect";
+import MediaSelectModal from "@/components/Panels/Media/MediaSelect";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/document/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/document/useNavigationGuard";
-import type { CollectionResponse } from "@types";
-import { getDocumentRoute } from "@/utils/route-helpers";
 import helpers from "@/utils/helpers";
+import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const Modals: Component<{
 	hooks: {

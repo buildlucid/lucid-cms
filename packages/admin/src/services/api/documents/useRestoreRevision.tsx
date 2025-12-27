@@ -1,7 +1,7 @@
+import type { ErrorResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, ErrorResponse } from "@types";
 
 export interface Params {
 	id: number;

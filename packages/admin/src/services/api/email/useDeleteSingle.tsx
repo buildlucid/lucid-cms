@@ -1,7 +1,7 @@
+import type { EmailResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, EmailResponse } from "@types";
 
 interface Params {
 	id: number;

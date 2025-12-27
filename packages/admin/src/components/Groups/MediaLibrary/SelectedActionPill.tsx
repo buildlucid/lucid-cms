@@ -1,6 +1,6 @@
-import T from "@/translations";
-import { createMemo, Show, type Component } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import Button from "@/components/Partials/Button";
+import T from "@/translations";
 
 export const SelectedActionPill: Component<{
 	state: {

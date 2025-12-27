@@ -1,13 +1,13 @@
-import T from "@/translations";
+import { useQueryClient } from "@tanstack/solid-query";
 import { type Component, createSignal } from "solid-js";
-import userStore from "@/store/userStore";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import { UserList } from "@/components/Groups/Content";
+import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
-import { Wrapper } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
-import { UserList } from "@/components/Groups/Content";
-import { useQueryClient } from "@tanstack/solid-query";
+import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 
 const UsersListRoute: Component = () => {
 	// ----------------------------------

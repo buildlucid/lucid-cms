@@ -2,8 +2,8 @@ import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
 import formatter from "../../../libs/formatters/index.js";
 import {
-	UserTokensRepository,
 	UsersRepository,
+	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import { generateSecret } from "../../../utils/helpers/index.js";

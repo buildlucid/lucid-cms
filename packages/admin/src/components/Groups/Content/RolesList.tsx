@@ -1,15 +1,15 @@
-import T from "@/translations";
+import { FaSolidCalendar, FaSolidT } from "solid-icons/fa";
 import { type Component, Index } from "solid-js";
-import { FaSolidT, FaSolidCalendar } from "solid-icons/fa";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import api from "@/services/api";
-import useRowTarget from "@/hooks/useRowTarget";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table";
-import RoleRow from "@/components/Tables/Rows/RoleRow";
-import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import DeleteRole from "@/components/Modals/Role/DeleteRole";
+import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
+import RoleRow from "@/components/Tables/Rows/RoleRow";
+import useRowTarget from "@/hooks/useRowTarget";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import api from "@/services/api";
+import T from "@/translations";
 
 export const RolesList: Component<{
 	state: {

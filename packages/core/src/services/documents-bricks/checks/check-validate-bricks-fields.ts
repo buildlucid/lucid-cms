@@ -1,21 +1,21 @@
-import T from "../../../translations/index.js";
-import logger from "../../../libs/logger/index.js";
 import constants from "../../../constants/constants.js";
-import fetchValidationData, {
-	type ValidationData,
-} from "../helpers/fetch-validation-data.js";
-import type { FieldTypes } from "../../../libs/custom-fields/types.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import type CustomField from "../../../libs/custom-fields/custom-field.js";
+import type { FieldTypes } from "../../../libs/custom-fields/types.js";
+import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import T from "../../../translations/index.js";
 import type {
 	BrickError,
 	FieldError,
 	FieldInputSchema,
 	GroupError,
 } from "../../../types.js";
-import type CustomField from "../../../libs/custom-fields/custom-field.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import fetchValidationData, {
+	type ValidationData,
+} from "../helpers/fetch-validation-data.js";
 
 const checkValidateBricksFields: ServiceFn<
 	[

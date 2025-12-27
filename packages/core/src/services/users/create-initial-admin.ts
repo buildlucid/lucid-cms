@@ -1,9 +1,9 @@
-import T from "../../translations/index.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
-import constants from "../../constants/constants.js";
-import generateSecret from "../../utils/helpers/generate-secret.js";
-import formatter from "../../libs/formatters/index.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
+import constants from "../../constants/constants.js";
+import formatter from "../../libs/formatters/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import generateSecret from "../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createInitialAdmin: ServiceFn<

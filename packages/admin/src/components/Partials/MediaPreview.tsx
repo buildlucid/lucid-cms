@@ -1,12 +1,12 @@
-import { type Component, Switch, Match } from "solid-js";
-import {
-	FaSolidFileZipper,
-	FaSolidFileAudio,
-	FaSolidFileVideo,
-	FaSolidFile,
-	FaSolidFileLines,
-} from "solid-icons/fa";
 import type { MediaResponse } from "@types";
+import {
+	FaSolidFile,
+	FaSolidFileAudio,
+	FaSolidFileLines,
+	FaSolidFileVideo,
+	FaSolidFileZipper,
+} from "solid-icons/fa";
+import { type Component, Match, Switch } from "solid-js";
 import Image from "@/components/Partials/Image";
 
 interface MediaPreviewProps {

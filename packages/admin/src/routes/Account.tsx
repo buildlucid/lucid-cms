@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { createMemo, type Component } from "solid-js";
-import userStore from "@/store/userStore";
+import { type Component, createMemo } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
+import { Account } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
-import { Account } from "@/components/Groups/Content";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 
 const AccountRoute: Component = () => {
 	// ----------------------------------------

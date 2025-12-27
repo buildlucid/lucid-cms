@@ -1,11 +1,11 @@
 import constants from "../../../constants/constants.js";
-import FieldBuilder from "../field-builder/index.js";
-import type BrickBuilder from "../brick-builder/index.js";
 import type { CFProps } from "../../custom-fields/types.js";
+import type BrickBuilder from "../brick-builder/index.js";
+import FieldBuilder from "../field-builder/index.js";
 import type {
+	CollectionBrickConfig,
 	CollectionConfigSchemaType,
 	CollectionData,
-	CollectionBrickConfig,
 	DisplayInListing,
 } from "./types.js";
 

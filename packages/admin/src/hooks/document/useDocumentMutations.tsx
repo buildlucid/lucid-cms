@@ -1,19 +1,19 @@
+import { useNavigate } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
+import type {
+	BrickError,
+	CollectionResponse,
+	DocumentResponse,
+	DocumentVersionType,
+	FieldError,
+} from "@types";
+import { type Accessor, createSignal } from "solid-js";
+import { useFocusPreservation } from "@/hooks/useFocusPreservation";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import { useNavigate } from "@solidjs/router";
-import { useQueryClient } from "@tanstack/solid-query";
-import { useFocusPreservation } from "@/hooks/useFocusPreservation";
-import { createSignal, type Accessor } from "solid-js";
-import type {
-	BrickError,
-	CollectionResponse,
-	DocumentResponse,
-	FieldError,
-	DocumentVersionType,
-} from "@types";
 
 export function useDocumentMutations(props: {
 	collection: Accessor<CollectionResponse | undefined>;

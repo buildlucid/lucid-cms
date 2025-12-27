@@ -1,8 +1,8 @@
 import constants from "../../constants/constants.js";
-import logger from "../logger/index.js";
 import type { Config } from "../../types/config.js";
-import type { EmailAdapterInstance } from "./types.js";
+import logger from "../logger/index.js";
 import passthroughEmailAdapter from "./adapters/passthrough.js";
+import type { EmailAdapterInstance } from "./types.js";
 
 /**
  * Get the preferred email adapter. Falls back to passthrough adapter.

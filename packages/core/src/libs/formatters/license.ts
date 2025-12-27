@@ -1,5 +1,5 @@
-import type { BooleanInt } from "../../types.js";
 import type { LicenseResponse } from "../../types/response.js";
+import type { BooleanInt } from "../../types.js";
 import formatter from "./index.js";
 
 interface LicensePropsT {

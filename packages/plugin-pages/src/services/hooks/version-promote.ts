@@ -1,22 +1,22 @@
+import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
+import type { PluginOptionsInternal } from "../../types/types.js";
+import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import {
+	checkCircularParents,
 	checkDuplicateSlugParents,
 	checkFieldsExist,
-	checkCircularParents,
 } from "../checks/index.js";
+import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 import {
-	getTargetCollection,
-	getParentFields,
 	constructParentFullSlug,
-	setFullSlug,
 	getDocumentVersionFields,
+	getParentFields,
+	getTargetCollection,
+	setFullSlug,
 	updateFullSlugFields,
 } from "../index.js";
-import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import afterUpsertHandler from "./after-upsert-handler.js";
-import type { PluginOptionsInternal } from "../../types/types.js";
-import type { LucidHookDocuments } from "@lucidcms/core/types";
-import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 
 const versionPromoteHandler =
 	(

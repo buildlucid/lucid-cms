@@ -1,7 +1,7 @@
 import mime from "mime-types";
 import {
-	MediaRepository,
 	MediaAwaitingSyncRepository,
+	MediaRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { generateKey } from "../../utils/media/index.js";

@@ -1,6 +1,6 @@
 import z from "zod";
-import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const userResponsePermissionSchema = z.string().meta({
 	description: "A permission identifier",

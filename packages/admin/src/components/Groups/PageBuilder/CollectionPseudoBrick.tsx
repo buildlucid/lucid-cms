@@ -1,7 +1,7 @@
+import type { CFConfig, CollectionResponse, FieldTypes } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
-import type { CFConfig, FieldTypes, CollectionResponse } from "@types";
-import brickStore, { type BrickData } from "@/store/brickStore";
 import { BrickBody } from "@/components/Groups/Builder";
+import brickStore, { type BrickData } from "@/store/brickStore";
 
 interface CollectionPseudoBrickProps {
 	fields: CFConfig<FieldTypes>[];

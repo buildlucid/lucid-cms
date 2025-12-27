@@ -1,30 +1,30 @@
-import {
-	InputField,
-	RepeaterField,
-	WYSIWYGField,
-	UserField,
-	DocumentField,
-	CheckboxField,
-	ColorField,
-	JSONField,
-	LinkField,
-	MediaField,
-	SelectField,
-	TextareaField,
-} from "@/components/Groups/Builder/CustomFields";
-import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
-import brickStore from "@/store/brickStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import type { CFConfig, FieldError, FieldResponse, FieldTypes } from "@types";
 import classNames from "classnames";
 import {
 	type Component,
+	createMemo,
 	Index,
 	Match,
 	Show,
 	Switch,
-	createMemo,
 } from "solid-js";
+import {
+	CheckboxField,
+	ColorField,
+	DocumentField,
+	InputField,
+	JSONField,
+	LinkField,
+	MediaField,
+	RepeaterField,
+	SelectField,
+	TextareaField,
+	UserField,
+	WYSIWYGField,
+} from "@/components/Groups/Builder/CustomFields";
+import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
+import brickStore from "@/store/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore";
 
 interface DynamicFieldProps {
 	state: {

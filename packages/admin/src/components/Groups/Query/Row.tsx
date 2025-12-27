@@ -1,20 +1,20 @@
-import T from "@/translations";
-import {
-	type Component,
-	Show,
-	type JSX,
-	type Accessor,
-	createSignal,
-	createMemo,
-} from "solid-js";
-import { FaSolidXmark, FaSolidArrowsRotate } from "solid-icons/fa";
 import classNames from "classnames";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import { FaSolidArrowsRotate, FaSolidXmark } from "solid-icons/fa";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	createSignal,
+	type JSX,
+	Show,
+} from "solid-js";
+import { CheckboxButton } from "@/components/Groups/Form";
+import { Filter, PerPage, Sort } from "@/components/Groups/Query";
 import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
-import { PerPage, Filter, Sort } from "@/components/Groups/Query";
 import Button from "@/components/Partials/Button";
-import { CheckboxButton } from "@/components/Groups/Form";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 interface QueryRowProps {
 	filters?: FilterProps["filters"];

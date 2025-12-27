@@ -1,15 +1,15 @@
-import type { MediaFolderResponse } from "@types";
-import { FaSolidFolder } from "solid-icons/fa";
-import { type Accessor, createMemo, Show, type Component } from "solid-js";
-import userStore from "@/store/userStore";
-import mediaStore from "@/store/mediaStore";
 import { useLocation, useNavigate } from "@solidjs/router";
-import { Checkbox } from "@/components/Groups/Form";
 import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
+import type { MediaFolderResponse } from "@types";
 import classNames from "classnames";
-import T from "@/translations";
+import { FaSolidFolder } from "solid-icons/fa";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import { Checkbox } from "@/components/Groups/Form";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import type useRowTarget from "@/hooks/useRowTarget";
+import mediaStore from "@/store/mediaStore";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 
 export const MediaFolderCardLoading: Component = () => {
 	// ----------------------------------

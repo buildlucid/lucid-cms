@@ -1,6 +1,6 @@
-import { type Component, type JSXElement, createMemo } from "solid-js";
 import { Navigate } from "@solidjs/router";
 import type { Permission } from "@types";
+import { type Component, createMemo, type JSXElement } from "solid-js";
 import userStore from "@/store/userStore";
 
 interface PermissionGuardProps {

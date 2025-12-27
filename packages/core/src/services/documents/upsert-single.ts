@@ -1,9 +1,9 @@
-import T from "../../translations/index.js";
-import { DocumentsRepository } from "../../libs/repositories/index.js";
-import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
+import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentServices, documentVersionServices } from "../index.js";
 

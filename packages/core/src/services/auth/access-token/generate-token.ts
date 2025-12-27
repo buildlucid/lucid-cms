@@ -1,13 +1,13 @@
-import constants from "../../../constants/constants.js";
+import { randomBytes } from "node:crypto";
+import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
-import { UsersRepository } from "../../../libs/repositories/index.js";
+import constants from "../../../constants/constants.js";
 import formatter, {
 	userPermissionsFormatter,
 } from "../../../libs/formatters/index.js";
-import { setCookie } from "hono/cookie";
-import { randomBytes } from "node:crypto";
-import type { ServiceResponse } from "../../../utils/services/types.js";
+import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
+import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const generateToken = async (
 	c: LucidHonoContext,

@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, Show, createMemo } from "solid-js";
-import classNames from "classnames";
-import userStore from "@/store/userStore";
-import ActionDropdown from "./ActionDropdown";
-import type useRowTarget from "@/hooks/useRowTarget";
 import type { ClientIntegrationResponse } from "@types";
+import classNames from "classnames";
+import { type Component, createMemo, Show } from "solid-js";
+import type useRowTarget from "@/hooks/useRowTarget";
+import userStore from "@/store/userStore";
+import T from "@/translations";
+import ActionDropdown from "./ActionDropdown";
 
 interface ClientIntegrationRow {
 	clientIntegration: ClientIntegrationResponse;

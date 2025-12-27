@@ -1,6 +1,6 @@
 import T from "../../../translations/index.js";
-import errorTypeDefaults from "../../errors/error-type-defaults.js";
 import type { LucidErrorData } from "../../../types/errors.js";
+import errorTypeDefaults from "../../errors/error-type-defaults.js";
 
 const mergeServiceError = (
 	error: LucidErrorData,

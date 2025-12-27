@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, For, Switch, createMemo, Match } from "solid-js";
-import { FaSolidSort, FaSolidCaretUp, FaSolidMinus } from "solid-icons/fa";
-import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
 import { DropdownMenu } from "@kobalte/core";
-import DropdownContent from "@/components/Partials/DropdownContent";
 import classNames from "classnames";
+import { FaSolidCaretUp, FaSolidMinus, FaSolidSort } from "solid-icons/fa";
+import { type Component, createMemo, For, Match, Switch } from "solid-js";
+import DropdownContent from "@/components/Partials/DropdownContent";
+import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 interface SortItemProps {
 	sort: {

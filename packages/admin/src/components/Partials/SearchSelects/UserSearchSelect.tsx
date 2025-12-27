@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, createMemo, createSignal } from "solid-js";
-import type { ValueT, SelectProps } from "@/components/Groups/Form/Select";
 import type { ErrorResult, FieldError } from "@types";
-import api from "@/services/api";
-import helpers from "@/utils/helpers";
+import { type Component, createMemo, createSignal } from "solid-js";
 import { Select } from "@/components/Groups/Form";
+import type { SelectProps, ValueT } from "@/components/Groups/Form/Select";
+import api from "@/services/api";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 interface UserSearchSelectProps {
 	value: ValueT;

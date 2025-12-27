@@ -1,7 +1,7 @@
 import merge from "lodash.merge";
-import type { Config } from "../../types/config.js";
-import type { HookServiceHandlers, ArgumentsType } from "../../types/hooks.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import type { Config } from "../../types/config.js";
+import type { ArgumentsType, HookServiceHandlers } from "../../types/hooks.js";
 import type { ServiceResponse } from "../services/types.js";
 
 const executeHooks = async <

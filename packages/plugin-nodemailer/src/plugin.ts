@@ -1,9 +1,9 @@
-import T from "./translations/index.js";
-import verifyTransporter from "./utils/verify-transporter.js";
-import isValidData from "./utils/is-valid-data.js";
-import { PLUGIN_KEY, LUCID_VERSION, PLUGIN_IDENTIFIER } from "./constants.js";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
+import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
+import T from "./translations/index.js";
 import type { PluginOptions } from "./types/types.js";
+import isValidData from "./utils/is-valid-data.js";
+import verifyTransporter from "./utils/verify-transporter.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return {

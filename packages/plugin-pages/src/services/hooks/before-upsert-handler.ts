@@ -1,20 +1,20 @@
+import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
+import type { PluginOptionsInternal } from "../../types/types.js";
 import {
-	checkDuplicateSlugParents,
-	checkRootSlugWithParent,
-	checkParentIsPageOfSelf,
-	checkFieldsExist,
 	checkCircularParents,
+	checkDuplicateSlugParents,
+	checkFieldsExist,
+	checkParentIsPageOfSelf,
+	checkRootSlugWithParent,
 } from "../checks/index.js";
+import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 import {
-	getTargetCollection,
-	getParentFields,
 	constructParentFullSlug,
+	getParentFields,
+	getTargetCollection,
 	setFullSlug,
 } from "../index.js";
-import type { PluginOptionsInternal } from "../../types/types.js";
-import type { LucidHookDocuments } from "@lucidcms/core/types";
-import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 
 const beforeUpsertHandler =
 	(

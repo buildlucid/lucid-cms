@@ -1,9 +1,9 @@
-import T from "@/translations";
 import type { Component } from "solid-js";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import { Wrapper } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
 import { CollectionsList } from "@/components/Groups/Content";
+import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
+import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 const CollectionsListRoute: Component = () => {
 	// ----------------------------------

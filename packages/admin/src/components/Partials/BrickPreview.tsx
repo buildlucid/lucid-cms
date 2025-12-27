@@ -1,8 +1,8 @@
-import type { Component } from "solid-js";
 import brickPlaceholder from "@assets/images/brick-placeholder.jpg";
 import { Image } from "@kobalte/core";
-import AspectRatio from "@/components/Partials/AspectRatio";
 import classNames from "classnames";
+import type { Component } from "solid-js";
+import AspectRatio from "@/components/Partials/AspectRatio";
 
 interface BrickPreviewProps {
 	data: {

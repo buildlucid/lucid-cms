@@ -1,16 +1,16 @@
-import T from "@/translations";
+import type { ResponseBody } from "@types";
+import { FaSolidChevronLeft, FaSolidChevronRight } from "solid-icons/fa";
 import {
 	type Component,
-	Show,
-	Switch,
 	createEffect,
 	createMemo,
 	createSignal,
 	Match,
+	Show,
+	Switch,
 } from "solid-js";
-import { FaSolidChevronLeft, FaSolidChevronRight } from "solid-icons/fa";
-import type { ResponseBody } from "@types";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 export const SimplifiedPagination: Component<{
 	state: {

@@ -1,8 +1,8 @@
-import T from "@/translations";
-import { type Component, type Accessor, createMemo } from "solid-js";
+import type { CollectionResponse } from "@types";
+import { type Accessor, type Component, createMemo } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
-import type { CollectionResponse } from "@types";
+import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 interface DeleteDocumentPermanentlyProps {

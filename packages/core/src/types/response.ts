@@ -12,6 +12,7 @@ import type {
 	FieldTypes,
 } from "../libs/custom-fields/types.js";
 import type { DocumentVersionType } from "../libs/db-adapter/types.js";
+import type { Permission } from "../libs/permission/types.js";
 import type {
 	QueueEvent,
 	QueueJobStatus,
@@ -21,7 +22,6 @@ import type { OptionsName } from "../schemas/options.js";
 import type { AuthProvider, EmailDeliveryStatus, EmailType } from "../types.js";
 import type { ErrorResult } from "./errors.js";
 import type { LocaleValue } from "./shared.js";
-import type { Permission } from "../libs/permission/types.js";
 
 export type UserPermissionsResponse = {
 	roles: Array<{

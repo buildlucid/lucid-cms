@@ -1,4 +1,5 @@
 import type z from "zod";
+
 export type { FieldInputSchema } from "../schemas/collection-fields.js";
 
 export type ControllerSchema = {

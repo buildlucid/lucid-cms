@@ -1,6 +1,6 @@
 import z from "zod";
-import type { BuildHandler, ServeHandler } from "./types.js";
 import type { CLILogger } from "../cli/logger.js";
+import type { BuildHandler, ServeHandler } from "./types.js";
 
 const ServeHandlerSchema = z.custom<ServeHandler>(
 	(data) => typeof data === "function",

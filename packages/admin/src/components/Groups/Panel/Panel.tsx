@@ -1,24 +1,24 @@
-import T from "@/translations";
-import {
-	type Component,
-	type JSXElement,
-	Show,
-	createSignal,
-	Switch,
-	Match,
-	createEffect,
-	type Accessor,
-} from "solid-js";
-import { FaSolidXmark } from "solid-icons/fa";
 import notifyIllustration from "@assets/illustrations/notify.svg";
-import type { ErrorResponse } from "@types";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import { Dialog } from "@kobalte/core";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
-import Button from "@/components/Partials/Button";
-import ErrorMessage from "@/components/Partials/ErrorMessage";
-import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
+import type { ErrorResponse } from "@types";
 import classNames from "classnames";
+import { FaSolidXmark } from "solid-icons/fa";
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createSignal,
+	type JSXElement,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
+import Button from "@/components/Partials/Button";
+import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
+import ErrorMessage from "@/components/Partials/ErrorMessage";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations";
 
 export const Panel: Component<{
 	state: {

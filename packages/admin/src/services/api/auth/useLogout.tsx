@@ -1,10 +1,10 @@
-import T from "@/translations";
 import { useNavigate } from "@solidjs/router";
+import type { ResponseBody } from "@types";
 import userStore from "@/store/userStore";
+import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import { clearCsrfSession } from "./useCsrf";
-import type { ResponseBody } from "@types";
 
 export const logoutReq = () => {
 	return request<

@@ -1,6 +1,6 @@
-import formatter from "./index.js";
-import type { LucidOptions, Select } from "../db-adapter/types.js";
 import type { OptionsResponse } from "../../types/response.js";
+import type { LucidOptions, Select } from "../db-adapter/types.js";
+import formatter from "./index.js";
 
 const formatMultiple = (props: {
 	options: Select<LucidOptions>[];

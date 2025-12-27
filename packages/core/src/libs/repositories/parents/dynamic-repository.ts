@@ -1,14 +1,14 @@
-import BaseRepository from "./base-repository.js";
+import type {
+	Insert,
+	LucidDB,
+	Select,
+	Update,
+} from "../../db-adapter/types.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../../query-builder/index.js";
-import type {
-	Select,
-	Insert,
-	Update,
-	LucidDB,
-} from "../../db-adapter/types.js";
-import type { QueryProps, DynamicConfig } from "../types.js";
+import type { DynamicConfig, QueryProps } from "../types.js";
+import BaseRepository from "./base-repository.js";
 
 abstract class DynamicRepository<
 	Table extends keyof LucidDB,

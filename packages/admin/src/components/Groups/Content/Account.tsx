@@ -1,4 +1,5 @@
-import T, { getLocale, setLocale, localesConfig } from "@/translations";
+import { useLocation, useNavigate } from "@solidjs/router";
+import type { SupportedLocales, UserResponse } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -7,19 +8,18 @@ import {
 	For,
 	Show,
 } from "solid-js";
-import { useLocation, useNavigate } from "@solidjs/router";
-import userStore from "@/store/userStore";
-import { DynamicContent } from "@/components/Groups/Layout";
 import InfoRow from "@/components/Blocks/InfoRow";
 import UpdateAccountForm from "@/components/Forms/Account/UpdateAccountForm";
 import { Select } from "@/components/Groups/Form";
+import { DynamicContent } from "@/components/Groups/Layout";
+import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import Button from "@/components/Partials/Button";
-import api from "@/services/api";
-import spawnToast from "@/utils/spawn-toast";
 import constants from "@/constants";
-import type { SupportedLocales, UserResponse } from "@types";
-import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
+import api from "@/services/api";
+import userStore from "@/store/userStore";
+import T, { getLocale, localesConfig, setLocale } from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 export const Account: Component = () => {
 	// ----------------------------------------

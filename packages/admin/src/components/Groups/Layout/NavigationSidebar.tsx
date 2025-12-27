@@ -1,16 +1,16 @@
-import T from "@/translations";
+import LogoIcon from "@assets/svgs/text-logo-dark.svg";
+import { A } from "@solidjs/router";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import { IconLinkFull } from "@/components/Groups/Navigation";
+import UserDisplay from "@/components/Partials/UserDisplay";
 import api from "@/services/api";
+import userStore from "@/store/userStore";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
+import { getDocumentRoute } from "@/utils/route-helpers";
 import packageJson from "../../../../../../packages/core/package.json" with {
 	type: "json",
 };
-import { A } from "@solidjs/router";
-import LogoIcon from "@assets/svgs/text-logo-dark.svg";
-import userStore from "@/store/userStore";
-import { IconLinkFull } from "@/components/Groups/Navigation";
-import UserDisplay from "@/components/Partials/UserDisplay";
-import helpers from "@/utils/helpers";
-import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const NavigationSidebar: Component = () => {
 	// ----------------------------------------

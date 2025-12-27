@@ -1,5 +1,6 @@
-import { type Component, For } from "solid-js";
 import { A } from "@solidjs/router";
+import { type Component, For } from "solid-js";
+
 // Components
 
 interface NavigationTabsProps {

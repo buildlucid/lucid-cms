@@ -1,7 +1,7 @@
 import {
 	MediaRepository,
-	ProcessedImagesRepository,
 	OptionsRepository,
+	ProcessedImagesRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

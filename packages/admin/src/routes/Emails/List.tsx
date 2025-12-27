@@ -1,11 +1,11 @@
-import T from "@/translations";
-import type { Component } from "solid-js";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import { QueryRow } from "@/components/Groups/Query";
-import { Wrapper } from "@/components/Groups/Layout";
-import { Standard } from "@/components/Groups/Headers";
-import { EmailsList } from "@/components/Groups/Content";
 import { useQueryClient } from "@tanstack/solid-query";
+import type { Component } from "solid-js";
+import { EmailsList } from "@/components/Groups/Content";
+import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
+import { QueryRow } from "@/components/Groups/Query";
+import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 const EmailListRoute: Component = () => {
 	// ----------------------------------

@@ -1,6 +1,6 @@
-import { type Component, Switch, Match, Show } from "solid-js";
-import helpers from "@/utils/helpers";
 import classNames from "classnames";
+import { type Component, Match, Show, Switch } from "solid-js";
+import helpers from "@/utils/helpers";
 
 interface UserDisplayProps {
 	user: {

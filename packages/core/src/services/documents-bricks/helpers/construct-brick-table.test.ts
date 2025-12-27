@@ -1,9 +1,9 @@
-import { expect, test, describe } from "vitest";
-import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
-import aggregateBrickTables from "./aggregate-brick-tables.js";
-import type { FieldInputSchema } from "../../../types.js";
+import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../types.js";
+import aggregateBrickTables from "./aggregate-brick-tables.js";
 
 const TEST_CONFIG = {
 	localization: {

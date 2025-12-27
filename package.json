@@ -12,6 +12,8 @@
         "format:fix": "turbo run format:fix",
         "lint": "turbo run lint",
         "lint:fix": "turbo run lint:fix",
+        "check": "turbo run check",
+        "check:fix": "turbo run check:fix",
         "prepare": "husky"
     },
     "devDependencies": {

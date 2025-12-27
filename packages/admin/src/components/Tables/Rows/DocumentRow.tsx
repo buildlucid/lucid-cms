@@ -1,21 +1,21 @@
-import T from "@/translations";
-import { type Component, For, Switch, Match, createMemo } from "solid-js";
-import type { TableRowProps } from "@/types/components";
 import type {
-	DocumentResponse,
-	CollectionResponse,
 	CFConfig,
-	UserRef,
+	CollectionResponse,
+	DocumentResponse,
 	FieldTypes,
+	UserRef,
 } from "@types";
-import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
-import brickHelpers from "@/utils/brick-helpers";
-import contentLocaleStore from "@/store/contentLocaleStore";
+import { type Component, createMemo, For, Match, Switch } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
-import DateCol from "@/components/Tables/Columns/DateCol";
+import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import AuthorCol from "@/components/Tables/Columns/AuthorCol";
+import DateCol from "@/components/Tables/Columns/DateCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import T from "@/translations";
+import type { TableRowProps } from "@/types/components";
+import brickHelpers from "@/utils/brick-helpers";
 import PillCol from "../Columns/PillCol";
 
 interface DocumentRowProps extends TableRowProps {

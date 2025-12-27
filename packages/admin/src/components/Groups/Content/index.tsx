@@ -1,10 +1,10 @@
-export { MediaList } from "./MediaList";
-export { Dashboard } from "./Dashboard";
 export { Account } from "./Account";
-export { UserList } from "./UserList";
-export { RolesList } from "./RolesList";
+export { CollectionsList } from "./CollectionsList";
+export { Dashboard } from "./Dashboard";
+export { DocumentsList } from "./DocumentsList";
 export { EmailsList } from "./EmailsList";
 export { JobsList } from "./JobsList";
-export { CollectionsList } from "./CollectionsList";
-export { DocumentsList } from "./DocumentsList";
 export { License } from "./License";
+export { MediaList } from "./MediaList";
+export { RolesList } from "./RolesList";
+export { UserList } from "./UserList";

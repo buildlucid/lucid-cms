@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
-import logger from "../../logger/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import logger from "../../logger/index.js";
 
 const humanize = (times: string[]) => {
 	const [delimiter, separator] = [",", "."];

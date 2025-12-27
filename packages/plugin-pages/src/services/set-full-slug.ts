@@ -1,5 +1,5 @@
-import type { CollectionConfig } from "../types/types.js";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
+import type { CollectionConfig } from "../types/types.js";
 
 /**
  *  Update the fullSlug field with the computed value

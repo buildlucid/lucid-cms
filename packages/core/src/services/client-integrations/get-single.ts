@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
-import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
 	[

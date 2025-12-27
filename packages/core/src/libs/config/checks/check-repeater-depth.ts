@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
+import T from "../../../translations/index.js";
 
 const checkRepeaterDepth = (
 	type: "brick" | "collection",

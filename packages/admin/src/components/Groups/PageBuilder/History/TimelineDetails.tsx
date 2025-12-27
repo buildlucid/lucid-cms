@@ -1,19 +1,19 @@
-import T from "@/translations";
+import type { CollectionResponse, DocumentResponse } from "@types";
+import classNames from "classnames";
 import {
+	type Accessor,
 	type Component,
 	createMemo,
-	type Accessor,
 	Match,
 	Switch,
 } from "solid-js";
-import type { TimelineItem } from "@/hooks/document/useHistoryState";
 import DateText from "@/components/Partials/DateText";
-import Pill from "@/components/Partials/Pill";
-import Link from "@/components/Partials/Link";
 import DetailsList from "@/components/Partials/DetailsList";
+import Link from "@/components/Partials/Link";
+import Pill from "@/components/Partials/Pill";
+import type { TimelineItem } from "@/hooks/document/useHistoryState";
+import T from "@/translations";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import type { CollectionResponse, DocumentResponse } from "@types";
-import classNames from "classnames";
 
 const TimelineDetails: Component<{
 	item: TimelineItem;

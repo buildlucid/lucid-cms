@@ -1,10 +1,10 @@
-import T from "@/translations";
 import { type Component, For } from "solid-js";
-import api from "@/services/api";
-import { DynamicContent } from "@/components/Groups/Layout";
-import StartingPoints from "@/components/Blocks/StartingPoints";
 import Alert from "@/components/Blocks/Alert";
+import StartingPoints from "@/components/Blocks/StartingPoints";
+import { DynamicContent } from "@/components/Groups/Layout";
 import constants from "@/constants";
+import api from "@/services/api";
+import T from "@/translations";
 
 export const Dashboard: Component = () => {
 	// ----------------------------------------

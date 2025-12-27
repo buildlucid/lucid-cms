@@ -1,23 +1,23 @@
-import T from "@/translations";
-import { type Component, type Accessor, Index, createMemo } from "solid-js";
+import { useNavigate, useParams } from "@solidjs/router";
+import type { CFConfig, CollectionResponse, FieldTypes } from "@types";
 import { FaSolidCalendar } from "solid-icons/fa";
-import { useParams, useNavigate } from "@solidjs/router";
-import type { CollectionResponse, CFConfig, FieldTypes } from "@types";
-import userStore from "@/store/userStore";
-import { getDocumentRoute } from "@/utils/route-helpers";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import useRowTarget from "@/hooks/useRowTarget";
-import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
+import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import { Table } from "@/components/Groups/Table";
+import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
+import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
+import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
+import DocumentRow from "@/components/Tables/Rows/DocumentRow";
+import useRowTarget from "@/hooks/useRowTarget";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
-import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
+import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const DocumentsList: Component<{
 	state: {

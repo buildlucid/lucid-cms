@@ -1,8 +1,8 @@
-import type { Component } from "solid-js";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
+import type { Component } from "solid-js";
 import { Toaster } from "solid-toast";
-import { LucidError } from "./utils/error-handling";
 import Router from "@/Router";
+import { LucidError } from "./utils/error-handling";
 import "solid-devtools";
 
 const App: Component = () => {

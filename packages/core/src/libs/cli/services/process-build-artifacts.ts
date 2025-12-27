@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import type {
 	RuntimeBuildArtifact,
 	RuntimeBuildArtifactCompile,
@@ -5,8 +7,6 @@ import type {
 	RuntimeBuildArtifactFile,
 	RuntimeBuildArtifacts,
 } from "../../runtime-adapter/types.js";
-import fs from "node:fs/promises";
-import path from "node:path";
 import cliLogger from "../logger.js";
 
 export const CORE_ARTIFACT_TYPES = ["file", "compile"];

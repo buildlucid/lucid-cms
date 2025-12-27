@@ -5,10 +5,10 @@ import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import { Permissions } from "../../../permission/definitions.js";
 
 const factory = createFactory();
 

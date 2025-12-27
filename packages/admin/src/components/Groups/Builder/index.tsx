@@ -1,3 +1,3 @@
 export { BrickBody } from "./BrickBody";
-export { GroupBody } from "./GroupBody";
 export { BrickImagePreviewButton } from "./BrickImagePreviewButton";
+export { GroupBody } from "./GroupBody";

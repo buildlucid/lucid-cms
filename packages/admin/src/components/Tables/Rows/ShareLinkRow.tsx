@@ -1,13 +1,13 @@
-import T from "@/translations";
-import type { Component } from "solid-js";
 import type { MediaShareLinkResponse } from "@types";
-import type { TableRowProps } from "@/types/components";
-import type useRowTarget from "@/hooks/useRowTarget";
-import TextCol from "@/components/Tables/Columns/TextCol";
+import type { Component } from "solid-js";
+import { Tr } from "@/components/Groups/Table";
+import CopyRow from "@/components/Tables/Columns/CopyRow";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
-import CopyRow from "@/components/Tables/Columns/CopyRow";
-import { Tr } from "@/components/Groups/Table";
+import TextCol from "@/components/Tables/Columns/TextCol";
+import type useRowTarget from "@/hooks/useRowTarget";
+import T from "@/translations";
+import type { TableRowProps } from "@/types/components";
 
 interface ShareLinkRowProps extends TableRowProps {
 	link: MediaShareLinkResponse;

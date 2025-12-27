@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, For, createMemo } from "solid-js";
-import { FaSolidSort } from "solid-icons/fa";
-import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
 import { DropdownMenu } from "@kobalte/core";
-import DropdownContent from "@/components/Partials/DropdownContent";
 import classNames from "classnames";
+import { FaSolidSort } from "solid-icons/fa";
+import { type Component, createMemo, For } from "solid-js";
+import DropdownContent from "@/components/Partials/DropdownContent";
+import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 export interface PerPageProps {
 	options?: Array<number>;

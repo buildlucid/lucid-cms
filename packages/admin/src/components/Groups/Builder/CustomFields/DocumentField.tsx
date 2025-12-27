@@ -1,15 +1,15 @@
+import type { CFConfig, DocumentRef, FieldError, FieldResponse } from "@types";
 import {
-	type Component,
-	createSignal,
-	createMemo,
 	batch,
+	type Component,
 	createEffect,
+	createMemo,
+	createSignal,
 } from "solid-js";
-import type { CFConfig, FieldResponse, FieldError, DocumentRef } from "@types";
+import { DocumentSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { DocumentSelect } from "@/components/Groups/Form";
 
 interface DocumentFieldProps {
 	state: {

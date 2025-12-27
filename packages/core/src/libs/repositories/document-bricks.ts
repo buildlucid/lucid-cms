@@ -1,16 +1,16 @@
 import z from "zod";
-import DynamicRepository from "./parents/dynamic-repository.js";
+import type { CollectionSchemaColumn } from "../collection/schema/types.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type {
-	LucidBrickTableName,
+	KyselyDB,
 	LucidBricksTable,
+	LucidBrickTableName,
 	LucidVersionTable,
 	LucidVersionTableName,
 	Select,
 } from "../db-adapter/types.js";
-import type { KyselyDB } from "../db-adapter/types.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig } from "./types.js";
-import type { CollectionSchemaColumn } from "../collection/schema/types.js";
 
 export interface BrickQueryResponse extends Select<LucidVersionTable> {
 	[key: LucidBrickTableName]: Select<LucidBricksTable>[];

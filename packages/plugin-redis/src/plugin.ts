@@ -1,7 +1,7 @@
-import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
 import type { LucidPlugin } from "@lucidcms/core/types";
-import type { PluginOptions } from "./types.js";
 import redisKVAdapter from "./adapter.js";
+import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import type { PluginOptions } from "./types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return {

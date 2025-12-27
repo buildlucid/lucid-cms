@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import processFieldValues from "./process-field-values.js";
+import { describe, expect, it } from "vitest";
 import type { FieldInputSchema } from "../../../types";
+import processFieldValues from "./process-field-values.js";
 
 describe("testing processFieldValues", () => {
 	const defaultLocale = "en";

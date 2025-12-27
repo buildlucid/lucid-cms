@@ -1,8 +1,8 @@
-import { PLUGIN_KEY, LUCID_VERSION } from "./constants.js";
-import type { LucidPlugin } from "@lucidcms/core/types";
-import type { PluginOptions } from "./types/types.js";
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { LucidPlugin } from "@lucidcms/core/types";
+import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	const currentDir = dirname(fileURLToPath(import.meta.url));

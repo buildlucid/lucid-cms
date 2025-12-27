@@ -1,5 +1,5 @@
-import type { Component } from "solid-js";
 import LogoColumn from "@assets/svgs/logo-column.svg";
+import type { Component } from "solid-js";
 
 const FullPageLoading: Component = () => {
 	return (

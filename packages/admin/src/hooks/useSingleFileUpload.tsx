@@ -1,10 +1,10 @@
-import { type Accessor, createSignal } from "solid-js";
-import type { SingleFileUploadProps } from "@/components/Groups/Form/SingleFileUpload";
 import type { ErrorResponse } from "@types";
-import { getBodyError } from "@/utils/error-helpers";
-import { SingleFileUpload } from "@/components/Groups/Form";
 import { encode } from "blurhash";
 import { FastAverageColor } from "fast-average-color";
+import { type Accessor, createSignal } from "solid-js";
+import { SingleFileUpload } from "@/components/Groups/Form";
+import type { SingleFileUploadProps } from "@/components/Groups/Form/SingleFileUpload";
+import { getBodyError } from "@/utils/error-helpers";
 
 interface UseSingleFileUploadProps {
 	id: SingleFileUploadProps["id"];

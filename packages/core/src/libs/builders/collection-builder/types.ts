@@ -1,7 +1,4 @@
 import type z from "zod";
-import type BrickBuilder from "../brick-builder/index.js";
-import type { FieldTypes, CFConfig } from "../../custom-fields/types.js";
-import type CollectionConfigSchema from "./schema.js";
 import type { DocumentBuilderHooks } from "../../../types/hooks.js";
 import type { LocaleValue } from "../../../types/shared.js";
 import type {
@@ -9,6 +6,9 @@ import type {
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../../types.js";
+import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
+import type BrickBuilder from "../brick-builder/index.js";
+import type CollectionConfigSchema from "./schema.js";
 
 export type DisplayInListing = boolean;
 

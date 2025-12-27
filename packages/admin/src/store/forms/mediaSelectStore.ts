@@ -1,5 +1,5 @@
-import { createStore } from "solid-js/store";
 import type { MediaResponse } from "@types";
+import { createStore } from "solid-js/store";
 
 type SelectCallbackT = (_media: MediaResponse) => void;
 

@@ -1,10 +1,10 @@
-import formatter from "./index.js";
 import type { EmailResponse } from "../../types/response.js";
 import type {
 	BooleanInt,
-	EmailType,
 	EmailDeliveryStatus,
+	EmailType,
 } from "../../types.js";
+import formatter from "./index.js";
 
 interface EmailPropT {
 	id: number;

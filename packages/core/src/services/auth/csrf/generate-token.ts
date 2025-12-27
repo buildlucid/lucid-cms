@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
-import constants from "../../../constants/constants.js";
 import { setCookie } from "hono/cookie";
-import type { ServiceResponse } from "../../../utils/services/types.js";
+import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const generateToken = async (c: LucidHonoContext): ServiceResponse<string> => {
 	const token = crypto.randomBytes(32).toString("hex");

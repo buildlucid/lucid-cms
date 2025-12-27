@@ -1,25 +1,25 @@
-import T from "@/translations";
 import {
-	type Component,
-	type Accessor,
-	createMemo,
-	Show,
-	Index,
-} from "solid-js";
-import {
-	FaSolidT,
 	FaSolidCalendar,
-	FaSolidShield,
 	FaSolidGlobe,
+	FaSolidShield,
+	FaSolidT,
 } from "solid-icons/fa";
-import api from "@/services/api";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
-import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
-import { Table } from "@/components/Groups/Table";
-import { DynamicContent } from "@/components/Groups/Layout";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	Index,
+	Show,
+} from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
-import { Filter, Sort, PerPage } from "@/components/Groups/Query";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import { Filter, PerPage, Sort } from "@/components/Groups/Query";
+import { Table } from "@/components/Groups/Table";
 import UserLoginRow from "@/components/Tables/Rows/UserLoginRow";
+import useSearchParamsState from "@/hooks/useSearchParamsState";
+import api from "@/services/api";
+import T from "@/translations";
 
 const ViewUserLoginsPanel: Component<{
 	id?: Accessor<number | undefined>;

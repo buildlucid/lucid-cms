@@ -1,23 +1,23 @@
-import T from "@/translations";
+import type { UserResponse } from "@types";
 import {
-	type Component,
 	type Accessor,
+	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
-	createEffect,
-	Show,
 	For,
+	Show,
 } from "solid-js";
-import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
-import api from "@/services/api";
-import { getBodyError } from "@/utils/error-helpers";
-import userStore from "@/store/userStore";
-import helpers from "@/utils/helpers";
-import { Panel } from "@/components/Groups/Panel";
-import { SelectMultiple, Switch } from "@/components/Groups/Form";
-import type { UserResponse } from "@types";
-import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import SectionHeading from "@/components/Blocks/SectionHeading";
+import { SelectMultiple, Switch } from "@/components/Groups/Form";
+import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
+import { Panel } from "@/components/Groups/Panel";
+import AuthProviderRow from "@/components/Partials/AuthProviderRow";
+import api from "@/services/api";
+import userStore from "@/store/userStore";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
+import helpers from "@/utils/helpers";
 
 const UpdateUserPanel: Component<{
 	id: Accessor<number | undefined>;

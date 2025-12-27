@@ -1,16 +1,16 @@
-import useGetMultiple from "./useGetMultiple";
-import useDeleteSingle from "./useDeleteSingle";
-import useDeleteMultiple from "./useDeleteMultiple";
-import useCreateSingleVersion from "./useCreateSingleVersion";
-import useGetSingle from "./useGetSingle";
 import useCreateSingle from "./useCreateSingle";
-import usePromoteSingle from "./usePromoteSingle";
-import useGetSingleVersion from "./useGetSingleVersion";
+import useCreateSingleVersion from "./useCreateSingleVersion";
+import useDeleteMultiple from "./useDeleteMultiple";
+import useDeleteSingle from "./useDeleteSingle";
+import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
+import useGetMultiple from "./useGetMultiple";
 import useGetMultipleRevisions from "./useGetMultipleRevisions";
+import useGetSingle from "./useGetSingle";
+import useGetSingleVersion from "./useGetSingleVersion";
+import usePromoteSingle from "./usePromoteSingle";
+import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
 import useUpdateSingleVersion from "./useUpdateSingleVersion";
-import useRestore from "./useRestore";
-import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 
 const exportObject = {
 	useGetMultiple,

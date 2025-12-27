@@ -1,6 +1,6 @@
+import type { FieldTypes } from "@types";
 import classNames from "classnames";
 import { type Component, Match, Switch } from "solid-js";
-import type { FieldTypes } from "@types";
 
 interface FieldTypeIconProps {
 	type: FieldTypes;

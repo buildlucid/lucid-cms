@@ -1,8 +1,9 @@
+import { Route, Router } from "@solidjs/router";
 import { type Component, lazy } from "solid-js";
-import { Router, Route } from "@solidjs/router";
+import PermissionGuard from "@/guards/Permission";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
-import PermissionGuard from "@/guards/Permission";
+
 // Routes
 const ComponentsRoute = lazy(() => import("@/routes/Components"));
 const LoginRoute = lazy(() => import("@/routes/Login"));

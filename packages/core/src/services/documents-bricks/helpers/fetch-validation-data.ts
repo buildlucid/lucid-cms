@@ -1,29 +1,29 @@
-import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
-import {
-	MediaRepository,
-	UsersRepository,
-	DocumentsRepository,
-} from "../../../libs/repositories/index.js";
-import logger from "../../../libs/logger/index.js";
-import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
+import type CustomField from "../../../libs/custom-fields/custom-field.js";
 import type {
-	ServiceContext,
-	ServiceFn,
-} from "../../../utils/services/types.js";
+	DocumentReferenceData,
+	MediaReferenceData,
+	UserReferenceData,
+} from "../../../libs/custom-fields/types.js";
+import logger from "../../../libs/logger/index.js";
+import {
+	DocumentsRepository,
+	MediaRepository,
+	UsersRepository,
+} from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import T from "../../../translations/index.js";
 import type {
 	FieldInputSchema,
 	LucidDocumentTableName,
 } from "../../../types.js";
 import type {
-	UserReferenceData,
-	MediaReferenceData,
-	DocumentReferenceData,
-} from "../../../libs/custom-fields/types.js";
-import type CustomField from "../../../libs/custom-fields/custom-field.js";
+	ServiceContext,
+	ServiceFn,
+} from "../../../utils/services/types.js";
 
 export interface ValidationData {
 	media: MediaReferenceData[];

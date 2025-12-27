@@ -1,5 +1,5 @@
-import { describe, test, expect } from "vitest";
-import { encodeApiKey, decodeApiKey } from "./encode-api-key";
+import { describe, expect, test } from "vitest";
+import { decodeApiKey, encodeApiKey } from "./encode-api-key";
 
 describe("API Key Encoding/Decoding", () => {
 	test("should correctly encode client key and api secret", () => {

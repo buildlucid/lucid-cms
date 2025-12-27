@@ -1,11 +1,11 @@
-import T from "../../translations/index.js";
-import { DocumentsRepository } from "../../libs/repositories/index.js";
-import { documentsFormatter } from "../../libs/formatters/index.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
-import type { DocumentResponse } from "../../types.js";
+import { documentsFormatter } from "../../libs/formatters/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
+import T from "../../translations/index.js";
+import type { DocumentResponse } from "../../types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices, documentBrickServices } from "../index.js";
 
 const getSingle: ServiceFn<

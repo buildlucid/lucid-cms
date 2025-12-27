@@ -1,7 +1,7 @@
+import classNames from "classnames";
 import { type Component, Index, Show } from "solid-js";
 import { Td } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
-import classNames from "classnames";
 
 interface LoadingRowProps {
 	columns: number;

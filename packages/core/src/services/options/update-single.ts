@@ -1,6 +1,6 @@
 import { OptionsRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import type { OptionsName } from "../../schemas/options.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const updateSingle: ServiceFn<
 	[

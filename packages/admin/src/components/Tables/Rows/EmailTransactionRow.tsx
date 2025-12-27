@@ -1,12 +1,12 @@
-import type { Component } from "solid-js";
-import type { TableRowProps } from "@/types/components";
 import type { EmailDeliveryStatus, EmailResponse } from "@lucidcms/core/types";
+import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
-import TextCol from "@/components/Tables/Columns/TextCol";
-import PillCol from "@/components/Tables/Columns/PillCol";
-import DateCol from "../Columns/DateCol";
 import type { PillProps } from "@/components/Partials/Pill";
+import PillCol from "@/components/Tables/Columns/PillCol";
+import TextCol from "@/components/Tables/Columns/TextCol";
+import type { TableRowProps } from "@/types/components";
+import DateCol from "../Columns/DateCol";
 
 interface EmailTransactionRowProps extends TableRowProps {
 	transaction: EmailResponse["transactions"][number];

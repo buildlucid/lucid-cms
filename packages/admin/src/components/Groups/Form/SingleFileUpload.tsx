@@ -1,24 +1,24 @@
-import T from "@/translations";
-import {
-	type Component,
-	Switch,
-	createMemo,
-	Match,
-	Show,
-	createEffect,
-	createSignal,
-} from "solid-js";
+import type { ErrorResult, MediaResponse } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidArrowUpFromBracket,
 	FaSolidArrowRotateLeft,
+	FaSolidArrowUpFromBracket,
+	FaSolidFile,
 	FaSolidMagnifyingGlass,
 	FaSolidXmark,
-	FaSolidFile,
 } from "solid-icons/fa";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
+import T from "@/translations";
 import helpers from "@/utils/helpers";
-import type { ErrorResult, MediaResponse } from "@types";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 export interface SingleFileUploadProps {
 	id: string;

@@ -1,9 +1,9 @@
-import T from "@/translations";
 import { type Component, createMemo, createSignal } from "solid-js";
-import { Modal } from "@/components/Groups/Modal";
 import { Form, Input } from "@/components/Groups/Form";
-import { getBodyError } from "@/utils/error-helpers";
+import { Modal } from "@/components/Groups/Modal";
 import api from "@/services/api";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
 
 interface UpdatePasswordModalProps {
 	state: {

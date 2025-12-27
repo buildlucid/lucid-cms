@@ -1,8 +1,8 @@
+import { FaSolidCopy } from "solid-icons/fa";
 import type { Component } from "solid-js";
 import { Td } from "@/components/Groups/Table";
-import spawnToast from "@/utils/spawn-toast";
 import T from "@/translations";
-import { FaSolidCopy } from "solid-icons/fa";
+import spawnToast from "@/utils/spawn-toast";
 
 interface TextColProps {
 	text?: string | number | null;

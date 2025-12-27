@@ -1,13 +1,13 @@
-import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
+import { randomUUID } from "node:crypto";
 import merge from "lodash.merge";
+import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentBrickServices } from "../index.js";
-import { randomUUID } from "node:crypto";
 
 /**
  * Creates a new version. This is always for the "latest" version type

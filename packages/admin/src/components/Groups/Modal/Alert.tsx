@@ -1,6 +1,6 @@
-import { type Component, type JSXElement, Show } from "solid-js";
-import { FaSolidXmark } from "solid-icons/fa";
 import { AlertDialog } from "@kobalte/core";
+import { FaSolidXmark } from "solid-icons/fa";
+import { type Component, type JSXElement, Show } from "solid-js";
 
 export const Alert: Component<{
 	state: {

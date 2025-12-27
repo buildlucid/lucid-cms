@@ -1,6 +1,6 @@
+import type { ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody } from "@types";
 
 export const csrfSessionKey = "_csrf";
 

@@ -1,6 +1,6 @@
-import type { ServiceFn } from "../../utils/services/types.js";
-import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
+import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import { licenseServices } from "../index.js";
 
 const updateLicense: ServiceFn<

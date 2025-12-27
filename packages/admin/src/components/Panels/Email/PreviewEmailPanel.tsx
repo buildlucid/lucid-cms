@@ -1,20 +1,20 @@
-import T from "@/translations";
-import { type Component, type Accessor, Show, Index } from "solid-js";
-import api from "@/services/api";
-import { Panel } from "@/components/Groups/Panel";
+import classNames from "classnames";
+import {
+	FaSolidCalendar,
+	FaSolidCommentDots,
+	FaSolidEnvelope,
+	FaSolidTag,
+} from "solid-icons/fa";
+import { type Accessor, type Component, Index, Show } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
+import { Panel } from "@/components/Groups/Panel";
+import { Table } from "@/components/Groups/Table";
 import DetailsList from "@/components/Partials/DetailsList";
 import JSONPreview from "@/components/Partials/JSONPreview";
-import dateHelpers from "@/utils/date-helpers";
-import classNames from "classnames";
-import { Table } from "@/components/Groups/Table";
 import EmailTransactionRow from "@/components/Tables/Rows/EmailTransactionRow";
-import {
-	FaSolidEnvelope,
-	FaSolidCalendar,
-	FaSolidTag,
-	FaSolidCommentDots,
-} from "solid-icons/fa";
+import api from "@/services/api";
+import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
 
 interface PreviewEmailPanelProps {
 	id: Accessor<number | undefined>;

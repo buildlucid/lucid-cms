@@ -1,10 +1,10 @@
-import { type Component, type JSXElement, Show, createMemo } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import type { TableRowProps } from "@/types/components";
-import SelectCol from "@/components/Tables/Columns/SelectCol";
-import ActionMenuCol from "@/components/Tables/Columns/ActionMenuCol";
-import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import classNames from "classnames";
+import { type Component, createMemo, type JSXElement, Show } from "solid-js";
+import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
+import ActionMenuCol from "@/components/Tables/Columns/ActionMenuCol";
+import SelectCol from "@/components/Tables/Columns/SelectCol";
+import type { TableRowProps } from "@/types/components";
 import type { TableTheme } from "./Table";
 
 interface TrProps extends TableRowProps {

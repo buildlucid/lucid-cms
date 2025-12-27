@@ -1,17 +1,17 @@
 import { DatabaseAdapter } from "@lucidcms/core/db-adapter";
 import type {
 	DatabaseConfig,
+	InferredColumn,
 	InferredTable,
 	OnDelete,
 	OnUpdate,
-	InferredColumn,
 } from "@lucidcms/core/types";
+import { type ColumnDataType, ParseJSONResultsPlugin, sql } from "kysely";
+import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import {
 	LibsqlDialect,
 	type LibsqlDialectConfig,
 } from "./lib/kysely-libsql.js";
-import { ParseJSONResultsPlugin, type ColumnDataType, sql } from "kysely";
-import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";

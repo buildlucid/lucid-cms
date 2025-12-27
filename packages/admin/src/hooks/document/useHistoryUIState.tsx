@@ -1,6 +1,6 @@
-import { createMemo, createSignal, type Accessor } from "solid-js";
-import type api from "@/services/api";
 import type { CollectionResponse, DocumentVersionType } from "@types";
+import { type Accessor, createMemo, createSignal } from "solid-js";
+import type api from "@/services/api";
 import type { UseDocumentUIState } from "./useDocumentUIState";
 
 export function useHistoryUIState(props: {

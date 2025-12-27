@@ -1,8 +1,8 @@
-import useGetAll from "./useGetAll";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteSingle from "./useDeleteSingle";
-import useRegenerateAPIKey from "./useRegenerateAPIKey";
+import useGetAll from "./useGetAll";
 import useGetSingle from "./useGetSingle";
+import useRegenerateAPIKey from "./useRegenerateAPIKey";
 import useUpdateSingle from "./useUpdateSingle";
 
 const exportObject = {

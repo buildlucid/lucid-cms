@@ -1,18 +1,18 @@
-import T from "../../translations/index.js";
-import {
-	DocumentVersionsRepository,
-	DocumentsRepository,
-	DocumentBricksRepository,
-} from "../../libs/repositories/index.js";
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
-import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
+import { documentBricksFormatter } from "../../libs/formatters/index.js";
+import {
+	DocumentBricksRepository,
+	DocumentsRepository,
+	DocumentVersionsRepository,
+} from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import { collectionServices, documentBrickServices } from "../index.js";
 
 const promoteVersion: ServiceFn<

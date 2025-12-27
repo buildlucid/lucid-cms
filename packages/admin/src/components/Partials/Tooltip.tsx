@@ -1,6 +1,6 @@
-import { type Component, Show } from "solid-js";
-import { FaSolidInfo } from "solid-icons/fa";
 import { Tooltip } from "@kobalte/core";
+import { FaSolidInfo } from "solid-icons/fa";
+import { type Component, Show } from "solid-js";
 
 interface TooltipProps {
 	copy?: string;

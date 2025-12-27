@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
 import type { ZodType } from "zod";
 import type { Config } from "../../types/config.js";
+import cliLogger from "../cli/logger.js";
 import type {
 	AdapterDefineConfig,
 	EnvironmentVariables,
@@ -10,7 +11,6 @@ import type {
 } from "../runtime-adapter/types.js";
 import getConfigPath from "./get-config-path.js";
 import processConfig from "./process-config.js";
-import cliLogger from "../cli/logger.js";
 
 export type LoadConfigResult = {
 	config: Config;

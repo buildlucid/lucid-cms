@@ -1,17 +1,17 @@
+import classNames from "classnames";
 import {
 	type Component,
-	type JSXElement,
-	Switch,
-	Match,
 	createMemo,
+	type JSXElement,
+	Match,
 	Show,
+	Switch,
 } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import SkeletonCard from "@/components/Cards/SkeletonCard";
-import classNames from "classnames";
 import NoEntriesBlock, {
 	type NoEntriesBlockProps,
 } from "@/components/Partials/NoEntriesBlock";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 
 export const Grid: Component<{
 	state?: {

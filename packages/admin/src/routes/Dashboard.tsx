@@ -1,9 +1,9 @@
-import T from "@/translations";
 import type { Component } from "solid-js";
-import userStore from "@/store/userStore";
 import { Dashboard } from "@/components/Groups/Content";
-import { Wrapper } from "@/components/Groups/Layout";
 import { Standard } from "@/components/Groups/Headers";
+import { Wrapper } from "@/components/Groups/Layout";
+import userStore from "@/store/userStore";
+import T from "@/translations";
 
 const DashboardRoute: Component = () => {
 	// ----------------------------------------

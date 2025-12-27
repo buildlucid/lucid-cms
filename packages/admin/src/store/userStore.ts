@@ -1,5 +1,5 @@
+import type { Permission, UserResponse } from "@types";
 import { createStore } from "solid-js/store";
-import type { UserResponse, Permission } from "@types";
 
 type UserStoreT = {
 	user: UserResponse | null;

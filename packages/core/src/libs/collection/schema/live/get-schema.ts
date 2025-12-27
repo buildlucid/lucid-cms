@@ -1,15 +1,15 @@
+import type { ServiceFn } from "../../../../utils/services/types.js";
 import migrateCollections from "../../migrate-collections.js";
-import {
-	getSchema as getCachedSchema,
-	setSchema as setCachedSchema,
-} from "./cache.js";
 import {
 	getCachedMigrationResult,
 	setCachedMigrationResult,
 } from "../../migration/cache.js";
-import filterSchemaByMigrationPlan from "./filter-schema-by-migration-plan.js";
-import type { ServiceFn } from "../../../../utils/services/types.js";
 import type { CollectionSchema } from "../types.js";
+import {
+	getSchema as getCachedSchema,
+	setSchema as setCachedSchema,
+} from "./cache.js";
+import filterSchemaByMigrationPlan from "./filter-schema-by-migration-plan.js";
 
 const getSchema: ServiceFn<
 	[

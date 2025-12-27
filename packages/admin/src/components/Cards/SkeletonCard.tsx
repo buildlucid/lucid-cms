@@ -1,4 +1,4 @@
-import { type Component, Switch, Match } from "solid-js";
+import { type Component, Match, Switch } from "solid-js";
 
 interface SkeletonCardProps {
 	size: "small" | "medium";

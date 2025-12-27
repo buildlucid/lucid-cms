@@ -1,5 +1,5 @@
-import { expect, test } from "vitest";
 import path from "node:path";
+import { expect, test } from "vitest";
 import loadConfigFile from "./load-config-file.js";
 
 test("should return lucid config object", async () => {

@@ -1,7 +1,7 @@
-import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
-import { Confirmation } from "@/components/Groups/Modal";
 import type { DocumentVersionType } from "@types";
+import type { Accessor, Component } from "solid-js";
+import { Confirmation } from "@/components/Groups/Modal";
+import T from "@/translations";
 
 const ReleaseEnvironment: Component<{
 	target: Accessor<Exclude<DocumentVersionType, "revision"> | null>;

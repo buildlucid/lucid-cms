@@ -1,8 +1,8 @@
-import T from "../../translations/index.js";
-import { DocumentsRepository } from "../../libs/repositories/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
+import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { documentServices } from "../index.js";
 
 const deleteSingle: ServiceFn<

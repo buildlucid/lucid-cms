@@ -1,6 +1,6 @@
-export { Pagination } from "./Pagination";
-export { QueryRow } from "./Row";
 export { Filter } from "./Filter";
-export { Sort } from "./Sort";
+export { Pagination } from "./Pagination";
 export { PerPage } from "./PerPage";
+export { QueryRow } from "./Row";
 export { SimplifiedPagination } from "./SimplifiedPagination";
+export { Sort } from "./Sort";

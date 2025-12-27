@@ -1,5 +1,5 @@
-import T from "../translations/index.js";
 import type { ServiceResponse } from "@lucidcms/core/types";
+import T from "../translations/index.js";
 import type {
 	CollectionConfig,
 	PluginOptionsInternal,

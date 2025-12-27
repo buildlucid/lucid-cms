@@ -1,17 +1,17 @@
-import T from "@/translations";
-import { type Accessor, type Component, Match, Switch } from "solid-js";
-import classNames from "classnames";
-import { FaSolidXmark, FaSolidPen } from "solid-icons/fa";
 import type {
+	DocumentRef,
+	DocumentResponse,
 	ErrorResult,
 	FieldError,
-	DocumentResponse,
-	DocumentRef,
 } from "@types";
-import documentSelectStore from "@/store/forms/documentSelectStore";
+import classNames from "classnames";
+import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import { type Accessor, type Component, Match, Switch } from "solid-js";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import documentSelectStore from "@/store/forms/documentSelectStore";
+import T from "@/translations";
 import helpers from "@/utils/brick-helpers";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
 
 interface DocumentSelectProps {
 	id: string;

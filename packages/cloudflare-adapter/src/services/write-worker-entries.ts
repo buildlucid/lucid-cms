@@ -1,9 +1,9 @@
 import { writeFile } from "node:fs/promises";
-import buildTempWorkerEntry from "./build-temp-worker-entry.js";
 import type {
 	CloudflareWorkerExport,
 	CloudflareWorkerImport,
 } from "../types.js";
+import buildTempWorkerEntry from "./build-temp-worker-entry.js";
 
 /**
  * Writes temp worker entry files to the filesystem

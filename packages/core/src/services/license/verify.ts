@@ -1,10 +1,10 @@
-import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import packageJson from "../../../package.json" with { type: "json" };
+import constants from "../../constants/constants.js";
+import { OptionsRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
-import { OptionsRepository } from "../../libs/repositories/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 type VerifyAPIError = {
 	status: number;

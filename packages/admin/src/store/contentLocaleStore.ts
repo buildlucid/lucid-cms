@@ -1,5 +1,5 @@
-import { createStore } from "solid-js/store";
 import type { LocalesResponse } from "@types";
+import { createStore } from "solid-js/store";
 
 type ContentLangStoreT = {
 	contentLocale: string | undefined;

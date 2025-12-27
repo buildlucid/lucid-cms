@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
 import logger from "../../logger/index.js";
 import { QueueJobsRepository } from "../../repositories/index.js";
-import type { QueueAdapterInstance } from "../types.js";
 import executeSingleJob from "../execute-single-job.js";
+import type { QueueAdapterInstance } from "../types.js";
 
 const ADAPTER_KEY = "passthrough";
 

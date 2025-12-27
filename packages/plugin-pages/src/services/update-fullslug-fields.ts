@@ -1,12 +1,12 @@
-import T from "../translations/index.js";
-import constants from "../constants.js";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
-	ServiceFn,
 	DocumentVersionType,
-	LucidVersionTableName,
 	LucidBrickTableName,
+	LucidVersionTableName,
+	ServiceFn,
 } from "@lucidcms/core/types";
+import constants from "../constants.js";
+import T from "../translations/index.js";
 
 /**
  *  Update the fullSlug fields with the computed value

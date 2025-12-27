@@ -1,8 +1,8 @@
+import type { DocumentVersionType, ErrorResponse, ResponseBody } from "@types";
+import type { Accessor } from "solid-js";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { DocumentVersionType, ResponseBody, ErrorResponse } from "@types";
-import type { Accessor } from "solid-js";
 
 export interface Params {
 	id: number;

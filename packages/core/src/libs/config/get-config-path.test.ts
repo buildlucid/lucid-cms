@@ -1,6 +1,6 @@
+import path from "node:path";
 import { expect, test } from "vitest";
 import T from "../../translations/index.js";
-import path from "node:path";
 import getConfigPath from "./get-config-path.js";
 
 test("finds lucid.config.ts file", async () => {

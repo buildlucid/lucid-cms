@@ -1,13 +1,13 @@
-import { type Component, For, createSignal, createMemo, Show } from "solid-js";
-import { FaSolidMagnifyingGlass, FaSolidXmark } from "solid-icons/fa";
-import classNames from "classnames";
-import type { CollectionBrickConfig } from "@types";
 import brickIcon from "@assets/svgs/default-brick-icon-white.svg";
-import brickStore from "@/store/brickStore";
-import helpers from "@/utils/helpers";
+import type { CollectionBrickConfig } from "@types";
+import classNames from "classnames";
+import { FaSolidMagnifyingGlass, FaSolidXmark } from "solid-icons/fa";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { Modal } from "@/components/Groups/Modal";
 import BrickPreview from "@/components/Partials/BrickPreview";
 import Tooltip from "@/components/Partials/Tooltip";
+import brickStore from "@/store/brickStore";
+import helpers from "@/utils/helpers";
 
 interface AddBrickProps {
 	state: {

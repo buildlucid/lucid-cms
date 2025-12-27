@@ -1,10 +1,10 @@
-import T from "@/translations";
 import { DropdownMenu } from "@kobalte/core";
-import { type Component, createMemo } from "solid-js";
 import classNames from "classnames";
-import DropdownContent from "@/components/Partials/DropdownContent";
-import spawnToast from "@/utils/spawn-toast";
 import { FaSolidEllipsisVertical } from "solid-icons/fa";
+import { type Component, createMemo } from "solid-js";
+import DropdownContent from "@/components/Partials/DropdownContent";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 export const DocumentActions: Component<{
 	onDelete: () => void;

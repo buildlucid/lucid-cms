@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, type Accessor, Show } from "solid-js";
-import api from "@/services/api";
-import { Panel } from "@/components/Groups/Panel";
+import { type Accessor, type Component, Show } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
+import { Panel } from "@/components/Groups/Panel";
 import DetailsList from "@/components/Partials/DetailsList";
 import JSONPreview from "@/components/Partials/JSONPreview";
+import api from "@/services/api";
+import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 
 interface ViewJobPanelProps {

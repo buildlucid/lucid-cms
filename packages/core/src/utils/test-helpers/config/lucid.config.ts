@@ -1,5 +1,5 @@
+import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
 import Database from "better-sqlite3";
 import testingConstants from "../../../constants/testing-constants.js";
 

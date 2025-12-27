@@ -1,6 +1,6 @@
-import T from "../../translations/index.js";
-import constants from "../../constants/constants.js";
 import type { OpenAPIV3 } from "openapi-types";
+import constants from "../../constants/constants.js";
+import T from "../../translations/index.js";
 
 const metaObject: OpenAPIV3.SchemaObject = {
 	type: "object",

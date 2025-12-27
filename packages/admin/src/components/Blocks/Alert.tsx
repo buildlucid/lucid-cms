@@ -1,11 +1,11 @@
-import { type Component, Switch, Match, For, createMemo, Show } from "solid-js";
 import classNames from "classnames";
 import {
-	FaSolidTriangleExclamation,
 	FaSolidCheck,
 	FaSolidExclamation,
 	FaSolidInfo,
+	FaSolidTriangleExclamation,
 } from "solid-icons/fa";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 
 interface AlertProps {
 	style: "layout" | "block" | "pill";

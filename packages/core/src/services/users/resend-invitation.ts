@@ -2,8 +2,8 @@ import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import {
-	UserTokensRepository,
 	UsersRepository,
+	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";

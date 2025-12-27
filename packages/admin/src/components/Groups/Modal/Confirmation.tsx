@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, type JSXElement, Show } from "solid-js";
-import { FaSolidXmark } from "solid-icons/fa";
 import { AlertDialog } from "@kobalte/core";
+import classNames from "classnames";
+import { FaSolidXmark } from "solid-icons/fa";
+import { type Component, type JSXElement, Show } from "solid-js";
 import Button from "@/components/Partials/Button";
 import ErrorMessage from "@/components/Partials/ErrorMessage";
-import classNames from "classnames";
+import T from "@/translations";
 
 export const Confirmation: Component<{
 	theme?: "primary" | "danger";

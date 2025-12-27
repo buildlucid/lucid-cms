@@ -1,9 +1,9 @@
-import { expect, test, describe } from "vitest";
-import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
-import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
-import type { FieldInputSchema } from "../../../types.js";
+import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../types.js";
+import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
 
 describe("testing prepareBricksAndFields", () => {
 	// Mock localization config to pass to the functions

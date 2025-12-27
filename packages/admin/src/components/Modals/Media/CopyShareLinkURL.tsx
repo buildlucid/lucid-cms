@@ -1,8 +1,8 @@
-import T from "@/translations";
-import { type Component, type Accessor, createMemo } from "solid-js";
+import { type Accessor, type Component, createMemo } from "solid-js";
 import { Alert } from "@/components/Groups/Modal";
 import CopyInput from "@/components/Partials/CopyInput";
 import api from "@/services/api";
+import T from "@/translations";
 
 const CopyShareLinkURL: Component<{
 	ids: Accessor<[number, number] | undefined>;

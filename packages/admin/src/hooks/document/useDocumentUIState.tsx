@@ -1,18 +1,18 @@
-import { createMemo, createSignal, type Accessor } from "solid-js";
-import brickStore from "@/store/brickStore";
-import brickHelpers from "@/utils/brick-helpers";
-import { getBodyError } from "@/utils/error-helpers";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import userStore from "@/store/userStore";
-import type api from "@/services/api";
 import type {
 	BrickError,
 	CollectionResponse,
 	DocumentResponse,
-	FieldError,
 	DocumentVersionType,
+	FieldError,
 } from "@types";
+import { type Accessor, createMemo, createSignal } from "solid-js";
+import type api from "@/services/api";
+import brickStore from "@/store/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/userPreferencesStore";
+import userStore from "@/store/userStore";
+import brickHelpers from "@/utils/brick-helpers";
+import { getBodyError } from "@/utils/error-helpers";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;

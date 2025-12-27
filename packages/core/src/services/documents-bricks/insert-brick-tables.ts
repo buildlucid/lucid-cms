@@ -1,10 +1,10 @@
-import { DocumentBricksRepository } from "../../libs/repositories/index.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { LucidBricksTable } from "../../types.js";
-import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { ColumnDataType } from "kysely";
+import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import { DocumentBricksRepository } from "../../libs/repositories/index.js";
+import type { LucidBricksTable } from "../../types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
 
 const insertBrickTables: ServiceFn<
 	[

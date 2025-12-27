@@ -1,21 +1,21 @@
-import { parentPort, workerData } from "node:worker_threads";
-import { pathToFileURL } from "node:url";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { parentPort, workerData } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
+import type { Config } from "../../../../types.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
+import processConfig from "../../../config/process-config.js";
 import getKVAdapter from "../../../kv-adapter/get-adapter.js";
 import logger from "../../../logger/index.js";
 import { QueueJobsRepository } from "../../../repositories/index.js";
-import executeSingleJob from "../../execute-single-job.js";
-import passthroughQueueAdapter from "../passthrough.js";
-import type { WorkerQueueAdapterOptions } from "./index.js";
 import type {
 	AdapterDefineConfig,
 	EnvironmentVariables,
 } from "../../../runtime-adapter/types.js";
-import type { Config } from "../../../../types.js";
-import processConfig from "../../../config/process-config.js";
+import executeSingleJob from "../../execute-single-job.js";
+import passthroughQueueAdapter from "../passthrough.js";
+import type { WorkerQueueAdapterOptions } from "./index.js";
 
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;

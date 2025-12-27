@@ -1,6 +1,6 @@
-import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
+import type { Accessor, Component } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
+import T from "@/translations";
 
 const RestoreRevision: Component<{
 	versionId: Accessor<number | null>;

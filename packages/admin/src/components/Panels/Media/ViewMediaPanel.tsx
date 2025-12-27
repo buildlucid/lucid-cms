@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import { Checkbox, Input, Select } from "@/components/Groups/Form";
@@ -10,7 +11,6 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import helpers from "@/utils/helpers";
-import classNames from "classnames";
 
 interface ViewMediaPanelProps {
 	id?: Accessor<number | undefined>;

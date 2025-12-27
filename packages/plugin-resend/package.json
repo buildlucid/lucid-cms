@@ -17,7 +17,9 @@
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
-		"lint:fix": "biome lint --write ./src"
+		"lint:fix": "biome lint --write ./src",
+        "check": "biome check ./src",
+        "check:fix": "biome check --write ./src"
 	},
 	"files": ["dist/**"],
 	"author": "Lucid",

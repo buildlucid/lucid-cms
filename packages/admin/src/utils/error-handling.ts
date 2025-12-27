@@ -1,6 +1,6 @@
+import type { ErrorResponse } from "@types";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
-import type { ErrorResponse } from "@types";
 
 export class LucidError extends Error {
 	errorRes: ErrorResponse;

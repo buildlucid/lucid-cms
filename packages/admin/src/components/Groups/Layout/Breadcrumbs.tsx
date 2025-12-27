@@ -1,7 +1,7 @@
-import { type Component, Show, For, createMemo } from "solid-js";
-import { FaSolidCaretRight } from "solid-icons/fa";
 import { A } from "@solidjs/router";
 import classNames from "classnames";
+import { FaSolidCaretRight } from "solid-icons/fa";
+import { type Component, createMemo, For, Show } from "solid-js";
 
 export const Breadcrumbs: Component<{
 	breadcrumbs?: {

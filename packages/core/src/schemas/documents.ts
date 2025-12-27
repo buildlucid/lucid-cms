@@ -1,5 +1,5 @@
 import z from "zod";
-import { queryFormatted, queryString } from "./helpers/querystring.js";
+import type { ControllerSchema } from "../types.js";
 import {
 	brickClientResponseSchema,
 	brickInputSchema,
@@ -11,7 +11,7 @@ import {
 	fieldResponseSchema,
 } from "./collection-fields.js";
 import { documentVersionResponseSchema } from "./document-versions.js";
-import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const documentResponseUserSchema = z.object({
 	id: z.number().meta({

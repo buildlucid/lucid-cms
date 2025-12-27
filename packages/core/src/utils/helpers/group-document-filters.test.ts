@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
-import groupDocumentFilters from "./group-document-filters.js";
+import { describe, expect, it, vi } from "vitest";
+import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
 import type { LucidBrickTableName } from "../../types.js";
-import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
+import groupDocumentFilters from "./group-document-filters.js";
 
 // Mock the prefixGeneratedColName function
 vi.mock(

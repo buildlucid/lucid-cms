@@ -1,4 +1,4 @@
-import type { FieldResponse, FieldInputSchema } from "../../../types.js";
+import type { FieldInputSchema, FieldResponse } from "../../../types.js";
 
 /**
  * Process fields and return field values by locale

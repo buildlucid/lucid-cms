@@ -1,8 +1,8 @@
+import type { ColumnDataType } from "kysely";
 import type {
 	CollectionSchemaColumn,
 	TableType,
 } from "../../../libs/collection/schema/types.js";
-import type { ColumnDataType } from "kysely";
 
 export type ModifyColumnOperation = {
 	type: "modify";

@@ -1,7 +1,7 @@
 import z from "zod";
 import T from "../translations/index.js";
-import { userResponseSchema } from "./users.js";
 import type { ControllerSchema } from "../types.js";
+import { userResponseSchema } from "./users.js";
 
 export const controllerSchemas = {
 	getMe: {

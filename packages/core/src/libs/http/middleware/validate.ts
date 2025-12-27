@@ -1,8 +1,8 @@
-import T from "../../../translations/index.js";
-import { zValidator as zv } from "./z-validator.js";
-import { LucidAPIError } from "../../../utils/errors/index.js";
-import type { ZodType } from "zod";
 import type { ValidationTargets } from "hono";
+import type { ZodType } from "zod";
+import T from "../../../translations/index.js";
+import { LucidAPIError } from "../../../utils/errors/index.js";
+import { zValidator as zv } from "./z-validator.js";
 
 const validate = <T extends ZodType, Target extends keyof ValidationTargets>(
 	target: Target,

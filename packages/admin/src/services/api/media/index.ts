@@ -1,15 +1,15 @@
-import useGetMultiple from "./useGetMultiple";
-import useGetSingle from "./useGetSingle";
-import useUpdateSingle from "./useUpdateSingle";
-import useDeleteSingle from "./useDeleteSingle";
-import useDeleteAllProcessedImages from "./useDeleteAllProcessedImages";
-import useDeleteProcessedImages from "./useDeleteProcessedImages";
 import useCreateSingle from "./useCreateSingle";
-import useGetPresignedUrl from "./useGetPresignedUrl";
-import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
+import useDeleteAllProcessedImages from "./useDeleteAllProcessedImages";
 import useDeleteBatch from "./useDeleteBatch";
+import useDeleteProcessedImages from "./useDeleteProcessedImages";
+import useDeleteSingle from "./useDeleteSingle";
+import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
+import useGetMultiple from "./useGetMultiple";
+import useGetPresignedUrl from "./useGetPresignedUrl";
+import useGetSingle from "./useGetSingle";
 import useMoveFolder from "./useMoveFolder";
 import useRestore from "./useRestore";
+import useUpdateSingle from "./useUpdateSingle";
 
 const exportObject = {
 	useGetMultiple,

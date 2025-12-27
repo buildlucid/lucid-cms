@@ -1,8 +1,8 @@
-import T from "@/translations";
-import { createSignal, type Component } from "solid-js";
-import { FaSolidCopy } from "solid-icons/fa";
-import spawnToast from "@/utils/spawn-toast";
 import classNames from "classnames";
+import { FaSolidCopy } from "solid-icons/fa";
+import { type Component, createSignal } from "solid-js";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 interface CopyInputProps {
 	value: string;

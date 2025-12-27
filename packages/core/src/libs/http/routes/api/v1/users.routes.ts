@@ -1,15 +1,15 @@
 import { Hono } from "hono";
-import inviteSingle from "../../../controllers/users/invite-single.js";
-import getSingle from "../../../controllers/users/get-single.js";
-import getMultiple from "../../../controllers/users/get-multiple.js";
+import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js";
 import deleteSingle from "../../../controllers/users/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/users/delete-single-permanently.js";
-import restoreMultiple from "../../../controllers/users/restore-multiple.js";
-import updateSingle from "../../../controllers/users/update-single.js";
+import getMultiple from "../../../controllers/users/get-multiple.js";
+import getSingle from "../../../controllers/users/get-single.js";
+import inviteSingle from "../../../controllers/users/invite-single.js";
 import resendInvitation from "../../../controllers/users/resend-invitation.js";
-import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js";
+import restoreMultiple from "../../../controllers/users/restore-multiple.js";
 import unlinkAuthProvider from "../../../controllers/users/unlink-auth-provider.js";
-import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import updateSingle from "../../../controllers/users/update-single.js";
 
 const usersRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)

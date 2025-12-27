@@ -1,6 +1,6 @@
+import type { EmailResponse } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import type { EmailResponse } from "../../types/response.js";
 import { emailServices } from "../index.js";
 
 const sendExternal: ServiceFn<

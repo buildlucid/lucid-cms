@@ -1,20 +1,20 @@
-import { type Component, Switch, Match, Show } from "solid-js";
+import { A } from "@solidjs/router";
 import classNames from "classnames";
 import {
-	FaSolidPhotoFilm,
-	FaSolidUsers,
-	FaSolidHouse,
-	FaSolidUserLock,
-	FaSolidEnvelope,
+	FaSolidBarsProgress,
 	FaSolidBox,
 	FaSolidBoxesStacked,
-	FaSolidRightFromBracket,
-	FaSolidBarsProgress,
 	FaSolidDesktop,
+	FaSolidEnvelope,
+	FaSolidHouse,
 	FaSolidKey,
 	FaSolidMoneyCheck,
+	FaSolidPhotoFilm,
+	FaSolidRightFromBracket,
+	FaSolidUserLock,
+	FaSolidUsers,
 } from "solid-icons/fa";
-import { A } from "@solidjs/router";
+import { type Component, Match, Show, Switch } from "solid-js";
 
 interface IconLinkFullProps {
 	type: "link" | "button";

@@ -1,13 +1,13 @@
-import T from "../translations/index.js";
-import constants from "../constants.js";
+import { inspect } from "node:util";
 import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
-	ServiceFn,
 	DocumentVersionType,
-	LucidVersionTableName,
 	LucidBrickTableName,
+	LucidVersionTableName,
+	ServiceFn,
 } from "@lucidcms/core/types";
-import { inspect } from "node:util";
+import constants from "../constants.js";
+import T from "../translations/index.js";
 
 export type DescendantFieldsResponse = {
 	document_id: number;

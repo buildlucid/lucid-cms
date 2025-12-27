@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 import { logger, QueueJobsRepository } from "@lucidcms/core";
 import { executeSingleJob, logScope } from "@lucidcms/core/queue-adapter";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
-import type { PluginOptions } from "./types.js";
 import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
+import type { PluginOptions } from "./types.js";
 
 const cloudflareQueuesAdapter = (
 	options: PluginOptions,

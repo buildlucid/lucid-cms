@@ -1,12 +1,12 @@
+import getEmailAdapter from "../../../libs/email-adapter/get-adapter.js";
 import renderHandlebarsTemplate from "../../../libs/email-adapter/templates/render-handlebars-template.js";
+import type { EmailStrategyResponse } from "../../../libs/email-adapter/types.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
-import type { EmailStrategyResponse } from "../../../libs/email-adapter/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getEmailAdapter from "../../../libs/email-adapter/get-adapter.js";
 
 const sendEmail: ServiceFn<
 	[

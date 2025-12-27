@@ -1,7 +1,7 @@
-import T from "@/translations";
-import { createMemo, type Component } from "solid-js";
+import { type Component, createMemo } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
+import T from "@/translations";
 
 export type MoveToFolderParams = {
 	mode: "media" | "folder";

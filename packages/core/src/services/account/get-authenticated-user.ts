@@ -1,9 +1,9 @@
-import T from "../../translations/index.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { UserResponse } from "../../types.js";
-import type { LucidAuth } from "../../types/hono.js";
 import { usersFormatter } from "../../libs/formatters/index.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import type { LucidAuth } from "../../types/hono.js";
+import type { UserResponse } from "../../types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAuthenticatedUser: ServiceFn<
 	[

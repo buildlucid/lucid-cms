@@ -1,17 +1,17 @@
 import { DatabaseAdapter } from "@lucidcms/core/db-adapter";
 import type {
 	DatabaseConfig,
-	InferredTable,
 	InferredColumn,
-	OnUpdate,
+	InferredTable,
 	OnDelete,
+	OnUpdate,
 } from "@lucidcms/core/types";
 import {
-	SqliteDialect,
-	ParseJSONResultsPlugin,
-	sql,
-	type SqliteDialectConfig,
 	type ColumnDataType,
+	ParseJSONResultsPlugin,
+	SqliteDialect,
+	type SqliteDialectConfig,
+	sql,
 } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import formatDefaultValue from "./utils/format-default-value.js";

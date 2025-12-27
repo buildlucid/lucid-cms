@@ -1,10 +1,10 @@
-import T from "@/translations";
+import type { CFConfig, FieldError, FieldResponse } from "@types";
 import { type Component, createMemo } from "solid-js";
-import type { CFConfig, FieldResponse, FieldError } from "@types";
+import { Select } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
+import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { Select } from "@/components/Groups/Form";
 
 interface SelectFieldProps {
 	state: {

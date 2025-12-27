@@ -1,13 +1,13 @@
-import T from "../translations/index.js";
-import constants from "../constants.js";
+import { prefixGeneratedColName } from "@lucidcms/core/helpers";
 import type {
-	ServiceFn,
 	DocumentVersionType,
+	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
-	LucidBrickTableName,
+	ServiceFn,
 } from "@lucidcms/core/types";
-import { prefixGeneratedColName } from "@lucidcms/core/helpers";
+import constants from "../constants.js";
+import T from "../translations/index.js";
 
 export type VersionFieldsQueryResponse = {
 	locale: string;

@@ -1,8 +1,8 @@
-import T from "../../../translations/index.js";
-import constants from "../../../constants/constants.js";
 import { getCookie } from "hono/cookie";
-import type { ServiceResponse } from "../../../utils/services/types.js";
+import constants from "../../../constants/constants.js";
+import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const verifyToken = (
 	c: LucidHonoContext,

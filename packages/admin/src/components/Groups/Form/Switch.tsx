@@ -1,19 +1,19 @@
-import T from "@/translations";
+import type { ErrorResult, FieldError } from "@types";
+import classnames from "classnames";
 import {
 	type Component,
-	createSignal,
 	createEffect,
-	onMount,
 	createMemo,
+	createSignal,
+	onMount,
 } from "solid-js";
-import classnames from "classnames";
-import type { ErrorResult, FieldError } from "@types";
 import {
-	Label,
 	DescribedBy,
 	ErrorMessage,
+	Label,
 	Tooltip,
 } from "@/components/Groups/Form";
+import T from "@/translations";
 
 interface SwitchProps {
 	id: string;

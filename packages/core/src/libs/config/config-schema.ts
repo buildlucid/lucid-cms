@@ -6,6 +6,7 @@ import type {
 	UrlStrategy,
 } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
+import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
@@ -20,7 +21,6 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../queue-adapter/types.js";
-import { AuthProviderSchema } from "../auth-providers/schema.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>

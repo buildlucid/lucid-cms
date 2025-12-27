@@ -8,8 +8,8 @@ import updateMediaStorageJob from "../../services/media/jobs/update-storage.js";
 import deleteTokenJob from "../../services/user-tokens/jobs/delete-single.js";
 import deleteUserJob from "../../services/users/jobs/delete-single.js";
 import type {
-	QueueJobHandlerFn,
 	QueueEvent,
+	QueueJobHandlerFn,
 	QueueJobHandlers,
 } from "./types.js";
 

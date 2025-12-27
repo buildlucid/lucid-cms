@@ -1,9 +1,8 @@
-import T from "../../../translations/index.js";
-import z from "zod";
-import CustomField from "../custom-field.js";
 import merge from "lodash.merge";
-import keyToTitle from "../utils/key-to-title.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
+import z from "zod";
+import T from "../../../translations/index.js";
+import type { ServiceResponse } from "../../../types.js";
+import CustomField from "../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -11,7 +10,8 @@ import type {
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type { ServiceResponse } from "../../../types.js";
+import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class SelectCustomField extends CustomField<"select"> {
 	type = "select" as const;

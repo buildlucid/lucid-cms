@@ -1,8 +1,8 @@
-import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
-import { collectionTableParts } from "./build-table-name.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
+import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
+import { collectionTableParts } from "./build-table-name.js";
 
 const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 	const parts = name.split(constants.db.collectionKeysJoin);

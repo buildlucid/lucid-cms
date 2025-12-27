@@ -1,29 +1,29 @@
-import T from "@/translations";
-import { type Component, Show, createMemo, onMount, onCleanup } from "solid-js";
-import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
-import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
-import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
-import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
-import { DocumentActions } from "./DocumentActions";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import userPreferencesStore from "@/store/userPreferencesStore";
-import DateText from "@/components/Partials/DateText";
-import Spinner from "@/components/Partials/Spinner";
+import type { CollectionResponse, DocumentResponse } from "@types";
+import classNames from "classnames";
 import {
-	FaSolidLanguage,
-	FaSolidClock,
 	FaSolidCalendarPlus,
+	FaSolidClock,
+	FaSolidLanguage,
 	FaSolidRotate,
 } from "solid-icons/fa";
+import type { Accessor } from "solid-js";
+import { type Component, createMemo, onCleanup, onMount, Show } from "solid-js";
+import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
+import Button from "@/components/Partials/Button";
+import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
+import DateText from "@/components/Partials/DateText";
+import Spinner from "@/components/Partials/Spinner";
+import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
-import type { CollectionResponse, DocumentResponse } from "@types";
-import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
-import { getDocumentRoute } from "@/utils/route-helpers";
-import type { Accessor } from "solid-js";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import userPreferencesStore from "@/store/userPreferencesStore";
+import T from "@/translations";
 import helpers from "@/utils/helpers";
-import classNames from "classnames";
-import Button from "@/components/Partials/Button";
+import { getDocumentRoute } from "@/utils/route-helpers";
+import { DocumentActions } from "./DocumentActions";
+import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
+import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
 
 export const HeaderBar: Component<{
 	mode: "create" | "edit" | undefined;

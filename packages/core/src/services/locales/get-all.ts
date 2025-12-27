@@ -1,7 +1,7 @@
-import { LocalesRepository } from "../../libs/repositories/index.js";
 import { localesFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import { LocalesRepository } from "../../libs/repositories/index.js";
 import type { LocalesResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<[], LocalesResponse[]> = async (context) => {
 	const Locales = new LocalesRepository(context.db, context.config.db);

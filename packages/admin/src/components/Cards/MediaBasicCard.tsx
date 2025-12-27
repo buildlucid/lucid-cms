@@ -1,10 +1,10 @@
-import T from "@/translations";
-import { type Component, createMemo } from "solid-js";
-import classNames from "classnames";
 import type { MediaResponse } from "@types";
-import helpers from "@/utils/helpers";
+import classNames from "classnames";
+import { type Component, createMemo } from "solid-js";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 interface MediaBasicCardProps {
 	media: MediaResponse;

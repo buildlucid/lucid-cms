@@ -1,6 +1,6 @@
+import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 
 const checkCollection: ServiceFn<
 	[

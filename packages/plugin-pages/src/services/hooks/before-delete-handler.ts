@@ -1,11 +1,11 @@
+import type { LucidHookDocuments } from "@lucidcms/core/types";
+import type { PluginOptionsInternal } from "../../types/types.js";
 import {
-	getTargetCollection,
 	constructChildFullSlug,
 	getDescendantFields,
+	getTargetCollection,
 	updateFullSlugFields,
 } from "../index.js";
-import type { PluginOptionsInternal } from "../../types/types.js";
-import type { LucidHookDocuments } from "@lucidcms/core/types";
 
 /**
  * Handles the before delete hook for documents. What this does is:

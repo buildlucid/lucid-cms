@@ -1,8 +1,8 @@
-import T from "@/translations/index";
-import classNames from "classnames";
-import { type Component, createSignal } from "solid-js";
 import { debounce } from "@solid-primitives/scheduled";
+import classNames from "classnames";
 import { FaRegularTrashCan } from "solid-icons/fa";
+import { type Component, createSignal } from "solid-js";
+import T from "@/translations/index";
 
 interface DeleteButtonProps {
 	disabled?: boolean;

@@ -1,14 +1,14 @@
 import T from "../../../../translations/index.js";
-import getSchema from "./get-schema.js";
-import type { ServiceContext } from "../../../../utils/services/types.js";
-import type { CollectionSchemaTable } from "../types.js";
 import type {
+	CollectionTableNames,
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
 	ServiceResponse,
-	CollectionTableNames,
 } from "../../../../types.js";
+import type { ServiceContext } from "../../../../utils/services/types.js";
+import type { CollectionSchemaTable } from "../types.js";
+import getSchema from "./get-schema.js";
 
 /**
  * Returns the schema for the bricks table for a given collection.

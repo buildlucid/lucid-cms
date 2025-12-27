@@ -3,16 +3,16 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
-import { DocumentBricksRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import {
 	documentBricksFormatter,
 	documentsFormatter,
 } from "../../libs/formatters/index.js";
+import { DocumentBricksRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
 import type {
 	BrickResponse,
-	FieldResponse,
 	DocumentResponse,
+	FieldResponse,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getSingleInstance } from "../collections/index.js";

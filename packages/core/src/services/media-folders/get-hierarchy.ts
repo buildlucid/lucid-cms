@@ -1,7 +1,7 @@
-import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import { mediaFoldersFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { MediaFolderResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import buildHierarchy from "./helpers/build-hierachy.js";
 
 const getHierarchy: ServiceFn<[], MediaFolderResponse[]> = async (context) => {

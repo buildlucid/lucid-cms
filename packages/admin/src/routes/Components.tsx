@@ -1,25 +1,25 @@
+import { FaSolidXmark } from "solid-icons/fa";
 import type { Component } from "solid-js";
 import { createSignal } from "solid-js";
-import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
-import Button from "@/components/Partials/Button";
-import { FaSolidXmark } from "solid-icons/fa";
-import { Standard } from "@/components/Groups/Headers";
 import InfoRow from "@/components/Blocks/InfoRow";
-import PluginLoader from "@/components/PluginLoader";
 import {
+	Checkbox,
+	CheckboxButton,
+	Color,
 	Input,
 	InputFull,
-	Textarea,
-	Switch,
-	Select,
-	SelectMultiple,
-	Color,
-	Checkbox,
 	JSONTextarea,
 	Search,
-	CheckboxButton,
+	Select,
+	SelectMultiple,
+	Switch,
+	Textarea,
 	WYSIWYG,
 } from "@/components/Groups/Form";
+import { Standard } from "@/components/Groups/Headers";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
+import Button from "@/components/Partials/Button";
+import PluginLoader from "@/components/PluginLoader";
 
 const ComponentsRoute: Component = () => {
 	// ----------------------------------------

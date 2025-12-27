@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import type { MediaFolderBreadcrumbResponse } from "@types";
-import { type Accessor, type Component, For, Match, Switch } from "solid-js";
 import { FaSolidChevronRight, FaSolidHouse } from "solid-icons/fa";
+import { type Accessor, type Component, For, Match, Switch } from "solid-js";
 import T from "@/translations";
 
 export const Breadcrumbs: Component<{

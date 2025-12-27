@@ -1,10 +1,10 @@
-import type { UserResponse } from "../../types/response.js";
 import type { LucidAuth } from "../../types/hono.js";
+import type { UserResponse } from "../../types/response.js";
 import type { BooleanInt } from "../db-adapter/types.js";
-import formatter from "./index.js";
-import hasAccess from "../permission/has-access.js";
-import userPermissionsFormatter from "./user-permissions.js";
 import { Permissions } from "../permission/definitions.js";
+import hasAccess from "../permission/has-access.js";
+import formatter from "./index.js";
+import userPermissionsFormatter from "./user-permissions.js";
 
 export interface UserPropT {
 	created_at: Date | string | null;

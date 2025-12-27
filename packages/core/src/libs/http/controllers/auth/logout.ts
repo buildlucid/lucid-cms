@@ -3,11 +3,11 @@ import { describeRoute } from "hono-openapi";
 import { authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
-	honoOpenAPIResponse,
 	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
 import authenticate from "../../middleware/authenticate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
 

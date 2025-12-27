@@ -1,18 +1,18 @@
-import T from "@/translations";
+import { useLocation, useNavigate } from "@solidjs/router";
 import {
 	type Component,
-	Switch,
-	Match,
+	createEffect,
 	createMemo,
 	type JSXElement,
-	createEffect,
+	Match,
 	Suspense,
+	Switch,
 } from "solid-js";
-import { useNavigate, useLocation } from "@solidjs/router";
-import api from "@/services/api";
 import { NavigationSidebar, Wrapper } from "@/components/Groups/Layout";
-import spawnToast from "@/utils/spawn-toast";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
+import api from "@/services/api";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 const MainLayout: Component<{
 	children?: JSXElement;

@@ -1,8 +1,8 @@
-import { UsersRepository } from "../../libs/repositories/index.js";
 import formatter, { usersFormatter } from "../../libs/formatters/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { UserResponse } from "../../types/response.js";
+import { UsersRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
+import type { UserResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
 	[

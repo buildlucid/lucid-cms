@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getDirName } from "../../../utils/helpers/index.js";
 import constants from "../../../constants/constants.js";
 import type { Config, ServiceResponse } from "../../../types.js";
+import { getDirName } from "../../../utils/helpers/index.js";
 import cliLogger from "../logger.js";
 
 const currentDir = getDirName(import.meta.url);

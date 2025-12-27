@@ -1,9 +1,9 @@
-import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
 import constants from "../../constants/constants.js";
-import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
-import type { LicenseResponse } from "../../types.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
+import type { LicenseResponse } from "../../types.js";
+import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import { licenseServices } from "../index.js";
 
 const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {

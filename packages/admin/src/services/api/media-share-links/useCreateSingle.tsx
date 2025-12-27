@@ -1,7 +1,7 @@
+import type { MediaShareLinkResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, MediaShareLinkResponse } from "@types";
 
 interface Params {
 	mediaId: number;

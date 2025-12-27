@@ -1,5 +1,5 @@
-import { createStore } from "solid-js/store";
 import type { LinkResValue } from "@types";
+import { createStore } from "solid-js/store";
 
 type SelectCallbackT = (_link: LinkResValue) => void;
 

@@ -1,6 +1,6 @@
 import z from "zod";
-import { queryFormatted, queryString } from "./helpers/querystring.js";
 import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const mediaFolderResponseSchema = z.object({
 	id: z.number().meta({ description: "Folder ID", example: 1 }),

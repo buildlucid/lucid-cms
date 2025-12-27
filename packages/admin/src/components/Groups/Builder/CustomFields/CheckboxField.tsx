@@ -1,9 +1,9 @@
+import type { CFConfig, FieldError, FieldResponse } from "@types";
 import { type Component, createMemo } from "solid-js";
-import type { CFConfig, FieldResponse, FieldError } from "@types";
+import { Switch } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { Switch } from "@/components/Groups/Form";
 
 interface CheckboxFieldProps {
 	state: {

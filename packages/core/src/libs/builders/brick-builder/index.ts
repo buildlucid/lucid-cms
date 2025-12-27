@@ -1,7 +1,7 @@
-import FieldBuilder from "../field-builder/index.js";
 import TabCustomField from "../../custom-fields/fields/tab.js";
 import type { CFProps } from "../../custom-fields/types.js";
-import type { BrickConfigProps, BrickConfig } from "./types.js";
+import FieldBuilder from "../field-builder/index.js";
+import type { BrickConfig, BrickConfigProps } from "./types.js";
 
 class BrickBuilder extends FieldBuilder {
 	key: string;

@@ -1,14 +1,14 @@
-import { type Component, Switch, Match, For } from "solid-js";
+import { A } from "@solidjs/router";
 import classNames from "classnames";
 import {
-	FaSolidPhotoFilm,
-	FaSolidUsers,
-	FaSolidGear,
-	FaSolidUserLock,
-	FaSolidEnvelope,
 	FaSolidBox,
+	FaSolidEnvelope,
+	FaSolidGear,
+	FaSolidPhotoFilm,
+	FaSolidUserLock,
+	FaSolidUsers,
 } from "solid-icons/fa";
-import { A } from "@solidjs/router";
+import { type Component, For, Match, Switch } from "solid-js";
 import T from "@/translations";
 
 interface StartingPointsProps {

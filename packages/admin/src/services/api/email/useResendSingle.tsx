@@ -1,8 +1,8 @@
+import type { ResponseBody } from "@types";
 import T from "@/translations";
+import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import spawnToast from "@/utils/spawn-toast";
-import request from "@/utils/request";
-import type { ResponseBody } from "@types";
 
 interface Params {
 	id: number;

@@ -1,10 +1,10 @@
-import aggregateBrickTables from "./helpers/aggregate-brick-tables.js";
-import prepareBricksAndFields from "./helpers/prepare-bricks-and-fields.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import { documentBrickServices } from "../index.js";
+import aggregateBrickTables from "./helpers/aggregate-brick-tables.js";
+import prepareBricksAndFields from "./helpers/prepare-bricks-and-fields.js";
 
 const createMultiple: ServiceFn<
 	[

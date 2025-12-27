@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
+import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import T from "../../../translations/index.js";
 import CollectionBuilder from "../../builders/collection-builder/index.js";
-import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import CustomFieldSchema from "../schema.js";
 import ColorCustomField from "./color.js";
 

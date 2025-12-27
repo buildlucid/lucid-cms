@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/solid-query";
+import type { ResponseBody, UserLoginResponse } from "@types";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, UserLoginResponse } from "@types";
 
 interface QueryParams {
 	queryString?: () => string;

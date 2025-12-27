@@ -1,30 +1,30 @@
-import T from "@/translations";
-import {
-	type Component,
-	Switch,
-	Match,
-	createEffect,
-	on,
-	createMemo,
-	onCleanup,
-	batch,
-	createSignal,
-} from "solid-js";
 import { useParams } from "@solidjs/router";
 import {
-	HeaderBar,
-	Modals,
+	batch,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Match,
+	on,
+	onCleanup,
+	Switch,
+} from "solid-js";
+import Alert from "@/components/Blocks/Alert";
+import {
 	BuilderBricks,
 	CollectionPseudoBrick,
 	FixedBricks,
+	HeaderBar,
+	Modals,
 } from "@/components/Groups/PageBuilder";
-import { useDocumentState } from "@/hooks/document/useDocumentState";
-import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
-import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
+import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
+import { useDocumentState } from "@/hooks/document/useDocumentState";
+import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
-import Alert from "@/components/Blocks/Alert";
 import brickStore from "@/store/brickStore";
+import T from "@/translations";
 
 const CollectionsDocumentsEditRoute: Component<{
 	mode: "create" | "edit";

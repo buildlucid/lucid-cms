@@ -1,29 +1,29 @@
-import T from "@/translations";
-import { type Accessor, type Component, createMemo, Index } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import {
-	FaSolidT,
 	FaSolidCalendar,
 	FaSolidEnvelope,
-	FaSolidUserTie,
 	FaSolidIdCard,
 	FaSolidLock,
+	FaSolidT,
+	FaSolidUserTie,
 } from "solid-icons/fa";
-import api from "@/services/api";
-import useRowTarget from "@/hooks/useRowTarget";
+import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
-import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
-import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
-import DeleteUser from "@/components/Modals/User/DeleteUser";
-import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
-import ResendInvitation from "@/components/Modals/User/ResendInvitation";
 import { Table } from "@/components/Groups/Table";
-import UserRow from "@/components/Tables/Rows/UserRow";
-import RestoreUsers from "@/components/Modals/User/RestoreUser";
+import DeleteUser from "@/components/Modals/User/DeleteUser";
 import DeleteUserPermanently from "@/components/Modals/User/DeleteUserPermanently";
+import ResendInvitation from "@/components/Modals/User/ResendInvitation";
+import RestoreUsers from "@/components/Modals/User/RestoreUser";
+import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
+import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
+import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
+import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
+import UserRow from "@/components/Tables/Rows/UserRow";
+import useRowTarget from "@/hooks/useRowTarget";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import api from "@/services/api";
 import userStore from "@/store/userStore";
+import T from "@/translations";
 
 export const UserList: Component<{
 	state: {

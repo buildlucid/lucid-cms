@@ -1,8 +1,8 @@
 import { Hono } from "hono";
+import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import status from "../../../controllers/license/status.js";
 import update from "../../../controllers/license/update.js";
 import verify from "../../../controllers/license/verify.js";
-import status from "../../../controllers/license/status.js";
-import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 
 const licenseRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/", ...update)

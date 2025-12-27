@@ -1,12 +1,12 @@
+import type { ServiceResponse } from "../../../types.js";
 import CustomField from "../custom-field.js";
-import keyToTitle from "../utils/key-to-title.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
 	SchemaDefinition,
 } from "../types.js";
-import type { ServiceResponse } from "../../../types.js";
+import keyToTitle from "../utils/key-to-title.js";
 
 class TabCustomField extends CustomField<"tab"> {
 	type = "tab" as const;

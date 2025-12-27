@@ -1,12 +1,12 @@
-import T from "@/translations";
-import { type Component, Show, createMemo, createSignal } from "solid-js";
-import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
-import userStore from "@/store/userStore";
-import api from "@/services/api";
-import { getBodyError } from "@/utils/error-helpers";
-import { Panel } from "@/components/Groups/Panel";
-import { Input, Checkbox, SelectMultiple } from "@/components/Groups/Form";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import InputGrid from "@/components/Containers/InputGrid";
+import { Checkbox, Input, SelectMultiple } from "@/components/Groups/Form";
+import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
+import { Panel } from "@/components/Groups/Panel";
+import api from "@/services/api";
+import userStore from "@/store/userStore";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
 
 interface CreateUserPanelProps {
 	state: {

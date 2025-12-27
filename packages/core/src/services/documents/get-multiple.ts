@@ -1,17 +1,17 @@
-import { DocumentsRepository } from "../../libs/repositories/index.js";
-import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
-import { groupDocumentFilters } from "../../utils/helpers/index.js";
-import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
-import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
 import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
 	getTableNames,
 } from "../../libs/collection/schema/live/schema-filters.js";
-import type { GetMultipleQueryParams } from "../../schemas/documents.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { DocumentResponse } from "../../types/response.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
+import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
+import type { GetMultipleQueryParams } from "../../schemas/documents.js";
+import type { DocumentResponse } from "../../types/response.js";
+import { groupDocumentFilters } from "../../utils/helpers/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
+import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
 import { collectionServices } from "../index.js";
 
 const getMultiple: ServiceFn<

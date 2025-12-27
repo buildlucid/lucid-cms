@@ -1,8 +1,8 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import {
-	MediaRepository,
 	MediaFoldersRepository,
+	MediaRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";

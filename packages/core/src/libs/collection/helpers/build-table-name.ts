@@ -1,7 +1,7 @@
-import T from "../../../translations/index.js";
 import constants from "../../../constants/constants.js";
-import type { ServiceResponse } from "../../../types.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
+import T from "../../../translations/index.js";
+import type { ServiceResponse } from "../../../types.js";
 
 /**
  * Default parts for table names

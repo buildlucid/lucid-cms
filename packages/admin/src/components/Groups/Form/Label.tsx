@@ -1,7 +1,7 @@
-import T from "@/translations";
-import { type Component, Show } from "solid-js";
 import classnames from "classnames";
-import { FaSolidGlobe, FaSolidDatabase } from "solid-icons/fa";
+import { FaSolidDatabase, FaSolidGlobe } from "solid-icons/fa";
+import { type Component, Show } from "solid-js";
+import T from "@/translations";
 
 interface LabelProps {
 	id: string;

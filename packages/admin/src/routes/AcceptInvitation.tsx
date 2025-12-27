@@ -12,8 +12,8 @@ import {
 	Switch,
 } from "solid-js";
 import AcceptInvitationForm from "@/components/Forms/Auth/AcceptInvitationForm";
-import ProviderButton from "@/components/Partials/ProviderButton";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
+import ProviderButton from "@/components/Partials/ProviderButton";
 import Spinner from "@/components/Partials/Spinner";
 import constants from "@/constants";
 import api from "@/services/api";

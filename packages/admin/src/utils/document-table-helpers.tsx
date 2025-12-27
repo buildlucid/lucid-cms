@@ -1,4 +1,4 @@
-import type { CFConfig, FieldTypes, CollectionResponse } from "@types";
+import type { CFConfig, CollectionResponse, FieldTypes } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import helpers from "@/utils/helpers";
 

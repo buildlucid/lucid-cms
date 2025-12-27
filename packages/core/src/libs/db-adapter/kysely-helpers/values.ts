@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
 import { sql } from "kysely";
+import T from "../../../translations/index.js";
 import { LucidError } from "../../../utils/errors/index.js";
 
 // https://old.kyse.link/?p=s&i=C0yoagEodj9vv4AxE3TH

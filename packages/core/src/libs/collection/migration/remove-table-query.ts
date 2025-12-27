@@ -1,5 +1,5 @@
-import logger from "../../../libs/logger/index.js";
 import constants from "../../../constants/constants.js";
+import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
 import type { TableMigration } from "./types.js";
 

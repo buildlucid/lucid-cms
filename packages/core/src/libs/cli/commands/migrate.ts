@@ -6,10 +6,10 @@ import loadConfigFile from "../../config/load-config-file.js";
 import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
 import getKVAdapter from "../../kv-adapter/get-adapter.js";
 import type { KVAdapterInstance } from "../../kv-adapter/types.js";
-import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 import logger from "../../logger/index.js";
+import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
 import cliLogger from "../logger.js";
+import validateEnvVars from "../services/validate-env-vars.js";
 
 const runSyncTasks = async (
 	config: Config,

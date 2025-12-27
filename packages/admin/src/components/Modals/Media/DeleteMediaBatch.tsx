@@ -1,10 +1,10 @@
-import T from "@/translations";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, Show } from "solid-js";
+import { CheckboxInput } from "@/components/Groups/Form/Checkbox";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore";
-import { CheckboxInput } from "@/components/Groups/Form/Checkbox";
+import T from "@/translations";
 
 interface DeleteMediaBatchProps {
 	state: {

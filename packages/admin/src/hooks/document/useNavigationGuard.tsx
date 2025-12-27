@@ -1,5 +1,5 @@
-import { createSignal, type Accessor } from "solid-js";
-import { useBeforeLeave, type BeforeLeaveEventArgs } from "@solidjs/router";
+import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
+import { type Accessor, createSignal } from "solid-js";
 
 export interface NavigationGuardState {
 	isOpen: Accessor<boolean>;

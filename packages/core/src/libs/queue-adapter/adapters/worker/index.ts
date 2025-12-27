@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { join } from "node:path";
 import { Worker } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
 import logger from "../../../logger/index.js";
@@ -8,7 +9,6 @@ import type {
 	QueueBatchJobResponse,
 	QueueJobResponse,
 } from "../../types.js";
-import { join } from "node:path";
 
 const ADAPTER_KEY = "worker";
 

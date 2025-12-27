@@ -1,7 +1,7 @@
-import T from "@/translations";
 import type { Component } from "solid-js";
 import { Alert } from "@/components/Groups/Modal";
 import CopyInput from "@/components/Partials/CopyInput";
+import T from "@/translations";
 
 interface CopyAPIKeyProps {
 	apiKey: string | undefined;

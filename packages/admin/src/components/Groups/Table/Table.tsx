@@ -1,18 +1,18 @@
 import {
 	type Component,
-	type JSXElement,
-	Show,
+	createEffect,
+	createMemo,
 	createSignal,
 	Index,
-	createMemo,
-	createEffect,
-	Switch,
+	type JSXElement,
 	Match,
+	Show,
+	Switch,
 } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import { SelectAction, Th, ColumnToggle } from "@/components/Groups/Table";
+import { ColumnToggle, SelectAction, Th } from "@/components/Groups/Table";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 
 export type TableTheme = "primary" | "secondary";
 

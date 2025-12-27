@@ -1,6 +1,6 @@
 import type z from "zod";
-import type { GenerateTypesResult } from "./types.js";
 import constants from "../../constants/constants.js";
+import type { GenerateTypesResult } from "./types.js";
 
 /**
  * Generates the EnvironmentVariables interface based on the provided schema

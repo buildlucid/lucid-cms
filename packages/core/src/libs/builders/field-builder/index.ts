@@ -2,6 +2,7 @@ import type CustomField from "../../custom-fields/custom-field.js";
 import CheckboxCustomField from "../../custom-fields/fields/checkbox.js";
 import ColorCustomField from "../../custom-fields/fields/color.js";
 import DateTimeCF from "../../custom-fields/fields/datetime.js";
+import DocumentCustomField from "../../custom-fields/fields/document.js";
 import JSONCF from "../../custom-fields/fields/json.js";
 import LinkCustomField from "../../custom-fields/fields/link.js";
 import MediaCustomField from "../../custom-fields/fields/media.js";
@@ -12,11 +13,10 @@ import TextCustomField from "../../custom-fields/fields/text.js";
 import TextareaCustomField from "../../custom-fields/fields/textarea.js";
 import UserCustomField from "../../custom-fields/fields/user.js";
 import WysiwygCustomField from "../../custom-fields/fields/wysiwyg.js";
-import DocumentCustomField from "../../custom-fields/fields/document.js";
 import type {
-	FieldTypes,
-	CFProps,
 	CFConfig,
+	CFProps,
+	FieldTypes,
 	TabFieldConfig,
 } from "../../custom-fields/types.js";
 import type { FieldBuilderMeta } from "./types.js";

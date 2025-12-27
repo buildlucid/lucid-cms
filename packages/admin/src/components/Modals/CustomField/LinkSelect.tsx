@@ -1,14 +1,14 @@
-import T from "@/translations";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
-	createEffect,
 } from "solid-js";
-import linkFieldStore from "@/store/forms/linkFieldStore";
-import { Modal } from "@/components/Groups/Modal";
 import { Checkbox, Input } from "@/components/Groups/Form";
+import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
+import linkFieldStore from "@/store/forms/linkFieldStore";
+import T from "@/translations";
 
 const LinkSelect: Component = () => {
 	// ------------------------------

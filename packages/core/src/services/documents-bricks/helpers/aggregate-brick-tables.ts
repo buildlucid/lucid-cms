@@ -1,6 +1,3 @@
-import constructBrickTable, {
-	type InsertBrickTables,
-} from "./construct-brick-table.js";
 import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
@@ -10,6 +7,9 @@ import type {
 	FieldResponse,
 	LucidBrickTableName,
 } from "../../../types.js";
+import constructBrickTable, {
+	type InsertBrickTables,
+} from "./construct-brick-table.js";
 
 /**
  * Aggregates brick tables generate from bricks and fields using the constructBrickTable helper

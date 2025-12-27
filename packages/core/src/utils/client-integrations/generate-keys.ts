@@ -1,7 +1,7 @@
-import { randomBytes } from "@noble/hashes/utils.js";
 import { scrypt } from "@noble/hashes/scrypt.js";
-import { generateSecret } from "../helpers/index.js";
+import { randomBytes } from "@noble/hashes/utils.js";
 import constants from "../../constants/constants.js";
+import { generateSecret } from "../helpers/index.js";
 
 const generateKeys = async (
 	encryptionKey: string,

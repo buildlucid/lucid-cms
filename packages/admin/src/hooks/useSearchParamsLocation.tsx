@@ -1,10 +1,10 @@
+import { useLocation, useSearchParams } from "@solidjs/router";
 import {
+	type Accessor,
 	createEffect,
 	createMemo,
 	createSignal,
-	type Accessor,
 } from "solid-js";
-import { useLocation, useSearchParams } from "@solidjs/router";
 
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;

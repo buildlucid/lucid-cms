@@ -1,12 +1,12 @@
 import classNames from "classnames";
+import { FaSolidCaretUp, FaSolidMinus } from "solid-icons/fa";
 import {
 	type Component,
-	type JSXElement,
-	Switch,
-	Match,
 	createMemo,
+	type JSXElement,
+	Match,
+	Switch,
 } from "solid-js";
-import { FaSolidCaretUp, FaSolidMinus } from "solid-icons/fa";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import type { TableTheme } from "./Table";
 

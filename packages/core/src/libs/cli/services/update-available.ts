@@ -1,11 +1,11 @@
-import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
-import packageJson from "../../../../package.json" with { type: "json" };
-import semver from "semver";
-import { join } from "node:path";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import boxen from "boxen";
 import picocolors from "picocolors";
+import semver from "semver";
+import packageJson from "../../../../package.json" with { type: "json" };
+import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
 
 const UPDATE_AVAILABLE_FILE = "update-available.json";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;

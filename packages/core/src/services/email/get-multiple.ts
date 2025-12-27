@@ -1,8 +1,8 @@
-import { EmailsRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import type { EmailResponse } from "../../types/response.js";
-import type { GetMultipleQueryParams } from "../../schemas/email.js";
 import formatter, { emailsFormatter } from "../../libs/formatters/index.js";
+import { EmailsRepository } from "../../libs/repositories/index.js";
+import type { GetMultipleQueryParams } from "../../schemas/email.js";
+import type { EmailResponse } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
 	[

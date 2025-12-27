@@ -1,24 +1,24 @@
-import T from "../../../translations/index.js";
 import z from "zod";
-import CustomField from "../custom-field.js";
-import keyToTitle from "../utils/key-to-title.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
+import T from "../../../translations/index.js";
+import type { ServiceResponse } from "../../../types.js";
 import buildTableName from "../../collection/helpers/build-table-name.js";
+import {
+	documentBricksFormatter,
+	documentFieldsFormatter,
+} from "../../formatters/index.js";
+import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
+import CustomField from "../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
 	DocumentReferenceData,
+	FieldRefParams,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type { ServiceResponse } from "../../../types.js";
-import type { BrickQueryResponse } from "../../repositories/document-bricks.js";
-import {
-	documentFieldsFormatter,
-	documentBricksFormatter,
-} from "../../formatters/index.js";
-import type { FieldRefParams } from "../types.js";
+import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class DocumentCustomField extends CustomField<"document"> {
 	type = "document" as const;

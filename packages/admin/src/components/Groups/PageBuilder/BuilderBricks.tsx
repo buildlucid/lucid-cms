@@ -1,31 +1,31 @@
-import T from "@/translations";
-import {
-	type Accessor,
-	type Component,
-	createMemo,
-	For,
-	Show,
-	createSignal,
-	Switch,
-	Match,
-} from "solid-js";
 import type { CollectionBrickConfig, CollectionResponse } from "@types";
+import classNames from "classnames";
 import {
 	FaSolidChevronUp,
 	FaSolidGripLines,
 	FaSolidLayerGroup,
 } from "solid-icons/fa";
-import classNames from "classnames";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	createSignal,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import {
 	BrickBody,
 	BrickImagePreviewButton,
 } from "@/components/Groups/Builder";
-import Button from "@/components/Partials/Button";
 import AddBrick from "@/components/Modals/Bricks/AddBrick";
+import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
-import helpers from "@/utils/helpers";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
+import brickStore, { type BrickData } from "@/store/brickStore";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
 import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BuilderBricksProps {

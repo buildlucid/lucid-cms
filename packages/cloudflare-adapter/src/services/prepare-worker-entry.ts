@@ -1,10 +1,10 @@
 import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
+import constants from "../constants.js";
 import type {
-	CloudflareWorkerImport,
 	CloudflareWorkerExport,
 	CloudflareWorkerExportArtifact,
+	CloudflareWorkerImport,
 } from "../types.js";
-import constants from "../constants.js";
 
 /**
  * Prepares the main worker entry file and add additional imports/exports from custom artifacts

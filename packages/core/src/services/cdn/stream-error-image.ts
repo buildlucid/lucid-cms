@@ -1,7 +1,7 @@
 import T from "../../translations/index.js";
-import pipeRemoteUrl from "./helpers/pipe-remote-url.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import type { LucidErrorData } from "../../types/errors.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import pipeRemoteUrl from "./helpers/pipe-remote-url.js";
 
 const streamErrorImage: ServiceFn<
 	[

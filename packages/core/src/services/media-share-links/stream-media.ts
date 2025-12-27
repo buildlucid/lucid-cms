@@ -1,6 +1,6 @@
+import type { Readable } from "node:stream";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
-import type { Readable } from "node:stream";
 
 /**
  * Stream media

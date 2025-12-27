@@ -1,9 +1,9 @@
-import { Show, createMemo, type Component } from "solid-js";
-import type { CollectionResponse } from "@types";
 import { A } from "@solidjs/router";
+import type { CollectionResponse } from "@types";
+import { FaSolidBox, FaSolidBoxesStacked } from "solid-icons/fa";
+import { type Component, createMemo, Show } from "solid-js";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import { FaSolidBox, FaSolidBoxesStacked } from "solid-icons/fa";
 
 export const CollectionCardLoading: Component = () => {
 	// ----------------------------------

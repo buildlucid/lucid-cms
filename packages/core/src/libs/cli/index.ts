@@ -4,10 +4,10 @@ import packageJson from "../../../package.json" with { type: "json" };
 import buildCommand from "./commands/build.js";
 import devCommand from "./commands/dev.js";
 import migrateCommand from "./commands/migrate.js";
-import serveCommand from "./commands/serve.js";
-import migrateRollbackCommand from "./commands/migrate-rollback.js";
-import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateFreshCommand from "./commands/migrate-fresh.js";
+import migrateResetCommand from "./commands/migrate-reset.js";
+import migrateRollbackCommand from "./commands/migrate-rollback.js";
+import serveCommand from "./commands/serve.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();

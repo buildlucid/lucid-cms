@@ -1,9 +1,8 @@
-import T from "../../../translations/index.js";
 import z from "zod";
-import CustomField from "../custom-field.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
 import constants from "../../../constants/constants.js";
+import T from "../../../translations/index.js";
 import type { LinkResValue, ServiceResponse } from "../../../types.js";
+import CustomField from "../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -12,6 +11,7 @@ import type {
 	SchemaDefinition,
 } from "../types.js";
 import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class LinkCustomField extends CustomField<"link"> {
 	type = "link" as const;

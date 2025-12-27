@@ -1,8 +1,8 @@
-import T from "@/translations";
 import { useNavigate } from "@solidjs/router";
+import type { ResponseBody, UserResponse } from "@types";
+import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { ResponseBody, UserResponse } from "@types";
 
 interface Params {
 	usernameOrEmail: string;

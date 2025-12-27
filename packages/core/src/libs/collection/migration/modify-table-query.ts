@@ -1,9 +1,9 @@
-import { addColumn, modifyColumn, dropColumn } from "./column-builder.js";
-import logger from "../../../libs/logger/index.js";
-import constants from "../../../constants/constants.js";
-import type { ServiceFn } from "../../../types.js";
-import type { TableMigration } from "./types.js";
 import type { AlterTableColumnAlteringBuilder } from "kysely";
+import constants from "../../../constants/constants.js";
+import logger from "../../../libs/logger/index.js";
+import type { ServiceFn } from "../../../types.js";
+import { addColumn, dropColumn, modifyColumn } from "./column-builder.js";
+import type { TableMigration } from "./types.js";
 
 /**
  * Executes table modifications, handling databases with and without multiple ALTER TABLE support

@@ -6,8 +6,8 @@ import T from "../../../translations/index.js";
 import type { Config } from "../../../types.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import type { RenderedTemplates } from "../types.js";
 import cliLogger from "../../cli/logger.js";
+import type { RenderedTemplates } from "../types.js";
 
 const currentDir = getDirName(import.meta.url);
 

@@ -1,7 +1,7 @@
 import path from "node:path";
 import loadConfigFile from "../../libs/config/load-config-file.js";
-import { getDirName } from "../helpers/index.js";
 import type { Config } from "../../types/config.js";
+import { getDirName } from "../helpers/index.js";
 
 const currentDir = getDirName(import.meta.url);
 

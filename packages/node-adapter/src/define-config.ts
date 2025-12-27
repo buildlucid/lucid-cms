@@ -1,7 +1,7 @@
-import { getBuildPaths } from "@lucidcms/core/helpers";
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { getBuildPaths } from "@lucidcms/core/helpers";
 import type { AdapterDefineConfig, LucidConfig } from "@lucidcms/core/types";
 
 const defineConfig = (factory: AdapterDefineConfig): AdapterDefineConfig => {

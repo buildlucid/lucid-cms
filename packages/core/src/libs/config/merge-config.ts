@@ -1,5 +1,5 @@
-import type { LucidConfig, Config } from "../../types/config.js";
 import merge from "lodash.merge";
+import type { Config, LucidConfig } from "../../types/config.js";
 
 const mergeConfig = (
 	config: LucidConfig,

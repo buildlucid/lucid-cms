@@ -1,21 +1,21 @@
-import T from "@/translations";
-import { type Component, Index } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import {
-	FaSolidT,
 	FaSolidCalendar,
 	FaSolidEnvelope,
 	FaSolidPaperPlane,
+	FaSolidT,
 } from "solid-icons/fa";
-import api from "@/services/api";
-import useRowTarget from "@/hooks/useRowTarget";
+import { type Component, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table";
-import EmailRow from "@/components/Tables/Rows/EmailRow";
-import PreviewEmailPanel from "@/components/Panels/Email/PreviewEmailPanel";
 import DeleteEmail from "@/components/Modals/Email/DeleteEmail";
 import ResendEmail from "@/components/Modals/Email/ResendEmail";
+import PreviewEmailPanel from "@/components/Panels/Email/PreviewEmailPanel";
+import EmailRow from "@/components/Tables/Rows/EmailRow";
+import useRowTarget from "@/hooks/useRowTarget";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import api from "@/services/api";
+import T from "@/translations";
 
 export const EmailsList: Component<{
 	state: {

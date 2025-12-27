@@ -1,12 +1,12 @@
+import type { LucidHookDocuments } from "@lucidcms/core/types";
+import constants from "../../constants.js";
+import type { PluginOptionsInternal } from "../../types/types.js";
 import {
+	constructChildFullSlug,
 	getDescendantFields,
 	getTargetCollection,
-	constructChildFullSlug,
 	updateFullSlugFields,
 } from "../index.js";
-import constants from "../../constants.js";
-import type { LucidHookDocuments } from "@lucidcms/core/types";
-import type { PluginOptionsInternal } from "../../types/types.js";
 
 const afterUpsertHandler =
 	(

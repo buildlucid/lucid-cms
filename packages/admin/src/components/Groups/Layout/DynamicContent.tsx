@@ -1,13 +1,13 @@
-import T from "@/translations";
-import { type Component, type JSXElement, Switch, Match, Show } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import classNames from "classnames";
-import notifySvg from "@assets/illustrations/notify.svg";
 import noPermission from "@assets/illustrations/no-permission.svg";
-import NoEntriesBlock from "@/components/Partials/NoEntriesBlock";
+import notifySvg from "@assets/illustrations/notify.svg";
+import classNames from "classnames";
+import { type Component, type JSXElement, Match, Show, Switch } from "solid-js";
+import Button from "@/components/Partials/Button";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import Loading from "@/components/Partials/Loading";
-import Button from "@/components/Partials/Button";
+import NoEntriesBlock from "@/components/Partials/NoEntriesBlock";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import T from "@/translations";
 
 export const DynamicContent: Component<{
 	class?: string;

@@ -3,9 +3,9 @@ import formatter from "../../libs/formatters/index.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import {
+	MediaAwaitingSyncRepository,
 	MediaRepository,
 	MediaTranslationsRepository,
-	MediaAwaitingSyncRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";

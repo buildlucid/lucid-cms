@@ -1,11 +1,11 @@
 import prefixGeneratedColName from "../../libs/collection/helpers/prefix-generated-column-name.js";
+import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type {
 	FilterOperator,
 	FilterValue,
 	QueryParamFilters,
 } from "../../types/query-params.js";
 import type { LucidBrickTableName } from "../../types.js";
-import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 
 const CUSTOMFIELD_FILTER_PREFIX = "_";
 const DOCUMENT_FIELDS_KEY = "fields";

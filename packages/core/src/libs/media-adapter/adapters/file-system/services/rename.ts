@@ -1,4 +1,4 @@
-import { mkdir, copyFile, rm } from "node:fs/promises";
+import { copyFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import type {
 	FileSystemMediaAdapterOptions,

@@ -1,15 +1,15 @@
 import { DatabaseAdapter } from "@lucidcms/core/db-adapter";
 import type {
 	DatabaseConfig,
-	InferredTable,
-	OnUpdate,
-	OnDelete,
 	InferredColumn,
+	InferredTable,
+	OnDelete,
+	OnUpdate,
 } from "@lucidcms/core/types";
-import { sql, ParseJSONResultsPlugin, type ColumnDataType } from "kysely";
+import { type ColumnDataType, ParseJSONResultsPlugin, sql } from "kysely";
+import { jsonArrayFrom } from "kysely/helpers/postgres";
 import { PostgresJSDialect } from "kysely-postgres-js";
 import postgres from "postgres";
-import { jsonArrayFrom } from "kysely/helpers/postgres";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";

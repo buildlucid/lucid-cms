@@ -1,12 +1,12 @@
-import { createMemo, type Accessor } from "solid-js";
 import { useQuery } from "@tanstack/solid-query";
-import request from "@/utils/request";
-import serviceHelpers from "@/utils/service-helpers";
 import type {
-	ResponseBody,
 	DocumentResponse,
 	DocumentVersionType,
+	ResponseBody,
 } from "@types";
+import { type Accessor, createMemo } from "solid-js";
+import request from "@/utils/request";
+import serviceHelpers from "@/utils/service-helpers";
 
 interface QueryParams {
 	location: {

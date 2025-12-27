@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
+import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
-import processFieldValues from "./process-field-values.js";
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import type { TableType } from "../../../libs/collection/schema/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
@@ -12,7 +12,7 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../../types.js";
-import type { TableType } from "../../../libs/collection/schema/types.js";
+import processFieldValues from "./process-field-values.js";
 
 export type InsertBrickTables = {
 	table: LucidBrickTableName;

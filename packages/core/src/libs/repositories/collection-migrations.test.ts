@@ -1,6 +1,6 @@
-import { describe, afterAll, test, expect } from "vitest";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
+import { afterAll, describe, expect, test } from "vitest";
 import CollectionMigrationsRepository from "./collection-migrations";
 
 describe("Tests for the collection migrations repository", async () => {

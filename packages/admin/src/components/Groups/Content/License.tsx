@@ -1,13 +1,13 @@
-import T from "@/translations";
-import { Show, type Component } from "solid-js";
-import InfoRow from "@/components/Blocks/InfoRow";
-import { DynamicContent } from "@/components/Groups/Layout";
-import api from "@/services/api";
-import UpdateLicenseForm from "@/components/Forms/System/UpdateLicenseForm";
-import constants from "@/constants";
-import Button from "@/components/Partials/Button";
 import classNames from "classnames";
 import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { type Component, Show } from "solid-js";
+import InfoRow from "@/components/Blocks/InfoRow";
+import UpdateLicenseForm from "@/components/Forms/System/UpdateLicenseForm";
+import { DynamicContent } from "@/components/Groups/Layout";
+import Button from "@/components/Partials/Button";
+import constants from "@/constants";
+import api from "@/services/api";
+import T from "@/translations";
 
 export const License: Component = () => {
 	// ----------------------------------------

@@ -1,12 +1,12 @@
-import T from "@/translations";
-import { type Component, Show, Switch, Match, createMemo, For } from "solid-js";
+import classNames from "classnames";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import DateText from "@/components/Partials/DateText";
 import type {
+	TimelineCardType,
 	TimelineItem,
 	UseHistoryState,
-	TimelineCardType,
 } from "@/hooks/document/useHistoryState";
-import DateText from "@/components/Partials/DateText";
-import classNames from "classnames";
+import T from "@/translations";
 
 const TimelineCardWrapper: Component<{
 	item: TimelineItem;

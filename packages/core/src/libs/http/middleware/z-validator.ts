@@ -9,11 +9,11 @@ import type {
 } from "hono";
 import { validator } from "hono/validator";
 import type {
-	ZodType,
-	ZodError,
-	ZodSafeParseResult,
 	input,
 	output,
+	ZodError,
+	ZodSafeParseResult,
+	ZodType,
 	infer as zInfer,
 } from "zod";
 import type { LucidHonoVariables } from "../../../types/hono.js";

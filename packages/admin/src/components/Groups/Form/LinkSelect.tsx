@@ -1,11 +1,11 @@
-import T from "@/translations";
-import { type Component, Match, Switch } from "solid-js";
+import type { ErrorResult, FieldError, LinkResValue } from "@types";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
-import type { ErrorResult, FieldError, LinkResValue } from "@types";
-import linkFieldStore from "@/store/forms/linkFieldStore";
+import { type Component, Match, Switch } from "solid-js";
+import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
-import { Label, DescribedBy, ErrorMessage } from "@/components/Groups/Form";
+import linkFieldStore from "@/store/forms/linkFieldStore";
+import T from "@/translations";
 
 interface LinkSelectProps {
 	id: string;

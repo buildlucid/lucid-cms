@@ -1,7 +1,6 @@
-import formatter from "./index.js";
 import crypto from "node:crypto";
+import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
 import type { BrickResponse } from "../../types/response.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type {
 	Config,
 	FieldResponse,
@@ -9,11 +8,11 @@ import type {
 	LucidBrickTableName,
 	Select,
 } from "../../types.js";
+import type CollectionBuilder from "../builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
-import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
-import { documentFieldsFormatter } from "./index.js";
+import formatter, { documentFieldsFormatter } from "./index.js";
 
 const formatMultiple = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;

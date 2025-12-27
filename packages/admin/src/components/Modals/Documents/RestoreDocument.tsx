@@ -1,8 +1,8 @@
-import T from "@/translations";
-import type { Component, Accessor } from "solid-js";
+import type { CollectionResponse } from "@types";
+import type { Accessor, Component } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
-import type { CollectionResponse } from "@types";
+import T from "@/translations";
 
 interface RestoreDocumentProps {
 	id: Accessor<number | undefined>;

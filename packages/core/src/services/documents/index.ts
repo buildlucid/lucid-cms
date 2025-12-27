@@ -1,12 +1,12 @@
 export * as checks from "./checks/index.js";
 export * as client from "./client/index.js";
-export { default as upsertSingle } from "./upsert-single.js";
 export { default as deleteMultiple } from "./delete-multiple.js";
 export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
-export { default as getSingle } from "./get-single.js";
 export { default as getMultiple } from "./get-multiple.js";
 export { default as getMultipleFieldMeta } from "./get-multiple-field-meta.js";
 export { default as getMultipleRevisions } from "./get-multiple-revisions.js";
+export { default as getSingle } from "./get-single.js";
 export { default as nullifyDocumentReferences } from "./nullify-document-references.js";
 export { default as restoreMultiple } from "./restore-multiple.js";
+export { default as upsertSingle } from "./upsert-single.js";

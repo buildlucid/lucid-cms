@@ -1,7 +1,7 @@
-import T from "../../translations/index.js";
-import constants from "../../constants/constants.js";
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
+import constants from "../../constants/constants.js";
+import T from "../../translations/index.js";
 
 const getConfigPath = (cwd: string, filename?: string): string => {
 	let configPath: string | undefined;

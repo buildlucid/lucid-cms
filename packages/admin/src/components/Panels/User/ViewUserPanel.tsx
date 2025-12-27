@@ -1,11 +1,11 @@
-import T from "@/translations";
-import { type Component, type Accessor, createMemo, Show } from "solid-js";
-import api from "@/services/api";
-import dateHelpers from "@/utils/date-helpers";
-import { Panel } from "@/components/Groups/Panel";
-import SectionHeading from "@/components/Blocks/SectionHeading";
-import DetailsList from "@/components/Partials/DetailsList";
 import type { AuthProvidersResponse, UserResponse } from "@types";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import SectionHeading from "@/components/Blocks/SectionHeading";
+import { Panel } from "@/components/Groups/Panel";
+import DetailsList from "@/components/Partials/DetailsList";
+import api from "@/services/api";
+import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
 
 const ViewUserPanel: Component<{
 	id?: Accessor<number | undefined>;

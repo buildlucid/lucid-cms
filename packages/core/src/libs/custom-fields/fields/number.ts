@@ -1,7 +1,6 @@
 import z from "zod";
+import type { ServiceResponse } from "../../../types.js";
 import CustomField from "../custom-field.js";
-import keyToTitle from "../utils/key-to-title.js";
-import zodSafeParse from "../utils/zod-safe-parse.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -9,7 +8,8 @@ import type {
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../types.js";
-import type { ServiceResponse } from "../../../types.js";
+import keyToTitle from "../utils/key-to-title.js";
+import zodSafeParse from "../utils/zod-safe-parse.js";
 
 class NumberCustomField extends CustomField<"number"> {
 	type = "number" as const;

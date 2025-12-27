@@ -1,4 +1,3 @@
-import T from "@/translations";
 import {
 	type Component,
 	createMemo,
@@ -7,19 +6,20 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
+import InfoRow from "@/components/Blocks/InfoRow";
+import { Standard } from "@/components/Groups/Headers";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
+import CopyAPIKey from "@/components/Modals/ClientIntegrations/CopyAPIKey";
+import DeleteClientIntegration from "@/components/Modals/ClientIntegrations/DeleteClientIntegration";
+import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";
+import UpsertClientIntegrationPanel from "@/components/Panels/ClientIntegrations/UpsertClientIntegrationPanel";
+import Button from "@/components/Partials/Button";
+import ClientIntegrationRow from "@/components/Partials/ClientIntegrationRow";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
 import useRowTarget from "@/hooks/useRowTarget";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
-import UpsertClientIntegrationPanel from "@/components/Panels/ClientIntegrations/UpsertClientIntegrationPanel";
-import InfoRow from "@/components/Blocks/InfoRow";
-import { Wrapper, DynamicContent } from "@/components/Groups/Layout";
-import DeleteClientIntegration from "@/components/Modals/ClientIntegrations/DeleteClientIntegration";
-import CopyAPIKey from "@/components/Modals/ClientIntegrations/CopyAPIKey";
-import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";
-import Button from "@/components/Partials/Button";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
-import ClientIntegrationRow from "@/components/Partials/ClientIntegrationRow";
-import { Standard } from "@/components/Groups/Headers";
+import T from "@/translations";
 
 const SystemClientIntegrationsRoute: Component = () => {
 	// ----------------------------------------

@@ -1,4 +1,4 @@
-import { onMount, onCleanup } from "solid-js";
+import { onCleanup, onMount } from "solid-js";
 import isMac from "@/utils/is-mac";
 
 const modKey = isMac() ? "⌘" : "Ctrl";

@@ -3,9 +3,9 @@ import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import {
+	MediaAwaitingSyncRepository,
 	MediaRepository,
 	MediaTranslationsRepository,
-	MediaAwaitingSyncRepository,
 } from "../../libs/repositories/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";

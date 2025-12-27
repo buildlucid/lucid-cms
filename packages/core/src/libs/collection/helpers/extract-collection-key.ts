@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
-import { collectionTableParts } from "./build-table-name.js";
 import type { LucidDocumentTableName } from "../../../types.js";
+import { collectionTableParts } from "./build-table-name.js";
 
 /**
  * Extracts the collection key from a LucidDocumentTableName table

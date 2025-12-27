@@ -1,12 +1,12 @@
-import T from "@/translations";
 import { type Component, For } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import api from "@/services/api";
-import { DynamicContent } from "@/components/Groups/Layout";
-import { Grid } from "@/components/Groups/Grid";
 import CollectionCard, {
 	CollectionCardLoading,
 } from "@/components/Cards/CollectionCard";
+import { Grid } from "@/components/Groups/Grid";
+import { DynamicContent } from "@/components/Groups/Layout";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import api from "@/services/api";
+import T from "@/translations";
 
 export const CollectionsList: Component<{
 	state: {

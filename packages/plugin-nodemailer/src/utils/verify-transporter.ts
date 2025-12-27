@@ -1,7 +1,7 @@
-import T from "../translations/index.js";
 import { logger } from "@lucidcms/core";
-import { PLUGIN_KEY } from "../constants.js";
 import type { Transporter } from "nodemailer";
+import { PLUGIN_KEY } from "../constants.js";
+import T from "../translations/index.js";
 
 const verifyTransporter = async (transporter: Transporter) => {
 	try {

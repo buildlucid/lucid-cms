@@ -1,15 +1,15 @@
+import type { CFConfig, FieldError, FieldResponse, LinkResValue } from "@types";
 import {
-	type Component,
-	createSignal,
-	createMemo,
 	batch,
+	type Component,
 	createEffect,
+	createMemo,
+	createSignal,
 } from "solid-js";
-import type { CFConfig, LinkResValue, FieldResponse, FieldError } from "@types";
+import { LinkSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
-import { LinkSelect } from "@/components/Groups/Form";
 
 interface LinkFieldProps {
 	state: {

@@ -1,25 +1,25 @@
-import T from "@/translations";
-import { type Component, createMemo, createEffect, Index } from "solid-js";
-import { FaSolidCalendar } from "solid-icons/fa";
 import type { CollectionResponse } from "@types";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
-import type { FilterSchema } from "@/hooks/useSearchParamsLocation";
-import documentSelectStore from "@/store/forms/documentSelectStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
-import api from "@/services/api";
-import { PerPage, Filter } from "@/components/Groups/Query";
-import helpers from "@/utils/helpers";
+import { FaSolidCalendar } from "solid-icons/fa";
+import { type Component, createEffect, createMemo, Index } from "solid-js";
+import { Paginated } from "@/components/Groups/Footers";
+import { DynamicContent } from "@/components/Groups/Layout";
+import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import { Filter, PerPage } from "@/components/Groups/Query";
 import { Table } from "@/components/Groups/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import { DynamicContent } from "@/components/Groups/Layout";
-import { Paginated } from "@/components/Groups/Footers";
+import type { FilterSchema } from "@/hooks/useSearchParamsLocation";
+import useSearchParamsState from "@/hooks/useSearchParamsState";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import documentSelectStore from "@/store/forms/documentSelectStore";
+import T from "@/translations";
 import {
-	tableHeadColumns,
 	collectionFieldFilters,
 	collectionFieldIncludes,
 	formatFieldFilters,
+	tableHeadColumns,
 } from "@/utils/document-table-helpers";
-import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import helpers from "@/utils/helpers";
 
 const DocumentSelectPanel: Component = () => {
 	const open = createMemo(() => documentSelectStore.get.open);

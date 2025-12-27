@@ -1,8 +1,8 @@
-import T from "../../../translations/index.js";
-import getBuildPaths from "../../cli/services/get-build-paths.js";
 import fs from "node:fs/promises";
-import type { Config, ServiceResponse } from "../../../types.js";
 import { join } from "node:path";
+import T from "../../../translations/index.js";
+import type { Config, ServiceResponse } from "../../../types.js";
+import getBuildPaths from "../../cli/services/get-build-paths.js";
 
 /**
  * Programatically build the admin SPA with Vite.

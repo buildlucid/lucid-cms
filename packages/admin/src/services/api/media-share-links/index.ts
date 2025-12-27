@@ -1,10 +1,10 @@
-import useGetMultiple from "./useGetMultiple";
-import useGetSingle from "./useGetSingle";
 import useCreateSingle from "./useCreateSingle";
-import useUpdateSingle from "./useUpdateSingle";
-import useDeleteSingle from "./useDeleteSingle";
 import useDeleteAllForMedia from "./useDeleteAllForMedia";
 import useDeleteAllSystem from "./useDeleteAllSystem";
+import useDeleteSingle from "./useDeleteSingle";
+import useGetMultiple from "./useGetMultiple";
+import useGetSingle from "./useGetSingle";
+import useUpdateSingle from "./useUpdateSingle";
 
 const exportObject = {
 	useGetMultiple,

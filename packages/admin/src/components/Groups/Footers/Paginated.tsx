@@ -1,8 +1,8 @@
-import type { Component } from "solid-js";
 import type { ResponseBody } from "@types";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
-import { Pagination } from "@/components/Groups/Query";
 import classNames from "classnames";
+import type { Component } from "solid-js";
+import { Pagination } from "@/components/Groups/Query";
+import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 
 export const Paginated: Component<{
 	state: {

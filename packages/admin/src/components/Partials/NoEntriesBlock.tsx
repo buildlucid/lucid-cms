@@ -1,7 +1,7 @@
-import T from "@/translations";
-import { Show, type Component } from "solid-js";
-import Button from "@/components/Partials/Button";
 import classNames from "classnames";
+import { type Component, Show } from "solid-js";
+import Button from "@/components/Partials/Button";
+import T from "@/translations";
 
 export interface NoEntriesBlockProps {
 	copy: {

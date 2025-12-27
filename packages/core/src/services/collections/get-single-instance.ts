@@ -1,9 +1,9 @@
+import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import T from "../../translations/index.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 
 const getSingleInstance = (
 	context: ServiceContext,

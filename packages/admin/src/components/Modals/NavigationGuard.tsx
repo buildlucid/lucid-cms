@@ -1,7 +1,7 @@
-import T from "@/translations";
 import type { Component } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import type { NavigationGuardState } from "@/hooks/document/useNavigationGuard";
+import T from "@/translations";
 
 interface NavigationGuardProps {
 	state: NavigationGuardState;

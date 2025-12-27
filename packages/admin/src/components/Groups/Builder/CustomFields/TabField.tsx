@@ -1,6 +1,6 @@
-import { type Component, createMemo } from "solid-js";
 import type { CFConfig, FieldTypes, TabFieldConfig } from "@types";
 import classNames from "classnames";
+import { type Component, createMemo } from "solid-js";
 import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
 

@@ -11,6 +11,7 @@ import {
 } from "@lucidcms/core/helpers";
 import type { LucidHonoGeneric, RuntimeAdapter } from "@lucidcms/core/types";
 import { Hono } from "hono";
+import { build } from "rolldown";
 import {
 	type GetPlatformProxyOptions,
 	getPlatformProxy,
@@ -18,10 +19,9 @@ import {
 } from "wrangler";
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
 import getRuntimeContext from "./runtime-context.js";
-import prepareMainWorkerEntry from "./services/prepare-worker-entry.js";
 import prepareAdditionalWorkerEntries from "./services/prepare-additional-worker-entries.js";
+import prepareMainWorkerEntry from "./services/prepare-worker-entry.js";
 import writeWorkerEntries from "./services/write-worker-entries.js";
-import { build } from "rolldown";
 
 const cloudflareAdapter = (options?: {
 	platformProxy?: GetPlatformProxyOptions;

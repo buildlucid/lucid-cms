@@ -1,6 +1,6 @@
-import type { Accessor, Setter } from "solid-js";
+import type { LocaleValue, MediaResponse, UserResponse } from "@types";
 import equal from "fast-deep-equal/es6";
-import type { UserResponse, MediaResponse, LocaleValue } from "@types";
+import type { Accessor, Setter } from "solid-js";
 import { getLocale } from "@/translations";
 
 // biome-ignore lint/suspicious/noExplicitAny: explanation

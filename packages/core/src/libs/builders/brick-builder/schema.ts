@@ -1,6 +1,6 @@
 import z from "zod";
-import { stringTranslations } from "../../../schemas/locales.js";
 import constants from "../../../constants/constants.js";
+import { stringTranslations } from "../../../schemas/locales.js";
 import { collectionTableParts } from "../../collection/helpers/build-table-name.js";
 
 // TODO: merge with brickConfigSchema from schemas/collection-bricks

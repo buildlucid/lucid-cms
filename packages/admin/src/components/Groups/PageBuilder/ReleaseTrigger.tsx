@@ -1,12 +1,12 @@
+import { DropdownMenu } from "@kobalte/core";
+import type { DocumentVersionType } from "@types";
+import classNames from "classnames";
+import { FaSolidChevronDown } from "solid-icons/fa";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import DropdownContent from "@/components/Partials/DropdownContent";
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
-import { DropdownMenu } from "@kobalte/core";
-import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
-import classNames from "classnames";
-import DropdownContent from "@/components/Partials/DropdownContent";
 import spawnToast from "@/utils/spawn-toast";
-import type { DocumentVersionType } from "@types";
-import { FaSolidChevronDown } from "solid-icons/fa";
 
 export interface ReleaseTriggerOption {
 	label: string;
