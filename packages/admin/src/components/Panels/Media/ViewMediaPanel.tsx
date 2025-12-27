@@ -10,6 +10,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import helpers from "@/utils/helpers";
+import classNames from "classnames";
 
 interface ViewMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -96,7 +97,12 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 					{/* Preview */}
 					<AspectRatio
 						ratio="16:9"
-						innerClass={"overflow-hidden mb-4 rounded-md"}
+						innerClass={classNames(
+							"overflow-hidden rounded-md z-0 bg-card-hover",
+							{
+								"rectangle-background": media.data?.data?.type === "image",
+							},
+						)}
 					>
 						<Show when={media.data?.data} keyed>
 							{(item) => (
@@ -107,6 +113,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 										helpers.getTranslation(item.title, lang?.contentLocale()) ||
 										""
 									}
+									imageFit="contain"
 								/>
 							)}
 						</Show>
