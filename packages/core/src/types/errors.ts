@@ -7,7 +7,8 @@ export interface LucidErrorData {
 		| "forbidden"
 		| "authorisation"
 		| "cron"
-		| "plugin";
+		| "plugin"
+		| "rate_limit";
 
 	name?: string;
 	message?: string;

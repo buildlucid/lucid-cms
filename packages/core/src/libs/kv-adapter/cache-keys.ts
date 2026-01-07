@@ -2,6 +2,15 @@ const HTTP_STATIC_PREFIX = "http:static:";
 
 const cacheKeys = {
 	/**
+	 * Generate cache keys for rate limiting (used by rate limiter middleware)
+	 */
+	rateLimit: {
+		ip: (ip: string) => `rate-limit:ip:${ip}`,
+		user: (userId: string | number) => `rate-limit:user:${userId}`,
+		client: (clientId: string | number) => `rate-limit:client:${clientId}`,
+		record: (key: string) => `rate-limit:record:${key}`,
+	},
+	/**
 	 * Generate a cache key for API key authentication
 	 */
 	auth: {

@@ -83,8 +83,7 @@ export default Object.freeze({
 	},
 	emailRenderedOutput: "email-templates.json",
 	rateLimit: {
-		max: 100,
-		timeWindow: "1 minute", // ms format - https://github.com/vercel/ms
+		ttlBufferSeconds: 1,
 	},
 	directories: {
 		public: "public",
