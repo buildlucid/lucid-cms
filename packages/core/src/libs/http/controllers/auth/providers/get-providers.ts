@@ -1,6 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod";
+import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
@@ -8,6 +9,7 @@ import type { LucidHonoContext } from "../../../../../types/hono.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import rateLimiter from "../../../middleware/rate-limiter.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 
 const factory = createFactory();
@@ -20,6 +22,12 @@ const getProvidersController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getProviders.response),
 		}),
+	}),
+	rateLimiter({
+		mode: "ip",
+		limit: 60,
+		scope: "auth:get-providers",
+		windowMs: constants.timeInMilliseconds["1-minute"],
 	}),
 	async (c: LucidHonoContext) => {
 		const providersRes = await serviceWrapper(

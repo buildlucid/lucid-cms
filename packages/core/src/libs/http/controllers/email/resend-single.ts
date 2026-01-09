@@ -1,6 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
+import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/email.js";
 import { emailServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
@@ -13,6 +14,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -36,6 +38,12 @@ const resendSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	rateLimiter({
+		mode: "user",
+		limit: 10,
+		scope: "email:resend",
+		windowMs: constants.timeInMilliseconds["1-minute"],
+	}),
 	permissions([Permissions.SendEmail]),
 	validate("param", controllerSchemas.resendSingle.params),
 	async (c) => {

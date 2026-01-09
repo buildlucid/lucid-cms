@@ -155,9 +155,12 @@ export default Object.freeze({
 		filename: "lucid.config",
 		extensions: [".ts", ".js", ".mjs", ".mts"],
 	},
-	ttl: {
+	timeInSeconds: {
 		"24-hours": 86400,
 		"5-minutes": 300,
+	},
+	timeInMilliseconds: {
+		"1-minute": 60000,
 	},
 	defaultUploadDirectory: "uploads",
 	queue: {

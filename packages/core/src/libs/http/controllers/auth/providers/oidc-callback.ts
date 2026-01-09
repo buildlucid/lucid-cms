@@ -13,6 +13,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
 
@@ -28,6 +29,12 @@ const providerOIDCCallbackController = factory.createHandlers(
 			params: controllerSchemas.providerOIDCCallback.params,
 			query: controllerSchemas.providerOIDCCallback.query.string,
 		}),
+	}),
+	rateLimiter({
+		mode: "ip",
+		limit: 10,
+		scope: "auth:oidc-callback",
+		windowMs: constants.timeInMilliseconds["1-minute"],
 	}),
 	validate("param", controllerSchemas.providerOIDCCallback.params),
 	validate("query", controllerSchemas.providerOIDCCallback.query.string),

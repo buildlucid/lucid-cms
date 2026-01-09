@@ -4,6 +4,7 @@ import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
 import type { StatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
@@ -15,6 +16,7 @@ import {
 	renderErrorPage,
 	renderPasswordForm,
 } from "../../../../utils/share-link/renderers.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import {
 	applyRangeHeaders,
@@ -38,6 +40,12 @@ const streamMediaController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			params: controllerSchemas.streamMedia.params,
 		}),
+	}),
+	rateLimiter({
+		mode: "ip",
+		scope: "share:stream",
+		limit: 500,
+		windowMs: constants.timeInMilliseconds["1-minute"],
 	}),
 	validate("param", controllerSchemas.streamMedia.params),
 	async (c) => {

@@ -2,6 +2,7 @@ import { Readable } from "node:stream";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -9,6 +10,7 @@ import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-re
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import {
 	applyRangeHeaders,
@@ -127,6 +129,12 @@ const streamSingleController = factory.createHandlers(
 	}),
 	validate("param", controllerSchemas.streamSingle.params),
 	authorizePrivateMedia,
+	rateLimiter({
+		mode: "ip",
+		scope: "cdn:stream",
+		limit: 500,
+		windowMs: constants.timeInMilliseconds["1-minute"],
+	}),
 	validate("query", controllerSchemas.streamSingle.query.string),
 	async (c) => {
 		const params = c.req.valid("param");

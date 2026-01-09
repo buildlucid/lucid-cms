@@ -43,7 +43,7 @@ const getMultipleController = factory.createHandlers(
 	contentLocale,
 	validate("query", controllerSchemas.client.getMultiple.query.string),
 	cache({
-		ttl: constants.ttl["5-minutes"],
+		ttl: constants.timeInSeconds["5-minutes"],
 		mode: "include-query",
 		includeHeaders: [constants.headers.contentLocale],
 		tags: [cacheKeys.http.tags.clientMedia],

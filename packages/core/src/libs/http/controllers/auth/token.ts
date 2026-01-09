@@ -1,11 +1,13 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../constants/constants.js";
 import { authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
 const factory = createFactory();
@@ -24,6 +26,12 @@ const tokenController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
+	rateLimiter({
+		mode: "ip",
+		limit: 10,
+		scope: "auth:refresh",
+		windowMs: constants.timeInMilliseconds["1-minute"],
+	}),
 	async (c) => {
 		const payloadRes = await authServices.refreshToken.verifyToken(c);
 		if (payloadRes.error) throw new LucidAPIError(payloadRes.error);

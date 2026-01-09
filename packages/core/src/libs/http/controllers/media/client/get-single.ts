@@ -38,7 +38,7 @@ const getSingleController = factory.createHandlers(
 	clientAuthentication,
 	validate("param", controllerSchemas.client.getSingle.params),
 	cache({
-		ttl: constants.ttl["5-minutes"],
+		ttl: constants.timeInSeconds["5-minutes"],
 		mode: "static",
 		staticKey: (c) =>
 			cacheKeys.http.static.clientMediaSingle(c.req.param("id")),

@@ -1,5 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../constants/constants.js";
 import { logger } from "../../../../index.js";
 import { controllerSchemas } from "../../../../schemas/fs.js";
 import { fsServices } from "../../../../services/index.js";
@@ -11,6 +12,7 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import getMediaAdapter from "../../../media-adapter/get-adapter.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 
 const factory = createFactory();
@@ -26,6 +28,12 @@ const uploadMediaController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
+	}),
+	rateLimiter({
+		mode: "ip",
+		scope: "fs:upload",
+		limit: 20,
+		windowMs: constants.timeInMilliseconds["1-minute"],
 	}),
 	validate("query", controllerSchemas.upload.query.string),
 	async (c) => {

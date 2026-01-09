@@ -20,8 +20,11 @@ type RateLimitOptions = {
 	/** Maximum number of requests allowed within the window */
 	limit: number;
 	/**
-	 * Custom key generator function. Takes precedence over mode when provided.
-	 * Return a unique string identifier for the client.
+	 * Scope for the rate limit. Creates separate rate limit groups per scope value. Useful for per-route or per-action limits.
+	 */
+	scope?: string | ((c: LucidHonoContext) => string | Promise<string>);
+	/**
+	 * Custom key generator function. Takes precedence over mode and scope.
 	 */
 	keyGenerator?: (c: LucidHonoContext) => string | Promise<string>;
 	/**
@@ -36,6 +39,14 @@ type RateLimitRecord = {
 	resetTime: number;
 };
 
+const resolveScope = async (
+	c: LucidHonoContext,
+	scope: RateLimitOptions["scope"],
+): Promise<string | undefined> => {
+	if (!scope) return undefined;
+	return typeof scope === "function" ? scope(c) : scope;
+};
+
 const rateLimiter = (options: RateLimitOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		if (options.skip && (await options.skip(c))) {
@@ -44,6 +55,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 		}
 
 		const kv = c.get("kv");
+		const scope = await resolveScope(c, options.scope);
 		let key: string;
 
 		if (options.keyGenerator) {
@@ -90,10 +102,10 @@ const rateLimiter = (options: RateLimitOptions) =>
 					break;
 				}
 			}
+			if (scope) key += `:${scope}`;
 		}
 
 		const now = Date.now();
-
 		const existing = await kv.command.get<RateLimitRecord>(key);
 
 		let record: RateLimitRecord;
@@ -128,7 +140,6 @@ const rateLimiter = (options: RateLimitOptions) =>
 
 		if (record.count > options.limit) {
 			c.header("Retry-After", resetSeconds.toString());
-
 			throw new LucidAPIError({
 				type: "rate_limit",
 				code: "rate_limit",

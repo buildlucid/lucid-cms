@@ -1,5 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
@@ -10,6 +11,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 
@@ -33,6 +35,12 @@ const acceptInvitationController = factory.createHandlers(
 		),
 	}),
 	validateCSRF,
+	rateLimiter({
+		mode: "ip",
+		limit: 10,
+		scope: "auth:accept-invitation",
+		windowMs: constants.timeInMilliseconds["1-minute"],
+	}),
 	validate("param", controllerSchemas.acceptInvitation.params),
 	validate("json", controllerSchemas.acceptInvitation.body),
 	async (c) => {

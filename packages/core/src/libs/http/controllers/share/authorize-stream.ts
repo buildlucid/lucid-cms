@@ -13,6 +13,7 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 
 const factory = createFactory();
@@ -31,6 +32,12 @@ const authorizeStreamController = factory.createHandlers(
 			params: controllerSchemas.authorizeStream.params,
 		}),
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.authorizeStream.body),
+	}),
+	rateLimiter({
+		mode: "ip",
+		scope: "share:authorize",
+		limit: 30,
+		windowMs: constants.timeInMilliseconds["1-minute"],
 	}),
 	validate("param", controllerSchemas.authorizeStream.params),
 	validate("json", controllerSchemas.authorizeStream.body),

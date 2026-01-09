@@ -1,5 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/auth.js";
 import { userServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
@@ -10,6 +11,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 
@@ -30,6 +32,12 @@ const setupController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.setup.body),
 	}),
 	validateCSRF,
+	rateLimiter({
+		mode: "ip",
+		limit: 10,
+		scope: "auth:setup",
+		windowMs: constants.timeInMilliseconds["1-minute"],
+	}),
 	validate("json", controllerSchemas.setup.body),
 	async (c) => {
 		const { email, username, firstName, lastName, password } =

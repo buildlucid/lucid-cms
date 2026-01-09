@@ -1,6 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
+import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { clientIntegrationServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
@@ -13,6 +14,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -36,6 +38,12 @@ const regenerateKeysController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	rateLimiter({
+		mode: "user",
+		limit: 10,
+		scope: "client-integrations:regenerate",
+		windowMs: constants.timeInMilliseconds["1-minute"],
+	}),
 	permissions([Permissions.RegenerateClientIntegration]),
 	validate("param", controllerSchemas.regenerateKeys.params),
 	async (c) => {

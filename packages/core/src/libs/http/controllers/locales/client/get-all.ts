@@ -35,7 +35,7 @@ const getAllController = factory.createHandlers(
 	}),
 	clientAuthentication,
 	cache({
-		ttl: constants.ttl["24-hours"],
+		ttl: constants.timeInSeconds["24-hours"],
 		mode: "static",
 		staticKey: cacheKeys.http.static.clientLocales,
 	}),

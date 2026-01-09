@@ -65,7 +65,7 @@ const clientAuthentication = createMiddleware(
 		if (verifyApiKey.error) throw new LucidAPIError(verifyApiKey.error);
 
 		await kv.command.set(cacheKey, verifyApiKey.data, {
-			expirationTtl: constants.ttl["5-minutes"],
+			expirationTtl: constants.timeInSeconds["5-minutes"],
 		});
 
 		c.set("clientIntegrationAuth", verifyApiKey.data);
