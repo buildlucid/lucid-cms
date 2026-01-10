@@ -1,5 +1,6 @@
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
+import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import type { StatusCode } from "hono/utils/http-status";
@@ -97,7 +98,7 @@ const createApp = async (props: {
 				crossOriginResourcePolicy: false,
 			}),
 		)
-		// TODO: add rate limiting. Might be adapter specific, due to some being stateless
+		.use(compress())
 		.use(async (c, next) => {
 			c.set("config", props.config);
 			c.set("runtimeContext", props.runtimeContext);
