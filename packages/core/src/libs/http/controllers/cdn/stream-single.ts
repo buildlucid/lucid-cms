@@ -1,4 +1,5 @@
 import { Readable } from "node:stream";
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
 import { describeRoute } from "hono-openapi";
@@ -127,14 +128,14 @@ const streamSingleController = factory.createHandlers(
 			default: defaultErrorResponse,
 		},
 	}),
-	validate("param", controllerSchemas.streamSingle.params),
-	authorizePrivateMedia,
 	rateLimiter({
 		mode: "ip",
-		scope: "cdn:stream",
-		limit: 500,
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		scope: constants.rateLimit.scopes.stream.scopeKey,
+		limit: constants.rateLimit.scopes.stream.limit,
+		windowMs: minutesToMilliseconds(1),
 	}),
+	validate("param", controllerSchemas.streamSingle.params),
+	authorizePrivateMedia,
 	validate("query", controllerSchemas.streamSingle.query.string),
 	async (c) => {
 		const params = c.req.valid("param");

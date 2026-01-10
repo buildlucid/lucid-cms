@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../../constants/constants.js";
@@ -32,9 +33,9 @@ const providerOIDCCallbackController = factory.createHandlers(
 	}),
 	rateLimiter({
 		mode: "ip",
-		limit: 10,
-		scope: "auth:oidc-callback",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("param", controllerSchemas.providerOIDCCallback.params),
 	validate("query", controllerSchemas.providerOIDCCallback.query.string),

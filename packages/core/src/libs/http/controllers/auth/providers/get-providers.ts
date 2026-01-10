@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod";
@@ -25,9 +26,9 @@ const getProvidersController = factory.createHandlers(
 	}),
 	rateLimiter({
 		mode: "ip",
-		limit: 60,
-		scope: "auth:get-providers",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.standard.limit,
+		scope: constants.rateLimit.scopes.standard.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	async (c: LucidHonoContext) => {
 		const providersRes = await serviceWrapper(

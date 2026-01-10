@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -40,9 +41,9 @@ const sendResetPasswordController = factory.createHandlers(
 	validateCSRF,
 	rateLimiter({
 		mode: "ip",
-		limit: 5,
-		scope: "account:send-reset-password",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("json", controllerSchemas.sendResetPassword.body),
 	async (c) => {

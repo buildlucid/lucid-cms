@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -40,9 +41,9 @@ const resendSingleController = factory.createHandlers(
 	authenticate,
 	rateLimiter({
 		mode: "user",
-		limit: 10,
-		scope: "email:resend",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	permissions([Permissions.SendEmail]),
 	validate("param", controllerSchemas.resendSingle.params),

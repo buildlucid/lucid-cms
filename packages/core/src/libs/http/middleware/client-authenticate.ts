@@ -1,5 +1,5 @@
+import { minutesToSeconds } from "date-fns";
 import { createMiddleware } from "hono/factory";
-import constants from "../../../constants/constants.js";
 import { clientIntegrationServices } from "../../../services/index.js";
 import T from "../../../translations/index.js";
 import type {
@@ -65,7 +65,7 @@ const clientAuthentication = createMiddleware(
 		if (verifyApiKey.error) throw new LucidAPIError(verifyApiKey.error);
 
 		await kv.command.set(cacheKey, verifyApiKey.data, {
-			expirationTtl: constants.timeInSeconds["5-minutes"],
+			expirationTtl: minutesToSeconds(5),
 		});
 
 		c.set("clientIntegrationAuth", verifyApiKey.data);

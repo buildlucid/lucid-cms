@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -40,9 +41,9 @@ const regenerateKeysController = factory.createHandlers(
 	authenticate,
 	rateLimiter({
 		mode: "user",
-		limit: 10,
-		scope: "client-integrations:regenerate",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	permissions([Permissions.RegenerateClientIntegration]),
 	validate("param", controllerSchemas.regenerateKeys.params),

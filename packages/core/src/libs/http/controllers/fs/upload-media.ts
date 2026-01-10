@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
@@ -31,9 +32,9 @@ const uploadMediaController = factory.createHandlers(
 	}),
 	rateLimiter({
 		mode: "ip",
-		scope: "fs:upload",
-		limit: 20,
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		scope: constants.rateLimit.scopes.low.scopeKey,
+		limit: constants.rateLimit.scopes.low.limit,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("query", controllerSchemas.upload.query.string),
 	async (c) => {

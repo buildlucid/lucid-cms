@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../../constants/constants.js";
@@ -37,9 +38,9 @@ const acceptInvitationController = factory.createHandlers(
 	validateCSRF,
 	rateLimiter({
 		mode: "ip",
-		limit: 10,
-		scope: "auth:accept-invitation",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("param", controllerSchemas.acceptInvitation.params),
 	validate("json", controllerSchemas.acceptInvitation.body),

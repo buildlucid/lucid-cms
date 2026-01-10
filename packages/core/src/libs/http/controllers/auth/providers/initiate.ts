@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod";
@@ -43,9 +44,9 @@ const providerInitiateController = factory.createHandlers(
 	softAuthenticate,
 	rateLimiter({
 		mode: "ip",
-		limit: 10,
-		scope: "auth:initiate",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("param", controllerSchemas.providerInitiate.params),
 	validate("json", controllerSchemas.providerInitiate.body),

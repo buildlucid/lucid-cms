@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { minutesToMilliseconds } from "date-fns";
 import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
@@ -35,9 +36,9 @@ const authorizeStreamController = factory.createHandlers(
 	}),
 	rateLimiter({
 		mode: "ip",
-		scope: "share:authorize",
-		limit: 30,
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		scope: constants.rateLimit.scopes.low.scopeKey,
+		limit: constants.rateLimit.scopes.low.limit,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("param", controllerSchemas.authorizeStream.params),
 	validate("json", controllerSchemas.authorizeStream.body),

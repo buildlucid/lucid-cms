@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
@@ -28,9 +29,9 @@ const tokenController = factory.createHandlers(
 	validateCSRF,
 	rateLimiter({
 		mode: "ip",
-		limit: 10,
-		scope: "auth:refresh",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	async (c) => {
 		const payloadRes = await authServices.refreshToken.verifyToken(c);

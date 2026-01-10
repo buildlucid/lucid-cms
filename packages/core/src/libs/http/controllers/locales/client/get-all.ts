@@ -1,7 +1,7 @@
+import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/locales.js";
 import { localeServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
@@ -35,7 +35,7 @@ const getAllController = factory.createHandlers(
 	}),
 	clientAuthentication,
 	cache({
-		ttl: constants.timeInSeconds["24-hours"],
+		ttl: hoursToSeconds(24),
 		mode: "static",
 		staticKey: cacheKeys.http.static.clientLocales,
 	}),

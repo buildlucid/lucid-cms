@@ -84,6 +84,12 @@ export default Object.freeze({
 	emailRenderedOutput: "email-templates.json",
 	rateLimit: {
 		ttlBufferSeconds: 1,
+		scopes: {
+			sensitive: { limit: 10, scopeKey: "sensitive" },
+			low: { limit: 20, scopeKey: "low" },
+			standard: { limit: 60, scopeKey: "standard" },
+			stream: { limit: 500, scopeKey: "stream" },
+		},
 	},
 	directories: {
 		public: "public",
@@ -154,13 +160,6 @@ export default Object.freeze({
 	config: {
 		filename: "lucid.config",
 		extensions: [".ts", ".js", ".mjs", ".mts"],
-	},
-	timeInSeconds: {
-		"24-hours": 86400,
-		"5-minutes": 300,
-	},
-	timeInMilliseconds: {
-		"1-minute": 60000,
 	},
 	defaultUploadDirectory: "uploads",
 	queue: {

@@ -1,7 +1,7 @@
+import { minutesToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/media.js";
 import { mediaServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
@@ -38,7 +38,7 @@ const getSingleController = factory.createHandlers(
 	clientAuthentication,
 	validate("param", controllerSchemas.client.getSingle.params),
 	cache({
-		ttl: constants.timeInSeconds["5-minutes"],
+		ttl: minutesToSeconds(5),
 		mode: "static",
 		staticKey: (c) =>
 			cacheKeys.http.static.clientMediaSingle(c.req.param("id")),

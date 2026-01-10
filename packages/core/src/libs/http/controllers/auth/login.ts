@@ -1,3 +1,4 @@
+import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
@@ -34,9 +35,9 @@ const loginController = factory.createHandlers(
 	validateCSRF,
 	rateLimiter({
 		mode: "ip",
-		limit: 10,
-		scope: "auth:login",
-		windowMs: constants.timeInMilliseconds["1-minute"],
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("json", controllerSchemas.login.body),
 	async (c) => {
