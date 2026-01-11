@@ -1,7 +1,7 @@
 {
     "name": "@lucidcms/cloudflare-example",
     "private": true,
-    "description": "This is the Lucid Cloudflare example app used for internal testing.",
+    "description": "This is the Lucid CMS Cloudflare example app",
     "main": "src/index.ts",
     "type": "module",
     "scripts": {

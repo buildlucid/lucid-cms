@@ -2,15 +2,14 @@ import type { KVNamespace, Queue } from "@cloudflare/workers-types";
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 import { z } from "@lucidcms/core";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
+import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
+import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
 import S3Plugin from "@lucidcms/plugin-s3";
-import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
-import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
-// Collections
+import NewsCollection from "./src/collections/news.js";
 import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
-import NewsCollection from "./src/collections/news.js";
 
 export const adapter = cloudflareAdapter({
 	platformProxy: {
@@ -46,29 +45,12 @@ export default defineConfig((env) => ({
 		authToken: env.LUCID_TURSO_AUTH_TOKEN,
 		// url: "http://127.0.0.1:8081",
 	}),
-	logger: {
-		level: "debug",
-	},
 	keys: {
 		encryptionKey: env.LUCID_ENCRYPTION_KEY,
 		cookieSecret: env.LUCID_COOKIE_SECRET,
 		refreshTokenSecret: env.LUCID_REFRESH_TOKEN_SECRET,
 		accessTokenSecret: env.LUCID_ACCESS_TOKEN_SECRET,
 	},
-	localization: {
-		locales: [
-			{
-				label: "English",
-				code: "en",
-			},
-			{
-				label: "French",
-				code: "fr",
-			},
-		],
-		defaultLocale: "en",
-	},
-	disableOpenAPI: true,
 	email: {
 		from: {
 			email: env.LUCID_RESEND_FROM_EMAIL,

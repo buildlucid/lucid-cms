@@ -1,0 +1,33 @@
+{
+    "name": "@lucidcms/node-example",
+    "private": true,
+    "description": "This is the Lucid CMS Node example app",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "dev": "lucidcms dev",
+        "serve": "lucidcms serve",
+        "build": "lucidcms build",
+        "migrate": "lucidcms migrate",
+        "migrate:rollback": "lucidcms migrate:rollback",
+        "migrate:reset": "lucidcms migrate:reset",
+        "migrate:fresh": "lucidcms migrate:fresh"
+    },
+    "dependencies": {
+        "@lucidcms/node-adapter": "*",
+        "@lucidcms/core": "*",
+        "@lucidcms/sqlite-adapter": "*",
+        "@lucidcms/plugin-pages": "*"
+    },
+    "author": "Lucid",
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "^5.9.3"
+    },
+    "volta": {
+        "node": "24.11.1"
+    },
+    "engines": {
+        "node": "^24.0.0"
+    }
+}

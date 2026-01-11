@@ -1,0 +1,60 @@
+import { z } from "@lucidcms/core";
+import { CollectionBuilder } from "@lucidcms/core/builders";
+import SeoBrick from "../bricks/seo.js";
+import TextareaBrick from "../bricks/textarea.js";
+
+const NewsCollection = new CollectionBuilder("news", {
+	mode: "multiple",
+	details: {
+		name: "News",
+		singularName: "News",
+		summary: "Manage your websites news articles.",
+	},
+	config: {
+		useTranslations: true,
+		useRevisions: true,
+		useAutoSave: false,
+		environments: [
+			{
+				key: "production",
+				name: "Production",
+			},
+		],
+	},
+	bricks: {
+		fixed: [SeoBrick],
+		builder: [TextareaBrick],
+	},
+})
+	.addText("title", {
+		details: {
+			label: "News title",
+			summary: "The title of the news article.",
+		},
+		validation: {
+			required: true,
+			zod: z.string().min(2).max(128),
+		},
+		displayInListing: true,
+	})
+	.addUser("author", {
+		displayInListing: true,
+	})
+	.addTextarea("excerpt", {
+		details: {
+			label: "Excerpt",
+		},
+		validation: {
+			required: true,
+		},
+	})
+	.addMedia("thumbnail", {
+		details: {
+			label: "Thumbnail",
+		},
+		validation: {
+			type: "image",
+		},
+	});
+
+export default NewsCollection;
