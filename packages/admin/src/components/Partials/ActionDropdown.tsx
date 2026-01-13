@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { FaSolidChevronRight, FaSolidEllipsisVertical } from "solid-icons/fa";
 import {
 	type Component,
+	createMemo,
 	createSignal,
 	For,
 	Match,
@@ -40,12 +41,20 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	const [isOpen, setIsOpen] = createSignal(false);
 
 	// ----------------------------------------
+	// Memos
+	const visibleActions = createMemo(() =>
+		props.actions.filter((action) => action.hide !== true),
+	);
+
+	// ----------------------------------------
 	// Classes
 	const liItemClasses =
 		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast";
 
 	// ----------------------------------------
 	// Render
+	if (visibleActions().length === 0) return null;
+
 	return (
 		<DropdownMenu.Root
 			placement={props.options?.placement}
@@ -71,13 +80,13 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 
 			<DropdownContent
 				options={{
-					class: "w-[200px] p-1.5!",
+					class: "w-[200px] p-1.5! z-60",
 					rounded: true,
 					raised: props.options?.raised,
 				}}
 			>
 				<ul class="flex flex-col gap-y-1">
-					<For each={props.actions}>
+					<For each={visibleActions()}>
 						{(action) => (
 							<Show when={action.hide !== true}>
 								<li

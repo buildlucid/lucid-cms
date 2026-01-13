@@ -9,6 +9,9 @@ import { Grid } from "@/components/Groups/Grid";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import { Filter, PerPage, Sort } from "@/components/Groups/Query";
+import ClearProcessedImages from "@/components/Modals/Media/ClearProcessedImages";
+import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
+import useRowTarget from "@/hooks/useRowTarget";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -48,6 +51,12 @@ const MediaSelectPanel: Component = () => {
 const SelectMediaContent: Component = () => {
 	// ------------------------------
 	// Hooks
+	const rowTarget = useRowTarget({
+		triggers: {
+			restore: false,
+			clear: false,
+		},
+	});
 	const searchParams = useSearchParamsState(
 		{
 			filters: {
@@ -95,6 +104,7 @@ const SelectMediaContent: Component = () => {
 	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
+	const isShowingDeleted = createMemo(() => showingDeleted() === 1);
 
 	// ----------------------------------
 	// Queries
@@ -277,6 +287,8 @@ const SelectMediaContent: Component = () => {
 								media={item}
 								contentLocale={contentLocale()}
 								current={item.id === mediaSelectStore.get.selected}
+								rowTarget={rowTarget}
+								showingDeleted={isShowingDeleted}
 								onClick={() => {
 									mediaSelectStore.get.onSelectCallback(item);
 									mediaSelectStore.set("open", false);
@@ -286,6 +298,26 @@ const SelectMediaContent: Component = () => {
 					</For>
 				</Grid>
 			</DynamicContent>
+
+			{/* Modals */}
+			<RestoreMedia
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().restore,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("restore", state);
+					},
+				}}
+			/>
+			<ClearProcessedImages
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().clear,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("clear", state);
+					},
+				}}
+			/>
 		</div>
 	);
 };

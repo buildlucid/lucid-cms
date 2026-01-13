@@ -1,8 +1,11 @@
 import type { MediaResponse } from "@types";
 import classNames from "classnames";
-import { type Component, createMemo } from "solid-js";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import ActionDropdown from "@/components/Partials/ActionDropdown";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import type useRowTarget from "@/hooks/useRowTarget";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -11,6 +14,8 @@ interface MediaBasicCardProps {
 	current: boolean;
 	contentLocale?: string;
 	onClick?: () => void;
+	rowTarget?: ReturnType<typeof useRowTarget<"clear" | "restore">>;
+	showingDeleted?: Accessor<boolean>;
 }
 
 export const MediaBasicCardLoading: Component = () => {
@@ -32,12 +37,16 @@ export const MediaBasicCardLoading: Component = () => {
 const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	// ----------------------------------
 	// Memos
+	const hasUpdatePermission = createMemo(() => {
+		return userStore.get.hasPermission(["update_media"]).all;
+	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
 	const alt = createMemo(() => {
 		return helpers.getTranslation(props.media.alt, props.contentLocale);
 	});
+	const showRestore = createMemo(() => props.showingDeleted?.() === true);
 
 	// ----------------------------------
 	// Return
@@ -58,6 +67,39 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 				}
 			}}
 		>
+			<Show when={props.rowTarget !== undefined}>
+				<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
+					<ActionDropdown
+						actions={[
+							{
+								label: T()("restore"),
+								type: "button",
+								onClick: () => {
+									props.rowTarget?.setTargetId(props.media.id);
+									props.rowTarget?.setTrigger("restore", true);
+								},
+								permission: hasUpdatePermission(),
+								hide: showRestore() === false,
+								theme: "primary",
+							},
+							{
+								label: T()("clear_processed"),
+								type: "button",
+								onClick: () => {
+									props.rowTarget?.setTargetId(props.media.id);
+									props.rowTarget?.setTrigger("clear", true);
+								},
+								hide: props.media.type !== "image",
+								permission: hasUpdatePermission(),
+								theme: "error",
+							},
+						]}
+						options={{
+							border: true,
+						}}
+					/>
+				</div>
+			</Show>
 			{/* Image */}
 			<AspectRatio
 				ratio="16:9"
