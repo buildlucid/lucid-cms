@@ -37,7 +37,7 @@ const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.command.addBatch("users:delete", {
+	const queueRes = await context.queue.addBatch("users:delete", {
 		payloads: softDeletedUsersRes.data.map((u) => ({
 			id: u.id,
 		})),

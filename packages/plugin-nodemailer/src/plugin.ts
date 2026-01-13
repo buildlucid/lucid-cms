@@ -21,45 +21,43 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						pluginOptions.transporter.close();
 					},
 				},
-				services: {
-					send: async (email) => {
-						try {
-							if (draft.email.simulate) {
-								return {
-									success: true,
-									deliveryStatus: "sent",
-									message: T("email_successfully_sent"),
-									data: null,
-								};
-							}
-							await verifyTransporter(pluginOptions.transporter);
-							const data = await pluginOptions.transporter.sendMail({
-								from: `${email.from.name} <${email.from.email}>`,
-								to: email.to,
-								subject: email.subject,
-								cc: email.cc,
-								bcc: email.bcc,
-								replyTo: email.replyTo,
-								text: email.text,
-								html: email.html,
-							});
+				send: async (email) => {
+					try {
+						if (draft.email.simulate) {
 							return {
 								success: true,
 								deliveryStatus: "sent",
 								message: T("email_successfully_sent"),
-								data: isValidData(data) ? data : null,
-							};
-						} catch (error) {
-							return {
-								success: false,
-								deliveryStatus: "failed",
-								message:
-									error instanceof Error
-										? error.message
-										: T("email_failed_to_send"),
+								data: null,
 							};
 						}
-					},
+						await verifyTransporter(pluginOptions.transporter);
+						const data = await pluginOptions.transporter.sendMail({
+							from: `${email.from.name} <${email.from.email}>`,
+							to: email.to,
+							subject: email.subject,
+							cc: email.cc,
+							bcc: email.bcc,
+							replyTo: email.replyTo,
+							text: email.text,
+							html: email.html,
+						});
+						return {
+							success: true,
+							deliveryStatus: "sent",
+							message: T("email_successfully_sent"),
+							data: isValidData(data) ? data : null,
+						};
+					} catch (error) {
+						return {
+							success: false,
+							deliveryStatus: "failed",
+							message:
+								error instanceof Error
+									? error.message
+									: T("email_failed_to_send"),
+						};
+					}
 				},
 			} satisfies EmailAdapterInstance;
 		},

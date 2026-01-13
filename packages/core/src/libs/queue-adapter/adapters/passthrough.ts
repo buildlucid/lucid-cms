@@ -38,224 +38,141 @@ function passthroughQueueAdapter(
 				});
 			},
 		},
-		command: {
-			add: async (event, params) => {
-				try {
-					logger.info({
-						message: "Adding job to the passthrough queue",
-						scope: constants.logScopes.queueAdapter,
-						data: { event },
-					});
+		add: async (event, params) => {
+			try {
+				logger.info({
+					message: "Adding job to the passthrough queue",
+					scope: constants.logScopes.queueAdapter,
+					data: { event },
+				});
 
-					const jobId = randomUUID();
-					const now = new Date();
-					const status = "pending";
-					const QueueJobs = new QueueJobsRepository(
-						params.serviceContext.db,
-						params.serviceContext.config.db,
-					);
+				const jobId = randomUUID();
+				const now = new Date();
+				const status = "pending";
+				const QueueJobs = new QueueJobsRepository(
+					params.serviceContext.db,
+					params.serviceContext.config.db,
+				);
 
-					const createJobRes = await QueueJobs.createSingle({
-						data: {
-							job_id: jobId,
-							event_type: event,
-							event_data: params.payload,
-							status: status,
-							queue_adapter_key: ADAPTER_KEY,
-							priority: params.options?.priority ?? 0,
-							attempts: 0,
-							max_attempts:
-								params.options?.maxAttempts ?? constants.queue.maxAttempts,
-							error_message: null,
-							created_at: now.toISOString(),
-							scheduled_for: params.options?.scheduledFor
-								? params.options.scheduledFor.toISOString()
-								: undefined,
-							created_by_user_id: params.options?.createdByUserId ?? null,
-							updated_at: now.toISOString(),
-						},
-						returning: ["id"],
-					});
-					if (createJobRes.error) return createJobRes;
-
-					//* skip immediate execution
-					if (options?.bypassImmediateExecution) {
-						return {
-							error: undefined,
-							data: { jobId, event: event, status },
-						};
-					}
-
-					//* execute the event handler immediately
-					const executeResult = await executeSingleJob(params.serviceContext, {
-						jobId: jobId,
-						event: event,
-						payload: params.payload,
+				const createJobRes = await QueueJobs.createSingle({
+					data: {
+						job_id: jobId,
+						event_type: event,
+						event_data: params.payload,
+						status: status,
+						queue_adapter_key: ADAPTER_KEY,
+						priority: params.options?.priority ?? 0,
 						attempts: 0,
-						maxAttempts: 1,
-						setNextRetryAt: false,
-					});
-					if (
-						executeResult.success === false &&
-						executeResult.shouldRetry === false
-					) {
-						return {
-							error: {
-								message: executeResult.message,
-							},
-							data: undefined,
-						};
-					}
+						max_attempts:
+							params.options?.maxAttempts ?? constants.queue.maxAttempts,
+						error_message: null,
+						created_at: now.toISOString(),
+						scheduled_for: params.options?.scheduledFor
+							? params.options.scheduledFor.toISOString()
+							: undefined,
+						created_by_user_id: params.options?.createdByUserId ?? null,
+						updated_at: now.toISOString(),
+					},
+					returning: ["id"],
+				});
+				if (createJobRes.error) return createJobRes;
 
+				//* skip immediate execution
+				if (options?.bypassImmediateExecution) {
 					return {
 						error: undefined,
 						data: { jobId, event: event, status },
 					};
-				} catch (error) {
-					logger.error({
-						message: "Error adding event to the queue",
-						scope: constants.logScopes.queueAdapter,
-						data: {
-							errorMessage:
-								error instanceof Error ? error.message : String(error),
-							errorStack: error instanceof Error ? error.stack : undefined,
-							error,
-						},
-					});
+				}
 
+				//* execute the event handler immediately
+				const executeResult = await executeSingleJob(params.serviceContext, {
+					jobId: jobId,
+					event: event,
+					payload: params.payload,
+					attempts: 0,
+					maxAttempts: 1,
+					setNextRetryAt: false,
+				});
+				if (
+					executeResult.success === false &&
+					executeResult.shouldRetry === false
+				) {
 					return {
-						error: { message: "Error adding event to the queue" },
+						error: {
+							message: executeResult.message,
+						},
 						data: undefined,
 					};
 				}
-			},
-			addBatch: async (event, params) => {
-				try {
-					logger.info({
-						message: "Adding batch jobs to the passthrough queue",
-						scope: constants.logScopes.queueAdapter,
-						data: { event, count: params.payloads.length },
-					});
 
-					const now = new Date();
-					const status = "pending";
-					const QueueJobs = new QueueJobsRepository(
-						params.serviceContext.db,
-						params.serviceContext.config.db,
-					);
+				return {
+					error: undefined,
+					data: { jobId, event: event, status },
+				};
+			} catch (error) {
+				logger.error({
+					message: "Error adding event to the queue",
+					scope: constants.logScopes.queueAdapter,
+					data: {
+						errorMessage:
+							error instanceof Error ? error.message : String(error),
+						errorStack: error instanceof Error ? error.stack : undefined,
+						error,
+					},
+				});
 
-					const jobsData = params.payloads.map((payload) => ({
-						jobId: randomUUID(),
-						payload,
-					}));
+				return {
+					error: { message: "Error adding event to the queue" },
+					data: undefined,
+				};
+			}
+		},
+		addBatch: async (event, params) => {
+			try {
+				logger.info({
+					message: "Adding batch jobs to the passthrough queue",
+					scope: constants.logScopes.queueAdapter,
+					data: { event, count: params.payloads.length },
+				});
 
-					const createJobsRes = await QueueJobs.createMultiple({
-						data: jobsData.map((job) => ({
-							job_id: job.jobId,
-							event_type: event,
-							event_data: job.payload,
-							status: status,
-							queue_adapter_key: ADAPTER_KEY,
-							priority: params.options?.priority ?? 0,
-							attempts: 0,
-							max_attempts:
-								params.options?.maxAttempts ?? constants.queue.maxAttempts,
-							error_message: null,
-							created_at: now.toISOString(),
-							scheduled_for: params.options?.scheduledFor
-								? params.options.scheduledFor.toISOString()
-								: undefined,
-							created_by_user_id: params.options?.createdByUserId ?? null,
-							updated_at: now.toISOString(),
-						})),
-						returning: ["id"],
-					});
-					if (createJobsRes.error) return createJobsRes;
+				const now = new Date();
+				const status = "pending";
+				const QueueJobs = new QueueJobsRepository(
+					params.serviceContext.db,
+					params.serviceContext.config.db,
+				);
 
-					//* skip immediate execution
-					if (options?.bypassImmediateExecution) {
-						return {
-							error: undefined,
-							data: {
-								jobIds: jobsData.map((j) => j.jobId),
-								event: event,
-								status: status,
-								count: jobsData.length,
-							},
-						};
-					}
+				const jobsData = params.payloads.map((payload) => ({
+					jobId: randomUUID(),
+					payload,
+				}));
 
-					//* execute the event handlers immediately for all jobs in chunks
-					const concurrentLimit = constants.queue.concurrentLimit;
+				const createJobsRes = await QueueJobs.createMultiple({
+					data: jobsData.map((job) => ({
+						job_id: job.jobId,
+						event_type: event,
+						event_data: job.payload,
+						status: status,
+						queue_adapter_key: ADAPTER_KEY,
+						priority: params.options?.priority ?? 0,
+						attempts: 0,
+						max_attempts:
+							params.options?.maxAttempts ?? constants.queue.maxAttempts,
+						error_message: null,
+						created_at: now.toISOString(),
+						scheduled_for: params.options?.scheduledFor
+							? params.options.scheduledFor.toISOString()
+							: undefined,
+						created_by_user_id: params.options?.createdByUserId ?? null,
+						updated_at: now.toISOString(),
+					})),
+					returning: ["id"],
+				});
+				if (createJobsRes.error) return createJobsRes;
 
-					//* split jobs into chunks based on concurrent limit
-					const jobChunks: Array<
-						{ jobId: string; payload: Record<string, unknown> }[]
-					> = [];
-					for (let i = 0; i < jobsData.length; i += concurrentLimit) {
-						const chunk = jobsData.slice(i, i + concurrentLimit).map((job) => {
-							return { jobId: job.jobId, payload: job.payload };
-						});
-						jobChunks.push(chunk);
-					}
-
-					logger.debug({
-						message: "Processing batch jobs in chunks",
-						scope: constants.logScopes.queueAdapter,
-						data: {
-							totalJobs: jobsData.length,
-							chunkCount: jobChunks.length,
-							concurrentLimit,
-						},
-					});
-
-					//* process each chunk sequentially
-					const allResults = await Promise.allSettled(
-						jobChunks.flatMap((chunk) =>
-							chunk.map((job) =>
-								executeSingleJob(params.serviceContext, {
-									jobId: job.jobId,
-									event,
-									payload: job.payload,
-									attempts: 0,
-									maxAttempts: 1,
-								}),
-							),
-						),
-					);
-
-					//* check if any jobs failed
-					const failedJobs = allResults.filter((r) => r.status === "rejected");
-					if (failedJobs.length > 0) {
-						const firstError = failedJobs[0]?.reason;
-						const errorMessage =
-							firstError instanceof Error
-								? firstError.message
-								: "Unknown error";
-
-						logger.error({
-							message: "Some batch jobs failed",
-							scope: constants.logScopes.queueAdapter,
-							data: {
-								failedCount: failedJobs.length,
-								totalCount: allResults.length,
-							},
-						});
-
-						return {
-							error: {
-								message: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
-							},
-							data: undefined,
-						};
-					}
-
-					logger.debug({
-						message: "All batch jobs completed successfully",
-						scope: constants.logScopes.queueAdapter,
-						data: { count: jobsData.length },
-					});
-
+				//* skip immediate execution
+				if (options?.bypassImmediateExecution) {
 					return {
 						error: undefined,
 						data: {
@@ -265,24 +182,103 @@ function passthroughQueueAdapter(
 							count: jobsData.length,
 						},
 					};
-				} catch (error) {
+				}
+
+				//* execute the event handlers immediately for all jobs in chunks
+				const concurrentLimit = constants.queue.concurrentLimit;
+
+				//* split jobs into chunks based on concurrent limit
+				const jobChunks: Array<
+					{ jobId: string; payload: Record<string, unknown> }[]
+				> = [];
+				for (let i = 0; i < jobsData.length; i += concurrentLimit) {
+					const chunk = jobsData.slice(i, i + concurrentLimit).map((job) => {
+						return { jobId: job.jobId, payload: job.payload };
+					});
+					jobChunks.push(chunk);
+				}
+
+				logger.debug({
+					message: "Processing batch jobs in chunks",
+					scope: constants.logScopes.queueAdapter,
+					data: {
+						totalJobs: jobsData.length,
+						chunkCount: jobChunks.length,
+						concurrentLimit,
+					},
+				});
+
+				//* process each chunk sequentially
+				const allResults = await Promise.allSettled(
+					jobChunks.flatMap((chunk) =>
+						chunk.map((job) =>
+							executeSingleJob(params.serviceContext, {
+								jobId: job.jobId,
+								event,
+								payload: job.payload,
+								attempts: 0,
+								maxAttempts: 1,
+							}),
+						),
+					),
+				);
+
+				//* check if any jobs failed
+				const failedJobs = allResults.filter((r) => r.status === "rejected");
+				if (failedJobs.length > 0) {
+					const firstError = failedJobs[0]?.reason;
+					const errorMessage =
+						firstError instanceof Error ? firstError.message : "Unknown error";
+
 					logger.error({
-						message: "Error adding batch events to the queue",
+						message: "Some batch jobs failed",
 						scope: constants.logScopes.queueAdapter,
 						data: {
-							errorMessage:
-								error instanceof Error ? error.message : String(error),
-							errorStack: error instanceof Error ? error.stack : undefined,
-							error,
+							failedCount: failedJobs.length,
+							totalCount: allResults.length,
 						},
 					});
 
 					return {
-						error: { message: "Error adding batch events to the queue" },
+						error: {
+							message: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
+						},
 						data: undefined,
 					};
 				}
-			},
+
+				logger.debug({
+					message: "All batch jobs completed successfully",
+					scope: constants.logScopes.queueAdapter,
+					data: { count: jobsData.length },
+				});
+
+				return {
+					error: undefined,
+					data: {
+						jobIds: jobsData.map((j) => j.jobId),
+						event: event,
+						status: status,
+						count: jobsData.length,
+					},
+				};
+			} catch (error) {
+				logger.error({
+					message: "Error adding batch events to the queue",
+					scope: constants.logScopes.queueAdapter,
+					data: {
+						errorMessage:
+							error instanceof Error ? error.message : String(error),
+						errorStack: error instanceof Error ? error.stack : undefined,
+						error,
+					},
+				});
+
+				return {
+					error: { message: "Error adding batch events to the queue" },
+					data: undefined,
+				};
+			}
 		},
 	};
 }

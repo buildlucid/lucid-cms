@@ -39,15 +39,12 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 		};
 	}
 
-	const queueRes = await context.queue.command.addBatch(
-		"media:delete-unsynced",
-		{
-			payloads: allExpiredMediaRes.data.map((media) => ({
-				key: media.key,
-			})),
-			serviceContext: context,
-		},
-	);
+	const queueRes = await context.queue.addBatch("media:delete-unsynced", {
+		payloads: allExpiredMediaRes.data.map((media) => ({
+			key: media.key,
+		})),
+		serviceContext: context,
+	});
 	if (queueRes.error) return queueRes;
 
 	return {

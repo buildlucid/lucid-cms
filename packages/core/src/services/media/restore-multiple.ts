@@ -72,7 +72,9 @@ const restoreMultiple: ServiceFn<
 
 	await Promise.all([
 		...data.ids.map((id) =>
-			context.kv.command.delete(cacheKeys.http.static.clientMediaSingle(id)),
+			context.kv.delete(cacheKeys.http.static.clientMediaSingle(id), {
+				hash: true,
+			}),
 		),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);

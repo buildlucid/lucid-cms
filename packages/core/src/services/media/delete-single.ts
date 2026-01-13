@@ -38,7 +38,9 @@ const deleteSingle: ServiceFn<
 	if (deleteMediaRes.error) return deleteMediaRes;
 
 	await Promise.all([
-		context.kv.command.delete(cacheKeys.http.static.clientMediaSingle(data.id)),
+		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {
+			hash: true,
+		}),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
 

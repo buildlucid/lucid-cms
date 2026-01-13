@@ -24,7 +24,7 @@ const deleteObject: ServiceFn<
 		(storageUsedRes.data.valueInt || 0) - data.size - data.processedSize;
 
 	const [_, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.services.delete(data.key),
+		mediaStrategyRes.data.delete(data.key),
 		optionServices.updateSingle(context, {
 			name: "media_storage_used",
 			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,

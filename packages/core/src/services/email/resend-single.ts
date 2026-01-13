@@ -77,7 +77,7 @@ const resendSingle: ServiceFn<
 	if (transactionRes.error) return transactionRes;
 	if (updateEmailRes.error) return updateEmailRes;
 
-	const queueRes = await context.queue.command.add("email:send", {
+	const queueRes = await context.queue.add("email:send", {
 		payload: {
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,

@@ -24,14 +24,11 @@ export type KVAdapterInstance = {
 		/** Destroy the adapter */
 		destroy?: () => Promise<void>;
 	};
-	/** KV commands */
-	command: {
-		get: <R>(key: string, options?: KVKeyOptions) => Promise<R | null>;
-		set: <T>(key: string, value: T, options?: KVSetOptions) => Promise<void>;
-		has: (key: string, options?: KVKeyOptions) => Promise<boolean>;
-		delete: (key: string, options?: KVKeyOptions) => Promise<void>;
-		clear: () => Promise<void>;
-	};
+	get: <R>(key: string, options?: KVKeyOptions) => Promise<R | null>;
+	set: <T>(key: string, value: T, options?: KVSetOptions) => Promise<void>;
+	has: (key: string, options?: KVKeyOptions) => Promise<boolean>;
+	delete: (key: string, options?: KVKeyOptions) => Promise<void>;
+	clear: () => Promise<void>;
 };
 
 export interface KVSetOptions extends KVKeyOptions {

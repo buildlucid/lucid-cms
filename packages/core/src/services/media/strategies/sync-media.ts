@@ -24,7 +24,7 @@ const syncMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const mediaMetaRes = await mediaStrategyRes.data.services.getMeta(data.key);
+	const mediaMetaRes = await mediaStrategyRes.data.getMeta(data.key);
 	if (mediaMetaRes.error) return mediaMetaRes;
 
 	const proposedSizeRes = await mediaServices.checks.checkCanStoreMedia(
@@ -32,7 +32,7 @@ const syncMedia: ServiceFn<
 		{
 			size: mediaMetaRes.data.size,
 			onError: async () => {
-				await mediaStrategyRes.data.services.delete(data.key);
+				await mediaStrategyRes.data.delete(data.key);
 			},
 		},
 	);

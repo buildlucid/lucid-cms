@@ -97,7 +97,7 @@ const sendEmail: ServiceFn<
 		};
 	} else {
 		try {
-			result = await emailAdapter.adapter.services.send(
+			result = await emailAdapter.adapter.send(
 				{
 					to: emailRes.data.to_address,
 					subject: emailRes.data.subject ?? "",

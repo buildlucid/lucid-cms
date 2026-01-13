@@ -29,7 +29,7 @@ const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.command.addBatch("user-tokens:delete", {
+	const queueRes = await context.queue.addBatch("user-tokens:delete", {
 		payloads: expiredTokensRes.data.map((token) => ({
 			tokenId: token.id,
 		})),

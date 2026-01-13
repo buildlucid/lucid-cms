@@ -75,7 +75,7 @@ const clearSingle: ServiceFn<
 	const newStorageUsed = (storageUsedRes.data.valueInt || 0) - totalSize;
 
 	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.services.deleteMultiple(
+		mediaStrategyRes.data.deleteMultiple(
 			processedImagesRes.data.map((i) => i.key),
 		),
 		ProcessedImages.deleteMultiple({

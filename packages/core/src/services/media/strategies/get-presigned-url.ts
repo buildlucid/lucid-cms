@@ -18,7 +18,7 @@ const getPresignedUrl: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const presignedUrlRes = await mediaStrategyRes.data.services.getPresignedUrl(
+	const presignedUrlRes = await mediaStrategyRes.data.getPresignedUrl(
 		data.key,
 		{
 			host: context.config.host,

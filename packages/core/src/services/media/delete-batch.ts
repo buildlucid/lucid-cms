@@ -83,8 +83,9 @@ const deleteBatch: ServiceFn<
 			if (r.data && r.data.length > 0) {
 				for (const item of r.data) {
 					clearCachePromises.push(
-						context.kv.command.delete(
+						context.kv.delete(
 							cacheKeys.http.static.clientMediaSingle(item.id),
+							{ hash: true },
 						),
 					);
 				}

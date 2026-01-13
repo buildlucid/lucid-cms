@@ -62,8 +62,6 @@ export type EmailAdapterInstance = {
 		/** Destroy the adapter */
 		destroy?: () => Promise<void>;
 	};
-	/** The email adapter services */
-	services: {
-		send: EmailAdapterServiceSend;
-	};
+	/** Send an email */
+	send: EmailAdapterServiceSend;
 };

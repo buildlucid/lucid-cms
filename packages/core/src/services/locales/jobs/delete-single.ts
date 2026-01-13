@@ -30,7 +30,7 @@ const deleteLocale: ServiceFn<
 	});
 	if (deleteRes.error) return deleteRes;
 
-	await context.kv.command.delete(cacheKeys.http.static.clientLocales);
+	await context.kv.delete(cacheKeys.http.static.clientLocales, { hash: true });
 
 	return {
 		error: undefined,

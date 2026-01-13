@@ -15,15 +15,13 @@ const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
 	return {
 		type: "media-adapter",
 		key: "s3",
-		services: {
-			getPresignedUrl: getPresignedUrl(client, options),
-			getMeta: getMetadata(client, options),
-			stream: stream(client, options),
-			upload: uploadSingle(client, options),
-			delete: deletSingle(client, options),
-			deleteMultiple: deleteMultiple(client, options),
-			rename: rename(client, options),
-		},
+		getPresignedUrl: getPresignedUrl(client, options),
+		getMeta: getMetadata(client, options),
+		stream: stream(client, options),
+		upload: uploadSingle(client, options),
+		delete: deletSingle(client, options),
+		deleteMultiple: deleteMultiple(client, options),
+		rename: rename(client, options),
 		getOptions: () => options,
 	};
 };

@@ -68,25 +68,22 @@ export type QueueAdapterInstance = {
 		/** Destroy the adapter */
 		destroy?: () => Promise<void>;
 	};
-	/** The queue commands */
-	command: {
-		/** Push a job to the queue */
-		add: (
-			event: QueueEvent,
-			params: {
-				payload: Record<string, unknown>;
-				options?: QueueJobOptions;
-				serviceContext: ServiceContext;
-			},
-		) => ServiceResponse<QueueJobResponse>;
-		/** Push multiple jobs of the same type to the queue */
-		addBatch: (
-			event: QueueEvent,
-			params: {
-				payloads: Record<string, unknown>[];
-				options?: QueueJobOptions;
-				serviceContext: ServiceContext;
-			},
-		) => ServiceResponse<QueueBatchJobResponse>;
-	};
+	/** Push a job to the queue */
+	add: (
+		event: QueueEvent,
+		params: {
+			payload: Record<string, unknown>;
+			options?: QueueJobOptions;
+			serviceContext: ServiceContext;
+		},
+	) => ServiceResponse<QueueJobResponse>;
+	/** Push multiple jobs of the same type to the queue */
+	addBatch: (
+		event: QueueEvent,
+		params: {
+			payloads: Record<string, unknown>[];
+			options?: QueueJobOptions;
+			serviceContext: ServiceContext;
+		},
+	) => ServiceResponse<QueueBatchJobResponse>;
 };

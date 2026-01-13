@@ -9,13 +9,11 @@ import type { KVAdapterInstance } from "../types.js";
 const passthroughKVAdapter = (): KVAdapterInstance => ({
 	type: "kv-adapter",
 	key: "passthrough",
-	command: {
-		get: async () => null,
-		set: async () => {},
-		has: async () => false,
-		delete: async () => {},
-		clear: async () => {},
-	},
+	get: async () => null,
+	set: async () => {},
+	has: async () => false,
+	delete: async () => {},
+	clear: async () => {},
 });
 
 export default passthroughKVAdapter;

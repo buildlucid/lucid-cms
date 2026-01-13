@@ -69,116 +69,114 @@ function workerQueueAdapter(
 				}
 			},
 		},
-		command: {
-			add: async (event, params) => {
-				if (!worker) {
-					return {
-						error: { message: "Worker queue is not started" },
-						data: undefined,
-					};
-				}
-
-				logger.info({
-					message: "Adding job to the worker queue",
-					scope: constants.logScopes.queueAdapter,
-					data: { event },
-				});
-
-				const jobId = randomUUID();
-				const now = new Date();
-				const status: QueueJobResponse["status"] = "pending";
-				const QueueJobs = new QueueJobsRepository(
-					params.serviceContext.db,
-					params.serviceContext.config.db,
-				);
-
-				const createJobRes = await QueueJobs.createSingle({
-					data: {
-						job_id: jobId,
-						event_type: event,
-						event_data: params.payload,
-						status: status,
-						queue_adapter_key: ADAPTER_KEY,
-						priority: params.options?.priority ?? 0,
-						attempts: 0,
-						max_attempts:
-							params.options?.maxAttempts ?? constants.queue.maxAttempts,
-						error_message: null,
-						created_at: now.toISOString(),
-						scheduled_for: params.options?.scheduledFor
-							? params.options.scheduledFor.toISOString()
-							: undefined,
-						created_by_user_id: params.options?.createdByUserId ?? null,
-						updated_at: now.toISOString(),
-					},
-					returning: ["id"],
-				});
-				if (createJobRes.error) return createJobRes;
-
+		add: async (event, params) => {
+			if (!worker) {
 				return {
-					error: undefined,
-					data: { jobId, event, status },
+					error: { message: "Worker queue is not started" },
+					data: undefined,
 				};
-			},
-			addBatch: async (event, params) => {
-				if (!worker) {
-					return {
-						error: { message: "Worker queue is not started" },
-						data: undefined,
-					};
-				}
+			}
 
-				logger.info({
-					message: "Adding batch jobs to the worker queue",
-					scope: constants.logScopes.queueAdapter,
-					data: { event, count: params.payloads.length },
-				});
+			logger.info({
+				message: "Adding job to the worker queue",
+				scope: constants.logScopes.queueAdapter,
+				data: { event },
+			});
 
-				const now = new Date();
-				const status: QueueBatchJobResponse["status"] = "pending";
-				const QueueJobs = new QueueJobsRepository(
-					params.serviceContext.db,
-					params.serviceContext.config.db,
-				);
+			const jobId = randomUUID();
+			const now = new Date();
+			const status: QueueJobResponse["status"] = "pending";
+			const QueueJobs = new QueueJobsRepository(
+				params.serviceContext.db,
+				params.serviceContext.config.db,
+			);
 
-				const jobsData = params.payloads.map((payload) => ({
-					jobId: randomUUID(),
-					payload,
-				}));
+			const createJobRes = await QueueJobs.createSingle({
+				data: {
+					job_id: jobId,
+					event_type: event,
+					event_data: params.payload,
+					status: status,
+					queue_adapter_key: ADAPTER_KEY,
+					priority: params.options?.priority ?? 0,
+					attempts: 0,
+					max_attempts:
+						params.options?.maxAttempts ?? constants.queue.maxAttempts,
+					error_message: null,
+					created_at: now.toISOString(),
+					scheduled_for: params.options?.scheduledFor
+						? params.options.scheduledFor.toISOString()
+						: undefined,
+					created_by_user_id: params.options?.createdByUserId ?? null,
+					updated_at: now.toISOString(),
+				},
+				returning: ["id"],
+			});
+			if (createJobRes.error) return createJobRes;
 
-				const createJobsRes = await QueueJobs.createMultiple({
-					data: jobsData.map((job) => ({
-						job_id: job.jobId,
-						event_type: event,
-						event_data: job.payload,
-						status: status,
-						queue_adapter_key: ADAPTER_KEY,
-						priority: params.options?.priority ?? 0,
-						attempts: 0,
-						max_attempts:
-							params.options?.maxAttempts ?? constants.queue.maxAttempts,
-						error_message: null,
-						created_at: now.toISOString(),
-						scheduled_for: params.options?.scheduledFor
-							? params.options.scheduledFor.toISOString()
-							: undefined,
-						created_by_user_id: params.options?.createdByUserId ?? null,
-						updated_at: now.toISOString(),
-					})),
-					returning: ["id"],
-				});
-				if (createJobsRes.error) return createJobsRes;
-
+			return {
+				error: undefined,
+				data: { jobId, event, status },
+			};
+		},
+		addBatch: async (event, params) => {
+			if (!worker) {
 				return {
-					error: undefined,
-					data: {
-						jobIds: jobsData.map((j) => j.jobId),
-						event,
-						status,
-						count: jobsData.length,
-					},
+					error: { message: "Worker queue is not started" },
+					data: undefined,
 				};
-			},
+			}
+
+			logger.info({
+				message: "Adding batch jobs to the worker queue",
+				scope: constants.logScopes.queueAdapter,
+				data: { event, count: params.payloads.length },
+			});
+
+			const now = new Date();
+			const status: QueueBatchJobResponse["status"] = "pending";
+			const QueueJobs = new QueueJobsRepository(
+				params.serviceContext.db,
+				params.serviceContext.config.db,
+			);
+
+			const jobsData = params.payloads.map((payload) => ({
+				jobId: randomUUID(),
+				payload,
+			}));
+
+			const createJobsRes = await QueueJobs.createMultiple({
+				data: jobsData.map((job) => ({
+					job_id: job.jobId,
+					event_type: event,
+					event_data: job.payload,
+					status: status,
+					queue_adapter_key: ADAPTER_KEY,
+					priority: params.options?.priority ?? 0,
+					attempts: 0,
+					max_attempts:
+						params.options?.maxAttempts ?? constants.queue.maxAttempts,
+					error_message: null,
+					created_at: now.toISOString(),
+					scheduled_for: params.options?.scheduledFor
+						? params.options.scheduledFor.toISOString()
+						: undefined,
+					created_by_user_id: params.options?.createdByUserId ?? null,
+					updated_at: now.toISOString(),
+				})),
+				returning: ["id"],
+			});
+			if (createJobsRes.error) return createJobsRes;
+
+			return {
+				error: undefined,
+				data: {
+					jobIds: jobsData.map((j) => j.jobId),
+					event,
+					status,
+					count: jobsData.length,
+				},
+			};
 		},
 	};
 }

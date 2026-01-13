@@ -37,7 +37,7 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.command.addBatch("media:delete", {
+	const queueRes = await context.queue.addBatch("media:delete", {
 		payloads: softDeletedMediaRes.data.map((media) => ({
 			mediaId: media.id,
 		})),

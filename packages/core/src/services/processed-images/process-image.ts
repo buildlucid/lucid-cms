@@ -28,7 +28,7 @@ const processImage: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// get og image
-	const mediaRes = await mediaStrategyRes.data.services.stream(data.key);
+	const mediaRes = await mediaStrategyRes.data.stream(data.key);
 	if (mediaRes.error) return mediaRes;
 
 	// If the response is not an image
@@ -129,7 +129,7 @@ const processImage: ServiceFn<
 					file_size: imageRes.data.size,
 				},
 			}),
-			mediaStrategyRes.data.services.upload({
+			mediaStrategyRes.data.upload({
 				key: data.processKey,
 				data: imageRes.data.buffer,
 				meta: {

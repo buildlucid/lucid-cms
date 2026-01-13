@@ -31,9 +31,7 @@ const update: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// Fetch meta data from new file
-	const mediaMetaRes = await mediaStrategyRes.data.services.getMeta(
-		data.updatedKey,
-	);
+	const mediaMetaRes = await mediaStrategyRes.data.getMeta(data.updatedKey);
 	if (mediaMetaRes.error) return mediaMetaRes;
 
 	// Ensure we available storage space
@@ -53,9 +51,7 @@ const update: ServiceFn<
 	if (fileMetaData.error) return fileMetaData;
 
 	// Delete old file
-	const deleteOldRes = await mediaStrategyRes.data.services.delete(
-		data.previousKey,
-	);
+	const deleteOldRes = await mediaStrategyRes.data.delete(data.previousKey);
 	if (deleteOldRes.error) {
 		return {
 			error: {

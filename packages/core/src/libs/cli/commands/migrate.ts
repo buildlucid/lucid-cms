@@ -289,7 +289,7 @@ const migrateCommand = (props?: {
 			}
 
 			cliLogger.info("Clearing KV cache...");
-			await kvInstance.command.clear();
+			await kvInstance.clear();
 
 			const endTime = startTime();
 			if (mode === "process") {

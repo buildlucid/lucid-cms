@@ -91,22 +91,20 @@ export type MediaAdapterInstance<T = any> = {
 	/**
 	 * The media adapter services
 	 */
-	services: {
-		/** Generate a presigned URL */
-		getPresignedUrl: MediaAdapterServiceGetPresignedUrl;
-		/** Get media metadata  */
-		getMeta: MediaAdapterServiceGetMeta;
-		/** Stream media */
-		stream: MediaAdapterServiceStream;
-		/** Upload media */
-		upload: MediaAdapterServiceUploadSingle;
-		/** Delete media */
-		delete: MediaAdapterServiceDeleteSingle;
-		/** Delete multiple media items */
-		deleteMultiple: MediaAdapterServiceDeleteMultiple;
-		/** Rename a media key (copy then delete) */
-		rename: MediaAdapterServiceRenameKey;
-	};
+	/** Generate a presigned URL */
+	getPresignedUrl: MediaAdapterServiceGetPresignedUrl;
+	/** Get media metadata  */
+	getMeta: MediaAdapterServiceGetMeta;
+	/** Stream media */
+	stream: MediaAdapterServiceStream;
+	/** Upload media */
+	upload: MediaAdapterServiceUploadSingle;
+	/** Delete media */
+	delete: MediaAdapterServiceDeleteSingle;
+	/** Delete multiple media items */
+	deleteMultiple: MediaAdapterServiceDeleteMultiple;
+	/** Rename a media key (copy then delete) */
+	rename: MediaAdapterServiceRenameKey;
 	/** Get passed adapter options */
 	getOptions?: () => T;
 };

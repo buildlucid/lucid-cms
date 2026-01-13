@@ -88,7 +88,7 @@ const migrateResetCommand = (props?: {
 
 			cliLogger.info("Clearing KV cache...");
 			const kvInstance = await getKVAdapter(config);
-			await kvInstance.command.clear();
+			await kvInstance.clear();
 
 			const endTime = startTime();
 			if (mode === "process") {

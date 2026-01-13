@@ -46,7 +46,7 @@ const streamMedia: ServiceFn<
 
 	//* if its already processed, dont allow it to be processed further
 	if (isProcessedKey) {
-		const res = await mediaStrategyRes.data.services.stream(data.key, {
+		const res = await mediaStrategyRes.data.stream(data.key, {
 			range: data.range,
 		});
 		if (res.error) return res;
@@ -75,7 +75,7 @@ const streamMedia: ServiceFn<
 	const quality = selectedPreset?.quality ?? constants.media.imagePresetQuality;
 
 	if (!selectedPreset && !format) {
-		const res = await mediaStrategyRes.data.services.stream(data.key, {
+		const res = await mediaStrategyRes.data.stream(data.key, {
 			range: data.range,
 		});
 		if (res.error) return res;
@@ -105,7 +105,7 @@ const streamMedia: ServiceFn<
 		},
 	});
 
-	const res = await mediaStrategyRes.data.services.stream(processKey, {
+	const res = await mediaStrategyRes.data.stream(processKey, {
 		range: data.range,
 	});
 	if (res.data) {

@@ -106,7 +106,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 		}
 
 		const now = Date.now();
-		const existing = await kv.command.get<RateLimitRecord>(key);
+		const existing = await kv.get<RateLimitRecord>(key);
 
 		let record: RateLimitRecord;
 		if (existing && existing.resetTime > now) {
@@ -126,7 +126,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 			Math.ceil((record.resetTime - now) / 1000) +
 				constants.rateLimit.ttlBufferSeconds,
 		);
-		await kv.command.set(key, record, { expirationTtl: ttl });
+		await kv.set(key, record, { expirationTtl: ttl });
 
 		const resetSeconds = Math.max(
 			0,

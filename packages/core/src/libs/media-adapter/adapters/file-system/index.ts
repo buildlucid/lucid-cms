@@ -16,15 +16,13 @@ const fileSystemAdapter: MediaAdapter<FileSystemMediaAdapterOptions> = (
 	return {
 		type: "media-adapter",
 		key: "file-system",
-		services: {
-			getPresignedUrl: getPresignedUrl(options),
-			getMeta: getMetadata(options),
-			stream: stream(options),
-			upload: uploadSingle(options),
-			delete: deletSingle(options),
-			deleteMultiple: deleteMultiple(options),
-			rename: rename(options),
-		},
+		getPresignedUrl: getPresignedUrl(options),
+		getMeta: getMetadata(options),
+		stream: stream(options),
+		upload: uploadSingle(options),
+		delete: deletSingle(options),
+		deleteMultiple: deleteMultiple(options),
+		rename: rename(options),
 		getOptions: () => options,
 	};
 };

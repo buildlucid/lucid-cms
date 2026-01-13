@@ -111,7 +111,7 @@ const createSingle: ServiceFn<
 
 	if (mediaRes.data === undefined) {
 		if (mediaAdapter.enabled) {
-			await mediaAdapter.adapter.services.delete(syncMediaRes.data.key);
+			await mediaAdapter.adapter.delete(syncMediaRes.data.key);
 		}
 		return {
 			error: {
@@ -137,7 +137,7 @@ const createSingle: ServiceFn<
 		});
 		if (mediaTranslationsRes.error) {
 			if (mediaAdapter.enabled) {
-				await mediaAdapter.adapter.services.delete(syncMediaRes.data.key);
+				await mediaAdapter.adapter.delete(syncMediaRes.data.key);
 			}
 			return mediaTranslationsRes;
 		}

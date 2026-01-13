@@ -68,52 +68,47 @@ const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
 				database.close();
 			},
 		},
-		command: {
-			get: async <R>(
-				key: string,
-				options?: KVKeyOptions,
-			): Promise<R | null> => {
-				const resolvedKey = resolveKey(key, options);
-				const row = stmts.get.get(resolvedKey, Date.now()) as
-					| { value: string }
-					| undefined;
+		get: async <R>(key: string, options?: KVKeyOptions): Promise<R | null> => {
+			const resolvedKey = resolveKey(key, options);
+			const row = stmts.get.get(resolvedKey, Date.now()) as
+				| { value: string }
+				| undefined;
 
-				if (!row) return null;
+			if (!row) return null;
 
-				try {
-					return JSON.parse(row.value) as R;
-				} catch {
-					return row.value as R;
-				}
-			},
-			set: async (key: string, value: unknown, options?: KVSetOptions) => {
-				const resolvedKey = resolveKey(key, options);
-				const serialised =
-					typeof value === "string" ? value : JSON.stringify(value);
+			try {
+				return JSON.parse(row.value) as R;
+			} catch {
+				return row.value as R;
+			}
+		},
+		set: async (key: string, value: unknown, options?: KVSetOptions) => {
+			const resolvedKey = resolveKey(key, options);
+			const serialised =
+				typeof value === "string" ? value : JSON.stringify(value);
 
-				let expiresAt: number | null = null;
+			let expiresAt: number | null = null;
 
-				if (options?.expirationTtl) {
-					expiresAt =
-						Date.now() + options.expirationTtl * MILLISECONDS_PER_SECOND;
-				} else if (options?.expirationTimestamp) {
-					expiresAt = options.expirationTimestamp * MILLISECONDS_PER_SECOND;
-				}
+			if (options?.expirationTtl) {
+				expiresAt =
+					Date.now() + options.expirationTtl * MILLISECONDS_PER_SECOND;
+			} else if (options?.expirationTimestamp) {
+				expiresAt = options.expirationTimestamp * MILLISECONDS_PER_SECOND;
+			}
 
-				stmts.set.run(resolvedKey, serialised, expiresAt);
-			},
-			has: async (key: string, options?: KVKeyOptions): Promise<boolean> => {
-				const resolvedKey = resolveKey(key, options);
-				const row = stmts.has.get(resolvedKey, Date.now());
-				return row !== undefined;
-			},
-			delete: async (key: string, options?: KVKeyOptions) => {
-				const resolvedKey = resolveKey(key, options);
-				stmts.delete.run(resolvedKey);
-			},
-			clear: async () => {
-				stmts.clear.run();
-			},
+			stmts.set.run(resolvedKey, serialised, expiresAt);
+		},
+		has: async (key: string, options?: KVKeyOptions): Promise<boolean> => {
+			const resolvedKey = resolveKey(key, options);
+			const row = stmts.has.get(resolvedKey, Date.now());
+			return row !== undefined;
+		},
+		delete: async (key: string, options?: KVKeyOptions) => {
+			const resolvedKey = resolveKey(key, options);
+			stmts.delete.run(resolvedKey);
+		},
+		clear: async () => {
+			stmts.clear.run();
 		},
 	};
 };
