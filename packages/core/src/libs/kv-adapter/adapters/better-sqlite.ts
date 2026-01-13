@@ -1,6 +1,11 @@
 import path from "node:path";
 import { ensureLucidDirectoryExists } from "../../../utils/helpers/lucid-directory.js";
-import type { KVAdapterInstance, KVSetOptions } from "../types.js";
+import type {
+	KVAdapterInstance,
+	KVKeyOptions,
+	KVSetOptions,
+} from "../types.js";
+import { resolveKey } from "../utils.js";
 
 const MILLISECONDS_PER_SECOND = 1000;
 const CLEANUP_INTERVAL_MS = 5 * 60 * MILLISECONDS_PER_SECOND;
@@ -64,8 +69,12 @@ const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
 			},
 		},
 		command: {
-			get: async <R>(key: string): Promise<R | null> => {
-				const row = stmts.get.get(key, Date.now()) as
+			get: async <R>(
+				key: string,
+				options?: KVKeyOptions,
+			): Promise<R | null> => {
+				const resolvedKey = resolveKey(key, options);
+				const row = stmts.get.get(resolvedKey, Date.now()) as
 					| { value: string }
 					| undefined;
 
@@ -78,6 +87,7 @@ const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
 				}
 			},
 			set: async (key: string, value: unknown, options?: KVSetOptions) => {
+				const resolvedKey = resolveKey(key, options);
 				const serialised =
 					typeof value === "string" ? value : JSON.stringify(value);
 
@@ -90,14 +100,16 @@ const betterSQLiteKVAdapter = async (): Promise<KVAdapterInstance> => {
 					expiresAt = options.expirationTimestamp * MILLISECONDS_PER_SECOND;
 				}
 
-				stmts.set.run(key, serialised, expiresAt);
+				stmts.set.run(resolvedKey, serialised, expiresAt);
 			},
-			has: async (key: string): Promise<boolean> => {
-				const row = stmts.has.get(key, Date.now());
+			has: async (key: string, options?: KVKeyOptions): Promise<boolean> => {
+				const resolvedKey = resolveKey(key, options);
+				const row = stmts.has.get(resolvedKey, Date.now());
 				return row !== undefined;
 			},
-			delete: async (key: string) => {
-				stmts.delete.run(key);
+			delete: async (key: string, options?: KVKeyOptions) => {
+				const resolvedKey = resolveKey(key, options);
+				stmts.delete.run(resolvedKey);
 			},
 			clear: async () => {
 				stmts.clear.run();

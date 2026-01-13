@@ -1,6 +1,13 @@
-import type { KVAdapterInstance, KVSetOptions } from "@lucidcms/core/types";
+import { resolveKey } from "@lucidcms/core/kv-adapter";
+import type {
+	KVAdapterInstance,
+	KVKeyOptions,
+	KVSetOptions,
+} from "@lucidcms/core/types";
 import { Redis } from "ioredis";
 import type { PluginOptions } from "./types.js";
+
+const MAX_KEY_BYTES = 512;
 
 const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 	const client =
@@ -17,8 +24,12 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			},
 		},
 		command: {
-			get: async <R>(key: string): Promise<R | null> => {
-				const value = await client.get(key);
+			get: async <R>(
+				key: string,
+				kvOptions?: KVKeyOptions,
+			): Promise<R | null> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+				const value = await client.get(resolvedKey);
 				if (value === null) return null;
 
 				try {
@@ -32,28 +43,31 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 				value: unknown,
 				kvOptions?: KVSetOptions,
 			): Promise<void> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
 				const serialised =
 					typeof value === "string" ? value : JSON.stringify(value);
 
 				if (kvOptions?.expirationTtl) {
-					await client.setex(key, kvOptions.expirationTtl, serialised);
+					await client.setex(resolvedKey, kvOptions.expirationTtl, serialised);
 				} else if (kvOptions?.expirationTimestamp) {
 					await client.set(
-						key,
+						resolvedKey,
 						serialised,
 						"EXAT",
 						kvOptions.expirationTimestamp,
 					);
 				} else {
-					await client.set(key, serialised);
+					await client.set(resolvedKey, serialised);
 				}
 			},
-			has: async (key: string): Promise<boolean> => {
-				const exists = await client.exists(key);
+			has: async (key: string, kvOptions?: KVKeyOptions): Promise<boolean> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+				const exists = await client.exists(resolvedKey);
 				return exists === 1;
 			},
-			delete: async (key: string): Promise<void> => {
-				await client.del(key);
+			delete: async (key: string, kvOptions?: KVKeyOptions): Promise<void> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+				await client.del(resolvedKey);
 			},
 			clear: async (): Promise<void> => {
 				await client.flushdb();

@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
-import type { ServiceFn } from "@lucidcms/core/types";
 import constants from "../../../constants/constants.js";
 import T from "../../../translations/index.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 
 const validatePresignedToken: ServiceFn<
 	[

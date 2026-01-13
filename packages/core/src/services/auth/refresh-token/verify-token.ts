@@ -38,6 +38,7 @@ const verifyToken = async (
 		const kv = c.get("kv");
 		const kvEntry = await kv.command.get<{ user_id: number }>(
 			cacheKeys.auth.refresh(_refresh),
+			{ hash: true },
 		);
 
 		if (kvEntry && kvEntry.user_id === decode.id) {
@@ -96,7 +97,7 @@ const verifyToken = async (
 		await kv.command.set(
 			cacheKeys.auth.refresh(_refresh),
 			{ user_id: tokenRes.data.user_id },
-			{ expirationTtl: constants.refreshTokenExpiration },
+			{ expirationTtl: constants.refreshTokenExpiration, hash: true },
 		);
 
 		return {

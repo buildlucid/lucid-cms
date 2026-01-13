@@ -1,15 +1,25 @@
-import type { KVAdapterInstance, KVSetOptions } from "@lucidcms/core/types";
+import { resolveKey } from "@lucidcms/core/kv-adapter";
+import type {
+	KVAdapterInstance,
+	KVKeyOptions,
+	KVSetOptions,
+} from "@lucidcms/core/types";
 import type { PluginOptions } from "./types.js";
 
 const MILLISECONDS_PER_SECOND = 1000;
+const MAX_KEY_BYTES = 512;
 
 const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 	return {
 		type: "kv-adapter",
 		key: "cloudflare-kv",
 		command: {
-			get: async <R>(key: string): Promise<R | null> => {
-				const value = await options.binding.get(key, { type: "text" });
+			get: async <R>(
+				key: string,
+				kvOptions?: KVKeyOptions,
+			): Promise<R | null> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+				const value = await options.binding.get(resolvedKey, { type: "text" });
 				if (value === null) return null;
 
 				try {
@@ -23,6 +33,7 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 				value: unknown,
 				kvOptions?: KVSetOptions,
 			): Promise<void> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
 				const serialised =
 					typeof value === "string" ? value : JSON.stringify(value);
 
@@ -38,16 +49,18 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 					);
 				}
 
-				await options.binding.put(key, serialised, {
+				await options.binding.put(resolvedKey, serialised, {
 					expirationTtl,
 				});
 			},
-			has: async (key: string): Promise<boolean> => {
-				const value = await options.binding.get(key, { type: "text" });
+			has: async (key: string, kvOptions?: KVKeyOptions): Promise<boolean> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+				const value = await options.binding.get(resolvedKey, { type: "text" });
 				return value !== null;
 			},
-			delete: async (key: string): Promise<void> => {
-				await options.binding.delete(key);
+			delete: async (key: string, kvOptions?: KVKeyOptions): Promise<void> => {
+				const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+				await options.binding.delete(resolvedKey);
 			},
 			clear: async (): Promise<void> => {
 				const keys = await options.binding.list();

@@ -97,6 +97,7 @@ const cache = (options: CacheOptions) =>
 
 		const cached = await kv.command.get<{ data: unknown; cachedAt: number }>(
 			cacheKey,
+			{ hash: true },
 		);
 		if (cached !== null) {
 			const age = Math.floor((Date.now() - cached.cachedAt) / 1000);
@@ -121,6 +122,7 @@ const cache = (options: CacheOptions) =>
 				},
 				{
 					expirationTtl: options.ttl,
+					hash: true,
 				},
 			);
 

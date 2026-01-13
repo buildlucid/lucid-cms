@@ -33,7 +33,9 @@ const clientAuthentication = createMiddleware(
 		}
 
 		const cacheKey = cacheKeys.auth.client(decodedKey);
-		const cached = await kv.command.get<LucidClientIntegrationAuth>(cacheKey);
+		const cached = await kv.command.get<LucidClientIntegrationAuth>(cacheKey, {
+			hash: true,
+		});
 
 		if (cached) {
 			c.set("clientIntegrationAuth", cached);
@@ -66,6 +68,7 @@ const clientAuthentication = createMiddleware(
 
 		await kv.command.set(cacheKey, verifyApiKey.data, {
 			expirationTtl: minutesToSeconds(5),
+			hash: true,
 		});
 
 		c.set("clientIntegrationAuth", verifyApiKey.data);

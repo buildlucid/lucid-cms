@@ -12,11 +12,12 @@ export const addKeyToTag = async (
 	await Promise.all(
 		tags.map(async (tag) => {
 			const tagKey = cacheKeys.http.tag(tag);
-			const existingKeys = (await kv.command.get<string[]>(tagKey)) || [];
+			const existingKeys =
+				(await kv.command.get<string[]>(tagKey, { hash: true })) || [];
 
 			if (!existingKeys.includes(key)) {
 				existingKeys.push(key);
-				await kv.command.set(tagKey, existingKeys);
+				await kv.command.set(tagKey, existingKeys, { hash: true });
 			}
 		}),
 	);
@@ -30,10 +31,10 @@ export const invalidateHttpCacheTag = async (
 	tag: string,
 ) => {
 	const tagKey = cacheKeys.http.tag(tag);
-	const keys = (await kv.command.get<string[]>(tagKey)) || [];
+	const keys = (await kv.command.get<string[]>(tagKey, { hash: true })) || [];
 
-	await Promise.all(keys.map((key) => kv.command.delete(key)));
-	await kv.command.delete(tagKey);
+	await Promise.all(keys.map((key) => kv.command.delete(key, { hash: true })));
+	await kv.command.delete(tagKey, { hash: true });
 };
 
 /**
