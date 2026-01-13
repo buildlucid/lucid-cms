@@ -26,7 +26,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 		<Switch>
 			<Match when={props.media.type === "image"}>
 				<Image
-					classes={"rounded-t-md backface-hidden p-2 z-10 relative"}
+					classes={"rounded-t-md backface-hidden z-10 relative"}
 					fit={props.imageFit}
 					src={`${props.media.url}?preset=thumbnail&format=webp`}
 					alt={props.alt || ""}
