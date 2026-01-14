@@ -18,7 +18,7 @@ interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 	size: "small" | "medium" | "icon" | "icon-subtle" | "large";
 	children: JSX.Element;
 
-	onClick?: () => void;
+	onClick?: (e: MouseEvent) => void;
 	type?: "button" | "submit" | "reset";
 	classes?: string;
 	loading?: boolean;
@@ -46,7 +46,7 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "danger-outline",
 				"text-icon-fade fill-icon-fade hover:text-title hover:fill-title hover:bg-background-base/50 ring-primary-base":
 					props.theme === "secondary-subtle",
-				"text-error-base fill-error-base hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
+				"text-icon-fade fill-icon-fade hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
 					props.theme === "danger-subtle",
 
 				// Toggles
@@ -81,7 +81,7 @@ const Button: Component<ButtonProps> = (props) => {
 			return;
 		}
 
-		props.onClick?.();
+		props.onClick?.(e);
 	};
 
 	// ----------------------------------------

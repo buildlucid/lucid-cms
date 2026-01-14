@@ -1,6 +1,7 @@
 import type { CollectionBrickConfig } from "@types";
 import { FaSolidInfo } from "solid-icons/fa";
 import { type Component, Show } from "solid-js";
+import Button from "@/components/Partials/Button";
 import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
 
@@ -15,12 +16,12 @@ export const BrickImagePreviewButton: Component<
 	// Render
 	return (
 		<Show when={props.brickConfig?.preview?.image}>
-			<button
+			<Button
 				type="button"
+				theme="secondary-subtle"
+				size="icon-subtle"
 				tabIndex="-1"
-				class={
-					"text-2xl text-icon-faded hover:text-icon-hover transition-all duration-200"
-				}
+				classes="text-icon-faded hover:text-icon-hover transition-all duration-200"
 				onClick={(e) => {
 					e.stopPropagation();
 					brickStore.set("imagePreview", {
@@ -40,7 +41,7 @@ export const BrickImagePreviewButton: Component<
 				}}
 			>
 				<FaSolidInfo size={14} />
-			</button>
+			</Button>
 		</Show>
 	);
 };

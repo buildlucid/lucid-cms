@@ -278,7 +278,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						})}
 					</h3>
 				</div>
-				<div class="flex gap-2">
+				<div class="flex gap-0.5">
 					<BrickImagePreviewButton brickConfig={config()} />
 					<DeleteDebounceButton
 						callback={() => {
@@ -286,18 +286,20 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						}}
 						disabled={isDisabled()}
 					/>
-					<button
+					<Button
 						type="button"
+						theme="secondary-subtle"
+						size="icon-subtle"
 						tabIndex="-1"
-						class={classNames(
-							"text-2xl text-icon-faded hover:text-icon-hover transition-all duration-200",
+						classes={classNames(
+							"text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
 								"transform rotate-180": getBrickOpen(),
 							},
 						)}
 					>
 						<FaSolidChevronUp size={14} />
-					</button>
+					</Button>
 				</div>
 			</div>
 			{/* Body */}

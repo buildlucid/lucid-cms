@@ -9,6 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
+import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
 import brickStore from "@/store/brickStore";
@@ -197,7 +198,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						</Show>
 					</div>
 				</div>
-				<div class="flex gap-2">
+				<div class="flex gap-0.5">
 					<DeleteDebounceButton
 						callback={() => {
 							brickStore.get.removeRepeaterGroup({
@@ -210,18 +211,20 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						}}
 						disabled={isDisabled()}
 					/>
-					<button
+					<Button
 						type="button"
-						class={classNames(
-							"text-2xl text-icon-faded hover:text-icon-hover transition-all duration-200",
+						theme="secondary-subtle"
+						size="icon-subtle"
+						tabIndex="-1"
+						classes={classNames(
+							"text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
 								"transform rotate-180": getGroupOpen(),
 							},
 						)}
-						tabIndex="-1"
 					>
 						<FaSolidChevronUp size={14} />
-					</button>
+					</Button>
 				</div>
 			</div>
 			{/* Group Body */}

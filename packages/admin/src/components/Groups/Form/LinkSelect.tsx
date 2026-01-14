@@ -76,7 +76,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 			/>
 			<div class="mt-2 w-full">
 				<Show when={hasLink()}>
-					<div class="w-full flex items-center gap-3 bg-input-base border border-border rounded-md px-3 py-2.5 group">
+					<div class="w-full flex items-center justify-between gap-3 bg-input-base border border-border rounded-md px-3 py-2 group">
 						<Show when={opensInNewTab()} fallback={<FaSolidLink size={14} />}>
 							<FaSolidArrowUpRightFromSquare size={14} />
 						</Show>
@@ -88,19 +88,17 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 							</Show>
 							<Show when={linkUrl()}>
 								<span
-									class={classNames(
-										"text-xs text-body truncate leading-tight",
-										{
-											"font-medium text-title": !linkLabel(),
-										},
-									)}
+									class={classNames("text-body truncate leading-tight", {
+										"font-medium text-title text-sm": !linkLabel(),
+										"text-xs": linkLabel(),
+									})}
 								>
 									{linkUrl()}
 								</span>
 							</Show>
 						</div>
 
-						<div class="flex items-center gap-1">
+						<div class="flex items-center gap-0.5">
 							<Button
 								type="button"
 								theme="secondary-subtle"
