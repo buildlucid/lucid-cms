@@ -12,8 +12,10 @@ interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 		| "danger"
 		| "basic"
 		| "secondary-toggle"
-		| "danger-outline";
-	size: "small" | "medium" | "icon" | "large";
+		| "danger-outline"
+		| "secondary-subtle"
+		| "danger-subtle";
+	size: "small" | "medium" | "icon" | "icon-subtle" | "large";
 	children: JSX.Element;
 
 	onClick?: () => void;
@@ -42,6 +44,10 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "danger",
 				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-title fill-error-contrast hover:text-error-contrast":
 					props.theme === "danger-outline",
+				"text-icon-fade fill-icon-fade hover:text-title hover:fill-title hover:bg-background-base/50 ring-primary-base":
+					props.theme === "secondary-subtle",
+				"text-error-base fill-error-base hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
+					props.theme === "danger-subtle",
 
 				// Toggles
 				"ring-primary-base": props.theme === "secondary-toggle",
@@ -55,6 +61,7 @@ const Button: Component<ButtonProps> = (props) => {
 				"px-4 py-2 h-10 text-sm": props.size === "medium",
 				"px-6 py-3 h-12 text-base": props.size === "large",
 				"w-9 h-9 p-0 min-w-[36px]!": props.size === "icon",
+				"w-7 h-7 p-0 min-w-[28px]!": props.size === "icon-subtle",
 				"opacity-80 cursor-not-allowed": props.permission === false,
 			},
 		);

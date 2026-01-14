@@ -4,7 +4,7 @@ import {
 	createMemo,
 	createSignal,
 } from "solid-js";
-import { Checkbox, Input } from "@/components/Groups/Form";
+import { Input, Switch } from "@/components/Groups/Form";
 import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import linkFieldStore from "@/store/forms/linkFieldStore";
@@ -24,14 +24,18 @@ const LinkSelect: Component = () => {
 
 	// ----------------------------------
 	// Functions
+	const closeModal = () => {
+		linkFieldStore.set("open", false);
+		linkFieldStore.set("selectedLink", null);
+	};
+
 	const updateLink = () => {
 		linkFieldStore.get.onSelectCallback({
 			url: getUrl(),
 			target: getOpenInNewTab() ? "_blank" : "_self",
 			label: getLabel(),
 		});
-		linkFieldStore.set("open", false);
-		linkFieldStore.set("selectedLink", null);
+		closeModal();
 	};
 
 	// ----------------------------------
@@ -48,20 +52,11 @@ const LinkSelect: Component = () => {
 		<Modal
 			state={{
 				open: open(),
-				setOpen: () => {
-					linkFieldStore.set("open", false);
-					linkFieldStore.set("selectedLink", null);
-				},
-			}}
-			options={{
-				noPadding: true,
+				setOpen: closeModal,
 			}}
 		>
-			<div class="p-6">
-				<div class="mb-6 pb-6 border-b border-border">
-					<h2>{T()("set_link")}</h2>
-				</div>
-				<div class="mb-6 pb-6 border-b border-border">
+			<div class="flex flex-col gap-6">
+				<div class="flex flex-col gap-0">
 					<Input
 						id="label"
 						value={getLabel()}
@@ -84,19 +79,22 @@ const LinkSelect: Component = () => {
 						}}
 						required={false}
 					/>
-					<Checkbox
+					<Switch
 						id="open_in_new_tab"
 						value={getOpenInNewTab()}
 						onChange={(value) => setOpenInNewTab(value)}
 						name={"open_in_new_tab"}
 						copy={{
 							label: T()("open_in_new_tab"),
+							true: T()("yes"),
+							false: T()("no"),
 						}}
 						required={false}
+						hideOptionalText
+						labelLeft
 					/>
 				</div>
-
-				<div class="w-full flex gap-4 mt-6">
+				<div class="w-full flex gap-2.5">
 					<Button
 						type="button"
 						theme="primary"
@@ -109,10 +107,7 @@ const LinkSelect: Component = () => {
 						type="button"
 						theme="border-outline"
 						size="medium"
-						onClick={() => {
-							linkFieldStore.set("open", false);
-							linkFieldStore.set("selectedLink", null);
-						}}
+						onClick={closeModal}
 					>
 						{T()("cancel")}
 					</Button>

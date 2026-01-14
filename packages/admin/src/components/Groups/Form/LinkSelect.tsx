@@ -1,7 +1,12 @@
 import type { ErrorResult, FieldError, LinkResValue } from "@types";
 import classNames from "classnames";
-import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
-import { type Component, Match, Switch } from "solid-js";
+import {
+	FaSolidArrowUpRightFromSquare,
+	FaSolidLink,
+	FaSolidPen,
+	FaSolidXmark,
+} from "solid-icons/fa";
+import { type Component, createMemo, Show } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import linkFieldStore from "@/store/forms/linkFieldStore";
@@ -39,10 +44,18 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 
 	// -------------------------------
 	// Memos
-	const linkLabel = () => {
-		const value = props.value as LinkResValue;
-		return value?.label || value?.url;
-	};
+	const hasLink = createMemo(() => {
+		return props.value?.url || props.value?.label;
+	});
+	const linkLabel = createMemo(() => {
+		return props.value?.label;
+	});
+	const linkUrl = createMemo(() => {
+		return props.value?.url;
+	});
+	const opensInNewTab = createMemo(() => {
+		return props.value?.target === "_blank";
+	});
 
 	// -------------------------------
 	// Render
@@ -61,50 +74,68 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
-			<div class="mt-2 w-full flex flex-wrap gap-2">
-				<Switch>
-					<Match when={!linkLabel()}>
-						<Button
-							type="button"
-							theme="secondary"
-							size="small"
-							onClick={openLinkModal}
-							disabled={props.disabled}
-						>
-							{T()("select_link")}
-						</Button>
-					</Match>
-					<Match when={props.value}>
-						<div class="w-full flex items-center gap-2">
+			<div class="mt-2 w-full">
+				<Show when={hasLink()}>
+					<div class="w-full flex items-center gap-3 bg-input-base border border-border rounded-md px-3 py-2.5 group">
+						<Show when={opensInNewTab()} fallback={<FaSolidLink size={14} />}>
+							<FaSolidArrowUpRightFromSquare size={14} />
+						</Show>
+						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+							<Show when={linkLabel()}>
+								<span class="text-sm font-medium text-title truncate leading-tight">
+									{linkLabel()}
+								</span>
+							</Show>
+							<Show when={linkUrl()}>
+								<span
+									class={classNames(
+										"text-xs text-body truncate leading-tight",
+										{
+											"font-medium text-title": !linkLabel(),
+										},
+									)}
+								>
+									{linkUrl()}
+								</span>
+							</Show>
+						</div>
+
+						<div class="flex items-center gap-1">
 							<Button
 								type="button"
-								theme="secondary"
-								size="small"
+								theme="secondary-subtle"
+								size="icon-subtle"
 								onClick={openLinkModal}
 								disabled={props.disabled}
-								classes="capitalize"
 							>
-								<span class="line-clamp-1">{linkLabel()}</span>
-								<span class="ml-2 flex items-center border-l border-current pl-2">
-									<FaSolidPen size={12} class="text-current" />
-								</span>
+								<FaSolidPen size={12} />
+								<span class="sr-only">{T()("edit")}</span>
 							</Button>
 							<Button
 								type="button"
-								theme="border-outline"
-								size="icon"
-								onClick={() => {
-									props.onChange(null);
-								}}
+								theme="danger-subtle"
+								size="icon-subtle"
+								onClick={() => props.onChange(null)}
 								disabled={props.disabled}
-								classes="capitalize"
 							>
-								<FaSolidXmark />
+								<FaSolidXmark size={14} />
 								<span class="sr-only">{T()("clear")}</span>
 							</Button>
 						</div>
-					</Match>
-				</Switch>
+					</div>
+				</Show>
+
+				<Show when={!hasLink()}>
+					<Button
+						type="button"
+						theme="secondary"
+						size="small"
+						onClick={openLinkModal}
+						disabled={props.disabled}
+					>
+						{T()("select_link")}
+					</Button>
+				</Show>
 			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
