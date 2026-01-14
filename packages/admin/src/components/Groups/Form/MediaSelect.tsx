@@ -1,6 +1,11 @@
 import type { ErrorResult, FieldError, MediaRef, MediaResponse } from "@types";
 import classNames from "classnames";
 import {
+	FaSolidArrowUpRightFromSquare,
+	FaSolidPen,
+	FaSolidXmark,
+} from "solid-icons/fa";
+import {
 	type Accessor,
 	type Component,
 	createMemo,
@@ -9,7 +14,9 @@ import {
 	Switch,
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
+import AspectRatio from "@/components/Partials/AspectRatio";
 import Button from "@/components/Partials/Button";
+import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -89,6 +96,26 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	// -------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
+	const mediaTitle = createMemo(() => {
+		return (
+			helpers.getRecordTranslation(props.ref()?.title, contentLocale()) ||
+			helpers.getRecordTranslation(props.ref()?.alt, contentLocale()) ||
+			props.ref()?.key ||
+			""
+		);
+	});
+	const mediaAlt = createMemo(() => {
+		return (
+			helpers.getRecordTranslation(props.ref()?.alt, contentLocale()) ||
+			mediaTitle()
+		);
+	});
+	const mediaDimensions = createMemo(() => {
+		const width = props.ref()?.width ?? null;
+		const height = props.ref()?.height ?? null;
+		if (!width || !height) return null;
+		return `${width}x${height}`;
+	});
 
 	// -------------------------------
 	// Render
@@ -110,29 +137,105 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			<div class="mt-2.5 w-full">
 				<Switch>
 					<Match when={typeof props.value !== "number"}>
-						<Button
-							type="button"
-							theme="secondary"
-							size="small"
-							onClick={openMediaSelectModal}
-							disabled={props.disabled}
-							classes="capitalize"
-						>
-							{T()("select_media", {
-								type: props.type || "media",
-							})}
-						</Button>
+						<div class="w-full border border-dashed border-border rounded-md bg-input-base/30 p-4">
+							<div class="flex flex-wrap gap-2">
+								<Button
+									type="button"
+									theme="secondary"
+									size="small"
+									onClick={openMediaSelectModal}
+									disabled={props.disabled}
+									classes="capitalize"
+								>
+									{T()("select_media", {
+										type: props.type || "media",
+									})}
+								</Button>
+								<Button
+									type="button"
+									theme="border-outline"
+									size="small"
+									onClick={() => {}}
+									disabled={props.disabled}
+									classes="capitalize"
+								>
+									{T()("upload_media")}
+								</Button>
+							</div>
+						</div>
 					</Match>
 					<Match when={typeof props.value === "number"}>
-						<div class="w-full border border-border rounded-md bg-input-base rectangle-background">
-							<div class="p-2 flex items-center justify-center relative">
-								<div class="w-full max-w-md max-h-80">
+						<div class="w-full  border border-border rounded-md bg-card-base overflow-hidden group">
+							<div class="flex items-start justify-between gap-3 p-3 border-b border-border bg-card-base">
+								<div class="flex items-start gap-2 min-w-0">
+									<div class="min-w-0">
+										<p class="text-sm text-title font-medium line-clamp-1">
+											{mediaTitle() || T()("no_translation")}
+										</p>
+										<div class="flex items-center gap-2 min-w-0">
+											<ClickToCopy
+												type="simple"
+												text={props.ref()?.key || ""}
+												value={props.ref()?.url || ""}
+												class="text-xs text-unfocused max-w-full"
+											/>
+										</div>
+									</div>
+								</div>
+								<div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+									<Button
+										type="button"
+										theme="secondary-subtle"
+										size="icon-subtle"
+										onClick={openMediaSelectModal}
+										disabled={props.disabled}
+										aria-label={T()("select_new_media", {
+											type: props.type || "media",
+										})}
+									>
+										<FaSolidPen size={12} />
+									</Button>
+									<Button
+										type="button"
+										theme="danger-subtle"
+										size="icon-subtle"
+										onClick={() => {
+											props.onChange(null, null);
+										}}
+										disabled={props.disabled}
+										aria-label={T()("remove_media", {
+											type: props.type || "media",
+										})}
+									>
+										<FaSolidXmark size={14} />
+									</Button>
+								</div>
+							</div>
+							<div
+								class={classNames("relative z-0 bg-card-hover p-4", {
+									"rectangle-background":
+										props.ref()?.type === "image" ||
+										props.ref()?.type === "video",
+								})}
+							>
+								<div class="w-full max-w-lg mx-auto">
+									<MediaPreview
+										media={{
+											url: props.ref()?.url || "",
+											type: props.ref()?.type || "image",
+										}}
+										alt={mediaAlt() || ""}
+										richPreview={true}
+										imageFit="contain"
+									/>
+								</div>
+								<div class="z-10 flex flex-wrap items-center gap-2 absolute bottom-0 left-0 right-0 p-3 bg-linear-to-t from-card-base via-card-base/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
 									<Show
 										when={
 											props.ref()?.isDeleted || props.ref()?.public === false
 										}
 									>
-										<div class="absolute top-2 right-2 z-20 gap-2 flex items-center">
+										<div class="flex flex-wrap items-center gap-2">
 											<Show when={props.ref()?.isDeleted}>
 												<Pill theme="red" tooltip={T()("deleted_pill_tooltip")}>
 													{T()("deleted")}
@@ -145,47 +248,25 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											</Show>
 										</div>
 									</Show>
-
-									<MediaPreview
-										media={{
-											url: props.ref()?.url || "",
-											type: props.ref()?.type || "image",
-										}}
-										alt={helpers.getRecordTranslation(
-											props.ref()?.alt,
-											contentLocale(),
-										)}
-										richPreview={true}
-									/>
+									<div class="flex flex-wrap items-center gap-2 ">
+										<Show when={props.ref()?.fileSize}>
+											<Pill theme="outline">
+												{helpers.bytesToSize(props.ref()?.fileSize)}
+											</Pill>
+										</Show>
+										<Show when={mediaDimensions()}>
+											<Pill theme="outline">{mediaDimensions()}</Pill>
+										</Show>
+										<Show when={props.ref()?.mimeType}>
+											<Pill theme="outline">{props.ref()?.mimeType}</Pill>
+										</Show>
+										<Show when={props.ref()?.extension}>
+											<Pill theme="outline">
+												{props.ref()?.extension.toUpperCase()}
+											</Pill>
+										</Show>
+									</div>
 								</div>
-							</div>
-							<div class="grid grid-cols-2 gap-2 p-2 bg-card-base z-10 relative border-t border-border">
-								<Button
-									type="button"
-									theme="border-outline"
-									size="small"
-									onClick={openMediaSelectModal}
-									disabled={props.disabled}
-									classes="capitalize"
-								>
-									{T()("select_new_media", {
-										type: props.type || "media",
-									})}
-								</Button>
-								<Button
-									type="button"
-									theme="border-outline"
-									size="small"
-									onClick={() => {
-										props.onChange(null, null);
-									}}
-									disabled={props.disabled}
-									classes="capitalize"
-								>
-									{T()("remove_media", {
-										type: props.type || "media",
-									})}
-								</Button>
 							</div>
 						</div>
 					</Match>
