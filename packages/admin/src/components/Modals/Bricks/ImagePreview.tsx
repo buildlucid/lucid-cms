@@ -28,7 +28,7 @@ const BrickImagePreview: Component = () => {
 				noPadding: true,
 			}}
 		>
-			<div class="flex items-baseline justify-between p-4 md:p-6 border-b border-border">
+			<div class="flex items-baseline justify-between pt-4 px-4 md:px-6 md:pt-6">
 				<div class="flex flex-col">
 					<Dialog.Title>{selectedBrick()?.title}</Dialog.Title>
 					<Show when={selectedBrick()?.description}>
