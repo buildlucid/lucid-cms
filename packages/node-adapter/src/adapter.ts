@@ -23,7 +23,9 @@ const nodeAdapter = (options?: {
 		getEnvVars: async ({ logger }) => {
 			try {
 				const { config } = await import("dotenv");
-				const result = config();
+				const result = config({
+					quiet: true,
+				});
 
 				if (result.parsed) {
 					const envFile = process.env.DOTENV_CONFIG_PATH || ".env";
