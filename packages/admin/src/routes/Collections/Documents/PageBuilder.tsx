@@ -24,6 +24,7 @@ import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import brickStore from "@/store/brickStore";
+import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 
 const CollectionsDocumentsEditRoute: Component<{
@@ -120,6 +121,7 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	onCleanup(() => {
 		brickStore.get.reset();
+		pageBuilderModalsStore.reset();
 	});
 
 	// ----------------------------------

@@ -102,6 +102,14 @@ function close(): void {
 }
 
 /**
+ * Resets the store to its initial state.
+ * Should be called when navigating away from the page builder.
+ */
+function reset(): void {
+	set("current", null);
+}
+
+/**
  * Type guard to check if a specific modal type is currently open.
  * Narrows the type of the current modal state.
  *
@@ -145,6 +153,7 @@ const pageBuilderModalsStore = {
 	set,
 	open,
 	close,
+	reset,
 	isOpen,
 	getModal,
 	triggerAndClose,
