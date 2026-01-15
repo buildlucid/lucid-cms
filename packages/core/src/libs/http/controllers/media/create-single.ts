@@ -42,7 +42,7 @@ const createSingleController = factory.createHandlers(
 	async (c) => {
 		const body = c.req.valid("json");
 
-		const mediaIdRes = await serviceWrapper(mediaServices.createSingle, {
+		const mediaRes = await serviceWrapper(mediaServices.createSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -72,14 +72,12 @@ const createSingleController = factory.createHandlers(
 				userId: c.get("auth").id,
 			},
 		);
-		if (mediaIdRes.error) throw new LucidAPIError(mediaIdRes.error);
+		if (mediaRes.error) throw new LucidAPIError(mediaRes.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: {
-					id: mediaIdRes.data,
-				},
+				data: mediaRes.data,
 			}),
 		);
 	},

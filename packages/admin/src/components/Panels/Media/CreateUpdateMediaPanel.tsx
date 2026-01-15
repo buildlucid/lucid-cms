@@ -1,3 +1,4 @@
+import type { MediaResponse } from "@lucidcms/core/types";
 import {
 	type Accessor,
 	type Component,
@@ -27,7 +28,7 @@ interface CreateUpdateMediaPanelProps {
 		parentFolderId: Accessor<number | string | undefined>;
 	};
 	callbacks?: {
-		onSuccess?: (_mediaId: number) => void;
+		onSuccess?: (_media: MediaResponse) => void;
 	};
 }
 
@@ -196,14 +197,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const imageMeta = await MediaFile.getImageMeta();
 
 		if (panelMode() === "create") {
-			const mediaId = await createMedia.createMedia(
+			const media = await createMedia.createMedia(
 				MediaFile.getFile(),
 				imageMeta,
 			);
 
-			if (mediaId === null) return;
+			if (media === null) return;
 
-			props.callbacks?.onSuccess?.(mediaId);
+			props.callbacks?.onSuccess?.(media);
 			props.state.setOpen(false);
 		} else {
 			const success = await updateMedia?.updateMedia(

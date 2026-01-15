@@ -21,12 +21,9 @@ interface Params {
 	isDark?: boolean;
 	isLight?: boolean;
 }
-interface Response {
-	id: MediaResponse["id"];
-}
 
 export const createSingleReq = (params: Params) => {
-	return request<ResponseBody<Response>>({
+	return request<ResponseBody<MediaResponse>>({
 		url: "/api/v1/media",
 		csrf: true,
 		config: {
@@ -37,19 +34,21 @@ export const createSingleReq = (params: Params) => {
 };
 
 interface UseCreateSingleProps {
-	onSuccess?: (_data: ResponseBody<Response>) => void;
+	onSuccess?: (_data: ResponseBody<MediaResponse>) => void;
 	onError?: () => void;
 }
 
 const useCreateSingle = (props?: UseCreateSingleProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Response>>({
-		mutationFn: createSingleReq,
-		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
-		onSuccess: props?.onSuccess,
-		onError: props?.onError,
-	});
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<MediaResponse>>(
+		{
+			mutationFn: createSingleReq,
+			invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
+			onSuccess: props?.onSuccess,
+			onError: props?.onError,
+		},
+	);
 };
 
 export default useCreateSingle;

@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import { mediaFormatter } from "../../libs/formatters/index.js";
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
 import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
@@ -7,6 +8,8 @@ import {
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import type { MediaResponse } from "../../types.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
@@ -35,7 +38,7 @@ const createSingle: ServiceFn<
 			userId: number;
 		},
 	],
-	number
+	MediaResponse
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db, context.config.db);
 	const MediaTranslations = new MediaTranslationsRepository(
@@ -145,9 +148,25 @@ const createSingle: ServiceFn<
 
 	await invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]);
 
+	const mediaFetchRes = await Media.selectSingleById({
+		id: mediaRes.data.id,
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: T("media_not_found_message"),
+				status: 404,
+			},
+		},
+	});
+	if (mediaFetchRes.error) return mediaFetchRes;
+
 	return {
 		error: undefined,
-		data: mediaRes.data.id,
+		data: mediaFormatter.formatSingle({
+			media: mediaFetchRes.data,
+			host: context.config.host,
+			urlStrategy: context.config.media.urlStrategy,
+		}),
 	};
 };
 

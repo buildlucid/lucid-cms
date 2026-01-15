@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import type { CollectionResponse, MediaResponse, ResponseBody } from "@types";
+import type { CollectionResponse } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import BrickImagePreview from "@/components/Modals/Bricks/ImagePreview";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
@@ -16,7 +16,6 @@ import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import mediaUploadStore from "@/store/forms/mediaUploadStore";
 import helpers from "@/utils/helpers";
-import request from "@/utils/request";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const Modals: Component<{
@@ -33,23 +32,6 @@ export const Modals: Component<{
 	const [mediaUploadParentFolderId] = createSignal<number | undefined>(
 		undefined,
 	);
-
-	// ----------------------------------
-	// Functions
-	const handleMediaUploadSuccess = async (mediaId: number) => {
-		try {
-			const response = await request<ResponseBody<MediaResponse>>({
-				url: `/api/v1/media/${mediaId}`,
-				config: {
-					method: "GET",
-				},
-			});
-			mediaUploadStore.get.onSuccessCallback(response.data);
-		} catch {
-			// If we can't fetch the media, close the panel silently
-			// The media was still created successfully
-		}
-	};
 
 	// ----------------------------------
 	// Memos
@@ -79,7 +61,7 @@ export const Modals: Component<{
 					parentFolderId: mediaUploadParentFolderId,
 				}}
 				callbacks={{
-					onSuccess: handleMediaUploadSuccess,
+					onSuccess: (media) => mediaUploadStore.get.onSuccessCallback(media),
 				}}
 			/>
 			<BrickImagePreview />

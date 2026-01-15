@@ -99,7 +99,7 @@ export const useCreateMedia = () => {
 	const createMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
-	): Promise<number | null> => {
+	): Promise<MediaResponse | null> => {
 		let fileKey = getKey();
 
 		if (file) {
@@ -123,7 +123,7 @@ export const useCreateMedia = () => {
 			isLight: imageMeta?.isLight,
 		});
 
-		return result.data.id;
+		return result.data;
 	};
 
 	// -------------------------
