@@ -9,7 +9,7 @@ import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
 import { type Accessor, type Component, Match, Switch } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
-import documentSelectStore from "@/store/forms/documentSelectStore";
+import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 import helpers from "@/utils/brick-helpers";
 
@@ -37,17 +37,18 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
 	const openDocuSelectModal = () => {
-		documentSelectStore.set({
-			onSelectCallback: (doc: DocumentResponse) => {
+		pageBuilderModalsStore.open("documentSelect", {
+			data: {
+				collectionKey: props.collection,
+				selected: props.value,
+			},
+			onCallback: (doc: DocumentResponse) => {
 				props.onChange(doc.id, {
 					id: doc.id,
 					collectionKey: doc.collectionKey,
 					fields: helpers.objectifyFields(doc.fields || []),
 				});
 			},
-			open: true,
-			collectionKey: props.collection,
-			selected: props.value,
 		});
 	};
 

@@ -8,7 +8,7 @@ import {
 import { type Component, createMemo, Show } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
-import linkFieldStore from "@/store/forms/linkFieldStore";
+import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 
 interface LinkSelectProps {
@@ -33,12 +33,13 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
 	const openLinkModal = () => {
-		linkFieldStore.set({
-			onSelectCallback: (link) => {
+		pageBuilderModalsStore.open("linkSelect", {
+			data: {
+				selectedLink: props.value ?? null,
+			},
+			onCallback: (link) => {
 				props.onChange(link);
 			},
-			open: true,
-			selectedLink: props.value as LinkResValue,
 		});
 	};
 

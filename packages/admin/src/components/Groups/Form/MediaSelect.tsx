@@ -15,8 +15,7 @@ import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import mediaSelectStore from "@/store/forms/mediaSelectStore";
-import mediaUploadStore from "@/store/forms/mediaUploadStore";
+import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -80,24 +79,26 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		public: media.public,
 	});
 	const openMediaSelectModal = () => {
-		mediaSelectStore.set({
-			onSelectCallback: (media: MediaResponse) => {
+		pageBuilderModalsStore.open("mediaSelect", {
+			data: {
+				extensions: parseExtensions(props.extensions),
+				type: props.type,
+				selected: props.value,
+			},
+			onCallback: (media: MediaResponse) => {
 				props.onChange(media.id, mediaResponseToRef(media));
 			},
-			open: true,
-			extensions: parseExtensions(props.extensions),
-			type: props.type,
-			selected: props.value,
 		});
 	};
 	const openMediaUploadPanel = () => {
-		mediaUploadStore.set({
-			onSuccessCallback: (media: MediaResponse) => {
+		pageBuilderModalsStore.open("mediaUpload", {
+			data: {
+				extensions: parseExtensions(props.extensions),
+				type: props.type,
+			},
+			onCallback: (media: MediaResponse) => {
 				props.onChange(media.id, mediaResponseToRef(media));
 			},
-			open: true,
-			extensions: parseExtensions(props.extensions),
-			type: props.type,
 		});
 	};
 

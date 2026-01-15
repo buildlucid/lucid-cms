@@ -1,3 +1,4 @@
+import type { MediaResponse } from "@lucidcms/core/types";
 import classNames from "classnames";
 import { type Component, createMemo, createSignal, For } from "solid-js";
 import MediaBasicCard, {
@@ -15,19 +16,29 @@ import useRowTarget from "@/hooks/useRowTarget";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import mediaSelectStore from "@/store/forms/mediaSelectStore";
 import T from "@/translations";
 
-const MediaSelectPanel: Component = () => {
-	const open = createMemo(() => mediaSelectStore.get.open);
+interface MediaSelectPanelProps {
+	state: {
+		open: boolean;
+		setOpen: (state: boolean) => void;
+		extensions?: string;
+		type?: string;
+		selected?: number;
+	};
+	callbacks: {
+		onSelect: (media: MediaResponse) => void;
+	};
+}
 
+const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 	// ---------------------------------
 	// Render
 	return (
 		<BottomPanel
 			state={{
-				open: open(),
-				setOpen: () => mediaSelectStore.set("open", false),
+				open: props.state.open,
+				setOpen: props.state.setOpen,
 			}}
 			fetchState={{
 				isLoading: false,
@@ -43,12 +54,29 @@ const MediaSelectPanel: Component = () => {
 				description: T()("select_media_description"),
 			}}
 		>
-			{() => <SelectMediaContent />}
+			{() => (
+				<SelectMediaContent
+					extensions={props.state.extensions}
+					type={props.state.type}
+					selected={props.state.selected}
+					onSelect={(media) => {
+						props.callbacks.onSelect(media);
+						props.state.setOpen(false);
+					}}
+				/>
+			)}
 		</BottomPanel>
 	);
 };
 
-const SelectMediaContent: Component = () => {
+interface SelectMediaContentProps {
+	extensions?: string;
+	type?: string;
+	selected?: number;
+	onSelect: (media: MediaResponse) => void;
+}
+
+const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	// ------------------------------
 	// Hooks
 	const rowTarget = useRowTarget({
@@ -65,11 +93,11 @@ const SelectMediaContent: Component = () => {
 					type: "text",
 				},
 				extension: {
-					value: mediaSelectStore.get.extensions || "",
+					value: props.extensions || "",
 					type: "text",
 				},
 				type: {
-					value: mediaSelectStore.get.type || "",
+					value: props.type || "",
 					type: "array",
 				},
 				mimeType: {
@@ -286,13 +314,10 @@ const SelectMediaContent: Component = () => {
 							<MediaBasicCard
 								media={item}
 								contentLocale={contentLocale()}
-								current={item.id === mediaSelectStore.get.selected}
+								current={item.id === props.selected}
 								rowTarget={rowTarget}
 								showingDeleted={isShowingDeleted}
-								onClick={() => {
-									mediaSelectStore.get.onSelectCallback(item);
-									mediaSelectStore.set("open", false);
-								}}
+								onClick={() => props.onSelect(item)}
 							/>
 						)}
 					</For>

@@ -7,14 +7,14 @@ import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment";
 import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
 import NavigationGuard from "@/components/Modals/NavigationGuard";
-import DocumentSelectModal from "@/components/Panels/Documents/DocumentSelect";
+import DocumentSelectPanel from "@/components/Panels/Documents/DocumentSelect";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
-import MediaSelectModal from "@/components/Panels/Media/MediaSelect";
+import MediaSelectPanel from "@/components/Panels/Media/MediaSelect";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/document/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/document/useNavigationGuard";
-import mediaUploadStore from "@/store/forms/mediaUploadStore";
+import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
@@ -45,23 +45,72 @@ export const Modals: Component<{
 	});
 
 	// ----------------------------------
+	// Modal State Helpers
+	const mediaSelectModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("mediaSelect"),
+	);
+	const mediaUploadModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("mediaUpload"),
+	);
+	const documentSelectModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("documentSelect"),
+	);
+	const linkSelectModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("linkSelect"),
+	);
+
+	// ----------------------------------
 	// Render
 	return (
 		<>
 			<Show when={props.hooks.navigationGuard}>
 				{(navigationGuard) => <NavigationGuard state={navigationGuard()} />}
 			</Show>
-			<MediaSelectModal />
-			<DocumentSelectModal />
-			<LinkSelectModal />
+			<MediaSelectPanel
+				state={{
+					open: mediaSelectModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close(),
+					extensions: mediaSelectModal()?.data.extensions,
+					type: mediaSelectModal()?.data.type,
+					selected: mediaSelectModal()?.data.selected,
+				}}
+				callbacks={{
+					onSelect: (media) =>
+						pageBuilderModalsStore.triggerAndClose("mediaSelect", media),
+				}}
+			/>
+			<DocumentSelectPanel
+				state={{
+					open: documentSelectModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close(),
+					collectionKey: documentSelectModal()?.data.collectionKey,
+					selected: documentSelectModal()?.data.selected,
+				}}
+				callbacks={{
+					onSelect: (document) =>
+						pageBuilderModalsStore.triggerAndClose("documentSelect", document),
+				}}
+			/>
+			<LinkSelectModal
+				state={{
+					open: linkSelectModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close(),
+					selectedLink: linkSelectModal()?.data.selectedLink ?? null,
+				}}
+				callbacks={{
+					onSelect: (link) =>
+						pageBuilderModalsStore.triggerAndClose("linkSelect", link),
+				}}
+			/>
 			<CreateUpdateMediaPanel
 				state={{
-					open: mediaUploadStore.get.open,
-					setOpen: (state) => mediaUploadStore.set("open", state),
+					open: mediaUploadModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close(),
 					parentFolderId: mediaUploadParentFolderId,
 				}}
 				callbacks={{
-					onSuccess: (media) => mediaUploadStore.get.onSuccessCallback(media),
+					onSuccess: (media) =>
+						pageBuilderModalsStore.triggerAndClose("mediaUpload", media),
 				}}
 			/>
 			<BrickImagePreview />

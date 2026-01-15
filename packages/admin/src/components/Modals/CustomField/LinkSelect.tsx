@@ -1,16 +1,22 @@
-import {
-	type Component,
-	createEffect,
-	createMemo,
-	createSignal,
-} from "solid-js";
+import type { LinkResValue } from "@lucidcms/core/types";
+import { type Component, createEffect, createSignal } from "solid-js";
 import { Input, Switch } from "@/components/Groups/Form";
 import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
-import linkFieldStore from "@/store/forms/linkFieldStore";
 import T from "@/translations";
 
-const LinkSelect: Component = () => {
+interface LinkSelectModalProps {
+	state: {
+		open: boolean;
+		setOpen: (state: boolean) => void;
+		selectedLink: LinkResValue;
+	};
+	callbacks: {
+		onSelect: (link: LinkResValue) => void;
+	};
+}
+
+const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 	// ------------------------------
 	// State
 	const [getLabel, setLabel] = createSignal<string>("");
@@ -18,19 +24,13 @@ const LinkSelect: Component = () => {
 	const [getOpenInNewTab, setOpenInNewTab] = createSignal<boolean>(false);
 
 	// ----------------------------------
-	// Memos
-	const open = createMemo(() => linkFieldStore.get.open);
-	const selectedLink = createMemo(() => linkFieldStore.get.selectedLink);
-
-	// ----------------------------------
 	// Functions
 	const closeModal = () => {
-		linkFieldStore.set("open", false);
-		linkFieldStore.set("selectedLink", null);
+		props.state.setOpen(false);
 	};
 
 	const updateLink = () => {
-		linkFieldStore.get.onSelectCallback({
+		props.callbacks.onSelect({
 			url: getUrl(),
 			target: getOpenInNewTab() ? "_blank" : "_self",
 			label: getLabel(),
@@ -41,9 +41,9 @@ const LinkSelect: Component = () => {
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
-		setLabel(selectedLink()?.label || "");
-		setOpenInNewTab(selectedLink()?.target === "_blank");
-		setUrl(selectedLink()?.url || "");
+		setLabel(props.state.selectedLink?.label || "");
+		setOpenInNewTab(props.state.selectedLink?.target === "_blank");
+		setUrl(props.state.selectedLink?.url || "");
 	});
 
 	// ------------------------------
@@ -51,7 +51,7 @@ const LinkSelect: Component = () => {
 	return (
 		<Modal
 			state={{
-				open: open(),
+				open: props.state.open,
 				setOpen: closeModal,
 			}}
 		>
@@ -117,4 +117,4 @@ const LinkSelect: Component = () => {
 	);
 };
 
-export default LinkSelect;
+export default LinkSelectModal;

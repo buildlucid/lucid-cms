@@ -1,4 +1,7 @@
-import type { CollectionResponse } from "@types";
+import type {
+	CollectionResponse,
+	DocumentResponse,
+} from "@lucidcms/core/types";
 import { FaSolidCalendar } from "solid-icons/fa";
 import { type Component, createEffect, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
@@ -11,7 +14,6 @@ import type { FilterSchema } from "@/hooks/useSearchParamsLocation";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import documentSelectStore from "@/store/forms/documentSelectStore";
 import T from "@/translations";
 import {
 	collectionFieldFilters,
@@ -21,16 +23,26 @@ import {
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 
-const DocumentSelectPanel: Component = () => {
-	const open = createMemo(() => documentSelectStore.get.open);
+interface DocumentSelectPanelProps {
+	state: {
+		open: boolean;
+		setOpen: (state: boolean) => void;
+		collectionKey: string | undefined;
+		selected?: number;
+	};
+	callbacks: {
+		onSelect: (document: DocumentResponse) => void;
+	};
+}
 
+const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 	// ---------------------------------
 	// Render
 	return (
 		<BottomPanel
 			state={{
-				open: open(),
-				setOpen: () => documentSelectStore.set("open", false),
+				open: props.state.open,
+				setOpen: props.state.setOpen,
 			}}
 			fetchState={{
 				isLoading: false,
@@ -46,12 +58,29 @@ const DocumentSelectPanel: Component = () => {
 				description: T()("select_document_description"),
 			}}
 		>
-			{() => <DocumentSelectContent />}
+			{() => (
+				<DocumentSelectContent
+					collectionKey={props.state.collectionKey}
+					selected={props.state.selected}
+					onSelect={(document) => {
+						props.callbacks.onSelect(document);
+						props.state.setOpen(false);
+					}}
+				/>
+			)}
 		</BottomPanel>
 	);
 };
 
-const DocumentSelectContent: Component = () => {
+interface DocumentSelectContentProps {
+	collectionKey: string | undefined;
+	selected?: number;
+	onSelect: (document: DocumentResponse) => void;
+}
+
+const DocumentSelectContent: Component<DocumentSelectContentProps> = (
+	props,
+) => {
 	// ------------------------------
 	// Hooks
 	const searchParams = useSearchParamsState({
@@ -64,7 +93,7 @@ const DocumentSelectContent: Component = () => {
 
 	// ----------------------------------
 	// Memos
-	const collectionKey = createMemo(() => documentSelectStore.get.collectionKey);
+	const collectionKey = createMemo(() => props.collectionKey);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
@@ -279,13 +308,10 @@ const DocumentSelectContent: Component = () => {
 									}}
 									callbacks={{
 										setSelected: setSelected,
-										onClick: () => {
-											documentSelectStore.get.onSelectCallback(doc());
-											documentSelectStore.set("open", false);
-										},
+										onClick: () => props.onSelect(doc()),
 									}}
 									theme="secondary"
-									current={doc().id === documentSelectStore.get.selected}
+									current={doc().id === props.selected}
 								/>
 							)}
 						</Index>
