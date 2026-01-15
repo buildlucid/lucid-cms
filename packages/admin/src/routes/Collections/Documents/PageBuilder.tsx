@@ -111,20 +111,12 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	createEffect(
 		on(
-			() => docState.document(),
+			() => docState.document() || docState.collectionQuery.isFetchedAfterMount,
 			() => {
 				setDocumentState();
 			},
 		),
 	);
-	// createEffect(
-	// 	on(
-	// 		() => docState.collectionQuery.isFetchedAfterMount,
-	// 		() => {
-	// 			setDocumentState();
-	// 		},
-	// 	),
-	// );
 
 	onCleanup(() => {
 		brickStore.get.reset();

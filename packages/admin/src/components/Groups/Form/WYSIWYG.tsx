@@ -27,6 +27,7 @@ interface WYSIWYGProps {
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	fieldColumnIsMissing?: boolean;
+	hideOptionalText?: boolean;
 }
 
 export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
@@ -97,6 +98,7 @@ export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
+				hideOptionalText={props.hideOptionalText}
 			/>
 			<div
 				class={classnames("bg-input-base rounded-md", {

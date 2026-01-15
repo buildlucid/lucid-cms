@@ -19,6 +19,7 @@ export const Color: Component<{
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	hideOptionalText?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// State
@@ -52,6 +53,7 @@ export const Color: Component<{
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
+					hideOptionalText={props.hideOptionalText}
 				/>
 				<div class="relative">
 					{/** biome-ignore lint/a11y/useSemanticElements: explanation */}

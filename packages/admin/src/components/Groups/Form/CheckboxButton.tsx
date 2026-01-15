@@ -34,7 +34,7 @@ export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
 			<button
 				type="button"
 				class={classnames(
-					"flex max-w-max items-center gap-2 h-9 px-2 text-sm rounded-md relative disabled:cursor-not-allowed disabled:opacity-50 focus:outline-hidden ring-1 ring-border focus-visible:ring-1 ring-inset focus:ring-primary-base group duration-200 transition-colors",
+					"flex max-w-max items-center gap-2 h-9 px-2 text-sm rounded-md relative disabled:cursor-not-allowed disabled:opacity-50 focus:outline-hidden ring-1 ring-border focus-visible:ring-1 ring-inset focus-visible:ring-primary-base group duration-200 transition-colors",
 					{
 						"bg-input-base text-title hover:bg-secondary-hover hover:text-secondary-contrast":
 							!props.value,

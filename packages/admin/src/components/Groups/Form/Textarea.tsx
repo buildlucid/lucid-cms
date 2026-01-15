@@ -24,6 +24,7 @@ interface TextareaProps {
 	noMargin?: boolean;
 	rows?: number;
 	fieldColumnIsMissing?: boolean;
+	hideOptionalText?: boolean;
 }
 
 export const Textarea: Component<TextareaProps> = (props) => {
@@ -46,6 +47,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
+				hideOptionalText={props.hideOptionalText}
 			/>
 			<textarea
 				class={

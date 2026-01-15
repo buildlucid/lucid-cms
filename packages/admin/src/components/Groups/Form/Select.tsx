@@ -48,6 +48,7 @@ export interface SelectProps {
 	small?: boolean;
 	shortcut?: string;
 	fieldColumnIsMissing?: boolean;
+	hideOptionalText?: boolean;
 }
 
 export const Select: Component<SelectProps> = (props) => {
@@ -105,6 +106,7 @@ export const Select: Component<SelectProps> = (props) => {
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
+					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
 					class={classNames(

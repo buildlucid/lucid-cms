@@ -136,7 +136,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 								collection.data?.data.config.useTranslations ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
-									collectionKey: collectionKey(),
+									collectionKey: collectionKey() || "",
 								}),
 								permission: userStore.get.hasPermission(["create_content"])
 									.some,

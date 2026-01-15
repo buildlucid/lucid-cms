@@ -75,6 +75,7 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
 				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				hideOptionalText
 			/>
 		</div>
 	);

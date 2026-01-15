@@ -81,6 +81,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
+			hideOptionalText
 		/>
 	);
 };

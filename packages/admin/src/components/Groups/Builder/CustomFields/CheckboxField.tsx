@@ -79,6 +79,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+			hideOptionalText
 		/>
 	);
 };

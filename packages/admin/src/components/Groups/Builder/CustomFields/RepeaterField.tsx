@@ -1,8 +1,8 @@
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import classNames from "classnames";
+import { FaSolidCircle, FaSolidCirclePlus, FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
-import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -126,30 +126,49 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 											/>
 										)}
 									</For>
+									<button
+										type="button"
+										class={classNames(
+											"w-full bg-input-base hover:border-transparent hover:bg-secondary-hover transition-colors duration-200 px-3 py-3 flex items-center justify-center text-sm text-body hover:text-secondary-contrast ring-inset",
+											{
+												"cursor-not-allowed opacity-50 hover:bg-card-base":
+													isDisabled(),
+											},
+										)}
+										onClick={addGroup}
+										disabled={isDisabled()}
+									>
+										<FaSolidPlus size={14} />
+										<span class="sr-only">{T()("add_entry")}</span>
+									</button>
 								</div>
 							)}
 						</DragDrop>
 					</Match>
 					<Match when={groups().length === 0}>
-						<div class="w-full dotted-background border-border border p-4 md:p-6 min-h-32 rounded-md flex items-center flex-col justify-center text-center">
-							<span class="text-sm text-unfocused capitalize">
+						<button
+							type="button"
+							class={classNames(
+								"w-full dotted-background border border-dashed border-border p-4 md:p-6 min-h-32 rounded-md flex items-center justify-center text-center transition-colors duration-200",
+								{
+									group: !isDisabled(),
+									"cursor-not-allowed opacity-50": isDisabled(),
+									"hover:bg-card-hover/50": !isDisabled(),
+								},
+							)}
+							onClick={addGroup}
+							disabled={isDisabled()}
+						>
+							<span class="text-sm text-unfocused group-hover:hidden">
 								{T()("no_entries")}
 							</span>
-						</div>
+							<span class="hidden text-sm text-body group-hover:inline-flex items-center gap-2">
+								<FaSolidPlus size={14} />
+								<span class="sr-only">{T()("add_entry")}</span>
+							</span>
+						</button>
 					</Match>
 				</Switch>
-				{/* Repeater Footer */}
-				<div class="w-full flex justify-between items-center mt-3">
-					<Button
-						type="button"
-						theme="secondary"
-						size="small"
-						onClick={addGroup}
-						disabled={isDisabled()}
-					>
-						{T()("add_entry")}
-					</Button>
-				</div>
 			</div>
 		</div>
 	);

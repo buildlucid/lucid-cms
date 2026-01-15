@@ -2,7 +2,6 @@ import type { ErrorResult, FieldError, LinkResValue } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidArrowUpRightFromSquare,
-	FaSolidLink,
 	FaSolidPen,
 	FaSolidXmark,
 } from "solid-icons/fa";
@@ -27,6 +26,7 @@ interface LinkSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	hideOptionalText?: boolean;
 }
 
 export const LinkSelect: Component<LinkSelectProps> = (props) => {
@@ -53,9 +53,6 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 	const linkUrl = createMemo(() => {
 		return props.value?.url;
 	});
-	const opensInNewTab = createMemo(() => {
-		return props.value?.target === "_blank";
-	});
 
 	// -------------------------------
 	// Render
@@ -73,28 +70,33 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
+				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="mt-2 w-full">
 				<Show when={hasLink()}>
 					<div class="group w-full flex items-center justify-between gap-3 bg-input-base border border-border rounded-md px-3 py-2 group">
-						<Show when={opensInNewTab()} fallback={<FaSolidLink size={14} />}>
-							<FaSolidArrowUpRightFromSquare size={14} />
-						</Show>
-						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+						<div class="flex flex-col gap-0.5">
 							<Show when={linkLabel()}>
 								<span class="text-sm font-medium text-title truncate leading-tight">
 									{linkLabel()}
 								</span>
 							</Show>
 							<Show when={linkUrl()}>
-								<span
-									class={classNames("text-body truncate leading-tight", {
-										"font-medium text-title text-sm": !linkLabel(),
-										"text-xs": linkLabel(),
-									})}
+								<a
+									href={linkUrl() ?? undefined}
+									target="_blank"
+									rel="noreferrer"
+									class={classNames(
+										"text-body inline-flex items-center gap-2 min-w-0",
+										{
+											"font-medium text-title text-sm": !linkLabel(),
+											"text-xs": linkLabel(),
+										},
+									)}
 								>
-									{linkUrl()}
-								</span>
+									<span class="truncate">{linkUrl() ?? ""}</span>
+									<FaSolidArrowUpRightFromSquare />
+								</a>
 							</Show>
 						</div>
 
@@ -126,7 +128,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				<Show when={!hasLink()}>
 					<Button
 						type="button"
-						theme="secondary"
+						theme="border-outline"
 						size="small"
 						onClick={openLinkModal}
 						disabled={props.disabled}

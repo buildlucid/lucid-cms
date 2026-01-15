@@ -30,6 +30,7 @@ interface DocumentSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	hideOptionalText?: boolean;
 }
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
@@ -66,13 +67,14 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
+				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="mt-2.5 w-full">
 				<Switch>
 					<Match when={typeof props.value !== "number"}>
 						<Button
 							type="button"
-							theme="secondary"
+							theme="border-outline"
 							size="small"
 							onClick={openDocuSelectModal}
 							disabled={props.disabled}
@@ -102,7 +104,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 						<div class="w-full flex items-center gap-2.5">
 							<Button
 								type="button"
-								theme="secondary"
+								theme="border-outline"
 								size="small"
 								onClick={openDocuSelectModal}
 								disabled={props.disabled}

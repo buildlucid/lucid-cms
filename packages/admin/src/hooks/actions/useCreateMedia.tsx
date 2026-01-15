@@ -99,17 +99,17 @@ export const useCreateMedia = () => {
 	const createMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
-	): Promise<boolean> => {
+	): Promise<number | null> => {
 		let fileKey = getKey();
 
 		if (file) {
 			await getMediaPresignedUrl(file.name, file.type);
 			const uploadFileRes = await uploadFile(file);
-			if (!uploadFileRes) return false;
+			if (!uploadFileRes) return null;
 			fileKey = uploadFileRes;
 		}
 
-		await createSingle.action.mutateAsync({
+		const result = await createSingle.action.mutateAsync({
 			key: fileKey,
 			fileName: file?.name,
 			title: getTitle(),
@@ -123,7 +123,7 @@ export const useCreateMedia = () => {
 			isLight: imageMeta?.isLight,
 		});
 
-		return true;
+		return result.data.id;
 	};
 
 	// -------------------------

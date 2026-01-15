@@ -570,7 +570,12 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: undefined,
+		response: z.object({
+			id: z.number().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
 	} satisfies ControllerSchema,
 	client: {
 		processMedia: {

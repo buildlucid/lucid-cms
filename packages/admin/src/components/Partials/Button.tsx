@@ -38,7 +38,7 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "primary",
 				"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base":
 					props.theme === "secondary",
-				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-title hover:text-secondary-contrast ring-primary-base":
+				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-body hover:text-secondary-contrast ring-primary-base":
 					props.theme === "border-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					props.theme === "danger",

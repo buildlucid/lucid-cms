@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
-import type { CollectionResponse } from "@types";
-import { type Component, createMemo, Show } from "solid-js";
+import type { CollectionResponse, MediaResponse, ResponseBody } from "@types";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import BrickImagePreview from "@/components/Modals/Bricks/ImagePreview";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
@@ -8,12 +8,15 @@ import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment
 import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
 import NavigationGuard from "@/components/Modals/NavigationGuard";
 import DocumentSelectModal from "@/components/Panels/Documents/DocumentSelect";
+import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import MediaSelectModal from "@/components/Panels/Media/MediaSelect";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/document/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/document/useNavigationGuard";
+import mediaUploadStore from "@/store/forms/mediaUploadStore";
 import helpers from "@/utils/helpers";
+import request from "@/utils/request";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const Modals: Component<{
@@ -27,6 +30,26 @@ export const Modals: Component<{
 	// ----------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
+	const [mediaUploadParentFolderId] = createSignal<number | undefined>(
+		undefined,
+	);
+
+	// ----------------------------------
+	// Functions
+	const handleMediaUploadSuccess = async (mediaId: number) => {
+		try {
+			const response = await request<ResponseBody<MediaResponse>>({
+				url: `/api/v1/media/${mediaId}`,
+				config: {
+					method: "GET",
+				},
+			});
+			mediaUploadStore.get.onSuccessCallback(response.data);
+		} catch {
+			// If we can't fetch the media, close the panel silently
+			// The media was still created successfully
+		}
+	};
 
 	// ----------------------------------
 	// Memos
@@ -49,6 +72,16 @@ export const Modals: Component<{
 			<MediaSelectModal />
 			<DocumentSelectModal />
 			<LinkSelectModal />
+			<CreateUpdateMediaPanel
+				state={{
+					open: mediaUploadStore.get.open,
+					setOpen: (state) => mediaUploadStore.set("open", state),
+					parentFolderId: mediaUploadParentFolderId,
+				}}
+				callbacks={{
+					onSuccess: handleMediaUploadSuccess,
+				}}
+			/>
 			<BrickImagePreview />
 			<DeleteDocument
 				id={props.hooks.state.document()?.id}

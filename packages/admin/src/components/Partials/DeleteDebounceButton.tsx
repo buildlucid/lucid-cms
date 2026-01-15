@@ -40,7 +40,8 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 			onMouseDown={(e) => {
 				e.stopPropagation();
 			}}
-			onClick={() => {
+			onClick={(e) => {
+				e.stopPropagation();
 				if (getConfirmRemove() === 1) {
 					props.callback();
 				}

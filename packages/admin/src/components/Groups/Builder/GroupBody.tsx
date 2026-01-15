@@ -139,9 +139,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
 			<div
 				class={classNames(
-					"w-full bg-input-base focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
+					"w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
 					{
-						"bg-input-hover": getGroupOpen(),
 						"ring-1 ring-inset ring-primary-base":
 							props.state.dragDrop.getDraggingTarget()?.ref === ref(),
 					},

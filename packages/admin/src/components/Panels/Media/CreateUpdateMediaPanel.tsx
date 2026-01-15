@@ -26,6 +26,9 @@ interface CreateUpdateMediaPanelProps {
 		setOpen: (_state: boolean) => void;
 		parentFolderId: Accessor<number | string | undefined>;
 	};
+	callbacks?: {
+		onSuccess?: (_mediaId: number) => void;
+	};
 }
 
 const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
@@ -192,17 +195,26 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const onSubmit = async () => {
 		const imageMeta = await MediaFile.getImageMeta();
 
-		const mutation =
-			panelMode() === "create"
-				? createMedia.createMedia
-				: updateMedia?.updateMedia;
-		if (!mutation) return;
+		if (panelMode() === "create") {
+			const mediaId = await createMedia.createMedia(
+				MediaFile.getFile(),
+				imageMeta,
+			);
 
-		const success = await mutation(MediaFile.getFile(), imageMeta);
+			if (mediaId === null) return;
 
-		if (!success) return;
+			props.callbacks?.onSuccess?.(mediaId);
+			props.state.setOpen(false);
+		} else {
+			const success = await updateMedia?.updateMedia(
+				MediaFile.getFile(),
+				imageMeta,
+			);
 
-		props.state.setOpen(false);
+			if (!success) return;
+
+			props.state.setOpen(false);
+		}
 	};
 
 	// ---------------------------------

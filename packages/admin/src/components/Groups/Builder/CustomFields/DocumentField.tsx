@@ -101,6 +101,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			disabled={isDisabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+			hideOptionalText
 		/>
 	);
 };

@@ -1,5 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { mediaServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
@@ -15,6 +16,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import formatAPIResponse from "../../utils/build-response.js";
 
 const factory = createFactory();
 
@@ -24,7 +26,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["media"],
 		summary: "Create Media",
 		responses: honoOpenAPIResponse({
-			noProperties: true,
+			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: honoOpenAPIParamaters({
 			headers: {
@@ -72,8 +74,14 @@ const createSingleController = factory.createHandlers(
 		);
 		if (mediaIdRes.error) throw new LucidAPIError(mediaIdRes.error);
 
-		c.status(204);
-		return c.body(null);
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: {
+					id: mediaIdRes.data,
+				},
+			}),
+		);
 	},
 );
 

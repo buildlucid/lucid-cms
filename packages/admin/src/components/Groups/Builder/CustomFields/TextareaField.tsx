@@ -76,6 +76,7 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 			disabled={isDisabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
+			hideOptionalText
 		/>
 	);
 };
