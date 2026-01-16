@@ -98,7 +98,10 @@ export function useDocumentMutations(props: {
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
 			);
-
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
+			);
 			restoreFocus(brickStore.get.focusState);
 			brickStore.set("focusState", null);
 		},
@@ -114,6 +117,10 @@ export function useDocumentMutations(props: {
 			brickStore.set(
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
+			);
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
 			);
 		},
 		getCollectionName: props.collectionSingularName,
@@ -135,7 +142,7 @@ export function useDocumentMutations(props: {
 	const restoreRevision = api.documents.useRestoreRevision({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
-
+			brickStore.set("brickErrors", []);
 			navigate(
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
@@ -146,6 +153,7 @@ export function useDocumentMutations(props: {
 		},
 		onError: () => {
 			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
 		},
 		getCollectionName: props.collectionSingularName,
 	});

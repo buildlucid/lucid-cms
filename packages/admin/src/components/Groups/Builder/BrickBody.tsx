@@ -121,6 +121,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 									tab={tab()}
 									setActiveTab={setActiveTab}
 									getActiveTab={getActiveTab}
+									fieldErrors={props.state.fieldErrors}
 								/>
 							)}
 						</Index>

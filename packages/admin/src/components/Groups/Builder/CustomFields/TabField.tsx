@@ -1,13 +1,13 @@
-import type { CFConfig, FieldTypes, TabFieldConfig } from "@types";
+import type { CFConfig, FieldError, FieldTypes, TabFieldConfig } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo } from "solid-js";
-import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
 
 export const TabField: Component<{
 	tab: TabFieldConfig;
 	setActiveTab: (key: string) => void;
 	getActiveTab: () => string | undefined;
+	fieldErrors: FieldError[];
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
@@ -29,9 +29,9 @@ export const TabField: Component<{
 		return fieldKeys;
 	});
 	const hasChildrenError = createMemo(() => {
-		return childrenKeys().some((key) =>
-			brickStore.get.fieldsErrors.find((f) => f.key === key),
-		);
+		return childrenKeys().some((key) => {
+			return props.fieldErrors.find((f) => f.key === key);
+		});
 	});
 
 	// ----------------------------------------
