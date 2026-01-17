@@ -64,14 +64,18 @@ export type InitiateAuthResponse = {
 	redirectUrl: string;
 };
 
+export type SettingsInclude = "email" | "media" | "license" | "system";
+
 export interface SettingsResponse {
-	email: {
+	email?: {
+		simulated: boolean;
+		templates: string[];
 		from: {
 			email: string;
 			name: string;
-		};
+		} | null;
 	};
-	media: {
+	media?: {
 		enabled: boolean;
 		storage: {
 			total: number;
@@ -84,8 +88,17 @@ export interface SettingsResponse {
 			total: number | null;
 		};
 	};
-	license: {
+	license?: {
 		key: string | null;
+	};
+	system?: {
+		runtime: string;
+		database: string;
+		kv: string;
+		queue: string;
+		media: string | null;
+		email: string;
+		imageProcessor: string | null;
 	};
 }
 

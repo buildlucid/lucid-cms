@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, SettingsResponse } from "@types";
+import type { ResponseBody, SettingsInclude, SettingsResponse } from "@types";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
-// biome-ignore lint/suspicious/noEmptyInterface: explanation
-interface QueryParams {}
+interface QueryParams {
+	include?: Partial<Record<SettingsInclude, boolean>>;
+}
 
 const useGetSettings = (params?: QueryHook<QueryParams>) => {
 	const queryParams = createMemo(() =>
@@ -20,6 +21,7 @@ const useGetSettings = (params?: QueryHook<QueryParams>) => {
 		queryFn: () =>
 			request<ResponseBody<SettingsResponse>>({
 				url: "/api/v1/settings",
+				query: queryParams(),
 				config: {
 					method: "GET",
 				},

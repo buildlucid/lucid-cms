@@ -5,9 +5,14 @@ import { controllerSchemas } from "../../../../schemas/settings.js";
 import { settingServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
+import {
+	honoOpenAPIParamaters,
+	honoOpenAPIResponse,
+} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
+import validate from "../../middleware/validate.js";
+import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
 
 const factory = createFactory();
@@ -20,9 +25,18 @@ const getSettingsController = factory.createHandlers(
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
+		parameters: honoOpenAPIParamaters({
+			query: controllerSchemas.getSettings.query.string,
+		}),
 	}),
 	authenticate,
+	validate("query", controllerSchemas.getSettings.query.string),
 	async (c) => {
+		const formattedQuery = await buildFormattedQuery(
+			c,
+			controllerSchemas.getSettings.query.formatted,
+		);
+
 		const settings = await serviceWrapper(settingServices.getSettings, {
 			transaction: false,
 			defaultError: {
@@ -30,13 +44,19 @@ const getSettingsController = factory.createHandlers(
 				name: T("route_settings_fetch_error_name"),
 				message: T("route_settings_fetch_error_message"),
 			},
-		})({
-			db: c.get("config").db.client,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-		});
+		})(
+			{
+				db: c.get("config").db.client,
+				config: c.get("config"),
+				queue: c.get("queue"),
+				env: c.get("env"),
+				kv: c.get("kv"),
+			},
+			{
+				includes: formattedQuery.include,
+				runtime: c.get("runtimeContext").runtime,
+			},
+		);
 		if (settings.error) throw new LucidAPIError(settings.error);
 
 		c.status(200);

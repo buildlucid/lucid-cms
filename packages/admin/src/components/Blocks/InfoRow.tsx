@@ -9,6 +9,8 @@ interface InfoRowProps {
 	actionAlignment?: "top" | "center";
 	left?: JSXElement;
 	children?: JSXElement;
+	reducedMargin?: boolean;
+	theme?: "default" | "danger";
 }
 
 const InfoRow: Component<InfoRowProps> = (props) => {
@@ -36,7 +38,14 @@ const InfoRowContent: Component<InfoRowProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="bg-card-base p-4 rounded-md border border-border mb-4 last:mb-0">
+		<div
+			class={classNames("p-4 rounded-md border last:mb-0", {
+				"mb-2": props.reducedMargin,
+				"mb-4": props.reducedMargin !== true,
+				"bg-card-base border-border": props.theme !== "danger",
+				"bg-error-base/10 border-error-base/20": props.theme === "danger",
+			})}
+		>
 			<Show when={props.title || props.description || props.actions}>
 				<div
 					class={classNames(
@@ -51,10 +60,10 @@ const InfoRowContent: Component<InfoRowProps> = (props) => {
 				>
 					<div>
 						<Show when={props.title}>
-							<h3 class="text-base mb-1">{props.title}</h3>
+							<h3 class="text-base">{props.title}</h3>
 						</Show>
 						<Show when={props.description}>
-							<p class="text-sm max-w-4xl">{props.description}</p>
+							<p class="text-sm max-w-4xl mt-1">{props.description}</p>
 						</Show>
 					</div>
 					<Show when={props.actions}>

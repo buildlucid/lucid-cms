@@ -10,7 +10,11 @@ export const Dashboard: Component = () => {
 	// ----------------------------------------
 	// Queries / Mutations
 	const settings = api.settings.useGetSettings({
-		queryParams: {},
+		queryParams: {
+			include: {
+				media: true,
+			},
+		},
 	});
 
 	// ----------------------------------------
@@ -56,7 +60,7 @@ export const Dashboard: Component = () => {
 					{
 						type: "warning",
 						message: T()("media_support_config_stategy_error"),
-						show: settings.data?.data.media.enabled === false,
+						show: settings.data?.data?.media?.enabled === false,
 					},
 				]}
 			/>

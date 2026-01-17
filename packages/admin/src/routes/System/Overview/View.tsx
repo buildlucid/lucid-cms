@@ -1,4 +1,4 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
 import { Standard } from "@/components/Groups/Headers";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
@@ -7,6 +7,7 @@ import DeleteAllShareLinksSystem from "@/components/Modals/Media/DeleteAllShareL
 import ClearCache from "@/components/Modals/System/ClearCache";
 import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
+import Pill from "@/components/Partials/Pill";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -26,20 +27,33 @@ const SystemOverviewRoute: Component = () => {
 	// ----------------------------------
 	// Queries
 	const settingsData = api.settings.useGetSettings({
-		queryParams: {},
+		queryParams: {
+			include: {
+				email: true,
+				media: true,
+				system: true,
+			},
+		},
 	});
 
 	// ----------------------------------------
 	// Memos
 	const percentUsed = createMemo(() => {
-		if (settingsData.data?.data?.media.storage.remaining === null) return 0;
-		if (settingsData.data?.data?.media.storage.used === 0) return 0;
-		const total = settingsData.data?.data?.media.storage.total || 0;
-		const remaining = settingsData.data?.data?.media.storage.remaining || 0;
+		if (settingsData.data?.data?.media?.storage.remaining === null) return 0;
+		if (settingsData.data?.data?.media?.storage.used === 0) return 0;
+		const total = settingsData.data?.data?.media?.storage.total || 0;
+		const remaining = settingsData.data?.data?.media?.storage.remaining || 0;
 
 		return Math.floor(((total - remaining) / total) * 100);
 	});
 	const contentLocales = createMemo(() => contentLocaleStore.get.locales);
+	const systemInfo = createMemo(() => settingsData.data?.data?.system);
+	const emailInfo = createMemo(() => settingsData.data?.data?.email);
+	const emailFromValue = createMemo(() => {
+		const from = emailInfo()?.from;
+		return from ? `${from.name} <${from.email}>` : "-";
+	});
+	const emailTemplates = createMemo(() => emailInfo()?.templates ?? []);
 	const canClearCache = createMemo(
 		() => userStore.get.hasPermission(["clear_kv"]).all,
 	);
@@ -76,120 +90,152 @@ const SystemOverviewRoute: Component = () => {
 					padding: "24",
 				}}
 			>
-				{/* Storage */}
 				<InfoRow.Root
-					title={T()("storage_breakdown")}
-					description={T()("storage_breakdown_setting_message")}
+					title={T()("media_info_title")}
+					description={T()("media_info_description")}
 				>
 					<InfoRow.Content
 						title={T()("storage_remaining_title", {
 							storage: helpers.bytesToSize(
-								settingsData.data?.data?.media.storage.remaining,
+								settingsData.data?.data?.media?.storage.remaining,
 							),
 						})}
+						reducedMargin={true}
 					>
 						<ProgressBar
 							progress={percentUsed()}
 							type="usage"
 							labels={{
 								start: helpers.bytesToSize(
-									settingsData.data?.data?.media.storage.used,
+									settingsData.data?.data?.media?.storage.used,
 								),
 								end: helpers.bytesToSize(
-									settingsData.data?.data?.media.storage.total,
+									settingsData.data?.data?.media?.storage.total,
 								),
 							}}
 						/>
 					</InfoRow.Content>
+					<InfoRow.Content
+						title={T()("processed_images")}
+						description={T()("processed_images_setting_message", {
+							limit: settingsData.data?.data?.media?.processed.imageLimit || 0,
+						})}
+						reducedMargin={true}
+					>
+						<DetailsList
+							type="text"
+							theme="contained"
+							items={[
+								{
+									label: T()("stored"),
+									value: settingsData.data?.data?.media?.processed.stored
+										? T()("yes")
+										: T()("no"),
+								},
+								{
+									label: T()("limit"),
+									value:
+										settingsData.data?.data?.media?.processed.imageLimit ?? 0,
+								},
+								{
+									label: T()("total"),
+									value: settingsData.data?.data?.media?.processed.total ?? 0,
+								},
+							]}
+						/>
+					</InfoRow.Content>
 				</InfoRow.Root>
 
-				{/* Processed Images */}
 				<InfoRow.Root
-					title={T()("processed_images")}
-					description={T()("processed_images_setting_message", {
-						limit: settingsData.data?.data?.media.processed.imageLimit || 0,
-					})}
+					title={T()("email_info_title")}
+					description={T()("email_info_description")}
 				>
 					<InfoRow.Content
-						title={T()("clear_all")}
-						description={T()("clear_all_processed_images_setting_message")}
-						actions={
-							<Button
-								size="medium"
-								type="button"
-								theme="danger-outline"
-								onClick={() => {
-									setOpenClearAllProcessedImages(true);
-								}}
-								permission={canClearAllProcessedImages()}
-							>
-								{T()("clear_all_processed_images_button", {
-									count: settingsData.data?.data?.media.processed.total || 0,
-								})}
-							</Button>
-						}
-						actionAlignment="center"
-					/>
+						title={T()("email_delivery_title")}
+						reducedMargin={true}
+					>
+						<DetailsList
+							type="text"
+							theme="contained"
+							items={[
+								{
+									label: T()("simulated"),
+									value:
+										emailInfo()?.simulated === true ? T()("yes") : T()("no"),
+								},
+								{
+									label: T()("from"),
+									value: emailFromValue(),
+								},
+							]}
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content
+						title={T()("available_templates")}
+						reducedMargin={true}
+					>
+						<Show
+							when={emailTemplates().length > 0}
+							fallback={
+								<p class="text-sm text-unfocused">{T()("no_templates")}</p>
+							}
+						>
+							<div class="flex flex-wrap gap-2">
+								<For each={emailTemplates()}>
+									{(template) => <Pill theme="outline">{template}</Pill>}
+								</For>
+							</div>
+						</Show>
+					</InfoRow.Content>
 				</InfoRow.Root>
-
-				{/* Share Links */}
 				<InfoRow.Root
-					title={T()("share_links")}
-					description={T()("share_links_setting_message")}
+					title={T()("system_info_title")}
+					description={T()("system_info_description")}
 				>
 					<InfoRow.Content
-						title={T()("delete_all_share_links_system")}
-						description={T()("delete_all_share_links_system_setting_message")}
-						actions={
-							<Button
-								size="medium"
-								type="button"
-								theme="danger-outline"
-								onClick={() => {
-									setOpenDeleteAllShareLinks(true);
-								}}
-								permission={canDeleteAllShareLinks()}
-							>
-								{T()("delete_all_share_links_system_button")}
-							</Button>
-						}
-						actionAlignment="center"
-					/>
-				</InfoRow.Root>
-
-				{/* Cache */}
-				<InfoRow.Root
-					title={T()("cache")}
-					description={T()("cache_setting_message")}
-				>
-					<InfoRow.Content
-						title={T()("clear_cache")}
-						description={T()("clear_cache_setting_message")}
-						actions={
-							<Button
-								size="medium"
-								type="button"
-								theme="danger-outline"
-								onClick={() => {
-									setOpenClearCache(true);
-								}}
-								permission={canClearCache()}
-							>
-								{T()("clear_cache_button")}
-							</Button>
-						}
-						actionAlignment="center"
-					/>
-				</InfoRow.Root>
-
-				{/* Locales */}
-				<InfoRow.Root
-					title={T()("locales")}
-					description={T()("locales_setting_message")}
-				>
+						title={T()("adapters_title")}
+						description={T()("adapters_description")}
+						reducedMargin={true}
+					>
+						<DetailsList
+							type="text"
+							theme="contained"
+							items={[
+								{
+									label: T()("runtime"),
+									value: systemInfo()?.runtime ?? "-",
+								},
+								{
+									label: T()("database"),
+									value: systemInfo()?.database ?? "-",
+								},
+								{
+									label: T()("kv"),
+									value: systemInfo()?.kv ?? "-",
+								},
+								{
+									label: T()("queue"),
+									value: systemInfo()?.queue ?? "-",
+								},
+								{
+									label: T()("media"),
+									value: systemInfo()?.media ?? "-",
+								},
+								{
+									label: T()("email"),
+									value: systemInfo()?.email ?? "-",
+								},
+								{
+									label: T()("image_processor"),
+									value: systemInfo()?.imageProcessor ?? "-",
+								},
+							]}
+						/>
+					</InfoRow.Content>
 					<InfoRow.Content
 						title={T()("content_locales")}
 						description={T()("content_locales_description")}
+						reducedMargin={true}
 					>
 						<DetailsList
 							type="text"
@@ -205,26 +251,72 @@ const SystemOverviewRoute: Component = () => {
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
-
-				{/* Supported Features */}
 				<InfoRow.Root
-					title={T()("supported_features")}
-					description={T()("supported_features_setting_message")}
+					title={T()("maintenance_info_title")}
+					description={T()("maintenance_info_description")}
 				>
-					<InfoRow.Content>
-						<DetailsList
-							type="pill"
-							theme="contained"
-							items={[
-								{
-									label: T()("media_enabled"),
-									value: settingsData.data?.data?.media.enabled
-										? T()("yes")
-										: T()("no"),
-								},
-							]}
-						/>
-					</InfoRow.Content>
+					<InfoRow.Content
+						title={T()("clear_all")}
+						description={T()("clear_all_processed_images_setting_message")}
+						reducedMargin={true}
+						theme="danger"
+						actions={
+							<Button
+								size="medium"
+								type="button"
+								theme="danger-outline"
+								onClick={() => {
+									setOpenClearAllProcessedImages(true);
+								}}
+								permission={canClearAllProcessedImages()}
+							>
+								{T()("clear_all_processed_images_button", {
+									count: settingsData.data?.data?.media?.processed.total || 0,
+								})}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
+					<InfoRow.Content
+						title={T()("delete_all_share_links_system")}
+						description={T()("delete_all_share_links_system_setting_message")}
+						reducedMargin={true}
+						theme="danger"
+						actions={
+							<Button
+								size="medium"
+								type="button"
+								theme="danger-outline"
+								onClick={() => {
+									setOpenDeleteAllShareLinks(true);
+								}}
+								permission={canDeleteAllShareLinks()}
+							>
+								{T()("delete_all_share_links_system_button")}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
+					<InfoRow.Content
+						title={T()("clear_cache")}
+						description={T()("clear_cache_setting_message")}
+						reducedMargin={true}
+						theme="danger"
+						actions={
+							<Button
+								size="medium"
+								type="button"
+								theme="danger-outline"
+								onClick={() => {
+									setOpenClearCache(true);
+								}}
+								permission={canClearCache()}
+							>
+								{T()("clear_cache_button")}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
 				</InfoRow.Root>
 			</DynamicContent>
 
