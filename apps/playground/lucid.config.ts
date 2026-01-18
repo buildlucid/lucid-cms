@@ -39,7 +39,7 @@ export const adapter = nodeAdapter();
 
 export const envSchema = z.object({
 	DATABASE_URL: z.string(),
-	LUCID_ENCRYPTION_KEY: z.string(),
+	LUCID_ENCRYPTION_SECRET: z.string(),
 	LUCID_COOKIE_SECRET: z.string(),
 	LUCID_REFRESH_TOKEN_SECRET: z.string(),
 	LUCID_ACCESS_TOKEN_SECRET: z.string(),
@@ -82,11 +82,11 @@ export default defineConfig((env) => ({
 			enabled: true,
 		},
 	},
-	keys: {
-		encryptionKey: env.LUCID_ENCRYPTION_KEY,
-		cookieSecret: env.LUCID_COOKIE_SECRET,
-		refreshTokenSecret: env.LUCID_REFRESH_TOKEN_SECRET,
-		accessTokenSecret: env.LUCID_ACCESS_TOKEN_SECRET,
+	secrets: {
+		encryption: env.LUCID_ENCRYPTION_SECRET,
+		cookie: env.LUCID_COOKIE_SECRET,
+		refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
+		accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 	},
 	localization: {
 		locales: [

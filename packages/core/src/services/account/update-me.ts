@@ -93,7 +93,7 @@ const updateMe: ServiceFn<
 			currentPassword: data.currentPassword,
 			newPassword: data.newPassword,
 			passwordConfirmation: data.passwordConfirmation,
-			encryptionKey: context.config.keys.encryptionKey,
+			encryptionKey: context.config.secrets.encryption,
 		}),
 	]);
 	if (userWithEmail?.error) return userWithEmail;

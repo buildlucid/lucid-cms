@@ -23,7 +23,7 @@ const uploadSingle: ServiceFn<
 		token: data.token,
 		timestamp: data.timestamp,
 		secretKey:
-			data.mediaAdapterOptions?.secretKey ?? context.config.keys.cookieSecret,
+			data.mediaAdapterOptions?.secretKey ?? context.config.secrets.cookie,
 	});
 	if (checkPresignedTokenRes.error) return checkPresignedTokenRes;
 	const { targetDir, targetPath } = keyPaths(

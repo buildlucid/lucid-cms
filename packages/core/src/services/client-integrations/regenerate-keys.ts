@@ -40,7 +40,7 @@ const regenerateKeys: ServiceFn<
 	if (checkExistsRes.error) return checkExistsRes;
 
 	const { apiKey, apiKeyHash, secret } = await generateKeys(
-		context.config.keys.encryptionKey,
+		context.config.secrets.encryption,
 	);
 
 	const updateKeysRes = await ClientIntegrations.updateSingle({

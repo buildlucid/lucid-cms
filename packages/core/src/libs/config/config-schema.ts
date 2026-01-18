@@ -77,11 +77,11 @@ const ConfigSchema = z.object({
 			allowHeaders: z.array(z.string()).optional(),
 		})
 		.optional(),
-	keys: z.object({
-		encryptionKey: z.string().length(64),
-		cookieSecret: z.string().length(64),
-		accessTokenSecret: z.string().length(64),
-		refreshTokenSecret: z.string().length(64),
+	secrets: z.object({
+		encryption: z.string().length(64),
+		cookie: z.string().length(64),
+		accessToken: z.string().length(64),
+		refreshToken: z.string().length(64),
 	}),
 	logger: z.object({
 		level: LogLevelSchema,

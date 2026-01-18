@@ -68,7 +68,7 @@ const verifyApiKey: ServiceFn<
 
 	const secret = decrypt(
 		clientIntegrationRes.data.secret,
-		context.config.keys.encryptionKey,
+		context.config.secrets.encryption,
 	);
 
 	const inputApiKeyHash = Buffer.from(

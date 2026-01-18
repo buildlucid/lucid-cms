@@ -21,7 +21,7 @@ export const envSchema = z.object({
 	LUCID_HOST: z.string(),
 	LUCID_TURSO_URL: z.string(),
 	LUCID_TURSO_AUTH_TOKEN: z.string(),
-	LUCID_ENCRYPTION_KEY: z.string(),
+	LUCID_ENCRYPTION_SECRET: z.string(),
 	LUCID_COOKIE_SECRET: z.string(),
 	LUCID_REFRESH_TOKEN_SECRET: z.string(),
 	LUCID_ACCESS_TOKEN_SECRET: z.string(),
@@ -45,11 +45,11 @@ export default defineConfig((env) => ({
 		authToken: env.LUCID_TURSO_AUTH_TOKEN,
 		// url: "http://127.0.0.1:8081",
 	}),
-	keys: {
-		encryptionKey: env.LUCID_ENCRYPTION_KEY,
-		cookieSecret: env.LUCID_COOKIE_SECRET,
-		refreshTokenSecret: env.LUCID_REFRESH_TOKEN_SECRET,
-		accessTokenSecret: env.LUCID_ACCESS_TOKEN_SECRET,
+	secrets: {
+		encryption: env.LUCID_ENCRYPTION_SECRET,
+		cookie: env.LUCID_COOKIE_SECRET,
+		refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
+		accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 	},
 	email: {
 		from: {

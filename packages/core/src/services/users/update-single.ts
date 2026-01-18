@@ -128,7 +128,7 @@ const updateSingle: ServiceFn<
 	let hashedPassword: string | undefined;
 	let encryptSecret: string | undefined;
 	if (data.password) {
-		const genSecret = generateSecret(context.config.keys.encryptionKey);
+		const genSecret = generateSecret(context.config.secrets.encryption);
 		// Hash password using scrypt
 		hashedPassword = Buffer.from(
 			scrypt(data.password, genSecret.secret, constants.scrypt),

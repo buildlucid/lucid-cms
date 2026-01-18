@@ -65,7 +65,7 @@ const verifyLicense: ServiceFn<
 
 	const encryptedKey = licenseKeyRes.data?.value_text;
 	const key = encryptedKey
-		? decrypt(encryptedKey, context.config.keys.encryptionKey)
+		? decrypt(encryptedKey, context.config.secrets.encryption)
 		: undefined;
 	const last4 = key?.trim() ? key.trim().slice(-4) : null;
 

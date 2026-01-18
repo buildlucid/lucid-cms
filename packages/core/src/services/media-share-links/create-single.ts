@@ -32,7 +32,7 @@ const createSingle: ServiceFn<
 		? Buffer.from(
 				scrypt(
 					data.password,
-					context.config.keys.encryptionKey,
+					context.config.secrets.encryption,
 					constants.scrypt,
 				),
 			).toString("base64")

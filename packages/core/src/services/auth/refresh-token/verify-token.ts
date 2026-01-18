@@ -31,7 +31,7 @@ const verifyToken = async (
 
 		const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
-		const decode = (await verify(_refresh, config.keys.refreshTokenSecret)) as {
+		const decode = (await verify(_refresh, config.secrets.refreshToken)) as {
 			id: number;
 		};
 

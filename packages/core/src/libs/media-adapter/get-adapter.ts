@@ -43,7 +43,7 @@ const getMediaAdapter = async (
 		return {
 			adapter: await fileSystemAdapter({
 				uploadDir: constants.defaultUploadDirectory,
-				secretKey: config.keys.encryptionKey,
+				secretKey: config.secrets.encryption,
 			}),
 			enabled: true,
 		};

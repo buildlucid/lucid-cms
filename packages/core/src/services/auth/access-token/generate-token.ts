@@ -53,7 +53,7 @@ const generateToken = async (
 				iat: Math.floor(now / 1000),
 				nonce: nonce,
 			} satisfies LucidAuth,
-			config.keys.accessTokenSecret,
+			config.secrets.accessToken,
 		);
 
 		setCookie(c, constants.cookies.accessToken, token, {

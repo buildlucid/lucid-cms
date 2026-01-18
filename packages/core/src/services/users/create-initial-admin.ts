@@ -35,7 +35,7 @@ const createInitialAdmin: ServiceFn<
 	}
 
 	const { secret, encryptSecret } = generateSecret(
-		context.config.keys.encryptionKey,
+		context.config.secrets.encryption,
 	);
 	const hashedPassword = Buffer.from(
 		scrypt(data.password, secret, constants.scrypt),

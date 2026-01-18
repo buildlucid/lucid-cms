@@ -23,7 +23,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 
 		const decode = (await verify(
 			_access,
-			config.keys.accessTokenSecret,
+			config.secrets.accessToken,
 		)) as LucidAuth;
 
 		return {

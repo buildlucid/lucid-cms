@@ -66,7 +66,7 @@ const inviteSingle: ServiceFn<
 		};
 	}
 
-	const { encryptSecret } = generateSecret(context.config.keys.encryptionKey);
+	const { encryptSecret } = generateSecret(context.config.secrets.encryption);
 
 	const newUserRes = await Users.createSingle({
 		data: {

@@ -81,7 +81,7 @@ const authorizeShare: ServiceFn<
 		const hashed = Buffer.from(
 			scrypt(
 				data.providedPassword,
-				context.config.keys.encryptionKey,
+				context.config.secrets.encryption,
 				constants.scrypt,
 			),
 		).toString("base64");

@@ -22,7 +22,7 @@ const createSingle: ServiceFn<
 	);
 
 	const { key, apiKey, apiKeyHash, secret } = await generateKeys(
-		context.config.keys.encryptionKey,
+		context.config.secrets.encryption,
 	);
 
 	const keyExistsRes = await ClientIntegrations.selectSingle({

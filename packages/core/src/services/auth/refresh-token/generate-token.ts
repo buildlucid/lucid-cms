@@ -29,7 +29,7 @@ const generateToken = async (
 			iat: Math.floor(now / 1000),
 			nonce: nonce,
 		},
-		config.keys.refreshTokenSecret,
+		config.secrets.refreshToken,
 	);
 
 	setCookie(c, constants.cookies.refreshToken, token, {

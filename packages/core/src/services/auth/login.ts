@@ -71,7 +71,7 @@ const login: ServiceFn<
 
 	const decryptedSecret = decrypt(
 		userRes.data.secret,
-		context.config.keys.encryptionKey,
+		context.config.secrets.encryption,
 	);
 	const inputPasswordHash = Buffer.from(
 		scrypt(data.password, decryptedSecret, constants.scrypt),

@@ -16,7 +16,7 @@ const updateLicense: ServiceFn<
 	const plain = data.licenseKey?.trim() || null;
 	const last4 = plain ? plain.slice(-4) : null;
 	const encrypted = plain
-		? encrypt(plain, context.config.keys.encryptionKey)
+		? encrypt(plain, context.config.secrets.encryption)
 		: null;
 
 	const [keyRes, last4Res] = await Promise.all([

@@ -69,16 +69,16 @@ export interface LucidConfig {
 	};
 	/** The host of the Lucid instance. */
 	host: string;
-	/** `64 character` length keys to encrypt and sign data. */
-	keys: {
+	/** `64 character` length secrets to encrypt and sign data. */
+	secrets: {
 		/** Used to encrypt user secrets and API keys. Must be `64 characters` long. */
-		encryptionKey: string;
+		encryption: string;
 		/** Used to sign cookies. Must be `64 characters` long. */
-		cookieSecret: string;
+		cookie: string;
 		/** Used to sign the access token JWT. Must be `64 characters` long. */
-		accessTokenSecret: string;
+		accessToken: string;
 		/** Used to sign the refresh token JWT. Must be `64 characters` long. */
-		refreshTokenSecret: string;
+		refreshToken: string;
 	};
 	/** The logger configuration */
 	logger?: {
@@ -141,7 +141,7 @@ export interface LucidConfig {
 		storageLimit?: number;
 		/** The maximum file size in bytes. */
 		maxFileSize?: number;
-		/** Fallback URLs to redirect to when media cannot be found. Only used when the `fallback` query param is set and the Accept header matches the media type. */
+		/** Fallback URLs to redirect to when media cannot be found. Only used when the `fallback` query param is set and the sec-fetch-dest header is set to `image` or `video`. */
 		fallback?: {
 			/** The fallback image URL to redirect to when an image cannot be found. */
 			image?: string;
