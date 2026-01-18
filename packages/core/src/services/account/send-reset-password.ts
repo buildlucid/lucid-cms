@@ -26,7 +26,7 @@ const sendResetPassword: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const userExistsRes = await Users.selectSingle({
 		select: ["id", "first_name", "last_name", "email"],

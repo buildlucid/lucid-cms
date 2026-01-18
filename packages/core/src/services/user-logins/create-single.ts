@@ -13,7 +13,10 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const UserLogins = new UserLoginsRepository(context.db, context.config.db);
+	const UserLogins = new UserLoginsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const newLoginRes = await UserLogins.createSingle({
 		data: {

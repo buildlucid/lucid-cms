@@ -13,7 +13,7 @@ const createTableQuery: ServiceFn<
 	undefined
 > = async (context, data) => {
 	try {
-		let query = context.db.schema.createTable(data.migration.tableName);
+		let query = context.db.client.schema.createTable(data.migration.tableName);
 
 		for (const op of data.migration.columnOperations) {
 			if (op.type !== "add") continue; //* if its a new table, only columns can be added

@@ -26,7 +26,10 @@ const oidcCallback: ServiceFn<
 		grantAuthentication: boolean;
 	}
 > = async (context, data) => {
-	const AuthStates = new AuthStatesRepository(context.db, context.config.db);
+	const AuthStates = new AuthStatesRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	//* get provider config
 	const availableProviders = getAvailableProviders(context.config);

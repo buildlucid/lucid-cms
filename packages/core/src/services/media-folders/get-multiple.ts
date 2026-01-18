@@ -18,7 +18,7 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const MediaFolders = new MediaFoldersRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

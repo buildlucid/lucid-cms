@@ -28,7 +28,7 @@ const login: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const userRes = await Users.selectSingleByEmailUsername({
 		select: ["id", "password", "is_deleted", "is_locked", "secret"],

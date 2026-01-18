@@ -16,7 +16,7 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db, context.config.db);
+	const Roles = new RolesRepository(context.db.client, context.config.db);
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		roleServices.validatePermissions(context, {
@@ -67,7 +67,7 @@ const createSingle: ServiceFn<
 
 	if (validatePermsRes.data.length > 0) {
 		const RolePermissions = new RolePermissionsRepository(
-			context.db,
+			context.db.client,
 			context.config.db,
 		);
 		const rolePermsRes = await RolePermissions.createMultiple({

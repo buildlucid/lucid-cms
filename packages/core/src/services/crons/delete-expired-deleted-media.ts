@@ -6,7 +6,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
  * Finds all soft-deleted media older than 30 days and queues them for permanent deletion
  */
 const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	const compDate = getRetentionDays(context.config.softDelete, "media");
 

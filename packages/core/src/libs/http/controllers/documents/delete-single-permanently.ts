@@ -56,7 +56,7 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 			},
 		)(
 			{
-				db: c.get("config").db.client,
+				db: c.get("config").db,
 				config: c.get("config"),
 				queue: c.get("queue"),
 				env: c.get("env"),

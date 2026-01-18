@@ -16,7 +16,10 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const UserLogins = new UserLoginsRepository(context.db, context.config.db);
+	const UserLogins = new UserLoginsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const userLoginsRes = await UserLogins.selectMultipleFiltered({
 		select: [

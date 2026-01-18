@@ -6,7 +6,7 @@ import buildHierarchy from "./helpers/build-hierachy.js";
 
 const getHierarchy: ServiceFn<[], MediaFolderResponse[]> = async (context) => {
 	const MediaFolders = new MediaFoldersRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

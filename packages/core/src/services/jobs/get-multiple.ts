@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Jobs = new QueueJobsRepository(context.db, context.config.db);
+	const Jobs = new QueueJobsRepository(context.db.client, context.config.db);
 
 	const jobsRes = await Jobs.selectMultipleFiltered({
 		select: [

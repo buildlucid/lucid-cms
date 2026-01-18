@@ -130,7 +130,7 @@ const startConsumer = async () => {
 								executeSingleJob(
 									{
 										config: config,
-										db: config.db.client,
+										db: config.db,
 										env: env ?? null,
 										// TODO: should handlers be able to push jobs to the queue??
 										//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.

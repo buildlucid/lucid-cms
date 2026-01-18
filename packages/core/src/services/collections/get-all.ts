@@ -20,7 +20,10 @@ const getAll: ServiceFn<
 			(collection) => collection.getData.mode === "single",
 		);
 
-		const Documents = new DocumentsRepository(context.db, context.config.db);
+		const Documents = new DocumentsRepository(
+			context.db.client,
+			context.config.db,
+		);
 
 		await cacheAllSchemas(context, {
 			collectionKeys: singleCollections.map((c) => c.key),

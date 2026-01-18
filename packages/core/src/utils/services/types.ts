@@ -7,7 +7,10 @@ import type { Config } from "../../types/config.js";
 import type { LucidErrorData } from "../../types/errors.js";
 
 export type ServiceContext = {
-	db: KyselyDB;
+	db: {
+		// query: x, //* can be expanded to support some ORM like pattern later
+		client: KyselyDB;
+	};
 	config: Config;
 	env: EnvironmentVariables | null;
 	queue: QueueAdapterInstance;

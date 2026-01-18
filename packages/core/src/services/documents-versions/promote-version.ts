@@ -31,12 +31,15 @@ const promoteVersion: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Versions = new DocumentVersionsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
-	const Documents = new DocumentsRepository(context.db, context.config.db);
+	const Documents = new DocumentsRepository(
+		context.db.client,
+		context.config.db,
+	);
 	const DocumentBricks = new DocumentBricksRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

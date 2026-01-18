@@ -23,7 +23,10 @@ const deleteDocument: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const Documents = new DocumentsRepository(context.db, context.config.db);
+	const Documents = new DocumentsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;

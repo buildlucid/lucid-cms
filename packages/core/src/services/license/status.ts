@@ -7,7 +7,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { licenseServices } from "../index.js";
 
 const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
-	const Options = new OptionsRepository(context.db, context.config.db);
+	const Options = new OptionsRepository(context.db.client, context.config.db);
 
 	const licenseOptionsRes = await Options.selectMultiple({
 		select: ["name", "value_bool", "value_int", "value_text"],

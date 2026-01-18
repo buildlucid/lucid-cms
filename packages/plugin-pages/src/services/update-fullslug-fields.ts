@@ -39,7 +39,7 @@ const updateFullSlugFields: ServiceFn<
 		for (const doc of data.docFullSlugs) {
 			for (const [locale, fullSlug] of Object.entries(doc.fullSlugs)) {
 				updateFullSlugsPromises.push(
-					context.db
+					context.db.client
 						.updateTable(fieldsTable)
 						.set({ [fullSlugColumn]: fullSlug })
 						.where((eb) =>

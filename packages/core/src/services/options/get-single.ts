@@ -13,7 +13,7 @@ const getSingle: ServiceFn<
 	],
 	OptionsResponse
 > = async (context, data) => {
-	const Options = new OptionsRepository(context.db, context.config.db);
+	const Options = new OptionsRepository(context.db.client, context.config.db);
 
 	const optionRes = await Options.selectSingle({
 		select: ["name", "value_bool", "value_int", "value_text"],

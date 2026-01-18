@@ -10,7 +10,7 @@ const defaultRoles: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const Roles = new RolesRepository(context.db, context.config.db);
+		const Roles = new RolesRepository(context.db.client, context.config.db);
 
 		const totalRoleCountRes = await Roles.count({
 			where: [],

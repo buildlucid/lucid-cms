@@ -24,7 +24,10 @@ const updateSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Version = new DocumentVersionsRepository(context.db, context.config.db);
+	const Version = new DocumentVersionsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	// ----------------------------------------------
 	// Checks

@@ -36,7 +36,7 @@ const verifyLicense: ServiceFn<
 		errorMessage: string | null;
 	}
 > = async (context) => {
-	const Options = new OptionsRepository(context.db, context.config.db);
+	const Options = new OptionsRepository(context.db.client, context.config.db);
 	const now = getUnixTimeSeconds();
 
 	const licenseKeyRes = await Options.selectSingle({

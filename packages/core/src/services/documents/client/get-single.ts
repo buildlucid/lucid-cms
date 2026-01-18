@@ -22,7 +22,10 @@ const getSingle: ServiceFn<
 	],
 	ClientDocumentResponse
 > = async (context, data) => {
-	const Documents = new DocumentsRepository(context.db, context.config.db);
+	const Documents = new DocumentsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,

@@ -19,7 +19,10 @@ const authRedirectUrl: ServiceFn<
 		redirectUrl: string;
 	}
 > = async (context, data) => {
-	const AuthStates = new AuthStatesRepository(context.db, context.config.db);
+	const AuthStates = new AuthStatesRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const baseRedirectUrl = urlAddPath(
 		context.config.host,

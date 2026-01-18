@@ -12,7 +12,10 @@ const deleteCollection: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Collections = new CollectionsRepository(context.db, context.config.db);
+	const Collections = new CollectionsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const deleteRes = await Collections.deleteSingle({
 		where: [

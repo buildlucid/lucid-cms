@@ -10,7 +10,7 @@ const getMultipleFieldMeta: ServiceFn<
 	],
 	UserPropT[]
 > = async (context, data) => {
-	const User = new UsersRepository(context.db, context.config.db);
+	const User = new UsersRepository(context.db.client, context.config.db);
 
 	if (data.ids.length === 0) {
 		return {

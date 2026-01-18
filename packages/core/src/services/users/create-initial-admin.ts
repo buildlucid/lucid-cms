@@ -18,7 +18,7 @@ const createInitialAdmin: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const userCountRes = await Users.count({ where: [] });
 	if (userCountRes.error) return userCountRes;

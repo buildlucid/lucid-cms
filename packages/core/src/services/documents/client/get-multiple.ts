@@ -34,7 +34,10 @@ const getMultiple: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const Document = new DocumentsRepository(context.db, context.config.db);
+	const Document = new DocumentsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,

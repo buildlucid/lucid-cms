@@ -18,7 +18,10 @@ const updateMultipleRoles: ServiceFn<
 		};
 	}
 
-	const UserRoles = new UserRolesRepository(context.db, context.config.db);
+	const UserRoles = new UserRolesRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const [roleExistsRes, deleteMultipleRes] = await Promise.all([
 		userServices.checks.checkRolesExist(context, {

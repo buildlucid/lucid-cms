@@ -26,7 +26,7 @@ const getMultipleFieldMeta: ServiceFn<
 	Array<BrickQueryResponse>
 > = async (context, data) => {
 	const DocumentVersions = new DocumentVersionsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 	if (data.values.length === 0) {

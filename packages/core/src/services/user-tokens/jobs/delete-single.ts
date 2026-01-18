@@ -12,7 +12,10 @@ const deleteToken: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const deleteRes = await UserTokens.deleteSingle({
 		where: [

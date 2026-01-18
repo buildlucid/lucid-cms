@@ -41,7 +41,10 @@ const getSingle: ServiceFn<
 	if (migrationStatus.error) return migrationStatus;
 
 	if (collection.getData.mode === "single") {
-		const Documents = new DocumentsRepository(context.db, context.config.db);
+		const Documents = new DocumentsRepository(
+			context.db.client,
+			context.config.db,
+		);
 
 		const documentRes = await Documents.selectSingle(
 			{

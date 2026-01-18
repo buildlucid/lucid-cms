@@ -9,7 +9,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Emails = new EmailsRepository(context.db, context.config.db);
+	const Emails = new EmailsRepository(context.db.client, context.config.db);
 
 	const deleteEmailRes = await Emails.deleteSingle({
 		returning: ["id"],

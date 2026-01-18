@@ -29,9 +29,15 @@ const initiate: ServiceFn<
 	],
 	InitiateAuthResponse
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(context.db, context.config.db);
-	const AuthStates = new AuthStatesRepository(context.db, context.config.db);
-	const Users = new UsersRepository(context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const AuthStates = new AuthStatesRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	//* check if the provider is enabled and exists
 	const availableProviders = getAvailableProviders(context.config);

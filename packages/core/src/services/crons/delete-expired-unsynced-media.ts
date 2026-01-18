@@ -10,7 +10,7 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 	context,
 ) => {
 	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

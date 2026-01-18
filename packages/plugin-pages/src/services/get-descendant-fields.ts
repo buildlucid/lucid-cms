@@ -46,7 +46,7 @@ const getDescendantFields: ServiceFn<
 			constants.fields.parentPage.key,
 		);
 
-		const descendants = await context.db
+		const descendants = await context.db.client
 			.withRecursive("recursive_cte", (db) =>
 				db
 					.selectFrom(fieldsTable)

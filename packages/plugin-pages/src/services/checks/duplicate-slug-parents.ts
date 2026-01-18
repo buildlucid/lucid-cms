@@ -54,7 +54,7 @@ const checkDuplicateSlugParents: ServiceFn<
 			constants.fields.parentPage.key,
 		);
 
-		const duplicates = await context.db
+		const duplicates = await context.db.client
 			.selectFrom(documentTable)
 			.leftJoin(
 				versionTable,

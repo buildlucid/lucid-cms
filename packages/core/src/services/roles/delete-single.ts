@@ -9,7 +9,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db, context.config.db);
+	const Roles = new RolesRepository(context.db.client, context.config.db);
 
 	const deleteRolesRes = await Roles.deleteMultiple({
 		where: [

@@ -19,10 +19,10 @@ const clearSingle: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const ProcessedImages = new ProcessedImagesRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	const mediaRes = await Media.selectSingle({
 		select: ["key"],

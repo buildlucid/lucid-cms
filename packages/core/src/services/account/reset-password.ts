@@ -29,8 +29,11 @@ const resetPassword: ServiceFn<
 		};
 	}
 
-	const UserTokens = new UserTokensRepository(context.db, context.config.db);
-	const Users = new UsersRepository(context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const tokenRes = await userTokenServices.getSingle(context, {
 		token: data.token,

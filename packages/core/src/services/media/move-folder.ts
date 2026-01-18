@@ -14,7 +14,7 @@ const moveFolder: ServiceFn<
 	],
 	number | undefined
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	const mediaRes = await Media.selectSingle({
 		select: ["id", "folder_id", "is_deleted"],

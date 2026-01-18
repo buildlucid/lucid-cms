@@ -23,9 +23,9 @@ const unlinkAuthProvider: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 	const UserAuthProviders = new UserAuthProvidersRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

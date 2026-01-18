@@ -17,7 +17,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db, context.config.db);
+	const Roles = new RolesRepository(context.db.client, context.config.db);
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		data.permissions !== undefined
@@ -84,7 +84,7 @@ const updateSingle: ServiceFn<
 
 	if (validatePermsRes?.data !== undefined) {
 		const RolePermissions = new RolePermissionsRepository(
-			context.db,
+			context.db.client,
 			context.config.db,
 		);
 

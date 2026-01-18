@@ -45,7 +45,7 @@ const getDocumentVersionFields: ServiceFn<
 			constants.fields.parentPage.key,
 		);
 
-		const fields = await context.db
+		const fields = await context.db.client
 			.selectFrom(fieldsTable)
 			.innerJoin(
 				versionTable,

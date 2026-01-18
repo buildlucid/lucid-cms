@@ -43,7 +43,7 @@ const getMultipleRevisions: ServiceFn<
 	}
 
 	const VersionsRepo = new DocumentVersionsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

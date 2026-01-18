@@ -12,7 +12,7 @@ const deleteSingle: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

@@ -73,7 +73,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -90,7 +90,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -172,7 +172,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -189,7 +189,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -223,7 +223,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 		],
 		{ key: string }
 	> = async (service, data) => {
-		const documentRes = await service.db
+		const documentRes = await service.db.client
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
@@ -259,7 +259,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -274,7 +274,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -320,7 +320,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 		],
 		{ key: string }
 	> = async (service, data) => {
-		const documentRes = await service.db
+		const documentRes = await service.db.client
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
@@ -371,7 +371,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -391,7 +391,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -458,7 +458,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -474,7 +474,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: config.db.client,
+				db: config.db,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,

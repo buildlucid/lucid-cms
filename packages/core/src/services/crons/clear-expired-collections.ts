@@ -6,7 +6,10 @@ import getRetentionDays from "./helpers/get-retention-days.js";
  * Finds all expired collections and queues them for deletion
  */
 const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
-	const Collections = new CollectionsRepository(context.db, context.config.db);
+	const Collections = new CollectionsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const compDate = getRetentionDays(context.config.softDelete, "collections");
 

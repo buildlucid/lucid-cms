@@ -17,7 +17,7 @@ const verifyApiKey: ServiceFn<
 	LucidClientIntegrationAuth
 > = async (context, data) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

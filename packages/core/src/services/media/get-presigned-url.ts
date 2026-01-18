@@ -22,9 +22,9 @@ const getPresignedUrl: ServiceFn<
 		headers?: Record<string, string>;
 	}
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

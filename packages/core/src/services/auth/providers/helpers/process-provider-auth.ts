@@ -34,11 +34,14 @@ const processProviderAuth: ServiceFn<
 	}
 > = async (context, data) => {
 	const UserAuthProviders = new UserAuthProvidersRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
-	const UserTokens = new UserTokensRepository(context.db, context.config.db);
-	const Users = new UsersRepository(context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const redirectUrl = urlAddPath(
 		context.config.host,

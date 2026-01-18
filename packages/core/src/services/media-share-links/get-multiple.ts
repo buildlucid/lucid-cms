@@ -19,7 +19,7 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

@@ -13,7 +13,7 @@ const deleteUser: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const User = new UsersRepository(context.db, context.config.db);
+	const User = new UsersRepository(context.db.client, context.config.db);
 
 	await userServices.checks.checkNotLastUser(context);
 

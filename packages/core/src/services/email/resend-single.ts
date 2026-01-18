@@ -16,9 +16,9 @@ const resendSingle: ServiceFn<
 		jobId: string;
 	}
 > = async (context, data) => {
-	const Emails = new EmailsRepository(context.db, context.config.db);
+	const Emails = new EmailsRepository(context.db.client, context.config.db);
 	const EmailTransactions = new EmailTransactionsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

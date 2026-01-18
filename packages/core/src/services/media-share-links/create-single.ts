@@ -22,7 +22,7 @@ const createSingle: ServiceFn<
 	MediaShareLinkResponse
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

@@ -11,7 +11,7 @@ const deleteSingle: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

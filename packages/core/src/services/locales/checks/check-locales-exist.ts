@@ -19,7 +19,7 @@ const checkLocalesExist: ServiceFn<
 		};
 	}
 
-	const Locales = new LocalesRepository(context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db.client, context.config.db);
 
 	const localesRes = await Locales.selectMultiple({
 		select: ["code"],

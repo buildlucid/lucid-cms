@@ -3,7 +3,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteAll: ServiceFn<[], undefined> = async (context) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

@@ -20,8 +20,11 @@ const validateInvitation: ServiceFn<
 	],
 	ValidateInvitationResponse
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(context.db, context.config.db);
-	const Users = new UsersRepository(context.db, context.config.db);
+	const UserTokens = new UserTokensRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const userTokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],

@@ -13,7 +13,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Options = new OptionsRepository(context.db, context.config.db);
+	const Options = new OptionsRepository(context.db.client, context.config.db);
 
 	const updateOptionRes = await Options.updateSingle({
 		where: [

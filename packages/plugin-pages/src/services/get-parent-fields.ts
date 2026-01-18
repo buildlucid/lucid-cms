@@ -43,7 +43,7 @@ const getParentFields: ServiceFn<
 			constants.fields.fullSlug.key,
 		);
 
-		const parentFields = await context.db
+		const parentFields = await context.db.client
 			.selectFrom(fieldsTable)
 			.innerJoin(
 				versionTable,

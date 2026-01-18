@@ -87,7 +87,7 @@ const webhook: ServiceFn<
 		};
 	}
 
-	const transaction = await context.db
+	const transaction = await context.db.client
 		.selectFrom("lucid_email_transactions")
 		.select(["id", "email_id", "updated_at"])
 		.where("external_message_id", "=", body.data.data.email_id)
@@ -148,7 +148,7 @@ const webhook: ServiceFn<
 	}
 
 	await Promise.all([
-		context.db
+		context.db.client
 			.updateTable("lucid_email_transactions")
 			.set({
 				delivery_status: newDeliveryStatus,
@@ -156,7 +156,7 @@ const webhook: ServiceFn<
 			})
 			.where("id", "=", transaction.id)
 			.execute(),
-		context.db
+		context.db.client
 			.updateTable("lucid_emails")
 			.set({
 				current_status: newDeliveryStatus,

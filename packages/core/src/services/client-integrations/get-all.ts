@@ -5,7 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

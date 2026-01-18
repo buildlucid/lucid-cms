@@ -28,7 +28,7 @@ const createSingle: ServiceFn<
 	if (tableNamesRes.error) return tableNamesRes;
 
 	const DocumentVersions = new DocumentVersionsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

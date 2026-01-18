@@ -13,7 +13,7 @@ const deleteLocale: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Locales = new LocalesRepository(context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db.client, context.config.db);
 
 	const deleteRes = await Locales.deleteSingle({
 		where: [

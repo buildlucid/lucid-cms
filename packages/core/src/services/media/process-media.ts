@@ -17,9 +17,9 @@ const processMedia: ServiceFn<
 	],
 	MediaUrlResponse
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 	const ProcessedImage = new ProcessedImagesRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

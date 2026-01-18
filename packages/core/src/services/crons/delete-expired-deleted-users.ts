@@ -6,7 +6,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
  * Finds all soft-deleted users older than 30 days and queues them for permanent deletion
  */
 const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
-	const Users = new UsersRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const compDate = getRetentionDays(context.config.softDelete, "users");
 

@@ -4,7 +4,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 
 const getCount: ServiceFn<[], number> = async (context) => {
 	const ProcessedImages = new ProcessedImagesRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

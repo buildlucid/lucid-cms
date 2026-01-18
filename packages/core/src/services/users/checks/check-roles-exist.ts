@@ -17,7 +17,7 @@ const checkRolesExist: ServiceFn<
 		};
 	}
 
-	const Roles = new RolesRepository(context.db, context.config.db);
+	const Roles = new RolesRepository(context.db.client, context.config.db);
 	const rolesRes = await Roles.selectMultiple({
 		select: ["id"],
 		where: [

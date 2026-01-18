@@ -40,7 +40,7 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	const DocumentBricks = new DocumentBricksRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

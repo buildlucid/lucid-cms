@@ -6,7 +6,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
  * Finds all expired locales and queues them for deletion
  */
 const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
-	const Locales = new LocalesRepository(context.db, context.config.db);
+	const Locales = new LocalesRepository(context.db.client, context.config.db);
 
 	const compDate = getRetentionDays(context.config.softDelete, "locales");
 

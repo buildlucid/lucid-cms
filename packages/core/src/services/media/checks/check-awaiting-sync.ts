@@ -18,7 +18,7 @@ const checkAwaitingSync: ServiceFn<
 	true
 > = async (context, data) => {
 	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

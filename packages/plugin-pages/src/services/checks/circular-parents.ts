@@ -39,7 +39,7 @@ const checkCircularParents: ServiceFn<
 			constants.fields.parentPage.key,
 		);
 
-		const result = await context.db
+		const result = await context.db.client
 			.withRecursive("ancestors", (db) =>
 				db
 					.selectFrom(fieldsTable)

@@ -31,7 +31,7 @@ const updateMe: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db, context.config.db);
+	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const getUserRes = await Users.selectSingle({
 		select: ["super_admin", "password", "first_name", "secret"],

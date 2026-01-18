@@ -16,7 +16,7 @@ const restoreMultiple: ServiceFn<
 		return { error: undefined, data: undefined };
 	}
 
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	const existRes = await Media.selectMultiple({
 		select: ["id"],

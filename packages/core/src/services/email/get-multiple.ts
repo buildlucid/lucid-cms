@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Emails = new EmailsRepository(context.db, context.config.db);
+	const Emails = new EmailsRepository(context.db.client, context.config.db);
 
 	const emailsRes = await Emails.selectMultipleFiltered({
 		select: [

@@ -41,7 +41,7 @@ const cloudflareQueuesAdapter = (
 				const now = new Date();
 				const status = "pending";
 				const QueueJobs = new QueueJobsRepository(
-					params.serviceContext.db,
+					params.serviceContext.db.client,
 					params.serviceContext.config.db,
 				);
 
@@ -128,7 +128,7 @@ const cloudflareQueuesAdapter = (
 				const now = new Date();
 				const status = "pending";
 				const QueueJobs = new QueueJobsRepository(
-					params.serviceContext.db,
+					params.serviceContext.db.client,
 					params.serviceContext.config.db,
 				);
 

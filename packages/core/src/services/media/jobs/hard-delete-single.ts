@@ -20,9 +20,9 @@ const hardDeleteSingleMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 	const ProcessedImages = new ProcessedImagesRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

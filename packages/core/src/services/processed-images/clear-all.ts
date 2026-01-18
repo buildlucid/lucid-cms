@@ -9,7 +9,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const ProcessedImages = new ProcessedImagesRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

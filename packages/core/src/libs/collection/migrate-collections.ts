@@ -27,7 +27,7 @@ const migrateCollections: ServiceFn<
 	}
 > = async (context, data) => {
 	const CollectionMigrations = new CollectionMigrationsRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 	const dbSchema = await context.config.db.inferSchema();

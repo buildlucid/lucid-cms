@@ -116,7 +116,7 @@ const processImage: ServiceFn<
 	}
 
 	const ProcessedImages = new ProcessedImagesRepository(
-		context.db,
+		context.db.client,
 		context.config.db,
 	);
 

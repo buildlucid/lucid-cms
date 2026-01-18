@@ -11,7 +11,7 @@ const updateLicense: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Options = new OptionsRepository(context.db, context.config.db);
+	const Options = new OptionsRepository(context.db.client, context.config.db);
 
 	const plain = data.licenseKey?.trim() || null;
 	const last4 = plain ? plain.slice(-4) : null;

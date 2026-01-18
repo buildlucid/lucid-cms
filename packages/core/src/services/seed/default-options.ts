@@ -6,7 +6,7 @@ const defaultOptions: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const Options = new OptionsRepository(context.db, context.config.db);
+		const Options = new OptionsRepository(context.db.client, context.config.db);
 
 		const mediaStorageOptionRes = await Options.selectSingle({
 			select: ["name"],

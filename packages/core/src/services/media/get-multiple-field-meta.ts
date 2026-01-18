@@ -10,7 +10,7 @@ const getMultipleFieldMeta: ServiceFn<
 	],
 	MediaPropsT[]
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db, context.config.db);
+	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	if (data.ids.length === 0) {
 		return {

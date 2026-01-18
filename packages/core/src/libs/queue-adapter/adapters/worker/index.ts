@@ -87,7 +87,7 @@ function workerQueueAdapter(
 			const now = new Date();
 			const status: QueueJobResponse["status"] = "pending";
 			const QueueJobs = new QueueJobsRepository(
-				params.serviceContext.db,
+				params.serviceContext.db.client,
 				params.serviceContext.config.db,
 			);
 
@@ -136,7 +136,7 @@ function workerQueueAdapter(
 			const now = new Date();
 			const status: QueueBatchJobResponse["status"] = "pending";
 			const QueueJobs = new QueueJobsRepository(
-				params.serviceContext.db,
+				params.serviceContext.db.client,
 				params.serviceContext.config.db,
 			);
 

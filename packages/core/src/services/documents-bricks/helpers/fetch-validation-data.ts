@@ -238,7 +238,7 @@ const fetchMediaData = async (
 	if (mediaIds.length === 0) return [];
 
 	try {
-		const Media = new MediaRepository(context.db, context.config.db);
+		const Media = new MediaRepository(context.db.client, context.config.db);
 
 		const mediaRes = await Media.selectMultiple({
 			select: ["id", "file_extension", "width", "height", "type"],
@@ -274,7 +274,7 @@ const fetchUserData = async (
 	if (userIds.length === 0) return [];
 
 	try {
-		const Users = new UsersRepository(context.db, context.config.db);
+		const Users = new UsersRepository(context.db.client, context.config.db);
 
 		const usersRes = await Users.selectMultiple({
 			select: ["id"],
@@ -355,7 +355,10 @@ const fetchDocumentsFromCollection = async (
 			return [];
 		}
 
-		const Document = new DocumentsRepository(context.db, context.config.db);
+		const Document = new DocumentsRepository(
+			context.db.client,
+			context.config.db,
+		);
 
 		const documentIdRes = await Document.selectMultiple(
 			{

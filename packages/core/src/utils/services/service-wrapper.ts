@@ -37,7 +37,7 @@ const serviceWrapper =
 			}
 
 			//* If transactions are not enabled or the service is already in a transaction via a parent
-			if (!wrapperConfig.transaction || service.db.isTransaction) {
+			if (!wrapperConfig.transaction || service.db.client.isTransaction) {
 				const result = await fn(service, ...args);
 				if (result.error)
 					return {
@@ -48,11 +48,13 @@ const serviceWrapper =
 			}
 
 			//* If transactions are enabled
-			return await service.db.transaction().execute(async (tx) => {
+			return await service.db.client.transaction().execute(async (tx) => {
 				const result = await fn(
 					{
 						...service,
-						db: tx,
+						db: {
+							client: tx,
+						},
 					},
 					...args,
 				);
