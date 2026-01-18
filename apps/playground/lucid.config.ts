@@ -1,38 +1,38 @@
-import { z } from "@lucidcms/core";
-import {
-	passthroughQueueAdapter,
-	workerQueueAdapter,
-} from "@lucidcms/core/queue-adapter";
-import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
-import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
-import { passthroughImageProcessor } from "@lucidcms/core/image-processor";
-import Database from "better-sqlite3";
-import { describeRoute } from "hono-openapi";
-import transporter from "./src/services/email-transporter.js";
-// Adapters
-import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
-// import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
-// Plugins
-import LibSQLAdapter from "@lucidcms/libsql-adapter";
-import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
-import PagesPlugin from "@lucidcms/plugin-pages";
-import ResendPlugin from "@lucidcms/plugin-resend";
-import S3Plugin from "@lucidcms/plugin-s3";
-import PostgresAdapter from "@lucidcms/postgres-adapter";
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 // import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
 // import RedisPlugin from "@lucidcms/plugin-redis";
 // import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
+import { z } from "@lucidcms/core";
+import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
+import { passthroughImageProcessor } from "@lucidcms/core/image-processor";
+import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
+import {
+	passthroughQueueAdapter,
+	workerQueueAdapter,
+} from "@lucidcms/core/queue-adapter";
+// import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
+// Plugins
+import LibSQLAdapter from "@lucidcms/libsql-adapter";
+// Adapters
+import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
+import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
+import PagesPlugin from "@lucidcms/plugin-pages";
+import ResendPlugin from "@lucidcms/plugin-resend";
+import S3Plugin from "@lucidcms/plugin-s3";
+import PostgresAdapter from "@lucidcms/postgres-adapter";
+import SQLiteAdapter from "@lucidcms/sqlite-adapter";
+import Database from "better-sqlite3";
+import { describeRoute } from "hono-openapi";
+import BlogCollection from "./src/collections/blogs.js";
+import MainMenuCollection from "./src/collections/main-menu.js";
 // Collections
 import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
-import BlogCollection from "./src/collections/blogs.js";
-import MainMenuCollection from "./src/collections/main-menu.js";
+import transporter from "./src/services/email-transporter.js";
 
 export const adapter = nodeAdapter();
 // export const adapter = cloudflareAdapter();
@@ -111,7 +111,10 @@ export default defineConfig((env) => ({
 		processedImageLimit: 10,
 		storeProcessedImages: true,
 		onDemandFormats: true,
-		fallbackImage: "https://placehold.co/600x400",
+		fallback: {
+			image: "https://placehold.co/600x400",
+			video: "https://cdn.pixabay.com/video/2026/01/05/326081_large.mp4",
+		},
 		// imageProcessor: passthroughImageProcessor,
 		// urlStrategy: (media) => {
 		// 	return `https://media.protodigital.co.uk/${media.key}`;

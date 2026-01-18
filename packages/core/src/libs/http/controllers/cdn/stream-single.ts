@@ -162,8 +162,8 @@ const streamSingleController = factory.createHandlers(
 		);
 
 		if (response.error) {
-			const streamErrorImage = await serviceWrapper(
-				cdnServices.streamErrorImage,
+			const streamFallbackMedia = await serviceWrapper(
+				cdnServices.streamFallbackMedia,
 				{
 					transaction: false,
 				},
@@ -177,20 +177,14 @@ const streamSingleController = factory.createHandlers(
 				},
 				{
 					fallback: query?.fallback ? Boolean(query?.fallback) : undefined,
+					secFetchDest: c.req.header("sec-fetch-dest"),
 					error: response.error,
 				},
 			);
-			if (streamErrorImage.error)
-				throw new LucidAPIError(streamErrorImage.error);
+			if (streamFallbackMedia.error)
+				throw new LucidAPIError(streamFallbackMedia.error);
 
-			c.header("Content-Type", streamErrorImage.data.contentType);
-			return stream(c, async (stream) => {
-				if (streamErrorImage.data.body instanceof ReadableStream) {
-					await stream.pipe(streamErrorImage.data.body);
-				} else if (streamErrorImage.data.body instanceof Uint8Array) {
-					await stream.write(streamErrorImage.data.body);
-				}
-			});
+			return c.redirect(streamFallbackMedia.data.redirectUrl, 302);
 		}
 
 		applyRangeHeaders(c, {

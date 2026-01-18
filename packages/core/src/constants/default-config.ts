@@ -31,7 +31,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 	media: {
 		storageLimit: 5368709120,
 		maxFileSize: 16777216,
-		fallbackImage: undefined,
+		fallback: undefined,
 		processedImageLimit: 10,
 		storeProcessedImages: true,
 		onDemandFormats: false,

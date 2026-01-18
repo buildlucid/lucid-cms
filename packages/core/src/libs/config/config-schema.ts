@@ -124,7 +124,12 @@ const ConfigSchema = z.object({
 		adapter: MediaAdapterSchema.optional(),
 		storageLimit: z.number(),
 		maxFileSize: z.number(),
-		fallbackImage: z.string().optional(),
+		fallback: z
+			.object({
+				image: z.string().optional(),
+				video: z.string().optional(),
+			})
+			.optional(),
 		processedImageLimit: z.number(),
 		storeProcessedImages: z.boolean(),
 		onDemandFormats: z.boolean(),
