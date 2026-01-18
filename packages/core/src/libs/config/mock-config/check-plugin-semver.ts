@@ -13,11 +13,11 @@ export default defineConfig(() => ({
 	db: new SQLiteAdapter({
 		database: async () => new Database(":memory:"),
 	}),
-	keys: {
-		encryptionKey: testingConstants.key,
-		cookieSecret: testingConstants.key,
-		refreshTokenSecret: testingConstants.key,
-		accessTokenSecret: testingConstants.key,
+	secrets: {
+		encryption: testingConstants.key,
+		cookie: testingConstants.key,
+		refreshToken: testingConstants.key,
+		accessToken: testingConstants.key,
 	},
 	collections: [],
 	plugins: [
