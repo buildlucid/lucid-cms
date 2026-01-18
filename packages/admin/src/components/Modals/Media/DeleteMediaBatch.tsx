@@ -79,7 +79,6 @@ const DeleteMediaBatch: Component<DeleteMediaBatchProps> = (props) => {
 							label: T()("recursive_media_deletion"),
 							describedBy: T()("recursive_media_deletion_description"),
 						}}
-						theme="fit"
 						noMargin={true}
 					/>
 				</div>

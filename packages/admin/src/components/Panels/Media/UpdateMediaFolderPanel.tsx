@@ -106,7 +106,6 @@ const UpdateMediaFolderPanel: Component<{
 			}}
 			copy={{
 				title: T()("update_media_folder_panel_title"),
-				description: T()("update_media_folder_panel_description"),
 				submit: T()("update"),
 			}}
 			options={{

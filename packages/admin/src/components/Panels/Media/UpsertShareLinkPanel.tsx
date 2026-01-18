@@ -98,7 +98,6 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 	});
 	const panelDescription = createMemo(() => {
 		if (mode() === "create") return T()("create_share_link_panel_description");
-		return T()("update_share_link_panel_description");
 	});
 	const panelSubmit = createMemo(() => {
 		if (mode() === "create") return T()("create");

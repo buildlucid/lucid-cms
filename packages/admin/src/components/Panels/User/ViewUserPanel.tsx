@@ -53,7 +53,6 @@ const ViewUserPanel: Component<{
 			}}
 			copy={{
 				title: T()("view_user_panel_title"),
-				description: T()("view_user_panel_description"),
 			}}
 		>
 			{() => (

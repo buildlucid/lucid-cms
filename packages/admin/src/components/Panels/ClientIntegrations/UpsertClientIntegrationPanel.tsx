@@ -88,11 +88,6 @@ const UpsertClientIntegrationPanel: Component<
 			return T()("create_client_integration_panel_title");
 		return T()("update_client_integration_panel_title");
 	});
-	const panelDescription = createMemo(() => {
-		if (mode() === "create")
-			return T()("create_client_integration_panel_description");
-		return T()("update_client_integration_panel_description");
-	});
 	const panelSubmit = createMemo(() => {
 		if (mode() === "create") return T()("create");
 		return T()("update");
@@ -170,7 +165,6 @@ const UpsertClientIntegrationPanel: Component<
 			}}
 			copy={{
 				title: panelTitle(),
-				description: panelDescription(),
 				submit: panelSubmit(),
 			}}
 			options={{

@@ -163,13 +163,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (panelMode() === "create") {
 			return {
 				title: T()("create_media_panel_title"),
-				description: T()("create_media_panel_description"),
 				submit: T()("create"),
 			};
 		}
 		return {
 			title: T()("update_media_panel_title"),
-			description: T()("update_media_panel_description"),
 			submit: T()("update"),
 		};
 	});

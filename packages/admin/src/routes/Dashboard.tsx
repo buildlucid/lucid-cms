@@ -19,7 +19,6 @@ const DashboardRoute: Component = () => {
 									? `, ${userStore.get.user?.firstName}`
 									: "",
 							}),
-							description: T()("dashboard_route_description"),
 						}}
 					/>
 				),

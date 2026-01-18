@@ -40,7 +40,6 @@ const ViewShareLinksPanel: Component<ViewShareLinksPanelProps> = (props) => {
 	const panelContent = createMemo(() => {
 		return {
 			title: T()("view_share_links_panel_title"),
-			description: T()("view_share_links_panel_description"),
 		};
 	});
 

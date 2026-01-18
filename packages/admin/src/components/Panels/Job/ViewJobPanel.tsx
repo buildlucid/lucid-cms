@@ -45,7 +45,6 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 			}}
 			copy={{
 				title: T()("view_job_panel_title"),
-				description: T()("view_job_panel_description"),
 			}}
 		>
 			{() => (

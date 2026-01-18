@@ -153,7 +153,6 @@ const UpdateUserPanel: Component<{
 			}}
 			copy={{
 				title: T()("update_user_panel_title"),
-				description: T()("update_user_panel_description"),
 				submit: T()("update"),
 			}}
 			options={{

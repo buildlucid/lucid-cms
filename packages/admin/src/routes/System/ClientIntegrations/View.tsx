@@ -84,10 +84,7 @@ const SystemClientIntegrationsRoute: Component = () => {
 					padding: "24",
 				}}
 			>
-				<InfoRow.Root
-					title={T()("manage_integrations")}
-					description={T()("manage_integrations_description")}
-				>
+				<InfoRow.Root title={T()("manage_integrations")}>
 					<Switch>
 						<Match
 							when={

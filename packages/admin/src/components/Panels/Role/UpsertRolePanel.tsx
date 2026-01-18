@@ -88,12 +88,6 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 			name: role.data?.data.name || "",
 		});
 	});
-	const panelDescription = createMemo(() => {
-		if (props.id === undefined) return T()("create_role_panel_description");
-		return T()("update_role_panel_description", {
-			name: role.data?.data.name || "",
-		});
-	});
 	const panelSubmit = createMemo(() => {
 		if (props.id === undefined) return T()("create");
 		return T()("update");
@@ -179,7 +173,6 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 			}}
 			copy={{
 				title: panelTitle(),
-				description: panelDescription(),
 				submit: panelSubmit(),
 			}}
 			options={{
@@ -247,10 +240,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 															})
 														}
 														copy={{
-															label: T()(
-																// @ts-expect-error
-																`permissions_${permission}`,
-															),
+															label: T()(`permissions_${permission}`),
 														}}
 														noMargin={true}
 													/>

@@ -34,7 +34,7 @@ const ClickToCopy: Component<ClickToCopyProps> = (props) => {
 					type="button"
 					onClick={copyToClipboard}
 					class={classNames(
-						"duration-200 cursor-copy transition-colors flex items-center max-w-full text-title fill-title whitespace-nowrap text-base hover:text-primary-hover hover:fill-primary-hover",
+						"duration-200 cursor-copy transition-colors flex items-center max-w-full text-body fill-body whitespace-nowrap text-base hover:text-primary-hover hover:fill-primary-hover",
 						props.class,
 					)}
 				>

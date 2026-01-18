@@ -59,7 +59,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 	const panelContent = createMemo(() => {
 		return {
 			title: T()("view_media_panel_title"),
-			description: T()("view_media_panel_description"),
 		};
 	});
 	const panelFetchState = createMemo(() => {

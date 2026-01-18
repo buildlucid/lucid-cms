@@ -51,7 +51,6 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 			}}
 			copy={{
 				title: T()("select_media_title"),
-				description: T()("select_media_description"),
 			}}
 		>
 			{() => (

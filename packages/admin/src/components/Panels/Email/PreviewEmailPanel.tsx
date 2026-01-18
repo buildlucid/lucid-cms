@@ -54,7 +54,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 			}}
 			copy={{
 				title: T()("preview_email_panel_title"),
-				description: T()("preview_email_panel_description"),
 			}}
 		>
 			{() => (

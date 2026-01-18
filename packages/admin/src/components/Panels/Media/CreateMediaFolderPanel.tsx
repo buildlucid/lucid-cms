@@ -100,7 +100,6 @@ const CreateMediaFolderPanel: Component<{
 			}}
 			copy={{
 				title: T()("create_media_folder_panel_title"),
-				description: T()("create_media_folder_panel_description"),
 				submit: T()("create"),
 			}}
 			options={{
