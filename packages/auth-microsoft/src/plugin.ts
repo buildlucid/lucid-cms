@@ -35,7 +35,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				},
 			});
 
-			draft.compilerOptions.paths.copyPublic.push({
+			draft.build.paths.copyPublic.push({
 				input: path.join(currentDir, "../assets/microsoft-icon.svg"),
 				output: "assets/auth-provider-icons/microsoft-icon.svg",
 			});

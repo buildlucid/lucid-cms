@@ -29,13 +29,13 @@ const buildCommand = async (options?: {
 
 	try {
 		if (options?.cacheSpa) {
-			await partialBuildDirClear(configRes.config.compilerOptions.paths.outDir);
+			await partialBuildDirClear(configRes.config.build.paths.outDir);
 		} else {
-			await rm(configRes.config.compilerOptions.paths.outDir, {
+			await rm(configRes.config.build.paths.outDir, {
 				recursive: true,
 				force: true,
 			});
-			await mkdir(configRes.config.compilerOptions.paths.outDir);
+			await mkdir(configRes.config.build.paths.outDir);
 		}
 
 		if (!configRes.adapter?.cli?.build) {
@@ -57,7 +57,7 @@ const buildCommand = async (options?: {
 
 		//* the path to the config, relative from the output directory
 		const outputRelativeConfigPath = path.relative(
-			configRes.config.compilerOptions.paths.outDir,
+			configRes.config.build.paths.outDir,
 			configPath,
 		);
 		const normalisedOutputRelativePath = outputRelativeConfigPath.replace(
@@ -84,7 +84,7 @@ const buildCommand = async (options?: {
 					config: configRes.config,
 					silent,
 					configPath,
-					outputPath: configRes.config.compilerOptions.paths.outDir,
+					outputPath: configRes.config.build.paths.outDir,
 					outputRelativeConfigPath: normalisedOutputRelativePath,
 				}),
 			]);
@@ -121,7 +121,7 @@ const buildCommand = async (options?: {
 
 		const processedArtifacts = await processBuildArtifacts({
 			artifacts: pluginBuildArtifactsRes.data,
-			outDir: configRes.config.compilerOptions.paths.outDir,
+			outDir: configRes.config.build.paths.outDir,
 			silent,
 			customArtifactTypes: configRes.adapter.config?.customBuildArtifacts,
 		});
@@ -131,7 +131,7 @@ const buildCommand = async (options?: {
 			configRes.adapter.cli.build({
 				config: configRes.config,
 				configPath,
-				outputPath: configRes.config.compilerOptions.paths.outDir,
+				outputPath: configRes.config.build.paths.outDir,
 				outputRelativeConfigPath: normalisedOutputRelativePath,
 				buildArtifacts: processedArtifacts,
 				logger: {
@@ -159,7 +159,7 @@ const buildCommand = async (options?: {
 
 		const relativeBuildPath = path.relative(
 			process.cwd(),
-			configRes.config.compilerOptions.paths.outDir,
+			configRes.config.build.paths.outDir,
 		);
 
 		cliLogger.info(
@@ -208,7 +208,7 @@ const buildCommand = async (options?: {
 		const endTime = startTime();
 
 		const distSize = await calculateOutDirSize(
-			configRes.config.compilerOptions.paths.outDir,
+			configRes.config.build.paths.outDir,
 		);
 
 		cliLogger.log(

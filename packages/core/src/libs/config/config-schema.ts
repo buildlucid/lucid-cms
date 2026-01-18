@@ -166,7 +166,7 @@ const ConfigSchema = z.object({
 	),
 	hono: z.object({
 		middleware: z.array(HonoAppSchema).optional(),
-		extensions: z.array(HonoAppSchema).optional(),
+		routes: z.array(HonoAppSchema).optional(),
 	}),
 	queue: z
 		.object({
@@ -180,7 +180,7 @@ const ConfigSchema = z.object({
 		.optional(),
 	collections: z.array(z.unknown()),
 	plugins: z.array(z.unknown()),
-	compilerOptions: z
+	build: z
 		.object({
 			paths: z
 				.object({

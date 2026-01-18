@@ -15,26 +15,26 @@ const getBuildPaths = (config: Config, cwd = process.cwd()) => {
 		//* the output location for the admin SPA
 		adminOutput: join(
 			cwd,
-			config.compilerOptions.paths.outDir,
+			config.build.paths.outDir,
 			constants.directories.public,
 			constants.directories.admin,
 		),
 		//* the output location for the admin SPA plugins
 		adminPluginsOutput: join(
 			cwd,
-			config.compilerOptions.paths.outDir,
+			config.build.paths.outDir,
 			constants.directories.public,
 			constants.directories.admin,
 			constants.directories.plugins,
 		),
 		publicDist: join(
 			cwd,
-			config.compilerOptions.paths.outDir,
+			config.build.paths.outDir,
 			constants.directories.public,
 		),
 		clientDistHtml: join(
 			cwd,
-			config.compilerOptions.paths.outDir,
+			config.build.paths.outDir,
 			constants.directories.public,
 			constants.directories.admin,
 			"index.html",

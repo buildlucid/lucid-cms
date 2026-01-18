@@ -92,7 +92,7 @@ const copyPublicAssets = async (props: {
 		const assetsPath = path.join(currentDir, "../../../../public");
 
 		const outDir = path.join(
-			props.config.compilerOptions.paths.outDir,
+			props.config.build.paths.outDir,
 			constants.directories.public,
 		);
 
@@ -104,8 +104,7 @@ const copyPublicAssets = async (props: {
 		}
 
 		//* config defined additional public assets (medium prio)
-		const additionalPublic =
-			props.config.compilerOptions.paths.copyPublic ?? [];
+		const additionalPublic = props.config.build.paths.copyPublic ?? [];
 		await Promise.all(
 			additionalPublic.map(async (entry) => {
 				const isString = typeof entry === "string";

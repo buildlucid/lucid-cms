@@ -49,12 +49,12 @@ export const defaultConfig: Partial<LucidConfig> = {
 	},
 	hono: {
 		middleware: [],
-		extensions: [],
+		routes: [],
 	},
 	hooks: [],
 	collections: [],
 	plugins: [],
-	compilerOptions: {
+	build: {
 		paths: {
 			outDir: "dist",
 			emailTemplates: "./templates",

@@ -45,7 +45,7 @@ function workerQueueAdapter(
 				}
 
 				const configEntryPath = join(
-					params.config.compilerOptions.paths.outDir,
+					params.config.build.paths.outDir,
 					params.runtimeContext.configEntryPoint,
 				);
 

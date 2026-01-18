@@ -36,7 +36,7 @@ const createApp = async (props: {
 		middleware?: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
-		extensions?: Array<
+		routes?: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
@@ -153,11 +153,11 @@ const createApp = async (props: {
 		});
 
 	//* Hono Extensions
-	for (const ext of props.config.hono?.extensions || []) {
-		await ext(app, props.config);
+	for (const route of props.config.hono?.routes || []) {
+		await route(app, props.config);
 	}
-	for (const ext of props.hono?.extensions || []) {
-		await ext(app, props.config);
+	for (const route of props.hono?.routes || []) {
+		await route(app, props.config);
 	}
 
 	if (!props.config.disableOpenAPI) {

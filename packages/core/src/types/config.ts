@@ -174,12 +174,20 @@ export interface LucidConfig {
 		/** The url strategy to use. This is used to generate the url for the media. */
 		urlStrategy?: UrlStrategy;
 	};
-	/** Hono middleware and extensions to register. Allows you to register custom routes, middleware, and more. */
+	/** Hono middleware and routes to register. */
 	hono?: {
+		/**
+		 * Runs before Lucid's core routes.
+		 * Use for setting up context, environment bindings, custom middleware, etc.
+		 */
 		middleware?: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
-		extensions?: Array<
+		/**
+		 * Runs after Lucid's core routes.
+		 * Use for adding custom routes, serving static files, catch-all handlers, etc.
+		 */
+		routes?: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
@@ -215,8 +223,8 @@ export interface LucidConfig {
 	collections?: CollectionBuilder[];
 	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
 	plugins?: LucidPluginResponse[];
-	/** Compiler options. */
-	compilerOptions?: {
+	/** Build options. */
+	build?: {
 		paths?: {
 			/** The output directory. */
 			outDir?: string;
@@ -296,7 +304,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		middleware: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
-		extensions: Array<
+		routes: Array<
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
@@ -319,7 +327,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPluginResponse>;
-	compilerOptions: {
+	build: {
 		paths: {
 			outDir: string;
 			emailTemplates: string;

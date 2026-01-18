@@ -23,10 +23,10 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		recipe: (draft) => {
 			if (
 				pluginOptions.webhook?.enabled &&
-				draft.hono?.extensions &&
-				Array.isArray(draft.hono.extensions)
+				draft.hono?.routes &&
+				Array.isArray(draft.hono.routes)
 			) {
-				draft.hono.extensions.push(routes(pluginOptions));
+				draft.hono.routes.push(routes(pluginOptions));
 			}
 
 			draft.email.adapter = {

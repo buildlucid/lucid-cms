@@ -105,7 +105,7 @@ const cloudflareAdapter = (options?: {
 					env: platformProxy?.env,
 					app: cloudflareApp,
 					hono: {
-						extensions: [
+						routes: [
 							async (app, config) => {
 								const paths = getBuildPaths(config);
 								app.use(

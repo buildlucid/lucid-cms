@@ -10,8 +10,8 @@ const defineConfig = (factory: AdapterDefineConfig): AdapterDefineConfig => {
 		return {
 			...lucidConfig,
 			hono: {
-				extensions: [
-					...(lucidConfig.hono?.extensions || []),
+				routes: [
+					...(lucidConfig.hono?.routes || []),
 					async (app, config) => {
 						const paths = getBuildPaths(config);
 						app.use(

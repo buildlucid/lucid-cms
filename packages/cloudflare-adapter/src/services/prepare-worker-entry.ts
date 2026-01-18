@@ -76,7 +76,7 @@ const { app } = await lucid.createApp({
                 });
             },
         ],
-        extensions: [
+        routes: [
             async (app, config) => {
                 app.get("/admin/*", async (c) => {
                     const url = new URL(c.req.url);

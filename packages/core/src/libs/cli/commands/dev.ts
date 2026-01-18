@@ -189,7 +189,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 	const distPath = path.join(
 		process.cwd(),
-		currentConfig.config.compilerOptions.paths.outDir,
+		currentConfig.config.build.paths.outDir,
 	);
 
 	const ignorePatterns = [
@@ -207,7 +207,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 		"**/*.sqlite-shm",
 		"**/*.sqlite-wal",
 		`${constants.defaultUploadDirectory}/**`,
-		...(currentConfig.config.compilerOptions.watch?.ignore ?? []),
+		...(currentConfig.config.build.watch?.ignore ?? []),
 	];
 
 	const isIgnoredFile = (filePath: string) => {

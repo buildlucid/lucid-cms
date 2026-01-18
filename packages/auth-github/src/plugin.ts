@@ -33,7 +33,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					scopes: ["read:user"],
 				},
 			});
-			draft.compilerOptions.paths.copyPublic.push({
+			draft.build.paths.copyPublic.push({
 				input: path.join(currentDir, "../assets/github-icon.svg"),
 				output: "assets/auth-provider-icons/github-icon.svg",
 			});
