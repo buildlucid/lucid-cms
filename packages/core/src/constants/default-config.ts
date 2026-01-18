@@ -18,7 +18,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 		},
 		simulate: false,
 	},
-	disableOpenAPI: false,
+	openAPI: {
+		enabled: false,
+	},
 	localization: {
 		locales: [
 			{

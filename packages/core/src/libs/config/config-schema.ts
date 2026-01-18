@@ -95,7 +95,9 @@ const ConfigSchema = z.object({
 			providers: z.array(AuthProviderSchema).optional(),
 		})
 		.optional(),
-	disableOpenAPI: z.boolean(),
+	openAPI: z.object({
+		enabled: z.boolean(),
+	}),
 	localization: z
 		.object({
 			locales: z.array(

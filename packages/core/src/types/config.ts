@@ -97,8 +97,10 @@ export interface LucidConfig {
 		/** The authentication providers to use. */
 		providers?: AuthProvider[];
 	};
-	/** Disables the OpenAPI documentation site. */
-	disableOpenAPI?: boolean;
+	openAPI?: {
+		/** Whether the OpenAPI documentation site is enabled. */
+		enabled?: boolean;
+	};
 	/** Localization settings. */
 	localization?: {
 		/** A list of locales you want to write content in. */
@@ -262,7 +264,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| Promise<EmailAdapterInstance>;
 		simulate: boolean;
 	};
-	disableOpenAPI: boolean;
+	openAPI: {
+		enabled: boolean;
+	};
 	localization: {
 		locales: {
 			label: string;

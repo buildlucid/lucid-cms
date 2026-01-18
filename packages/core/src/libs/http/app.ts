@@ -160,7 +160,7 @@ const createApp = async (props: {
 		await route(app, props.config);
 	}
 
-	if (!props.config.disableOpenAPI) {
+	if (props.config.openAPI?.enabled) {
 		app.get(
 			"/openapi",
 			openAPIRouteHandler(app, {

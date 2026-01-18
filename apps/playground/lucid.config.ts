@@ -100,7 +100,9 @@ export default defineConfig((env) => ({
 		],
 		defaultLocale: "en",
 	},
-	disableOpenAPI: false,
+	openAPI: {
+		enabled: true,
+	},
 	media: {
 		// adapter: fileSystemMediaAdapter({
 		// 	uploadDir: "uploads",
