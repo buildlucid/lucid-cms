@@ -6,7 +6,6 @@ import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
 import { z } from "@lucidcms/core";
 import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
-import { passthroughImageProcessor } from "@lucidcms/core/image-processor";
 import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
 import {
 	passthroughQueueAdapter,
@@ -107,15 +106,18 @@ export default defineConfig((env) => ({
 		// 	uploadDir: "uploads",
 		// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
 		// }),
-		maxFileSize: 200 * 1024 * 1024, // 200MB
-		processedImageLimit: 10,
-		storeProcessedImages: true,
-		onDemandFormats: true,
+		limits: {
+			fileSize: 200 * 1024 * 1024, // 200MB.
+			processedImages: 10,
+		},
+		images: {
+			storeProcessed: true,
+			onDemandFormats: true,
+		},
 		fallback: {
 			image: "https://placehold.co/600x400",
 			video: "https://cdn.pixabay.com/video/2026/01/05/326081_large.mp4",
 		},
-		// imageProcessor: passthroughImageProcessor,
 		// urlStrategy: (media) => {
 		// 	return `https://media.protodigital.co.uk/${media.key}`;
 		// },

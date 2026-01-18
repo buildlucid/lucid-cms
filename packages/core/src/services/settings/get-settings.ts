@@ -52,11 +52,8 @@ const getSettings: ServiceFn<
 	const emailTemplates = Array.from(
 		new Set([...defaultTemplates, ...preRenderedTemplates]),
 	);
-	const imageProcessorKey = context.config.media.imageProcessor
-		? "custom"
-		: image === passthroughProcessor
-			? "passthrough"
-			: "sharp";
+	const imageProcessorKey =
+		image === passthroughProcessor ? "passthrough" : "sharp";
 
 	return {
 		error: undefined,

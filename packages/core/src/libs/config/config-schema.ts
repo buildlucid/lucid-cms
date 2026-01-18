@@ -122,34 +122,39 @@ const ConfigSchema = z.object({
 	preRenderedEmailTemplates: z.record(z.string(), z.string()).optional(),
 	media: z.object({
 		adapter: MediaAdapterSchema.optional(),
-		storageLimit: z.number(),
-		maxFileSize: z.number(),
+		limits: z.object({
+			storage: z.number(),
+			fileSize: z.number(),
+			processedImages: z.number(),
+		}),
+		images: z.object({
+			//* disabled for beta release
+			// processor: ImageProcessorSchema.optional(),
+			presets: z.record(
+				z.string(),
+				z.object({
+					width: z.number().optional(),
+					height: z.number().optional(),
+					format: z
+						.union([
+							z.literal("webp"),
+							z.literal("avif"),
+							z.literal("jpeg"),
+							z.literal("png"),
+						])
+						.optional(),
+					quality: z.number().optional(),
+				}),
+			),
+			storeProcessed: z.boolean(),
+			onDemandFormats: z.boolean(),
+		}),
 		fallback: z
 			.object({
 				image: z.string().optional(),
 				video: z.string().optional(),
 			})
 			.optional(),
-		processedImageLimit: z.number(),
-		storeProcessedImages: z.boolean(),
-		onDemandFormats: z.boolean(),
-		imageProcessor: ImageProcessorSchema.optional(),
-		imagePresets: z.record(
-			z.string(),
-			z.object({
-				width: z.number().optional(),
-				height: z.number().optional(),
-				format: z
-					.union([
-						z.literal("webp"),
-						z.literal("avif"),
-						z.literal("jpeg"),
-						z.literal("png"),
-					])
-					.optional(),
-				quality: z.number().optional(),
-			}),
-		),
 		urlStrategy: UrlStrategySchema.optional(),
 	}),
 	hooks: z.array(

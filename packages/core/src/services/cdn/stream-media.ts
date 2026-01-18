@@ -68,8 +68,8 @@ const streamMedia: ServiceFn<
 	// OG Image
 
 	const selectedPreset =
-		context.config.media.imagePresets?.[data.query.preset ?? ""];
-	const format = context.config.media.onDemandFormats
+		context.config.media.images.presets?.[data.query.preset ?? ""];
+	const format = context.config.media.images.onDemandFormats
 		? chooseAcceptHeaderFormat(data.accept, data.query.format)
 		: selectedPreset?.format;
 	const quality = selectedPreset?.quality ?? constants.media.imagePresetQuality;

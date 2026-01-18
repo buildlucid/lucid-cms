@@ -44,14 +44,14 @@ const formatSingle = (props: {
 		response.media = {
 			enabled: props.settings.mediaAdapterEnabled,
 			storage: {
-				total: props.config.media.storageLimit,
+				total: props.config.media.limits.storage,
 				remaining:
-					props.config.media.storageLimit - props.settings.mediaStorageUsed,
+					props.config.media.limits.storage - props.settings.mediaStorageUsed,
 				used: props.settings.mediaStorageUsed,
 			},
 			processed: {
-				stored: props.config.media.storeProcessedImages,
-				imageLimit: props.config.media.processedImageLimit,
+				stored: props.config.media.images.storeProcessed,
+				imageLimit: props.config.media.limits.processedImages,
 				total: props.settings.processedImageCount,
 			},
 		};

@@ -84,7 +84,7 @@ const processImage: ServiceFn<
 	}
 
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
-	if (processedCountRes.data >= context.config.media.processedImageLimit) {
+	if (processedCountRes.data >= context.config.media.limits.processedImages) {
 		return {
 			error: undefined,
 			data: {
@@ -120,7 +120,7 @@ const processImage: ServiceFn<
 		context.config.db,
 	);
 
-	if (context.config.media.storeProcessedImages === true) {
+	if (context.config.media.images.storeProcessed === true) {
 		await Promise.all([
 			ProcessedImages.createSingle({
 				data: {

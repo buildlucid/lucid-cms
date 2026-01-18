@@ -137,10 +137,33 @@ export interface LucidConfig {
 			| MediaAdapter
 			| MediaAdapterInstance
 			| Promise<MediaAdapterInstance>;
-		/** The storage limit in bytes. */
-		storageLimit?: number;
-		/** The maximum file size in bytes. */
-		maxFileSize?: number;
+		limits?: {
+			/** The storage limit in bytes. */
+			storage?: number;
+			/** The maximum file size in bytes. */
+			fileSize?: number;
+			/** The processed image limit. */
+			processedImages?: number;
+		};
+		/** Image settings. */
+		images?: {
+			// /** The image processor to use. */
+			// processor?: ImageProcessor;
+			/** The image presets to use. These are used to generate the processed images. */
+			presets?: Record<
+				string,
+				{
+					width?: number;
+					height?: number;
+					format?: "webp" | "avif" | "jpeg" | "png";
+					quality?: number;
+				}
+			>;
+			/** If true, the processed images will be stored. */
+			storeProcessed?: boolean;
+			/** If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse. */
+			onDemandFormats?: boolean;
+		};
 		/** Fallback URLs to redirect to when media cannot be found. Only used when the `fallback` query param is set and the sec-fetch-dest header is set to `image` or `video`. */
 		fallback?: {
 			/** The fallback image URL to redirect to when an image cannot be found. */
@@ -148,24 +171,6 @@ export interface LucidConfig {
 			/** The fallback video URL to redirect to when a video cannot be found. */
 			video?: string;
 		};
-		/** The image processor to use. */
-		imageProcessor?: ImageProcessor;
-		/** The processed image limit. */
-		processedImageLimit?: number;
-		/** If true, the processed images will be stored. */
-		storeProcessedImages?: boolean;
-		/** If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse. */
-		onDemandFormats?: boolean;
-		/** The image presets to use. These are used to generate the processed images. */
-		imagePresets?: Record<
-			string,
-			{
-				width?: number;
-				height?: number;
-				format?: "webp" | "avif" | "jpeg" | "png";
-				quality?: number;
-			}
-		>;
 		/** The url strategy to use. This is used to generate the url for the media. */
 		urlStrategy?: UrlStrategy;
 	};
@@ -262,25 +267,29 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| MediaAdapter
 			| MediaAdapterInstance
 			| Promise<MediaAdapterInstance>;
-		storageLimit: number;
-		maxFileSize: number;
-		processedImageLimit: number;
-		storeProcessedImages: boolean;
+		limits: {
+			storage: number;
+			fileSize: number;
+			processedImages: number;
+		};
+		images: {
+			// processor?: ImageProcessor;
+			presets: Record<
+				string,
+				{
+					width?: number;
+					height?: number;
+					format?: "webp" | "avif" | "jpeg" | "png";
+					quality?: number;
+				}
+			>;
+			storeProcessed: boolean;
+			onDemandFormats: boolean;
+		};
 		fallback?: {
 			image?: string;
 			video?: string;
 		};
-		imageProcessor?: ImageProcessor;
-		onDemandFormats: boolean;
-		imagePresets: Record<
-			string,
-			{
-				width?: number;
-				height?: number;
-				format?: "webp" | "avif" | "jpeg" | "png";
-				quality?: number;
-			}
-		>;
 		urlStrategy?: UrlStrategy;
 	};
 	hono: {

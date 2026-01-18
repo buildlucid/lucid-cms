@@ -29,19 +29,23 @@ export const defaultConfig: Partial<LucidConfig> = {
 		defaultLocale: "en",
 	},
 	media: {
-		storageLimit: 5368709120,
-		maxFileSize: 16777216,
-		fallback: undefined,
-		processedImageLimit: 10,
-		storeProcessedImages: true,
-		onDemandFormats: false,
-		imagePresets: {
-			thumbnail: {
-				height: 200,
-				format: "webp",
-				quality: 80,
-			},
+		limits: {
+			storage: 5368709120,
+			fileSize: 16777216,
+			processedImages: 10,
 		},
+		images: {
+			presets: {
+				thumbnail: {
+					height: 200,
+					format: "webp",
+					quality: 80,
+				},
+			},
+			onDemandFormats: false,
+			storeProcessed: true,
+		},
+		fallback: undefined,
 	},
 	hono: {
 		middleware: [],

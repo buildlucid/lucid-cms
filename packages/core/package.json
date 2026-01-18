@@ -42,10 +42,6 @@
             "types": "./dist/libs/email-adapter/index.d.mts",
             "default": "./dist/libs/email-adapter/index.mjs"
         },
-        "./image-processor": {
-            "types": "./dist/libs/image-processor/index.d.mts",
-            "default": "./dist/libs/image-processor/index.mjs"
-        },
         "./kv-adapter": {
             "types": "./dist/libs/kv-adapter/index.d.mts",
             "default": "./dist/libs/kv-adapter/index.mjs"

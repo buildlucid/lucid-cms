@@ -6,10 +6,11 @@ import passthroughProcessor from "./processors/passthrough.js";
 /**
  * Returns the ideal Image Processor based on config and the runtime environment
  */
-const getImageProcessor = async (config: Config): Promise<ImageProcessor> => {
-	if (config.media.imageProcessor) {
-		return config.media.imageProcessor;
-	}
+const getImageProcessor = async (_config: Config): Promise<ImageProcessor> => {
+	//* disabled for beta release
+	// if (config.media.images.processor) {
+	// 	return config.media.images.processor;
+	// }
 
 	try {
 		const { default: sharpProcessor } = await import("./processors/sharp.js");

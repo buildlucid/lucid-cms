@@ -13,7 +13,7 @@ export default defineConfig({
         "src/libs/builders/index.ts",
         "src/libs/db-adapter/index.ts",
         "src/libs/email-adapter/index.ts",
-        "src/libs/image-processor/index.ts",
+        // "src/libs/image-processor/index.ts",
         "src/libs/kv-adapter/index.ts",
         "src/libs/media-adapter/index.ts",
     ],
