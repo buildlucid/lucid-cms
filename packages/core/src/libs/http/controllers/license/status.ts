@@ -36,6 +36,7 @@ const statusController = factory.createHandlers(
 			queue: c.get("queue"),
 			env: c.get("env"),
 			kv: c.get("kv"),
+			requestUrl: c.req.url,
 		});
 		if (res.error) throw new LucidAPIError(res.error);
 

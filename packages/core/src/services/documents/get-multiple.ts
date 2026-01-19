@@ -8,7 +8,7 @@ import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import type { DocumentResponse } from "../../types/response.js";
-import { groupDocumentFilters } from "../../utils/helpers/index.js";
+import { getBaseUrl, groupDocumentFilters } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
@@ -97,6 +97,7 @@ const getMultiple: ServiceFn<
 				documents: documentsRes.data?.[0] || [],
 				collection: collectionRes.data,
 				config: context.config,
+				host: getBaseUrl(context),
 				relationData: relationDataRes.data,
 				hasFields: true,
 				hasBricks: false,

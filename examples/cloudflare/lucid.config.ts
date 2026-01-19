@@ -18,7 +18,6 @@ export const adapter = cloudflareAdapter({
 });
 
 export const envSchema = z.object({
-	LUCID_HOST: z.string(),
 	LUCID_TURSO_URL: z.string(),
 	LUCID_TURSO_AUTH_TOKEN: z.string(),
 	LUCID_ENCRYPTION_SECRET: z.string(),
@@ -39,7 +38,6 @@ export const envSchema = z.object({
 });
 
 export default defineConfig((env) => ({
-	host: env.LUCID_HOST,
 	db: new LibSQLAdapter({
 		url: env.LUCID_TURSO_URL,
 		authToken: env.LUCID_TURSO_AUTH_TOKEN,

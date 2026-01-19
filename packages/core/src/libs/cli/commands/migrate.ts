@@ -28,6 +28,7 @@ const runSyncTasks = async (
 			queue: queue,
 			env: null,
 			kv: kv,
+			requestUrl: config.baseUrl ?? "",
 		}),
 		syncServices.syncCollections({
 			db: config.db,
@@ -35,6 +36,7 @@ const runSyncTasks = async (
 			queue: queue,
 			env: null,
 			kv: kv,
+			requestUrl: config.baseUrl ?? "",
 		}),
 	]);
 
@@ -114,6 +116,7 @@ const migrateCommand = (props?: {
 					queue: queue,
 					env: null,
 					kv: passthroughKVAdapter(),
+					requestUrl: config.baseUrl ?? "",
 				},
 				{
 					dryRun: true,
@@ -256,6 +259,7 @@ const migrateCommand = (props?: {
 							queue: queue,
 							env: null,
 							kv: kvInstance,
+							requestUrl: config.baseUrl ?? "",
 						},
 						{ dryRun: false },
 					);

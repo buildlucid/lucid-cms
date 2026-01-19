@@ -10,6 +10,7 @@ import {
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { MediaResponse } from "../../types.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
@@ -164,7 +165,7 @@ const createSingle: ServiceFn<
 		error: undefined,
 		data: mediaFormatter.formatSingle({
 			media: mediaFetchRes.data,
-			host: context.config.host,
+			host: getBaseUrl(context),
 		}),
 	};
 };

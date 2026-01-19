@@ -24,6 +24,7 @@ const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
 	config: Config;
+	host: string;
 	hasFields: boolean;
 	hasBricks: boolean;
 	relationData?: FieldRelationResponse;
@@ -39,6 +40,7 @@ const formatMultiple = (props: {
 				relationMetaData: props.relationData || {},
 				collection: props.collection,
 				config: props.config,
+				host: props.host,
 			});
 		}
 		if (props.hasBricks) {
@@ -48,6 +50,7 @@ const formatMultiple = (props: {
 				relationMetaData: props.relationData || {},
 				collection: props.collection,
 				config: props.config,
+				host: props.host,
 			});
 		}
 
@@ -55,6 +58,7 @@ const formatMultiple = (props: {
 			data: props.relationData,
 			collection: props.collection,
 			config: props.config,
+			host: props.host,
 			bricksTableSchema: props.bricksTableSchema,
 		});
 
@@ -146,6 +150,7 @@ const formatClientMultiple = (props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
 	config: Config;
+	host: string;
 	hasFields: boolean;
 	hasBricks: boolean;
 	relationData?: FieldRelationResponse;
@@ -161,6 +166,7 @@ const formatClientMultiple = (props: {
 				relationMetaData: props.relationData || {},
 				collection: props.collection,
 				config: props.config,
+				host: props.host,
 			});
 		}
 		if (props.hasBricks) {
@@ -170,6 +176,7 @@ const formatClientMultiple = (props: {
 				relationMetaData: props.relationData || {},
 				collection: props.collection,
 				config: props.config,
+				host: props.host,
 			});
 		}
 
@@ -177,6 +184,7 @@ const formatClientMultiple = (props: {
 			data: props.relationData,
 			collection: props.collection,
 			config: props.config,
+			host: props.host,
 			bricksTableSchema: props.bricksTableSchema,
 		});
 
@@ -229,6 +237,7 @@ const formatRefs = (props: {
 	data?: FieldRelationResponse;
 	collection: CollectionBuilder;
 	config: Config;
+	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 }): Partial<Record<FieldTypes, FieldRefs[]>> | null => {
 	const refs: Partial<Record<FieldTypes, FieldRefs[]>> = {};
@@ -251,6 +260,7 @@ const formatRefs = (props: {
 				return customField.formatRef(d, {
 					collection: props.collection,
 					config: props.config,
+					host: props.host,
 					bricksTableSchema: props.bricksTableSchema,
 					localization: localization,
 				});

@@ -2,6 +2,7 @@ import formatter, { mediaFormatter } from "../../libs/formatters/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
 import type { MediaResponse } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -32,7 +33,7 @@ const getMultiple: ServiceFn<
 		data: {
 			data: mediaFormatter.formatMultiple({
 				media: mediaRes.data[0],
-				host: context.config.host,
+				host: getBaseUrl(context),
 			}),
 			count: formatter.parseCount(mediaRes.data[1]?.count),
 		},

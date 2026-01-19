@@ -60,13 +60,13 @@ export interface LucidConfig {
 	};
 	/** The cors configuration. */
 	cors?: {
-		/** Allowed origins. Your configured host is already added by default. */
+		/** Allowed origins. */
 		origin?: string[];
 		/** Allowed headers. */
 		allowHeaders?: string[];
 	};
-	/** The host of the Lucid instance. */
-	host: string;
+	/** The base URL of the Lucid instance. If not provided, the request URL will be used. */
+	baseUrl?: string;
 	/** `64 character` length secrets to encrypt and sign data. */
 	secrets: {
 		/** Used to encrypt user secrets and API keys. Must be `64 characters` long. */

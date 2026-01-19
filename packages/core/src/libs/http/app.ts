@@ -74,8 +74,8 @@ const createApp = async (props: {
 		.use(
 			cors({
 				origin: [
-					props.config.host,
 					"http://localhost:3000",
+					...(props.config.baseUrl ? [props.config.baseUrl] : []),
 					...(props.config.cors?.origin || []),
 				],
 				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -273,14 +273,16 @@ const createApp = async (props: {
 								"Client locale endpoints for fetching locale information.",
 						},
 					],
-					servers: [
-						{
-							url: props.config.host.includes("[::1]")
-								? props.config.host.replace("[::1]", "localhost")
-								: props.config.host,
-							description: "Development server",
-						},
-					],
+					servers: props.config.baseUrl
+						? [
+								{
+									url: props.config.baseUrl.includes("[::1]")
+										? props.config.baseUrl.replace("[::1]", "localhost")
+										: props.config.baseUrl,
+									description: "Development server",
+								},
+							]
+						: [],
 				},
 			}),
 		);

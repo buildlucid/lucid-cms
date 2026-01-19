@@ -49,6 +49,7 @@ const clearAllProcessedController = factory.createHandlers(
 			queue: c.get("queue"),
 			env: c.get("env"),
 			kv: c.get("kv"),
+			requestUrl: c.req.url,
 		});
 		if (clearProcessed.error) throw new LucidAPIError(clearProcessed.error);
 

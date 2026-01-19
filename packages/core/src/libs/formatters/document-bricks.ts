@@ -20,6 +20,7 @@ const formatMultiple = (props: {
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	relationMetaData: FieldRelationResponse;
 	config: Config;
+	host: string;
 }): BrickResponse[] => {
 	const brickSchemas = props.bricksSchema.filter(
 		(schema) => schema.type === "brick",
@@ -68,7 +69,7 @@ const formatMultiple = (props: {
 						relationMetaData: props.relationMetaData,
 					},
 					{
-						host: props.config.host,
+						host: props.host,
 						builder: brickBuilder,
 						collection: props.collection,
 						localization: {
@@ -93,6 +94,7 @@ const formatDocumentFields = (props: {
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	relationMetaData: FieldRelationResponse;
 	config: Config;
+	host: string;
 }): FieldResponse[] => {
 	const documentFieldsSchema = props.bricksSchema.find(
 		(bs) => bs.type === "document-fields",
@@ -116,7 +118,7 @@ const formatDocumentFields = (props: {
 			relationMetaData: props.relationMetaData,
 		},
 		{
-			host: props.config.host,
+			host: props.host,
 			builder: props.collection,
 			collection: props.collection,
 			localization: {

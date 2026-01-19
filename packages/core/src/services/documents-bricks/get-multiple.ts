@@ -14,6 +14,7 @@ import type {
 	DocumentResponse,
 	FieldResponse,
 } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getSingleInstance } from "../collections/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
@@ -94,6 +95,8 @@ const getMultiple: ServiceFn<
 	});
 	if (relationDataRes.error) return relationDataRes;
 
+	const baseUrl = getBaseUrl(context);
+
 	return {
 		error: undefined,
 		data: {
@@ -103,6 +106,7 @@ const getMultiple: ServiceFn<
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
+				host: baseUrl,
 			}),
 			fields: documentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
@@ -110,10 +114,12 @@ const getMultiple: ServiceFn<
 				relationMetaData: relationDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
+				host: baseUrl,
 			}),
 			refs: documentsFormatter.formatRefs({
 				collection: collectionRes.data,
 				config: context.config,
+				host: baseUrl,
 				bricksTableSchema: bricksTableSchemaRes.data,
 				data: relationDataRes.data,
 			}),

@@ -59,6 +59,7 @@ const clientAuthentication = createMiddleware(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: kv,
+				requestUrl: c.req.url,
 			},
 			{
 				apiKey: apiKey,

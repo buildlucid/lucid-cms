@@ -627,5 +627,6 @@ export type FieldRefParams = {
 		default: string;
 	};
 	config: Config;
+	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 };

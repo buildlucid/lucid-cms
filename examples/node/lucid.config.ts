@@ -10,7 +10,6 @@ import SettingsCollection from "./src/collections/settings.js";
 export const adapter = nodeAdapter();
 
 export const envSchema = z.object({
-	LUCID_HOST: z.string(),
 	LUCID_ENCRYPTION_SECRET: z.string(),
 	LUCID_COOKIE_SECRET: z.string(),
 	LUCID_REFRESH_TOKEN_SECRET: z.string(),
@@ -18,7 +17,6 @@ export const envSchema = z.object({
 });
 
 export default defineConfig((env) => ({
-	host: env.LUCID_HOST,
 	db: new SQLiteAdapter({
 		database: async () => new Database("db.sqlite"),
 	}),

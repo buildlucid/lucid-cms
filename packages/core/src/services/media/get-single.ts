@@ -2,6 +2,7 @@ import { mediaFormatter } from "../../libs/formatters/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { MediaResponse } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -30,7 +31,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: mediaFormatter.formatSingle({
 			media: mediaRes.data,
-			host: context.config.host,
+			host: getBaseUrl(context),
 		}),
 	};
 };

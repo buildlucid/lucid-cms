@@ -54,6 +54,7 @@ const deleteSingleController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				id: Number.parseInt(id, 10),

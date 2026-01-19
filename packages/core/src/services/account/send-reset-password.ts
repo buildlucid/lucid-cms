@@ -2,6 +2,7 @@ import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -68,7 +69,7 @@ const sendResetPassword: ServiceFn<
 			firstName: userExistsRes.data.first_name,
 			lastName: userExistsRes.data.last_name,
 			email: userExistsRes.data.email,
-			resetLink: `${context.config.host}${constants.locations.resetPassword}?token=${userToken.data.token}`,
+			resetLink: `${getBaseUrl(context)}${constants.locations.resetPassword}?token=${userToken.data.token}`,
 		},
 	});
 	if (sendEmail.error) return sendEmail;

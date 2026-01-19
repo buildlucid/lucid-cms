@@ -3,6 +3,7 @@ import constants from "../../constants/constants.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -106,14 +107,13 @@ const verifyLicense: ServiceFn<
 	let errorMessage: string | null = null;
 
 	try {
+		const baseUrl = getBaseUrl(context);
 		const res = await fetch(constants.endpoints.licenseVerify, {
 			method: "POST",
 			headers: {
 				"User-Agent": `LucidCMS/${packageJson.version}`,
 				"Content-Type": "application/json",
-				Origin: context.config.host.startsWith("http")
-					? context.config.host
-					: `https://${context.config.host}`,
+				Origin: baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`,
 			},
 			body: JSON.stringify({
 				licenseKey: key,

@@ -2,6 +2,7 @@ import constants from "../../../constants/constants.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import { AuthStatesRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
+import { getBaseUrl } from "../../../utils/helpers/index.js";
 import urlAddPath from "../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -24,8 +25,10 @@ const authRedirectUrl: ServiceFn<
 		context.config.db,
 	);
 
+	const baseUrl = getBaseUrl(context);
+
 	const baseRedirectUrl = urlAddPath(
-		context.config.host,
+		baseUrl,
 		constants.authState.defaultErrorRedirectPath,
 	);
 
@@ -81,7 +84,7 @@ const authRedirectUrl: ServiceFn<
 			error: undefined,
 			data: {
 				redirectUrl: urlAddPath(
-					context.config.host,
+					baseUrl,
 					`/admin/accept-invitation?token=${authStateRes.data.invitation_token}`,
 				),
 			},
@@ -92,10 +95,7 @@ const authRedirectUrl: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				redirectUrl: urlAddPath(
-					context.config.host,
-					authStateRes.data.redirect_path,
-				),
+				redirectUrl: urlAddPath(baseUrl, authStateRes.data.redirect_path),
 			},
 		};
 	}

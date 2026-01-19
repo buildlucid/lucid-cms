@@ -6,6 +6,7 @@ import {
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -96,7 +97,7 @@ const resendInvitation: ServiceFn<
 			firstName: userRes.data.first_name,
 			lastName: userRes.data.last_name,
 			email: userRes.data.email,
-			resetLink: `${context.config.host}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
+			resetLink: `${getBaseUrl(context)}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
 		},
 	});
 	if (sendEmailRes.error) return sendEmailRes;

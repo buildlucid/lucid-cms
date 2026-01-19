@@ -4,6 +4,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import type { MediaUrlResponse } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import { createMediaUrl, generateProcessKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
@@ -22,6 +23,8 @@ const processMedia: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+
+	const baseUrl = getBaseUrl(context);
 
 	const mediaStrategyRes =
 		await mediaServices.checks.checkHasMediaStrategy(context);
@@ -45,7 +48,7 @@ const processMedia: ServiceFn<
 			data: {
 				url: createMediaUrl({
 					key: data.key,
-					host: context.config.host,
+					host: baseUrl,
 				}),
 			},
 		};
@@ -63,7 +66,7 @@ const processMedia: ServiceFn<
 			data: {
 				url: createMediaUrl({
 					key: data.key,
-					host: context.config.host,
+					host: baseUrl,
 				}),
 			},
 		};
@@ -98,7 +101,7 @@ const processMedia: ServiceFn<
 			data: {
 				url: createMediaUrl({
 					key: processKey,
-					host: context.config.host,
+					host: baseUrl,
 				}),
 			},
 		};
@@ -122,7 +125,7 @@ const processMedia: ServiceFn<
 		data: {
 			url: createMediaUrl({
 				key: processKey,
-				host: context.config.host,
+				host: baseUrl,
 			}),
 		},
 	};

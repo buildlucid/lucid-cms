@@ -1,3 +1,4 @@
+import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 
@@ -21,7 +22,7 @@ const getPresignedUrl: ServiceFn<
 	const presignedUrlRes = await mediaStrategyRes.data.getPresignedUrl(
 		data.key,
 		{
-			host: context.config.host,
+			host: getBaseUrl(context),
 			mimeType: data.mimeType,
 			extension: data.extension,
 		},

@@ -152,6 +152,7 @@ const streamSingleController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				key: params.key,
@@ -174,6 +175,7 @@ const streamSingleController = factory.createHandlers(
 					queue: c.get("queue"),
 					env: c.get("env"),
 					kv: c.get("kv"),
+					requestUrl: c.req.url,
 				},
 				{
 					fallback: query?.fallback ? Boolean(query?.fallback) : undefined,

@@ -58,6 +58,7 @@ const createSingleController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				name: body.name,
@@ -81,6 +82,7 @@ const createSingleController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				id: roleId.data,

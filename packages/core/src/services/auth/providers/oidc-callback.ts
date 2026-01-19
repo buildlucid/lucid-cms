@@ -3,6 +3,7 @@ import getAvailableProviders from "../../../libs/auth-providers/get-available-pr
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import { AuthStatesRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
+import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import processProviderAuth from "./helpers/process-provider-auth.js";
 
@@ -93,7 +94,7 @@ const oidcCallback: ServiceFn<
 		code: data.code,
 		state: data.state,
 		redirectUri: buildCallbackRedirectUrl(
-			context.config.host,
+			getBaseUrl(context),
 			data.providerKey,
 		),
 	});

@@ -17,6 +17,7 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
+import getRequestBaseUrl from "../../../utils/get-request-base-url.js";
 
 const factory = createFactory();
 
@@ -60,6 +61,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				providerKey,
@@ -68,7 +70,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 		);
 		if (errorRedirectURLRes.error) {
 			const baseRedirectUrl = urlAddPath(
-				c.get("config").host,
+				getRequestBaseUrl(c),
 				constants.authState.defaultRedirectPath,
 			);
 			return c.redirect(
@@ -93,6 +95,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				providerKey,
@@ -145,6 +148,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 					queue: c.get("queue"),
 					env: c.get("env"),
 					kv: c.get("kv"),
+					requestUrl: c.req.url,
 				},
 				{
 					userId: callbackAuthRes.data.userId,

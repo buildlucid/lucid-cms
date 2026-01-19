@@ -100,6 +100,7 @@ class DocumentCustomField extends CustomField<"document"> {
 				relationMetaData: {},
 				collection: collection,
 				config: params.config,
+				host: params.host,
 			}),
 		);
 

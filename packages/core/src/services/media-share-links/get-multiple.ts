@@ -4,6 +4,7 @@ import formatter, {
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleShareLinksQueryParams } from "../../schemas/media-share-links.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -50,7 +51,7 @@ const getMultiple: ServiceFn<
 		data: {
 			data: mediaShareLinksFormatter.formatMultiple({
 				links: linksRes.data[0],
-				host: context.config.host,
+				host: getBaseUrl(context),
 			}),
 			count: formatter.parseCount(linksRes.data[1]?.count),
 		},

@@ -7,6 +7,7 @@ import {
 } from "../../../../libs/repositories/index.js";
 import T from "../../../../translations/index.js";
 import type { AuthStateActionType } from "../../../../types.js";
+import { getBaseUrl } from "../../../../utils/helpers/index.js";
 import urlAddPath from "../../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 
@@ -44,7 +45,7 @@ const processProviderAuth: ServiceFn<
 	const Users = new UsersRepository(context.db.client, context.config.db);
 
 	const redirectUrl = urlAddPath(
-		context.config.host,
+		getBaseUrl(context),
 		data.redirectPath ?? constants.authState.defaultRedirectPath,
 	);
 

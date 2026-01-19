@@ -1,6 +1,7 @@
 import { mediaShareLinksFormatter } from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { MediaShareLinkResponse } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -45,7 +46,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: mediaShareLinksFormatter.formatSingle({
 			link: linkRes.data,
-			host: context.config.host,
+			host: getBaseUrl(context),
 		}),
 	};
 };

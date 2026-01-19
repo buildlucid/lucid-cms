@@ -15,6 +15,7 @@ import type {
 	AuthStateActionType,
 	InitiateAuthResponse,
 } from "../../../types.js";
+import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const initiate: ServiceFn<
@@ -145,7 +146,7 @@ const initiate: ServiceFn<
 
 	const redirectUrl = await adapterRes.data.getAuthUrl({
 		redirectUri: buildCallbackRedirectUrl(
-			context.config.host,
+			getBaseUrl(context),
 			data.providerKey,
 		),
 		state: stateToken,

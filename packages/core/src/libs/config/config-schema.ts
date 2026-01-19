@@ -59,7 +59,7 @@ const EmailAdapterSchema = z.custom<
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
-	host: z.string(),
+	baseUrl: z.string().optional(),
 	cors: z
 		.object({
 			origin: z.array(z.string()).optional(),

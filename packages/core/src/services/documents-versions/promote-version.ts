@@ -10,6 +10,7 @@ import {
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
@@ -271,6 +272,7 @@ const promoteVersion: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// Create new brick tale rows for the new version
+	const baseUrl = getBaseUrl(context);
 	const brickTables = aggregateBrickTables({
 		collection: collectionRes.data,
 		documentId: data.documentId,
@@ -282,6 +284,7 @@ const promoteVersion: ServiceFn<
 			relationMetaData: {},
 			collection: collectionRes.data,
 			config: context.config,
+			host: baseUrl,
 		}),
 		fields: documentBricksFormatter.formatDocumentFields({
 			bricksQuery: bricksQueryRes.data,
@@ -289,6 +292,7 @@ const promoteVersion: ServiceFn<
 			relationMetaData: {},
 			collection: collectionRes.data,
 			config: context.config,
+			host: baseUrl,
 		}),
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);

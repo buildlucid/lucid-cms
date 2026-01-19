@@ -67,6 +67,7 @@ const streamMediaController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{ token, sessionCookie },
 		);
@@ -97,6 +98,7 @@ const streamMediaController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				mediaKey: authorizeRes.data.mediaKey,

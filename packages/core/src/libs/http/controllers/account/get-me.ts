@@ -38,6 +38,7 @@ const getMeController = factory.createHandlers(
 				queue: c.get("queue"),
 				env: c.get("env"),
 				kv: c.get("kv"),
+				requestUrl: c.req.url,
 			},
 			{
 				userId: c.get("auth").id,
