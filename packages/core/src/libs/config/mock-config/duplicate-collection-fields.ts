@@ -17,7 +17,6 @@ const collection = new CollectionBuilder("page", {
 	.addText("title");
 
 export default defineConfig(() => ({
-	host: "http://localhost:6543",
 	logger: {
 		level: "silent",
 	},
