@@ -165,7 +165,6 @@ const createSingle: ServiceFn<
 		data: mediaFormatter.formatSingle({
 			media: mediaFetchRes.data,
 			host: context.config.host,
-			urlStrategy: context.config.media.urlStrategy,
 		}),
 	};
 };

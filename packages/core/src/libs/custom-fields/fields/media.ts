@@ -76,7 +76,6 @@ class MediaCustomField extends CustomField<"media"> {
 			url: createMediaUrl({
 				key: value.key,
 				host: params.config.host,
-				urlStrategy: params.config.media?.urlStrategy,
 			}),
 			key: value.key,
 			mimeType: value.mime_type,

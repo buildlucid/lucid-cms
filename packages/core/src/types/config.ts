@@ -49,8 +49,6 @@ export type ImageProcessor = (
 	options: ImageProcessorOptions,
 ) => ServiceResponse<ImageProcessorResult>;
 
-export type UrlStrategy = (media: { key: string }) => string;
-
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. */
@@ -173,8 +171,6 @@ export interface LucidConfig {
 			/** The fallback video URL to redirect to when a video cannot be found. */
 			video?: string;
 		};
-		/** The url strategy to use. This is used to generate the url for the media. */
-		urlStrategy?: UrlStrategy;
 	};
 	/** Hono middleware and routes to register. */
 	hono?: {
@@ -302,7 +298,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			image?: string;
 			video?: string;
 		};
-		urlStrategy?: UrlStrategy;
 	};
 	hono: {
 		middleware: Array<

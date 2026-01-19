@@ -1,5 +1,4 @@
 import type { BooleanInt } from "../../libs/db-adapter/types.js";
-import type { UrlStrategy } from "../../types/config.js";
 import type { MediaResponse, MediaType } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import formatter from "./index.js";
@@ -52,16 +51,11 @@ const objectifyTranslations = (
 	);
 };
 
-const formatMultiple = (props: {
-	media: MediaPropsT[];
-	host: string;
-	urlStrategy: UrlStrategy | undefined;
-}) => {
+const formatMultiple = (props: { media: MediaPropsT[]; host: string }) => {
 	return props.media.map((m) =>
 		formatSingle({
 			media: m,
 			host: props.host,
-			urlStrategy: props.urlStrategy,
 		}),
 	);
 };
@@ -69,7 +63,6 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	media: MediaPropsT;
 	host: string;
-	urlStrategy: UrlStrategy | undefined;
 }): MediaResponse => {
 	return {
 		id: props.media.id,
@@ -78,7 +71,6 @@ const formatSingle = (props: {
 		url: createMediaUrl({
 			key: props.media.key,
 			host: props.host,
-			urlStrategy: props.urlStrategy,
 		}),
 		title:
 			props.media.translations?.map((t) => ({

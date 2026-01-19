@@ -120,9 +120,6 @@ export default defineConfig((env) => ({
 			image: "https://placehold.co/600x400",
 			video: "https://cdn.pixabay.com/video/2026/01/05/326081_large.mp4",
 		},
-		// urlStrategy: (media) => {
-		// 	return `https://media.protodigital.co.uk/${media.key}`;
-		// },
 	},
 	// email: {
 	// 	adapter: passthroughEmailAdapter,

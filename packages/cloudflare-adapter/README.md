@@ -86,49 +86,12 @@ export default defineConfig((env) => ({
 
 ## Media Streaming
 
-By default, media is streamed via the `cdn` endpoint. This supports image processing via presets and fallback images. However, as Sharp isn't supported on Workers, image processing won't work. To fix this, you'll need to explicitly tell Lucid CMS to bypass the image processor:
+By default, media is streamed via the `cdn` endpoint. This supports image processing via presets and fallback images. However, as Sharp isn't supported on Workers, image processing won't work. If you request an image via the CDN endpoint now and try to pass a preset, it will stream the original image instead of trying to optimize it via Sharp.
 
-```typescript
-import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
-import { passthroughImageProcessor } from "@lucidcms/core";
-
-export const adapter = cloudflareAdapter();
-
-export default defineConfig((env) => ({
-    media: {
-        imageProcessor: passthroughImageProcessor,
-    },
-    // ...other config
-}));
-```
-
-If you request an image via the CDN endpoint now and try to pass a preset, it will stream the original image instead of trying to optimize it via Sharp.
-
-## Image Processing with Cloudflare Images
-
-If you want to support image processing and don't want to handle this at build time, you can configure Cloudflare Images. To do this, you'll need to configure the URL strategy along with configuring your R2 bucket to have a custom domain and enabling Cloudflare Images for that domain.
-
-```typescript
-import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
-import { passthroughImageProcessor } from "@lucidcms/core";
-
-export const adapter = cloudflareAdapter();
-
-export default defineConfig((env) => ({
-    media: {
-        imageProcessor: passthroughImageProcessor,
-        urlStrategy: (media) => {
-            return `https://media.example.co.uk${media.key}`;
-        },
-    },
-    // ...other config
-}));
-```
-
-To use the original image, you'd use the URL that the media object returns (what the `urlStrategy` creates). To optimize the image via Cloudflare Images on your frontend, you'd use the media `key` to construct the URL:
+If you would like to still be able to process images on request, you can use the Cloudflare Images transforms feature like so:
 
 ```text
-https://media.example.co.uk/cdn-cgi/image/width=800,quality=75,format=auto/${mediaKey}
+https://example.co.uk/cdn-cgi/image/width=800,quality=75,format=auto/${media_url}
 ```
 
 ## Sending Emails

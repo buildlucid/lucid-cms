@@ -46,7 +46,6 @@ const processMedia: ServiceFn<
 				url: createMediaUrl({
 					key: data.key,
 					host: context.config.host,
-					urlStrategy: context.config.media?.urlStrategy,
 				}),
 			},
 		};
@@ -65,7 +64,6 @@ const processMedia: ServiceFn<
 				url: createMediaUrl({
 					key: data.key,
 					host: context.config.host,
-					urlStrategy: context.config.media?.urlStrategy,
 				}),
 			},
 		};
@@ -101,7 +99,6 @@ const processMedia: ServiceFn<
 				url: createMediaUrl({
 					key: processKey,
 					host: context.config.host,
-					urlStrategy: context.config.media?.urlStrategy,
 				}),
 			},
 		};
@@ -126,7 +123,6 @@ const processMedia: ServiceFn<
 			url: createMediaUrl({
 				key: processKey,
 				host: context.config.host,
-				urlStrategy: context.config.media?.urlStrategy,
 			}),
 		},
 	};
