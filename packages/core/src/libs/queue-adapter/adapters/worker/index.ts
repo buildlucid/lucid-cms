@@ -1,14 +1,9 @@
-import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { Worker } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
 import logger from "../../../logger/index.js";
-import { QueueJobsRepository } from "../../../repositories/index.js";
-import type {
-	QueueAdapterInstance,
-	QueueBatchJobResponse,
-	QueueJobResponse,
-} from "../../types.js";
+import { insertJobs } from "../../insert-job.js";
+import type { QueueAdapterInstance } from "../../types.js";
 
 const ADAPTER_KEY = "worker";
 
@@ -83,40 +78,31 @@ function workerQueueAdapter(
 				data: { event },
 			});
 
-			const jobId = randomUUID();
-			const now = new Date();
-			const status: QueueJobResponse["status"] = "pending";
-			const QueueJobs = new QueueJobsRepository(
-				params.serviceContext.db.client,
-				params.serviceContext.config.db,
-			);
-
-			const createJobRes = await QueueJobs.createSingle({
-				data: {
-					job_id: jobId,
-					event_type: event,
-					event_data: params.payload,
-					status: status,
-					queue_adapter_key: ADAPTER_KEY,
-					priority: params.options?.priority ?? 0,
-					attempts: 0,
-					max_attempts:
-						params.options?.maxAttempts ?? constants.queue.maxAttempts,
-					error_message: null,
-					created_at: now.toISOString(),
-					scheduled_for: params.options?.scheduledFor
-						? params.options.scheduledFor.toISOString()
-						: undefined,
-					created_by_user_id: params.options?.createdByUserId ?? null,
-					updated_at: now.toISOString(),
-				},
-				returning: ["id"],
+			const createJobRes = await insertJobs(params.serviceContext, {
+				event,
+				payloads: [params.payload],
+				options: params.options,
+				adapterKey: ADAPTER_KEY,
 			});
 			if (createJobRes.error) return createJobRes;
 
+			const jobData = createJobRes.data.jobs[0];
+			if (!jobData) {
+				return {
+					error: {
+						message: "Failed to create job",
+					},
+					data: undefined,
+				};
+			}
+
 			return {
 				error: undefined,
-				data: { jobId, event, status },
+				data: {
+					jobId: jobData.jobId,
+					event,
+					status: createJobRes.data.status,
+				},
 			};
 		},
 		addBatch: async (event, params) => {
@@ -133,48 +119,21 @@ function workerQueueAdapter(
 				data: { event, count: params.payloads.length },
 			});
 
-			const now = new Date();
-			const status: QueueBatchJobResponse["status"] = "pending";
-			const QueueJobs = new QueueJobsRepository(
-				params.serviceContext.db.client,
-				params.serviceContext.config.db,
-			);
-
-			const jobsData = params.payloads.map((payload) => ({
-				jobId: randomUUID(),
-				payload,
-			}));
-
-			const createJobsRes = await QueueJobs.createMultiple({
-				data: jobsData.map((job) => ({
-					job_id: job.jobId,
-					event_type: event,
-					event_data: job.payload,
-					status: status,
-					queue_adapter_key: ADAPTER_KEY,
-					priority: params.options?.priority ?? 0,
-					attempts: 0,
-					max_attempts:
-						params.options?.maxAttempts ?? constants.queue.maxAttempts,
-					error_message: null,
-					created_at: now.toISOString(),
-					scheduled_for: params.options?.scheduledFor
-						? params.options.scheduledFor.toISOString()
-						: undefined,
-					created_by_user_id: params.options?.createdByUserId ?? null,
-					updated_at: now.toISOString(),
-				})),
-				returning: ["id"],
+			const createJobsRes = await insertJobs(params.serviceContext, {
+				event,
+				payloads: params.payloads,
+				options: params.options,
+				adapterKey: ADAPTER_KEY,
 			});
 			if (createJobsRes.error) return createJobsRes;
 
 			return {
 				error: undefined,
 				data: {
-					jobIds: jobsData.map((j) => j.jobId),
+					jobIds: createJobsRes.data.jobs.map((j) => j.jobId),
 					event,
-					status,
-					count: jobsData.length,
+					status: createJobsRes.data.status,
+					count: createJobsRes.data.jobs.length,
 				},
 			};
 		},

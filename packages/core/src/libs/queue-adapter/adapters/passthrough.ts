@@ -1,8 +1,7 @@
-import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
 import logger from "../../logger/index.js";
-import { QueueJobsRepository } from "../../repositories/index.js";
 import executeSingleJob from "../execute-single-job.js";
+import { insertJobs } from "../insert-job.js";
 import type { QueueAdapterInstance } from "../types.js";
 
 const ADAPTER_KEY = "passthrough";
@@ -46,48 +45,39 @@ function passthroughQueueAdapter(
 					data: { event },
 				});
 
-				const jobId = randomUUID();
-				const now = new Date();
-				const status = "pending";
-				const QueueJobs = new QueueJobsRepository(
-					params.serviceContext.db.client,
-					params.serviceContext.config.db,
-				);
-
-				const createJobRes = await QueueJobs.createSingle({
-					data: {
-						job_id: jobId,
-						event_type: event,
-						event_data: params.payload,
-						status: status,
-						queue_adapter_key: ADAPTER_KEY,
-						priority: params.options?.priority ?? 0,
-						attempts: 0,
-						max_attempts:
-							params.options?.maxAttempts ?? constants.queue.maxAttempts,
-						error_message: null,
-						created_at: now.toISOString(),
-						scheduled_for: params.options?.scheduledFor
-							? params.options.scheduledFor.toISOString()
-							: undefined,
-						created_by_user_id: params.options?.createdByUserId ?? null,
-						updated_at: now.toISOString(),
-					},
-					returning: ["id"],
+				const createJobRes = await insertJobs(params.serviceContext, {
+					event,
+					payloads: [params.payload],
+					options: params.options,
+					adapterKey: ADAPTER_KEY,
 				});
 				if (createJobRes.error) return createJobRes;
+
+				const jobData = createJobRes.data.jobs[0];
+				if (!jobData) {
+					return {
+						error: {
+							message: "Failed to create job",
+						},
+						data: undefined,
+					};
+				}
 
 				//* skip immediate execution
 				if (options?.bypassImmediateExecution) {
 					return {
 						error: undefined,
-						data: { jobId, event: event, status },
+						data: {
+							jobId: jobData.jobId,
+							event,
+							status: createJobRes.data.status,
+						},
 					};
 				}
 
 				//* execute the event handler immediately
 				const executeResult = await executeSingleJob(params.serviceContext, {
-					jobId: jobId,
+					jobId: jobData.jobId,
 					event: event,
 					payload: params.payload,
 					attempts: 0,
@@ -108,7 +98,11 @@ function passthroughQueueAdapter(
 
 				return {
 					error: undefined,
-					data: { jobId, event: event, status },
+					data: {
+						jobId: jobData.jobId,
+						event,
+						status: createJobRes.data.status,
+					},
 				};
 			} catch (error) {
 				logger.error({
@@ -136,38 +130,11 @@ function passthroughQueueAdapter(
 					data: { event, count: params.payloads.length },
 				});
 
-				const now = new Date();
-				const status = "pending";
-				const QueueJobs = new QueueJobsRepository(
-					params.serviceContext.db.client,
-					params.serviceContext.config.db,
-				);
-
-				const jobsData = params.payloads.map((payload) => ({
-					jobId: randomUUID(),
-					payload,
-				}));
-
-				const createJobsRes = await QueueJobs.createMultiple({
-					data: jobsData.map((job) => ({
-						job_id: job.jobId,
-						event_type: event,
-						event_data: job.payload,
-						status: status,
-						queue_adapter_key: ADAPTER_KEY,
-						priority: params.options?.priority ?? 0,
-						attempts: 0,
-						max_attempts:
-							params.options?.maxAttempts ?? constants.queue.maxAttempts,
-						error_message: null,
-						created_at: now.toISOString(),
-						scheduled_for: params.options?.scheduledFor
-							? params.options.scheduledFor.toISOString()
-							: undefined,
-						created_by_user_id: params.options?.createdByUserId ?? null,
-						updated_at: now.toISOString(),
-					})),
-					returning: ["id"],
+				const createJobsRes = await insertJobs(params.serviceContext, {
+					event,
+					payloads: params.payloads,
+					options: params.options,
+					adapterKey: ADAPTER_KEY,
 				});
 				if (createJobsRes.error) return createJobsRes;
 
@@ -176,10 +143,10 @@ function passthroughQueueAdapter(
 					return {
 						error: undefined,
 						data: {
-							jobIds: jobsData.map((j) => j.jobId),
-							event: event,
-							status: status,
-							count: jobsData.length,
+							jobIds: createJobsRes.data.jobs.map((j) => j.jobId),
+							event,
+							status: createJobsRes.data.status,
+							count: createJobsRes.data.jobs.length,
 						},
 					};
 				}
@@ -191,10 +158,16 @@ function passthroughQueueAdapter(
 				const jobChunks: Array<
 					{ jobId: string; payload: Record<string, unknown> }[]
 				> = [];
-				for (let i = 0; i < jobsData.length; i += concurrentLimit) {
-					const chunk = jobsData.slice(i, i + concurrentLimit).map((job) => {
-						return { jobId: job.jobId, payload: job.payload };
-					});
+				for (
+					let i = 0;
+					i < createJobsRes.data.jobs.length;
+					i += concurrentLimit
+				) {
+					const chunk = createJobsRes.data.jobs
+						.slice(i, i + concurrentLimit)
+						.map((job) => {
+							return { jobId: job.jobId, payload: job.payload };
+						});
 					jobChunks.push(chunk);
 				}
 
@@ -202,7 +175,7 @@ function passthroughQueueAdapter(
 					message: "Processing batch jobs in chunks",
 					scope: constants.logScopes.queueAdapter,
 					data: {
-						totalJobs: jobsData.length,
+						totalJobs: createJobsRes.data.jobs.length,
 						chunkCount: jobChunks.length,
 						concurrentLimit,
 					},
@@ -250,16 +223,16 @@ function passthroughQueueAdapter(
 				logger.debug({
 					message: "All batch jobs completed successfully",
 					scope: constants.logScopes.queueAdapter,
-					data: { count: jobsData.length },
+					data: { count: createJobsRes.data.jobs.length },
 				});
 
 				return {
 					error: undefined,
 					data: {
-						jobIds: jobsData.map((j) => j.jobId),
-						event: event,
-						status: status,
-						count: jobsData.length,
+						jobIds: createJobsRes.data.jobs.map((j) => j.jobId),
+						event,
+						status: createJobsRes.data.status,
+						count: createJobsRes.data.jobs.length,
 					},
 				};
 			} catch (error) {
