@@ -68,6 +68,9 @@ export default Object.freeze({
 		resetPassword: "/admin/reset-password",
 		acceptInvitation: "/admin/accept-invitation",
 	},
+	assets: {
+		emailLogo: "/assets/email-logo.svg",
+	},
 	errors: {
 		name: T("default_error_name"),
 		message: T("default_error_message"),

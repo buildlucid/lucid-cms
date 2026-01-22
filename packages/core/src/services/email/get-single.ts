@@ -1,4 +1,4 @@
-import renderHandlebarsTemplate from "../../libs/email-adapter/templates/render-handlebars-template.js";
+import renderMustacheTemplate from "../../libs/email-adapter/templates/render-mustache-template.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
@@ -37,7 +37,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const html = await renderHandlebarsTemplate(context, {
+	const html = await renderMustacheTemplate(context, {
 		template: emailRes.data.template,
 		data: emailRes.data.data,
 	});

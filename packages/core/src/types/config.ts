@@ -236,6 +236,14 @@ export interface LucidConfig {
 			ignore?: string[];
 		};
 	};
+	/**
+	 * Brand configuration for white-labelling your Lucid CMS instance.
+	 * These values are used in emails and, in future, the admin interface.
+	 */
+	brand?: {
+		/** The name of your application or organisation. */
+		name?: string;
+	};
 }
 
 export interface Config extends z.infer<typeof ConfigSchema> {

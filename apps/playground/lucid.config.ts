@@ -205,4 +205,7 @@ export default defineConfig((env) => ({
 	// 		outDir: "out",
 	// 	},
 	// },
+	brand: {
+		name: "Playground",
+	},
 }));

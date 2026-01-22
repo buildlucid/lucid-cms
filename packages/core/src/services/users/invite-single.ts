@@ -103,6 +103,8 @@ const inviteSingle: ServiceFn<
 	});
 	if (userTokenRes.error) return userTokenRes;
 
+	const baseUrl = getBaseUrl(context);
+
 	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: data.email,
@@ -112,7 +114,11 @@ const inviteSingle: ServiceFn<
 			firstName: data.firstName,
 			lastName: data.lastName,
 			email: data.email,
-			resetLink: `${getBaseUrl(context)}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
+			inviteLink: `${baseUrl}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
+			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+			brand: {
+				name: context.config.brand?.name,
+			},
 		},
 	});
 	if (sendEmailRes.error) return sendEmailRes;

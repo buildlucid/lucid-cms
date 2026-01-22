@@ -210,6 +210,11 @@ const ConfigSchema = z.object({
 				.optional(),
 		})
 		.optional(),
+	brand: z
+		.object({
+			name: z.string().optional(),
+		})
+		.optional(),
 });
 
 export default ConfigSchema;

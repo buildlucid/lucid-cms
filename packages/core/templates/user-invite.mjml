@@ -1,18 +1,83 @@
 <mjml>
-  <mj-body background-color="#ffffff" font-size="13px">
-    <mj-section mj-class="main-section">
-      <mj-column vertical-align="middle" width="100%">
-        <mj-text mj-class="big-text">
-          Hi, {{firstName}}.
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" />
+      <mj-body background-color="#0A0A0A" />
+      <mj-section padding="0" />
+      <mj-text color="#a1a1a1" font-size="16px" line-height="24px" padding="0" align="center" />
+    </mj-attributes>
+    <mj-style>
+      .footer-link {
+        color: #6b6b6b !important;
+        text-decoration: none;
+      }
+
+      .footer-link:hover {
+        color: #C1FE77 !important;
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#0A0A0A">
+    <!-- Spacer -->
+    <mj-section padding="20px 0"></mj-section>
+
+    <!-- Main card -->
+    <mj-section background-color="#0F0F0F" border-radius="12px" padding="40px 30px">
+      <mj-column width="100%">
+        <!-- Logo -->
+        <mj-image src="{{logoUrl}}" alt="Lucid CMS" width="99px" align="center" padding-bottom="24px" />
+
+        <!-- Title -->
+        <mj-text color="#F1F1F1" font-size="24px" font-weight="600" align="center" padding-bottom="8px">
+          You've been invited
         </mj-text>
 
-        <mj-text mj-class="text">
-          A new user account has been created for you. Please click the link below to set your password.
+        <!-- Subtitle -->
+        <mj-raw>{{#brand.name}}</mj-raw>
+        <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
+          to join {{brand.name}}'s Lucid CMS
+        </mj-text>
+        <mj-raw>{{/brand.name}}</mj-raw>
+        <mj-raw>{{^brand.name}}</mj-raw>
+        <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
+          to join Lucid CMS
+        </mj-text>
+        <mj-raw>{{/brand.name}}</mj-raw>
+
+        <!-- Divider -->
+        <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 32px 0" />
+
+        <!-- Body text -->
+        <mj-text padding-bottom="12px">
+          Hi{{#firstName}} {{firstName}}{{/firstName}},
         </mj-text>
 
-        <mj-button mj-class="btn" href="{{reset_link}}">
-          Set Your Password
+        <mj-text padding-bottom="32px">
+          An account has been created for you. Click the button below to accept your invitation and get started.
+        </mj-text>
+
+        <!-- CTA Button -->
+        <mj-button href="{{inviteLink}}" background-color="#E5E5E5" color="#171717" font-size="14px" font-weight="500" border-radius="8px" padding="0 0 32px 0" inner-padding="12px 24px">
+          Accept invitation
         </mj-button>
+
+        <!-- Divider -->
+        <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 24px 0" />
+
+        <!-- Footer note -->
+        <mj-text font-size="13px" color="#6b6b6b" align="center">
+          If you didn't expect this invitation, you can safely ignore this email.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section padding="24px 0 40px 0">
+      <mj-column width="100%">
+        <mj-text font-size="13px" color="#6b6b6b" align="center">
+          Powered by <a href="https://lucidcms.io" class="footer-link">Lucid CMS</a>
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>

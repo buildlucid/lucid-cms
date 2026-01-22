@@ -1,15 +1,15 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import Mustache from "mustache";
 import constants from "../../../constants/constants.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RenderedTemplates } from "../types.js";
-import replaceTemplateVariables from "./replace-template-vars.js";
 
 /**
- * Dynamically renders a handlebars template with the given data.
+ * Dynamically renders a mustache template with the given data.
  */
-const renderHandlebarsTemplate: ServiceFn<
+const renderMustacheTemplate: ServiceFn<
 	[
 		{
 			template: string;
@@ -23,9 +23,11 @@ const renderHandlebarsTemplate: ServiceFn<
 		const preRenderedTemplate =
 			context.config.preRenderedEmailTemplates[data.template];
 		if (preRenderedTemplate) {
+			const renderedTemplate = Mustache.render(preRenderedTemplate, data.data);
+
 			return {
 				error: undefined,
-				data: replaceTemplateVariables(preRenderedTemplate, data.data),
+				data: renderedTemplate,
 			};
 		}
 	}
@@ -56,9 +58,11 @@ const renderHandlebarsTemplate: ServiceFn<
 			};
 		}
 
+		const renderedTemplate = Mustache.render(templateData.html, data.data);
+
 		return {
 			error: undefined,
-			data: replaceTemplateVariables(templateData.html, data.data),
+			data: renderedTemplate,
 		};
 	} catch (error) {
 		return {
@@ -74,4 +78,4 @@ const renderHandlebarsTemplate: ServiceFn<
 	}
 };
 
-export default renderHandlebarsTemplate;
+export default renderMustacheTemplate;

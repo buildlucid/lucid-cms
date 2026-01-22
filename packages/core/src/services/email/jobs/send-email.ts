@@ -1,5 +1,5 @@
 import getEmailAdapter from "../../../libs/email-adapter/get-adapter.js";
-import renderHandlebarsTemplate from "../../../libs/email-adapter/templates/render-handlebars-template.js";
+import renderMustacheTemplate from "../../../libs/email-adapter/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email-adapter/types.js";
 import {
 	EmailsRepository,
@@ -59,7 +59,7 @@ const sendEmail: ServiceFn<
 	]);
 	if (emailRes.error) return emailRes;
 
-	const html = await renderHandlebarsTemplate(context, {
+	const html = await renderMustacheTemplate(context, {
 		template: emailRes.data.template,
 		data: emailRes.data.data,
 	});
