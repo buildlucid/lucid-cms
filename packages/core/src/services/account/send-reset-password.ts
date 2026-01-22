@@ -60,6 +60,8 @@ const sendResetPassword: ServiceFn<
 	});
 	if (userToken.error) return userToken;
 
+	const baseUrl = getBaseUrl(context);
+
 	const sendEmail = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
@@ -69,7 +71,11 @@ const sendResetPassword: ServiceFn<
 			firstName: userExistsRes.data.first_name,
 			lastName: userExistsRes.data.last_name,
 			email: userExistsRes.data.email,
-			resetLink: `${getBaseUrl(context)}${constants.locations.resetPassword}?token=${userToken.data.token}`,
+			resetLink: `${baseUrl}${constants.locations.resetPassword}?token=${userToken.data.token}`,
+			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+			brand: {
+				name: context.config.brand?.name,
+			},
 		},
 	});
 	if (sendEmail.error) return sendEmail;

@@ -3,6 +3,7 @@ import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices } from "../index.js";
 
@@ -175,6 +176,8 @@ const updateSingle: ServiceFn<
 	if (updateUserRes.error) return updateUserRes;
 
 	if (data.email !== undefined) {
+		const baseUrl = getBaseUrl(context);
+
 		const sendEmailRes = await emailServices.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
@@ -182,6 +185,10 @@ const updateSingle: ServiceFn<
 			subject: T("email_update_success_subject"),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
+				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+				brand: {
+					name: context.config.brand?.name,
+				},
 			},
 		});
 		if (sendEmailRes.error) return sendEmailRes;

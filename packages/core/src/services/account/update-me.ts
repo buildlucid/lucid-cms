@@ -2,6 +2,7 @@ import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { accountServices, emailServices } from "../index.js";
 
@@ -161,6 +162,8 @@ const updateMe: ServiceFn<
 	if (updateMeRes.error) return updateMeRes;
 
 	if (data.email !== undefined) {
+		const baseUrl = getBaseUrl(context);
+
 		const sendEmail = await emailServices.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
@@ -168,6 +171,10 @@ const updateMe: ServiceFn<
 			subject: T("email_update_success_subject"),
 			data: {
 				firstName: data.firstName || getUserRes.data.first_name,
+				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+				brand: {
+					name: context.config.brand?.name,
+				},
 			},
 		});
 		if (sendEmail.error) return sendEmail;

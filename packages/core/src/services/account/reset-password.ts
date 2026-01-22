@@ -5,7 +5,7 @@ import {
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import { generateSecret } from "../../utils/helpers/index.js";
+import { generateSecret, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -91,6 +91,8 @@ const resetPassword: ServiceFn<
 	});
 	if (updatedUserRes.error) return updatedUserRes;
 
+	const baseUrl = getBaseUrl(context);
+
 	const [deleteMultipleTokensRes, sendEmail] = await Promise.all([
 		UserTokens.deleteMultiple({
 			where: [
@@ -109,6 +111,10 @@ const resetPassword: ServiceFn<
 			data: {
 				firstName: updatedUserRes.data.first_name,
 				lastName: updatedUserRes.data.last_name,
+				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+				brand: {
+					name: context.config.brand?.name,
+				},
 			},
 		}),
 	]);
