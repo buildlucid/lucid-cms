@@ -43,7 +43,7 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 		payloads: allExpiredMediaRes.data.map((media) => ({
 			key: media.key,
 		})),
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

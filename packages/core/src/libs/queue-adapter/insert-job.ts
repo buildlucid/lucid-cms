@@ -21,13 +21,13 @@ const insertJobs: ServiceFn<
 		event: QueueEvent;
 		status: QueueJobStatus;
 	}
-> = async (serviceContext, data) => {
+> = async (context, data) => {
 	const now = new Date();
 	const status: QueueJobStatus = "pending";
 
 	const QueueJobs = new QueueJobsRepository(
-		serviceContext.db.client,
-		serviceContext.config.db,
+		context.db.client,
+		context.config.db,
 	);
 
 	const jobsData = data.payloads.map((payload) => ({

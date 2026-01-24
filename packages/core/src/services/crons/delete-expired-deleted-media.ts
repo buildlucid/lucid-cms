@@ -41,7 +41,7 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 		payloads: softDeletedMediaRes.data.map((media) => ({
 			mediaId: media.id,
 		})),
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

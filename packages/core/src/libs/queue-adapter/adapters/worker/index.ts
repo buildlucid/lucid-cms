@@ -78,7 +78,7 @@ function workerQueueAdapter(
 				data: { event },
 			});
 
-			const createJobRes = await insertJobs(params.serviceContext, {
+			const createJobRes = await insertJobs(params.context, {
 				event,
 				payloads: [params.payload],
 				options: params.options,
@@ -119,7 +119,7 @@ function workerQueueAdapter(
 				data: { event, count: params.payloads.length },
 			});
 
-			const createJobsRes = await insertJobs(params.serviceContext, {
+			const createJobsRes = await insertJobs(params.context, {
 				event,
 				payloads: params.payloads,
 				options: params.options,

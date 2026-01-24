@@ -41,7 +41,7 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 		payloads: expiredLocalesRes.data.map((locale) => ({
 			localeCode: locale.code,
 		})),
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

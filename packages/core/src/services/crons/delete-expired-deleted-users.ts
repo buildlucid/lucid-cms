@@ -41,7 +41,7 @@ const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 		payloads: softDeletedUsersRes.data.map((u) => ({
 			id: u.id,
 		})),
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

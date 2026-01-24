@@ -6,7 +6,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
 	const queueRes = await context.queue.add("media:update-storage", {
 		payload: {},
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

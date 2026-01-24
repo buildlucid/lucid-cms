@@ -74,7 +74,7 @@ export type QueueAdapterInstance = {
 		params: {
 			payload: Record<string, unknown>;
 			options?: QueueJobOptions;
-			serviceContext: ServiceContext;
+			context: ServiceContext;
 		},
 	) => ServiceResponse<QueueJobResponse>;
 	/** Push multiple jobs of the same type to the queue */
@@ -83,7 +83,7 @@ export type QueueAdapterInstance = {
 		params: {
 			payloads: Record<string, unknown>[];
 			options?: QueueJobOptions;
-			serviceContext: ServiceContext;
+			context: ServiceContext;
 		},
 	) => ServiceResponse<QueueBatchJobResponse>;
 };

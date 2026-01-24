@@ -36,7 +36,7 @@ const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
 		payloads: expiredTokensRes.data.map((token) => ({
 			tokenId: token.id,
 		})),
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

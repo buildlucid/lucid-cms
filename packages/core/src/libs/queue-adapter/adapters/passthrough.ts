@@ -45,7 +45,7 @@ function passthroughQueueAdapter(
 					data: { event },
 				});
 
-				const createJobRes = await insertJobs(params.serviceContext, {
+				const createJobRes = await insertJobs(params.context, {
 					event,
 					payloads: [params.payload],
 					options: params.options,
@@ -76,7 +76,7 @@ function passthroughQueueAdapter(
 				}
 
 				//* execute the event handler immediately
-				const executeResult = await executeSingleJob(params.serviceContext, {
+				const executeResult = await executeSingleJob(params.context, {
 					jobId: jobData.jobId,
 					event: event,
 					payload: params.payload,
@@ -130,7 +130,7 @@ function passthroughQueueAdapter(
 					data: { event, count: params.payloads.length },
 				});
 
-				const createJobsRes = await insertJobs(params.serviceContext, {
+				const createJobsRes = await insertJobs(params.context, {
 					event,
 					payloads: params.payloads,
 					options: params.options,
@@ -185,7 +185,7 @@ function passthroughQueueAdapter(
 				const allResults = await Promise.allSettled(
 					jobChunks.flatMap((chunk) =>
 						chunk.map((job) =>
-							executeSingleJob(params.serviceContext, {
+							executeSingleJob(params.context, {
 								jobId: job.jobId,
 								event,
 								payload: job.payload,

@@ -44,7 +44,7 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 		payloads: expiredCollectionsRes.data.map((collection) => ({
 			collectionKey: collection.key,
 		})),
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

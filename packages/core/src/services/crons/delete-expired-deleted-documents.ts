@@ -65,7 +65,7 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 					collectionKey: d.collection_key,
 					userId: d.deleted_by ?? d.created_by,
 				})),
-				serviceContext: context,
+				context: context,
 			});
 			if (queueRes.error) return queueRes;
 		}),
