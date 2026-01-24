@@ -2,7 +2,7 @@ import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -65,7 +65,10 @@ const sendResetPassword: ServiceFn<
 	const sendEmail = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
-		subject: T("reset_password_email_subject"),
+		subject: formatEmailSubject(
+			T("reset_password_email_subject"),
+			context.config.brand?.name,
+		),
 		template: constants.emailTemplates.resetPassword,
 		data: {
 			firstName: userExistsRes.data.first_name,

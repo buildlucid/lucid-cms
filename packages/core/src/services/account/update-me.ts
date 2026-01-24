@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { accountServices, emailServices } from "../index.js";
 
@@ -168,7 +168,10 @@ const updateMe: ServiceFn<
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
 			to: data.email,
-			subject: T("email_update_success_subject"),
+			subject: formatEmailSubject(
+				T("email_update_success_subject"),
+				context.config.brand?.name,
+			),
 			data: {
 				firstName: data.firstName || getUserRes.data.first_name,
 				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,

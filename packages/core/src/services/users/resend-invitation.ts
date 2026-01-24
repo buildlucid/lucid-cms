@@ -6,7 +6,7 @@ import {
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -93,7 +93,10 @@ const resendInvitation: ServiceFn<
 	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: userRes.data.email,
-		subject: T("user_invite_email_subject"),
+		subject: formatEmailSubject(
+			T("user_invite_email_subject"),
+			context.config.brand?.name,
+		),
 		template: constants.emailTemplates.userInvite,
 		data: {
 			firstName: userRes.data.first_name,

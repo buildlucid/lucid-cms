@@ -3,7 +3,7 @@ import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices } from "../index.js";
 
@@ -182,7 +182,10 @@ const updateSingle: ServiceFn<
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
 			to: data.email,
-			subject: T("email_update_success_subject"),
+			subject: formatEmailSubject(
+				T("email_update_success_subject"),
+				context.config.brand?.name,
+			),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
 				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,

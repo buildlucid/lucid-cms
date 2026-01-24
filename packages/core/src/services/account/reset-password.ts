@@ -5,7 +5,11 @@ import {
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import { generateSecret, getBaseUrl } from "../../utils/helpers/index.js";
+import {
+	formatEmailSubject,
+	generateSecret,
+	getBaseUrl,
+} from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -107,7 +111,10 @@ const resetPassword: ServiceFn<
 			template: constants.emailTemplates.passwordResetSuccess,
 			type: "internal",
 			to: updatedUserRes.data.email,
-			subject: T("password_reset_success_subject"),
+			subject: formatEmailSubject(
+				T("password_reset_success_subject"),
+				context.config.brand?.name,
+			),
 			data: {
 				firstName: updatedUserRes.data.first_name,
 				lastName: updatedUserRes.data.last_name,

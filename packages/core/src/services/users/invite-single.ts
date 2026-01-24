@@ -6,7 +6,7 @@ import {
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices, userTokenServices } from "../index.js";
 
@@ -108,7 +108,10 @@ const inviteSingle: ServiceFn<
 	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: data.email,
-		subject: T("user_invite_email_subject"),
+		subject: formatEmailSubject(
+			T("user_invite_email_subject"),
+			context.config.brand?.name,
+		),
 		template: constants.emailTemplates.userInvite,
 		data: {
 			firstName: data.firstName,
