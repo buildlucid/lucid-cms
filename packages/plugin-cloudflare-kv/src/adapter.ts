@@ -8,6 +8,7 @@ import type { PluginOptions } from "./types.js";
 
 const MILLISECONDS_PER_SECOND = 1000;
 const MAX_KEY_BYTES = 512;
+const MIN_TTL_SECONDS = 60;
 
 const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 	return {
@@ -39,10 +40,13 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			let expirationTtl: number | undefined;
 
 			if (kvOptions?.expirationTtl) {
-				expirationTtl = kvOptions.expirationTtl;
+				expirationTtl = Math.max(MIN_TTL_SECONDS, kvOptions.expirationTtl);
 			} else if (kvOptions?.expirationTimestamp) {
 				const nowSeconds = Math.floor(Date.now() / MILLISECONDS_PER_SECOND);
-				expirationTtl = Math.max(0, kvOptions.expirationTimestamp - nowSeconds);
+				expirationTtl = Math.max(
+					MIN_TTL_SECONDS,
+					kvOptions.expirationTimestamp - nowSeconds,
+				);
 			}
 
 			await options.binding.put(resolvedKey, serialised, {
