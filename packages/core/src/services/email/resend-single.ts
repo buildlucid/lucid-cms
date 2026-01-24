@@ -82,7 +82,7 @@ const resendSingle: ServiceFn<
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,
 		},
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) {
 		await Promise.all([

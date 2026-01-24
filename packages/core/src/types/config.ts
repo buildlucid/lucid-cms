@@ -258,7 +258,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		providers: AuthProvider[];
 	};
 	email: {
-		from: {
+		from?: {
 			email: string;
 			name: string;
 		};

@@ -5,6 +5,7 @@ import {
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
 import type { EmailResponse } from "../../types/response.js";
+import { getEmailFrom } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const sendEmail: ServiceFn<
@@ -18,6 +19,10 @@ const sendEmail: ServiceFn<
 			bcc?: string;
 			replyTo?: string;
 			data: Record<string, unknown>;
+			from?: {
+				email?: string;
+				name?: string;
+			};
 		},
 	],
 	{
@@ -31,11 +36,15 @@ const sendEmail: ServiceFn<
 		context.config.db,
 	);
 
+	const emailFrom = getEmailFrom(context.config, context.requestUrl);
+	const fromAddress = data.from?.email ?? emailFrom.email;
+	const fromName = data.from?.name ?? emailFrom.name;
+
 	const [newEmailRes, emailAdapter] = await Promise.all([
 		Emails.createSingle({
 			data: {
-				from_address: context.config.email.from.email,
-				from_name: context.config.email.from.name,
+				from_address: fromAddress,
+				from_name: fromName,
 				to_address: data.to,
 				subject: data.subject,
 				template: data.template,
@@ -78,7 +87,7 @@ const sendEmail: ServiceFn<
 			emailId: newEmailRes.data.id,
 			transactionId: initialTransactionRes.data?.id ?? 0,
 		},
-		serviceContext: context,
+		context: context,
 	});
 	if (queueRes.error) {
 		//* if queueing fails, update email and transaction to failed

@@ -15,6 +15,10 @@ const sendExternal: ServiceFn<
 			data: {
 				[key: string]: unknown;
 			};
+			from?: {
+				email?: string;
+				name?: string;
+			};
 		},
 	],
 	{
@@ -33,6 +37,7 @@ const sendExternal: ServiceFn<
 		bcc: data.bcc,
 		replyTo: data.replyTo,
 		data: data.data,
+		from: data.from,
 	});
 
 export default sendExternal;

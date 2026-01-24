@@ -101,7 +101,10 @@ const sendEmail: ServiceFn<
 				{
 					to: emailRes.data.to_address,
 					subject: emailRes.data.subject ?? "",
-					from: context.config.email.from,
+					from: {
+						email: emailRes.data.from_address,
+						name: emailRes.data.from_name,
+					},
 					html: html.data,
 					cc: emailRes.data.cc ?? undefined,
 					bcc: emailRes.data.bcc ?? undefined,
