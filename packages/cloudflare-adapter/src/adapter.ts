@@ -245,12 +245,21 @@ const cloudflareAdapter = (options?: {
 								input: { [key]: inputPath },
 								output: {
 									dir: outputPath,
-									format: "esm" as const,
+									format: "esm",
 									minify: true,
 									inlineDynamicImports: true,
 								},
-								treeshake: true,
-								platform: "node" as const,
+								treeshake: {
+									moduleSideEffects: (id) => {
+										const noSideEffects = [
+											"kv-adapter/adapters/better-sqlite",
+											"image-processor/processors/sharp",
+											"media-adapter/adapters/file-system",
+										];
+										return !noSideEffects.some((path) => id.includes(path));
+									},
+								},
+								platform: "node",
 								plugins: [
 									{
 										name: "import-meta-polyfill",
