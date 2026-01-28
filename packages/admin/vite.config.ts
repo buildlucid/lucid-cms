@@ -1,13 +1,13 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "rolldown-vite";
-import solidPlugin from "vite-plugin-solid";
-import devtools from "solid-devtools/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "rolldown-vite";
+import devtools from "solid-devtools/vite";
+import solidPlugin from "vite-plugin-solid";
 
 export default defineConfig({
 	build: {
 		minify: true,
-		outDir: "../core/admin",
+		outDir: "../core/spa",
 		emptyOutDir: true,
 	},
 	plugins: [
@@ -17,7 +17,7 @@ export default defineConfig({
 		}),
 		solidPlugin(),
 	],
-	base: "/admin",
+	base: "/lucid",
 	server: {
 		port: 3000,
 	},

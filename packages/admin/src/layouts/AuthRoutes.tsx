@@ -26,7 +26,7 @@ const AuthRoutes: Component<AuthRoutesProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		if (authenticatedUser.isSuccess) {
-			navigate("/admin");
+			navigate("/lucid");
 		}
 	});
 

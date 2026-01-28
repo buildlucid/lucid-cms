@@ -16,7 +16,7 @@ export interface Params {
 
 export const promoteSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/promote-version`,
+		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/promote-version`,
 		csrf: true,
 		config: {
 			method: "POST",

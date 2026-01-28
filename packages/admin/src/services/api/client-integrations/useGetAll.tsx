@@ -20,7 +20,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 		queryKey: ["clientIntegrations.getAll", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ClientIntegrationResponse[]>>({
-				url: "/api/v1/client-integrations",
+				url: "/lucid/api/v1/client-integrations",
 				query: queryParams(),
 				config: {
 					method: "GET",

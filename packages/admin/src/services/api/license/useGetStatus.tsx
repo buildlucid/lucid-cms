@@ -18,7 +18,7 @@ const useGetStatus = (params: QueryHook<QueryParams>) => {
 		queryKey: ["license.getStatus", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<LicenseResponse>>({
-				url: "/api/v1/license/status",
+				url: "/lucid/api/v1/license/status",
 				query: queryParams(),
 				config: {
 					method: "GET",

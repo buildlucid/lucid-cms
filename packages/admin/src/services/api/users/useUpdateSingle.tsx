@@ -16,7 +16,7 @@ interface Params {
 
 export const updateSingleReq = (params: Params) => {
 	return request<ResponseBody<UserResponse>>({
-		url: `/api/v1/users/${params.id}`,
+		url: `/lucid/api/v1/users/${params.id}`,
 		csrf: true,
 		config: {
 			method: "PATCH",

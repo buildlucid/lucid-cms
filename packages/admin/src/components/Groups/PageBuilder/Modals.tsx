@@ -126,7 +126,7 @@ export const Modals: Component<{
 				callbacks={{
 					onSuccess: () => {
 						navigate(
-							`/admin/collections/${props.hooks.state.collectionQuery.data?.data.key}`,
+							`/lucid/collections/${props.hooks.state.collectionQuery.data?.data.key}`,
 						);
 					},
 				}}

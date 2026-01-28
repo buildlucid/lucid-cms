@@ -23,7 +23,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: ["mediaShareLinks.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaShareLinkResponse>>({
-				url: `/api/v1/media/${queryParams().location?.mediaId}/share-links/${queryParams().location?.id}`,
+				url: `/lucid/api/v1/media/${queryParams().location?.mediaId}/share-links/${queryParams().location?.id}`,
 				config: {
 					method: "GET",
 				},

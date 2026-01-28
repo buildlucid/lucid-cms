@@ -12,7 +12,7 @@ export const logoutReq = () => {
 			message: string;
 		}>
 	>({
-		url: "/api/v1/auth/logout",
+		url: "/lucid/api/v1/auth/logout",
 		csrf: true,
 		config: {
 			method: "POST",
@@ -44,12 +44,12 @@ const useLogout = (props?: UseLogoutProps) => {
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: () => {
 			userStore.get.reset();
-			navigate("/admin/login");
+			navigate("/lucid/login");
 			clearCsrfSession();
 			props?.onSuccess?.();
 		},
 		onError: () => {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 			props?.onError?.();
 		},
 	});

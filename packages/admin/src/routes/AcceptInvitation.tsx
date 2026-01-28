@@ -73,7 +73,7 @@ const AcceptInvitationRoute: Component = () => {
 		const urlParams = new URLSearchParams(location.search);
 
 		if (!token()) {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 		}
 
 		const errorName = urlParams.get(constants.errorQueryParams.errorName);
@@ -121,7 +121,7 @@ const AcceptInvitationRoute: Component = () => {
 					}}
 					link={{
 						text: T()("back_to_login"),
-						href: "/admin/login",
+						href: "/lucid/login",
 					}}
 				/>
 			</Match>

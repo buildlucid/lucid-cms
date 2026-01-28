@@ -14,7 +14,7 @@ interface Params {
 
 export const setupReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: "/api/v1/auth/setup",
+		url: "/lucid/api/v1/auth/setup",
 		csrf: true,
 		config: {
 			method: "POST",
@@ -41,7 +41,7 @@ const useSetup = (props?: UseSetupProps) => {
 		}),
 		invalidates: ["auth.setupRequired"],
 		onSuccess: () => {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

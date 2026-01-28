@@ -9,7 +9,7 @@ interface Params {
 
 export const deleteProcessedImagesReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/media/${params.id}/processed`,
+		url: `/lucid/api/v1/media/${params.id}/processed`,
 		csrf: true,
 		config: {
 			method: "DELETE",

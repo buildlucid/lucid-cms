@@ -11,7 +11,7 @@ interface Params {
 
 export const loginReq = (params: Params) => {
 	return request<ResponseBody<UserResponse>>({
-		url: "/api/v1/auth/login",
+		url: "/lucid/api/v1/auth/login",
 		csrf: true,
 		config: {
 			method: "POST",
@@ -38,7 +38,7 @@ const useLogin = (props?: UseLoginProps) => {
 		}),
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: () => {
-			navigate("/admin");
+			navigate("/lucid");
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

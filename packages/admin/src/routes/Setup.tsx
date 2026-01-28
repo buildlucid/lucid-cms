@@ -23,7 +23,7 @@ const SetupRoute: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (setupRequired.isSuccess && !setupRequired.data.data.setupRequired) {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 		}
 	});
 
@@ -45,7 +45,7 @@ const SetupRoute: Component = () => {
 					}}
 					link={{
 						text: T()("back_to_login"),
-						href: "/admin/login",
+						href: "/lucid/login",
 					}}
 				/>
 			</Match>

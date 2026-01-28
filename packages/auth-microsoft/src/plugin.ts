@@ -20,7 +20,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.auth.providers.push({
 				key: "microsoft",
 				name: "Microsoft",
-				icon: "/assets/auth-provider-icons/microsoft-icon.svg",
+				icon: "/lucid/assets/auth-provider-icons/microsoft-icon.svg",
 				enabled: pluginOptions.enabled ?? true,
 				type: "oidc" as const,
 				config: {
@@ -37,7 +37,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 
 			draft.build.paths.copyPublic.push({
 				input: path.join(currentDir, "../assets/microsoft-icon.svg"),
-				output: "assets/auth-provider-icons/microsoft-icon.svg",
+				output: "lucid/assets/auth-provider-icons/microsoft-icon.svg",
 			});
 		},
 	};

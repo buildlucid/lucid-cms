@@ -93,13 +93,13 @@ export const NavigationSidebar: Component = () => {
 					<ul class="py-6">
 						<IconLinkFull
 							type="link"
-							href="/admin"
+							href="/lucid"
 							icon="dashboard"
 							title={T()("dashboard")}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/media"
+							href="/lucid/media"
 							icon="media"
 							title={T()("media_library")}
 							permission={canReadMedia()}
@@ -107,7 +107,7 @@ export const NavigationSidebar: Component = () => {
 
 						<IconLinkFull
 							type="link"
-							href="/admin/emails"
+							href="/lucid/emails"
 							icon="email"
 							title={T()("email_activity")}
 							permission={canReadEmails()}
@@ -136,7 +136,7 @@ export const NavigationSidebar: Component = () => {
 										{(collection) => (
 											<IconLinkFull
 												type="link"
-												href={`/admin/collections/${collection.key}`}
+												href={`/lucid/collections/${collection.key}`}
 												icon="collection-multiple"
 												title={helpers.getLocaleValue({
 													value: collection.details.name,
@@ -177,14 +177,14 @@ export const NavigationSidebar: Component = () => {
 						</Show>
 						<IconLinkFull
 							type="link"
-							href="/admin/users"
+							href="/lucid/users"
 							icon="users"
 							title={T()("user_accounts")}
 							permission={canReadUsers()}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/roles"
+							href="/lucid/roles"
 							icon="roles"
 							title={T()("role_management")}
 							permission={canReadRoles()}
@@ -196,27 +196,27 @@ export const NavigationSidebar: Component = () => {
 						</div>
 						<IconLinkFull
 							type="link"
-							href="/admin/system/overview"
+							href="/lucid/system/overview"
 							icon="overview"
 							title={T()("overview")}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/system/client-integrations"
+							href="/lucid/system/client-integrations"
 							icon="client-integrations"
 							title={T()("client_integrations")}
 							permission={canReadClientIntegrations()}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/system/license"
+							href="/lucid/system/license"
 							icon="license"
 							title={T()("manage_license")}
 							permission={canManageLicense()}
 						/>
 						<IconLinkFull
 							type="link"
-							href="/admin/system/queue-observability"
+							href="/lucid/system/queue-observability"
 							icon="queue"
 							title={T()("queue_observability")}
 							permission={canReadJobs()}
@@ -235,7 +235,7 @@ export const NavigationSidebar: Component = () => {
 						<Show when={user()}>
 							<li>
 								<A
-									href="/admin/account"
+									href="/lucid/account"
 									class="flex items-center justify-center mt-6"
 								>
 									<UserDisplay

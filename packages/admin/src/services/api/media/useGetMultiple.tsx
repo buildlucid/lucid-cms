@@ -34,7 +34,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: ["media.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaResponse[]>>({
-				url: "/api/v1/media",
+				url: "/lucid/api/v1/media",
 				query: queryParams(),
 				config: {
 					method: "GET",

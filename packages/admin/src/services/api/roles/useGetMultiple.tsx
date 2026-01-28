@@ -26,7 +26,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: ["roles.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<RoleResponse[]>>({
-				url: "/api/v1/roles",
+				url: "/lucid/api/v1/roles",
 				query: queryParams(),
 				config: {
 					method: "GET",

@@ -37,7 +37,7 @@ const useRefreshToken = async <Response, Data = unknown>(
 };
 
 export const refreshTokenReq = async (): Promise<boolean> => {
-	const fetchURL = getFetchURL("/api/v1/auth/token");
+	const fetchURL = getFetchURL("/lucid/api/v1/auth/token");
 	const csrfToken = await csrfReq();
 
 	const refreshRes = await fetch(fetchURL, {

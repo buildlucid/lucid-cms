@@ -10,7 +10,7 @@ const useGetProviders = (params: QueryHook<QueryParams>) => {
 		queryKey: ["auth.getProviders", params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AuthProvidersResponse>>({
-				url: "/api/v1/auth/providers",
+				url: "/lucid/api/v1/auth/providers",
 				config: {
 					method: "GET",
 				},

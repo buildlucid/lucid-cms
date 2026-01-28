@@ -28,7 +28,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: ["email.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<EmailResponse[]>>({
-				url: "/api/v1/emails",
+				url: "/lucid/api/v1/emails",
 				query: queryParams(),
 				config: {
 					method: "GET",

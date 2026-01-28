@@ -9,7 +9,7 @@ interface Params {
 
 export const updateReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/api/v1/license",
+		url: "/lucid/api/v1/license",
 		csrf: true,
 		config: {
 			method: "PATCH",

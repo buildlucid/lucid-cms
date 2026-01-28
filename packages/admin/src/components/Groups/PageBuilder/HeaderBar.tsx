@@ -117,7 +117,7 @@ export const HeaderBar: Component<{
 				type: "link",
 				location:
 					props.state.documentID() !== undefined
-						? `/admin/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
+						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
 						: "#",
 			});
 		}
@@ -218,11 +218,11 @@ export const HeaderBar: Component<{
 						<LayoutBreadcrumbs
 							breadcrumbs={[
 								{
-									link: "/admin/collections",
+									link: "/lucid/collections",
 									label: T()("collections"),
 								},
 								{
-									link: `/admin/collections/${props.state.collectionKey()}`,
+									link: `/lucid/collections/${props.state.collectionKey()}`,
 									label: props.state.collectionName(),
 								},
 								{

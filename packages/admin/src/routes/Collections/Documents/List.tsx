@@ -82,7 +82,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 	createEffect(() => {
 		if (collection.isSuccess) {
 			if (collection.data.data.mode === "single") {
-				navigate("/admin/collections");
+				navigate("/lucid/collections");
 			}
 		}
 	});

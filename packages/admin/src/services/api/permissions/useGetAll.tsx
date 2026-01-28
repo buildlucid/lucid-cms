@@ -19,7 +19,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 		queryKey: ["permissions.getAll", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PermissionGroup[]>>({
-				url: "/api/v1/permissions",
+				url: "/lucid/api/v1/permissions",
 				query: queryParams(),
 				config: {
 					method: "GET",

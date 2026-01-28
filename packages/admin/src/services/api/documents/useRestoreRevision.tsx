@@ -11,7 +11,7 @@ export interface Params {
 
 export const restoreRevisionReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/restore-revision`,
+		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/restore-revision`,
 		csrf: true,
 		config: {
 			method: "POST",

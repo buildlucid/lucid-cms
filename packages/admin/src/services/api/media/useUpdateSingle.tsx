@@ -30,7 +30,7 @@ interface Params {
 
 export const updateSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/media/${params.id}`,
+		url: `/lucid/api/v1/media/${params.id}`,
 		csrf: true,
 		config: {
 			method: "PATCH",

@@ -6,7 +6,7 @@ import type { PluginOptions } from "../types/types.js";
 const routes =
 	(pluginOptions: PluginOptions) => async (app: Hono<LucidHonoGeneric>) => {
 		const resendRoutes = new Hono<LucidHonoGeneric>().post(
-			"/api/v1/resend/webhook",
+			"/lucid/api/v1/resend/webhook",
 			...webhookController(pluginOptions),
 		);
 

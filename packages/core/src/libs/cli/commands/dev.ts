@@ -138,7 +138,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 					cliLogger.log(
 						"🔐 Admin panel      ",
-						cliLogger.color.blue(`${serverUrl}/admin`),
+						cliLogger.color.blue(`${serverUrl}/lucid`),
 						{ symbol: "line" },
 					);
 

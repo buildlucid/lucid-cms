@@ -15,7 +15,7 @@ interface Params {
 
 export const updateMeReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/api/v1/account",
+		url: "/lucid/api/v1/account",
 		csrf: true,
 		config: {
 			method: "PATCH",

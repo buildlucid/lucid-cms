@@ -23,7 +23,7 @@ const useSetupRequired = (params?: QueryHook<QueryParams>) => {
 		queryKey: ["auth.setupRequired", queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<SetupRequiredResponse>>({
-				url: "/api/v1/auth/setup-required",
+				url: "/lucid/api/v1/auth/setup-required",
 				config: {
 					method: "GET",
 				},

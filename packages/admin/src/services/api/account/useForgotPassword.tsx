@@ -14,7 +14,7 @@ export const sendPasswordResetReq = (params: Params) => {
 		}>,
 		Params
 	>({
-		url: "/api/v1/account/reset-password",
+		url: "/lucid/api/v1/account/reset-password",
 		csrf: true,
 		config: {
 			method: "POST",

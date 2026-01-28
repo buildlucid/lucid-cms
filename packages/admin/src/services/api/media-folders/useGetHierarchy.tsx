@@ -19,7 +19,7 @@ const useGetHierarchy = (params?: QueryHook<QueryParams>) => {
 		queryKey: ["mediaFolders.getHierarchy", queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaFolderResponse[]>>({
-				url: "/api/v1/media/folders/hierarchy",
+				url: "/lucid/api/v1/media/folders/hierarchy",
 				query: queryParams(),
 				config: {
 					method: "GET",

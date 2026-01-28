@@ -15,7 +15,7 @@ export function useNavigationGuard(
 		createSignal<BeforeLeaveEventArgs | null>(null);
 
 	useBeforeLeave((e) => {
-		if (e.to === "/admin/login") return;
+		if (e.to === "/lucid/login") return;
 		if (!shouldBlock()) return;
 		e.preventDefault();
 

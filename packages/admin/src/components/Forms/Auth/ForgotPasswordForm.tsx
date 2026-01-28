@@ -59,7 +59,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				<A
 					class="block text-sm mt-1 hover:text-primary-hover duration-200 transition-colors"
 					type="button"
-					href="/admin/login"
+					href="/lucid/login"
 				>
 					{T()("back_to_login")}
 				</A>

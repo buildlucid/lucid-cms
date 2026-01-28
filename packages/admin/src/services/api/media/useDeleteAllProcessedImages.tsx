@@ -5,7 +5,7 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export const deleteAllProcessedImagesReq = () => {
 	return request<ResponseBody<null>>({
-		url: "/api/v1/media/processed",
+		url: "/lucid/api/v1/media/processed",
 		csrf: true,
 		config: {
 			method: "DELETE",

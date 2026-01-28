@@ -32,7 +32,7 @@ const CollectionCard: Component<{
 				collectionKey: props.collection.key,
 			});
 		}
-		return `/admin/collections/${props.collection.key}`;
+		return `/lucid/collections/${props.collection.key}`;
 	});
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({

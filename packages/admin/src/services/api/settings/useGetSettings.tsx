@@ -20,7 +20,7 @@ const useGetSettings = (params?: QueryHook<QueryParams>) => {
 		queryKey: ["settings.getSettings", queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<SettingsResponse>>({
-				url: "/api/v1/settings",
+				url: "/lucid/api/v1/settings",
 				query: queryParams(),
 				config: {
 					method: "GET",

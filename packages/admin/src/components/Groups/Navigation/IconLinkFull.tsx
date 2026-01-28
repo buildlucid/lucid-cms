@@ -108,7 +108,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							activeClass={classNames(
 								"bg-secondary-base! text-secondary-contrast! fill-secondary-base-contrast!",
 							)}
-							end={props.href === "/admin"}
+							end={props.href === "/lucid"}
 						>
 							<Icons />
 							<span class="ml-2 block text-sm font-medium">{props.title}</span>

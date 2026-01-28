@@ -18,7 +18,7 @@ export const createSingleReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/api/v1/documents/${params.collectionKey}`,
+		url: `/lucid/api/v1/documents/${params.collectionKey}`,
 		csrf: true,
 		config: {
 			method: "POST",

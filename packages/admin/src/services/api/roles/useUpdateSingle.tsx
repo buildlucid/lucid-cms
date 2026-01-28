@@ -14,7 +14,7 @@ interface Params {
 
 export const updateSingleReq = (params: Params) => {
 	return request<ResponseBody<RoleResponse>>({
-		url: `/api/v1/roles/${params.id}`,
+		url: `/lucid/api/v1/roles/${params.id}`,
 		csrf: true,
 		config: {
 			method: "PATCH",

@@ -15,7 +15,7 @@ export const mediaShareLinkResponseSchema = z.object({
 	}),
 	url: z.string().meta({
 		description: "Public share URL",
-		example: "https://example.com/share/a1B2c3D4e5F6",
+		example: "https://example.com/lucid/share/a1B2c3D4e5F6",
 	}),
 	name: z.string().nullable().meta({
 		description: "Optional display name",

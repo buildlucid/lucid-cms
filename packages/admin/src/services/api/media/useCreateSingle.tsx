@@ -24,7 +24,7 @@ interface Params {
 
 export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<MediaResponse>>({
-		url: "/api/v1/media",
+		url: "/lucid/api/v1/media",
 		csrf: true,
 		config: {
 			method: "POST",

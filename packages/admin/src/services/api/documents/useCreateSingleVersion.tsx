@@ -19,7 +19,7 @@ export const createSingleVersionReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}`,
+		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}`,
 		csrf: true,
 		config: {
 			method: "POST",

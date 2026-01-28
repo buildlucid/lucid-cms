@@ -29,7 +29,7 @@ const useGetMultipleRevisions = (params: QueryHook<QueryParams>) => {
 		queryKey: ["documents.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<DocumentVersionResponse[]>>({
-				url: `/api/v1/documents/${
+				url: `/lucid/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.documentId}/revisions`,
 				query: queryParams(),

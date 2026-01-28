@@ -10,7 +10,7 @@ interface Params {
 
 export const deleteSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/documents/${params.collectionKey}/${params.id}`,
+		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}`,
 		csrf: true,
 		config: {
 			method: "DELETE",

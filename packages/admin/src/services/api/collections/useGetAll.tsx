@@ -19,7 +19,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 		queryKey: ["collections.getAll", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<CollectionResponse[]>>({
-				url: "/api/v1/collections",
+				url: "/lucid/api/v1/collections",
 				query: queryParams(),
 				config: {
 					method: "GET",

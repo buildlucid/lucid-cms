@@ -12,7 +12,7 @@ const getLoginRedirectURL = (search: string) => {
 		urlQueryParams.delete(key);
 	}
 
-	return `/admin/login${urlQueryParams.size > 0 ? `?${urlQueryParams.toString()}` : ""}`;
+	return `/lucid/login${urlQueryParams.size > 0 ? `?${urlQueryParams.toString()}` : ""}`;
 };
 
 export default getLoginRedirectURL;

@@ -22,7 +22,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: ["roles.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<RoleResponse>>({
-				url: `/api/v1/roles/${queryParams().location?.roleId}`,
+				url: `/lucid/api/v1/roles/${queryParams().location?.roleId}`,
 				config: {
 					method: "GET",
 				},

@@ -19,7 +19,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.auth.providers.push({
 				key: "github",
 				name: "GitHub",
-				icon: "/assets/auth-provider-icons/github-icon.svg",
+				icon: "/lucid/assets/auth-provider-icons/github-icon.svg",
 				enabled: pluginOptions.enabled ?? true,
 				type: "oidc" as const,
 				config: {
@@ -35,7 +35,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			});
 			draft.build.paths.copyPublic.push({
 				input: path.join(currentDir, "../assets/github-icon.svg"),
-				output: "assets/auth-provider-icons/github-icon.svg",
+				output: "lucid/assets/auth-provider-icons/github-icon.svg",
 			});
 		},
 	};

@@ -120,12 +120,12 @@ const cloudflareAdapter = (options?: {
 										},
 									}),
 								);
-								app.get("/admin", (c) => {
-									const html = readFileSync(paths.clientDistHtml, "utf-8");
+								app.get("/lucid", (c) => {
+									const html = readFileSync(paths.spaDistHtml, "utf-8");
 									return c.html(html);
 								});
-								app.get("/admin/*", (c) => {
-									const html = readFileSync(paths.clientDistHtml, "utf-8");
+								app.get("/lucid/*", (c) => {
+									const html = readFileSync(paths.spaDistHtml, "utf-8");
 									return c.html(html);
 								});
 							},

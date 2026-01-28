@@ -27,7 +27,7 @@ const useGetAuthenticatedUser = (
 		queryKey: ["users.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<UserResponse>>({
-				url: "/api/v1/account",
+				url: "/lucid/api/v1/account",
 				config: {
 					method: "GET",
 				},

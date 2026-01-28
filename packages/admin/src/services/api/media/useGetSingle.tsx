@@ -22,7 +22,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: ["media.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MediaResponse>>({
-				url: `/api/v1/media/${queryParams().location?.id}`,
+				url: `/lucid/api/v1/media/${queryParams().location?.id}`,
 				config: {
 					method: "GET",
 				},

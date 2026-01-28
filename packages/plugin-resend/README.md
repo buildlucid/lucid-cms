@@ -64,4 +64,4 @@ This listens to the following event types:
 - email.scheduled
 - email.sent
 
-The webhook route is registered at `/api/v1/resend/webhook`.
+The webhook route is registered at `/lucid/api/v1/resend/webhook`.

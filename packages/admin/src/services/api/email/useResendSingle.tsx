@@ -14,7 +14,7 @@ export const resendSingleReq = (params: Params) => {
 			jobId: string;
 		}>
 	>({
-		url: `/api/v1/emails/${params.id}/resend`,
+		url: `/lucid/api/v1/emails/${params.id}/resend`,
 		csrf: true,
 		config: {
 			method: "POST",

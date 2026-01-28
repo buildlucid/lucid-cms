@@ -13,7 +13,7 @@ interface Params {
 
 export const acceptInvitationReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: `/api/v1/auth/invitation/accept/${params.token}`,
+		url: `/lucid/api/v1/auth/invitation/accept/${params.token}`,
 		csrf: true,
 		config: {
 			method: "POST",
@@ -33,7 +33,7 @@ const useAcceptInvitation = (props?: UseAcceptInvitationProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: acceptInvitationReq,
 		onSuccess: () => {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 			props?.onSuccess?.();
 		},
 		onError: props?.onError,

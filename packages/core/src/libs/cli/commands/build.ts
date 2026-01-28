@@ -165,7 +165,7 @@ const buildCommand = async (options?: {
 		cliLogger.info(
 			"SPA and component plugins built:",
 			cliLogger.color.green(
-				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.admin}`,
+				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.base}`,
 			),
 			{
 				silent,
@@ -246,7 +246,7 @@ const partialBuildDirClear = async (outDir: string | undefined) => {
 	const items = await readdir(outDir, { recursive: true });
 
 	const preservePaths = [
-		path.join(constants.directories.public, constants.directories.admin),
+		path.join(constants.directories.public, constants.directories.base),
 	];
 
 	for (const item of items) {

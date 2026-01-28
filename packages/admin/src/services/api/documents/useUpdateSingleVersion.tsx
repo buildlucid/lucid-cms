@@ -20,7 +20,7 @@ export const updateSingleVersionReq = (params: Params) => {
 			id: number;
 		}>
 	>({
-		url: `/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
+		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
 		csrf: true,
 		config: {
 			method: "PATCH",

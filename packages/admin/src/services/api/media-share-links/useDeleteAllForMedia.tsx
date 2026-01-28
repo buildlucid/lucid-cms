@@ -8,7 +8,7 @@ interface Params {
 
 export const deleteAllForMediaReq = (params: Params) => {
 	return request<undefined>({
-		url: `/api/v1/media/${params.mediaId}/share-links`,
+		url: `/lucid/api/v1/media/${params.mediaId}/share-links`,
 		csrf: true,
 		config: {
 			method: "DELETE",

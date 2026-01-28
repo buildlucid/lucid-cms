@@ -52,7 +52,7 @@ const MainLayout: Component<{
 	createEffect(() => {
 		if (
 			authenticatedUser.data?.data.triggerPasswordReset === true &&
-			location.pathname !== "/admin/account"
+			location.pathname !== "/lucid/account"
 		) {
 			spawnToast({
 				title: T()("password_reset_required"),
@@ -60,7 +60,7 @@ const MainLayout: Component<{
 				status: "error",
 			});
 
-			navigate("/admin/account");
+			navigate("/lucid/account");
 		}
 	});
 

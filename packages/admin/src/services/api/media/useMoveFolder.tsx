@@ -12,7 +12,7 @@ interface Params {
 
 export const moveFolderReq = (params: Params) => {
 	return request<ResponseBody<null>>({
-		url: `/api/v1/media/${params.id}/move`,
+		url: `/lucid/api/v1/media/${params.id}/move`,
 		csrf: true,
 		config: {
 			method: "PATCH",

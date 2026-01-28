@@ -55,7 +55,7 @@ const LoginRoute: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (setupRequired.isSuccess && setupRequired.data.data.setupRequired) {
-			navigate("/admin/setup");
+			navigate("/lucid/setup");
 		}
 	});
 

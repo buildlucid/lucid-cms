@@ -15,7 +15,7 @@ interface CreateSingleResponse {
 
 export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<CreateSingleResponse>>({
-		url: "/api/v1/client-integrations",
+		url: "/lucid/api/v1/client-integrations",
 		csrf: true,
 		config: {
 			method: "POST",

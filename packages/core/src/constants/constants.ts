@@ -3,7 +3,7 @@ import T from "../translations/index.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,
-	openAPIDocsRoute: "/documentation",
+	openAPIDocsRoute: "/lucid/documentation",
 	headers: {
 		csrf: "X-CSRF-Token",
 		contentLocale: "lucid-content-locale",
@@ -65,11 +65,11 @@ export default Object.freeze({
 		perPage: 10,
 	},
 	locations: {
-		resetPassword: "/admin/reset-password",
-		acceptInvitation: "/admin/accept-invitation",
+		resetPassword: "/lucid/reset-password",
+		acceptInvitation: "/lucid/accept-invitation",
 	},
 	assets: {
-		emailLogo: "/assets/email-logo.svg",
+		emailLogo: "/lucid/assets/email-logo.svg",
 	},
 	errors: {
 		name: T("default_error_name"),
@@ -97,7 +97,8 @@ export default Object.freeze({
 	directories: {
 		public: "public",
 		lucid: ".lucid",
-		admin: "admin",
+		base: "lucid",
+		viteBuild: "spa",
 		plugins: "plugins",
 	},
 	typeGeneration: {
@@ -181,8 +182,8 @@ export default Object.freeze({
 			authLink: "authenticated-link",
 			login: "login",
 		} as const,
-		defaultRedirectPath: "/admin",
-		defaultErrorRedirectPath: "/admin/login",
+		defaultRedirectPath: "/lucid",
+		defaultErrorRedirectPath: "/lucid/login",
 		ttl: 600000,
 	},
 });

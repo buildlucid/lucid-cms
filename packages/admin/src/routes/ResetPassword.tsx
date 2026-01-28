@@ -25,7 +25,7 @@ const ResetPasswordRoute: Component = () => {
 	const token = urlParams.get("token");
 
 	if (!token) {
-		navigate("/admin/login");
+		navigate("/lucid/login");
 	}
 
 	// ----------------------------------------
@@ -53,7 +53,7 @@ const ResetPasswordRoute: Component = () => {
 	// Effects
 	createEffect(() => {
 		if (providers.isSuccess && providers.data?.data.disablePassword === true) {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 		}
 	});
 
@@ -75,7 +75,7 @@ const ResetPasswordRoute: Component = () => {
 					}}
 					link={{
 						text: T()("back_to_login"),
-						href: "/admin/login",
+						href: "/lucid/login",
 					}}
 				/>
 			</Match>

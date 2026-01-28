@@ -16,7 +16,7 @@ export const resetPasswordReq = async (params: Params) => {
 			message: string;
 		}>
 	>({
-		url: `/api/v1/account/reset-password/${params.token}`,
+		url: `/lucid/api/v1/account/reset-password/${params.token}`,
 		csrf: true,
 		config: {
 			method: "PATCH",
@@ -51,7 +51,7 @@ const useResetPassword = (props?: UseResetPasswordProps) => {
 		}),
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: () => {
-			navigate("/admin/login");
+			navigate("/lucid/login");
 			props?.onSuccess?.();
 		},
 		onError: () => {

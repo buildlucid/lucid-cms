@@ -15,7 +15,7 @@ export const csrfReq = async () => {
 			_csrf: string;
 		}>
 	>({
-		url: "/api/v1/auth/csrf",
+		url: "/lucid/api/v1/auth/csrf",
 		config: {
 			method: "GET",
 		},

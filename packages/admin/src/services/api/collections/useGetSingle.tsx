@@ -22,7 +22,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: ["collections.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<CollectionResponse>>({
-				url: `/api/v1/collections/${queryParams().location?.collectionKey}`,
+				url: `/lucid/api/v1/collections/${queryParams().location?.collectionKey}`,
 				config: {
 					method: "GET",
 				},

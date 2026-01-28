@@ -26,7 +26,7 @@ const useVerifyResetToken = (params: QueryHook<QueryParams>) => {
 					message: string;
 				}>
 			>({
-				url: `/api/v1/account/reset-password/${queryParams().location?.token}`,
+				url: `/lucid/api/v1/account/reset-password/${queryParams().location?.token}`,
 				config: {
 					method: "GET",
 				},

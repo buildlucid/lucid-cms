@@ -18,7 +18,7 @@ export const getPresignedUrlReq = (params: Params) => {
 			headers?: Record<string, string>;
 		}>
 	>({
-		url: "/api/v1/media/presigned-url",
+		url: "/lucid/api/v1/media/presigned-url",
 		csrf: true,
 		config: {
 			method: "POST",

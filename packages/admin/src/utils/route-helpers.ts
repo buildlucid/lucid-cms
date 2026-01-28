@@ -10,12 +10,12 @@ export const getDocumentRoute = (
 	},
 ) => {
 	if (mode === "create") {
-		return `/admin/collections/${data.collectionKey}/latest/create`;
+		return `/lucid/collections/${data.collectionKey}/latest/create`;
 	}
 
 	if (data.status === "revision") {
-		return `/admin/collections/${data.collectionKey}/revision/${data.documentId}/${data.versionId}`;
+		return `/lucid/collections/${data.collectionKey}/revision/${data.documentId}/${data.versionId}`;
 	}
 
-	return `/admin/collections/${data.collectionKey}/${data.status ?? "latest"}/${data.documentId}`;
+	return `/lucid/collections/${data.collectionKey}/${data.status ?? "latest"}/${data.documentId}`;
 };

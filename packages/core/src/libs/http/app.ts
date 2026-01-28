@@ -139,7 +139,7 @@ const createApp = async (props: {
 			} satisfies LucidErrorData);
 		})
 		.notFound((c) => {
-			if (c.req.url.startsWith("/api")) {
+			if (c.req.url.includes(`/${constants.directories.base}/api`)) {
 				return c.json({
 					status: 404,
 					code: "not_found",
@@ -160,7 +160,7 @@ const createApp = async (props: {
 
 	if (props.config.openAPI?.enabled) {
 		app.get(
-			"/openapi",
+			`/${constants.directories.base}/openapi`,
 			openAPIRouteHandler(app, {
 				documentation: {
 					openapi: "3.0.0",
@@ -287,7 +287,7 @@ const createApp = async (props: {
 		app.get(
 			constants.openAPIDocsRoute,
 			Scalar({
-				url: "/openapi",
+				url: `/${constants.directories.base}/openapi`,
 				theme: "saturn",
 				defaultHttpClient: {
 					targetKey: "node",

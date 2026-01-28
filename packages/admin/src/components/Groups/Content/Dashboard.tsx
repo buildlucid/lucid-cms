@@ -71,37 +71,37 @@ export const Dashboard: Component = () => {
 							{
 								title: T()("starting_point_collections"),
 								description: T()("starting_point_collections_description"),
-								href: "/admin/collections",
+								href: "/lucid/collections",
 								icon: "collection",
 							},
 							{
 								title: T()("starting_point_media"),
 								description: T()("starting_point_media_description"),
-								href: "/admin/media",
+								href: "/lucid/media",
 								icon: "media",
 							},
 							{
 								title: T()("starting_point_emails"),
 								description: T()("starting_point_emails_description"),
-								href: "/admin/emails",
+								href: "/lucid/emails",
 								icon: "email",
 							},
 							{
 								title: T()("starting_point_users"),
 								description: T()("starting_point_users_description"),
-								href: "/admin/users",
+								href: "/lucid/users",
 								icon: "users",
 							},
 							{
 								title: T()("starting_point_roles"),
 								description: T()("starting_point_roles_description"),
-								href: "/admin/roles",
+								href: "/lucid/roles",
 								icon: "roles",
 							},
 							{
 								title: T()("starting_point_settings"),
 								description: T()("starting_point_settings_description"),
-								href: "/admin/system/overview",
+								href: "/lucid/system/overview",
 								icon: "settings",
 							},
 						]}

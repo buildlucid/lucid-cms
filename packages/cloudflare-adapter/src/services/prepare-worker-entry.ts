@@ -78,10 +78,10 @@ const { app } = await lucid.createApp({
         ],
         routes: [
             async (app, config) => {
-                app.get("/admin/*", async (c) => {
+                app.get("/lucid/*", async (c) => {
                     const url = new URL(c.req.url);
 
-                    const indexRequestUrl = url.origin + "/admin/index.html";
+                    const indexRequestUrl = url.origin + "/lucid/index.html";
                     const indexRequest = new Request(indexRequestUrl);
                     const indexAsset = await c.env.ASSETS.fetch(indexRequest);
                     return new Response(indexAsset.body, {

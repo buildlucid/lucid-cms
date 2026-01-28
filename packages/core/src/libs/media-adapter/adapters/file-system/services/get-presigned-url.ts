@@ -19,7 +19,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			return {
 				error: undefined,
 				data: {
-					url: `${meta.host}/api/v1/fs/upload?key=${key}&token=${token}&timestamp=${timestamp}`,
+					url: `${meta.host}/lucid/api/v1/fs/upload?key=${key}&token=${token}&timestamp=${timestamp}`,
 				},
 			};
 		} catch (e) {

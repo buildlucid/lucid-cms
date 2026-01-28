@@ -7,7 +7,7 @@ type Params = Record<string, never>;
 
 export const verifyReq = (_params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: "/api/v1/license/verify",
+		url: "/lucid/api/v1/license/verify",
 		csrf: true,
 		config: {
 			method: "POST",

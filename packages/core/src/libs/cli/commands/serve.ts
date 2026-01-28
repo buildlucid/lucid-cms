@@ -129,7 +129,7 @@ const serveCommand = async () => {
 
 				cliLogger.log(
 					"🔐 Admin panel      ",
-					cliLogger.color.blue(`${serverUrl}/admin`),
+					cliLogger.color.blue(`${serverUrl}/lucid`),
 					{ symbol: "line" },
 				);
 

@@ -9,7 +9,7 @@ function PluginTest() {
 	const [PluginComponent] = createResource(async () => {
 		const module = await import(
 			/* @vite-ignore */
-			`${window.location.origin}/admin/plugins/test-component.js`
+			`${window.location.origin}/lucid/plugins/test-component.js`
 		);
 		return module.default;
 	});

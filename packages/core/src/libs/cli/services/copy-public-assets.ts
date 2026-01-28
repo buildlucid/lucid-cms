@@ -89,7 +89,11 @@ const copyPublicAssets = async (props: {
 }): ServiceResponse<undefined> => {
 	try {
 		const silent = props.silent ?? false;
-		const assetsPath = path.join(currentDir, "../../../../public");
+		const corePublicPath = path.join(
+			currentDir,
+			"../../../../",
+			constants.directories.public,
+		);
 
 		const outDir = path.join(
 			props.config.build.paths.outDir,
@@ -99,8 +103,8 @@ const copyPublicAssets = async (props: {
 		await ensureDir(outDir);
 
 		//* core public assets (lowest prio)
-		if (await pathExists(assetsPath)) {
-			await copyDirectoryContentsInto(assetsPath, outDir, silent);
+		if (await pathExists(corePublicPath)) {
+			await copyDirectoryContentsInto(corePublicPath, outDir, silent);
 		}
 
 		//* config defined additional public assets (medium prio)

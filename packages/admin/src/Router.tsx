@@ -40,7 +40,7 @@ const AppRouter: Component = () => {
 	return (
 		<Router>
 			{/* Authenticated */}
-			<Route path="/admin" component={MainLayout}>
+			<Route path="/lucid" component={MainLayout}>
 				<Route path="/" component={DashboardRoute} />
 				<Route path="/components" component={ComponentsRoute} />
 				<Route path="/account" component={AccountRoute} />
@@ -172,7 +172,7 @@ const AppRouter: Component = () => {
 				/>
 			</Route>
 			{/* Non authenticated */}
-			<Route path="/admin" component={AuthRoutes}>
+			<Route path="/lucid" component={AuthRoutes}>
 				<Route path="/login" component={LoginRoute} />
 				<Route path="/setup" component={SetupRoute} />
 				<Route path="/forgot-password" component={ForgotPasswordRoute} />

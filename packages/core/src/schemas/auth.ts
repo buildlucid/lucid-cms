@@ -221,7 +221,7 @@ export const controllerSchemas = {
 				.string()
 				.meta({
 					description: "The redirect path on a successful callback",
-					example: "/admin",
+					example: "/lucid",
 				})
 				.optional(),
 		}),

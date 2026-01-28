@@ -10,34 +10,35 @@ const getBuildPaths = (config: Config, cwd = process.cwd()) => {
 	const currentDir = getDirName(import.meta.url);
 
 	return {
-		//* the input location for the admin SPA. this is where the admin package outputs its vite build
-		adminInput: join(currentDir, "../../../../", constants.directories.admin),
-		//* the output location for the admin SPA
-		adminOutput: join(
+		//* the input location for the SPA. this is where the package outputs its vite build
+		spaInput: join(currentDir, "../../../../", constants.directories.viteBuild),
+		//* the output location for the SPA
+		spaOutput: join(
 			cwd,
 			config.build.paths.outDir,
 			constants.directories.public,
-			constants.directories.admin,
+			constants.directories.base,
 		),
-		//* the output location for the admin SPA plugins
-		adminPluginsOutput: join(
+		//* the output location for the SPA index.html
+		spaDistHtml: join(
 			cwd,
 			config.build.paths.outDir,
 			constants.directories.public,
-			constants.directories.admin,
+			constants.directories.base,
+			"index.html",
+		),
+		//* the output location for the SPA plugins
+		spaPluginsOutput: join(
+			cwd,
+			config.build.paths.outDir,
+			constants.directories.public,
+			constants.directories.base,
 			constants.directories.plugins,
 		),
 		publicDist: join(
 			cwd,
 			config.build.paths.outDir,
 			constants.directories.public,
-		),
-		clientDistHtml: join(
-			cwd,
-			config.build.paths.outDir,
-			constants.directories.public,
-			constants.directories.admin,
-			"index.html",
 		),
 	};
 };

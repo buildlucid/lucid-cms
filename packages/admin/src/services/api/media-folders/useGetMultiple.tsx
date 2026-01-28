@@ -24,7 +24,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: ["mediaFolders.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MultipleMediaFolderResponse>>({
-				url: "/api/v1/media/folders",
+				url: "/lucid/api/v1/media/folders",
 				query: queryParams(),
 				config: {
 					method: "GET",

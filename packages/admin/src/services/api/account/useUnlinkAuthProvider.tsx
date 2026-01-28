@@ -9,7 +9,7 @@ interface Params {
 
 export const unlinkAccountAuthProviderReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: `/api/v1/account/auth-providers/${params.providerKey}`,
+		url: `/lucid/api/v1/account/auth-providers/${params.providerKey}`,
 		csrf: true,
 		config: {
 			method: "DELETE",

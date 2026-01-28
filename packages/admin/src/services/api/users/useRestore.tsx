@@ -11,7 +11,7 @@ interface Params {
 
 export const restoreReq = (params: Params) => {
 	return request<ResponseBody>({
-		url: "/api/v1/users/restore",
+		url: "/lucid/api/v1/users/restore",
 		csrf: true,
 		config: {
 			method: "POST",
