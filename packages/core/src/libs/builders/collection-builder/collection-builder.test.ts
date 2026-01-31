@@ -113,6 +113,7 @@ test("collection config is correct along with field includes and filters", async
 				"media_test",
 			],
 			environments: [],
+			revisionRetentionDays: 30,
 		},
 	});
 });
