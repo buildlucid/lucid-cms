@@ -39,6 +39,7 @@ export type CollectionData = {
 			key: string;
 			name: LocaleValue;
 		}[];
+		revisionRetentionDays: number | false;
 	};
 };
 

@@ -331,4 +331,46 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 			mode: "multiple-count",
 		});
 	}
+	/**
+	 * Deletes all expired revisions for a collection.
+	 * A revision is considered expired if:
+	 * 1. It is older than the cutoff date
+	 * 2. It is not referenced by any non-revision version's promoted_from field
+	 */
+	async deleteExpiredRevisions(
+		props: {
+			cutoffDate: Date;
+		},
+		dynamicConfig: DynamicConfig<LucidVersionTableName>,
+	) {
+		const { table } = this.db.dynamic;
+		const versionTable = dynamicConfig.tableName;
+
+		const queryFn = async () => {
+			await this.db
+				.deleteFrom(versionTable)
+				.where(`${versionTable}.type`, "=", "revision")
+				.where(`${versionTable}.created_at`, "<", props.cutoffDate)
+				.where(({ not, exists, selectFrom }) =>
+					not(
+						exists(
+							selectFrom(table(versionTable).as("promoted"))
+								.select(sql.lit(1).as("one"))
+								.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
+								.where("promoted.type", "!=", "revision"),
+						),
+					),
+				)
+				.execute();
+
+			return undefined;
+		};
+
+		const exec = await this.executeQuery(queryFn, {
+			method: "deleteExpiredRevisions",
+			tableName: versionTable,
+		});
+
+		return exec.response;
+	}
 }

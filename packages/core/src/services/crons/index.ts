@@ -4,5 +4,6 @@ export { default as clearExpiredTokens } from "./clear-expired-tokens.js";
 export { default as deleteExpiredDeletedDocuments } from "./delete-expired-deleted-documents.js";
 export { default as deleteExpiredDeletedMedia } from "./delete-expired-deleted-media.js";
 export { default as deleteExpiredDeletedUsers } from "./delete-expired-deleted-users.js";
+export { default as deleteExpiredRevisions } from "./delete-expired-revisions.js";
 export { default as deleteExpiredUnsyncedMedia } from "./delete-expired-unsynced-media.js";
 export { default as updateMediaStorage } from "./update-media-storage.js";

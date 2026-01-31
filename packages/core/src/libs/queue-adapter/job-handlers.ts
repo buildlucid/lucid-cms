@@ -1,5 +1,6 @@
 import deleteCollectionJob from "../../services/collections/jobs/delete-single.js";
 import deleteDocumentJob from "../../services/documents/jobs/delete-single.js";
+import deleteExpiredRevisionsJob from "../../services/documents-versions/jobs/delete-expired-revisions.js";
 import sendEmailJob from "../../services/email/jobs/send-email.js";
 import deleteLocaleJob from "../../services/locales/jobs/delete-single.js";
 import deleteAwaitingSyncMediaJob from "../../services/media/jobs/delete-awaiting-sync.js";
@@ -23,6 +24,7 @@ const jobHandlersMap: Record<QueueEvent, QueueJobHandlerFn> = {
 	"user-tokens:delete": deleteTokenJob,
 	"users:delete": deleteUserJob,
 	"documents:delete": deleteDocumentJob,
+	"document-versions:delete-expired": deleteExpiredRevisionsJob,
 };
 
 const getJobHandler = (

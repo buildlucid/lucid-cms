@@ -108,6 +108,15 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 							),
 						},
 					})(context),
+					serviceWrapper(cronServices.deleteExpiredRevisions, {
+						transaction: true,
+						logError: true,
+						defaultError: {
+							type: "cron",
+							name: T("cron_job_error_name"),
+							message: T("an_error_occurred_deleting_expired_revisions"),
+						},
+					})(context),
 				]);
 			} catch (_) {
 				logger.error({

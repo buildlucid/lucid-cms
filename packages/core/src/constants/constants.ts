@@ -54,6 +54,7 @@ export default Object.freeze({
 		useTranslations: false,
 		useAutoSave: false,
 		protectedEnvironments: ["latest", "revision"],
+		revisionRetentionDays: 30,
 	},
 	customFields: {
 		link: {

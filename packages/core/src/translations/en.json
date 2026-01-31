@@ -231,6 +231,7 @@
 	"an_error_occurred_deleting_old_soft_deleted_media": "An error occurred while deleting old soft deleted media.",
 	"an_error_occurred_deleting_old_soft_deleted_users": "An error occurred while deleting old soft deleted users.",
 	"an_error_occurred_deleting_old_soft_deleted_documents": "An error occurred while deleting old soft deleted documents.",
+	"an_error_occurred_deleting_expired_revisions": "An error occurred while deleting expired revisions.",
 	"cron_job_error_message": "An error occurred while running/registering the cron jobs.",
 	"running_cron_jobs": "Running cron jobs...",
 	"media_error_missing_file_name": "If you are updating the media file, a file name must be provided.",

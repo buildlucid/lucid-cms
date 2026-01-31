@@ -152,6 +152,9 @@ class CollectionBuilder extends FieldBuilder {
 					constants.collectionBuilder.useAutoSave,
 				displayInListing: this.displayInListing,
 				environments: this.config.config?.environments ?? [],
+				revisionRetentionDays:
+					this.config.config?.revisionRetentionDays ??
+					constants.collectionBuilder.revisionRetentionDays,
 			},
 		};
 	}

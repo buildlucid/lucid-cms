@@ -56,6 +56,10 @@ const CollectionConfigSchema = z.object({
 					}),
 				)
 				.optional(),
+			revisionRetentionDays: z
+				.union([z.number().int().positive(), z.literal(false)])
+				.default(constants.collectionBuilder.revisionRetentionDays)
+				.optional(),
 		})
 		.optional(),
 	hooks: z
