@@ -212,7 +212,7 @@ const nodeAdapter = (options?: {
 
 					const entry = /* ts */ `
 import "dotenv/config";
-import config from "./${constants.CONFIG_FILE}";
+import config from "./${constants.CONFIG_FILE}.js";
 import lucid from "@lucidcms/core";
 import { processConfig } from "@lucidcms/core/helpers";
 import { serve } from "@hono/node-server";
@@ -248,11 +248,14 @@ const startServer = async () => {
 			cron.schedule(cronJobSetup.schedule, async () => {
 				await cronJobSetup.register({
 					config: resolved,
-					db: resolved.db.client,
+					db: { client: resolved.db.client },
 					queue: queue,
 					env: process.env,
 					kv: kv,
+					requestUrl: "http://localhost:" + port,
 				});
+			}, {
+				noOverlap: true,
 			});
 		}
 

@@ -88,10 +88,11 @@ for (const message of batch.messages) {
         const result = await executeSingleJob(
             {
                 config: resolved,
-                db: resolved.db.client,
+                db: { client: resolved.db.client },
                 env: env || null,
                 queue: internalQueueAdapter,
                 kv: kvInstance,
+                requestUrl: "",
             },
             {
                 jobId,

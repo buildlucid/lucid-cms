@@ -113,10 +113,11 @@ return app.fetch(request, env, ctx);`,
     });
     await cronJobSetup.register({
         config: resolved,
-        db: resolved.db.client,
+        db: { client: resolved.db.client },
         queue: cronJobSetup.queue,
         env: env,
         kv: kv,
+        requestUrl: "",
     });
 };
 

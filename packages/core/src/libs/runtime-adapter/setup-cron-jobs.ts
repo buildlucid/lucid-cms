@@ -33,91 +33,57 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 					scope: constants.logScopes.cron,
 				});
 
-				await Promise.allSettled([
-					serviceWrapper(cronServices.clearExpiredLocales, {
+				const cronJobs = [
+					{
+						fn: cronServices.clearExpiredLocales,
+						error: T("an_error_occurred_clearing_expired_locales"),
+					},
+					{
+						fn: cronServices.clearExpiredCollections,
+						error: T("an_error_occurred_clearing_expired_collections"),
+					},
+					{
+						fn: cronServices.clearExpiredTokens,
+						error: T("an_error_occurred_clearing_expired_tokens"),
+					},
+					{
+						fn: cronServices.updateMediaStorage,
+						error: T("an_error_occurred_updating_media_storage"),
+					},
+					{
+						fn: cronServices.deleteExpiredUnsyncedMedia,
+						error: T("an_error_occurred_deleting_expired_media"),
+					},
+					{
+						fn: cronServices.deleteExpiredDeletedMedia,
+						error: T("an_error_occurred_deleting_old_soft_deleted_media"),
+					},
+					{
+						fn: cronServices.deleteExpiredDeletedUsers,
+						error: T("an_error_occurred_deleting_old_soft_deleted_users"),
+					},
+					{
+						fn: cronServices.deleteExpiredDeletedDocuments,
+						error: T("an_error_occurred_deleting_old_soft_deleted_documents"),
+					},
+					{
+						fn: cronServices.deleteExpiredRevisions,
+						error: T("an_error_occurred_deleting_expired_revisions"),
+					},
+				];
+
+				//* run cron jobs sequentially to avoid concurrent transaction conflicts (e.g. SQLITE_BUSY)
+				for (const job of cronJobs) {
+					await serviceWrapper(job.fn, {
 						transaction: true,
 						logError: true,
 						defaultError: {
 							type: "cron",
 							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_clearing_expired_locales"),
+							message: job.error,
 						},
-					})(context),
-					serviceWrapper(cronServices.clearExpiredCollections, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_clearing_expired_collections"),
-						},
-					})(context),
-					serviceWrapper(cronServices.clearExpiredTokens, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_clearing_expired_tokens"),
-						},
-					})(context),
-					serviceWrapper(cronServices.updateMediaStorage, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_updating_media_storage"),
-						},
-					})(context),
-					serviceWrapper(cronServices.deleteExpiredUnsyncedMedia, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_deleting_expired_media"),
-						},
-					})(context),
-					serviceWrapper(cronServices.deleteExpiredDeletedMedia, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_deleting_old_soft_deleted_media"),
-						},
-					})(context),
-					serviceWrapper(cronServices.deleteExpiredDeletedUsers, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_deleting_old_soft_deleted_users"),
-						},
-					})(context),
-					serviceWrapper(cronServices.deleteExpiredDeletedDocuments, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T(
-								"an_error_occurred_deleting_old_soft_deleted_documents",
-							),
-						},
-					})(context),
-					serviceWrapper(cronServices.deleteExpiredRevisions, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: T("an_error_occurred_deleting_expired_revisions"),
-						},
-					})(context),
-				]);
+					})(context);
+				}
 			} catch (_) {
 				logger.error({
 					message: T("cron_job_error_message"),
