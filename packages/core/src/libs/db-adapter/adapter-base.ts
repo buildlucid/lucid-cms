@@ -72,9 +72,10 @@ export default abstract class DatabaseAdapter {
 	 */
 	abstract get config(): DatabaseConfig;
 	/**
-	 * Infers the database schema. Uses the transaction client if provided, otherwise falls back to the base client
+	 * Infers the database schema. Uses the provided client if given, otherwise falls back to the base client.
+	 * Pass the transaction client when calling from within a transaction to avoid deadlocks on single-connection databases.
 	 */
-	abstract inferSchema(): Promise<InferredTable[]>;
+	abstract inferSchema(db?: KyselyDB): Promise<InferredTable[]>;
 	/**
 	 * Drops all tables in the database
 	 */

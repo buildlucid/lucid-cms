@@ -3,6 +3,7 @@ import type {
 	DatabaseConfig,
 	InferredColumn,
 	InferredTable,
+	KyselyDB,
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
@@ -61,7 +62,8 @@ class LibSQLAdapter extends DatabaseAdapter {
 			fuzzOperator: "like",
 		};
 	}
-	async inferSchema(): Promise<InferredTable[]> {
+	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
+		const client = db ?? this.client;
 		const res = await sql<{
 			table_name: string;
 			name: string;
@@ -125,7 +127,7 @@ class LibSQLAdapter extends DatabaseAdapter {
                 LEFT JOIN unique_constraints uc ON
                     t.table_name = uc.table_name AND
                     t.name = uc.column_name
-            `.execute(this.client);
+            `.execute(client);
 
 		const tableMap = new Map<string, InferredTable>();
 

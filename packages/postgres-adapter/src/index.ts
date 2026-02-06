@@ -3,6 +3,7 @@ import type {
 	DatabaseConfig,
 	InferredColumn,
 	InferredTable,
+	KyselyDB,
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
@@ -66,7 +67,8 @@ class PostgresAdapter extends DatabaseAdapter {
 			fuzzOperator: "%",
 		};
 	}
-	async inferSchema(): Promise<InferredTable[]> {
+	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
+		const client = db ?? this.client;
 		const res = await sql<{
 			table_name: string;
 			name: string;
@@ -141,7 +143,7 @@ class PostgresAdapter extends DatabaseAdapter {
             LEFT JOIN foreign_keys fk ON 
                 tc.table_name = fk.table_name AND 
                 tc.name = fk.column_name
-        `.execute(this.client);
+        `.execute(client);
 
 		const tableMap = new Map<string, InferredTable>();
 

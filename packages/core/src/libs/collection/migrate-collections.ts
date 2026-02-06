@@ -30,7 +30,7 @@ const migrateCollections: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const dbSchema = await context.config.db.inferSchema();
+	const dbSchema = await context.config.db.inferSchema(context.db.client);
 
 	//* infer schema for each collection
 	const inferedSchemas: Array<CollectionSchema> = [];
