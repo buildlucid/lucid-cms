@@ -73,11 +73,12 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				data: {
@@ -90,11 +91,12 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				data: {
@@ -172,11 +174,12 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				data: {
@@ -189,11 +192,12 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				data: {
@@ -259,11 +263,12 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				collectionKey: successCollectionKey,
@@ -274,11 +279,12 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				collectionKey: errorCollectionKey,
@@ -371,11 +377,12 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				collectionKey: successCollectionKey,
@@ -391,11 +398,12 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				collectionKey: errorCollectionKey,
@@ -463,6 +471,7 @@ test("service wrapper schema validation", async () => {
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				key: "test",
@@ -474,11 +483,12 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
 				env: null,
+				requestUrl: "https://test.com",
 			},
 			{
 				key: "test",

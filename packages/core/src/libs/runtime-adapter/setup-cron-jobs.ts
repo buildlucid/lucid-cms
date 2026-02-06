@@ -5,7 +5,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue-adapter/adapters/passthrough.js";
 import type { QueueAdapterInstance } from "../queue-adapter/types.js";
-import cronJobs, { type CronJobDefinition } from "./cron-jobs.js";
+import getCronJobs, { type CronJobDefinition } from "./cron-jobs.js";
 
 const MAX_RETRIES = 3;
 
@@ -83,7 +83,7 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 				});
 
 				const results = await Promise.allSettled(
-					Object.entries(cronJobs).map(([key, job]) =>
+					Object.entries(getCronJobs()).map(([key, job]) =>
 						executeCronJob(key, job, context),
 					),
 				);

@@ -7,7 +7,9 @@ import loadConfigFile from "../../config/load-config-file.js";
 import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
 import logger from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
-import cronJobs, { type CronJobKey } from "../../runtime-adapter/cron-jobs.js";
+import getCronJobs, {
+	type CronJobKey,
+} from "../../runtime-adapter/cron-jobs.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
@@ -15,6 +17,7 @@ const cronCommand = async (jobName?: string) => {
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
+		const cronJobs = getCronJobs();
 
 		//* resolve which cron job to run
 		let selectedJob: CronJobKey;
