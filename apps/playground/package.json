@@ -14,7 +14,8 @@
         "migrate:reset": "lucidcms migrate:reset",
         "migrate:fresh": "lucidcms migrate:fresh",
         "wrangler:dev": "wrangler --env dev dev --test-scheduled",
-        "wrangler:deploy": "npm run build && wrangler --env prod deploy"
+        "wrangler:deploy": "npm run build && wrangler --env prod deploy",
+        "cron:delete-expired-revisions": "lucidcms cron delete-expired-revisions"
     },
     "dependencies": {
         "@lucidcms/auth-github": "*",

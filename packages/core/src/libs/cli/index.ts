@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import packageJson from "../../../package.json" with { type: "json" };
 import buildCommand from "./commands/build.js";
+import cronCommand from "./commands/cron.js";
 import devCommand from "./commands/dev.js";
 import migrateCommand from "./commands/migrate.js";
 import migrateFreshCommand from "./commands/migrate-fresh.js";
@@ -71,5 +72,10 @@ program
 	.description("Drop all tables and re-run all migrations")
 	.option("-f, --force", "Skip confirmation prompt")
 	.action(migrateFreshCommand);
+
+program
+	.command("cron [job]")
+	.description("Run a cron job manually")
+	.action(cronCommand);
 
 program.parse();

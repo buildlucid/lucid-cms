@@ -1,11 +1,60 @@
 import constants from "../../constants/constants.js";
-import { cronServices } from "../../services/index.js";
 import T from "../../translations/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue-adapter/adapters/passthrough.js";
 import type { QueueAdapterInstance } from "../queue-adapter/types.js";
+import cronJobs, { type CronJobDefinition } from "./cron-jobs.js";
+
+const MAX_RETRIES = 3;
+
+/**
+ * Executes a single cron job with retry support.
+ * Uses serviceWrapper so errors are returned as values rather than thrown.
+ */
+const executeCronJob = async (
+	key: string,
+	job: CronJobDefinition,
+	context: ServiceContext,
+): Promise<{ key: string; success: boolean; error?: string }> => {
+	for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+		const result = await serviceWrapper(job.fn, {
+			transaction: job.transaction,
+			logError: true,
+			defaultError: {
+				type: "cron",
+				name: T("cron_job_error_name"),
+				message: job.error,
+			},
+		})(context);
+
+		if (!result.error) {
+			return { key, success: true };
+		}
+
+		if (attempt < MAX_RETRIES) {
+			logger.warn({
+				message: `Cron job "${job.label}" failed (attempt ${attempt}/${MAX_RETRIES}), retrying...`,
+				scope: constants.logScopes.cron,
+				data: { error: result.error.message },
+			});
+		} else {
+			logger.error({
+				message: `Cron job "${job.label}" failed after ${MAX_RETRIES} attempts`,
+				scope: constants.logScopes.cron,
+				data: { error: result.error.message },
+			});
+			return {
+				key,
+				success: false,
+				error: result.error.message,
+			};
+		}
+	}
+
+	return { key, success: false };
+};
 
 /**
  * Creates the environment for running cron jobs
@@ -33,56 +82,23 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 					scope: constants.logScopes.cron,
 				});
 
-				const cronJobs = [
-					{
-						fn: cronServices.clearExpiredLocales,
-						error: T("an_error_occurred_clearing_expired_locales"),
-					},
-					{
-						fn: cronServices.clearExpiredCollections,
-						error: T("an_error_occurred_clearing_expired_collections"),
-					},
-					{
-						fn: cronServices.clearExpiredTokens,
-						error: T("an_error_occurred_clearing_expired_tokens"),
-					},
-					{
-						fn: cronServices.updateMediaStorage,
-						error: T("an_error_occurred_updating_media_storage"),
-					},
-					{
-						fn: cronServices.deleteExpiredUnsyncedMedia,
-						error: T("an_error_occurred_deleting_expired_media"),
-					},
-					{
-						fn: cronServices.deleteExpiredDeletedMedia,
-						error: T("an_error_occurred_deleting_old_soft_deleted_media"),
-					},
-					{
-						fn: cronServices.deleteExpiredDeletedUsers,
-						error: T("an_error_occurred_deleting_old_soft_deleted_users"),
-					},
-					{
-						fn: cronServices.deleteExpiredDeletedDocuments,
-						error: T("an_error_occurred_deleting_old_soft_deleted_documents"),
-					},
-					{
-						fn: cronServices.deleteExpiredRevisions,
-						error: T("an_error_occurred_deleting_expired_revisions"),
-					},
-				];
+				const results = await Promise.allSettled(
+					Object.entries(cronJobs).map(([key, job]) =>
+						executeCronJob(key, job, context),
+					),
+				);
 
-				//* run cron jobs sequentially to avoid concurrent transaction conflicts (e.g. SQLITE_BUSY)
-				for (const job of cronJobs) {
-					await serviceWrapper(job.fn, {
-						transaction: true,
-						logError: true,
-						defaultError: {
-							type: "cron",
-							name: T("cron_job_error_name"),
-							message: job.error,
-						},
-					})(context);
+				const failures = results.filter(
+					(r) =>
+						r.status === "rejected" ||
+						(r.status === "fulfilled" && !r.value.success),
+				);
+
+				if (failures.length > 0) {
+					logger.error({
+						message: `${failures.length} of ${results.length} cron jobs failed`,
+						scope: constants.logScopes.cron,
+					});
 				}
 			} catch (_) {
 				logger.error({
