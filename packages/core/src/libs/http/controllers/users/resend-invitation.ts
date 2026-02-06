@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -37,6 +38,7 @@ const resendInvitationController = factory.createHandlers(
 	validate("param", controllerSchemas.resendInvitation.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const resendRes = await serviceWrapper(userServices.resendInvitation, {
 			transaction: true,
@@ -45,19 +47,7 @@ const resendInvitationController = factory.createHandlers(
 				name: T("route_user_create_error_name"),
 				message: T("route_user_create_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				userId: Number.parseInt(id, 10),
-			},
-		);
+		})(context, { userId: Number.parseInt(id, 10) });
 		if (resendRes.error) throw new LucidAPIError(resendRes.error);
 
 		c.status(204);

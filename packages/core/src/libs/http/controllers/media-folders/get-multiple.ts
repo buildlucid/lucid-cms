@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -33,6 +34,7 @@ const getMultipleController = factory.createHandlers(
 	authenticate,
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
+		const context = getServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.getMultiple.query.formatted,
@@ -48,19 +50,9 @@ const getMultipleController = factory.createHandlers(
 				name: T("route_media_folders_fetch_error_name"),
 				message: T("route_media_folders_fetch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				query: formattedQuery,
-			},
-		);
+		})(context, {
+			query: formattedQuery,
+		});
 		if (folders.error) throw new LucidAPIError(folders.error);
 
 		c.status(200);

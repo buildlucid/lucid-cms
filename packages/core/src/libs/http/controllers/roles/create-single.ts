@@ -17,6 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -43,6 +44,7 @@ const createSingleController = factory.createHandlers(
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const body = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const roleId = await serviceWrapper(roleServices.createSingle, {
 			transaction: true,
@@ -51,21 +53,11 @@ const createSingleController = factory.createHandlers(
 				name: T("route_roles_create_error_name"),
 				message: T("route_roles_create_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				name: body.name,
-				description: body.description,
-				permissions: body.permissions,
-			},
-		);
+		})(context, {
+			name: body.name,
+			description: body.description,
+			permissions: body.permissions,
+		});
 		if (roleId.error) throw new LucidAPIError(roleId.error);
 
 		const role = await serviceWrapper(roleServices.getSingle, {
@@ -75,19 +67,9 @@ const createSingleController = factory.createHandlers(
 				name: T("route_roles_fetch_error_name"),
 				message: T("route_roles_fetch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				id: roleId.data,
-			},
-		);
+		})(context, {
+			id: roleId.data,
+		});
 		if (role.error) throw new LucidAPIError(role.error);
 
 		c.status(200);

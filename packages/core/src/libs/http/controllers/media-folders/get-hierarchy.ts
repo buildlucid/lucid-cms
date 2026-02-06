@@ -9,6 +9,7 @@ import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -23,6 +24,8 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
+		const context = getServiceContext(c);
+
 		const folders = await serviceWrapper(mediaFolderServices.getHierarchy, {
 			transaction: false,
 			defaultError: {
@@ -30,14 +33,7 @@ const getAllController = factory.createHandlers(
 				name: T("route_media_folders_fetch_error_name"),
 				message: T("route_media_folders_fetch_error_message"),
 			},
-		})({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		})(context);
 		if (folders.error) throw new LucidAPIError(folders.error);
 
 		c.status(200);

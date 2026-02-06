@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -36,6 +37,7 @@ const getSettingsController = factory.createHandlers(
 			c,
 			controllerSchemas.getSettings.query.formatted,
 		);
+		const context = getServiceContext(c);
 
 		const settings = await serviceWrapper(settingServices.getSettings, {
 			transaction: false,
@@ -44,20 +46,10 @@ const getSettingsController = factory.createHandlers(
 				name: T("route_settings_fetch_error_name"),
 				message: T("route_settings_fetch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				includes: formattedQuery.include,
-				runtime: c.get("runtimeContext").runtime,
-			},
-		);
+		})(context, {
+			includes: formattedQuery.include,
+			runtime: c.get("runtimeContext").runtime,
+		});
 		if (settings.error) throw new LucidAPIError(settings.error);
 
 		c.status(200);

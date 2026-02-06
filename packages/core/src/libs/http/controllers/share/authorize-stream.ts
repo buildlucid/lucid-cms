@@ -16,6 +16,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -45,21 +46,12 @@ const authorizeStreamController = factory.createHandlers(
 	async (c) => {
 		const { token } = c.req.valid("param");
 		const { password } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const authorizeRes = await serviceWrapper(
 			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{ token, providedPassword: password },
-		);
+		)(context, { token, providedPassword: password });
 		if (authorizeRes.error) {
 			const status = (authorizeRes.error.status || 401) as ContentfulStatusCode;
 			return c.json(

@@ -18,6 +18,7 @@ import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
 import getRequestBaseUrl from "../../../utils/get-request-base-url.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -43,6 +44,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
 		const { code, state } = c.req.valid("query");
+		const context = getServiceContext(c);
 
 		const errorRedirectURLRes = await serviceWrapper(
 			authServices.providers.errorRedirectUrl,
@@ -54,20 +56,10 @@ const providerOIDCCallbackController = factory.createHandlers(
 					message: T("route_callback_auth_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				providerKey,
-				state,
-			},
-		);
+		)(context, {
+			providerKey,
+			state,
+		});
 		if (errorRedirectURLRes.error) {
 			const baseRedirectUrl = urlAddPath(
 				getRequestBaseUrl(c),
@@ -88,21 +80,11 @@ const providerOIDCCallbackController = factory.createHandlers(
 					message: T("route_callback_auth_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				providerKey,
-				code,
-				state,
-			},
-		);
+		)(context, {
+			providerKey,
+			code,
+			state,
+		});
 		if (callbackAuthRes.error) {
 			return c.redirect(
 				buildErrorURL(
@@ -141,23 +123,13 @@ const providerOIDCCallbackController = factory.createHandlers(
 						message: T("route_login_error_message"),
 					},
 				},
-			)(
-				{
-					db: c.get("config").db,
-					config: c.get("config"),
-					queue: c.get("queue"),
-					env: c.get("env"),
-					kv: c.get("kv"),
-					requestUrl: c.req.url,
-				},
-				{
-					userId: callbackAuthRes.data.userId,
-					tokenId: refreshRes.data.tokenId,
-					authMethod: providerKey,
-					ipAddress: connectionInfo.address ?? null,
-					userAgent: userAgent,
-				},
-			);
+			)(context, {
+				userId: callbackAuthRes.data.userId,
+				tokenId: refreshRes.data.tokenId,
+				authMethod: providerKey,
+				ipAddress: connectionInfo.address ?? null,
+				userAgent: userAgent,
+			});
 			if (userLoginTrackRes.error) {
 				return c.redirect(
 					buildErrorURL(

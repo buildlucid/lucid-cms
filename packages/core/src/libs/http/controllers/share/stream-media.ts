@@ -19,6 +19,7 @@ import {
 } from "../../../../utils/share-link/renderers.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import getServiceContext from "../../utils/get-service-context.js";
 import {
 	applyRangeHeaders,
 	applyStreamingHeaders,
@@ -51,7 +52,7 @@ const streamMediaController = factory.createHandlers(
 	validate("param", controllerSchemas.streamMedia.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
-
+		const context = getServiceContext(c);
 		const range = parseRangeHeader(c.req.header("range"));
 
 		const cookieName = createAuthCookieName(token);
@@ -60,17 +61,7 @@ const streamMediaController = factory.createHandlers(
 		const authorizeRes = await serviceWrapper(
 			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{ token, sessionCookie },
-		);
+		)(context, { token, sessionCookie });
 		if (authorizeRes.error) {
 			const status = (authorizeRes.error.status || 400) as StatusCode;
 			c.status(status);
@@ -91,20 +82,7 @@ const streamMediaController = factory.createHandlers(
 
 		const response = await serviceWrapper(mediaShareLinkServices.streamMedia, {
 			transaction: false,
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				mediaKey: authorizeRes.data.mediaKey,
-				range,
-			},
-		);
+		})(context, { mediaKey: authorizeRes.data.mediaKey, range });
 		if (response.error) throw new LucidAPIError(response.error);
 
 		applyRangeHeaders(c, {

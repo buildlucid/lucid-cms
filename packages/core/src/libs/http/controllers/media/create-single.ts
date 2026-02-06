@@ -17,6 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -41,6 +42,7 @@ const createSingleController = factory.createHandlers(
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const body = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const mediaRes = await serviceWrapper(mediaServices.createSingle, {
 			transaction: true,
@@ -49,30 +51,20 @@ const createSingleController = factory.createHandlers(
 				name: T("route_media_create_error_name"),
 				message: T("route_media_create_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				key: body.key,
-				fileName: body.fileName,
-				title: body.title,
-				alt: body.alt,
-				width: body.width,
-				height: body.height,
-				blurHash: body.blurHash,
-				averageColor: body.averageColor,
-				isDark: body.isDark,
-				isLight: body.isLight,
-				folderId: body.folderId,
-				userId: c.get("auth").id,
-			},
-		);
+		})(context, {
+			key: body.key,
+			fileName: body.fileName,
+			title: body.title,
+			alt: body.alt,
+			width: body.width,
+			height: body.height,
+			blurHash: body.blurHash,
+			averageColor: body.averageColor,
+			isDark: body.isDark,
+			isLight: body.isLight,
+			folderId: body.folderId,
+			userId: c.get("auth").id,
+		});
 		if (mediaRes.error) throw new LucidAPIError(mediaRes.error);
 
 		c.status(200);

@@ -15,6 +15,7 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -47,6 +48,7 @@ const acceptInvitationController = factory.createHandlers(
 	async (c) => {
 		const { token } = c.req.valid("param");
 		const { password } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const acceptInvitation = await serviceWrapper(
 			authServices.invitation.acceptInvitation,
@@ -58,20 +60,10 @@ const acceptInvitationController = factory.createHandlers(
 					message: T("route_accept_invitation_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				token: token,
-				password: password,
-			},
-		);
+		)(context, {
+			token: token,
+			password: password,
+		});
 
 		if (acceptInvitation.error) throw new LucidAPIError(acceptInvitation.error);
 

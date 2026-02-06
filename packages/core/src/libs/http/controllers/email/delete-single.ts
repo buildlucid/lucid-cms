@@ -13,6 +13,7 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -36,6 +37,7 @@ const deleteSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const deleteSingle = await serviceWrapper(emailServices.deleteSingle, {
 			transaction: true,
@@ -44,19 +46,9 @@ const deleteSingleController = factory.createHandlers(
 				name: T("route_email_delete_error_name"),
 				message: T("route_email_delete_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				id: Number.parseInt(id, 10),
-			},
-		);
+		})(context, {
+			id: Number.parseInt(id, 10),
+		});
 		if (deleteSingle.error) throw new LucidAPIError(deleteSingle.error);
 
 		c.status(204);

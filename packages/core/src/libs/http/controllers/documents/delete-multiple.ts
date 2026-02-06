@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -42,6 +43,7 @@ const deleteMultipleController = factory.createHandlers(
 	async (c) => {
 		const { ids } = c.req.valid("json");
 		const { collectionKey } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const deleteMultiple = await serviceWrapper(
 			documentServices.deleteMultiple,
@@ -53,21 +55,11 @@ const deleteMultipleController = factory.createHandlers(
 					message: T("route_document_delete_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				ids,
-				collectionKey,
-				userId: c.get("auth").id,
-			},
-		);
+		)(context, {
+			ids,
+			collectionKey,
+			userId: c.get("auth").id,
+		});
 		if (deleteMultiple.error) throw new LucidAPIError(deleteMultiple.error);
 
 		c.status(204);

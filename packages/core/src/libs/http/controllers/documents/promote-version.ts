@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -42,6 +43,7 @@ const promoteVersionController = factory.createHandlers(
 	async (c) => {
 		const { versionType, bypassRevision } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const restoreRevisionRes = await serviceWrapper(
 			documentVersionServices.promoteVersion,
@@ -53,24 +55,14 @@ const promoteVersionController = factory.createHandlers(
 					message: T("route_document_promote_version_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				fromVersionId: Number.parseInt(versionId, 10),
-				userId: c.get("auth").id,
-				documentId: Number.parseInt(id, 10),
-				collectionKey,
-				toVersionType: versionType,
-				createRevision: bypassRevision === true ? false : undefined,
-			},
-		);
+		)(context, {
+			fromVersionId: Number.parseInt(versionId, 10),
+			userId: c.get("auth").id,
+			documentId: Number.parseInt(id, 10),
+			collectionKey,
+			toVersionType: versionType,
+			createRevision: bypassRevision === true ? false : undefined,
+		});
 		if (restoreRevisionRes.error)
 			throw new LucidAPIError(restoreRevisionRes.error);
 

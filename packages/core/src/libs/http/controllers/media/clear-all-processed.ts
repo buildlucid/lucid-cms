@@ -12,6 +12,7 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -33,6 +34,8 @@ const clearAllProcessedController = factory.createHandlers(
 	authenticate,
 	permissions([Permissions.UpdateMedia]),
 	async (c) => {
+		const context = getServiceContext(c);
+
 		const clearProcessed = await serviceWrapper(
 			processedImageServices.clearAll,
 			{
@@ -43,14 +46,7 @@ const clearAllProcessedController = factory.createHandlers(
 					message: T("route_media_clear_processed_error_message"),
 				},
 			},
-		)({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		)(context);
 		if (clearProcessed.error) throw new LucidAPIError(clearProcessed.error);
 
 		c.status(204);

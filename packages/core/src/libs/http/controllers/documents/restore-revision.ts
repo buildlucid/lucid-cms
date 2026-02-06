@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -38,6 +39,7 @@ const restoreRevisionController = factory.createHandlers(
 	validate("param", controllerSchemas.restoreRevision.params),
 	async (c) => {
 		const { collectionKey, id, versionId } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const restoreRevisionRes = await serviceWrapper(
 			documentVersionServices.restoreRevision,
@@ -49,22 +51,12 @@ const restoreRevisionController = factory.createHandlers(
 					message: T("route_document_restore_revision_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				versionId: Number.parseInt(versionId, 10),
-				userId: c.get("auth").id,
-				documentId: Number.parseInt(id, 10),
-				collectionKey,
-			},
-		);
+		)(context, {
+			versionId: Number.parseInt(versionId, 10),
+			userId: c.get("auth").id,
+			documentId: Number.parseInt(id, 10),
+			collectionKey,
+		});
 		if (restoreRevisionRes.error)
 			throw new LucidAPIError(restoreRevisionRes.error);
 

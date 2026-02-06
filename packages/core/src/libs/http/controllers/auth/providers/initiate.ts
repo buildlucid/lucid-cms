@@ -18,6 +18,7 @@ import softAuthenticate from "../../../middleware/soft-authenticate.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../../utils/build-response.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -53,6 +54,7 @@ const providerInitiateController = factory.createHandlers(
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
 		const { invitationToken, redirectPath, actionType } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const initiateAuthRes = await serviceWrapper(
 			authServices.providers.initiate,
@@ -64,23 +66,13 @@ const providerInitiateController = factory.createHandlers(
 					message: T("route_initiate_auth_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				providerKey,
-				invitationToken,
-				redirectPath,
-				actionType,
-				authenticatedUserId: c.get("auth")?.id,
-			},
-		);
+		)(context, {
+			providerKey,
+			invitationToken,
+			redirectPath,
+			actionType,
+			authenticatedUserId: c.get("auth")?.id,
+		});
 		if (initiateAuthRes.error) throw new LucidAPIError(initiateAuthRes.error);
 
 		c.status(200);

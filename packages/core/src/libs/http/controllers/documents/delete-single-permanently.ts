@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -43,6 +44,7 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 	validate("param", controllerSchemas.deleteSinglePermanently.params),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const deleteSinglePermanently = await serviceWrapper(
 			documentServices.deleteSinglePermanently,
@@ -54,21 +56,11 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 					message: T("route_document_delete_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				id: Number.parseInt(id, 10),
-				collectionKey: collectionKey,
-				userId: c.get("auth").id,
-			},
-		);
+		)(context, {
+			id: Number.parseInt(id, 10),
+			collectionKey: collectionKey,
+			userId: c.get("auth").id,
+		});
 		if (deleteSinglePermanently.error)
 			throw new LucidAPIError(deleteSinglePermanently.error);
 

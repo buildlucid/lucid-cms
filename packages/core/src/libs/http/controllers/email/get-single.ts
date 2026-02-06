@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -35,6 +36,7 @@ const getSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const email = await serviceWrapper(emailServices.getSingle, {
 			transaction: false,
@@ -43,20 +45,10 @@ const getSingleController = factory.createHandlers(
 				name: T("route_email_fetch_error_name"),
 				message: T("route_email_fetch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				id: Number.parseInt(id, 10),
-				renderTemplate: true,
-			},
-		);
+		})(context, {
+			id: Number.parseInt(id, 10),
+			renderTemplate: true,
+		});
 		if (email.error) throw new LucidAPIError(email.error);
 
 		c.status(200);

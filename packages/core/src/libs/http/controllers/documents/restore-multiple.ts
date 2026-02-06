@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -40,6 +41,7 @@ const restoreMultipleController = factory.createHandlers(
 	async (c) => {
 		const { collectionKey } = c.req.valid("param");
 		const { ids } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const restoreRes = await serviceWrapper(documentServices.restoreMultiple, {
 			transaction: true,
@@ -48,20 +50,10 @@ const restoreMultipleController = factory.createHandlers(
 				name: T("route_document_update_error_name"),
 				message: T("route_document_update_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				ids,
-				collectionKey,
-			},
-		);
+		})(context, {
+			ids,
+			collectionKey,
+		});
 		if (restoreRes.error) throw new LucidAPIError(restoreRes.error);
 
 		c.status(201);

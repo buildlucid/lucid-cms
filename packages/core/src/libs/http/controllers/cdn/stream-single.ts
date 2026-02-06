@@ -13,6 +13,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import getServiceContext from "../../utils/get-service-context.js";
 import {
 	applyRangeHeaders,
 	applyStreamingHeaders,
@@ -140,27 +141,18 @@ const streamSingleController = factory.createHandlers(
 	async (c) => {
 		const params = c.req.valid("param");
 		const query = c.req.valid("query");
+		const context = getServiceContext(c);
 
 		const range = parseRangeHeader(c.req.header("range"));
 
 		const response = await serviceWrapper(cdnServices.streamMedia, {
 			transaction: false,
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				key: params.key,
-				query: query,
-				accept: c.req.header("accept"),
-				range,
-			},
-		);
+		})(context, {
+			key: params.key,
+			query: query,
+			accept: c.req.header("accept"),
+			range,
+		});
 
 		if (response.error) {
 			const streamFallbackMedia = await serviceWrapper(
@@ -168,21 +160,11 @@ const streamSingleController = factory.createHandlers(
 				{
 					transaction: false,
 				},
-			)(
-				{
-					db: c.get("config").db,
-					config: c.get("config"),
-					queue: c.get("queue"),
-					env: c.get("env"),
-					kv: c.get("kv"),
-					requestUrl: c.req.url,
-				},
-				{
-					fallback: query?.fallback ? Boolean(query?.fallback) : undefined,
-					secFetchDest: c.req.header("sec-fetch-dest"),
-					error: response.error,
-				},
-			);
+			)(context, {
+				fallback: query?.fallback ? Boolean(query?.fallback) : undefined,
+				secFetchDest: c.req.header("sec-fetch-dest"),
+				error: response.error,
+			});
 			if (streamFallbackMedia.error)
 				throw new LucidAPIError(streamFallbackMedia.error);
 

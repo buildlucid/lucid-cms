@@ -12,6 +12,7 @@ import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import formatAPIResponse from "../../../utils/build-response.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -31,6 +32,7 @@ const getProvidersController = factory.createHandlers(
 		windowMs: minutesToMilliseconds(1),
 	}),
 	async (c: LucidHonoContext) => {
+		const context = getServiceContext(c);
 		const providersRes = await serviceWrapper(
 			authServices.providers.getProviders,
 			{
@@ -41,14 +43,7 @@ const getProvidersController = factory.createHandlers(
 					message: T("route_providers_error_message"),
 				},
 			},
-		)({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		)(context);
 		if (providersRes.error) throw new LucidAPIError(providersRes.error);
 
 		c.status(200);

@@ -15,6 +15,7 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import formatAPIResponse from "../../../utils/build-response.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -40,6 +41,7 @@ const validateInvitationController = factory.createHandlers(
 	validate("param", controllerSchemas.validateInvitation.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const validateRes = await serviceWrapper(
 			authServices.invitation.validateInvitation,
@@ -51,19 +53,9 @@ const validateInvitationController = factory.createHandlers(
 					message: T("default_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				token,
-			},
-		);
+		)(context, {
+			token,
+		});
 		if (validateRes.error) throw new LucidAPIError(validateRes.error);
 
 		c.status(200);

@@ -15,6 +15,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import getMediaAdapter from "../../../media-adapter/get-adapter.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -52,6 +53,7 @@ const uploadMediaController = factory.createHandlers(
 
 		const query = c.req.valid("query");
 		const buffer = await c.req.arrayBuffer();
+		const context = getServiceContext(c);
 
 		const uploadMedia = await serviceWrapper(fsServices.uploadSingle, {
 			transaction: false,
@@ -60,23 +62,13 @@ const uploadMediaController = factory.createHandlers(
 				name: T("route_fs_upload_error_name"),
 				message: T("route_fs_upload_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				buffer: buffer ? Buffer.from(buffer) : undefined,
-				key: query.key,
-				token: query.token,
-				timestamp: query.timestamp,
-				mediaAdapterOptions: mediaAdapter.adapter?.getOptions?.(),
-			},
-		);
+		})(context, {
+			buffer: buffer ? Buffer.from(buffer) : undefined,
+			key: query.key,
+			token: query.token,
+			timestamp: query.timestamp,
+			mediaAdapterOptions: mediaAdapter.adapter?.getOptions?.(),
+		});
 		if (uploadMedia.error) throw new LucidAPIError(uploadMedia.error);
 
 		c.status(204);

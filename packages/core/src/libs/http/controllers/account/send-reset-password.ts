@@ -17,6 +17,7 @@ import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -48,6 +49,7 @@ const sendResetPasswordController = factory.createHandlers(
 	validate("json", controllerSchemas.sendResetPassword.body),
 	async (c) => {
 		const { email } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const resetPassword = await serviceWrapper(
 			accountServices.sendResetPassword,
@@ -59,19 +61,9 @@ const sendResetPasswordController = factory.createHandlers(
 					message: T("route_send_password_reset_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				email: email,
-			},
-		);
+		)(context, {
+			email: email,
+		});
 
 		if (resetPassword.error) throw new LucidAPIError(resetPassword.error);
 

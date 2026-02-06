@@ -466,7 +466,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,

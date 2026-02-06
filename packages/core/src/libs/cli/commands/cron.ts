@@ -1,7 +1,6 @@
 import { select } from "@inquirer/prompts";
 import T from "../../../translations/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
-import type { ServiceContext } from "../../../utils/services/types.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
@@ -72,15 +71,6 @@ const cronCommand = async (jobName?: string) => {
 		const queue = passthroughQueueAdapter();
 		const kv = passthroughKVAdapter();
 
-		const context: ServiceContext = {
-			db: { client: configRes.config.db.client },
-			config: configRes.config,
-			env: configRes.env ?? null,
-			queue: queue,
-			kv: kv,
-			requestUrl: configRes.config.baseUrl ?? "",
-		};
-
 		//* run the selected cron job with retry support
 		const maxRetries = 3;
 		let lastError: string | undefined;
@@ -95,7 +85,14 @@ const cronCommand = async (jobName?: string) => {
 					name: T("cron_job_error_name"),
 					message: job.error,
 				},
-			})(context);
+			})({
+				db: { client: configRes.config.db.client },
+				config: configRes.config,
+				env: configRes.env ?? null,
+				queue: queue,
+				kv: kv,
+				requestUrl: configRes.config.baseUrl ?? "",
+			});
 
 			if (!result.error) {
 				success = true;

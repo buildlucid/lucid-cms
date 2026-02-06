@@ -12,6 +12,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -36,6 +37,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 	async (c) => {
 		const { providerId } = c.req.valid("param");
 		const auth = c.get("auth");
+		const context = getServiceContext(c);
 
 		const unlinkAuthProvider = await serviceWrapper(
 			userServices.unlinkAuthProvider,
@@ -47,21 +49,11 @@ const unlinkAuthProviderController = factory.createHandlers(
 					message: T("route_account_auth_provider_unlink_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				auth: auth,
-				targetUserId: auth.id,
-				providerKey: providerId,
-			},
-		);
+		)(context, {
+			auth: auth,
+			targetUserId: auth.id,
+			providerKey: providerId,
+		});
 		if (unlinkAuthProvider.error) {
 			throw new LucidAPIError(unlinkAuthProvider.error);
 		}

@@ -54,7 +54,7 @@ const clientAuthentication = createMiddleware(
 			},
 		)(
 			{
-				db: config.db,
+				db: { client: config.db.client },
 				config: config,
 				queue: c.get("queue"),
 				env: c.get("env"),

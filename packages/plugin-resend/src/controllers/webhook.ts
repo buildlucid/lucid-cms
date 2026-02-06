@@ -38,7 +38,7 @@ const webhookController = (pluginOptions: PluginOptions) =>
 				},
 			})(
 				{
-					db: c.get("config").db,
+					db: { client: c.get("config").db.client },
 					config: c.get("config"),
 					queue: c.get("queue"),
 					env: c.get("env"),

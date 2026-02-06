@@ -13,6 +13,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -32,6 +33,7 @@ const getSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { code } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const localeRes = await serviceWrapper(localeServices.getSingle, {
 			transaction: false,
@@ -40,19 +42,9 @@ const getSingleController = factory.createHandlers(
 				name: T("route_locale_fetch_error_name"),
 				message: T("route_locale_fetch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				code,
-			},
-		);
+		})(context, {
+			code,
+		});
 		if (localeRes.error) throw new LucidAPIError(localeRes.error);
 
 		c.status(200);

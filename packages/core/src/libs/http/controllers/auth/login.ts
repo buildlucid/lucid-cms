@@ -15,6 +15,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -42,6 +43,7 @@ const loginController = factory.createHandlers(
 	validate("json", controllerSchemas.login.body),
 	async (c) => {
 		const { usernameOrEmail, password } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const userRes = await serviceWrapper(authServices.login, {
 			transaction: false,
@@ -51,20 +53,10 @@ const loginController = factory.createHandlers(
 				name: T("route_login_error_name"),
 				message: T("route_login_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				usernameOrEmail: usernameOrEmail,
-				password: password,
-			},
-		);
+		})(context, {
+			usernameOrEmail: usernameOrEmail,
+			password: password,
+		});
 		if (userRes.error) throw new LucidAPIError(userRes.error);
 
 		const [refreshRes, accessRes] = await Promise.all([
@@ -87,23 +79,13 @@ const loginController = factory.createHandlers(
 					message: T("route_login_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				userId: userRes.data.id,
-				tokenId: refreshRes.data.tokenId,
-				authMethod: "password",
-				ipAddress: connectionInfo.address ?? null,
-				userAgent: userAgent,
-			},
-		);
+		)(context, {
+			userId: userRes.data.id,
+			tokenId: refreshRes.data.tokenId,
+			authMethod: "password",
+			ipAddress: connectionInfo.address ?? null,
+			userAgent: userAgent,
+		});
 		if (userLoginTrackRes.error)
 			throw new LucidAPIError(userLoginTrackRes.error);
 

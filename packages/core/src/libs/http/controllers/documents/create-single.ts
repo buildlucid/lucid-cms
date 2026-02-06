@@ -17,6 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -44,6 +45,7 @@ const createSingleController = factory.createHandlers(
 	async (c) => {
 		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const documentId = await serviceWrapper(documentServices.upsertSingle, {
 			transaction: true,
@@ -52,22 +54,12 @@ const createSingleController = factory.createHandlers(
 				name: T("route_document_create_error_name"),
 				message: T("route_document_create_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				collectionKey,
-				userId: c.get("auth").id,
-				bricks,
-				fields,
-			},
-		);
+		})(context, {
+			collectionKey,
+			userId: c.get("auth").id,
+			bricks,
+			fields,
+		});
 		if (documentId.error) throw new LucidAPIError(documentId.error);
 
 		c.status(200);

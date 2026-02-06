@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -43,6 +44,7 @@ const updateSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const auth = c.get("auth");
+		const context = getServiceContext(c);
 
 		const updateUser = await serviceWrapper(userServices.updateSingle, {
 			transaction: true,
@@ -51,28 +53,18 @@ const updateSingleController = factory.createHandlers(
 				name: T("route_user_update_error_name"),
 				message: T("route_user_update_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
+		})(context, {
+			auth: {
+				id: auth.id,
+				superAdmin: auth.superAdmin,
 			},
-			{
-				auth: {
-					id: auth.id,
-					superAdmin: auth.superAdmin,
-				},
-				userId: Number.parseInt(id, 10),
-				roleIds: body.roleIds,
-				superAdmin: body.superAdmin,
-				triggerPasswordReset: body.triggerPasswordReset,
-				isDeleted: body.isDeleted,
-				isLocked: body.isLocked,
-			},
-		);
+			userId: Number.parseInt(id, 10),
+			roleIds: body.roleIds,
+			superAdmin: body.superAdmin,
+			triggerPasswordReset: body.triggerPasswordReset,
+			isDeleted: body.isDeleted,
+			isLocked: body.isLocked,
+		});
 		if (updateUser.error) throw new LucidAPIError(updateUser.error);
 
 		c.status(204);

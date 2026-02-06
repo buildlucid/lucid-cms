@@ -15,6 +15,7 @@ import cacheKeys from "../../../../kv-adapter/cache-keys.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import formatAPIResponse from "../../../utils/build-response.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -40,6 +41,8 @@ const getAllController = factory.createHandlers(
 		staticKey: cacheKeys.http.static.clientLocales,
 	}),
 	async (c) => {
+		const context = getServiceContext(c);
+
 		const locales = await serviceWrapper(localeServices.getAll, {
 			transaction: false,
 			defaultError: {
@@ -47,14 +50,7 @@ const getAllController = factory.createHandlers(
 				name: T("route_locale_fetch_error_name"),
 				message: T("route_locale_fetch_error_message"),
 			},
-		})({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		})(context);
 		if (locales.error) throw new LucidAPIError(locales.error);
 
 		c.status(200);

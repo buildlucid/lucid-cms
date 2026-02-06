@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -36,6 +37,7 @@ const getSingleController = factory.createHandlers(
 	validate("query", controllerSchemas.getSingle.query.string),
 	async (c) => {
 		const { collectionKey, id, statusOrId } = c.req.valid("param");
+		const context = getServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.getSingle.query.formatted,
@@ -50,23 +52,13 @@ const getSingleController = factory.createHandlers(
 				name: T("route_document_fetch_error_name"),
 				message: T("route_document_fetch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				id: Number.parseInt(id, 10),
-				status: !isVersionId ? (statusOrId as DocumentVersionType) : undefined,
-				versionId: isVersionId ? Number.parseInt(statusOrId, 10) : undefined,
-				collectionKey,
-				query: formattedQuery,
-			},
-		);
+		})(context, {
+			id: Number.parseInt(id, 10),
+			status: !isVersionId ? (statusOrId as DocumentVersionType) : undefined,
+			versionId: isVersionId ? Number.parseInt(statusOrId, 10) : undefined,
+			collectionKey,
+			query: formattedQuery,
+		});
 		if (document.error) throw new LucidAPIError(document.error);
 
 		c.status(200);

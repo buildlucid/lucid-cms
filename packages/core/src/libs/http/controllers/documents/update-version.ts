@@ -17,6 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -45,6 +46,7 @@ const updateVersionController = factory.createHandlers(
 	async (c) => {
 		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const documentId = await serviceWrapper(
 			documentVersionServices.updateSingle,
@@ -56,24 +58,14 @@ const updateVersionController = factory.createHandlers(
 					message: T("route_document_update_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				collectionKey,
-				userId: c.get("auth").id,
-				documentId: Number.parseInt(id, 10),
-				versionId: Number.parseInt(versionId, 10),
-				bricks,
-				fields,
-			},
-		);
+		)(context, {
+			collectionKey,
+			userId: c.get("auth").id,
+			documentId: Number.parseInt(id, 10),
+			versionId: Number.parseInt(versionId, 10),
+			bricks,
+			fields,
+		});
 		if (documentId.error) throw new LucidAPIError(documentId.error);
 
 		c.status(200);

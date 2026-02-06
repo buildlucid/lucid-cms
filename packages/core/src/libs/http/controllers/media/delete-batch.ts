@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -38,6 +39,7 @@ const deleteBatchController = factory.createHandlers(
 	validate("json", controllerSchemas.deleteBatch.body),
 	async (c) => {
 		const { folderIds, mediaIds, recursiveMedia } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const deleteBatch = await serviceWrapper(mediaServices.deleteBatch, {
 			transaction: true,
@@ -46,22 +48,12 @@ const deleteBatchController = factory.createHandlers(
 				name: T("route_media_delete_batch_error_name"),
 				message: T("route_media_delete_batch_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				folderIds,
-				mediaIds,
-				recursiveMedia,
-				userId: c.get("auth").id,
-			},
-		);
+		})(context, {
+			folderIds,
+			mediaIds,
+			recursiveMedia,
+			userId: c.get("auth").id,
+		});
 		if (deleteBatch.error) throw new LucidAPIError(deleteBatch.error);
 
 		c.status(204);

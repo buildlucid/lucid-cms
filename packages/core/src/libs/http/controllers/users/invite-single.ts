@@ -14,6 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -36,6 +37,7 @@ const inviteSingleController = factory.createHandlers(
 	async (c) => {
 		const body = c.req.valid("json");
 		const auth = c.get("auth");
+		const context = getServiceContext(c);
 
 		const userId = await serviceWrapper(userServices.inviteSingle, {
 			transaction: true,
@@ -44,25 +46,15 @@ const inviteSingleController = factory.createHandlers(
 				name: T("route_user_create_error_name"),
 				message: T("route_user_create_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				email: body.email,
-				username: body.username,
-				roleIds: body.roleIds,
-				firstName: body.firstName,
-				lastName: body.lastName,
-				superAdmin: body.superAdmin,
-				authSuperAdmin: auth.superAdmin,
-			},
-		);
+		})(context, {
+			email: body.email,
+			username: body.username,
+			roleIds: body.roleIds,
+			firstName: body.firstName,
+			lastName: body.lastName,
+			superAdmin: body.superAdmin,
+			authSuperAdmin: auth.superAdmin,
+		});
 		if (userId.error) throw new LucidAPIError(userId.error);
 
 		c.status(201);

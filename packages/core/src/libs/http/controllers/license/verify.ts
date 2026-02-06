@@ -10,6 +10,7 @@ import {
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -26,6 +27,7 @@ const verifyLicenseController = factory.createHandlers(
 	validateCSRF,
 	authenticate,
 	async (c) => {
+		const context = getServiceContext(c);
 		const res = await serviceWrapper(licenseServices.verifyLicense, {
 			transaction: true,
 			defaultError: {
@@ -33,14 +35,7 @@ const verifyLicenseController = factory.createHandlers(
 				name: T("default_error_name"),
 				message: T("default_error_message"),
 			},
-		})({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		})(context);
 		if (res.error) throw new LucidAPIError(res.error);
 
 		c.status(204);

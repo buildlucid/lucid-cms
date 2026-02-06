@@ -15,6 +15,7 @@ import clientAuthentication from "../../../middleware/client-authenticate.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../../utils/build-response.js";
+import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -50,6 +51,7 @@ const getMultipleController = factory.createHandlers(
 	// }),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");
+		const context = getServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.client.getMultiple.query.formatted,
@@ -65,21 +67,11 @@ const getMultipleController = factory.createHandlers(
 					message: T("route_document_fetch_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				collectionKey,
-				status,
-				query: formattedQuery,
-			},
-		);
+		)(context, {
+			collectionKey,
+			status,
+			query: formattedQuery,
+		});
 		if (documents.error) throw new LucidAPIError(documents.error);
 
 		c.status(200);

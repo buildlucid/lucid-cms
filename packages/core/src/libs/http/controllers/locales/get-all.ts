@@ -9,6 +9,7 @@ import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -24,6 +25,8 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
+		const context = getServiceContext(c);
+
 		const locales = await serviceWrapper(localeServices.getAll, {
 			transaction: false,
 			defaultError: {
@@ -31,14 +34,7 @@ const getAllController = factory.createHandlers(
 				name: T("route_locale_fetch_error_name"),
 				message: T("route_locale_fetch_error_message"),
 			},
-		})({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		})(context);
 		if (locales.error) throw new LucidAPIError(locales.error);
 
 		c.status(200);

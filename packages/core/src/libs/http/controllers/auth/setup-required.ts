@@ -12,6 +12,7 @@ import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -32,6 +33,7 @@ const setupRequiredController = factory.createHandlers(
 		windowMs: minutesToMilliseconds(1),
 	}),
 	async (c: LucidHonoContext) => {
+		const context = getServiceContext(c);
 		const setupRequiredRes = await serviceWrapper(authServices.setupRequired, {
 			transaction: false,
 			defaultError: {
@@ -39,14 +41,7 @@ const setupRequiredController = factory.createHandlers(
 				name: T("route_setup_required_error_name"),
 				message: T("route_setup_required_error_message"),
 			},
-		})({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		})(context);
 		if (setupRequiredRes.error) throw new LucidAPIError(setupRequiredRes.error);
 
 		c.status(200);

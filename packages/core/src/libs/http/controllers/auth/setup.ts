@@ -15,6 +15,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -43,6 +44,7 @@ const setupController = factory.createHandlers(
 	async (c) => {
 		const { email, username, firstName, lastName, password } =
 			c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const createAdminRes = await serviceWrapper(
 			userServices.createInitialAdmin,
@@ -54,23 +56,13 @@ const setupController = factory.createHandlers(
 					message: T("route_user_create_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				email,
-				username,
-				firstName,
-				lastName,
-				password,
-			},
-		);
+		)(context, {
+			email,
+			username,
+			firstName,
+			lastName,
+			password,
+		});
 		if (createAdminRes.error) throw new LucidAPIError(createAdminRes.error);
 
 		c.status(204);

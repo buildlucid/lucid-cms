@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -35,6 +36,7 @@ const updateLicenseController = factory.createHandlers(
 	validate("json", controllerSchemas.update.body),
 	async (c) => {
 		const body = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const updateRes = await serviceWrapper(licenseServices.updateLicense, {
 			transaction: true,
@@ -43,19 +45,9 @@ const updateLicenseController = factory.createHandlers(
 				name: T("default_error_name"),
 				message: T("default_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				licenseKey: body.licenseKey,
-			},
-		);
+		})(context, {
+			licenseKey: body.licenseKey,
+		});
 		if (updateRes.error) throw new LucidAPIError(updateRes.error);
 
 		c.status(204);

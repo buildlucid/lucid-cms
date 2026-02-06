@@ -11,6 +11,7 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import validate from "../../middleware/validate.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -27,6 +28,7 @@ const verifyResetPasswordController = factory.createHandlers(
 	validate("param", controllerSchemas.verifyResetPassword.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const tokenResult = await serviceWrapper(userTokenServices.getSingle, {
 			transaction: false,
@@ -35,20 +37,10 @@ const verifyResetPasswordController = factory.createHandlers(
 				name: T("route_verify_password_reset_error_name"),
 				message: T("route_verify_password_reset_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				tokenType: constants.userTokens.passwordReset,
-				token: token,
-			},
-		);
+		})(context, {
+			tokenType: constants.userTokens.passwordReset,
+			token: token,
+		});
 
 		if (tokenResult.error) throw new LucidAPIError(tokenResult.error);
 

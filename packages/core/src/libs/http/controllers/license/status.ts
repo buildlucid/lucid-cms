@@ -9,6 +9,7 @@ import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -23,6 +24,7 @@ const statusController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
+		const context = getServiceContext(c);
 		const res = await serviceWrapper(licenseServices.licenseStatus, {
 			transaction: false,
 			defaultError: {
@@ -30,14 +32,7 @@ const statusController = factory.createHandlers(
 				name: T("default_error_name"),
 				message: T("default_error_message"),
 			},
-		})({
-			db: c.get("config").db,
-			config: c.get("config"),
-			queue: c.get("queue"),
-			env: c.get("env"),
-			kv: c.get("kv"),
-			requestUrl: c.req.url,
-		});
+		})(context);
 		if (res.error) throw new LucidAPIError(res.error);
 
 		c.status(200);

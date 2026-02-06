@@ -17,6 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -42,6 +43,7 @@ const createSingleController = factory.createHandlers(
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const { name, description, enabled } = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const clientIntegrationRes = await serviceWrapper(
 			clientIntegrationServices.createSingle,
@@ -53,21 +55,11 @@ const createSingleController = factory.createHandlers(
 					message: T("route_client_integrations_create_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				name,
-				description,
-				enabled,
-			},
-		);
+		)(context, {
+			name,
+			description,
+			enabled,
+		});
 		if (clientIntegrationRes.error)
 			throw new LucidAPIError(clientIntegrationRes.error);
 

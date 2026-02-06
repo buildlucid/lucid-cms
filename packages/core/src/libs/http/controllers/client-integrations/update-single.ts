@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -42,6 +43,7 @@ const updateSingleController = factory.createHandlers(
 	async (c) => {
 		const { name, description, enabled } = c.req.valid("json");
 		const { id } = c.req.valid("param");
+		const context = getServiceContext(c);
 
 		const updateSingleRes = await serviceWrapper(
 			clientIntegrationServices.updateSingle,
@@ -53,22 +55,12 @@ const updateSingleController = factory.createHandlers(
 					message: T("route_client_integrations_update_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				id: Number.parseInt(id, 10),
-				name,
-				description,
-				enabled,
-			},
-		);
+		)(context, {
+			id: Number.parseInt(id, 10),
+			name,
+			description,
+			enabled,
+		});
 		if (updateSingleRes.error) throw new LucidAPIError(updateSingleRes.error);
 
 		c.status(204);

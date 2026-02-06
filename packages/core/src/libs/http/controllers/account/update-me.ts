@@ -13,6 +13,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -42,6 +43,7 @@ const updateMeController = factory.createHandlers(
 			newPassword,
 			passwordConfirmation,
 		} = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const updateMe = await serviceWrapper(accountServices.updateMe, {
 			transaction: true,
@@ -50,26 +52,16 @@ const updateMeController = factory.createHandlers(
 				name: T("route_user_me_update_error_name"),
 				message: T("route_user_me_update_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				auth: c.get("auth"),
-				firstName,
-				lastName,
-				username,
-				email,
-				currentPassword,
-				newPassword,
-				passwordConfirmation,
-			},
-		);
+		})(context, {
+			auth: c.get("auth"),
+			firstName,
+			lastName,
+			username,
+			email,
+			currentPassword,
+			newPassword,
+			passwordConfirmation,
+		});
 
 		if (updateMe.error) throw new LucidAPIError(updateMe.error);
 

@@ -17,6 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -41,6 +42,7 @@ const getPresignedUrlController = factory.createHandlers(
 	validate("json", controllerSchemas.getPresignedUrl.body),
 	async (c) => {
 		const body = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const presignedUrl = await serviceWrapper(mediaServices.getPresignedUrl, {
 			transaction: false,
@@ -49,21 +51,11 @@ const getPresignedUrlController = factory.createHandlers(
 				name: T("route_media_presigned_url_error_name"),
 				message: T("route_media_presigned_url_error_message"),
 			},
-		})(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				fileName: body.fileName,
-				mimeType: body.mimeType,
-				public: body.public,
-			},
-		);
+		})(context, {
+			fileName: body.fileName,
+			mimeType: body.mimeType,
+			public: body.public,
+		});
 		if (presignedUrl.error) throw new LucidAPIError(presignedUrl.error);
 
 		c.status(200);

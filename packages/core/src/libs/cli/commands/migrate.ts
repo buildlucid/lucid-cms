@@ -23,7 +23,7 @@ const runSyncTasks = async (
 
 	const [localesResult, collectionsResult] = await Promise.all([
 		syncServices.syncLocales({
-			db: config.db,
+			db: { client: config.db.client },
 			config: config,
 			queue: queue,
 			env: null,
@@ -31,7 +31,7 @@ const runSyncTasks = async (
 			requestUrl: config.baseUrl ?? "",
 		}),
 		syncServices.syncCollections({
-			db: config.db,
+			db: { client: config.db.client },
 			config: config,
 			queue: queue,
 			env: null,
@@ -111,7 +111,7 @@ const migrateCommand = (props?: {
 			//* check if collections need migrating
 			const collectionMigrationResult = await migrateCollections(
 				{
-					db: config.db,
+					db: { client: config.db.client },
 					config: config,
 					queue: queue,
 					env: null,
@@ -254,7 +254,7 @@ const migrateCommand = (props?: {
 				try {
 					const result = await migrateCollections(
 						{
-							db: config.db,
+							db: { client: config.db.client },
 							config: config,
 							queue: queue,
 							env: null,

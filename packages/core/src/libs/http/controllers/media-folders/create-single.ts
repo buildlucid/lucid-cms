@@ -15,6 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -39,6 +40,7 @@ const createSingleController = factory.createHandlers(
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const body = c.req.valid("json");
+		const context = getServiceContext(c);
 
 		const mediaFolderIdRes = await serviceWrapper(
 			mediaFolderServices.createSingle,
@@ -50,21 +52,11 @@ const createSingleController = factory.createHandlers(
 					message: T("route_media_folders_create_error_message"),
 				},
 			},
-		)(
-			{
-				db: c.get("config").db,
-				config: c.get("config"),
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: c.get("kv"),
-				requestUrl: c.req.url,
-			},
-			{
-				title: body.title,
-				parentFolderId: body.parentFolderId,
-				userId: c.get("auth").id,
-			},
-		);
+		)(context, {
+			title: body.title,
+			parentFolderId: body.parentFolderId,
+			userId: c.get("auth").id,
+		});
 		if (mediaFolderIdRes.error) throw new LucidAPIError(mediaFolderIdRes.error);
 
 		c.status(204);
