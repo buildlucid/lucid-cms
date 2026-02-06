@@ -6,9 +6,10 @@ import type { ServiceFn } from "../../utils/services/types.js";
  */
 const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 	const collectionsWithRevisions = context.config.collections.filter(
-		(collection) =>
-			collection.config.config?.useRevisions &&
-			collection.config.config?.revisionRetentionDays !== false,
+		(collection) => {
+			const config = collection.getData.config;
+			return config.useRevisions && config.revisionRetentionDays !== false;
+		},
 	);
 
 	if (collectionsWithRevisions.length === 0) {
@@ -25,7 +26,7 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 				{
 					payload: {
 						collectionKey: collection.key,
-						retentionDays: collection.config.config?.revisionRetentionDays,
+						retentionDays: collection.getData.config.revisionRetentionDays,
 					},
 					context: context,
 				},

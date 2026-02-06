@@ -339,7 +339,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	 */
 	async deleteExpiredRevisions(
 		props: {
-			cutoffDate: Date;
+			cutoffDate: string;
 		},
 		dynamicConfig: DynamicConfig<LucidVersionTableName>,
 	) {

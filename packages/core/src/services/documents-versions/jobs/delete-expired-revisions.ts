@@ -30,13 +30,12 @@ const deleteExpiredRevisions: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-
 	const cutoffDate = new Date();
 	cutoffDate.setDate(cutoffDate.getDate() - data.retentionDays);
 
 	const deleteRes = await DocumentVersions.deleteExpiredRevisions(
 		{
-			cutoffDate,
+			cutoffDate: cutoffDate.toISOString(),
 		},
 		{
 			tableName: tableNamesRes.data.version,
