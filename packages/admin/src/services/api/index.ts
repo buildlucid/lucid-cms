@@ -13,6 +13,7 @@ import mediaShareLinks from "./media-share-links";
 import permissions from "./permissions";
 import roles from "./roles";
 import settings from "./settings";
+import share from "./share";
 import userLogins from "./user-logins";
 import users from "./users";
 
@@ -23,6 +24,7 @@ const exportObject = {
 	userLogins,
 	roles,
 	permissions,
+	share,
 	media,
 	mediaFolders,
 	mediaShareLinks,

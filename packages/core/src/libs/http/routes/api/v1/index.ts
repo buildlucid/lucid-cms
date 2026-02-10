@@ -15,6 +15,7 @@ import mediaRoutes from "./media.routes.js";
 import permissionRoutes from "./permissions.routes.js";
 import roleRoutes from "./roles.routes.js";
 import settingsRoutes from "./settings.routes.js";
+import shareRoutes from "./share.routes.js";
 import userRoutes from "./users.routes.js";
 
 const routes = new Hono<LucidHonoGeneric>()
@@ -32,6 +33,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/roles", roleRoutes)
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)
+	.route("/share", shareRoutes)
 	.route("/client", clientRoutes)
 	.route("/fs", fsRoutes);
 

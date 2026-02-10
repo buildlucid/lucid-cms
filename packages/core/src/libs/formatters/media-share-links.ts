@@ -1,4 +1,9 @@
-import type { MediaShareLinkResponse } from "../../types/response.js";
+import constants from "../../constants/constants.js";
+import type {
+	MediaShareLinkResponse,
+	MediaType,
+	ShareLinkAccessResponse,
+} from "../../types/response.js";
 import { createShareLinkUrl } from "../../utils/media/index.js";
 import formatter from "./index.js";
 
@@ -15,6 +20,53 @@ export interface MediaShareLinkPropsT {
 	created_by: number | null;
 	updated_by: number | null;
 }
+
+export interface ShareLinkAccessPropsT {
+	token: string;
+	name: string | null;
+	description: string | null;
+	expires_at: Date | string | null;
+	media_key: string | null;
+	media_type: string | null;
+	media_mime_type: string | null;
+	media_file_extension: string | null;
+	media_file_size: number | null;
+	media_width: number | null;
+	media_height: number | null;
+}
+
+const formatShareAccess = (props: {
+	link: ShareLinkAccessPropsT;
+	shareUrl: string;
+	passwordRequired: boolean;
+}): ShareLinkAccessResponse => {
+	const link = props.link;
+	const mediaType = (link.media_type ?? "unknown") as MediaType;
+	const previewableTypes = constants.media.previewableTypes;
+	const previewable = previewableTypes.includes(
+		mediaType as (typeof previewableTypes)[number],
+	);
+
+	return {
+		token: link.token,
+		name: link.name,
+		description: link.description,
+		expiresAt: formatter.formatDate(link.expires_at),
+		hasExpired: false,
+		passwordRequired: props.passwordRequired,
+		media: {
+			key: link.media_key ?? "",
+			type: mediaType,
+			mimeType: link.media_mime_type ?? "",
+			extension: link.media_file_extension ?? "",
+			fileSize: link.media_file_size ?? 0,
+			width: link.media_width ?? null,
+			height: link.media_height ?? null,
+			previewable,
+			shareUrl: props.shareUrl,
+		},
+	};
+};
 
 const formatMultiple = (props: {
 	links: MediaShareLinkPropsT[];
@@ -50,4 +102,5 @@ const formatSingle = (props: {
 export default {
 	formatMultiple,
 	formatSingle,
+	formatShareAccess,
 };

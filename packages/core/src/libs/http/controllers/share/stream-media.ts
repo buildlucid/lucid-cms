@@ -3,7 +3,6 @@ import { minutesToMilliseconds } from "date-fns";
 import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { stream } from "hono/streaming";
-import type { StatusCode } from "hono/utils/http-status";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
@@ -13,10 +12,6 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
-import {
-	renderErrorPage,
-	renderPasswordForm,
-} from "../../../../utils/share-link/renderers.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import getServiceContext from "../../utils/get-service-context.js";
@@ -29,18 +24,15 @@ import {
 const factory = createFactory();
 
 /**
- * Stream shared media content by token.
- * Handles password protection, expired links, and deleted media.
- * Returns an HTML password form if authentication is required, or streams the media content.
+ * Stream shared media content by token for previewable media types.
  */
 const streamMediaController = factory.createHandlers(
 	describeRoute({
-		description:
-			"Access a shared media file by token. If password-protected, returns a minimal HTML password form.",
+		description: "Streams shared media content by token.",
 		tags: ["share"],
 		summary: "Stream Shared Media",
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.streamMedia.params,
+			params: controllerSchemas.streamShareMedia.params,
 		}),
 	}),
 	rateLimiter({
@@ -49,7 +41,7 @@ const streamMediaController = factory.createHandlers(
 		limit: constants.rateLimit.scopes.stream.limit,
 		windowMs: minutesToMilliseconds(1),
 	}),
-	validate("param", controllerSchemas.streamMedia.params),
+	validate("param", controllerSchemas.streamShareMedia.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
 		const context = getServiceContext(c);
@@ -62,22 +54,29 @@ const streamMediaController = factory.createHandlers(
 			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
 		)(context, { token, sessionCookie });
-		if (authorizeRes.error) {
-			const status = (authorizeRes.error.status || 400) as StatusCode;
-			c.status(status);
-			c.header("Content-Type", "text/html; charset=utf-8");
-			return c.body(
-				renderErrorPage(
-					authorizeRes.error.name || T("share_link_error_title"),
-					authorizeRes.error.message || T("unknown_service_error"),
-				),
-			);
-		}
+		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
 
 		if (authorizeRes.data.passwordRequired && !sessionCookie) {
-			c.status(200);
-			c.header("Content-Type", "text/html; charset=utf-8");
-			return c.body(renderPasswordForm());
+			throw new LucidAPIError({
+				type: "authorisation",
+				status: 401,
+				name: T("share_stream_password_required_title"),
+				message: T("share_stream_password_required_message"),
+			});
+		}
+
+		const shareAccessRes = await serviceWrapper(
+			mediaShareLinkServices.getShareAccess,
+			{ transaction: false },
+		)(context, { token, sessionCookie });
+		if (shareAccessRes.error) throw new LucidAPIError(shareAccessRes.error);
+		if (!shareAccessRes.data.media.previewable) {
+			throw new LucidAPIError({
+				type: "basic",
+				status: 415,
+				name: T("share_stream_unsupported_media_type_name"),
+				message: T("share_stream_unsupported_media_type_message"),
+			});
 		}
 
 		const response = await serviceWrapper(mediaShareLinkServices.streamMedia, {

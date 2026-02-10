@@ -25,6 +25,12 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
 		media_key: z.string().nullable().optional(),
+		media_type: z.string().nullable().optional(),
+		media_mime_type: z.string().nullable().optional(),
+		media_file_extension: z.string().nullable().optional(),
+		media_file_size: z.number().nullable().optional(),
+		media_width: z.number().nullable().optional(),
+		media_height: z.number().nullable().optional(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -83,6 +89,12 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 						"lucid_media_share_links.created_by",
 						"lucid_media.is_deleted as media_is_deleted",
 						"lucid_media.key as media_key",
+						"lucid_media.type as media_type",
+						"lucid_media.mime_type as media_mime_type",
+						"lucid_media.file_extension as media_file_extension",
+						"lucid_media.file_size as media_file_size",
+						"lucid_media.width as media_width",
+						"lucid_media.height as media_height",
 					])
 					.where("lucid_media_share_links.token", "=", props.token)
 					.limit(1);
@@ -110,6 +122,12 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 				"created_by",
 				"media_is_deleted",
 				"media_key",
+				"media_type",
+				"media_mime_type",
+				"media_file_extension",
+				"media_file_size",
+				"media_width",
+				"media_height",
 			],
 		});
 	}

@@ -190,6 +190,26 @@ export interface MediaShareLinkResponse {
 	hasPassword: boolean;
 }
 
+export interface ShareLinkAccessResponse {
+	token: string;
+	name: string | null;
+	description: string | null;
+	expiresAt: string | null;
+	hasExpired: boolean;
+	passwordRequired: boolean;
+	media: {
+		key: string;
+		type: MediaType;
+		mimeType: string;
+		extension: string;
+		fileSize: number;
+		width: number | null;
+		height: number | null;
+		previewable: boolean;
+		shareUrl: string;
+	};
+}
+
 export interface MediaFolderResponse {
 	id: number;
 	title: string;

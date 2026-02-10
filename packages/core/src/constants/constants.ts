@@ -155,6 +155,7 @@ export default Object.freeze({
 			private: "private",
 			public: "public",
 		} as const,
+		previewableTypes: ["image", "video", "audio"] as const,
 	},
 	license: {
 		statusRecheckIntervalSeconds: 21600, //  6 hours

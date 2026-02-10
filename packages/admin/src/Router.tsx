@@ -3,6 +3,7 @@ import { type Component, lazy } from "solid-js";
 import PermissionGuard from "@/guards/Permission";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
+import PublicRoutes from "@/layouts/PublicRoutes";
 
 // Routes
 const ComponentsRoute = lazy(() => import("@/routes/Components"));
@@ -11,6 +12,7 @@ const SetupRoute = lazy(() => import("@/routes/Setup"));
 const ForgotPasswordRoute = lazy(() => import("@/routes/ForgotPassword"));
 const ResetPasswordRoute = lazy(() => import("@/routes/ResetPassword"));
 const AcceptInvitationRoute = lazy(() => import("@/routes/AcceptInvitation"));
+const ShareRoute = lazy(() => import("@/routes/Share"));
 const DashboardRoute = lazy(() => import("@/routes/Dashboard"));
 const MediaListRoute = lazy(() => import("@/routes/Media/List"));
 const UsersListRoute = lazy(() => import("@/routes/Users/List"));
@@ -178,6 +180,9 @@ const AppRouter: Component = () => {
 				<Route path="/forgot-password" component={ForgotPasswordRoute} />
 				<Route path="/reset-password" component={ResetPasswordRoute} />
 				<Route path="/accept-invitation" component={AcceptInvitationRoute} />
+			</Route>
+			<Route path="/lucid" component={PublicRoutes}>
+				<Route path="/share/:token" component={ShareRoute} />
 			</Route>
 		</Router>
 	);

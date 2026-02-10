@@ -1,26 +1,22 @@
-import { scrypt } from "@noble/hashes/scrypt.js";
 import { isPast } from "date-fns";
-import constants from "../../constants/constants.js";
-import formatter from "../../libs/formatters/index.js";
+import formatter, {
+	mediaShareLinksFormatter,
+} from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import type { ShareLinkAccessResponse } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
+import { createShareStreamUrl } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-/**
- * Authorize share access by validating the share password and checking that it isn't expired or soft-deleted
- */
-const authorizeShare: ServiceFn<
+const getShareAccess: ServiceFn<
 	[
 		{
 			token: string;
 			sessionCookie?: string;
-			providedPassword?: string;
 		},
 	],
-	{
-		mediaKey: string;
-		passwordRequired: boolean;
-	}
+	ShareLinkAccessResponse
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,
@@ -42,7 +38,6 @@ const authorizeShare: ServiceFn<
 		};
 	}
 
-	//* check if expired
 	if (linkRes.data.expires_at && isPast(linkRes.data.expires_at)) {
 		return {
 			error: {
@@ -55,7 +50,6 @@ const authorizeShare: ServiceFn<
 		};
 	}
 
-	//* check if media is soft-deleted
 	const isDeleted = formatter.formatBoolean(linkRes.data.media_is_deleted);
 	if (isDeleted) {
 		return {
@@ -69,46 +63,22 @@ const authorizeShare: ServiceFn<
 		};
 	}
 
-	//* check if password is required
-	if (linkRes.data.password && !data.sessionCookie) {
-		if (!data.providedPassword) {
-			return {
-				error: undefined,
-				data: {
-					passwordRequired: true,
-					mediaKey: linkRes.data.media_key,
-				},
-			};
-		}
-
-		const hashed = Buffer.from(
-			scrypt(
-				data.providedPassword,
-				context.config.secrets.encryption,
-				constants.scrypt,
-			),
-		).toString("base64");
-
-		if (hashed !== linkRes.data.password) {
-			return {
-				error: {
-					type: "authorisation",
-					name: T("share_link_access_denied_title"),
-					status: 401,
-					message: T("share_link_incorrect_password_message"),
-				},
-				data: undefined,
-			};
-		}
-	}
+	const hasPassword = Boolean(linkRes.data.password);
+	const passwordRequired = hasPassword && !data.sessionCookie;
+	const host = getBaseUrl(context);
+	const shareUrl = createShareStreamUrl({
+		token: linkRes.data.token,
+		host,
+	});
 
 	return {
 		error: undefined,
-		data: {
-			mediaKey: linkRes.data.media_key,
-			passwordRequired: false,
-		},
+		data: mediaShareLinksFormatter.formatShareAccess({
+			link: linkRes.data,
+			shareUrl,
+			passwordRequired,
+		}),
 	};
 };
 
-export default authorizeShare;
+export default getShareAccess;
