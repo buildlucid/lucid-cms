@@ -13,6 +13,15 @@ export type MediaAdapterServiceGetPresignedUrl = (
 	headers?: Record<string, string>;
 }>;
 
+export type MediaAdapterServiceGetDownloadUrl = (
+	key: string,
+	meta: {
+		host: string;
+	},
+) => ServiceResponse<{
+	url: string;
+}>;
+
 export type MediaAdapterServiceGetMeta = (key: string) => ServiceResponse<{
 	size: number;
 	mimeType: string | null;
@@ -93,6 +102,8 @@ export type MediaAdapterInstance<T = any> = {
 	 */
 	/** Generate a presigned URL */
 	getPresignedUrl: MediaAdapterServiceGetPresignedUrl;
+	/** Generate a direct download URL */
+	getDownloadUrl: MediaAdapterServiceGetDownloadUrl;
 	/** Get media metadata  */
 	getMeta: MediaAdapterServiceGetMeta;
 	/** Stream media */

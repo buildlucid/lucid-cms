@@ -15,6 +15,7 @@ const authorizeShare: ServiceFn<
 			token: string;
 			sessionCookie?: string;
 			providedPassword?: string;
+			enforcePasswordSession?: boolean;
 		},
 	],
 	{
@@ -72,6 +73,18 @@ const authorizeShare: ServiceFn<
 	//* check if password is required
 	if (linkRes.data.password && !data.sessionCookie) {
 		if (!data.providedPassword) {
+			if (data.enforcePasswordSession) {
+				return {
+					error: {
+						type: "authorisation",
+						name: T("share_stream_password_required_title"),
+						status: 401,
+						message: T("share_stream_password_required_message"),
+					},
+					data: undefined,
+				};
+			}
+
 			return {
 				error: undefined,
 				data: {

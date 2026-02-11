@@ -2,6 +2,7 @@ import type { MediaAdapter } from "@lucidcms/core/types";
 import getAwsClient from "./clients/aws-client.js";
 import deleteMultiple from "./services/delete-multiple.js";
 import deletSingle from "./services/delete-single.js";
+import getDownloadUrl from "./services/get-download-url.js";
 import getMetadata from "./services/get-metadata.js";
 import getPresignedUrl from "./services/get-presigned-url.js";
 import rename from "./services/rename.js";
@@ -16,6 +17,7 @@ const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
 		type: "media-adapter",
 		key: "s3",
 		getPresignedUrl: getPresignedUrl(client, options),
+		getDownloadUrl: getDownloadUrl(client, options),
 		getMeta: getMetadata(client, options),
 		stream: stream(client, options),
 		upload: uploadSingle(client, options),

@@ -65,6 +65,7 @@ const getShareAccess: ServiceFn<
 
 	const hasPassword = Boolean(linkRes.data.password);
 	const passwordRequired = hasPassword && !data.sessionCookie;
+
 	const host = getBaseUrl(context);
 	const shareUrl = createShareStreamUrl({
 		token: linkRes.data.token,

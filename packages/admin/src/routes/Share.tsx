@@ -49,18 +49,23 @@ const ShareRoute: Component = () => {
 		if (error instanceof LucidError) return error.errorRes;
 		return undefined;
 	});
-	const shareUrl = createMemo(() => accessData()?.media.shareUrl ?? "");
+	const grantedAccess = createMemo(() => {
+		const access = accessData();
+		if (!access || access.passwordRequired) return undefined;
+		return access;
+	});
+	const shareUrl = createMemo(() => grantedAccess()?.media.shareUrl ?? "");
 	const isExpired = createMemo(() => {
 		if (accessError()?.status === 410) return true;
-		return accessData()?.hasExpired === true;
+		return grantedAccess()?.hasExpired === true;
 	});
 	const canRenderInlinePreview = createMemo(() => {
-		const access = accessData();
+		const access = grantedAccess();
 		if (!access) return false;
-		return access.media.previewable && !access.passwordRequired;
+		return access.media.previewable;
 	});
 	const formattedExpiresAt = createMemo(() => {
-		const expiresAt = accessData()?.expiresAt;
+		const expiresAt = grantedAccess()?.expiresAt;
 		if (!expiresAt) return T()("share_route_no_expiry");
 		return (
 			dateHelpers.formatFullDate(expiresAt) || T()("share_route_no_expiry")
@@ -105,19 +110,19 @@ const ShareRoute: Component = () => {
 												<Match
 													when={
 														canRenderInlinePreview() &&
-														accessData()?.media.type === "image"
+														grantedAccess()?.media.type === "image"
 													}
 												>
 													<img
 														src={shareUrl()}
-														alt={accessData()?.name || ""}
+														alt={grantedAccess()?.name || ""}
 														class="max-w-full max-h-[40vh] object-contain"
 													/>
 												</Match>
 												<Match
 													when={
 														canRenderInlinePreview() &&
-														accessData()?.media.type === "video"
+														grantedAccess()?.media.type === "video"
 													}
 												>
 													<div class="w-full aspect-video flex items-center justify-center min-w-0">
@@ -132,14 +137,10 @@ const ShareRoute: Component = () => {
 												<Match
 													when={
 														canRenderInlinePreview() &&
-														accessData()?.media.type === "audio"
+														grantedAccess()?.media.type === "audio"
 													}
 												>
-													<div class="w-full px-4 flex flex-col items-center gap-2">
-														<FaSolidFileAudio
-															size={36}
-															class="text-icon-fade"
-														/>
+													<div class="w-full p-4 flex flex-col items-center gap-2">
 														{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 														<audio
 															src={shareUrl()}
@@ -149,25 +150,27 @@ const ShareRoute: Component = () => {
 													</div>
 												</Match>
 												<Match when={true}>
-													<div class="flex flex-col gap-2 items-center justify-center text-icon-fade">
+													<div class="flex flex-col gap-2 items-center justify-center text-icon-fade p-4">
 														<Switch>
 															<Match
-																when={accessData()?.media.type === "archive"}
+																when={grantedAccess()?.media.type === "archive"}
 															>
 																<FaSolidFileZipper size={40} />
 															</Match>
 															<Match
-																when={accessData()?.media.type === "audio"}
+																when={grantedAccess()?.media.type === "audio"}
 															>
 																<FaSolidFileAudio size={40} />
 															</Match>
 															<Match
-																when={accessData()?.media.type === "video"}
+																when={grantedAccess()?.media.type === "video"}
 															>
 																<FaSolidFileVideo size={40} />
 															</Match>
 															<Match
-																when={accessData()?.media.type === "document"}
+																when={
+																	grantedAccess()?.media.type === "document"
+																}
 															>
 																<FaSolidFileLines size={40} />
 															</Match>
@@ -187,11 +190,11 @@ const ShareRoute: Component = () => {
 								<div class="rounded-md border border-border bg-card-base p-4 space-y-4">
 									<div>
 										<h2 class="text-base truncate">
-											{accessData()?.name || T()("untitled")}
+											{grantedAccess()?.name || T()("untitled")}
 										</h2>
-										<Show when={accessData()?.description}>
+										<Show when={grantedAccess()?.description}>
 											<p class="text-sm text-body mt-1">
-												{accessData()?.description}
+												{grantedAccess()?.description}
 											</p>
 										</Show>
 									</div>
@@ -201,13 +204,13 @@ const ShareRoute: Component = () => {
 										<div class="flex justify-between gap-4">
 											<span class="text-body">{T()("file_size")}</span>
 											<span>
-												{helpers.bytesToSize(accessData()?.media.fileSize)}
+												{helpers.bytesToSize(grantedAccess()?.media.fileSize)}
 											</span>
 										</div>
 										<div class="flex justify-between gap-4">
 											<span class="text-body">{T()("type")}</span>
 											<span class="truncate">
-												{accessData()?.media.mimeType}
+												{grantedAccess()?.media.mimeType}
 											</span>
 										</div>
 									</div>

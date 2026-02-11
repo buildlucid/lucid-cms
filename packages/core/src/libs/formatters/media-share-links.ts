@@ -47,13 +47,20 @@ const formatShareAccess = (props: {
 		mediaType as (typeof previewableTypes)[number],
 	);
 
+	if (props.passwordRequired) {
+		return {
+			token: link.token,
+			passwordRequired: true,
+		};
+	}
+
 	return {
 		token: link.token,
 		name: link.name,
 		description: link.description,
 		expiresAt: formatter.formatDate(link.expires_at),
 		hasExpired: false,
-		passwordRequired: props.passwordRequired,
+		passwordRequired: false,
 		media: {
 			key: link.media_key ?? "",
 			type: mediaType,

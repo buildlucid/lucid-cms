@@ -6,5 +6,6 @@ export { default as deleteSingle } from "./delete-single.js";
 export { default as getMultiple } from "./get-multiple.js";
 export { default as getShareAccess } from "./get-share-access.js";
 export { default as getSingle } from "./get-single.js";
+export { default as requestDownload } from "./request-download.js";
 export { default as streamMedia } from "./stream-media.js";
 export { default as updateSingle } from "./update-single.js";

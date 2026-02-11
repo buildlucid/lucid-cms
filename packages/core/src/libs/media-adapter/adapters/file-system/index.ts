@@ -4,6 +4,7 @@ import type {
 } from "../../types.js";
 import deleteMultiple from "./services/delete-multiple.js";
 import deletSingle from "./services/delete-single.js";
+import getDownloadUrl from "./services/get-download-url.js";
 import getMetadata from "./services/get-metadata.js";
 import getPresignedUrl from "./services/get-presigned-url.js";
 import rename from "./services/rename.js";
@@ -17,6 +18,7 @@ const fileSystemAdapter: MediaAdapter<FileSystemMediaAdapterOptions> = (
 		type: "media-adapter",
 		key: "file-system",
 		getPresignedUrl: getPresignedUrl(options),
+		getDownloadUrl: getDownloadUrl(options),
 		getMeta: getMetadata(options),
 		stream: stream(options),
 		upload: uploadSingle(options),

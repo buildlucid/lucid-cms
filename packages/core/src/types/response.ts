@@ -190,13 +190,13 @@ export interface MediaShareLinkResponse {
 	hasPassword: boolean;
 }
 
-export interface ShareLinkAccessResponse {
+export interface ShareLinkAccessGrantedResponse {
 	token: string;
 	name: string | null;
 	description: string | null;
 	expiresAt: string | null;
 	hasExpired: boolean;
-	passwordRequired: boolean;
+	passwordRequired: false;
 	media: {
 		key: string;
 		type: MediaType;
@@ -209,6 +209,15 @@ export interface ShareLinkAccessResponse {
 		shareUrl: string;
 	};
 }
+
+export interface ShareLinkAccessProtectedResponse {
+	token: string;
+	passwordRequired: true;
+}
+
+export type ShareLinkAccessResponse =
+	| ShareLinkAccessGrantedResponse
+	| ShareLinkAccessProtectedResponse;
 
 export interface MediaFolderResponse {
 	id: number;

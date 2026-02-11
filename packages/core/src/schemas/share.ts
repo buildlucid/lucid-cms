@@ -11,25 +11,31 @@ const shareMediaTypeSchema = z.enum([
 	"unknown",
 ]);
 
-const shareAccessResponseSchema = z.object({
-	token: tokenSchema,
-	name: z.string().nullable(),
-	description: z.string().nullable(),
-	expiresAt: z.string().nullable(),
-	hasExpired: z.boolean(),
-	passwordRequired: z.boolean(),
-	media: z.object({
-		key: z.string(),
-		type: shareMediaTypeSchema,
-		mimeType: z.string(),
-		extension: z.string(),
-		fileSize: z.number(),
-		width: z.number().nullable(),
-		height: z.number().nullable(),
-		previewable: z.boolean(),
-		shareUrl: z.string(),
+const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
+	z.object({
+		token: tokenSchema,
+		passwordRequired: z.literal(true),
 	}),
-});
+	z.object({
+		token: tokenSchema,
+		name: z.string().nullable(),
+		description: z.string().nullable(),
+		expiresAt: z.string().nullable(),
+		hasExpired: z.boolean(),
+		passwordRequired: z.literal(false),
+		media: z.object({
+			key: z.string(),
+			type: shareMediaTypeSchema,
+			mimeType: z.string(),
+			extension: z.string(),
+			fileSize: z.number(),
+			width: z.number().nullable(),
+			height: z.number().nullable(),
+			previewable: z.boolean(),
+			shareUrl: z.string(),
+		}),
+	}),
+]);
 
 export const controllerSchemas = {
 	getShareAccess: {
@@ -77,7 +83,7 @@ export const controllerSchemas = {
 			token: tokenSchema,
 		}),
 		response: z.object({
-			url: z.string().nullable(),
+			url: z.string(),
 		}),
 	} satisfies ControllerSchema,
 };

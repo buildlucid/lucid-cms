@@ -1,6 +1,6 @@
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import classNames from "classnames";
-import { FaSolidCircle, FaSolidCirclePlus, FaSolidPlus } from "solid-icons/fa";
+import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import DragDrop from "@/components/Partials/DragDrop";

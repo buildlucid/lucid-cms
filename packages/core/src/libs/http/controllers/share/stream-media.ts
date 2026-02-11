@@ -53,10 +53,20 @@ const streamMediaController = factory.createHandlers(
 		const authorizeRes = await serviceWrapper(
 			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
-		)(context, { token, sessionCookie });
+		)(context, {
+			token,
+			sessionCookie,
+			enforcePasswordSession: true,
+		});
 		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
 
-		if (authorizeRes.data.passwordRequired && !sessionCookie) {
+		const shareAccessRes = await serviceWrapper(
+			mediaShareLinkServices.getShareAccess,
+			{ transaction: false },
+		)(context, { token, sessionCookie });
+		if (shareAccessRes.error) throw new LucidAPIError(shareAccessRes.error);
+
+		if (shareAccessRes.data.passwordRequired) {
 			throw new LucidAPIError({
 				type: "authorisation",
 				status: 401,
@@ -65,11 +75,7 @@ const streamMediaController = factory.createHandlers(
 			});
 		}
 
-		const shareAccessRes = await serviceWrapper(
-			mediaShareLinkServices.getShareAccess,
-			{ transaction: false },
-		)(context, { token, sessionCookie });
-		if (shareAccessRes.error) throw new LucidAPIError(shareAccessRes.error);
+		//* we only support previews on images, video and audio for the time being
 		if (!shareAccessRes.data.media.previewable) {
 			throw new LucidAPIError({
 				type: "basic",

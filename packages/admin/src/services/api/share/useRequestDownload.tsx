@@ -6,8 +6,12 @@ interface Params {
 	token: string;
 }
 
+interface UseRequestDownloadProps {
+	onSuccess?: (data: ResponseBody<{ url: string }>) => void;
+}
+
 const requestDownloadReq = (params: Params) => {
-	return request<ResponseBody<{ url: string | null }>>({
+	return request<ResponseBody<{ url: string }>>({
 		url: `/lucid/api/v1/share/${params.token}/download`,
 		config: {
 			method: "POST",
@@ -15,12 +19,18 @@ const requestDownloadReq = (params: Params) => {
 	});
 };
 
-const useRequestDownload = () => {
+const useRequestDownload = (props?: UseRequestDownloadProps) => {
 	return serviceHelpers.useMutationWrapper<
 		Params,
-		ResponseBody<{ url: string | null }>
+		ResponseBody<{ url: string }>
 	>({
 		mutationFn: requestDownloadReq,
+		onSuccess: (data) => {
+			if (data?.data?.url) {
+				window.location.href = data.data.url;
+			}
+			props?.onSuccess?.(data);
+		},
 	});
 };
 
