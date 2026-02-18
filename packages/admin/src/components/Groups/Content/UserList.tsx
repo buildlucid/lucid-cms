@@ -160,7 +160,12 @@ export const UserList: Component<{
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("super_admin"),
+						label: T()("email"),
+						key: "email",
+						icon: <FaSolidEnvelope />,
+					},
+					{
+						label: T()("user_type"),
 						key: "superAdmin",
 						icon: <FaSolidUserTie />,
 					},
@@ -171,9 +176,14 @@ export const UserList: Component<{
 						sortable: true,
 					},
 					{
-						label: T()("email"),
-						key: "email",
+						label: T()("invitation_status"),
+						key: "invitationAccepted",
 						icon: <FaSolidEnvelope />,
+					},
+					{
+						label: T()("password_reset_status"),
+						key: "triggerPasswordReset",
+						icon: <FaSolidLock />,
 					},
 					{
 						label: T()("created_at"),

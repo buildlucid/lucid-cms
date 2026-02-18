@@ -140,7 +140,7 @@ const DocumentDynamicColumns: Component<{
 							? T()("yes")
 							: T()("no")
 					}
-					theme="primary"
+					theme="primary-opaque"
 					options={{ include: props?.include[props.index] }}
 				/>
 			</Match>

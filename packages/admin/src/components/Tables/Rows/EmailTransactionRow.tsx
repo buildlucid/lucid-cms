@@ -21,12 +21,12 @@ const EmailTransactionRow: Component<EmailTransactionRowProps> = (props) => {
 		deliveryStatus: EmailDeliveryStatus,
 	): PillProps["theme"] => {
 		if (deliveryStatus === "sent" || deliveryStatus === "delivered") {
-			return "primary";
+			return "primary-opaque";
 		}
 		if (deliveryStatus === "failed") {
-			return "red";
+			return "error-opaque";
 		}
-		return "grey";
+		return "outline";
 	};
 
 	// ----------------------------------

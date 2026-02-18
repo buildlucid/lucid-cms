@@ -61,10 +61,10 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				theme={
 					props.email.currentStatus === "sent" ||
 					props.email.currentStatus === "delivered"
-						? "primary"
+						? "primary-opaque"
 						: props.email.currentStatus === "failed"
-							? "red"
-							: "grey"
+							? "error-opaque"
+							: "outline"
 				}
 				options={{ include: props?.include[0] }}
 			/>
@@ -75,6 +75,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 			<PillCol
 				text={props.email.mailDetails.template}
 				options={{ include: props?.include[2] }}
+				theme={"outline"}
 			/>
 			<TextCol
 				text={props.email.mailDetails.to}
@@ -86,12 +87,12 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 			/>
 			<PillCol
 				text={props.email.attemptCount || 0}
-				theme={"grey"}
+				theme={"outline"}
 				options={{ include: props?.include[5] }}
 			/>
 			<PillCol
 				text={props.email.type}
-				theme={"grey"}
+				theme={"outline"}
 				options={{ include: props?.include[6] }}
 			/>
 			<DateCol

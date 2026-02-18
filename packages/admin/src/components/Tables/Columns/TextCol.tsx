@@ -28,6 +28,7 @@ const TextCol: Component<TextColProps> = (props) => {
 					"line-clamp-3": props?.options?.maxLines === 3,
 					"line-clamp-4": props?.options?.maxLines === 4,
 				})}
+				title={String(props.text ?? "-")}
 			>
 				{props.text || "-"}
 			</span>

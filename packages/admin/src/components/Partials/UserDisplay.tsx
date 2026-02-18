@@ -28,7 +28,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 		>
 			<span
 				class={classNames(
-					"rounded-full flex bg-primary-base text-primary-contrast justify-center items-center text-xs font-bold",
+					"rounded-full flex bg-primary-base/20 text-primary-base border border-primary-base/30 justify-center items-center text-[10px] font-bold",
 					{
 						"h-10 w-10 min-w-10": props.mode === "icon",
 						"h-8 w-8 min-w-8": props.mode === "long",

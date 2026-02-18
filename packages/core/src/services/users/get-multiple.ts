@@ -1,6 +1,7 @@
 import formatter, { usersFormatter } from "../../libs/formatters/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { UserResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -8,6 +9,7 @@ const getMultiple: ServiceFn<
 	[
 		{
 			query: GetMultipleQueryParams;
+			authUser: LucidAuth;
 		},
 	],
 	{
@@ -30,6 +32,7 @@ const getMultiple: ServiceFn<
 		data: {
 			data: usersFormatter.formatMultiple({
 				users: usersRes.data[0],
+				authUser: data.authUser,
 			}),
 			count: formatter.parseCount(usersRes.data[1]?.count),
 		},

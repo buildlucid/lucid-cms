@@ -64,7 +64,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 			/>
 			<PillCol
 				text={props.link.hasPassword ? T()("yes") : T()("no")}
-				theme={props.link.hasPassword ? "primary" : "grey"}
+				theme={props.link.hasPassword ? "primary-opaque" : "outline"}
 				options={{ include: props?.include[2] }}
 			/>
 			<DateCol
@@ -73,7 +73,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 			/>
 			<PillCol
 				text={props.link.hasExpired ? T()("yes") : T()("no")}
-				theme={props.link.hasExpired ? "red" : "grey"}
+				theme={props.link.hasExpired ? "error-opaque" : "outline"}
 				options={{ include: props?.include[3] }}
 			/>
 			<DateCol

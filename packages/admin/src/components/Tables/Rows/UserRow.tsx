@@ -156,21 +156,43 @@ const UserRow: Component<UserRowProps> = (props) => {
 				text={props.user.lastName}
 				options={{ include: props?.include[2] }}
 			/>
-			<PillCol
-				text={props.user.superAdmin ? T()("super_admin") : T()("standard")}
+			<TextCol
+				text={props.user.email}
 				options={{ include: props?.include[3] }}
 			/>
-			<PillCol
-				text={props.user.isLocked ? T()("locked") : T()("unlocked")}
+			<TextCol
+				text={props.user.superAdmin ? T()("super_admin") : T()("standard")}
 				options={{ include: props?.include[4] }}
 			/>
 			<TextCol
-				text={props.user.email}
+				text={props.user.isLocked ? T()("locked") : T()("unlocked")}
 				options={{ include: props?.include[5] }}
+			/>
+			<PillCol
+				text={
+					props.user.invitationAccepted == null
+						? undefined
+						: props.user.invitationAccepted
+							? T()("invitation_accepted")
+							: T()("pending")
+				}
+				theme={props.user.invitationAccepted ? "outline" : "warning-opaque"}
+				options={{ include: props?.include[6] }}
+			/>
+			<PillCol
+				options={{ include: props?.include[7] }}
+				text={
+					props.user.triggerPasswordReset == null
+						? undefined
+						: props.user.triggerPasswordReset
+							? T()("password_reset_required")
+							: T()("password_reset_not_required")
+				}
+				theme={"outline"}
 			/>
 			<DateCol
 				date={props.user.createdAt}
-				options={{ include: props?.include[6] }}
+				options={{ include: props?.include[8] }}
 			/>
 		</Tr>
 	);

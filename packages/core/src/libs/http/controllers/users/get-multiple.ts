@@ -49,6 +49,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		})(context, {
 			query: formattedQuery,
+			authUser: c.get("auth"),
 		});
 		if (users.error) throw new LucidAPIError(users.error);
 

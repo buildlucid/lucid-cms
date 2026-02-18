@@ -75,8 +75,8 @@ export const Th: Component<ThProps> = (props) => {
 					<Switch>
 						<Match when={props.options?.sortable !== true}>
 							<div class="flex items-center min-h-[50px]">
-								<span class="text-base mr-2.5 fill-body">{props?.icon}</span>
-								<span class="text-base text-body">{props?.label}</span>
+								<span class="text-sm mr-2.5 fill-body">{props?.icon}</span>
+								<span class="text-sm text-body">{props?.label}</span>
 							</div>
 						</Match>
 						<Match when={props.options?.sortable === true}>
@@ -104,14 +104,14 @@ export const Th: Component<ThProps> = (props) => {
 								type="button"
 							>
 								<div class="flex items-center">
-									<span class="text-base mr-2.5 fill-body">{props?.icon}</span>
-									<span class="text-base text-body">{props?.label}</span>
+									<span class="text-sm mr-2.5 fill-body">{props?.icon}</span>
+									<span class="text-sm text-body">{props?.label}</span>
 								</div>
 								<Switch>
 									<Match when={sort() === "desc" || sort() === "asc"}>
 										<FaSolidCaretUp
 											aria-hidden="true"
-											class={classNames("w-3 h-3 ml-2 text-title", {
+											class={classNames("w-3 h-3 ml-2 text-icon-base", {
 												"transform rotate-180": sort() === "desc",
 											})}
 										/>
@@ -119,7 +119,7 @@ export const Th: Component<ThProps> = (props) => {
 									<Match when={sort() === undefined}>
 										<FaSolidMinus
 											aria-hidden="true"
-											class="w-3 h-3 text-title ml-2"
+											class="w-3 h-3 text-icon-base ml-2"
 										/>
 									</Match>
 								</Switch>
