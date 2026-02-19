@@ -1,11 +1,12 @@
-import { type Accessor, type Component, Show } from "solid-js";
+import { type Accessor, type Component, lazy, Show, Suspense } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import { Panel } from "@/components/Groups/Panel";
 import DetailsList from "@/components/Partials/DetailsList";
-import JSONPreview from "@/components/Partials/JSONPreview";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
+
+const JSONPreview = lazy(() => import("@/components/Partials/JSONPreview"));
 
 interface ViewJobPanelProps {
 	id: Accessor<number | undefined>;
@@ -122,10 +123,16 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 					<Show when={job.data?.data.eventData}>
 						<SectionHeading title={T()("job_payload")} />
 						<div class="mb-4">
-							<JSONPreview
-								title={T()("job_payload")}
-								json={job.data?.data.eventData || {}}
-							/>
+							<Suspense
+								fallback={
+									<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
+								}
+							>
+								<JSONPreview
+									title={T()("job_payload")}
+									json={job.data?.data.eventData || {}}
+								/>
+							</Suspense>
 						</div>
 					</Show>
 				</>

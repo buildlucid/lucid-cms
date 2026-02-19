@@ -5,16 +5,24 @@ import {
 	FaSolidEnvelope,
 	FaSolidTag,
 } from "solid-icons/fa";
-import { type Accessor, type Component, Index, Show } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	Index,
+	lazy,
+	Show,
+	Suspense,
+} from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import { Panel } from "@/components/Groups/Panel";
 import { Table } from "@/components/Groups/Table";
 import DetailsList from "@/components/Partials/DetailsList";
-import JSONPreview from "@/components/Partials/JSONPreview";
 import EmailTransactionRow from "@/components/Tables/Rows/EmailTransactionRow";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
+
+const JSONPreview = lazy(() => import("@/components/Partials/JSONPreview"));
 
 interface PreviewEmailPanelProps {
 	id: Accessor<number | undefined>;
@@ -112,10 +120,16 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 									email.data?.data.transactions.length > 0,
 							})}
 						>
-							<JSONPreview
-								title={T()("template_data")}
-								json={email.data?.data.data || {}}
-							/>
+							<Suspense
+								fallback={
+									<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
+								}
+							>
+								<JSONPreview
+									title={T()("template_data")}
+									json={email.data?.data.data || {}}
+								/>
+							</Suspense>
 						</div>
 					</Show>
 					<Show

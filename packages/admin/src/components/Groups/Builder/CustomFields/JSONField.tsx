@@ -4,12 +4,19 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
+	lazy,
+	Suspense,
 	untrack,
 } from "solid-js";
-import { JSONTextarea } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
+
+const JSONTextarea = lazy(() =>
+	import("@/components/Groups/Form/JSONTextarea").then((m) => ({
+		default: m.JSONTextarea,
+	})),
+);
 
 interface JSONFieldProps {
 	state: {
@@ -66,48 +73,56 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<JSONTextarea
-			id={brickHelpers.customFieldId({
-				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
-				groupRef: props.state.groupRef,
-			})}
-			value={getValue()}
-			onChange={(value) => {
-				setValue(value);
-				try {
-					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
-						fieldConfig: props.state.fieldConfig,
-						key: props.state.fieldConfig.key,
-						ref: props.state.groupRef,
-						repeaterKey: props.state.repeaterKey,
-						value: JSON.parse(value),
-						contentLocale: props.state.contentLocale,
-					});
-				} catch {
-					// store retains last valid JSON
-				}
-			}}
-			name={props.state.fieldConfig.key}
-			copy={{
-				label: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.label,
-				}),
-				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.summary,
-				}),
-				placeholder: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.placeholder,
-				}),
-			}}
-			altLocaleError={props.state.altLocaleError}
-			localised={props.state.localised}
-			disabled={isDisabled()}
-			errors={props.state.fieldError}
-			required={props.state.fieldConfig.validation?.required || false}
-			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			hideOptionalText
-		/>
+		<Suspense
+			fallback={
+				<div class="w-full mb-3 last:mb-0">
+					<div class="h-52 bg-input-base border border-border rounded-md animate-pulse" />
+				</div>
+			}
+		>
+			<JSONTextarea
+				id={brickHelpers.customFieldId({
+					key: props.state.fieldConfig.key,
+					brickIndex: props.state.brickIndex,
+					groupRef: props.state.groupRef,
+				})}
+				value={getValue()}
+				onChange={(value) => {
+					setValue(value);
+					try {
+						brickStore.get.setFieldValue({
+							brickIndex: props.state.brickIndex,
+							fieldConfig: props.state.fieldConfig,
+							key: props.state.fieldConfig.key,
+							ref: props.state.groupRef,
+							repeaterKey: props.state.repeaterKey,
+							value: JSON.parse(value),
+							contentLocale: props.state.contentLocale,
+						});
+					} catch {
+						// store retains last valid JSON
+					}
+				}}
+				name={props.state.fieldConfig.key}
+				copy={{
+					label: helpers.getLocaleValue({
+						value: props.state.fieldConfig.details.label,
+					}),
+					describedBy: helpers.getLocaleValue({
+						value: props.state.fieldConfig.details.summary,
+					}),
+					placeholder: helpers.getLocaleValue({
+						value: props.state.fieldConfig.details.placeholder,
+					}),
+				}}
+				altLocaleError={props.state.altLocaleError}
+				localised={props.state.localised}
+				disabled={isDisabled()}
+				errors={props.state.fieldError}
+				required={props.state.fieldConfig.validation?.required || false}
+				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				hideOptionalText
+			/>
+		</Suspense>
 	);
 };
