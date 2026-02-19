@@ -651,5 +651,6 @@
 	"database": "Database",
 	"kv": "KV",
 	"queue": "Queue",
-	"image_processor": "Image Processor"
+	"image_processor": "Image Processor",
+	"json_invalid_save_warning": "Using last valid save"
 }

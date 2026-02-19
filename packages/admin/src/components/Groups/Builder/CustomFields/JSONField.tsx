@@ -1,10 +1,10 @@
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import {
-	batch,
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
+	untrack,
 } from "solid-js";
 import { JSONTextarea } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
@@ -50,7 +50,17 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	// -------------------------------
 	// Effects
 	createEffect(() => {
-		setValue(JSON.stringify(fieldValue() ?? "", null, 4));
+		const storeVal = fieldValue();
+		const compact = JSON.stringify(storeVal ?? "");
+
+		const current = untrack(getValue);
+		try {
+			if (JSON.stringify(JSON.parse(current)) === compact) return;
+		} catch {
+			// current editor content is invalid JSON — fall through to update
+		}
+
+		setValue(JSON.stringify(storeVal ?? "", null, 2));
 	});
 
 	// -------------------------------
@@ -64,21 +74,19 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 			})}
 			value={getValue()}
 			onChange={(value) => {
+				setValue(value);
 				try {
-					batch(() => {
-						brickStore.get.setFieldValue({
-							brickIndex: props.state.brickIndex,
-							fieldConfig: props.state.fieldConfig,
-							key: props.state.fieldConfig.key,
-							ref: props.state.groupRef,
-							repeaterKey: props.state.repeaterKey,
-							value: JSON.parse(value),
-							contentLocale: props.state.contentLocale,
-						});
-						setValue(value);
+					brickStore.get.setFieldValue({
+						brickIndex: props.state.brickIndex,
+						fieldConfig: props.state.fieldConfig,
+						key: props.state.fieldConfig.key,
+						ref: props.state.groupRef,
+						repeaterKey: props.state.repeaterKey,
+						value: JSON.parse(value),
+						contentLocale: props.state.contentLocale,
 					});
-				} catch (err) {
-					console.log(err);
+				} catch {
+					// store retains last valid JSON
 				}
 			}}
 			name={props.state.fieldConfig.key}

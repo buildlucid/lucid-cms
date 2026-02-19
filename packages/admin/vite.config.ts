@@ -10,6 +10,9 @@ export default defineConfig({
 		outDir: "../core/spa",
 		emptyOutDir: true,
 	},
+	optimizeDeps: {
+		include: ["@codemirror/state", "@codemirror/view"],
+	},
 	plugins: [
 		tailwindcss(),
 		devtools({
