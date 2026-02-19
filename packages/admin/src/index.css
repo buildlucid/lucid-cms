@@ -185,78 +185,59 @@
 		}
 	}
 
-	/* Wysiwyg */
-	.ql-toolbar {
-		@apply border-border! rounded-t-md!;
+	/* WYSIWYG (TipTap) */
+	.wysiwyg-content h1 {
+		@apply text-xl font-bold mb-2 mt-4 first:mt-0;
 	}
-	.ql-container.ql-snow {
-		@apply border-border! rounded-b-md!;
+	.wysiwyg-content h2 {
+		@apply text-lg font-bold mb-2 mt-3 first:mt-0;
 	}
-	.ql-container-1 {
-		@apply border-border! rounded-b-md!;
+	.wysiwyg-content h3 {
+		@apply text-base font-semibold mb-1.5 mt-3 first:mt-0;
 	}
-	.ql-toolbar .ql-stroke {
-		@apply stroke-body! duration-200 transition-colors;
+	.wysiwyg-content h4 {
+		@apply text-base font-medium mb-1.5 mt-2 first:mt-0;
 	}
-	.ql-toolbar .ql-fill {
-		@apply fill-body! duration-200 transition-colors;
+	.wysiwyg-content h5,
+	.wysiwyg-content h6 {
+		@apply text-sm font-medium mb-1 mt-2 first:mt-0;
 	}
-	.ql-picker-label {
-		@apply text-body hover:text-primary-hover! duration-200 transition-colors;
+	.wysiwyg-content p {
+		@apply mb-2 last:mb-0 leading-relaxed;
 	}
-	.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {
-		@apply border-border!;
+	.wysiwyg-content ul {
+		@apply list-disc pl-6 mb-2;
 	}
-	.ql-picker-label.ql-active {
-		@apply text-primary-base!;
+	.wysiwyg-content ol {
+		@apply list-decimal pl-6 mb-2;
 	}
-	.ql-toolbar .ql-picker:hover .ql-stroke,
-	.ql-toolbar button:hover .ql-stroke {
-		@apply stroke-primary-hover!;
+	.wysiwyg-content li {
+		@apply mb-0.5;
 	}
-	.ql-toolbar .ql-picker:hover .ql-fill,
-	.ql-toolbar button:hover .ql-fill {
-		@apply fill-primary-hover!;
+	.wysiwyg-content li p {
+		@apply mb-0;
 	}
-	.ql-active .ql-stroke {
-		@apply stroke-primary-base!;
+	.wysiwyg-content blockquote {
+		@apply border-l-3 border-border pl-4 italic text-body/80 my-2;
 	}
-	.ql-active .ql-fill {
-		@apply fill-primary-base!;
+	.wysiwyg-content code {
+		@apply bg-background-hover rounded px-1 py-0.5 text-xs font-mono;
 	}
-	.ql-tooltip {
-		@apply left-1/2! -translate-x-1/2! shadow-none! bg-background-base! rounded-md border-border! border! text-body!;
+	.wysiwyg-content pre {
+		@apply bg-background-hover rounded-md p-3 my-2 overflow-x-auto;
 	}
-	.ql-tooltip input {
-		@apply bg-background-base! rounded-md border-border! border! text-body! focus:outline-hidden focus-visible:ring-1 ring-primary-base;
+	.wysiwyg-content pre code {
+		@apply bg-transparent p-0;
 	}
-	.ql-tooltip .ql-action,
-	.ql-tooltip .ql-remove {
-		@apply text-primary-contrast! bg-primary-base hover:bg-primary-hover ml-2.5 px-2.5 rounded-md;
+	.wysiwyg-content a {
+		@apply underline;
 	}
-	.ql-tooltip .ql-action:after,
-	.ql-tooltip .ql-remove:before {
-		@apply ml-0! text-sm! px-0!;
+	.wysiwyg-content hr {
+		@apply border-border my-4;
 	}
-	.ql-tooltip .ql-action:hover,
-	.ql-tooltip .ql-remove:hover {
-		@apply text-primary-contrast! bg-primary-hover!;
-	}
-	.ql-preview {
-		@apply text-primary-base!;
-	}
-	.ql-snow a {
-		@apply text-primary-base! hover:text-primary-hover! duration-200 transition-colors;
-	}
-
-	.ql-picker-options {
-		@apply bg-background-base! rounded-md border-border! border! text-body!;
-	}
-	.ql-picker-item:hover {
-		@apply text-primary-hover!;
-	}
-	.ql-picker-item.ql-selected {
-		@apply text-primary-base!;
+	.wysiwyg-content p.is-editor-empty:first-child::before {
+		@apply text-body/40 float-left h-0 pointer-events-none;
+		content: attr(data-placeholder);
 	}
 
 	::view-transition-group(document-builder-header) {

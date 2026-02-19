@@ -191,7 +191,7 @@ export interface WysiwygFieldConfig extends SharedFieldConfig {
 	};
 	config: {
 		useTranslations?: boolean;
-		default?: string;
+		default?: Record<string, unknown>;
 		isHidden?: boolean;
 		isDisabled?: boolean;
 	};
@@ -457,7 +457,7 @@ export type UserFieldProps = Partial<
 
 export type TabResValue = null;
 export type TextResValue = string | null;
-export type WysiwygResValue = string | null;
+export type WysiwygResValue = Record<string, unknown> | null;
 export type MediaResValue = number | null;
 export type RepeaterResValue = null;
 export type NumberResValue = number | null;

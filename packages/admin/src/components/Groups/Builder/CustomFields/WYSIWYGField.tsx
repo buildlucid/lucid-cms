@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { WYSIWYG } from "@/components/Groups/Form";
@@ -27,7 +28,7 @@ export const WYSIWYGField: Component<WYSIWYGFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<string>({
+		return brickHelpers.getFieldValue<JSONContent | null>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
@@ -46,7 +47,7 @@ export const WYSIWYGField: Component<WYSIWYGFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			value={fieldValue() ?? ""}
+			value={fieldValue()}
 			onChange={(value) => {
 				brickStore.get.setFieldValue({
 					brickIndex: props.state.brickIndex,

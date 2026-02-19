@@ -30,7 +30,10 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 			},
 			config: {
 				useTranslations: this.props?.config?.useTranslations ?? true,
-				default: this.props?.config?.default ?? "",
+				default: this.props?.config?.default ?? {
+					type: "doc",
+					content: [{ type: "paragraph" }],
+				},
 				isHidden: this.props?.config?.isHidden,
 				isDisabled: this.props?.config?.isDisabled,
 			},
@@ -46,7 +49,7 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 				columns: [
 					{
 						name: this.key,
-						type: props.db.getDataType("text"),
+						type: props.db.getDataType("json"),
 						nullable: true,
 						default: this.config.config.default,
 					},
@@ -55,13 +58,16 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 			error: undefined,
 		};
 	}
-	formatResponseValue(value?: string | null) {
+	formatResponseValue(value?: Record<string, unknown> | null) {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"wysiwyg">["value"];
 	}
-	cfSpecificValidation(value: string) {
-		const valueSchema = z.string();
+	cfSpecificValidation(value: unknown) {
+		const valueSchema = z.record(
+			z.union([z.string(), z.number(), z.symbol()]),
+			z.unknown(),
+		);
 
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;

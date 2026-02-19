@@ -151,7 +151,10 @@ test("flat fields should return correct config", async () => {
 			},
 			config: {
 				useTranslations: true,
-				default: "",
+				default: {
+					type: "doc",
+					content: [{ type: "paragraph" }],
+				},
 				isHidden: undefined,
 				isDisabled: undefined,
 			},
@@ -176,7 +179,12 @@ test("flat fields should return correct config", async () => {
 		{
 			key: "checkbox_test",
 			type: "checkbox",
-			details: { label: "Checkbox Test", summary: undefined },
+			details: {
+				label: "Checkbox Test",
+				summary: undefined,
+				true: undefined,
+				false: undefined,
+			},
 			config: {
 				useTranslations: false,
 				default: false,

@@ -26,7 +26,9 @@ const WysiwygCollection = new CollectionBuilder("collection", {
 	})
 	.addWysiwyg("min_length_wysiwyg", {
 		validation: {
-			zod: z.string().min(5),
+			zod: z.object({
+				type: z.literal("doc"),
+			}),
 		},
 	});
 
@@ -36,7 +38,10 @@ test("successfully validate field - wysiwyg", async () => {
 		field: {
 			key: "standard_wysiwyg",
 			type: "wysiwyg",
-			value: "<h1>Heading</h1><p>Body</p>",
+			value: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
@@ -57,7 +62,10 @@ test("successfully validate field - wysiwyg", async () => {
 		field: {
 			key: "required_wysiwyg",
 			type: "wysiwyg",
-			value: "<h1>Heading</h1><p>Body</p>",
+			value: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("required_wysiwyg")!,
@@ -78,7 +86,10 @@ test("successfully validate field - wysiwyg", async () => {
 		field: {
 			key: "min_length_wysiwyg",
 			type: "wysiwyg",
-			value: "<h1>Heading</h1><p>Body</p>",
+			value: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
@@ -119,7 +130,7 @@ test("fail to validate field - wysiwyg", async () => {
 		{
 			key: "standard_wysiwyg",
 			localeCode: "en",
-			message: "Invalid input: expected string, received number", // zod error message
+			message: "Invalid input: expected record, received number",
 		},
 	]);
 
@@ -184,7 +195,10 @@ test("fail to validate field - wysiwyg", async () => {
 		field: {
 			key: "min_length_wysiwyg",
 			type: "wysiwyg",
-			value: "Hi",
+			value: {
+				type: "not_doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
@@ -202,7 +216,7 @@ test("fail to validate field - wysiwyg", async () => {
 		{
 			key: "min_length_wysiwyg",
 			localeCode: "en",
-			message: "Too small: expected string to have >=5 characters", // zod error message
+			message: 'Invalid input: expected "doc" → at type',
 		},
 	]);
 });
@@ -224,13 +238,18 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
-			default: "",
+			default: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 			isHidden: false,
 			isDisabled: false,
 		},
 		validation: {
 			required: true,
-			zod: z.string().min(5),
+			zod: z.object({
+				type: z.literal("doc"),
+			}),
 		},
 	});
 
