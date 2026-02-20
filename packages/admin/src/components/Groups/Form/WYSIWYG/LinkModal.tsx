@@ -4,7 +4,7 @@ import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
 
-interface LinkModalProps {
+const LinkModal: Component<{
 	state: {
 		open: boolean;
 		setOpen: (open: boolean) => void;
@@ -19,9 +19,7 @@ interface LinkModalProps {
 			openInNewTab: boolean;
 		}) => void;
 	};
-}
-
-const LinkModal: Component<LinkModalProps> = (props) => {
+}> = (props) => {
 	// ----------------------------------------
 	// State
 	const [label, setLabel] = createSignal("");

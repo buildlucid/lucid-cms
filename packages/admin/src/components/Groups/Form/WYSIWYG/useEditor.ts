@@ -60,6 +60,9 @@ const useEditor = (config: {
 				const instance = editor();
 				if (!instance) return;
 				if (safeDeepEqual(instance.getJSON(), value)) return;
+				//* avoid resetting the document while the user is actively editing,
+				//* which can move the caret to the end and create unexpected blocks.
+				if (instance.isFocused) return;
 				instance.commands.setContent(value, {
 					emitUpdate: false,
 				});
