@@ -232,6 +232,9 @@
 	.wysiwyg-content a {
 		@apply underline;
 	}
+	.wysiwyg-content a:hover {
+		@apply cursor-pointer;
+	}
 	.wysiwyg-content hr {
 		@apply border-border my-4;
 	}

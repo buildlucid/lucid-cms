@@ -1,8 +1,5 @@
 import type { Editor, JSONContent } from "@tiptap/core";
-import Link from "@tiptap/extension-link";
-import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
-import deepEqual from "fast-deep-equal";
 import {
 	type Accessor,
 	createEffect,
@@ -12,6 +9,7 @@ import {
 	untrack,
 } from "solid-js";
 import { createTiptapEditor } from "solid-tiptap";
+import safeDeepEqual from "@/utils/safe-deep-equal";
 
 const useEditor = (config: {
 	value: JSONContent | null;
@@ -31,10 +29,10 @@ const useEditor = (config: {
 		// biome-ignore lint/style/noNonNullAssertion: container is guaranteed to exist
 		element: container()!,
 		extensions: [
-			StarterKit,
-			Underline,
-			Link.configure({
-				openOnClick: false,
+			StarterKit.configure({
+				link: {
+					openOnClick: true,
+				},
 			}),
 		],
 		editorProps: {
@@ -61,7 +59,7 @@ const useEditor = (config: {
 			(value) => {
 				const instance = editor();
 				if (!instance) return;
-				if (deepEqual(instance.getJSON(), value)) return;
+				if (safeDeepEqual(instance.getJSON(), value)) return;
 				instance.commands.setContent(value, {
 					emitUpdate: false,
 				});
