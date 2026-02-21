@@ -1,0 +1,67 @@
+{
+	"name": "@lucidcms/rich-text",
+	"version": "1.0.0",
+	"private": false,
+	"description": "Shared Tiptap extensions and rich text conversion utilities for Lucid CMS.",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.ts"
+		},
+		"./browser": {
+			"import": "./dist/browser.mjs",
+			"types": "./dist/browser.d.ts"
+		},
+		"./server": {
+			"import": "./dist/server.mjs",
+			"types": "./dist/server.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc && tsdown",
+		"dev": "tsdown --watch",
+		"format": "biome format ./src",
+		"format:fix": "biome format --write ./src",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
+	},
+	"files": [
+		"dist"
+	],
+	"author": "Lucid",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/buildlucid/lucid-cms.git",
+		"directory": "packages/rich-text"
+	},
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"Lucid",
+		"Rich Text",
+		"Tiptap"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.10",
+		"@lucidcms/config": "*",
+		"tsdown": "^0.18.2",
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@tiptap/core": "^3.20.0",
+		"@tiptap/html": "^3.20.0",
+		"@tiptap/starter-kit": "^3.20.0"
+	},
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
+	"license": "MIT"
+}

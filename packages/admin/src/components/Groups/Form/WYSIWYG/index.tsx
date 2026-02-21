@@ -1,4 +1,4 @@
-import type { JSONContent } from "@tiptap/core";
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { type Component, Show } from "solid-js";
@@ -8,8 +8,8 @@ import useEditor from "./useEditor";
 
 interface WYSIWYGProps {
 	id: string;
-	value: JSONContent | null | undefined;
-	onChange: (_value: JSONContent) => void;
+	value: RichTextJSON | null | undefined;
+	onChange: (_value: RichTextJSON) => void;
 	copy?: {
 		label?: string;
 		placeholder?: string;

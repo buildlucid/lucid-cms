@@ -1,5 +1,5 @@
-import type { Editor, JSONContent } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
+import { extensions, type RichTextJSON } from "@lucidcms/rich-text";
+import type { Editor } from "@tiptap/core";
 import {
 	type Accessor,
 	createEffect,
@@ -12,8 +12,8 @@ import { createTiptapEditor } from "solid-tiptap";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
 const useEditor = (config: {
-	value: JSONContent | null;
-	onChange: (value: JSONContent) => void;
+	value: RichTextJSON | null;
+	onChange: (value: RichTextJSON) => void;
 	disabled?: boolean;
 }): {
 	editor: Accessor<Editor | undefined>;
@@ -28,13 +28,7 @@ const useEditor = (config: {
 	const editor = createTiptapEditor(() => ({
 		// biome-ignore lint/style/noNonNullAssertion: container is guaranteed to exist
 		element: container()!,
-		extensions: [
-			StarterKit.configure({
-				link: {
-					openOnClick: true,
-				},
-			}),
-		],
+		extensions,
 		editorProps: {
 			attributes: {
 				class:

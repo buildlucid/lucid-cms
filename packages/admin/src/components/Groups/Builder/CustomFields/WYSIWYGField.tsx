@@ -1,4 +1,4 @@
-import type { JSONContent } from "@tiptap/core";
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { WYSIWYG } from "@/components/Groups/Form";
@@ -28,7 +28,7 @@ export const WYSIWYGField: Component<WYSIWYGFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<JSONContent | null>({
+		return brickHelpers.getFieldValue<RichTextJSON | null>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
