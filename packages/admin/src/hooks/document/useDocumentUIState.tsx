@@ -132,7 +132,15 @@ export function useDocumentUIState(props: {
 	 * Determines if auto-save is actively running (both collection config AND user preference enabled)
 	 */
 	const isAutoSaveActive = createMemo(() => {
-		return useAutoSave() && autoSaveUserEnabled();
+		if (props.mode === "create") return false;
+		if (props.mode === "history") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+		return (
+			userStore.get.hasPermission(["update_content"]).all &&
+			useAutoSave() &&
+			autoSaveUserEnabled()
+		);
 	});
 
 	/**
