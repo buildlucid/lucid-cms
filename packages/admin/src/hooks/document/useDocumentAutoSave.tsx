@@ -33,6 +33,11 @@ export function useDocumentAutoSave(props: {
 	}, 800);
 
 	createEffect(() => {
+		// Wait until initial snapshot is captured after store reset/refetch.
+		// Without this guard, mount-time editor sync events can bump autoSaveCounter
+		// and trigger autosave loops before baseline state exists.
+		if (brickStore.get.initialSnapshot === null) return;
+
 		if (!brickStore.getDocumentMutated()) return;
 		if (brickStore.get.autoSaveCounter === 0) return;
 		if (!props.hasAutoSavePermission()) return;

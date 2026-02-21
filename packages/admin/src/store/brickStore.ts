@@ -11,12 +11,12 @@ import type {
 	FieldResponseValue,
 	FieldTypes,
 } from "@types";
-import equal from "fast-deep-equal/es6";
 import { nanoid } from "nanoid";
 import { batch } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 import type { FocusState } from "@/hooks/useFocusPreservation";
 import brickHelpers from "@/utils/brick-helpers";
+import safeDeepEqual from "@/utils/safe-deep-equal";
 
 export interface BrickData {
 	ref: string;
@@ -241,6 +241,8 @@ const [get, set] = createStore<{
 	},
 	// Fields
 	setFieldValue(params) {
+		let fieldChanged = false;
+
 		set(
 			"bricks",
 			params.brickIndex,
@@ -259,14 +261,24 @@ const [get, set] = createStore<{
 					params.fieldConfig.config.useTranslations === true &&
 					get.collectionTranslations === true
 				) {
+					const previousValue = field.translations?.[params.contentLocale];
+					if (safeDeepEqual(previousValue, params.value)) return;
+
 					if (!field.translations) field.translations = {};
 					field.translations[params.contentLocale] = params.value;
 				} else {
+					if (safeDeepEqual(field.value, params.value)) return;
+
 					field.value = params.value;
 				}
+
+				fieldChanged = true;
 			}),
 		);
-		set("autoSaveCounter", (prev) => prev + 1);
+
+		if (fieldChanged) {
+			set("autoSaveCounter", (prev) => prev + 1);
+		}
 	},
 	addField(params) {
 		const newField: FieldResponse = {
@@ -538,7 +550,7 @@ const getDocumentMutated = (): boolean => {
 		return get.bricks.some((b) => b.type === "builder" || b.fields.length > 0);
 	}
 	const currentSnapshot = createBricksSnapshot(get.bricks);
-	return !equal(currentSnapshot, get.initialSnapshot);
+	return !safeDeepEqual(currentSnapshot, get.initialSnapshot);
 };
 
 const brickStore = {

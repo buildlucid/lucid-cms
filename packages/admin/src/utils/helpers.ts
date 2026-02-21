@@ -1,7 +1,7 @@
 import type { LocaleValue, MediaResponse, UserResponse } from "@types";
-import equal from "fast-deep-equal/es6";
 import type { Accessor, Setter } from "solid-js";
 import { getLocale } from "@/translations";
+import safeDeepEqual from "@/utils/safe-deep-equal";
 
 // biome-ignore lint/suspicious/noExplicitAny: explanation
 type GenericObject = Record<string, any>;
@@ -35,7 +35,7 @@ const deepDiff = <T>(obj1: T, obj2: T): Partial<T> => {
 	for (const key in obj1) {
 		if (Object.hasOwn(obj1, key)) {
 			if (Array.isArray(obj1[key])) {
-				if (!equal(obj1[key], obj2[key])) {
+				if (!safeDeepEqual(obj1[key], obj2[key])) {
 					result[key] = obj2[key];
 				}
 			} else if (typeof obj1[key] === "object" && obj1[key] !== null) {
