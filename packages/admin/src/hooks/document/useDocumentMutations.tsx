@@ -8,7 +8,6 @@ import type {
 	FieldError,
 } from "@types";
 import { type Accessor, createSignal } from "solid-js";
-import { useFocusPreservation } from "@/hooks/useFocusPreservation";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -27,7 +26,6 @@ export function useDocumentMutations(props: {
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { captureFocus, restoreFocus } = useFocusPreservation();
 	const [releaseVersionType, setReleaseVersionType] =
 		createSignal<DocumentVersionType>();
 
@@ -81,17 +79,13 @@ export function useDocumentMutations(props: {
 	});
 
 	const updateSingleVersionMutation = api.documents.useUpdateSingleVersion({
-		onMutate: () => {
-			const focusState = captureFocus();
-			brickStore.set("focusState", focusState);
-		},
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
+			// Reset autosave baseline after a successful save so refetch/sync diffs
+			// don't retrigger autosave until the next user edit.
+			brickStore.set("autoSaveCounter", 0);
 			brickStore.get.captureInitialSnapshot();
-
-			restoreFocus(brickStore.get.focusState);
-			brickStore.set("focusState", null);
 		},
 		onError: (errors) => {
 			brickStore.set(
@@ -102,8 +96,6 @@ export function useDocumentMutations(props: {
 				"brickErrors",
 				getBodyError<BrickError[]>("bricks", errors) || [],
 			);
-			restoreFocus(brickStore.get.focusState);
-			brickStore.set("focusState", null);
 		},
 		getCollectionName: props.collectionSingularName,
 	});

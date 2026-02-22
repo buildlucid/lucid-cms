@@ -42,6 +42,7 @@ const CollectionsDocumentsEditRoute: Component<{
 		params.versionId ? Number.parseInt(params.versionId, 10) : undefined,
 	);
 	let snapshotTimeout: ReturnType<typeof setTimeout> | undefined;
+	let hydratedViewKey: string | null = null;
 
 	const docState = useDocumentState({
 		mode: props.mode,
@@ -87,18 +88,54 @@ const CollectionsDocumentsEditRoute: Component<{
 	// ------------------------------------------
 	// Setup document state
 
-	// TODO: attempt to merge brick state in when the document ID and collection key are the same. Hopefully cut down on re-renders from nuking the brick store
+	const getViewKey = (): string | null => {
+		if (props.mode === "create") {
+			return `create:${docState.collectionKey()}`;
+		}
+
+		const routeDocumentId = docState.documentId();
+		if (routeDocumentId === undefined) return null;
+
+		const routeVersionKey =
+			versionType() === "revision"
+				? `revision:${versionId() ?? "unknown"}`
+				: `status:${versionType()}`;
+
+		return `${docState.collectionKey()}:${routeDocumentId}:${routeVersionKey}`;
+	};
 	const setDocumentState = () => {
-		setStateLoading(true);
+		const collection = docState.collection();
+		if (!collection) return;
+
+		const document = docState.document();
+		if (props.mode === "edit") {
+			const routeDocumentId = docState.documentId();
+			if (!document || routeDocumentId === undefined) return;
+			if (document.id !== routeDocumentId) return;
+		}
+
+		const nextViewKey = getViewKey();
+		const shouldMerge = nextViewKey !== null && hydratedViewKey === nextViewKey;
+
+		if (!shouldMerge) {
+			setStateLoading(true);
+		}
 
 		batch(() => {
-			brickStore.get.reset();
+			if (!shouldMerge) {
+				brickStore.get.reset();
+			}
+
 			brickStore.set(
 				"collectionTranslations",
-				docState.collection()?.config.useTranslations || false,
+				collection.config.useTranslations || false,
 			);
-			brickStore.get.setBricks(docState.document(), docState.collection());
-			brickStore.get.setRefs(docState.document());
+			if (shouldMerge) {
+				brickStore.get.syncBricks(document, collection);
+			} else {
+				brickStore.get.setBricks(document, collection);
+			}
+			brickStore.get.setRefs(document);
 			brickStore.set("locked", uiState.isBuilderLocked());
 		});
 
@@ -107,12 +144,22 @@ const CollectionsDocumentsEditRoute: Component<{
 			brickStore.get.captureInitialSnapshot();
 		}, 0);
 
-		setStateLoading(false);
+		hydratedViewKey = nextViewKey;
+
+		if (!shouldMerge) {
+			setStateLoading(false);
+		}
 	};
 
 	createEffect(
 		on(
-			() => docState.document() || docState.collectionQuery.isFetchedAfterMount,
+			() => [
+				docState.collection(),
+				docState.document(),
+				docState.documentId(),
+				versionType(),
+				versionId(),
+			],
 			() => {
 				setDocumentState();
 			},
@@ -120,6 +167,8 @@ const CollectionsDocumentsEditRoute: Component<{
 	);
 
 	onCleanup(() => {
+		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
+		hydratedViewKey = null;
 		brickStore.get.reset();
 		pageBuilderModalsStore.reset();
 	});

@@ -14,7 +14,6 @@ import type {
 import { nanoid } from "nanoid";
 import { batch } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
-import type { FocusState } from "@/hooks/useFocusPreservation";
 import brickHelpers from "@/utils/brick-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
@@ -55,9 +54,12 @@ const [get, set] = createStore<{
 			| undefined;
 	};
 	collectionTranslations: boolean;
-	focusState: FocusState | null;
 	reset: () => void;
 	setBricks: (
+		document?: DocumentResponse,
+		collection?: CollectionResponse,
+	) => void;
+	syncBricks: (
 		document?: DocumentResponse,
 		collection?: CollectionResponse,
 	) => void;
@@ -128,7 +130,6 @@ const [get, set] = createStore<{
 		open: false,
 		data: undefined,
 	},
-	focusState: null,
 	reset() {
 		batch(() => {
 			set("bricks", []);
@@ -139,7 +140,6 @@ const [get, set] = createStore<{
 			set("skipAutoSave", true);
 			set("collectionTranslations", false);
 			set("refs", {});
-			set("focusState", null);
 		});
 	},
 	captureInitialSnapshot() {
@@ -147,42 +147,51 @@ const [get, set] = createStore<{
 	},
 	// Bricks
 	setBricks(document, collection) {
-		const bricks = structuredClone(unwrap(document?.bricks));
-		const fields = structuredClone(unwrap(document?.fields));
+		set(
+			"bricks",
+			brickHelpers.buildBricks({
+				document: structuredClone(unwrap(document)),
+				collection: structuredClone(unwrap(collection)),
+			}),
+		);
+	},
+	syncBricks(document, collection) {
+		const nextBricks = brickHelpers.buildBricks({
+			document: structuredClone(unwrap(document)),
+			collection: structuredClone(unwrap(collection)),
+		});
 
 		set(
 			"bricks",
 			produce((draft) => {
-				// Set with data from document respponse
-				draft.push({
-					ref: "collection-pseudo-brick",
-					key: "collection-pseudo-brick",
-					order: -1,
-					type: "collection-fields",
-					open: false,
-					fields: fields || [],
-				});
+				const currentBySyncKey = new Map(
+					draft.map((brick) => [brickHelpers.getBrickSyncKey(brick), brick]),
+				);
+				const mergedBricks: BrickData[] = [];
 
-				for (const brick of bricks || []) {
-					draft.push(brick);
-				}
-
-				// add empty fixed bricks
-				for (const brick of collection?.fixedBricks || []) {
-					const brickIndex = draft.findIndex(
-						(b) => b.key === brick.key && b.type === "fixed",
+				for (const nextBrick of nextBricks) {
+					const currentBrick = currentBySyncKey.get(
+						brickHelpers.getBrickSyncKey(nextBrick),
 					);
-					if (brickIndex !== -1) continue;
+					if (!currentBrick) {
+						mergedBricks.push(nextBrick);
+						continue;
+					}
 
-					draft.push({
-						ref: nanoid(),
-						key: brick.key,
-						fields: [],
-						type: "fixed",
-						open: false,
-						order: -1,
-					});
+					currentBrick.key = nextBrick.key;
+					currentBrick.order = nextBrick.order;
+					currentBrick.type = nextBrick.type;
+					if (nextBrick.type === "builder") {
+						currentBrick.ref = nextBrick.ref;
+					}
+					currentBrick.fields = brickHelpers.preserveRepeaterGroupOpenState(
+						nextBrick.fields || [],
+						currentBrick.fields || [],
+					);
+					mergedBricks.push(currentBrick);
 				}
+
+				draft.splice(0, draft.length, ...mergedBricks);
 			}),
 		);
 	},

@@ -1,13 +1,16 @@
 import type {
 	BrickError,
 	CFConfig,
+	CollectionResponse,
 	DocumentRef,
+	DocumentResponse,
 	FieldAltResponse,
 	FieldError,
 	FieldRefs,
 	FieldResponse,
 	FieldTypes,
 } from "@types";
+import { nanoid } from "nanoid";
 import brickStore from "@/store/brickStore";
 
 const findFieldRecursive = (props: {
@@ -197,6 +200,106 @@ const objectifyFields = (
 	);
 };
 
+/**
+ * Creates a stable identity key used to match incoming bricks to existing
+ * store bricks during same-view sync operations.
+ */
+const getBrickSyncKey = (brick: {
+	type: "builder" | "fixed" | "collection-fields";
+	key: string;
+	order: number;
+}): string => {
+	if (brick.type === "collection-fields") return "collection-pseudo-brick";
+	if (brick.type === "fixed") return `fixed:${brick.key}`;
+	return `builder:${brick.key}:${brick.order}`;
+};
+
+/**
+ * Recursively preserves repeater group open states from the current store
+ * fields while applying fresh field values from the server response.
+ */
+const preserveRepeaterGroupOpenState = (
+	nextFields: FieldResponse[] = [],
+	currentFields: FieldResponse[] = [],
+): FieldResponse[] => {
+	const currentFieldsByKey = new Map(
+		currentFields.map((field) => [field.key, field]),
+	);
+
+	for (const nextField of nextFields) {
+		if (nextField.type !== "repeater" || !nextField.groups) continue;
+
+		const currentField = currentFieldsByKey.get(nextField.key);
+		const currentGroups =
+			currentField?.type === "repeater" ? currentField.groups || [] : [];
+		const currentGroupsByRef = new Map(
+			currentGroups.map((group) => [group.ref, group]),
+		);
+
+		nextField.groups = nextField.groups.map((nextGroup) => {
+			const currentGroup = currentGroupsByRef.get(nextGroup.ref);
+			return {
+				...nextGroup,
+				open: currentGroup?.open ?? nextGroup.open,
+				fields: preserveRepeaterGroupOpenState(
+					nextGroup.fields || [],
+					currentGroup?.fields || [],
+				),
+			};
+		});
+	}
+
+	return nextFields;
+};
+
+/**
+ * Builds the brick store payload from a document response, including the
+ * collection pseudo brick and any missing fixed brick placeholders.
+ */
+const buildBricks = (props: {
+	document?: DocumentResponse;
+	collection?: CollectionResponse;
+}): Array<{
+	ref: string;
+	key: string;
+	order: number;
+	type: "builder" | "fixed" | "collection-fields";
+	open: boolean;
+	fields: FieldResponse[];
+}> => {
+	const documentBricks = structuredClone(props.document?.bricks) || [];
+	const collectionFields = structuredClone(props.document?.fields) || [];
+	const bricks = [
+		{
+			ref: "collection-pseudo-brick",
+			key: "collection-pseudo-brick",
+			order: -1,
+			type: "collection-fields" as const,
+			open: false,
+			fields: collectionFields,
+		},
+		...documentBricks,
+	];
+
+	for (const fixedBrick of props.collection?.fixedBricks || []) {
+		const hasFixedBrick = bricks.some(
+			(brick) => brick.key === fixedBrick.key && brick.type === "fixed",
+		);
+		if (hasFixedBrick) continue;
+
+		bricks.push({
+			ref: nanoid(),
+			key: fixedBrick.key,
+			fields: [],
+			type: "fixed",
+			open: false,
+			order: -1,
+		});
+	}
+
+	return bricks;
+};
+
 // ---------------------------------------------
 // Exports
 const brickHelpers = {
@@ -208,6 +311,9 @@ const brickHelpers = {
 	getFieldRef,
 	hasErrorsOnOtherLocale,
 	objectifyFields,
+	getBrickSyncKey,
+	preserveRepeaterGroupOpenState,
+	buildBricks,
 };
 
 export default brickHelpers;
