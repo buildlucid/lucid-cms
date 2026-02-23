@@ -88,6 +88,7 @@ class DocumentCustomField extends CustomField<"document"> {
 		if (!collection || !value) {
 			return {
 				id: value.document_id,
+				versionId: value.id,
 				collectionKey: value.collection_key,
 				fields: null,
 			};
@@ -105,7 +106,8 @@ class DocumentCustomField extends CustomField<"document"> {
 		);
 
 		return {
-			id: value.id,
+			id: value.document_id,
+			versionId: value.id,
 			collectionKey: value.collection_key,
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies CFResponse<"document">["ref"];
