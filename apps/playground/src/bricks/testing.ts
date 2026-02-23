@@ -18,7 +18,7 @@ const TestingBrick = new BrickBuilder("testing", {
 			placeholder: "Testing title",
 		},
 	})
-	.addWysiwyg("wysiwyg-key")
+	.addRichText("rich-text-key")
 	.addMedia("media-key", {
 		validation: {
 			extensions: ["png"],

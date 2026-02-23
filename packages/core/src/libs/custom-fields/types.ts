@@ -31,12 +31,12 @@ export type CustomFieldMap = {
 			ref: TextRef;
 		};
 	};
-	wysiwyg: {
-		props: WysiwygFieldProps;
-		config: WysiwygFieldConfig;
+	"rich-text": {
+		props: RichTextFieldProps;
+		config: RichTextFieldConfig;
 		response: {
-			value: WysiwygResValue;
-			ref: WysiwygRef;
+			value: RichTextResValue;
+			ref: RichTextRef;
 		};
 	};
 	media: {
@@ -182,8 +182,8 @@ export interface TextFieldConfig extends SharedFieldConfig {
 		zod?: ZodType<unknown> | undefined;
 	};
 }
-export interface WysiwygFieldConfig extends SharedFieldConfig {
-	type: "wysiwyg";
+export interface RichTextFieldConfig extends SharedFieldConfig {
+	type: "rich-text";
 	details: {
 		label?: LocaleValue;
 		summary?: LocaleValue;
@@ -428,7 +428,7 @@ type OmitDefault<T> = T extends { config: unknown }
 
 export type TabFieldProps = Partial<Omit<TabFieldConfig, "type" | "fields">>;
 export type TextFieldProps = Partial<Omit<TextFieldConfig, "type">>;
-export type WysiwygFieldProps = Partial<Omit<WysiwygFieldConfig, "type">>;
+export type RichTextFieldProps = Partial<Omit<RichTextFieldConfig, "type">>;
 export type MediaFieldProps = Partial<
 	OmitDefault<Omit<MediaFieldConfig, "type">>
 >;
@@ -457,7 +457,7 @@ export type UserFieldProps = Partial<
 
 export type TabResValue = null;
 export type TextResValue = string | null;
-export type WysiwygResValue = Record<string, unknown> | null;
+export type RichTextResValue = Record<string, unknown> | null;
 export type MediaResValue = number | null;
 export type RepeaterResValue = null;
 export type NumberResValue = number | null;
@@ -478,7 +478,7 @@ export type UserResValue = number | null;
 export type FieldResponseValue =
 	| TabResValue
 	| TextResValue
-	| WysiwygResValue
+	| RichTextResValue
 	| MediaResValue
 	| RepeaterResValue
 	| NumberResValue
@@ -497,7 +497,7 @@ export type FieldResponseValue =
 
 export type TabRef = null;
 export type TextRef = null;
-export type WysiwygRef = null;
+export type RichTextRef = null;
 export type MediaRef = {
 	id: number;
 	url: string;
@@ -543,7 +543,7 @@ export type UserRef = {
 export type FieldRefs =
 	| TabRef
 	| TextRef
-	| WysiwygRef
+	| RichTextRef
 	| MediaRef
 	| RepeaterRef
 	| NumberRef

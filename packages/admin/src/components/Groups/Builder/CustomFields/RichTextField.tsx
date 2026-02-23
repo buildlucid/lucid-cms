@@ -1,15 +1,15 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { CFConfig, FieldError, FieldResponse } from "@types";
 import { type Component, createMemo } from "solid-js";
-import { WYSIWYG } from "@/components/Groups/Form";
+import { RichText } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
-interface WYSIWYGFieldProps {
+interface RichTextFieldProps {
 	state: {
 		brickIndex: number;
-		fieldConfig: CFConfig<"wysiwyg">;
+		fieldConfig: CFConfig<"rich-text">;
 		fieldData?: FieldResponse;
 		groupRef?: string;
 		repeaterKey?: string;
@@ -21,7 +21,7 @@ interface WYSIWYGFieldProps {
 	};
 }
 
-export const WYSIWYGField: Component<WYSIWYGFieldProps> = (props) => {
+export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
@@ -41,7 +41,7 @@ export const WYSIWYGField: Component<WYSIWYGFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<WYSIWYG
+		<RichText
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,

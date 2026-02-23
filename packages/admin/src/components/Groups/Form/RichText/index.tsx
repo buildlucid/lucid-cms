@@ -6,7 +6,7 @@ import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Toolbar from "./Toolbar";
 import useEditor from "./useEditor";
 
-interface WYSIWYGProps {
+interface RichTextProps {
 	id: string;
 	value: RichTextJSON | null | undefined;
 	onChange: (_value: RichTextJSON) => void;
@@ -25,7 +25,7 @@ interface WYSIWYGProps {
 	hideOptionalText?: boolean;
 }
 
-export const WYSIWYG: Component<WYSIWYGProps> = (props) => {
+export const RichText: Component<RichTextProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const { editor, focused, setContainer } = useEditor({

@@ -23,7 +23,7 @@ describe("Schema inference", async () => {
 			},
 			bricks: {
 				fixed: [
-					new BrickBuilder("hero").addText("title").addWysiwyg("content"),
+					new BrickBuilder("hero").addText("title").addRichText("content"),
 				],
 			},
 		});

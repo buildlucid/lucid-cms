@@ -5,7 +5,7 @@ import type {
 	FieldError,
 } from "@types";
 import classNames from "classnames";
-import { FaRegularFileLines, FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,

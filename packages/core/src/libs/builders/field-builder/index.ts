@@ -8,11 +8,11 @@ import LinkCustomField from "../../custom-fields/fields/link.js";
 import MediaCustomField from "../../custom-fields/fields/media.js";
 import NumberCustomField from "../../custom-fields/fields/number.js";
 import RepeaterCustomField from "../../custom-fields/fields/repeater.js";
+import RichTextCustomField from "../../custom-fields/fields/rich-text.js";
 import SelectCustomField from "../../custom-fields/fields/select.js";
 import TextCustomField from "../../custom-fields/fields/text.js";
 import TextareaCustomField from "../../custom-fields/fields/textarea.js";
 import UserCustomField from "../../custom-fields/fields/user.js";
-import WysiwygCustomField from "../../custom-fields/fields/wysiwyg.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -40,8 +40,8 @@ class FieldBuilder {
 		this.meta.fieldKeys.push(key);
 		return this;
 	}
-	public addWysiwyg(key: string, props?: CFProps<"wysiwyg">) {
-		this.fields.set(key, new WysiwygCustomField(key, props));
+	public addRichText(key: string, props?: CFProps<"rich-text">) {
+		this.fields.set(key, new RichTextCustomField(key, props));
 		this.meta.fieldKeys.push(key);
 		return this;
 	}

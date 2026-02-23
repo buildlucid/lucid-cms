@@ -15,7 +15,7 @@ const IntroBrick = new BrickBuilder("intro", {
 			useTranslations: true,
 		},
 	})
-	.addWysiwyg("intro")
+	.addRichText("intro")
 	.addTab("advanced_tab", {
 		details: {
 			label: "Advanced",

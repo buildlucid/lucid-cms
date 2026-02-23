@@ -11,12 +11,12 @@ import type {
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 
-class WysiwygCustomField extends CustomField<"wysiwyg"> {
-	type = "wysiwyg" as const;
+class RichTextCustomField extends CustomField<"rich-text"> {
+	type = "rich-text" as const;
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"wysiwyg">) {
+	constructor(key: string, props?: CFProps<"rich-text">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -38,7 +38,7 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 				isDisabled: this.props?.config?.isDisabled,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"wysiwyg">;
+		} satisfies CFConfig<"rich-text">;
 	}
 	// Methods
 	getSchemaDefinition(
@@ -61,7 +61,7 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 	formatResponseValue(value?: Record<string, unknown> | null) {
 		return (value ??
 			this.config.config.default ??
-			null) satisfies CFResponse<"wysiwyg">["value"];
+			null) satisfies CFResponse<"rich-text">["value"];
 	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.record(
@@ -86,4 +86,4 @@ class WysiwygCustomField extends CustomField<"wysiwyg"> {
 	}
 }
 
-export default WysiwygCustomField;
+export default RichTextCustomField;

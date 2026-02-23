@@ -7,12 +7,12 @@ import LinkCustomField from "./fields/link.js";
 import MediaCustomField from "./fields/media.js";
 import NumberCustomField from "./fields/number.js";
 import RepeaterCustomField from "./fields/repeater.js";
+import RichTextCustomField from "./fields/rich-text.js";
 import SelectCustomField from "./fields/select.js";
 import TabCustomField from "./fields/tab.js";
 import TextCustomField from "./fields/text.js";
 import TextareaCustomField from "./fields/textarea.js";
 import UserCustomField from "./fields/user.js";
-import WysiwygCustomField from "./fields/wysiwyg.js";
 import type { FieldTypes } from "./types.js";
 
 const customFieldMap = {
@@ -30,7 +30,7 @@ const customFieldMap = {
 	text: TextCustomField,
 	textarea: TextareaCustomField,
 	user: UserCustomField,
-	wysiwyg: WysiwygCustomField,
+	"rich-text": RichTextCustomField,
 	// biome-ignore lint/suspicious/noExplicitAny: explanation
 } satisfies Record<FieldTypes, any>; // used to verify the field types are correct
 

@@ -12,7 +12,7 @@ test("all brick fields are added", async () => {
 		.addDateTime("datetime_test")
 		.addUser("user_test")
 		.addMedia("media_test")
-		.addWysiwyg("wysiwyg_test")
+		.addRichText("rich_text_test")
 		.addLink("link_test")
 		.addJSON("json_test")
 		.addColor("color_test")

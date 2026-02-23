@@ -77,7 +77,7 @@ test("collection config is correct along with field includes and filters", async
 		.addMedia("media_test", {
 			displayInListing: true,
 		})
-		.addWysiwyg("wysiwyg_test")
+		.addRichText("rich_text_test")
 		.addLink("link_test")
 		.addJSON("json_test")
 		.addColor("color_test")

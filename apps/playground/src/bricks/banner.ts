@@ -27,7 +27,7 @@ const BannerBrick = new BrickBuilder("banner", {
 			required: true,
 		},
 	})
-	.addWysiwyg("intro")
+	.addRichText("intro")
 	.addRepeater("call_to_actions", {
 		details: {
 			label: "Call to Actions",

@@ -5,7 +5,7 @@ export const fieldInputSchema = z.object({
 	key: z.string(),
 	type: z.union([
 		z.literal("text"),
-		z.literal("wysiwyg"),
+		z.literal("rich-text"),
 		z.literal("media"),
 		z.literal("number"),
 		z.literal("checkbox"),

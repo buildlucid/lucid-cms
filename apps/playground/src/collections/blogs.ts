@@ -30,6 +30,6 @@ const BlogCollection = new CollectionBuilder("blog", {
 	.addUser("author", {
 		displayInListing: true,
 	})
-	.addWysiwyg("content");
+	.addRichText("content");
 
 export default BlogCollection;

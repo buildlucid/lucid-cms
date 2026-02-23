@@ -9,12 +9,12 @@ import {
 	Input,
 	InputFull,
 	JSONTextarea,
+	RichText,
 	Search,
 	Select,
 	SelectMultiple,
 	Switch,
 	Textarea,
-	WYSIWYG,
 } from "@/components/Groups/Form";
 import { Standard } from "@/components/Groups/Headers";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
@@ -85,9 +85,17 @@ const ComponentsRoute: Component = () => {
 		option3: true,
 	});
 
-	const [wysiwygValue, setWysiwygValue] = createSignal(
-		"<p>This is <strong>rich text</strong> content with <em>formatting</em>.</p>",
-	);
+	const [richTextValue, setRichTextValue] = createSignal({
+		type: "doc",
+		content: [
+			{
+				type: "paragraph",
+				content: [
+					{ type: "text", text: "This is rich text content with formatting." },
+				],
+			},
+		],
+	});
 
 	// ----------------------------------------
 	// Render
@@ -492,14 +500,14 @@ const ComponentsRoute: Component = () => {
 				</InfoRow.Root>
 
 				<InfoRow.Root
-					title={"WYSIWYG Editor"}
+					title={"Rich Text Editor"}
 					description={"Rich text editor with formatting toolbar"}
 				>
 					<InfoRow.Content title={"Rich Text Editor"}>
-						<WYSIWYG
-							id="wysiwyg"
-							value={wysiwygValue()}
-							onChange={setWysiwygValue}
+						<RichText
+							id="rich-text"
+							value={richTextValue()}
+							onChange={setRichTextValue}
 							copy={{
 								label: "Content Editor",
 								placeholder: "Start writing...",

@@ -4,11 +4,11 @@ import CollectionBuilder from "../../../libs/builders/collection-builder/index.j
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import T from "../../../translations/index.js";
 import CustomFieldSchema from "../schema.js";
-import WysiwygCustomField from "./wysiwyg.js";
+import RichTextCustomField from "./rich-text.js";
 
 // -----------------------------------------------
 // Validation
-const WysiwygCollection = new CollectionBuilder("collection", {
+const RichTextCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
 		name: "Test",
@@ -18,13 +18,13 @@ const WysiwygCollection = new CollectionBuilder("collection", {
 		useTranslations: true,
 	},
 })
-	.addWysiwyg("standard_wysiwyg")
-	.addWysiwyg("required_wysiwyg", {
+	.addRichText("standard_rich_text")
+	.addRichText("required_rich_text", {
 		validation: {
 			required: true,
 		},
 	})
-	.addWysiwyg("min_length_wysiwyg", {
+	.addRichText("min_length_rich_text", {
 		validation: {
 			zod: z.object({
 				type: z.literal("doc"),
@@ -32,26 +32,26 @@ const WysiwygCollection = new CollectionBuilder("collection", {
 		},
 	});
 
-test("successfully validate field - wysiwyg", async () => {
+test("successfully validate field - rich text", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_wysiwyg",
-			type: "wysiwyg",
+			key: "standard_rich_text",
+			type: "rich-text",
 			value: {
 				type: "doc",
 				content: [{ type: "paragraph" }],
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
+		instance: RichTextCollection.fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -60,22 +60,22 @@ test("successfully validate field - wysiwyg", async () => {
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_wysiwyg",
-			type: "wysiwyg",
+			key: "required_rich_text",
+			type: "rich-text",
 			value: {
 				type: "doc",
 				content: [{ type: "paragraph" }],
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: WysiwygCollection.fields.get("required_wysiwyg")!,
+		instance: RichTextCollection.fields.get("required_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -84,51 +84,51 @@ test("successfully validate field - wysiwyg", async () => {
 	// Min length
 	const minLengthValidate = validateField({
 		field: {
-			key: "min_length_wysiwyg",
-			type: "wysiwyg",
+			key: "min_length_rich_text",
+			type: "rich-text",
 			value: {
 				type: "doc",
 				content: [{ type: "paragraph" }],
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
+		instance: RichTextCollection.fields.get("min_length_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(minLengthValidate).length(0);
 });
 
-test("fail to validate field - wysiwyg", async () => {
+test("fail to validate field - rich text", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_wysiwyg",
-			type: "wysiwyg",
+			key: "standard_rich_text",
+			type: "rich-text",
 			value: 100,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: WysiwygCollection.fields.get("standard_wysiwyg")!,
+		instance: RichTextCollection.fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(standardValidate).toEqual([
 		{
-			key: "standard_wysiwyg",
+			key: "standard_rich_text",
 			localeCode: "en",
 			message: "Invalid input: expected record, received number",
 		},
@@ -138,37 +138,37 @@ test("fail to validate field - wysiwyg", async () => {
 	const requiredValidate = {
 		exists: validateField({
 			field: {
-				key: "required_wysiwyg",
-				type: "wysiwyg",
+				key: "required_rich_text",
+				type: "rich-text",
 				value: undefined,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: WysiwygCollection.fields.get("required_wysiwyg")!,
+			instance: RichTextCollection.fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
 			meta: {
-				useTranslations: WysiwygCollection.getData.config.useTranslations,
+				useTranslations: RichTextCollection.getData.config.useTranslations,
 				defaultLocale: "en",
 			},
 		}),
 		null: validateField({
 			field: {
-				key: "required_wysiwyg",
-				type: "wysiwyg",
+				key: "required_rich_text",
+				type: "rich-text",
 				value: null,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: WysiwygCollection.fields.get("required_wysiwyg")!,
+			instance: RichTextCollection.fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
 			meta: {
-				useTranslations: WysiwygCollection.getData.config.useTranslations,
+				useTranslations: RichTextCollection.getData.config.useTranslations,
 				defaultLocale: "en",
 			},
 		}),
@@ -176,14 +176,14 @@ test("fail to validate field - wysiwyg", async () => {
 	expect(requiredValidate).toEqual({
 		exists: [
 			{
-				key: "required_wysiwyg",
+				key: "required_rich_text",
 				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 		null: [
 			{
-				key: "required_wysiwyg",
+				key: "required_rich_text",
 				localeCode: "en",
 				message: T("generic_field_required"),
 			},
@@ -193,28 +193,28 @@ test("fail to validate field - wysiwyg", async () => {
 	// Min length
 	const minLengthValidate = validateField({
 		field: {
-			key: "min_length_wysiwyg",
-			type: "wysiwyg",
+			key: "min_length_rich_text",
+			type: "rich-text",
 			value: {
 				type: "not_doc",
 				content: [{ type: "paragraph" }],
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: WysiwygCollection.fields.get("min_length_wysiwyg")!,
+		instance: RichTextCollection.fields.get("min_length_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: WysiwygCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(minLengthValidate).toEqual([
 		{
-			key: "min_length_wysiwyg",
+			key: "min_length_rich_text",
 			localeCode: "en",
 			message: 'Invalid input: expected "doc" → at type',
 		},
@@ -224,7 +224,7 @@ test("fail to validate field - wysiwyg", async () => {
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
-	const field = new WysiwygCustomField("field", {
+	const field = new RichTextCustomField("field", {
 		details: {
 			label: {
 				en: "title",

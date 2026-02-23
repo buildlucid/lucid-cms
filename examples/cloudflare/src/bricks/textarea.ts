@@ -15,7 +15,7 @@ const TextareaBrick = new BrickBuilder("textarea", {
 			label: "Heading",
 		},
 	})
-	.addWysiwyg("content", {
+	.addRichText("content", {
 		details: {
 			label: "Content",
 		},

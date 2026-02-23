@@ -16,7 +16,7 @@ const FieldTypeIcon: Component<FieldTypeIconProps> = (props) => {
 				{
 					"bg-[#75f175] border-[#6ae06a]":
 						props.type === "text" ||
-						props.type === "wysiwyg" ||
+						props.type === "rich-text" ||
 						props.type === "textarea",
 					"bg-[#87b6ec] border-[#7aa6d9]":
 						props.type === "number" ||
@@ -35,7 +35,7 @@ const FieldTypeIcon: Component<FieldTypeIconProps> = (props) => {
 		>
 			<Switch>
 				<Match when={props.type === "text"}>Aa</Match>
-				<Match when={props.type === "wysiwyg"}>W</Match>
+				<Match when={props.type === "rich-text"}>RT</Match>
 				<Match when={props.type === "textarea"}>T</Match>
 				<Match when={props.type === "number"}>#</Match>
 				<Match when={props.type === "select"}>S</Match>

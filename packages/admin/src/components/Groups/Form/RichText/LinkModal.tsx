@@ -58,7 +58,7 @@ const LinkModal: Component<{
 			<div class="flex flex-col gap-6">
 				<div class="flex flex-col gap-0">
 					<Input
-						id="wysiwyg_link_label"
+						id="rich_text_link_label"
 						value={label()}
 						onChange={(value) => setLabel(value)}
 						name="label"
@@ -69,7 +69,7 @@ const LinkModal: Component<{
 						required={false}
 					/>
 					<Input
-						id="wysiwyg_link_url"
+						id="rich_text_link_url"
 						value={url()}
 						onChange={(value) => setUrl(value)}
 						name="url"
@@ -80,7 +80,7 @@ const LinkModal: Component<{
 						required={false}
 					/>
 					<Switch
-						id="wysiwyg_open_in_new_tab"
+						id="rich_text_open_in_new_tab"
 						value={openInNewTab()}
 						onChange={(value) => setOpenInNewTab(value)}
 						name="open_in_new_tab"

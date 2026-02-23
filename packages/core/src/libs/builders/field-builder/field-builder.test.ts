@@ -5,7 +5,7 @@ test("all fields should be added", async () => {
 	const instance = new FieldBuilder()
 		.addText("text_test")
 		.addTextarea("textarea_test")
-		.addWysiwyg("wysiwyg_test")
+		.addRichText("rich_text_test")
 		.addNumber("number_test")
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
@@ -23,7 +23,7 @@ test("all fields should be added", async () => {
 
 	expect(instance.fields.get("text_test")).toBeDefined();
 	expect(instance.fields.get("textarea_test")).toBeDefined();
-	expect(instance.fields.get("wysiwyg_test")).toBeDefined();
+	expect(instance.fields.get("rich_text_test")).toBeDefined();
 	expect(instance.fields.get("number_test")).toBeDefined();
 	expect(instance.fields.get("checkbox_test")).toBeDefined();
 	expect(instance.fields.get("select_test")).toBeDefined();
@@ -92,7 +92,7 @@ test("flat fields should return correct config", async () => {
 	const instance = new FieldBuilder()
 		.addText("text_test")
 		.addTextarea("textarea_test")
-		.addWysiwyg("wysiwyg_test")
+		.addRichText("rich_text_test")
 		.addNumber("number_test")
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
@@ -142,10 +142,10 @@ test("flat fields should return correct config", async () => {
 			validation: undefined,
 		},
 		{
-			key: "wysiwyg_test",
-			type: "wysiwyg",
+			key: "rich_text_test",
+			type: "rich-text",
 			details: {
-				label: "Wysiwyg Test",
+				label: "Rich Text Test",
 				summary: undefined,
 				placeholder: undefined,
 			},

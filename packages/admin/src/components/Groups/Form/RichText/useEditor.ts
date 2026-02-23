@@ -32,7 +32,7 @@ const useEditor = (config: {
 		editorProps: {
 			attributes: {
 				class:
-					"wysiwyg-content min-h-48 p-3 text-sm text-title focus:outline-none",
+					"rich-text-content min-h-48 p-3 text-sm text-title focus:outline-none",
 			},
 		},
 		editable: untrack(() => !config.disabled),

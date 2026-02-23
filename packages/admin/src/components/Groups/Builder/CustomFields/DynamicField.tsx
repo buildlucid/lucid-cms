@@ -17,10 +17,10 @@ import {
 	LinkField,
 	MediaField,
 	RepeaterField,
+	RichTextField,
 	SelectField,
 	TextareaField,
 	UserField,
-	WYSIWYGField,
 } from "@/components/Groups/Builder/CustomFields";
 import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
 import brickStore from "@/store/brickStore";
@@ -373,11 +373,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							}}
 						/>
 					</Match>
-					<Match when={fieldConfig().type === "wysiwyg"}>
-						<WYSIWYGField
+					<Match when={fieldConfig().type === "rich-text"}>
+						<RichTextField
 							state={{
 								brickIndex: props.state.brickIndex,
-								fieldConfig: fieldConfig() as CFConfig<"wysiwyg">,
+								fieldConfig: fieldConfig() as CFConfig<"rich-text">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,

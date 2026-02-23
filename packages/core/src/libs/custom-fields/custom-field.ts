@@ -112,7 +112,7 @@ abstract class CustomField<T extends FieldTypes> {
 		if (this.config.type === "color") return { valid: true };
 		if (this.config.type === "link") return { valid: true };
 		if (this.config.type === "user") return { valid: true };
-		if (this.config.type === "wysiwyg") return { valid: true };
+		if (this.config.type === "rich-text") return { valid: true };
 		if (this.config.type === "document") return { valid: true };
 
 		if (!this.config.validation?.zod) return { valid: true };
