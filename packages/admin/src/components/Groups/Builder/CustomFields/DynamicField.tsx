@@ -49,6 +49,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	);
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
 	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const hasMultipleLocales = createMemo(() => locales().length > 1);
 	const fieldData = createMemo(() => {
 		if (props.state.fieldConfig.type === "tab") return;
 
@@ -89,6 +90,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	});
 	const isLocalised = createMemo(() => {
 		return (
+			hasMultipleLocales() &&
 			// @ts-expect-error
 			props.state.fieldConfig?.config?.useTranslations &&
 			brickStore.get.collectionTranslations

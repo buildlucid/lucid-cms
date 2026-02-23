@@ -57,6 +57,12 @@ export const HeaderBar: Component<{
 	const defaultLocale = createMemo(() => {
 		return contentLocaleStore.get.locales.find((locale) => locale.isDefault);
 	});
+	const displayLocale = createMemo(() => {
+		return defaultLocale() ?? contentLocaleStore.get.locales[0];
+	});
+	const hasMultipleLocales = createMemo(() => {
+		return contentLocaleStore.get.locales.length > 1;
+	});
 	const viewOptions = createMemo(() => {
 		const options: ViewSelectorOption[] = [
 			{
@@ -335,7 +341,12 @@ export const HeaderBar: Component<{
 					<div class="flex md:flex-wrap md:items-center gap-2.5 justify-end w-full lg:w-auto">
 						<Show when={props.mode !== undefined}>
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
-								<Show when={props.state.collection()?.config.useTranslations}>
+								<Show
+									when={
+										props.state.collection()?.config.useTranslations &&
+										hasMultipleLocales()
+									}
+								>
 									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
 										<ContentLocaleSelect
 											hasError={props.state.ui.brickTranslationErrors?.()}
@@ -344,14 +355,16 @@ export const HeaderBar: Component<{
 								</Show>
 								<Show
 									when={
-										props.state.collection()?.config.useTranslations !== true &&
-										defaultLocale()
+										(props.state.collection()?.config.useTranslations !==
+											true ||
+											!hasMultipleLocales()) &&
+										displayLocale()
 									}
 								>
 									<div class="flex items-center">
 										<FaSolidLanguage size={20} />
 										<span class="ml-2.5 text-base font-medium text-body">
-											{defaultLocale()?.name} ({defaultLocale()?.code})
+											{displayLocale()?.name} ({displayLocale()?.code})
 										</span>
 									</div>
 								</Show>
