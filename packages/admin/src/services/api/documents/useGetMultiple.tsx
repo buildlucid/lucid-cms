@@ -23,6 +23,7 @@ interface QueryParams {
 			| Accessor<Exclude<DocumentVersionType, "revision">>
 			| Exclude<DocumentVersionType, "revision">;
 	};
+	include?: Record<string, Accessor<boolean | undefined> | boolean>;
 	perPage?: Accessor<number> | number;
 }
 

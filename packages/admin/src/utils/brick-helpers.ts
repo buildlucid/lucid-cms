@@ -288,6 +288,7 @@ const buildBricks = (props: {
 		if (hasFixedBrick) continue;
 
 		bricks.push({
+			id: -1,
 			ref: nanoid(),
 			key: fixedBrick.key,
 			fields: [],

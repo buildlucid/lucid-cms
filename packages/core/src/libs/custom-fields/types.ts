@@ -519,6 +519,7 @@ export type MediaRef = {
 } | null;
 export type DocumentRef = {
 	id: number;
+	versionId?: number;
 	collectionKey: string;
 	fields: Record<string, FieldAltResponse> | null;
 };

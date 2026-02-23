@@ -32,7 +32,7 @@ export const DocumentsList: Component<{
 	// ----------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
-	const params = useParams();
+	const params = useParams<{ collectionKey: string }>();
 	const rowTarget = useRowTarget({
 		triggers: {
 			delete: false,

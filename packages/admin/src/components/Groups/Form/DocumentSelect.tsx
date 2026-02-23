@@ -5,13 +5,25 @@ import type {
 	FieldError,
 } from "@types";
 import classNames from "classnames";
-import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
-import { type Accessor, type Component, Match, Switch } from "solid-js";
+import { FaRegularFileLines, FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
-import helpers from "@/utils/brick-helpers";
+import brickHelpers from "@/utils/brick-helpers";
+import { getDocumentListingPreviewFields } from "@/utils/document-table-helpers";
+import helpers from "@/utils/helpers";
 
 interface DocumentSelectProps {
 	id: string;
@@ -36,6 +48,11 @@ interface DocumentSelectProps {
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
+	const documentResponseToRef = (doc: DocumentResponse): DocumentRef => ({
+		id: doc.id,
+		collectionKey: doc.collectionKey,
+		fields: brickHelpers.objectifyFields(doc.fields || []),
+	});
 	const openDocuSelectModal = () => {
 		pageBuilderModalsStore.open("documentSelect", {
 			data: {
@@ -43,14 +60,53 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				selected: props.value,
 			},
 			onCallback: (doc: DocumentResponse) => {
-				props.onChange(doc.id, {
-					id: doc.id,
-					collectionKey: doc.collectionKey,
-					fields: helpers.objectifyFields(doc.fields || []),
-				});
+				props.onChange(doc.id, documentResponseToRef(doc));
 			},
 		});
 	};
+
+	// -------------------------------
+	// Memos
+	const storeDocumentRef = createMemo(() => props.ref());
+	const previewCollectionKey = createMemo(
+		() => storeDocumentRef()?.collectionKey || props.collection,
+	);
+	const contentLocale = createMemo(
+		() => contentLocaleStore.get.contentLocale || "",
+	);
+
+	// -------------------------------
+	// Queries
+	const collection = api.collections.useGetSingle({
+		queryParams: {
+			location: {
+				collectionKey: previewCollectionKey,
+			},
+		},
+		key: () => `document-field-preview:${previewCollectionKey() || "unknown"}`,
+		enabled: () => typeof props.value === "number" && !!previewCollectionKey(),
+		refetchOnWindowFocus: false,
+	});
+
+	// -------------------------------
+	// Memos
+	const previewFields = createMemo(() =>
+		getDocumentListingPreviewFields({
+			collection: collection.data?.data,
+			documentRef: storeDocumentRef(),
+			contentLocale: contentLocale(),
+		}),
+	);
+	const isPreviewLoading = createMemo(
+		() => typeof props.value === "number" && collection.isLoading,
+	);
+	const documentPreviewLabel = createMemo(() => {
+		const singularCollectionTitle = helpers.getLocaleValue({
+			value: collection.data?.data.details.singularName,
+		});
+		return `${singularCollectionTitle || T()("document")} ${T()("preview")}`;
+	});
+	const gridPreviewFields = createMemo(() => previewFields().slice(0, 6));
 
 	// -------------------------------
 	// Render
@@ -85,54 +141,79 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 						</Button>
 					</Match>
 					<Match when={typeof props.value === "number"}>
-						{/* <div class="border border-border rounded-md p-4 bg-card-base mb-2.5">
-							<For each={Object.values(props.ref()?.fields || {})}>
-								{(field, i) => {
-									if (field.type === "tab") return null;
-									if (field.type === "repeater") return null;
+						<div class="group w-full border border-border rounded-md bg-input-base px-3 pt-2 pb-0">
+							<div class="flex items-center justify-between gap-3">
+								<div class="min-w-0">
+									<div class="flex flex-wrap items-center gap-1.5">
+										<span class="inline-flex items-center rounded-sm border border-border bg-card-base px-1.5 py-0.5 text-[10px] font-medium text-unfocused">
+											#{props.value}
+										</span>
+										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-title">
+											{documentPreviewLabel()}
+										</span>
+									</div>
+								</div>
+								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+									<Button
+										type="button"
+										theme="secondary-subtle"
+										size="icon-subtle"
+										onClick={openDocuSelectModal}
+										disabled={props.disabled}
+									>
+										<FaSolidPen size={12} />
+										<span class="sr-only">{T()("edit")}</span>
+									</Button>
+									<Button
+										type="button"
+										theme="danger-subtle"
+										size="icon-subtle"
+										onClick={() => {
+											props.onChange(null, null);
+										}}
+										disabled={props.disabled}
+									>
+										<FaSolidXmark size={14} />
+										<span class="sr-only">{T()("clear")}</span>
+									</Button>
+								</div>
+							</div>
 
-									return (
-										<Switch>
-											<Match when={field.type === "text"}>
-												{field.key}
-												{field.value}
-											</Match>
-										</Switch>
-									);
-								}}
-							</For>
-						</div> */}
-						<div class="w-full flex items-center gap-2.5">
-							<Button
-								type="button"
-								theme="border-outline"
-								size="small"
-								onClick={openDocuSelectModal}
-								disabled={props.disabled}
-								classes="capitalize"
-							>
-								<span class="line-clamp-1">
-									{T()("selected_document", {
-										id: props.value,
-									})}
-								</span>
-								<span class="ml-2.5 flex items-center border-l border-current pl-2.5">
-									<FaSolidPen size={12} class="text-current" />
-								</span>
-							</Button>
-							<Button
-								type="button"
-								theme="border-outline"
-								size="icon"
-								onClick={() => {
-									props.onChange(null, null);
-								}}
-								disabled={props.disabled}
-								classes="capitalize"
-							>
-								<FaSolidXmark />
-								<span class="sr-only">{T()("clear")}</span>
-							</Button>
+							<Show when={gridPreviewFields().length > 0}>
+								<div class="py-2">
+									<Show
+										when={!isPreviewLoading()}
+										fallback={
+											<div>
+												<span class="skeleton block h-4 w-24 mb-2" />
+												<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+													<span class="skeleton block h-12 w-full rounded-md" />
+													<span class="skeleton block h-12 w-full rounded-md" />
+													<span class="skeleton block h-12 w-full rounded-md" />
+												</div>
+											</div>
+										}
+									>
+										<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+											<For each={gridPreviewFields()}>
+												{(preview) => (
+													<div
+														class="min-w-0 rounded-md border border-border px-2 py-1.5 bg-card-base"
+														title={`${preview.label}: ${preview.value}`}
+													>
+														<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
+															{preview.label}
+														</p>
+														<p class="text-xs text-title truncate mt-0.5">
+															{preview.value}
+														</p>
+													</div>
+												)}
+											</For>
+										</div>
+									</Show>
+								</div>
+							</Show>
 						</div>
 					</Match>
 				</Switch>

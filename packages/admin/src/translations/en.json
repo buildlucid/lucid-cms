@@ -63,7 +63,7 @@
 	"revision_history": "Revision History",
 	"revision": "Revision",
 	"save": "Save",
-	"selected_document": "Selected Document: {{id}}",
+	"selected_document": "Selected {{document}}: {{id}}",
 	"add_brick": "Add Brick",
 	"create": "Create",
 	"error_title": "Something Went Wrong",
