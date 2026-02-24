@@ -249,9 +249,38 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 
 export const Filter: Component<FilterProps> = (props) => {
 	// ----------------------------------
+	// State
+	let lastAnchorRect:
+		| {
+				x?: number;
+				y?: number;
+				width?: number;
+				height?: number;
+		  }
+		| undefined;
+
+	// ----------------------------------
+	// Functions
+	const getAnchorRect = (anchor?: HTMLElement) => {
+		const rect = anchor?.getBoundingClientRect();
+
+		if (rect && rect.width > 0 && rect.height > 0) {
+			lastAnchorRect = {
+				x: rect.x,
+				y: rect.y,
+				width: rect.width,
+				height: rect.height,
+			};
+			return lastAnchorRect;
+		}
+
+		return lastAnchorRect;
+	};
+
+	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root>
+		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
 			<DropdownMenu.Trigger
 				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-2 h-9 text-sm border border-transparent rounded-md flex items-center disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
 				disabled={props.disabled}

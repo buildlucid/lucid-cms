@@ -90,9 +90,38 @@ const SortItem: Component<SortItemProps> = (props) => {
 
 export const Sort: Component<SortProps> = (props) => {
 	// ----------------------------------
+	// State
+	let lastAnchorRect:
+		| {
+				x?: number;
+				y?: number;
+				width?: number;
+				height?: number;
+		  }
+		| undefined;
+
+	// ----------------------------------
+	// Functions
+	const getAnchorRect = (anchor?: HTMLElement) => {
+		const rect = anchor?.getBoundingClientRect();
+
+		if (rect && rect.width > 0 && rect.height > 0) {
+			lastAnchorRect = {
+				x: rect.x,
+				y: rect.y,
+				width: rect.width,
+				height: rect.height,
+			};
+			return lastAnchorRect;
+		}
+
+		return lastAnchorRect;
+	};
+
+	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root>
+		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
 			<DropdownMenu.Trigger
 				class={
 					"dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
