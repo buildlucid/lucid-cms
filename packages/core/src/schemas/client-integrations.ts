@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 export const clientIntegrationResponseSchema = z.object({
 	id: z.number().meta({
@@ -88,8 +89,45 @@ export const controllerSchemas = {
 	getAll: {
 		body: undefined,
 		query: {
-			string: undefined,
-			formatted: undefined,
+			string: z
+				.object({
+					"filter[name]": queryString.schema.filter(false, {
+						example: "Marketing Website",
+					}),
+					"filter[enabled]": queryString.schema.filter(false, {
+						example: "1",
+					}),
+					sort: queryString.schema.sort("name,description,enabled,createdAt"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				})
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						name: queryFormatted.schema.filters.single.optional(),
+						enabled: queryFormatted.schema.filters.single.optional(),
+					})
+					.optional(),
+				sort: z
+					.array(
+						z.object({
+							key: z.enum([
+								"name",
+								"description",
+								"enabled",
+								"createdAt",
+								"updatedAt",
+							]),
+							value: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
+				include: z.array(z.string()).optional(),
+				exclude: z.array(z.string()).optional(),
+			}),
 		},
 		params: undefined,
 		response: z.array(clientIntegrationResponseSchema),
@@ -168,3 +206,7 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 };
+
+export type GetAllQueryParams = z.infer<
+	typeof controllerSchemas.getAll.query.formatted
+>;

@@ -41,6 +41,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 			},
 			sorts: {
 				name: "name",
+				description: "description",
 				enabled: "enabled",
 				createdAt: "created_at",
 				updatedAt: "updated_at",

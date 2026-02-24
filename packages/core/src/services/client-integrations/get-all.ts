@@ -1,15 +1,28 @@
-import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
+import formatter, {
+	clientIntegrationsFormatter,
+} from "../../libs/formatters/index.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
+import type { GetAllQueryParams } from "../../schemas/client-integrations.js";
 import type { ClientIntegrationResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
+const getAll: ServiceFn<
+	[
+		{
+			query: GetAllQueryParams;
+		},
+	],
+	{
+		data: ClientIntegrationResponse[];
+		count: number;
+	}
+> = async (context, data) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db.client,
 		context.config.db,
 	);
 
-	const integrationsRes = await ClientIntegrations.selectMultiple({
+	const integrationsRes = await ClientIntegrations.selectMultipleFiltered({
 		select: [
 			"id",
 			"key",
@@ -19,7 +32,7 @@ const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 			"created_at",
 			"updated_at",
 		],
-		where: [],
+		queryParams: data.query,
 		validation: {
 			enabled: true,
 		},
@@ -28,9 +41,12 @@ const getAll: ServiceFn<[], ClientIntegrationResponse[]> = async (context) => {
 
 	return {
 		error: undefined,
-		data: clientIntegrationsFormatter.formatMultiple({
-			integrations: integrationsRes.data,
-		}),
+		data: {
+			data: clientIntegrationsFormatter.formatMultiple({
+				integrations: integrationsRes.data[0],
+			}),
+			count: formatter.parseCount(integrationsRes.data[1]?.count),
+		},
 	};
 };
 

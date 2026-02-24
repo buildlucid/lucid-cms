@@ -1,4 +1,5 @@
 export { Account } from "./Account";
+export { ClientIntegrationsList } from "./ClientIntegrationsList";
 export { CollectionsList } from "./CollectionsList";
 export { Dashboard } from "./Dashboard";
 export { DocumentsList } from "./DocumentsList";

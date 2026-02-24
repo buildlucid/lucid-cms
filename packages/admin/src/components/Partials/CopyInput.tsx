@@ -33,7 +33,7 @@ const CopyInput: Component<CopyInputProps> = (props) => {
 	return (
 		<div class="relative flex items-stretch w-full rounded-md overflow-hidden border border-border bg-input-base">
 			<input
-				class="flex-1 h-12 pr-2.5 pl-10 text-base text-title font-medium bg-transparent focus:outline-hidden"
+				class="flex-1 h-12 pr-2.5 pl-10 text-base text-subtitle font-medium bg-transparent focus:outline-hidden"
 				type="text"
 				value={props.value}
 				disabled={true}
@@ -45,7 +45,7 @@ const CopyInput: Component<CopyInputProps> = (props) => {
 				class={classNames(
 					"absolute left-2.5 w-6 h-6 top-1/2 -translate-y-1/2 flex items-center justify-center bg-container-4 hover:bg-container-5 transition-colors duration-200 text-body hover:text-title cursor-pointer focus:ring-0 focus-visible:ring-1 rounded-md",
 					{
-						"text-primary-base hover:!text-primary-hover": isCopied(),
+						"text-primary-base hover:text-primary-hover!": isCopied(),
 					},
 				)}
 				aria-label={T()("copy_to_clipboard")}
