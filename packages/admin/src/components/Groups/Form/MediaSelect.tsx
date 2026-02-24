@@ -144,7 +144,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 				hideOptionalText={props.hideOptionalText}
 			/>
-			<div class="mt-2.5 w-full">
+			<div class="w-full">
 				<Switch>
 					<Match when={typeof props.value !== "number"}>
 						<div class="flex flex-wrap gap-2">
@@ -175,7 +175,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					<Match when={typeof props.value === "number"}>
 						<div class="w-full  border border-border rounded-md bg-input-base overflow-hidden group">
 							<div
-								class={classNames("relative z-0 bg-input-hover p-4", {
+								class={classNames("relative z-0 bg-card-base p-4", {
 									"rectangle-background":
 										props.ref()?.type === "image" ||
 										props.ref()?.type === "video",
@@ -219,7 +219,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										</Show>
 									</div>
 								</div>
-								<div class="w-full max-w-lg h-full mx-auto z-10">
+								<div class="w-full max-w-120 h-full max-h-96 mx-auto z-10 flex items-center justify-center :flex *:items-center *:justify-center [&_img]:max-h-96 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-96 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
 									<MediaPreview
 										media={{
 											url: props.ref()?.url || "",
