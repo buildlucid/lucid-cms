@@ -118,16 +118,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 						</Show>
 					</AspectRatio>
 					<SectionHeading title={T()("details")} />
-					<Checkbox
-						id="public"
-						value={media.data?.data.public ?? true}
-						onChange={() => {}}
-						name="public"
-						copy={{
-							label: T()("publicly_available"),
-							tooltip: T()("media_public_description"),
-						}}
-					/>
 					<For each={locales()}>
 						{(locale) => (
 							<Show when={locale.code === lang?.contentLocale()}>
@@ -143,9 +133,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 									name={`name-${locale.code}`}
 									type="text"
 									copy={{
-										label: T()("name_lang", {
-											code: locale.code,
-										}),
+										label: T()("name"),
 									}}
 									errors={undefined}
 									autoComplete="off"
@@ -164,9 +152,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 										name={`alt-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("alt_lang", {
-												code: locale.code,
-											}),
+											label: T()("alt"),
 										}}
 										errors={undefined}
 										disabled={true}
@@ -187,6 +173,16 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 						noMargin={false}
 						noClear={true}
 						disabled={true}
+					/>
+					<Checkbox
+						id="public"
+						value={media.data?.data.public ?? true}
+						onChange={() => {}}
+						name="public"
+						copy={{
+							label: T()("publicly_available"),
+							tooltip: T()("media_public_description"),
+						}}
 					/>
 					<Show when={props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />

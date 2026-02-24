@@ -40,18 +40,6 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 						.all,
 				},
 				{
-					label: T()("delete"),
-					type: "button",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.clientIntegration.id);
-						props.rowTarget.setTrigger("delete", true);
-					},
-					permission: userStore.get.hasPermission(["delete_client_integration"])
-						.all,
-					theme: "error",
-					actionExclude: true,
-				},
-				{
 					label: T()("regenerate_api_key"),
 					type: "button",
 					onClick: () => {
@@ -61,6 +49,18 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 					permission: userStore.get.hasPermission([
 						"regenerate_client_integration",
 					]).all,
+					theme: "error",
+					actionExclude: true,
+				},
+				{
+					label: T()("delete"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.clientIntegration.id);
+						props.rowTarget.setTrigger("delete", true);
+					},
+					permission: userStore.get.hasPermission(["delete_client_integration"])
+						.all,
 					theme: "error",
 					actionExclude: true,
 				},

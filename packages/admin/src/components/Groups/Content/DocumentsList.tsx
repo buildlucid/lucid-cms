@@ -258,6 +258,21 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted(),
 									},
 									{
+										label: T()("preview"),
+										type: "button",
+										onClick: () => {
+											navigate(
+												getDocumentRoute("edit", {
+													collectionKey: props.state.collection?.key as string,
+													documentId: doc().id,
+												}),
+											);
+										},
+										permission: userStore.get.hasPermission(["read_content"])
+											.some,
+										hide: props.state.showingDeleted() === false,
+									},
+									{
 										label: T()("restore"),
 										type: "button",
 										onClick: () => {

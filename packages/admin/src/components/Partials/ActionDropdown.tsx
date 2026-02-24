@@ -35,6 +35,34 @@ export interface ActionDropdownProps {
 	};
 }
 
+type ActionItem = ActionDropdownProps["actions"][number];
+
+const DANGEROUS_ACTION_LABEL_MATCHER =
+	/\b(delete|remove|clear|purge|revoke|disconnect)\b/i;
+const PRIMARY_ACTION_LABEL_MATCHER =
+	/\b(restore|publish|enable|approve|resend|activate)\b/i;
+const EDIT_ACTION_LABEL_MATCHER = /\b(edit|update)\b/i;
+
+const getActionTheme = (action: ActionItem): ActionItem["theme"] => {
+	if (action.theme) return action.theme;
+
+	if (DANGEROUS_ACTION_LABEL_MATCHER.test(action.label)) return "error";
+	if (PRIMARY_ACTION_LABEL_MATCHER.test(action.label)) return "primary";
+
+	return undefined;
+};
+
+const getActionSortWeight = (action: ActionItem): number => {
+	if (EDIT_ACTION_LABEL_MATCHER.test(action.label)) return 0;
+
+	const theme = getActionTheme(action);
+
+	if (theme === "error") return 3;
+	if (theme === "primary") return 2;
+
+	return 1;
+};
+
 const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// State
@@ -43,13 +71,32 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const visibleActions = createMemo(() =>
-		props.actions.filter((action) => action.hide !== true),
+		props.actions
+			.map((action, index) => ({ action, index }))
+			.filter(({ action }) => action.hide !== true)
+			.sort((a, b) => {
+				const weightDiff =
+					getActionSortWeight(a.action) - getActionSortWeight(b.action);
+
+				if (weightDiff !== 0) return weightDiff;
+
+				return a.index - b.index;
+			})
+			.map(({ action }) => action),
 	);
 
 	// ----------------------------------------
 	// Classes
 	const liItemClasses =
 		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast";
+	const getActionItemClasses = (action: ActionItem) =>
+		classNames(liItemClasses, {
+			"cursor-not-allowed": action.permission === false,
+			"hover:bg-error-hover hover:text-error-contrast":
+				getActionTheme(action) === "error",
+			"hover:bg-primary-base hover:text-primary-contrast":
+				getActionTheme(action) === "primary",
+		});
 
 	// ----------------------------------------
 	// Render
@@ -74,7 +121,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 			>
 				<span class="sr-only">{T()("show_options")}</span>
 				<DropdownMenu.Icon>
-					<FaSolidEllipsisVertical class="text-body pointer-events-none" />
+					<FaSolidEllipsisVertical class="text-subtitle pointer-events-none" />
 				</DropdownMenu.Icon>
 			</DropdownMenu.Trigger>
 
@@ -101,9 +148,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 										<Match when={action.type === "link"}>
 											<A
 												href={action.href || "/"}
-												class={classNames(liItemClasses, {
-													"cursor-not-allowed": action.permission === false,
-												})}
+												class={getActionItemClasses(action)}
 												onClick={(e) => {
 													e.stopPropagation();
 													if (action.permission === false) {
@@ -136,13 +181,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 													action.onClick?.();
 													setIsOpen(false);
 												}}
-												class={classNames(liItemClasses, {
-													"cursor-not-allowed": action.permission === false,
-													"hover:bg-error-hover hover:text-error-contrast":
-														action.theme === "error",
-													"hover:bg-primary-base hover:text-primary-contrast":
-														action.theme === "primary",
-												})}
+												class={getActionItemClasses(action)}
 											>
 												<span class="line-clamp-1 mr-2.5">{action.label}</span>
 												<Show when={action.isLoading !== true}>
