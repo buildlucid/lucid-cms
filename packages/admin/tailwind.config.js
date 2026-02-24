@@ -60,9 +60,9 @@ export default {
                 },
                 // Typography
                 title: "#F1F1F1",
+                subtitle: "#C9C9C9",
                 body: "#a1a1a1",
                 unfocused: "#A0A0A0",
-                table: "#C9C9C9",
             },
             fontFamily: {
                 body: ["Inter", "sans-serif"],

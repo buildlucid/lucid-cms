@@ -3,6 +3,7 @@ import { CollectionBuilder } from "@lucidcms/core/builders";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import SEOBrick from "../bricks/seo.js";
+import TestingBrick from "../bricks/testing.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
@@ -76,7 +77,7 @@ const PageCollection = new CollectionBuilder("page", {
 	],
 	bricks: {
 		fixed: [SEOBrick],
-		builder: [BannerBrick, IntroBrick],
+		builder: [BannerBrick, IntroBrick, TestingBrick],
 	},
 })
 	.addText("page_title", {

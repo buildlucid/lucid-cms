@@ -86,7 +86,7 @@ export const Color: Component<{
 					/>
 					<input
 						class={classnames(
-							"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title font-medium pl-10 pr-3 py-2 bg-input-base border border-border h-10 w-full rounded-md focus:border-primary-base duration-200 transition-colors",
+							"focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-subtitle font-medium pl-10 pr-3 py-2 bg-input-base border border-border h-10 w-full rounded-md focus:border-primary-base duration-200 transition-colors",
 						)}
 						onKeyDown={(e) => {
 							e.stopPropagation();
@@ -112,7 +112,7 @@ export const Color: Component<{
 							<ul class="flex flex-nowrap items-center gap-1">
 								<For each={props.presets}>
 									{(preset) => (
-										<li class="flex-shrink-0">
+										<li class="shrink-0">
 											<button
 												class="focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base focus:ring-opacity-50 rounded-md h-7 w-7 border border-border block"
 												style={{ "background-color": preset }}

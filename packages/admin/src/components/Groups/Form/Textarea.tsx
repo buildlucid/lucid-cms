@@ -51,7 +51,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 			/>
 			<textarea
 				class={
-					"focus:outline-hidden text-sm text-title font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
+					"focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
 				}
 				onKeyDown={(e) => {
 					e.stopPropagation();

@@ -71,7 +71,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		<div class={"mb-2.5 last:mb-0 w-full"}>
 			<div class={"w-full"}>
 				<div class="w-full flex items-center justify-between gap-3 mb-1.5">
-					<p class="block text-sm transition-colors duration-200 ease-in-out text-title">
+					<p class="block text-sm transition-colors duration-200 ease-in-out text-body">
 						{helpers.getLocaleValue({
 							value: fieldConfig().details?.label,
 						})}

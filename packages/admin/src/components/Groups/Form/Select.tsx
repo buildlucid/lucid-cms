@@ -110,7 +110,7 @@ export const Select: Component<SelectProps> = (props) => {
 				/>
 				<DropdownMenu.Trigger
 					class={classNames(
-						"focus:outline-hidden overflow-hidden px-2 text-sm text-title font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
+						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
 						{
 							"h-10": !props.small,
 							"h-9": props.small,
@@ -143,10 +143,10 @@ export const Select: Component<SelectProps> = (props) => {
 									props.onChange(undefined);
 								}}
 							>
-								<FaSolidXmark size={16} class="text-title" />
+								<FaSolidXmark size={16} class="text-subtitle" />
 							</button>
 						</Show>
-						<FaSolidSort size={16} class="text-title ml-1" />
+						<FaSolidSort size={16} class="text-subtitle ml-1" />
 					</div>
 				</DropdownMenu.Trigger>
 				<DropdownContent
@@ -169,7 +169,7 @@ export const Select: Component<SelectProps> = (props) => {
 							<div class="relative">
 								<input
 									type="text"
-									class="bg-dropdown-base px-2 rounded-md w-full border border-border text-sm text-title font-medium h-10 focus:outline-hidden focus:border-primary-base"
+									class="bg-dropdown-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
 									placeholder={props.copy?.searchPlaceholder || T()("search")}
 									value={props.search?.value || ""}
 									onKeyDown={(e) => {
@@ -218,7 +218,7 @@ export const Select: Component<SelectProps> = (props) => {
 								<For each={props.options}>
 									{(option) => (
 										<li
-											class="flex items-center justify-between text-sm text-body hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
+											class="flex items-center justify-between text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
 											onClick={() => {
 												props.onChange(option.value);
 												setDebouncedValue("");

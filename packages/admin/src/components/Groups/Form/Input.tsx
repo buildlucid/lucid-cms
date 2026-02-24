@@ -65,7 +65,7 @@ export const Input: Component<{
 			/>
 			<input
 				class={classnames(
-					"w-full focus:outline-hidden px-2 text-sm text-title disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
+					"w-full focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
 					{
 						"pr-[32px]": props.type === "password",
 					},

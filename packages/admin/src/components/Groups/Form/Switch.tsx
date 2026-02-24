@@ -107,7 +107,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				class={classnames(
 					"flex-1 py-1 px-3 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
 					!props.value && "text-secondary-contrast",
-					props.value && "text-title",
+					props.value && "text-subtitle",
 				)}
 			>
 				{props.copy?.false || T()("false")}
@@ -117,7 +117,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				class={classnames(
 					"flex-1 px-3 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
 					props.value && "text-secondary-contrast",
-					!props.value && "text-title",
+					!props.value && "text-subtitle",
 				)}
 			>
 				{props.copy?.true || T()("true")}

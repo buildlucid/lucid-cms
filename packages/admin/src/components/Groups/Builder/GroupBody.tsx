@@ -185,16 +185,14 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						<span class="text-xs text-unfocused font-medium shrink-0 px-2 py-0.5 rounded-md border border-border bg-background-base">
 							{props.state.groupIndex + 1}
 						</span>
-						<h3 class="text-sm text-title font-medium truncate">
-							{helpers.getLocaleValue({
-								value: props.state.fieldConfig.details?.label,
-							})}
+						<h3 class="text-sm text-subtitle font-medium truncate">
+							<Show when={titlePreview()}>{titlePreview()}</Show>
+							<Show when={!titlePreview()}>
+								{helpers.getLocaleValue({
+									value: props.state.fieldConfig.details?.label,
+								})}
+							</Show>
 						</h3>
-						<Show when={titlePreview()}>
-							<span class="text-sm font-medium text-unfocused truncate min-w-0 max-w-[42ch]">
-								- {titlePreview()}
-							</span>
-						</Show>
 					</div>
 				</div>
 				<div class="flex gap-0.5">

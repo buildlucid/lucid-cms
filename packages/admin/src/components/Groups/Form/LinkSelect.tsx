@@ -78,7 +78,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 					<div class="group w-full flex items-center justify-between gap-3 bg-input-base border border-border rounded-md px-3 py-2 group">
 						<div class="flex flex-col gap-0.5">
 							<Show when={linkLabel()}>
-								<span class="text-sm font-medium text-title truncate leading-tight">
+								<span class="text-sm font-medium text-subtitle truncate leading-tight">
 									{linkLabel()}
 								</span>
 							</Show>
@@ -90,7 +90,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 									class={classNames(
 										"text-body inline-flex items-center gap-2 min-w-0",
 										{
-											"font-medium text-title text-sm": !linkLabel(),
+											"font-medium text-subtitle text-sm": !linkLabel(),
 											"text-xs": linkLabel(),
 										},
 									)}

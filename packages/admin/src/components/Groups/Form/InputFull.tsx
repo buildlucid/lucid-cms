@@ -75,7 +75,7 @@ export const InputFull: Component<{
 				/>
 				<input
 					class={classnames(
-						"focus:outline-hidden px-2 text-sm text-title disabled:cursor-not-allowed disabled:opacity-80 bg-transparent pb-2 pt-1 rounded-b-md",
+						"focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-transparent pb-2 pt-1 rounded-b-md",
 						{
 							"pr-[32px]": props.type === "password",
 							"pt-2": props.copy?.label === undefined,

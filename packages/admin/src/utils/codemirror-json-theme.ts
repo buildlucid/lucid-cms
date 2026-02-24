@@ -8,7 +8,7 @@ export const cmTheme = EditorView.theme(
 	{
 		"&": {
 			backgroundColor: "#181818",
-			color: "#E3E3E3",
+			color: "#C9C9C9",
 			fontSize: "13px",
 			borderRadius: "6px",
 			border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -67,7 +67,7 @@ export const cmTheme = EditorView.theme(
 			backgroundColor: "#171717",
 			border: "1px solid rgba(255, 255, 255, 0.1)",
 			borderRadius: "6px",
-			color: "#E3E3E3",
+			color: "#C9C9C9",
 		},
 		".cm-tooltip-autocomplete": {
 			"& > ul > li[aria-selected]": {
@@ -76,7 +76,7 @@ export const cmTheme = EditorView.theme(
 		},
 		".cm-panels": {
 			backgroundColor: "#141414",
-			color: "#E3E3E3",
+			color: "#C9C9C9",
 		},
 		".cm-panels.cm-panels-top": {
 			borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
@@ -119,7 +119,7 @@ const highlightStyle = HighlightStyle.define([
 	{ tag: tags.number, color: "#7EC8E3" },
 	{ tag: tags.bool, color: "#FF9E64" },
 	{ tag: tags.null, color: "#FF9E64" },
-	{ tag: tags.propertyName, color: "#E3E3E3" },
+	{ tag: tags.propertyName, color: "#C9C9C9" },
 	{ tag: tags.punctuation, color: "#666" },
 	{ tag: tags.brace, color: "#888" },
 	{ tag: tags.squareBracket, color: "#888" },

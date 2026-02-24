@@ -234,7 +234,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							<div class="flex items-center justify-between gap-3 p-3 border-border bg-input-base border-t-0">
 								<div class="flex items-start gap-2 min-w-0">
 									<div class="min-w-0">
-										<p class="text-sm text-title font-medium line-clamp-1">
+										<p class="text-sm text-subtitle font-medium line-clamp-1">
 											{mediaTitle() || T()("no_translation")}
 										</p>
 										<div class=" border-t-0flex items-center gap-2 min-w-0">

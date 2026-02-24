@@ -148,7 +148,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										<span class="inline-flex items-center rounded-sm border border-border bg-card-base px-1.5 py-0.5 text-[10px] font-medium text-unfocused">
 											#{props.value}
 										</span>
-										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-title">
+										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
 											{documentPreviewLabel()}
 										</span>
 									</div>
@@ -204,7 +204,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 														<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
 															{preview.label}
 														</p>
-														<p class="text-xs text-title truncate mt-0.5">
+														<p class="text-xs text-subtitle truncate mt-0.5">
 															{preview.value}
 														</p>
 													</div>

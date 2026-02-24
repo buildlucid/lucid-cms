@@ -83,7 +83,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 				{/* Select */}
 				<div
 					class={
-						"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-title font-medium justify-between flex bg-input-base border border-border items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors"
+						"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-subtitle font-medium justify-between flex bg-input-base border border-border items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors"
 					}
 				>
 					{/* Selected Items */}
@@ -112,7 +112,7 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					</div>
 					{/* Icons */}
 					<div class="flex items-center ml-2">
-						<FaSolidSort size={16} class="text-title ml-1" />
+						<FaSolidSort size={16} class="text-subtitle ml-1" />
 					</div>
 				</div>
 				{/* Trigger */}
