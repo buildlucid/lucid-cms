@@ -1,6 +1,12 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
-import { type Component, createMemo } from "solid-js";
-import UserSearchSelect from "@/components/Partials/SearchSelects/UserSearchSelect";
+import type { CFConfig, FieldError, FieldResponse, UserRef } from "@types";
+import {
+	batch,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+} from "solid-js";
+import { UserSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -22,6 +28,10 @@ interface UserFieldProps {
 
 export const UserField: Component<UserFieldProps> = (props) => {
 	// -------------------------------
+	// State
+	const [getValue, setValue] = createSignal<number | undefined>();
+
+	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
@@ -35,35 +45,46 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			}) ?? undefined
 		);
 	});
-	// const fieldRef = createMemo(() => {
-	// 	return brickHelpers.getFieldRef<UserRef>({
-	// 		fieldType: "user",
-	// 		fieldValue: fieldValue(),
-	// 	});
-	// });
+	const fieldRef = createMemo(() => {
+		return brickHelpers.getFieldRef<UserRef>({
+			fieldType: "user",
+			fieldValue: fieldValue(),
+		});
+	});
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
+	// Effects
+	createEffect(() => {
+		setValue(fieldValue());
+	});
+
+	// -------------------------------
 	// Render
 	return (
-		<UserSearchSelect
+		<UserSelect
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			value={fieldValue()}
-			setValue={(value) => {
-				brickStore.get.setFieldValue({
-					brickIndex: props.state.brickIndex,
-					fieldConfig: props.state.fieldConfig,
-					key: props.state.fieldConfig.key,
-					ref: props.state.groupRef,
-					repeaterKey: props.state.repeaterKey,
-					value: value === undefined ? undefined : Number(value),
-					contentLocale: props.state.contentLocale,
+			value={getValue()}
+			ref={fieldRef}
+			onChange={(value, ref) => {
+				batch(() => {
+					if (ref) brickStore.get.addRef("user", ref);
+					brickStore.get.setFieldValue({
+						brickIndex: props.state.brickIndex,
+						fieldConfig: props.state.fieldConfig,
+						key: props.state.fieldConfig.key,
+						ref: props.state.groupRef,
+						repeaterKey: props.state.repeaterKey,
+						value: !value ? null : Number(value),
+						contentLocale: props.state.contentLocale,
+					});
+					setValue(value ?? undefined);
 				});
 			}}
 			copy={{
@@ -74,7 +95,6 @@ export const UserField: Component<UserFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.summary,
 				}),
 			}}
-			name={props.state.fieldConfig.key}
 			errors={props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}

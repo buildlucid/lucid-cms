@@ -9,6 +9,7 @@ import NavigationGuard from "@/components/Modals/NavigationGuard";
 import DocumentSelectPanel from "@/components/Panels/Documents/DocumentSelect";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import MediaSelectPanel from "@/components/Panels/Media/MediaSelect";
+import UserSelectPanel from "@/components/Panels/User/UserSelect";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/document/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
@@ -54,6 +55,9 @@ export const Modals: Component<{
 	const documentSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("documentSelect"),
 	);
+	const userSelectModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("userSelect"),
+	);
 	const linkSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("linkSelect"),
 	);
@@ -88,6 +92,17 @@ export const Modals: Component<{
 				callbacks={{
 					onSelect: (document) =>
 						pageBuilderModalsStore.triggerAndClose("documentSelect", document),
+				}}
+			/>
+			<UserSelectPanel
+				state={{
+					open: userSelectModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close(),
+					selected: userSelectModal()?.data.selected,
+				}}
+				callbacks={{
+					onSelect: (user) =>
+						pageBuilderModalsStore.triggerAndClose("userSelect", user),
 				}}
 			/>
 			<LinkSelectModal

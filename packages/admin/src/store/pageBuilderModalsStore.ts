@@ -2,6 +2,7 @@ import type {
 	DocumentResponse,
 	LinkResValue,
 	MediaResponse,
+	UserResponse,
 } from "@lucidcms/core/types";
 import { createStore } from "solid-js/store";
 
@@ -32,6 +33,12 @@ type ModalRegistry = {
 			selected?: number;
 		};
 		result: DocumentResponse;
+	};
+	userSelect: {
+		data: {
+			selected?: number;
+		};
+		result: UserResponse;
 	};
 	linkSelect: {
 		data: {

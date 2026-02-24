@@ -19,3 +19,4 @@ export { SingleFileUpload } from "./SingleFileUpload";
 export { Switch } from "./Switch";
 export { Textarea } from "./Textarea";
 export { Tooltip } from "./Tooltip";
+export { UserSelect } from "./UserSelect";
