@@ -1,7 +1,7 @@
 import { DropdownMenu } from "@kobalte/core";
 import type { ErrorResult } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidCheck, FaSolidSort } from "solid-icons/fa";
 import {
 	type Component,
 	createSignal,
@@ -92,20 +92,6 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 							{(value) => (
 								<span class="bg-secondary-base hover:bg-secondary-hover duration-200 transition-colors rounded-md text-secondary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
 									{value.label}
-									<button
-										type="button"
-										class="ml-1 pointer-events-auto duration-200 transition-colors rounded-full focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base hover:text-error-base"
-										onClick={(e) => {
-											e.stopPropagation();
-											e.preventDefault();
-											setValues(
-												props.values.filter((v) => v.value !== value.value),
-											);
-										}}
-									>
-										<FaSolidXmark size={16} class="" />
-										<span class="sr-only">{T()("remove")}</span>
-									</button>
 								</span>
 							)}
 						</For>

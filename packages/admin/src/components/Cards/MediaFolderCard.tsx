@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
 import type { MediaFolderResponse } from "@types";
 import classNames from "classnames";
-import { FaSolidFolder } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
