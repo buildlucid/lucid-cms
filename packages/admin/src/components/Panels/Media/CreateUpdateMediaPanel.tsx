@@ -163,7 +163,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (panelMode() === "create") {
 			return {
 				title: T()("create_media_panel_title"),
-				submit: T()("create"),
+				submit: T()("upload"),
 			};
 		}
 		return {
@@ -282,19 +282,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				<>
 					<MediaFile.Render />
 					<SectionHeading title={T()("details")} />
-					<Checkbox
-						id="public"
-						value={targetState()?.public() ?? true}
-						onChange={(val) => {
-							targetAction()?.setPublic(val);
-						}}
-						name="public"
-						copy={{
-							label: T()("publicly_available"),
-							tooltip: T()("media_public_description"),
-						}}
-						errors={getBodyError("featured", mutateErrors())}
-					/>
 					<For each={locales()}>
 						{(locale, index) => (
 							<Show when={locale.code === lang?.contentLocale()}>
@@ -315,9 +302,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									name={`name-${locale.code}`}
 									type="text"
 									copy={{
-										label: T()("name_lang", {
-											code: locale.code,
-										}),
+										label: T()("name"),
 									}}
 									errors={getErrorObject(inputError(index())?.name)}
 									autoComplete="off"
@@ -340,9 +325,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										name={`alt-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("alt_lang", {
-												code: locale.code,
-											}),
+											label: T()("alt"),
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
 									/>
@@ -365,6 +348,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						errors={getBodyError("folderId", mutateErrors())}
 						noMargin={false}
 						noClear={true}
+					/>
+					<Checkbox
+						id="public"
+						value={targetState()?.public() ?? true}
+						onChange={(val) => {
+							targetAction()?.setPublic(val);
+						}}
+						name="public"
+						copy={{
+							label: T()("publicly_available"),
+							tooltip: T()("media_public_description"),
+						}}
+						errors={getBodyError("featured", mutateErrors())}
 					/>
 					<Show when={props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />

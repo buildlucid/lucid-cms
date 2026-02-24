@@ -104,22 +104,6 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyDown={() => {}}
 			onKeyPress={() => {}}
 		>
-			<Show when={hasUpdatePermission() && !props.showingDeleted?.()}>
-				<div class="absolute top-3 left-3 z-30">
-					<Checkbox
-						value={isSelected()}
-						onChange={() => {
-							if (isSelected()) {
-								mediaStore.get.removeSelectedMedia(props.media.id);
-							} else {
-								mediaStore.get.addSelectedMedia(props.media.id);
-							}
-						}}
-						copy={{}}
-						noMargin={true}
-					/>
-				</div>
-			</Show>
 			<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
 				<ActionDropdown
 					actions={[
@@ -240,15 +224,36 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			</AspectRatio>
 			{/* Content */}
 			<div class="p-3 border-t border-border">
-				<h3 class="mb-0.5 line-clamp-1 text-sm">
-					{title() || T()("no_translation")}
-				</h3>
-				<ClickToCopy
-					type="simple"
-					text={props.media.key}
-					value={props.media.url}
-					class="text-xs"
-				/>
+				<div class="flex items-start gap-3">
+					<Show when={hasUpdatePermission() && !props.showingDeleted?.()}>
+						{/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation */}
+						{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
+						<div class="pt-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+							<Checkbox
+								value={isSelected()}
+								onChange={() => {
+									if (isSelected()) {
+										mediaStore.get.removeSelectedMedia(props.media.id);
+									} else {
+										mediaStore.get.addSelectedMedia(props.media.id);
+									}
+								}}
+								copy={{}}
+								noMargin={true}
+								fullWidth={false}
+							/>
+						</div>
+					</Show>
+					<div class="min-w-0 flex-1">
+						<h3 class="mb-0.5 line-clamp-1 text-sm">{title() || "-"}</h3>
+						<ClickToCopy
+							type="simple"
+							text={props.media.key}
+							value={props.media.url}
+							class="text-xs"
+						/>
+					</div>
+				</div>
 			</div>
 		</li>
 	);

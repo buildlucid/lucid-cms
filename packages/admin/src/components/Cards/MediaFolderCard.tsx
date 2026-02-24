@@ -115,8 +115,7 @@ export const MediaFolderCard: Component<{
 				/>
 			</Show>
 			<div class="w-full flex flex-col -mt-px">
-				<div class="flex items-center gap-2 mb-1">
-					<FaSolidFolder size={18} />
+				<div class="flex items-center gap-2 mb-0.5">
 					<p
 						class="text-sm font-medium text-title line-clamp-1"
 						title={props.folder.title}

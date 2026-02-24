@@ -30,7 +30,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 	return (
 		<div
 			class={classnames("relative", props.class, {
-				"mb-3 last:mb-0": props.noMargin !== true,
+				"mb-3 last:mb-0 mt-4": props.noMargin !== true,
 				"w-full": props.fullWidth !== false,
 			})}
 		>
@@ -67,7 +67,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 					{props.copy.label && (
 						<Checkbox.Label
 							class={classnames(
-								"text-sm transition-colors duration-200 ease-in-out ml-2.5",
+								"text-sm transition-colors duration-200 ease-in-out ml-2.5 text-body",
 								{
 									"text-primary-hover": inputFocus(),
 								},
