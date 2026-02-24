@@ -1,52 +1,55 @@
 import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
-import { FaSolidPlus, FaSolidTrash } from "solid-icons/fa";
-import {
-	type Component,
-	createMemo,
-	For,
-	type JSXElement,
-	Show,
-} from "solid-js";
+import { FaSolidTrash } from "solid-icons/fa";
+import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Link from "@/components/Partials/Link";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import T from "@/translations";
+import HeaderPrimaryActions, {
+	type HeaderPrimaryAction,
+} from "./HeaderPrimaryActions";
+
+export interface StandardCreateAction {
+	open: boolean;
+	setOpen: (_open: boolean) => void;
+	permission?: boolean;
+	label?: string;
+	secondary?: boolean;
+}
+
+export interface StandardCreateLinkAction {
+	link: string;
+	label: string;
+	permission?: boolean;
+	show?: boolean;
+}
+
+export interface StandardHeaderActions {
+	delete?: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+		permission?: boolean;
+	};
+	create?: StandardCreateAction[];
+	createLink?: StandardCreateLinkAction;
+	link?: {
+		href: string;
+		label: string;
+		permission?: boolean;
+		icon: JSXElement;
+		newTab?: boolean;
+	};
+	contentLocale?: boolean;
+}
 
 export const Standard: Component<{
 	copy?: {
 		title?: string;
 		description?: string;
 	};
-	actions?: {
-		delete?: {
-			open: boolean;
-			setOpen: (_open: boolean) => void;
-			permission?: boolean;
-		};
-		create?: Array<{
-			open: boolean;
-			setOpen: (_open: boolean) => void;
-			permission?: boolean;
-			label?: string;
-			secondary?: boolean;
-		}>;
-		createLink?: {
-			link: string;
-			label: string;
-			permission?: boolean;
-			show?: boolean;
-		};
-		link?: {
-			href: string;
-			label: string;
-			permission?: boolean;
-			icon: JSXElement;
-			newTab?: boolean;
-		};
-		contentLocale?: boolean;
-	};
+	actions?: StandardHeaderActions;
 	slots?: {
 		bottom?: JSXElement;
 	};
@@ -57,35 +60,49 @@ export const Standard: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const showFirstCreateAction = createMemo(() => {
-		return (
-			props.actions?.create !== undefined &&
-			props.actions.create[0].permission !== false
-		);
+	const primaryActions = createMemo<HeaderPrimaryAction[]>(() => {
+		const actions: HeaderPrimaryAction[] = [];
+
+		for (const action of props.actions?.create || []) {
+			if (action.permission === false) continue;
+			actions.push({
+				type: "button",
+				label: action.label ?? T()("create"),
+				secondary: action.secondary,
+				onClick: () => {
+					action.setOpen(true);
+				},
+			});
+		}
+
+		const createLink = props.actions?.createLink;
+		if (
+			createLink !== undefined &&
+			createLink.permission !== false &&
+			createLink.show !== false
+		) {
+			actions.push({
+				type: "link",
+				label: createLink.label ?? T()("create"),
+				href: createLink.link,
+			});
+		}
+
+		return actions;
 	});
 
-	const showCreateLink = createMemo(() => {
-		return (
-			props.actions?.createLink !== undefined &&
-			props.actions.createLink.permission !== false &&
-			props.actions.createLink.show !== false
-		);
-	});
+	const firstPrimaryAction = createMemo(() => primaryActions()[0]);
 
 	// ----------------------------------------
 	// Hooks & State
 	useKeyboardShortcuts({
 		newEntry: {
-			permission: () => showFirstCreateAction() || showCreateLink(),
+			permission: () => firstPrimaryAction() !== undefined,
 			callback: () => {
-				if (showFirstCreateAction()) {
-					props.actions?.create?.[0]?.setOpen(true);
-					return;
-				}
-
-				if (showCreateLink() && props.actions?.createLink?.link) {
-					navigate(props.actions?.createLink?.link);
-				}
+				const action = firstPrimaryAction();
+				if (!action) return;
+				if (action.type === "button") action.onClick();
+				if (action.type === "link") navigate(action.href);
 			},
 		},
 	});
@@ -124,33 +141,7 @@ export const Standard: Component<{
 								<ContentLocaleSelect showShortcut={false} />
 							</div>
 						</Show>
-						<For each={props.actions?.create}>
-							{(action) => (
-								<Show when={action.permission !== false}>
-									<Button
-										type="submit"
-										theme={action.secondary ? "border-outline" : "primary"}
-										size="small"
-										onClick={() => {
-											action.setOpen(true);
-										}}
-									>
-										<FaSolidPlus class="mr-1" />
-										{action.label ?? T()("create")}
-									</Button>
-								</Show>
-							)}
-						</For>
-						<Show when={showCreateLink()}>
-							<Link
-								theme="primary"
-								size="small"
-								href={props.actions?.createLink?.link}
-							>
-								<FaSolidPlus class="mr-1" />
-								{props.actions?.createLink?.label ?? T()("create")}
-							</Link>
-						</Show>
+						<HeaderPrimaryActions actions={primaryActions()} />
 						<Show
 							when={
 								props.actions?.link !== undefined &&
