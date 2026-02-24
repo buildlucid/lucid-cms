@@ -31,11 +31,11 @@ export default {
                 dropdown: {
                     base: "#171717",
                     hover: "#0A0A0A",
-                    contrast: "#E3E3E3",
+                    contrast: "#C9C9C9",
                 },
                 input: {
                     base: "#181818",
-                    contrast: "#E3E3E3",
+                    contrast: "#C9C9C9",
                 },
                 icon: {
                     base: "#E3E3E3",

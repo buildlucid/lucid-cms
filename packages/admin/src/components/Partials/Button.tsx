@@ -38,16 +38,17 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "primary",
 				"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base":
 					props.theme === "secondary",
-				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-body hover:text-secondary-contrast ring-primary-base":
+				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base":
 					props.theme === "border-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					props.theme === "danger",
-				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-title fill-error-contrast hover:text-error-contrast":
+				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-subtitle fill-error-contrast hover:text-error-contrast":
 					props.theme === "danger-outline",
-				"text-icon-fade fill-icon-fade hover:text-title hover:fill-title hover:bg-background-base/50 ring-primary-base":
+				"text-icon-fade fill-icon-fade hover:text-subtitle hover:fill-subtitle hover:bg-background-base/50 ring-primary-base":
 					props.theme === "secondary-subtle",
 				"text-icon-fade fill-icon-fade hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
 					props.theme === "danger-subtle",
+				"text-subtitle": props.theme === "basic",
 
 				// Toggles
 				"ring-primary-base": props.theme === "secondary-toggle",

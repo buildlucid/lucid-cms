@@ -61,7 +61,7 @@ export const Breadcrumbs: Component<{
 									</A>
 								</Match>
 								<Match when={i() === props.state.breadcrumbs.length - 1}>
-									<span class="font-medium text-title text-sm">
+									<span class="font-medium text-subtitle text-sm">
 										{breadcrumb.title}
 									</span>
 								</Match>

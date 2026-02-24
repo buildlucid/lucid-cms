@@ -38,7 +38,7 @@ export const DocumentActions: Component<{
 			<DropdownMenu.Trigger
 				class={classNames(
 					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative font-base",
-					"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-title hover:text-secondary-contrast ring-primary-base",
+					"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base",
 					"w-9 h-9 p-0 min-w-[36px]!",
 					{
 						"opacity-80 cursor-not-allowed":

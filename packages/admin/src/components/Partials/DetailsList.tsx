@@ -46,7 +46,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 						>
 							<Switch>
 								<Match when={props.type === "pill"}>
-									<span class="font-medium text-title text-sm">
+									<span class="font-medium text-subtitle text-sm">
 										{item.label}
 									</span>
 									<Show when={item.value !== undefined}>
@@ -54,7 +54,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 									</Show>
 								</Match>
 								<Match when={props.type === "text"}>
-									<span class="font-medium text-title text-sm">
+									<span class="font-medium text-subtitle text-sm">
 										{item.label}
 									</span>
 									<Show when={item.value !== undefined}>

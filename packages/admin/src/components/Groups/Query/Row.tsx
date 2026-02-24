@@ -119,6 +119,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						aria-label={T()("refresh")}
 					>
 						<FaSolidArrowsRotate
+							size={12}
 							class={classNames({
 								"animate-spin": isRefreshing(),
 							})}
