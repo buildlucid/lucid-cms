@@ -126,7 +126,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 				hideOptionalText={props.hideOptionalText}
 			/>
-			<div class="mt-2.5 w-full">
+			<div class="w-full">
 				<Switch>
 					<Match when={typeof props.value !== "number"}>
 						<Button

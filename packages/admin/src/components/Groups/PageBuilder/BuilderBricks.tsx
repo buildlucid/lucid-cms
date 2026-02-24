@@ -15,10 +15,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import {
-	BrickBody,
-	BrickImagePreviewButton,
-} from "@/components/Groups/Builder";
+import { BrickBody } from "@/components/Groups/Builder";
 import AddBrick from "@/components/Modals/Bricks/AddBrick";
 import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
@@ -279,7 +276,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					</h3>
 				</div>
 				<div class="flex gap-0.5">
-					<BrickImagePreviewButton brickConfig={config()} />
 					<DeleteDebounceButton
 						callback={() => {
 							brickStore.get.removeBrick(brickIndex());

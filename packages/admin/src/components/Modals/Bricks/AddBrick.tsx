@@ -1,11 +1,15 @@
 import brickIcon from "@assets/svgs/default-brick-icon-white.svg";
 import type { CollectionBrickConfig } from "@types";
 import classNames from "classnames";
-import { FaSolidMagnifyingGlass, FaSolidXmark } from "solid-icons/fa";
+import {
+	FaSolidImage,
+	FaSolidMagnifyingGlass,
+	FaSolidXmark,
+} from "solid-icons/fa";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import { Tooltip as FormTooltip } from "@/components/Groups/Form/Tooltip";
 import { Modal } from "@/components/Groups/Modal";
 import BrickPreview from "@/components/Partials/BrickPreview";
-import Tooltip from "@/components/Partials/Tooltip";
 import brickStore from "@/store/brickStore";
 import helpers from "@/utils/helpers";
 
@@ -139,28 +143,40 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 				<div class="w-[60%] p-4 h-full pl-0">
 					<div class="border border-border bg-card-base h-full rounded-md flex items-center justify-center relative">
 						<div class="w-[80%]">
-							<BrickPreview
-								data={{
-									brick: {
-										title: helpers.getLocaleValue({
-											value: highlightedBrick()?.details.name,
-											fallback: highlightedBrick()?.key,
-										}),
-										image: highlightedBrick()?.preview?.image,
-									},
-								}}
-								options={{
-									rounded: true,
-								}}
-							/>
+							<Show
+								when={highlightedBrick()?.preview?.image}
+								fallback={
+									<div class="flex items-center justify-center px-4 text-center">
+										<FaSolidImage size={22} />
+									</div>
+								}
+							>
+								<BrickPreview
+									data={{
+										brick: {
+											title: helpers.getLocaleValue({
+												value: highlightedBrick()?.details.name,
+												fallback: highlightedBrick()?.key,
+											}),
+											image: highlightedBrick()?.preview?.image,
+										},
+									}}
+									options={{
+										rounded: true,
+									}}
+								/>
+							</Show>
 						</div>
 						<Show when={highlightedBrick()?.details.summary}>
-							<Tooltip
-								copy={helpers.getLocaleValue({
-									value: highlightedBrick()?.details.summary,
-									fallback: highlightedBrick()?.key,
-								})}
-							/>
+							<div class="absolute top-4 right-4">
+								<FormTooltip
+									theme="inline"
+									copy={helpers.getLocaleValue({
+										value: highlightedBrick()?.details.summary,
+										fallback: highlightedBrick()?.key,
+									})}
+								/>
+							</div>
 						</Show>
 					</div>
 				</div>

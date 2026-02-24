@@ -43,16 +43,6 @@ const [get, set] = createStore<{
 	skipAutoSave: boolean;
 	locked: boolean;
 	refs: Partial<Record<FieldTypes, FieldRefs[]>>;
-	imagePreview: {
-		open: boolean;
-		data:
-			| {
-					title: string;
-					description?: string;
-					image?: string;
-			  }
-			| undefined;
-	};
 	collectionTranslations: boolean;
 	reset: () => void;
 	setBricks: (
@@ -126,10 +116,6 @@ const [get, set] = createStore<{
 	skipAutoSave: true,
 	collectionTranslations: false,
 	refs: {},
-	imagePreview: {
-		open: false,
-		data: undefined,
-	},
 	reset() {
 		batch(() => {
 			set("bricks", []);

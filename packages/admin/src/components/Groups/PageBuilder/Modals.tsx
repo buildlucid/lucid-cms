@@ -1,7 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import type { CollectionResponse } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
-import BrickImagePreview from "@/components/Modals/Bricks/ImagePreview";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment";
@@ -113,7 +112,6 @@ export const Modals: Component<{
 						pageBuilderModalsStore.triggerAndClose("mediaUpload", media),
 				}}
 			/>
-			<BrickImagePreview />
 			<DeleteDocument
 				id={props.hooks.state.document()?.id}
 				state={{

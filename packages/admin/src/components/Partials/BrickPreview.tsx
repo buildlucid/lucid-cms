@@ -1,6 +1,6 @@
-import brickPlaceholder from "@assets/images/brick-placeholder.jpg";
 import { Image } from "@kobalte/core";
 import classNames from "classnames";
+import { FaSolidImage } from "solid-icons/fa";
 import type { Component } from "solid-js";
 import AspectRatio from "@/components/Partials/AspectRatio";
 
@@ -33,13 +33,10 @@ const BrickPreview: Component<BrickPreviewProps> = (props) => {
 					loading="lazy"
 					class="w-full h-full object-cover"
 				/>
-				<Image.Fallback class="">
-					<img
-						src={brickPlaceholder}
-						class="w-full h-full object-cover"
-						alt="Brick Placeholder"
-						loading="lazy"
-					/>
+				<Image.Fallback class="w-full h-full">
+					<div class="w-full h-full flex items-center justify-center text-icon-faded">
+						<FaSolidImage size={22} />
+					</div>
 				</Image.Fallback>
 			</Image.Root>
 		</AspectRatio>
