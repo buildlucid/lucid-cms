@@ -1,72 +1,14 @@
 import { confirm } from "@inquirer/prompts";
-import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
 import getKVAdapter from "../../kv-adapter/get-adapter.js";
-import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import logger from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
 import cliLogger from "../logger.js";
+import runSyncTasks from "../services/run-sync-tasks.js";
 import validateEnvVars from "../services/validate-env-vars.js";
-
-const runSyncTasks = async (
-	config: Config,
-	mode: "process" | "return",
-	kvInstance?: KVAdapterInstance,
-): Promise<boolean> => {
-	cliLogger.info("Running sync tasks (locales, collections)...");
-
-	const kv = kvInstance ?? (await getKVAdapter(config));
-	const queue = passthroughQueueAdapter();
-
-	const [localesResult, collectionsResult] = await Promise.all([
-		syncServices.syncLocales({
-			db: { client: config.db.client },
-			config: config,
-			queue: queue,
-			env: null,
-			kv: kv,
-			requestUrl: config.baseUrl ?? "",
-		}),
-		syncServices.syncCollections({
-			db: { client: config.db.client },
-			config: config,
-			queue: queue,
-			env: null,
-			kv: kv,
-			requestUrl: config.baseUrl ?? "",
-		}),
-	]);
-
-	if (localesResult.error) {
-		cliLogger.error(
-			"Migration failed during locale sync, with error:",
-			localesResult.error.message || "unknown",
-		);
-		if (mode === "process") {
-			logger.setBuffering(false);
-			process.exit(1);
-		} else return false;
-	}
-	if (collectionsResult.error) {
-		cliLogger.error(
-			"Migration failed during collections sync, with error:",
-			collectionsResult.error.message || "unknown",
-		);
-		if (mode === "process") {
-			logger.setBuffering(false);
-			process.exit(1);
-		} else return false;
-	}
-
-	cliLogger.success(
-		"Sync tasks completed",
-		cliLogger.color.green("successfully"),
-	);
-	return true;
-};
 
 const migrateCommand = (props?: {
 	config?: Config;
@@ -242,12 +184,6 @@ const migrateCommand = (props?: {
 				}
 			}
 
-			//* run sync tasks (locales, collections). We dont skip these as migrations are being ran also.
-			const syncResult = await runSyncTasks(config, mode, kvInstance);
-			if (!syncResult && mode === "return") {
-				return false;
-			}
-
 			//* run collection migrations if needed
 			if (needsCollectionMigrations) {
 				cliLogger.info("Running collection migrations...");
@@ -290,6 +226,12 @@ const migrateCommand = (props?: {
 						process.exit(1);
 					} else return false;
 				}
+			}
+
+			//* run sync tasks after migrations so sync can rely on latest schema changes
+			const syncResult = await runSyncTasks(config, mode, kvInstance);
+			if (!syncResult && mode === "return") {
+				return false;
 			}
 
 			cliLogger.info("Clearing KV cache...");

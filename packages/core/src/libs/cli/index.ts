@@ -9,6 +9,7 @@ import migrateFreshCommand from "./commands/migrate-fresh.js";
 import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateRollbackCommand from "./commands/migrate-rollback.js";
 import serveCommand from "./commands/serve.js";
+import syncCommand from "./commands/sync.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();
@@ -44,12 +45,14 @@ program
 
 program
 	.command("migrate")
-	.description("Run database migrations")
+	.description("Run database migrations (also runs sync as a side effect)")
 	.option("-f, --force", "Skip confirmation prompt")
 	.action(
 		// @ts-expect-error
 		migrateCommand({ mode: "process" }),
 	);
+
+program.command("sync").description("Run sync").action(syncCommand);
 
 program
 	.command("migrate:rollback")

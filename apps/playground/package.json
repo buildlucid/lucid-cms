@@ -9,6 +9,7 @@
         "serve": "lucidcms serve",
         "build": "lucidcms build",
         "start": "lucidcms build && node dist/server.js",
+        "sync": "lucidcms sync",
         "migrate": "lucidcms migrate",
         "migrate:rollback": "lucidcms migrate:rollback",
         "migrate:reset": "lucidcms migrate:reset",

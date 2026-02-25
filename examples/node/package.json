@@ -8,6 +8,7 @@
         "dev": "lucidcms dev",
         "serve": "lucidcms serve",
         "build": "lucidcms build",
+        "sync": "lucidcms sync",
         "migrate": "lucidcms migrate",
         "migrate:rollback": "lucidcms migrate:rollback",
         "migrate:reset": "lucidcms migrate:reset",
