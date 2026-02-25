@@ -379,6 +379,20 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	deleteMultiplePermanently: {
+		body: z.object({
+			ids: z.array(z.number()).meta({
+				description: "An array of user IDs you wish to permanently delete",
+				example: [1, 2, 3],
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 	resendInvitation: {
 		body: undefined,
 		query: {

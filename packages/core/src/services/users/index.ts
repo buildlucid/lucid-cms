@@ -1,5 +1,6 @@
 export * as checks from "./checks/index.js";
 export { default as createInitialAdmin } from "./create-initial-admin.js";
+export { default as deleteMultiplePermanently } from "./delete-multiple-permanently.js";
 export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
 export { default as getMultiple } from "./get-multiple.js";

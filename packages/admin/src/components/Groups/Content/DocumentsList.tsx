@@ -69,10 +69,17 @@ export const DocumentsList: Component<{
 	);
 	const rowsAreSelectable = createMemo(() => {
 		if (props.state.showingDeleted()) {
-			return userStore.get.hasPermission(["update_content"]).some;
+			return userStore.get.hasPermission(["update_content", "delete_content"])
+				.some;
 		}
 		return userStore.get.hasPermission(["delete_content"]).some;
 	});
+	const canRestoreDocuments = createMemo(
+		() => userStore.get.hasPermission(["update_content"]).some,
+	);
+	const canDeleteDocuments = createMemo(
+		() => userStore.get.hasPermission(["delete_content"]).some,
+	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
 			value: props.state.collection?.details.name,
@@ -137,6 +144,9 @@ export const DocumentsList: Component<{
 	const deleteMultiple = api.documents.useDeleteMultiple({
 		getCollectionName: collectionSingularName,
 	});
+	const deleteMultiplePermanently = api.documents.useDeleteMultiplePermanently({
+		getCollectionName: collectionSingularName,
+	});
 	const restoreDocuments = api.documents.useRestore();
 
 	// ----------------------------------------
@@ -190,8 +200,10 @@ export const DocumentsList: Component<{
 				}}
 				options={{
 					isSelectable: rowsAreSelectable(),
-					allowRestore: props.state.showingDeleted(),
-					allowDelete: !props.state.showingDeleted(),
+					allowRestore: props.state.showingDeleted() && canRestoreDocuments(),
+					allowDelete: !props.state.showingDeleted() && canDeleteDocuments(),
+					allowDeletePermanently:
+						props.state.showingDeleted() && canDeleteDocuments(),
 				}}
 				callbacks={{
 					deleteRows: async (selected) => {
@@ -216,6 +228,20 @@ export const DocumentsList: Component<{
 							}
 						}
 						await restoreDocuments.action.mutateAsync({
+							collectionKey: collectionKey(),
+							body: {
+								ids: ids,
+							},
+						});
+					},
+					deletePermanentlyRows: async (selected) => {
+						const ids: number[] = [];
+						for (const i in selected) {
+							if (selected[i] && documents.data?.data[i].id) {
+								ids.push(documents.data?.data[i].id);
+							}
+						}
+						await deleteMultiplePermanently.action.mutateAsync({
 							collectionKey: collectionKey(),
 							body: {
 								ids: ids,
@@ -279,7 +305,7 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("restore", true);
 										},
-										permission: userStore.get.hasPermission(["update_media"])
+										permission: userStore.get.hasPermission(["update_content"])
 											.all,
 										hide: props.state.showingDeleted() === false,
 										theme: "primary",

@@ -1,4 +1,5 @@
 import useCreateSingle from "./useCreateSingle";
+import useDeleteMultiplePermanently from "./useDeleteMultiplePermanently";
 import useDeleteSingle from "./useDeleteSingle";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 import useGetMultiple from "./useGetMultiple";
@@ -14,6 +15,7 @@ const exportObject = {
 	useUpdateSingle,
 	useCreateSingle,
 	useDeleteSingle,
+	useDeleteMultiplePermanently,
 	useRestore,
 	useDeleteSinglePermanently,
 	useResendInvitation,

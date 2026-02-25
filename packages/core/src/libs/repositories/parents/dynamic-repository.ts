@@ -362,6 +362,49 @@ abstract class DynamicRepository<
 			schema: this.mergeSchema(dynamicConfig.schema),
 		});
 	}
+	async deleteMultiple<K extends keyof Select<T>, V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				where: QueryBuilderWhere<Table>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+		dynamicConfig: DynamicConfig<Table>,
+	) {
+		let query = this.db
+			.deleteFrom(dynamicConfig.tableName)
+			.$if(
+				props.returnAll !== true &&
+					props.returning !== undefined &&
+					props.returning.length > 0,
+				// @ts-expect-error
+				(qb) => qb.returning(props.returning),
+			)
+			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+
+		// @ts-expect-error
+		query = queryBuilder.delete(query, props.where);
+
+		const exec = await this.executeQuery(
+			() => query.execute() as Promise<Pick<Select<T>, K>[]>,
+			{
+				method: "deleteMultiple",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: props.returning as string[],
+			selectAll: props.returnAll,
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
 }
 
 export default DynamicRepository;

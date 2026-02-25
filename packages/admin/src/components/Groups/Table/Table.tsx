@@ -37,16 +37,20 @@ interface TableRootProps {
 		totalLoadingRows?: number;
 		allowRestore?: boolean;
 		allowDelete?: boolean;
+		allowDeletePermanently?: boolean;
 	};
 	callbacks?: {
 		deleteRows?: (_selected: boolean[]) => Promise<void>;
 		restoreRows?: (_selected: boolean[]) => Promise<void>;
+		deletePermanentlyRows?: (_selected: boolean[]) => Promise<void>;
 	};
 	copy?: {
 		deleteModalTitle?: string;
 		deleteModalDescription?: string;
 		restoreModalTitle?: string;
 		restoreModalDescription?: string;
+		deletePermanentlyModalTitle?: string;
+		deletePermanentlyModalDescription?: string;
 	};
 	theme?: TableTheme;
 	children: (_props: {
@@ -258,9 +262,11 @@ export const Table: Component<TableRootProps> = (props) => {
 				setSelected={setSelected}
 				allowRestore={props.options?.allowRestore ?? false}
 				allowDelete={props.options?.allowDelete ?? false}
+				allowDeletePermanently={props.options?.allowDeletePermanently ?? false}
 				callbacks={{
 					delete: props.callbacks?.deleteRows,
 					restore: props.callbacks?.restoreRows,
+					deletePermanently: props.callbacks?.deletePermanentlyRows,
 				}}
 				copy={props.copy}
 			/>

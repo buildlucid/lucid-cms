@@ -6,6 +6,7 @@ import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -18,17 +19,20 @@ import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
-const deleteSinglePermanentlyController = factory.createHandlers(
+const deleteMultiplePermanentlyController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Permanently delete a single document by ID. The document must be soft-deleted first before it can be permanently deleted.",
+			"Permanently delete multiple documents for a given collection. Documents should be soft-deleted before they are permanently deleted.",
 		tags: ["documents"],
-		summary: "Delete Document Permanently",
+		summary: "Delete Multiple Documents Permanently",
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
+		requestBody: honoOpenAPIRequestBody(
+			controllerSchemas.deleteMultiplePermanently.body,
+		),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.deleteSinglePermanently.params,
+			params: controllerSchemas.deleteMultiplePermanently.params,
 			headers: {
 				csrf: true,
 			},
@@ -37,13 +41,15 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 	validateCSRF,
 	authenticate,
 	permissions([Permissions.DeleteContent]),
-	validate("param", controllerSchemas.deleteSinglePermanently.params),
+	validate("param", controllerSchemas.deleteMultiplePermanently.params),
+	validate("json", controllerSchemas.deleteMultiplePermanently.body),
 	async (c) => {
-		const { collectionKey, id } = c.req.valid("param");
+		const { collectionKey } = c.req.valid("param");
+		const { ids } = c.req.valid("json");
 		const context = getServiceContext(c);
 
-		const deleteSinglePermanently = await serviceWrapper(
-			documentServices.deleteSinglePermanently,
+		const deleteMultiplePermanently = await serviceWrapper(
+			documentServices.deleteMultiplePermanently,
 			{
 				transaction: true,
 				defaultError: {
@@ -53,16 +59,16 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 				},
 			},
 		)(context, {
-			id: Number.parseInt(id, 10),
-			collectionKey: collectionKey,
+			ids,
+			collectionKey,
 			userId: c.get("auth").id,
 		});
-		if (deleteSinglePermanently.error)
-			throw new LucidAPIError(deleteSinglePermanently.error);
+		if (deleteMultiplePermanently.error)
+			throw new LucidAPIError(deleteMultiplePermanently.error);
 
 		c.status(204);
 		return c.body(null);
 	},
 );
 
-export default deleteSinglePermanentlyController;
+export default deleteMultiplePermanentlyController;

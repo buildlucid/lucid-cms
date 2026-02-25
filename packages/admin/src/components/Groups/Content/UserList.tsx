@@ -79,10 +79,16 @@ export const UserList: Component<{
 	});
 	const rowsAreSelectable = createMemo(() => {
 		if (props.state.showingDeleted()) {
-			return userStore.get.hasPermission(["update_user"]).some;
+			return userStore.get.hasPermission(["update_user", "delete_user"]).some;
 		}
 		return false;
 	});
+	const canRestoreUsers = createMemo(
+		() => userStore.get.hasPermission(["update_user"]).some,
+	);
+	const canDeleteUsersPermanently = createMemo(
+		() => userStore.get.hasPermission(["delete_user"]).some,
+	);
 
 	// ----------------------------------
 	// Queries
@@ -101,6 +107,7 @@ export const UserList: Component<{
 
 	// ----------------------------------
 	// Mutations
+	const deleteUsersPermanently = api.users.useDeleteMultiplePermanently();
 	const restoreUsers = api.users.useRestore();
 
 	// ----------------------------------------
@@ -198,9 +205,24 @@ export const UserList: Component<{
 				}}
 				options={{
 					isSelectable: rowsAreSelectable(),
-					allowRestore: true,
+					allowRestore: props.state.showingDeleted() && canRestoreUsers(),
+					allowDeletePermanently:
+						props.state.showingDeleted() && canDeleteUsersPermanently(),
 				}}
 				callbacks={{
+					deletePermanentlyRows: async (selected) => {
+						const ids: number[] = [];
+						for (const i in selected) {
+							if (selected[i] && users.data?.data[i].id) {
+								ids.push(users.data?.data[i].id);
+							}
+						}
+						await deleteUsersPermanently.action.mutateAsync({
+							body: {
+								ids: ids,
+							},
+						});
+					},
 					restoreRows: async (selected) => {
 						const ids: number[] = [];
 						for (const i in selected) {

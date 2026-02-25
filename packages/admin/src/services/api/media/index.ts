@@ -1,6 +1,7 @@
 import useCreateSingle from "./useCreateSingle";
 import useDeleteAllProcessedImages from "./useDeleteAllProcessedImages";
 import useDeleteBatch from "./useDeleteBatch";
+import useDeleteMultiplePermanently from "./useDeleteMultiplePermanently";
 import useDeleteProcessedImages from "./useDeleteProcessedImages";
 import useDeleteSingle from "./useDeleteSingle";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
@@ -22,6 +23,7 @@ const exportObject = {
 	useGetPresignedUrl,
 	useDeleteSinglePermanently,
 	useDeleteBatch,
+	useDeleteMultiplePermanently,
 	useMoveFolder,
 	useRestore,
 };

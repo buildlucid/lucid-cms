@@ -1,11 +1,12 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { controllerSchemas } from "../../../../schemas/documents.js";
-import { documentServices } from "../../../../services/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { mediaServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
+	honoOpenAPIRequestBody,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -18,17 +19,19 @@ import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
-const deleteSinglePermanentlyController = factory.createHandlers(
+const deleteMultiplePermanentlyController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Permanently delete a single document by ID. The document must be soft-deleted first before it can be permanently deleted.",
-		tags: ["documents"],
-		summary: "Delete Document Permanently",
+			"Permanently delete multiple media items by IDs and clear processed images for image media.",
+		tags: ["media"],
+		summary: "Delete Multiple Media Permanently",
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
+		requestBody: honoOpenAPIRequestBody(
+			controllerSchemas.deleteMultiplePermanently.body,
+		),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.deleteSinglePermanently.params,
 			headers: {
 				csrf: true,
 			},
@@ -36,33 +39,32 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteContent]),
-	validate("param", controllerSchemas.deleteSinglePermanently.params),
+	permissions([Permissions.DeleteMedia]),
+	validate("json", controllerSchemas.deleteMultiplePermanently.body),
 	async (c) => {
-		const { collectionKey, id } = c.req.valid("param");
+		const { ids } = c.req.valid("json");
 		const context = getServiceContext(c);
 
-		const deleteSinglePermanently = await serviceWrapper(
-			documentServices.deleteSinglePermanently,
+		const deleteMultiplePermanently = await serviceWrapper(
+			mediaServices.deleteMultiplePermanently,
 			{
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_document_delete_error_name"),
-					message: T("route_document_delete_error_message"),
+					name: T("route_media_delete_error_name"),
+					message: T("route_media_delete_error_message"),
 				},
 			},
 		)(context, {
-			id: Number.parseInt(id, 10),
-			collectionKey: collectionKey,
+			ids,
 			userId: c.get("auth").id,
 		});
-		if (deleteSinglePermanently.error)
-			throw new LucidAPIError(deleteSinglePermanently.error);
+		if (deleteMultiplePermanently.error)
+			throw new LucidAPIError(deleteMultiplePermanently.error);
 
 		c.status(204);
 		return c.body(null);
 	},
 );
 
-export default deleteSinglePermanentlyController;
+export default deleteMultiplePermanentlyController;

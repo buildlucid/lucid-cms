@@ -1,6 +1,7 @@
 export * as checks from "./checks/index.js";
 export * as client from "./client/index.js";
 export { default as deleteMultiple } from "./delete-multiple.js";
+export { default as deleteMultiplePermanently } from "./delete-multiple-permanently.js";
 export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
 export { default as getMultiple } from "./get-multiple.js";

@@ -7,9 +7,11 @@ import classNames from "classnames";
 import {
 	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	For,
+	onCleanup,
 	Show,
 } from "solid-js";
 import MediaCard, { MediaCardLoading } from "@/components/Cards/MediaCard";
@@ -29,11 +31,13 @@ import CopyShareLinkURL from "@/components/Modals/Media/CopyShareLinkURL";
 import DeleteAllShareLinks from "@/components/Modals/Media/DeleteAllShareLinks";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
+import DeleteMediaBatchPermanently from "@/components/Modals/Media/DeleteMediaBatchPermanently";
 import DeleteMediaPermanently from "@/components/Modals/Media/DeleteMediaPermanently";
 import MoveToFolder, {
 	type MoveToFolderParams,
 } from "@/components/Modals/Media/MoveToFolder";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
+import RestoreMediaBatch from "@/components/Modals/Media/RestoreMediaBatch";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import UpdateMediaFolderPanel from "@/components/Panels/Media/UpdateMediaFolderPanel";
 import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
@@ -44,6 +48,7 @@ import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import mediaStore from "@/store/mediaStore";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 
 export const MediaList: Component<{
@@ -62,7 +67,9 @@ export const MediaList: Component<{
 			delete: false,
 			clear: false,
 			restore: false,
+			restoreBatch: false,
 			deletePermanently: false,
+			deleteBatchPermanently: false,
 			deleteBatch: false,
 			moveToFolder: false,
 			view: false,
@@ -198,6 +205,23 @@ export const MediaList: Component<{
 			button: T()("upload_media"),
 		};
 	});
+	const canRestoreMedia = createMemo(
+		() => userStore.get.hasPermission(["update_media"]).all,
+	);
+	const canDeleteMedia = createMemo(
+		() => userStore.get.hasPermission(["delete_media"]).all,
+	);
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		props.state.showingDeleted();
+		mediaStore.get.reset();
+	});
+
+	onCleanup(() => {
+		mediaStore.get.reset();
+	});
 
 	// ----------------------------------------
 	// Render
@@ -319,6 +343,19 @@ export const MediaList: Component<{
 					deleteAction: () => {
 						rowTarget.setTrigger("deleteBatch", true);
 					},
+					restoreAction: () => {
+						rowTarget.setTrigger("restoreBatch", true);
+					},
+					deletePermanentlyAction: () => {
+						rowTarget.setTrigger("deleteBatchPermanently", true);
+					},
+				}}
+				options={{
+					showingDeleted: props.state.showingDeleted(),
+					allowDelete: !props.state.showingDeleted(),
+					allowRestore: props.state.showingDeleted() && canRestoreMedia(),
+					allowDeletePermanently:
+						props.state.showingDeleted() && canDeleteMedia(),
 				}}
 			/>
 
@@ -427,6 +464,22 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().deleteBatch,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("deleteBatch", state);
+					},
+				}}
+			/>
+			<RestoreMediaBatch
+				state={{
+					open: rowTarget.getTriggers().restoreBatch,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("restoreBatch", state);
+					},
+				}}
+			/>
+			<DeleteMediaBatchPermanently
+				state={{
+					open: rowTarget.getTriggers().deleteBatchPermanently,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deleteBatchPermanently", state);
 					},
 				}}
 			/>

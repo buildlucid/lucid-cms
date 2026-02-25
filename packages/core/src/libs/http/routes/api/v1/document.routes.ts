@@ -3,6 +3,7 @@ import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import createSingle from "../../../controllers/documents/create-single.js";
 import createVersion from "../../../controllers/documents/create-version.js";
 import deleteMultiple from "../../../controllers/documents/delete-multiple.js";
+import deleteMultiplePermanently from "../../../controllers/documents/delete-multiple-permanently.js";
 import deleteSingle from "../../../controllers/documents/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/documents/delete-single-permanently.js";
 import getMultiple from "../../../controllers/documents/get-multiple.js";
@@ -18,6 +19,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey/restore", ...restoreMultiple)
 	.post("/:collectionKey/:id", ...createVersion)
 	.delete("/:collectionKey", ...deleteMultiple)
+	.delete("/:collectionKey/permanent", ...deleteMultiplePermanently)
 	.delete("/:collectionKey/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:collectionKey/:id", ...deleteSingle)
 	.get("/:collectionKey/:status", ...getMultiple)

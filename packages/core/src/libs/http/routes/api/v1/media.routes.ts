@@ -4,6 +4,7 @@ import clearAllProcessed from "../../../controllers/media/clear-all-processed.js
 import clearSingleProcessed from "../../../controllers/media/clear-single-processed.js";
 import createSingle from "../../../controllers/media/create-single.js";
 import deleteBatch from "../../../controllers/media/delete-batch.js";
+import deleteMultiplePermanently from "../../../controllers/media/delete-multiple-permanently.js";
 import deleteSingle from "../../../controllers/media/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/media/delete-single-permanently.js";
 import getMultiple from "../../../controllers/media/get-multiple.js";
@@ -46,6 +47,7 @@ const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.delete("/processed", ...clearAllProcessed)
 	.delete("/share-links", ...deleteAllMediaShareLinksSystem)
 	.delete("/batch", ...deleteBatch)
+	.delete("/permanent", ...deleteMultiplePermanently)
 	.delete("/:id/processed", ...clearSingleProcessed)
 	.delete("/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:id/share-links/:linkId", ...deleteMediaShareLink)

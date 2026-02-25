@@ -78,6 +78,12 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const isSelected = createMemo(() => {
 		return mediaStore.get.selectedMedia.includes(props.media.id);
 	});
+	const canSelect = createMemo(() => {
+		if (props.showingDeleted?.()) {
+			return hasUpdatePermission() || hasDeletePermission();
+		}
+		return hasUpdatePermission();
+	});
 
 	// ----------------------------------
 	// Return
@@ -225,7 +231,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			{/* Content */}
 			<div class="p-3 border-t border-border">
 				<div class="flex items-start gap-3">
-					<Show when={hasUpdatePermission() && !props.showingDeleted?.()}>
+					<Show when={canSelect()}>
 						{/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation */}
 						{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
 						<div class="pt-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>

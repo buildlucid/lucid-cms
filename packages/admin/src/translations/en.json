@@ -596,6 +596,8 @@
 	"builder_area_empty": "You can add and edit bricks in this area to dynamically build content on your site or app",
 	"delete_items_modal_title": "Delete Items",
 	"delete_items_modal_description": "Are you sure you want to delete the selected items?",
+	"delete_items_permanently_modal_title": "Delete Items Permanently",
+	"delete_items_permanently_modal_description": "Are you sure you want to permanently delete the selected items? This action is irreversible.",
 	"restore_items_modal_title": "Restore Items",
 	"restore_items_modal_description": "Are you sure you want to restore the selected items?",
 	"publicly_available": "Publicly Available",
