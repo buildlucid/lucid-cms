@@ -84,6 +84,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					hasError={props.hasError}
 					small={true}
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
+					shortcutDisplay={props.showShortcut ? "compact" : undefined}
 				/>
 			</Match>
 			<Match when={props.value !== undefined}>
@@ -101,6 +102,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					hasError={props.hasError}
 					small={true}
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
+					shortcutDisplay={props.showShortcut ? "compact" : undefined}
 				/>
 			</Match>
 		</Switch>

@@ -138,7 +138,7 @@ export const Standard: Component<{
 							}
 						>
 							<div class="w-full md:max-w-42">
-								<ContentLocaleSelect showShortcut={false} />
+								<ContentLocaleSelect showShortcut={true} />
 							</div>
 						</Show>
 						<HeaderPrimaryActions actions={primaryActions()} />

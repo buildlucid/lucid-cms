@@ -4,7 +4,7 @@ import isMac from "@/utils/is-mac";
 const modKey = isMac() ? "⌘" : "Ctrl";
 
 export const shortcutText = {
-	changeLocale: `${modKey}+Shift+L`,
+	changeLocale: `${modKey}+Shift+.`,
 	newEntry: "Shift+T",
 };
 
@@ -26,13 +26,9 @@ const useKeyboardShortcuts = (options: {
 	// };
 }) => {
 	const handleKeyDown = (e: KeyboardEvent) => {
-		// change locale: meta/cntrl + shfit + l
+		// change locale: meta/ctrl + shift + .
 		if (options.changeLocale?.permission()) {
-			if (
-				(e.metaKey || e.ctrlKey) &&
-				e.shiftKey &&
-				e.key.toLowerCase() === "l"
-			) {
+			if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === "Period") {
 				e.preventDefault();
 				e.stopPropagation();
 				options.changeLocale.callback();

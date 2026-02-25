@@ -2,7 +2,12 @@ import { DropdownMenu } from "@kobalte/core";
 import { debounce } from "@solid-primitives/scheduled";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
-import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
+import {
+	FaSolidCheck,
+	FaSolidKeyboard,
+	FaSolidSort,
+	FaSolidXmark,
+} from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -47,6 +52,7 @@ export interface SelectProps {
 	hasError?: boolean;
 	small?: boolean;
 	shortcut?: string;
+	shortcutDisplay?: "full" | "compact";
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
 }
@@ -122,7 +128,13 @@ export const Select: Component<SelectProps> = (props) => {
 					disabled={props.disabled}
 				>
 					<div class="flex items-center">
-						<Show when={props.shortcut}>
+						<Show
+							when={
+								props.shortcut &&
+								(props.shortcutDisplay === undefined ||
+									props.shortcutDisplay === "full")
+							}
+						>
 							<span class="text-xs bg-background-base px-2 py-1 rounded-md mr-1 border border-border">
 								{props.shortcut}
 							</span>
@@ -134,6 +146,14 @@ export const Select: Component<SelectProps> = (props) => {
 						)}
 					</div>
 					<div class="flex items-center gap-1">
+						<Show when={props.shortcut && props.shortcutDisplay === "compact"}>
+							<span
+								class="bg-background-base px-1.5 py-1 rounded-md border border-border text-body inline-flex items-center justify-center"
+								title={props.shortcut}
+							>
+								<FaSolidKeyboard size={12} aria-hidden="true" />
+							</span>
+						</Show>
 						<Show when={props.noClear !== true}>
 							<button
 								type="button"

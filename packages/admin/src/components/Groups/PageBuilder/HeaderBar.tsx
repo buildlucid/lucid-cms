@@ -350,6 +350,7 @@ export const HeaderBar: Component<{
 									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
 										<ContentLocaleSelect
 											hasError={props.state.ui.brickTranslationErrors?.()}
+											showShortcut={true}
 										/>
 									</div>
 								</Show>
