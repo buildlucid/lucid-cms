@@ -169,7 +169,7 @@ export const Select: Component<SelectProps> = (props) => {
 							<div class="relative">
 								<input
 									type="text"
-									class="bg-dropdown-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
+									class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
 									placeholder={props.copy?.searchPlaceholder || T()("search")}
 									value={props.search?.value || ""}
 									onKeyDown={(e) => {
