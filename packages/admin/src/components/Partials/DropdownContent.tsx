@@ -11,6 +11,7 @@ interface DropdownContentProps {
 		maxHeight?: "md";
 		noMargin?: boolean;
 		raised?: boolean;
+		onOpenAutoFocus?: (event: Event) => void;
 	};
 	children: JSXElement;
 }
@@ -20,6 +21,7 @@ const DropdownContent: Component<DropdownContentProps> = (props) => {
 		<DropdownMenu.Portal>
 			<DropdownMenu.Content
 				as={props.options?.as}
+				onOpenAutoFocus={props.options?.onOpenAutoFocus}
 				class={classNames(
 					"bg-dropdown-base border border-border px-2.5 py-2.5 shadow-md animate-animate-dropdown focus:outline-hidden scrollbar",
 					{

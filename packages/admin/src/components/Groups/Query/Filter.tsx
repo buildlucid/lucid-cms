@@ -125,10 +125,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Item
-			class="mb-2 last-of-type:mb-0 focus:outline-hidden"
-			closeOnSelect={false}
-		>
+		<li class="mb-2 last-of-type:mb-0" role="none">
 			<label
 				for={`${props.filter.key}-${props.filter.type}`}
 				class="text-body flex items-center justify-between text-sm mb-1"
@@ -243,7 +240,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 					/>
 				</Match>
 			</Switch>
-		</DropdownMenu.Item>
+		</li>
 	);
 };
 
@@ -280,7 +277,7 @@ export const Filter: Component<FilterProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
+		<DropdownMenu.Root getAnchorRect={getAnchorRect} modal={false}>
 			<DropdownMenu.Trigger
 				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast px-2 h-9 text-sm border border-transparent rounded-md flex items-center disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
 				disabled={props.disabled}
@@ -295,6 +292,9 @@ export const Filter: Component<FilterProps> = (props) => {
 					as: "ul",
 					rounded: true,
 					class: "w-[300px] z-60",
+					onOpenAutoFocus: (e) => {
+						e.preventDefault();
+					},
 				}}
 			>
 				<For each={props.filters}>

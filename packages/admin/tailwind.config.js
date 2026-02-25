@@ -29,7 +29,7 @@ export default {
                     contrast: "#a1a1a1",
                 },
                 dropdown: {
-                    base: "#171717",
+                    base: "#121212",
                     hover: "#0A0A0A",
                     contrast: "#C9C9C9",
                 },
