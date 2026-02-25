@@ -31,9 +31,18 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const queryClient = useQueryClient();
 	const params = useParams();
 	const navigate = useNavigate();
-	const searchParams = useSearchParamsLocation(undefined, {
-		manualSettled: true,
-	});
+	const searchParams = useSearchParamsLocation(
+		{
+			sorts: {
+				updatedAt: "desc",
+				createdAt: undefined,
+			},
+		},
+		{
+			manualSettled: true,
+			singleSort: true,
+		},
+	);
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 
 	// ----------------------------------
@@ -204,6 +213,16 @@ const CollectionsDocumentsListRoute: Component = () => {
 											}
 										}
 									})}
+									sorts={[
+										{
+											label: T()("updated_at"),
+											key: "updatedAt",
+										},
+										{
+											label: T()("created_at"),
+											key: "createdAt",
+										},
+									]}
 									perPage={[]}
 								/>
 							),

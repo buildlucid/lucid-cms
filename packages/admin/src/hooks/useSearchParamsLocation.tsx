@@ -71,7 +71,9 @@ const useSearchParamsLocation = (
 		createSignal<ReturnType<typeof setTimeout>>();
 	const [getPrevQueryString, setPrevQueryString] = createSignal("");
 	const [getQueryString, setQueryString] = createSignal("");
-	const [getInitialParams, setInitialParams] = createSignal(false);
+	const [getInitialParamsPath, setInitialParamsPath] = createSignal<
+		string | undefined
+	>(undefined);
 	const [getFilters, setFilters] = createSignal<FilterMap>(new Map());
 	const [getSorts, setSorts] = createSignal<SortMap>(new Map());
 	const [getPagination, setPagination] = createSignal({
@@ -347,8 +349,8 @@ const useSearchParamsLocation = (
 	};
 
 	const setDefaultParams = () => {
-		if (getInitialParams()) return;
-		setInitialParams(true);
+		if (getInitialParamsPath() === location.pathname) return;
+		setInitialParamsPath(location.pathname);
 
 		const searchParams = new URLSearchParams(location.search);
 		const schema = getSchema();

@@ -190,8 +190,9 @@ export const DocumentsList: Component<{
 					...getTableHeadColumns(),
 					{
 						label: T()("updated_at"),
-						key: "updated_at",
+						key: "updatedAt",
 						icon: <FaSolidCalendar />,
+						sortable: true,
 					},
 				]}
 				state={{
