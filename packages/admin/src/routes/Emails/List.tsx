@@ -36,8 +36,8 @@ const EmailListRoute: Component = () => {
 				},
 			},
 			sorts: {
-				createdAt: undefined,
-				lastAttemptedAt: "desc",
+				createdAt: "desc",
+				lastAttemptedAt: undefined,
 				attemptCount: undefined,
 			},
 		},
