@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import DOMPurify from "dompurify";
 import {
 	FaSolidCalendar,
 	FaSolidCommentDots,
@@ -8,6 +9,7 @@ import {
 import {
 	type Accessor,
 	type Component,
+	createMemo,
 	Index,
 	lazy,
 	Show,
@@ -23,6 +25,44 @@ import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 
 const JSONPreview = lazy(() => import("@/components/Partials/JSONPreview"));
+
+const PREVIEW_DISABLE_LINKS_STYLE =
+	"<style>a,area{pointer-events:none!important;cursor:default!important;}</style>";
+
+const disablePreviewLinkInteractions = (html: string) => {
+	if (!html) return html;
+
+	if (/<\/head>/i.test(html)) {
+		return html.replace(/<\/head>/i, `${PREVIEW_DISABLE_LINKS_STYLE}</head>`);
+	}
+
+	return `${PREVIEW_DISABLE_LINKS_STYLE}${html}`;
+};
+
+const buildSafePreviewHtml = (unsafeHtml: string) => {
+	if (typeof window === "undefined") return unsafeHtml || "";
+
+	try {
+		const sanitized = DOMPurify.sanitize(unsafeHtml || "", {
+			WHOLE_DOCUMENT: true,
+			FORBID_TAGS: [
+				"script",
+				"iframe",
+				"frame",
+				"frameset",
+				"object",
+				"embed",
+				"base",
+				"meta",
+			],
+			FORBID_ATTR: ["srcdoc", "sandbox"],
+		});
+
+		return disablePreviewLinkInteractions(sanitized);
+	} catch {
+		return unsafeHtml || "";
+	}
+};
 
 interface PreviewEmailPanelProps {
 	id: Accessor<number | undefined>;
@@ -43,6 +83,9 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 		},
 		enabled: () => !!props.id(),
 	});
+	const previewHtml = createMemo(() =>
+		buildSafePreviewHtml(email.data?.data.html || ""),
+	);
 
 	// ---------------------------------
 	// Render
@@ -69,8 +112,10 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 					<div class="border border-border rounded-md overflow-hidden mb-4">
 						<iframe
 							class="w-full h-96"
-							srcdoc={email.data?.data.html || ""}
+							srcdoc={previewHtml()}
 							title="Preview"
+							sandbox=""
+							referrerPolicy="no-referrer"
 						/>
 					</div>
 					<SectionHeading title={T()("details")} />
