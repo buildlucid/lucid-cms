@@ -60,6 +60,9 @@ class ColorCustomField extends CustomField<"color"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"color">["value"];
 	}
+	override normalizeInputValue(value: unknown) {
+		return typeof value === "string" ? value.trim() : value;
+	}
 	cfSpecificValidation(value: unknown) {
 		// TODO: down the line, add validation for different color formats - currently accepts any value
 		const valueSchema = z.string();

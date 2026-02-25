@@ -100,7 +100,7 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The media ID",
 				example: 1,
 			}),
@@ -111,11 +111,13 @@ export const controllerSchemas = {
 		body: z.object({
 			name: z
 				.string()
+				.trim()
 				.min(1)
 				.meta({ description: "Optional display name" })
 				.optional(),
 			description: z
 				.string()
+				.trim()
 				.meta({ description: "Optional description" })
 				.optional(),
 			password: z
@@ -125,6 +127,7 @@ export const controllerSchemas = {
 				.optional(),
 			expiresAt: z
 				.string()
+				.trim()
 				.meta({
 					description: "Optional expiry date",
 					example: "2025-01-01T00:00:00Z",
@@ -136,7 +139,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({ description: "The media ID", example: 1 }),
+			id: z.string().trim().meta({ description: "The media ID", example: 1 }),
 		}),
 		response: mediaShareLinkResponseSchema,
 	} satisfies ControllerSchema,
@@ -144,10 +147,12 @@ export const controllerSchemas = {
 		body: z.object({
 			name: z
 				.string()
+				.trim()
 				.meta({ description: "Optional display name" })
 				.optional(),
 			description: z
 				.string()
+				.trim()
 				.meta({ description: "Optional description" })
 				.optional(),
 			password: z
@@ -155,7 +160,7 @@ export const controllerSchemas = {
 				.meta({ description: "Set a password or null to clear" })
 				.optional(),
 			expiresAt: z
-				.union([z.string(), z.null()])
+				.union([z.string().trim(), z.null()])
 				.meta({
 					description: "Expiry date or null to clear",
 					example: "2025-01-01T00:00:00Z",
@@ -167,8 +172,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({ description: "The media ID", example: 1 }),
-			linkId: z.string().meta({ description: "The share link ID", example: 1 }),
+			id: z.string().trim().meta({ description: "The media ID", example: 1 }),
+			linkId: z
+				.string()
+				.trim()
+				.meta({ description: "The share link ID", example: 1 }),
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
@@ -179,8 +187,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({ description: "The media ID", example: 1 }),
-			linkId: z.string().meta({ description: "The share link ID", example: 1 }),
+			id: z.string().trim().meta({ description: "The media ID", example: 1 }),
+			linkId: z
+				.string()
+				.trim()
+				.meta({ description: "The share link ID", example: 1 }),
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
@@ -191,8 +202,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({ description: "The media ID", example: 1 }),
-			linkId: z.string().meta({ description: "The share link ID", example: 1 }),
+			id: z.string().trim().meta({ description: "The media ID", example: 1 }),
+			linkId: z
+				.string()
+				.trim()
+				.meta({ description: "The share link ID", example: 1 }),
 		}),
 		response: mediaShareLinkResponseSchema,
 	} satisfies ControllerSchema,
@@ -203,7 +217,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({ description: "The media ID", example: 1 }),
+			id: z.string().trim().meta({ description: "The media ID", example: 1 }),
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,

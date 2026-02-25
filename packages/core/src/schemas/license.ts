@@ -5,7 +5,7 @@ export const controllerSchemas = {
 	update: {
 		body: z
 			.object({
-				licenseKey: z.string().min(1).nullable().meta({
+				licenseKey: z.string().trim().min(1).nullable().meta({
 					description: "The license key to save",
 					example:
 						"******-************-***************-****************-********",

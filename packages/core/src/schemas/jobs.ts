@@ -151,7 +151,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The job ID",
 				example: 1,
 			}),

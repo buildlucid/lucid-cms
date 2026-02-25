@@ -4,6 +4,7 @@ import formatter from "../../libs/formatters/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
+import { trimStringInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const login: ServiceFn<
@@ -29,12 +30,13 @@ const login: ServiceFn<
 	}
 
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const usernameOrEmail = trimStringInput(data.usernameOrEmail);
 
 	const userRes = await Users.selectSingleByEmailUsername({
 		select: ["id", "password", "is_deleted", "is_locked", "secret"],
 		where: {
-			username: data.usernameOrEmail,
-			email: data.usernameOrEmail,
+			username: usernameOrEmail,
+			email: usernameOrEmail.toLowerCase(),
 		},
 		validation: {
 			enabled: true,

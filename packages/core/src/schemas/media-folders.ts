@@ -107,7 +107,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The folder ID",
 				example: 1,
 			}),
@@ -118,6 +118,7 @@ export const controllerSchemas = {
 		body: z.object({
 			title: z
 				.string()
+				.trim()
 				.min(1)
 				.meta({
 					description: "The folder title",
@@ -138,7 +139,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The folder ID",
 				example: 1,
 			}),
@@ -147,7 +148,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({
-			title: z.string().min(1).meta({
+			title: z.string().trim().min(1).meta({
 				description: "The folder title",
 				example: "Heros",
 			}),

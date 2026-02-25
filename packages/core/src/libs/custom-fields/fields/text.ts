@@ -60,6 +60,9 @@ class TextCustomField extends CustomField<"text"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"text">["value"];
 	}
+	override normalizeInputValue(value: unknown) {
+		return typeof value === "string" ? value.trim() : value;
+	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.string();
 

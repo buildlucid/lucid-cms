@@ -60,6 +60,9 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"textarea">["value"];
 	}
+	override normalizeInputValue(value: unknown) {
+		return typeof value === "string" ? value.trim() : value;
+	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.string();
 

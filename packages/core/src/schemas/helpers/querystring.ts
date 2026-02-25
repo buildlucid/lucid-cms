@@ -20,6 +20,7 @@ export const queryString = {
 		) =>
 			z
 				.string()
+				.trim()
 				.meta({
 					description: multiple
 						? options?.description ||
@@ -32,6 +33,7 @@ export const queryString = {
 		sort: (example: string) =>
 			z
 				.string()
+				.trim()
 				// .regex(/^-?[a-zA-Z0-9_]+(,-?[a-zA-Z0-9_]+)*$/)
 				.meta({
 					description:
@@ -42,6 +44,7 @@ export const queryString = {
 		include: (example: string) =>
 			z
 				.string()
+				.trim()
 				.meta({
 					description:
 						"Specifies related resources to include in response as comma-separated values",
@@ -51,6 +54,7 @@ export const queryString = {
 		exclude: (example: string) =>
 			z
 				.string()
+				.trim()
 				.meta({
 					description:
 						"Defines fields to exclude from response as comma-separated values",
@@ -59,6 +63,7 @@ export const queryString = {
 				.optional(),
 		page: z
 			.string()
+			.trim()
 			.regex(/^[1-9][0-9]*$/)
 			.describe(
 				"Specifies the page number for pagination (must be a positive integer)",
@@ -66,6 +71,7 @@ export const queryString = {
 			.optional(),
 		perPage: z
 			.string()
+			.trim()
 			.regex(/^([1-9][0-9]*|-1)$/)
 			.describe(
 				"Sets the number of items per page (use positive integer or -1 for all items)",

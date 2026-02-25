@@ -7,6 +7,7 @@ import {
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices, userTokenServices } from "../index.js";
 
@@ -25,13 +26,14 @@ const inviteSingle: ServiceFn<
 	number
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const email = normalizeEmailInput(data.email);
 
 	const [userExistsRes, roleExistsRes] = await Promise.all([
 		Users.selectSingleByEmailUsername({
 			select: ["id", "username", "email"],
 			where: {
 				username: data.username,
-				email: data.email,
+				email: email,
 			},
 		}),
 		userServices.checks.checkRolesExist(context, {
@@ -48,7 +50,7 @@ const inviteSingle: ServiceFn<
 				status: 500,
 				errors: {
 					email:
-						userExistsRes.data.email === data.email
+						userExistsRes.data.email === email
 							? {
 									code: "invalid",
 									message: T("duplicate_entry_error_message"),
@@ -71,7 +73,7 @@ const inviteSingle: ServiceFn<
 
 	const newUserRes = await Users.createSingle({
 		data: {
-			email: data.email,
+			email: email,
 			username: data.username,
 			first_name: data.firstName,
 			last_name: data.lastName,
@@ -107,7 +109,7 @@ const inviteSingle: ServiceFn<
 
 	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
-		to: data.email,
+		to: email,
 		subject: formatEmailSubject(
 			T("user_invite_email_subject"),
 			context.config.brand?.name,
@@ -116,7 +118,7 @@ const inviteSingle: ServiceFn<
 		data: {
 			firstName: data.firstName,
 			lastName: data.lastName,
-			email: data.email,
+			email: email,
 			inviteLink: `${baseUrl}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
 			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
 			brand: {

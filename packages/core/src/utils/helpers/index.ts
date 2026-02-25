@@ -4,4 +4,5 @@ export { default as getBaseUrl } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as groupDocumentFilters } from "./group-document-filters.js";
+export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
 export { default as urlAddPath } from "./url-add-path.js";

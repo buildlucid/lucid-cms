@@ -8,6 +8,7 @@ export const controllerSchemas = {
 			string: z.object({
 				preset: z
 					.string()
+					.trim()
 					.meta({
 						description: "The preset to use for the image",
 						example: "thumbnail",
@@ -30,13 +31,13 @@ export const controllerSchemas = {
 					.optional(),
 			}),
 			formatted: z.object({
-				preset: z.string().optional(),
+				preset: z.string().trim().optional(),
 				format: z.enum(["jpeg", "png", "webp", "avif"]).optional(),
 				fallback: z.enum(["true", "false"]).optional(),
 			}),
 		},
 		params: z.object({
-			key: z.string().meta({
+			key: z.string().trim().meta({
 				description: "The media key you wish to stream",
 				example: "2024/09/5ttogd-placeholder-image.png",
 			}),

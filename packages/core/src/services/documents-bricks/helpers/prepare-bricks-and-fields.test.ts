@@ -190,4 +190,67 @@ describe("testing prepareBricksAndFields", () => {
 		expect(result.preparedBricks).toBeUndefined();
 		expect(result.preparedFields).toBeUndefined();
 	});
+
+	test("should trim string custom field values and translations", () => {
+		const collection = new CollectionBuilder("trim-test", {
+			mode: "single",
+			details: {
+				name: "Trim Test",
+				singularName: "Trim Test",
+			},
+			config: {
+				useTranslations: true,
+			},
+		})
+			.addText("title")
+			.addSelect("status", {
+				options: [
+					{ label: "Draft", value: "draft" },
+					{ label: "Live", value: "live" },
+				],
+			})
+			.addLink("cta");
+
+		const fields: Array<FieldInputSchema> = [
+			{
+				key: "title",
+				type: "text",
+				translations: {
+					en: "  Hello  ",
+				},
+			},
+			{
+				key: "status",
+				type: "select",
+				value: "  draft  ",
+			},
+			{
+				key: "cta",
+				type: "link",
+				value: {
+					url: "  https://example.com  ",
+					label: "  Learn more  ",
+					target: "  _blank  ",
+				},
+			},
+		];
+
+		const { preparedFields } = prepareBricksAndFields({
+			collection,
+			fields,
+			localization: mockLocalization,
+		});
+
+		expect(
+			preparedFields?.find((f) => f.key === "title")?.translations?.en,
+		).toBe("Hello");
+		expect(preparedFields?.find((f) => f.key === "status")?.value).toBe(
+			"draft",
+		);
+		expect(preparedFields?.find((f) => f.key === "cta")?.value).toEqual({
+			url: "https://example.com",
+			label: "Learn more",
+			target: "_blank",
+		});
+	});
 });

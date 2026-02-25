@@ -4,6 +4,7 @@ import formatter from "../../libs/formatters/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
+import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createInitialAdmin: ServiceFn<
@@ -19,6 +20,7 @@ const createInitialAdmin: ServiceFn<
 	number
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const email = normalizeEmailInput(data.email);
 
 	const userCountRes = await Users.count({ where: [] });
 	if (userCountRes.error) return userCountRes;
@@ -43,7 +45,7 @@ const createInitialAdmin: ServiceFn<
 
 	const newUserRes = await Users.createSingle({
 		data: {
-			email: data.email,
+			email: email,
 			username: data.username,
 			first_name: data.firstName,
 			last_name: data.lastName,

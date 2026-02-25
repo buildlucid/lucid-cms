@@ -119,6 +119,9 @@ abstract class CustomField<T extends FieldTypes> {
 
 		return zodSafeParse(value, this.config.validation?.zod);
 	}
+	public normalizeInputValue(value: unknown): unknown {
+		return value;
+	}
 	// Getters
 	get errors(): {
 		fieldType: CustomFieldErrorItem;

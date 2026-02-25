@@ -3,6 +3,7 @@ import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -28,6 +29,7 @@ const sendResetPassword: ServiceFn<
 	}
 
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const email = normalizeEmailInput(data.email);
 
 	const userExistsRes = await Users.selectSingle({
 		select: ["id", "first_name", "last_name", "email"],
@@ -35,7 +37,7 @@ const sendResetPassword: ServiceFn<
 			{
 				key: "email",
 				operator: "=",
-				value: data.email,
+				value: email,
 			},
 		],
 	});

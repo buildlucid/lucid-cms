@@ -38,7 +38,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			code: z.string().min(2).meta({
+			code: z.string().trim().min(2).meta({
 				description: "The locales code",
 				example: "en",
 			}),

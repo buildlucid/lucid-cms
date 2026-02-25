@@ -44,7 +44,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	sendResetPassword: {
 		body: z.object({
-			email: z.email().meta({
+			email: z.email().trim().toLowerCase().meta({
 				description: "Your email address",
 				example: "admin@lucidcms.io",
 			}),
@@ -83,7 +83,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			providerId: z.string().min(1).meta({
+			providerId: z.string().trim().min(1).meta({
 				description: "The provider key you wish to unlink",
 				example: "github",
 			}),
@@ -94,6 +94,7 @@ export const controllerSchemas = {
 		body: z.object({
 			firstName: z
 				.string()
+				.trim()
 				.meta({
 					description: "Your new first name",
 					example: "John",
@@ -101,6 +102,7 @@ export const controllerSchemas = {
 				.optional(),
 			lastName: z
 				.string()
+				.trim()
 				.meta({
 					description: "Your new last name",
 					example: "Smith",
@@ -108,6 +110,7 @@ export const controllerSchemas = {
 				.optional(),
 			username: z
 				.string()
+				.trim()
 				.min(3)
 				.meta({
 					description: "Your new username",
@@ -116,6 +119,8 @@ export const controllerSchemas = {
 				.optional(),
 			email: z
 				.email()
+				.trim()
+				.toLowerCase()
 				.meta({
 					description: "your new email address",
 					example: "admin@lucidcms.io",

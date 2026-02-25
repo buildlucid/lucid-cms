@@ -70,7 +70,7 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user ID to fetch logins for",
 				example: "1",
 			}),

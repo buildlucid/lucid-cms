@@ -4,6 +4,7 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices } from "../index.js";
 
@@ -30,6 +31,8 @@ const updateSingle: ServiceFn<
 	number
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const normalizedEmail =
+		data.email !== undefined ? normalizeEmailInput(data.email) : undefined;
 
 	if (data.auth.id === data.userId) {
 		return {
@@ -67,14 +70,14 @@ const updateSingle: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const [emailExists, usernameExists] = await Promise.all([
-		data.email
+		normalizedEmail
 			? Users.selectSingle({
 					select: ["email"],
 					where: [
 						{
 							key: "email",
 							operator: "=",
-							value: data.email,
+							value: normalizedEmail,
 						},
 					],
 				})
@@ -95,7 +98,7 @@ const updateSingle: ServiceFn<
 	if (emailExists?.error) return emailExists;
 	if (usernameExists?.error) return usernameExists;
 
-	if (data.email !== undefined && emailExists?.data !== undefined) {
+	if (normalizedEmail !== undefined && emailExists?.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -143,7 +146,7 @@ const updateSingle: ServiceFn<
 				first_name: data.firstName,
 				last_name: data.lastName,
 				username: data.username,
-				email: data.email,
+				email: normalizedEmail,
 				password: hashedPassword,
 				secret: encryptSecret,
 				super_admin: data.auth.superAdmin ? data.superAdmin : undefined,
@@ -175,13 +178,13 @@ const updateSingle: ServiceFn<
 	if (updateRoelsRes.error) return updateRoelsRes;
 	if (updateUserRes.error) return updateUserRes;
 
-	if (data.email !== undefined) {
+	if (normalizedEmail !== undefined) {
 		const baseUrl = getBaseUrl(context);
 
 		const sendEmailRes = await emailServices.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
-			to: data.email,
+			to: normalizedEmail,
 			subject: formatEmailSubject(
 				T("email_update_success_subject"),
 				context.config.brand?.name,

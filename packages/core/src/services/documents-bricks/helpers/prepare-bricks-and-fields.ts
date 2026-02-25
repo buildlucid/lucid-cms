@@ -7,6 +7,7 @@ import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
  * - Processes fields to remove any that don't exist in the custom fields.
  * - Processes recursively for repeater fields with nested groups.
  * - Based on collection and field translation support, sort out the fields translations/value props and fill missing translations with default values
+ * - Normalizes the input value of the field using the custom field instance's normalizeInputValue method
  */
 const processFields = (props: {
 	collection: CollectionBuilder;
@@ -20,6 +21,22 @@ const processFields = (props: {
 			// biome-ignore lint/style/noNonNullAssertion: explanation
 			const cfInstance = props.customFields.get(field.key)!;
 			const processedField = { ...field };
+
+			if (processedField.value !== undefined) {
+				processedField.value = cfInstance.normalizeInputValue(
+					processedField.value,
+				);
+			}
+			if (processedField.translations) {
+				processedField.translations = Object.fromEntries(
+					Object.entries(processedField.translations).map(
+						([localeCode, value]) => [
+							localeCode,
+							cfInstance.normalizeInputValue(value),
+						],
+					),
+				);
+			}
 
 			if (field.type === "repeater" && field.groups) {
 				processedField.groups = field.groups.map((group) => ({

@@ -62,6 +62,9 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"datetime">["value"];
 	}
+	override normalizeInputValue(value: unknown) {
+		return typeof value === "string" ? value.trim() : value;
+	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.union([z.string(), z.number(), z.date()]);
 

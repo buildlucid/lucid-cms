@@ -38,12 +38,13 @@ export const clientIntegrationResponseSchema = z.object({
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			name: z.string().min(2).meta({
+			name: z.string().trim().min(2).meta({
 				description: "The name of the client",
 				example: "Marketing Website",
 			}),
 			description: z
 				.string()
+				.trim()
 				.meta({
 					description: "A description of the client",
 					example: "The Astro marketing site at example.com",
@@ -79,7 +80,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The client integration ID you want to delete",
 				example: "1",
 			}),
@@ -139,7 +140,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The client integration ID",
 				example: "1",
 			}),
@@ -153,7 +154,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The client integration ID",
 				example: "1",
 			}),
@@ -171,6 +172,7 @@ export const controllerSchemas = {
 		body: z.object({
 			name: z
 				.string()
+				.trim()
 				.min(2)
 				.meta({
 					description: "The name of the client",
@@ -179,6 +181,7 @@ export const controllerSchemas = {
 				.optional(),
 			description: z
 				.string()
+				.trim()
 				.meta({
 					description: "A description of the client",
 					example: "The Astro marketing site at example.com",
@@ -198,7 +201,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The client integration ID",
 				example: "1",
 			}),

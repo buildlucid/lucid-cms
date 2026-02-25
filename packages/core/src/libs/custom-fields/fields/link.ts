@@ -68,6 +68,19 @@ class LinkCustomField extends CustomField<"link"> {
 			target: value?.target ?? this.config.config.default.target ?? null,
 		} satisfies CFResponse<"link">["value"];
 	}
+	override normalizeInputValue(value: unknown) {
+		if (!value || typeof value !== "object" || Array.isArray(value))
+			return value;
+
+		const obj = value as Record<string, unknown>;
+
+		return {
+			...obj,
+			url: typeof obj.url === "string" ? obj.url.trim() : obj.url,
+			label: typeof obj.label === "string" ? obj.label.trim() : obj.label,
+			target: typeof obj.target === "string" ? obj.target.trim() : obj.target,
+		};
+	}
 	cfSpecificValidation(value: unknown) {
 		const valueSchema = z.object({
 			url: z.string().optional().nullable(),

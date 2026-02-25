@@ -207,7 +207,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The email ID",
 				example: 1,
 			}),
@@ -221,7 +221,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The email ID",
 				example: 1,
 			}),
@@ -235,7 +235,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The email ID",
 				example: 1,
 			}),

@@ -135,11 +135,11 @@ export const userResponseSchema = z.object({
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			email: z.email().meta({
+			email: z.email().trim().toLowerCase().meta({
 				description: "The user's email address",
 				example: "admin@lucidcms.io",
 			}),
-			username: z.string().meta({
+			username: z.string().trim().meta({
 				description: "The user's username",
 				example: "Admin",
 			}),
@@ -149,6 +149,7 @@ export const controllerSchemas = {
 			}),
 			firstName: z
 				.string()
+				.trim()
 				.meta({
 					description: "The user's first name",
 					example: "John",
@@ -156,6 +157,7 @@ export const controllerSchemas = {
 				.optional(),
 			lastName: z
 				.string()
+				.trim()
 				.meta({
 					description: "The user's last name",
 					example: "Smith",
@@ -220,7 +222,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user's ID",
 				example: 1,
 			}),
@@ -234,7 +236,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user's ID",
 				example: 1,
 			}),
@@ -340,11 +342,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user's ID",
 				example: 1,
 			}),
-			providerId: z.string().min(1).meta({
+			providerId: z.string().trim().min(1).meta({
 				description: "The provider key you wish to unlink",
 				example: "github",
 			}),
@@ -358,7 +360,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user's ID",
 				example: 1,
 			}),
@@ -372,7 +374,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user's ID",
 				example: 1,
 			}),
@@ -400,7 +402,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The user's ID",
 				example: 1,
 			}),

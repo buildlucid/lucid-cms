@@ -128,7 +128,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
@@ -160,11 +160,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document's ID",
 				example: 1,
 			}),
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
@@ -196,15 +196,15 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document's ID",
 				example: 1,
 			}),
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
-			versionId: z.string().meta({
+			versionId: z.string().trim().meta({
 				description: "The version ID",
 				example: 1,
 			}),
@@ -228,7 +228,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
@@ -242,11 +242,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document ID",
 				example: 1,
 			}),
@@ -260,11 +260,11 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document ID",
 				example: 1,
 			}),
@@ -283,7 +283,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
@@ -302,7 +302,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
@@ -350,7 +350,7 @@ export const controllerSchemas = {
 				description: "The collection key",
 				example: "page",
 			}),
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document ID",
 				example: 1,
 			}),
@@ -449,11 +449,11 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
-			status: z.string().meta({
+			status: z.string().trim().meta({
 				description: "The status version type",
 				example: "latest",
 			}),
@@ -471,20 +471,22 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document ID",
 				example: 1,
 			}),
 			statusOrId: z
 				.union([
 					z.literal("latest"),
-					z.string(), // version id or custom environment key
+					z
+						.string()
+						.trim(), // version id or custom environment key
 				])
 				.meta({
 					description: "The status (version type), or a version ID",
 					example: "latest",
 				}),
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
@@ -496,6 +498,7 @@ export const controllerSchemas = {
 		body: z.object({
 			versionType: z
 				.string()
+				.trim()
 				.refine((val) => val !== "revision", {
 					message:
 						"Cannot promote to revision - use 'latest' or a valid environment key",
@@ -516,15 +519,15 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document ID",
 				example: 1,
 			}),
-			versionId: z.string().meta({
+			versionId: z.string().trim().meta({
 				description: "The version ID you want to promote",
 				example: 2,
 			}),
@@ -538,15 +541,15 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			collectionKey: z.string().meta({
+			collectionKey: z.string().trim().meta({
 				description: "The collection key",
 				example: "page",
 			}),
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The document ID",
 				example: 1,
 			}),
-			versionId: z.string().meta({
+			versionId: z.string().trim().meta({
 				description: "The version ID you want to promote",
 				example: 2,
 			}),
@@ -617,11 +620,11 @@ export const controllerSchemas = {
 				}),
 			},
 			params: z.object({
-				collectionKey: z.string().meta({
+				collectionKey: z.string().trim().meta({
 					description: "The collection key",
 					example: "page",
 				}),
-				status: z.string().meta({
+				status: z.string().trim().meta({
 					description: "The status version type",
 					example: "latest",
 				}),
@@ -716,11 +719,11 @@ export const controllerSchemas = {
 				}),
 			},
 			params: z.object({
-				collectionKey: z.string().meta({
+				collectionKey: z.string().trim().meta({
 					description: "The collection key",
 					example: "page",
 				}),
-				status: z.string().meta({
+				status: z.string().trim().meta({
 					description: "The status version type",
 					example: "latest",
 				}),

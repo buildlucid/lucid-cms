@@ -23,7 +23,7 @@ export const controllerSchemas = {
 	login: {
 		body: z
 			.object({
-				usernameOrEmail: z.string().meta({
+				usernameOrEmail: z.string().trim().meta({
 					description: "Username or email address",
 					example: "admin",
 				}),
@@ -75,16 +75,17 @@ export const controllerSchemas = {
 	setup: {
 		body: z
 			.object({
-				email: z.email().meta({
+				email: z.email().trim().toLowerCase().meta({
 					description: "Admin user email address",
 					example: "admin@example.com",
 				}),
-				username: z.string().meta({
+				username: z.string().trim().meta({
 					description: "Admin username",
 					example: "admin",
 				}),
 				firstName: z
 					.string()
+					.trim()
 					.meta({
 						description: "Admin first name",
 						example: "John",
@@ -92,6 +93,7 @@ export const controllerSchemas = {
 					.optional(),
 				lastName: z
 					.string()
+					.trim()
 					.meta({
 						description: "Admin last name",
 						example: "Doe",
@@ -219,6 +221,7 @@ export const controllerSchemas = {
 			}),
 			redirectPath: z
 				.string()
+				.trim()
 				.meta({
 					description: "The redirect path on a successful callback",
 					example: "/lucid",
@@ -230,7 +233,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			providerKey: z.string().meta({
+			providerKey: z.string().trim().meta({
 				description: "The provider key",
 				example: "google",
 			}),
@@ -267,7 +270,7 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			providerKey: z.string().meta({
+			providerKey: z.string().trim().meta({
 				description: "The provider key",
 				example: "google",
 			}),

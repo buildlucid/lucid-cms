@@ -46,18 +46,19 @@ const roleResponseSchema = z.object({
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			name: z.string().min(2).meta({
+			name: z.string().trim().min(2).meta({
 				description: "The role's name",
 				example: "Editor",
 			}),
 			description: z
 				.string()
+				.trim()
 				.meta({
 					description: "A description for the role",
 					example: "Editor's can edit documents from any collection",
 				})
 				.optional(),
-			permissions: z.array(z.string()).meta({
+			permissions: z.array(z.string().trim()).meta({
 				description: "A lit of permissions",
 				example: ["create_user", "update_user"],
 			}),
@@ -73,6 +74,7 @@ export const controllerSchemas = {
 		body: z.object({
 			name: z
 				.string()
+				.trim()
 				.min(2)
 				.meta({
 					description: "The role's name",
@@ -81,13 +83,14 @@ export const controllerSchemas = {
 				.optional(),
 			description: z
 				.string()
+				.trim()
 				.meta({
 					description: "A description for the role",
 					example: "Editor's can edit documents from any collection",
 				})
 				.optional(),
 			permissions: z
-				.array(z.string())
+				.array(z.string().trim())
 				.meta({
 					description: "A lit of permissions",
 					example: ["create_user", "update_user"],
@@ -99,7 +102,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The role's ID",
 				example: 1,
 			}),
@@ -113,7 +116,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The role's ID",
 				example: 1,
 			}),
@@ -167,7 +170,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The role's ID",
 				example: 1,
 			}),

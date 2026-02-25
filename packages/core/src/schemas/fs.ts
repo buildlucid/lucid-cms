@@ -15,7 +15,7 @@ export const controllerSchemas = {
 					description: "Timestamp",
 					example: "1745601807970",
 				}),
-				key: z.string().meta({
+				key: z.string().trim().meta({
 					description: "The media key",
 					example: "public/5ttogd-placeholder-image.png",
 				}),
@@ -38,7 +38,7 @@ export const controllerSchemas = {
 					description: "Timestamp",
 					example: "1745601807970",
 				}),
-				key: z.string().meta({
+				key: z.string().trim().meta({
 					description: "The media key",
 					example: "private/2024/09/5ttogd-placeholder-image.png",
 				}),

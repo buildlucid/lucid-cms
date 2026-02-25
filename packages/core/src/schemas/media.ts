@@ -203,7 +203,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The media ID",
 				example: 1,
 			}),
@@ -217,7 +217,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The media ID",
 				example: 1,
 			}),
@@ -231,7 +231,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The media ID",
 				example: 1,
 			}),
@@ -301,7 +301,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: z.object({
-			id: z.string().meta({
+			id: z.string().trim().meta({
 				description: "The media ID",
 				example: 1,
 			}),
@@ -312,6 +312,7 @@ export const controllerSchemas = {
 		body: z.object({
 			key: z
 				.string()
+				.trim()
 				.meta({
 					description: "The media key",
 					example: "public/5ttogd-placeholder-image.png",
@@ -334,6 +335,7 @@ export const controllerSchemas = {
 				.optional(),
 			fileName: z
 				.string()
+				.trim()
 				.meta({
 					description: "The filename",
 					example: "funny-cats.jpg",
@@ -344,8 +346,9 @@ export const controllerSchemas = {
 					z.object({
 						localeCode: z
 							.string()
+							.trim()
 							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().nullable().meta({
+						value: z.string().trim().nullable().meta({
 							description: "Title value",
 						}),
 					}),
@@ -356,8 +359,9 @@ export const controllerSchemas = {
 					z.object({
 						localeCode: z
 							.string()
+							.trim()
 							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().nullable().meta({
+						value: z.string().trim().nullable().meta({
 							description: "Alt text value",
 						}),
 					}),
@@ -381,6 +385,7 @@ export const controllerSchemas = {
 				.optional(),
 			blurHash: z
 				.string()
+				.trim()
 				.nullable()
 				.meta({
 					description: "The blur hash",
@@ -389,6 +394,7 @@ export const controllerSchemas = {
 				.optional(),
 			averageColor: z
 				.string()
+				.trim()
 				.nullable()
 				.meta({
 					description: "The average color",
@@ -456,11 +462,11 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	getPresignedUrl: {
 		body: z.object({
-			fileName: z.string().meta({
+			fileName: z.string().trim().meta({
 				description: "The file name",
 				example: "funny-cats.jpg",
 			}),
-			mimeType: z.string().meta({
+			mimeType: z.string().trim().meta({
 				description: "The media's mime type",
 				example: "image/jpeg",
 			}),
@@ -496,7 +502,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({
-			key: z.string().meta({
+			key: z.string().trim().meta({
 				description: "The media key",
 				example: "public/5ttogd-placeholder-image.png",
 			}),
@@ -508,7 +514,7 @@ export const controllerSchemas = {
 					example: 1,
 				})
 				.optional(),
-			fileName: z.string().meta({
+			fileName: z.string().trim().meta({
 				description: "The filename",
 				example: "funny-cats.jpg",
 			}),
@@ -517,8 +523,9 @@ export const controllerSchemas = {
 					z.object({
 						localeCode: z
 							.string()
+							.trim()
 							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().nullable().meta({
+						value: z.string().trim().nullable().meta({
 							description: "Title value",
 						}),
 					}),
@@ -529,8 +536,9 @@ export const controllerSchemas = {
 					z.object({
 						localeCode: z
 							.string()
+							.trim()
 							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().nullable().meta({
+						value: z.string().trim().nullable().meta({
 							description: "Alt text value",
 						}),
 					}),
@@ -552,6 +560,7 @@ export const controllerSchemas = {
 				.optional(),
 			blurHash: z
 				.string()
+				.trim()
 				.meta({
 					description: "The blur hash",
 					example: "AQABAAAABAAAAgAA...",
@@ -559,6 +568,7 @@ export const controllerSchemas = {
 				.optional(),
 			averageColor: z
 				.string()
+				.trim()
 				.meta({
 					description: "The average color",
 					example: "rgba(255, 255, 255, 1)",
@@ -623,7 +633,7 @@ export const controllerSchemas = {
 				formatted: undefined,
 			},
 			params: z.object({
-				key: z.string().meta({
+				key: z.string().trim().meta({
 					description: "The media key you wish to stream",
 					example: "public/5ttogd-placeholder-image.png",
 				}),
@@ -643,7 +653,7 @@ export const controllerSchemas = {
 				formatted: undefined,
 			},
 			params: z.object({
-				id: z.string().meta({
+				id: z.string().trim().meta({
 					description: "The media ID",
 					example: 1,
 				}),
