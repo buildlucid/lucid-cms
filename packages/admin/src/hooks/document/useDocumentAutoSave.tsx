@@ -1,9 +1,11 @@
 import { debounce } from "@solid-primitives/scheduled";
 import type { CollectionResponse, DocumentResponse } from "@types";
-import { type Accessor, createEffect, onCleanup } from "solid-js";
+import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js";
 import type api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
+
+const AUTO_SAVE_DEBOUNCE_MS = 800;
 
 export function useDocumentAutoSave(props: {
 	updateSingleVersionMutation: ReturnType<
@@ -14,7 +16,50 @@ export function useDocumentAutoSave(props: {
 	hasAutoSavePermission: Accessor<boolean | undefined>;
 	autoSaveUserEnabled: Accessor<boolean>;
 }) {
-	const debouncedAutoSave = debounce(() => {
+	let debounceProgressRaf: number | undefined;
+	let debounceProgressStart = 0;
+	const [isDebouncePending, setIsDebouncePending] = createSignal(false);
+	const [debounceProgress, setDebounceProgress] = createSignal(0);
+
+	const clearDebounceProgress = () => {
+		if (debounceProgressRaf) {
+			cancelAnimationFrame(debounceProgressRaf);
+			debounceProgressRaf = undefined;
+		}
+		setIsDebouncePending(false);
+		setDebounceProgress(0);
+	};
+
+	const tickDebounceProgress = (timestamp: number) => {
+		if (!isDebouncePending()) {
+			debounceProgressRaf = undefined;
+			return;
+		}
+
+		const elapsed = timestamp - debounceProgressStart;
+		const progress = Math.min(elapsed / AUTO_SAVE_DEBOUNCE_MS, 1);
+		setDebounceProgress(progress);
+
+		if (progress < 1) {
+			debounceProgressRaf = requestAnimationFrame(tickDebounceProgress);
+			return;
+		}
+
+		debounceProgressRaf = undefined;
+	};
+
+	const startDebounceProgress = () => {
+		debounceProgressStart = performance.now();
+		setIsDebouncePending(true);
+		setDebounceProgress(0);
+
+		if (debounceProgressRaf) cancelAnimationFrame(debounceProgressRaf);
+		debounceProgressRaf = requestAnimationFrame(tickDebounceProgress);
+	};
+
+	const rawDebouncedAutoSave = debounce(() => {
+		clearDebounceProgress();
+
 		const collectionKey = props.collection()?.key;
 		const documentId = props.document()?.id;
 		const versionId = props.document()?.versionId;
@@ -30,7 +75,20 @@ export function useDocumentAutoSave(props: {
 				fields: brickHelpers.getCollectionPseudoBrickFields(),
 			},
 		});
-	}, 800);
+	}, AUTO_SAVE_DEBOUNCE_MS);
+
+	const debouncedAutoSave = Object.assign(
+		() => {
+			startDebounceProgress();
+			rawDebouncedAutoSave();
+		},
+		{
+			clear: () => {
+				clearDebounceProgress();
+				rawDebouncedAutoSave.clear();
+			},
+		},
+	);
 
 	createEffect(() => {
 		// Wait until initial snapshot is captured after store reset/refetch.
@@ -57,6 +115,8 @@ export function useDocumentAutoSave(props: {
 
 	return {
 		debouncedAutoSave,
+		isDebouncePending,
+		debounceProgress,
 	};
 }
 
