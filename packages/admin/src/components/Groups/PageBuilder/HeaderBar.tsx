@@ -12,7 +12,6 @@ import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import DateText from "@/components/Partials/DateText";
-import Spinner from "@/components/Partials/Spinner";
 import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
@@ -21,6 +20,7 @@ import userPreferencesStore from "@/store/userPreferencesStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
+import { AutoSaveStatusPill } from "./AutoSaveStatusPill";
 import { DocumentActions } from "./DocumentActions";
 import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
 import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
@@ -173,19 +173,6 @@ export const HeaderBar: Component<{
 			(collection.config.useRevisions || environments.length > 0)
 		);
 	});
-	const showAutoSaveToggle = createMemo(() => {
-		return (
-			props.state.collection()?.config.useAutoSave === true &&
-			props.mode === "edit"
-		);
-	});
-	const isSavingOrAutoSaving = createMemo(() => {
-		return (
-			props.state.ui.isSaving?.() ||
-			props.state.ui.isAutoSaving?.() ||
-			props.state.ui.isPromotingToPublished?.()
-		);
-	});
 
 	// ----------------------------------
 	// Effects
@@ -261,7 +248,7 @@ export const HeaderBar: Component<{
 									<DateText date={props.state.document()?.updatedAt} />
 								</div>
 							</div>
-							<Show when={showAutoSaveToggle()}>
+							<Show when={props.state.ui.hasAutoSavePermission?.()}>
 								<button
 									type="button"
 									onClick={() => userPreferencesStore.get.toggleAutoSave()}
@@ -291,14 +278,6 @@ export const HeaderBar: Component<{
 				ref={stickyBarRef}
 				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2.5"
 			>
-				<Show when={isSavingOrAutoSaving()}>
-					<div class="absolute inset-2 z-50 bg-white/5 rounded-md flex items-center justify-center pointer-events-auto animate-pulse">
-						<div class="flex items-center gap-2.5">
-							<Spinner size="sm" />
-							<span class="sr-only">{T()("saving")}</span>
-						</div>
-					</div>
-				</Show>
 				<div class="flex items-center gap-2.5 w-full lg:w-auto">
 					<div class="flex flex-col gap-1">
 						<div class="flex flex-wrap items-center gap-2">
@@ -421,6 +400,11 @@ export const HeaderBar: Component<{
 					</div>
 				</Show>
 			</div>
+			<AutoSaveStatusPill
+				ui={props.state.ui}
+				autoSave={props.state.autoSave}
+				autoSaveUserEnabled={props.state.autoSaveUserEnabled}
+			/>
 		</>
 	);
 };
