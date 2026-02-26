@@ -100,13 +100,16 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const isPreviewLoading = createMemo(
 		() => typeof props.value === "number" && collection.isLoading,
 	);
+	const gridPreviewFields = createMemo(() => previewFields().slice(0, 6));
 	const documentPreviewLabel = createMemo(() => {
 		const singularCollectionTitle = helpers.getLocaleValue({
 			value: collection.data?.data.details.singularName,
 		});
+		if (gridPreviewFields().length === 0) {
+			return singularCollectionTitle || T()("document");
+		}
 		return `${singularCollectionTitle || T()("document")} ${T()("preview")}`;
 	});
-	const gridPreviewFields = createMemo(() => previewFields().slice(0, 6));
 
 	// -------------------------------
 	// Render
@@ -142,7 +145,11 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 					</Match>
 					<Match when={typeof props.value === "number"}>
 						<div class="group w-full border border-border rounded-md bg-input-base px-3 pt-2 pb-0">
-							<div class="flex items-center justify-between gap-3">
+							<div
+								class={classNames("flex items-center justify-between gap-3", {
+									"pb-2": gridPreviewFields().length === 0,
+								})}
+							>
 								<div class="min-w-0">
 									<div class="flex flex-wrap items-center gap-1.5">
 										<span class="inline-flex items-center rounded-sm border border-border bg-card-base px-1.5 py-0.5 text-[10px] font-medium text-unfocused">

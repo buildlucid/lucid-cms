@@ -4,10 +4,12 @@ import {
 	getDocumentFieldsTableSchema,
 	getDocumentVersionTableSchema,
 } from "../../libs/collection/schema/live/schema-filters.js";
+import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type { BrickQueryResponse } from "../../libs/repositories/document-bricks.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type {
 	DocumentVersionType,
+	LucidBrickTableName,
 	LucidDocumentTableName,
 } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -23,7 +25,13 @@ const getMultipleFieldMeta: ServiceFn<
 			versionType: Exclude<DocumentVersionType, "revision">;
 		},
 	],
-	Array<BrickQueryResponse>
+	{
+		rows: Array<BrickQueryResponse>;
+		fieldsSchemaByCollection: Record<
+			string,
+			CollectionSchemaTable<LucidBrickTableName>
+		>;
+	}
 > = async (context, data) => {
 	const DocumentVersions = new DocumentVersionsRepository(
 		context.db.client,
@@ -31,7 +39,10 @@ const getMultipleFieldMeta: ServiceFn<
 	);
 	if (data.values.length === 0) {
 		return {
-			data: [],
+			data: {
+				rows: [],
+				fieldsSchemaByCollection: {},
+			},
 			error: undefined,
 		};
 	}
@@ -86,9 +97,26 @@ const getMultipleFieldMeta: ServiceFn<
 	});
 	if (documentsRes.error) return documentsRes;
 
+	const documentFieldsSchemaByCollection = new Map<
+		string,
+		CollectionSchemaTable<LucidBrickTableName>
+	>();
+	for (const union of unionDataRes) {
+		documentFieldsSchemaByCollection.set(
+			union.collectionKey,
+			union.documentFieldSchema,
+		);
+	}
+	const fieldsSchemaByCollection = Object.fromEntries(
+		documentFieldsSchemaByCollection.entries(),
+	);
+
 	return {
 		error: undefined,
-		data: documentsRes.data,
+		data: {
+			rows: documentsRes.data || [],
+			fieldsSchemaByCollection,
+		},
 	};
 };
 

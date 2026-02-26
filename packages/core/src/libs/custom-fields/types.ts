@@ -630,4 +630,10 @@ export type FieldRefParams = {
 	config: Config;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+	documentRefMeta?: {
+		fieldsSchemaByCollection?: Record<
+			string,
+			CollectionSchemaTable<LucidBrickTableName>
+		>;
+	};
 };

@@ -1,21 +1,36 @@
+import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
 import type { UserPropT } from "../../../libs/formatters/users.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type {
 	DocumentVersionType,
 	FieldTypes,
+	LucidBrickTableName,
 	LucidDocumentTableName,
 	ServiceFn,
 } from "../../../types.js";
 import { documentServices, mediaServices, userServices } from "../../index.js";
 import type { FieldRelationValues } from "./extract-related-entity-ids.js";
 
-export type FieldRelationResponse = Partial<
+type FieldRelationData = Partial<
 	Record<
 		FieldTypes,
 		Array<MediaPropsT> | Array<UserPropT> | Array<BrickQueryResponse>
 	>
 >;
+
+export type FieldRelationResponse = {
+	data: FieldRelationData;
+	meta?: {
+		document?: {
+			/** Document-field table schema for referenced collections, keyed by collection key. */
+			fieldsSchemaByCollection: Record<
+				string,
+				CollectionSchemaTable<LucidBrickTableName>
+			>;
+		};
+	};
+};
 
 /**
  * Responsible for fetching all of the relation data for a documnet based on what is extracted from field data and config
@@ -31,7 +46,9 @@ const fetchRelationData: ServiceFn<
 	],
 	FieldRelationResponse
 > = async (context, data) => {
-	const response: FieldRelationResponse = {};
+	const response: FieldRelationResponse = {
+		data: {},
+	};
 	const fetchPromises = [];
 
 	let firstError = false;
@@ -55,7 +72,7 @@ const fetchRelationData: ServiceFn<
 					}
 
 					if (res.data && Array.isArray(res.data)) {
-						response.media = res.data;
+						response.data.media = res.data;
 					}
 					return res.data;
 				}),
@@ -79,7 +96,7 @@ const fetchRelationData: ServiceFn<
 					}
 
 					if (res.data && Array.isArray(res.data)) {
-						response.user = res.data;
+						response.data.user = res.data;
 					}
 					return res.data;
 				}),
@@ -102,8 +119,14 @@ const fetchRelationData: ServiceFn<
 						return;
 					}
 
-					if (res.data && Array.isArray(res.data)) {
-						response.document = res.data;
+					if (res.data) {
+						response.data.document = res.data.rows;
+						response.meta = {
+							...response.meta,
+							document: {
+								fieldsSchemaByCollection: res.data.fieldsSchemaByCollection,
+							},
+						};
 					}
 					return res.data;
 				}),

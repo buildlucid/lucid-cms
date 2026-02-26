@@ -37,7 +37,7 @@ const formatMultiple = (props: {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || {},
+				relationMetaData: props.relationData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -47,7 +47,7 @@ const formatMultiple = (props: {
 			bricks = documentBricksFormatter.formatMultiple({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || {},
+				relationMetaData: props.relationData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -163,7 +163,7 @@ const formatClientMultiple = (props: {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || {},
+				relationMetaData: props.relationData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -173,7 +173,7 @@ const formatClientMultiple = (props: {
 			bricks = documentBricksFormatter.formatMultiple({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || {},
+				relationMetaData: props.relationData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -248,12 +248,12 @@ const formatRefs = (props: {
 		default: props.config.localization.defaultLocale,
 	} satisfies FieldRefParams["localization"];
 
-	for (const [type, data] of Object.entries(props.data)) {
-		const key = type as FieldTypes;
+	for (const key of Object.keys(customFieldMap) as FieldTypes[]) {
 		const customField = customFieldMap[key];
-		if (!customField) continue;
+		const relationData = props.data.data[key];
+		if (!customField || !relationData || !Array.isArray(relationData)) continue;
 
-		refs[key] = data
+		refs[key] = relationData
 			.map((d) => {
 				if (d === null || d === undefined) return null;
 				// @ts-expect-error
@@ -262,6 +262,7 @@ const formatRefs = (props: {
 					config: props.config,
 					host: props.host,
 					bricksTableSchema: props.bricksTableSchema,
+					documentRefMeta: props.data?.meta?.document,
 					localization: localization,
 				});
 			})

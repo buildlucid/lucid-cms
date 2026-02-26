@@ -82,14 +82,32 @@ class DocumentCustomField extends CustomField<"document"> {
 	) {
 		if (value === null || value === undefined) return null;
 
+		const targetCollectionKey = value.collection_key;
 		const collection = params.config.collections.find(
-			(c) => c.key === params.collection.key,
+			(c) => c.key === targetCollectionKey,
 		);
-		if (!collection || !value) {
+
+		//* gets the target bricks schema for the referenced document
+		const targetBricksSchema =
+			targetCollectionKey === params.collection.key
+				? // if the target (whats set against the custom field) is the same as the collection key of the requested document
+					params.bricksTableSchema
+				: // else get the bricks schema from the document fields schema by collection key
+					params.documentRefMeta?.fieldsSchemaByCollection?.[
+							targetCollectionKey
+						]
+					? [
+							params.documentRefMeta.fieldsSchemaByCollection[
+								targetCollectionKey
+							],
+						]
+					: undefined;
+
+		if (!collection || !targetBricksSchema) {
 			return {
 				id: value.document_id,
 				versionId: value.id,
-				collectionKey: value.collection_key,
+				collectionKey: targetCollectionKey,
 				fields: null,
 			};
 		}
@@ -97,8 +115,8 @@ class DocumentCustomField extends CustomField<"document"> {
 		const documentFields = documentFieldsFormatter.objectifyFields(
 			documentBricksFormatter.formatDocumentFields({
 				bricksQuery: value,
-				bricksSchema: params.bricksTableSchema,
-				relationMetaData: {},
+				bricksSchema: targetBricksSchema,
+				relationMetaData: { data: {} },
 				collection: collection,
 				config: params.config,
 				host: params.host,
@@ -108,7 +126,7 @@ class DocumentCustomField extends CustomField<"document"> {
 		return {
 			id: value.document_id,
 			versionId: value.id,
-			collectionKey: value.collection_key,
+			collectionKey: targetCollectionKey,
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies CFResponse<"document">["ref"];
 	}
