@@ -148,7 +148,7 @@ export const Select: Component<SelectProps> = (props) => {
 					<div class="flex items-center gap-1">
 						<Show when={props.shortcut && props.shortcutDisplay === "compact"}>
 							<span
-								class="bg-background-base px-1.5 py-1 rounded-md border border-border text-body inline-flex items-center justify-center"
+								class="bg-background-base hidden px-1.5 py-1 rounded-md border border-border text-body md:inline-flex items-center justify-center"
 								title={props.shortcut}
 							>
 								<FaSolidKeyboard size={12} aria-hidden="true" />

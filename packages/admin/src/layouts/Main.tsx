@@ -8,7 +8,7 @@ import {
 	Suspense,
 	Switch,
 } from "solid-js";
-import { NavigationSidebar, Wrapper } from "@/components/Groups/Layout";
+import { NavigationChrome, Wrapper } from "@/components/Groups/Layout";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
 import api from "@/services/api";
 import T from "@/translations";
@@ -67,9 +67,9 @@ const MainLayout: Component<{
 	// ------------------------------------------------------
 	// Render
 	return (
-		<div class="grid grid-cols-main-layout min-h-full relative">
-			<NavigationSidebar />
-			<main class="flex flex-col mt-4 pr-4 w-full min-w-[calc(100vw-236px)]">
+		<div class="grid grid-cols-1 lg:grid-cols-main-layout min-h-full relative">
+			<NavigationChrome />
+			<main class="flex flex-col lg:mt-4 px-4 lg:px-0 lg:pr-4 w-full min-w-0 lg:min-w-[calc(100vw-236px)]">
 				<Switch>
 					<Match when={isSuccess()}>
 						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>

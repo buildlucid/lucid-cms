@@ -33,7 +33,7 @@ const Alert: Component<AlertProps> = (props) => {
 				class={classNames(
 					{
 						"w-full mb-4 last:mb-0": props.style === "block",
-						"fixed bottom-6 left-[220px] right-0 z-50 flex justify-center gap-4 pointer-events-none px-4":
+						"fixed bottom-6 left-0 lg:left-[220px] right-0 z-50 flex justify-center gap-4 pointer-events-none px-4":
 							props.style === "pill",
 					},
 					props.class,

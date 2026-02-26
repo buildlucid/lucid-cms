@@ -10,6 +10,7 @@ interface UserDisplayProps {
 		thumbnail?: string;
 	};
 	mode: "short" | "long" | "icon";
+	size?: "small" | "medium";
 }
 
 const UserDisplay: Component<UserDisplayProps> = (props) => {
@@ -28,11 +29,14 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 		>
 			<span
 				class={classNames(
-					"rounded-full flex bg-primary-base/20 text-primary-base border border-primary-base/30 justify-center items-center text-[10px] font-bold",
+					"rounded-full flex bg-primary-base/20 text-primary-base border border-primary-base/30 justify-center items-center font-bold",
 					{
-						"h-10 w-10 min-w-10": props.mode === "icon",
-						"h-8 w-8 min-w-8": props.mode === "long",
-						"h-8 w-8 min-w-8 mr-2.5": props.mode === "short",
+						"h-10 w-10 min-w-10 text-[10px]":
+							props.mode === "icon" && props.size !== "small",
+						"h-7 w-7 min-w-7 text-[8px]":
+							(props.mode === "icon" && props.size === "small") ||
+							props.mode === "long",
+						"h-8 w-8 min-w-8 mr-2.5 text-[10px]": props.mode === "short",
 					},
 				)}
 			>

@@ -1,6 +1,5 @@
 import type { ErrorResponse, FieldResponse, ResponseBody } from "@types";
 import type { BrickData } from "@/store/brickStore";
-import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -50,16 +49,6 @@ const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
 		}>
 	>({
 		mutationFn: updateSingleVersionReq,
-		getSuccessToast: () => {
-			return {
-				title: T()("update_toast_title", {
-					name: props.getCollectionName(),
-				}),
-				message: T()("update_toast_message", {
-					name: props.getCollectionName().toLowerCase(),
-				}),
-			};
-		},
 		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

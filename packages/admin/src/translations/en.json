@@ -548,6 +548,7 @@
 	"this_field_supports_translations": "This field supports translations.",
 	"auto_save": "Auto Save",
 	"disabled": "Disabled",
+	"saved": "Saved",
 	"saving": "Saving Document",
 	"delayed": "Delayed",
 	"complained": "Complained",
