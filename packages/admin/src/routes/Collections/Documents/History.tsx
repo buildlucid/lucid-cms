@@ -25,8 +25,8 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 					state.isLoading() && state.searchParams.getPagination().page === 1
 				}
 			>
-				<span class="absolute top-0 left-0 lg:left-[220px] right-4 h-32 bg-background-hover z-5" />
-				<div class="fixed top-4 left-4 lg:left-[220px] bottom-4 right-4 flex flex-col z-10">
+				<span class="absolute top-0 left-0 md:left-[220px] right-4 h-32 bg-background-hover z-5" />
+				<div class="fixed top-4 left-4 md:left-[220px] bottom-4 right-4 flex flex-col z-10">
 					<span class="h-32 w-full skeleton block mb-4" />
 					<span class="h-full w-full skeleton block" />
 				</div>

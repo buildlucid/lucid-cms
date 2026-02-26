@@ -67,9 +67,9 @@ const MainLayout: Component<{
 	// ------------------------------------------------------
 	// Render
 	return (
-		<div class="grid grid-cols-1 lg:grid-cols-main-layout min-h-full relative">
+		<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
 			<NavigationChrome />
-			<main class="flex flex-col lg:mt-4 px-4 lg:px-0 lg:pr-4 w-full min-w-0 lg:min-w-[calc(100vw-236px)]">
+			<main class="flex flex-col md:mt-4 px-4 md:px-0 md:pr-4 w-full min-w-0 md:min-w-[calc(100vw-236px)]">
 				<Switch>
 					<Match when={isSuccess()}>
 						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>

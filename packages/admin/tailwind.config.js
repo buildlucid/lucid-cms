@@ -68,6 +68,7 @@ export default {
                 body: ["Inter", "sans-serif"],
             },
             screens: {
+                xs: "420px",
                 "3xl": "1600px",
             },
             gridTemplateColumns: {

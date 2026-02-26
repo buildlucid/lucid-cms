@@ -73,7 +73,7 @@ export const Grid: Component<{
 					<Show when={props.slots?.topRow}>{props.slots?.topRow}</Show>
 					<ul
 						class={classNames(
-							"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
+							"grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4",
 						)}
 					>
 						<Switch fallback={props.children}>

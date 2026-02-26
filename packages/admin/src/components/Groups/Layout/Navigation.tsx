@@ -129,7 +129,7 @@ export const NavigationChrome: Component = () => {
 	// Render
 	return (
 		<>
-			<header class="lg:hidden z-32 px-4">
+			<header class="md:hidden z-32 px-4">
 				<div class="px-2 py-4 bg-sidebar-base flex items-center justify-between gap-2">
 					<A href="/lucid" class="flex items-center min-w-0">
 						<img src={LogoIcon} alt="Lucid CMS Logo" class="h-5" />
@@ -192,7 +192,7 @@ export const NavigationChrome: Component = () => {
 			</header>
 
 			{/* Desktop Navigation */}
-			<div class="hidden lg:flex bg-sidebar-base max-h-screen sticky top-0 z-10">
+			<div class="hidden md:flex bg-sidebar-base max-h-screen sticky top-0 z-10">
 				<div class="w-[220px] h-full flex flex-col overflow-y-auto scrollbar">
 					<div class="pt-6 px-4">
 						<div class="flex items-center pl-2">
@@ -225,7 +225,7 @@ export const NavigationChrome: Component = () => {
 			{/* Mobile Navigation */}
 			<div
 				class={classNames(
-					"lg:hidden fixed inset-0 z-50 transition-[visibility] duration-200",
+					"md:hidden fixed inset-0 z-50 transition-[visibility] duration-200",
 					{
 						visible: mobileMenuOpen(),
 						"invisible pointer-events-none": !mobileMenuOpen(),

@@ -51,8 +51,8 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="w-full px-4 md:px-6 pb-4 md:pb-6 flex justify-between">
-			<div class="flex gap-2.5 items-center">
+		<div class="w-full px-4 md:px-6 pb-4 md:pb-6 flex flex-wrap justify-between gap-2.5">
+			<div class="flex flex-wrap gap-2.5 items-center">
 				<Show when={props.filters !== undefined}>
 					<Filter
 						filters={props.filters as FilterProps["filters"]}
@@ -95,7 +95,8 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					<button
 						type="button"
 						class={classNames(
-							"z-20 relative text-sm flex items-center gap-1.5 ml-2 hover:text-error-hover duration-200 transition-colors group",
+							"z-20 relative text-sm flex items-center gap-1.5 hover:text-error-hover duration-200 transition-colors group",
+							"md:ml-2",
 						)}
 						onClick={(e) => {
 							e.stopPropagation();
@@ -108,7 +109,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					</button>
 				</Show>
 			</div>
-			<div class="flex gap-2.5 items-center">
+			<div class="flex flex-wrap gap-2.5 items-center md:justify-end">
 				<Show when={showRefreshButton()}>
 					<Button
 						theme="border-outline"

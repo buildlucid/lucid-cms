@@ -205,7 +205,7 @@ export const HeaderBar: Component<{
 	// Render
 	return (
 		<>
-			<div class="w-full -mt-4 px-4 md:px-6 pt-4 lg:pt-6 bg-background-base border-x max-lg:border-t border-border max-lg:rounded-t-xl max-lg:mt-px">
+			<div class="w-full -mt-4 px-4 md:px-6 pt-4 mt:pt-6 bg-background-base border-x max-md:border-t border-border max-md:rounded-t-xl max-md:mt-px">
 				<div class="flex md:items-center md:justify-between gap-3 w-full text-sm">
 					<div class="flex-1 min-w-0">
 						<LayoutBreadcrumbs

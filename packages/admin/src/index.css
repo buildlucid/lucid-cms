@@ -53,7 +53,7 @@
 
 	/* Typography */
 	h1 {
-		@apply text-lg tracking-wider font-bold text-title;
+		@apply text-base md:text-lg tracking-wider font-bold text-title;
 	}
 	h2 {
 		@apply text-base font-bold text-title;

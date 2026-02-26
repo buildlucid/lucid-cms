@@ -153,7 +153,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										</span>
 									</div>
 								</div>
-								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+								<div class="flex shrink-0 items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
 										type="button"
 										theme="secondary-subtle"
