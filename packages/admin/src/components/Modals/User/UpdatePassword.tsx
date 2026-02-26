@@ -50,7 +50,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 				setOpen: props.state.setOpen,
 			}}
 		>
-			<div class="border-b border-border pb-4 mb-4">
+			<div class="mb-4">
 				<h2>{T()("update_password")}</h2>
 				<p class="mt-1">{T()("password_description")}</p>
 			</div>
