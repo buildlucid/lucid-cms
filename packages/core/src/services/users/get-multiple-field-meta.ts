@@ -27,11 +27,6 @@ const getMultipleFieldMeta: ServiceFn<
 				operator: "=",
 				value: context.config.db.getDefault("boolean", "false"),
 			},
-			{
-				key: "invitation_accepted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "true"),
-			},
 		],
 		validation: {
 			enabled: true,
