@@ -9,6 +9,7 @@ import type { PluginOptions } from "./types.js";
 const MILLISECONDS_PER_SECOND = 1000;
 const MAX_KEY_BYTES = 512;
 const MIN_TTL_SECONDS = 60;
+const CLEAR_BATCH_SIZE = 100;
 
 const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 	return {
@@ -63,8 +64,25 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			await options.binding.delete(resolvedKey);
 		},
 		clear: async (): Promise<void> => {
-			const keys = await options.binding.list();
-			await Promise.all(keys.keys.map((k) => options.binding.delete(k.name)));
+			let cursor: string | undefined;
+
+			while (true) {
+				const keys = cursor
+					? await options.binding.list({ cursor })
+					: await options.binding.list();
+
+				if (keys.keys.length > 0) {
+					for (let i = 0; i < keys.keys.length; i += CLEAR_BATCH_SIZE) {
+						const batch = keys.keys.slice(i, i + CLEAR_BATCH_SIZE);
+						await Promise.all(
+							batch.map((key) => options.binding.delete(key.name)),
+						);
+					}
+				}
+
+				if (keys.list_complete) break;
+				cursor = keys.cursor;
+			}
 		},
 	};
 };

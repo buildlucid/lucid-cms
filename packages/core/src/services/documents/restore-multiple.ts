@@ -3,6 +3,7 @@ import { DocumentsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import { documentServices } from "../index.js";
+import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -89,6 +90,8 @@ const restoreMultiple: ServiceFn<
 		{ tableName: tableNamesRes.data.document },
 	);
 	if (updateRes.error) return updateRes;
+
+	await invalidateClientDocumentCache(context, data.collectionKey);
 
 	return { error: undefined, data: undefined };
 };

@@ -4,6 +4,7 @@ import T from "../../../translations/index.js";
 import executeHooks from "../../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { documentServices } from "../../index.js";
+import invalidateClientDocumentCache from "../helpers/invalidate-client-cache.js";
 
 /**
  * Deletes a single document
@@ -133,6 +134,8 @@ const deleteDocument: ServiceFn<
 		},
 	);
 	if (hookAfterRes.error) return hookAfterRes;
+
+	await invalidateClientDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

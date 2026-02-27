@@ -1,3 +1,4 @@
+import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
@@ -10,7 +11,8 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-// import cache from "../../../middleware/cache.js";
+import cacheKeys from "../../../../kv-adapter/cache-keys.js";
+import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
@@ -40,15 +42,16 @@ const getMultipleController = factory.createHandlers(
 	clientAuthentication,
 	validate("param", controllerSchemas.client.getMultiple.params),
 	validate("query", controllerSchemas.client.getMultiple.query.string),
-	// TODO: Re-enable when the cache clear is implemented. Also create a new group keys helper
-	// cache({
-	// 	ttl: 60 * 60 * 24,
-	// 	mode: "include-query",
-	// 	tags: (c) => [
-	// 		"documents",
-	// 		`document:${c.req.param("collectionKey")}:${c.req.param("status")}`,
-	// 	],
-	// }),
+	cache({
+		ttl: hoursToSeconds(24),
+		mode: "include-query",
+		tags: (c) => [
+			cacheKeys.http.tags.clientDocuments,
+			cacheKeys.http.tags.clientDocumentsCollection(
+				c.req.param("collectionKey"),
+			),
+		],
+	}),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");
 		const context = getServiceContext(c);

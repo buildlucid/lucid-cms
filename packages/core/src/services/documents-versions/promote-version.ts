@@ -13,6 +13,7 @@ import T from "../../translations/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import { collectionServices, documentBrickServices } from "../index.js";
 
@@ -328,6 +329,8 @@ const promoteVersion: ServiceFn<
 		},
 	);
 	if (hookResponse.error) return hookResponse;
+
+	await invalidateClientDocumentCache(context, data.collectionKey);
 
 	// -------------------------------------------------------------------------------
 	// Success

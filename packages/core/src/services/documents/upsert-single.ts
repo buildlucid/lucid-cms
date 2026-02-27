@@ -6,6 +6,7 @@ import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentServices, documentVersionServices } from "../index.js";
+import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
 const upsertSingle: ServiceFn<
 	[
@@ -143,6 +144,8 @@ const upsertSingle: ServiceFn<
 		collection: collectionRes.data,
 	});
 	if (createVersionRes.error) return createVersionRes;
+
+	await invalidateClientDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

@@ -4,6 +4,7 @@ import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import { documentServices } from "../index.js";
+import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -130,6 +131,8 @@ const deleteSinglePermanently: ServiceFn<
 		},
 	);
 	if (hookAfterRes.error) return hookAfterRes;
+
+	await invalidateClientDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

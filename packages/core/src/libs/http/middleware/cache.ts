@@ -4,7 +4,7 @@ import type { LucidHonoContext } from "../../../types/hono.js";
 import cacheKeys, {
 	type HttpStaticValues,
 } from "../../kv-adapter/cache-keys.js";
-import { addKeyToTag } from "../../kv-adapter/http-cache.js";
+import { getHttpCacheNamespaceTokens } from "../../kv-adapter/http-cache.js";
 
 const hashInstance = hasher({ sort: true, coerce: true });
 
@@ -30,11 +30,27 @@ type CacheOptions = {
 /**
  * Generate a cache key based on the request context and options.
  */
-const generateCacheKey = (c: LucidHonoContext, options: CacheOptions) => {
+const generateCacheKey = (
+	c: LucidHonoContext,
+	options: CacheOptions,
+	namespaceTokens?: Record<string, string>,
+) => {
 	if (options.staticKey) {
-		return typeof options.staticKey === "function"
-			? options.staticKey(c)
-			: options.staticKey;
+		const staticKey =
+			typeof options.staticKey === "function"
+				? options.staticKey(c)
+				: options.staticKey;
+
+		if (!namespaceTokens || Object.keys(namespaceTokens).length === 0) {
+			return staticKey;
+		}
+
+		return cacheKeys.http.response(
+			hashInstance.hash({
+				staticKey,
+				namespaceTokens,
+			}),
+		);
 	}
 
 	const { mode = "include-query", includeHeaders = [] } = options;
@@ -57,6 +73,10 @@ const generateCacheKey = (c: LucidHonoContext, options: CacheOptions) => {
 				cacheObject.headers[headerName] = headerValue;
 			}
 		}
+	}
+
+	if (namespaceTokens && Object.keys(namespaceTokens).length > 0) {
+		cacheObject.namespaceTokens = namespaceTokens;
 	}
 
 	return cacheKeys.http.response(hashInstance.hash(cacheObject));
@@ -93,7 +113,13 @@ const cache = (options: CacheOptions) =>
 		}
 
 		const kv = c.get("kv");
-		const cacheKey = generateCacheKey(c, options);
+		const tags =
+			typeof options.tags === "function" ? options.tags(c) : options.tags;
+		const namespaceTokens =
+			tags && tags.length > 0
+				? await getHttpCacheNamespaceTokens(kv, tags)
+				: undefined;
+		const cacheKey = generateCacheKey(c, options, namespaceTokens);
 
 		const cached = await kv.get<{ data: unknown; cachedAt: number }>(cacheKey, {
 			hash: true,
@@ -124,12 +150,6 @@ const cache = (options: CacheOptions) =>
 					hash: true,
 				},
 			);
-
-			if (options.tags) {
-				const tags =
-					typeof options.tags === "function" ? options.tags(c) : options.tags;
-				await addKeyToTag(kv, tags, cacheKey);
-			}
 		}
 
 		c.header("X-Cache", "MISS");

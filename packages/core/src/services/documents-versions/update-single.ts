@@ -8,6 +8,7 @@ import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import T from "../../translations/index.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
 import { documentBrickServices, documentServices } from "../index.js";
 
 const updateSingle: ServiceFn<
@@ -214,6 +215,8 @@ const updateSingle: ServiceFn<
 		{ tableName: tableNamesRes.data.version },
 	);
 	if (updateVersionRes.error) return updateVersionRes;
+
+	await invalidateClientDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

@@ -28,14 +28,22 @@ const cacheKeys = {
 		refresh: (token: string) => `auth:refresh:${token}`,
 	},
 	/**
+	 * Generate namespace keys for token-based invalidation/versioning.
+	 */
+	namespace: {
+		token: (namespace: string) => `_namespace:${namespace}`,
+	},
+	/**
 	 * Generate cache keys for HTTP responses (used by cache middleware)
 	 */
 	http: {
 		response: (hash: string) => `http:${hash}`,
-		tag: (tag: string) => `_http_cache_tag:${tag}`,
 		tags: {
 			clientLocales: "client-locales",
 			clientMedia: "client-media",
+			clientDocuments: "client-documents",
+			clientDocumentsCollection: (collectionKey: string) =>
+				`client-documents:${collectionKey}`,
 		},
 		static: {
 			clientLocales: `${HTTP_STATIC_PREFIX}client-locales`,

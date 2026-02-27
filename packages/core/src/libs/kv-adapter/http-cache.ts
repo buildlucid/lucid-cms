@@ -1,48 +1,48 @@
-import cacheKeys from "./cache-keys.js";
+import {
+	getNamespaceTokens,
+	invalidateNamespace,
+	invalidateNamespaces,
+} from "./namespaces.js";
 import type { KVAdapterInstance } from "./types.js";
 
+const HTTP_NAMESPACE_PREFIX = "http-cache:";
+
+const toHttpNamespace = (tag: string) => `${HTTP_NAMESPACE_PREFIX}${tag}`;
+
 /**
- * Adds a key to multiple cache tags.
+ * Resolve the namespace token for each HTTP cache tag.
  */
-export const addKeyToTag = async (
+export const getHttpCacheNamespaceTokens = async (
 	kv: KVAdapterInstance,
 	tags: string[],
-	key: string,
-) => {
-	await Promise.all(
-		tags.map(async (tag) => {
-			const tagKey = cacheKeys.http.tag(tag);
-			const existingKeys =
-				(await kv.get<string[]>(tagKey, { hash: true })) || [];
+): Promise<Record<string, string>> => {
+	const namespaces = Array.from(new Set(tags)).map(toHttpNamespace);
+	const namespaceTokens = await getNamespaceTokens(kv, namespaces);
 
-			if (!existingKeys.includes(key)) {
-				existingKeys.push(key);
-				await kv.set(tagKey, existingKeys, { hash: true });
-			}
-		}),
-	);
+	const tagTokenPairs = tags.map((tag) => [
+		tag,
+		namespaceTokens[toHttpNamespace(tag)],
+	]);
+
+	return Object.fromEntries(tagTokenPairs);
 };
 
 /**
- * Invalidates a cache tag by deleting all keys associated with it.
+ * Invalidates a cache tag by rotating its namespace token.
  */
 export const invalidateHttpCacheTag = async (
 	kv: KVAdapterInstance,
 	tag: string,
 ) => {
-	const tagKey = cacheKeys.http.tag(tag);
-	const keys = (await kv.get<string[]>(tagKey, { hash: true })) || [];
-
-	await Promise.all(keys.map((key) => kv.delete(key, { hash: true })));
-	await kv.delete(tagKey, { hash: true });
+	await invalidateNamespace(kv, toHttpNamespace(tag));
 };
 
 /**
- * Invalidates multiple cache tags by deleting all keys associated with them.
+ * Invalidates multiple cache tags by rotating namespace tokens.
  */
 export const invalidateHttpCacheTags = async (
 	kv: KVAdapterInstance,
 	tags: string[],
 ) => {
-	await Promise.all(tags.map((tag) => invalidateHttpCacheTag(kv, tag)));
+	await invalidateNamespaces(kv, tags.map(toHttpNamespace));
 };
