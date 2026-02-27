@@ -133,6 +133,19 @@ const DocumentDynamicColumns: Component<{
 					}}
 				/>
 			</Match>
+			<Match when={fieldData()?.type === "datetime"}>
+				<DateCol
+					date={
+						typeof fieldValue() === "string" || typeof fieldValue() === "number"
+							? String(fieldValue())
+							: null
+					}
+					includeTime={props.field.config.useTime !== false}
+					localDateOnly={props.field.config.useTime === false}
+					fullWithTime={props.field.config.useTime !== false}
+					options={{ include: props?.include[props.index] }}
+				/>
+			</Match>
 			<Match when={fieldData()?.type === "checkbox"}>
 				<PillCol
 					text={

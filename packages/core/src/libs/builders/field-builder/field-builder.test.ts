@@ -260,6 +260,7 @@ test("flat fields should return correct config", async () => {
 			},
 			config: {
 				useTranslations: false,
+				useTime: false,
 				default: "",
 				isHidden: undefined,
 				isDisabled: undefined,

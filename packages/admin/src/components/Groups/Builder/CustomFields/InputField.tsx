@@ -6,7 +6,7 @@ import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface InputFieldProps {
-	type: "number" | "text" | "datetime-local";
+	type: "number" | "text" | "date" | "datetime-local";
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"text" | "number" | "datetime">;
@@ -33,10 +33,23 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
 		});
+
 		if (typeof value === "number") {
 			return value.toString();
 		}
-		return value ?? "";
+
+		if (typeof value !== "string") {
+			return "";
+		}
+
+		if (props.type === "date") {
+			return toDateInputValue(value);
+		}
+		if (props.type === "datetime-local") {
+			return toDateTimeInputValue(value);
+		}
+
+		return value;
 	});
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
@@ -85,4 +98,33 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			hideOptionalText
 		/>
 	);
+};
+
+const toDateInputValue = (value: string) => {
+	if (!value) return "";
+	if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+	if (/^\d{4}-\d{2}-\d{2}T/.test(value)) return value.slice(0, 10);
+
+	const parsed = new Date(value);
+	if (Number.isNaN(parsed.getTime())) return "";
+
+	return parsed.toISOString().slice(0, 10);
+};
+
+const toDateTimeInputValue = (value: string) => {
+	if (!value) return "";
+	if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00`;
+	if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return value;
+	if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:/.test(value)) return value.slice(0, 16);
+
+	const parsed = new Date(value);
+	if (Number.isNaN(parsed.getTime())) return "";
+
+	const year = parsed.getFullYear();
+	const month = String(parsed.getMonth() + 1).padStart(2, "0");
+	const day = String(parsed.getDate()).padStart(2, "0");
+	const hours = String(parsed.getHours()).padStart(2, "0");
+	const minutes = String(parsed.getMinutes()).padStart(2, "0");
+
+	return `${year}-${month}-${day}T${hours}:${minutes}`;
 };

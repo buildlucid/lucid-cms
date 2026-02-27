@@ -238,6 +238,7 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
+			useTime: false,
 			default: "2024-06-15T14:14:21.704Z",
 			isHidden: false,
 			isDisabled: false,
@@ -250,4 +251,9 @@ test("custom field config passes schema validation", async () => {
 
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
+});
+
+test("datetime config defaults to date-only mode", () => {
+	const field = new DatetimeCustomField("field");
+	expect(field.config.config.useTime).toBe(false);
 });

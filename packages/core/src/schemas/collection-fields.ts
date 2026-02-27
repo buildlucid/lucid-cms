@@ -98,6 +98,14 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
+			useTime: z
+				.boolean()
+				.meta({
+					description: "Whether datetime fields include time selection",
+					example: true,
+				})
+				.nullable()
+				.optional(),
 			isHidden: z
 				.boolean()
 				.meta({

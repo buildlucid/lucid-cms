@@ -102,7 +102,9 @@
 	[data-overflowing="true"] .row-actions-td {
 		filter: drop-shadow(-5px 0px 5px rgba(0, 0, 0, 0.1));
 	}
-	input[type="date"]::-webkit-calendar-picker-indicator {
+	input[type="date"]::-webkit-calendar-picker-indicator,
+	input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+	input[type="time"]::-webkit-calendar-picker-indicator {
 		@apply invert opacity-60;
 	}
 

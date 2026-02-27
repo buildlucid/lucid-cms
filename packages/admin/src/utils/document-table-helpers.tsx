@@ -7,6 +7,7 @@ import type {
 } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
 import helpers from "@/utils/helpers";
 
 export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
@@ -78,6 +79,21 @@ export interface DocumentListingPreviewField {
 	label: string;
 	value: string;
 }
+
+export const formatDateTimeListValue = (
+	value: string | number,
+	useTime: boolean,
+) => {
+	const raw = String(value).trim();
+	if (!raw) return null;
+
+	return (
+		dateHelpers.formatDate(raw, {
+			includeTime: useTime,
+			localDateOnly: useTime === false,
+		}) || raw
+	);
+};
 
 export const getDocumentListingPreviewFields = (props: {
 	collection?: CollectionResponse;
@@ -211,10 +227,16 @@ const formatDocumentPreviewValue = (props: {
 		case "textarea":
 		case "text":
 		case "number":
-		case "datetime":
 		case "color":
 			return typeof rawValue === "string" || typeof rawValue === "number"
 				? String(rawValue)
+				: null;
+		case "datetime":
+			return typeof rawValue === "string" || typeof rawValue === "number"
+				? formatDateTimeListValue(
+						rawValue,
+						props.fieldConfig.config.useTime !== false,
+					)
 				: null;
 
 		case "json":

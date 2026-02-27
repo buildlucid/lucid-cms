@@ -248,7 +248,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					</Match>
 					<Match when={fieldConfig().type === "datetime"}>
 						<InputField
-							type="datetime-local"
+							type={
+								(fieldConfig() as CFConfig<"datetime">).config.useTime === false
+									? "date"
+									: "datetime-local"
+							}
 							state={{
 								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"datetime">,

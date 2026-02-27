@@ -374,6 +374,7 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 	};
 	config: {
 		useTranslations?: boolean;
+		useTime?: boolean;
 		isHidden?: boolean;
 		isDisabled?: boolean;
 		default?: string;

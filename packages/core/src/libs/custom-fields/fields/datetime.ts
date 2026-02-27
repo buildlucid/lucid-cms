@@ -32,6 +32,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			},
 			config: {
 				useTranslations: this.props?.config?.useTranslations ?? false,
+				useTime: this.props?.config?.useTime ?? false,
 				default: this.props?.config?.default ?? "",
 				isHidden: this.props?.config?.isHidden,
 				isDisabled: this.props?.config?.isDisabled,

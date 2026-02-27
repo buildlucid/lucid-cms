@@ -4,6 +4,9 @@ import DateText from "@/components/Partials/DateText";
 
 interface DateColProps {
 	date?: string | null;
+	includeTime?: boolean;
+	localDateOnly?: boolean;
+	fullWithTime?: boolean;
 	options?: {
 		include?: boolean;
 		padding?: "16" | "24";
@@ -20,7 +23,12 @@ const DateCol: Component<DateColProps> = (props) => {
 				padding: props?.options?.padding,
 			}}
 		>
-			<DateText date={props.date} />
+			<DateText
+				date={props.date}
+				includeTime={props.includeTime}
+				localDateOnly={props.localDateOnly}
+				fullWithTime={props.fullWithTime}
+			/>
 		</Td>
 	);
 };
