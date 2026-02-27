@@ -42,7 +42,7 @@ const TimelineDetails: Component<{
 			<section class="relative overflow-hidden rounded-md border border-border bg-card-base p-4">
 				<span
 					class={classNames("absolute inset-x-0 top-0 h-0.5 bg-linear-to-r", {
-						"from-primary-base/60 to-primary-base/20":
+						"from-primary-muted-bg to-primary-muted-bg":
 							props.item.type === "latest" || isEnvironmentInSyncWithPromoted(),
 						"from-warning-base/60 to-warning-base/20":
 							props.item.type === "environment" &&

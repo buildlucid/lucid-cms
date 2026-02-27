@@ -56,7 +56,7 @@ export const ViewSelector: Component<{
 			<DropdownMenu.Trigger class="group flex items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
 				<span
 					class={classNames("size-3 rounded-full border block", {
-						"bg-primary-base/40 border-primary-base/60":
+						"bg-primary-muted-bg border-primary-muted-border":
 							(currentOption()?.type === "latest" &&
 								!props.isDocumentMutated?.()) ||
 							(currentOption()?.type === "environment" &&
@@ -115,7 +115,7 @@ export const ViewSelector: Component<{
 									</span>
 									<span
 										class={classNames("w-2.5 h-2.5 rounded-full border", {
-											"bg-primary-base/40 border-primary-base/60":
+											"bg-primary-muted-bg border-primary-muted-border":
 												(item.type === "latest" &&
 													!props.isDocumentMutated?.()) ||
 												(item.type === "environment" &&

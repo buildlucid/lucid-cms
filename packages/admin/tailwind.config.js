@@ -10,6 +10,8 @@ export default {
                     base: "#C1FE77",
                     hover: "#D0FF96",
                     contrast: "#131313",
+                    "muted-bg": "#2F3A20",
+                    "muted-border": "#5B753B",
                 },
                 secondary: {
                     base: "rgba(229, 229, 229, 1)",

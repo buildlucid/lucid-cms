@@ -44,7 +44,7 @@ const HeadingMenu: Component<{
 						"h-7 bg-input-base px-2 text-title border-border":
 							props.mode === "mobile",
 						"h-7 px-2": props.mode === "pill",
-						"bg-primary-base/20 text-primary-base border-primary-base/30":
+						"bg-primary-muted-bg text-primary-base border-primary-muted-border":
 							props.activeHeading > 0,
 						"text-body hover:bg-background-hover hover:text-title border-transparent":
 							props.mode === "pill" && props.activeHeading === 0,

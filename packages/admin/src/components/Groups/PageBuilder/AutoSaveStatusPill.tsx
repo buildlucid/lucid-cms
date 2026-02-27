@@ -119,7 +119,7 @@ export const AutoSaveStatusPill: Component<{
 						class={classNames(
 							"inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm transition-[opacity,transform,background-color,border-color,color] duration-300",
 							{
-								"border-primary-base/25 bg-primary-base/10 text-primary-base opacity-100":
+								"border-primary-muted-border bg-primary-muted-bg text-primary-base opacity-100":
 									showAutoSaveSavingState(),
 								"border-border bg-success-base/10 text-success-base opacity-100":
 									showAutoSaveSavedState(),

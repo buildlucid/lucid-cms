@@ -55,7 +55,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 			class={classNames(
 				"bg-card-base border-border border rounded-md group overflow-hidden relative cursor-pointer transition-colors",
 				{
-					"border-primary-base bg-primary-base/5 ring-1 ring-primary-base/30":
+					"border-primary-base bg-primary-muted-bg ring-1 ring-primary-muted-border":
 						props.current,
 				},
 			)}

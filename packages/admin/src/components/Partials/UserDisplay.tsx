@@ -29,7 +29,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 		>
 			<span
 				class={classNames(
-					"rounded-full flex bg-primary-base/20 text-primary-base border border-primary-base/30 justify-center items-center font-bold",
+					"rounded-full flex bg-primary-muted-bg text-primary-base border border-primary-muted-border justify-center items-center font-bold",
 					{
 						"h-10 w-10 min-w-10 text-[10px]":
 							props.mode === "icon" && props.size !== "small",

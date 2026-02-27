@@ -143,7 +143,7 @@ export const ReleaseTrigger: Component<{
 											</span>
 											<span
 												class={classNames("w-2.5 h-2.5 rounded-full border", {
-													"bg-primary-base/40 border-primary-base/60":
+													"bg-primary-muted-bg border-primary-muted-border":
 														option.status?.isReleased === true &&
 														option.status?.upToDate === true,
 													"bg-warning-base/40 border-warning-base/60":

@@ -120,7 +120,8 @@ const TimelineCard: Component<{
 					class={classNames(
 						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors duration-200",
 						{
-							"border-primary-base/70 bg-primary-base/10": props.isSelected,
+							"border-primary-muted-border bg-primary-muted-bg":
+								props.isSelected,
 							"border-secondary-base/60 bg-background-base": !props.isSelected,
 						},
 					)}
@@ -153,7 +154,7 @@ const TimelineCard: Component<{
 						class={classNames(
 							"absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r",
 							{
-								"from-primary-base/60 to-primary-base/20":
+								"from-primary-muted-bg to-primary-muted-bg":
 									props.item.type === "latest" ||
 									isEnvironmentInSyncWithPromoted(),
 								"from-warning-base/60 to-warning-base/20":

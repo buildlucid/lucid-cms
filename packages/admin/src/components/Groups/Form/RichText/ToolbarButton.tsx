@@ -19,7 +19,7 @@ const ToolbarButton: Component<{
 					props.mode === "pill",
 				"p-1.5 rounded transition-colors duration-150 border disabled:opacity-50 disabled:cursor-not-allowed":
 					props.mode === "default",
-				"bg-primary-base/20 text-primary-base border-primary-base/30":
+				"bg-primary-muted-bg text-primary-base border-primary-muted-border":
 					props.isActive,
 				"text-body hover:bg-background-hover hover:text-title border-transparent":
 					!props.isActive,

@@ -27,7 +27,7 @@ const Pill: Component<PillProps> = (props) => {
 				props.class,
 				{
 					"bg-primary-base text-primary-contrast": props.theme === "primary",
-					"bg-primary-base/20 text-primary-base border border-primary-base/30":
+					"bg-primary-muted-bg text-primary-base border border-primary-muted-border":
 						props.theme === "primary-opaque",
 					"bg-input-base text-title": props.theme === "grey",
 					"bg-error-base text-error-contrast": props.theme === "red",
