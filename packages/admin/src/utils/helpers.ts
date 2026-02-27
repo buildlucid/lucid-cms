@@ -91,17 +91,24 @@ const bytesToSize = (bytes?: number | null): string => {
 // Get media type from mime type
 const getMediaType = (mimeType?: string): MediaResponse["type"] => {
 	if (!mimeType) return "unknown";
-	const normalizedMimeType = mimeType.toLowerCase();
+	const normalizedMimeType = mimeType.toLowerCase().split(";")[0]?.trim();
 
-	if (normalizedMimeType.includes("image")) return "image";
-	if (normalizedMimeType.includes("video")) return "video";
-	if (normalizedMimeType.includes("audio")) return "audio";
+	if (!normalizedMimeType) return "unknown";
+	if (normalizedMimeType.startsWith("image/")) return "image";
+	if (normalizedMimeType.startsWith("video/")) return "video";
+	if (normalizedMimeType.startsWith("audio/")) return "audio";
 	if (
-		normalizedMimeType.includes("pdf") ||
-		normalizedMimeType.startsWith("application/vnd")
+		normalizedMimeType === "application/pdf" ||
+		normalizedMimeType.startsWith("application/vnd") ||
+		normalizedMimeType.startsWith("text/")
 	)
 		return "document";
-	if (normalizedMimeType.includes("zip") || normalizedMimeType.includes("tar"))
+	if (
+		normalizedMimeType.includes("zip") ||
+		normalizedMimeType.includes("tar") ||
+		normalizedMimeType.includes("gzip") ||
+		normalizedMimeType.includes("diskimage")
+	)
 		return "archive";
 
 	return "unknown";

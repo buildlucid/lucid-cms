@@ -54,7 +54,7 @@ export const useCreateMedia = () => {
 				method: "PUT",
 				body: file,
 				headers: {
-					"content-type": file.type,
+					...(file.type ? { "content-type": file.type } : {}),
 					...getPresignedUrlHeaders(),
 				},
 			});

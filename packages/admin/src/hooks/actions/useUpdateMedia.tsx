@@ -54,7 +54,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				method: "PUT",
 				body: file,
 				headers: {
-					"content-type": file.type,
+					...(file.type ? { "content-type": file.type } : {}),
 					...getPresignedUrlHeaders(),
 				},
 			});

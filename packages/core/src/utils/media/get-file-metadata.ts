@@ -1,5 +1,4 @@
 import mime from "mime-types";
-import T from "../../translations/index.js";
 import type { MediaType } from "../../types.js";
 import type { ServiceResponse } from "../services/types.js";
 import getMediaType from "./get-media-type.js";
@@ -17,23 +16,23 @@ const getFileMetadata = async (props: {
 	mimeType: string | null;
 	fileName: string;
 }): ServiceResponse<FileMetadata> => {
-	let mimeType = props.mimeType;
-	const extension =
-		mime.extension(mimeType ?? "") || props.fileName.split(".").pop() || "";
+	const fallbackMimeType = "application/octet-stream";
+	const fileNameExtension =
+		props.fileName.split(".").pop()?.toLowerCase() || "";
+	let mimeType = props.mimeType?.toLowerCase().split(";")[0]?.trim() || null;
+	let extension = mime.extension(mimeType || "") || fileNameExtension;
 
 	if (mimeType === undefined || mimeType === null) {
-		mimeType = mime.lookup(extension) || null;
+		mimeType = mime.lookup(fileNameExtension || extension) || null;
+	}
+	if (mimeType === "application/mp4") {
+		mimeType = "video/mp4";
 	}
 	if (mimeType === undefined || mimeType === null) {
-		return {
-			error: {
-				type: "basic",
-				name: T("media_error_getting_metadata"),
-				message: T("media_error_getting_metadata"),
-				status: 500,
-			},
-			data: undefined,
-		};
+		mimeType = fallbackMimeType;
+	}
+	if (!extension) {
+		extension = mime.extension(mimeType) || "bin";
 	}
 
 	const type = getMediaType(mimeType);
