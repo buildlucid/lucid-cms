@@ -12,6 +12,7 @@ import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
+import Pill from "@/components/Partials/Pill";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations/index";
@@ -182,9 +183,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						<FaSolidGripLines size={14} />
 					</button>
 					<div class="min-w-0 flex items-center gap-2">
-						<span class="text-xs text-unfocused font-medium shrink-0 px-2 py-0.5 rounded-md border border-border bg-background-base">
-							{props.state.groupIndex + 1}
-						</span>
+						<Pill theme="outline" class="shrink-0">
+							#{props.state.groupIndex + 1}
+						</Pill>
 						<h3 class="text-sm text-subtitle font-medium truncate">
 							<Show when={titlePreview()}>{titlePreview()}</Show>
 							<Show when={!titlePreview()}>

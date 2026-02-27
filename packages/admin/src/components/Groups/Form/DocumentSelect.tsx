@@ -17,6 +17,7 @@ import {
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
@@ -151,10 +152,10 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								})}
 							>
 								<div class="min-w-0">
-									<div class="flex flex-wrap items-center gap-1.5">
-										<span class="inline-flex items-center rounded-sm border border-border bg-card-base px-1.5 py-0.5 text-[10px] font-medium text-unfocused">
+									<div class="flex flex-wrap items-center gap-2">
+										<Pill theme="outline" class="text-[10px]">
 											#{props.value}
-										</span>
+										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
 											{documentPreviewLabel()}
 										</span>

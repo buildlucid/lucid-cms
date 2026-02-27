@@ -4,6 +4,7 @@ import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import DragDrop from "@/components/Partials/DragDrop";
+import Pill from "@/components/Partials/Pill";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations/index";
@@ -78,7 +79,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					</p>
 					<Show when={fieldConfig().validation?.maxGroups !== undefined}>
 						<span
-							class={classNames("text-body text-sm", {
+							class={classNames("text-body text-xs", {
 								"text-error-base": !canAddGroup(),
 							})}
 						>
