@@ -2,10 +2,7 @@ import type CollectionBuilder from "../../libs/builders/collection-builder/index
 import type { ServiceFn } from "../../utils/services/types.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";
 import migrateCollections from "./migrate-collections.js";
-import {
-	getCachedMigrationResult,
-	setCachedMigrationResult,
-} from "./migration/cache.js";
+import { resolveCachedMigrationResult } from "./migration/cache.js";
 
 export type MigrationStatus = {
 	requiresMigration: boolean;
@@ -22,16 +19,15 @@ const getMigrationStatus: ServiceFn<
 	[{ collection: CollectionBuilder }],
 	MigrationStatus
 > = async (context, data) => {
-	let migrationResult = getCachedMigrationResult();
-	if (!migrationResult) {
-		const migrationRes = await migrateCollections(context, { dryRun: true });
-		if (migrationRes.error) return migrationRes;
+	const migrationResultRes = await resolveCachedMigrationResult(
+		context,
+		async () => {
+			return await migrateCollections(context, { dryRun: true });
+		},
+	);
+	if (migrationResultRes.error) return migrationResultRes;
 
-		migrationResult = migrationRes.data;
-		setCachedMigrationResult(migrationResult);
-	}
-
-	const collectionPlan = migrationResult.migrationPlans.find(
+	const collectionPlan = migrationResultRes.data.migrationPlans.find(
 		(plan) => plan.collectionKey === data.collection.key,
 	);
 

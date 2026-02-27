@@ -2,6 +2,13 @@ const HTTP_STATIC_PREFIX = "http:static:";
 
 const cacheKeys = {
 	/**
+	 * Generate cache keys for collection schema + migration metadata.
+	 */
+	collection: {
+		schema: (collectionKey: string) => `collection:schema:${collectionKey}`,
+		migrationResult: "collection:migration:result",
+	},
+	/**
 	 * Generate cache keys for rate limiting (used by rate limiter middleware)
 	 */
 	rateLimit: {

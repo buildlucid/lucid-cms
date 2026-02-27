@@ -1,14 +1,8 @@
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import migrateCollections from "../../migrate-collections.js";
-import {
-	getCachedMigrationResult,
-	setCachedMigrationResult,
-} from "../../migration/cache.js";
+import { resolveCachedMigrationResult } from "../../migration/cache.js";
 import type { CollectionSchema } from "../types.js";
-import {
-	getSchema as getCachedSchema,
-	setSchema as setCachedSchema,
-} from "./cache.js";
+import { resolveSchema } from "./cache.js";
 import filterSchemaByMigrationPlan from "./filter-schema-by-migration-plan.js";
 
 const getSchema: ServiceFn<
@@ -19,60 +13,50 @@ const getSchema: ServiceFn<
 	],
 	CollectionSchema
 > = async (context, data) => {
-	const cachedSchema = getCachedSchema(data.collectionKey);
-	if (cachedSchema) {
-		return {
-			data: cachedSchema,
-			error: undefined,
-		};
-	}
-
-	let migrationResult = getCachedMigrationResult();
-	if (!migrationResult) {
-		const migrationRes = await migrateCollections(context, { dryRun: true });
-		if (migrationRes.error) return migrationRes;
-
-		migrationResult = migrationRes.data;
-		setCachedMigrationResult(migrationResult);
-	}
-
-	const collectionPlan = migrationResult.migrationPlans.find(
-		(plan) => plan.collectionKey === data.collectionKey,
-	);
-
-	const liveSchema = migrationResult.inferedSchemas.find(
-		(schema) => schema.key === data.collectionKey,
-	);
-
-	if (!liveSchema) {
-		return {
-			data: undefined,
-			error: {
-				message: `Collection schema not found for key: ${data.collectionKey}`,
+	return await resolveSchema(context, data.collectionKey, async () => {
+		const migrationResultRes = await resolveCachedMigrationResult(
+			context,
+			async () => {
+				return await migrateCollections(context, { dryRun: true });
 			},
-		};
-	}
+		);
+		if (migrationResultRes.error) return migrationResultRes;
 
-	if (!collectionPlan || collectionPlan.tables.length === 0) {
-		setCachedSchema(data.collectionKey, liveSchema);
+		const collectionPlan = migrationResultRes.data.migrationPlans.find(
+			(plan) => plan.collectionKey === data.collectionKey,
+		);
+
+		const liveSchema = migrationResultRes.data.inferedSchemas.find(
+			(schema) => schema.key === data.collectionKey,
+		);
+
+		if (!liveSchema) {
+			return {
+				data: undefined,
+				error: {
+					message: `Collection schema not found for key: ${data.collectionKey}`,
+				},
+			};
+		}
+
+		if (!collectionPlan || collectionPlan.tables.length === 0) {
+			return {
+				data: liveSchema,
+				error: undefined,
+			};
+		}
+
+		//* filter out tables and columns that haven't been migrated yet
+		const filteredSchema = filterSchemaByMigrationPlan(
+			liveSchema,
+			collectionPlan,
+		);
+
 		return {
-			data: liveSchema,
+			data: filteredSchema,
 			error: undefined,
 		};
-	}
-
-	//* filter out tables and columns that haven't been migrated yet
-	const filteredSchema = filterSchemaByMigrationPlan(
-		liveSchema,
-		collectionPlan,
-	);
-
-	setCachedSchema(data.collectionKey, filteredSchema);
-
-	return {
-		data: filteredSchema,
-		error: undefined,
-	};
+	});
 };
 
 export default getSchema;

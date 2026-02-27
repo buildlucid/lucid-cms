@@ -1,10 +1,7 @@
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import migrateCollections from "../../migrate-collections.js";
-import {
-	getCachedMigrationResult,
-	setCachedMigrationResult,
-} from "../../migration/cache.js";
-import { schemaCache, setSchema } from "./cache.js";
+import { resolveCachedMigrationResult } from "../../migration/cache.js";
+import { hasSchema, setSchema } from "./cache.js";
 import filterSchemaByMigrationPlan from "./filter-schema-by-migration-plan.js";
 
 const cacheAllSchemas: ServiceFn<
@@ -17,7 +14,12 @@ const cacheAllSchemas: ServiceFn<
 > = async (context, data) => {
 	const keys =
 		data.collectionKeys ?? context.config.collections.map((c) => c.key);
-	const nonCachedKeys = keys.filter((k) => !schemaCache.has(k));
+	const keyCacheStatus = await Promise.all(
+		keys.map(async (key) => {
+			return (await hasSchema(context, key)) ? null : key;
+		}),
+	);
+	const nonCachedKeys = keyCacheStatus.filter((key) => key !== null);
 
 	if (nonCachedKeys.length === 0) {
 		return {
@@ -26,32 +28,33 @@ const cacheAllSchemas: ServiceFn<
 		};
 	}
 
-	let migrationResult = getCachedMigrationResult();
-	if (!migrationResult) {
-		const migrationRes = await migrateCollections(context, { dryRun: true });
-		if (migrationRes.error) return migrationRes;
+	const migrationResultRes = await resolveCachedMigrationResult(
+		context,
+		async () => {
+			return await migrateCollections(context, { dryRun: true });
+		},
+	);
+	if (migrationResultRes.error) return migrationResultRes;
 
-		migrationResult = migrationRes.data;
-		setCachedMigrationResult(migrationResult);
-	}
+	await Promise.all(
+		nonCachedKeys.map(async (collectionKey) => {
+			const collectionPlan = migrationResultRes.data.migrationPlans.find(
+				(plan) => plan.collectionKey === collectionKey,
+			);
+			const liveSchema = migrationResultRes.data.inferedSchemas.find(
+				(schema) => schema.key === collectionKey,
+			);
 
-	for (const collectionKey of nonCachedKeys) {
-		const collectionPlan = migrationResult.migrationPlans.find(
-			(plan) => plan.collectionKey === collectionKey,
-		);
-		const liveSchema = migrationResult.inferedSchemas.find(
-			(schema) => schema.key === collectionKey,
-		);
+			if (!liveSchema) return;
 
-		if (!liveSchema) continue;
+			let finalSchema = liveSchema;
+			if (collectionPlan && collectionPlan.tables.length > 0) {
+				finalSchema = filterSchemaByMigrationPlan(liveSchema, collectionPlan);
+			}
 
-		let finalSchema = liveSchema;
-		if (collectionPlan && collectionPlan.tables.length > 0) {
-			finalSchema = filterSchemaByMigrationPlan(liveSchema, collectionPlan);
-		}
-
-		setSchema(collectionKey, finalSchema);
-	}
+			await setSchema(context, collectionKey, finalSchema);
+		}),
+	);
 
 	return {
 		data: undefined,
