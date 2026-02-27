@@ -59,11 +59,13 @@ export const Tr: Component<TrProps> = (props) => {
 		<tr
 			class={classNames("duration-200 transition-colors", {
 				"cursor-pointer": firstPermittedAction() !== undefined || props.onClick,
-				"after:border-l-4 after:border-primary-base after:left-0 after:top-0 after:bottom-0 after:absolute relative":
+				"outline outline-1 outline-primary-base/45 outline-offset-[-1px] [&>td]:bg-primary-base/7 [&>td]:after:border-primary-base/25":
 					props.current,
 				"bg-background-base hover:bg-background-hover":
-					props.theme === "primary" || props.theme === undefined,
-				"bg-card-base hover:bg-card-hover": props.theme === "secondary",
+					(props.theme === "primary" || props.theme === undefined) &&
+					!props.current,
+				"bg-card-base hover:bg-card-hover":
+					props.theme === "secondary" && !props.current,
 			})}
 			onClick={onClickHandler}
 			onKeyDown={(e) => {

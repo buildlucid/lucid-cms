@@ -53,9 +53,10 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	return (
 		<li
 			class={classNames(
-				"bg-card-base border-border border rounded-md group overflow-hidden relative cursor-pointer",
+				"bg-card-base border-border border rounded-md group overflow-hidden relative cursor-pointer transition-colors",
 				{
-					"border-primary-base": props.current,
+					"border-primary-base bg-primary-base/5 ring-1 ring-primary-base/30":
+						props.current,
 				},
 			)}
 			onClick={() => {
