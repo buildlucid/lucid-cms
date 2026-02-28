@@ -244,6 +244,8 @@
 	"clear_all_processed_images_setting_message": "Clearing processed images will require them to be regenerated on next view, which may take longer than usual",
 	"clear_all_processed_images_button": "Clear All {{count}} Images",
 	"storage_remaining_title": "{{storage}} remaining",
+	"storage_unlimited_title": "Unlimited storage",
+	"unlimited": "Unlimited",
 	"drag_and_drop_file_or": "Drag & drop your file/image or",
 	"upload_here": "upload here",
 	"if_left_blank_file_will_be_removed": "If left blank, the current file will be removed",

@@ -1,4 +1,6 @@
+import T from "../../../translations/index.js";
 import type { MediaType } from "../../../types/response.js";
+import { formatBytes } from "../../../utils/helpers/index.js";
 import { getFileMetadata } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import {
@@ -39,7 +41,6 @@ const update: ServiceFn<
 		context,
 		{
 			size: mediaMetaRes.data.size,
-			previousSize: data.previousSize,
 		},
 	);
 	if (proposedSizeRes.error) return proposedSizeRes;
@@ -70,16 +71,49 @@ const update: ServiceFn<
 	}
 
 	// update storage, processed images and delete temp
-	const [storageRes, clearProcessRes] = await Promise.all([
-		optionServices.updateSingle(context, {
-			name: "media_storage_used",
-			valueInt: proposedSizeRes.data.proposedSize,
-		}),
-		processedImageServices.clearSingle(context, {
-			id: data.id,
-		}),
-	]);
+	const delta = mediaMetaRes.data.size - data.previousSize;
+	const storageLimit = context.config.media.limits.storage;
+	const storageRes = await optionServices.adjustInt(context, {
+		name: "media_storage_used",
+		delta: delta,
+		max: storageLimit === false ? undefined : storageLimit,
+		min: 0,
+	});
 	if (storageRes.error) return storageRes;
+	if (!storageRes.data.applied) {
+		if (storageLimit === false) {
+			return {
+				error: {
+					type: "basic",
+					status: 500,
+				},
+				data: undefined,
+			};
+		}
+
+		return {
+			error: {
+				type: "basic",
+				message: T("file_exceeds_storage_limit_max_limit_is", {
+					size: formatBytes(storageLimit),
+				}),
+				status: 500,
+				errors: {
+					file: {
+						code: "storage",
+						message: T("file_exceeds_storage_limit_max_limit_is", {
+							size: formatBytes(storageLimit),
+						}),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
+
+	const clearProcessRes = await processedImageServices.clearSingle(context, {
+		id: data.id,
+	});
 	if (clearProcessRes.error) return clearProcessRes;
 
 	return {

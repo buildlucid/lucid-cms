@@ -114,7 +114,7 @@ const ConfigSchema = z.object({
 	media: z.object({
 		adapter: MediaAdapterSchema.optional(),
 		limits: z.object({
-			storage: z.number(),
+			storage: z.union([z.number(), z.literal(false)]),
 			fileSize: z.number(),
 			processedImages: z.number(),
 		}),

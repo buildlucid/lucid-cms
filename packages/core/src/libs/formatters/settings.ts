@@ -45,12 +45,17 @@ const formatSingle = (props: {
 	}
 
 	if (includeSet.has("media")) {
+		const storageTotal = props.config.media.limits.storage;
+		const storageRemaining =
+			storageTotal === false
+				? null
+				: storageTotal - props.settings.mediaStorageUsed;
+
 		response.media = {
 			enabled: props.settings.mediaAdapterEnabled,
 			storage: {
-				total: props.config.media.limits.storage,
-				remaining:
-					props.config.media.limits.storage - props.settings.mediaStorageUsed,
+				total: storageTotal === false ? null : storageTotal,
+				remaining: storageRemaining,
 				used: props.settings.mediaStorageUsed,
 			},
 			processed: {

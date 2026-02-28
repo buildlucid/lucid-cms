@@ -79,7 +79,7 @@ const resolveValue = <T>(value: Accessor<T> | T): T =>
 // ---------------------------------------------
 // Bytes to human readable format
 const bytesToSize = (bytes?: number | null): string => {
-	if (!bytes) return "0 Byte";
+	if (!bytes || !Number.isFinite(bytes) || bytes <= 0) return "0 Byte";
 
 	const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
 	if (bytes === 0) return "0 Byte";

@@ -35,7 +35,7 @@ const settingsResponseSchema = z.object({
 				example: true,
 			}),
 			storage: z.object({
-				total: z.number().meta({
+				total: z.number().nullable().meta({
 					description: "The total available storage",
 					example: 1024,
 				}),

@@ -39,26 +39,20 @@ const clearSingle: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 
-	const [storageUsedRes, processedImagesRes] = await Promise.all([
-		optionServices.getSingle(context, {
-			name: "media_storage_used",
-		}),
-		ProcessedImages.selectMultiple({
-			select: ["key", "file_size"],
-			where: [
-				{
-					key: "media_key",
-					operator: "=",
-					value: mediaRes.data.key,
-				},
-			],
-			validation: {
-				enabled: true,
+	const processedImagesRes = await ProcessedImages.selectMultiple({
+		select: ["key", "file_size"],
+		where: [
+			{
+				key: "media_key",
+				operator: "=",
+				value: mediaRes.data.key,
 			},
-		}),
-	]);
+		],
+		validation: {
+			enabled: true,
+		},
+	});
 	if (processedImagesRes.error) return processedImagesRes;
-	if (storageUsedRes.error) return storageUsedRes;
 
 	if (processedImagesRes.data.length === 0) {
 		return {
@@ -71,8 +65,6 @@ const clearSingle: ServiceFn<
 		(acc, i) => acc + i.file_size,
 		0,
 	);
-
-	const newStorageUsed = (storageUsedRes.data.valueInt || 0) - totalSize;
 
 	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple(
@@ -87,9 +79,10 @@ const clearSingle: ServiceFn<
 				},
 			],
 		}),
-		optionServices.updateSingle(context, {
+		optionServices.adjustInt(context, {
 			name: "media_storage_used",
-			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
+			delta: -totalSize,
+			min: 0,
 		}),
 	]);
 	if (clearProcessedRes.error) return clearProcessedRes;

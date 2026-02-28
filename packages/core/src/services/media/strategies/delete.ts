@@ -15,19 +15,12 @@ const deleteObject: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const storageUsedRes = await optionServices.getSingle(context, {
-		name: "media_storage_used",
-	});
-	if (storageUsedRes.error) return storageUsedRes;
-
-	const newStorageUsed =
-		(storageUsedRes.data.valueInt || 0) - data.size - data.processedSize;
-
 	const [_, updateStorageRes] = await Promise.all([
 		mediaStrategyRes.data.delete(data.key),
-		optionServices.updateSingle(context, {
+		optionServices.adjustInt(context, {
 			name: "media_storage_used",
-			valueInt: newStorageUsed < 0 ? 0 : newStorageUsed,
+			delta: -(data.size + data.processedSize),
+			min: 0,
 		}),
 	]);
 	if (updateStorageRes.error) return updateStorageRes;

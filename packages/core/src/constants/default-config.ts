@@ -28,7 +28,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 	},
 	media: {
 		limits: {
-			storage: 5368709120,
+			storage: false,
 			fileSize: 16777216,
 			processedImages: 10,
 		},

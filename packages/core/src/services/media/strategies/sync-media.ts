@@ -1,4 +1,6 @@
+import T from "../../../translations/index.js";
 import type { MediaType } from "../../../types/response.js";
+import { formatBytes } from "../../../utils/helpers/index.js";
 import { getFileMetadata } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices, optionServices } from "../../index.js";
@@ -31,12 +33,12 @@ const syncMedia: ServiceFn<
 		context,
 		{
 			size: mediaMetaRes.data.size,
-			onError: async () => {
-				await mediaStrategyRes.data.delete(data.key);
-			},
 		},
 	);
-	if (proposedSizeRes.error) return proposedSizeRes;
+	if (proposedSizeRes.error) {
+		await mediaStrategyRes.data.delete(data.key);
+		return proposedSizeRes;
+	}
 
 	const fileMetaData = await getFileMetadata({
 		mimeType: mediaMetaRes.data.mimeType,
@@ -44,11 +46,45 @@ const syncMedia: ServiceFn<
 	});
 	if (fileMetaData.error) return fileMetaData;
 
-	const updateStorageRes = await optionServices.updateSingle(context, {
+	const storageLimit = context.config.media.limits.storage;
+	const adjustStorageRes = await optionServices.adjustInt(context, {
 		name: "media_storage_used",
-		valueInt: proposedSizeRes.data.proposedSize,
+		delta: mediaMetaRes.data.size,
+		max: storageLimit === false ? undefined : storageLimit,
+		min: 0,
 	});
-	if (updateStorageRes.error) return updateStorageRes;
+	if (adjustStorageRes.error) return adjustStorageRes;
+	if (!adjustStorageRes.data.applied) {
+		if (storageLimit === false) {
+			return {
+				error: {
+					type: "basic",
+					status: 500,
+				},
+				data: undefined,
+			};
+		}
+
+		await mediaStrategyRes.data.delete(data.key);
+		return {
+			error: {
+				type: "basic",
+				message: T("file_exceeds_storage_limit_max_limit_is", {
+					size: formatBytes(storageLimit),
+				}),
+				status: 500,
+				errors: {
+					file: {
+						code: "storage",
+						message: T("file_exceeds_storage_limit_max_limit_is", {
+							size: formatBytes(storageLimit),
+						}),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
 
 	return {
 		error: undefined,

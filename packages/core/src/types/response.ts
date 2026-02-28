@@ -78,7 +78,7 @@ export interface SettingsResponse {
 	media?: {
 		enabled: boolean;
 		storage: {
-			total: number;
+			total: number | null;
 			remaining: number | null;
 			used: number | null;
 		};

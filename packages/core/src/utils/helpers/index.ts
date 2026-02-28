@@ -1,8 +1,10 @@
+export { default as formatBytes } from "./format-bytes.js";
 export { default as formatEmailSubject } from "./format-email-subject.js";
 export { default as generateSecret } from "./generate-secret.js";
 export { default as getBaseUrl } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as groupDocumentFilters } from "./group-document-filters.js";
+export { default as isRequestSecure } from "./is-request-secure.js";
 export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
 export { default as urlAddPath } from "./url-add-path.js";

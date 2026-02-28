@@ -139,7 +139,7 @@ export interface LucidConfig {
 			| Promise<MediaAdapterInstance>;
 		limits?: {
 			/** The storage limit in bytes. */
-			storage?: number;
+			storage?: number | false;
 			/** The maximum file size in bytes. */
 			fileSize?: number;
 			/** The processed image limit. */
@@ -284,7 +284,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| MediaAdapterInstance
 			| Promise<MediaAdapterInstance>;
 		limits: {
-			storage: number;
+			storage: number | false;
 			fileSize: number;
 			processedImages: number;
 		};

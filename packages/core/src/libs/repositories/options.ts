@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import z from "zod";
 import { optionsNameSchema } from "../../schemas/options.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
@@ -87,6 +88,60 @@ export default class OptionsRepository extends StaticRepository<"lucid_options">
 			mode: "single",
 			select: props.returning,
 			selectAll: props.returnAll,
+		});
+	}
+
+	// ----------------------------------------
+	// queries
+	async adjustInt<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				data: {
+					name: Select<LucidOptions>["name"];
+					delta: number;
+					max?: number;
+					min?: number;
+				};
+			}
+		>,
+	) {
+		const min = props.data.min ?? 0;
+
+		let query = this.db
+			.updateTable("lucid_options")
+			.set({
+				value_int: sql<number>`CASE
+					WHEN COALESCE(value_int, 0) + ${props.data.delta} < ${min} THEN ${min}
+					ELSE COALESCE(value_int, 0) + ${props.data.delta}
+				END`,
+			})
+			.where("name", "=", props.data.name);
+
+		if (props.data.max !== undefined && props.data.delta > 0) {
+			query = query.where(
+				sql<number>`COALESCE(value_int, 0) + ${props.data.delta}`,
+				"<=",
+				props.data.max,
+			);
+		}
+
+		const exec = await this.executeQuery(
+			async () => {
+				const updateRes = await query.executeTakeFirst();
+				return {
+					count: Number(updateRes.numUpdatedRows ?? 0n),
+				};
+			},
+			{
+				method: "adjustInt",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "count",
 		});
 	}
 }

@@ -121,6 +121,25 @@ const processImage: ServiceFn<
 	);
 
 	if (context.config.media.images.storeProcessed === true) {
+		const storageLimit = context.config.media.limits.storage;
+		const adjustStorageRes = await optionServices.adjustInt(context, {
+			name: "media_storage_used",
+			delta: imageRes.data.size,
+			max: storageLimit === false ? undefined : storageLimit,
+			min: 0,
+		});
+		if (adjustStorageRes.error || !adjustStorageRes.data.applied) {
+			return {
+				error: undefined,
+				data: {
+					key: data.processKey,
+					contentLength: imageRes.data.size,
+					contentType: imageRes.data.mimeType,
+					body: stream,
+				},
+			};
+		}
+
 		await Promise.all([
 			ProcessedImages.createSingle({
 				data: {
@@ -138,10 +157,6 @@ const processImage: ServiceFn<
 					size: imageRes.data.size,
 					type: "image",
 				},
-			}),
-			optionServices.updateSingle(context, {
-				name: "media_storage_used",
-				valueInt: canStoreRes.data.proposedSize,
 			}),
 		]);
 	}

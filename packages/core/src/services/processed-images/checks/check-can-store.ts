@@ -30,7 +30,7 @@ const checkCanStore: ServiceFn<
 	if (storageUsed.error) return storageUsed;
 
 	const proposedSize = (storageUsed.data.valueInt || 0) + data.size;
-	if (proposedSize > storageLimit) {
+	if (storageLimit !== false && proposedSize > storageLimit) {
 		return {
 			error: {
 				type: "basic",

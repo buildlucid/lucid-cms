@@ -39,13 +39,41 @@ const SystemOverviewRoute: Component = () => {
 
 	// ----------------------------------------
 	// Memos
+	const storageInfo = createMemo(
+		() => settingsData.data?.data?.media?.storage ?? null,
+	);
+	const isUnlimitedStorage = createMemo(
+		() => storageInfo()?.total === null || storageInfo()?.remaining === null,
+	);
+	const clampedRemainingStorage = createMemo(() =>
+		Math.max(0, storageInfo()?.remaining ?? 0),
+	);
 	const percentUsed = createMemo(() => {
-		if (settingsData.data?.data?.media?.storage.remaining === null) return 0;
-		if (settingsData.data?.data?.media?.storage.used === 0) return 0;
-		const total = settingsData.data?.data?.media?.storage.total || 0;
-		const remaining = settingsData.data?.data?.media?.storage.remaining || 0;
+		if (isUnlimitedStorage()) return 100;
+		const total = storageInfo()?.total ?? 0;
+		const used = storageInfo()?.used ?? 0;
+		if (total <= 0 || used <= 0) return 0;
 
-		return Math.floor(((total - remaining) / total) * 100);
+		const rawPercent = (used / total) * 100;
+		return Math.max(0, Math.min(100, Math.floor(rawPercent)));
+	});
+	const storageTitle = createMemo(() => {
+		if (isUnlimitedStorage()) return T()("storage_unlimited_title");
+		return T()("storage_remaining_title", {
+			storage: helpers.bytesToSize(clampedRemainingStorage()),
+		});
+	});
+	const storageBarLabels = createMemo(() => {
+		if (isUnlimitedStorage()) {
+			return {
+				start: helpers.bytesToSize(storageInfo()?.used),
+				end: T()("unlimited"),
+			};
+		}
+		return {
+			start: helpers.bytesToSize(storageInfo()?.used),
+			end: helpers.bytesToSize(storageInfo()?.total),
+		};
 	});
 	const contentLocales = createMemo(() => contentLocaleStore.get.locales);
 	const systemInfo = createMemo(() => settingsData.data?.data?.system);
@@ -95,25 +123,11 @@ const SystemOverviewRoute: Component = () => {
 					title={T()("media_info_title")}
 					description={T()("media_info_description")}
 				>
-					<InfoRow.Content
-						title={T()("storage_remaining_title", {
-							storage: helpers.bytesToSize(
-								settingsData.data?.data?.media?.storage.remaining,
-							),
-						})}
-						reducedMargin={true}
-					>
+					<InfoRow.Content title={storageTitle()} reducedMargin={true}>
 						<ProgressBar
 							progress={percentUsed()}
-							type="usage"
-							labels={{
-								start: helpers.bytesToSize(
-									settingsData.data?.data?.media?.storage.used,
-								),
-								end: helpers.bytesToSize(
-									settingsData.data?.data?.media?.storage.total,
-								),
-							}}
+							type={isUnlimitedStorage() ? "target" : "usage"}
+							labels={storageBarLabels()}
 						/>
 					</InfoRow.Content>
 					<InfoRow.Content
