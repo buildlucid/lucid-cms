@@ -40,7 +40,7 @@ interface SelectMultipleProps {
 
 export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 	const [open, setOpen] = createSignal(false);
-	const [_inputFocus, setInputFocus] = createSignal(false);
+	const [inputFocus, setInputFocus] = createSignal(false);
 
 	// ----------------------------------------
 	// Functions
@@ -75,19 +75,22 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 				<Label
 					id={props.id}
 					label={props.copy?.label}
+					focused={inputFocus()}
 					required={props.required}
 					theme={"basic"}
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
 				/>
-				{/* Select */}
-				<div
-					class={
-						"w-full pointer-events-none z-10 focus:outline-hidden px-2 text-sm text-subtitle font-medium justify-between flex bg-input-base border border-border items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors"
-					}
+				<DropdownMenu.Trigger
+					class={classnames(
+						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
+					)}
+					onFocus={() => setInputFocus(true)}
+					onBlur={() => setInputFocus(false)}
+					disabled={props.disabled}
 				>
 					{/* Selected Items */}
-					<div class="flex flex-wrap gap-1">
+					<div class="flex flex-wrap gap-1 text-left">
 						<For each={props.values}>
 							{(value) => (
 								<span class="bg-secondary-base hover:bg-secondary-hover duration-200 transition-colors rounded-md text-secondary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
@@ -97,16 +100,10 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						</For>
 					</div>
 					{/* Icons */}
-					<div class="flex items-center ml-2">
+					<div class="flex items-center ml-2 shrink-0">
 						<FaSolidSort size={16} class="text-subtitle ml-1" />
 					</div>
-				</div>
-				{/* Trigger */}
-				<DropdownMenu.Trigger
-					class="absolute inset-0 w-full left-0 rounded-md focus:outline-hidden"
-					onFocus={() => setInputFocus(true)}
-					onBlur={() => setInputFocus(false)}
-				/>
+				</DropdownMenu.Trigger>
 				<DropdownContent
 					options={{
 						anchorWidth: true,
