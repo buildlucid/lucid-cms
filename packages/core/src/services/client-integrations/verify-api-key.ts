@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
@@ -69,7 +70,14 @@ const verifyApiKey: ServiceFn<
 		scrypt(decodedApiKey, secret, constants.scrypt),
 	).toString("base64");
 
-	const verifyApiKey = inputApiKeyHash === clientIntegrationRes.data.api_key;
+	const inputHashBuffer = Buffer.from(inputApiKeyHash, "utf8");
+	const storedHashBuffer = Buffer.from(
+		clientIntegrationRes.data.api_key,
+		"utf8",
+	);
+	const verifyApiKey =
+		inputHashBuffer.length === storedHashBuffer.length &&
+		timingSafeEqual(inputHashBuffer, storedHashBuffer);
 
 	if (verifyApiKey === false) {
 		return {

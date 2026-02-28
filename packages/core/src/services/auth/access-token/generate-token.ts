@@ -7,6 +7,7 @@ import formatter, {
 } from "../../../libs/formatters/index.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
+import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const generateToken = async (
@@ -59,7 +60,7 @@ const generateToken = async (
 		setCookie(c, constants.cookies.accessToken, token, {
 			maxAge: constants.accessTokenExpiration,
 			httpOnly: true,
-			secure: c.req.url.startsWith("https://"),
+			secure: isRequestSecure(c),
 			sameSite: "strict",
 			path: "/",
 		});

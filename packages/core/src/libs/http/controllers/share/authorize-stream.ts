@@ -7,6 +7,7 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { isRequestSecure } from "../../../../utils/helpers/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIRequestBody,
@@ -58,7 +59,7 @@ const authorizeStreamController = factory.createHandlers(
 		setCookie(c, cookieName, randomUUID(), {
 			maxAge: constants.shareLinkExpiration,
 			httpOnly: true,
-			secure: c.req.url.startsWith("https://"),
+			secure: isRequestSecure(c),
 			sameSite: "strict",
 			path: `/${constants.directories.base}`,
 		});

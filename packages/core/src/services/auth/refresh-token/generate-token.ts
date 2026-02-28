@@ -5,6 +5,7 @@ import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearToken from "./clear-token.js";
 
@@ -77,7 +78,7 @@ const generateToken = async (
 	setCookie(c, constants.cookies.refreshToken, token, {
 		maxAge: constants.refreshTokenExpiration,
 		httpOnly: true,
-		secure: c.req.url.startsWith("https://"),
+		secure: isRequestSecure(c),
 		sameSite: "strict",
 		path: "/",
 	});

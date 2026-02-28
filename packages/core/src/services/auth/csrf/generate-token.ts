@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { setCookie } from "hono/cookie";
 import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const generateToken = async (c: LucidHonoContext): ServiceResponse<string> => {
@@ -10,7 +11,7 @@ const generateToken = async (c: LucidHonoContext): ServiceResponse<string> => {
 	setCookie(c, constants.cookies.csrf, token, {
 		maxAge: constants.csrfExpiration,
 		httpOnly: true,
-		secure: c.req.url.startsWith("https://"),
+		secure: isRequestSecure(c),
 		sameSite: "strict",
 		path: "/",
 	});
