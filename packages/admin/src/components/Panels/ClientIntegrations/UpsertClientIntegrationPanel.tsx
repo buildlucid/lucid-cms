@@ -8,7 +8,12 @@ import {
 	For,
 } from "solid-js";
 import InputGrid from "@/components/Containers/InputGrid";
-import { Checkbox, Input, Switch, Textarea } from "@/components/Groups/Form";
+import {
+	CheckboxButton,
+	Input,
+	Switch,
+	Textarea,
+} from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
 import T, { type TranslationKeys } from "@/translations";
@@ -228,31 +233,63 @@ const UpsertClientIntegrationPanel: Component<
 						hideOptionalText={true}
 					/>
 					<div class="w-full mb-5 last:mb-0">
+						<div class="mb-1.5">
+							<h3 class="text-sm text-body">{T()("scopes")}</h3>
+						</div>
 						<div class="w-full">
 							<For each={availableScopes.data?.data}>
 								{(group) => (
-									<div class="mb-4 last:mb-0">
-										<div class="flex justify-between">
+									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
+										<div class="flex justify-between items-start gap-3">
 											<h4 class="text-sm font-medium text-body">
 												{T()(group.key as TranslationKeys)}
 											</h4>
+											<button
+												type="button"
+												class="text-xs text-unfocused hover:text-body transition-colors"
+												onClick={() => {
+													const groupIsSelected = group.scopes.every((scope) =>
+														getScopes().includes(scope),
+													);
+
+													if (groupIsSelected) {
+														setScopes((prev) =>
+															prev.filter(
+																(scope) => !group.scopes.includes(scope),
+															),
+														);
+														return;
+													}
+
+													setScopes((prev) => [
+														...new Set([...prev, ...group.scopes]),
+													]);
+												}}
+											>
+												{group.scopes.every((scope) =>
+													getScopes().includes(scope),
+												)
+													? T()("clear")
+													: T()("select_all")}
+											</button>
 										</div>
-										<div class="mt-1.5 border border-border p-3 rounded-md grid grid-cols-2 gap-x-4 gap-y-2 bg-card-base">
+										<div class="mt-2 flex flex-wrap gap-2">
 											<For each={group.scopes}>
 												{(scope) => (
-													<Checkbox
+													<CheckboxButton
+														id={`scope-${group.key}-${scope}`}
 														value={getScopes().includes(scope)}
-														onChange={() =>
+														onChange={() => {
 															setScopes((prev) => {
 																if (prev.includes(scope))
 																	return prev.filter((s) => s !== scope);
 																return [...prev, scope];
-															})
-														}
+															});
+														}}
 														copy={{
 															label: T()(clientScopeKeyToTranslation(scope)),
 														}}
-														noMargin={true}
+														theme="secondary"
 													/>
 												)}
 											</For>

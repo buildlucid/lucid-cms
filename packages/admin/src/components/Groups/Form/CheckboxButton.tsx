@@ -11,7 +11,7 @@ interface CheckboxButtonProps {
 		label?: string;
 	};
 	disabled?: boolean;
-	theme: "primary" | "error";
+	theme: "primary" | "secondary" | "error";
 }
 
 export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
@@ -40,6 +40,8 @@ export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
 							!props.value,
 						"bg-primary-base hover:bg-primary-hover text-primary-contrast":
 							props.value && props.theme === "primary",
+						"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast":
+							props.value && props.theme === "secondary",
 						"bg-error-base hover:bg-error-hover text-error-contrast":
 							props.value && props.theme === "error",
 					},

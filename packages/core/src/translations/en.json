@@ -249,7 +249,7 @@
 	"invalid_client_integration_api_key": "The client integration API key is invalid. Please ensure it is correct and try again.",
 	"client_integration_error": "An error occurred while verifying the client integration API key.",
 	"client_scope_error_name": "Client Scope Error",
-	"client_scope_missing_message": "The client integration does not have required scopes.",
+	"client_scope_missing_message": "The integration is missing required scopes. Required: {{requiredScopes}}. Missing: {{missingScopes}}.",
 	"rate_limit_error_name": "Rate Limit Error",
 	"route_not_found": "Route Not Found",
 	"route_not_found_message": "The route you are trying to access does not exist.",

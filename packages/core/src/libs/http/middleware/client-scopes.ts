@@ -6,6 +6,9 @@ import { LucidAPIError } from "../../../utils/errors/index.js";
 const clientScopes = (requiredScopes: string[]) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		const auth = c.get("clientIntegrationAuth");
+		const missingScopes = requiredScopes.filter(
+			(scope) => !auth.scopes.includes(scope),
+		);
 		const hasAllRequired = requiredScopes.every((scope) =>
 			auth.scopes.includes(scope),
 		);
@@ -14,7 +17,10 @@ const clientScopes = (requiredScopes: string[]) =>
 			throw new LucidAPIError({
 				type: "authorisation",
 				name: T("client_scope_error_name"),
-				message: T("client_scope_missing_message"),
+				message: T("client_scope_missing_message", {
+					requiredScopes: requiredScopes.join(", "),
+					missingScopes: missingScopes.join(", "),
+				}),
 				status: 403,
 			});
 		}
