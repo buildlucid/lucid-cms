@@ -66,6 +66,11 @@ const ConfigSchema = z.object({
 			allowHeaders: z.array(z.string()).optional(),
 		})
 		.optional(),
+	security: z
+		.object({
+			trustProxyHeaders: z.boolean().optional(),
+		})
+		.optional(),
 	secrets: z.object({
 		encryption: z.string().length(64),
 		cookie: z.string().length(64),

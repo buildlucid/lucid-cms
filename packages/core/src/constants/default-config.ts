@@ -5,6 +5,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
 		level: "info",
 	},
+	security: {
+		trustProxyHeaders: false,
+	},
 	auth: {
 		password: {
 			enabled: true,

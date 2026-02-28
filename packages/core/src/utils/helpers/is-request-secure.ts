@@ -32,6 +32,7 @@ const parseForwardedProto = (headerValue: string | undefined) => {
  */
 const isRequestSecure = (c: LucidHonoContext) => {
 	if (c.req.url.startsWith("https://")) return true;
+	if (!c.get("config").security.trustProxyHeaders) return false;
 
 	if (parseForwardedProto(c.req.header("Forwarded"))) return true;
 

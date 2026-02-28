@@ -65,6 +65,14 @@ export interface LucidConfig {
 		/** Allowed headers. */
 		allowHeaders?: string[];
 	};
+	/** Security settings. */
+	security?: {
+		/**
+		 * Whether proxy-forwarded protocol headers should be trusted when
+		 * determining secure request context.
+		 */
+		trustProxyHeaders?: boolean;
+	};
 	/** The base URL of the Lucid instance. If not provided, the request URL will be used. */
 	baseUrl?: string;
 	/** `64 character` length secrets to encrypt and sign data. */
@@ -306,6 +314,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			image?: string;
 			video?: string;
 		};
+	};
+	security: {
+		trustProxyHeaders: boolean;
 	};
 	hono: {
 		middleware: Array<
