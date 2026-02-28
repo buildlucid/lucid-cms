@@ -31,7 +31,7 @@ const deleteMultipleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteMedia]),
+	permissions([Permissions.MediaDelete]),
 	validate("param", controllerSchemas.deleteMultiple.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

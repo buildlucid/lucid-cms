@@ -31,7 +31,7 @@ const deleteSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteMedia]),
+	permissions([Permissions.MediaDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { id, linkId } = c.req.valid("param");

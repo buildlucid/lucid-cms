@@ -20,6 +20,7 @@ import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
 import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
 import UserRow from "@/components/Tables/Rows/UserRow";
+import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -70,7 +71,7 @@ export const UserList: Component<{
 		return {
 			title: T()("no_users"),
 			description: T()("no_users_description"),
-			button: T()("create_user"),
+			button: T()(Permissions.UsersCreate),
 		};
 	});
 	const createEntryCallback = createMemo(() => {
@@ -81,15 +82,18 @@ export const UserList: Component<{
 	});
 	const rowsAreSelectable = createMemo(() => {
 		if (props.state.showingDeleted()) {
-			return userStore.get.hasPermission(["update_user", "delete_user"]).some;
+			return userStore.get.hasPermission([
+				Permissions.UsersUpdate,
+				Permissions.UsersDelete,
+			]).some;
 		}
 		return false;
 	});
 	const canRestoreUsers = createMemo(
-		() => userStore.get.hasPermission(["update_user"]).some,
+		() => userStore.get.hasPermission([Permissions.UsersUpdate]).some,
 	);
 	const canDeleteUsersPermanently = createMemo(
-		() => userStore.get.hasPermission(["delete_user"]).some,
+		() => userStore.get.hasPermission([Permissions.UsersDelete]).some,
 	);
 
 	// ----------------------------------

@@ -20,6 +20,7 @@ import { Table } from "@/components/Groups/Table";
 import DeleteShareLink from "@/components/Modals/Media/DeleteShareLink";
 import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
 import ShareLinkRow from "@/components/Tables/Rows/ShareLinkRow";
+import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
@@ -127,10 +128,10 @@ const ViewShareLinksPanelContent: Component<{
 		);
 	});
 	const canUpdateShareLinks = createMemo(
-		() => userStore.get.hasPermission(["update_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaUpdate]).all,
 	);
 	const canDeleteShareLinks = createMemo(
-		() => userStore.get.hasPermission(["delete_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaDelete]).all,
 	);
 
 	// ---------------------------------

@@ -108,6 +108,7 @@ const updateSingle: ServiceFn<
 				data: validatePermsRes.data.map((p) => ({
 					role_id: data.id,
 					permission: p.permission,
+					core: true,
 				})),
 			});
 			if (rolePermsRes.error) return rolePermsRes;

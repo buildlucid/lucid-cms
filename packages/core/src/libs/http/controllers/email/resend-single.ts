@@ -46,7 +46,7 @@ const resendSingleController = factory.createHandlers(
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
 		windowMs: minutesToMilliseconds(1),
 	}),
-	permissions([Permissions.SendEmail]),
+	permissions([Permissions.EmailSend]),
 	validate("param", controllerSchemas.resendSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

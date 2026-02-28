@@ -1,6 +1,15 @@
 import z from "zod";
+import { ClientScopes } from "../libs/permission/client-scopes.js";
+import { ClientScopeGroups } from "../libs/permission/scopes.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+
+const clientScopeSchema = z.enum([
+	ClientScopes.DocumentsRead,
+	ClientScopes.MediaRead,
+	ClientScopes.MediaProcess,
+	ClientScopes.LocalesRead,
+] as const);
 
 export const clientIntegrationResponseSchema = z.object({
 	id: z.number().meta({
@@ -25,6 +34,10 @@ export const clientIntegrationResponseSchema = z.object({
 			"Whether or not the client is active. If inactive you wont be able to use it to query data",
 		example: true,
 	}),
+	scopes: z.array(clientScopeSchema).meta({
+		description: "The scopes this client integration has access to.",
+		example: ["documents:read", "media:read"],
+	}),
 	lastUsedAt: z.string().nullable().meta({
 		description: "The time the client integration was last used",
 		example: "2022-01-01T00:00:00Z",
@@ -44,6 +57,24 @@ export const clientIntegrationResponseSchema = z.object({
 	updatedAt: z.string().nullable().meta({
 		description: "The time the client integration was last updated",
 		example: "2022-01-01T00:00:00Z",
+	}),
+});
+
+const clientIntegrationScopeGroupResponseSchema = z.object({
+	key: z
+		.enum(
+			Object.values(ClientScopeGroups).map((group) => group.key) as [
+				string,
+				...string[],
+			],
+		)
+		.meta({
+			description: "The scope group key",
+			example: "media_scopes",
+		}),
+	scopes: z.array(clientScopeSchema).meta({
+		description: "The scopes for this scope group",
+		example: ["media:read", "media:process"],
 	}),
 });
 
@@ -70,6 +101,13 @@ export const controllerSchemas = {
 					example: true,
 				})
 				.optional(),
+			scopes: z
+				.array(clientScopeSchema)
+				.min(1)
+				.meta({
+					description: "Scopes granted to this client integration.",
+					example: ["documents:read"],
+				}),
 		}),
 		query: {
 			string: undefined,
@@ -159,6 +197,15 @@ export const controllerSchemas = {
 		}),
 		response: clientIntegrationResponseSchema,
 	} satisfies ControllerSchema,
+	getScopes: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.array(clientIntegrationScopeGroupResponseSchema),
+	} satisfies ControllerSchema,
 	regenerateKeys: {
 		body: undefined,
 		query: {
@@ -205,6 +252,13 @@ export const controllerSchemas = {
 					description:
 						"Whether or not the client is active. If inactive you wont be able to use it to query data",
 					example: true,
+				})
+				.optional(),
+			scopes: z
+				.array(clientScopeSchema)
+				.meta({
+					description: "Scopes granted to this client integration.",
+					example: ["media:read", "media:process"],
 				})
 				.optional(),
 		}),

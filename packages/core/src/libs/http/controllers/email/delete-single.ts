@@ -33,7 +33,7 @@ const deleteSingleController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
-	permissions([Permissions.DeleteEmail]),
+	permissions([Permissions.EmailDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

@@ -12,8 +12,10 @@ import {
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import cacheKeys from "../../../../kv-adapter/cache-keys.js";
+import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
+import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -38,6 +40,7 @@ const getSingleController = factory.createHandlers(
 		}),
 	}),
 	clientAuthentication,
+	clientScopes([ClientScopes.DocumentsRead]),
 	validate("param", controllerSchemas.client.getSingle.params),
 	validate("query", controllerSchemas.client.getSingle.query.string),
 	cache({

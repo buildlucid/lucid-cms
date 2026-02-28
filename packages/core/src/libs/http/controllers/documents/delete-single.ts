@@ -35,7 +35,7 @@ const deleteSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteContent]),
+	permissions([Permissions.DocumentsDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");

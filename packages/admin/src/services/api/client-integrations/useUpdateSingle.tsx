@@ -10,6 +10,7 @@ interface Params {
 		name?: string;
 		description?: string | null;
 		enabled?: boolean | null;
+		scopes?: string[];
 	};
 }
 

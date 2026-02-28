@@ -34,7 +34,7 @@ const resendInvitationController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.CreateUser]),
+	permissions([Permissions.UsersCreate]),
 	validate("param", controllerSchemas.resendInvitation.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

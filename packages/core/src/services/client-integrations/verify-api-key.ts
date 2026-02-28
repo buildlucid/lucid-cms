@@ -39,22 +39,16 @@ const verifyApiKey: ServiceFn<
 		};
 	}
 
-	const clientIntegrationRes = await ClientIntegrations.selectSingle({
-		where: [
-			{
-				key: "key",
-				operator: "=",
-				value: decodedKey,
+	const clientIntegrationRes =
+		await ClientIntegrations.selectSingleByKeyWithScopes({
+			key: decodedKey,
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("cannot_find_client_integration"),
+				},
 			},
-		],
-		select: ["id", "api_key", "secret", "enabled", "key"],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: T("cannot_find_client_integration"),
-			},
-		},
-	});
+		});
 	if (clientIntegrationRes.error) return clientIntegrationRes;
 
 	if (!formatter.formatBoolean(clientIntegrationRes.data.enabled)) {
@@ -91,6 +85,7 @@ const verifyApiKey: ServiceFn<
 		data: {
 			id: clientIntegrationRes.data.id,
 			key: clientIntegrationRes.data.key,
+			scopes: (clientIntegrationRes.data.scopes || []).map((s) => s.scope),
 		},
 	};
 };

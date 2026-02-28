@@ -13,6 +13,7 @@ import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
 import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore";
@@ -135,14 +136,18 @@ const MediaListRoute: Component = () => {
 								{
 									open: getOpenCreateMediaFolderPanel(),
 									setOpen: setOpenCreateMediaFolderPanel,
-									permission: userStore.get.hasPermission(["create_media"]).all,
+									permission: userStore.get.hasPermission([
+										Permissions.MediaCreate,
+									]).all,
 									label: T()("add_folder"),
 									secondary: true,
 								},
 								{
 									open: getOpenCreateMediaPanel(),
 									setOpen: setOpenCreateMediaPanel,
-									permission: userStore.get.hasPermission(["create_media"]).all,
+									permission: userStore.get.hasPermission([
+										Permissions.MediaCreate,
+									]).all,
 									label: T()("upload_media"),
 								},
 							],

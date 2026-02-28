@@ -22,24 +22,13 @@ const getAll: ServiceFn<
 		context.config.db,
 	);
 
-	const integrationsRes = await ClientIntegrations.selectMultipleFiltered({
-		select: [
-			"id",
-			"key",
-			"name",
-			"description",
-			"enabled",
-			"last_used_at",
-			"last_used_ip",
-			"last_used_user_agent",
-			"created_at",
-			"updated_at",
-		],
-		queryParams: data.query,
-		validation: {
-			enabled: true,
-		},
-	});
+	const integrationsRes =
+		await ClientIntegrations.selectMultipleFilteredWithScopes({
+			queryParams: data.query,
+			validation: {
+				enabled: true,
+			},
+		});
 	if (integrationsRes.error) return integrationsRes;
 
 	return {

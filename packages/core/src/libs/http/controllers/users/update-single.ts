@@ -37,7 +37,7 @@ const updateSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateUser]),
+	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.updateSingle.params),
 	validate("json", controllerSchemas.updateSingle.body),
 	async (c) => {

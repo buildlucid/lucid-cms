@@ -32,7 +32,7 @@ const getSingleController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
-	permissions([Permissions.ReadJob]),
+	permissions([Permissions.JobsRead]),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

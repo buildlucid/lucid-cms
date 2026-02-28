@@ -7,6 +7,7 @@ interface Params {
 	name: string;
 	description: string;
 	enabled: boolean;
+	scopes: string[];
 }
 
 interface CreateSingleResponse {

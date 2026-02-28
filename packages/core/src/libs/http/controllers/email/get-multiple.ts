@@ -34,7 +34,7 @@ const getMultipleController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
-	permissions([Permissions.ReadEmail]),
+	permissions([Permissions.EmailRead]),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const context = getServiceContext(c);

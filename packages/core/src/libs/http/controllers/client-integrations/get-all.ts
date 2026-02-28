@@ -10,7 +10,9 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -32,6 +34,7 @@ const getAllController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
+	permissions([Permissions.IntegrationRead]),
 	validate("query", controllerSchemas.getAll.query.string),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

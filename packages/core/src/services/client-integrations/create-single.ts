@@ -1,4 +1,7 @@
-import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
+import {
+	ClientIntegrationScopesRepository,
+	ClientIntegrationsRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
@@ -10,6 +13,7 @@ const createSingle: ServiceFn<
 			name: string;
 			description?: string;
 			enabled?: boolean;
+			scopes: string[];
 		},
 	],
 	{
@@ -17,6 +21,10 @@ const createSingle: ServiceFn<
 	}
 > = async (context, data) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const ClientIntegrationScopes = new ClientIntegrationScopesRepository(
 		context.db.client,
 		context.config.db,
 	);
@@ -65,6 +73,15 @@ const createSingle: ServiceFn<
 		},
 	});
 	if (newIntegrationRes.error) return newIntegrationRes;
+
+	const scopeInsertRes = await ClientIntegrationScopes.createMultiple({
+		data: data.scopes.map((scope) => ({
+			client_integration_id: newIntegrationRes.data.id,
+			scope,
+			core: true,
+		})),
+	});
+	if (scopeInsertRes.error) return scopeInsertRes;
 
 	return {
 		error: undefined,

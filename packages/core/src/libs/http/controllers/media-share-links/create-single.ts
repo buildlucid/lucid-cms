@@ -37,7 +37,7 @@ const createSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.CreateMedia]),
+	permissions([Permissions.MediaCreate]),
 	validate("param", controllerSchemas.createSingle.params),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {

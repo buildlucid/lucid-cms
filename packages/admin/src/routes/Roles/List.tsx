@@ -5,6 +5,7 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
+import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -48,8 +49,10 @@ const RolesListRoute: Component = () => {
 								{
 									open: openCreateRolePanel(),
 									setOpen: setOpenCreateRolePanel,
-									permission: userStore.get.hasPermission(["create_role"]).all,
-									label: T()("create_role"),
+									permission: userStore.get.hasPermission([
+										Permissions.RolesCreate,
+									]).all,
+									label: T()(Permissions.RolesCreate),
 								},
 							],
 						}}

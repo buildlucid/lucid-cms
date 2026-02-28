@@ -40,7 +40,7 @@ const createVersionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateContent]),
+	permissions([Permissions.DocumentsUpdate]),
 	validate("json", controllerSchemas.createVersion.body),
 	validate("param", controllerSchemas.createVersion.params),
 	async (c) => {

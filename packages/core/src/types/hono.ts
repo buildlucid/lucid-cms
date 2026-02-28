@@ -23,6 +23,7 @@ export type LucidAuth = {
 export type LucidClientIntegrationAuth = {
 	id: number;
 	key: string;
+	scopes: string[];
 };
 
 export type LucidLocale = {

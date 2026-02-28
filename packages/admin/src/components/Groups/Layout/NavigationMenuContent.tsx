@@ -165,7 +165,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					/>
 					<IconLinkFull
 						type="link"
-						href="/lucid/system/client-integrations"
+						href="/lucid/system/integrations"
 						icon="client-integrations"
 						title={T()("client_integrations")}
 						permission={props.canReadClientIntegrations}

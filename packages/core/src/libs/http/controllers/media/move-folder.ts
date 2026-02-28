@@ -37,7 +37,7 @@ const moveFolderController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateMedia]),
+	permissions([Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.moveFolder.params),
 	validate("json", controllerSchemas.moveFolder.body),
 	async (c) => {

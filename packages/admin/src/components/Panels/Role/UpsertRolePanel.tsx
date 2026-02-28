@@ -1,3 +1,4 @@
+import type { Permission } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -6,12 +7,12 @@ import {
 	createSignal,
 	For,
 } from "solid-js";
-import SectionHeading from "@/components/Blocks/SectionHeading";
 import InputGrid from "@/components/Containers/InputGrid";
 import { Checkbox, Input } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
-import T from "@/translations";
+import T, { type TranslationKeys } from "@/translations";
+import { permissionKeyToTranslation } from "@/translations/helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 
@@ -26,9 +27,9 @@ interface UpsertRolePanelProps {
 const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 	// ---------------------------------
 	// State
-	const [selectedPermissions, setSelectedPermissions] = createSignal<string[]>(
-		[],
-	);
+	const [selectedPermissions, setSelectedPermissions] = createSignal<
+		Permission[]
+	>([]);
 	const [getName, setName] = createSignal("");
 
 	// ---------------------------------
@@ -113,17 +114,6 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 		return !updateData().changed;
 	});
 
-	const allSelected = createMemo(() => {
-		const totalOptionPerms = permissions.data?.data.reduce((acc, option) => {
-			return acc + option.permissions.length;
-		}, 0);
-
-		if (selectedPermissions().length === totalOptionPerms) {
-			return true;
-		}
-		return false;
-	});
-
 	// Mutation memos
 	const isCreating = createMemo(() => {
 		return createRole.action.isPending || updateRole.action.isPending;
@@ -181,8 +171,6 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 		>
 			{() => (
 				<>
-					{/* Details */}
-					<SectionHeading title={T()("details")} />
 					<InputGrid columns={2}>
 						<Input
 							id="name"
@@ -198,35 +186,17 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 							noMargin={true}
 						/>
 					</InputGrid>
-					{/* Global perms */}
 					<div class="w-full mb-5 last:mb-0">
-						<SectionHeading title={T()("permissions")} headingType="h3">
-							<div>
-								<Checkbox
-									value={allSelected()}
-									onChange={(value) => {
-										if (value) {
-											setSelectedPermissions(
-												permissions.data?.data.flatMap(
-													(option) => option.permissions,
-												) || [],
-											);
-										} else {
-											setSelectedPermissions([]);
-										}
-									}}
-									copy={{}}
-									noMargin={true}
-								/>
-							</div>
-						</SectionHeading>
 						<div class="w-full">
 							<For each={permissions?.data?.data}>
 								{(option) => (
 									<div class="mb-4 last:mb-0">
-										{/* @ts-expect-error */}
-										<h4>{T(option.key)}</h4>
-										<div class="mt-2 border border-border p-4 rounded-md grid grid-cols-2 gap-x-4 gap-y-2 bg-card-base">
+										<div class="flex justify-between items-center">
+											<h4 class="text-sm font-medium text-body">
+												{T()(option.key as TranslationKeys)}
+											</h4>
+										</div>
+										<div class="mt-1.5 border border-border p-3 rounded-md grid grid-cols-2 gap-x-4 gap-y-2 bg-card-base">
 											<For each={option.permissions}>
 												{(permission) => (
 													<Checkbox
@@ -240,7 +210,9 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 															})
 														}
 														copy={{
-															label: T()(`permissions_${permission}`),
+															label: T()(
+																permissionKeyToTranslation(permission),
+															),
 														}}
 														noMargin={true}
 													/>

@@ -4,6 +4,7 @@ import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -36,8 +37,9 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 						props.rowTarget.setTargetId(props.clientIntegration.id);
 						props.rowTarget.setTrigger("update", true);
 					},
-					permission: userStore.get.hasPermission(["update_client_integration"])
-						.all,
+					permission: userStore.get.hasPermission([
+						Permissions.IntegrationsUpdate,
+					]).all,
 				},
 				{
 					label: T()("regenerate_api_key"),
@@ -47,7 +49,7 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 						props.rowTarget.setTrigger("regenerateAPIKey", true);
 					},
 					permission: userStore.get.hasPermission([
-						"regenerate_client_integration",
+						Permissions.IntegrationsRegenerate,
 					]).all,
 					theme: "error",
 					actionExclude: true,
@@ -59,8 +61,9 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 						props.rowTarget.setTargetId(props.clientIntegration.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					permission: userStore.get.hasPermission(["delete_client_integration"])
-						.all,
+					permission: userStore.get.hasPermission([
+						Permissions.IntegrationsDelete,
+					]).all,
 					theme: "error",
 					actionExclude: true,
 				},

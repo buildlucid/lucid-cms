@@ -34,7 +34,7 @@ const restoreMultipleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateMedia]),
+	permissions([Permissions.MediaUpdate]),
 	validate("json", controllerSchemas.restoreMultiple.body),
 	async (c) => {
 		const { ids } = c.req.valid("json");

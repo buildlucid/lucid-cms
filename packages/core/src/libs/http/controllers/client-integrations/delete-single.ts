@@ -35,7 +35,7 @@ const deleteSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteClientIntegration]),
+	permissions([Permissions.IntegrationDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

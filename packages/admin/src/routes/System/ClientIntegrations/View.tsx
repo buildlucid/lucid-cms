@@ -4,6 +4,7 @@ import { ClientIntegrationsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
+import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -43,7 +44,7 @@ const SystemClientIntegrationsRoute: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const hasCreatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["create_client_integration"]).all;
+		return userStore.get.hasPermission([Permissions.IntegrationsCreate]).all;
 	});
 
 	// ----------------------------------------

@@ -39,7 +39,7 @@ const createSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.CreateContent]),
+	permissions([Permissions.DocumentsCreate]),
 	validate("json", controllerSchemas.createSingle.body),
 	validate("param", controllerSchemas.createSingle.params),
 	async (c) => {

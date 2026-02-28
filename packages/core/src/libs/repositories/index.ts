@@ -1,4 +1,5 @@
 export { default as AuthStatesRepository } from "./auth-states.js";
+export { default as ClientIntegrationScopesRepository } from "./client-integration-scopes.js";
 export { default as ClientIntegrationsRepository } from "./client-integrations.js";
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";

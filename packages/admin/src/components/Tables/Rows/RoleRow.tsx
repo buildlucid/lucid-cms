@@ -2,6 +2,7 @@ import type { RoleResponse } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -29,7 +30,8 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.role.id);
 						props.rowTarget.setTrigger("update", true);
 					},
-					permission: userStore.get.hasPermission(["update_role"]).all,
+					permission: userStore.get.hasPermission([Permissions.RolesUpdate])
+						.all,
 				},
 				{
 					label: T()("delete"),
@@ -38,7 +40,8 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.role.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					permission: userStore.get.hasPermission(["delete_role"]).all,
+					permission: userStore.get.hasPermission([Permissions.RolesDelete])
+						.all,
 					actionExclude: true,
 				},
 			]}

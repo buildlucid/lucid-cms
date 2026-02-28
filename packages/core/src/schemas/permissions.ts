@@ -8,7 +8,7 @@ const permissionResponseSchema = z.object({
 	}),
 	permissions: z.array(z.string()).meta({
 		description: "The permissions for this permission group",
-		example: ["create_user", "update_user", "delete_user"],
+		example: ["users:create", "users:update", "users:delete"],
 	}),
 });
 

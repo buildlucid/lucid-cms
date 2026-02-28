@@ -21,7 +21,7 @@ const clearKVController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.ClearKv]),
+	permissions([Permissions.CacheClear]),
 	async (c) => {
 		await c.get("kv").clear();
 

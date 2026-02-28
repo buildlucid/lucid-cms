@@ -9,6 +9,7 @@ import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
+import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -69,16 +70,18 @@ export const DocumentsList: Component<{
 	);
 	const rowsAreSelectable = createMemo(() => {
 		if (props.state.showingDeleted()) {
-			return userStore.get.hasPermission(["update_content", "delete_content"])
-				.some;
+			return userStore.get.hasPermission([
+				Permissions.DocumentsUpdate,
+				Permissions.DocumentsDelete,
+			]).some;
 		}
-		return userStore.get.hasPermission(["delete_content"]).some;
+		return userStore.get.hasPermission([Permissions.DocumentsDelete]).some;
 	});
 	const canRestoreDocuments = createMemo(
-		() => userStore.get.hasPermission(["update_content"]).some,
+		() => userStore.get.hasPermission([Permissions.DocumentsUpdate]).some,
 	);
 	const canDeleteDocuments = createMemo(
-		() => userStore.get.hasPermission(["delete_content"]).some,
+		() => userStore.get.hasPermission([Permissions.DocumentsDelete]).some,
 	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
@@ -176,7 +179,7 @@ export const DocumentsList: Component<{
 				noEntries: noEntriesCopy(),
 			}}
 			permissions={{
-				create: userStore.get.hasPermission(["create_content"]).some,
+				create: userStore.get.hasPermission([Permissions.DocumentsCreate]).some,
 			}}
 			callback={{
 				createEntry: createEntryCallback(),
@@ -280,8 +283,9 @@ export const DocumentsList: Component<{
 												}),
 											);
 										},
-										permission: userStore.get.hasPermission(["update_content"])
-											.some,
+										permission: userStore.get.hasPermission([
+											Permissions.DocumentsUpdate,
+										]).some,
 										hide: props.state.showingDeleted(),
 									},
 									{
@@ -295,8 +299,9 @@ export const DocumentsList: Component<{
 												}),
 											);
 										},
-										permission: userStore.get.hasPermission(["read_content"])
-											.some,
+										permission: userStore.get.hasPermission([
+											Permissions.DocumentsRead,
+										]).some,
 										hide: props.state.showingDeleted() === false,
 									},
 									{
@@ -306,8 +311,9 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("restore", true);
 										},
-										permission: userStore.get.hasPermission(["update_content"])
-											.all,
+										permission: userStore.get.hasPermission([
+											Permissions.DocumentsUpdate,
+										]).all,
 										hide: props.state.showingDeleted() === false,
 										theme: "primary",
 									},
@@ -318,8 +324,9 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("delete", true);
 										},
-										permission: userStore.get.hasPermission(["delete_content"])
-											.all,
+										permission: userStore.get.hasPermission([
+											Permissions.DocumentsDelete,
+										]).all,
 										actionExclude: true,
 										theme: "error",
 										hide: props.state.showingDeleted(),
@@ -331,8 +338,9 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("deletePermanently", true);
 										},
-										permission: userStore.get.hasPermission(["delete_content"])
-											.all,
+										permission: userStore.get.hasPermission([
+											Permissions.DocumentsDelete,
+										]).all,
 										hide: props.state.showingDeleted?.() === false,
 										theme: "error",
 									},

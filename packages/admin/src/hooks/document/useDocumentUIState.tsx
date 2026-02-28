@@ -6,6 +6,7 @@ import type {
 	FieldError,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
+import { Permissions } from "@/constants/permissions";
 import type api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -137,7 +138,7 @@ export function useDocumentUIState(props: {
 		if (props.version() !== "latest") return false;
 		if (props.document()?.isDeleted) return false;
 		return (
-			userStore.get.hasPermission(["update_content"]).all &&
+			userStore.get.hasPermission([Permissions.DocumentsUpdate]).all &&
 			useAutoSave() &&
 			autoSaveUserEnabled()
 		);
@@ -238,9 +239,9 @@ export function useDocumentUIState(props: {
 	 */
 	const hasSavePermission = createMemo(() => {
 		if (props.mode === "create") {
-			return userStore.get.hasPermission(["create_content"]).all;
+			return userStore.get.hasPermission([Permissions.DocumentsCreate]).all;
 		}
-		return userStore.get.hasPermission(["update_content"]).all;
+		return userStore.get.hasPermission([Permissions.DocumentsUpdate]).all;
 	});
 
 	/**
@@ -253,7 +254,7 @@ export function useDocumentUIState(props: {
 		if (props.document()?.isDeleted) return false;
 
 		return (
-			userStore.get.hasPermission(["update_content"]).all &&
+			userStore.get.hasPermission([Permissions.DocumentsUpdate]).all &&
 			props.collection()?.config.useAutoSave
 		);
 	});
@@ -262,14 +263,14 @@ export function useDocumentUIState(props: {
 	 * Determines if the user has publish permission
 	 */
 	const hasPublishPermission = createMemo(() => {
-		return userStore.get.hasPermission(["publish_content"]).all;
+		return userStore.get.hasPermission([Permissions.DocumentsPublish]).all;
 	});
 
 	/**
 	 * Determines if the user has delete permission
 	 */
 	const hasDeletePermission = createMemo(() => {
-		return userStore.get.hasPermission(["delete_content"]).all;
+		return userStore.get.hasPermission([Permissions.DocumentsDelete]).all;
 	});
 
 	/**
@@ -288,7 +289,7 @@ export function useDocumentUIState(props: {
 	 * Determines if the user has permission to restore documents
 	 */
 	const hasRestorePermission = createMemo(() => {
-		return userStore.get.hasPermission(["restore_content"]).all;
+		return userStore.get.hasPermission([Permissions.DocumentsRestore]).all;
 	});
 
 	// ------------------------------------------

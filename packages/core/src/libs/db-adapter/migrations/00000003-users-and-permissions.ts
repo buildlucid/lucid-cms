@@ -187,6 +187,16 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("permission", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("core", adapter.getDataType("boolean"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "true"),
+							),
+						),
+				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(

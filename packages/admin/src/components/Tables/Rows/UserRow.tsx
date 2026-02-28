@@ -2,6 +2,7 @@ import type { UserResponse } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -39,13 +40,19 @@ const UserRow: Component<UserRowProps> = (props) => {
 		return currentUser() ? `${props.user.username} (you)` : props.user.username;
 	});
 	const canUpdateNotSelf = createMemo(() => {
-		return userStore.get.hasPermission(["update_user"]).all && !currentUser();
+		return (
+			userStore.get.hasPermission([Permissions.UsersUpdate]).all &&
+			!currentUser()
+		);
 	});
 	const canDeleteNotSelf = createMemo(() => {
-		return userStore.get.hasPermission(["delete_user"]).all && !currentUser();
+		return (
+			userStore.get.hasPermission([Permissions.UsersDelete]).all &&
+			!currentUser()
+		);
 	});
 	const canRevokeRefreshTokens = createMemo(() => {
-		return userStore.get.hasPermission(["update_user"]).all;
+		return userStore.get.hasPermission([Permissions.UsersUpdate]).all;
 	});
 
 	// ----------------------------------

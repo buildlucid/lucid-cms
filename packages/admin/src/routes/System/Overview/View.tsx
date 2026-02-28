@@ -9,6 +9,7 @@ import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
 import Pill from "@/components/Partials/Pill";
 import ProgressBar from "@/components/Partials/ProgressBar";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
@@ -55,13 +56,13 @@ const SystemOverviewRoute: Component = () => {
 	});
 	const emailTemplates = createMemo(() => emailInfo()?.templates ?? []);
 	const canClearCache = createMemo(
-		() => userStore.get.hasPermission(["clear_kv"]).all,
+		() => userStore.get.hasPermission([Permissions.CacheClear]).all,
 	);
 	const canDeleteAllShareLinks = createMemo(
-		() => userStore.get.hasPermission(["delete_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaDelete]).all,
 	);
 	const canClearAllProcessedImages = createMemo(
-		() => userStore.get.hasPermission(["update_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaUpdate]).all,
 	);
 
 	// ----------------------------------------

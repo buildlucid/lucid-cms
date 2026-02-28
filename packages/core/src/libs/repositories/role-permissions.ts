@@ -11,6 +11,10 @@ export default class RolePermissionsRepository extends StaticRepository<"lucid_r
 		id: z.number(),
 		role_id: z.number(),
 		permission: z.string(),
+		core: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
@@ -18,6 +22,7 @@ export default class RolePermissionsRepository extends StaticRepository<"lucid_r
 		id: this.dbAdapter.getDataType("primary"),
 		role_id: this.dbAdapter.getDataType("integer"),
 		permission: this.dbAdapter.getDataType("text"),
+		core: this.dbAdapter.getDataType("boolean"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};

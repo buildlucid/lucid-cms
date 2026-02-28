@@ -32,7 +32,7 @@ const inviteSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.CreateUser]),
+	permissions([Permissions.UsersCreate]),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const body = c.req.valid("json");

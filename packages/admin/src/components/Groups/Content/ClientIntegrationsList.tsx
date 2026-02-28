@@ -14,6 +14,7 @@ import DeleteClientIntegration from "@/components/Modals/ClientIntegrations/Dele
 import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";
 import UpsertClientIntegrationPanel from "@/components/Panels/ClientIntegrations/UpsertClientIntegrationPanel";
 import ClientIntegrationTableRow from "@/components/Tables/Rows/ClientIntegrationTableRow";
+import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -51,7 +52,7 @@ export const ClientIntegrationsList: Component<{
 	// ----------------------------------
 	// Memos
 	const hasCreatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["create_client_integration"]).all;
+		return userStore.get.hasPermission([Permissions.IntegrationsCreate]).all;
 	});
 
 	// ----------------------------------

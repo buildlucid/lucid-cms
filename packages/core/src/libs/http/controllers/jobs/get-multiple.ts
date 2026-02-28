@@ -34,7 +34,7 @@ const getMultipleController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
-	permissions([Permissions.ReadJob]),
+	permissions([Permissions.JobsRead]),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const context = getServiceContext(c);

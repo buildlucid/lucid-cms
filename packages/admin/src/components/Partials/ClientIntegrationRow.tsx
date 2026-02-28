@@ -1,6 +1,7 @@
 import type { ClientIntegrationResponse } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -17,13 +18,14 @@ const ClientIntegrationRow: Component<ClientIntegrationRow> = (props) => {
 	// ----------------------------------
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["update_client_integration"]).all;
+		return userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all;
 	});
 	const hasDeletePermission = createMemo(() => {
-		return userStore.get.hasPermission(["delete_client_integration"]).all;
+		return userStore.get.hasPermission([Permissions.IntegrationsDelete]).all;
 	});
 	const hasRegeneratePermission = createMemo(() => {
-		return userStore.get.hasPermission(["regenerate_client_integration"]).all;
+		return userStore.get.hasPermission([Permissions.IntegrationsRegenerate])
+			.all;
 	});
 
 	// ----------------------------------

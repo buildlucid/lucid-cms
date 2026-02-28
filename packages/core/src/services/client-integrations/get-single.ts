@@ -17,26 +17,8 @@ const getSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const integrationsRes = await ClientIntegrations.selectSingle({
-		select: [
-			"id",
-			"key",
-			"name",
-			"description",
-			"enabled",
-			"last_used_at",
-			"last_used_ip",
-			"last_used_user_agent",
-			"created_at",
-			"updated_at",
-		],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-		],
+	const integrationsRes = await ClientIntegrations.selectSingleByIdWithScopes({
+		id: data.id,
 		validation: {
 			enabled: true,
 			defaultError: {

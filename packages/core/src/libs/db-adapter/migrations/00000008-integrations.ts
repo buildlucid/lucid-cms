@@ -62,6 +62,63 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_client_integrations")
 				.column("secret")
 				.execute();
+
+			await db.schema
+				.createTable("lucid_client_integration_scopes")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn(
+					"client_integration_id",
+					adapter.getDataType("integer"),
+					(col) =>
+						col
+							.references("lucid_client_integrations.id")
+							.onDelete("cascade")
+							.notNull(),
+				)
+				.addColumn("scope", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("core", adapter.getDataType("boolean"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "true"),
+							),
+						),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex(
+					"idx_lucid_client_integration_scopes_client_integration_id",
+				)
+				.on("lucid_client_integration_scopes")
+				.column("client_integration_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_client_integration_scopes_scope")
+				.on("lucid_client_integration_scopes")
+				.column("scope")
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

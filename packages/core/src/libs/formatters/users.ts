@@ -59,13 +59,13 @@ const formatSingle = (props: {
 
 	const canViewDetails = hasAccess({
 		user: props.authUser,
-		requiredPermissions: [Permissions.ReadUser],
+		requiredPermissions: [Permissions.UsersRead],
 		resourceOwnerId: props.user.id,
 	});
 
 	const canViewSensitive = hasAccess({
 		user: props.authUser,
-		requiredPermissions: [Permissions.UpdateUser],
+		requiredPermissions: [Permissions.UsersUpdate],
 		resourceOwnerId: props.user.id,
 	});
 

@@ -13,8 +13,10 @@ import {
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import cacheKeys from "../../../../kv-adapter/cache-keys.js";
+import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
+import clientScopes from "../../../middleware/client-scopes.js";
 import contentLocale from "../../../middleware/content-locale.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
@@ -42,6 +44,7 @@ const getMultipleController = factory.createHandlers(
 		}),
 	}),
 	clientAuthentication,
+	clientScopes([ClientScopes.MediaRead]),
 	contentLocale,
 	validate("query", controllerSchemas.client.getMultiple.query.string),
 	cache({

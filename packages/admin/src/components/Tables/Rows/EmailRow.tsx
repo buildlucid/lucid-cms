@@ -4,6 +4,7 @@ import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -32,7 +33,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("preview", true);
 					},
-					permission: userStore.get.hasPermission(["read_email"]).all,
+					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
 				},
 				{
 					label: T()("resend"),
@@ -41,7 +42,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("resend", true);
 					},
-					permission: userStore.get.hasPermission(["send_email"]).all,
+					permission: userStore.get.hasPermission([Permissions.EmailSend]).all,
 					actionExclude: true,
 				},
 				{
@@ -51,7 +52,8 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					permission: userStore.get.hasPermission(["delete_email"]).all,
+					permission: userStore.get.hasPermission([Permissions.EmailDelete])
+						.all,
 					actionExclude: true,
 				},
 			]}

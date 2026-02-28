@@ -35,7 +35,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateUser]),
+	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.unlinkAuthProvider.params),
 	async (c) => {
 		const { id, providerId } = c.req.valid("param");

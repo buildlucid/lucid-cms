@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
@@ -42,7 +43,7 @@ export const MediaFolderCard: Component<{
 	// ----------------------------------
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["update_media"]).all;
+		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
 	});
 	const isSelected = createMemo(() => {
 		return mediaStore.get.selectedFolders.includes(props.folder.id);
@@ -90,7 +91,8 @@ export const MediaFolderCard: Component<{
 								props.rowTarget.setTargetId(props.folder.id);
 								props.rowTarget.setTrigger("updateFolder", true);
 							},
-							permission: userStore.get.hasPermission(["update_media"]).all,
+							permission: userStore.get.hasPermission([Permissions.MediaUpdate])
+								.all,
 						},
 					]}
 					options={{

@@ -35,7 +35,7 @@ const deleteBatchController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteMedia]),
+	permissions([Permissions.MediaDelete]),
 	validate("json", controllerSchemas.deleteBatch.body),
 	async (c) => {
 		const { folderIds, mediaIds, recursiveMedia } = c.req.valid("json");

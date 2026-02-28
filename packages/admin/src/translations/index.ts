@@ -20,6 +20,7 @@ i18next.init<TranslationKeys>({
 		},
 	},
 	fallbackLng: "en",
+	nsSeparator: false,
 });
 
 const T = createMemo(() => {

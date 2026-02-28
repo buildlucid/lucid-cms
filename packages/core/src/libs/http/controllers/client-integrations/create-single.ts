@@ -39,10 +39,10 @@ const createSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.CreateClientIntegration]),
+	permissions([Permissions.IntegrationCreate]),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
-		const { name, description, enabled } = c.req.valid("json");
+		const { name, description, enabled, scopes } = c.req.valid("json");
 		const context = getServiceContext(c);
 
 		const clientIntegrationRes = await serviceWrapper(
@@ -59,6 +59,7 @@ const createSingleController = factory.createHandlers(
 			name,
 			description,
 			enabled,
+			scopes,
 		});
 		if (clientIntegrationRes.error)
 			throw new LucidAPIError(clientIntegrationRes.error);

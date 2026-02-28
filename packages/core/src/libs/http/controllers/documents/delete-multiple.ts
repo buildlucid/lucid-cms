@@ -37,7 +37,7 @@ const deleteMultipleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteContent]),
+	permissions([Permissions.DocumentsDelete]),
 	validate("json", controllerSchemas.deleteMultiple.body),
 	validate("param", controllerSchemas.deleteMultiple.params),
 	async (c) => {

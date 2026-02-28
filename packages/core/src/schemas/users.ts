@@ -4,7 +4,7 @@ import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const userResponsePermissionSchema = z.string().meta({
 	description: "A permission identifier",
-	example: "create_user",
+	example: "users:create",
 });
 const userResponseRoleSchema = z.object({
 	id: z.number().meta({

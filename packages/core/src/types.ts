@@ -6,6 +6,8 @@ export * from "./libs/email-adapter/types.js";
 export * from "./libs/kv-adapter/types.js";
 export * from "./libs/logger/types.js";
 export * from "./libs/media-adapter/types.js";
+export * from "./libs/permission/client-scopes.js";
+export * from "./libs/permission/scopes.js";
 export * from "./libs/permission/types.js";
 export * from "./libs/plugins/types.js";
 export * from "./libs/queue-adapter/types.js";

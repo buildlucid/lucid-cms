@@ -32,7 +32,7 @@ const updateLicenseController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateLicense]),
+	permissions([Permissions.LicenseUpdate]),
 	validate("json", controllerSchemas.update.body),
 	async (c) => {
 		const body = c.req.valid("json");

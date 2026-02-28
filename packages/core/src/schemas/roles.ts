@@ -24,7 +24,7 @@ const roleResponseSchema = z.object({
 				}),
 				permission: z.string().meta({
 					description: "The permission key",
-					example: "create_user",
+					example: "users:create",
 				}),
 			}),
 		)
@@ -60,7 +60,7 @@ export const controllerSchemas = {
 				.optional(),
 			permissions: z.array(z.string().trim()).meta({
 				description: "A lit of permissions",
-				example: ["create_user", "update_user"],
+				example: ["users:create", "users:update"],
 			}),
 		}),
 		query: {
@@ -93,7 +93,7 @@ export const controllerSchemas = {
 				.array(z.string().trim())
 				.meta({
 					description: "A lit of permissions",
-					example: ["create_user", "update_user"],
+					example: ["users:create", "users:update"],
 				})
 				.optional(),
 		}),

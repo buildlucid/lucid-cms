@@ -10,7 +10,9 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import getServiceContext from "../../utils/get-service-context.js";
@@ -30,6 +32,7 @@ const getSingleController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
+	permissions([Permissions.IntegrationRead]),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

@@ -6,6 +6,7 @@ import UpdateLicenseForm from "@/components/Forms/System/UpdateLicenseForm";
 import { DynamicContent } from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
 import constants from "@/constants";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -50,7 +51,7 @@ export const License: Component = () => {
 					</Button>
 				</InfoRow.Content>
 				<InfoRow.Content
-					title={T()("update_license")}
+					title={T()(Permissions.LicenseUpdate)}
 					description={T()("license_host_blurb")}
 				>
 					<UpdateLicenseForm licenseKey={status.data?.data?.key || ""} />

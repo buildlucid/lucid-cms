@@ -46,7 +46,7 @@ const regenerateKeysController = factory.createHandlers(
 		scope: constants.rateLimit.scopes.sensitive.scopeKey,
 		windowMs: minutesToMilliseconds(1),
 	}),
-	permissions([Permissions.RegenerateClientIntegration]),
+	permissions([Permissions.IntegrationRegenerate]),
 	validate("param", controllerSchemas.regenerateKeys.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

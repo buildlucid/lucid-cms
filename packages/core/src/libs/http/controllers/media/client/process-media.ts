@@ -11,7 +11,9 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { ClientScopes } from "../../../../permission/client-scopes.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
+import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import getServiceContext from "../../../utils/get-service-context.js";
@@ -38,6 +40,7 @@ const processMediaController = factory.createHandlers(
 		),
 	}),
 	clientAuthentication,
+	clientScopes([ClientScopes.MediaProcess]),
 	validate("param", controllerSchemas.client.processMedia.params),
 	validate("json", controllerSchemas.client.processMedia.body),
 	async (c) => {

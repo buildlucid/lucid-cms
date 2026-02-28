@@ -16,6 +16,7 @@ import {
 } from "solid-js";
 import { NavigationMenuContent } from "@/components/Groups/Layout/NavigationMenuContent";
 import UserDisplay from "@/components/Partials/UserDisplay";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -31,28 +32,28 @@ export const NavigationChrome: Component = () => {
 	const user = createMemo(() => userStore.get.user);
 	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
 	const canReadDocuments = createMemo(
-		() => userStore.get.hasPermission(["read_content"]).all,
+		() => userStore.get.hasPermission([Permissions.DocumentsRead]).all,
 	);
 	const canReadMedia = createMemo(
-		() => userStore.get.hasPermission(["read_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaRead]).all,
 	);
 	const canReadEmails = createMemo(
-		() => userStore.get.hasPermission(["read_email"]).all,
+		() => userStore.get.hasPermission([Permissions.EmailRead]).all,
 	);
 	const canReadUsers = createMemo(
-		() => userStore.get.hasPermission(["read_user"]).all,
+		() => userStore.get.hasPermission([Permissions.UsersRead]).all,
 	);
 	const canReadRoles = createMemo(
-		() => userStore.get.hasPermission(["read_role"]).all,
+		() => userStore.get.hasPermission([Permissions.RolesRead]).all,
 	);
 	const canReadJobs = createMemo(
-		() => userStore.get.hasPermission(["read_job"]).all,
+		() => userStore.get.hasPermission([Permissions.JobsRead]).all,
 	);
 	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission(["update_license"]).all,
+		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
 	const canReadClientIntegrations = createMemo(
-		() => userStore.get.hasPermission(["read_client_integration"]).all,
+		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
 	);
 	const showAccessAndPermissions = createMemo(
 		() => canReadUsers() || canReadRoles(),

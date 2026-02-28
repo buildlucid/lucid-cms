@@ -1,5 +1,6 @@
 import { Route, Router } from "@solidjs/router";
 import { type Component, lazy } from "solid-js";
+import { Permissions } from "@/constants/permissions";
 import PermissionGuard from "@/guards/Permission";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
@@ -50,7 +51,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections"
 					component={() => (
-						<PermissionGuard permission={"read_content"}>
+						<PermissionGuard permission={Permissions.DocumentsRead}>
 							<CollectionsListRoute />
 						</PermissionGuard>
 					)}
@@ -58,7 +59,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections/:collectionKey"
 					component={() => (
-						<PermissionGuard permission={"read_content"}>
+						<PermissionGuard permission={Permissions.DocumentsRead}>
 							<CollectionsDocumentsListRoute />
 						</PermissionGuard>
 					)}
@@ -67,7 +68,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections/:collectionKey/latest/create"
 					component={() => (
-						<PermissionGuard permission={"read_content"}>
+						<PermissionGuard permission={Permissions.DocumentsRead}>
 							<CollectionDocumentPageBuilderRoute
 								mode="create"
 								version="latest"
@@ -78,7 +79,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections/:collectionKey/:versionType/:documentId"
 					component={() => (
-						<PermissionGuard permission={"read_content"}>
+						<PermissionGuard permission={Permissions.DocumentsRead}>
 							<CollectionDocumentPageBuilderRoute mode="edit" />
 						</PermissionGuard>
 					)}
@@ -86,7 +87,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections/:collectionKey/revision/:documentId/:versionId"
 					component={() => (
-						<PermissionGuard permission={"read_content"}>
+						<PermissionGuard permission={Permissions.DocumentsRead}>
 							<CollectionDocumentPageBuilderRoute
 								mode="edit"
 								version="revision"
@@ -97,7 +98,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections/:collectionKey/:documentId/history"
 					component={() => (
-						<PermissionGuard permission={"read_content"}>
+						<PermissionGuard permission={Permissions.DocumentsRead}>
 							<CollectionsDocumentsHistoryRoute />
 						</PermissionGuard>
 					)}
@@ -106,7 +107,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/media"
 					component={() => (
-						<PermissionGuard permission={"read_media"}>
+						<PermissionGuard permission={Permissions.MediaRead}>
 							<MediaListRoute />
 						</PermissionGuard>
 					)}
@@ -114,7 +115,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/media/:folderId"
 					component={() => (
-						<PermissionGuard permission={"read_media"}>
+						<PermissionGuard permission={Permissions.MediaRead}>
 							<MediaListRoute />
 						</PermissionGuard>
 					)}
@@ -123,7 +124,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/users"
 					component={() => (
-						<PermissionGuard permission={"read_user"}>
+						<PermissionGuard permission={Permissions.UsersRead}>
 							<UsersListRoute />
 						</PermissionGuard>
 					)}
@@ -132,7 +133,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/roles"
 					component={() => (
-						<PermissionGuard permission={"read_role"}>
+						<PermissionGuard permission={Permissions.RolesRead}>
 							<RolesListRoute />
 						</PermissionGuard>
 					)}
@@ -141,7 +142,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/emails"
 					component={() => (
-						<PermissionGuard permission={"read_email"}>
+						<PermissionGuard permission={Permissions.EmailRead}>
 							<EmailListRoute />
 						</PermissionGuard>
 					)}
@@ -151,15 +152,15 @@ const AppRouter: Component = () => {
 				<Route
 					path="/system/queue-observability"
 					component={() => (
-						<PermissionGuard permission={"read_job"}>
+						<PermissionGuard permission={Permissions.JobsRead}>
 							<SystemQueueObservabilityRoute />
 						</PermissionGuard>
 					)}
 				/>
 				<Route
-					path="/system/client-integrations"
+					path="/system/integrations"
 					component={() => (
-						<PermissionGuard permission={"read_client_integration"}>
+						<PermissionGuard permission={Permissions.IntegrationsRead}>
 							<SystemClientIntegrationsRoute />
 						</PermissionGuard>
 					)}
@@ -167,7 +168,7 @@ const AppRouter: Component = () => {
 				<Route
 					path="/system/license"
 					component={() => (
-						<PermissionGuard permission={"update_license"}>
+						<PermissionGuard permission={Permissions.LicenseUpdate}>
 							<SystemLicenseRoute />
 						</PermissionGuard>
 					)}

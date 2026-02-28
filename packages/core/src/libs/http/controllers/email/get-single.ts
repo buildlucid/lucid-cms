@@ -32,7 +32,7 @@ const getSingleController = factory.createHandlers(
 		}),
 	}),
 	authenticate,
-	permissions([Permissions.ReadEmail]),
+	permissions([Permissions.EmailRead]),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

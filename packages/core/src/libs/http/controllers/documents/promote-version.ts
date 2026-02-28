@@ -37,7 +37,7 @@ const promoteVersionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.PublishContent]),
+	permissions([Permissions.DocumentsPublish]),
 	validate("json", controllerSchemas.promoteVersion.body),
 	validate("param", controllerSchemas.promoteVersion.params),
 	async (c) => {

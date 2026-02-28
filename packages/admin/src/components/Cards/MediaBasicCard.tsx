@@ -4,6 +4,7 @@ import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -38,7 +39,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["update_media"]).all;
+		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
 	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);

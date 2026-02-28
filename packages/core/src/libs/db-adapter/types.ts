@@ -241,6 +241,7 @@ export interface LucidRolePermissions {
 	id: Generated<number>;
 	role_id: number;
 	permission: string;
+	core: BooleanInt;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
@@ -422,6 +423,15 @@ export interface LucidClientIntegrations {
 	updated_at: TimestampMutateable;
 }
 
+export interface LucidClientIntegrationScopes {
+	id: Generated<number>;
+	client_integration_id: number;
+	scope: string;
+	core: BooleanInt;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export type LucidDocumentTableName = `lucid_document__${string}`;
 export interface LucidDocumentTable {
 	id: Generated<number>;
@@ -512,6 +522,7 @@ export interface LucidDB {
 	lucid_media_share_links: LucidMediaShareLinks;
 	lucid_processed_images: HeadlessProcessedImages;
 	lucid_client_integrations: LucidClientIntegrations;
+	lucid_client_integration_scopes: LucidClientIntegrationScopes;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_queue_jobs: LucidQueueJobs;

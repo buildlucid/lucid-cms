@@ -4,6 +4,7 @@ import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -32,7 +33,7 @@ const JobRow: Component<JobRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.job.id);
 						props.rowTarget.setTrigger("preview", true);
 					},
-					permission: userStore.get.hasPermission(["read_email"]).all,
+					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
 				},
 			]}
 		>

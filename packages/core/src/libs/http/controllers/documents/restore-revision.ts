@@ -35,7 +35,7 @@ const restoreRevisionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.RestoreContent]),
+	permissions([Permissions.DocumentsRestore]),
 	validate("param", controllerSchemas.restoreRevision.params),
 	async (c) => {
 		const { collectionKey, id, versionId } = c.req.valid("param");

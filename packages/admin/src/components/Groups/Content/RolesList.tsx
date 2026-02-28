@@ -6,6 +6,7 @@ import { Table } from "@/components/Groups/Table";
 import DeleteRole from "@/components/Modals/Role/DeleteRole";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import RoleRow from "@/components/Tables/Rows/RoleRow";
+import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -65,7 +66,7 @@ export const RolesList: Component<{
 				noEntries: {
 					title: T()("no_roles"),
 					description: T()("no_roles_description"),
-					button: T()("create_role"),
+					button: T()(Permissions.RolesCreate),
 				},
 			}}
 			callback={{

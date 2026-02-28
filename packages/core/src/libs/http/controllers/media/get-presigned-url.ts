@@ -38,7 +38,7 @@ const getPresignedUrlController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.CreateMedia, Permissions.UpdateMedia]),
+	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
 	validate("json", controllerSchemas.getPresignedUrl.body),
 	async (c) => {
 		const body = c.req.valid("json");

@@ -33,7 +33,7 @@ const revokeRefreshTokensController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateUser]),
+	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.revokeRefreshTokens.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

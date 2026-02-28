@@ -5,6 +5,7 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
+import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -65,7 +66,9 @@ const UsersListRoute: Component = () => {
 								{
 									open: openCreateUserPanel(),
 									setOpen: setOpenCreateUserPanel,
-									permission: userStore.get.hasPermission(["create_user"]).all,
+									permission: userStore.get.hasPermission([
+										Permissions.UsersCreate,
+									]).all,
 									label: T()("add_user"),
 								},
 							],

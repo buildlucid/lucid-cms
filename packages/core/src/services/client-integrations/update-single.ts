@@ -1,5 +1,8 @@
 import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
-import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
+import {
+	ClientIntegrationScopesRepository,
+	ClientIntegrationsRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -10,11 +13,16 @@ const updateSingle: ServiceFn<
 			name?: string;
 			description?: string;
 			enabled?: boolean;
+			scopes?: string[];
 		},
 	],
 	undefined
 > = async (context, data) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const ClientIntegrationScopes = new ClientIntegrationScopesRepository(
 		context.db.client,
 		context.config.db,
 	);
@@ -58,6 +66,34 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (updateRes.error) return updateRes;
+
+	if (data.scopes !== undefined) {
+		const deleteScopesRes = await ClientIntegrationScopes.deleteMultiple({
+			where: [
+				{
+					key: "client_integration_id",
+					operator: "=",
+					value: data.id,
+				},
+			],
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
+		});
+		if (deleteScopesRes.error) return deleteScopesRes;
+
+		if (data.scopes.length > 0) {
+			const createScopesRes = await ClientIntegrationScopes.createMultiple({
+				data: data.scopes.map((scope) => ({
+					client_integration_id: data.id,
+					scope,
+					core: true,
+				})),
+			});
+			if (createScopesRes.error) return createScopesRes;
+		}
+	}
 
 	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
 	await context.kv.delete(cacheKey, { hash: true });

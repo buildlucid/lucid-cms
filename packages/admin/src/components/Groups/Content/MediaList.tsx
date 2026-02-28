@@ -43,6 +43,7 @@ import UpdateMediaFolderPanel from "@/components/Panels/Media/UpdateMediaFolderP
 import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
 import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
 import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
+import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -206,10 +207,10 @@ export const MediaList: Component<{
 		};
 	});
 	const canRestoreMedia = createMemo(
-		() => userStore.get.hasPermission(["update_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaUpdate]).all,
 	);
 	const canDeleteMedia = createMemo(
-		() => userStore.get.hasPermission(["delete_media"]).all,
+		() => userStore.get.hasPermission([Permissions.MediaDelete]).all,
 	);
 
 	// ----------------------------------------

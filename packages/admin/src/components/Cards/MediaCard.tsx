@@ -7,6 +7,7 @@ import ActionDropdown from "@/components/Partials/ActionDropdown";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
@@ -58,16 +59,16 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["update_media"]).all;
+		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
 	});
 	const canReadMedia = createMemo(() => {
-		return userStore.get.hasPermission(["read_media"]).all;
+		return userStore.get.hasPermission([Permissions.MediaRead]).all;
 	});
 	const hasCreatePermission = createMemo(() => {
-		return userStore.get.hasPermission(["create_media"]).all;
+		return userStore.get.hasPermission([Permissions.MediaCreate]).all;
 	});
 	const hasDeletePermission = createMemo(() => {
-		return userStore.get.hasPermission(["delete_media"]).all;
+		return userStore.get.hasPermission([Permissions.MediaDelete]).all;
 	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);

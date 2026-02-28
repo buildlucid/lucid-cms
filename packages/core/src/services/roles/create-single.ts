@@ -74,6 +74,7 @@ const createSingle: ServiceFn<
 			data: validatePermsRes.data.map((p) => ({
 				role_id: newRolesRes.data.id,
 				permission: p.permission,
+				core: true,
 			})),
 		});
 		if (rolePermsRes.error) return rolePermsRes;

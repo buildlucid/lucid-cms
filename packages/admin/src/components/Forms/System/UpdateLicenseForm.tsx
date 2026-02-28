@@ -1,6 +1,7 @@
 import { type Component, createMemo, createSignal } from "solid-js";
 import { Form, Input } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -25,7 +26,7 @@ const UpdateLicenseForm: Component<{
 	// ----------------------------------------
 	// Memos
 	const hasPermission = createMemo(
-		() => userStore.get.hasPermission(["update_license"]).all,
+		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
 	const placeholder = createMemo(() => props.licenseKey || "");
 	const updateData = createMemo(() => {

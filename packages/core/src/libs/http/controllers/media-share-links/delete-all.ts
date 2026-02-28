@@ -22,7 +22,7 @@ const deleteAllController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DeleteMedia]),
+	permissions([Permissions.MediaDelete]),
 	async (c) => {
 		const context = getServiceContext(c);
 

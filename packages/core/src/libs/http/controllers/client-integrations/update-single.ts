@@ -37,11 +37,11 @@ const updateSingleController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UpdateClientIntegration]),
+	permissions([Permissions.IntegrationUpdate]),
 	validate("json", controllerSchemas.updateSingle.body),
 	validate("param", controllerSchemas.updateSingle.params),
 	async (c) => {
-		const { name, description, enabled } = c.req.valid("json");
+		const { name, description, enabled, scopes } = c.req.valid("json");
 		const { id } = c.req.valid("param");
 		const context = getServiceContext(c);
 
@@ -60,6 +60,7 @@ const updateSingleController = factory.createHandlers(
 			name,
 			description,
 			enabled,
+			scopes,
 		});
 		if (updateSingleRes.error) throw new LucidAPIError(updateSingleRes.error);
 
