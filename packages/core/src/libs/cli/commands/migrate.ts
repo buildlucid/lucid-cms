@@ -1,4 +1,5 @@
 import { confirm } from "@inquirer/prompts";
+import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
@@ -184,6 +185,28 @@ const migrateCommand = (props?: {
 				}
 			}
 
+			//* run collections sync before collection migrations
+			if (needsCollectionMigrations) {
+				const preCollectionSyncResult = await syncServices.syncCollections({
+					db: { client: config.db.client },
+					config: config,
+					queue: queue,
+					env: null,
+					kv: kvInstance,
+					requestUrl: config.baseUrl ?? "",
+				});
+				if (preCollectionSyncResult.error) {
+					cliLogger.error(
+						"Sync failed during pre-migration collection sync, with error:",
+						preCollectionSyncResult.error.message || "unknown",
+					);
+					if (mode === "process") {
+						logger.setBuffering(false);
+						process.exit(1);
+					} else return false;
+				}
+			}
+
 			//* run collection migrations if needed
 			if (needsCollectionMigrations) {
 				cliLogger.info("Running collection migrations...");
@@ -229,9 +252,11 @@ const migrateCommand = (props?: {
 			}
 
 			//* run sync tasks after migrations so sync can rely on latest schema changes
-			const syncResult = await runSyncTasks(config, mode, kvInstance);
-			if (!syncResult && mode === "return") {
-				return false;
+			if (!skipSyncSteps) {
+				const syncResult = await runSyncTasks(config, mode, kvInstance);
+				if (!syncResult && mode === "return") {
+					return false;
+				}
 			}
 
 			cliLogger.info("Clearing KV cache...");

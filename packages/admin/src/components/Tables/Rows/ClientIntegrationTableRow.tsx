@@ -86,12 +86,24 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 				options={{ include: props.include[3], maxLines: 2 }}
 			/>
 			<DateCol
-				date={props.clientIntegration.createdAt}
+				date={props.clientIntegration.lastUsedAt}
 				options={{ include: props.include[4] }}
+			/>
+			<TextCol
+				text={props.clientIntegration.lastUsedIp}
+				options={{ include: props.include[5], maxLines: 1 }}
+			/>
+			<TextCol
+				text={props.clientIntegration.lastUsedUserAgent}
+				options={{ include: props.include[6], maxLines: 2 }}
+			/>
+			<DateCol
+				date={props.clientIntegration.createdAt}
+				options={{ include: props.include[7] }}
 			/>
 			<DateCol
 				date={props.clientIntegration.updatedAt}
-				options={{ include: props.include[5] }}
+				options={{ include: props.include[8] }}
 			/>
 		</Tr>
 	);

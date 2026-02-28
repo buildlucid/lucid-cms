@@ -64,6 +64,55 @@ const resetPassword: ServiceFn<
 	});
 	if (userRes.error) return userRes;
 
+	const now = new Date().toISOString();
+	const consumeTokenRes = await UserTokens.updateSingle({
+		data: {
+			consumed_at: now,
+			revoked_at: now,
+			revoke_reason: constants.userTokenRevokeReasons.passwordResetUsed,
+			expiry_date: now,
+		},
+		where: [
+			{
+				key: "id",
+				operator: "=",
+				value: tokenRes.data.id,
+			},
+			{
+				key: "token_type",
+				operator: "=",
+				value: constants.userTokens.passwordReset,
+			},
+			{
+				key: "expiry_date",
+				operator: ">",
+				value: now,
+			},
+			{
+				key: "revoked_at",
+				operator: "is",
+				value: null,
+			},
+			{
+				key: "consumed_at",
+				operator: "is",
+				value: null,
+			},
+		],
+		returning: ["id"],
+	});
+	if (consumeTokenRes.error) return consumeTokenRes;
+	if (!consumeTokenRes.data) {
+		return {
+			error: {
+				type: "basic",
+				message: T("token_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
 	const { secret, encryptSecret } = generateSecret(
 		context.config.secrets.encryption,
 	);
@@ -97,35 +146,23 @@ const resetPassword: ServiceFn<
 
 	const baseUrl = getBaseUrl(context);
 
-	const [deleteMultipleTokensRes, sendEmail] = await Promise.all([
-		UserTokens.deleteMultiple({
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: tokenRes.data.id,
-				},
-			],
-		}),
-		emailServices.sendEmail(context, {
-			template: constants.emailTemplates.passwordResetSuccess,
-			type: "internal",
-			to: updatedUserRes.data.email,
-			subject: formatEmailSubject(
-				T("password_reset_success_subject"),
-				context.config.brand?.name,
-			),
-			data: {
-				firstName: updatedUserRes.data.first_name,
-				lastName: updatedUserRes.data.last_name,
-				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
-				brand: {
-					name: context.config.brand?.name,
-				},
+	const sendEmail = await emailServices.sendEmail(context, {
+		template: constants.emailTemplates.passwordResetSuccess,
+		type: "internal",
+		to: updatedUserRes.data.email,
+		subject: formatEmailSubject(
+			T("password_reset_success_subject"),
+			context.config.brand?.name,
+		),
+		data: {
+			firstName: updatedUserRes.data.first_name,
+			lastName: updatedUserRes.data.last_name,
+			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+			brand: {
+				name: context.config.brand?.name,
 			},
-		}),
-	]);
-	if (deleteMultipleTokensRes.error) return deleteMultipleTokensRes;
+		},
+	});
 	if (sendEmail.error) return sendEmail;
 
 	return {

@@ -8,6 +8,9 @@ export interface ClientIntegrationQueryRes {
 	description: string | null;
 	enabled: BooleanInt;
 	key: string;
+	last_used_at: Date | string | null;
+	last_used_ip: string | null;
+	last_used_user_agent: string | null;
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 }
@@ -31,6 +34,9 @@ const formatSingle = (props: {
 		name: props.integration.name,
 		description: props.integration.description,
 		enabled: formatter.formatBoolean(props.integration.enabled),
+		lastUsedAt: formatter.formatDate(props.integration.last_used_at),
+		lastUsedIp: props.integration.last_used_ip,
+		lastUsedUserAgent: props.integration.last_used_user_agent,
 		createdAt: formatter.formatDate(props.integration.created_at),
 		updatedAt: formatter.formatDate(props.integration.updated_at),
 	};

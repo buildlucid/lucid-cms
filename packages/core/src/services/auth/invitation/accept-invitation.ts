@@ -56,6 +56,16 @@ const acceptInvitation: ServiceFn<
 				operator: ">",
 				value: new Date().toISOString(),
 			},
+			{
+				key: "revoked_at",
+				operator: "is",
+				value: null,
+			},
+			{
+				key: "consumed_at",
+				operator: "is",
+				value: null,
+			},
 		],
 		validation: {
 			enabled: true,
@@ -98,6 +108,55 @@ const acceptInvitation: ServiceFn<
 		};
 	}
 
+	const now = new Date().toISOString();
+	const consumeTokenRes = await UserTokens.updateSingle({
+		data: {
+			consumed_at: now,
+			revoked_at: now,
+			revoke_reason: constants.userTokenRevokeReasons.invitationAccepted,
+			expiry_date: now,
+		},
+		where: [
+			{
+				key: "id",
+				operator: "=",
+				value: tokenRes.data.id,
+			},
+			{
+				key: "token_type",
+				operator: "=",
+				value: constants.userTokens.invitation,
+			},
+			{
+				key: "expiry_date",
+				operator: ">",
+				value: now,
+			},
+			{
+				key: "revoked_at",
+				operator: "is",
+				value: null,
+			},
+			{
+				key: "consumed_at",
+				operator: "is",
+				value: null,
+			},
+		],
+		returning: ["id"],
+	});
+	if (consumeTokenRes.error) return consumeTokenRes;
+	if (!consumeTokenRes.data) {
+		return {
+			error: {
+				type: "basic",
+				message: T("token_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
 	const { secret, encryptSecret } = generateSecret(
 		context.config.secrets.encryption,
 	);
@@ -129,17 +188,6 @@ const acceptInvitation: ServiceFn<
 		},
 	});
 	if (updatedUserRes.error) return updatedUserRes;
-
-	const deleteMultipleTokensRes = await UserTokens.deleteMultiple({
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: tokenRes.data.id,
-			},
-		],
-	});
-	if (deleteMultipleTokensRes.error) return deleteMultipleTokensRes;
 
 	return {
 		error: undefined,

@@ -134,7 +134,56 @@ const processProviderAuth: ServiceFn<
 			};
 		}
 
-		//* update the user, create a user auth provider entry and delete the invitation token
+		//* consume the invitation token first to enforce single-use
+		const now = new Date().toISOString();
+		const consumeTokenRes = await UserTokens.updateSingle({
+			data: {
+				consumed_at: now,
+				revoked_at: now,
+				revoke_reason: constants.userTokenRevokeReasons.invitationAccepted,
+				expiry_date: now,
+			},
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.invitationTokenId,
+				},
+				{
+					key: "token_type",
+					operator: "=",
+					value: constants.userTokens.invitation,
+				},
+				{
+					key: "expiry_date",
+					operator: ">",
+					value: now,
+				},
+				{
+					key: "revoked_at",
+					operator: "is",
+					value: null,
+				},
+				{
+					key: "consumed_at",
+					operator: "is",
+					value: null,
+				},
+			],
+			returning: ["id"],
+		});
+		if (consumeTokenRes.error) return consumeTokenRes;
+		if (!consumeTokenRes.data) {
+			return {
+				error: {
+					status: 404,
+					message: T("invitation_token_not_found_message"),
+				},
+				data: undefined,
+			};
+		}
+
+		//* update the user, create a user auth provider entry
 		const [linkRes, updateUserRes] = await Promise.all([
 			userAuthProviderRes.data
 				? undefined
@@ -161,15 +210,6 @@ const processProviderAuth: ServiceFn<
 					invitation_accepted: true,
 					updated_at: new Date().toISOString(),
 				},
-			}),
-			UserTokens.deleteSingle({
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.invitationTokenId,
-					},
-				],
 			}),
 		]);
 		if (linkRes?.error) return linkRes;

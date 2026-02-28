@@ -123,6 +123,21 @@ export const ClientIntegrationsList: Component<{
 							sortable: true,
 						},
 						{
+							label: T()("last_used_at"),
+							key: "lastUsedAt",
+							icon: <FaSolidCalendar />,
+						},
+						{
+							label: T()("ip_address"),
+							key: "lastUsedIp",
+							icon: <FaSolidIdCard />,
+						},
+						{
+							label: T()("user_agent"),
+							key: "lastUsedUserAgent",
+							icon: <FaSolidT />,
+						},
+						{
 							label: T()("created_at"),
 							key: "createdAt",
 							icon: <FaSolidCalendar />,

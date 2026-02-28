@@ -261,6 +261,10 @@ export interface LucidUserTokens {
 	user_id: number;
 	token_type: UserTokenType;
 	token: string;
+	revoked_at: TimestampMutateable;
+	revoke_reason: string | null;
+	consumed_at: TimestampMutateable;
+	replaced_by_token_id: number | null;
 	created_at: TimestampImmutable;
 	expiry_date: TimestampMutateable;
 }
@@ -411,6 +415,9 @@ export interface LucidClientIntegrations {
 	key: string;
 	api_key: string;
 	secret: string;
+	last_used_at: TimestampMutateable;
+	last_used_ip: string | null;
+	last_used_user_agent: string | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }

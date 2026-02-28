@@ -12,6 +12,7 @@ import InfoRow from "@/components/Blocks/InfoRow";
 import UpdateAccountForm from "@/components/Forms/Account/UpdateAccountForm";
 import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
+import { Confirmation } from "@/components/Groups/Modal";
 import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import Button from "@/components/Partials/Button";
@@ -30,6 +31,8 @@ export const Account: Component = () => {
 	const [unlinkingProviderKey, setUnlinkingProviderKey] =
 		createSignal<string>();
 	const [passwordModalOpen, setPasswordModalOpen] = createSignal(false);
+	const [revokeSessionsModalOpen, setRevokeSessionsModalOpen] =
+		createSignal(false);
 
 	// ----------------------------------------
 	// Memos
@@ -53,6 +56,11 @@ export const Account: Component = () => {
 		},
 		onError: () => {
 			setUnlinkingProviderKey(undefined);
+		},
+	});
+	const revokeRefreshTokens = api.account.useRevokeRefreshTokens({
+		onSuccess: () => {
+			setRevokeSessionsModalOpen(false);
 		},
 	});
 
@@ -136,93 +144,102 @@ export const Account: Component = () => {
 				</InfoRow.Content>
 			</InfoRow.Root>
 			{/* Security */}
-			<Show
-				when={
-					providers.data?.data.disablePassword === false ||
-					(providers.data?.data.providers?.length ?? 0) > 0
-				}
+			<InfoRow.Root
+				title={T()("security")}
+				description={T()("account_security_description")}
 			>
-				<InfoRow.Root
-					title={T()("security")}
-					description={T()("account_security_description")}
-				>
-					<Show when={providers.data?.data.disablePassword === false}>
-						<InfoRow.Content
-							title={T()("password")}
-							description={T()("account_password_description")}
-							actions={
-								<Button
-									theme="border-outline"
-									size="small"
-									type="button"
-									onClick={() => setPasswordModalOpen(true)}
-								>
-									{T()("reset_password")}
-								</Button>
-							}
-							actionAlignment="center"
-						/>
-					</Show>
-					<Show when={providersList().length > 0}>
-						<InfoRow.Content
-							title={T()("auth_providers")}
-							description={T()("account_auth_providers_description")}
+				<Show when={providers.data?.data.disablePassword === false}>
+					<InfoRow.Content
+						title={T()("password")}
+						description={T()("account_password_description")}
+						actions={
+							<Button
+								theme="border-outline"
+								size="small"
+								type="button"
+								onClick={() => setPasswordModalOpen(true)}
+							>
+								{T()("reset_password")}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
+				</Show>
+				<Show when={providersList().length > 0}>
+					<InfoRow.Content
+						title={T()("auth_providers")}
+						description={T()("account_auth_providers_description")}
+					>
+						<div class="flex flex-col gap-3">
+							<For each={providersList()}>
+								{(provider) => {
+									const linkedProvider = linkedProvidersByKey()[provider.key];
+									const isLinking =
+										linkingProviderKey() === provider.key &&
+										initiateProvider.action.isPending;
+
+									const isUnlinking =
+										unlinkingProviderKey() === provider.key &&
+										unlinkAuthProvider.action.isPending;
+
+									return (
+										<AuthProviderRow
+											provider={provider}
+											linkedProvider={linkedProvider}
+											onUnlink={
+												linkedProvider
+													? () => {
+															if (unlinkAuthProvider.action.isPending) return;
+															unlinkAuthProvider.action.mutate({
+																providerKey: provider.key,
+															});
+														}
+													: undefined
+											}
+											onLink={
+												!linkedProvider
+													? () => {
+															if (initiateProvider.action.isPending) {
+																return;
+															}
+															setLinkingProviderKey(provider.key);
+															initiateProvider.action.mutate({
+																providerKey: provider.key,
+																body: {
+																	actionType: "authenticated-link",
+																	redirectPath: `${location.pathname}${location.search}${location.hash}`,
+																},
+															});
+														}
+													: undefined
+											}
+											isLoading={isLinking || isUnlinking}
+										/>
+									);
+								}}
+							</For>
+						</div>
+					</InfoRow.Content>
+				</Show>
+				<InfoRow.Content
+					title={T()("account_sessions")}
+					description={T()("account_sessions_description")}
+					theme="danger"
+					actions={
+						<Button
+							theme="danger-outline"
+							size="small"
+							type="button"
+							onClick={() => {
+								setRevokeSessionsModalOpen(true);
+							}}
 						>
-							<div class="flex flex-col gap-3">
-								<For each={providersList()}>
-									{(provider) => {
-										const linkedProvider = linkedProvidersByKey()[provider.key];
-										const isLinking =
-											linkingProviderKey() === provider.key &&
-											initiateProvider.action.isPending;
-
-										const isUnlinking =
-											unlinkingProviderKey() === provider.key &&
-											unlinkAuthProvider.action.isPending;
-
-										return (
-											<AuthProviderRow
-												provider={provider}
-												linkedProvider={linkedProvider}
-												onUnlink={
-													linkedProvider
-														? () => {
-																if (unlinkAuthProvider.action.isPending) return;
-																unlinkAuthProvider.action.mutate({
-																	providerKey: provider.key,
-																});
-															}
-														: undefined
-												}
-												onLink={
-													!linkedProvider
-														? () => {
-																if (initiateProvider.action.isPending) {
-																	return;
-																}
-																setLinkingProviderKey(provider.key);
-																initiateProvider.action.mutate({
-																	providerKey: provider.key,
-																	body: {
-																		actionType: "authenticated-link",
-																		redirectPath: `${location.pathname}${
-																			location.search
-																		}${location.hash}`,
-																	},
-																});
-															}
-														: undefined
-												}
-												isLoading={isLinking || isUnlinking}
-											/>
-										);
-									}}
-								</For>
-							</div>
-						</InfoRow.Content>
-					</Show>
-				</InfoRow.Root>
-			</Show>
+							{T()("logout_everywhere")}
+						</Button>
+					}
+					actionAlignment="center"
+				/>
+			</InfoRow.Root>
 			{/* Configuration */}
 			<InfoRow.Root
 				title={T()("account_preferences")}
@@ -257,6 +274,29 @@ export const Account: Component = () => {
 					}}
 				/>
 			</Show>
+			<Confirmation
+				theme="danger"
+				state={{
+					open: revokeSessionsModalOpen(),
+					setOpen: setRevokeSessionsModalOpen,
+					isLoading: revokeRefreshTokens.action.isPending,
+					isError: revokeRefreshTokens.action.isError,
+				}}
+				copy={{
+					title: T()("account_revoke_sessions_modal_title"),
+					description: T()("account_revoke_sessions_modal_description"),
+					error: revokeRefreshTokens.errors()?.message,
+				}}
+				callbacks={{
+					onConfirm: () => {
+						revokeRefreshTokens.action.mutate({});
+					},
+					onCancel: () => {
+						setRevokeSessionsModalOpen(false);
+						revokeRefreshTokens.reset();
+					},
+				}}
+			/>
 		</DynamicContent>
 	);
 };

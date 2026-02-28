@@ -178,6 +178,20 @@ export default Object.freeze({
 		refresh: "refresh",
 		invitation: "invitation",
 	} as const,
+	refreshTokenRevokeReasons: {
+		logout: "logout",
+		rotated: "rotated",
+		revokeAll: "revoke_all",
+		reuseDetected: "reuse_detected",
+		accountRevokeAll: "account_revoke_all",
+		adminRevokeAll: "admin_revoke_all",
+	} as const,
+	userTokenRevokeReasons: {
+		passwordResetUsed: "password_reset_used",
+		invitationAccepted: "invitation_accepted",
+		invitationResent: "invitation_resent",
+		expired: "expired",
+	} as const,
 	authState: {
 		actionTypes: {
 			invitation: "invitation",

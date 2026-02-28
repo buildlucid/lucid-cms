@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { setCookie } from "hono/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
@@ -12,7 +12,12 @@ const generateToken = async (
 	c: LucidHonoContext,
 	userId: number,
 ): ServiceResponse<{ tokenId: number }> => {
-	const clearRes = await clearToken(c);
+	const existingRefreshToken = getCookie(c, constants.cookies.refreshToken);
+
+	const clearRes = await clearToken(c, {
+		revokeReason: constants.refreshTokenRevokeReasons.rotated,
+		consume: true,
+	});
 	if (clearRes.error) return clearRes;
 
 	const config = c.get("config");
@@ -32,14 +37,6 @@ const generateToken = async (
 		config.secrets.refreshToken,
 	);
 
-	setCookie(c, constants.cookies.refreshToken, token, {
-		maxAge: constants.refreshTokenExpiration,
-		httpOnly: true,
-		secure: c.req.url.startsWith("https://"),
-		sameSite: "strict",
-		path: "/",
-	});
-
 	const createTokenRes = await UserTokens.createSingle({
 		data: {
 			user_id: userId,
@@ -55,6 +52,35 @@ const generateToken = async (
 		},
 	});
 	if (createTokenRes.error) return createTokenRes;
+
+	if (existingRefreshToken) {
+		const updateRotatedTokenRes = await UserTokens.updateMultiple({
+			data: {
+				replaced_by_token_id: createTokenRes.data.id,
+			},
+			where: [
+				{
+					key: "token",
+					operator: "=",
+					value: existingRefreshToken,
+				},
+				{
+					key: "token_type",
+					operator: "=",
+					value: constants.userTokens.refresh,
+				},
+			],
+		});
+		if (updateRotatedTokenRes.error) return updateRotatedTokenRes;
+	}
+
+	setCookie(c, constants.cookies.refreshToken, token, {
+		maxAge: constants.refreshTokenExpiration,
+		httpOnly: true,
+		secure: c.req.url.startsWith("https://"),
+		sameSite: "strict",
+		path: "/",
+	});
 
 	const kv = c.get("kv");
 	await kv.set(

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import getMeController from "../../../controllers/account/get-me.js";
 import resetPasswordController from "../../../controllers/account/reset-password.js";
+import revokeRefreshTokensController from "../../../controllers/account/revoke-refresh-tokens.js";
 import sendResetPasswordController from "../../../controllers/account/send-reset-password.js";
 import unlinkAuthProviderController from "../../../controllers/account/unlink-auth-provider.js";
 import updateMeController from "../../../controllers/account/update-me.js";
@@ -12,6 +13,7 @@ const accountRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/", ...updateMeController)
 	.patch("/reset-password/:token", ...resetPasswordController)
 	.post("/reset-password", ...sendResetPasswordController)
+	.post("/revoke-refresh-tokens", ...revokeRefreshTokensController)
 	.get("/reset-password/:token", ...verifyResetPasswordController)
 	.delete("/auth-providers/:providerId", ...unlinkAuthProviderController);
 

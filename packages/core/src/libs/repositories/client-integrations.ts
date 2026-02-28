@@ -18,6 +18,9 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 		key: z.string(),
 		api_key: z.string(),
 		secret: z.string(),
+		last_used_at: z.union([z.string(), z.date()]).nullable(),
+		last_used_ip: z.string().nullable(),
+		last_used_user_agent: z.string().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
@@ -29,6 +32,9 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 		key: this.dbAdapter.getDataType("text"),
 		api_key: this.dbAdapter.getDataType("text"),
 		secret: this.dbAdapter.getDataType("text"),
+		last_used_at: this.dbAdapter.getDataType("timestamp"),
+		last_used_ip: this.dbAdapter.getDataType("varchar", 255),
+		last_used_user_agent: this.dbAdapter.getDataType("text"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};

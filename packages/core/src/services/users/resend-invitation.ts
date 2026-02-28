@@ -58,7 +58,13 @@ const resendInvitation: ServiceFn<
 		};
 	}
 
-	const deleteMultipleRes = await UserTokens.deleteMultiple({
+	const now = new Date().toISOString();
+	const revokeExistingRes = await UserTokens.updateMultiple({
+		data: {
+			revoked_at: now,
+			revoke_reason: constants.userTokenRevokeReasons.invitationResent,
+			expiry_date: now,
+		},
 		where: [
 			{
 				key: "user_id",
@@ -70,12 +76,14 @@ const resendInvitation: ServiceFn<
 				operator: "=",
 				value: constants.userTokens.invitation,
 			},
+			{
+				key: "revoked_at",
+				operator: "is",
+				value: null,
+			},
 		],
-		validation: {
-			enabled: true,
-		},
 	});
-	if (deleteMultipleRes.error) return deleteMultipleRes;
+	if (revokeExistingRes.error) return revokeExistingRes;
 
 	const expiryDate = add(new Date(), {
 		minutes: constants.userInviteTokenExpirationMinutes,

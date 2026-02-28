@@ -1,32 +1,44 @@
 import { deleteCookie, getCookie } from "hono/cookie";
-import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
-const clearToken = async (c: LucidHonoContext): ServiceResponse<undefined> => {
+interface ClearTokenConfig {
+	revokeReason?: string;
+	consume?: boolean;
+}
+
+const clearToken = async (
+	c: LucidHonoContext,
+	options?: ClearTokenConfig,
+): ServiceResponse<undefined> => {
 	const _refresh = getCookie(c, constants.cookies.refreshToken);
+	deleteCookie(c, constants.cookies.refreshToken, { path: "/" });
+
 	if (!_refresh) {
 		return {
 			error: undefined,
 			data: undefined,
 		};
 	}
+
 	const config = c.get("config");
+	const now = new Date().toISOString();
 
 	const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
-	const decode = (await verify(_refresh, config.secrets.refreshToken)) as {
-		id: number;
-	};
-
-	deleteCookie(c, constants.cookies.refreshToken, { path: "/" });
-
 	await c.get("kv").delete(cacheKeys.auth.refresh(_refresh), { hash: true });
 
-	const deleteMultipleTokenRes = await UserTokens.deleteMultiple({
+	const updateTokenRes = await UserTokens.updateMultiple({
+		data: {
+			revoked_at: now,
+			revoke_reason:
+				options?.revokeReason ?? constants.refreshTokenRevokeReasons.logout,
+			expiry_date: now,
+			...(options?.consume ? { consumed_at: now } : {}),
+		},
 		where: [
 			{
 				key: "token",
@@ -39,13 +51,13 @@ const clearToken = async (c: LucidHonoContext): ServiceResponse<undefined> => {
 				value: constants.userTokens.refresh,
 			},
 			{
-				key: "user_id",
-				operator: "=",
-				value: decode.id,
+				key: "revoked_at",
+				operator: "is",
+				value: null,
 			},
 		],
 	});
-	if (deleteMultipleTokenRes.error) return deleteMultipleTokenRes;
+	if (updateTokenRes.error) return updateTokenRes;
 
 	return {
 		error: undefined,

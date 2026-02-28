@@ -14,6 +14,7 @@ import DeleteUser from "@/components/Modals/User/DeleteUser";
 import DeleteUserPermanently from "@/components/Modals/User/DeleteUserPermanently";
 import ResendInvitation from "@/components/Modals/User/ResendInvitation";
 import RestoreUsers from "@/components/Modals/User/RestoreUser";
+import RevokeRefreshTokens from "@/components/Modals/User/RevokeRefreshTokens";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
 import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
@@ -41,6 +42,7 @@ export const UserList: Component<{
 			update: false,
 			delete: false,
 			passwordReset: false,
+			revokeRefreshTokens: false,
 			restore: false,
 			deletePermanently: false,
 			resendInvitation: false,
@@ -311,6 +313,15 @@ export const UserList: Component<{
 					open: rowTarget.getTriggers().passwordReset,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("passwordReset", state);
+					},
+				}}
+			/>
+			<RevokeRefreshTokens
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().revokeRefreshTokens,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("revokeRefreshTokens", state);
 					},
 				}}
 			/>

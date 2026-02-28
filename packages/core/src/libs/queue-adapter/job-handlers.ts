@@ -6,7 +6,6 @@ import deleteLocaleJob from "../../services/locales/jobs/delete-single.js";
 import deleteAwaitingSyncMediaJob from "../../services/media/jobs/delete-awaiting-sync.js";
 import hardDeleteSingleMediaJob from "../../services/media/jobs/hard-delete-single.js";
 import updateMediaStorageJob from "../../services/media/jobs/update-storage.js";
-import deleteTokenJob from "../../services/user-tokens/jobs/delete-single.js";
 import deleteUserJob from "../../services/users/jobs/delete-single.js";
 import type {
 	QueueEvent,
@@ -21,7 +20,6 @@ const jobHandlersMap: Record<QueueEvent, QueueJobHandlerFn> = {
 	"media:update-storage": updateMediaStorageJob,
 	"collections:delete": deleteCollectionJob,
 	"locales:delete": deleteLocaleJob,
-	"user-tokens:delete": deleteTokenJob,
 	"users:delete": deleteUserJob,
 	"documents:delete": deleteDocumentJob,
 	"document-versions:delete-expired": deleteExpiredRevisionsJob,

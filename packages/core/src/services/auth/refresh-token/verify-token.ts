@@ -7,6 +7,7 @@ import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { authServices } from "../../index.js";
+import revokeUserTokens from "./revoke-user-tokens.js";
 
 const verifyToken = async (
 	c: LucidHonoContext,
@@ -35,21 +36,14 @@ const verifyToken = async (
 			id: number;
 		};
 
-		const kv = c.get("kv");
-		const kvEntry = await kv.get<{ user_id: number }>(
-			cacheKeys.auth.refresh(_refresh),
-			{ hash: true },
-		);
-
-		if (kvEntry && kvEntry.user_id === decode.id) {
-			return {
-				error: undefined,
-				data: { user_id: kvEntry.user_id },
-			};
-		}
-
 		const tokenRes = await UserTokens.selectSingle({
-			select: ["id", "user_id"],
+			select: [
+				"user_id",
+				"expiry_date",
+				"revoked_at",
+				"revoke_reason",
+				"replaced_by_token_id",
+			],
 			where: [
 				{
 					key: "token",
@@ -61,29 +55,11 @@ const verifyToken = async (
 					operator: "=",
 					value: constants.userTokens.refresh,
 				},
-				{
-					key: "user_id",
-					operator: "=",
-					value: decode.id,
-				},
-				{
-					key: "expiry_date",
-					operator: ">",
-					value: new Date().toISOString(),
-				},
 			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					type: "authorisation",
-					name: T("refresh_token_error_name"),
-					message: T("no_refresh_token_found"),
-				},
-			},
 		});
 		if (tokenRes.error) return tokenRes;
 
-		if (!tokenRes.data.user_id) {
+		if (!tokenRes.data || tokenRes.data.user_id !== decode.id) {
 			return {
 				error: {
 					type: "authorisation",
@@ -91,6 +67,88 @@ const verifyToken = async (
 					message: T("no_refresh_token_found"),
 				},
 				data: undefined,
+			};
+		}
+
+		if (tokenRes.data.revoked_at !== null) {
+			if (tokenRes.data.replaced_by_token_id !== null) {
+				await revokeUserTokens(
+					{
+						db: { client: config.db.client },
+						config: config,
+						queue: c.get("queue"),
+						env: c.get("env"),
+						kv: c.get("kv"),
+						requestUrl: c.req.url,
+					},
+					{
+						userId: tokenRes.data.user_id,
+						revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
+					},
+				);
+
+				const [refreshRes, accessRes] = await Promise.all([
+					authServices.refreshToken.clearToken(c, {
+						revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
+					}),
+					authServices.accessToken.clearToken(c),
+				]);
+				if (refreshRes.error) return refreshRes;
+				if (accessRes.error) return accessRes;
+
+				return {
+					error: {
+						type: "authorisation",
+						name: T("refresh_token_error_name"),
+						message: T("refresh_token_error_message"),
+					},
+					data: undefined,
+				};
+			}
+
+			return {
+				error: {
+					type: "authorisation",
+					name: T("refresh_token_error_name"),
+					message: T("no_refresh_token_found"),
+				},
+				data: undefined,
+			};
+		}
+
+		if (!tokenRes.data.expiry_date) {
+			return {
+				error: {
+					type: "authorisation",
+					name: T("refresh_token_error_name"),
+					message: T("no_refresh_token_found"),
+				},
+				data: undefined,
+			};
+		}
+
+		const expiryMs = new Date(tokenRes.data.expiry_date).getTime();
+		if (Number.isNaN(expiryMs) || expiryMs <= Date.now()) {
+			return {
+				error: {
+					type: "authorisation",
+					name: T("refresh_token_error_name"),
+					message: T("no_refresh_token_found"),
+				},
+				data: undefined,
+			};
+		}
+
+		const kv = c.get("kv");
+		const kvEntry = await kv.get<{ user_id: number }>(
+			cacheKeys.auth.refresh(_refresh),
+			{ hash: true },
+		);
+
+		if (kvEntry && kvEntry.user_id === tokenRes.data.user_id) {
+			return {
+				error: undefined,
+				data: { user_id: kvEntry.user_id },
 			};
 		}
 

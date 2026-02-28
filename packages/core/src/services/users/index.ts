@@ -9,6 +9,7 @@ export { default as getSingle } from "./get-single.js";
 export { default as inviteSingle } from "./invite-single.js";
 export { default as resendInvitation } from "./resend-invitation.js";
 export { default as restoreMultiple } from "./restore-multiple.js";
+export { default as revokeRefreshTokens } from "./revoke-refresh-tokens.js";
 export { default as unlinkAuthProvider } from "./unlink-auth-provider.js";
 export { default as updateMultipleRoles } from "./update-multiple-roles.js";
 export { default as updateSingle } from "./update-single.js";

@@ -24,6 +24,9 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("secret", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("last_used_at", adapter.getDataType("timestamp"))
+				.addColumn("last_used_ip", adapter.getDataType("varchar", 255))
+				.addColumn("last_used_user_agent", adapter.getDataType("text"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(

@@ -16,7 +16,6 @@ export type QueueEvent<T extends string = string> =
 	| "media:update-storage"
 	| "collections:delete"
 	| "locales:delete"
-	| "user-tokens:delete"
 	| "users:delete"
 	| "documents:delete"
 	| "document-versions:delete-expired"

@@ -19,6 +19,7 @@ interface UserRowProps extends TableRowProps {
 			| "update"
 			| "delete"
 			| "passwordReset"
+			| "revokeRefreshTokens"
 			| "restore"
 			| "deletePermanently"
 			| "resendInvitation"
@@ -42,6 +43,9 @@ const UserRow: Component<UserRowProps> = (props) => {
 	});
 	const canDeleteNotSelf = createMemo(() => {
 		return userStore.get.hasPermission(["delete_user"]).all && !currentUser();
+	});
+	const canRevokeRefreshTokens = createMemo(() => {
+		return userStore.get.hasPermission(["update_user"]).all;
 	});
 
 	// ----------------------------------
@@ -118,6 +122,18 @@ const UserRow: Component<UserRowProps> = (props) => {
 						props.showingDeleted?.() || props.user.invitationAccepted !== false,
 					actionExclude: true,
 					theme: "primary",
+				},
+				{
+					label: T()("revoke_sessions"),
+					type: "button",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("revokeRefreshTokens", true);
+					},
+					permission: canRevokeRefreshTokens(),
+					actionExclude: true,
+					hide: props.showingDeleted?.() || currentUser(),
+					theme: "error",
 				},
 				{
 					label: T()("delete"),

@@ -18,6 +18,10 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 			z.literal(constants.userTokens.invitation),
 		]),
 		token: z.string(),
+		revoked_at: z.union([z.string(), z.date()]).nullable(),
+		revoke_reason: z.string().nullable(),
+		consumed_at: z.union([z.string(), z.date()]).nullable(),
+		replaced_by_token_id: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		expiry_date: z.union([z.string(), z.date()]),
 		// user
@@ -42,6 +46,10 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 		user_id: this.dbAdapter.getDataType("integer"),
 		token_type: this.dbAdapter.getDataType("varchar", 255),
 		token: this.dbAdapter.getDataType("varchar", 255),
+		revoked_at: this.dbAdapter.getDataType("timestamp"),
+		revoke_reason: this.dbAdapter.getDataType("varchar", 255),
+		consumed_at: this.dbAdapter.getDataType("timestamp"),
+		replaced_by_token_id: this.dbAdapter.getDataType("integer"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		expiry_date: this.dbAdapter.getDataType("timestamp"),
 	};
@@ -77,6 +85,8 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 				"lucid_users.is_locked as user_is_locked",
 			])
 			.where("lucid_user_tokens.expiry_date", ">", new Date().toISOString())
+			.where("lucid_user_tokens.revoked_at", "is", null)
+			.where("lucid_user_tokens.consumed_at", "is", null)
 			.where("lucid_user_tokens.id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {

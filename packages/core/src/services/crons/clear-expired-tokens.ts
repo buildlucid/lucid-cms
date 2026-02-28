@@ -1,44 +1,36 @@
+import constants from "../../constants/constants.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
- * Finds all expired tokens and queues them for deletion
+ * Marks expired tokens as revoked
  */
 const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
 	const UserTokens = new UserTokensRepository(
 		context.db.client,
 		context.config.db,
 	);
+	const now = new Date().toISOString();
 
-	const expiredTokensRes = await UserTokens.selectMultiple({
-		select: ["id"],
+	const revokeExpiredRes = await UserTokens.updateMultiple({
+		data: {
+			revoked_at: now,
+			revoke_reason: constants.userTokenRevokeReasons.expired,
+		},
 		where: [
 			{
 				key: "expiry_date",
 				operator: "<",
-				value: new Date().toISOString(),
+				value: now,
+			},
+			{
+				key: "revoked_at",
+				operator: "is",
+				value: null,
 			},
 		],
-		validation: {
-			enabled: true,
-		},
 	});
-	if (expiredTokensRes.error) return expiredTokensRes;
-
-	if (expiredTokensRes.data.length === 0) {
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	}
-
-	const queueRes = await context.queue.addBatch("user-tokens:delete", {
-		payloads: expiredTokensRes.data.map((token) => ({
-			tokenId: token.id,
-		})),
-		context: context,
-	});
-	if (queueRes.error) return queueRes;
+	if (revokeExpiredRes.error) return revokeExpiredRes;
 
 	return {
 		error: undefined,

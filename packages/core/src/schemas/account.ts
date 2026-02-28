@@ -90,6 +90,15 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	revokeAllRefreshTokens: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
 	updateMe: {
 		body: z.object({
 			firstName: z

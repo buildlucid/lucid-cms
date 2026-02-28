@@ -79,6 +79,16 @@ const initiate: ServiceFn<
 					operator: ">",
 					value: new Date().toISOString(),
 				},
+				{
+					key: "revoked_at",
+					operator: "is",
+					value: null,
+				},
+				{
+					key: "consumed_at",
+					operator: "is",
+					value: null,
+				},
 			],
 			validation: {
 				enabled: true,

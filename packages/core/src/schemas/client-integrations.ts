@@ -25,6 +25,18 @@ export const clientIntegrationResponseSchema = z.object({
 			"Whether or not the client is active. If inactive you wont be able to use it to query data",
 		example: true,
 	}),
+	lastUsedAt: z.string().nullable().meta({
+		description: "The time the client integration was last used",
+		example: "2022-01-01T00:00:00Z",
+	}),
+	lastUsedIp: z.string().nullable().meta({
+		description: "The last IP address that used the client integration",
+		example: "203.0.113.42",
+	}),
+	lastUsedUserAgent: z.string().nullable().meta({
+		description: "The last user agent that used the client integration",
+		example: "Mozilla/5.0",
+	}),
 	createdAt: z.string().nullable().meta({
 		description: "The time the client integration was created",
 		example: "2022-01-01T00:00:00Z",

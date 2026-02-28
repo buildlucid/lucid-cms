@@ -246,6 +246,14 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("token", adapter.getDataType("varchar", 255), (col) =>
 					col.notNull().unique(),
 				)
+				.addColumn("revoked_at", adapter.getDataType("timestamp"))
+				.addColumn("revoke_reason", adapter.getDataType("varchar", 255))
+				.addColumn("consumed_at", adapter.getDataType("timestamp"))
+				.addColumn(
+					"replaced_by_token_id",
+					adapter.getDataType("integer"),
+					(col) => col.references("lucid_user_tokens.id").onDelete("set null"),
+				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -257,6 +265,18 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("expiry_date", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),
 				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_user_tokens_user_id")
+				.on("lucid_user_tokens")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_user_tokens_refresh_lookup")
+				.on("lucid_user_tokens")
+				.columns(["user_id", "token_type", "revoked_at", "expiry_date"])
 				.execute();
 
 			await db.schema

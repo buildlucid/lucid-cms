@@ -10,12 +10,16 @@ import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import cacheKeys from "../../kv-adapter/cache-keys.js";
+import getServiceContext from "../utils/get-service-context.js";
 
 const clientAuthentication = createMiddleware(
 	async (c: LucidHonoContext, next) => {
 		const apiKey = c.req.header("Authorization");
-		const config = c.get("config");
-		const kv = c.get("kv");
+		const runtimeContext = c.get("runtimeContext");
+		const connectionInfo = runtimeContext.getConnectionInfo(c);
+		const userAgent = c.req.header("user-agent") || null;
+
+		const context = getServiceContext(c);
 
 		if (!apiKey) {
 			throw new LucidAPIError({
@@ -33,13 +37,23 @@ const clientAuthentication = createMiddleware(
 		}
 
 		const cacheKey = cacheKeys.auth.client(decodedKey);
-		const cached = await kv.get<LucidClientIntegrationAuth>(cacheKey, {
+		const cached = await context.kv.get<LucidClientIntegrationAuth>(cacheKey, {
 			hash: true,
 		});
 
 		if (cached) {
 			c.set("clientIntegrationAuth", cached);
-			return await next();
+			const response = await next();
+
+			void clientIntegrationServices
+				.updateLastUsed(context, {
+					id: cached.id,
+					ipAddress: connectionInfo.address ?? null,
+					userAgent: userAgent,
+				})
+				.catch(() => undefined);
+
+			return response;
 		}
 
 		const verifyApiKey = await serviceWrapper(
@@ -52,28 +66,27 @@ const clientAuthentication = createMiddleware(
 					status: 401,
 				},
 			},
-		)(
-			{
-				db: { client: config.db.client },
-				config: config,
-				queue: c.get("queue"),
-				env: c.get("env"),
-				kv: kv,
-				requestUrl: c.req.url,
-			},
-			{
-				apiKey: apiKey,
-			},
-		);
+		)(context, {
+			apiKey: apiKey,
+		});
 		if (verifyApiKey.error) throw new LucidAPIError(verifyApiKey.error);
 
-		await kv.set(cacheKey, verifyApiKey.data, {
-			expirationTtl: minutesToSeconds(5),
-			hash: true,
-		});
-
 		c.set("clientIntegrationAuth", verifyApiKey.data);
-		return await next();
+		const response = await next();
+
+		void Promise.all([
+			context.kv.set(cacheKey, verifyApiKey.data, {
+				expirationTtl: minutesToSeconds(5),
+				hash: true,
+			}),
+			clientIntegrationServices.updateLastUsed(context, {
+				id: verifyApiKey.data.id,
+				ipAddress: connectionInfo.address ?? null,
+				userAgent: userAgent,
+			}),
+		]).catch(() => undefined);
+
+		return response;
 	},
 );
 
