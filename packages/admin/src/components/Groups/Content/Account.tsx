@@ -47,6 +47,12 @@ export const Account: Component = () => {
 	// ----------------------------------------
 	// Mutations
 	const initiateProvider = api.auth.useInitiateProvider();
+	const logout = api.auth.useLogout();
+	const forgotPassword = api.account.useForgotPassword({
+		onSuccess: () => {
+			logout.action.mutate({});
+		},
+	});
 	const unlinkAuthProvider = api.account.useUnlinkAuthProvider({
 		onMutate: (params) => {
 			setUnlinkingProviderKey(params.providerKey);
@@ -67,6 +73,16 @@ export const Account: Component = () => {
 	// ----------------------------------------
 	// Derived state
 	const providersList = createMemo(() => providers.data?.data.providers ?? []);
+	const passwordAuthEnabled = createMemo(
+		() => providers.data?.data.disablePassword === false,
+	);
+	const userHasPassword = createMemo(() => user()?.hasPassword === true);
+	const linkedProvidersCount = createMemo(
+		() => user()?.authProviders?.length ?? 0,
+	);
+	const setPasswordResetLoading = createMemo(
+		() => forgotPassword.action.isPending || logout.action.isPending,
+	);
 	const linkedProvidersByKey = createMemo(() => {
 		const authProviders = user()?.authProviders ?? [];
 		return authProviders.reduce<
@@ -148,7 +164,7 @@ export const Account: Component = () => {
 				title={T()("security")}
 				description={T()("account_security_description")}
 			>
-				<Show when={providers.data?.data.disablePassword === false}>
+				<Show when={passwordAuthEnabled() && userHasPassword()}>
 					<InfoRow.Content
 						title={T()("password")}
 						description={T()("account_password_description")}
@@ -160,6 +176,36 @@ export const Account: Component = () => {
 								onClick={() => setPasswordModalOpen(true)}
 							>
 								{T()("reset_password")}
+							</Button>
+						}
+						actionAlignment="center"
+					/>
+				</Show>
+				<Show when={passwordAuthEnabled() && !userHasPassword()}>
+					<InfoRow.Content
+						title={T()("password")}
+						description={T()("account_set_password_description")}
+						actions={
+							<Button
+								theme="border-outline"
+								size="small"
+								type="button"
+								loading={setPasswordResetLoading()}
+								onClick={() => {
+									if (setPasswordResetLoading()) return;
+									const email = user()?.email;
+									if (!email) {
+										spawnToast({
+											title: T()("error_title"),
+											message: T()("error_message"),
+											status: "error",
+										});
+										return;
+									}
+									forgotPassword.action.mutate({ email });
+								}}
+							>
+								{T()("send_password_reset_and_logout")}
 							</Button>
 						}
 						actionAlignment="center"
@@ -190,6 +236,34 @@ export const Account: Component = () => {
 												linkedProvider
 													? () => {
 															if (unlinkAuthProvider.action.isPending) return;
+															const isLastLinkedProvider =
+																linkedProvidersCount() <= 1;
+															if (isLastLinkedProvider) {
+																if (!passwordAuthEnabled()) {
+																	spawnToast({
+																		title: T()(
+																			"auth_provider_last_unlink_blocked_toast_title",
+																		),
+																		message: T()(
+																			"auth_provider_last_unlink_password_disabled_toast_message",
+																		),
+																		status: "error",
+																	});
+																	return;
+																}
+																if (!userHasPassword()) {
+																	spawnToast({
+																		title: T()(
+																			"auth_provider_last_unlink_blocked_toast_title",
+																		),
+																		message: T()(
+																			"auth_provider_last_unlink_no_password_toast_message",
+																		),
+																		status: "error",
+																	});
+																	return;
+																}
+															}
 															unlinkAuthProvider.action.mutate({
 																providerKey: provider.key,
 															});
@@ -266,7 +340,7 @@ export const Account: Component = () => {
 			</InfoRow.Root>
 
 			{/* Modals */}
-			<Show when={providers.data?.data.disablePassword === false}>
+			<Show when={passwordAuthEnabled() && userHasPassword()}>
 				<UpdatePasswordModal
 					state={{
 						open: passwordModalOpen(),

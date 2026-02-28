@@ -10,8 +10,9 @@ import type { ServiceFn } from "../../utils/services/types.js";
 /**
  * Unlinks an auth provider from the target user.
  *
- * When password authentication is disabled you cannot unlink the last auth provider.
- * When password authentication is enabled the last auth provider can always be removed.
+ * You cannot unlink the last auth provider when:
+ * - password authentication is disabled, or
+ * - the user does not have a password set.
  */
 const unlinkAuthProvider: ServiceFn<
 	[
@@ -33,7 +34,7 @@ const unlinkAuthProvider: ServiceFn<
 
 	const [userRes, providerRes, providersCountRes] = await Promise.all([
 		Users.selectSingle({
-			select: ["id"],
+			select: ["id", "password"],
 			where: [
 				{
 					key: "id",
@@ -86,23 +87,34 @@ const unlinkAuthProvider: ServiceFn<
 	if (providerRes.error) return providerRes;
 	if (providersCountRes.error) return providersCountRes;
 
-	if (passwordEnabled === false) {
-		const providersCount = formatter.parseCount(providersCountRes.data?.count);
-		const isLastProvider = providersCount <= 1;
+	const providersCount = formatter.parseCount(providersCountRes.data?.count);
+	const isLastProvider = providersCount <= 1;
+	const hasPassword = Boolean(userRes.data.password);
 
-		if (isLastProvider) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					name: T("auth_provider_cannot_remove_last_link_name"),
-					message: T(
-						"auth_provider_cannot_remove_last_link_password_disabled_message",
-					),
-				},
-				data: undefined,
-			};
-		}
+	if (isLastProvider && passwordEnabled === false) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				name: T("auth_provider_cannot_remove_last_link_name"),
+				message: T(
+					"auth_provider_cannot_remove_last_link_password_disabled_message",
+				),
+			},
+			data: undefined,
+		};
+	}
+
+	if (isLastProvider && hasPassword === false) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				name: T("auth_provider_cannot_remove_last_link_name"),
+				message: T("auth_provider_cannot_remove_last_link_no_password_message"),
+			},
+			data: undefined,
+		};
 	}
 
 	const [deleteRes, updateRes] = await Promise.all([

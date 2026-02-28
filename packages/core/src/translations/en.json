@@ -374,6 +374,7 @@
 	"auth_provider_link_not_found_message": "The auth provider link you are trying to access does not exist.",
 	"auth_provider_cannot_remove_last_link_name": "Cannot Remove Last Auth Provider",
 	"auth_provider_cannot_remove_last_link_password_disabled_message": "You must keep at least one auth provider linked.",
+	"auth_provider_cannot_remove_last_link_no_password_message": "Set a password before unlinking your last auth provider.",
 	"auth_provider_user_not_found_name": "Auth Provider Not Found",
 	"auth_provider_user_not_found_message": "You are trying to authenticate with an auth provider that hasnt been linked to your account.",
 	"oidc_user_info_incomplete_name": "Incomplete User Info",
