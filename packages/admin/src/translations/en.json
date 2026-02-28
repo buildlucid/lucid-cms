@@ -185,6 +185,7 @@
 	"media_scopes": "Media Scopes",
 	"locales_scopes": "Locale Scopes",
 	"permissions_license_update": "Update License",
+	"permissions_settings_read": "Read Settings",
 	"permissions_cache_clear": "Clear Cache",
 	"permissions_documents_restore": "Restore Revisions",
 	"permissions_documents_publish": "Publish Documents",

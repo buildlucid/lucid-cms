@@ -1,8 +1,11 @@
 import type { Config } from "../../types/config.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type {
 	SettingsInclude,
 	SettingsResponse,
 } from "../../types/response.js";
+import { Permissions } from "../permission/definitions.js";
+import hasAccess from "../permission/has-access.js";
 import { licenseFormatter } from "./index.js";
 
 interface SettingsPropsT {
@@ -25,6 +28,7 @@ const formatSingle = (props: {
 	settings: SettingsPropsT;
 	config: Config;
 	includes: SettingsInclude[] | undefined;
+	authUser?: LucidAuth;
 }): SettingsResponse => {
 	const includes = props.includes ?? [];
 	if (includes.length === 0) return {};
@@ -65,7 +69,12 @@ const formatSingle = (props: {
 		};
 	}
 
-	if (includeSet.has("system")) {
+	const canReadSystem = hasAccess({
+		user: props.authUser,
+		requiredPermissions: [Permissions.SettingsRead],
+	});
+
+	if (includeSet.has("system") && canReadSystem) {
 		response.system = {
 			runtime: props.settings.runtimeKey,
 			database: props.settings.databaseKey,

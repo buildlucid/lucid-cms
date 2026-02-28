@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import type { CollectionResponse } from "@types";
 import classNames from "classnames";
-import { type Component, For, Match, Show, Switch } from "solid-js";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { IconLinkFull } from "@/components/Groups/Navigation";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
@@ -31,6 +31,7 @@ export type NavigationMenuContentProps = {
 	canReadJobs: boolean;
 	canManageLicense: boolean;
 	canReadClientIntegrations: boolean;
+	canReadSystemOverview: boolean;
 	showAccessAndPermissions: boolean;
 	collectionsIsLoading: boolean;
 	collectionsIsError: boolean;
@@ -46,6 +47,13 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 	const handleNavigate = () => {
 		props.onNavigate?.();
 	};
+	const showSystemSection = createMemo(
+		() =>
+			props.canReadSystemOverview ||
+			props.canReadClientIntegrations ||
+			props.canManageLicense ||
+			props.canReadJobs,
+	);
 
 	// ----------------------------------
 	// Render
@@ -154,14 +162,17 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					/>
 
 					{/* System */}
-					<div class="w-full mt-4 mb-2">
-						<span class="text-xs">{T()("system")}</span>
-					</div>
+					<Show when={showSystemSection()}>
+						<div class="w-full mt-4 mb-2">
+							<span class="text-xs">{T()("system")}</span>
+						</div>
+					</Show>
 					<IconLinkFull
 						type="link"
 						href="/lucid/system/overview"
 						icon="overview"
 						title={T()("overview")}
+						permission={props.canReadSystemOverview}
 					/>
 					<IconLinkFull
 						type="link"

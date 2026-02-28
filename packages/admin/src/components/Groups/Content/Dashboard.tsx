@@ -1,9 +1,11 @@
-import { type Component, For } from "solid-js";
+import { type Component, createMemo, For } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
 import StartingPoints from "@/components/Blocks/StartingPoints";
 import { DynamicContent } from "@/components/Groups/Layout";
 import constants from "@/constants";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 
 export const Dashboard: Component = () => {
@@ -45,6 +47,24 @@ export const Dashboard: Component = () => {
 			href: `${constants.documentationUrl}/extending-lucid/plugins/`,
 		},
 	];
+	const canReadSystemOverview = createMemo(
+		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
+	);
+	const canReadCollections = createMemo(
+		() => userStore.get.hasPermission([Permissions.DocumentsRead]).all,
+	);
+	const canReadMedia = createMemo(
+		() => userStore.get.hasPermission([Permissions.MediaRead]).all,
+	);
+	const canReadEmails = createMemo(
+		() => userStore.get.hasPermission([Permissions.EmailRead]).all,
+	);
+	const canReadUsers = createMemo(
+		() => userStore.get.hasPermission([Permissions.UsersRead]).all,
+	);
+	const canReadRoles = createMemo(
+		() => userStore.get.hasPermission([Permissions.RolesRead]).all,
+	);
 
 	// ----------------------------------------
 	// Render
@@ -73,36 +93,42 @@ export const Dashboard: Component = () => {
 								description: T()("starting_point_collections_description"),
 								href: "/lucid/collections",
 								icon: "collection",
+								permission: canReadCollections(),
 							},
 							{
 								title: T()("starting_point_media"),
 								description: T()("starting_point_media_description"),
 								href: "/lucid/media",
 								icon: "media",
+								permission: canReadMedia(),
 							},
 							{
 								title: T()("starting_point_emails"),
 								description: T()("starting_point_emails_description"),
 								href: "/lucid/emails",
 								icon: "email",
+								permission: canReadEmails(),
 							},
 							{
 								title: T()("starting_point_users"),
 								description: T()("starting_point_users_description"),
 								href: "/lucid/users",
 								icon: "users",
+								permission: canReadUsers(),
 							},
 							{
 								title: T()("starting_point_roles"),
 								description: T()("starting_point_roles_description"),
 								href: "/lucid/roles",
 								icon: "roles",
+								permission: canReadRoles(),
 							},
 							{
 								title: T()("starting_point_settings"),
 								description: T()("starting_point_settings_description"),
 								href: "/lucid/system/overview",
 								icon: "settings",
+								permission: canReadSystemOverview(),
 							},
 						]}
 					/>

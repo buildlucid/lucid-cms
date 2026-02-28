@@ -4,6 +4,7 @@ import { settingsFormatter } from "../../libs/formatters/index.js";
 import getImageProcessor from "../../libs/image-processor/get-processor.js";
 import passthroughProcessor from "../../libs/image-processor/processors/passthrough.js";
 import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type {
 	SettingsInclude,
 	SettingsResponse,
@@ -16,6 +17,7 @@ const getSettings: ServiceFn<
 		{
 			includes?: SettingsInclude[];
 			runtime: string;
+			authUser: LucidAuth;
 		},
 	],
 	SettingsResponse
@@ -75,6 +77,7 @@ const getSettings: ServiceFn<
 			},
 			config: context.config,
 			includes: data.includes,
+			authUser: data.authUser,
 		}),
 	};
 };

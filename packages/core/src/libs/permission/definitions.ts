@@ -43,6 +43,7 @@ export const Permissions = {
 	IntegrationRegenerate: "integrations:regenerate",
 
 	// Settings permissions
+	SettingsRead: "settings:read",
 	LicenseUpdate: "license:update",
 	CacheClear: "cache:clear",
 } as const;
@@ -110,6 +111,10 @@ export const PermissionGroups = Object.freeze({
 	},
 	settings: {
 		key: "settings_permissions",
-		permissions: [Permissions.LicenseUpdate, Permissions.CacheClear],
+		permissions: [
+			Permissions.SettingsRead,
+			Permissions.LicenseUpdate,
+			Permissions.CacheClear,
+		],
 	},
 }) satisfies Record<string, PermissionGroup>;

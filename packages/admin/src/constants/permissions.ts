@@ -26,6 +26,7 @@ export const Permissions = {
 	IntegrationsUpdate: "integrations:update",
 	IntegrationsDelete: "integrations:delete",
 	IntegrationsRegenerate: "integrations:regenerate",
+	SettingsRead: "settings:read",
 	LicenseUpdate: "license:update",
 	CacheClear: "cache:clear",
 } as const;

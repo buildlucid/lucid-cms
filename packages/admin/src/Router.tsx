@@ -148,7 +148,14 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				{/* System */}
-				<Route path="/system/overview" component={SystemOverviewRoute} />
+				<Route
+					path="/system/overview"
+					component={() => (
+						<PermissionGuard permission={Permissions.SettingsRead}>
+							<SystemOverviewRoute />
+						</PermissionGuard>
+					)}
+				/>
 				<Route
 					path="/system/queue-observability"
 					component={() => (
