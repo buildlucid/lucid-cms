@@ -335,6 +335,7 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 					adapter.getDataType("integer"),
 					(col) => col.references("lucid_user_tokens.id").onDelete("cascade"),
 				)
+				.addColumn("invitation_token", adapter.getDataType("text"))
 				.addColumn(
 					"authenticated_user_id",
 					adapter.getDataType("integer"),

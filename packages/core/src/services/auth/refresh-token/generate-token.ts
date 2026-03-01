@@ -5,6 +5,7 @@ import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import clearToken from "./clear-token.js";
@@ -37,11 +38,12 @@ const generateToken = async (
 		},
 		config.secrets.refreshToken,
 	);
+	const hashedToken = hashUserToken(token);
 
 	const createTokenRes = await UserTokens.createSingle({
 		data: {
 			user_id: userId,
-			token: token,
+			token: hashedToken,
 			token_type: constants.userTokens.refresh,
 			expiry_date: new Date(
 				Date.now() + constants.refreshTokenExpiration * 1000, // convert to ms
@@ -55,6 +57,7 @@ const generateToken = async (
 	if (createTokenRes.error) return createTokenRes;
 
 	if (existingRefreshToken) {
+		const hashedExistingRefreshToken = hashUserToken(existingRefreshToken);
 		const updateRotatedTokenRes = await UserTokens.updateMultiple({
 			data: {
 				replaced_by_token_id: createTokenRes.data.id,
@@ -63,7 +66,7 @@ const generateToken = async (
 				{
 					key: "token",
 					operator: "=",
-					value: existingRefreshToken,
+					value: hashedExistingRefreshToken,
 				},
 				{
 					key: "token_type",

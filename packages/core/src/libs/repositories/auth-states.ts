@@ -1,5 +1,4 @@
 import z from "zod";
-import constants from "../../constants/constants.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type { KyselyDB } from "../db-adapter/types.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -16,11 +15,10 @@ export default class AuthStatesRepository extends StaticRepository<"lucid_auth_s
 		authenticated_user_id: z.number().nullable(),
 		action_type: z.string(),
 		invitation_token_id: z.number().nullable(),
+		invitation_token: z.string().nullable(),
 		redirect_path: z.string().nullable(),
 		expiry_date: z.union([z.string(), z.date()]),
 		created_at: z.union([z.string(), z.date()]),
-		// user tokens
-		invitation_token: z.string().nullable().optional(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -29,6 +27,7 @@ export default class AuthStatesRepository extends StaticRepository<"lucid_auth_s
 		authenticated_user_id: this.dbAdapter.getDataType("integer"),
 		action_type: this.dbAdapter.getDataType("text"),
 		invitation_token_id: this.dbAdapter.getDataType("integer"),
+		invitation_token: this.dbAdapter.getDataType("text"),
 		redirect_path: this.dbAdapter.getDataType("text"),
 		expiry_date: this.dbAdapter.getDataType("timestamp"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
@@ -52,24 +51,9 @@ export default class AuthStatesRepository extends StaticRepository<"lucid_auth_s
 				"lucid_auth_states.redirect_path",
 				"lucid_auth_states.action_type",
 				"lucid_auth_states.invitation_token_id",
+				"lucid_auth_states.invitation_token",
 			])
-			.leftJoin(
-				"lucid_user_tokens",
-				"lucid_user_tokens.id",
-				"lucid_auth_states.invitation_token_id",
-			)
-			.select(["lucid_user_tokens.token as invitation_token"])
-			.where("lucid_auth_states.state", "=", props.state)
-			.where((eb) =>
-				eb.or([
-					eb("lucid_auth_states.invitation_token_id", "is", null),
-					eb(
-						"lucid_user_tokens.token_type",
-						"=",
-						constants.userTokens.invitation,
-					),
-				]),
-			);
+			.where("lucid_auth_states.state", "=", props.state);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleWithInvitation",

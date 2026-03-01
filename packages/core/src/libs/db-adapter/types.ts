@@ -498,6 +498,7 @@ export interface LucidAuthStates {
 	expiry_date: TimestampImmutable;
 	redirect_path: string | null;
 	invitation_token_id: number | null;
+	invitation_token: string | null;
 	created_at: TimestampImmutable;
 }
 

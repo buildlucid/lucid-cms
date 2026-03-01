@@ -1,6 +1,7 @@
 import type { UserTokenType } from "../../libs/db-adapter/types.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import hashUserToken from "../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -19,6 +20,7 @@ const getSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const hashedToken = hashUserToken(data.token);
 
 	const userTokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],
@@ -26,7 +28,7 @@ const getSingle: ServiceFn<
 			{
 				key: "token",
 				operator: "=",
-				value: data.token,
+				value: hashedToken,
 			},
 			{
 				key: "token_type",

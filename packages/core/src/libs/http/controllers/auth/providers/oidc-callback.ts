@@ -2,6 +2,7 @@ import { minutesToMilliseconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import constants from "../../../../../constants/constants.js";
+import { AuthStatesRepository } from "../../../../../libs/repositories/index.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import {
 	authServices,
@@ -45,6 +46,31 @@ const providerOIDCCallbackController = factory.createHandlers(
 		const { providerKey } = c.req.valid("param");
 		const { code, state } = c.req.valid("query");
 		const context = getServiceContext(c);
+		const AuthStates = new AuthStatesRepository(
+			context.db.client,
+			context.config.db,
+		);
+
+		//* scrub so callback redirect behavior is preserved even if this fails.
+		const scrubInvitationToken = async () => {
+			await AuthStates.updateMultiple({
+				data: {
+					invitation_token: null,
+				},
+				where: [
+					{
+						key: "state",
+						operator: "=",
+						value: state,
+					},
+					{
+						key: "provider_key",
+						operator: "=",
+						value: providerKey,
+					},
+				],
+			});
+		};
 
 		const errorRedirectURLRes = await serviceWrapper(
 			authServices.providers.errorRedirectUrl,
@@ -65,6 +91,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 				getRequestBaseUrl(c),
 				constants.authState.defaultRedirectPath,
 			);
+			await scrubInvitationToken();
 			return c.redirect(
 				buildErrorURL(baseRedirectUrl, errorRedirectURLRes.error),
 			);
@@ -86,6 +113,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 			state,
 		});
 		if (callbackAuthRes.error) {
+			await scrubInvitationToken();
 			return c.redirect(
 				buildErrorURL(
 					errorRedirectURLRes.data.redirectUrl,
@@ -100,11 +128,13 @@ const providerOIDCCallbackController = factory.createHandlers(
 				authServices.accessToken.generateToken(c, callbackAuthRes.data.userId),
 			]);
 			if (refreshRes.error) {
+				await scrubInvitationToken();
 				return c.redirect(
 					buildErrorURL(errorRedirectURLRes.data.redirectUrl, refreshRes.error),
 				);
 			}
 			if (accessRes.error) {
+				await scrubInvitationToken();
 				return c.redirect(
 					buildErrorURL(errorRedirectURLRes.data.redirectUrl, accessRes.error),
 				);
@@ -131,6 +161,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 				userAgent: userAgent,
 			});
 			if (userLoginTrackRes.error) {
+				await scrubInvitationToken();
 				return c.redirect(
 					buildErrorURL(
 						errorRedirectURLRes.data.redirectUrl,
@@ -140,6 +171,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 			}
 		}
 
+		await scrubInvitationToken();
 		return c.redirect(callbackAuthRes.data.redirectUrl);
 	},
 );

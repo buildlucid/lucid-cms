@@ -15,6 +15,7 @@ import type {
 	AuthStateActionType,
 	InitiateAuthResponse,
 } from "../../../types.js";
+import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -67,7 +68,7 @@ const initiate: ServiceFn<
 				{
 					key: "token",
 					operator: "=",
-					value: data.invitationToken,
+					value: hashUserToken(data.invitationToken),
 				},
 				{
 					key: "token_type",
@@ -140,6 +141,10 @@ const initiate: ServiceFn<
 			state: stateToken,
 			provider_key: data.providerKey,
 			invitation_token_id: invitationTokenId,
+			invitation_token:
+				data.actionType === constants.authState.actionTypes.invitation
+					? data.invitationToken
+					: undefined,
 			action_type: data.actionType,
 			authenticated_user_id: data.authenticatedUserId,
 			expiry_date: addMilliseconds(

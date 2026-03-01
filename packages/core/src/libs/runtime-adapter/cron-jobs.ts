@@ -29,6 +29,12 @@ const cronJobsMap = () =>
 			error: T("an_error_occurred_clearing_expired_tokens"),
 			transaction: true,
 		},
+		"clear-expired-auth-states": {
+			fn: cronServices.clearExpiredAuthStates,
+			label: "Clear expired auth states",
+			error: T("an_error_occurred_clearing_expired_auth_states"),
+			transaction: true,
+		},
 		"update-media-storage": {
 			fn: cronServices.updateMediaStorage,
 			label: "Update media storage",

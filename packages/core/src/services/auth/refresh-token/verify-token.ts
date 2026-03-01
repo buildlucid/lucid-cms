@@ -5,6 +5,7 @@ import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { authServices } from "../../index.js";
 import revokeUserTokens from "./revoke-user-tokens.js";
@@ -35,6 +36,7 @@ const verifyToken = async (
 		const decode = (await verify(_refresh, config.secrets.refreshToken)) as {
 			id: number;
 		};
+		const hashedRefreshToken = hashUserToken(_refresh);
 
 		const tokenRes = await UserTokens.selectSingle({
 			select: [
@@ -48,7 +50,7 @@ const verifyToken = async (
 				{
 					key: "token",
 					operator: "=",
-					value: _refresh,
+					value: hashedRefreshToken,
 				},
 				{
 					key: "token_type",

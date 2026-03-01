@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import type { UserTokenType } from "../../libs/db-adapter/types.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
+import hashUserToken from "../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const createSingle: ServiceFn<
@@ -21,15 +22,15 @@ const createSingle: ServiceFn<
 	);
 
 	const token = crypto.randomBytes(32).toString("hex");
+	const hashedToken = hashUserToken(token);
 
 	const userTokenRes = await UserTokens.createSingle({
 		data: {
 			user_id: data.userId,
 			token_type: data.tokenType,
 			expiry_date: data.expiryDate,
-			token: token,
+			token: hashedToken,
 		},
-		returning: ["token"],
 		validation: {
 			enabled: true,
 		},
@@ -39,7 +40,7 @@ const createSingle: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			token: userTokenRes.data.token,
+			token: token,
 		},
 	};
 };

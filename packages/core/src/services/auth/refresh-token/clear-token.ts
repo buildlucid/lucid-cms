@@ -3,6 +3,7 @@ import constants from "../../../constants/constants.js";
 import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
+import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 interface ClearTokenConfig {
@@ -26,6 +27,7 @@ const clearToken = async (
 
 	const config = c.get("config");
 	const now = new Date().toISOString();
+	const hashedRefreshToken = hashUserToken(_refresh);
 
 	const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
@@ -43,7 +45,7 @@ const clearToken = async (
 			{
 				key: "token",
 				operator: "=",
-				value: _refresh,
+				value: hashedRefreshToken,
 			},
 			{
 				key: "token_type",

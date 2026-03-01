@@ -6,6 +6,7 @@ import {
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
+import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { generateSecret } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -37,6 +38,7 @@ const acceptInvitation: ServiceFn<
 		context.config.db,
 	);
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const hashedToken = hashUserToken(data.token);
 
 	const tokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],
@@ -44,7 +46,7 @@ const acceptInvitation: ServiceFn<
 			{
 				key: "token",
 				operator: "=",
-				value: data.token,
+				value: hashedToken,
 			},
 			{
 				key: "token_type",

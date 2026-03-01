@@ -7,6 +7,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { ValidateInvitationResponse } from "../../../types.js";
+import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -25,6 +26,7 @@ const validateInvitation: ServiceFn<
 		context.config.db,
 	);
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const hashedToken = hashUserToken(data.token);
 
 	const userTokenRes = await UserTokens.selectSingle({
 		select: ["id", "user_id"],
@@ -32,7 +34,7 @@ const validateInvitation: ServiceFn<
 			{
 				key: "token",
 				operator: "=",
-				value: data.token,
+				value: hashedToken,
 			},
 			{
 				key: "token_type",
