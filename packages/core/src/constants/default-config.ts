@@ -7,6 +7,11 @@ export const defaultConfig: Partial<LucidConfig> = {
 	},
 	security: {
 		trustProxyHeaders: false,
+		headers: {
+			crossOriginResourcePolicy: false,
+			xFrameOptions: true,
+			referrerPolicy: "strict-origin-when-cross-origin",
+		},
 	},
 	auth: {
 		password: {

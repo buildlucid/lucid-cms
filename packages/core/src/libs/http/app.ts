@@ -75,7 +75,7 @@ const createApp = async (props: {
 				origin: [
 					"http://localhost:3000",
 					...(props.config.baseUrl ? [props.config.baseUrl] : []),
-					...(props.config.cors?.origin || []),
+					...(props.config.security.cors?.origin || []),
 				],
 				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 				allowHeaders: [
@@ -83,19 +83,17 @@ const createApp = async (props: {
 					"Authorization",
 					"Content-Length",
 					...Object.values(constants.headers),
-					...(props.config.cors?.allowHeaders || []),
+					...(props.config.security.cors?.allowHeaders || []),
 				],
 				credentials: true,
 			}),
 		)
 		.use(
-			secureHeaders({
-				// contentSecurityPolicy: {
-				// 	scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-				// 	styleSrc: ["'self'", "'unsafe-inline'"],
-				// },
-				crossOriginResourcePolicy: false,
-			}),
+			secureHeaders(
+				props.config.security.headers ?? {
+					crossOriginResourcePolicy: false,
+				},
+			),
 		)
 		.use(async (c, next) => {
 			c.set("config", props.config);

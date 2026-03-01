@@ -57,18 +57,59 @@ const EmailAdapterSchema = z.custom<
 	message: "Expected an EmailAdapter function",
 });
 
+const ContentSecurityPolicySchema = z
+	.object({
+		defaultSrc: z.array(z.string()).optional(),
+		baseUri: z.array(z.string()).optional(),
+		childSrc: z.array(z.string()).optional(),
+		connectSrc: z.array(z.string()).optional(),
+		fontSrc: z.array(z.string()).optional(),
+		formAction: z.array(z.string()).optional(),
+		frameAncestors: z.array(z.string()).optional(),
+		frameSrc: z.array(z.string()).optional(),
+		imgSrc: z.array(z.string()).optional(),
+		manifestSrc: z.array(z.string()).optional(),
+		mediaSrc: z.array(z.string()).optional(),
+		objectSrc: z.array(z.string()).optional(),
+		sandbox: z.array(z.string()).optional(),
+		scriptSrc: z.array(z.string()).optional(),
+		scriptSrcAttr: z.array(z.string()).optional(),
+		scriptSrcElem: z.array(z.string()).optional(),
+		styleSrc: z.array(z.string()).optional(),
+		styleSrcAttr: z.array(z.string()).optional(),
+		styleSrcElem: z.array(z.string()).optional(),
+		upgradeInsecureRequests: z.array(z.string()).optional(),
+		workerSrc: z.array(z.string()).optional(),
+		requireTrustedTypesFor: z.array(z.string()).optional(),
+		trustedTypes: z.array(z.string()).optional(),
+	})
+	.optional();
+
+const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
+
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	baseUrl: z.string().optional(),
-	cors: z
-		.object({
-			origin: z.array(z.string()).optional(),
-			allowHeaders: z.array(z.string()).optional(),
-		})
-		.optional(),
 	security: z
 		.object({
 			trustProxyHeaders: z.boolean().optional(),
+			cors: z
+				.object({
+					origin: z.array(z.string()).optional(),
+					allowHeaders: z.array(z.string()).optional(),
+				})
+				.optional(),
+			headers: z
+				.object({
+					contentSecurityPolicy: ContentSecurityPolicySchema,
+					strictTransportSecurity: OverridableHeaderSchema.optional(),
+					xFrameOptions: OverridableHeaderSchema.optional(),
+					referrerPolicy: OverridableHeaderSchema.optional(),
+					crossOriginResourcePolicy: OverridableHeaderSchema.optional(),
+					crossOriginOpenerPolicy: OverridableHeaderSchema.optional(),
+					crossOriginEmbedderPolicy: OverridableHeaderSchema.optional(),
+				})
+				.optional(),
 		})
 		.optional(),
 	secrets: z.object({

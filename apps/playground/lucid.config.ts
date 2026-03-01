@@ -56,8 +56,10 @@ export const envSchema = z.object({
 });
 
 export default defineConfig((env) => ({
-	// cors: {
-	// 	origin: [],
+	// security: {
+	// 	cors: {
+	// 		origin: [],
+	// 	},
 	// },
 	logger: {
 		level: "silent",

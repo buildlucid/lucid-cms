@@ -49,6 +49,32 @@ export type ImageProcessor = (
 	options: ImageProcessorOptions,
 ) => ServiceResponse<ImageProcessorResult>;
 
+export type SecurityContentSecurityPolicy = {
+	defaultSrc?: string[];
+	baseUri?: string[];
+	childSrc?: string[];
+	connectSrc?: string[];
+	fontSrc?: string[];
+	formAction?: string[];
+	frameAncestors?: string[];
+	frameSrc?: string[];
+	imgSrc?: string[];
+	manifestSrc?: string[];
+	mediaSrc?: string[];
+	objectSrc?: string[];
+	sandbox?: string[];
+	scriptSrc?: string[];
+	scriptSrcAttr?: string[];
+	scriptSrcElem?: string[];
+	styleSrc?: string[];
+	styleSrcAttr?: string[];
+	styleSrcElem?: string[];
+	upgradeInsecureRequests?: string[];
+	workerSrc?: string[];
+	requireTrustedTypesFor?: string[];
+	trustedTypes?: string[];
+};
+
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
 	/** A Postgres, SQLite or LibSQL database adapter instance. */
@@ -58,13 +84,6 @@ export interface LucidConfig {
 		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 	};
-	/** The cors configuration. */
-	cors?: {
-		/** Allowed origins. */
-		origin?: string[];
-		/** Allowed headers. */
-		allowHeaders?: string[];
-	};
 	/** Security settings. */
 	security?: {
 		/**
@@ -72,6 +91,24 @@ export interface LucidConfig {
 		 * determining secure request context.
 		 */
 		trustProxyHeaders?: boolean;
+		/** The CORS configuration. */
+		cors?: {
+			/** Allowed origins. */
+			origin?: string[];
+			/** Allowed headers. */
+			allowHeaders?: string[];
+		};
+		/** The secure headers configuration. */
+		headers?: {
+			/** Content-Security-Policy directives. */
+			contentSecurityPolicy?: SecurityContentSecurityPolicy;
+			strictTransportSecurity?: boolean | string;
+			xFrameOptions?: boolean | string;
+			referrerPolicy?: boolean | string;
+			crossOriginResourcePolicy?: boolean | string;
+			crossOriginOpenerPolicy?: boolean | string;
+			crossOriginEmbedderPolicy?: boolean | string;
+		};
 	};
 	/** The base URL of the Lucid instance. If not provided, the request URL will be used. */
 	baseUrl?: string;
@@ -317,6 +354,19 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	security: {
 		trustProxyHeaders: boolean;
+		cors?: {
+			origin?: string[];
+			allowHeaders?: string[];
+		};
+		headers?: {
+			contentSecurityPolicy?: SecurityContentSecurityPolicy;
+			strictTransportSecurity?: boolean | string;
+			xFrameOptions?: boolean | string;
+			referrerPolicy?: boolean | string;
+			crossOriginResourcePolicy?: boolean | string;
+			crossOriginOpenerPolicy?: boolean | string;
+			crossOriginEmbedderPolicy?: boolean | string;
+		};
 	};
 	hono: {
 		middleware: Array<
