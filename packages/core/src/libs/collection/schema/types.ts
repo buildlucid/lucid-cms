@@ -12,6 +12,11 @@ export type TableType =
 export type CollectionSchemaColumn = {
 	name: string;
 	source: "core" | "field";
+	/**
+	 * Controls whether this column can be auto-removed by collection migrations when no longer present in the inferred schema.
+	 * Defaults to true.
+	 */
+	canAutoRemove?: boolean;
 	type: ColumnDataType;
 	nullable?: boolean;
 	default?: unknown;

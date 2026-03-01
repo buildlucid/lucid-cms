@@ -242,6 +242,7 @@ const createFieldTables = (props: {
 				columns.push({
 					name: prefixGeneratedColName(column.name),
 					source: "field",
+					canAutoRemove: false,
 					type: column.type,
 					nullable: column.nullable,
 					foreignKey: column.foreignKey,

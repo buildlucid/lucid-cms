@@ -95,4 +95,15 @@ describe("Schema inference", async () => {
 			}),
 		);
 	});
+
+	test("marks generated custom field columns as non-removable", () => {
+		const res = inferSchema(pagesCollection, db);
+		const generatedFieldColumn = res.data?.tables
+			.flatMap((table) => table.columns)
+			.find((column) => column.source === "field");
+
+		expect(generatedFieldColumn).toBeDefined();
+		expect(generatedFieldColumn?.name.startsWith("_")).toBe(true);
+		expect(generatedFieldColumn?.canAutoRemove).toBe(false);
+	});
 });

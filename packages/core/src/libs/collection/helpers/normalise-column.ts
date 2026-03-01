@@ -11,6 +11,8 @@ const normaliseColumn = (
 	return {
 		source: source,
 		name: column.name,
+		canAutoRemove:
+			"canAutoRemove" in column ? (column.canAutoRemove ?? true) : true,
 		type: column.type,
 		nullable: column.nullable ?? false,
 		default: column.default ?? null,

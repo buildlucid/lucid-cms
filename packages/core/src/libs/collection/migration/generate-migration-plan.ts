@@ -14,7 +14,7 @@ import type {
 } from "./types.js";
 
 const DISABLE_REMOVE_TABLES = true;
-const DISABLE_REMOVE_COLUMNS = true;
+const PROTECT_NON_REMOVABLE_COLUMNS = true;
 
 /**
  * Generates a migration plan for a collection
@@ -122,18 +122,23 @@ const generateMigrationPlan = (props: {
 			}
 		}
 
-		if (!DISABLE_REMOVE_COLUMNS) {
-			for (const column of targetTable.columns) {
-				const columnStillExists = table.columns.some(
-					(c) => c.name === column.name,
-				);
-				if (!columnStillExists) {
-					columnOperations.push({
-						type: "remove",
-						columnName: column.name,
-					});
-				}
-			}
+		for (const column of targetTable.columns) {
+			const columnStillExists = table.columns.some(
+				(c) => c.name === column.name,
+			);
+			if (columnStillExists) continue;
+
+			// DB inferred columns do not include schema metadata, so we infer
+			// custom-field columns from the generated prefix.
+			const canAutoRemove =
+				!PROTECT_NON_REMOVABLE_COLUMNS ||
+				!column.name.startsWith(constants.db.generatedColumnPrefix);
+			if (!canAutoRemove) continue;
+
+			columnOperations.push({
+				type: "remove",
+				columnName: column.name,
+			});
 		}
 
 		if (columnOperations.length) {
