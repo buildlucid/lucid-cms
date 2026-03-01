@@ -1,6 +1,7 @@
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import cacheKeys from "../../kv-adapter/cache-keys.js";
+import { getCollectionsSignature } from "../cache-signature.js";
 import type { MigrationPlan } from "../migration/types.js";
 import type { CollectionSchema } from "../schema/types.js";
 
@@ -20,35 +21,47 @@ type CachedMigrationResultResponse =
 
 const MIGRATION_RESULT_KEY = cacheKeys.collection.migrationResult;
 
-let migrationCache: CachedMigrationResult | undefined;
-let inFlightMigrationResult: Promise<CachedMigrationResultResponse> | undefined;
+const migrationCache = new Map<string, CachedMigrationResult>();
+const inFlightMigrationResult = new Map<
+	string,
+	Promise<CachedMigrationResultResponse>
+>();
+
+const getCacheKey = (configSignature: string) =>
+	`${MIGRATION_RESULT_KEY}:${configSignature}`;
 
 const getCachedMigrationResult = async (
 	context: ServiceContext,
+	configSignature: string,
 ): Promise<CachedMigrationResult | undefined> => {
-	if (migrationCache) return migrationCache;
+	const memoryCached = migrationCache.get(configSignature);
+	if (memoryCached) return memoryCached;
 
-	const cached =
-		await context.kv.get<CachedMigrationResult>(MIGRATION_RESULT_KEY);
+	const cached = await context.kv.get<CachedMigrationResult>(
+		getCacheKey(configSignature),
+	);
 	if (!cached) return undefined;
 
-	migrationCache = cached;
-	return migrationCache;
+	migrationCache.set(configSignature, cached);
+	return cached;
 };
 
 const setCachedMigrationResult = async (
 	context: ServiceContext,
+	configSignature: string,
 	result: CachedMigrationResult,
 ): Promise<void> => {
-	migrationCache = result;
-	await context.kv.set(MIGRATION_RESULT_KEY, result);
+	migrationCache.set(configSignature, result);
+	await context.kv.set(getCacheKey(configSignature), result);
 };
 
 export const resolveCachedMigrationResult = async (
 	context: ServiceContext,
 	resolver: () => Promise<CachedMigrationResultResponse>,
 ): Promise<CachedMigrationResultResponse> => {
-	const cachedResult = await getCachedMigrationResult(context);
+	const configSignature = getCollectionsSignature(context.config.collections);
+
+	const cachedResult = await getCachedMigrationResult(context, configSignature);
 	if (cachedResult) {
 		return {
 			data: cachedResult,
@@ -56,22 +69,23 @@ export const resolveCachedMigrationResult = async (
 		};
 	}
 
-	if (inFlightMigrationResult) return inFlightMigrationResult;
+	const inFlight = inFlightMigrationResult.get(configSignature);
+	if (inFlight) return inFlight;
 
 	const pending = (async (): Promise<CachedMigrationResultResponse> => {
 		try {
 			const result = await resolver();
 			if (!result.error) {
-				await setCachedMigrationResult(context, result.data);
+				await setCachedMigrationResult(context, configSignature, result.data);
 			}
 
 			return result;
 		} finally {
-			inFlightMigrationResult = undefined;
+			inFlightMigrationResult.delete(configSignature);
 		}
 	})();
 
-	inFlightMigrationResult = pending;
+	inFlightMigrationResult.set(configSignature, pending);
 
 	return pending;
 };

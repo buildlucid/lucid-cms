@@ -1,6 +1,7 @@
 import type { LucidErrorData } from "../../../../types/errors.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import cacheKeys from "../../../kv-adapter/cache-keys.js";
+import { getCollectionSignature } from "../../cache-signature.js";
 import type { CollectionSchema } from "../types.js";
 
 type CachedSchemaResponse =
@@ -16,22 +17,37 @@ type CachedSchemaResponse =
 const schemaCache = new Map<string, CollectionSchema>();
 const inFlightSchemaLoads = new Map<string, Promise<CachedSchemaResponse>>();
 
-const getSchemaKey = (collectionKey: string) =>
-	cacheKeys.collection.schema(collectionKey);
+const getSchemaKey = (collectionKey: string, signature: string) =>
+	`${cacheKeys.collection.schema(collectionKey)}:${signature}`;
+
+const getCollectionSignatureByKey = (
+	context: ServiceContext,
+	collectionKey: string,
+): string | undefined => {
+	const collection = context.config.collections.find(
+		(c) => c.key === collectionKey,
+	);
+	if (!collection) return undefined;
+
+	return getCollectionSignature(collection);
+};
 
 export const getSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): Promise<CollectionSchema | undefined> => {
-	const memoryCached = schemaCache.get(collectionKey);
+	const signature = getCollectionSignatureByKey(context, collectionKey);
+	if (!signature) return undefined;
+
+	const cacheKey = getSchemaKey(collectionKey, signature);
+
+	const memoryCached = schemaCache.get(cacheKey);
 	if (memoryCached) return memoryCached;
 
-	const kvCached = await context.kv.get<CollectionSchema>(
-		getSchemaKey(collectionKey),
-	);
+	const kvCached = await context.kv.get<CollectionSchema>(cacheKey);
 	if (!kvCached) return undefined;
 
-	schemaCache.set(collectionKey, kvCached);
+	schemaCache.set(cacheKey, kvCached);
 	return kvCached;
 };
 
@@ -47,8 +63,13 @@ export const setSchema = async (
 	collectionKey: string,
 	schema: CollectionSchema,
 ): Promise<void> => {
-	schemaCache.set(collectionKey, schema);
-	await context.kv.set(getSchemaKey(collectionKey), schema);
+	const signature = getCollectionSignatureByKey(context, collectionKey);
+	if (!signature) return;
+
+	const cacheKey = getSchemaKey(collectionKey, signature);
+
+	schemaCache.set(cacheKey, schema);
+	await context.kv.set(cacheKey, schema);
 };
 
 export const resolveSchema = async (
@@ -56,6 +77,12 @@ export const resolveSchema = async (
 	collectionKey: string,
 	resolver: () => Promise<CachedSchemaResponse>,
 ): Promise<CachedSchemaResponse> => {
+	const signature = getCollectionSignatureByKey(context, collectionKey);
+	if (!signature) {
+		return await resolver();
+	}
+
+	const cacheKey = getSchemaKey(collectionKey, signature);
 	const cachedSchema = await getSchema(context, collectionKey);
 	if (cachedSchema) {
 		return {
@@ -64,7 +91,7 @@ export const resolveSchema = async (
 		};
 	}
 
-	const inFlightSchema = inFlightSchemaLoads.get(collectionKey);
+	const inFlightSchema = inFlightSchemaLoads.get(cacheKey);
 	if (inFlightSchema) return inFlightSchema;
 
 	const pending = (async (): Promise<CachedSchemaResponse> => {
@@ -75,11 +102,11 @@ export const resolveSchema = async (
 			}
 			return result;
 		} finally {
-			inFlightSchemaLoads.delete(collectionKey);
+			inFlightSchemaLoads.delete(cacheKey);
 		}
 	})();
 
-	inFlightSchemaLoads.set(collectionKey, pending);
+	inFlightSchemaLoads.set(cacheKey, pending);
 
 	return pending;
 };
