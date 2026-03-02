@@ -40,6 +40,7 @@ class SQLiteAdapter extends DatabaseAdapter {
 	}
 	get config(): DatabaseConfig {
 		return {
+			tableNameByteLimit: null,
 			support: {
 				alterColumn: false,
 				multipleAlterTables: false,

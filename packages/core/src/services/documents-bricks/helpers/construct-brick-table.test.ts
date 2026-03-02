@@ -178,6 +178,7 @@ describe("brick table construction", () => {
 			localization: TEST_CONFIG.localization,
 			bricks: simpleInputData.bricks,
 			fields: simpleInputData.fields,
+			tableNameByteLimit: null,
 		});
 		brickTables.sort((a, b) => a.priority - b.priority);
 
@@ -398,6 +399,7 @@ describe("brick table construction", () => {
 			localization: TEST_CONFIG.localization,
 			bricks: deepInputData.bricks,
 			fields: [],
+			tableNameByteLimit: null,
 		});
 		brickTables.sort((a, b) => a.priority - b.priority);
 

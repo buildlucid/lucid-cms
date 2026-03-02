@@ -119,7 +119,7 @@ export default Object.freeze({
 	} as const,
 	db: {
 		prefix: "lucid_",
-		collectionKeysJoin: "__",
+		nameSeparator: "__",
 		generatedColumnPrefix: "_" as const,
 	},
 	logScopes: {

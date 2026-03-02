@@ -7,7 +7,11 @@ export type TableType =
 	| "versions"
 	| "document-fields"
 	| "brick"
-	| "repeater";
+	| "repeater"
+	// custom field relation table types
+	| "media-rel"
+	| "user-rel"
+	| "document-rel";
 
 export type CollectionSchemaColumn = {
 	name: string;
@@ -34,6 +38,7 @@ export type CollectionSchemaColumn = {
 };
 export type CollectionSchemaTable<TableName = string> = {
 	name: TableName;
+	rawName: TableName;
 	type: TableType;
 	key: {
 		collection: string;

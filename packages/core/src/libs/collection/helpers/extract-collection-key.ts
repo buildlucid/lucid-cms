@@ -8,7 +8,7 @@ import { collectionTableParts } from "./build-table-name.js";
 const extractCollectionKey = (table: LucidDocumentTableName) => {
 	return table
 		.split(`${constants.db.prefix}${collectionTableParts.document}`)[1]
-		?.replaceAll(constants.db.collectionKeysJoin, "");
+		?.replaceAll(constants.db.nameSeparator, "");
 };
 
 export default extractCollectionKey;

@@ -2,6 +2,8 @@ import constants from "../../../constants/constants.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
+import RepeaterCustomField from "../../custom-fields/fields/repeater.js";
+import toSafeTableName from "./to-safe-table-name.js";
 
 /**
  * Default parts for table names
@@ -22,7 +24,15 @@ const buildTableName = <R extends string>(
 		brick?: string;
 		repeater?: Array<string>;
 	},
-): Awaited<ServiceResponse<R>> => {
+	tableNameByteLimit: number | null,
+): Awaited<
+	ServiceResponse<{
+		/** The hashed table name */
+		name: R;
+		/** The raw, readable table name */
+		rawName: R;
+	}>
+> => {
 	const parts = [collectionTableParts.document, keys.collection];
 
 	switch (type) {
@@ -69,13 +79,23 @@ const buildTableName = <R extends string>(
 				parts.push(collectionTableParts.fields);
 			} else parts.push(keys.brick);
 
+			parts.push(RepeaterCustomField.getRelationConfig().separator);
+
 			// push all repeater keys - repeaters can have have children/parent repeaters
 			parts.push(...keys.repeater);
 		}
 	}
 
+	const safeNameRes = toSafeTableName(
+		`${constants.db.prefix}${parts.join(constants.db.nameSeparator)}`,
+		tableNameByteLimit,
+	);
+
 	return {
-		data: `${constants.db.prefix}${parts.join(constants.db.collectionKeysJoin)}` as R,
+		data: {
+			name: safeNameRes.name as R,
+			rawName: safeNameRes.rawName as R,
+		},
 		error: undefined,
 	};
 };

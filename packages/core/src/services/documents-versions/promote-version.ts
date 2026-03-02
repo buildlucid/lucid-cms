@@ -305,6 +305,7 @@ const promoteVersion: ServiceFn<
 			config: context.config,
 			host: baseUrl,
 		}),
+		tableNameByteLimit: context.config.db.config.tableNameByteLimit,
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 

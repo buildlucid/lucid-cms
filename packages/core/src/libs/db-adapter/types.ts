@@ -44,6 +44,11 @@ export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
 export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
 
 export type DatabaseConfig = {
+	/**
+	 * Maximum allowed table-name length in bytes for this database.
+	 * - `null` means no explicit limit is enforced.
+	 */
+	tableNameByteLimit: number | null;
 	support: {
 		/**
 		 * Whether the database supports the ALTER COLUMN statement.
@@ -400,6 +405,7 @@ export interface LucidCollections {
 export interface LucidCollectionMigrations {
 	id: Generated<number>;
 	collection_key: string;
+	table_name_map: string;
 	migration_plans: JSONColumnType<
 		MigrationPlan,
 		//* __insert__ includes a Record as the base repository handles formatting via formatData method

@@ -15,12 +15,20 @@ const createVersionsTable = (props: {
 		schema: CollectionSchemaTable;
 	}>
 > => {
-	const tableNameRes = buildTableName("versions", {
-		collection: props.collection.key,
-	});
-	const documentTableRes = buildTableName("document", {
-		collection: props.collection.key,
-	});
+	const tableNameRes = buildTableName(
+		"versions",
+		{
+			collection: props.collection.key,
+		},
+		props.db.config.tableNameByteLimit,
+	);
+	const documentTableRes = buildTableName(
+		"document",
+		{
+			collection: props.collection.key,
+		},
+		props.db.config.tableNameByteLimit,
+	);
 
 	if (tableNameRes.error) return tableNameRes;
 	if (documentTableRes.error) return documentTableRes;
@@ -28,7 +36,8 @@ const createVersionsTable = (props: {
 	return {
 		data: {
 			schema: {
-				name: tableNameRes.data,
+				name: tableNameRes.data.name,
+				rawName: tableNameRes.data.rawName,
 				type: "versions",
 				key: {
 					collection: props.collection.key,
@@ -69,7 +78,7 @@ const createVersionsTable = (props: {
 						type: props.db.getDataType("integer"),
 						nullable: false,
 						foreignKey: {
-							table: documentTableRes.data,
+							table: documentTableRes.data.name,
 							column: "id",
 							onDelete: "cascade",
 						},
@@ -87,7 +96,7 @@ const createVersionsTable = (props: {
 						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
-							table: tableNameRes.data,
+							table: tableNameRes.data.name,
 							column: "id",
 							onDelete: "set null",
 						},

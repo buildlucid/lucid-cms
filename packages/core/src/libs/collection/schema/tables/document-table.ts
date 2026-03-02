@@ -15,15 +15,20 @@ const createDocumentTable = (props: {
 		schema: CollectionSchemaTable;
 	}>
 > => {
-	const tableNameRes = buildTableName("document", {
-		collection: props.collection.key,
-	});
+	const tableNameRes = buildTableName(
+		"document",
+		{
+			collection: props.collection.key,
+		},
+		props.db.config.tableNameByteLimit,
+	);
 	if (tableNameRes.error) return tableNameRes;
 
 	return {
 		data: {
 			schema: {
-				name: tableNameRes.data,
+				name: tableNameRes.data.name,
+				rawName: tableNameRes.data.rawName,
 				type: "document",
 				key: {
 					collection: props.collection.key,

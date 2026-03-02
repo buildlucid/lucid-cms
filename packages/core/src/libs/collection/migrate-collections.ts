@@ -43,13 +43,17 @@ const migrateCollections: ServiceFn<
 	//* generate migration plan
 	const migrationPlans: MigrationPlan[] = [];
 	for (const i of inferedSchemas) {
-		const tableNameRes = buildTableName("document", {
-			collection: i.key,
-		});
+		const tableNameRes = buildTableName(
+			"document",
+			{
+				collection: i.key,
+			},
+			context.config.db.config.tableNameByteLimit,
+		);
 		if (tableNameRes.error) return tableNameRes;
 
 		const existingTables = dbSchema.filter((t) =>
-			t.name.startsWith(tableNameRes.data),
+			t.name.startsWith(tableNameRes.data.name),
 		);
 
 		const migraitonPlanRes = generateMigrationPlan({
@@ -85,9 +89,13 @@ const migrateCollections: ServiceFn<
 		const migrationPlan = migrationPlans.find(
 			(plan) => plan.collectionKey === schema.key,
 		);
+		const tableNameMap = Object.fromEntries(
+			schema.tables.map((table) => [table.name, table.rawName ?? table.name]),
+		);
 
 		return {
 			collection_key: schema.key,
+			table_name_map: JSON.stringify(tableNameMap),
 			migration_plans: migrationPlan ?? {
 				collectionKey: schema.key,
 				tables: [],

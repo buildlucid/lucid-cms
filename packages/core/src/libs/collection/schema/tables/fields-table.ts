@@ -37,11 +37,15 @@ const createFieldTables = (props: {
 		childTables: CollectionSchemaTable[];
 	}>
 > => {
-	const tableNameRes = buildTableName(props.type, {
-		collection: props.collection.key,
-		brick: props.brick?.key,
-		repeater: props.repeaterKeys,
-	});
+	const tableNameRes = buildTableName(
+		props.type,
+		{
+			collection: props.collection.key,
+			brick: props.brick?.key,
+			repeater: props.repeaterKeys,
+		},
+		props.db.config.tableNameByteLimit,
+	);
 	if (tableNameRes.error) return tableNameRes;
 
 	const childTables: CollectionSchemaTable[] = [];
@@ -204,8 +208,8 @@ const createFieldTables = (props: {
 				versionTable: props.versionTable,
 				brick: props.brick,
 				repeaterKeys: repeaterKeys,
-				parentTable: tableNameRes.data,
-				brickTable: props.brickTable ?? tableNameRes.data,
+				parentTable: tableNameRes.data.name,
+				brickTable: props.brickTable ?? tableNameRes.data.name,
 			});
 			if (repeaterTableRes.error) return repeaterTableRes;
 
@@ -260,7 +264,8 @@ const createFieldTables = (props: {
 	return {
 		data: {
 			schema: {
-				name: tableNameRes.data,
+				name: tableNameRes.data.name,
+				rawName: tableNameRes.data.rawName,
 				type: props.type,
 				key: {
 					collection: props.collection.key,

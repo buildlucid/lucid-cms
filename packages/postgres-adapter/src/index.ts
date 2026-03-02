@@ -38,6 +38,7 @@ class PostgresAdapter extends DatabaseAdapter {
 	}
 	get config(): DatabaseConfig {
 		return {
+			tableNameByteLimit: 63,
 			support: {
 				alterColumn: true,
 				multipleAlterTables: true,

@@ -2,10 +2,24 @@ import constants from "../../../constants/constants.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
+import DocumentCustomField from "../../custom-fields/fields/document.js";
+import MediaCustomField from "../../custom-fields/fields/media.js";
+import RepeaterCustomField from "../../custom-fields/fields/repeater.js";
+import UserCustomField from "../../custom-fields/fields/user.js";
 import { collectionTableParts } from "./build-table-name.js";
 
+const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
+
+const RELATION_CONFIGS = [
+	RepeaterCustomField.getRelationConfig(),
+	DocumentCustomField.getRelationConfig(),
+	MediaCustomField.getRelationConfig(),
+	UserCustomField.getRelationConfig(),
+];
+
 const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
-	const parts = name.split(constants.db.collectionKeysJoin);
+	const normalizedName = name.replace(HASHED_TABLE_SUFFIX_REGEX, "");
+	const parts = normalizedName.split(constants.db.nameSeparator);
 	const prefix = `${constants.db.prefix}${collectionTableParts.document}`;
 
 	if (!parts[0] || parts[0] !== prefix) {
@@ -22,6 +36,13 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 	try {
 		let tableType: TableType;
 
+		if (parts.length === 1) {
+			return {
+				data: undefined,
+				error: { message: T("invalid_table_name_format_insufficient_parts") },
+			};
+		}
+
 		if (parts.length === 2) {
 			tableType = "document";
 		} else if (parts.length === 3) {
@@ -33,7 +54,38 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 				tableType = "brick";
 			}
 		} else if (parts.length > 3) {
-			tableType = "repeater";
+			const relationConfig = RELATION_CONFIGS.find(
+				(config) => config.separator === parts[3],
+			);
+			if (!relationConfig) {
+				return {
+					data: undefined,
+					error: {
+						message: T("invalid_table_name_format_insufficient_parts"),
+					},
+				};
+			}
+			switch (relationConfig.type) {
+				case "media":
+					tableType = "media-rel";
+					break;
+				case "user":
+					tableType = "user-rel";
+					break;
+				case "document":
+					tableType = "document-rel";
+					break;
+				case "repeater":
+					tableType = "repeater";
+					break;
+				default:
+					return {
+						data: undefined,
+						error: {
+							message: T("invalid_table_name_format_insufficient_parts"),
+						},
+					};
+			}
 		} else {
 			return {
 				data: undefined,

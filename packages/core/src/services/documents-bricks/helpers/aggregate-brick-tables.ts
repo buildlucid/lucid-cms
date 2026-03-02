@@ -21,6 +21,7 @@ const aggregateBrickTables = (params: {
 	fields?: Array<FieldInputSchema> | Array<FieldResponse>;
 	collection: CollectionBuilder;
 	localization: Config["localization"];
+	tableNameByteLimit: number | null;
 }) => {
 	const brickTables: Array<InsertBrickTables> = [];
 	const brickKeyTableNameMap: Map<string, LucidBrickTableName> = new Map();
@@ -41,6 +42,7 @@ const aggregateBrickTables = (params: {
 			brickKeyTableNameMap: brickKeyTableNameMap,
 			order: 0,
 			open: true,
+			tableNameByteLimit: params.tableNameByteLimit,
 		});
 	}
 
@@ -63,6 +65,7 @@ const aggregateBrickTables = (params: {
 				brickKeyTableNameMap: brickKeyTableNameMap,
 				order: brick.order !== undefined ? brick.order : i,
 				open: brick.open ?? false,
+				tableNameByteLimit: params.tableNameByteLimit,
 			});
 		}
 	}

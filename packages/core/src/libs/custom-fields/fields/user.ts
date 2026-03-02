@@ -14,8 +14,11 @@ import type {
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 
+const CF_TYPE = "user" as const;
+const CF_RELATION_SEPARATOR = "usr" as const;
+
 class UserCustomField extends CustomField<"user"> {
-	type = "user" as const;
+	type = CF_TYPE;
 	config;
 	key;
 	props;
@@ -95,6 +98,12 @@ class UserCustomField extends CustomField<"user"> {
 	}
 	get defaultValue() {
 		return null;
+	}
+	static getRelationConfig() {
+		return {
+			type: CF_TYPE,
+			separator: CF_RELATION_SEPARATOR,
+		};
 	}
 }
 

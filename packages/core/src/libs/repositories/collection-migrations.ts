@@ -14,6 +14,7 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
+		table_name_map: z.string(),
 		migration_plans: z.unknown(),
 		collection_schema: z.unknown(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
@@ -21,6 +22,7 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
+		table_name_map: this.dbAdapter.getDataType("text"),
 		migration_plans: this.dbAdapter.getDataType("json"),
 		collection_schema: this.dbAdapter.getDataType("json"),
 		created_at: this.dbAdapter.getDataType("timestamp"),

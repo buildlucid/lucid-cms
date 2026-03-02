@@ -56,6 +56,7 @@ const constructBrickTable = (
 		brickKeyTableNameMap: Map<string, LucidBrickTableName>;
 		order: number;
 		open: boolean;
+		tableNameByteLimit: number | null;
 	},
 ): void => {
 	//* get or build the table name
@@ -69,14 +70,18 @@ const constructBrickTable = (
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		tableName = params.brickKeyTableNameMap.get(mapKey)!;
 	} else {
-		const brickTableNameRes = buildTableName<LucidBrickTableName>(params.type, {
-			collection: params.collection.key,
-			brick: params.brick?.key,
-			repeater: params.repeaterKeys,
-		});
+		const brickTableNameRes = buildTableName<LucidBrickTableName>(
+			params.type,
+			{
+				collection: params.collection.key,
+				brick: params.brick?.key,
+				repeater: params.repeaterKeys,
+			},
+			params.tableNameByteLimit,
+		);
 		if (brickTableNameRes.error) return;
-		tableName = brickTableNameRes.data;
-		params.brickKeyTableNameMap.set(mapKey, brickTableNameRes.data);
+		tableName = brickTableNameRes.data.name;
+		params.brickKeyTableNameMap.set(mapKey, brickTableNameRes.data.name);
 	}
 
 	//* find existing table or create new one
@@ -215,6 +220,7 @@ const constructBrickTable = (
 					brick: params.brick,
 					order: group.order !== undefined ? group.order : groupIndex,
 					open: group.open ?? false,
+					tableNameByteLimit: params.tableNameByteLimit,
 				});
 			}
 		});

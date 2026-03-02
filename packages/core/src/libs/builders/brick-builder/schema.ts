@@ -7,8 +7,8 @@ import { collectionTableParts } from "../../collection/helpers/build-table-name.
 const BrickConfigSchema = z.object({
 	key: z
 		.string()
-		.refine((val) => !val.includes(constants.db.collectionKeysJoin), {
-			message: `Brick key cannot contain '${constants.db.collectionKeysJoin}'`,
+		.refine((val) => !val.includes(constants.db.nameSeparator), {
+			message: `Brick key cannot contain '${constants.db.nameSeparator}'`,
 		})
 		// TODO: come up with a better solution that reserving certain keywords
 		//* these keys are reserved due to them being used in the table name generation on the same level as the brick key

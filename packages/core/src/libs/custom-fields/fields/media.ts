@@ -17,8 +17,11 @@ import type {
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 
+const CF_TYPE = "media" as const;
+const CF_RELATION_SEPARATOR = "med" as const;
+
 class MediaCustomField extends CustomField<"media"> {
-	type = "media" as const;
+	type = CF_TYPE;
 	config;
 	key;
 	props;
@@ -225,6 +228,12 @@ class MediaCustomField extends CustomField<"media"> {
 	}
 	get defaultValue() {
 		return null;
+	}
+	static getRelationConfig() {
+		return {
+			type: CF_TYPE,
+			separator: CF_RELATION_SEPARATOR,
+		};
 	}
 }
 

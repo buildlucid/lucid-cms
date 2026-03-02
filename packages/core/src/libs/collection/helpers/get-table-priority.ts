@@ -11,6 +11,9 @@ const TABLE_PRIORITY: Record<TableType, number> = {
 	"document-fields": 800,
 	brick: 700,
 	repeater: 600,
+	"media-rel": 500,
+	"user-rel": 500,
+	"document-rel": 500,
 };
 const EXTERNAL_REFERENCE_PRIORITY = 100;
 const REPEATER_DEPTH_PRIORITY = 10;

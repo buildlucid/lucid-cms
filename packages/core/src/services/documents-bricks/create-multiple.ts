@@ -54,6 +54,7 @@ const createMultiple: ServiceFn<
 		localization: context.config.localization,
 		bricks: preparedBricks,
 		fields: preparedFields,
+		tableNameByteLimit: context.config.db.config.tableNameByteLimit,
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 

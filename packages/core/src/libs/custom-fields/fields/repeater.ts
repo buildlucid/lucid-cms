@@ -9,8 +9,11 @@ import type {
 } from "../types.js";
 import keyToTitle from "../utils/key-to-title.js";
 
+const CF_TYPE = "repeater" as const;
+const CF_RELATION_SEPARATOR = "rep" as const;
+
 class RepeaterCustomField extends CustomField<"repeater"> {
-	type = "repeater" as const;
+	type = CF_TYPE;
 	config;
 	key;
 	props;
@@ -80,6 +83,12 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	}
 	get defaultValue() {
 		return null;
+	}
+	static getRelationConfig() {
+		return {
+			type: CF_TYPE,
+			separator: CF_RELATION_SEPARATOR,
+		};
 	}
 }
 

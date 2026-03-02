@@ -54,7 +54,7 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_document__pages__fields__authors",
+				name: "lucid_document__pages__fields__rep__authors",
 				type: "repeater",
 				key: expect.objectContaining({
 					repeater: ["authors"],
@@ -74,7 +74,7 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_document__pages__fields__authors__books",
+				name: "lucid_document__pages__fields__rep__authors__books",
 				type: "repeater",
 				key: expect.objectContaining({
 					repeater: ["authors", "books"],

@@ -7,8 +7,8 @@ const CustomFieldSchema = z.object({
 	type: z.string(),
 	key: z
 		.string()
-		.refine((val) => !val.includes(constants.db.collectionKeysJoin), {
-			message: `Field key cannot contain '${constants.db.collectionKeysJoin}'`,
+		.refine((val) => !val.includes(constants.db.nameSeparator), {
+			message: `Field key cannot contain '${constants.db.nameSeparator}'`,
 		})
 		.refine((val) => !val.startsWith(constants.db.generatedColumnPrefix), {
 			message: `Field key cannot start with a '${constants.db.generatedColumnPrefix}' prefix`,

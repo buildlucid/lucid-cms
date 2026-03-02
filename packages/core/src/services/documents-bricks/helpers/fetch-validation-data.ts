@@ -342,9 +342,13 @@ const fetchDocumentsFromCollection = async (
 	if (ids.length === 0) return [];
 
 	try {
-		const tableNameRes = buildTableName<LucidDocumentTableName>("document", {
-			collection: collectionKey,
-		});
+		const tableNameRes = buildTableName<LucidDocumentTableName>(
+			"document",
+			{
+				collection: collectionKey,
+			},
+			context.config.db.config.tableNameByteLimit,
+		);
 		if (tableNameRes.error) {
 			logger.error({
 				scope: constants.logScopes.validation,
@@ -375,7 +379,7 @@ const fetchDocumentsFromCollection = async (
 				},
 			},
 			{
-				tableName: tableNameRes.data,
+				tableName: tableNameRes.data.name,
 			},
 		);
 		if (documentIdRes.error) {

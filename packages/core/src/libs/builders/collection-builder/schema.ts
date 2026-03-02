@@ -3,11 +3,9 @@ import constants from "../../../constants/constants.js";
 import { stringTranslations } from "../../../schemas/locales.js";
 
 const CollectionConfigSchema = z.object({
-	key: z
-		.string()
-		.refine((val) => !val.includes(constants.db.collectionKeysJoin), {
-			message: `Collection key cannot contain '${constants.db.collectionKeysJoin}'`,
-		}),
+	key: z.string().refine((val) => !val.includes(constants.db.nameSeparator), {
+		message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
+	}),
 	mode: z.enum(["single", "multiple"]),
 	details: z.object({
 		name: stringTranslations,

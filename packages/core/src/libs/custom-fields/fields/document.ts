@@ -20,8 +20,11 @@ import type {
 import keyToTitle from "../utils/key-to-title.js";
 import zodSafeParse from "../utils/zod-safe-parse.js";
 
+const CF_TYPE = "document" as const;
+const CF_RELATION_SEPARATOR = "doc" as const;
+
 class DocumentCustomField extends CustomField<"document"> {
-	type = "document" as const;
+	type = CF_TYPE;
 	column = "document_id" as const;
 	config;
 	key;
@@ -50,9 +53,13 @@ class DocumentCustomField extends CustomField<"document"> {
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {
-		const documentTableRes = buildTableName("document", {
-			collection: this.config.collection,
-		});
+		const documentTableRes = buildTableName(
+			"document",
+			{
+				collection: this.config.collection,
+			},
+			props.db.config.tableNameByteLimit,
+		);
 		if (documentTableRes.error) return documentTableRes;
 
 		return {
@@ -63,7 +70,7 @@ class DocumentCustomField extends CustomField<"document"> {
 						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
-							table: documentTableRes.data,
+							table: documentTableRes.data.name,
 							column: "id",
 							onDelete: "set null",
 						},
@@ -154,6 +161,12 @@ class DocumentCustomField extends CustomField<"document"> {
 	}
 	get defaultValue() {
 		return null;
+	}
+	static getRelationConfig() {
+		return {
+			type: CF_TYPE,
+			separator: CF_RELATION_SEPARATOR,
+		};
 	}
 }
 
