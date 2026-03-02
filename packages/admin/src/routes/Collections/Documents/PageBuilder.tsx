@@ -116,6 +116,9 @@ const CollectionsDocumentsEditRoute: Component<{
 
 		const nextViewKey = getViewKey();
 		const shouldMerge = nextViewKey !== null && hydratedViewKey === nextViewKey;
+		const hasUnsavedChanges =
+			brickStore.get.initialSnapshot !== null &&
+			brickStore.getDocumentMutated();
 
 		if (!shouldMerge) {
 			setStateLoading(true);
@@ -130,6 +133,14 @@ const CollectionsDocumentsEditRoute: Component<{
 				"collectionTranslations",
 				collection.config.useTranslations || false,
 			);
+
+			//* preserve local unsaved edits during same-view background query updates
+			//* - Without this guard, selecting a relation field can trigger a refetch that rehydrates store fields from stale server data and wipes local changes
+			if (shouldMerge && hasUnsavedChanges) {
+				brickStore.set("locked", uiState.isBuilderLocked());
+				return;
+			}
+
 			if (shouldMerge) {
 				brickStore.get.syncBricks(document, collection);
 			} else {
