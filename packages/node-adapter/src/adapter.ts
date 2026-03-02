@@ -159,7 +159,7 @@ const nodeAdapter = (options?: {
 							dir: outputPath,
 							format: "esm",
 							minify: true,
-							inlineDynamicImports: true,
+							codeSplitting: false,
 						},
 						plugins: [
 							nodeExternals(),

@@ -33,7 +33,11 @@ const verifyToken = async (
 
 		const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
-		const decode = (await verify(_refresh, config.secrets.refreshToken)) as {
+		const decode = (await verify(
+			_refresh,
+			config.secrets.refreshToken,
+			constants.jwt.algorithm,
+		)) as {
 			id: number;
 		};
 		const hashedRefreshToken = hashUserToken(_refresh);

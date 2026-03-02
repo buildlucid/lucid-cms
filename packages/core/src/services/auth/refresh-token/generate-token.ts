@@ -37,6 +37,7 @@ const generateToken = async (
 			nonce: nonce,
 		},
 		config.secrets.refreshToken,
+		constants.jwt.algorithm,
 	);
 	const hashedToken = hashUserToken(token);
 

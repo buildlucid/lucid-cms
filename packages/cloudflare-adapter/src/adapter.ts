@@ -247,7 +247,7 @@ const cloudflareAdapter = (options?: {
 									dir: outputPath,
 									format: "esm",
 									minify: true,
-									inlineDynamicImports: true,
+									codeSplitting: false,
 								},
 								treeshake: {
 									moduleSideEffects: (id) => {

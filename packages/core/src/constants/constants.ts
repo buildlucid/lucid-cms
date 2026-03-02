@@ -13,6 +13,9 @@ export default Object.freeze({
 		refreshToken: "_refresh",
 		accessToken: "_access",
 	},
+	jwt: {
+		algorithm: "HS256" as const,
+	},
 	scrypt: {
 		N: 2 ** 16, // 65536 iterations
 		r: 8,

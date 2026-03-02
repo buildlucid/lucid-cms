@@ -55,6 +55,7 @@ const generateToken = async (
 				nonce: nonce,
 			} satisfies LucidAuth,
 			config.secrets.accessToken,
+			constants.jwt.algorithm,
 		);
 
 		setCookie(c, constants.cookies.accessToken, token, {

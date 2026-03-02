@@ -39,16 +39,16 @@
         "DB Adapter"
     ],
     "devDependencies": {
-        "@biomejs/biome": "^2.3.10",
+        "@biomejs/biome": "^2.4.4",
         "@lucidcms/config": "*",
         "@lucidcms/core": "*",
         "@types/node": "^24.10.4",
-        "tsdown": "^0.18.2",
+        "tsdown": "^0.20.3",
         "typescript": "^5.9.3"
     },
     "dependencies": {
-        "better-sqlite3": "^12.5.0",
-        "kysely": "0.28.9"
+        "better-sqlite3": "^12.6.2",
+        "kysely": "0.28.11"
     },
     "peerDependencies": {
         "@lucidcms/core": "^0.12.0-alpha.1"

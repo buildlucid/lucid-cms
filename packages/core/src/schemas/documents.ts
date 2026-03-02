@@ -478,9 +478,7 @@ export const controllerSchemas = {
 			statusOrId: z
 				.union([
 					z.literal("latest"),
-					z
-						.string()
-						.trim(), // version id or custom environment key
+					z.string().trim(), // version id or custom environment key
 				])
 				.meta({
 					description: "The status (version type), or a version ID",

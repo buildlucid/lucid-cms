@@ -1,4 +1,4 @@
-import type { Queue } from "@cloudflare/workers-types";
+/// <reference types="@cloudflare/workers-types" />
 
 export type PluginOptions = {
 	/**

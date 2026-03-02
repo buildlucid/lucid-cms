@@ -24,6 +24,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 		const decode = (await verify(
 			_access,
 			config.secrets.accessToken,
+			constants.jwt.algorithm,
 		)) as LucidAuth;
 
 		return {
