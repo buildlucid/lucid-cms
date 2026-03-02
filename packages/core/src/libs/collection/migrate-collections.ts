@@ -81,15 +81,20 @@ const migrateCollections: ServiceFn<
 	if (migrationRes.error) return migrationRes;
 
 	//* save migration plans to db
-	const migrationPlanEntries = migrationPlans
-		.map((mp) => {
-			if (mp.tables.length === 0) return null;
-			return {
-				collection_key: mp.collectionKey,
-				migration_plans: mp,
-			};
-		})
-		.filter((mp) => mp !== null);
+	const migrationPlanEntries = inferedSchemas.map((schema) => {
+		const migrationPlan = migrationPlans.find(
+			(plan) => plan.collectionKey === schema.key,
+		);
+
+		return {
+			collection_key: schema.key,
+			migration_plans: migrationPlan ?? {
+				collectionKey: schema.key,
+				tables: [],
+			},
+			collection_schema: schema,
+		};
+	});
 
 	if (migrationPlanEntries.length > 0) {
 		const migrationsRes = await CollectionMigrations.createMultiple({

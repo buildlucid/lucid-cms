@@ -42,6 +42,9 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("migration_plans", adapter.getDataType("json"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("collection_schema", adapter.getDataType("json"), (col) =>
+					col.notNull(),
+				)
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(

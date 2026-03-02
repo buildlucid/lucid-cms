@@ -1,5 +1,5 @@
 import { prefixGeneratedColName } from "../../helpers.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type {
 	CollectionSchemaTable,
 	TableType,

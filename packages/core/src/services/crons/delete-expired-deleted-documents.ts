@@ -1,4 +1,4 @@
-import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRetentionDays from "./helpers/get-retention-days.js";

@@ -1,8 +1,9 @@
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
+import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
-} from "../../libs/collection/schema/live/schema-filters.js";
+} from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import {
 	DocumentBricksRepository,
@@ -169,6 +170,12 @@ const promoteVersion: ServiceFn<
 		};
 	}
 
+	const migrationIdRes = await getCurrentCollectionMigrationId(
+		context,
+		data.collectionKey,
+	);
+	if (migrationIdRes.error) return migrationIdRes;
+
 	//-------------------------------------------------------------------------------
 	// Mutate/create revisions and update the document
 	const shouldCreateRevision =
@@ -193,6 +200,7 @@ const promoteVersion: ServiceFn<
 						],
 						data: {
 							type: "revision",
+							collection_migration_id: migrationIdRes.data,
 							promoted_from: data.fromVersionId,
 							created_by: data.userId,
 						},
@@ -225,6 +233,7 @@ const promoteVersion: ServiceFn<
 				data: {
 					id: data.documentId,
 					collection_key: data.collectionKey,
+					collection_migration_id: migrationIdRes.data,
 					created_by: data.userId,
 					updated_by: data.userId,
 					is_deleted: false,
@@ -248,6 +257,7 @@ const promoteVersion: ServiceFn<
 				data: {
 					document_id: data.documentId,
 					collection_key: data.collectionKey,
+					collection_migration_id: migrationIdRes.data,
 					type: data.toVersionType,
 					promoted_from: data.fromVersionId,
 					content_id: versionRes.data.content_id,

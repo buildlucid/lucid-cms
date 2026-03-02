@@ -1,5 +1,5 @@
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
-import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";

@@ -1,5 +1,5 @@
-import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
-import { getDocumentTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import primeRuntimeSchemas from "../../libs/collection/schema/runtime/prime-runtime-schemas.js";
+import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { CollectionResponse } from "../../types/response.js";
@@ -25,7 +25,7 @@ const getAll: ServiceFn<
 			context.config.db,
 		);
 
-		await cacheAllSchemas(context, {
+		await primeRuntimeSchemas(context, {
 			collectionKeys: singleCollections.map((c) => c.key),
 		});
 

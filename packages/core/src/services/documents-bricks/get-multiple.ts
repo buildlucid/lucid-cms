@@ -1,7 +1,7 @@
 import {
 	getBricksTableSchema,
 	getTableNames,
-} from "../../libs/collection/schema/live/schema-filters.js";
+} from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
 import {
 	documentBricksFormatter,

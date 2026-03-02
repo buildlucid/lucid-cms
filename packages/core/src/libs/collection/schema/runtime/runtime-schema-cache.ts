@@ -1,8 +1,8 @@
 import type { LucidErrorData } from "../../../../types/errors.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import cacheKeys from "../../../kv-adapter/cache-keys.js";
-import { getCollectionSignature } from "../../cache-signature.js";
 import type { CollectionSchema } from "../types.js";
+import { getCollectionSignature } from "./cache-signature.js";
 
 type CachedSchemaResponse =
 	| {
@@ -32,7 +32,11 @@ const getCollectionSignatureByKey = (
 	return getCollectionSignature(collection);
 };
 
-export const getSchema = async (
+/**
+ * Gets a runtime schema from memory/KV cache using the current collection
+ * config signature.
+ */
+export const getRuntimeSchemaFromCache = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): Promise<CollectionSchema | undefined> => {
@@ -51,14 +55,16 @@ export const getSchema = async (
 	return kvCached;
 };
 
-export const hasSchema = async (
+export const hasRuntimeSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): Promise<boolean> => {
-	return (await getSchema(context, collectionKey)) !== undefined;
+	return (
+		(await getRuntimeSchemaFromCache(context, collectionKey)) !== undefined
+	);
 };
 
-export const setSchema = async (
+export const setRuntimeSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 	schema: CollectionSchema,
@@ -72,7 +78,7 @@ export const setSchema = async (
 	await context.kv.set(cacheKey, schema);
 };
 
-export const resolveSchema = async (
+export const resolveRuntimeSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 	resolver: () => Promise<CachedSchemaResponse>,
@@ -83,7 +89,7 @@ export const resolveSchema = async (
 	}
 
 	const cacheKey = getSchemaKey(collectionKey, signature);
-	const cachedSchema = await getSchema(context, collectionKey);
+	const cachedSchema = await getRuntimeSchemaFromCache(context, collectionKey);
 	if (cachedSchema) {
 		return {
 			data: cachedSchema,
@@ -98,7 +104,7 @@ export const resolveSchema = async (
 		try {
 			const result = await resolver();
 			if (!result.error) {
-				await setSchema(context, collectionKey, result.data);
+				await setRuntimeSchema(context, collectionKey, result.data);
 			}
 			return result;
 		} finally {

@@ -1,6 +1,6 @@
 import type { ColumnDataType } from "kysely";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
-import { getBricksTableSchema } from "../../libs/collection/schema/live/schema-filters.js";
+import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type { LucidBricksTable } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";

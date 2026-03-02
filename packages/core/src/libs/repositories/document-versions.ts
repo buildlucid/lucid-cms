@@ -44,6 +44,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
+		collection_migration_id: z.number(),
 		document_id: z.number(),
 		type: versionTypesSchema,
 		promoted_from: z.number().nullable(),
@@ -56,6 +57,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
+		collection_migration_id: this.dbAdapter.getDataType("integer"),
 		document_id: this.dbAdapter.getDataType("integer"),
 		type: this.dbAdapter.getDataType("text"),
 		promoted_from: this.dbAdapter.getDataType("integer"),

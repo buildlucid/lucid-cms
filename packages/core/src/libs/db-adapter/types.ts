@@ -11,6 +11,7 @@ import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
 import type { BrickTypes } from "../builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
+import type { CollectionSchema } from "../collection/schema/types.js";
 import type { EmailDeliveryStatus, EmailType } from "../email-adapter/types.js";
 import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
@@ -405,6 +406,12 @@ export interface LucidCollectionMigrations {
 		MigrationPlan,
 		MigrationPlan
 	>;
+	collection_schema: JSONColumnType<
+		CollectionSchema,
+		//* __insert__ includes a Record as the base repository handles formatting via formatData method
+		CollectionSchema,
+		CollectionSchema
+	>;
 	created_at: TimestampImmutable;
 }
 
@@ -436,6 +443,7 @@ export type LucidDocumentTableName = `lucid_document__${string}`;
 export interface LucidDocumentTable {
 	id: Generated<number>;
 	collection_key: string;
+	collection_migration_id: number;
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number;
@@ -449,6 +457,7 @@ export type LucidVersionTableName = `lucid_document__${string}__versions`;
 export interface LucidVersionTable {
 	id: Generated<number>;
 	collection_key: string;
+	collection_migration_id: number;
 	document_id: number;
 	type: DocumentVersionType;
 	promoted_from: number | null;

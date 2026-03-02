@@ -1,9 +1,9 @@
 import extractCollectionKey from "../../libs/collection/helpers/extract-collection-key.js";
-import cacheAllSchemas from "../../libs/collection/schema/live/cache-all-schemas.js";
+import primeRuntimeSchemas from "../../libs/collection/schema/runtime/prime-runtime-schemas.js";
 import {
 	getDocumentFieldsTableSchema,
 	getDocumentVersionTableSchema,
-} from "../../libs/collection/schema/live/schema-filters.js";
+} from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type { BrickQueryResponse } from "../../libs/repositories/document-bricks.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
@@ -51,7 +51,7 @@ const getMultipleFieldMeta: ServiceFn<
 		.map((v) => extractCollectionKey(v.table))
 		.filter((c) => c !== undefined);
 
-	const cacheSchemaRes = await cacheAllSchemas(context, {
+	const cacheSchemaRes = await primeRuntimeSchemas(context, {
 		collectionKeys: collectionKeys,
 	});
 	if (cacheSchemaRes.error) return cacheSchemaRes;

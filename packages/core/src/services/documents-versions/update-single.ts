@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import merge from "lodash.merge";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
-import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -72,6 +73,12 @@ const updateSingle: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const migrationIdRes = await getCurrentCollectionMigrationId(
+		context,
+		data.collectionKey,
+	);
+	if (migrationIdRes.error) return migrationIdRes;
 
 	//* check if document exists within the collection
 	const versionExistsRes = await Version.selectSingle(
@@ -208,6 +215,7 @@ const updateSingle: ServiceFn<
 			where: [{ key: "id", operator: "=", value: data.versionId }],
 			data: {
 				content_id: randomUUID(),
+				collection_migration_id: migrationIdRes.data,
 				updated_by: data.userId,
 				updated_at: new Date().toISOString(),
 			},

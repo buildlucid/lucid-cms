@@ -1,8 +1,9 @@
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { CollectionMigrationsRepository } from "../repositories/index.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";
-import migrateCollections from "./migrate-collections.js";
-import { resolveCachedMigrationResult } from "./migration/cache.js";
+import inferSchema from "./schema/infer-schema.js";
+import diffSnapshotVsConfigAdditions from "./schema/runtime/diff-snapshot-vs-config-additions.js";
 
 export type MigrationStatus = {
 	requiresMigration: boolean;
@@ -13,76 +14,82 @@ export type MigrationStatus = {
 };
 
 /**
- * Works out if a collection requires migration by doing a dry run of the migration process
+ * Works out if a collection requires migration by comparing the latest
+ * persisted schema snapshot with the current inferred schema.
  */
 const getMigrationStatus: ServiceFn<
 	[{ collection: CollectionBuilder }],
 	MigrationStatus
 > = async (context, data) => {
-	const migrationResultRes = await resolveCachedMigrationResult(
-		context,
-		async () => {
-			return await migrateCollections(context, { dryRun: true });
-		},
-	);
-	if (migrationResultRes.error) return migrationResultRes;
-
-	const collectionPlan = migrationResultRes.data.migrationPlans.find(
-		(plan) => plan.collectionKey === data.collection.key,
+	const CollectionMigrations = new CollectionMigrationsRepository(
+		context.db.client,
+		context.config.db,
 	);
 
-	if (!collectionPlan) {
+	const localSchemaRes = inferSchema(data.collection, context.config.db);
+	if (localSchemaRes.error) return localSchemaRes;
+
+	const latestMigrationRes =
+		await CollectionMigrations.selectLatestByCollectionKey({
+			collectionKey: data.collection.key,
+		});
+	if (latestMigrationRes.error) return latestMigrationRes;
+
+	if (!latestMigrationRes.data) {
 		return {
 			data: {
-				requiresMigration: false,
+				requiresMigration: true,
 				missingColumns: {},
 			},
 			error: undefined,
 		};
 	}
 
+	const diff = diffSnapshotVsConfigAdditions(
+		latestMigrationRes.data.collection_schema,
+		localSchemaRes.data,
+	);
+
 	const missingColumns: Record<string, string[]> = {};
 
-	for (const tableMigration of collectionPlan.tables) {
+	for (const table of localSchemaRes.data.tables) {
 		if (
-			tableMigration.tableType !== "document-fields" &&
-			tableMigration.tableType !== "brick" &&
-			tableMigration.tableType !== "repeater"
+			table.type !== "document-fields" &&
+			table.type !== "brick" &&
+			table.type !== "repeater"
 		) {
 			continue;
 		}
 
-		if (tableMigration.type === "create" || tableMigration.type === "modify") {
-			const addOperations = tableMigration.columnOperations.filter(
-				(op) => op.type === "add",
-			);
+		const missingTable = diff.missingTableNames.has(table.name);
+		const missingColumnNames = diff.missingColumnsByTable.get(table.name);
 
-			if (addOperations.length > 0) {
-				const tableKey =
-					tableMigration.tableType === "document-fields"
-						? "document-fields"
-						: tableMigration.key?.brick;
+		const missingFieldColumns = table.columns
+			.filter((column) => column.source === "field")
+			.filter((column) =>
+				missingTable ? true : missingColumnNames?.has(column.name),
+			)
+			.map((column) => stripColumnPrefix(column.name));
 
-				if (!tableKey) continue;
+		if (missingFieldColumns.length === 0) continue;
 
-				if (!missingColumns[tableKey]) {
-					missingColumns[tableKey] = [];
-				}
+		const tableKey =
+			table.type === "document-fields" ? "document-fields" : table.key.brick;
+		if (!tableKey) continue;
 
-				const fieldKeys = addOperations
-					.map((op) => {
-						return stripColumnPrefix(op.column.name);
-					})
-					.filter(Boolean);
-
-				missingColumns[tableKey].push(...fieldKeys);
-			}
+		if (!missingColumns[tableKey]) {
+			missingColumns[tableKey] = [];
 		}
+
+		missingColumns[tableKey].push(...missingFieldColumns);
 	}
+
+	const requiresMigration =
+		diff.missingTableNames.size > 0 || diff.missingColumnsByTable.size > 0;
 
 	return {
 		data: {
-			requiresMigration: collectionPlan.tables.length > 0,
+			requiresMigration,
 			missingColumns,
 		},
 		error: undefined,

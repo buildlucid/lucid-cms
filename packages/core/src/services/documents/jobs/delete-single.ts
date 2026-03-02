@@ -1,4 +1,4 @@
-import { getTableNames } from "../../../libs/collection/schema/live/schema-filters.js";
+import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import executeHooks from "../../../utils/hooks/execute-hooks.js";

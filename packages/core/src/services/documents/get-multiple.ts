@@ -2,7 +2,7 @@ import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
 	getTableNames,
-} from "../../libs/collection/schema/live/schema-filters.js";
+} from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";

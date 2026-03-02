@@ -53,6 +53,17 @@ const createVersionsTable = (props: {
 						},
 					},
 					{
+						name: "collection_migration_id",
+						source: "core",
+						type: props.db.getDataType("integer"),
+						nullable: false,
+						foreignKey: {
+							table: "lucid_collection_migrations",
+							column: "id",
+							onDelete: "restrict",
+						},
+					},
+					{
 						name: "document_id",
 						source: "core",
 						type: props.db.getDataType("integer"),

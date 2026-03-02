@@ -1,5 +1,6 @@
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
-import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -69,6 +70,12 @@ const upsertSingle: ServiceFn<
 		};
 	}
 
+	const migrationIdRes = await getCurrentCollectionMigrationId(
+		context,
+		data.collectionKey,
+	);
+	if (migrationIdRes.error) return migrationIdRes;
+
 	//* check if document exists within the collection
 	if (data.documentId !== undefined) {
 		const existingDocumentRes = await Document.selectSingle(
@@ -118,6 +125,7 @@ const upsertSingle: ServiceFn<
 			data: {
 				id: data.documentId,
 				collection_key: data.collectionKey,
+				collection_migration_id: migrationIdRes.data,
 				created_by: data.userId,
 				updated_by: data.userId,
 				is_deleted: false,

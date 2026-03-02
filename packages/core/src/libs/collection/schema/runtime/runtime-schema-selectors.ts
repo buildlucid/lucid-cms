@@ -8,10 +8,10 @@ import type {
 } from "../../../../types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import type { CollectionSchemaTable } from "../types.js";
-import getSchema from "./get-schema.js";
+import getRuntimeSchema from "./get-runtime-schema.js";
 
 /**
- * Returns the schema for the bricks table for a given collection.
+ * Returns runtime schema tables for brick content on a collection.
  * - document-fields
  * - repeater
  * - brick
@@ -20,7 +20,7 @@ export const getBricksTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): ServiceResponse<Array<CollectionSchemaTable<LucidBrickTableName>>> => {
-	const schemaRes = await getSchema(context, { collectionKey });
+	const schemaRes = await getRuntimeSchema(context, { collectionKey });
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -32,7 +32,7 @@ export const getBricksTableSchema = async (
 };
 
 /**
- * Returns the schema for the document table for a given collection.
+ * Returns runtime schema for the document table on a collection.
  * - document
  */
 export const getDocumentTableSchema = async (
@@ -41,7 +41,7 @@ export const getDocumentTableSchema = async (
 ): ServiceResponse<
 	CollectionSchemaTable<LucidDocumentTableName> | undefined
 > => {
-	const schema = await getSchema(context, { collectionKey });
+	const schema = await getRuntimeSchema(context, { collectionKey });
 	if (schema.error) return schema;
 
 	return {
@@ -53,14 +53,14 @@ export const getDocumentTableSchema = async (
 };
 
 /**
- * Returns the schema for the document fields table for a given collection.
+ * Returns runtime schema for the top-level document-fields table.
  * - document-fields
  */
 export const getDocumentFieldsTableSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): ServiceResponse<CollectionSchemaTable<LucidBrickTableName> | undefined> => {
-	const schemaRes = await getSchema(context, { collectionKey });
+	const schemaRes = await getRuntimeSchema(context, { collectionKey });
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -72,7 +72,7 @@ export const getDocumentFieldsTableSchema = async (
 };
 
 /**
- * Returns the schema for the document version table for a given collection.
+ * Returns runtime schema for the document versions table.
  * - versions
  */
 export const getDocumentVersionTableSchema = async (
@@ -81,7 +81,7 @@ export const getDocumentVersionTableSchema = async (
 ): ServiceResponse<
 	CollectionSchemaTable<LucidVersionTableName> | undefined
 > => {
-	const schemaRes = await getSchema(context, { collectionKey });
+	const schemaRes = await getRuntimeSchema(context, { collectionKey });
 	if (schemaRes.error) return schemaRes;
 
 	return {
@@ -93,7 +93,7 @@ export const getDocumentVersionTableSchema = async (
 };
 
 /**
- * Returns the names of the tables for a given collection.
+ * Returns runtime table names for a collection.
  * - version
  * - document
  * - document-fields

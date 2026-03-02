@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import merge from "lodash.merge";
 import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
-import { getTableNames } from "../../libs/collection/schema/live/schema-filters.js";
+import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -31,6 +32,11 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const migrationIdRes = await getCurrentCollectionMigrationId(
+		context,
+		data.collection.key,
+	);
+	if (migrationIdRes.error) return migrationIdRes;
 
 	const versionType = "latest";
 
@@ -52,6 +58,7 @@ const createSingle: ServiceFn<
 				],
 				data: {
 					type: "revision",
+					collection_migration_id: migrationIdRes.data,
 					created_by: data.userId,
 				},
 			},
@@ -89,6 +96,7 @@ const createSingle: ServiceFn<
 		{
 			data: {
 				collection_key: data.collection.key,
+				collection_migration_id: migrationIdRes.data,
 				document_id: data.documentId,
 				type: versionType,
 				content_id: randomUUID(),

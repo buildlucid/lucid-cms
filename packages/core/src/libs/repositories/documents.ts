@@ -67,6 +67,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		id: z.number(),
 		collection_key: z.string(),
+		collection_migration_id: z.number(),
 		created_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_by: z.number().nullable(),
@@ -95,6 +96,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
+		collection_migration_id: this.dbAdapter.getDataType("integer"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		deleted_by: this.dbAdapter.getDataType("integer"),
@@ -131,6 +133,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			)
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet((eb) => ({
+					collection_migration_id: eb.ref("excluded.collection_migration_id"),
 					is_deleted: eb.ref("excluded.is_deleted"),
 					is_deleted_at: eb.ref("excluded.is_deleted_at"),
 					deleted_by: eb.ref("excluded.deleted_by"),
@@ -192,6 +195,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			)
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet((eb) => ({
+					collection_migration_id: eb.ref("excluded.collection_migration_id"),
 					is_deleted: eb.ref("excluded.is_deleted"),
 					is_deleted_at: eb.ref("excluded.is_deleted_at"),
 					deleted_by: eb.ref("excluded.deleted_by"),
