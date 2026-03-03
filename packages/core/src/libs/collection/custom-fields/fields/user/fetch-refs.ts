@@ -1,8 +1,8 @@
-import type { UserPropT } from "../../libs/formatters/users.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceFn } from "../../../../../utils/services/types.js";
+import type { UserPropT } from "../../../../formatters/users.js";
+import { UsersRepository } from "../../../../repositories/index.js";
 
-const getMultipleFieldMeta: ServiceFn<
+const fetchUserRefs: ServiceFn<
 	[
 		{
 			ids: number[];
@@ -40,4 +40,4 @@ const getMultipleFieldMeta: ServiceFn<
 	};
 };
 
-export default getMultipleFieldMeta;
+export default fetchUserRefs;

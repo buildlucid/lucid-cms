@@ -11,7 +11,7 @@ import type { DocumentResponse } from "../../types/response.js";
 import { getBaseUrl, groupDocumentFilters } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
-import fetchRelationData from "../documents-bricks/helpers/fetch-relation-data.js";
+import fetchRefData from "../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../index.js";
 
 const getMultiple: ServiceFn<
@@ -84,11 +84,11 @@ const getMultiple: ServiceFn<
 	});
 	if (relationIdRes.error) return relationIdRes;
 
-	const relationDataRes = await fetchRelationData(context, {
+	const refDataRes = await fetchRefData(context, {
 		values: relationIdRes.data,
 		versionType: data.status !== "revision" ? data.status : "latest",
 	});
-	if (relationDataRes.error) return relationDataRes;
+	if (refDataRes.error) return refDataRes;
 
 	return {
 		error: undefined,
@@ -98,7 +98,7 @@ const getMultiple: ServiceFn<
 				collection: collectionRes.data,
 				config: context.config,
 				host: getBaseUrl(context),
-				relationData: relationDataRes.data,
+				refData: refDataRes.data,
 				hasFields: true,
 				hasBricks: false,
 				bricksTableSchema: bricksTableSchemaRes.data,

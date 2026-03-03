@@ -1,4 +1,4 @@
-import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type {
 	BrickAltResponse,
 	BrickResponse,
@@ -27,7 +27,7 @@ const formatMultiple = (props: {
 	host: string;
 	hasFields: boolean;
 	hasBricks: boolean;
-	relationData?: FieldRelationResponse;
+	refData?: FieldRefResponse;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 }) => {
 	return props.documents.map((d) => {
@@ -37,7 +37,7 @@ const formatMultiple = (props: {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || { data: {} },
+				refData: props.refData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -47,7 +47,7 @@ const formatMultiple = (props: {
 			bricks = documentBricksFormatter.formatMultiple({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || { data: {} },
+				refData: props.refData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -55,7 +55,7 @@ const formatMultiple = (props: {
 		}
 
 		const refs = formatRefs({
-			data: props.relationData,
+			data: props.refData,
 			collection: props.collection,
 			config: props.config,
 			host: props.host,
@@ -153,7 +153,7 @@ const formatClientMultiple = (props: {
 	host: string;
 	hasFields: boolean;
 	hasBricks: boolean;
-	relationData?: FieldRelationResponse;
+	refData?: FieldRefResponse;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 }): ClientDocumentResponse[] => {
 	return props.documents.map((d) => {
@@ -163,7 +163,7 @@ const formatClientMultiple = (props: {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || { data: {} },
+				refData: props.refData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -173,7 +173,7 @@ const formatClientMultiple = (props: {
 			bricks = documentBricksFormatter.formatMultiple({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
-				relationMetaData: props.relationData || { data: {} },
+				refData: props.refData || { data: {} },
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -181,7 +181,7 @@ const formatClientMultiple = (props: {
 		}
 
 		const refs = formatRefs({
-			data: props.relationData,
+			data: props.refData,
 			collection: props.collection,
 			config: props.config,
 			host: props.host,
@@ -234,7 +234,7 @@ const formatClientSingle = (props: {
 };
 
 const formatRefs = (props: {
-	data?: FieldRelationResponse;
+	data?: FieldRefResponse;
 	collection: CollectionBuilder;
 	config: Config;
 	host: string;
@@ -250,10 +250,10 @@ const formatRefs = (props: {
 
 	for (const key of Object.keys(registeredFields) as FieldTypes[]) {
 		const customField = registeredFields[key].class;
-		const relationData = props.data.data[key];
-		if (!customField || !relationData || !Array.isArray(relationData)) continue;
+		const refData = props.data.data[key];
+		if (!customField || !refData || !Array.isArray(refData)) continue;
 
-		refs[key] = relationData
+		refs[key] = refData
 			.map((d) => {
 				if (d === null || d === undefined) return null;
 				// @ts-expect-error

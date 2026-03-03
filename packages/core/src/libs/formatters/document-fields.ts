@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type {
 	CFConfig,
 	Config,
@@ -43,7 +43,7 @@ interface FieldFormatData {
 	/** The schema for the entire collection and all possible bricks */
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	/** All relation meta data, users, media, documents etc. Used to populate the field meta data based on the CF type and value */
-	relationMetaData: FieldRelationResponse;
+	refData: FieldRefResponse;
 }
 
 interface IntermediaryFieldValues {
@@ -54,7 +54,7 @@ interface IntermediaryFieldValues {
 /**
  * The entry point for building out the FieldResponse array.
  *
- * Formats, creates groups, creates nested structure, marries relationMetaData etc.
+ * Formats, creates groups, creates nested structure, marries refData etc.
  */
 const formatMultiple = (
 	data: FieldFormatData,
@@ -121,7 +121,7 @@ const buildFieldTree = (
 		const fieldValue = buildField(
 			{
 				values: fieldValues,
-				relationMetaData: data.relationMetaData,
+				refData: data.refData,
 			},
 			{
 				builder: meta.builder,
@@ -149,7 +149,7 @@ const buildFieldTree = (
 const buildField = (
 	data: {
 		values: IntermediaryFieldValues[];
-		relationMetaData: FieldRelationResponse;
+		refData: FieldRefResponse;
 	},
 	meta: FieldFormatMeta & {
 		fieldConfig: CFConfig<FieldTypes>;
@@ -253,7 +253,7 @@ const buildGroups = (
 					brickRows: localeRows,
 					bricksQuery: data.bricksQuery,
 					bricksSchema: data.bricksSchema,
-					relationMetaData: data.relationMetaData,
+					refData: data.refData,
 				},
 				{
 					builder: meta.builder,

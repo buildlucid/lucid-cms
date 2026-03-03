@@ -27,19 +27,19 @@ const checkValidateBricksFields: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const relationDataRes = await fetchValidationData(context, data);
-	if (relationDataRes.error) return relationDataRes;
+	const refDataRes = await fetchValidationData(context, data);
+	if (refDataRes.error) return refDataRes;
 
 	const brickErrors = validateBricks({
 		bricks: data.bricks,
 		collection: data.collection,
-		validationData: relationDataRes.data,
+		validationData: refDataRes.data,
 		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
 		instance: data.collection,
-		validationData: relationDataRes.data,
+		validationData: refDataRes.data,
 		meta: {
 			useTranslations: data.collection.getData.config.useTranslations,
 			defaultLocale: context.config.localization.defaultLocale,
@@ -248,12 +248,9 @@ const recursiveFieldValidate = (props: {
 };
 
 /**
- * Helper function to get the appropriate relation data based on field type
+ * Helper function to get the appropriate reference data based on field type
  */
-const getRelationData = (
-	fieldType: FieldTypes,
-	validationData: ValidationData,
-) => {
+const getRefData = (fieldType: FieldTypes, validationData: ValidationData) => {
 	switch (fieldType) {
 		case "media":
 			return validationData.media;
@@ -279,7 +276,7 @@ export const validateField = (props: {
 	};
 }): FieldError[] => {
 	const errors: FieldError[] = [];
-	const relationData = getRelationData(props.field.type, props.validationData);
+	const refData = getRefData(props.field.type, props.validationData);
 
 	//* handle fields with translations
 	if (props.field.translations) {
@@ -288,7 +285,7 @@ export const validateField = (props: {
 			const validationResult = props.instance.validate({
 				type: props.field.type,
 				value,
-				relationData,
+				refData: refData,
 			});
 
 			if (!validationResult.valid) {
@@ -307,7 +304,7 @@ export const validateField = (props: {
 		const validationResult = props.instance.validate({
 			type: props.field.type,
 			value: props.field.value,
-			relationData,
+			refData: refData,
 		});
 
 		if (!validationResult.valid) {

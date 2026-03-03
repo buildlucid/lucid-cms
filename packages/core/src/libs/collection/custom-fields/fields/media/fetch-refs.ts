@@ -1,8 +1,8 @@
-import type { MediaPropsT } from "../../libs/formatters/media.js";
-import { MediaRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceFn } from "../../../../../utils/services/types.js";
+import type { MediaPropsT } from "../../../../formatters/media.js";
+import { MediaRepository } from "../../../../repositories/index.js";
 
-const getMultipleFieldMeta: ServiceFn<
+const fetchMediaRefs: ServiceFn<
 	[
 		{
 			ids: number[];
@@ -33,4 +33,4 @@ const getMultipleFieldMeta: ServiceFn<
 	};
 };
 
-export default getMultipleFieldMeta;
+export default fetchMediaRefs;

@@ -292,7 +292,7 @@ const promoteVersion: ServiceFn<
 		bricks: documentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,
-			relationMetaData: { data: {} },
+			refData: { data: {} },
 			collection: collectionRes.data,
 			config: context.config,
 			host: baseUrl,
@@ -300,7 +300,7 @@ const promoteVersion: ServiceFn<
 		fields: documentBricksFormatter.formatDocumentFields({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,
-			relationMetaData: { data: {} },
+			refData: { data: {} },
 			collection: collectionRes.data,
 			config: context.config,
 			host: baseUrl,

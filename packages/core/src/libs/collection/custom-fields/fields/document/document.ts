@@ -123,7 +123,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			documentBricksFormatter.formatDocumentFields({
 				bricksQuery: value,
 				bricksSchema: targetBricksSchema,
-				relationMetaData: { data: {} },
+				refData: { data: {} },
 				collection: collection,
 				config: params.config,
 				host: params.host,
@@ -137,13 +137,13 @@ class DocumentCustomField extends CustomField<"document"> {
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies CFResponse<"document">["ref"];
 	}
-	cfSpecificValidation(value: unknown, relationData?: DocumentReferenceData[]) {
+	cfSpecificValidation(value: unknown, refData?: DocumentReferenceData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		const findDocument = relationData?.find(
+		const findDocument = refData?.find(
 			(d) => d.id === value && d.collection_key === this.config.collection,
 		);
 

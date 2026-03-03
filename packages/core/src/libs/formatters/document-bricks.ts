@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { FieldRelationResponse } from "../../services/documents-bricks/helpers/fetch-relation-data.js";
+import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type { BrickResponse } from "../../types/response.js";
 import type {
 	Config,
@@ -18,7 +18,7 @@ const formatMultiple = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	collection: CollectionBuilder;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	relationMetaData: FieldRelationResponse;
+	refData: FieldRefResponse;
 	config: Config;
 	host: string;
 }): BrickResponse[] => {
@@ -66,7 +66,7 @@ const formatMultiple = (props: {
 						brickRows: rows,
 						bricksQuery: props.bricksQuery,
 						bricksSchema: props.bricksSchema,
-						relationMetaData: props.relationMetaData,
+						refData: props.refData,
 					},
 					{
 						host: props.host,
@@ -92,7 +92,7 @@ const formatDocumentFields = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	collection: CollectionBuilder;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	relationMetaData: FieldRelationResponse;
+	refData: FieldRefResponse;
 	config: Config;
 	host: string;
 }): FieldResponse[] => {
@@ -115,7 +115,7 @@ const formatDocumentFields = (props: {
 			brickRows: rowOne,
 			bricksQuery: props.bricksQuery,
 			bricksSchema: props.bricksSchema,
-			relationMetaData: props.relationMetaData,
+			refData: props.refData,
 		},
 		{
 			host: props.host,

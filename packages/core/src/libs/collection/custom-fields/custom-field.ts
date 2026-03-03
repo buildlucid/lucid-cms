@@ -25,7 +25,7 @@ abstract class CustomField<T extends FieldTypes> {
 
 	abstract cfSpecificValidation(
 		value: unknown,
-		relationData?: unknown,
+		refData?: unknown,
 	): {
 		valid: boolean;
 		message?: string;
@@ -52,7 +52,7 @@ abstract class CustomField<T extends FieldTypes> {
 	public validate(props: {
 		type: FieldTypes;
 		value: unknown;
-		relationData?: unknown;
+		refData?: unknown;
 	}): CustomFieldValidateResponse {
 		if (this.config.type === "tab") return { valid: true };
 
@@ -74,7 +74,7 @@ abstract class CustomField<T extends FieldTypes> {
 		}
 
 		// custom field specific validation
-		return this.cfSpecificValidation(props.value, props.relationData);
+		return this.cfSpecificValidation(props.value, props.refData);
 	}
 	private fieldTypeValidation(type: FieldTypes) {
 		if (this.errors.fieldType.condition?.(type)) {

@@ -1,21 +1,21 @@
-import extractCollectionKey from "../../libs/collection/helpers/extract-collection-key.js";
-import primeRuntimeSchemas from "../../libs/collection/schema/runtime/prime-runtime-schemas.js";
-import {
-	getDocumentFieldsTableSchema,
-	getDocumentVersionTableSchema,
-} from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
-import type { BrickQueryResponse } from "../../libs/repositories/document-bricks.js";
-import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
+import { collectionServices } from "../../../../../services/index.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
 	LucidDocumentTableName,
-} from "../../types.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
+} from "../../../../../types.js";
+import type { ServiceFn } from "../../../../../utils/services/types.js";
+import type { BrickQueryResponse } from "../../../../repositories/document-bricks.js";
+import { DocumentVersionsRepository } from "../../../../repositories/index.js";
+import extractCollectionKey from "../../../helpers/extract-collection-key.js";
+import primeRuntimeSchemas from "../../../schema/runtime/prime-runtime-schemas.js";
+import {
+	getDocumentFieldsTableSchema,
+	getDocumentVersionTableSchema,
+} from "../../../schema/runtime/runtime-schema-selectors.js";
+import type { CollectionSchemaTable } from "../../../schema/types.js";
 
-const getMultipleFieldMeta: ServiceFn<
+const fetchDocumentRefs: ServiceFn<
 	[
 		{
 			values: Array<{
@@ -120,4 +120,4 @@ const getMultipleFieldMeta: ServiceFn<
 	};
 };
 
-export default getMultipleFieldMeta;
+export default fetchDocumentRefs;

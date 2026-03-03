@@ -107,13 +107,13 @@ class MediaCustomField extends CustomField<"media"> {
 			isDeleted: formatter.formatBoolean(value.is_deleted),
 		} satisfies CFResponse<"media">["ref"];
 	}
-	cfSpecificValidation(value: unknown, relationData?: MediaReferenceData[]) {
+	cfSpecificValidation(value: unknown, refData?: MediaReferenceData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		const findMedia = relationData?.find((m) => m.id === value);
+		const findMedia = refData?.find((m) => m.id === value);
 
 		if (findMedia === undefined) {
 			return {

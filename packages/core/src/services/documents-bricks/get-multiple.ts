@@ -18,7 +18,7 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getSingleInstance } from "../collections/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
-import fetchRelationData from "./helpers/fetch-relation-data.js";
+import fetchRefData from "./helpers/fetch-ref-data.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -89,11 +89,11 @@ const getMultiple: ServiceFn<
 	});
 	if (relationIdRes.error) return relationIdRes;
 
-	const relationDataRes = await fetchRelationData(context, {
+	const refDataRes = await fetchRefData(context, {
 		values: relationIdRes.data,
 		versionType: data.versionType,
 	});
-	if (relationDataRes.error) return relationDataRes;
+	if (refDataRes.error) return refDataRes;
 
 	const baseUrl = getBaseUrl(context);
 
@@ -103,7 +103,7 @@ const getMultiple: ServiceFn<
 			bricks: documentBricksFormatter.formatMultiple({
 				bricksQuery: bricksQueryRes.data,
 				bricksSchema: bricksTableSchemaRes.data,
-				relationMetaData: relationDataRes.data,
+				refData: refDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
 				host: baseUrl,
@@ -111,7 +111,7 @@ const getMultiple: ServiceFn<
 			fields: documentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
 				bricksSchema: bricksTableSchemaRes.data,
-				relationMetaData: relationDataRes.data,
+				refData: refDataRes.data,
 				collection: collectionRes.data,
 				config: context.config,
 				host: baseUrl,
@@ -121,7 +121,7 @@ const getMultiple: ServiceFn<
 				config: context.config,
 				host: baseUrl,
 				bricksTableSchema: bricksTableSchemaRes.data,
-				data: relationDataRes.data,
+				data: refDataRes.data,
 			}),
 		},
 	};

@@ -4,7 +4,6 @@ export { default as deleteMultiplePermanently } from "./delete-multiple-permanen
 export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
 export { default as getMultiple } from "./get-multiple.js";
-export { default as getMultipleFieldMeta } from "./get-multiple-field-meta.js";
 export { default as getSingle } from "./get-single.js";
 export { default as inviteSingle } from "./invite-single.js";
 export { default as resendInvitation } from "./resend-invitation.js";

@@ -76,13 +76,13 @@ class UserCustomField extends CustomField<"user"> {
 			lastName: value.last_name,
 		} satisfies CFResponse<"user">["ref"];
 	}
-	cfSpecificValidation(value: unknown, relationData?: UserReferenceData[]) {
+	cfSpecificValidation(value: unknown, refData?: UserReferenceData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		const findUser = relationData?.find((u) => u.id === value);
+		const findUser = refData?.find((u) => u.id === value);
 
 		if (findUser === undefined) {
 			return {

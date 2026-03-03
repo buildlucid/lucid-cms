@@ -37,7 +37,7 @@ const extractRelatedEntityIds: ServiceFn<
 	],
 	FieldRelationValues
 > = async (_, data) => {
-	const relationData: FieldRelationValues = {};
+	const refData: FieldRelationValues = {};
 
 	for (const response of data.responses) {
 		for (const schema of data.brickSchema) {
@@ -63,10 +63,9 @@ const extractRelatedEntityIds: ServiceFn<
 
 					if (data.excludeTypes?.includes(fieldType)) continue;
 
-					if (relationData[fieldType] === undefined)
-						relationData[fieldType] = [];
+					if (refData[fieldType] === undefined) refData[fieldType] = [];
 
-					let tableEntry = relationData[fieldType]?.find(
+					let tableEntry = refData[fieldType]?.find(
 						(entry) => entry.table === tableName,
 					);
 
@@ -75,7 +74,7 @@ const extractRelatedEntityIds: ServiceFn<
 							table: tableName,
 							values: new Set<unknown>(),
 						};
-						relationData[fieldType]?.push(tableEntry);
+						refData[fieldType]?.push(tableEntry);
 					}
 					tableEntry.values.add(targetColumn);
 				}
@@ -84,7 +83,7 @@ const extractRelatedEntityIds: ServiceFn<
 	}
 
 	return {
-		data: relationData,
+		data: refData,
 		error: undefined,
 	};
 };
