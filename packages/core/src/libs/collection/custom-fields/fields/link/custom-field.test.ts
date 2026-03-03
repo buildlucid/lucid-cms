@@ -4,7 +4,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import LinkCustomField from "./link.js";
+import LinkCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation

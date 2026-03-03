@@ -13,11 +13,11 @@ import type {
 	CFResponse,
 	FieldRefParams,
 	GetSchemaDefinitionProps,
-	MediaReferenceData,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import type { MediaValidationData } from "./types.js";
 
 const CF_TYPE = "media" as const;
 const CF_RELATION_SEPARATOR = "med" as const;
@@ -107,7 +107,7 @@ class MediaCustomField extends CustomField<"media"> {
 			isDeleted: formatter.formatBoolean(value.is_deleted),
 		} satisfies CFResponse<"media">["ref"];
 	}
-	cfSpecificValidation(value: unknown, refData?: MediaReferenceData[]) {
+	cfSpecificValidation(value: unknown, refData?: MediaValidationData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);

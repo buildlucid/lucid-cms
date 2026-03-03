@@ -3,7 +3,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import UserCustomField from "./user.js";
+import UserCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation

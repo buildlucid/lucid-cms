@@ -4,11 +4,11 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import TextareaCustomField from "./textarea.js";
+import NumberCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const TextareaCollection = new CollectionBuilder("collection", {
+const NumberCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
 		name: "Test",
@@ -18,35 +18,35 @@ const TextareaCollection = new CollectionBuilder("collection", {
 		useTranslations: true,
 	},
 })
-	.addTextarea("standard_textarea")
-	.addTextarea("required_textarea", {
+	.addNumber("standard_number")
+	.addNumber("required_number", {
 		validation: {
 			required: true,
 		},
 	})
-	.addTextarea("min_length_textarea", {
+	.addNumber("min_number", {
 		validation: {
-			zod: z.string().min(5),
+			zod: z.number().min(5),
 		},
 	});
 
-test("successfully validate field - textarea", async () => {
+test("successfully validate field - number", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_textarea",
-			type: "textarea",
-			value: "Standard textarea",
+			key: "standard_number",
+			type: "number",
+			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextareaCollection.fields.get("standard_textarea")!,
+		instance: NumberCollection.fields.get("standard_number")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			useTranslations: NumberCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -55,125 +55,125 @@ test("successfully validate field - textarea", async () => {
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_textarea",
-			type: "textarea",
-			value: "Required textarea",
+			key: "required_number",
+			type: "number",
+			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextareaCollection.fields.get("required_textarea")!,
+		instance: NumberCollection.fields.get("required_number")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			useTranslations: NumberCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(requiredValidate).length(0);
 
-	// Min length
-	const minLengthValidate = validateField({
+	// Zod
+	const zodValidate = validateField({
 		field: {
-			key: "min_length_textarea",
-			type: "textarea",
-			value: "Min length textarea",
+			key: "min_number",
+			type: "number",
+			value: 5,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextareaCollection.fields.get("min_length_textarea")!,
+		instance: NumberCollection.fields.get("min_number")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			useTranslations: NumberCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
-	expect(minLengthValidate).length(0);
+	expect(zodValidate).length(0);
 });
 
-test("fail to validate field - textarea", async () => {
+test("fail to validate field - number", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_textarea",
-			type: "textarea",
-			value: 100,
+			key: "standard_number",
+			type: "number",
+			value: "1",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextareaCollection.fields.get("standard_textarea")!,
+		instance: NumberCollection.fields.get("standard_number")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			useTranslations: NumberCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(standardValidate).toEqual([
 		{
-			key: "standard_textarea",
-			localeCode: "en",
-			message: "Invalid input: expected string, received number", // zod error message
+			key: "standard_number",
+			localeCode: null,
+			message: "Invalid input: expected number, received string", // zod error message
 		},
 	]);
 
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_textarea",
-			type: "textarea",
+			key: "required_number",
+			type: "number",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextareaCollection.fields.get("required_textarea")!,
+		instance: NumberCollection.fields.get("required_number")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			useTranslations: NumberCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(requiredValidate).toEqual([
 		{
-			key: "required_textarea",
-			localeCode: "en",
+			key: "required_number",
+			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
 
-	// Min length
-	const minLengthValidate = validateField({
+	// Zod
+	const zodValidate = validateField({
 		field: {
-			key: "min_length_textarea",
-			type: "textarea",
-			value: "1",
+			key: "min_number",
+			type: "number",
+			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextareaCollection.fields.get("min_length_textarea")!,
+		instance: NumberCollection.fields.get("min_number")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			useTranslations: NumberCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
-	expect(minLengthValidate).toEqual([
+	expect(zodValidate).toEqual([
 		{
-			key: "min_length_textarea",
-			localeCode: "en",
-			message: "Too small: expected string to have >=5 characters", // zod error message
+			key: "min_number",
+			localeCode: null,
+			message: "Too small: expected number to be >=5",
 		},
 	]);
 });
@@ -181,7 +181,7 @@ test("fail to validate field - textarea", async () => {
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
-	const field = new TextareaCustomField("field", {
+	const field = new NumberCustomField("field", {
 		details: {
 			label: {
 				en: "title",
@@ -195,7 +195,7 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
-			default: "",
+			default: 10,
 			isHidden: false,
 			isDisabled: false,
 		},
@@ -204,7 +204,6 @@ test("custom field config passes schema validation", async () => {
 			zod: z.string().min(5),
 		},
 	});
-
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });

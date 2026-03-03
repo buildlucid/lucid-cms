@@ -3,11 +3,11 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import DocumentCustomField from "./document.js";
+import ColorCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const DocumentCollection = new CollectionBuilder("collection", {
+const ColorCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
 		name: "Test",
@@ -17,44 +17,30 @@ const DocumentCollection = new CollectionBuilder("collection", {
 		useTranslations: true,
 	},
 })
-	.addDocument("standard_doc", {
-		collection: "page",
-	})
-	.addDocument("required_doc", {
-		collection: "page",
-		validation: {
-			required: true,
-		},
-	})
-	.addDocument("wrong_collection", {
-		collection: "wrong_collection",
+	.addColor("standard_color")
+	.addColor("required_color", {
 		validation: {
 			required: true,
 		},
 	});
 
-test("successfully validate field - document", async () => {
+test("successfully validate field - color", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_doc",
-			type: "document",
-			value: 1,
+			key: "standard_color",
+			type: "color",
+			value: "#000000",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("standard_doc")!,
+		instance: ColorCollection.fields.get("standard_color")!,
 		validationData: {
 			media: [],
 			users: [],
-			documents: [
-				{
-					id: 1,
-					collection_key: "page",
-				},
-			],
+			documents: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			useTranslations: ColorCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -63,114 +49,131 @@ test("successfully validate field - document", async () => {
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_doc",
-			type: "document",
-			value: 1,
+			key: "required_color",
+			type: "color",
+			value: "#000000",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("required_doc")!,
+		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
 			users: [],
-			documents: [
-				{
-					id: 1,
-					collection_key: "page",
-				},
-			],
+			documents: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			useTranslations: ColorCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(requiredValidate).length(0);
 });
 
-test("fail to validate field - document", async () => {
-	// Required - document not found
-	const requiredExistsValidate = validateField({
+test("fail to validate field - color", async () => {
+	// Standard
+	const standardValidate = validateField({
 		field: {
-			key: "required_doc",
-			type: "document",
-			value: 1,
+			key: "standard_color",
+			type: "color",
+			value: 0,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("required_doc")!,
+		instance: ColorCollection.fields.get("standard_color")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			useTranslations: ColorCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
-	expect(requiredExistsValidate).toEqual([
+	expect(standardValidate).toEqual([
 		{
-			key: "required_doc",
+			key: "standard_color",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: "Invalid input: expected string, received number", // zod error message
+		},
+	]);
+
+	// Required - empty value
+	const requiredEmptyValidate = validateField({
+		field: {
+			key: "required_color",
+			type: "color",
+			value: "",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: ColorCollection.fields.get("required_color")!,
+		validationData: {
+			media: [],
+			users: [],
+			documents: [],
+		},
+		meta: {
+			useTranslations: ColorCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	expect(requiredEmptyValidate).toEqual([
+		{
+			key: "required_color",
+			localeCode: null,
+			message: T("generic_field_required"),
 		},
 	]);
 
 	// Required - null value
 	const requiredNullValidate = validateField({
 		field: {
-			key: "required_doc",
-			type: "document",
+			key: "required_color",
+			type: "color",
 			value: null,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("required_doc")!,
+		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			useTranslations: ColorCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(requiredNullValidate).toEqual([
 		{
-			key: "required_doc",
+			key: "required_color",
 			localeCode: null,
 			message: T("generic_field_required"),
 		},
 	]);
 
-	// Wrong collection
-	const wrongCollectionValidate = validateField({
+	// Required - undefined value
+	const requiredUndefinedValidate = validateField({
 		field: {
-			key: "wrong_collection",
-			type: "document",
-			value: 1,
+			key: "required_color",
+			type: "color",
+			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("wrong_collection")!,
+		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
 			users: [],
-			documents: [
-				{
-					id: 1,
-					collection_key: "page",
-				},
-			],
+			documents: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			useTranslations: ColorCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
-	expect(wrongCollectionValidate).toEqual([
+	expect(requiredUndefinedValidate).toEqual([
 		{
-			key: "wrong_collection",
+			key: "required_color",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: T("generic_field_required"),
 		},
 	]);
 });
@@ -178,8 +181,7 @@ test("fail to validate field - document", async () => {
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
-	const field = new DocumentCustomField("field", {
-		collection: "page",
+	const field = new ColorCustomField("field", {
 		details: {
 			label: {
 				en: "title",
@@ -190,12 +192,14 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
+			default: "2024-06-15T14:14:21.704Z",
 			isHidden: false,
 			isDisabled: false,
 		},
 		validation: {
 			required: true,
 		},
+		presets: ["#000000"],
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);

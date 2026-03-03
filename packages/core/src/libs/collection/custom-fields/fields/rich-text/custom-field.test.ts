@@ -4,11 +4,11 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import TextCutomField from "./text.js";
+import RichTextCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const TextCollection = new CollectionBuilder("collection", {
+const RichTextCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
 		name: "Test",
@@ -18,35 +18,40 @@ const TextCollection = new CollectionBuilder("collection", {
 		useTranslations: true,
 	},
 })
-	.addText("standard_text")
-	.addText("required_text", {
+	.addRichText("standard_rich_text")
+	.addRichText("required_rich_text", {
 		validation: {
 			required: true,
 		},
 	})
-	.addText("min_length_text", {
+	.addRichText("min_length_rich_text", {
 		validation: {
-			zod: z.string().min(5),
+			zod: z.object({
+				type: z.literal("doc"),
+			}),
 		},
 	});
 
-test("successfully validate field - text", async () => {
+test("successfully validate field - rich text", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_text",
-			type: "text",
-			value: "Standard text",
+			key: "standard_rich_text",
+			type: "rich-text",
+			value: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("standard_text")!,
+		instance: RichTextCollection.fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -55,19 +60,22 @@ test("successfully validate field - text", async () => {
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_text",
-			type: "text",
-			value: "Required text",
+			key: "required_rich_text",
+			type: "rich-text",
+			value: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("required_text")!,
+		instance: RichTextCollection.fields.get("required_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -76,128 +84,106 @@ test("successfully validate field - text", async () => {
 	// Min length
 	const minLengthValidate = validateField({
 		field: {
-			key: "min_length_text",
-			type: "text",
-			value: "Min length text",
+			key: "min_length_rich_text",
+			type: "rich-text",
+			value: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("min_length_text")!,
+		instance: RichTextCollection.fields.get("min_length_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(minLengthValidate).length(0);
 });
 
-test("fail to validate field - text", async () => {
+test("fail to validate field - rich text", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_text",
-			type: "text",
+			key: "standard_rich_text",
+			type: "rich-text",
 			value: 100,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("standard_text")!,
+		instance: RichTextCollection.fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(standardValidate).toEqual([
 		{
-			key: "standard_text",
+			key: "standard_rich_text",
 			localeCode: "en",
-			message: "Invalid input: expected string, received number", // zod error message
+			message: "Invalid input: expected record, received number",
 		},
 	]);
 
 	// Required
 	const requiredValidate = {
-		undefined: validateField({
+		exists: validateField({
 			field: {
-				key: "required_text",
-				type: "text",
+				key: "required_rich_text",
+				type: "rich-text",
 				value: undefined,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: TextCollection.fields.get("required_text")!,
+			instance: RichTextCollection.fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
 			meta: {
-				useTranslations: TextCollection.getData.config.useTranslations,
+				useTranslations: RichTextCollection.getData.config.useTranslations,
 				defaultLocale: "en",
 			},
 		}),
 		null: validateField({
 			field: {
-				key: "required_text",
-				type: "text",
+				key: "required_rich_text",
+				type: "rich-text",
 				value: null,
 			},
 			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: TextCollection.fields.get("required_text")!,
+			instance: RichTextCollection.fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
 				users: [],
 				documents: [],
 			},
 			meta: {
-				useTranslations: TextCollection.getData.config.useTranslations,
-				defaultLocale: "en",
-			},
-		}),
-		empty: validateField({
-			field: {
-				key: "required_text",
-				type: "text",
-				value: "",
-			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: TextCollection.fields.get("required_text")!,
-			validationData: {
-				media: [],
-				users: [],
-				documents: [],
-			},
-			meta: {
-				useTranslations: TextCollection.getData.config.useTranslations,
+				useTranslations: RichTextCollection.getData.config.useTranslations,
 				defaultLocale: "en",
 			},
 		}),
 	};
 	expect(requiredValidate).toEqual({
-		undefined: [
+		exists: [
 			{
-				key: "required_text",
+				key: "required_rich_text",
 				localeCode: "en",
 				message: T("generic_field_required"),
 			},
 		],
 		null: [
 			{
-				key: "required_text",
-				localeCode: "en",
-				message: T("generic_field_required"),
-			},
-		],
-		empty: [
-			{
-				key: "required_text",
+				key: "required_rich_text",
 				localeCode: "en",
 				message: T("generic_field_required"),
 			},
@@ -207,27 +193,30 @@ test("fail to validate field - text", async () => {
 	// Min length
 	const minLengthValidate = validateField({
 		field: {
-			key: "min_length_text",
-			type: "text",
-			value: "1",
+			key: "min_length_rich_text",
+			type: "rich-text",
+			value: {
+				type: "not_doc",
+				content: [{ type: "paragraph" }],
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("min_length_text")!,
+		instance: RichTextCollection.fields.get("min_length_rich_text")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			useTranslations: RichTextCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(minLengthValidate).toEqual([
 		{
-			key: "min_length_text",
+			key: "min_length_rich_text",
 			localeCode: "en",
-			message: "Too small: expected string to have >=5 characters", // zod error message
+			message: 'Invalid input: expected "doc" → at type',
 		},
 	]);
 });
@@ -235,7 +224,7 @@ test("fail to validate field - text", async () => {
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
-	const field = new TextCutomField("field", {
+	const field = new RichTextCustomField("field", {
 		details: {
 			label: {
 				en: "title",
@@ -249,13 +238,18 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
-			default: "",
+			default: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
 			isHidden: false,
 			isDisabled: false,
 		},
 		validation: {
 			required: true,
-			zod: z.string().min(5),
+			zod: z.object({
+				type: z.literal("doc"),
+			}),
 		},
 	});
 

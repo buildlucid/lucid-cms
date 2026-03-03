@@ -570,25 +570,6 @@ export type CustomFieldValidateResponse = {
 	message?: string;
 };
 
-export interface MediaReferenceData {
-	id: number;
-	file_extension: string;
-	width: number | null;
-	height: number | null;
-	type: string;
-}
-export interface UserReferenceData {
-	id: number;
-	// username: string;
-	// first_name: string | null;
-	// last_name: string | null;
-	// email: string;
-}
-export interface DocumentReferenceData {
-	id: number;
-	collection_key: string;
-}
-
 // -----------------------------------------------
 //
 

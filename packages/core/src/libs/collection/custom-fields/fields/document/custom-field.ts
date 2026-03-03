@@ -12,13 +12,13 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	DocumentReferenceData,
 	FieldRefParams,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import type { DocumentValidationData } from "./types.js";
 
 const CF_TYPE = "document" as const;
 const CF_RELATION_SEPARATOR = "doc" as const;
@@ -137,7 +137,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies CFResponse<"document">["ref"];
 	}
-	cfSpecificValidation(value: unknown, refData?: DocumentReferenceData[]) {
+	cfSpecificValidation(value: unknown, refData?: DocumentValidationData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);

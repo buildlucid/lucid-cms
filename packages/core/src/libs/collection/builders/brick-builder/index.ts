@@ -1,4 +1,4 @@
-import TabCustomField from "../../custom-fields/fields/tab/tab.js";
+import TabCustomField from "../../custom-fields/fields/tab/custom-field.js";
 import type { CFProps } from "../../custom-fields/types.js";
 import FieldBuilder from "../field-builder/index.js";
 import type { BrickConfig, BrickConfigProps } from "./types.js";

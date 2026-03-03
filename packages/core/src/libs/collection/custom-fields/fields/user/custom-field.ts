@@ -9,10 +9,10 @@ import type {
 	CFResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
-	UserReferenceData,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import type { UserValidationData } from "./types.js";
 
 const CF_TYPE = "user" as const;
 const CF_RELATION_SEPARATOR = "usr" as const;
@@ -76,7 +76,7 @@ class UserCustomField extends CustomField<"user"> {
 			lastName: value.last_name,
 		} satisfies CFResponse<"user">["ref"];
 	}
-	cfSpecificValidation(value: unknown, refData?: UserReferenceData[]) {
+	cfSpecificValidation(value: unknown, refData?: UserValidationData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);

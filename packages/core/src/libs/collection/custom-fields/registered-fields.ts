@@ -1,71 +1,40 @@
-import CheckboxCustomField from "./fields/checkbox/checkbox.js";
-import ColorCustomField from "./fields/color/color.js";
-import DatetimeCustomField from "./fields/datetime/datetime.js";
-import DocumentCustomField from "./fields/document/document.js";
-import JsonCustomField from "./fields/json/json.js";
-import LinkCustomField from "./fields/link/link.js";
-import MediaCustomField from "./fields/media/media.js";
-import NumberCustomField from "./fields/number/number.js";
-import RepeaterCustomField from "./fields/repeater/repeater.js";
-import RichTextCustomField from "./fields/rich-text/rich-text.js";
-import SelectCustomField from "./fields/select/select.js";
-import TabCustomField from "./fields/tab/tab.js";
-import TextCustomField from "./fields/text/text.js";
-import TextareaCustomField from "./fields/textarea/textarea.js";
-import UserCustomField from "./fields/user/user.js";
+import checkbox from "./fields/checkbox/index.js";
+import color from "./fields/color/index.js";
+import datetime from "./fields/datetime/index.js";
+import document from "./fields/document/index.js";
+import json from "./fields/json/index.js";
+import link from "./fields/link/index.js";
+import media from "./fields/media/index.js";
+import number from "./fields/number/index.js";
+import repeater from "./fields/repeater/index.js";
+import richText from "./fields/rich-text/index.js";
+import select from "./fields/select/index.js";
+import tab from "./fields/tab/index.js";
+import text from "./fields/text/index.js";
+import textarea from "./fields/textarea/index.js";
+import user from "./fields/user/index.js";
 import type { FieldTypes } from "./types.js";
 
 const registeredFields = {
-	checkbox: {
-		class: CheckboxCustomField,
-	},
-	color: {
-		class: ColorCustomField,
-	},
-	datetime: {
-		class: DatetimeCustomField,
-	},
-	document: {
-		class: DocumentCustomField,
-	},
-	json: {
-		class: JsonCustomField,
-	},
-	link: {
-		class: LinkCustomField,
-	},
-	media: {
-		class: MediaCustomField,
-	},
-	number: {
-		class: NumberCustomField,
-	},
-	repeater: {
-		class: RepeaterCustomField,
-	},
-	select: {
-		class: SelectCustomField,
-	},
-	tab: {
-		class: TabCustomField,
-	},
-	text: {
-		class: TextCustomField,
-	},
-	textarea: {
-		class: TextareaCustomField,
-	},
-	user: {
-		class: UserCustomField,
-	},
-	"rich-text": {
-		class: RichTextCustomField,
-	},
-} satisfies Record<
+	checkbox: checkbox,
+	color: color,
+	datetime: datetime,
+	document: document,
+	json: json,
+	link: link,
+	media: media,
+	number: number,
+	repeater: repeater,
+	select: select,
+	tab: tab,
+	text: text,
+	textarea: textarea,
+	user: user,
+	"rich-text": richText,
+} as const satisfies Record<
+	//* only used to ensure we have all fields registered
 	FieldTypes,
-	{
-		class: unknown;
-	}
+	unknown
 >;
 
 export default registeredFields;

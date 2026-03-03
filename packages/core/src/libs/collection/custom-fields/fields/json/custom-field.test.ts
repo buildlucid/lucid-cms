@@ -4,11 +4,11 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import NumberCustomField from "./number.js";
+import JsonCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
-const NumberCollection = new CollectionBuilder("collection", {
+const JSONCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
 		name: "Test",
@@ -18,35 +18,40 @@ const NumberCollection = new CollectionBuilder("collection", {
 		useTranslations: true,
 	},
 })
-	.addNumber("standard_number")
-	.addNumber("required_number", {
+	.addJSON("standard_json")
+	.addJSON("required_json", {
 		validation: {
 			required: true,
 		},
 	})
-	.addNumber("min_number", {
+	.addJSON("zod_json", {
 		validation: {
-			zod: z.number().min(5),
+			zod: z.object({
+				key: z.string(),
+				value: z.string(),
+			}),
 		},
 	});
 
-test("successfully validate field - number", async () => {
+test("successfully validate field - json", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_number",
-			type: "number",
-			value: 1,
+			key: "standard_json",
+			type: "json",
+			value: {
+				key: "value",
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("standard_number")!,
+		instance: JSONCollection.fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			useTranslations: JSONCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -55,19 +60,21 @@ test("successfully validate field - number", async () => {
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_number",
-			type: "number",
-			value: 1,
+			key: "required_json",
+			type: "json",
+			value: {
+				key: "value",
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("required_number")!,
+		instance: JSONCollection.fields.get("required_json")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			useTranslations: JSONCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
@@ -76,75 +83,78 @@ test("successfully validate field - number", async () => {
 	// Zod
 	const zodValidate = validateField({
 		field: {
-			key: "min_number",
-			type: "number",
-			value: 5,
+			key: "zod_json",
+			type: "json",
+			value: {
+				key: "value",
+				value: "value",
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("min_number")!,
+		instance: JSONCollection.fields.get("zod_json")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			useTranslations: JSONCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(zodValidate).length(0);
 });
 
-test("fail to validate field - number", async () => {
+test("fail to validate field - json", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
-			key: "standard_number",
-			type: "number",
-			value: "1",
+			key: "standard_json",
+			type: "json",
+			value: "invalid json",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("standard_number")!,
+		instance: JSONCollection.fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			useTranslations: JSONCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(standardValidate).toEqual([
 		{
-			key: "standard_number",
+			key: "standard_json",
 			localeCode: null,
-			message: "Invalid input: expected number, received string", // zod error message
+			message: "Invalid input: expected record, received string",
 		},
 	]);
 
 	// Required
 	const requiredValidate = validateField({
 		field: {
-			key: "required_number",
-			type: "number",
+			key: "required_json",
+			type: "json",
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("required_number")!,
+		instance: JSONCollection.fields.get("required_json")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			useTranslations: JSONCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(requiredValidate).toEqual([
 		{
-			key: "required_number",
+			key: "required_json",
 			localeCode: null,
 			message: T("generic_field_required"),
 		},
@@ -153,27 +163,30 @@ test("fail to validate field - number", async () => {
 	// Zod
 	const zodValidate = validateField({
 		field: {
-			key: "min_number",
-			type: "number",
-			value: 1,
+			key: "zod_json",
+			type: "json",
+			value: {
+				key: "value",
+				value: true, // not a string
+			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("min_number")!,
+		instance: JSONCollection.fields.get("zod_json")!,
 		validationData: {
 			media: [],
 			users: [],
 			documents: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			useTranslations: JSONCollection.getData.config.useTranslations,
 			defaultLocale: "en",
 		},
 	});
 	expect(zodValidate).toEqual([
 		{
-			key: "min_number",
+			key: "zod_json",
 			localeCode: null,
-			message: "Too small: expected number to be >=5",
+			message: "Invalid input: expected string, received boolean → at value",
 		},
 	]);
 });
@@ -181,7 +194,7 @@ test("fail to validate field - number", async () => {
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
-	const field = new NumberCustomField("field", {
+	const field = new JsonCustomField("field", {
 		details: {
 			label: {
 				en: "title",
@@ -195,13 +208,17 @@ test("custom field config passes schema validation", async () => {
 		},
 		config: {
 			useTranslations: true,
-			default: 10,
+			default: {
+				hello: "world",
+			},
 			isHidden: false,
 			isDisabled: false,
 		},
 		validation: {
 			required: true,
-			zod: z.string().min(5),
+			zod: z.object({
+				hello: z.string(),
+			}),
 		},
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);

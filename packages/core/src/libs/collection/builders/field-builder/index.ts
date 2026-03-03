@@ -1,18 +1,18 @@
 import type CustomField from "../../custom-fields/custom-field.js";
-import CheckboxCustomField from "../../custom-fields/fields/checkbox/checkbox.js";
-import ColorCustomField from "../../custom-fields/fields/color/color.js";
-import DateTimeCF from "../../custom-fields/fields/datetime/datetime.js";
-import DocumentCustomField from "../../custom-fields/fields/document/document.js";
-import JSONCF from "../../custom-fields/fields/json/json.js";
-import LinkCustomField from "../../custom-fields/fields/link/link.js";
-import MediaCustomField from "../../custom-fields/fields/media/media.js";
-import NumberCustomField from "../../custom-fields/fields/number/number.js";
-import RepeaterCustomField from "../../custom-fields/fields/repeater/repeater.js";
-import RichTextCustomField from "../../custom-fields/fields/rich-text/rich-text.js";
-import SelectCustomField from "../../custom-fields/fields/select/select.js";
-import TextCustomField from "../../custom-fields/fields/text/text.js";
-import TextareaCustomField from "../../custom-fields/fields/textarea/textarea.js";
-import UserCustomField from "../../custom-fields/fields/user/user.js";
+import CheckboxCustomField from "../../custom-fields/fields/checkbox/custom-field.js";
+import ColorCustomField from "../../custom-fields/fields/color/custom-field.js";
+import DateTimeCF from "../../custom-fields/fields/datetime/custom-field.js";
+import DocumentCustomField from "../../custom-fields/fields/document/custom-field.js";
+import JSONCF from "../../custom-fields/fields/json/custom-field.js";
+import LinkCustomField from "../../custom-fields/fields/link/custom-field.js";
+import MediaCustomField from "../../custom-fields/fields/media/custom-field.js";
+import NumberCustomField from "../../custom-fields/fields/number/custom-field.js";
+import RepeaterCustomField from "../../custom-fields/fields/repeater/custom-field.js";
+import RichTextCustomField from "../../custom-fields/fields/rich-text/custom-field.js";
+import SelectCustomField from "../../custom-fields/fields/select/custom-field.js";
+import TextCustomField from "../../custom-fields/fields/text/custom-field.js";
+import TextareaCustomField from "../../custom-fields/fields/textarea/custom-field.js";
+import UserCustomField from "../../custom-fields/fields/user/custom-field.js";
 import type {
 	CFConfig,
 	CFProps,

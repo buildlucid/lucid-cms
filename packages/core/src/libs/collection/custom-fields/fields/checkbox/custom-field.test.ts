@@ -3,7 +3,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import T from "../../../../../translations/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import CheckboxCustomField from "./checkbox.js";
+import CheckboxCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation

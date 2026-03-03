@@ -1,34 +1,18 @@
-import constants from "../../../constants/constants.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
-import type {
-	DocumentReferenceData,
-	MediaReferenceData,
-	UserReferenceData,
-} from "../../../libs/collection/custom-fields/types.js";
-import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
-import logger from "../../../libs/logger/index.js";
-import {
-	DocumentsRepository,
-	MediaRepository,
-	UsersRepository,
-} from "../../../libs/repositories/index.js";
+import type { DocumentValidationData } from "../../../libs/collection/custom-fields/fields/document/types.js";
+import type { MediaValidationData } from "../../../libs/collection/custom-fields/fields/media/types.js";
+import type { UserValidationData } from "../../../libs/collection/custom-fields/fields/user/types.js";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import T from "../../../translations/index.js";
-import type {
-	FieldInputSchema,
-	LucidDocumentTableName,
-} from "../../../types.js";
-import type {
-	ServiceContext,
-	ServiceFn,
-} from "../../../utils/services/types.js";
+import type { FieldInputSchema } from "../../../types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
 
 export interface ValidationData {
-	media: MediaReferenceData[];
-	users: UserReferenceData[];
-	documents: DocumentReferenceData[];
+	media: MediaValidationData[];
+	users: UserValidationData[];
+	documents: DocumentValidationData[];
 }
 
 /**
@@ -53,9 +37,9 @@ const fetchValidationData: ServiceFn<
 	);
 
 	const [media, users, documents] = await Promise.all([
-		fetchMediaData(context, mediaIds),
-		fetchUserData(context, userIds),
-		fetchDocumentData(context, documentIdsByCollection),
+		registeredFields.media.validateInput(context, mediaIds),
+		registeredFields.user.validateInput(context, userIds),
+		registeredFields.document.validateInput(context, documentIdsByCollection),
 	]);
 
 	return {
@@ -225,185 +209,6 @@ const extractDocumentIds = (
 				}
 			}
 		}
-	}
-};
-
-/**
- * Fetch media data
- */
-const fetchMediaData = async (
-	context: ServiceContext,
-	mediaIds: number[],
-): Promise<MediaReferenceData[]> => {
-	if (mediaIds.length === 0) return [];
-
-	try {
-		const Media = new MediaRepository(context.db.client, context.config.db);
-
-		const mediaRes = await Media.selectMultiple({
-			select: ["id", "file_extension", "width", "height", "type"],
-			where: [
-				{
-					key: "id",
-					operator: "in",
-					value: mediaIds,
-				},
-			],
-			validation: {
-				enabled: true,
-			},
-		});
-
-		return mediaRes.error ? [] : mediaRes.data;
-	} catch (_err) {
-		logger.error({
-			scope: constants.logScopes.validation,
-			message: T("error_fetching_media_for_validation"),
-		});
-		return [];
-	}
-};
-
-/**
- * Fetch user data
- */
-const fetchUserData = async (
-	context: ServiceContext,
-	userIds: number[],
-): Promise<UserReferenceData[]> => {
-	if (userIds.length === 0) return [];
-
-	try {
-		const Users = new UsersRepository(context.db.client, context.config.db);
-
-		const usersRes = await Users.selectMultiple({
-			select: ["id"],
-			where: [
-				{
-					key: "id",
-					operator: "in",
-					value: userIds,
-				},
-			],
-			validation: {
-				enabled: true,
-			},
-		});
-
-		return usersRes.error ? [] : usersRes.data;
-	} catch (_err) {
-		logger.error({
-			scope: constants.logScopes.validation,
-			message: T("error_fetching_users_for_validation"),
-		});
-		return [];
-	}
-};
-
-/**
- * Fetch document data from multiple collections
- */
-const fetchDocumentData = async (
-	context: ServiceContext,
-	documentIdsByCollection: Record<string, number[]>,
-): Promise<DocumentReferenceData[]> => {
-	const allDocuments: DocumentReferenceData[] = [];
-	try {
-		//* create queries for each collection key
-		const promises = Object.entries(documentIdsByCollection).map(
-			([collectionKey, ids]) => {
-				if (ids.length === 0) return Promise.resolve([]);
-
-				const uniqueIds = [...new Set(ids)];
-				return fetchDocumentsFromCollection(context, collectionKey, uniqueIds);
-			},
-		);
-
-		const results = await Promise.all(promises);
-		for (const documents of results) allDocuments.push(...documents);
-		return allDocuments;
-	} catch (_err) {
-		logger.error({
-			scope: constants.logScopes.validation,
-			message: T("error_fetching_documents_for_validation"),
-		});
-		return [];
-	}
-};
-
-/**
- * Fetch documents from a specific collection
- */
-const fetchDocumentsFromCollection = async (
-	context: ServiceContext,
-	collectionKey: string,
-	ids: number[],
-): Promise<DocumentReferenceData[]> => {
-	if (ids.length === 0) return [];
-
-	try {
-		const tableNameRes = buildTableName<LucidDocumentTableName>(
-			"document",
-			{
-				collection: collectionKey,
-			},
-			context.config.db.config.tableNameByteLimit,
-		);
-		if (tableNameRes.error) {
-			logger.error({
-				scope: constants.logScopes.validation,
-				message: T("error_fetching_documents_from_collection", {
-					collection: collectionKey,
-				}),
-			});
-			return [];
-		}
-
-		const Document = new DocumentsRepository(
-			context.db.client,
-			context.config.db,
-		);
-
-		const documentIdRes = await Document.selectMultiple(
-			{
-				select: ["id"],
-				where: [
-					{
-						key: "id",
-						operator: "in",
-						value: ids,
-					},
-				],
-				validation: {
-					enabled: true,
-				},
-			},
-			{
-				tableName: tableNameRes.data.name,
-			},
-		);
-		if (documentIdRes.error) {
-			logger.error({
-				scope: constants.logScopes.validation,
-				message: T("error_fetching_documents_from_collection", {
-					collection: collectionKey,
-				}),
-			});
-			return [];
-		}
-
-		return documentIdRes.data.map((doc) => ({
-			id: doc.id,
-			collection_key: collectionKey,
-		}));
-	} catch (_err) {
-		logger.error({
-			scope: constants.logScopes.validation,
-			message: T("error_fetching_documents_from_collection", {
-				collection: collectionKey,
-			}),
-		});
-		return [];
 	}
 };
 
