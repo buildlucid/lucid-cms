@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 
 const TranslatedCollection = new CollectionBuilder("collection", {

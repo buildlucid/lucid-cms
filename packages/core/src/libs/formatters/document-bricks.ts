@@ -8,7 +8,7 @@ import type {
 	LucidBrickTableName,
 	Select,
 } from "../../types.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";

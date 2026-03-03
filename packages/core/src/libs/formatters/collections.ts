@@ -1,5 +1,5 @@
 import type { CollectionResponse } from "../../types/response.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
 
 const formatMultiple = (props: {

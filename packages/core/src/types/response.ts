@@ -1,16 +1,16 @@
 import type z from "zod";
-import type { BrickTypes } from "../libs/builders/brick-builder/types.js";
+import type { BrickTypes } from "../libs/collection/builders/brick-builder/types.js";
 import type {
 	CollectionBrickConfig,
 	CollectionConfigSchemaType,
-} from "../libs/builders/collection-builder/types.js";
-import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
+} from "../libs/collection/builders/collection-builder/types.js";
 import type {
 	CFConfig,
 	FieldRefs,
 	FieldResponseValue,
 	FieldTypes,
-} from "../libs/custom-fields/types.js";
+} from "../libs/collection/custom-fields/types.js";
+import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type { DocumentVersionType } from "../libs/db-adapter/types.js";
 import type { Permission } from "../libs/permission/types.js";
 import type {

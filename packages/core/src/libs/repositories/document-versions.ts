@@ -2,7 +2,7 @@ import { sql } from "kysely";
 import z from "zod";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
-import type { BrickTypes } from "../builders/brick-builder/types.js";
+import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,

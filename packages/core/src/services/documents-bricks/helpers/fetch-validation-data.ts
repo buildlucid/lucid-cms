@@ -1,13 +1,13 @@
 import constants from "../../../constants/constants.js";
-import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
-import type CustomField from "../../../libs/custom-fields/custom-field.js";
+import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
+import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import type {
 	DocumentReferenceData,
 	MediaReferenceData,
 	UserReferenceData,
-} from "../../../libs/custom-fields/types.js";
+} from "../../../libs/collection/custom-fields/types.js";
+import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import logger from "../../../libs/logger/index.js";
 import {
 	DocumentsRepository,

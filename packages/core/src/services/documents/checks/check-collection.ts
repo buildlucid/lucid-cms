@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

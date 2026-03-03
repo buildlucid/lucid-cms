@@ -1,5 +1,5 @@
-import type BrickBuilder from "../../../../libs/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../../libs/builders/collection-builder/index.js";
+import type BrickBuilder from "../../../../libs/collection/builders/brick-builder/index.js";
+import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db-adapter/adapter-base.js";
 import T from "../../../../translations/index.js";
 import type {

@@ -1,6 +1,9 @@
 import T from "../../../translations/index.js";
 import type { Config } from "../../../types.js";
-import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
+import type {
+	CFConfig,
+	FieldTypes,
+} from "../../collection/custom-fields/types.js";
 
 // TODO: Handle this within the custom field class
 

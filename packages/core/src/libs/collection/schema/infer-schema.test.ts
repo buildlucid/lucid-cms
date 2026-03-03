@@ -1,8 +1,8 @@
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
-import BrickBuilder from "../../../libs/builders/brick-builder/index.js";
-import CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
+import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import inferSchema from "./infer-schema.js";
 
 // -----------------------------------------------

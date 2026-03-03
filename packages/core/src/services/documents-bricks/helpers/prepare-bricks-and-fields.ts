@@ -1,5 +1,5 @@
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type CustomField from "../../../libs/custom-fields/custom-field.js";
+import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 

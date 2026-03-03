@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";

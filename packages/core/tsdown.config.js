@@ -10,7 +10,7 @@ export default defineConfig({
         "src/libs/cli/index.ts",
         "src/libs/queue-adapter/index.ts",
         "src/libs/queue-adapter/adapters/worker/consumer.ts",
-        "src/libs/builders/index.ts",
+        "src/libs/collection/builders/index.ts",
         "src/libs/db-adapter/index.ts",
         "src/libs/email-adapter/index.ts",
         // "src/libs/image-processor/index.ts",

@@ -12,8 +12,8 @@ import type {
 	LucidBrickTableName,
 	Select,
 } from "../../types.js";
-import type BrickBuilder from "../builders/brick-builder/index.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type BrickBuilder from "../collection/builders/brick-builder/index.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";

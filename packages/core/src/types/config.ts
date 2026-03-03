@@ -2,7 +2,7 @@ import type { Readable } from "node:stream";
 import type { Hono } from "hono";
 import type z from "zod";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
-import type CollectionBuilder from "../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db-adapter/adapter-base.js";
 import type {

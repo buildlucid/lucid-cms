@@ -1,5 +1,5 @@
 import merge from "lodash.merge";
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import type { Config } from "../../types/config.js";
 import type { ArgumentsType, HookServiceHandlers } from "../../types/hooks.js";
 import type { ServiceResponse } from "../services/types.js";

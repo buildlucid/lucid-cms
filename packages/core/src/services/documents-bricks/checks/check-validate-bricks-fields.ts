@@ -1,8 +1,8 @@
 import constants from "../../../constants/constants.js";
-import type BrickBuilder from "../../../libs/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../libs/builders/collection-builder/index.js";
-import type CustomField from "../../../libs/custom-fields/custom-field.js";
-import type { FieldTypes } from "../../../libs/custom-fields/types.js";
+import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
+import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
+import type { FieldTypes } from "../../../libs/collection/custom-fields/types.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import T from "../../../translations/index.js";

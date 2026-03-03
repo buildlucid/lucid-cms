@@ -9,7 +9,7 @@ import type {
 } from "kysely";
 import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
-import type { BrickTypes } from "../builders/brick-builder/types.js";
+import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { CollectionSchema } from "../collection/schema/types.js";
 import type { EmailDeliveryStatus, EmailType } from "../email-adapter/types.js";

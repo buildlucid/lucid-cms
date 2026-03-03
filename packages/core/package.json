@@ -31,8 +31,8 @@
             "default": "./dist/libs/queue-adapter/index.mjs"
         },
         "./builders": {
-            "types": "./dist/libs/builders/index.d.mts",
-            "default": "./dist/libs/builders/index.mjs"
+            "types": "./dist/libs/collection/builders/index.d.mts",
+            "default": "./dist/libs/collection/builders/index.mjs"
         },
         "./db-adapter": {
             "types": "./dist/libs/db-adapter/index.d.mts",

@@ -2,7 +2,7 @@ import constants from "../../../constants/constants.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
-import RepeaterCustomField from "../../custom-fields/fields/repeater.js";
+import RepeaterCustomField from "../custom-fields/fields/repeater/repeater.js";
 import toSafeTableName from "./to-safe-table-name.js";
 
 /**

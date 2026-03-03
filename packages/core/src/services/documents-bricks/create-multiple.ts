@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";

@@ -11,9 +11,9 @@ import type {
 	FieldTypes,
 	LucidBrickTableName,
 } from "../../types.js";
-import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import registeredFields from "../collection/custom-fields/registered-fields.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
-import customFieldMap from "../custom-fields/custom-field-map.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import formatter, {
 	documentBricksFormatter,
@@ -248,8 +248,8 @@ const formatRefs = (props: {
 		default: props.config.localization.defaultLocale,
 	} satisfies FieldRefParams["localization"];
 
-	for (const key of Object.keys(customFieldMap) as FieldTypes[]) {
-		const customField = customFieldMap[key];
+	for (const key of Object.keys(registeredFields) as FieldTypes[]) {
+		const customField = registeredFields[key].class;
 		const relationData = props.data.data[key];
 		if (!customField || !relationData || !Array.isArray(relationData)) continue;
 

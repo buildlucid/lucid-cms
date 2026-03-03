@@ -1,4 +1,4 @@
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { CollectionMigrationsRepository } from "../repositories/index.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";

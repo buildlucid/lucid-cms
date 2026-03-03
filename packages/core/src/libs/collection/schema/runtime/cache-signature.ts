@@ -1,5 +1,5 @@
 import { hasher } from "node-object-hash";
-import type CollectionBuilder from "../../../builders/collection-builder/index.js";
+import type CollectionBuilder from "../../../collection/builders/collection-builder/index.js";
 
 const hashInstance = hasher({ sort: true, coerce: true });
 

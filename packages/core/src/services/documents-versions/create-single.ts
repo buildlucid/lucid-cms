@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import merge from "lodash.merge";
-import type CollectionBuilder from "../../libs/builders/collection-builder/index.js";
+import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
