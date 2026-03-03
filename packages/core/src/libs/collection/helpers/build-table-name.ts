@@ -9,9 +9,9 @@ import toSafeTableName from "./to-safe-table-name.js";
  * Default parts for table names
  */
 export const collectionTableParts = {
-	document: "document",
-	fields: "fields",
-	versions: "versions",
+	document: "doc",
+	fields: "fld",
+	versions: "ver",
 };
 
 /**

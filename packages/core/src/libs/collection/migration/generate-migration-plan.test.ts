@@ -17,7 +17,7 @@ describe("Generate migration plan", () => {
 	test("does not remove generated custom field columns", () => {
 		const existing: InferredTable[] = [
 			{
-				name: "lucid_document__pages__fields",
+				name: "lucid_doc__pages__fld",
 				columns: [
 					{ name: "id", type: "integer", nullable: false, default: null },
 					{
@@ -35,7 +35,8 @@ describe("Generate migration plan", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [
@@ -63,7 +64,7 @@ describe("Generate migration plan", () => {
 	test("removes missing non-field columns", () => {
 		const existing: InferredTable[] = [
 			{
-				name: "lucid_document__pages",
+				name: "lucid_doc__pages",
 				columns: [
 					{ name: "id", type: "integer", nullable: false, default: null },
 					{
@@ -86,7 +87,8 @@ describe("Generate migration plan", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages",
+					name: "lucid_doc__pages",
+					rawName: "lucid_doc__pages",
 					type: "document",
 					key: { collection: "pages" },
 					columns: [

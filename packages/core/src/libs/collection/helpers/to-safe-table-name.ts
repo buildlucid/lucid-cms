@@ -13,12 +13,14 @@ const byteLength = (value: string): number => Buffer.byteLength(value, "utf8");
  * Converts a table name to a safe table name by truncating the name if it exceeds the limit
  */
 const toSafeTableName = (name: string, limit: number | null) => {
-	if (
-		limit === null ||
-		limit === undefined ||
-		!Number.isFinite(limit) ||
-		byteLength(name) <= limit
-	) {
+	if (limit === null || limit === undefined || !Number.isFinite(limit)) {
+		return {
+			name,
+			rawName: name,
+		};
+	}
+	const effectiveLimit = Math.max(limit, constants.db.minTableNameByteLimit);
+	if (byteLength(name) <= effectiveLimit) {
 		return {
 			name,
 			rawName: name,
@@ -29,12 +31,12 @@ const toSafeTableName = (name: string, limit: number | null) => {
 	const segments = name.split(constants.db.nameSeparator);
 	const suffix = `_${hash}`;
 	// Keep the first sections stable. For relation tables this preserves:
-	// lucid_document__{collection}__{scope}__{relation-separator}
+	// lucid_doc___{collection}__{scope}__{relation-separator}
 	// and only hashes what's after it.
 	if (segments.length > 4) {
 		const stablePrefix = segments.slice(0, 4).join(constants.db.nameSeparator);
 		const candidate = `${stablePrefix}${suffix}`;
-		if (byteLength(candidate) <= limit) {
+		if (byteLength(candidate) <= effectiveLimit) {
 			return {
 				name: candidate,
 				rawName: name,

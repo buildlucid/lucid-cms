@@ -39,7 +39,7 @@ export interface RevisionsQueryResponse extends Select<LucidVersionTable> {
 
 export default class DocumentVersionsRepository extends DynamicRepository<LucidVersionTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document__collection-key__versions");
+		super(db, dbAdapter, "lucid_doc__collection-key__ver");
 	}
 	tableSchema = z.object({
 		id: z.number(),

@@ -189,11 +189,11 @@ describe("brick table construction", () => {
 			brickTables;
 
 		// verify table names
-		expect(fieldsTable.table).toBe("lucid_document__simple__fields");
-		expect(simpleBrickTable.table).toBe("lucid_document__simple__simple");
-		expect(itemsTable.table).toBe("lucid_document__simple__simple__items");
+		expect(fieldsTable.table).toBe("lucid_doc__simple__fld");
+		expect(simpleBrickTable.table).toBe("lucid_doc__simple__simple");
+		expect(itemsTable.table).toBe("lucid_doc__simple__simple__rep__items");
 		expect(nestedItemsTable.table).toBe(
-			"lucid_document__simple__simple__items__nestedItems",
+			"lucid_doc__simple__simple__rep__items__nestedItems",
 		);
 
 		// verify priorities
@@ -409,13 +409,13 @@ describe("brick table construction", () => {
 		const [rootTable, level1Table, level2Table, level3Table] = brickTables;
 
 		// verify table names
-		expect(rootTable.table).toBe("lucid_document__deep__deep");
-		expect(level1Table.table).toBe("lucid_document__deep__deep__level1");
+		expect(rootTable.table).toBe("lucid_doc__deep__deep");
+		expect(level1Table.table).toBe("lucid_doc__deep__deep__rep__level1");
 		expect(level2Table.table).toBe(
-			"lucid_document__deep__deep__level1__level2",
+			"lucid_doc__deep__deep__rep__level1__level2",
 		);
 		expect(level3Table.table).toBe(
-			"lucid_document__deep__deep__level1__level2__level3",
+			"lucid_doc__deep__deep__rep__level1__level2__level3",
 		);
 
 		// verify priorities

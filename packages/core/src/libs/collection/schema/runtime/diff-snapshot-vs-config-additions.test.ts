@@ -18,7 +18,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [
@@ -38,7 +39,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [
@@ -53,7 +55,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 					],
 				},
 				{
-					name: "lucid_document__pages__hero",
+					name: "lucid_doc__pages__hero",
+					rawName: "lucid_doc__pages__hero",
 					type: "brick",
 					key: { collection: "pages", brick: "hero" },
 					columns: [...baseTableColumns],
@@ -63,12 +66,10 @@ describe("diffSnapshotVsConfigAdditions", () => {
 
 		const diff = diffSnapshotVsConfigAdditions(migrated, local);
 
-		expect(
-			diff.missingColumnsByTable.get("lucid_document__pages__fields"),
-		).toEqual(new Set(["_summary"]));
-		expect(diff.missingTableNames).toEqual(
-			new Set(["lucid_document__pages__hero"]),
+		expect(diff.missingColumnsByTable.get("lucid_doc__pages__fld")).toEqual(
+			new Set(["_summary"]),
 		);
+		expect(diff.missingTableNames).toEqual(new Set(["lucid_doc__pages__hero"]));
 	});
 
 	test("ignores tables/columns present in migrated schema but removed locally", () => {
@@ -76,7 +77,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [
@@ -90,7 +92,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 					],
 				},
 				{
-					name: "lucid_document__pages__legacy",
+					name: "lucid_doc__pages__legacy",
+					rawName: "lucid_doc__pages__legacy",
 					type: "brick",
 					key: { collection: "pages", brick: "legacy" },
 					columns: [...baseTableColumns],
@@ -102,7 +105,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [...baseTableColumns],
@@ -121,7 +125,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [
@@ -141,7 +146,8 @@ describe("diffSnapshotVsConfigAdditions", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_document__pages__fields",
+					name: "lucid_doc__pages__fld",
+					rawName: "lucid_doc__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [

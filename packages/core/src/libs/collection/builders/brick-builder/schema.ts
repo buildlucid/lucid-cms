@@ -7,16 +7,16 @@ import { collectionTableParts } from "../../helpers/build-table-name.js";
 const BrickConfigSchema = z.object({
 	key: z
 		.string()
+		.max(constants.db.maxBuilderKeyLength)
 		.refine((val) => !val.includes(constants.db.nameSeparator), {
 			message: `Brick key cannot contain '${constants.db.nameSeparator}'`,
 		})
-		// TODO: come up with a better solution that reserving certain keywords
 		//* these keys are reserved due to them being used in the table name generation on the same level as the brick key
-		.refine((val) => !val.includes(collectionTableParts.versions), {
-			message: `Brick key cannot contain '${collectionTableParts.versions}'`,
+		.refine((val) => val !== collectionTableParts.versions, {
+			message: `Brick key cannot be '${collectionTableParts.versions}'`,
 		})
-		.refine((val) => !val.includes(collectionTableParts.fields), {
-			message: `Brick key cannot contain '${collectionTableParts.fields}'`,
+		.refine((val) => val !== collectionTableParts.fields, {
+			message: `Brick key cannot be '${collectionTableParts.fields}'`,
 		}),
 	details: z
 		.object({

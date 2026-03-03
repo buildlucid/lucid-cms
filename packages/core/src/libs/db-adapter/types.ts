@@ -445,7 +445,7 @@ export interface LucidClientIntegrationScopes {
 	updated_at: TimestampMutateable;
 }
 
-export type LucidDocumentTableName = `lucid_document__${string}`;
+export type LucidDocumentTableName = `lucid_doc__${string}`;
 export interface LucidDocumentTable {
 	id: Generated<number>;
 	collection_key: string;
@@ -459,7 +459,7 @@ export interface LucidDocumentTable {
 	updated_at: TimestampMutateable;
 }
 
-export type LucidVersionTableName = `lucid_document__${string}__versions`;
+export type LucidVersionTableName = `lucid_doc__${string}__ver`;
 export interface LucidVersionTable {
 	id: Generated<number>;
 	collection_key: string;
@@ -475,9 +475,9 @@ export interface LucidVersionTable {
 }
 
 export type LucidBrickTableName =
-	| `lucid_document__${string}__fields`
-	| `lucid_document__${string}__${string}`
-	| `lucid_document__${string}__${string}__${string}`;
+	| `lucid_doc__${string}__fld`
+	| `lucid_doc__${string}__${string}`
+	| `lucid_doc__${string}__${string}__${string}`;
 
 type CustomFieldColumnName = string; // `_${string}`;
 export interface LucidBricksTable {

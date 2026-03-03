@@ -47,7 +47,6 @@ export type CollectionSchemaTable<TableName = string> = {
 	};
 	columns: Array<CollectionSchemaColumn>;
 };
-
 export type CollectionSchema = {
 	key: string;
 	tables: Array<CollectionSchemaTable>;
