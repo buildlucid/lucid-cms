@@ -42,8 +42,8 @@ test("successfully validate field - text", async () => {
 		instance: TextCollection.fields.get("standard_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextCollection.getData.config.useTranslations,
@@ -63,8 +63,8 @@ test("successfully validate field - text", async () => {
 		instance: TextCollection.fields.get("required_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextCollection.getData.config.useTranslations,
@@ -84,8 +84,8 @@ test("successfully validate field - text", async () => {
 		instance: TextCollection.fields.get("min_length_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextCollection.getData.config.useTranslations,
@@ -107,8 +107,8 @@ test("fail to validate field - text", async () => {
 		instance: TextCollection.fields.get("standard_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextCollection.getData.config.useTranslations,
@@ -135,8 +135,8 @@ test("fail to validate field - text", async () => {
 			instance: TextCollection.fields.get("required_text")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: TextCollection.getData.config.useTranslations,
@@ -153,8 +153,8 @@ test("fail to validate field - text", async () => {
 			instance: TextCollection.fields.get("required_text")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: TextCollection.getData.config.useTranslations,
@@ -171,8 +171,8 @@ test("fail to validate field - text", async () => {
 			instance: TextCollection.fields.get("required_text")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: TextCollection.getData.config.useTranslations,
@@ -215,8 +215,8 @@ test("fail to validate field - text", async () => {
 		instance: TextCollection.fields.get("min_length_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextCollection.getData.config.useTranslations,

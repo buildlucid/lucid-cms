@@ -56,8 +56,8 @@ test("successfully validate field - select", async () => {
 		instance: SelectCollection.fields.get("standard_select")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: SelectCollection.getData.config.useTranslations,
@@ -77,8 +77,8 @@ test("successfully validate field - select", async () => {
 		instance: SelectCollection.fields.get("required_select")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: SelectCollection.getData.config.useTranslations,
@@ -101,8 +101,8 @@ test("fail to validate field - select", async () => {
 			instance: SelectCollection.fields.get("standard_select")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: SelectCollection.getData.config.useTranslations,
@@ -119,8 +119,8 @@ test("fail to validate field - select", async () => {
 			instance: SelectCollection.fields.get("standard_select")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: SelectCollection.getData.config.useTranslations,
@@ -156,8 +156,8 @@ test("fail to validate field - select", async () => {
 		instance: SelectCollection.fields.get("required_select")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: SelectCollection.getData.config.useTranslations,

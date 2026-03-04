@@ -42,8 +42,8 @@ test("successfully validate field - textarea", async () => {
 		instance: TextareaCollection.fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextareaCollection.getData.config.useTranslations,
@@ -63,8 +63,8 @@ test("successfully validate field - textarea", async () => {
 		instance: TextareaCollection.fields.get("required_textarea")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextareaCollection.getData.config.useTranslations,
@@ -84,8 +84,8 @@ test("successfully validate field - textarea", async () => {
 		instance: TextareaCollection.fields.get("min_length_textarea")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextareaCollection.getData.config.useTranslations,
@@ -107,8 +107,8 @@ test("fail to validate field - textarea", async () => {
 		instance: TextareaCollection.fields.get("standard_textarea")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextareaCollection.getData.config.useTranslations,
@@ -134,8 +134,8 @@ test("fail to validate field - textarea", async () => {
 		instance: TextareaCollection.fields.get("required_textarea")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextareaCollection.getData.config.useTranslations,
@@ -161,8 +161,8 @@ test("fail to validate field - textarea", async () => {
 		instance: TextareaCollection.fields.get("min_length_textarea")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: TextareaCollection.getData.config.useTranslations,

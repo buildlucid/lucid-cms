@@ -18,13 +18,11 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { documentFieldConfig } from "./config.js";
 import type { DocumentValidationData } from "./types.js";
 
-const CF_TYPE = "document" as const;
-const CF_RELATION_SEPARATOR = "doc" as const;
-
 class DocumentCustomField extends CustomField<"document"> {
-	type = CF_TYPE;
+	type = documentFieldConfig.type;
 	column = "document_id" as const;
 	config;
 	key;
@@ -161,12 +159,6 @@ class DocumentCustomField extends CustomField<"document"> {
 	}
 	get defaultValue() {
 		return null;
-	}
-	static getRelationConfig() {
-		return {
-			type: CF_TYPE,
-			separator: CF_RELATION_SEPARATOR,
-		};
 	}
 }
 

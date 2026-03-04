@@ -28,77 +28,67 @@ class FieldBuilder {
 		fieldKeys: [],
 		repeaterDepth: {},
 	};
+	private cachedFieldTree: CFConfig<FieldTypes>[] | null = null;
+	private cachedFieldTreeNoTab:
+		| Exclude<CFConfig<FieldTypes>, TabFieldConfig>[]
+		| null = null;
+
+	protected invalidateFieldTreeCache() {
+		this.cachedFieldTree = null;
+		this.cachedFieldTreeNoTab = null;
+	}
+
+	private registerField(key: string, field: CustomField<FieldTypes>) {
+		this.fields.set(key, field);
+		this.meta.fieldKeys.push(key);
+		this.invalidateFieldTreeCache();
+		return this;
+	}
+
 	// Custom Fields
 	public addRepeater(key: string, props?: CFProps<"repeater">) {
 		this.meta.repeaterDepth[key] = this.repeaterStack.length;
-		this.fields.set(key, new RepeaterCustomField(key, props));
 		this.repeaterStack.push(key);
-		return this;
+		return this.registerField(key, new RepeaterCustomField(key, props));
 	}
 	public addText(key: string, props?: CFProps<"text">) {
-		this.fields.set(key, new TextCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new TextCustomField(key, props));
 	}
 	public addRichText(key: string, props?: CFProps<"rich-text">) {
-		this.fields.set(key, new RichTextCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new RichTextCustomField(key, props));
 	}
 	public addMedia(key: string, props?: CFProps<"media">) {
-		this.fields.set(key, new MediaCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new MediaCustomField(key, props));
 	}
 	public addDocument(key: string, props: CFProps<"document">) {
-		this.fields.set(key, new DocumentCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new DocumentCustomField(key, props));
 	}
 	public addNumber(key: string, props?: CFProps<"number">) {
-		this.fields.set(key, new NumberCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new NumberCustomField(key, props));
 	}
 	public addCheckbox(key: string, props?: CFProps<"checkbox">) {
-		this.fields.set(key, new CheckboxCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new CheckboxCustomField(key, props));
 	}
 	public addSelect(key: string, props?: CFProps<"select">) {
-		this.fields.set(key, new SelectCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new SelectCustomField(key, props));
 	}
 	public addTextarea(key: string, props?: CFProps<"textarea">) {
-		this.fields.set(key, new TextareaCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new TextareaCustomField(key, props));
 	}
 	public addJSON(key: string, props?: CFProps<"json">) {
-		this.fields.set(key, new JSONCF(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new JSONCF(key, props));
 	}
 	public addColor(key: string, props?: CFProps<"color">) {
-		this.fields.set(key, new ColorCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new ColorCustomField(key, props));
 	}
 	public addDateTime(key: string, props?: CFProps<"datetime">) {
-		this.fields.set(key, new DateTimeCF(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new DateTimeCF(key, props));
 	}
 	public addLink(key: string, props?: CFProps<"link">) {
-		this.fields.set(key, new LinkCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new LinkCustomField(key, props));
 	}
 	public addUser(key: string, props?: CFProps<"user">) {
-		this.fields.set(key, new UserCustomField(key, props));
-		this.meta.fieldKeys.push(key);
-		return this;
+		return this.registerField(key, new UserCustomField(key, props));
 	}
 	public endRepeater() {
 		const key = this.repeaterStack.pop();
@@ -114,10 +104,16 @@ class FieldBuilder {
 
 		// only fields after this repeater
 		const fieldsAfter = fields.slice(selectedRepeaterIndex + 1);
+		let hasUpdatedFieldRepeater = false;
 
 		for (const field of fieldsAfter) {
 			if (field.type === "tab" || field.repeater) continue;
 			field.repeater = key;
+			hasUpdatedFieldRepeater = true;
+		}
+
+		if (hasUpdatedFieldRepeater) {
+			this.invalidateFieldTreeCache();
 		}
 
 		return this;
@@ -167,13 +163,21 @@ class FieldBuilder {
 	}
 	// Getters
 	get fieldTree(): CFConfig<FieldTypes>[] {
-		return this.nestFields(false);
+		if (!this.cachedFieldTree) {
+			this.cachedFieldTree = this.nestFields(false);
+		}
+
+		return this.cachedFieldTree;
 	}
 	get fieldTreeNoTab(): Exclude<CFConfig<FieldTypes>, TabFieldConfig>[] {
-		return this.nestFields(true) as Exclude<
-			CFConfig<FieldTypes>,
-			TabFieldConfig
-		>[];
+		if (!this.cachedFieldTreeNoTab) {
+			this.cachedFieldTreeNoTab = this.nestFields(true) as Exclude<
+				CFConfig<FieldTypes>,
+				TabFieldConfig
+			>[];
+		}
+
+		return this.cachedFieldTreeNoTab;
 	}
 	get flatFields(): CFConfig<FieldTypes>[] {
 		const config: CFConfig<FieldTypes>[] = [];

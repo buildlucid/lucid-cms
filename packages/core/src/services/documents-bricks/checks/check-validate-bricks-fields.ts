@@ -17,6 +17,18 @@ import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
 
+const isRequiredFieldConfig = (
+	config: CustomField<FieldTypes>["config"],
+): config is CustomField<FieldTypes>["config"] & {
+	validation: { required?: boolean };
+} => {
+	return (
+		"validation" in config &&
+		typeof config.validation === "object" &&
+		config.validation !== null
+	);
+};
+
 const checkValidateBricksFields: ServiceFn<
 	[
 		{
@@ -234,8 +246,10 @@ const recursiveFieldValidate = (props: {
 			return;
 		}
 
-		// @ts-expect-error: not all custom fields have validation config
-		if (fieldInstance.config?.validation?.required) {
+		if (
+			isRequiredFieldConfig(fieldInstance.config) &&
+			fieldInstance.config.validation.required
+		) {
 			errors.push({
 				key: key,
 				localeCode: null,
@@ -245,22 +259,6 @@ const recursiveFieldValidate = (props: {
 	});
 
 	return errors;
-};
-
-/**
- * Helper function to get the appropriate reference data based on field type
- */
-const getRefData = (fieldType: FieldTypes, validationData: ValidationData) => {
-	switch (fieldType) {
-		case "media":
-			return validationData.media;
-		case "user":
-			return validationData.users;
-		case "document":
-			return validationData.documents;
-		default:
-			return undefined;
-	}
 };
 
 /**
@@ -276,7 +274,7 @@ export const validateField = (props: {
 	};
 }): FieldError[] => {
 	const errors: FieldError[] = [];
-	const refData = getRefData(props.field.type, props.validationData);
+	const refData = props.validationData[props.field.type];
 
 	//* handle fields with translations
 	if (props.field.translations) {

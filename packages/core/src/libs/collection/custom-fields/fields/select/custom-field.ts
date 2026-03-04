@@ -12,9 +12,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { selectFieldConfig } from "./config.js";
 
 class SelectCustomField extends CustomField<"select"> {
-	type = "select" as const;
+	type = selectFieldConfig.type;
 	config;
 	key;
 	props;

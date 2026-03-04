@@ -10,9 +10,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { colorFieldConfig } from "./config.js";
 
 class ColorCustomField extends CustomField<"color"> {
-	type = "color" as const;
+	type = colorFieldConfig.type;
 	config;
 	key;
 	props;

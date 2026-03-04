@@ -7,9 +7,10 @@ import type {
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
+import { tabFieldConfig } from "./config.js";
 
 class TabCustomField extends CustomField<"tab"> {
-	type = "tab" as const;
+	type = tabFieldConfig.type;
 	config;
 	key: string;
 	props?: CFProps<"tab">;

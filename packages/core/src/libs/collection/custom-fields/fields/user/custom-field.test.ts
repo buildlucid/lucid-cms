@@ -36,7 +36,7 @@ test("successfully validate field - user", async () => {
 		instance: UserCollection.fields.get("standard_user")!,
 		validationData: {
 			media: [],
-			users: [
+			user: [
 				{
 					id: 1,
 					// email: "test@test.com",
@@ -45,7 +45,7 @@ test("successfully validate field - user", async () => {
 					// username: "test-user",
 				},
 			],
-			documents: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: UserCollection.getData.config.useTranslations,
@@ -65,7 +65,7 @@ test("successfully validate field - user", async () => {
 		instance: UserCollection.fields.get("required_user")!,
 		validationData: {
 			media: [],
-			users: [
+			user: [
 				{
 					id: 1,
 					// email: "test@test.com",
@@ -74,7 +74,7 @@ test("successfully validate field - user", async () => {
 					// username: "test-user",
 				},
 			],
-			documents: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: UserCollection.getData.config.useTranslations,
@@ -97,8 +97,8 @@ test("fail to validate field - user", async () => {
 			instance: UserCollection.fields.get("required_user")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: UserCollection.getData.config.useTranslations,
@@ -115,8 +115,8 @@ test("fail to validate field - user", async () => {
 			instance: UserCollection.fields.get("required_user")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: UserCollection.getData.config.useTranslations,

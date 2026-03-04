@@ -17,13 +17,11 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { mediaFieldConfig } from "./config.js";
 import type { MediaValidationData } from "./types.js";
 
-const CF_TYPE = "media" as const;
-const CF_RELATION_SEPARATOR = "med" as const;
-
 class MediaCustomField extends CustomField<"media"> {
-	type = CF_TYPE;
+	type = mediaFieldConfig.type;
 	config;
 	key;
 	props;
@@ -230,12 +228,6 @@ class MediaCustomField extends CustomField<"media"> {
 	}
 	get defaultValue() {
 		return null;
-	}
-	static getRelationConfig() {
-		return {
-			type: CF_TYPE,
-			separator: CF_RELATION_SEPARATOR,
-		};
 	}
 }
 

@@ -1,21 +1,18 @@
 import constants from "../../../constants/constants.js";
+import registeredFields, {
+	fieldTypes,
+} from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
-import DocumentCustomField from "../custom-fields/fields/document/custom-field.js";
-import MediaCustomField from "../custom-fields/fields/media/custom-field.js";
-import RepeaterCustomField from "../custom-fields/fields/repeater/custom-field.js";
-import UserCustomField from "../custom-fields/fields/user/custom-field.js";
 import { collectionTableParts } from "./build-table-name.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
 
-const RELATION_CONFIGS = [
-	RepeaterCustomField.getRelationConfig(),
-	DocumentCustomField.getRelationConfig(),
-	MediaCustomField.getRelationConfig(),
-	UserCustomField.getRelationConfig(),
-];
+const RELATION_CONFIGS = fieldTypes.flatMap((fieldType) => {
+	const relation = registeredFields[fieldType].config.relation;
+	return relation ? [relation] : [];
+});
 
 const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 	const normalizedName = name.replace(HASHED_TABLE_SUFFIX_REGEX, "");
@@ -65,27 +62,7 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 					},
 				};
 			}
-			switch (relationConfig.type) {
-				case "media":
-					tableType = "media-rel";
-					break;
-				case "user":
-					tableType = "user-rel";
-					break;
-				case "document":
-					tableType = "document-rel";
-					break;
-				case "repeater":
-					tableType = "repeater";
-					break;
-				default:
-					return {
-						data: undefined,
-						error: {
-							message: T("invalid_table_name_format_insufficient_parts"),
-						},
-					};
-			}
+			tableType = relationConfig.tableType;
 		} else {
 			return {
 				data: undefined,

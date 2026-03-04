@@ -10,9 +10,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { numberFieldConfig } from "./config.js";
 
 class NumberCustomField extends CustomField<"number"> {
-	type = "number" as const;
+	type = numberFieldConfig.type;
 	config;
 	key;
 	props;

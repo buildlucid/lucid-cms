@@ -45,8 +45,8 @@ test("successfully validate field - document", async () => {
 		instance: DocumentCollection.fields.get("standard_doc")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [
+			user: [],
+			document: [
 				{
 					id: 1,
 					collection_key: "page",
@@ -71,8 +71,8 @@ test("successfully validate field - document", async () => {
 		instance: DocumentCollection.fields.get("required_doc")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [
+			user: [],
+			document: [
 				{
 					id: 1,
 					collection_key: "page",
@@ -99,8 +99,8 @@ test("fail to validate field - document", async () => {
 		instance: DocumentCollection.fields.get("required_doc")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DocumentCollection.getData.config.useTranslations,
@@ -126,8 +126,8 @@ test("fail to validate field - document", async () => {
 		instance: DocumentCollection.fields.get("required_doc")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DocumentCollection.getData.config.useTranslations,
@@ -153,8 +153,8 @@ test("fail to validate field - document", async () => {
 		instance: DocumentCollection.fields.get("wrong_collection")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [
+			user: [],
+			document: [
 				{
 					id: 1,
 					collection_key: "page",

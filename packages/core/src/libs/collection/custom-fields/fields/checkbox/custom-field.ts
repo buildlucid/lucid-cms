@@ -14,9 +14,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { checkboxFieldConfig } from "./config.js";
 
 class CheckboxCustomField extends CustomField<"checkbox"> {
-	type = "checkbox" as const;
+	type = checkboxFieldConfig.type;
 	config;
 	key;
 	props;

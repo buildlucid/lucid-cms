@@ -10,9 +10,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { textareaFieldConfig } from "./config.js";
 
 class TextareaCustomField extends CustomField<"textarea"> {
-	type = "textarea" as const;
+	type = textareaFieldConfig.type;
 	config;
 	key;
 	props;

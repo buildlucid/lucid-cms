@@ -1,8 +1,8 @@
 import constants from "../../../constants/constants.js";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
-import RepeaterCustomField from "../custom-fields/fields/repeater/custom-field.js";
 import toSafeTableName from "./to-safe-table-name.js";
 
 /**
@@ -79,7 +79,17 @@ const buildTableName = <R extends string>(
 				parts.push(collectionTableParts.fields);
 			} else parts.push(keys.brick);
 
-			parts.push(RepeaterCustomField.getRelationConfig().separator);
+			const repeaterRelation = registeredFields.repeater.config.relation;
+			if (!repeaterRelation) {
+				return {
+					data: undefined,
+					error: {
+						message: T("invalid_table_name_format_insufficient_parts"),
+					},
+				};
+			}
+
+			parts.push(repeaterRelation.separator);
 
 			// push all repeater keys - repeaters can have have children/parent repeaters
 			parts.push(...keys.repeater);

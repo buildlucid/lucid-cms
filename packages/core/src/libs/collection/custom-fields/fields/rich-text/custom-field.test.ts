@@ -47,8 +47,8 @@ test("successfully validate field - rich text", async () => {
 		instance: RichTextCollection.fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: RichTextCollection.getData.config.useTranslations,
@@ -71,8 +71,8 @@ test("successfully validate field - rich text", async () => {
 		instance: RichTextCollection.fields.get("required_rich_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: RichTextCollection.getData.config.useTranslations,
@@ -95,8 +95,8 @@ test("successfully validate field - rich text", async () => {
 		instance: RichTextCollection.fields.get("min_length_rich_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: RichTextCollection.getData.config.useTranslations,
@@ -118,8 +118,8 @@ test("fail to validate field - rich text", async () => {
 		instance: RichTextCollection.fields.get("standard_rich_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: RichTextCollection.getData.config.useTranslations,
@@ -146,8 +146,8 @@ test("fail to validate field - rich text", async () => {
 			instance: RichTextCollection.fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: RichTextCollection.getData.config.useTranslations,
@@ -164,8 +164,8 @@ test("fail to validate field - rich text", async () => {
 			instance: RichTextCollection.fields.get("required_rich_text")!,
 			validationData: {
 				media: [],
-				users: [],
-				documents: [],
+				user: [],
+				document: [],
 			},
 			meta: {
 				useTranslations: RichTextCollection.getData.config.useTranslations,
@@ -204,8 +204,8 @@ test("fail to validate field - rich text", async () => {
 		instance: RichTextCollection.fields.get("min_length_rich_text")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: RichTextCollection.getData.config.useTranslations,

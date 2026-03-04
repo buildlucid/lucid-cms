@@ -37,8 +37,8 @@ test("successfully validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -58,8 +58,8 @@ test("successfully validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -79,8 +79,8 @@ test("successfully validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -100,8 +100,8 @@ test("successfully validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("required_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -123,8 +123,8 @@ test("fail to validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -150,8 +150,8 @@ test("fail to validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -177,8 +177,8 @@ test("fail to validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,
@@ -204,8 +204,8 @@ test("fail to validate field - datetime", async () => {
 		instance: DateTimeCollection.fields.get("required_datetime")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: DateTimeCollection.getData.config.useTranslations,

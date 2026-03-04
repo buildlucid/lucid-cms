@@ -41,8 +41,8 @@ test("successfully validate field - link", async () => {
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: LinkCollection.getData.config.useTranslations,
@@ -66,8 +66,8 @@ test("successfully validate field - link", async () => {
 		instance: LinkCollection.fields.get("required_link")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: LinkCollection.getData.config.useTranslations,
@@ -93,8 +93,8 @@ test("fail to validate field - link", async () => {
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: LinkCollection.getData.config.useTranslations,
@@ -124,8 +124,8 @@ test("fail to validate field - link", async () => {
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: LinkCollection.getData.config.useTranslations,
@@ -157,8 +157,8 @@ test("fail to validate field - link", async () => {
 		instance: LinkCollection.fields.get("standard_link")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: LinkCollection.getData.config.useTranslations,
@@ -184,8 +184,8 @@ test("fail to validate field - link", async () => {
 		instance: LinkCollection.fields.get("required_link")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: LinkCollection.getData.config.useTranslations,

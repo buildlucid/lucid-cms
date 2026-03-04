@@ -36,8 +36,8 @@ test("successfully validate field - color", async () => {
 		instance: ColorCollection.fields.get("standard_color")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: ColorCollection.getData.config.useTranslations,
@@ -57,8 +57,8 @@ test("successfully validate field - color", async () => {
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: ColorCollection.getData.config.useTranslations,
@@ -80,8 +80,8 @@ test("fail to validate field - color", async () => {
 		instance: ColorCollection.fields.get("standard_color")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: ColorCollection.getData.config.useTranslations,
@@ -107,8 +107,8 @@ test("fail to validate field - color", async () => {
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: ColorCollection.getData.config.useTranslations,
@@ -134,8 +134,8 @@ test("fail to validate field - color", async () => {
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: ColorCollection.getData.config.useTranslations,
@@ -161,8 +161,8 @@ test("fail to validate field - color", async () => {
 		instance: ColorCollection.fields.get("required_color")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: ColorCollection.getData.config.useTranslations,

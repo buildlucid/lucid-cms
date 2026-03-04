@@ -12,7 +12,9 @@ import type {
 	LucidBrickTableName,
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import registeredFields from "../collection/custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldTypes,
+} from "../collection/custom-fields/registered-fields.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import formatter, {
@@ -248,25 +250,28 @@ const formatRefs = (props: {
 		default: props.config.localization.defaultLocale,
 	} satisfies FieldRefParams["localization"];
 
-	for (const key of Object.keys(registeredFields) as FieldTypes[]) {
-		const customField = registeredFields[key].class;
+	for (const key of fieldTypes) {
+		const formatRef = registeredFields[key].formatRef;
 		const refData = props.data.data[key];
-		if (!customField || !refData || !Array.isArray(refData)) continue;
+		if (!formatRef || !refData || !Array.isArray(refData)) continue;
 
-		refs[key] = refData
-			.map((d) => {
-				if (d === null || d === undefined) return null;
-				// @ts-expect-error
-				return customField.formatRef(d, {
-					collection: props.collection,
-					config: props.config,
-					host: props.host,
-					bricksTableSchema: props.bricksTableSchema,
-					documentRefMeta: props.data?.meta?.document,
-					localization: localization,
-				});
-			})
-			.filter((d) => d !== null);
+		const formattedRefs: FieldRefs[] = [];
+		for (const item of refData) {
+			if (item === null || item === undefined) continue;
+
+			const formattedRef = formatRef(item, {
+				collection: props.collection,
+				config: props.config,
+				host: props.host,
+				bricksTableSchema: props.bricksTableSchema,
+				documentRefMeta: props.data?.meta?.document,
+				localization: localization,
+			});
+			if (formattedRef === null) continue;
+			formattedRefs.push(formattedRef);
+		}
+
+		refs[key] = formattedRefs;
 	}
 
 	return refs;

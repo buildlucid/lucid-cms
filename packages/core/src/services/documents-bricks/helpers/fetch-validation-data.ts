@@ -1,24 +1,25 @@
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
-import type { DocumentValidationData } from "../../../libs/collection/custom-fields/fields/document/types.js";
-import type { MediaValidationData } from "../../../libs/collection/custom-fields/fields/media/types.js";
-import type { UserValidationData } from "../../../libs/collection/custom-fields/fields/user/types.js";
-import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import registeredFields, {
+	fieldTypes,
+} from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldInputSchema } from "../../../types.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import type { FieldInputSchema, FieldTypes } from "../../../types.js";
+import type {
+	ServiceContext,
+	ServiceFn,
+} from "../../../utils/services/types.js";
 
-export interface ValidationData {
-	media: MediaValidationData[];
-	users: UserValidationData[];
-	documents: DocumentValidationData[];
-}
+export type ValidationData = Partial<Record<FieldTypes, unknown>>;
+
+type ValidationBuckets = {
+	ids: Partial<Record<FieldTypes, Set<number>>>;
+	byCollection: Partial<Record<FieldTypes, Record<string, Set<number>>>>;
+};
 
 /**
  * Responsible for fetching data used for validating custom field values.
- *
- * @todo For custom custom field support down the line - validation data fetch logic should be moved to custom field instances. Active custom fields would need to be registered in config.
  */
 const fetchValidationData: ServiceFn<
 	[
@@ -30,72 +31,41 @@ const fetchValidationData: ServiceFn<
 	],
 	ValidationData
 > = async (context, data) => {
-	const { mediaIds, userIds, documentIdsByCollection } = extractRelationIds(
-		data.bricks,
-		data.fields,
-		data.collection,
-	);
-
-	const [media, users, documents] = await Promise.all([
-		registeredFields.media.validateInput(context, mediaIds),
-		registeredFields.user.validateInput(context, userIds),
-		registeredFields.document.validateInput(context, documentIdsByCollection),
-	]);
+	const buckets = extractRelationIds(data.bricks, data.fields, data.collection);
+	const validationData = await buildValidationData(context, buckets);
 
 	return {
-		data: {
-			media,
-			users,
-			documents,
-		},
+		data: validationData,
 		error: undefined,
 	};
 };
 
 /**
- * Extract all relation IDs from bricks and fields
+ * Extract all relation IDs from bricks and fields.
  */
 const extractRelationIds = (
 	bricks: Array<BrickInputSchema>,
 	fields: Array<FieldInputSchema>,
 	collection: CollectionBuilder,
-) => {
-	const mediaIds: number[] = [];
-	const userIds: number[] = [];
-	const documentIdsByCollection: Record<string, number[]> = {};
+): ValidationBuckets => {
+	const buckets: ValidationBuckets = {
+		ids: {},
+		byCollection: {},
+	};
 
 	for (const brick of bricks) {
 		const instance = getBrickInstance(brick, collection);
-		if (!instance) continue;
+		if (!instance || !brick.fields) continue;
 
-		if (brick.fields) {
-			extractRelationIdsFromFields(
-				brick.fields,
-				instance,
-				mediaIds,
-				userIds,
-				documentIdsByCollection,
-			);
-		}
+		extractRelationIdsFromFields(brick.fields, instance, buckets);
 	}
 
-	extractRelationIdsFromFields(
-		fields,
-		collection,
-		mediaIds,
-		userIds,
-		documentIdsByCollection,
-	);
-
-	return {
-		mediaIds: [...new Set(mediaIds)],
-		userIds: [...new Set(userIds)],
-		documentIdsByCollection,
-	};
+	extractRelationIdsFromFields(fields, collection, buckets);
+	return buckets;
 };
 
 /**
- * Gets the appropriate brick instance based on brick type
+ * Gets the appropriate brick instance based on brick type.
  */
 const getBrickInstance = (
 	brick: BrickInputSchema,
@@ -114,102 +84,143 @@ const getBrickInstance = (
 };
 
 /**
- * Recursively extract relation IDs from fields
+ * Recursively extract relation IDs from fields.
  */
 const extractRelationIdsFromFields = (
 	fields: Array<FieldInputSchema>,
 	instance: CollectionBuilder | BrickBuilder,
-	mediaIds: number[],
-	userIds: number[],
-	documentIdsByCollection: Record<string, number[]>,
+	buckets: ValidationBuckets,
 ) => {
 	for (const field of fields) {
 		const fieldInstance = instance.fields.get(field.key);
 		if (!fieldInstance) continue;
 
-		if (field.type === "media") {
-			extractIdsFromField(field, mediaIds);
-		} else if (field.type === "user") {
-			extractIdsFromField(field, userIds);
-		} else if (field.type === "document") {
-			extractDocumentIds(
-				field,
-				fieldInstance as CustomField<"document">,
-				documentIdsByCollection,
+		const validationConfig = registeredFields[field.type].config.validation;
+		const ids = extractIdsFromField(field);
+
+		if (validationConfig?.mode === "ids") {
+			const current = buckets.ids[field.type] ?? new Set<number>();
+			for (const id of ids) current.add(id);
+			buckets.ids[field.type] = current;
+		}
+
+		if (validationConfig?.mode === "document-by-collection") {
+			const collectionKey = getDocumentCollectionKey(fieldInstance);
+			if (collectionKey) {
+				const currentByType = buckets.byCollection[field.type] ?? {};
+				const currentByCollection =
+					currentByType[collectionKey] ?? new Set<number>();
+
+				for (const id of ids) currentByCollection.add(id);
+
+				currentByType[collectionKey] = currentByCollection;
+				buckets.byCollection[field.type] = currentByType;
+			}
+		}
+
+		if (field.type === "repeater" && field.groups) {
+			for (const group of field.groups) {
+				extractRelationIdsFromFields(group.fields, instance, buckets);
+			}
+		}
+	}
+};
+
+const getDocumentCollectionKey = (
+	fieldInstance: CustomField<FieldTypes>,
+): string | null => {
+	if (
+		"collection" in fieldInstance.config &&
+		typeof fieldInstance.config.collection === "string"
+	) {
+		return fieldInstance.config.collection;
+	}
+
+	return null;
+};
+
+/**
+ * Extract IDs from a field (both direct value and translations).
+ */
+const extractIdsFromField = (field: FieldInputSchema): number[] => {
+	const ids: number[] = [];
+
+	if (field.value !== undefined && field.value !== null) {
+		const id = Number(field.value);
+		if (!Number.isNaN(id)) ids.push(id);
+	}
+
+	if (field.translations) {
+		for (const localeCode in field.translations) {
+			const value = field.translations[localeCode];
+			if (value === undefined || value === null) continue;
+
+			const id = Number(value);
+			if (!Number.isNaN(id)) ids.push(id);
+		}
+	}
+
+	return ids;
+};
+
+const hasIdsValidator = (
+	field: (typeof registeredFields)[FieldTypes],
+): field is
+	| (typeof registeredFields)["media"]
+	| (typeof registeredFields)["user"] => {
+	return (
+		field.config.validation?.mode === "ids" && field.validateInput !== null
+	);
+};
+
+const hasDocumentValidator = (
+	field: (typeof registeredFields)[FieldTypes],
+): field is (typeof registeredFields)["document"] => {
+	return (
+		field.config.validation?.mode === "document-by-collection" &&
+		field.validateInput !== null
+	);
+};
+
+const buildValidationData = async (
+	context: ServiceContext,
+	buckets: ValidationBuckets,
+): Promise<ValidationData> => {
+	const validationData: ValidationData = {};
+	const promises: Promise<void>[] = [];
+
+	for (const fieldType of fieldTypes) {
+		const fieldDefinition = registeredFields[fieldType];
+		if (hasIdsValidator(fieldDefinition)) {
+			const ids = Array.from(buckets.ids[fieldType] ?? new Set<number>());
+			promises.push(
+				fieldDefinition.validateInput(context, ids).then((result) => {
+					validationData[fieldType] = result;
+				}),
+			);
+			continue;
+		}
+
+		if (!hasDocumentValidator(fieldDefinition)) continue;
+
+		const byCollection = buckets.byCollection[fieldType] ?? {};
+		const input: Record<string, number[]> = {};
+
+		for (const collectionKey in byCollection) {
+			input[collectionKey] = Array.from(
+				byCollection[collectionKey] ?? new Set<number>(),
 			);
 		}
 
-		//* recursively process repeater fields
-		if (field.type === "repeater" && field.groups) {
-			for (const group of field.groups) {
-				extractRelationIdsFromFields(
-					group.fields,
-					instance,
-					mediaIds,
-					userIds,
-					documentIdsByCollection,
-				);
-			}
-		}
-	}
-};
-
-/**
- * Extract IDs from a field (general purpose)
- */
-const extractIdsFromField = (field: FieldInputSchema, idsList: number[]) => {
-	//* check direct value
-	if (field.value !== undefined && field.value !== null) {
-		const id = Number(field.value);
-		if (!Number.isNaN(id)) idsList.push(id);
+		promises.push(
+			fieldDefinition.validateInput(context, input).then((result) => {
+				validationData[fieldType] = result;
+			}),
+		);
 	}
 
-	//* check translations
-	if (field.translations) {
-		for (const localeCode in field.translations) {
-			const value = field.translations[localeCode];
-			if (value !== undefined && value !== null) {
-				const id = Number(value);
-				if (!Number.isNaN(id)) idsList.push(id);
-			}
-		}
-	}
-};
-
-/**
- * Extract document IDs and group them by collection key
- */
-const extractDocumentIds = (
-	field: FieldInputSchema,
-	fieldInstance: CustomField<"document">,
-	documentIdsByCollection: Record<string, number[]>,
-) => {
-	const collectionKey = fieldInstance.config.collection;
-
-	if (!documentIdsByCollection[collectionKey]) {
-		documentIdsByCollection[collectionKey] = [];
-	}
-
-	//* extract IDs from direct value
-	if (field.value !== undefined && field.value !== null) {
-		const id = Number(field.value);
-		if (!Number.isNaN(id)) {
-			documentIdsByCollection[collectionKey].push(id);
-		}
-	}
-
-	//* extract IDs from translations
-	if (field.translations) {
-		for (const localeCode in field.translations) {
-			const value = field.translations[localeCode];
-			if (value !== undefined && value !== null) {
-				const id = Number(value);
-				if (!Number.isNaN(id)) {
-					documentIdsByCollection[collectionKey].push(id);
-				}
-			}
-		}
-	}
+	await Promise.all(promises);
+	return validationData;
 };
 
 export default fetchValidationData;

@@ -10,9 +10,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { richTextFieldConfig } from "./config.js";
 
 class RichTextCustomField extends CustomField<"rich-text"> {
-	type = "rich-text" as const;
+	type = richTextFieldConfig.type;
 	config;
 	key;
 	props;

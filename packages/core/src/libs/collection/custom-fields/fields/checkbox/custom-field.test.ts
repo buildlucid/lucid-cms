@@ -36,8 +36,8 @@ test("successfully validate field - checkbox", async () => {
 		instance: CheckboxCollection.fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: CheckboxCollection.getData.config.useTranslations,
@@ -57,8 +57,8 @@ test("successfully validate field - checkbox", async () => {
 		instance: CheckboxCollection.fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: CheckboxCollection.getData.config.useTranslations,
@@ -80,8 +80,8 @@ test("fail to validate field - checkbox", async () => {
 		instance: CheckboxCollection.fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: CheckboxCollection.getData.config.useTranslations,
@@ -107,8 +107,8 @@ test("fail to validate field - checkbox", async () => {
 		instance: CheckboxCollection.fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: CheckboxCollection.getData.config.useTranslations,

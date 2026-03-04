@@ -42,8 +42,8 @@ test("successfully validate field - number", async () => {
 		instance: NumberCollection.fields.get("standard_number")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: NumberCollection.getData.config.useTranslations,
@@ -63,8 +63,8 @@ test("successfully validate field - number", async () => {
 		instance: NumberCollection.fields.get("required_number")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: NumberCollection.getData.config.useTranslations,
@@ -84,8 +84,8 @@ test("successfully validate field - number", async () => {
 		instance: NumberCollection.fields.get("min_number")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: NumberCollection.getData.config.useTranslations,
@@ -107,8 +107,8 @@ test("fail to validate field - number", async () => {
 		instance: NumberCollection.fields.get("standard_number")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: NumberCollection.getData.config.useTranslations,
@@ -134,8 +134,8 @@ test("fail to validate field - number", async () => {
 		instance: NumberCollection.fields.get("required_number")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: NumberCollection.getData.config.useTranslations,
@@ -161,8 +161,8 @@ test("fail to validate field - number", async () => {
 		instance: NumberCollection.fields.get("min_number")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: NumberCollection.getData.config.useTranslations,

@@ -12,9 +12,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { linkFieldConfig } from "./config.js";
 
 class LinkCustomField extends CustomField<"link"> {
-	type = "link" as const;
+	type = linkFieldConfig.type;
 	config;
 	key;
 	props;

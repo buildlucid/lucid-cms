@@ -25,11 +25,13 @@ class BrickBuilder extends FieldBuilder {
 			this.fields.set(field.key, field);
 			this.meta.fieldKeys.push(field.key);
 		}
+		this.invalidateFieldTreeCache();
 		return this;
 	}
 	public addTab(key: string, props?: CFProps<"tab">) {
 		this.fields.set(key, new TabCustomField(key, props));
 		this.meta.fieldKeys.push(key);
+		this.invalidateFieldTreeCache();
 		return this;
 	}
 }

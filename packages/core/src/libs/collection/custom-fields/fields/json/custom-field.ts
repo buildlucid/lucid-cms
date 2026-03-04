@@ -10,9 +10,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { jsonFieldConfig } from "./config.js";
 
 class JsonCustomField extends CustomField<"json"> {
-	type = "json" as const;
+	type = jsonFieldConfig.type;
 	config;
 	key;
 	props;

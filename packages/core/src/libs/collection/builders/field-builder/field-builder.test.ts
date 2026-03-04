@@ -327,3 +327,37 @@ test("flat fields should return correct config", async () => {
 		},
 	]);
 });
+
+test("fieldTree memoization invalidates on add operations", async () => {
+	const instance = new FieldBuilder().addText("text_test");
+
+	const initialTree = instance.fieldTree;
+	const cachedTree = instance.fieldTree;
+	expect(cachedTree).toBe(initialTree);
+
+	instance.addNumber("number_test");
+
+	const updatedTree = instance.fieldTree;
+	expect(updatedTree).not.toBe(initialTree);
+	expect(updatedTree.length).toBe(2);
+});
+
+test("fieldTreeNoTab memoization invalidates on repeater mutation", async () => {
+	const instance = new FieldBuilder()
+		.addRepeater("repeater_test")
+		.addText("text_test");
+
+	const beforeEnd = instance.fieldTreeNoTab;
+	expect(instance.fieldTreeNoTab).toBe(beforeEnd);
+
+	instance.endRepeater();
+
+	const afterEnd = instance.fieldTreeNoTab;
+	expect(afterEnd).not.toBe(beforeEnd);
+
+	const repeater = afterEnd[0];
+	if (repeater?.type === "repeater") {
+		expect(repeater.fields.length).toBe(1);
+		expect(repeater.fields[0]?.key).toBe("text_test");
+	}
+});

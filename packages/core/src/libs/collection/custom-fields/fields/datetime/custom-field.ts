@@ -12,9 +12,10 @@ import type {
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
+import { datetimeFieldConfig } from "./config.js";
 
 class DatetimeCustomField extends CustomField<"datetime"> {
-	type = "datetime" as const;
+	type = datetimeFieldConfig.type;
 	config;
 	key;
 	props;

@@ -79,3 +79,19 @@ test("brick config is correct", async () => {
 		preview: { image: "https://placehold.co/600x400" },
 	});
 });
+
+test("field tree cache invalidates when adding tabs and external fields", async () => {
+	const childFieldBuilder = new FieldBuilder().addText("child_text");
+	const brick = new BrickBuilder("brick").addText("text_test");
+
+	const initialTree = brick.fieldTree;
+	expect(brick.fieldTree).toBe(initialTree);
+
+	brick.addTab("content_tab");
+	const afterTabTree = brick.fieldTree;
+	expect(afterTabTree).not.toBe(initialTree);
+
+	brick.addFields(childFieldBuilder);
+	const afterAddFieldsTree = brick.fieldTree;
+	expect(afterAddFieldsTree).not.toBe(afterTabTree);
+});

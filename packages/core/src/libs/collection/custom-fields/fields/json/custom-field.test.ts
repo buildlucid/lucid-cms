@@ -47,8 +47,8 @@ test("successfully validate field - json", async () => {
 		instance: JSONCollection.fields.get("standard_json")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: JSONCollection.getData.config.useTranslations,
@@ -70,8 +70,8 @@ test("successfully validate field - json", async () => {
 		instance: JSONCollection.fields.get("required_json")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: JSONCollection.getData.config.useTranslations,
@@ -94,8 +94,8 @@ test("successfully validate field - json", async () => {
 		instance: JSONCollection.fields.get("zod_json")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: JSONCollection.getData.config.useTranslations,
@@ -117,8 +117,8 @@ test("fail to validate field - json", async () => {
 		instance: JSONCollection.fields.get("standard_json")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: JSONCollection.getData.config.useTranslations,
@@ -144,8 +144,8 @@ test("fail to validate field - json", async () => {
 		instance: JSONCollection.fields.get("required_json")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: JSONCollection.getData.config.useTranslations,
@@ -174,8 +174,8 @@ test("fail to validate field - json", async () => {
 		instance: JSONCollection.fields.get("zod_json")!,
 		validationData: {
 			media: [],
-			users: [],
-			documents: [],
+			user: [],
+			document: [],
 		},
 		meta: {
 			useTranslations: JSONCollection.getData.config.useTranslations,
