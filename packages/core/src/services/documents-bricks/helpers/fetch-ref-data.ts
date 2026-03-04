@@ -1,5 +1,5 @@
 import registeredFields, {
-	fieldTypes,
+	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
@@ -77,7 +77,7 @@ const fetchRefData: ServiceFn<
 	let firstError = false;
 	// let responseError: LucidErrorData;
 
-	for (const fieldType of fieldTypes) {
+	for (const fieldType of registeredFieldTypes) {
 		const relationValues = data.values[fieldType];
 		const fieldDefinition = registeredFields[fieldType];
 		if (!relationValues || relationValues.length === 0) continue;

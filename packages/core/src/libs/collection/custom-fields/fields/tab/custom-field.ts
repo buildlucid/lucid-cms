@@ -14,6 +14,15 @@ class TabCustomField extends CustomField<"tab"> {
 	config;
 	key: string;
 	props?: CFProps<"tab">;
+
+	protected override get sharedValidationFlags() {
+		return {
+			skipValidation: true,
+			skipRequiredValidation: true,
+			skipZodValidation: true,
+		} as const;
+	}
+
 	constructor(key: string, props?: CFProps<"tab">) {
 		super();
 		this.key = key;
@@ -40,16 +49,10 @@ class TabCustomField extends CustomField<"tab"> {
 	formatResponseValue() {
 		return null satisfies CFResponse<"tab">["value"];
 	}
-	cfSpecificValidation() {
+	uniqueValidation() {
 		return {
 			valid: true,
 		};
-	}
-	get translationsEnabled() {
-		return false;
-	}
-	get defaultValue() {
-		return null;
 	}
 }
 

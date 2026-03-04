@@ -9,22 +9,36 @@ import type {
 } from "../../db-adapter/types.js";
 import type { CollectionBuilder } from "../builders/index.js";
 import type { CollectionSchemaTable, TableType } from "../schema/types.js";
+import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
+import { colorFieldConfig } from "./fields/color/config.js";
 import type { ColorCustomFieldMapItem } from "./fields/color/types.js";
+import { datetimeFieldConfig } from "./fields/datetime/config.js";
 import type { DatetimeCustomFieldMapItem } from "./fields/datetime/types.js";
+import { documentFieldConfig } from "./fields/document/config.js";
 import type { DocumentCustomFieldMapItem } from "./fields/document/types.js";
+import { jsonFieldConfig } from "./fields/json/config.js";
 import type { JsonCustomFieldMapItem } from "./fields/json/types.js";
+import { linkFieldConfig } from "./fields/link/config.js";
 import type { LinkCustomFieldMapItem } from "./fields/link/types.js";
+import { mediaFieldConfig } from "./fields/media/config.js";
 import type { MediaCustomFieldMapItem } from "./fields/media/types.js";
+import { numberFieldConfig } from "./fields/number/config.js";
 import type { NumberCustomFieldMapItem } from "./fields/number/types.js";
+import { repeaterFieldConfig } from "./fields/repeater/config.js";
 import type { RepeaterCustomFieldMapItem } from "./fields/repeater/types.js";
+import { richTextFieldConfig } from "./fields/rich-text/config.js";
 import type { RichTextCustomFieldMapItem } from "./fields/rich-text/types.js";
+import { selectFieldConfig } from "./fields/select/config.js";
 import type { SelectCustomFieldMapItem } from "./fields/select/types.js";
+import { tabFieldConfig } from "./fields/tab/config.js";
 import type { TabCustomFieldMapItem } from "./fields/tab/types.js";
+import { textFieldConfig } from "./fields/text/config.js";
 import type { TextCustomFieldMapItem } from "./fields/text/types.js";
+import { textareaFieldConfig } from "./fields/textarea/config.js";
 import type { TextareaCustomFieldMapItem } from "./fields/textarea/types.js";
+import { userFieldConfig } from "./fields/user/config.js";
 import type { UserCustomFieldMapItem } from "./fields/user/types.js";
-import type { fieldTypes } from "./registered-fields.js";
 
 export type * from "./fields/checkbox/types.js";
 export type * from "./fields/color/types.js";
@@ -44,6 +58,24 @@ export type * from "./fields/user/types.js";
 
 // -----------------------------------------------
 // Field Keys
+
+export const fieldTypes = [
+	checkboxFieldConfig.type,
+	colorFieldConfig.type,
+	datetimeFieldConfig.type,
+	documentFieldConfig.type,
+	jsonFieldConfig.type,
+	linkFieldConfig.type,
+	mediaFieldConfig.type,
+	numberFieldConfig.type,
+	repeaterFieldConfig.type,
+	selectFieldConfig.type,
+	tabFieldConfig.type,
+	textFieldConfig.type,
+	textareaFieldConfig.type,
+	userFieldConfig.type,
+	richTextFieldConfig.type,
+] as const;
 
 export type FieldTypes = (typeof fieldTypes)[number];
 

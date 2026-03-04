@@ -2,7 +2,7 @@ import type BrickBuilder from "../../../libs/collection/builders/brick-builder/i
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields, {
-	fieldTypes,
+	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema, FieldTypes } from "../../../types.js";
@@ -189,7 +189,7 @@ const buildValidationData = async (
 	const validationData: ValidationData = {};
 	const promises: Promise<void>[] = [];
 
-	for (const fieldType of fieldTypes) {
+	for (const fieldType of registeredFieldTypes) {
 		const fieldDefinition = registeredFields[fieldType];
 		if (hasIdsValidator(fieldDefinition)) {
 			const ids = Array.from(buckets.ids[fieldType] ?? new Set<number>());

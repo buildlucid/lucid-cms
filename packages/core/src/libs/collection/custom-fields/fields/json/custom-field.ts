@@ -61,7 +61,7 @@ class JsonCustomField extends CustomField<"json"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"json">["value"];
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.record(
 			z.union([z.string(), z.number(), z.symbol()]),
 			z.unknown(),
@@ -73,12 +73,6 @@ class JsonCustomField extends CustomField<"json"> {
 		return {
 			valid: true,
 		};
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

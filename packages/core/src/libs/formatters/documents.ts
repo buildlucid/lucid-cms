@@ -13,7 +13,7 @@ import type {
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import registeredFields, {
-	fieldTypes,
+	registeredFieldTypes,
 } from "../collection/custom-fields/registered-fields.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
@@ -250,7 +250,7 @@ const formatRefs = (props: {
 		default: props.config.localization.defaultLocale,
 	} satisfies FieldRefParams["localization"];
 
-	for (const key of fieldTypes) {
+	for (const key of registeredFieldTypes) {
 		const formatRef = registeredFields[key].formatRef;
 		const refData = props.data.data[key];
 		if (!formatRef || !refData || !Array.isArray(refData)) continue;

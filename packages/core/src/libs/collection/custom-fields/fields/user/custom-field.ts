@@ -1,7 +1,6 @@
 import z from "zod";
 import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
-import type { UserPropT } from "../../../../formatters/users.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -64,17 +63,7 @@ class UserCustomField extends CustomField<"user"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"user">["value"];
 	}
-	static formatRef(value: UserPropT | undefined | null) {
-		if (value === null || value === undefined) return null;
-		return {
-			id: value.id ?? null,
-			email: value.email,
-			username: value.username,
-			firstName: value.first_name,
-			lastName: value.last_name,
-		} satisfies CFResponse<"user">["ref"];
-	}
-	cfSpecificValidation(value: unknown, refData?: UserValidationData[]) {
+	uniqueValidation(value: unknown, refData?: UserValidationData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -90,12 +79,6 @@ class UserCustomField extends CustomField<"user"> {
 		}
 
 		return { valid: true };
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return null;
 	}
 }
 

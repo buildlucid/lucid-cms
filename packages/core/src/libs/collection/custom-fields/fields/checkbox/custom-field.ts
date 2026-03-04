@@ -69,7 +69,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			Boolean(value) ?? this.config.config.default,
 		) satisfies CFResponse<"checkbox">["value"];
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.union([z.literal(1), z.literal(0), z.boolean()]);
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -88,12 +88,6 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 				message: T("checkbox_field_required"),
 			},
 		});
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

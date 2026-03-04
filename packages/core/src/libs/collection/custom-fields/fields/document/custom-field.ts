@@ -1,18 +1,12 @@
 import z from "zod";
 import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
-import {
-	documentBricksFormatter,
-	documentFieldsFormatter,
-} from "../../../../formatters/index.js";
-import type { BrickQueryResponse } from "../../../../repositories/document-bricks.js";
 import buildTableName from "../../../helpers/build-table-name.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	FieldRefParams,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -81,61 +75,7 @@ class DocumentCustomField extends CustomField<"document"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"document">["value"];
 	}
-	static formatRef(
-		value: BrickQueryResponse | undefined | null,
-		params: FieldRefParams,
-	) {
-		if (value === null || value === undefined) return null;
-
-		const targetCollectionKey = value.collection_key;
-		const collection = params.config.collections.find(
-			(c) => c.key === targetCollectionKey,
-		);
-
-		//* gets the target bricks schema for the referenced document
-		const targetBricksSchema =
-			targetCollectionKey === params.collection.key
-				? // if the target (whats set against the custom field) is the same as the collection key of the requested document
-					params.bricksTableSchema
-				: // else get the bricks schema from the document fields schema by collection key
-					params.documentRefMeta?.fieldsSchemaByCollection?.[
-							targetCollectionKey
-						]
-					? [
-							params.documentRefMeta.fieldsSchemaByCollection[
-								targetCollectionKey
-							],
-						]
-					: undefined;
-
-		if (!collection || !targetBricksSchema) {
-			return {
-				id: value.document_id,
-				versionId: value.id,
-				collectionKey: targetCollectionKey,
-				fields: null,
-			};
-		}
-
-		const documentFields = documentFieldsFormatter.objectifyFields(
-			documentBricksFormatter.formatDocumentFields({
-				bricksQuery: value,
-				bricksSchema: targetBricksSchema,
-				refData: { data: {} },
-				collection: collection,
-				config: params.config,
-				host: params.host,
-			}),
-		);
-
-		return {
-			id: value.document_id,
-			versionId: value.id,
-			collectionKey: targetCollectionKey,
-			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
-		} satisfies CFResponse<"document">["ref"];
-	}
-	cfSpecificValidation(value: unknown, refData?: DocumentValidationData[]) {
+	uniqueValidation(value: unknown, refData?: DocumentValidationData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -153,12 +93,6 @@ class DocumentCustomField extends CustomField<"document"> {
 		}
 
 		return { valid: true };
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return null;
 	}
 }
 

@@ -15,6 +15,15 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	config;
 	key;
 	props;
+
+	protected override get sharedValidationFlags() {
+		return {
+			skipValidation: false,
+			skipRequiredValidation: true,
+			skipZodValidation: true,
+		} as const;
+	}
+
 	constructor(key: string, props?: CFProps<"repeater">) {
 		super();
 		this.key = key;
@@ -45,7 +54,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	formatResponseValue() {
 		return null satisfies CFResponse<"repeater">["value"];
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		if (
 			Array.isArray(value) &&
 			typeof this.config.validation?.maxGroups === "number"
@@ -75,12 +84,6 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 		}
 
 		return { valid: true };
-	}
-	get translationsEnabled() {
-		return false;
-	}
-	get defaultValue() {
-		return null;
 	}
 }
 

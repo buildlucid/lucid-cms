@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import registeredFields, {
-	fieldTypes,
+	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
@@ -9,7 +9,7 @@ import { collectionTableParts } from "./build-table-name.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
 
-const RELATION_CONFIGS = fieldTypes.flatMap((fieldType) => {
+const RELATION_CONFIGS = registeredFieldTypes.flatMap((fieldType) => {
 	const relation = registeredFields[fieldType].config.relation;
 	return relation ? [relation] : [];
 });

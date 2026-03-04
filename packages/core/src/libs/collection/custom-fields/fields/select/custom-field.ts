@@ -66,7 +66,7 @@ class SelectCustomField extends CustomField<"select"> {
 	override normalizeInputValue(value: unknown) {
 		return typeof value === "string" ? value.trim() : value;
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.string();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -91,12 +91,6 @@ class SelectCustomField extends CustomField<"select"> {
 				message: T("select_field_required"),
 			},
 		});
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

@@ -64,7 +64,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"rich-text">["value"];
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.record(
 			z.union([z.string(), z.number(), z.symbol()]),
 			z.unknown(),
@@ -73,17 +73,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 		const valueValidate = zodSafeParse(value, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		if (this.config.validation?.zod) {
-			return zodSafeParse(value, this.config.validation?.zod);
-		}
-
 		return { valid: true };
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

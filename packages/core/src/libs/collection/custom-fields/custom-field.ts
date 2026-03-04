@@ -1,3 +1,4 @@
+import type { ZodType } from "zod";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
 import type {
@@ -6,14 +7,68 @@ import type {
 	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidateResponse,
-	FieldRefParams,
 	FieldTypes,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "./types.js";
 import zodSafeParse from "./utils/zod-safe-parse.js";
 
+type SharedValidationFlags = {
+	skipValidation: boolean;
+	skipRequiredValidation: boolean;
+	skipZodValidation: boolean;
+};
+
+type FieldValidationShape = {
+	required?: boolean;
+	zod?: ZodType<unknown>;
+};
+
+const defaultSharedValidationFlags: SharedValidationFlags = {
+	skipValidation: false,
+	skipRequiredValidation: false,
+	skipZodValidation: false,
+};
+
+const hasRuntimeConfig = (
+	config: CFConfig<FieldTypes>,
+): config is CFConfig<FieldTypes> & {
+	config: {
+		useTranslations?: boolean;
+		default?: unknown;
+	};
+} => {
+	return (
+		typeof config === "object" &&
+		config !== null &&
+		"config" in config &&
+		typeof config.config === "object" &&
+		config.config !== null
+	);
+};
+
+const hasValidationConfig = (
+	config: CFConfig<FieldTypes>,
+): config is CFConfig<FieldTypes> & {
+	validation?: FieldValidationShape;
+} => {
+	return (
+		typeof config === "object" && config !== null && "validation" in config
+	);
+};
+
+const hasZodValidation = (
+	validation: unknown,
+): validation is {
+	zod?: ZodType<unknown>;
+} => {
+	return (
+		typeof validation === "object" && validation !== null && "zod" in validation
+	);
+};
+
 abstract class CustomField<T extends FieldTypes> {
+	/** Repeater key when this field belongs to a repeater scope. */
 	repeater: string | null = null;
 
 	abstract type: T;
@@ -21,62 +76,61 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract props?: CFProps<T>;
 	abstract config: CFConfig<T>;
 
+	/** Formats raw DB values into API response values for this field. */
 	abstract formatResponseValue(value: unknown): CFResponse<T>["value"];
 
-	abstract cfSpecificValidation(
+	/** Runs field-specific validation once shared checks have passed. */
+	abstract uniqueValidation(
 		value: unknown,
 		refData?: unknown,
 	): {
 		valid: boolean;
 		message?: string;
 	};
-	abstract get translationsEnabled(): boolean;
-	abstract get defaultValue(): unknown;
-
 	/**
-	 * Determins how the field should be defined in the database
+	 * Defines DB schema fragments for this field.
 	 *
-	 * If the foreign key is referencing a Custom Field key, use the `prefixGeneratedColName(key)` helper on the column
+	 * If the foreign key references another custom field key, use
+	 * `prefixGeneratedColName(key)` for the referenced column.
 	 */
 	abstract getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>>;
 
-	// Methods
-	static formatRef(
-		_value: unknown,
-		_params: FieldRefParams,
-	): CFResponse<FieldTypes>["ref"] | null {
-		return null;
+	/**
+	 * Field-level switches for shared validation phases.
+	 * Override in subclasses when a field should skip a shared phase.
+	 */
+	protected get sharedValidationFlags(): SharedValidationFlags {
+		return defaultSharedValidationFlags;
 	}
+
+	/** Runs shared validation and then delegates to `uniqueValidation`. */
 	public validate(props: {
 		type: FieldTypes;
 		value: unknown;
 		refData?: unknown;
 	}): CustomFieldValidateResponse {
-		if (this.config.type === "tab") return { valid: true };
+		if (this.sharedValidationFlags.skipValidation) return { valid: true };
 
-		// Check type
-		const fieldTypeRes = this.fieldTypeValidation(props.type);
+		const fieldTypeRes = this.validateFieldType(props.type);
 		if (fieldTypeRes.valid === false) return fieldTypeRes;
 
-		// required
-		const requiredRes = this.requiredCheck(props.value);
+		const requiredRes = this.validateRequired(props.value);
 		if (!requiredRes.valid) return requiredRes;
 
-		// zod
-		const zodRes = this.zodCheck(props.value);
+		const zodRes = this.validateZodConstraint(props.value);
 		if (!zodRes.valid) return zodRes;
 
-		// nullish skip further validation
 		if (props.value === null || props.value === undefined) {
 			return { valid: true };
 		}
 
-		// custom field specific validation
-		return this.cfSpecificValidation(props.value, props.refData);
+		return this.uniqueValidation(props.value, props.refData);
 	}
-	private fieldTypeValidation(type: FieldTypes) {
+
+	/** Validates that the submitted field type matches this instance type. */
+	private validateFieldType(type: FieldTypes) {
 		if (this.errors.fieldType.condition?.(type)) {
 			return {
 				valid: false,
@@ -88,9 +142,15 @@ abstract class CustomField<T extends FieldTypes> {
 		}
 		return { valid: true };
 	}
-	private requiredCheck(value: unknown): CustomFieldValidateResponse {
-		if (this.config.type === "tab") return { valid: true };
-		if (this.config.type === "repeater") return { valid: true };
+
+	/** Applies shared required checks where supported. */
+	private validateRequired(value: unknown): CustomFieldValidateResponse {
+		if (this.sharedValidationFlags.skipRequiredValidation) {
+			return { valid: true };
+		}
+		if (!hasValidationConfig(this.config)) {
+			return { valid: true };
+		}
 
 		if (
 			this.config.validation?.required === true &&
@@ -103,26 +163,48 @@ abstract class CustomField<T extends FieldTypes> {
 		}
 		return { valid: true };
 	}
-	private zodCheck(value: unknown): CustomFieldValidateResponse {
-		if (this.config.type === "tab") return { valid: true };
-		if (this.config.type === "repeater") return { valid: true };
-		if (this.config.type === "media") return { valid: true };
-		if (this.config.type === "checkbox") return { valid: true };
-		if (this.config.type === "select") return { valid: true };
-		if (this.config.type === "color") return { valid: true };
-		if (this.config.type === "link") return { valid: true };
-		if (this.config.type === "user") return { valid: true };
-		if (this.config.type === "rich-text") return { valid: true };
-		if (this.config.type === "document") return { valid: true };
 
-		if (!this.config.validation?.zod) return { valid: true };
+	/** Applies optional zod checks when the field exposes a zod validator. */
+	private validateZodConstraint(value: unknown): CustomFieldValidateResponse {
+		if (this.sharedValidationFlags.skipZodValidation) {
+			return { valid: true };
+		}
+		if (!hasValidationConfig(this.config)) {
+			return { valid: true };
+		}
 
-		return zodSafeParse(value, this.config.validation?.zod);
+		if (
+			!hasZodValidation(this.config.validation) ||
+			!this.config.validation.zod
+		) {
+			return { valid: true };
+		}
+
+		return zodSafeParse(value, this.config.validation.zod);
 	}
+
+	/** Normalizes input values before validation and persistence. */
 	public normalizeInputValue(value: unknown): unknown {
 		return value;
 	}
-	// Getters
+
+	/** Whether this field should be processed with localization translations. */
+	get translationsEnabled(): boolean {
+		if (!hasRuntimeConfig(this.config)) return false;
+		return this.config.config.useTranslations ?? false;
+	}
+
+	/** Default fallback value used while normalizing missing field input. */
+	get defaultValue(): unknown {
+		if (!hasRuntimeConfig(this.config)) return null;
+		if (!Object.hasOwn(this.config.config, "default")) {
+			return null;
+		}
+
+		return this.config.config.default;
+	}
+
+	/** Shared error builders used by `validate*` checks. */
 	get errors(): {
 		fieldType: CustomFieldErrorItem;
 		required: CustomFieldErrorItem;

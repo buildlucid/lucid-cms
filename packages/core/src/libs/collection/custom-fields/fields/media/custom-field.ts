@@ -1,17 +1,11 @@
 import z from "zod";
 import T from "../../../../../translations/index.js";
-import type { MediaType, ServiceResponse } from "../../../../../types.js";
-import { createMediaUrl } from "../../../../../utils/media/index.js";
-import formatter from "../../../../formatters/index.js";
-import MediaFormatter, {
-	type MediaPropsT,
-} from "../../../../formatters/media.js";
+import type { ServiceResponse } from "../../../../../types.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
-	FieldRefParams,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -69,43 +63,7 @@ class MediaCustomField extends CustomField<"media"> {
 	formatResponseValue(value?: number | null) {
 		return (value ?? null) satisfies CFResponse<"media">["value"];
 	}
-	static formatRef(
-		value: MediaPropsT | undefined | null,
-		params: FieldRefParams,
-	) {
-		if (value === null || value === undefined) return null;
-		return {
-			id: value.id,
-			url: createMediaUrl({
-				key: value.key,
-				host: params.host,
-			}),
-			key: value.key,
-			mimeType: value.mime_type,
-			extension: value.file_extension,
-			fileSize: value.file_size,
-			width: value.width,
-			height: value.height,
-			blurHash: value.blur_hash,
-			averageColor: value.average_color,
-			isDark: formatter.formatBoolean(value.is_dark),
-			isLight: formatter.formatBoolean(value.is_light),
-			title: MediaFormatter.objectifyTranslations(
-				"title",
-				value.translations || [],
-				params.localization.locales,
-			),
-			alt: MediaFormatter.objectifyTranslations(
-				"alt",
-				value.translations || [],
-				params.localization.locales,
-			),
-			type: value.type as MediaType,
-			public: formatter.formatBoolean(value.public),
-			isDeleted: formatter.formatBoolean(value.is_deleted),
-		} satisfies CFResponse<"media">["ref"];
-	}
-	cfSpecificValidation(value: unknown, refData?: MediaValidationData[]) {
+	uniqueValidation(value: unknown, refData?: MediaValidationData[]) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -222,12 +180,6 @@ class MediaCustomField extends CustomField<"media"> {
 		}
 
 		return { valid: true };
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return null;
 	}
 }
 

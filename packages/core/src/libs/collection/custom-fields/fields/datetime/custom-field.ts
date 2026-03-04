@@ -67,7 +67,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 	override normalizeInputValue(value: unknown) {
 		return typeof value === "string" ? value.trim() : value;
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.union([z.string(), z.number(), z.date()]);
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -84,12 +84,6 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 		return {
 			valid: true,
 		};
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

@@ -64,7 +64,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 	override normalizeInputValue(value: unknown) {
 		return typeof value === "string" ? value.trim() : value;
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.string();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -73,12 +73,6 @@ class TextareaCustomField extends CustomField<"textarea"> {
 		return {
 			valid: true,
 		};
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

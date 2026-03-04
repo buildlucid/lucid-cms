@@ -13,6 +13,8 @@ import tab from "./fields/tab/index.js";
 import text from "./fields/text/index.js";
 import textarea from "./fields/textarea/index.js";
 import user from "./fields/user/index.js";
+import type { FieldTypes } from "./types.js";
+import { fieldTypes } from "./types.js";
 
 const registeredFields = {
 	checkbox: checkbox,
@@ -30,10 +32,8 @@ const registeredFields = {
 	textarea: textarea,
 	user: user,
 	"rich-text": richText,
-} as const;
+} as const satisfies Record<FieldTypes, unknown>;
 
-export const fieldTypes = Object.keys(
-	registeredFields,
-) as (keyof typeof registeredFields)[];
+export const registeredFieldTypes: readonly FieldTypes[] = fieldTypes;
 
 export default registeredFields;

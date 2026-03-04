@@ -61,7 +61,7 @@ class NumberCustomField extends CustomField<"number"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"number">["value"];
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.number();
 
 		const valueValidate = zodSafeParse(value, valueSchema);
@@ -70,12 +70,6 @@ class NumberCustomField extends CustomField<"number"> {
 		return {
 			valid: true,
 		};
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 

@@ -82,7 +82,7 @@ class LinkCustomField extends CustomField<"link"> {
 			target: typeof obj.target === "string" ? obj.target.trim() : obj.target,
 		};
 	}
-	cfSpecificValidation(value: unknown) {
+	uniqueValidation(value: unknown) {
 		const valueSchema = z.object({
 			url: z.string().optional().nullable(),
 			target: z.string().optional().nullable(),
@@ -109,12 +109,6 @@ class LinkCustomField extends CustomField<"link"> {
 		return {
 			valid: true,
 		};
-	}
-	get translationsEnabled() {
-		return this.config.config.useTranslations;
-	}
-	get defaultValue() {
-		return this.config.config.default;
 	}
 }
 
