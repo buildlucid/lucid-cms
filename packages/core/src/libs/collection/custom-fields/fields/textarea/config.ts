@@ -5,7 +5,6 @@ export const textareaFieldConfig = {
 	database: {
 		mode: "column",
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"textarea">;
 
 export type TextareaFieldType = typeof textareaFieldConfig.type;

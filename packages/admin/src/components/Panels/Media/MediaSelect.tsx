@@ -24,7 +24,7 @@ interface MediaSelectPanelProps {
 		setOpen: (state: boolean) => void;
 		extensions?: string;
 		type?: string;
-		selected?: number;
+		selected?: number[];
 	};
 	callbacks: {
 		onSelect: (media: MediaResponse) => void;
@@ -71,7 +71,7 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 interface SelectMediaContentProps {
 	extensions?: string;
 	type?: string;
-	selected?: number;
+	selected?: number[];
 	onSelect: (media: MediaResponse) => void;
 }
 
@@ -131,6 +131,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
+	const selectedMediaId = createMemo(() => props.selected?.[0]);
 	const isShowingDeleted = createMemo(() => showingDeleted() === 1);
 
 	// ----------------------------------
@@ -313,7 +314,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 							<MediaBasicCard
 								media={item}
 								contentLocale={contentLocale()}
-								current={item.id === props.selected}
+								current={item.id === selectedMediaId()}
 								rowTarget={rowTarget}
 								showingDeleted={isShowingDeleted}
 								onClick={() => props.onSelect(item)}

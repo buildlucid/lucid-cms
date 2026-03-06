@@ -1,6 +1,7 @@
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import T from "../../translations/index.js";
+import getParentPageId from "../../utils/get-parent-page-id.js";
 
 /**
  *  Returns an error if the parentPage field is set to the same document as the current document
@@ -12,10 +13,9 @@ const checkParentIsPageOfSelf = (data: {
 		parentPage: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
-	if (
-		data.fields.parentPage.value &&
-		data.fields.parentPage.value === data.documentId
-	) {
+	const parentPageId = getParentPageId(data.fields.parentPage);
+
+	if (parentPageId !== null && parentPageId === data.documentId) {
 		return {
 			error: {
 				type: "basic",

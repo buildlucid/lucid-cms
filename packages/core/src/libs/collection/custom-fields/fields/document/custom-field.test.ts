@@ -39,7 +39,7 @@ test("successfully validate field - document", async () => {
 		field: {
 			key: "standard_doc",
 			type: "document",
-			value: 1,
+			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("standard_doc")!,
@@ -65,7 +65,7 @@ test("successfully validate field - document", async () => {
 		field: {
 			key: "required_doc",
 			type: "document",
-			value: 1,
+			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("required_doc")!,
@@ -93,7 +93,7 @@ test("fail to validate field - document", async () => {
 		field: {
 			key: "required_doc",
 			type: "document",
-			value: 1,
+			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("required_doc")!,
@@ -120,7 +120,7 @@ test("fail to validate field - document", async () => {
 		field: {
 			key: "required_doc",
 			type: "document",
-			value: null,
+			value: [],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("required_doc")!,
@@ -147,7 +147,7 @@ test("fail to validate field - document", async () => {
 		field: {
 			key: "wrong_collection",
 			type: "document",
-			value: 1,
+			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: DocumentCollection.fields.get("wrong_collection")!,
@@ -199,4 +199,67 @@ test("custom field config passes schema validation", async () => {
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
+});
+
+test("document field controls its grouped validation input", () => {
+	const singleField = new DocumentCustomField("single_doc", {
+		collection: "page",
+		config: {
+			multiple: false,
+		},
+	});
+	const multipleField = new DocumentCustomField("multiple_doc", {
+		collection: "page",
+		config: {
+			multiple: true,
+		},
+	});
+
+	expect(
+		singleField.getRelationFieldValidationInput([
+			{ id: 1, collectionKey: "page" },
+			{ id: 2, collectionKey: "blog" },
+		]),
+	).toEqual({
+		page: [1],
+	});
+	expect(
+		multipleField.getRelationFieldValidationInput([
+			{ id: 1, collectionKey: "page" },
+			{ id: 2, collectionKey: "blog" },
+			{ id: 3, collectionKey: "page" },
+		]),
+	).toEqual({
+		page: [1, 3],
+		blog: [2],
+	});
+});
+
+test("multiple config controls how many document IDs are kept", () => {
+	const singleField = new DocumentCustomField("single_doc", {
+		collection: "page",
+		config: {
+			multiple: false,
+		},
+	});
+	const multipleField = new DocumentCustomField("multiple_doc", {
+		collection: "page",
+		config: {
+			multiple: true,
+		},
+	});
+
+	const values = [
+		{ id: 1, collectionKey: "page" },
+		{ id: 2, collectionKey: "page" },
+		{ id: 3, collectionKey: "page" },
+	];
+
+	expect(singleField.normalizeInputValue(values)).toEqual([values[0]]);
+	expect(singleField.formatResponseValue(values)).toEqual([values[0]]);
+	expect(multipleField.normalizeInputValue(values)).toEqual(values);
+	expect(multipleField.formatResponseValue(values)).toEqual(values);
+	expect(singleField.validate({ type: "document", value: 1 }).valid).toBe(
+		false,
+	);
 });

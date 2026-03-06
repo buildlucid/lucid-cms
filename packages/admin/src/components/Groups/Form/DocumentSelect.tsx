@@ -1,4 +1,5 @@
 import type {
+	DocumentFieldValue,
 	DocumentRef,
 	DocumentResponse,
 	ErrorResult,
@@ -29,8 +30,8 @@ import helpers from "@/utils/helpers";
 interface DocumentSelectProps {
 	id: string;
 	collection: string;
-	value: number | undefined;
-	onChange: (value: number | null, ref: DocumentRef | null) => void;
+	value: DocumentFieldValue[] | undefined;
+	onChange: (value: DocumentFieldValue[], ref: DocumentRef | null) => void;
 	ref: Accessor<DocumentRef | undefined>;
 	copy?: {
 		label?: string;
@@ -49,6 +50,8 @@ interface DocumentSelectProps {
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
+	const selectedDocument = () => props.value?.[0];
+	const selectedDocumentId = () => selectedDocument()?.id;
 	const documentResponseToRef = (doc: DocumentResponse): DocumentRef => ({
 		id: doc.id,
 		collectionKey: doc.collectionKey,
@@ -61,7 +64,15 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				selected: props.value,
 			},
 			onCallback: (doc: DocumentResponse) => {
-				props.onChange(doc.id, documentResponseToRef(doc));
+				props.onChange(
+					[
+						{
+							id: doc.id,
+							collectionKey: doc.collectionKey,
+						},
+					],
+					documentResponseToRef(doc),
+				);
 			},
 		});
 	};
@@ -85,7 +96,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			},
 		},
 		key: () => `document-field-preview:${previewCollectionKey() || "unknown"}`,
-		enabled: () => typeof props.value === "number" && !!previewCollectionKey(),
+		enabled: () =>
+			typeof selectedDocumentId() === "number" && !!previewCollectionKey(),
 		refetchOnWindowFocus: false,
 	});
 
@@ -99,7 +111,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 		}),
 	);
 	const isPreviewLoading = createMemo(
-		() => typeof props.value === "number" && collection.isLoading,
+		() => typeof selectedDocumentId() === "number" && collection.isLoading,
 	);
 	const gridPreviewFields = createMemo(() => previewFields().slice(0, 6));
 	const documentPreviewLabel = createMemo(() => {
@@ -132,7 +144,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			/>
 			<div class="w-full">
 				<Switch>
-					<Match when={typeof props.value !== "number"}>
+					<Match when={typeof selectedDocumentId() !== "number"}>
 						<Button
 							type="button"
 							theme="border-outline"
@@ -144,7 +156,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							{T()("select_document")}
 						</Button>
 					</Match>
-					<Match when={typeof props.value === "number"}>
+					<Match when={typeof selectedDocumentId() === "number"}>
 						<div class="group w-full border border-border rounded-md bg-input-base px-3 pt-2 pb-0">
 							<div
 								class={classNames("flex items-center justify-between gap-3", {
@@ -154,7 +166,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								<div class="min-w-0">
 									<div class="flex flex-wrap items-center gap-2">
 										<Pill theme="outline" class="text-[10px]">
-											#{props.value}
+											#{selectedDocumentId()}
 										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
 											{documentPreviewLabel()}
@@ -177,7 +189,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										theme="danger-subtle"
 										size="icon-subtle"
 										onClick={() => {
-											props.onChange(null, null);
+											props.onChange([], null);
 										}}
 										disabled={props.disabled}
 									>

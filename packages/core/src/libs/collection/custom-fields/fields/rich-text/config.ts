@@ -5,7 +5,6 @@ export const richTextFieldConfig = {
 	database: {
 		mode: "column",
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"rich-text">;
 
 export type RichTextFieldType = typeof richTextFieldConfig.type;

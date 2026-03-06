@@ -120,14 +120,9 @@ export type FieldDatabaseConfig<T extends string = string> =
 	| RelationTableFieldDatabaseConfig<T>
 	| TreeTableFieldDatabaseConfig;
 
-export type FieldValidationConfig = {
-	mode: "ids" | "document-by-collection";
-};
-
 export type FieldStaticConfig<T extends string = string> = {
 	type: T;
 	database: FieldDatabaseConfig<T>;
-	validation: FieldValidationConfig | null;
 };
 
 // -----------------------------------------------
@@ -163,6 +158,13 @@ export type FieldResponseValue =
 export type FieldRefs =
 	| CustomFieldMap[FieldTypes]["response"]["ref"]
 	| undefined;
+
+export type FieldRelationValidationInput = Record<string, number[]>;
+
+export type FieldRelationRefTarget = {
+	table: string;
+	value: unknown;
+};
 
 // -----------------------------------------------
 // Validation/Errors

@@ -5,7 +5,6 @@ export const colorFieldConfig = {
 	database: {
 		mode: "column",
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"color">;
 
 export type ColorFieldType = typeof colorFieldConfig.type;

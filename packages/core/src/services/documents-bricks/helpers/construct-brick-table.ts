@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import {
@@ -26,7 +27,7 @@ import processFieldValues from "./process-field-values.js";
 
 export type InsertBrickTables = {
 	table: LucidBrickTableName;
-	data: Array<Insert<LucidBricksTable>>;
+	data: Array<Partial<Insert<LucidBricksTable>>>;
 	priority: number;
 };
 
@@ -37,6 +38,7 @@ export type ConstructBrickTableParams = {
 	brick?: BrickInputSchema | BrickResponse;
 	targetFields: ConstructField[];
 	fieldPath?: Array<string>;
+	priority?: number;
 	parentId?: Map<string, number> | null;
 	parentIdRef?: Map<string, number>;
 	brickIdByLocale?: Map<string, number>; // Track brick_id_refs by locale
@@ -58,6 +60,7 @@ type ChildTableBuild = Pick<
 	| "type"
 	| "targetFields"
 	| "fieldPath"
+	| "priority"
 	| "parentId"
 	| "parentIdRef"
 	| "brickIdByLocale"
@@ -83,6 +86,21 @@ type FieldModeHandler = {
 	buildChildTables?: (context: FieldModeHandlerContext) => ChildTableBuild[];
 };
 
+/**
+ * Resolves the builder that owns the current target fields.
+ */
+const getFieldOwner = (
+	params: ConstructBrickTableParams,
+): CollectionBuilder | BrickBuilder | null => {
+	if (!params.brick?.key) return params.collection;
+
+	return (
+		params.collection.brickInstances.find(
+			(item) => item.key === params.brick?.key,
+		) ?? null
+	);
+};
+
 const createTempRelationId = (): number => {
 	return -Math.abs(
 		Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) % 2147483647,
@@ -98,7 +116,10 @@ const getTableMode = (
 const getTablePriority = (params: {
 	mode: FieldDatabaseMode;
 	fieldPath?: string[];
+	priority?: number;
 }): number => {
+	if (typeof params.priority === "number") return params.priority;
+
 	switch (params.mode) {
 		case "tree-table":
 			return treeTableMode.getInsertPriority(params.fieldPath);
@@ -194,7 +215,89 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 			});
 		},
 	},
-	"relation-table": {},
+	"relation-table": {
+		buildChildTables: (context) => {
+			const databaseConfig =
+				registeredFields[context.field.type].config.database;
+			if (!isStorageMode(databaseConfig, "relation-table")) return [];
+			if (!context.field.key) return [];
+
+			const parentId =
+				context.parentTableMode === "tree-table"
+					? context.params.parentIdRef
+					: context.params.type === "brick" ||
+							context.params.type === "document-fields"
+						? context.brickIdRefByLocale
+						: context.params.brickIdByLocale;
+			if (!parentId) return [];
+
+			const parentPriority = getTablePriority({
+				mode: context.parentTableMode,
+				fieldPath: context.params.fieldPath,
+				priority: context.params.priority,
+			});
+
+			return [
+				{
+					type: databaseConfig.tableType,
+					targetFields: [context.field],
+					fieldPath: [context.field.key],
+					priority: parentPriority + 1,
+					parentId: parentId,
+					parentIdRef: parentId,
+					brickIdByLocale: undefined,
+					order: 0,
+					open: false,
+				},
+			];
+		},
+	},
+};
+
+/**
+ * Builds one insert row per localized relation value for relation-table fields.
+ */
+const constructRelationTableRows = (
+	params: ConstructBrickTableParams,
+): Array<Partial<Insert<LucidBricksTable>>> => {
+	const field = params.targetFields[0];
+	if (!field?.key) return [];
+
+	const fieldOwner = getFieldOwner(params);
+	if (!fieldOwner) return [];
+
+	const fieldInstance = fieldOwner.fields.get(field.key);
+	if (!fieldInstance) return [];
+
+	const valuesByLocale = processFieldValues(
+		field,
+		params.localization.locales,
+		params.localization.defaultLocale,
+	);
+	const rows: Array<Partial<Insert<LucidBricksTable>>> = [];
+
+	for (const locale of params.localization.locales) {
+		const parentId = params.parentId?.get(locale);
+		if (typeof parentId !== "number") continue;
+
+		const relationRows = fieldInstance.serializeRelationFieldValue(
+			valuesByLocale.get(locale),
+		);
+
+		relationRows.forEach((relationRow, index) => {
+			rows.push({
+				collection_key: params.collection.key,
+				document_id: params.documentId,
+				document_version_id: params.versionId,
+				locale: locale,
+				position: index,
+				parent_id: parentId,
+				...relationRow,
+			});
+		});
+	}
+
+	return rows;
 };
 
 /**
@@ -218,6 +321,54 @@ const constructBrickTable = (
 	params: ConstructBrickTableParams,
 ): void => {
 	const tableMode = getTableMode(params.type);
+
+	if (tableMode === "relation-table") {
+		const relationRows = constructRelationTableRows(params);
+		if (relationRows.length === 0) return;
+
+		const mapKey = genTableMapKey({
+			brickKey: params.brick?.key,
+			fieldPath: params.fieldPath,
+		});
+
+		let tableName: LucidBrickTableName;
+		if (params.brickKeyTableNameMap.has(mapKey)) {
+			// biome-ignore lint/style/noNonNullAssertion: explanation
+			tableName = params.brickKeyTableNameMap.get(mapKey)!;
+		} else {
+			const brickTableNameRes = buildTableName<LucidBrickTableName>(
+				params.type,
+				{
+					collection: params.collection.key,
+					brick: params.brick?.key,
+					fieldPath: params.fieldPath,
+				},
+				params.tableNameByteLimit,
+			);
+			if (brickTableNameRes.error) return;
+			tableName = brickTableNameRes.data.name;
+			params.brickKeyTableNameMap.set(mapKey, brickTableNameRes.data.name);
+		}
+
+		const tableIndex = brickTables.findIndex(
+			(table) => table.table === tableName,
+		);
+		if (tableIndex === -1) {
+			brickTables.push({
+				table: tableName,
+				data: relationRows,
+				priority: getTablePriority({
+					mode: tableMode,
+					fieldPath: params.fieldPath,
+					priority: params.priority,
+				}),
+			});
+			return;
+		}
+
+		brickTables[tableIndex]?.data.push(...relationRows);
+		return;
+	}
 
 	//* get or build the table name
 	const mapKey = genTableMapKey({
@@ -253,6 +404,7 @@ const constructBrickTable = (
 			priority: getTablePriority({
 				mode: tableMode,
 				fieldPath: params.fieldPath,
+				priority: params.priority,
 			}),
 		});
 		tableIndex = brickTables.length - 1;
@@ -271,9 +423,7 @@ const constructBrickTable = (
 			locale: locale,
 			position: params.order,
 		};
-		if (tableMode !== "relation-table") {
-			baseRowData.is_open = params.open;
-		}
+		baseRowData.is_open = params.open;
 
 		if (params.type === "brick") {
 			baseRowData.brick_type = params.brick?.type;
@@ -324,7 +474,7 @@ const constructBrickTable = (
 
 	//* add the rows to the table
 	for (const row of rowsByLocale.values()) {
-		brickTables[tableIndex]?.data.push(row as Insert<LucidBricksTable>);
+		brickTables[tableIndex]?.data.push(row);
 	}
 
 	for (const childBuild of childTableBuilds) {
@@ -335,6 +485,7 @@ const constructBrickTable = (
 			versionId: params.versionId,
 			targetFields: childBuild.targetFields,
 			fieldPath: childBuild.fieldPath,
+			priority: childBuild.priority,
 			parentId: childBuild.parentId,
 			parentIdRef: childBuild.parentIdRef,
 			brickIdByLocale: childBuild.brickIdByLocale,

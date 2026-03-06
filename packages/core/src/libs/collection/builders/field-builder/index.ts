@@ -104,15 +104,15 @@ class FieldBuilder {
 
 		// only fields after this repeater
 		const fieldsAfter = fields.slice(selectedRepeaterIndex + 1);
-		let hasUpdatedFieldRepeater = false;
+		let hasUpdatedTreeParent = false;
 
 		for (const field of fieldsAfter) {
-			if (field.type === "tab" || field.repeater) continue;
-			field.repeater = key;
-			hasUpdatedFieldRepeater = true;
+			if (field.type === "tab" || field.treeParent) continue;
+			field.treeParent = key;
+			hasUpdatedTreeParent = true;
 		}
 
-		if (hasUpdatedFieldRepeater) {
+		if (hasUpdatedTreeParent) {
 			this.invalidateFieldTreeCache();
 		}
 
@@ -146,8 +146,8 @@ class FieldBuilder {
 
 			const targetPush = currentTab ? currentTab.fields : result;
 
-			if (field.repeater) {
-				const repeater = repeaterStack.get(field.repeater);
+			if (field.treeParent) {
+				const repeater = repeaterStack.get(field.treeParent);
 				if (repeater)
 					repeater.fields.push(
 						config as Exclude<CFConfig<FieldTypes>, TabFieldConfig>,

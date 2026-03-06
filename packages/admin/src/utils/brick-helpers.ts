@@ -2,13 +2,15 @@ import type {
 	BrickError,
 	CFConfig,
 	CollectionResponse,
+	DocumentFieldValue,
 	DocumentRef,
 	DocumentResponse,
 	FieldAltResponse,
 	FieldError,
-	FieldRefs,
 	FieldResponse,
 	FieldTypes,
+	MediaRef,
+	UserRef,
 } from "@types";
 import { nanoid } from "nanoid";
 import brickStore from "@/store/brickStore";
@@ -116,32 +118,70 @@ const getFieldValue = <T>(props: {
 };
 
 /**
- * Returns the ref for a given field value and type
+ * Returns the first selected relation ID from an array-backed relation field.
  */
-const getFieldRef = <T extends FieldRefs>(props: {
-	fieldType: "media" | "document" | "user";
-	fieldValue: number | null | undefined;
-	collection?: string;
-}): T | undefined => {
-	if (props.fieldValue === null || props.fieldValue === undefined)
-		return undefined;
+const getFirstRelationValue = (
+	fieldValue: number[] | null | undefined,
+): number | undefined => {
+	if (!fieldValue?.length) return undefined;
+	return fieldValue[0];
+};
 
-	const refs = brickStore.get.refs[props.fieldType] as T[] | undefined;
+/**
+ * Returns the first selected document relation from an array-backed document field.
+ */
+const getFirstDocumentRelationValue = (
+	fieldValue: DocumentFieldValue[] | null | undefined,
+): DocumentFieldValue | undefined => {
+	if (!fieldValue?.length) return undefined;
+	return fieldValue[0];
+};
+
+function getFieldRef(props: {
+	fieldType: "media";
+	fieldValue: number[] | null | undefined;
+	collection?: string;
+}): MediaRef | undefined;
+function getFieldRef(props: {
+	fieldType: "user";
+	fieldValue: number[] | null | undefined;
+	collection?: string;
+}): UserRef | undefined;
+function getFieldRef(props: {
+	fieldType: "document";
+	fieldValue: DocumentFieldValue[] | null | undefined;
+	collection?: string;
+}): DocumentRef | undefined;
+/**
+ * Returns the first matching ref for an array-backed relation field.
+ */
+function getFieldRef(props: {
+	fieldType: "media" | "document" | "user";
+	fieldValue: number[] | DocumentFieldValue[] | null | undefined;
+	collection?: string;
+}): MediaRef | UserRef | DocumentRef | undefined {
+	const refs = brickStore.get.refs[props.fieldType];
 	if (!refs) return undefined;
 
-	return refs.find((ref) => {
-		if (!ref) return false;
+	if (props.fieldType === "document") {
+		const documentRelation = getFirstDocumentRelationValue(props.fieldValue);
+		if (!documentRelation) return undefined;
 
-		if (props.fieldType === "document" && props.collection) {
+		return refs.find((ref) => {
+			const targetCollectionKey =
+				props.collection ?? documentRelation.collectionKey;
 			return (
-				ref.id === props.fieldValue &&
-				(ref as DocumentRef).collectionKey === props.collection
+				ref.id === documentRelation.id &&
+				ref.collectionKey === targetCollectionKey
 			);
-		}
+		});
+	}
 
-		return ref.id === props.fieldValue;
-	}) as T | undefined;
-};
+	const relationId = getFirstRelationValue(props.fieldValue);
+	if (relationId === undefined) return undefined;
+
+	return refs.find((ref) => ref.id === relationId);
+}
 
 /**
  * Recursively checks field and brick errors for any that are of a differetn locale to the current one
@@ -309,6 +349,8 @@ const brickHelpers = {
 	getUpsertBricks,
 	customFieldId,
 	getFieldValue,
+	getFirstRelationValue,
+	getFirstDocumentRelationValue,
 	getFieldRef,
 	hasErrorsOnOtherLocale,
 	objectifyFields,

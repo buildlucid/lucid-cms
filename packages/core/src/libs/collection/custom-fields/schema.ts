@@ -31,11 +31,13 @@ const CustomFieldSchema = z.object({
 					z.number(),
 					z.undefined(),
 					z.object({}),
+					z.array(z.any()),
 					z.null(),
 				])
 				.optional(),
 			useTranslations: z.boolean().optional(),
 			useTime: z.boolean().optional(),
+			multiple: z.boolean().optional(),
 			isHidden: z.boolean().optional(),
 			isDisabled: z.boolean().optional(),
 		})

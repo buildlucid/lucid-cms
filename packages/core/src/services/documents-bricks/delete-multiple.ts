@@ -1,4 +1,3 @@
-import { isTreeTableType } from "../../libs/collection/custom-fields/storage/index.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -24,14 +23,18 @@ const deleteMultiple: ServiceFn<
 	);
 	if (brickTableSchema.error) return brickTableSchema;
 
-	const exlcudeRepeaters = brickTableSchema.data.filter(
-		(table) => !isTreeTableType(table.type),
+	/**
+	 * Child storage tables are linked to root document-fields/brick rows via foreign
+	 * keys, so deleting the roots is enough to cascade repeater and relation rows.
+	 */
+	const rootTables = brickTableSchema.data.filter(
+		(table) => table.type === "document-fields" || table.type === "brick",
 	);
 
 	const deleteBricksPromises = [];
-	for (const brickTable of exlcudeRepeaters) {
+	for (const brickTable of rootTables) {
 		deleteBricksPromises.push(
-			Bricks.deleteSingle(
+			Bricks.deleteMultiple(
 				{
 					where: [
 						{
@@ -52,7 +55,10 @@ const deleteMultiple: ServiceFn<
 			),
 		);
 	}
-	await Promise.all(deleteBricksPromises);
+	const deleteResults = await Promise.all(deleteBricksPromises);
+	for (const result of deleteResults) {
+		if (result.error) return result;
+	}
 
 	return {
 		error: undefined,

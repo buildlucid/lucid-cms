@@ -245,8 +245,10 @@ test("flat fields should return correct config", async () => {
 			details: { label: "Media Test", summary: undefined },
 			config: {
 				useTranslations: false,
+				default: [],
 				isHidden: undefined,
 				isDisabled: undefined,
+				multiple: undefined,
 			},
 			validation: undefined,
 		},
@@ -293,8 +295,10 @@ test("flat fields should return correct config", async () => {
 			details: { label: "User Test", summary: undefined },
 			config: {
 				useTranslations: false,
+				default: [],
 				isHidden: undefined,
 				isDisabled: undefined,
+				multiple: undefined,
 			},
 
 			validation: undefined,

@@ -106,6 +106,15 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
+			multiple: z
+				.boolean()
+				.meta({
+					description:
+						"Whether relation fields can store more than one related item",
+					example: true,
+				})
+				.nullable()
+				.optional(),
 			isHidden: z
 				.boolean()
 				.meta({

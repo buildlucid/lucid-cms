@@ -1,5 +1,10 @@
 import type { FieldAltResponse } from "../../../../../types/response.js";
-import type { OmitDefault, SharedFieldConfig } from "../../types.js";
+import type { SharedFieldConfig } from "../../types.js";
+
+export type DocumentFieldValue = {
+	id: number;
+	collectionKey: string;
+};
 
 export interface DocumentFieldConfig extends SharedFieldConfig {
 	type: "document";
@@ -12,7 +17,8 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 		useTranslations?: boolean;
 		isHidden?: boolean;
 		isDisabled?: boolean;
-		default?: number | null;
+		multiple?: boolean;
+		default?: DocumentFieldValue[];
 	};
 	validation?: {
 		required?: boolean;
@@ -20,12 +26,12 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 }
 
 export type DocumentFieldProps = Partial<
-	OmitDefault<Omit<DocumentFieldConfig, "type">>
+	Omit<DocumentFieldConfig, "type" | "collection">
 > & {
 	collection: string;
 };
 
-export type DocumentResValue = number | null;
+export type DocumentResValue = DocumentFieldValue[];
 export type DocumentRef = {
 	id: number;
 	versionId?: number;

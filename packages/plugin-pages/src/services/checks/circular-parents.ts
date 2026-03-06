@@ -7,6 +7,8 @@ import type {
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import T from "../../translations/index.js";
+import getParentPageId from "../../utils/get-parent-page-id.js";
+import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
 
 /**
  *  Recursively checks all parent pages for a circular reference and errors in that case
@@ -17,6 +19,7 @@ const checkCircularParents: ServiceFn<
 			defaultLocale: string;
 			documentId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
+			collectionKey: string;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
@@ -26,46 +29,47 @@ const checkCircularParents: ServiceFn<
 	undefined
 > = async (context, data) => {
 	try {
-		if (!data.documentId || !data.fields.parentPage.value) {
+		const parentPageId = getParentPageId(data.fields.parentPage);
+
+		if (!data.documentId || parentPageId === null) {
 			return {
 				error: undefined,
 				data: undefined,
 			};
 		}
 
-		const { version: versionTable, documentFields: fieldsTable } = data.tables;
-
-		const parentPageField = prefixGeneratedColName(
-			constants.fields.parentPage.key,
+		const { version: versionTable } = data.tables;
+		const parentPageField = prefixGeneratedColName("document_id");
+		const parentPageTableRes = getParentPageRelationTable(
+			data.collectionKey,
+			context.config.db.config.tableNameByteLimit,
 		);
+		if (parentPageTableRes.error) return parentPageTableRes;
+		const parentPageTable = parentPageTableRes.data;
 
 		const result = await context.db.client
 			.withRecursive("ancestors", (db) =>
 				db
-					.selectFrom(fieldsTable)
+					.selectFrom(parentPageTable)
 					.innerJoin(
 						versionTable,
 						`${versionTable}.id`,
-						`${fieldsTable}.document_version_id`,
+						`${parentPageTable}.document_version_id`,
 					)
 					.select([
 						`${versionTable}.document_id as current_id`,
-						`${fieldsTable}.${parentPageField} as parent_id`,
+						`${parentPageTable}.${parentPageField} as parent_id`,
 					])
-					.where(`${fieldsTable}.locale`, "=", data.defaultLocale)
+					.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
 					.where(`${versionTable}.type`, "=", data.versionType)
-					.where(
-						`${versionTable}.document_id`,
-						"=",
-						data.fields.parentPage.value,
-					)
+					.where(`${versionTable}.document_id`, "=", parentPageId)
 					.unionAll(
 						db
-							.selectFrom(fieldsTable)
+							.selectFrom(parentPageTable)
 							.innerJoin(
 								versionTable,
 								`${versionTable}.id`,
-								`${fieldsTable}.document_version_id`,
+								`${parentPageTable}.document_version_id`,
 							)
 							.innerJoin(
 								"ancestors",
@@ -74,9 +78,9 @@ const checkCircularParents: ServiceFn<
 							)
 							.select([
 								`${versionTable}.document_id as current_id`,
-								`${fieldsTable}.${parentPageField} as parent_id`,
+								`${parentPageTable}.${parentPageField} as parent_id`,
 							])
-							.where(`${fieldsTable}.locale`, "=", data.defaultLocale)
+							.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
 							.where(`${versionTable}.type`, "=", data.versionType),
 					),
 			)

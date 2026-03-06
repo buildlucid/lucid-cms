@@ -1,6 +1,7 @@
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
+import getParentPageId from "../../utils/get-parent-page-id.js";
 import {
 	checkCircularParents,
 	checkDuplicateSlugParents,
@@ -94,13 +95,15 @@ const beforeUpsertHandler =
 		// Build and set fullSlug
 
 		let parentFieldsData: Array<ParentPageQueryResponse> = [];
+		const parentPageId = getParentPageId(parentPage);
 
 		// parent page checks and query
-		if (parentPage.value) {
+		if (parentPageId !== null) {
 			const circularParentsRes = await checkCircularParents(context, {
 				documentId: data.data.documentId,
 				versionType: data.data.versionType,
 				defaultLocale: context.config.localization.defaultLocale,
+				collectionKey: targetCollectionRes.data.collectionKey,
 				fields: {
 					parentPage: parentPage,
 				},
@@ -111,6 +114,7 @@ const beforeUpsertHandler =
 			const parentFieldsRes = await getParentFields(context, {
 				defaultLocale: context.config.localization.defaultLocale,
 				versionType: data.data.versionType,
+				collectionKey: targetCollectionRes.data.collectionKey,
 				fields: {
 					parentPage: parentPage,
 				},

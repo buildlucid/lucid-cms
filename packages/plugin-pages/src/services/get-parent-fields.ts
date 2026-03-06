@@ -7,6 +7,8 @@ import type {
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
 import T from "../translations/index.js";
+import getParentPageId from "../utils/get-parent-page-id.js";
+import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
 export type ParentPageQueryResponse = {
 	_slug: string | null;
@@ -24,6 +26,7 @@ const getParentFields: ServiceFn<
 		{
 			defaultLocale: string;
 			versionType: Exclude<DocumentVersionType, "revision">;
+			collectionKey: string;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
@@ -33,15 +36,27 @@ const getParentFields: ServiceFn<
 	Array<ParentPageQueryResponse>
 > = async (context, data) => {
 	try {
+		const parentPageId = getParentPageId(data.fields.parentPage);
+		if (parentPageId === null) {
+			return {
+				error: undefined,
+				data: [],
+			};
+		}
+
 		const { version: versionTable, documentFields: fieldsTable } = data.tables;
 
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
-		const parentPageColumn = prefixGeneratedColName(
-			constants.fields.parentPage.key,
-		);
+		const parentPageColumn = prefixGeneratedColName("document_id");
 		const fullSlugColumn = prefixGeneratedColName(
 			constants.fields.fullSlug.key,
 		);
+		const parentPageTableRes = getParentPageRelationTable(
+			data.collectionKey,
+			context.config.db.config.tableNameByteLimit,
+		);
+		if (parentPageTableRes.error) return parentPageTableRes;
+		const parentPageTable = parentPageTableRes.data;
 
 		const parentFields = await context.db.client
 			.selectFrom(fieldsTable)
@@ -50,14 +65,20 @@ const getParentFields: ServiceFn<
 				`${versionTable}.id`,
 				`${fieldsTable}.document_version_id`,
 			)
+			.leftJoin(
+				parentPageTable,
+				`${parentPageTable}.parent_id`,
+				`${fieldsTable}.id`,
+			)
+			// @ts-expect-error
 			.select([
 				`${fieldsTable}.${slugColumn}`,
 				`${fieldsTable}.${fullSlugColumn}`,
-				`${fieldsTable}.${parentPageColumn}`,
+				`${parentPageTable}.${parentPageColumn}`,
 				`${versionTable}.document_id`,
 				`${fieldsTable}.locale`,
 			])
-			.where(`${versionTable}.document_id`, "=", data.fields.parentPage.value)
+			.where(`${versionTable}.document_id`, "=", parentPageId)
 			.where(`${versionTable}.type`, "=", data.versionType)
 			.execute();
 

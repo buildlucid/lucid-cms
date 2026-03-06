@@ -1,26 +1,90 @@
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields, {
 	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
+import type {
+	FieldRelationValidationInput,
+	FieldTypes,
+} from "../../../libs/collection/custom-fields/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldInputSchema, FieldTypes } from "../../../types.js";
+import type { FieldInputSchema } from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceFn,
 } from "../../../utils/services/types.js";
 
 export type ValidationData = Partial<Record<FieldTypes, unknown>>;
-export type FieldValidationInput = {
-	ids: number[];
-	idsByCollection: Record<string, number[]>;
+
+type ValidationBuckets = Partial<
+	Record<FieldTypes, Record<string, Set<number>>>
+>;
+
+/**
+ * Merges a field instance's grouped validation IDs into the shared buckets.
+ */
+const mergeValidationInput = (
+	fieldType: FieldTypes,
+	input: FieldRelationValidationInput,
+	buckets: ValidationBuckets,
+) => {
+	const fieldBuckets = buckets[fieldType] ?? {};
+
+	for (const groupKey in input) {
+		const groupIds = input[groupKey];
+		if (!groupIds) continue;
+
+		const groupBucket = fieldBuckets[groupKey] ?? new Set<number>();
+		for (const id of groupIds) {
+			groupBucket.add(id);
+		}
+		fieldBuckets[groupKey] = groupBucket;
+	}
+
+	buckets[fieldType] = fieldBuckets;
 };
 
-type ValidationBuckets = {
-	ids: Partial<Record<FieldTypes, Set<number>>>;
-	byCollection: Partial<Record<FieldTypes, Record<string, Set<number>>>>;
+/**
+ * Collects grouped validation IDs from a field value and any translations.
+ */
+const collectFieldValidationInput = (
+	field: FieldInputSchema,
+	instance: CollectionBuilder | BrickBuilder,
+): FieldRelationValidationInput | null => {
+	const fieldInstance = instance.fields.get(field.key);
+	if (!fieldInstance) return null;
+
+	const mergedInput: FieldRelationValidationInput = {};
+
+	const pushValue = (value: unknown) => {
+		const validationInput =
+			fieldInstance.getRelationFieldValidationInput(value);
+
+		for (const groupKey in validationInput) {
+			const groupIds = validationInput[groupKey];
+			if (!groupIds) continue;
+
+			const currentIds = mergedInput[groupKey] ?? [];
+			currentIds.push(...groupIds);
+			mergedInput[groupKey] = currentIds;
+		}
+	};
+
+	if (field.value !== undefined && field.value !== null) {
+		pushValue(field.value);
+	}
+
+	if (field.translations) {
+		for (const localeCode in field.translations) {
+			const localeValue = field.translations[localeCode];
+			if (localeValue === undefined || localeValue === null) continue;
+
+			pushValue(localeValue);
+		}
+	}
+
+	return mergedInput;
 };
 
 /**
@@ -46,17 +110,14 @@ const fetchValidationData: ServiceFn<
 };
 
 /**
- * Extract all relation IDs from bricks and fields.
+ * Extracts grouped relation IDs from the provided bricks and fields.
  */
 const extractRelationIds = (
 	bricks: Array<BrickInputSchema>,
 	fields: Array<FieldInputSchema>,
 	collection: CollectionBuilder,
 ): ValidationBuckets => {
-	const buckets: ValidationBuckets = {
-		ids: {},
-		byCollection: {},
-	};
+	const buckets: ValidationBuckets = {};
 
 	for (const brick of bricks) {
 		const instance = getBrickInstance(brick, collection);
@@ -70,7 +131,7 @@ const extractRelationIds = (
 };
 
 /**
- * Gets the appropriate brick instance based on brick type.
+ * Returns the configured brick instance for a submitted brick payload.
  */
 const getBrickInstance = (
 	brick: BrickInputSchema,
@@ -89,7 +150,7 @@ const getBrickInstance = (
 };
 
 /**
- * Recursively extract relation IDs from fields.
+ * Recursively extracts grouped relation IDs from a field tree.
  */
 const extractRelationIdsFromFields = (
 	fields: Array<FieldInputSchema>,
@@ -99,28 +160,14 @@ const extractRelationIdsFromFields = (
 	for (const field of fields) {
 		const fieldInstance = instance.fields.get(field.key);
 		if (!fieldInstance) continue;
-		const databaseConfig = registeredFields[fieldInstance.type].config.database;
 
-		const validationConfig = registeredFields[field.type].config.validation;
-		const ids = extractIdsFromField(field);
+		const fieldDefinition = registeredFields[fieldInstance.type];
+		const databaseConfig = fieldDefinition.config.database;
 
-		if (validationConfig?.mode === "ids") {
-			const current = buckets.ids[field.type] ?? new Set<number>();
-			for (const id of ids) current.add(id);
-			buckets.ids[field.type] = current;
-		}
-
-		if (validationConfig?.mode === "document-by-collection") {
-			const collectionKey = getDocumentCollectionKey(fieldInstance);
-			if (collectionKey) {
-				const currentByType = buckets.byCollection[field.type] ?? {};
-				const currentByCollection =
-					currentByType[collectionKey] ?? new Set<number>();
-
-				for (const id of ids) currentByCollection.add(id);
-
-				currentByType[collectionKey] = currentByCollection;
-				buckets.byCollection[field.type] = currentByType;
+		if (fieldDefinition.validateInput !== null) {
+			const validationInput = collectFieldValidationInput(field, instance);
+			if (validationInput) {
+				mergeValidationInput(field.type, validationInput, buckets);
 			}
 		}
 
@@ -132,52 +179,9 @@ const extractRelationIdsFromFields = (
 	}
 };
 
-const getDocumentCollectionKey = (
-	fieldInstance: CustomField<FieldTypes>,
-): string | null => {
-	if (
-		"collection" in fieldInstance.config &&
-		typeof fieldInstance.config.collection === "string"
-	) {
-		return fieldInstance.config.collection;
-	}
-
-	return null;
-};
-
 /**
- * Extract IDs from a field (both direct value and translations).
+ * Fetches shared validation data for each field type with a validator.
  */
-const extractIdsFromField = (field: FieldInputSchema): number[] => {
-	const ids: number[] = [];
-
-	if (field.value !== undefined && field.value !== null) {
-		const id = Number(field.value);
-		if (!Number.isNaN(id)) ids.push(id);
-	}
-
-	if (field.translations) {
-		for (const localeCode in field.translations) {
-			const value = field.translations[localeCode];
-			if (value === undefined || value === null) continue;
-
-			const id = Number(value);
-			if (!Number.isNaN(id)) ids.push(id);
-		}
-	}
-
-	return ids;
-};
-
-const hasValidator = (
-	field: (typeof registeredFields)[FieldTypes],
-): field is
-	| (typeof registeredFields)["media"]
-	| (typeof registeredFields)["user"]
-	| (typeof registeredFields)["document"] => {
-	return field.config.validation !== null && field.validateInput !== null;
-};
-
 const buildValidationData = async (
 	context: ServiceContext,
 	buckets: ValidationBuckets,
@@ -187,21 +191,14 @@ const buildValidationData = async (
 
 	for (const fieldType of registeredFieldTypes) {
 		const fieldDefinition = registeredFields[fieldType];
-		if (!hasValidator(fieldDefinition)) continue;
+		if (fieldDefinition.validateInput === null) continue;
 
-		const byCollection = buckets.byCollection[fieldType] ?? {};
-		const idsByCollection: Record<string, number[]> = {};
-
-		for (const collectionKey in byCollection) {
-			idsByCollection[collectionKey] = Array.from(
-				byCollection[collectionKey] ?? new Set<number>(),
-			);
-		}
-
-		const input: FieldValidationInput = {
-			ids: Array.from(buckets.ids[fieldType] ?? new Set<number>()),
-			idsByCollection,
-		};
+		const input = Object.entries(
+			buckets[fieldType] ?? {},
+		).reduce<FieldRelationValidationInput>((acc, [groupKey, ids]) => {
+			acc[groupKey] = Array.from(ids);
+			return acc;
+		}, {});
 
 		promises.push(
 			fieldDefinition.validateInput(context, input).then((result) => {

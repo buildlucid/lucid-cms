@@ -41,7 +41,16 @@ class SelectCustomField extends CustomField<"select"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"select">;
 	}
-	// Methods
+	get errors() {
+		return merge(super.errors, {
+			required: {
+				message: T("select_field_required"),
+			},
+		});
+	}
+	override normalizeInputValue(value: unknown) {
+		return typeof value === "string" ? value.trim() : value;
+	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {
@@ -63,9 +72,6 @@ class SelectCustomField extends CustomField<"select"> {
 			this.config.config.default ??
 			null) satisfies CFResponse<"select">["value"];
 	}
-	override normalizeInputValue(value: unknown) {
-		return typeof value === "string" ? value.trim() : value;
-	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.string();
 
@@ -83,14 +89,6 @@ class SelectCustomField extends CustomField<"select"> {
 		}
 
 		return { valid: true };
-	}
-	// Getters
-	get errors() {
-		return merge(super.errors, {
-			required: {
-				message: T("select_field_required"),
-			},
-		});
 	}
 }
 

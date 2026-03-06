@@ -8,9 +8,6 @@ export const documentFieldConfig = {
 		separator: "doc",
 		tableType: `${constants.db.customFieldTablePrefix}document`,
 	},
-	validation: {
-		mode: "document-by-collection",
-	},
 } as const satisfies FieldStaticConfig<"document">;
 
 export type DocumentFieldType = typeof documentFieldConfig.type;

@@ -52,6 +52,7 @@ const registerFields = (
 			config: {
 				isHidden: false,
 				isDisabled: false,
+				multiple: false,
 			},
 		});
 };

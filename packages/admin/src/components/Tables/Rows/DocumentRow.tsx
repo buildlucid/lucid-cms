@@ -98,13 +98,23 @@ const DocumentDynamicColumns: Component<{
 		// Only get ref for user fields (could extend to media/document if needed)
 		if (props.field.type !== "user") return undefined;
 
-		const value = fieldValue() as number | null | undefined;
-		if (value === null || value === undefined) return undefined;
+		const relationValues = fieldValue();
+		const value = Array.isArray(relationValues)
+			? brickHelpers.getFirstRelationValue(relationValues)
+			: undefined;
+		if (value === undefined) return undefined;
 
-		const refs = props.document.refs?.user as UserRef[] | undefined;
+		const refs = props.document.refs?.user;
 		if (!refs) return undefined;
 
-		return refs.find((ref) => ref?.id === value);
+		return refs.find(
+			(ref): ref is UserRef =>
+				"username" in ref &&
+				"email" in ref &&
+				"firstName" in ref &&
+				"lastName" in ref &&
+				ref.id === value,
+		);
 	});
 
 	// ----------------------------------
@@ -159,7 +169,7 @@ const DocumentDynamicColumns: Component<{
 			</Match>
 			<Match when={fieldData()?.type === "user"}>
 				<AuthorCol
-					user={fieldRef() as UserRef}
+					user={fieldRef()}
 					options={{ include: props?.include[props.index] }}
 				/>
 			</Match>

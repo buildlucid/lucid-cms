@@ -1,5 +1,5 @@
 import type { MediaType } from "../../../../../types/response.js";
-import type { OmitDefault, SharedFieldConfig } from "../../types.js";
+import type { SharedFieldConfig } from "../../types.js";
 
 export interface MediaFieldConfig extends SharedFieldConfig {
 	type: "media";
@@ -11,7 +11,8 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 		useTranslations?: boolean;
 		isHidden?: boolean;
 		isDisabled?: boolean;
-		default?: number;
+		multiple?: boolean;
+		default?: number[];
 	};
 	validation?: {
 		required?: boolean;
@@ -28,11 +29,9 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 	};
 }
 
-export type MediaFieldProps = Partial<
-	OmitDefault<Omit<MediaFieldConfig, "type">>
->;
+export type MediaFieldProps = Partial<Omit<MediaFieldConfig, "type">>;
 
-export type MediaResValue = number | null;
+export type MediaResValue = number[];
 export type MediaRef = {
 	id: number;
 	url: string;

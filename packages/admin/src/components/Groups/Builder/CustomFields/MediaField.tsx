@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse, MediaRef } from "@types";
+import type { CFConfig, FieldError, FieldResponse } from "@types";
 import {
 	batch,
 	type Component,
@@ -29,7 +29,7 @@ interface MediaFieldProps {
 export const MediaField: Component<MediaFieldProps> = (props) => {
 	// -------------------------------
 	// State
-	const [getValue, setValue] = createSignal<number | undefined>();
+	const [getValue, setValue] = createSignal<number[] | undefined>();
 
 	// -------------------------------
 	// Memos
@@ -37,14 +37,14 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<number>({
+		return brickHelpers.getFieldValue<number[]>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
 		});
 	});
 	const fieldRef = createMemo(() => {
-		return brickHelpers.getFieldRef<MediaRef>({
+		return brickHelpers.getFieldRef({
 			fieldType: "media",
 			fieldValue: fieldValue(),
 		});
@@ -82,7 +82,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 						value: value,
 						contentLocale: props.state.contentLocale,
 					});
-					setValue(value ?? undefined);
+					setValue(value);
 				});
 			}}
 			copy={{

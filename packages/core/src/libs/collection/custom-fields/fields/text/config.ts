@@ -5,7 +5,6 @@ export const textFieldConfig = {
 	database: {
 		mode: "column",
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"text">;
 
 export type TextFieldType = typeof textFieldConfig.type;

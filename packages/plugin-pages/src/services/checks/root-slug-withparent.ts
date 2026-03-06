@@ -6,6 +6,7 @@ import type {
 import constants from "../../constants.js";
 import T from "../../translations/index.js";
 import type { CollectionConfig } from "../../types/types.js";
+import getParentPageId from "../../utils/get-parent-page-id.js";
 
 /**
  *  If slug is / and parentPage is set (would cause fullSlug to be the same as parentPage just with trailing slash)
@@ -18,10 +19,12 @@ const checkRootSlugWithParent = (data: {
 		parentPage: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
+	const parentPageId = getParentPageId(data.fields.parentPage);
+
 	if (data.collection.useTranslations && data.fields.slug.translations) {
 		const fieldErrors: FieldError[] = [];
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
-			if (value === "/" && data.fields.parentPage.value) {
+			if (value === "/" && parentPageId !== null) {
 				fieldErrors.push({
 					key: constants.fields.slug.key,
 					localeCode: key,
@@ -42,7 +45,7 @@ const checkRootSlugWithParent = (data: {
 				data: undefined,
 			};
 		}
-	} else if (data.fields.slug.value === "/" && data.fields.parentPage.value) {
+	} else if (data.fields.slug.value === "/" && parentPageId !== null) {
 		return {
 			error: {
 				type: "basic",

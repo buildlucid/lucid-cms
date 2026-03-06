@@ -1,4 +1,4 @@
-import type { OmitDefault, SharedFieldConfig } from "../../types.js";
+import type { SharedFieldConfig } from "../../types.js";
 
 export interface UserFieldConfig extends SharedFieldConfig {
 	type: "user";
@@ -7,21 +7,20 @@ export interface UserFieldConfig extends SharedFieldConfig {
 		summary?: string | Record<string, string>;
 	};
 	config: {
-		default?: number;
+		default?: number[];
 		useTranslations?: boolean;
 		isHidden?: boolean;
 		isDisabled?: boolean;
+		multiple?: boolean;
 	};
 	validation?: {
 		required?: boolean;
 	};
 }
 
-export type UserFieldProps = Partial<
-	OmitDefault<Omit<UserFieldConfig, "type">>
->;
+export type UserFieldProps = Partial<Omit<UserFieldConfig, "type">>;
 
-export type UserResValue = number | null;
+export type UserResValue = number[];
 export type UserRef = {
 	id: number;
 	username: string;

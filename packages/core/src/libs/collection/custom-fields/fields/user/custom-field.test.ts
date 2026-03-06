@@ -30,7 +30,7 @@ test("successfully validate field - user", async () => {
 		field: {
 			key: "standard_user",
 			type: "user",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: UserCollection.fields.get("standard_user")!,
@@ -59,7 +59,7 @@ test("successfully validate field - user", async () => {
 		field: {
 			key: "required_user",
 			type: "user",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: UserCollection.fields.get("required_user")!,
@@ -91,7 +91,7 @@ test("fail to validate field - user", async () => {
 			field: {
 				key: "required_user",
 				type: "user",
-				value: 1,
+				value: [1],
 			},
 			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: UserCollection.fields.get("required_user")!,
@@ -109,7 +109,7 @@ test("fail to validate field - user", async () => {
 			field: {
 				key: "required_user",
 				type: "user",
-				value: null,
+				value: [],
 			},
 			// biome-ignore lint/style/noNonNullAssertion: explanation
 			instance: UserCollection.fields.get("required_user")!,
@@ -165,4 +165,43 @@ test("custom field config passes schema validation", async () => {
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
+});
+
+test("user field controls its grouped validation input", () => {
+	const singleField = new UserCustomField("single_user", {
+		config: {
+			multiple: false,
+		},
+	});
+	const multipleField = new UserCustomField("multiple_user", {
+		config: {
+			multiple: true,
+		},
+	});
+
+	expect(singleField.getRelationFieldValidationInput([1, 2, 3])).toEqual({
+		default: [1],
+	});
+	expect(multipleField.getRelationFieldValidationInput([1, 2, 3])).toEqual({
+		default: [1, 2, 3],
+	});
+});
+
+test("multiple config controls how many user IDs are kept", () => {
+	const singleField = new UserCustomField("single_user", {
+		config: {
+			multiple: false,
+		},
+	});
+	const multipleField = new UserCustomField("multiple_user", {
+		config: {
+			multiple: true,
+		},
+	});
+
+	expect(singleField.normalizeInputValue([1, 2, 3])).toEqual([1]);
+	expect(singleField.formatResponseValue([1, 2, 3])).toEqual([1]);
+	expect(multipleField.normalizeInputValue([1, 2, 3])).toEqual([1, 2, 3]);
+	expect(multipleField.formatResponseValue([1, 2, 3])).toEqual([1, 2, 3]);
+	expect(singleField.validate({ type: "user", value: 1 }).valid).toBe(false);
 });

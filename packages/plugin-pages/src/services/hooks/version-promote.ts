@@ -2,6 +2,7 @@ import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import fieldResToSchema from "../../utils/field-res-to-schema.js";
+import getParentPageId from "../../utils/get-parent-page-id.js";
 import {
 	checkCircularParents,
 	checkDuplicateSlugParents,
@@ -44,6 +45,7 @@ const versionPromoteHandler =
 			documentId: data.data.documentId,
 			versionId: data.data.versionId,
 			versionType: data.data.versionType,
+			collectionKey: targetCollectionRes.data.collectionKey,
 			tables: data.meta.collectionTableNames,
 		});
 		if (docVersionFieldRes.error) return docVersionFieldRes;
@@ -63,6 +65,7 @@ const versionPromoteHandler =
 					false,
 					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
+					targetCollectionRes.data.collectionKey,
 				),
 				fullSlug: fieldResToSchema(
 					constants.fields.fullSlug.key,
@@ -96,13 +99,15 @@ const versionPromoteHandler =
 				return checkDuplicateSlugParentsRes;
 
 			let parentFieldsData: Array<ParentPageQueryResponse> = [];
+			const parentPageId = getParentPageId(parentPage);
 
 			// parent page checks and query
-			if (parentPage.value) {
+			if (parentPageId !== null) {
 				const circularParentsRes = await checkCircularParents(context, {
 					documentId: data.data.documentId,
 					versionType: data.data.versionType,
 					defaultLocale: context.config.localization.defaultLocale,
+					collectionKey: targetCollectionRes.data.collectionKey,
 					fields: {
 						parentPage: parentPage,
 					},
@@ -113,6 +118,7 @@ const versionPromoteHandler =
 				const parentFieldsRes = await getParentFields(context, {
 					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.versionType,
+					collectionKey: targetCollectionRes.data.collectionKey,
 					fields: {
 						parentPage: parentPage,
 					},

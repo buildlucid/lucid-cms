@@ -44,7 +44,6 @@ class LinkCustomField extends CustomField<"link"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"link">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

@@ -68,7 +68,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "standard_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("standard_media")!,
@@ -97,7 +97,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "required_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("required_media")!,
@@ -126,7 +126,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "min_width_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("min_width_media")!,
@@ -155,7 +155,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "max_width_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("max_width_media")!,
@@ -184,7 +184,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "min_height_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("min_height_media")!,
@@ -213,7 +213,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "max_height_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("max_height_media")!,
@@ -242,7 +242,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "type_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("type_media")!,
@@ -271,7 +271,7 @@ test("successfully validate field - media", async () => {
 		field: {
 			key: "extension_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("extension_media")!,
@@ -302,7 +302,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "required_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("required_media")!,
@@ -329,7 +329,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "required_media",
 			type: "media",
-			value: null,
+			value: [],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("required_media")!,
@@ -356,7 +356,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "min_width_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("min_width_media")!,
@@ -393,7 +393,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "max_width_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("max_width_media")!,
@@ -430,7 +430,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "min_height_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("min_height_media")!,
@@ -467,7 +467,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "max_height_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("max_height_media")!,
@@ -504,7 +504,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "type_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("type_media")!,
@@ -541,7 +541,7 @@ test("fail to validate field - media", async () => {
 		field: {
 			key: "extension_media",
 			type: "media",
-			value: 1,
+			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
 		instance: MediaCollection.fields.get("extension_media")!,
@@ -608,4 +608,43 @@ test("custom field config passes schema validation", async () => {
 
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
+});
+
+test("media field controls its grouped validation input", () => {
+	const singleField = new MediaCustomField("single_media", {
+		config: {
+			multiple: false,
+		},
+	});
+	const multipleField = new MediaCustomField("multiple_media", {
+		config: {
+			multiple: true,
+		},
+	});
+
+	expect(singleField.getRelationFieldValidationInput([1, 2, 3])).toEqual({
+		default: [1],
+	});
+	expect(multipleField.getRelationFieldValidationInput([1, 2, 3])).toEqual({
+		default: [1, 2, 3],
+	});
+});
+
+test("multiple config controls how many media IDs are kept", () => {
+	const singleField = new MediaCustomField("single_media", {
+		config: {
+			multiple: false,
+		},
+	});
+	const multipleField = new MediaCustomField("multiple_media", {
+		config: {
+			multiple: true,
+		},
+	});
+
+	expect(singleField.normalizeInputValue([1, 2, 3])).toEqual([1]);
+	expect(singleField.formatResponseValue([1, 2, 3])).toEqual([1]);
+	expect(multipleField.normalizeInputValue([1, 2, 3])).toEqual([1, 2, 3]);
+	expect(multipleField.formatResponseValue([1, 2, 3])).toEqual([1, 2, 3]);
+	expect(singleField.validate({ type: "media", value: 1 }).valid).toBe(false);
 });

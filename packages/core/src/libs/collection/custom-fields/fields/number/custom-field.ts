@@ -38,7 +38,6 @@ class NumberCustomField extends CustomField<"number"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"number">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

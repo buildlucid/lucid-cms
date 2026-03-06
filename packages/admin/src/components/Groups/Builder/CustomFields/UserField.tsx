@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse, UserRef } from "@types";
+import type { CFConfig, FieldError, FieldResponse } from "@types";
 import {
 	batch,
 	type Component,
@@ -29,7 +29,7 @@ interface UserFieldProps {
 export const UserField: Component<UserFieldProps> = (props) => {
 	// -------------------------------
 	// State
-	const [getValue, setValue] = createSignal<number | undefined>();
+	const [getValue, setValue] = createSignal<number[] | undefined>();
 
 	// -------------------------------
 	// Memos
@@ -38,7 +38,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 	});
 	const fieldValue = createMemo(() => {
 		return (
-			brickHelpers.getFieldValue<number>({
+			brickHelpers.getFieldValue<number[]>({
 				fieldData: fieldData(),
 				fieldConfig: props.state.fieldConfig,
 				contentLocale: props.state.contentLocale,
@@ -46,7 +46,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 		);
 	});
 	const fieldRef = createMemo(() => {
-		return brickHelpers.getFieldRef<UserRef>({
+		return brickHelpers.getFieldRef({
 			fieldType: "user",
 			fieldValue: fieldValue(),
 		});
@@ -81,10 +81,10 @@ export const UserField: Component<UserFieldProps> = (props) => {
 						key: props.state.fieldConfig.key,
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
-						value: !value ? null : Number(value),
+						value: value,
 						contentLocale: props.state.contentLocale,
 					});
-					setValue(value ?? undefined);
+					setValue(value);
 				});
 			}}
 			copy={{

@@ -5,7 +5,6 @@ export const jsonFieldConfig = {
 	database: {
 		mode: "column",
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"json">;
 
 export type JsonFieldType = typeof jsonFieldConfig.type;

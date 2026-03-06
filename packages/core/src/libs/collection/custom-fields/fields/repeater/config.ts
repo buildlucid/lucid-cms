@@ -8,7 +8,6 @@ export const repeaterFieldConfig = {
 		separator: "rep",
 		tableType: `${constants.db.customFieldTablePrefix}repeater`,
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"repeater">;
 
 export type RepeaterFieldType = typeof repeaterFieldConfig.type;

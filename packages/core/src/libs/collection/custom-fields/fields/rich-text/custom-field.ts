@@ -41,7 +41,6 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"rich-text">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

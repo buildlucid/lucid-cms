@@ -15,7 +15,7 @@ interface UserSelectPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
-		selected?: number;
+		selected?: number[];
 	};
 	callbacks: {
 		onSelect: (user: UserResponse) => void;
@@ -56,11 +56,12 @@ const UserSelectPanel: Component<UserSelectPanelProps> = (props) => {
 };
 
 interface UserSelectContentProps {
-	selected?: number;
+	selected?: number[];
 	onSelect: (user: UserResponse) => void;
 }
 
 const UserSelectContent: Component<UserSelectContentProps> = (props) => {
+	const selectedUserId = createMemo(() => props.selected?.[0]);
 	const searchParams = useSearchParamsState({
 		filters: {
 			username: {
@@ -211,7 +212,7 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 										setSelected,
 									}}
 									onClick={() => props.onSelect(user())}
-									current={user().id === props.selected}
+									current={user().id === selectedUserId()}
 									theme="secondary"
 								>
 									<TextCol

@@ -1,9 +1,9 @@
 import constants from "../../../../../constants/constants.js";
-import type { FieldValidationInput } from "../../../../../services/documents-bricks/helpers/fetch-validation-data.js";
 import T from "../../../../../translations/index.js";
 import type { ServiceContext } from "../../../../../types.js";
 import logger from "../../../../logger/index.js";
 import { UsersRepository } from "../../../../repositories/index.js";
+import type { FieldRelationValidationInput } from "../../types.js";
 import type { UserValidationData } from "./types.js";
 
 /**
@@ -11,9 +11,9 @@ import type { UserValidationData } from "./types.js";
  */
 const validateUserInputData = async (
 	context: ServiceContext,
-	input: FieldValidationInput,
+	input: FieldRelationValidationInput,
 ): Promise<UserValidationData[]> => {
-	const userIds = input.ids;
+	const userIds = input.default ?? [];
 	if (userIds.length === 0) return [];
 
 	try {

@@ -38,7 +38,6 @@ class TextCustomField extends CustomField<"text"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"text">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

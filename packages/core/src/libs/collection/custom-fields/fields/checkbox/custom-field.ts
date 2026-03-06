@@ -43,7 +43,15 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"checkbox">;
 	}
-	// Methods
+	get errors() {
+		return merge(super.errors, {
+			required: {
+				condition: (value: unknown) =>
+					value === undefined || value === null || value === 0,
+				message: T("checkbox_field_required"),
+			},
+		});
+	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {
@@ -78,16 +86,6 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 		return {
 			valid: true,
 		};
-	}
-	// Getters
-	get errors() {
-		return merge(super.errors, {
-			required: {
-				condition: (value: unknown) =>
-					value === undefined || value === null || value === 0,
-				message: T("checkbox_field_required"),
-			},
-		});
 	}
 }
 

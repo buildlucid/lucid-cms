@@ -8,6 +8,8 @@ import type {
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import T from "../../translations/index.js";
+import getParentPageId from "../../utils/get-parent-page-id.js";
+import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
 
 /**
  *  Query for document fields that have same slug and parentPage for each slug translation (would cause duplicate fullSlug)
@@ -29,6 +31,7 @@ const checkDuplicateSlugParents: ServiceFn<
 	undefined
 > = async (context, data) => {
 	try {
+		const parentPageId = getParentPageId(data.fields.parentPage);
 		const {
 			document: documentTable,
 			version: versionTable,
@@ -49,10 +52,21 @@ const checkDuplicateSlugParents: ServiceFn<
 			});
 		}
 
+		if (slugConditions.length === 0) {
+			return {
+				error: undefined,
+				data: undefined,
+			};
+		}
+
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
-		const parentPageColumn = prefixGeneratedColName(
-			constants.fields.parentPage.key,
+		const parentPageColumn = prefixGeneratedColName("document_id");
+		const parentPageTableRes = getParentPageRelationTable(
+			data.collectionKey,
+			context.config.db.config.tableNameByteLimit,
 		);
+		if (parentPageTableRes.error) return parentPageTableRes;
+		const parentPageTable = parentPageTableRes.data;
 
 		const duplicates = await context.db.client
 			.selectFrom(documentTable)
@@ -69,12 +83,17 @@ const checkDuplicateSlugParents: ServiceFn<
 				`${versionTable}.id`,
 			)
 			// @ts-expect-error
+			.leftJoin(
+				parentPageTable,
+				`${parentPageTable}.parent_id`,
+				`${fieldsTable}.id`,
+			)
 			.select([
 				`${documentTable}.id`,
 				`${documentTable}.collection_key`,
 				`${fieldsTable}.${slugColumn}`,
 				`${fieldsTable}.locale`,
-				`${fieldsTable}.${parentPageColumn}`,
+				`${parentPageTable}.${parentPageColumn}`,
 			])
 			// @ts-expect-error
 			.where(({ eb, and, or }) =>
@@ -89,13 +108,9 @@ const checkDuplicateSlugParents: ServiceFn<
 							]),
 						),
 					),
-					data.fields.parentPage.value
-						? eb(
-								`${fieldsTable}.${parentPageColumn}`,
-								"=",
-								data.fields.parentPage.value,
-							)
-						: eb(`${fieldsTable}.${parentPageColumn}`, "is", null),
+					parentPageId !== null
+						? eb(`${parentPageTable}.${parentPageColumn}`, "=", parentPageId)
+						: eb(`${parentPageTable}.${parentPageColumn}`, "is", null),
 					eb(`${versionTable}.type`, "=", data.versionType),
 				]),
 			)

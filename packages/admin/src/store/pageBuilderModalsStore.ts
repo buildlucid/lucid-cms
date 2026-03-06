@@ -1,4 +1,5 @@
 import type {
+	DocumentFieldValue,
 	DocumentResponse,
 	LinkResValue,
 	MediaResponse,
@@ -16,7 +17,7 @@ type ModalRegistry = {
 		data: {
 			extensions?: string;
 			type?: string;
-			selected?: number;
+			selected?: number[];
 		};
 		result: MediaResponse;
 	};
@@ -30,13 +31,13 @@ type ModalRegistry = {
 	documentSelect: {
 		data: {
 			collectionKey: string;
-			selected?: number;
+			selected?: DocumentFieldValue[];
 		};
 		result: DocumentResponse;
 	};
 	userSelect: {
 		data: {
-			selected?: number;
+			selected?: number[];
 		};
 		result: UserResponse;
 	};

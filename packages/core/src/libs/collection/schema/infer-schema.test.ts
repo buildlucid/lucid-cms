@@ -139,6 +139,15 @@ describe("Schema inference", async () => {
 		expect(
 			documentTable?.columns.some((column) => column.name === "is_open"),
 		).toBe(false);
+		expect(
+			mediaTable?.columns.some((column) => column.name === "parent_id_ref"),
+		).toBe(false);
+		expect(
+			userTable?.columns.some((column) => column.name === "parent_id_ref"),
+		).toBe(false);
+		expect(
+			documentTable?.columns.some((column) => column.name === "parent_id_ref"),
+		).toBe(false);
 	});
 
 	test("keeps relation tables top-level when fields are nested in repeater groups", () => {

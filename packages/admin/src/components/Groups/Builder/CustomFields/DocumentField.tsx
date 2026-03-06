@@ -1,4 +1,9 @@
-import type { CFConfig, DocumentRef, FieldError, FieldResponse } from "@types";
+import type {
+	CFConfig,
+	DocumentFieldValue,
+	FieldError,
+	FieldResponse,
+} from "@types";
 import {
 	batch,
 	type Component,
@@ -29,7 +34,7 @@ interface DocumentFieldProps {
 export const DocumentField: Component<DocumentFieldProps> = (props) => {
 	// -------------------------------
 	// State
-	const [getValue, setValue] = createSignal<number | undefined>();
+	const [getValue, setValue] = createSignal<DocumentFieldValue[] | undefined>();
 
 	// -------------------------------
 	// Memos
@@ -37,19 +42,21 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<number>({
+		return brickHelpers.getFieldValue<DocumentFieldValue[]>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: props.state.contentLocale,
 		});
 	});
 	const fieldRef = createMemo(() => {
-		return brickHelpers.getFieldRef<DocumentRef>({
+		return brickHelpers.getFieldRef({
 			fieldType: "document",
 			fieldValue: fieldValue(),
-			collection: props.state.fieldConfig.collection,
 		});
 	});
+	const primaryCollectionKey = createMemo(
+		() => props.state.fieldConfig.collection,
+	);
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
@@ -69,7 +76,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			collection={props.state.fieldConfig.collection}
+			collection={primaryCollectionKey()}
 			value={getValue()}
 			ref={fieldRef}
 			onChange={(value, ref) => {
@@ -81,10 +88,10 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 						key: props.state.fieldConfig.key,
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
-						value: !value ? null : Number(value),
+						value: value,
 						contentLocale: props.state.contentLocale,
 					});
-					setValue(value ?? undefined);
+					setValue(value);
 				});
 			}}
 			copy={{

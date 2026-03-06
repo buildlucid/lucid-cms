@@ -1,5 +1,6 @@
 import type {
 	CollectionResponse,
+	DocumentFieldValue,
 	DocumentResponse,
 } from "@lucidcms/core/types";
 import { FaSolidCalendar } from "solid-icons/fa";
@@ -28,7 +29,7 @@ interface DocumentSelectPanelProps {
 		open: boolean;
 		setOpen: (state: boolean) => void;
 		collectionKey: string | undefined;
-		selected?: number;
+		selected?: DocumentFieldValue[];
 	};
 	callbacks: {
 		onSelect: (document: DocumentResponse) => void;
@@ -74,7 +75,7 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 
 interface DocumentSelectContentProps {
 	collectionKey: string | undefined;
-	selected?: number;
+	selected?: DocumentFieldValue[];
 	onSelect: (document: DocumentResponse) => void;
 }
 
@@ -94,6 +95,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	// ----------------------------------
 	// Memos
 	const collectionKey = createMemo(() => props.collectionKey);
+	const selectedDocumentId = createMemo(() => props.selected?.[0]?.id);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
@@ -314,7 +316,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 										onClick: () => props.onSelect(doc()),
 									}}
 									theme="secondary"
-									current={doc().id === props.selected}
+									current={doc().id === selectedDocumentId()}
 								/>
 							)}
 						</Index>

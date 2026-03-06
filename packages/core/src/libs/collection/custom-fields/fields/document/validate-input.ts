@@ -1,5 +1,4 @@
 import constants from "../../../../../constants/constants.js";
-import type { FieldValidationInput } from "../../../../../services/documents-bricks/helpers/fetch-validation-data.js";
 import T from "../../../../../translations/index.js";
 import type {
 	LucidDocumentTableName,
@@ -8,6 +7,7 @@ import type {
 import logger from "../../../../logger/index.js";
 import DocumentsRepository from "../../../../repositories/documents.js";
 import buildTableName from "../../../helpers/build-table-name.js";
+import type { FieldRelationValidationInput } from "../../types.js";
 import type { DocumentValidationData } from "./types.js";
 
 /**
@@ -15,20 +15,17 @@ import type { DocumentValidationData } from "./types.js";
  */
 const validateDocumentInputData = async (
 	context: ServiceContext,
-	input: FieldValidationInput,
+	input: FieldRelationValidationInput,
 ): Promise<DocumentValidationData[]> => {
-	const documentIdsByCollection = input.idsByCollection;
 	const allDocuments: DocumentValidationData[] = [];
 	try {
 		//* create queries for each collection key
-		const promises = Object.entries(documentIdsByCollection).map(
-			([collectionKey, ids]) => {
-				if (ids.length === 0) return Promise.resolve([]);
+		const promises = Object.entries(input).map(([collectionKey, ids]) => {
+			if (ids.length === 0) return Promise.resolve([]);
 
-				const uniqueIds = [...new Set(ids)];
-				return fetchDocumentsFromCollection(context, collectionKey, uniqueIds);
-			},
-		);
+			const uniqueIds = [...new Set(ids)];
+			return fetchDocumentsFromCollection(context, collectionKey, uniqueIds);
+		});
 
 		const results = await Promise.all(promises);
 		for (const documents of results) allDocuments.push(...documents);

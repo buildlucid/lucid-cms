@@ -14,7 +14,6 @@ class TabCustomField extends CustomField<"tab"> {
 	config;
 	key: string;
 	props?: CFProps<"tab">;
-
 	protected override get sharedValidationFlags() {
 		return {
 			skipValidation: true,
@@ -22,7 +21,6 @@ class TabCustomField extends CustomField<"tab"> {
 			skipZodValidation: true,
 		} as const;
 	}
-
 	constructor(key: string, props?: CFProps<"tab">) {
 		super();
 		this.key = key;
@@ -37,7 +35,6 @@ class TabCustomField extends CustomField<"tab"> {
 			fields: [],
 		} satisfies CFConfig<"tab">;
 	}
-	// Methods
 	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
 			data: {

@@ -41,7 +41,6 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"datetime">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

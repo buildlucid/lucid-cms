@@ -53,6 +53,56 @@ interface IntermediaryFieldValues {
 	locale: string;
 }
 
+/**
+ * Resolves the localized values for a field from either parent rows or relation rows.
+ */
+const getFieldValues = (
+	data: FieldFormatData,
+	meta: FieldFormatMeta & {
+		fieldConfig: CFConfig<FieldTypes>;
+	},
+): IntermediaryFieldValues[] => {
+	const fieldInstance = meta.builder.fields.get(meta.fieldConfig.key);
+	if (!fieldInstance) return [];
+
+	const databaseConfig =
+		registeredFields[meta.fieldConfig.type].config.database;
+	if (!isStorageMode(databaseConfig, "relation-table")) {
+		const fieldKey = prefixGeneratedColName(meta.fieldConfig.key);
+
+		return data.brickRows.map((row) => ({
+			value: row[fieldKey],
+			locale: row.locale,
+		}));
+	}
+
+	const relationRows = DocumentBricksFormatter.getRelationRows({
+		bricksQuery: data.bricksQuery,
+		bricksSchema: data.bricksSchema,
+		collectionKey: meta.collection.key,
+		brickKey: meta.brickKey,
+		fieldKey: meta.fieldConfig.key,
+		relationIds: data.brickRows.flatMap((row) => row.id),
+		tableType: databaseConfig.tableType,
+	});
+
+	return meta.localization.locales.map((locale) => {
+		const localeValues = relationRows
+			.filter((row) => row.locale === locale)
+			.sort((a, b) => a.position - b.position)
+			.reduce<unknown[]>((acc, row) => {
+				const value = fieldInstance.extractRelationFieldValue(row);
+				if (value !== null) acc.push(value);
+				return acc;
+			}, []);
+
+		return {
+			value: localeValues,
+			locale,
+		};
+	});
+};
+
 const isTreeTableFieldType = (type: FieldTypes): boolean => {
 	return isStorageMode(registeredFields[type].config.database, "tree-table");
 };
@@ -126,15 +176,16 @@ const buildFieldTree = (
 			continue;
 		}
 
-		const fieldKey = prefixGeneratedColName(config.key);
-
-		//* get all instaces of this field (config.key) accross the data.brickRows (so the value for each locale)
-		const fieldValues: IntermediaryFieldValues[] = data.brickRows.flatMap(
-			(row) => ({
-				value: row[fieldKey],
-				locale: row.locale,
-			}),
-		);
+		const fieldValues = getFieldValues(data, {
+			builder: meta.builder,
+			fieldConfig: config,
+			host: meta.host,
+			localization: meta.localization,
+			collection: meta.collection,
+			brickKey: meta.brickKey,
+			config: meta.config,
+			bricksTableSchema: meta.bricksTableSchema,
+		});
 
 		const fieldValue = buildField(
 			{

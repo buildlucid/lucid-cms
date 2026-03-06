@@ -8,6 +8,7 @@ import type {
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
 import T from "../translations/index.js";
+import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
 export type VersionFieldsQueryResponse = {
 	locale: string;
@@ -26,6 +27,7 @@ const getDocumentVersionFields: ServiceFn<
 			documentId: number;
 			versionId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
+			collectionKey: string;
 			tables: {
 				document: LucidDocumentTableName;
 				version: LucidVersionTableName;
@@ -41,9 +43,13 @@ const getDocumentVersionFields: ServiceFn<
 		const fullSlugColumn = prefixGeneratedColName(
 			constants.fields.fullSlug.key,
 		);
-		const parentPageColumn = prefixGeneratedColName(
-			constants.fields.parentPage.key,
+		const parentPageColumn = prefixGeneratedColName("document_id");
+		const parentPageTableRes = getParentPageRelationTable(
+			data.collectionKey,
+			context.config.db.config.tableNameByteLimit,
 		);
+		if (parentPageTableRes.error) return parentPageTableRes;
+		const parentPageTable = parentPageTableRes.data;
 
 		const fields = await context.db.client
 			.selectFrom(fieldsTable)
@@ -52,12 +58,18 @@ const getDocumentVersionFields: ServiceFn<
 				`${versionTable}.id`,
 				`${fieldsTable}.document_version_id`,
 			)
+			.leftJoin(
+				parentPageTable,
+				`${parentPageTable}.parent_id`,
+				`${fieldsTable}.id`,
+			)
+			// @ts-expect-error
 			.select([
 				`${fieldsTable}.locale`,
 				`${versionTable}.document_id`,
 				`${fieldsTable}.${slugColumn}`,
 				`${fieldsTable}.${fullSlugColumn}`,
-				`${fieldsTable}.${parentPageColumn}`,
+				`${parentPageTable}.${parentPageColumn}`,
 			])
 			.where(`${versionTable}.document_id`, "=", data.documentId)
 			.where(`${versionTable}.id`, "=", data.versionId)

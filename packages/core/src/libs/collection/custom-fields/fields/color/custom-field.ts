@@ -38,7 +38,6 @@ class ColorCustomField extends CustomField<"color"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"color">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

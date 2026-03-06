@@ -2,7 +2,6 @@ import type { RelationTableModeDefinition } from "./types.js";
 
 export const relationTableSchemaColumns = {
 	parentId: "parent_id",
-	parentIdRef: "parent_id_ref",
 } as const;
 
 export const relationTableMode: RelationTableModeDefinition = {
@@ -20,11 +19,6 @@ export const relationTableMode: RelationTableModeDefinition = {
 						column: "id",
 						onDelete: "cascade",
 					},
-				},
-				{
-					name: relationTableSchemaColumns.parentIdRef,
-					type: props.db.getDataType("integer"),
-					nullable: false,
 				},
 			],
 		};

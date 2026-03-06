@@ -448,4 +448,264 @@ describe("brick table construction", () => {
 		expect(level2Item?.is_open).toBe(true);
 		expect(level3Item?.is_open).toBe(false);
 	});
+
+	test("should create relation tables for relation fields and keep repeater relations top-level", () => {
+		const galleryBrick = new BrickBuilder("gallery")
+			.addMedia("heroMedia", {
+				config: {
+					multiple: true,
+				},
+			})
+			.addRepeater("items")
+			.addMedia("itemMedia", {
+				config: {
+					multiple: true,
+				},
+			})
+			.endRepeater();
+
+		const galleryCollection = new CollectionBuilder("gallery", {
+			mode: "multiple",
+			details: {
+				name: "Gallery",
+				singularName: "Gallery",
+			},
+			config: {
+				useTranslations: true,
+				useRevisions: true,
+			},
+			bricks: {
+				builder: [galleryBrick],
+			},
+		}).addDocument("relatedPage", {
+			collection: "page",
+			config: {
+				multiple: true,
+			},
+		});
+
+		const brickTables = aggregateBrickTables({
+			collection: galleryCollection,
+			documentId: TEST_CONFIG.documentId,
+			versionId: TEST_CONFIG.versionId,
+			localization: TEST_CONFIG.localization,
+			fields: [
+				{
+					key: "relatedPage",
+					type: "document",
+					value: [
+						{ id: 7, collectionKey: "page" },
+						{ id: 8, collectionKey: "page" },
+					],
+				},
+			],
+			bricks: [
+				{
+					ref: "gallery-ref",
+					key: "gallery",
+					order: 0,
+					type: "builder",
+					open: true,
+					fields: [
+						{
+							key: "heroMedia",
+							type: "media",
+							value: [10, 11],
+						},
+						{
+							key: "items",
+							type: "repeater",
+							groups: [
+								{
+									ref: "item-group",
+									order: 0,
+									open: false,
+									fields: [
+										{
+											key: "itemMedia",
+											type: "media",
+											value: [20, 21],
+										},
+									],
+								},
+							],
+						},
+					],
+				},
+			],
+			tableNameByteLimit: null,
+		});
+		brickTables.sort((a, b) => a.priority - b.priority);
+
+		expect(brickTables).toHaveLength(6);
+
+		const fieldsTable = brickTables.find(
+			(table) => table.table === "lucid_doc__gallery__fld",
+		);
+		const brickTable = brickTables.find(
+			(table) => table.table === "lucid_doc__gallery__gallery",
+		);
+		const repeaterTable = brickTables.find(
+			(table) => table.table === "lucid_doc__gallery__gallery__rep__items",
+		);
+		const documentRelationTable = brickTables.find(
+			(table) => table.table === "lucid_doc__gallery__fld__doc__relatedPage",
+		);
+		const heroMediaRelationTable = brickTables.find(
+			(table) => table.table === "lucid_doc__gallery__gallery__med__heroMedia",
+		);
+		const itemMediaRelationTable = brickTables.find(
+			(table) => table.table === "lucid_doc__gallery__gallery__med__itemMedia",
+		);
+
+		expect(fieldsTable).toBeDefined();
+		expect(brickTable).toBeDefined();
+		expect(repeaterTable).toBeDefined();
+		expect(documentRelationTable).toBeDefined();
+		expect(heroMediaRelationTable).toBeDefined();
+		expect(itemMediaRelationTable).toBeDefined();
+		expect(fieldsTable?.priority).toBe(0);
+		expect(brickTable?.priority).toBe(0);
+		expect(repeaterTable?.priority).toBe(1);
+		expect(documentRelationTable?.priority).toBe(1);
+		expect(heroMediaRelationTable?.priority).toBe(1);
+		expect(itemMediaRelationTable?.priority).toBe(2);
+
+		const fieldRow = fieldsTable?.data.find((row) => row.locale === "en");
+		const brickRow = brickTable?.data.find((row) => row.locale === "en");
+		const repeaterRow = repeaterTable?.data.find((row) => row.locale === "en");
+
+		expect(fieldRow?.brick_id_ref).toBeTypeOf("number");
+		expect(brickRow?.brick_id_ref).toBeTypeOf("number");
+		expect(repeaterRow?.parent_id_ref).toBeTypeOf("number");
+
+		expect(documentRelationTable?.data).toEqual([
+			{
+				collection_key: "gallery",
+				document_id: TEST_CONFIG.documentId,
+				document_version_id: TEST_CONFIG.versionId,
+				locale: "en",
+				position: 0,
+				parent_id: fieldRow?.brick_id_ref,
+				_collection_key: "page",
+				_document_id: 7,
+			},
+			{
+				collection_key: "gallery",
+				document_id: TEST_CONFIG.documentId,
+				document_version_id: TEST_CONFIG.versionId,
+				locale: "en",
+				position: 1,
+				parent_id: fieldRow?.brick_id_ref,
+				_collection_key: "page",
+				_document_id: 8,
+			},
+		]);
+
+		expect(heroMediaRelationTable?.data).toEqual([
+			{
+				collection_key: "gallery",
+				document_id: TEST_CONFIG.documentId,
+				document_version_id: TEST_CONFIG.versionId,
+				locale: "en",
+				position: 0,
+				parent_id: brickRow?.brick_id_ref,
+				_media_id: 10,
+			},
+			{
+				collection_key: "gallery",
+				document_id: TEST_CONFIG.documentId,
+				document_version_id: TEST_CONFIG.versionId,
+				locale: "en",
+				position: 1,
+				parent_id: brickRow?.brick_id_ref,
+				_media_id: 11,
+			},
+		]);
+
+		expect(itemMediaRelationTable?.data).toEqual([
+			{
+				collection_key: "gallery",
+				document_id: TEST_CONFIG.documentId,
+				document_version_id: TEST_CONFIG.versionId,
+				locale: "en",
+				position: 0,
+				parent_id: repeaterRow?.parent_id_ref,
+				_media_id: 20,
+			},
+			{
+				collection_key: "gallery",
+				document_id: TEST_CONFIG.documentId,
+				document_version_id: TEST_CONFIG.versionId,
+				locale: "en",
+				position: 1,
+				parent_id: repeaterRow?.parent_id_ref,
+				_media_id: 21,
+			},
+		]);
+
+		expect(
+			documentRelationTable?.data.every((row) => !("is_open" in row)),
+		).toBe(true);
+		expect(
+			heroMediaRelationTable?.data.every((row) => !("is_open" in row)),
+		).toBe(true);
+		expect(
+			itemMediaRelationTable?.data.every((row) => !("is_open" in row)),
+		).toBe(true);
+	});
+
+	test("should not create relation tables when relation values are empty", () => {
+		const articleCollection = new CollectionBuilder("articles", {
+			mode: "multiple",
+			details: {
+				name: "Articles",
+				singularName: "Article",
+			},
+			config: {
+				useTranslations: true,
+				useRevisions: true,
+			},
+		})
+			.addUser("author", {
+				config: {
+					multiple: true,
+				},
+			})
+			.addDocument("relatedPage", {
+				collection: "page",
+				config: {
+					multiple: true,
+				},
+			});
+
+		const brickTables = aggregateBrickTables({
+			collection: articleCollection,
+			documentId: TEST_CONFIG.documentId,
+			versionId: TEST_CONFIG.versionId,
+			localization: TEST_CONFIG.localization,
+			fields: [
+				{
+					key: "author",
+					type: "user",
+					value: [],
+				},
+				{
+					key: "relatedPage",
+					type: "document",
+					value: [],
+				},
+			],
+			tableNameByteLimit: null,
+		});
+
+		expect(brickTables).toHaveLength(1);
+		expect(brickTables[0]?.table).toBe("lucid_doc__articles__fld");
+		expect(brickTables.find((table) => table.table.includes("__usr__"))).toBe(
+			undefined,
+		);
+		expect(brickTables.find((table) => table.table.includes("__doc__"))).toBe(
+			undefined,
+		);
+	});
 });

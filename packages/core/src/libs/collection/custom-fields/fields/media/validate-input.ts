@@ -1,9 +1,9 @@
 import constants from "../../../../../constants/constants.js";
-import type { FieldValidationInput } from "../../../../../services/documents-bricks/helpers/fetch-validation-data.js";
 import T from "../../../../../translations/index.js";
 import type { ServiceContext } from "../../../../../types.js";
 import logger from "../../../../logger/index.js";
 import { MediaRepository } from "../../../../repositories/index.js";
+import type { FieldRelationValidationInput } from "../../types.js";
 import type { MediaValidationData } from "./types.js";
 
 /**
@@ -11,9 +11,9 @@ import type { MediaValidationData } from "./types.js";
  */
 const validateMediaInputData = async (
 	context: ServiceContext,
-	input: FieldValidationInput,
+	input: FieldRelationValidationInput,
 ): Promise<MediaValidationData[]> => {
-	const mediaIds = input.ids;
+	const mediaIds = input.default ?? [];
 	if (mediaIds.length === 0) return [];
 
 	try {

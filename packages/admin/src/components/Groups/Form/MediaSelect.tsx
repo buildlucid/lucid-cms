@@ -21,9 +21,9 @@ import helpers from "@/utils/helpers";
 
 interface MediaSelectProps {
 	id: string;
-	value: number | undefined;
+	value: number[] | undefined;
 	ref: Accessor<MediaRef | undefined>;
-	onChange: (_value: number | null, _ref: MediaRef | null) => void;
+	onChange: (_value: number[], _ref: MediaRef | null) => void;
 	extensions?: string[];
 	type?: string;
 	copy?: {
@@ -43,6 +43,7 @@ interface MediaSelectProps {
 export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
+	const selectedMediaId = () => props.value?.[0];
 	const parseExtensions = (extensions?: string[]) => {
 		if (!extensions) return undefined;
 		return extensions
@@ -86,7 +87,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				selected: props.value,
 			},
 			onCallback: (media: MediaResponse) => {
-				props.onChange(media.id, mediaResponseToRef(media));
+				props.onChange([media.id], mediaResponseToRef(media));
 			},
 		});
 	};
@@ -97,7 +98,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				type: props.type,
 			},
 			onCallback: (media: MediaResponse) => {
-				props.onChange(media.id, mediaResponseToRef(media));
+				props.onChange([media.id], mediaResponseToRef(media));
 			},
 		});
 	};
@@ -146,7 +147,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			/>
 			<div class="w-full">
 				<Switch>
-					<Match when={typeof props.value !== "number"}>
+					<Match when={typeof selectedMediaId() !== "number"}>
 						<div class="flex flex-wrap gap-2">
 							<Button
 								type="button"
@@ -172,7 +173,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							</Button>
 						</div>
 					</Match>
-					<Match when={typeof props.value === "number"}>
+					<Match when={typeof selectedMediaId() === "number"}>
 						<div class="w-full  border border-border rounded-md bg-input-base overflow-hidden group">
 							<div
 								class={classNames("relative z-0 bg-card-base p-4", {
@@ -265,7 +266,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										theme="danger-subtle"
 										size="icon-subtle"
 										onClick={() => {
-											props.onChange(null, null);
+											props.onChange([], null);
 										}}
 										disabled={props.disabled}
 										aria-label={T()("remove_media", {

@@ -1,11 +1,19 @@
 import type { ColumnDataType } from "kysely";
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import {
+	getFieldDatabaseConfig,
+	isStorageMode,
+} from "../../libs/collection/custom-fields/storage/index.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type { LucidBricksTable } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
 
+/**
+ * Inserts aggregated brick tables in dependency order while resolving temporary
+ * parent and root references between batches.
+ */
 const insertBrickTables: ServiceFn<
 	[
 		{
@@ -29,6 +37,10 @@ const insertBrickTables: ServiceFn<
 	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
 
 	for (const table of data.tables) {
+		if (table.data.length === 0) {
+			continue;
+		}
+
 		// update parent and brick IDs using the mappings before inserting
 		for (const row of table.data) {
 			// check for parent_id_ref that needs updating
@@ -49,6 +61,16 @@ const insertBrickTables: ServiceFn<
 				) {
 					row.parent_id = idMapping[row.parent_id];
 				}
+			}
+
+			// relation tables use parent_id directly as their transient parent ref.
+			if (
+				"parent_id" in row &&
+				typeof row.parent_id === "number" &&
+				row.parent_id < 0
+			) {
+				const mappedId = idMapping[row.parent_id];
+				if (mappedId) row.parent_id = mappedId;
 			}
 
 			// check for brick_id that needs updating
@@ -76,6 +98,12 @@ const insertBrickTables: ServiceFn<
 		const schema = bricksTableSchemaRes.data.find(
 			(s) => s.name === table.table,
 		);
+		const fieldDatabaseConfig = schema
+			? getFieldDatabaseConfig(schema.type)
+			: null;
+		const isTreeTableInsert =
+			fieldDatabaseConfig !== null &&
+			isStorageMode(fieldDatabaseConfig, "tree-table");
 
 		// insert rows for this table
 		const response = await Bricks.createMultiple(
@@ -112,7 +140,8 @@ const insertBrickTables: ServiceFn<
 				if (
 					"parent_id_ref" in insertedRow &&
 					typeof insertedRow.parent_id_ref === "number" &&
-					insertedRow.parent_id_ref < 0
+					insertedRow.parent_id_ref < 0 &&
+					isTreeTableInsert
 				) {
 					idMapping[insertedRow.parent_id_ref] = insertedRow.id;
 					mappedFromInsertedRefs = true;
@@ -132,17 +161,10 @@ const insertBrickTables: ServiceFn<
 				if (
 					"parent_id_ref" in originalRow &&
 					typeof originalRow.parent_id_ref === "number" &&
-					originalRow.parent_id_ref < 0
+					originalRow.parent_id_ref < 0 &&
+					isTreeTableInsert
 				) {
 					idMapping[originalRow.parent_id_ref] = insertedRow.id;
-				}
-
-				if (
-					"parent_id" in originalRow &&
-					typeof originalRow.parent_id === "number" &&
-					originalRow.parent_id < 0
-				) {
-					idMapping[originalRow.parent_id] = insertedRow.id;
 				}
 
 				if (

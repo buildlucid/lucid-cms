@@ -16,7 +16,6 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 	config;
 	key;
 	props;
-
 	protected override get sharedValidationFlags() {
 		return {
 			skipValidation: false,
@@ -24,7 +23,6 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			skipZodValidation: true,
 		} as const;
 	}
-
 	constructor(key: string, props?: CFProps<"repeater">) {
 		super();
 		this.key = key;
@@ -43,7 +41,6 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"repeater">;
 	}
-	// Methods
 	getSchemaDefinition(
 		_props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {

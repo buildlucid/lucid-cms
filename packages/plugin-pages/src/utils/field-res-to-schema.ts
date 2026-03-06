@@ -6,6 +6,7 @@ const fieldResToSchema = (
 	useTranslations: boolean,
 	defaultLocale: string,
 	items: VersionFieldsQueryResponse[],
+	relationCollectionKey?: string,
 ): FieldInputSchema => {
 	// Determine field type based on key
 	const fieldType = getFieldTypeFromKey(key);
@@ -28,7 +29,11 @@ const fieldResToSchema = (
 				result.translations[item.locale] = item[`_${key}`] as string | null;
 			} else if (fieldType === "document") {
 				// @ts-expect-error
-				result.translations[item.locale] = item[`_${key}`] as number | null;
+				const relationId = item[`_${key}`];
+				result.translations[item.locale] =
+					typeof relationId === "number" && relationCollectionKey
+						? [{ id: relationId, collectionKey: relationCollectionKey }]
+						: [];
 			}
 		}
 	} else {
@@ -40,7 +45,11 @@ const fieldResToSchema = (
 			result.value = defaultItem[`_${key}`] as string | null;
 		} else if (fieldType === "document") {
 			// @ts-expect-error
-			result.value = defaultItem[`_${key}`] as number | null;
+			const relationId = defaultItem[`_${key}`];
+			result.value =
+				typeof relationId === "number" && relationCollectionKey
+					? [{ id: relationId, collectionKey: relationCollectionKey }]
+					: [];
 		}
 	}
 

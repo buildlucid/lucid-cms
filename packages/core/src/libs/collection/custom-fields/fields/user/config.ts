@@ -8,9 +8,6 @@ export const userFieldConfig = {
 		separator: "usr",
 		tableType: `${constants.db.customFieldTablePrefix}user`,
 	},
-	validation: {
-		mode: "ids",
-	},
 } as const satisfies FieldStaticConfig<"user">;
 
 export type UserFieldType = typeof userFieldConfig.type;

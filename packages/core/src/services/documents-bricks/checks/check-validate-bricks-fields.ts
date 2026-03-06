@@ -241,7 +241,7 @@ const recursiveFieldValidate = (props: {
 		if (submittedFieldKeys.has(key)) return;
 
 		//* skip fields that belong to a different tree-table parent context
-		const fieldTreeParent = fieldInstance.repeater;
+		const fieldTreeParent = fieldInstance.treeParent;
 		if (
 			(fieldTreeParent && fieldTreeParent !== props.parentTreeFieldKey) ||
 			(!fieldTreeParent && props.parentTreeFieldKey)

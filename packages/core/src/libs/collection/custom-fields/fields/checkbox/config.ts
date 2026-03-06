@@ -5,7 +5,6 @@ export const checkboxFieldConfig = {
 	database: {
 		mode: "column",
 	},
-	validation: null,
 } as const satisfies FieldStaticConfig<"checkbox">;
 
 export type CheckboxFieldType = typeof checkboxFieldConfig.type;

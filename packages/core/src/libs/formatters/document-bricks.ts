@@ -9,7 +9,11 @@ import type {
 	Select,
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { isTreeTableType } from "../collection/custom-fields/storage/index.js";
+import {
+	getFieldDatabaseConfig,
+	isStorageMode,
+	isTreeTableType,
+} from "../collection/custom-fields/storage/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
@@ -188,6 +192,53 @@ const getBrickTreeRows = (props: {
 };
 
 /**
+ * Resolves the target relation-table rows linked to the provided parent rows.
+ */
+const getRelationRows = (props: {
+	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
+	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+	collectionKey: string;
+	brickKey: string | undefined;
+	fieldKey: string;
+	relationIds: number[];
+	tableType: CollectionSchemaTable<LucidBrickTableName>["type"];
+}): Select<LucidBricksTable>[] => {
+	const databaseConfig = getFieldDatabaseConfig(props.tableType);
+	if (!databaseConfig || !isStorageMode(databaseConfig, "relation-table")) {
+		return [];
+	}
+
+	const matchingSchema = props.bricksSchema.find((schema) => {
+		if (schema.key.collection !== props.collectionKey) return false;
+		if (schema.type !== props.tableType) return false;
+		if (props.brickKey !== undefined && schema.key.brick !== props.brickKey) {
+			return false;
+		}
+		if (props.brickKey === undefined && schema.key.brick !== undefined) {
+			return false;
+		}
+
+		const relationPath = schema.key.fieldPath;
+		if (!relationPath || relationPath.length !== 1) return false;
+
+		return relationPath[0] === props.fieldKey;
+	});
+
+	if (!matchingSchema || !(matchingSchema.name in props.bricksQuery)) {
+		return [];
+	}
+
+	const rows = props.bricksQuery[matchingSchema.name];
+	if (!rows) return [];
+
+	return rows.filter(
+		(row) =>
+			typeof row.parent_id === "number" &&
+			props.relationIds.includes(row.parent_id),
+	);
+};
+
+/**
  * Generates a unique deterministic reference for a brick
  */
 const generateBrickRef = (
@@ -206,4 +257,5 @@ export default {
 	formatMultiple,
 	formatDocumentFields,
 	getBrickTreeRows,
+	getRelationRows,
 };

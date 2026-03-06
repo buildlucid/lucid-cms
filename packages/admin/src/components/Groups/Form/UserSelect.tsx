@@ -16,9 +16,9 @@ import helpers from "@/utils/helpers";
 
 interface UserSelectProps {
 	id: string;
-	value: number | undefined;
+	value: number[] | undefined;
 	ref: Accessor<UserRef | undefined>;
-	onChange: (_value: number | null, _ref: UserRef) => void;
+	onChange: (_value: number[], _ref: UserRef | null) => void;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -36,6 +36,7 @@ interface UserSelectProps {
 export const UserSelect: Component<UserSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
+	const selectedUserId = () => props.value?.[0];
 	const userResponseToRef = (user: UserResponse): NonNullable<UserRef> => ({
 		id: user.id,
 		username: user.username,
@@ -49,7 +50,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 				selected: props.value,
 			},
 			onCallback: (user: UserResponse) => {
-				props.onChange(user.id, userResponseToRef(user));
+				props.onChange([user.id], userResponseToRef(user));
 			},
 		});
 	};
@@ -82,7 +83,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 			/>
 			<div class="w-full">
 				<Switch>
-					<Match when={typeof props.value !== "number"}>
+					<Match when={typeof selectedUserId() !== "number"}>
 						<Button
 							type="button"
 							theme="border-outline"
@@ -94,7 +95,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							{T()("select_user")}
 						</Button>
 					</Match>
-					<Match when={typeof props.value === "number"}>
+					<Match when={typeof selectedUserId() === "number"}>
 						<div class="group w-full border border-border rounded-md bg-input-base px-3 py-2">
 							<div class="flex items-center justify-between gap-3">
 								<div class="min-w-0 flex-1">
@@ -121,7 +122,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										theme="danger-subtle"
 										size="icon-subtle"
 										onClick={() => {
-											props.onChange(null, null);
+											props.onChange([], null);
 										}}
 										disabled={props.disabled}
 									>

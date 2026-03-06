@@ -38,7 +38,6 @@ class JsonCustomField extends CustomField<"json"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"json">;
 	}
-	// Methods
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {
