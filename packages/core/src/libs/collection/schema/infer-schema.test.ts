@@ -84,6 +84,111 @@ describe("Schema inference", async () => {
 		);
 	});
 
+	test("creates relation tables for media, user and document fields", () => {
+		pagesCollection
+			.addMedia("hero_media")
+			.addUser("author")
+			.addDocument("related_page", {
+				collection: "pages",
+			});
+
+		const res = inferSchema(pagesCollection, db);
+		const mediaTable = res.data?.tables.find(
+			(table) => table.name === "lucid_doc__pages__fld__med__hero_media",
+		);
+		const userTable = res.data?.tables.find(
+			(table) => table.name === "lucid_doc__pages__fld__usr__author",
+		);
+		const documentTable = res.data?.tables.find(
+			(table) => table.name === "lucid_doc__pages__fld__doc__related_page",
+		);
+
+		expect(res.data?.tables).toContainEqual(
+			expect.objectContaining({
+				name: "lucid_doc__pages__fld__med__hero_media",
+				type: `${constants.db.customFieldTablePrefix}media`,
+				key: expect.objectContaining({
+					fieldPath: ["hero_media"],
+				}),
+			}),
+		);
+		expect(res.data?.tables).toContainEqual(
+			expect.objectContaining({
+				name: "lucid_doc__pages__fld__usr__author",
+				type: `${constants.db.customFieldTablePrefix}user`,
+				key: expect.objectContaining({
+					fieldPath: ["author"],
+				}),
+			}),
+		);
+		expect(res.data?.tables).toContainEqual(
+			expect.objectContaining({
+				name: "lucid_doc__pages__fld__doc__related_page",
+				type: `${constants.db.customFieldTablePrefix}document`,
+				key: expect.objectContaining({
+					fieldPath: ["related_page"],
+				}),
+			}),
+		);
+		expect(
+			mediaTable?.columns.some((column) => column.name === "is_open"),
+		).toBe(false);
+		expect(userTable?.columns.some((column) => column.name === "is_open")).toBe(
+			false,
+		);
+		expect(
+			documentTable?.columns.some((column) => column.name === "is_open"),
+		).toBe(false);
+	});
+
+	test("keeps relation tables top-level when fields are nested in repeater groups", () => {
+		pagesCollection
+			.addRepeater("authors")
+			.addMedia("avatar")
+			.addRepeater("socials")
+			.addUser("owner")
+			.endRepeater()
+			.endRepeater();
+
+		const res = inferSchema(pagesCollection, db);
+		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
+
+		expect(tableNames).toContain("lucid_doc__pages__fld__med__avatar");
+		expect(tableNames).toContain("lucid_doc__pages__fld__usr__owner");
+		expect(tableNames).not.toContain(
+			"lucid_doc__pages__fld__rep__authors__med__avatar",
+		);
+		expect(tableNames).not.toContain(
+			"lucid_doc__pages__fld__rep__authors__socials__usr__owner",
+		);
+	});
+
+	test("keeps brick relation tables top-level when fields are nested in repeater groups", () => {
+		const brickScopedCollection = new CollectionBuilder("pages", {
+			mode: "multiple",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+			bricks: {
+				fixed: [
+					new BrickBuilder("content")
+						.addRepeater("authors")
+						.addMedia("avatar")
+						.endRepeater(),
+				],
+			},
+		});
+
+		const res = inferSchema(brickScopedCollection, db);
+		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
+
+		expect(tableNames).toContain("lucid_doc__pages__content__med__avatar");
+		expect(tableNames).not.toContain(
+			"lucid_doc__pages__content__rep__authors__med__avatar",
+		);
+	});
+
 	test("creates brick tables", () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(

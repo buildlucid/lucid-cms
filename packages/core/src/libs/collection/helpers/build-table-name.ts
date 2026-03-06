@@ -89,7 +89,10 @@ const buildTableName = <R extends string>(
 			};
 		}
 
-		if (!isStorageMode(databaseConfig, "tree-table")) {
+		if (
+			!isStorageMode(databaseConfig, "tree-table") &&
+			!isStorageMode(databaseConfig, "relation-table")
+		) {
 			return {
 				data: undefined,
 				error: {
@@ -98,14 +101,10 @@ const buildTableName = <R extends string>(
 			};
 		}
 
-		// add brick key first - tree-table storage tables are scoped to them
+		// add brick key first - table-backed custom fields are scoped to these
 		//* assumes document-fields type when brick key isnt present
-		if (!keys.brick) {
-			parts.push(collectionTableParts.fields);
-		} else {
-			parts.push(keys.brick);
-		}
-
+		const scope = keys.brick ?? collectionTableParts.fields;
+		parts.push(scope);
 		parts.push(databaseConfig.separator);
 		parts.push(...keys.fieldPath);
 	}

@@ -9,10 +9,7 @@ import type {
 	OnUpdate,
 } from "../../db-adapter/types.js";
 import type { CollectionBuilder } from "../builders/index.js";
-import type {
-	CollectionSchemaTable,
-	CustomFieldTableType,
-} from "../schema/types.js";
+import type { CollectionSchemaTable } from "../schema/types.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
 import { colorFieldConfig } from "./fields/color/config.js";
@@ -109,19 +106,13 @@ export type ColumnFieldDatabaseConfig = {
 export type RelationTableFieldDatabaseConfig<T extends string = string> = {
 	mode: "relation-table";
 	separator: string;
-	tableType: Extract<
-		CustomFieldTableType,
-		`${typeof constants.db.customFieldTablePrefix}${T}`
-	>;
+	tableType: `${typeof constants.db.customFieldTablePrefix}${T}`;
 };
 
 export type TreeTableFieldDatabaseConfig<T extends string = string> = {
 	mode: "tree-table";
 	separator: string;
-	tableType: Extract<
-		CustomFieldTableType,
-		`${typeof constants.db.customFieldTablePrefix}${T}`
-	>;
+	tableType: `${typeof constants.db.customFieldTablePrefix}${T}`;
 };
 
 export type FieldDatabaseConfig<T extends string = string> =

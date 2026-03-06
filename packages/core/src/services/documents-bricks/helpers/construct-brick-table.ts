@@ -270,8 +270,10 @@ const constructBrickTable = (
 			document_version_id: params.versionId,
 			locale: locale,
 			position: params.order,
-			is_open: params.open,
 		};
+		if (tableMode !== "relation-table") {
+			baseRowData.is_open = params.open;
+		}
 
 		if (params.type === "brick") {
 			baseRowData.brick_type = params.brick?.type;

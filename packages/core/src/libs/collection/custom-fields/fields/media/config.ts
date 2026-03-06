@@ -1,9 +1,12 @@
+import constants from "../../../../../constants/constants.js";
 import type { FieldStaticConfig } from "../../types.js";
 
 export const mediaFieldConfig = {
 	type: "media",
 	database: {
-		mode: "column",
+		mode: "relation-table",
+		separator: "med",
+		tableType: `${constants.db.customFieldTablePrefix}media`,
 	},
 	validation: {
 		mode: "ids",

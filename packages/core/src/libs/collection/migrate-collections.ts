@@ -14,6 +14,7 @@ import type { MigrationPlan } from "./migration/types.js";
  * - lucid_doc___{key}__fld
  * - lucid_doc___{key}__{brick-key} * all potential bricks
  * - lucid_doc___{key}__{brick-key}__rep__{repeater-field-key} * for each repeater for a single brick
+ * - lucid_doc___{key}__{brick-key}__{cf-relation-separator}__{field-key} * for each relation-table custom field
  */
 const migrateCollections: ServiceFn<
 	[

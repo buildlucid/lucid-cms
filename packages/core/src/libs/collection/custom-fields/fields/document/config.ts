@@ -1,9 +1,12 @@
+import constants from "../../../../../constants/constants.js";
 import type { FieldStaticConfig } from "../../types.js";
 
 export const documentFieldConfig = {
 	type: "document",
 	database: {
-		mode: "column",
+		mode: "relation-table",
+		separator: "doc",
+		tableType: `${constants.db.customFieldTablePrefix}document`,
 	},
 	validation: {
 		mode: "document-by-collection",

@@ -9,7 +9,13 @@ import type {
 	TabFieldConfig,
 } from "../../../../types.js";
 import registeredFields from "../../custom-fields/registered-fields.js";
-import { normalizeFieldDatabaseMode } from "../../custom-fields/storage/index.js";
+import {
+	getFieldDatabaseConfig,
+	isCustomFieldTableType,
+	isStorageMode,
+	normalizeFieldDatabaseMode,
+} from "../../custom-fields/storage/index.js";
+import { relationTableMode } from "../../custom-fields/storage/relation-table.js";
 import { treeTableMode } from "../../custom-fields/storage/tree-table.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../helpers/prefix-generated-column-name.js";
@@ -21,7 +27,7 @@ import type {
 
 /**
  * Creates table schemas for fields
- * Handles document fields, brick fields, and tree-table custom-field tables
+ * Handles document fields, brick fields, and custom-field storage tables
  */
 const createFieldTables = (props: {
 	collection: CollectionBuilder;
@@ -50,6 +56,14 @@ const createFieldTables = (props: {
 		props.db.config.tableNameByteLimit,
 	);
 	if (tableNameRes.error) return tableNameRes;
+
+	let includeIsOpen = true;
+	if (isCustomFieldTableType(props.type)) {
+		const databaseConfig = getFieldDatabaseConfig(props.type);
+		if (databaseConfig && isStorageMode(databaseConfig, "relation-table")) {
+			includeIsOpen = false;
+		}
+	}
 
 	const childTables: CollectionSchemaTable[] = [];
 	const columns: CollectionSchemaColumn[] = [
@@ -112,14 +126,16 @@ const createFieldTables = (props: {
 			nullable: false,
 			default: 0,
 		},
-		{
+	];
+	if (includeIsOpen) {
+		columns.push({
 			name: "is_open",
 			source: "core",
 			type: props.db.getDataType("boolean"),
 			nullable: false,
 			default: props.db.getDefault("boolean", "false"),
-		},
-	];
+		});
+	}
 
 	//* bricks only
 	if (props.type === "brick") {
@@ -178,7 +194,7 @@ const createFieldTables = (props: {
 
 				const fieldPath = (props.fieldPath || []).concat(field.key);
 				const treeTableRoot = props.rootTable ?? tableNameRes.data.name;
-				const treeTableCoreColumns: CollectionSchemaColumn[] = treeTableMode
+				const treeTableCoreColumns = treeTableMode
 					.getSchemaDefinition({
 						db: props.db,
 						table: {
@@ -195,7 +211,7 @@ const createFieldTables = (props: {
 						nullable: column.nullable,
 						foreignKey: column.foreignKey,
 						default: column.default,
-					}));
+					})) satisfies CollectionSchemaColumn[];
 
 				const treeTableRes = createFieldTables({
 					collection: props.collection,
@@ -269,11 +285,86 @@ const createFieldTables = (props: {
 						},
 					};
 				}
-				/**
-				 * Planned:
-				 * - Generate dedicated custom-field relation tables.
-				 * - Use the custom field's database config for table metadata.
-				 */
+
+				//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and tree-table tables) we need to update this
+				const fieldInstance = (props.brick || props.collection).fields.get(
+					field.key,
+				);
+				if (!fieldInstance) {
+					return {
+						data: undefined,
+						error: {
+							message: T("cannot_find_field_with_key_in_collection_brick", {
+								key: field.key,
+								type: props.brick ? "brick" : "collection",
+								typeKey: props.brick ? props.brick.key : props.collection.key,
+							}),
+						},
+					};
+				}
+
+				const fieldSchemaRes = fieldInstance.getSchemaDefinition({
+					db: props.db,
+					tables: {
+						document: props.documentTable,
+						version: props.versionTable,
+					},
+				});
+				if (fieldSchemaRes.error) return fieldSchemaRes;
+
+				const relationFieldPath = relationTableMode.getTableFieldPath({
+					fieldKey: field.key,
+					fieldPath: props.fieldPath,
+				});
+				const relationCoreColumns = relationTableMode
+					.getSchemaDefinition({
+						db: props.db,
+						table: {
+							type: databaseConfig.tableType,
+							parent: tableNameRes.data.name,
+						},
+					})
+					.columns.map((column) => ({
+						name: column.name,
+						source: "core",
+						type: column.type,
+						nullable: column.nullable,
+						foreignKey: column.foreignKey,
+						default: column.default,
+					})) satisfies CollectionSchemaColumn[];
+
+				const relationTableRes = createFieldTables({
+					collection: props.collection,
+					fields: [],
+					db: props.db,
+					type: databaseConfig.tableType,
+					documentTable: props.documentTable,
+					versionTable: props.versionTable,
+					brick: props.brick,
+					fieldPath: relationFieldPath,
+					additionalCoreColumns: relationCoreColumns,
+				});
+				if (relationTableRes.error) return relationTableRes;
+
+				const relationFieldColumns = fieldSchemaRes.data.columns.map(
+					(column) => ({
+						name: prefixGeneratedColName(column.name),
+						source: "field",
+						canAutoRemove: false,
+						type: column.type,
+						nullable: column.nullable,
+						foreignKey: column.foreignKey,
+						customField: {
+							type: field.type,
+						},
+						default: props.db.supports("alterColumn") ? column.default : null,
+					}),
+				) satisfies CollectionSchemaColumn[];
+
+				relationTableRes.data.schema.columns.push(...relationFieldColumns);
+
+				childTables.push(relationTableRes.data.schema);
+				childTables.push(...relationTableRes.data.childTables);
 				break;
 			}
 		}

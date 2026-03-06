@@ -104,19 +104,22 @@ describe("inferTableType", () => {
 		expect(longRes.data).toBe(`${constants.db.customFieldTablePrefix}repeater`);
 	});
 
-	test("unknown custom-field separators return errors", () => {
+	test("relation-table names (short + hashed)", () => {
 		const tableNames = [
 			{
 				short: "lucid_doc__page__banner__med__hero_image",
 				long: "lucid_doc__page__banner__med__hero_image__extremely_long_media_reference_key",
+				tableType: `${constants.db.customFieldTablePrefix}media`,
 			},
 			{
 				short: "lucid_doc__page__banner__doc__related_post",
 				long: "lucid_doc__page__banner__doc__related_post__very_long_document_reference_key",
+				tableType: `${constants.db.customFieldTablePrefix}document`,
 			},
 			{
 				short: "lucid_doc__page__banner__usr__author",
 				long: "lucid_doc__page__banner__usr__author__very_long_user_reference_key",
+				tableType: `${constants.db.customFieldTablePrefix}user`,
 			},
 		] as const;
 
@@ -130,10 +133,10 @@ describe("inferTableType", () => {
 			const shortRes = inferTableType(shortSafe.name);
 			const longRes = inferTableType(longSafe.name);
 
-			expect(shortRes.error).toBeDefined();
-			expect(shortRes.data).toBeUndefined();
-			expect(longRes.error).toBeDefined();
-			expect(longRes.data).toBeUndefined();
+			expect(shortRes.error).toBeUndefined();
+			expect(shortRes.data).toBe(entry.tableType);
+			expect(longRes.error).toBeUndefined();
+			expect(longRes.data).toBe(entry.tableType);
 		}
 	});
 });

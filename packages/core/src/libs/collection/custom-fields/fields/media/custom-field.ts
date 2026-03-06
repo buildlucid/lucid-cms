@@ -46,13 +46,13 @@ class MediaCustomField extends CustomField<"media"> {
 			data: {
 				columns: [
 					{
-						name: this.config.key,
+						name: "media_id",
 						type: props.db.getDataType("integer"),
-						nullable: true,
+						nullable: false,
 						foreignKey: {
 							table: "lucid_media",
 							column: "id",
-							onDelete: "set null",
+							onDelete: "cascade",
 						},
 					},
 				],

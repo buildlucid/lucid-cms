@@ -58,13 +58,24 @@ class DocumentCustomField extends CustomField<"document"> {
 			data: {
 				columns: [
 					{
-						name: this.config.key,
+						name: "collection_key",
+						type: props.db.getDataType("text"),
+						nullable: false,
+						default: this.config.collection,
+						foreignKey: {
+							table: "lucid_collections",
+							column: "key",
+							onDelete: "cascade",
+						},
+					},
+					{
+						name: "document_id",
 						type: props.db.getDataType("integer"),
-						nullable: true,
+						nullable: false,
 						foreignKey: {
 							table: documentTableRes.data.name,
 							column: "id",
-							onDelete: "set null",
+							onDelete: "cascade",
 						},
 					},
 				],

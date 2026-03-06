@@ -46,13 +46,13 @@ class UserCustomField extends CustomField<"user"> {
 			data: {
 				columns: [
 					{
-						name: this.config.key,
+						name: "user_id",
 						type: props.db.getDataType("integer"),
-						nullable: true,
+						nullable: false,
 						foreignKey: {
 							table: "lucid_users",
 							column: "id",
-							onDelete: "set null",
+							onDelete: "cascade",
 						},
 					},
 				],

@@ -28,6 +28,14 @@ export type TreeTableSchemaProps = {
 	};
 };
 
+export type RelationTableSchemaProps = {
+	db: DatabaseAdapter;
+	table: {
+		type: CustomFieldTableType;
+		parent: string;
+	};
+};
+
 export type StorageFieldConfig = Exclude<CFConfig<FieldTypes>, TabFieldConfig>;
 
 export type StorageModeDefinition<M extends FieldDatabaseMode> = {
@@ -46,3 +54,12 @@ export type TreeTableModeDefinition = StorageModeDefinition<"tree-table"> & {
 		config: FieldDatabaseConfig,
 	) => config is TreeTableFieldDatabaseConfig;
 };
+
+export type RelationTableModeDefinition =
+	StorageModeDefinition<"relation-table"> & {
+		getSchemaDefinition: (props: RelationTableSchemaProps) => SchemaDefinition;
+		getTableFieldPath: (props: {
+			fieldKey: string;
+			fieldPath?: string[];
+		}) => string[];
+	};
