@@ -58,7 +58,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			data: {
 				columns: [
 					{
-						name: this.key,
+						name: this.config.key,
 						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {

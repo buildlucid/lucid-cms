@@ -2,6 +2,8 @@ import constants from "../../../constants/constants.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type { FieldTypes } from "../../../libs/collection/custom-fields/types.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
@@ -148,7 +150,7 @@ const recursiveFieldValidate = (props: {
 	fields: Array<FieldInputSchema>;
 	instance: CollectionBuilder | BrickBuilder;
 	validationData: ValidationData;
-	parentRepeaterKey?: string;
+	parentTreeFieldKey?: string;
 	meta: {
 		useTranslations: boolean;
 		defaultLocale: string;
@@ -167,15 +169,17 @@ const recursiveFieldValidate = (props: {
 			});
 			continue;
 		}
+		const databaseConfig = registeredFields[fieldInstance.type].config.database;
 
-		//* handle repeater fields separately with recursive validation
-		if (field.type === "repeater" && field.groups) {
+		//* handle tree-table fields separately with recursive validation
+		if (isStorageMode(databaseConfig, "tree-table")) {
 			const groupErrors: Array<GroupError> = [];
+			const groups = field.groups || [];
 
-			// validates the repeater field and its group length
+			// validates the tree-table field and its group length
 			const validationResult = fieldInstance.validate({
 				type: field.type,
-				value: field.groups,
+				value: groups,
 			});
 			if (!validationResult.valid) {
 				errors.push({
@@ -186,15 +190,15 @@ const recursiveFieldValidate = (props: {
 				});
 			}
 
-			for (let i = 0; i < field.groups.length; i++) {
-				const group = field.groups[i];
+			for (let i = 0; i < groups.length; i++) {
+				const group = groups[i];
 				if (!group) continue;
 
 				const groupFieldErrors = recursiveFieldValidate({
 					fields: group.fields,
 					instance: props.instance,
 					validationData: props.validationData,
-					parentRepeaterKey: field.key,
+					parentTreeFieldKey: field.key,
 					meta: props.meta,
 				});
 
@@ -236,12 +240,11 @@ const recursiveFieldValidate = (props: {
 	props.instance.fields.forEach((fieldInstance, key) => {
 		if (submittedFieldKeys.has(key)) return;
 
-		//* skip fields that belong to a different repeater context
-		const fieldRepeaterParent = fieldInstance.repeater;
+		//* skip fields that belong to a different tree-table parent context
+		const fieldTreeParent = fieldInstance.repeater;
 		if (
-			(fieldRepeaterParent &&
-				fieldRepeaterParent !== props.parentRepeaterKey) ||
-			(!fieldRepeaterParent && props.parentRepeaterKey)
+			(fieldTreeParent && fieldTreeParent !== props.parentTreeFieldKey) ||
+			(!fieldTreeParent && props.parentTreeFieldKey)
 		) {
 			return;
 		}

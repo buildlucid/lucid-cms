@@ -288,7 +288,7 @@
 	"media_error_not_awaiting_sync": "The media key has either expired, been created already or has been deleted.",
 	"vite_build_error_message": "An unknown error occurred while copying the SPA over and building plugin components.",
 	"collection_migrator_table_name_brick_key_missing_message": "The collection buildTableName function received type 'brick' but received no brick key.",
-	"collection_migrator_table_name_repeater_keys_missing_message": "The collection buildTableName function received type 'repeater' but received no repeater keys.",
+	"collection_migrator_table_name_repeater_keys_missing_message": "The collection buildTableName function received a tree-table type but no field path keys.",
 	"cannot_find_field_with_key_in_collection_brick": "Cannot find field with key '{{key}}' in {{type}} '{{typeKey}}'.",
 	"infer_collection_schema_error": "An error occurred while inferring the collection schema.",
 	"invalid_table_name_format_start_with": "Invalid table name format, must start with '{{prefix}}'.",

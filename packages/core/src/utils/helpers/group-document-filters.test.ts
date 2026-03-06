@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import constants from "../../constants/constants.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type { QueryParamFilters } from "../../types/query-params.js";
 import type { LucidBrickTableName } from "../../types.js";
@@ -19,7 +20,7 @@ describe("groupDocumentFilters", () => {
 			name: "lucid_doc__simple__simple",
 			rawName: "lucid_doc__simple__simple",
 			type: "brick",
-			key: { collection: "simple", brick: "simple", repeater: undefined },
+			key: { collection: "simple", brick: "simple", fieldPath: undefined },
 			columns: [
 				{
 					name: "id",
@@ -54,8 +55,8 @@ describe("groupDocumentFilters", () => {
 		{
 			name: "lucid_doc__simple__simple__items",
 			rawName: "lucid_doc__simple__simple__items",
-			type: "repeater",
-			key: { collection: "simple", brick: "simple", repeater: ["items"] },
+			type: `${constants.db.customFieldTablePrefix}repeater`,
+			key: { collection: "simple", brick: "simple", fieldPath: ["items"] },
 			columns: [
 				{
 					name: "id",
@@ -76,11 +77,11 @@ describe("groupDocumentFilters", () => {
 		{
 			name: "lucid_doc__simple__simple__items__nestedItems",
 			rawName: "lucid_doc__simple__simple__items__nestedItems",
-			type: "repeater",
+			type: `${constants.db.customFieldTablePrefix}repeater`,
 			key: {
 				collection: "simple",
 				brick: "simple",
-				repeater: ["items", "nestedItems"],
+				fieldPath: ["items", "nestedItems"],
 			},
 			columns: [
 				{
@@ -110,7 +111,11 @@ describe("groupDocumentFilters", () => {
 			name: "lucid_doc__simple__simple-fixed",
 			rawName: "lucid_doc__simple__simple-fixed",
 			type: "brick",
-			key: { collection: "simple", brick: "simple-fixed", repeater: undefined },
+			key: {
+				collection: "simple",
+				brick: "simple-fixed",
+				fieldPath: undefined,
+			},
 			columns: [
 				{
 					name: "id",
@@ -132,7 +137,7 @@ describe("groupDocumentFilters", () => {
 			name: "lucid_doc__simple__fld",
 			rawName: "lucid_doc__simple__fld",
 			type: "document-fields",
-			key: { collection: "simple", brick: undefined, repeater: undefined },
+			key: { collection: "simple", brick: undefined, fieldPath: undefined },
 			columns: [
 				{
 					name: "id",
@@ -153,8 +158,8 @@ describe("groupDocumentFilters", () => {
 		{
 			name: "lucid_doc__simple__fld__people",
 			rawName: "lucid_doc__simple__fld__people",
-			type: "repeater",
-			key: { collection: "simple", brick: undefined, repeater: ["people"] },
+			type: `${constants.db.customFieldTablePrefix}repeater`,
+			key: { collection: "simple", brick: undefined, fieldPath: ["people"] },
 			columns: [
 				{
 					name: "id",

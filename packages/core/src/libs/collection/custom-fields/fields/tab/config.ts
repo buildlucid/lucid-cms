@@ -2,8 +2,9 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const tabFieldConfig = {
 	type: "tab",
-	relation: null,
-	refs: null,
+	database: {
+		mode: "column",
+	},
 	validation: null,
 } as const satisfies FieldStaticConfig<"tab">;
 

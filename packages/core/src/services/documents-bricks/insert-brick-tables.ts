@@ -97,19 +97,44 @@ const insertBrickTables: ServiceFn<
 		);
 		if (response.error) return response;
 
-		// create mappings for the next tables
+		// create mappings for the next tables.
+		// Prefer returned ref values when available; fall back to original row
+		// refs for adapters that do not return custom columns in insert results.
 		if (response.data?.length) {
 			for (let i = 0; i < response.data.length; i++) {
 				const insertedRow = response.data[i];
 				const originalRow = table.data[i];
-				if (!insertedRow || !originalRow) continue;
+				if (!insertedRow) continue;
+				if (typeof insertedRow.id !== "number") continue;
+
+				let mappedFromInsertedRefs = false;
+
+				if (
+					"parent_id_ref" in insertedRow &&
+					typeof insertedRow.parent_id_ref === "number" &&
+					insertedRow.parent_id_ref < 0
+				) {
+					idMapping[insertedRow.parent_id_ref] = insertedRow.id;
+					mappedFromInsertedRefs = true;
+				}
+
+				if (
+					"brick_id_ref" in insertedRow &&
+					typeof insertedRow.brick_id_ref === "number" &&
+					insertedRow.brick_id_ref < 0
+				) {
+					idMapping[insertedRow.brick_id_ref] = insertedRow.id;
+					mappedFromInsertedRefs = true;
+				}
+
+				if (mappedFromInsertedRefs || !originalRow) continue;
 
 				if (
 					"parent_id_ref" in originalRow &&
 					typeof originalRow.parent_id_ref === "number" &&
 					originalRow.parent_id_ref < 0
 				) {
-					idMapping[originalRow.parent_id_ref] = insertedRow.id as number;
+					idMapping[originalRow.parent_id_ref] = insertedRow.id;
 				}
 
 				if (
@@ -117,7 +142,7 @@ const insertBrickTables: ServiceFn<
 					typeof originalRow.parent_id === "number" &&
 					originalRow.parent_id < 0
 				) {
-					idMapping[originalRow.parent_id] = insertedRow.id as number;
+					idMapping[originalRow.parent_id] = insertedRow.id;
 				}
 
 				if (
@@ -125,7 +150,7 @@ const insertBrickTables: ServiceFn<
 					typeof originalRow.brick_id_ref === "number" &&
 					originalRow.brick_id_ref < 0
 				) {
-					idMapping[originalRow.brick_id_ref] = insertedRow.id as number;
+					idMapping[originalRow.brick_id_ref] = insertedRow.id;
 				}
 			}
 		}

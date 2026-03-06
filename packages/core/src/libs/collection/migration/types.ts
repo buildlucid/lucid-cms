@@ -54,7 +54,7 @@ export type TableMigration = {
 	key?: {
 		collection: string;
 		brick?: string;
-		repeater?: Array<string>;
+		fieldPath?: Array<string>;
 	};
 	columnOperations: ColumnOperation[];
 };

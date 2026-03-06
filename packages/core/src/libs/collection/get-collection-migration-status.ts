@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import { isTreeTableType } from "../../libs/collection/custom-fields/storage/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { CollectionMigrationsRepository } from "../repositories/index.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";
@@ -56,7 +57,7 @@ const getMigrationStatus: ServiceFn<
 		if (
 			table.type !== "document-fields" &&
 			table.type !== "brick" &&
-			table.type !== "repeater"
+			!isTreeTableType(table.type)
 		) {
 			continue;
 		}

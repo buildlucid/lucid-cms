@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import constants from "../../../constants/constants.js";
 import inferTableType from "./infer-table-type.js";
 import toSafeTableName from "./to-safe-table-name.js";
 
@@ -96,68 +97,43 @@ describe("inferTableType", () => {
 		const longRes = inferTableType(longSafe.name);
 
 		expect(shortRes.error).toBeUndefined();
-		expect(shortRes.data).toBe("repeater");
+		expect(shortRes.data).toBe(
+			`${constants.db.customFieldTablePrefix}repeater`,
+		);
 		expect(longRes.error).toBeUndefined();
-		expect(longRes.data).toBe("repeater");
+		expect(longRes.data).toBe(`${constants.db.customFieldTablePrefix}repeater`);
 	});
 
-	test("media relation names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__page__banner__med__hero_image";
-		const longRaw =
-			"lucid_doc__page__banner__med__hero_image__extremely_long_media_reference_key";
+	test("unknown custom-field separators return errors", () => {
+		const tableNames = [
+			{
+				short: "lucid_doc__page__banner__med__hero_image",
+				long: "lucid_doc__page__banner__med__hero_image__extremely_long_media_reference_key",
+			},
+			{
+				short: "lucid_doc__page__banner__doc__related_post",
+				long: "lucid_doc__page__banner__doc__related_post__very_long_document_reference_key",
+			},
+			{
+				short: "lucid_doc__page__banner__usr__author",
+				long: "lucid_doc__page__banner__usr__author__very_long_user_reference_key",
+			},
+		] as const;
 
-		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
-		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
+		for (const entry of tableNames) {
+			const shortSafe = toSafeTableName(entry.short, TABLE_NAME_LIMIT);
+			const longSafe = toSafeTableName(entry.long, TABLE_NAME_LIMIT);
 
-		expect(shortSafe.name).toBe(shortRaw);
-		expect(longSafe.name).not.toBe(longRaw);
+			expect(shortSafe.name).toBe(entry.short);
+			expect(longSafe.name).not.toBe(entry.long);
 
-		const shortRes = inferTableType(shortSafe.name);
-		const longRes = inferTableType(longSafe.name);
+			const shortRes = inferTableType(shortSafe.name);
+			const longRes = inferTableType(longSafe.name);
 
-		expect(shortRes.error).toBeUndefined();
-		expect(shortRes.data).toBe("media-rel");
-		expect(longRes.error).toBeUndefined();
-		expect(longRes.data).toBe("media-rel");
-	});
-
-	test("document relation names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__page__banner__doc__related_post";
-		const longRaw =
-			"lucid_doc__page__banner__doc__related_post__very_long_document_reference_key";
-
-		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
-		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
-
-		expect(shortSafe.name).toBe(shortRaw);
-		expect(longSafe.name).not.toBe(longRaw);
-
-		const shortRes = inferTableType(shortSafe.name);
-		const longRes = inferTableType(longSafe.name);
-
-		expect(shortRes.error).toBeUndefined();
-		expect(shortRes.data).toBe("document-rel");
-		expect(longRes.error).toBeUndefined();
-		expect(longRes.data).toBe("document-rel");
-	});
-
-	test("user relation names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__page__banner__usr__author";
-		const longRaw =
-			"lucid_doc__page__banner__usr__author__very_long_user_reference_key";
-
-		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
-		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
-
-		expect(shortSafe.name).toBe(shortRaw);
-		expect(longSafe.name).not.toBe(longRaw);
-
-		const shortRes = inferTableType(shortSafe.name);
-		const longRes = inferTableType(longSafe.name);
-
-		expect(shortRes.error).toBeUndefined();
-		expect(shortRes.data).toBe("user-rel");
-		expect(longRes.error).toBeUndefined();
-		expect(longRes.data).toBe("user-rel");
+			expect(shortRes.error).toBeDefined();
+			expect(shortRes.data).toBeUndefined();
+			expect(longRes.error).toBeDefined();
+			expect(longRes.data).toBeUndefined();
+		}
 	});
 });

@@ -1,4 +1,5 @@
 import type { ColumnDataType } from "kysely";
+import type constants from "../../../constants/constants.js";
 import type { Config } from "../../../types/config.js";
 import type { LocaleValue } from "../../../types/shared.js";
 import type DatabaseAdapter from "../../db-adapter/adapter-base.js";
@@ -8,7 +9,10 @@ import type {
 	OnUpdate,
 } from "../../db-adapter/types.js";
 import type { CollectionBuilder } from "../builders/index.js";
-import type { CollectionSchemaTable, TableType } from "../schema/types.js";
+import type {
+	CollectionSchemaTable,
+	CustomFieldTableType,
+} from "../schema/types.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
 import { colorFieldConfig } from "./fields/color/config.js";
@@ -96,17 +100,34 @@ export type OmitDefault<T> = T extends { config: unknown }
 		}
 	: T;
 
-export type FieldRelationConfig = {
+export type FieldDatabaseMode = "column" | "relation-table" | "tree-table";
+
+export type ColumnFieldDatabaseConfig = {
+	mode: "column";
+};
+
+export type RelationTableFieldDatabaseConfig<T extends string = string> = {
+	mode: "relation-table";
 	separator: string;
 	tableType: Extract<
-		TableType,
-		"repeater" | "document-rel" | "media-rel" | "user-rel"
+		CustomFieldTableType,
+		`${typeof constants.db.customFieldTablePrefix}${T}`
 	>;
 };
 
-export type FieldRefsConfig = {
-	fetchMode: "ids" | "document-values";
+export type TreeTableFieldDatabaseConfig<T extends string = string> = {
+	mode: "tree-table";
+	separator: string;
+	tableType: Extract<
+		CustomFieldTableType,
+		`${typeof constants.db.customFieldTablePrefix}${T}`
+	>;
 };
+
+export type FieldDatabaseConfig<T extends string = string> =
+	| ColumnFieldDatabaseConfig
+	| RelationTableFieldDatabaseConfig<T>
+	| TreeTableFieldDatabaseConfig;
 
 export type FieldValidationConfig = {
 	mode: "ids" | "document-by-collection";
@@ -114,8 +135,7 @@ export type FieldValidationConfig = {
 
 export type FieldStaticConfig<T extends string = string> = {
 	type: T;
-	relation: FieldRelationConfig | null;
-	refs: FieldRefsConfig | null;
+	database: FieldDatabaseConfig<T>;
 	validation: FieldValidationConfig | null;
 };
 
@@ -166,6 +186,7 @@ export type CustomFieldValidateResponse = {
 
 // -----------------------------------------------
 // DB Schema Definitions
+
 export type GetSchemaDefinitionProps = {
 	db: DatabaseAdapter;
 	tables: {

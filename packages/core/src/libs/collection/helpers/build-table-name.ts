@@ -1,8 +1,12 @@
 import constants from "../../../constants/constants.js";
-import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
+import {
+	getFieldDatabaseConfig,
+	isCustomFieldTableType,
+	isStorageMode,
+} from "../custom-fields/storage/index.js";
 import toSafeTableName from "./to-safe-table-name.js";
 
 /**
@@ -22,7 +26,7 @@ const buildTableName = <R extends string>(
 	keys: {
 		collection: string;
 		brick?: string;
-		repeater?: Array<string>;
+		fieldPath?: Array<string>;
 	},
 	tableNameByteLimit: number | null,
 ): Awaited<
@@ -61,39 +65,49 @@ const buildTableName = <R extends string>(
 			parts.push(collectionTableParts.fields);
 			break;
 		}
-		case "repeater": {
-			if (keys.repeater === undefined || keys.repeater?.length === 0) {
-				return {
-					data: undefined,
-					error: {
-						message: T(
-							"collection_migrator_table_name_repeater_keys_missing_message",
-						),
-					},
-				};
-			}
+	}
 
-			// add brick key first - repeater tables are scoped to them
-			//* assumes document-fields type when brick key isnt present
-			if (!keys.brick) {
-				parts.push(collectionTableParts.fields);
-			} else parts.push(keys.brick);
-
-			const repeaterRelation = registeredFields.repeater.config.relation;
-			if (!repeaterRelation) {
-				return {
-					data: undefined,
-					error: {
-						message: T("invalid_table_name_format_insufficient_parts"),
-					},
-				};
-			}
-
-			parts.push(repeaterRelation.separator);
-
-			// push all repeater keys - repeaters can have have children/parent repeaters
-			parts.push(...keys.repeater);
+	if (isCustomFieldTableType(type)) {
+		if (keys.fieldPath === undefined || keys.fieldPath.length === 0) {
+			return {
+				data: undefined,
+				error: {
+					message: T(
+						"collection_migrator_table_name_repeater_keys_missing_message",
+					),
+				},
+			};
 		}
+
+		const databaseConfig = getFieldDatabaseConfig(type);
+		if (!databaseConfig) {
+			return {
+				data: undefined,
+				error: {
+					message: T("invalid_table_name_format_insufficient_parts"),
+				},
+			};
+		}
+
+		if (!isStorageMode(databaseConfig, "tree-table")) {
+			return {
+				data: undefined,
+				error: {
+					message: T("invalid_table_name_format_insufficient_parts"),
+				},
+			};
+		}
+
+		// add brick key first - tree-table storage tables are scoped to them
+		//* assumes document-fields type when brick key isnt present
+		if (!keys.brick) {
+			parts.push(collectionTableParts.fields);
+		} else {
+			parts.push(keys.brick);
+		}
+
+		parts.push(databaseConfig.separator);
+		parts.push(...keys.fieldPath);
 	}
 
 	const safeNameRes = toSafeTableName(

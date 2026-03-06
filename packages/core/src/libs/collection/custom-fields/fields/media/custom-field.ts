@@ -46,7 +46,7 @@ class MediaCustomField extends CustomField<"media"> {
 			data: {
 				columns: [
 					{
-						name: this.key,
+						name: this.config.key,
 						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {

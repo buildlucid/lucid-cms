@@ -1,6 +1,7 @@
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
+import constants from "../../../constants/constants.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import inferSchema from "./infer-schema.js";
@@ -55,9 +56,9 @@ describe("Schema inference", async () => {
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_doc__pages__fld__rep__authors",
-				type: "repeater",
+				type: `${constants.db.customFieldTablePrefix}repeater`,
 				key: expect.objectContaining({
-					repeater: ["authors"],
+					fieldPath: ["authors"],
 				}),
 			}),
 		);
@@ -75,9 +76,9 @@ describe("Schema inference", async () => {
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
 				name: "lucid_doc__pages__fld__rep__authors__books",
-				type: "repeater",
+				type: `${constants.db.customFieldTablePrefix}repeater`,
 				key: expect.objectContaining({
-					repeater: ["authors", "books"],
+					fieldPath: ["authors", "books"],
 				}),
 			}),
 		);

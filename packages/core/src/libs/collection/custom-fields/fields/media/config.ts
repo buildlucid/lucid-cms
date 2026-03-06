@@ -2,12 +2,8 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const mediaFieldConfig = {
 	type: "media",
-	relation: {
-		separator: "med",
-		tableType: "media-rel",
-	},
-	refs: {
-		fetchMode: "ids",
+	database: {
+		mode: "column",
 	},
 	validation: {
 		mode: "ids",

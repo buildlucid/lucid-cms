@@ -4,6 +4,7 @@ import type CustomField from "../../../libs/collection/custom-fields/custom-fiel
 import registeredFields, {
 	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
+import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema, FieldTypes } from "../../../types.js";
 import type {
@@ -12,6 +13,10 @@ import type {
 } from "../../../utils/services/types.js";
 
 export type ValidationData = Partial<Record<FieldTypes, unknown>>;
+export type FieldValidationInput = {
+	ids: number[];
+	idsByCollection: Record<string, number[]>;
+};
 
 type ValidationBuckets = {
 	ids: Partial<Record<FieldTypes, Set<number>>>;
@@ -94,6 +99,7 @@ const extractRelationIdsFromFields = (
 	for (const field of fields) {
 		const fieldInstance = instance.fields.get(field.key);
 		if (!fieldInstance) continue;
+		const databaseConfig = registeredFields[fieldInstance.type].config.database;
 
 		const validationConfig = registeredFields[field.type].config.validation;
 		const ids = extractIdsFromField(field);
@@ -118,7 +124,7 @@ const extractRelationIdsFromFields = (
 			}
 		}
 
-		if (field.type === "repeater" && field.groups) {
+		if (isStorageMode(databaseConfig, "tree-table") && field.groups) {
 			for (const group of field.groups) {
 				extractRelationIdsFromFields(group.fields, instance, buckets);
 			}
@@ -163,23 +169,13 @@ const extractIdsFromField = (field: FieldInputSchema): number[] => {
 	return ids;
 };
 
-const hasIdsValidator = (
+const hasValidator = (
 	field: (typeof registeredFields)[FieldTypes],
 ): field is
 	| (typeof registeredFields)["media"]
-	| (typeof registeredFields)["user"] => {
-	return (
-		field.config.validation?.mode === "ids" && field.validateInput !== null
-	);
-};
-
-const hasDocumentValidator = (
-	field: (typeof registeredFields)[FieldTypes],
-): field is (typeof registeredFields)["document"] => {
-	return (
-		field.config.validation?.mode === "document-by-collection" &&
-		field.validateInput !== null
-	);
+	| (typeof registeredFields)["user"]
+	| (typeof registeredFields)["document"] => {
+	return field.config.validation !== null && field.validateInput !== null;
 };
 
 const buildValidationData = async (
@@ -191,26 +187,21 @@ const buildValidationData = async (
 
 	for (const fieldType of registeredFieldTypes) {
 		const fieldDefinition = registeredFields[fieldType];
-		if (hasIdsValidator(fieldDefinition)) {
-			const ids = Array.from(buckets.ids[fieldType] ?? new Set<number>());
-			promises.push(
-				fieldDefinition.validateInput(context, ids).then((result) => {
-					validationData[fieldType] = result;
-				}),
-			);
-			continue;
-		}
-
-		if (!hasDocumentValidator(fieldDefinition)) continue;
+		if (!hasValidator(fieldDefinition)) continue;
 
 		const byCollection = buckets.byCollection[fieldType] ?? {};
-		const input: Record<string, number[]> = {};
+		const idsByCollection: Record<string, number[]> = {};
 
 		for (const collectionKey in byCollection) {
-			input[collectionKey] = Array.from(
+			idsByCollection[collectionKey] = Array.from(
 				byCollection[collectionKey] ?? new Set<number>(),
 			);
 		}
+
+		const input: FieldValidationInput = {
+			ids: Array.from(buckets.ids[fieldType] ?? new Set<number>()),
+			idsByCollection,
+		};
 
 		promises.push(
 			fieldDefinition.validateInput(context, input).then((result) => {

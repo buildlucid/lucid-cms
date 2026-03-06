@@ -9,10 +9,29 @@ import type {
 	DocumentVersionType,
 	FieldTypes,
 	LucidBrickTableName,
-	LucidDocumentTableName,
 	ServiceFn,
 } from "../../../types.js";
 import type { FieldRelationValues } from "./extract-related-entity-ids.js";
+
+export type FieldRefFetchInput = {
+	relations: Array<{
+		table: string;
+		values: Set<unknown>;
+	}>;
+	versionType: Exclude<DocumentVersionType, "revision">;
+};
+
+export type FieldRefFetchOutput = {
+	rows: Array<MediaPropsT> | Array<UserPropT> | Array<BrickQueryResponse>;
+	meta?: {
+		document?: {
+			fieldsSchemaByCollection: Record<
+				string,
+				CollectionSchemaTable<LucidBrickTableName>
+			>;
+		};
+	};
+};
 
 type FieldRefData = Partial<
 	Record<
@@ -35,31 +54,20 @@ export type FieldRefResponse = {
 };
 
 /**
- * Responsible for fetching all of the reference data for a document based on what is extracted from field data and config
+ * Returns true when a field has a ref fetcher enabled.
  */
-const isLucidDocumentTableName = (
-	tableName: string,
-): tableName is LucidDocumentTableName => {
-	return tableName.startsWith("lucid_doc__");
-};
-
-const hasIdRefFetcher = (
+const hasRefFetcher = (
 	field: (typeof registeredFields)[FieldTypes],
 ): field is
 	| (typeof registeredFields)["media"]
-	| (typeof registeredFields)["user"] => {
-	return field.config.refs?.fetchMode === "ids" && field.fetchRefs !== null;
+	| (typeof registeredFields)["user"]
+	| (typeof registeredFields)["document"] => {
+	return field.fetchRefs !== null;
 };
 
-const hasDocumentRefFetcher = (
-	field: (typeof registeredFields)[FieldTypes],
-): field is (typeof registeredFields)["document"] => {
-	return (
-		field.config.refs?.fetchMode === "document-values" &&
-		field.fetchRefs !== null
-	);
-};
-
+/**
+ * Fetches reference rows for all field types present in the extracted relation values.
+ */
 const fetchRefData: ServiceFn<
 	[
 		{
@@ -72,82 +80,36 @@ const fetchRefData: ServiceFn<
 	const response: FieldRefResponse = {
 		data: {},
 	};
-	const fetchPromises: Promise<unknown>[] = [];
-
-	let firstError = false;
-	// let responseError: LucidErrorData;
 
 	for (const fieldType of registeredFieldTypes) {
 		const relationValues = data.values[fieldType];
 		const fieldDefinition = registeredFields[fieldType];
 		if (!relationValues || relationValues.length === 0) continue;
+		if (!hasRefFetcher(fieldDefinition)) continue;
 
-		if (hasIdRefFetcher(fieldDefinition)) {
-			const ids = relationValues
-				.flatMap((entry) => Array.from(entry.values))
-				.filter((value) => typeof value === "number");
-
-			fetchPromises.push(
-				fieldDefinition
-					.fetchRefs(context, {
-						ids: ids,
-					})
-					.then((res) => {
-						if (res.error && !firstError) {
-							firstError = true;
-							return;
-						}
-
-						if (res.data && Array.isArray(res.data)) {
-							response.data[fieldType] = res.data;
-						}
-					}),
-			);
-			continue;
-		}
-
-		if (!hasDocumentRefFetcher(fieldDefinition)) continue;
-
-		const values = relationValues.flatMap((entry) => {
-			if (!isLucidDocumentTableName(entry.table)) return [];
-
-			const ids = Array.from(entry.values).filter(
-				(value) => typeof value === "number",
-			);
-			return [
-				{
-					table: entry.table,
-					ids: ids,
-				},
-			];
+		const res = await fieldDefinition.fetchRefs(context, {
+			relations: relationValues,
+			versionType: data.versionType,
 		});
+		if (res.error) {
+			return {
+				data: undefined,
+				error: res.error,
+			};
+		}
+		if (!res.data) continue;
 
-		fetchPromises.push(
-			fieldDefinition
-				.fetchRefs(context, {
-					values: values,
-					versionType: data.versionType,
-				})
-				.then((res) => {
-					if (res.error && !firstError) {
-						firstError = true;
-						return;
-					}
-
-					if (!res.data) return;
-
-					response.data[fieldType] = res.data.rows;
-					response.meta = {
-						...response.meta,
-						document: {
-							fieldsSchemaByCollection: res.data.fieldsSchemaByCollection,
-						},
-					};
-				}),
-		);
+		response.data[fieldType] = res.data.rows;
+		if (res.data.meta?.document) {
+			response.meta = {
+				...response.meta,
+				document: {
+					fieldsSchemaByCollection:
+						res.data.meta.document.fieldsSchemaByCollection,
+				},
+			};
+		}
 	}
-
-	await Promise.all(fetchPromises);
 
 	return {
 		data: response,

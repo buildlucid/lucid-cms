@@ -1,3 +1,4 @@
+import { isTreeTableType } from "../../libs/collection/custom-fields/storage/index.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -24,7 +25,7 @@ const deleteMultiple: ServiceFn<
 	if (brickTableSchema.error) return brickTableSchema;
 
 	const exlcudeRepeaters = brickTableSchema.data.filter(
-		(table) => table.type !== "repeater",
+		(table) => !isTreeTableType(table.type),
 	);
 
 	const deleteBricksPromises = [];

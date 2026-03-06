@@ -9,11 +9,24 @@ import { collectionTableParts } from "./build-table-name.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
 
-const RELATION_CONFIGS = registeredFieldTypes.flatMap((fieldType) => {
-	const relation = registeredFields[fieldType].config.relation;
-	return relation ? [relation] : [];
+/**
+ * Returns table configs for any custom field with the repeater or relation table mode
+ */
+const customFieldTableConfigs = registeredFieldTypes.flatMap((fieldType) => {
+	const databaseConfig = registeredFields[fieldType].config.database;
+	if (databaseConfig.mode === "column") return [];
+
+	return [
+		{
+			separator: databaseConfig.separator,
+			tableType: databaseConfig.tableType,
+		},
+	];
 });
 
+/**
+ * Infers the table type from a table name
+ */
 const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 	const normalizedName = name.replace(HASHED_TABLE_SUFFIX_REGEX, "");
 	const parts = normalizedName.split(constants.db.nameSeparator);
@@ -51,10 +64,10 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 				tableType = "brick";
 			}
 		} else if (parts.length > 3) {
-			const relationConfig = RELATION_CONFIGS.find(
+			const customFieldTableConfig = customFieldTableConfigs.find(
 				(config) => config.separator === parts[3],
 			);
-			if (!relationConfig) {
+			if (!customFieldTableConfig) {
 				return {
 					data: undefined,
 					error: {
@@ -62,7 +75,8 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 					},
 				};
 			}
-			tableType = relationConfig.tableType;
+
+			tableType = customFieldTableConfig.tableType;
 		} else {
 			return {
 				data: undefined,

@@ -9,6 +9,7 @@ import type {
 	Select,
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { isTreeTableType } from "../collection/custom-fields/storage/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
@@ -133,16 +134,16 @@ const formatDocumentFields = (props: {
 };
 
 /**
- * Works out the target repeater table based on props and schema, and returns all the rows for it from the brciksQuery prop
+ * Resolves the target tree-table field rows based on schema path metadata.
  */
-const getBrickRepeaterRows = (props: {
+const getBrickTreeRows = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	collectionKey: string;
 	brickKey: string | undefined; // document-fields type doesnt add a brick key,
-	repeaterKey: string;
-	repeaterLevel: number;
-	/** Filters the response based on the given brick IDs or repeater IDs depending on the repeater depth */
+	treeFieldKey: string;
+	treeLevel: number;
+	/** Filters the response based on root IDs or parent IDs depending on tree depth. */
 	relationIds: number[];
 }): Select<LucidBricksTable>[] => {
 	const matchingSchema = props.bricksSchema.find((schema) => {
@@ -151,20 +152,18 @@ const getBrickRepeaterRows = (props: {
 		//* match the brick key if provided
 		if (props.brickKey !== undefined && schema.key.brick !== props.brickKey)
 			return false;
-		//* check if this is a repeater schema
-		if (schema.type !== "repeater") return false;
+		//* check if this schema belongs to a tree-table storage mode
+		if (!isTreeTableType(schema.type)) return false;
 		//* for document fields without a brick key
 		if (props.brickKey === undefined && schema.key.brick !== undefined)
 			return false;
-		//* check if the repeater array exists and has the correct path
-		if (!schema.key.repeater || schema.key.repeater.length === 0) return false;
+		//* check if the tree field path exists
+		const treePath = schema.key.fieldPath;
+		if (!treePath || treePath.length === 0) return false;
 		//* ensure we're at the correct nesting level
-		if (schema.key.repeater.length !== props.repeaterLevel + 1) return false;
-		//* check repeater key if it matches the last item in the repeater path
-		if (
-			schema.key.repeater[schema.key.repeater.length - 1] !== props.repeaterKey
-		)
-			return false;
+		if (treePath.length !== props.treeLevel + 1) return false;
+		//* check tree field key if it matches the last path segment
+		if (treePath[treePath.length - 1] !== props.treeFieldKey) return false;
 
 		return true;
 	});
@@ -173,14 +172,14 @@ const getBrickRepeaterRows = (props: {
 		const rows = props.bricksQuery[matchingSchema.name];
 		if (!rows) return [];
 
-		if (props.repeaterLevel === 0) {
-			//* filters the rows based on given brick IDs (each locale has its own unique brick ID, brick IDs are used on repeaters to build the relationship)
+		if (props.treeLevel === 0) {
+			//* depth 0 tree tables are linked to the root brick/document-fields rows
 			return rows.filter(
 				(r) => r.brick_id && props.relationIds.includes(r.brick_id),
 			);
 		}
 
-		//* filters the rows based on the given repeater IDs
+		//* nested tree tables are linked by parent_id
 		return rows.filter(
 			(r) => r.parent_id && props.relationIds.includes(r.parent_id),
 		);
@@ -206,5 +205,5 @@ const generateBrickRef = (
 export default {
 	formatMultiple,
 	formatDocumentFields,
-	getBrickRepeaterRows,
+	getBrickTreeRows,
 };

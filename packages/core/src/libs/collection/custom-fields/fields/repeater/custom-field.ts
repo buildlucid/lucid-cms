@@ -5,6 +5,7 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
@@ -43,7 +44,9 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 		} satisfies CFConfig<"repeater">;
 	}
 	// Methods
-	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
+	getSchemaDefinition(
+		_props: GetSchemaDefinitionProps,
+	): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
 			data: {
 				columns: [],

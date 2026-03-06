@@ -14,6 +14,8 @@ import type {
 } from "../../types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import registeredFields from "../collection/custom-fields/registered-fields.js";
+import { isStorageMode } from "../collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
@@ -38,7 +40,7 @@ export interface FieldFormatMeta {
 interface FieldFormatData {
 	/** The filtered target brick table rows, grouped by position, each row represent a different locale for the same brick instance */
 	brickRows: Select<LucidBricksTable>[];
-	/** The entire bricksQuery or DocumentQueryResponse response data - used to select repeater rows from later */
+	/** The entire bricksQuery or DocumentQueryResponse response data - used to select tree-table rows from later */
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	/** The schema for the entire collection and all possible bricks */
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
@@ -50,6 +52,19 @@ interface IntermediaryFieldValues {
 	value: unknown;
 	locale: string;
 }
+
+const isTreeTableFieldType = (type: FieldTypes): boolean => {
+	return isStorageMode(registeredFields[type].config.database, "tree-table");
+};
+
+const getTreeTableChildFieldConfig = (
+	field: CFConfig<FieldTypes>,
+): CFConfig<FieldTypes>[] | null => {
+	if (!isTreeTableFieldType(field.type)) return null;
+	if (!("fields" in field)) return null;
+	if (!Array.isArray(field.fields)) return null;
+	return field.fields as CFConfig<FieldTypes>[];
+};
 
 /**
  * The entry point for building out the FieldResponse array.
@@ -79,7 +94,7 @@ const buildFieldTree = (
 	data: FieldFormatData,
 	meta: FieldFormatMeta & {
 		fieldConfig: CFConfig<FieldTypes>[];
-		repeaterLevel?: number;
+		treeLevel?: number;
 		groupRef?: string;
 	},
 ): FieldResponse[] => {
@@ -87,20 +102,23 @@ const buildFieldTree = (
 
 	//* loop over fieldConfig (nested field structure - no tabs)
 	for (const config of meta.fieldConfig) {
-		if (config.type === "repeater") {
-			//* recursively build out repeater groups
+		const treeTableChildFields = getTreeTableChildFieldConfig(config);
+		if (treeTableChildFields) {
+			//* recursively build out tree-table groups
 			fieldsRes.push({
 				key: config.key,
 				type: config.type,
 				groupRef: meta.groupRef,
-				groups: buildGroups(data, {
+				groups: buildTreeGroups(data, {
 					builder: meta.builder,
-					repeaterConfig: config,
+					treeFieldConfig: config,
+					treeChildFields: treeTableChildFields,
 					host: meta.host,
 					localization: meta.localization,
 					collection: meta.collection,
 					brickKey: meta.brickKey,
-					repeaterLevel: meta.repeaterLevel || 0,
+					treeLevel: meta.treeLevel || 0,
+					groupRef: meta.groupRef,
 					config: meta.config,
 					bricksTableSchema: meta.bricksTableSchema,
 				}),
@@ -161,9 +179,9 @@ const buildField = (
 
 	//* if the field supports translations, use the translations field key
 	if (
-		meta.fieldConfig.type !== "repeater" &&
+		!isTreeTableFieldType(meta.fieldConfig.type) &&
 		meta.fieldConfig.type !== "tab" &&
-		meta.fieldConfig.config.useTranslations === true &&
+		cfInstance.translationsEnabled === true &&
 		meta.collection.getData.config.useTranslations === true
 	) {
 		const fieldTranslations: Record<string, FieldResponseValue> = {};
@@ -204,33 +222,32 @@ const buildField = (
 };
 
 /**
- * Responsible for building out groups for a repeater field
+ * Responsible for building out groups for a tree-table field
  */
-const buildGroups = (
+const buildTreeGroups = (
 	data: FieldFormatData,
 	meta: FieldFormatMeta & {
-		repeaterConfig: CFConfig<"repeater">;
-		repeaterLevel: number;
+		treeFieldConfig: CFConfig<FieldTypes>;
+		treeChildFields: CFConfig<FieldTypes>[];
+		treeLevel: number;
+		groupRef?: string;
 	},
 ): FieldGroupResponse[] => {
 	const groupsRes: FieldGroupResponse[] = [];
 
-	const repeaterFields = meta.repeaterConfig.fields;
-	if (!repeaterFields) return groupsRes;
-
-	//* using DocumentBricksFormatter.getBrickRepeaterRows, get the target repeater brick table rows and construct groups from them
-	const repeaterTables = DocumentBricksFormatter.getBrickRepeaterRows({
+	//* using DocumentBricksFormatter.getBrickTreeRows, get the target tree-table rows and construct groups from them
+	const treeRows = DocumentBricksFormatter.getBrickTreeRows({
 		bricksQuery: data.bricksQuery,
 		bricksSchema: data.bricksSchema,
 		collectionKey: meta.collection.key,
 		brickKey: meta.brickKey,
-		repeaterKey: meta.repeaterConfig.key,
-		repeaterLevel: meta.repeaterLevel,
+		treeFieldKey: meta.treeFieldConfig.key,
+		treeLevel: meta.treeLevel,
 		relationIds: data.brickRows.flatMap((b) => b.id),
 	});
 
 	//* group by the position
-	const groups = Map.groupBy(repeaterTables, (item) => {
+	const groups = Map.groupBy(treeRows, (item) => {
 		return item.position;
 	});
 	groups.forEach((localeRows, key) => {
@@ -239,9 +256,10 @@ const buildGroups = (
 		const ref = generateGroupRef(
 			meta.collection.key,
 			meta.brickKey,
-			meta.repeaterConfig.key,
+			meta.treeFieldConfig.key,
 			key,
-			meta.repeaterLevel,
+			meta.treeLevel,
+			meta.groupRef,
 		);
 
 		groupsRes.push({
@@ -261,8 +279,8 @@ const buildGroups = (
 					localization: meta.localization,
 					collection: meta.collection,
 					brickKey: meta.brickKey,
-					fieldConfig: repeaterFields,
-					repeaterLevel: meta.repeaterLevel + 1,
+					fieldConfig: meta.treeChildFields,
+					treeLevel: meta.treeLevel + 1,
 					config: meta.config,
 					groupRef: ref,
 					bricksTableSchema: meta.bricksTableSchema,
@@ -305,14 +323,15 @@ const objectifyFields = (
 const generateGroupRef = (
 	collectionKey: string,
 	brickKey: string | undefined,
-	repeaterKey: string,
+	treeFieldKey: string,
 	position: number,
-	repeaterLevel: number,
+	treeLevel: number,
+	parentGroupRef?: string,
 ): string => {
 	return crypto
 		.createHash("sha256")
 		.update(
-			`${collectionKey}-${brickKey || "document"}-${repeaterKey}-${position}-${repeaterLevel}`,
+			`${collectionKey}-${brickKey || "document"}-${treeFieldKey}-${position}-${treeLevel}-${parentGroupRef || "root"}`,
 		)
 		.digest("hex")
 		.substring(0, 36);

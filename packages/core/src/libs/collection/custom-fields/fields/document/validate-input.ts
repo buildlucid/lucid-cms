@@ -1,4 +1,5 @@
 import constants from "../../../../../constants/constants.js";
+import type { FieldValidationInput } from "../../../../../services/documents-bricks/helpers/fetch-validation-data.js";
 import T from "../../../../../translations/index.js";
 import type {
 	LucidDocumentTableName,
@@ -14,8 +15,9 @@ import type { DocumentValidationData } from "./types.js";
  */
 const validateDocumentInputData = async (
 	context: ServiceContext,
-	documentIdsByCollection: Record<string, number[]>,
+	input: FieldValidationInput,
 ): Promise<DocumentValidationData[]> => {
+	const documentIdsByCollection = input.idsByCollection;
 	const allDocuments: DocumentValidationData[] = [];
 	try {
 		//* create queries for each collection key

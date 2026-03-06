@@ -13,7 +13,7 @@ import getRuntimeSchema from "./get-runtime-schema.js";
 /**
  * Returns runtime schema tables for brick content on a collection.
  * - document-fields
- * - repeater
+ * - tree-table custom-field tables
  * - brick
  */
 export const getBricksTableSchema = async (

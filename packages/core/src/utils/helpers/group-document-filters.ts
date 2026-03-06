@@ -1,3 +1,4 @@
+import { getFieldDatabaseConfig } from "../../libs/collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../../libs/collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
 import type {
@@ -5,11 +6,12 @@ import type {
 	FilterValue,
 	QueryParamFilters,
 } from "../../types/query-params.js";
-import type { LucidBrickTableName } from "../../types.js";
+import type { FieldDatabaseMode, LucidBrickTableName } from "../../types.js";
 
 const CUSTOMFIELD_FILTER_PREFIX = "_";
 const DOCUMENT_FIELDS_KEY = "fields";
 const BRICK_SEPERATOR = ".";
+const TREE_TABLE_FILTER_MODE: FieldDatabaseMode = "tree-table";
 
 export type BrickFieldFilters = {
 	key: string;
@@ -23,15 +25,50 @@ export type BrickFilters = {
 	filters: BrickFieldFilters[];
 };
 
+const hasFieldColumn = (
+	schema: CollectionSchemaTable<LucidBrickTableName>,
+	fieldKey: string,
+): boolean => {
+	const prefixedColName = prefixGeneratedColName(fieldKey);
+	return schema.columns.some(
+		(column) => column.name === prefixedColName && column.source === "field",
+	);
+};
+
+const pushBrickFilter = (params: {
+	brickFiltersMap: Map<LucidBrickTableName, BrickFieldFilters[]>;
+	table: LucidBrickTableName;
+	fieldKey: string;
+	value: FilterValue;
+	operator?: FilterOperator;
+}): void => {
+	const filters = params.brickFiltersMap.get(params.table) || [];
+	filters.push({
+		key: params.fieldKey,
+		value: params.value,
+		operator: params.operator || "=",
+		column: prefixGeneratedColName(params.fieldKey),
+	});
+	params.brickFiltersMap.set(params.table, filters);
+};
+
+const matchesStorageMode = (
+	schema: CollectionSchemaTable<LucidBrickTableName>,
+	mode: FieldDatabaseMode,
+): boolean => {
+	const databaseConfig = getFieldDatabaseConfig(schema.type);
+	return databaseConfig?.mode === mode;
+};
+
 /**
  * Splits filters based on document columns and brick tables for custom fields.
  *
  * - `filter[_customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
  * - `filter[fields._customFieldKey]` Targets the `document-fiedls` table and checks for a CF with a key of `customFieldKey`.
  * - `filter[brickKey._customFieldKey]` Targets the `brick` table with a key of `brickKey` and checks for a CF with a key of `customFieldKey`.
- * - `filter[brickKey.repeaterKey._customFieldKey]` Targets the `repeater` table that belongs to the `brick` and checks for a CF with a key of `customFieldKey`.
+ * - `filter[brickKey.treeFieldKey._customFieldKey]` Targets a tree-table custom-field table scoped to the `brick` and checks for a CF with a key of `customFieldKey`.
  *
- * This supports filtering on any repeater table, but you only need to include the repeater key of the level you're searching. This works as repeater keys within a brick are strictly unique.
+ * This supports filtering on any tree-table depth. Include the tree field key for the target table path segment.
  */
 const groupDocumentFilters = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
@@ -68,29 +105,19 @@ const groupDocumentFilters = (
 			const fieldTable = bricksTableSchema.find(
 				(schema) => schema.type === "document-fields",
 			);
-
-			if (fieldTable) {
-				// Validate the field exists in the schema
-				const prefixedColName = prefixGeneratedColName(fieldKey);
-				const column = fieldTable.columns.find(
-					(col) => col.name === prefixedColName && col.source === "field",
-				);
-
-				if (column) {
-					const filters = brickFiltersMap.get(fieldTable.name) || [];
-					filters.push({
-						key: fieldKey,
-						value: value.value,
-						operator: value.operator || "=",
-						column: prefixedColName,
-					});
-					brickFiltersMap.set(fieldTable.name, filters);
-				}
+			if (fieldTable && hasFieldColumn(fieldTable, fieldKey)) {
+				pushBrickFilter({
+					brickFiltersMap,
+					table: fieldTable.name,
+					fieldKey,
+					value: value.value,
+					operator: value.operator,
+				});
 			}
 			continue;
 		}
 
-		//* handle brick fields and repeaters (format: "brickKey.fieldKey" or "brickKey.repeaterKey._fieldKey")
+		//* handle brick fields and tree-table fields (format: "brickKey.fieldKey" or "brickKey.treeFieldKey._fieldKey")
 		const parts = key.split(BRICK_SEPERATOR);
 		if (parts.length >= 2) {
 			const brickKey = parts[0];
@@ -122,25 +149,25 @@ const groupDocumentFilters = (
 				parts.length === 3 &&
 				parts[2]?.startsWith(CUSTOMFIELD_FILTER_PREFIX)
 			) {
-				// repeater field ("hero.items._text", "fields.people._name")
-				const repeaterKey = parts[1];
+				// tree-table field ("hero.items._text", "fields.people._name")
+				const treeFieldKey = parts[1];
 				fieldKey = parts[2].substring(1);
 
-				if (repeaterKey) {
-					// handle document fields repeaters v brick repeaters
+				if (treeFieldKey) {
+					// handle document-fields tree tables vs brick-scoped tree tables
 					if (brickKey === DOCUMENT_FIELDS_KEY) {
 						schemaTable = bricksTableSchema.find(
 							(schema) =>
-								schema.type === "repeater" &&
+								matchesStorageMode(schema, TREE_TABLE_FILTER_MODE) &&
 								schema.key.brick === undefined &&
-								schema.key.repeater?.includes(repeaterKey),
+								schema.key.fieldPath?.includes(treeFieldKey),
 						);
 					} else {
 						schemaTable = bricksTableSchema.find(
 							(schema) =>
-								schema.type === "repeater" &&
+								matchesStorageMode(schema, TREE_TABLE_FILTER_MODE) &&
 								schema.key.brick === brickKey &&
-								schema.key.repeater?.includes(repeaterKey),
+								schema.key.fieldPath?.includes(treeFieldKey),
 						);
 					}
 
@@ -148,22 +175,19 @@ const groupDocumentFilters = (
 				}
 			}
 
-			if (tableName && fieldKey && schemaTable) {
-				const prefixedColName = prefixGeneratedColName(fieldKey);
-				const columnExists = schemaTable.columns.some(
-					(col) => col.name === prefixedColName && col.source === "field",
-				);
-
-				if (columnExists) {
-					const filters = brickFiltersMap.get(tableName) || [];
-					filters.push({
-						key: fieldKey,
-						value: value.value,
-						operator: value.operator || "=",
-						column: prefixedColName,
-					});
-					brickFiltersMap.set(tableName, filters);
-				}
+			if (
+				tableName &&
+				fieldKey &&
+				schemaTable &&
+				hasFieldColumn(schemaTable, fieldKey)
+			) {
+				pushBrickFilter({
+					brickFiltersMap,
+					table: tableName,
+					fieldKey,
+					value: value.value,
+					operator: value.operator,
+				});
 			}
 		}
 	}

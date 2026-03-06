@@ -1,5 +1,14 @@
 import crypto from "node:crypto";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import {
+	getFieldDatabaseConfig,
+	isStorageMode,
+} from "../../../libs/collection/custom-fields/storage/index.js";
+import {
+	treeTableMode,
+	treeTableSchemaColumns,
+} from "../../../libs/collection/custom-fields/storage/tree-table.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
@@ -7,6 +16,7 @@ import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
 	BrickResponse,
+	FieldDatabaseMode,
 	FieldResponse,
 	Insert,
 	LucidBricksTable,
@@ -20,49 +30,199 @@ export type InsertBrickTables = {
 	priority: number;
 };
 
+type ConstructField = FieldInputSchema | FieldResponse;
+
+export type ConstructBrickTableParams = {
+	type: Exclude<TableType, "versions" | "document">;
+	brick?: BrickInputSchema | BrickResponse;
+	targetFields: ConstructField[];
+	fieldPath?: Array<string>;
+	parentId?: Map<string, number> | null;
+	parentIdRef?: Map<string, number>;
+	brickIdByLocale?: Map<string, number>; // Track brick_id_refs by locale
+	collection: CollectionBuilder;
+	documentId: number;
+	versionId: number;
+	localization: {
+		locales: string[];
+		defaultLocale: string;
+	};
+	brickKeyTableNameMap: Map<string, LucidBrickTableName>;
+	order: number;
+	open: boolean;
+	tableNameByteLimit: number | null;
+};
+
+type ChildTableBuild = Pick<
+	ConstructBrickTableParams,
+	| "type"
+	| "targetFields"
+	| "fieldPath"
+	| "parentId"
+	| "parentIdRef"
+	| "brickIdByLocale"
+	| "order"
+	| "open"
+>;
+
+type TableModeContext = Pick<
+	ConstructBrickTableParams,
+	"type" | "fieldPath" | "parentId" | "parentIdRef" | "brickIdByLocale"
+>;
+
+type FieldModeHandlerContext = {
+	field: ConstructField;
+	params: ConstructBrickTableParams;
+	rowsByLocale: Map<string, Partial<Insert<LucidBricksTable>>>;
+	brickIdRefByLocale: Map<string, number>;
+	parentTableMode: FieldDatabaseMode;
+};
+
+type FieldModeHandler = {
+	writeColumns?: (context: FieldModeHandlerContext) => void;
+	buildChildTables?: (context: FieldModeHandlerContext) => ChildTableBuild[];
+};
+
+const createTempRelationId = (): number => {
+	return -Math.abs(
+		Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) % 2147483647,
+	);
+};
+
+const getTableMode = (
+	type: Exclude<TableType, "versions" | "document">,
+): FieldDatabaseMode => {
+	return getFieldDatabaseConfig(type)?.mode ?? "column";
+};
+
+const getTablePriority = (params: {
+	mode: FieldDatabaseMode;
+	fieldPath?: string[];
+}): number => {
+	switch (params.mode) {
+		case "tree-table":
+			return treeTableMode.getInsertPriority(params.fieldPath);
+		case "column":
+		case "relation-table":
+			return 0;
+	}
+};
+
+const applyTableModeColumns = (context: {
+	mode: FieldDatabaseMode;
+	row: Partial<Insert<LucidBricksTable>>;
+	locale: string;
+	params: TableModeContext;
+}): void => {
+	switch (context.mode) {
+		case "tree-table":
+			context.row[treeTableSchemaColumns.parentId] =
+				context.params.parentId?.get(context.locale) || null;
+			context.row[treeTableSchemaColumns.parentIdRef] =
+				context.params.parentIdRef?.get(context.locale);
+
+			if (context.params.brickIdByLocale?.has(context.locale)) {
+				context.row[treeTableSchemaColumns.rootId] =
+					context.params.brickIdByLocale.get(context.locale);
+			}
+			break;
+		case "column":
+		case "relation-table":
+			break;
+	}
+};
+
+const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
+	column: {
+		writeColumns: (context) => {
+			if (!context.field.key) return;
+
+			const valuesByLocale = processFieldValues(
+				context.field,
+				context.params.localization.locales,
+				context.params.localization.defaultLocale,
+			);
+
+			for (const locale of context.params.localization.locales) {
+				const row = context.rowsByLocale.get(locale);
+				if (!row) continue;
+
+				row[prefixGeneratedColName(context.field.key)] =
+					valuesByLocale.get(locale);
+			}
+		},
+	},
+	"tree-table": {
+		buildChildTables: (context) => {
+			const databaseConfig =
+				registeredFields[context.field.type].config.database;
+			if (!isStorageMode(databaseConfig, "tree-table")) return [];
+			if (!context.field.key) return [];
+			if (!context.field.groups || context.field.groups.length === 0) return [];
+
+			const fieldPath = context.params.fieldPath
+				? [...context.params.fieldPath, context.field.key]
+				: [context.field.key];
+
+			return context.field.groups.flatMap((group, groupIndex) => {
+				if (!group.fields) return [];
+
+				const localeGroupRef = new Map<string, number>();
+				for (const locale of context.params.localization.locales) {
+					localeGroupRef.set(locale, createTempRelationId());
+				}
+
+				return [
+					{
+						type: databaseConfig.tableType,
+						targetFields: group.fields,
+						fieldPath: fieldPath,
+						parentId:
+							context.parentTableMode === "tree-table"
+								? context.params.parentIdRef || null
+								: null,
+						parentIdRef: localeGroupRef,
+						brickIdByLocale:
+							context.params.type === "brick" ||
+							context.params.type === "document-fields"
+								? context.brickIdRefByLocale
+								: context.params.brickIdByLocale,
+						order: group.order !== undefined ? group.order : groupIndex,
+						open: group.open ?? false,
+					},
+				];
+			});
+		},
+	},
+	"relation-table": {},
+};
+
 /**
  * Generate a key for mapping brick to table names.
  * Stops us from doing duplicate work generating table names.
  */
 const genTableMapKey = (params: {
 	brickKey?: string;
-	repeaterKeys?: Array<string>;
+	fieldPath?: Array<string>;
 }): string => {
 	const prefix = params.brickKey ?? "pseudo-brick";
-	if (!params.repeaterKeys || params.repeaterKeys.length === 0) return prefix;
-	return `${prefix}:${params.repeaterKeys.join(":")}`;
+	if (!params.fieldPath || params.fieldPath.length === 0) return prefix;
+	return `${prefix}:${params.fieldPath.join(":")}`;
 };
 
 /**
- * Construct brick/repeater table data ready to insert into the DB
+ * Construct brick/tree-table table data ready to insert into the DB
  */
 const constructBrickTable = (
 	brickTables: Array<InsertBrickTables>,
-	params: {
-		type: Exclude<TableType, "versions" | "document">;
-		brick?: BrickInputSchema | BrickResponse;
-		targetFields: Array<FieldInputSchema> | Array<FieldResponse>;
-		repeaterKeys?: Array<string>;
-		parentId?: Map<string, number> | null;
-		parentIdRef?: Map<string, number>;
-		brickIdByLocale?: Map<string, number>; // Track brick_id_refs by locale
-		collection: CollectionBuilder;
-		documentId: number;
-		versionId: number;
-		localization: {
-			locales: string[];
-			defaultLocale: string;
-		};
-		brickKeyTableNameMap: Map<string, LucidBrickTableName>;
-		order: number;
-		open: boolean;
-		tableNameByteLimit: number | null;
-	},
+	params: ConstructBrickTableParams,
 ): void => {
+	const tableMode = getTableMode(params.type);
+
 	//* get or build the table name
 	const mapKey = genTableMapKey({
 		brickKey: params.brick?.key,
-		repeaterKeys: params.repeaterKeys,
+		fieldPath: params.fieldPath,
 	});
 
 	let tableName: LucidBrickTableName;
@@ -75,7 +235,7 @@ const constructBrickTable = (
 			{
 				collection: params.collection.key,
 				brick: params.brick?.key,
-				repeater: params.repeaterKeys,
+				fieldPath: params.fieldPath,
 			},
 			params.tableNameByteLimit,
 		);
@@ -87,23 +247,16 @@ const constructBrickTable = (
 	//* find existing table or create new one
 	let tableIndex = brickTables.findIndex((table) => table.table === tableName);
 	if (tableIndex === -1) {
-		let tablePriority = 0;
-		if (params.type === "repeater" && params.repeaterKeys) {
-			tablePriority = params.repeaterKeys.length;
-		}
-
 		brickTables.push({
 			table: tableName,
 			data: [],
-			priority: tablePriority,
+			priority: getTablePriority({
+				mode: tableMode,
+				fieldPath: params.fieldPath,
+			}),
 		});
 		tableIndex = brickTables.length - 1;
 	}
-
-	//* process regular fields - excluding repeaters
-	const nonRepeaterFields = params.targetFields.filter(
-		(field) => field.type !== "repeater",
-	);
 
 	const brickInstanceId = crypto.randomUUID();
 	const rowsByLocale = new Map<string, Partial<Insert<LucidBricksTable>>>();
@@ -127,43 +280,44 @@ const constructBrickTable = (
 
 		//* generate brick_id_ref for each brick by locale
 		if (params.type === "brick" || params.type === "document-fields") {
-			const localeSpecificBrickRef = -Math.abs(
-				Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) % 2147483647,
-			);
+			const localeSpecificBrickRef = createTempRelationId();
 			baseRowData.brick_id_ref = localeSpecificBrickRef;
 			brickIdRefByLocale.set(locale, localeSpecificBrickRef);
 		}
 
-		//* add repeater specific columns
-		if (params.type === "repeater") {
-			baseRowData.parent_id = params.parentId?.get(locale) || null;
-			baseRowData.parent_id_ref = params.parentIdRef?.get(locale);
-
-			//* set brick_id to the corresponding locale's brick reference
-			if (params.brickIdByLocale?.has(locale)) {
-				baseRowData.brick_id = params.brickIdByLocale.get(locale); // will be populated after insertion
-			}
-		}
+		applyTableModeColumns({
+			mode: tableMode,
+			row: baseRowData,
+			locale: locale,
+			params,
+		});
 
 		rowsByLocale.set(locale, baseRowData);
 	}
 
-	//* process each field and add its values to the corresponding locale rows
-	for (const field of nonRepeaterFields) {
-		if (!field.key) continue;
+	const childTableBuilds: ChildTableBuild[] = [];
 
-		const valuesByLocale = processFieldValues(
+	for (const field of params.targetFields) {
+		const fieldMode = registeredFields[field.type].config.database.mode;
+		const handler = fieldModeHandlers[fieldMode];
+
+		handler.writeColumns?.({
 			field,
-			params.localization.locales,
-			params.localization.defaultLocale,
-		);
+			params,
+			rowsByLocale,
+			brickIdRefByLocale,
+			parentTableMode: tableMode,
+		});
 
-		for (const locale of params.localization.locales) {
-			const value = valuesByLocale.get(locale);
-			const row = rowsByLocale.get(locale);
-
-			if (row) row[prefixGeneratedColName(field.key)] = value;
-		}
+		const fieldChildBuilds = handler.buildChildTables?.({
+			field,
+			params,
+			rowsByLocale,
+			brickIdRefByLocale,
+			parentTableMode: tableMode,
+		});
+		if (!fieldChildBuilds) continue;
+		childTableBuilds.push(...fieldChildBuilds);
 	}
 
 	//* add the rows to the table
@@ -171,58 +325,23 @@ const constructBrickTable = (
 		brickTables[tableIndex]?.data.push(row as Insert<LucidBricksTable>);
 	}
 
-	//* handle repeater fields for nested table gen
-	const repeaterFields = params.targetFields.filter(
-		(field) =>
-			field.type === "repeater" &&
-			field.key &&
-			field.groups &&
-			field.groups?.length > 0,
-	);
-
-	for (const repeaterField of repeaterFields) {
-		if (!repeaterField.key) continue;
-
-		const newRepeaterKeys = params.repeaterKeys
-			? [...params.repeaterKeys, repeaterField.key]
-			: [repeaterField.key];
-
-		repeaterField.groups?.forEach((group, groupIndex) => {
-			//* generate a temp ID for parent/child relation. This will be replaced before being inserted into the DB with its parents actual ID.
-			const localeGroupRef = new Map<string, number>();
-			for (const locale of params.localization.locales) {
-				localeGroupRef.set(
-					locale,
-					-Math.abs(
-						Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) %
-							2147483647,
-					),
-				);
-			}
-
-			if (group.fields) {
-				constructBrickTable(brickTables, {
-					type: "repeater",
-					collection: params.collection,
-					documentId: params.documentId,
-					versionId: params.versionId,
-					targetFields: group.fields,
-					repeaterKeys: newRepeaterKeys,
-					parentId:
-						params.type === "repeater" ? params.parentIdRef || null : null,
-					parentIdRef: localeGroupRef,
-					brickIdByLocale:
-						params.type === "brick" || params.type === "document-fields"
-							? brickIdRefByLocale
-							: params.brickIdByLocale,
-					localization: params.localization,
-					brickKeyTableNameMap: params.brickKeyTableNameMap,
-					brick: params.brick,
-					order: group.order !== undefined ? group.order : groupIndex,
-					open: group.open ?? false,
-					tableNameByteLimit: params.tableNameByteLimit,
-				});
-			}
+	for (const childBuild of childTableBuilds) {
+		constructBrickTable(brickTables, {
+			type: childBuild.type,
+			collection: params.collection,
+			documentId: params.documentId,
+			versionId: params.versionId,
+			targetFields: childBuild.targetFields,
+			fieldPath: childBuild.fieldPath,
+			parentId: childBuild.parentId,
+			parentIdRef: childBuild.parentIdRef,
+			brickIdByLocale: childBuild.brickIdByLocale,
+			localization: params.localization,
+			brickKeyTableNameMap: params.brickKeyTableNameMap,
+			brick: params.brick,
+			order: childBuild.order,
+			open: childBuild.open,
+			tableNameByteLimit: params.tableNameByteLimit,
 		});
 	}
 };

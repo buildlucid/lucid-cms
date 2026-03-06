@@ -2,12 +2,8 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const documentFieldConfig = {
 	type: "document",
-	relation: {
-		separator: "doc",
-		tableType: "document-rel",
-	},
-	refs: {
-		fetchMode: "document-values",
+	database: {
+		mode: "column",
 	},
 	validation: {
 		mode: "document-by-collection",

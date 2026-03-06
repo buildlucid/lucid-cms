@@ -2,8 +2,9 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const datetimeFieldConfig = {
 	type: "datetime",
-	relation: null,
-	refs: null,
+	database: {
+		mode: "column",
+	},
 	validation: null,
 } as const satisfies FieldStaticConfig<"datetime">;
 

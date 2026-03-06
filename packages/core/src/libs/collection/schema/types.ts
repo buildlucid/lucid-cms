@@ -1,17 +1,18 @@
 import type { ColumnDataType } from "kysely";
+import type constants from "../../../constants/constants.js";
 import type { FieldTypes } from "../../../types.js";
 import type { OnDelete, OnUpdate } from "../../db-adapter/types.js";
 
-export type TableType =
+export type CoreTableType =
 	| "document"
 	| "versions"
 	| "document-fields"
-	| "brick"
-	| "repeater"
-	// custom field relation table types
-	| "media-rel"
-	| "user-rel"
-	| "document-rel";
+	| "brick";
+
+export type CustomFieldTableType =
+	`${typeof constants.db.customFieldTablePrefix}${string}`;
+
+export type TableType = CoreTableType | CustomFieldTableType;
 
 export type CollectionSchemaColumn = {
 	name: string;
@@ -43,7 +44,7 @@ export type CollectionSchemaTable<TableName = string> = {
 	key: {
 		collection: string;
 		brick?: string;
-		repeater?: Array<string>;
+		fieldPath?: Array<string>;
 	};
 	columns: Array<CollectionSchemaColumn>;
 };

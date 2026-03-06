@@ -33,7 +33,7 @@ const inferSchema = (
 		if (versionTableRes.error) return versionTableRes;
 		tables.push(versionTableRes.data.schema);
 
-		//* field / repeater tables
+		//* field / storage-pattern tables
 		for (const brick of collection.brickInstances || []) {
 			const brickFieldsTableRes = createFieldTables({
 				collection: collection,

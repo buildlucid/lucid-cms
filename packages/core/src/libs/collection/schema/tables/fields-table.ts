@@ -8,6 +8,9 @@ import type {
 	ServiceResponse,
 	TabFieldConfig,
 } from "../../../../types.js";
+import registeredFields from "../../custom-fields/registered-fields.js";
+import { normalizeFieldDatabaseMode } from "../../custom-fields/storage/index.js";
+import { treeTableMode } from "../../custom-fields/storage/tree-table.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../helpers/prefix-generated-column-name.js";
 import type {
@@ -18,19 +21,19 @@ import type {
 
 /**
  * Creates table schemas for fields
- * Handles document fields, brick fields, and repeater fields
+ * Handles document fields, brick fields, and tree-table custom-field tables
  */
 const createFieldTables = (props: {
 	collection: CollectionBuilder;
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
 	db: DatabaseAdapter;
-	type: Extract<TableType, "document-fields" | "brick" | "repeater">;
+	type: Exclude<TableType, "document" | "versions">;
 	documentTable: string;
 	versionTable: string;
 	brick?: BrickBuilder;
-	repeaterKeys?: string[];
-	parentTable?: string;
-	brickTable?: string;
+	fieldPath?: string[];
+	rootTable?: string;
+	additionalCoreColumns?: CollectionSchemaColumn[];
 }): Awaited<
 	ServiceResponse<{
 		schema: CollectionSchemaTable;
@@ -42,7 +45,7 @@ const createFieldTables = (props: {
 		{
 			collection: props.collection.key,
 			brick: props.brick?.key,
-			repeater: props.repeaterKeys,
+			fieldPath: props.fieldPath,
 		},
 		props.db.config.tableNameByteLimit,
 	);
@@ -101,7 +104,7 @@ const createFieldTables = (props: {
 				onDelete: "cascade",
 			},
 		},
-		// used for repeater groups position along with brick position
+		// used for tree-table groups position along with brick position
 		{
 			name: "position",
 			source: "core",
@@ -145,118 +148,133 @@ const createFieldTables = (props: {
 			nullable: false,
 		});
 	}
-
-	//* add repeater columns
-	if (props.type === "repeater") {
-		const brickTable =
-			props.brickTable === undefined ? props.parentTable : props.brickTable;
-		// add a parent reference to all repeaters that points to the top level parent which is always a 'brick' | 'document-fields' table
-		columns.push({
-			name: "brick_id",
-			source: "core",
-			type: props.db.getDataType("integer"),
-			nullable: false,
-			foreignKey: brickTable
-				? {
-						table: brickTable,
-						column: "id",
-						onDelete: "cascade",
-					}
-				: undefined,
-		});
-
-		const isNestedRepeater =
-			props.repeaterKeys && props.repeaterKeys.length > 1;
-
-		// add parent reference for repeater fields
-		columns.push({
-			name: "parent_id",
-			source: "core",
-			type: props.db.getDataType("integer"),
-			nullable: true,
-			foreignKey:
-				isNestedRepeater &&
-				props.parentTable &&
-				props.parentTable !== brickTable
-					? {
-							table: props.parentTable,
-							column: "id",
-							onDelete: "cascade",
-						}
-					: undefined,
-		});
-		// add parent reference temp ID for insertion tracking
-		columns.push({
-			name: "parent_id_ref",
-			source: "core",
-			type: props.db.getDataType("integer"),
-			nullable: true,
-		});
-	}
+	if (props.additionalCoreColumns) columns.push(...props.additionalCoreColumns);
 
 	//* process field columns
 	for (const field of props.fields) {
-		if (field.type === "repeater") {
-			const repeaterKeys = (props.repeaterKeys || []).concat(field.key);
+		const databaseConfig = registeredFields[field.type].config.database;
+		const databaseMode = normalizeFieldDatabaseMode(databaseConfig.mode);
 
-			const repeaterTableRes = createFieldTables({
-				collection: props.collection,
-				fields: field.fields,
-				db: props.db,
-				type: "repeater",
-				documentTable: props.documentTable,
-				versionTable: props.versionTable,
-				brick: props.brick,
-				repeaterKeys: repeaterKeys,
-				parentTable: tableNameRes.data.name,
-				brickTable: props.brickTable ?? tableNameRes.data.name,
-			});
-			if (repeaterTableRes.error) return repeaterTableRes;
+		switch (databaseMode) {
+			case "tree-table": {
+				if (!("tableType" in databaseConfig)) {
+					return {
+						data: undefined,
+						error: {
+							message: T("invalid_table_name_format_insufficient_parts"),
+						},
+					};
+				}
 
-			childTables.push(repeaterTableRes.data.schema);
-			childTables.push(...repeaterTableRes.data.childTables);
-		} else {
-			//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and repeaters) we need to update this
-			const fieldInstance = (props.brick || props.collection).fields.get(
-				field.key,
-			);
-			if (!fieldInstance) {
-				return {
-					data: undefined,
-					error: {
-						message: T("cannot_find_field_with_key_in_collection_brick", {
-							key: field.key,
-							type: props.brick ? "brick" : "collection",
-							typeKey: props.brick ? props.brick.key : props.collection.key,
-						}),
-					},
-				};
-			}
+				const treeTableChildFields = treeTableMode.getChildFieldConfigs(field);
+				if (!treeTableChildFields) {
+					return {
+						data: undefined,
+						error: {
+							message: T("invalid_table_name_format_insufficient_parts"),
+						},
+					};
+				}
 
-			const fieldSchemaRes = fieldInstance.getSchemaDefinition({
-				db: props.db,
-				tables: {
-					document: props.documentTable,
-					version: props.versionTable,
-				},
-			});
-			if (fieldSchemaRes.error) return fieldSchemaRes;
+				const fieldPath = (props.fieldPath || []).concat(field.key);
+				const treeTableRoot = props.rootTable ?? tableNameRes.data.name;
+				const treeTableCoreColumns: CollectionSchemaColumn[] = treeTableMode
+					.getSchemaDefinition({
+						db: props.db,
+						table: {
+							type: databaseConfig.tableType,
+							parent: tableNameRes.data.name,
+							root: treeTableRoot,
+							depth: fieldPath.length,
+						},
+					})
+					.columns.map((column) => ({
+						name: column.name,
+						source: "core",
+						type: column.type,
+						nullable: column.nullable,
+						foreignKey: column.foreignKey,
+						default: column.default,
+					}));
 
-			for (const column of fieldSchemaRes.data.columns) {
-				columns.push({
-					name: prefixGeneratedColName(column.name),
-					source: "field",
-					canAutoRemove: false,
-					type: column.type,
-					nullable: column.nullable,
-					foreignKey: column.foreignKey,
-					customField: {
-						type: field.type,
-					},
-					//* holding off on default value contraint on custom field columns due to sqlite/libsql adapters not supporting the alter column operation and instead having to drop+add the column again resulting in data loss.
-					//* CF default values are a lot more likely to be edited than the others and in a way where a user wouldnt expect data loss - so until we have a solution here, no default contraints for CF exist
-					default: props.db.supports("alterColumn") ? column.default : null,
+				const treeTableRes = createFieldTables({
+					collection: props.collection,
+					fields: treeTableChildFields,
+					db: props.db,
+					type: databaseConfig.tableType,
+					documentTable: props.documentTable,
+					versionTable: props.versionTable,
+					brick: props.brick,
+					fieldPath: fieldPath,
+					rootTable: treeTableRoot,
+					additionalCoreColumns: treeTableCoreColumns,
 				});
+				if (treeTableRes.error) return treeTableRes;
+
+				childTables.push(treeTableRes.data.schema);
+				childTables.push(...treeTableRes.data.childTables);
+				break;
+			}
+			case "column": {
+				//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and tree-table tables) we need to update this
+				const fieldInstance = (props.brick || props.collection).fields.get(
+					field.key,
+				);
+				if (!fieldInstance) {
+					return {
+						data: undefined,
+						error: {
+							message: T("cannot_find_field_with_key_in_collection_brick", {
+								key: field.key,
+								type: props.brick ? "brick" : "collection",
+								typeKey: props.brick ? props.brick.key : props.collection.key,
+							}),
+						},
+					};
+				}
+
+				const fieldSchemaRes = fieldInstance.getSchemaDefinition({
+					db: props.db,
+					tables: {
+						document: props.documentTable,
+						version: props.versionTable,
+					},
+				});
+				if (fieldSchemaRes.error) return fieldSchemaRes;
+
+				for (const column of fieldSchemaRes.data.columns) {
+					columns.push({
+						name: prefixGeneratedColName(column.name),
+						source: "field",
+						canAutoRemove: false,
+						type: column.type,
+						nullable: column.nullable,
+						foreignKey: column.foreignKey,
+						customField: {
+							type: field.type,
+						},
+						//* holding off on default value contraint on custom field columns due to sqlite/libsql adapters not supporting the alter column operation and instead having to drop+add the column again resulting in data loss.
+						//* CF default values are a lot more likely to be edited than the others and in a way where a user wouldnt expect data loss - so until we have a solution here, no default contraints for CF exist
+						default: props.db.supports("alterColumn") ? column.default : null,
+					});
+				}
+				break;
+			}
+			case "relation-table": {
+				if (!("tableType" in databaseConfig)) {
+					return {
+						data: undefined,
+						error: {
+							message: T("invalid_table_name_format_insufficient_parts"),
+						},
+					};
+				}
+				/**
+				 * Planned:
+				 * - Generate dedicated custom-field relation tables.
+				 * - Use the custom field's database config for table metadata.
+				 */
+				break;
 			}
 		}
 	}
@@ -270,7 +288,7 @@ const createFieldTables = (props: {
 				key: {
 					collection: props.collection.key,
 					brick: props.brick?.key,
-					repeater: props.repeaterKeys,
+					fieldPath: props.fieldPath,
 				},
 				columns: columns,
 			},

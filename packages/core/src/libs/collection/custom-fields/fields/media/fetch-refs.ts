@@ -1,26 +1,37 @@
+import type {
+	FieldRefFetchInput,
+	FieldRefFetchOutput,
+} from "../../../../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type { ServiceFn } from "../../../../../utils/services/types.js";
 import type { MediaPropsT } from "../../../../formatters/media.js";
 import { MediaRepository } from "../../../../repositories/index.js";
 
 const fetchMediaRefs: ServiceFn<
-	[
-		{
-			ids: number[];
-		},
-	],
-	MediaPropsT[]
+	[FieldRefFetchInput],
+	FieldRefFetchOutput
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db.client, context.config.db);
+	const ids = Array.from(
+		new Set(
+			data.relations.flatMap((relation) =>
+				Array.from(relation.values).filter(
+					(value): value is number => typeof value === "number",
+				),
+			),
+		),
+	);
 
-	if (data.ids.length === 0) {
+	if (ids.length === 0) {
 		return {
-			data: [],
+			data: {
+				rows: [] satisfies MediaPropsT[],
+			},
 			error: undefined,
 		};
 	}
 
 	const mediaRes = await Media.selectMultipleByIds({
-		ids: data.ids,
+		ids,
 		validation: {
 			enabled: true,
 		},
@@ -29,7 +40,9 @@ const fetchMediaRefs: ServiceFn<
 
 	return {
 		error: undefined,
-		data: mediaRes.data,
+		data: {
+			rows: mediaRes.data,
+		},
 	};
 };
 

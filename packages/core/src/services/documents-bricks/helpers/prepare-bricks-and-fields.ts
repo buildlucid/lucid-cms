@@ -1,11 +1,13 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
+import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 
 /**
  * - Processes fields to remove any that don't exist in the custom fields.
- * - Processes recursively for repeater fields with nested groups.
+ * - Processes recursively for tree-table fields with nested groups.
  * - Based on collection and field translation support, sort out the fields translations/value props and fill missing translations with default values
  * - Normalizes the input value of the field using the custom field instance's normalizeInputValue method
  */
@@ -21,6 +23,7 @@ const processFields = (props: {
 			// biome-ignore lint/style/noNonNullAssertion: explanation
 			const cfInstance = props.customFields.get(field.key)!;
 			const processedField = { ...field };
+			const databaseConfig = registeredFields[cfInstance.type].config.database;
 
 			if (processedField.value !== undefined) {
 				processedField.value = cfInstance.normalizeInputValue(
@@ -38,7 +41,7 @@ const processFields = (props: {
 				);
 			}
 
-			if (field.type === "repeater" && field.groups) {
+			if (isStorageMode(databaseConfig, "tree-table") && field.groups) {
 				processedField.groups = field.groups.map((group) => ({
 					...group,
 					fields: processFields({

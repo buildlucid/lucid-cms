@@ -1,22 +1,26 @@
 import type {
 	CollectionSchemaTable,
+	CoreTableType,
 	TableType,
 } from "../../../libs/collection/schema/types.js";
+import T from "../../../translations/index.js";
 import type { InferredTable, ServiceResponse } from "../../../types.js";
+import {
+	getFieldDatabaseConfig,
+	getStorageModeBasePriority,
+	isCustomFieldTableType,
+	isStorageMode,
+} from "../custom-fields/storage/index.js";
+import { treeTableMode } from "../custom-fields/storage/tree-table.js";
 import inferTableType from "./infer-table-type.js";
 
-const TABLE_PRIORITY: Record<TableType, number> = {
+const TABLE_PRIORITY: Record<CoreTableType, number> = {
 	document: 1000,
 	versions: 900,
 	"document-fields": 800,
 	brick: 700,
-	repeater: 600,
-	"media-rel": 500,
-	"user-rel": 500,
-	"document-rel": 500,
 };
 const EXTERNAL_REFERENCE_PRIORITY = 100;
-const REPEATER_DEPTH_PRIORITY = 10;
 
 /**
  * Works out the table priority based on its type and foreign keys
@@ -33,7 +37,21 @@ const getTablePriority = (
 		tableType = tableTypeRes.data;
 	} else tableType = (table as CollectionSchemaTable).type;
 
-	let basePriority = TABLE_PRIORITY[tableType];
+	let basePriority: number;
+	if (isCustomFieldTableType(tableType)) {
+		const databaseConfig = getFieldDatabaseConfig(tableType);
+		if (!databaseConfig) {
+			return {
+				data: undefined,
+				error: {
+					message: T("invalid_table_name_format_insufficient_parts"),
+				},
+			};
+		}
+		basePriority = getStorageModeBasePriority(databaseConfig.mode);
+	} else {
+		basePriority = TABLE_PRIORITY[tableType];
+	}
 
 	const hasExternalReferences = table.columns.some((column) => {
 		if (!column.foreignKey) return false;
@@ -44,9 +62,17 @@ const getTablePriority = (
 	}
 
 	if (type === "collection-inferred") {
-		const repeaterDepth = (table as CollectionSchemaTable).key.repeater?.length;
-		if (repeaterDepth) {
-			basePriority -= repeaterDepth * REPEATER_DEPTH_PRIORITY;
+		if (isCustomFieldTableType(tableType)) {
+			const databaseConfig = getFieldDatabaseConfig(tableType);
+			const treeDepth = (table as CollectionSchemaTable).key.fieldPath?.length;
+
+			if (
+				databaseConfig &&
+				isStorageMode(databaseConfig, "tree-table") &&
+				treeDepth
+			) {
+				basePriority -= treeTableMode.getPriorityOffsetForDepth(treeDepth);
+			}
 		}
 	}
 

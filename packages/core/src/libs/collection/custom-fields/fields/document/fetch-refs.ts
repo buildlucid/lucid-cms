@@ -1,6 +1,9 @@
+import type {
+	FieldRefFetchInput,
+	FieldRefFetchOutput,
+} from "../../../../../services/documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../../../../../services/index.js";
 import type {
-	DocumentVersionType,
 	LucidBrickTableName,
 	LucidDocumentTableName,
 } from "../../../../../types.js";
@@ -16,38 +19,43 @@ import {
 import type { CollectionSchemaTable } from "../../../schema/types.js";
 
 const fetchDocumentRefs: ServiceFn<
-	[
-		{
-			values: Array<{
-				table: LucidDocumentTableName;
-				ids: number[];
-			}>;
-			versionType: Exclude<DocumentVersionType, "revision">;
-		},
-	],
-	{
-		rows: Array<BrickQueryResponse>;
-		fieldsSchemaByCollection: Record<
-			string,
-			CollectionSchemaTable<LucidBrickTableName>
-		>;
-	}
+	[FieldRefFetchInput],
+	FieldRefFetchOutput
 > = async (context, data) => {
 	const DocumentVersions = new DocumentVersionsRepository(
 		context.db.client,
 		context.config.db,
 	);
-	if (data.values.length === 0) {
+
+	const values = data.relations.flatMap((relation) => {
+		if (!relation.table.startsWith("lucid_doc__")) return [];
+
+		const ids = Array.from(relation.values).filter(
+			(value): value is number => typeof value === "number",
+		);
+		return [
+			{
+				table: relation.table as LucidDocumentTableName,
+				ids,
+			},
+		];
+	});
+
+	if (values.length === 0) {
 		return {
 			data: {
-				rows: [],
-				fieldsSchemaByCollection: {},
+				rows: [] satisfies Array<BrickQueryResponse>,
+				meta: {
+					document: {
+						fieldsSchemaByCollection: {},
+					},
+				},
 			},
 			error: undefined,
 		};
 	}
 
-	const collectionKeys = data.values
+	const collectionKeys = values
 		.map((v) => extractCollectionKey(v.table))
 		.filter((c) => c !== undefined);
 
@@ -56,7 +64,7 @@ const fetchDocumentRefs: ServiceFn<
 	});
 	if (cacheSchemaRes.error) return cacheSchemaRes;
 
-	const unionData = data.values.map(async (v) => {
+	const unionData = values.map(async (v) => {
 		const collectionKey = extractCollectionKey(v.table);
 		if (!collectionKey) return null;
 
@@ -115,7 +123,11 @@ const fetchDocumentRefs: ServiceFn<
 		error: undefined,
 		data: {
 			rows: documentsRes.data || [],
-			fieldsSchemaByCollection,
+			meta: {
+				document: {
+					fieldsSchemaByCollection,
+				},
+			},
 		},
 	};
 };
