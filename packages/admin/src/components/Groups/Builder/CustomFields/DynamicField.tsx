@@ -68,7 +68,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		}
 		return field;
 	});
-	const fieldError = createMemo(() => {
+	const fieldErrors = createMemo(() => {
 		//* repeaters dont incldue a localeCode
 		//* if the field or collection doesnt support translations
 		if (
@@ -77,17 +77,18 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			fieldConfig()?.config?.useTranslations !== true ||
 			brickStore.get.collectionTranslations !== true
 		) {
-			return props.state.fieldErrors.find(
+			return props.state.fieldErrors.filter(
 				(f) => f.key === props.state.fieldConfig.key,
 			);
 		}
 
-		return props.state.fieldErrors.find(
+		return props.state.fieldErrors.filter(
 			(f) =>
 				f.key === props.state.fieldConfig.key &&
 				f.localeCode === contentLocale(),
 		);
 	});
+	const fieldError = createMemo(() => fieldErrors()[0]);
 	const isLocalised = createMemo(() => {
 		return (
 			hasMultipleLocales() &&
@@ -207,6 +208,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
+								fieldErrors: fieldErrors(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
 								fieldColumnIsMissing: fieldColumnIsMissing(),
@@ -223,6 +225,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
+								fieldErrors: fieldErrors(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
 								fieldColumnIsMissing: fieldColumnIsMissing(),
@@ -341,6 +344,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								repeaterKey: props.state.repeaterKey,
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
+								fieldErrors: fieldErrors(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
 								fieldColumnIsMissing: fieldColumnIsMissing(),

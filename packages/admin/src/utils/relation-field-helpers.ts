@@ -1,4 +1,12 @@
-import type { MediaRef, MediaResponse, UserRef, UserResponse } from "@types";
+import type {
+	DocumentRef,
+	DocumentResponse,
+	MediaRef,
+	MediaResponse,
+	UserRef,
+	UserResponse,
+} from "@types";
+import brickHelpers from "@/utils/brick-helpers";
 
 export type MediaRelationRef = NonNullable<MediaRef>;
 export type UserRelationRef = NonNullable<UserRef>;
@@ -37,4 +45,14 @@ export const userResponseToRef = (user: UserResponse): UserRelationRef => ({
 	email: user.email,
 	firstName: user.firstName,
 	lastName: user.lastName,
+});
+
+/**
+ * Converts a document response into the ref shape stored by relation fields in
+ * the page builder.
+ */
+export const documentResponseToRef = (doc: DocumentResponse): DocumentRef => ({
+	id: doc.id,
+	collectionKey: doc.collectionKey,
+	fields: doc.fields ? brickHelpers.objectifyFields(doc.fields) : null,
 });

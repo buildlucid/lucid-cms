@@ -89,11 +89,13 @@ export const Modals: Component<{
 					open: documentSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close(),
 					collectionKey: documentSelectModal()?.data.collectionKey,
+					multiple: documentSelectModal()?.data.multiple,
 					selected: documentSelectModal()?.data.selected,
+					selectedRefs: documentSelectModal()?.data.selectedRefs,
 				}}
 				callbacks={{
-					onSelect: (document) =>
-						pageBuilderModalsStore.triggerAndClose("documentSelect", document),
+					onSelect: (selection) =>
+						pageBuilderModalsStore.triggerAndClose("documentSelect", selection),
 				}}
 			/>
 			<UserSelectPanel

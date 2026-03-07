@@ -8,6 +8,7 @@ import type {
 	CFProps,
 	CFResponse,
 	CustomFieldErrorItem,
+	CustomFieldValidationError,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -16,6 +17,7 @@ import {
 	clampRelationInputValue,
 	normalizeStoredRelationValues,
 } from "../../utils/normalize-relation-values.js";
+import { validateRelationItemCount } from "../../utils/relation-item-count-validation.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { userFieldConfig } from "./config.js";
 import type { UserValidationData } from "./types.js";
@@ -125,16 +127,30 @@ class UserCustomField extends CustomField<"user"> {
 					(item): item is number => typeof item === "number",
 				)
 			: [];
+		const itemCountValidation = validateRelationItemCount({
+			multiple: this.config.config.multiple,
+			length: normalizedValue.length,
+			validation: this.config.validation,
+		});
+		if (!itemCountValidation.valid) return itemCountValidation;
 
-		for (const userId of normalizedValue) {
+		const errors: CustomFieldValidationError[] = [];
+		for (const [itemIndex, userId] of normalizedValue.entries()) {
 			const findUser = refData?.find((u) => u.id === userId);
 
 			if (findUser === undefined) {
-				return {
-					valid: false,
+				errors.push({
+					itemIndex,
 					message: T("field_user_not_found"),
-				};
+				});
 			}
+		}
+
+		if (errors.length > 0) {
+			return {
+				valid: false,
+				errors,
+			};
 		}
 
 		return { valid: true };

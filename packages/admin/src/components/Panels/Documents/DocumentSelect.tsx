@@ -1,6 +1,7 @@
 import type {
 	CollectionResponse,
 	DocumentFieldValue,
+	DocumentRef,
 	DocumentResponse,
 } from "@lucidcms/core/types";
 import { FaSolidCalendar } from "solid-icons/fa";
@@ -30,22 +31,26 @@ import {
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import { documentResponseToRef } from "@/utils/relation-field-helpers";
 
 interface DocumentSelectPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
 		collectionKey: string | undefined;
+		multiple?: boolean;
 		selected?: DocumentFieldValue[];
+		selectedRefs?: DocumentRef[];
 	};
 	callbacks: {
-		onSelect: (document: DocumentResponse) => void;
+		onSelect: (selection: {
+			value: DocumentFieldValue[];
+			refs: DocumentRef[];
+		}) => void;
 	};
 }
 
 const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
-	// ---------------------------------
-	// Render
 	return (
 		<BottomPanel
 			state={{
@@ -69,10 +74,12 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 			{() => (
 				<DocumentSelectContent
 					collectionKey={props.state.collectionKey}
+					multiple={props.state.multiple}
 					selected={props.state.selected}
+					selectedRefs={props.state.selectedRefs}
 					onClose={() => props.state.setOpen(false)}
-					onSelect={(document) => {
-						props.callbacks.onSelect(document);
+					onSelect={(selection) => {
+						props.callbacks.onSelect(selection);
 						props.state.setOpen(false);
 					}}
 				/>
@@ -83,19 +90,22 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 
 interface DocumentSelectContentProps {
 	collectionKey: string | undefined;
+	multiple?: boolean;
 	selected?: DocumentFieldValue[];
+	selectedRefs?: DocumentRef[];
 	onClose: () => void;
-	onSelect: (document: DocumentResponse) => void;
+	onSelect: (selection: {
+		value: DocumentFieldValue[];
+		refs: DocumentRef[];
+	}) => void;
 }
 
 const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	props,
 ) => {
-	// ------------------------------
-	// Hooks
-	const [selectedDocument, setSelectedDocument] = createSignal<
-		DocumentResponse | undefined
-	>(undefined);
+	const [selectedDocuments, setSelectedDocuments] = createSignal<DocumentRef[]>(
+		[],
+	);
 	const searchParams = useSearchParamsState({
 		filters: {},
 		sorts: {},
@@ -104,16 +114,18 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 	});
 
-	// ----------------------------------
-	// Memos
 	const collectionKey = createMemo(() => props.collectionKey);
-	const selectedDocumentId = createMemo(() => selectedDocument()?.id);
+	const isMultiple = createMemo(() => props.multiple === true);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
+	const selectedDocumentValues = createMemo<DocumentFieldValue[]>(() =>
+		selectedDocuments().map((document) => ({
+			id: document.id,
+			collectionKey: document.collectionKey,
+		})),
+	);
 
-	// ----------------------------------
-	// Queries
 	const collection = api.collections.useGetSingle({
 		queryParams: {
 			location: {
@@ -139,8 +151,6 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		enabled: () => searchParams.getSettled() && collection.isSuccess,
 	});
 
-	// ----------------------------------
-	// Memos
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collection.data?.data),
 	);
@@ -166,8 +176,6 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	);
 	const isError = createMemo(() => documents.isError || collection.isError);
 
-	// ----------------------------------
-	// Effects
 	createEffect(() => {
 		if (collection.isSuccess) {
 			const filterConfig: FilterSchema = {};
@@ -175,53 +183,51 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				const fieldKey = formatFieldFilters({
 					fieldKey: field.key,
 				});
-				switch (field.type) {
-					default: {
-						filterConfig[fieldKey] = {
-							type: "text",
-							value: "",
-						};
-						break;
-					}
-				}
+				filterConfig[fieldKey] = {
+					type: "text",
+					value: "",
+				};
 			}
 			searchParams.setFilterSchema(filterConfig);
 		}
 	});
 	createEffect(() => {
-		const selectedId = props.selected?.[0]?.id;
-		if (!selectedId) {
-			setSelectedDocument(undefined);
-			return;
-		}
-		if (!documents.data?.data) return;
-
-		const matchingDocument = documents.data.data.find(
-			(doc) => doc.id === selectedId,
-		);
-		if (matchingDocument) {
-			setSelectedDocument(matchingDocument);
-		}
+		setSelectedDocuments(props.selectedRefs ?? []);
 	});
 
-	// ----------------------------------
-	// Functions
 	const toggleSelectedDocument = (document: DocumentResponse) => {
-		setSelectedDocument((prev) => {
-			if (prev?.id === document.id) return undefined;
-			return document;
+		const nextRef = documentResponseToRef(document);
+
+		setSelectedDocuments((prev) => {
+			const exists = prev.some(
+				(selectedDocument) =>
+					selectedDocument.id === nextRef.id &&
+					selectedDocument.collectionKey === nextRef.collectionKey,
+			);
+			if (exists) {
+				return prev.filter(
+					(selectedDocument) =>
+						selectedDocument.id !== nextRef.id ||
+						selectedDocument.collectionKey !== nextRef.collectionKey,
+				);
+			}
+
+			if (!isMultiple()) {
+				return [nextRef];
+			}
+
+			return [...prev, nextRef];
 		});
 	};
 	const confirmSelection = () => {
-		const document = selectedDocument();
-		if (!document) return;
-		props.onSelect(document);
+		props.onSelect({
+			value: selectedDocumentValues(),
+			refs: selectedDocuments(),
+		});
 	};
 
-	// ----------------------------------
-	// Render
 	return (
-		<div class="flex flex-col h-full pb-4">
+		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap">
 					<Filter
@@ -363,7 +369,11 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									theme="secondary"
 									current={false}
 									selection={{
-										selected: doc().id === selectedDocumentId(),
+										selected: selectedDocuments().some(
+											(selectedDocument) =>
+												selectedDocument.id === doc().id &&
+												selectedDocument.collectionKey === doc().collectionKey,
+										),
 										onChange: () => toggleSelectedDocument(doc()),
 									}}
 								/>
@@ -373,7 +383,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				</Table>
 			</DynamicContent>
 			<PanelFooterActions
-				selectedCount={selectedDocumentId() ? 1 : 0}
+				selectedCount={selectedDocuments().length}
 				onClose={props.onClose}
 				onConfirm={confirmSelection}
 			/>

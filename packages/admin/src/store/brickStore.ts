@@ -14,7 +14,7 @@ import type {
 import { nanoid } from "nanoid";
 import { batch } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
-import brickHelpers from "@/utils/brick-helpers";
+import brickHelpers, { clearTargetFieldErrors } from "@/utils/brick-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
 export interface BrickData {
@@ -66,6 +66,7 @@ const [get, set] = createStore<{
 		ref?: string;
 		value: FieldResponseValue;
 		contentLocale: string;
+		clearFromItemIndex?: number;
 	}) => void;
 	addField: (params: {
 		brickIndex: number;
@@ -275,6 +276,50 @@ const [get, set] = createStore<{
 		);
 
 		if (fieldChanged) {
+			const brick = get.bricks[params.brickIndex];
+			const localeCode =
+				params.fieldConfig.config.useTranslations === true &&
+				get.collectionTranslations === true
+					? params.contentLocale
+					: null;
+			const errorTarget = {
+				key: params.key,
+				localeCode,
+				groupRef: params.ref,
+				clearFromItemIndex: params.clearFromItemIndex,
+			};
+
+			if (brick?.type === "collection-fields") {
+				set(
+					"fieldsErrors",
+					produce((draft) => {
+						const nextErrors = clearTargetFieldErrors(draft, errorTarget);
+						draft.splice(0, draft.length, ...nextErrors);
+					}),
+				);
+			} else if (brick) {
+				set(
+					"brickErrors",
+					produce((draft) => {
+						const brickErrorIndex = draft.findIndex(
+							(error) => error.ref === brick.ref && error.key === brick.key,
+						);
+						if (brickErrorIndex === -1) return;
+
+						const nextFields = clearTargetFieldErrors(
+							draft[brickErrorIndex].fields,
+							errorTarget,
+						);
+						if (nextFields.length === 0) {
+							draft.splice(brickErrorIndex, 1);
+							return;
+						}
+
+						draft[brickErrorIndex].fields = nextFields;
+					}),
+				);
+			}
+
 			set("autoSaveCounter", (prev) => prev + 1);
 		}
 	},

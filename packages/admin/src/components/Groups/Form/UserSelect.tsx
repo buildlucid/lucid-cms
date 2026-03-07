@@ -14,6 +14,7 @@ import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import type { UserRelationRef } from "@/utils/relation-field-helpers";
 
@@ -30,7 +31,7 @@ interface UserSelectProps {
 	disabled?: boolean;
 	noMargin?: boolean;
 	required?: boolean;
-	errors?: ErrorResult | FieldError;
+	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
@@ -68,6 +69,11 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 	const selectedUserIds = createMemo(() => props.value ?? []);
 	const selectedUsers = createMemo(() => props.refs() ?? []);
 	const selectedUser = createMemo(() => selectedUsers()[0]);
+	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
+	const getItemErrors = (itemIndex: number) =>
+		fieldErrors().filter((error) => error.itemIndex === itemIndex);
+	const hasItemError = (itemIndex: number) =>
+		getItemErrors(itemIndex).length > 0;
 	const userName = createMemo(() => {
 		const user = selectedUser();
 		if (!user) return "";
@@ -99,8 +105,17 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							<Show when={selectedUsers().length > 0}>
 								<div class="flex flex-col gap-2">
 									<For each={selectedUsers()}>
-										{(user) => (
-											<div class="group flex items-center justify-between gap-3 rounded-md border bg-input-base border-border px-3 py-2">
+										{(user, index) => (
+											<div
+												class={classNames(
+													"group flex items-center justify-between gap-3 rounded-md border bg-input-base px-3 py-2",
+													{
+														"border-border": !hasItemError(index()),
+														"border-error-base ring-1 ring-inset ring-error-base":
+															hasItemError(index()),
+													},
+												)}
+											>
 												<div class="min-w-0">
 													<p class="truncate text-sm font-medium text-subtitle">
 														{helpers.formatUserName(user, "username") || "-"}

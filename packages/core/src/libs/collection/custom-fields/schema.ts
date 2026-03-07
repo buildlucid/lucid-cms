@@ -55,6 +55,8 @@ const CustomFieldSchema = z.object({
 		.object({
 			zod: z.any().optional(),
 			required: z.boolean().optional(),
+			minItems: z.number().optional(),
+			maxItems: z.number().optional(),
 			extensions: z.array(z.string()).optional(),
 			width: z
 				.object({

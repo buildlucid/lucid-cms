@@ -1,7 +1,6 @@
 import type {
 	DocumentFieldValue,
 	DocumentRef,
-	DocumentResponse,
 	ErrorResult,
 	FieldError,
 } from "@types";
@@ -23,16 +22,17 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
-import brickHelpers from "@/utils/brick-helpers";
 import { getDocumentListingPreviewFields } from "@/utils/document-table-helpers";
+import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 
 interface DocumentSelectProps {
 	id: string;
 	collection: string;
 	value: DocumentFieldValue[] | undefined;
-	onChange: (value: DocumentFieldValue[], ref: DocumentRef | null) => void;
-	ref: Accessor<DocumentRef | undefined>;
+	refs: Accessor<DocumentRef[] | undefined>;
+	onChange: (value: DocumentFieldValue[], refs: DocumentRef[]) => void;
+	multiple?: boolean;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -40,7 +40,7 @@ interface DocumentSelectProps {
 	disabled?: boolean;
 	noMargin?: boolean;
 	required?: boolean;
-	errors?: ErrorResult | FieldError;
+	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
@@ -48,84 +48,66 @@ interface DocumentSelectProps {
 }
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
-	// -------------------------------
-	// Functions
-	const selectedDocument = () => props.value?.[0];
-	const selectedDocumentId = () => selectedDocument()?.id;
-	const documentResponseToRef = (doc: DocumentResponse): DocumentRef => ({
-		id: doc.id,
-		collectionKey: doc.collectionKey,
-		fields: brickHelpers.objectifyFields(doc.fields || []),
-	});
 	const openDocuSelectModal = () => {
 		pageBuilderModalsStore.open("documentSelect", {
 			data: {
 				collectionKey: props.collection,
+				multiple: isMultiple(),
 				selected: props.value,
+				selectedRefs: selectedDocuments(),
 			},
-			onCallback: (doc: DocumentResponse) => {
-				props.onChange(
-					[
-						{
-							id: doc.id,
-							collectionKey: doc.collectionKey,
-						},
-					],
-					documentResponseToRef(doc),
-				);
+			onCallback: (selection) => {
+				props.onChange(selection.value, selection.refs);
 			},
 		});
 	};
+	const clearSelection = () => {
+		props.onChange([], []);
+	};
+	const removeSelectedDocument = (documentValue: DocumentFieldValue) => {
+		props.onChange(
+			(props.value || []).filter(
+				(selectedDocument) =>
+					selectedDocument.id !== documentValue.id ||
+					selectedDocument.collectionKey !== documentValue.collectionKey,
+			),
+			selectedDocuments().filter(
+				(selectedDocument) =>
+					selectedDocument.id !== documentValue.id ||
+					selectedDocument.collectionKey !== documentValue.collectionKey,
+			),
+		);
+	};
 
-	// -------------------------------
-	// Memos
-	const storeDocumentRef = createMemo(() => props.ref());
-	const previewCollectionKey = createMemo(
-		() => storeDocumentRef()?.collectionKey || props.collection,
-	);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale || "",
 	);
+	const isMultiple = createMemo(() => props.multiple === true);
+	const selectedDocumentValue = createMemo(() => props.value?.[0]);
+	const selectedDocuments = createMemo(() => props.refs() ?? []);
+	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
 
-	// -------------------------------
-	// Queries
 	const collection = api.collections.useGetSingle({
 		queryParams: {
 			location: {
-				collectionKey: previewCollectionKey,
+				collectionKey: props.collection,
 			},
 		},
-		key: () => `document-field-preview:${previewCollectionKey() || "unknown"}`,
-		enabled: () =>
-			typeof selectedDocumentId() === "number" && !!previewCollectionKey(),
-		refetchOnWindowFocus: false,
+		enabled: () => selectedDocuments().length > 0,
 	});
 
-	// -------------------------------
-	// Memos
-	const previewFields = createMemo(() =>
+	const getItemErrors = (itemIndex: number) => {
+		return fieldErrors().filter((error) => error.itemIndex === itemIndex);
+	};
+	const hasItemError = (itemIndex: number) =>
+		getItemErrors(itemIndex).length > 0;
+	const previewFields = (documentRef?: DocumentRef) =>
 		getDocumentListingPreviewFields({
 			collection: collection.data?.data,
-			documentRef: storeDocumentRef(),
+			documentRef,
 			contentLocale: contentLocale(),
-		}),
-	);
-	const isPreviewLoading = createMemo(
-		() => typeof selectedDocumentId() === "number" && collection.isLoading,
-	);
-	const gridPreviewFields = createMemo(() => previewFields().slice(0, 6));
-	const documentPreviewLabel = createMemo(() => {
-		const singularCollectionTitle = helpers.getLocaleValue({
-			value: collection.data?.data.details.singularName,
-		});
-		if (gridPreviewFields().length === 0) {
-			return singularCollectionTitle || T()("document");
-		}
-		return `${singularCollectionTitle || T()("document")} ${T()("preview")}`;
-	});
+		}).slice(0, 3);
 
-	// -------------------------------
-	// Render
 	return (
 		<div
 			class={classNames("w-full", {
@@ -144,32 +126,113 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			/>
 			<div class="w-full">
 				<Switch>
-					<Match when={typeof selectedDocumentId() !== "number"}>
-						<Button
-							type="button"
-							theme="border-outline"
-							size="small"
-							onClick={openDocuSelectModal}
-							disabled={props.disabled}
-							classes="capitalize"
-						>
-							{T()("select_document")}
-						</Button>
+					<Match when={isMultiple()}>
+						<div class="w-full">
+							<div class="flex flex-col gap-2">
+								<For each={selectedDocuments()}>
+									{(document, index) => (
+										<div
+											class={classNames(
+												"group rounded-md border bg-input-base px-3 py-2 transition-colors duration-200",
+												{
+													"border-border": !hasItemError(index()),
+													"border-error-base ring-1 ring-inset ring-error-base":
+														hasItemError(index()),
+												},
+											)}
+										>
+											<div class="flex items-start justify-between gap-3">
+												<div class="min-w-0 flex-1">
+													<div class="flex flex-wrap items-center gap-2">
+														<Pill theme="outline" class="text-[10px]">
+															#{document.id}
+														</Pill>
+														<p class="truncate text-sm font-medium text-subtitle">
+															{helpers.getLocaleValue({
+																value:
+																	collection.data?.data.details.singularName,
+																fallback: T()("document"),
+															})}
+														</p>
+													</div>
+													<Show when={previewFields(document).length > 0}>
+														<div class="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
+															<For each={previewFields(document)}>
+																{(preview) => (
+																	<div
+																		class="min-w-0 rounded-md border border-border bg-card-base px-2 py-1.5"
+																		title={`${preview.label}: ${preview.value}`}
+																	>
+																		<p class="truncate text-[10px] uppercase tracking-wide text-unfocused">
+																			{preview.label}
+																		</p>
+																		<p class="mt-0.5 truncate text-xs text-subtitle">
+																			{preview.value}
+																		</p>
+																	</div>
+																)}
+															</For>
+														</div>
+													</Show>
+												</div>
+												<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+													<Button
+														type="button"
+														theme="danger-subtle"
+														size="icon-subtle"
+														onClick={() =>
+															removeSelectedDocument({
+																id: document.id,
+																collectionKey: document.collectionKey,
+															})
+														}
+														disabled={props.disabled}
+														aria-label={T()("remove")}
+													>
+														<FaSolidXmark size={14} />
+													</Button>
+												</div>
+											</div>
+										</div>
+									)}
+								</For>
+							</div>
+							<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+								<Button
+									type="button"
+									theme="border-outline"
+									size="small"
+									onClick={openDocuSelectModal}
+									disabled={props.disabled}
+									classes="capitalize"
+								>
+									{T()("select_document")}
+								</Button>
+								<Show when={selectedDocuments().length > 0}>
+									<p class="text-sm text-unfocused">
+										{selectedDocuments().length} {T()("selected").toLowerCase()}
+									</p>
+								</Show>
+							</div>
+						</div>
 					</Match>
-					<Match when={typeof selectedDocumentId() === "number"}>
+					<Match
+						when={
+							!isMultiple() && typeof selectedDocumentValue()?.id === "number"
+						}
+					>
 						<div class="group w-full border border-border rounded-md bg-input-base px-3 pt-2 pb-0">
-							<div
-								class={classNames("flex items-center justify-between gap-3", {
-									"pb-2": gridPreviewFields().length === 0,
-								})}
-							>
+							<div class="flex items-center justify-between gap-3">
 								<div class="min-w-0">
 									<div class="flex flex-wrap items-center gap-2">
 										<Pill theme="outline" class="text-[10px]">
-											#{selectedDocumentId()}
+											#{selectedDocumentValue()?.id}
 										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
-											{documentPreviewLabel()}
+											{helpers.getLocaleValue({
+												value: collection.data?.data.details.singularName,
+												fallback: T()("document"),
+											})}
 										</span>
 									</div>
 								</div>
@@ -188,9 +251,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										type="button"
 										theme="danger-subtle"
 										size="icon-subtle"
-										onClick={() => {
-											props.onChange([], null);
-										}}
+										onClick={clearSelection}
 										disabled={props.disabled}
 									>
 										<FaSolidXmark size={14} />
@@ -199,42 +260,40 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								</div>
 							</div>
 
-							<Show when={gridPreviewFields().length > 0}>
+							<Show when={selectedDocuments()[0]}>
 								<div class="py-2">
-									<Show
-										when={!isPreviewLoading()}
-										fallback={
-											<div>
-												<span class="skeleton block h-4 w-24 mb-2" />
-												<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-													<span class="skeleton block h-12 w-full rounded-md" />
-													<span class="skeleton block h-12 w-full rounded-md" />
-													<span class="skeleton block h-12 w-full rounded-md" />
+									<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+										<For each={previewFields(selectedDocuments()[0])}>
+											{(preview) => (
+												<div
+													class="min-w-0 rounded-md border border-border px-2 py-1.5 bg-card-base"
+													title={`${preview.label}: ${preview.value}`}
+												>
+													<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
+														{preview.label}
+													</p>
+													<p class="text-xs text-subtitle truncate mt-0.5">
+														{preview.value}
+													</p>
 												</div>
-											</div>
-										}
-									>
-										<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-											<For each={gridPreviewFields()}>
-												{(preview) => (
-													<div
-														class="min-w-0 rounded-md border border-border px-2 py-1.5 bg-card-base"
-														title={`${preview.label}: ${preview.value}`}
-													>
-														<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
-															{preview.label}
-														</p>
-														<p class="text-xs text-subtitle truncate mt-0.5">
-															{preview.value}
-														</p>
-													</div>
-												)}
-											</For>
-										</div>
-									</Show>
+											)}
+										</For>
+									</div>
 								</div>
 							</Show>
 						</div>
+					</Match>
+					<Match when={typeof selectedDocumentValue()?.id !== "number"}>
+						<Button
+							type="button"
+							theme="border-outline"
+							size="small"
+							onClick={openDocuSelectModal}
+							disabled={props.disabled}
+							classes="capitalize"
+						>
+							{T()("select_document")}
+						</Button>
 					</Match>
 				</Switch>
 			</div>

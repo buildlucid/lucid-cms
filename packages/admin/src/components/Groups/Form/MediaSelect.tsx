@@ -18,6 +18,7 @@ import Pill from "@/components/Partials/Pill";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import type { MediaRelationRef } from "@/utils/relation-field-helpers";
 import { mediaResponseToRef } from "@/utils/relation-field-helpers";
@@ -37,7 +38,7 @@ interface MediaSelectProps {
 	disabled?: boolean;
 	noMargin?: boolean;
 	required?: boolean;
-	errors?: ErrorResult | FieldError;
+	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
@@ -141,6 +142,11 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	const mediaDimensions = createMemo(() =>
 		getMediaDimensions(primarySelectedMedia()),
 	);
+	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
+	const getItemErrors = (itemIndex: number) =>
+		fieldErrors().filter((error) => error.itemIndex === itemIndex);
+	const hasItemError = (itemIndex: number) =>
+		getItemErrors(itemIndex).length > 0;
 
 	// -------------------------------
 	// Render
@@ -309,8 +315,17 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							<Show when={selectedMediaRefs().length > 0}>
 								<div class="relative z-20 grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 xl:grid-cols-3">
 									<For each={selectedMediaRefs()}>
-										{(media) => (
-											<div class="group overflow-hidden rounded-md border border-border bg-card-base">
+										{(media, index) => (
+											<div
+												class={classNames(
+													"group overflow-hidden rounded-md border bg-card-base",
+													{
+														"border-border": !hasItemError(index()),
+														"border-error-base ring-1 ring-inset ring-error-base":
+															hasItemError(index()),
+													},
+												)}
+											>
 												<div
 													class={classNames(
 														"relative border-b border-border p-3",

@@ -15,6 +15,8 @@ export interface UserFieldConfig extends SharedFieldConfig {
 	};
 	validation?: {
 		required?: boolean;
+		minItems?: number;
+		maxItems?: number;
 	};
 }
 

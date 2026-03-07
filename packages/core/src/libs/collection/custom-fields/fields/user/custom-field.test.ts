@@ -22,6 +22,15 @@ const UserCollection = new CollectionBuilder("collection", {
 		validation: {
 			required: true,
 		},
+	})
+	.addUser("multi_user", {
+		config: {
+			multiple: true,
+		},
+		validation: {
+			minItems: 2,
+			maxItems: 3,
+		},
 	});
 
 test("successfully validate field - user", async () => {
@@ -130,6 +139,7 @@ test("fail to validate field - user", async () => {
 				key: "required_user",
 				localeCode: null,
 				message: T("field_user_not_found"),
+				itemIndex: 0,
 			},
 		],
 		null: [
@@ -140,6 +150,96 @@ test("fail to validate field - user", async () => {
 			},
 		],
 	});
+});
+
+test("user field validates multiple item counts and indexed errors", async () => {
+	const minItemsValidate = validateField({
+		field: {
+			key: "multi_user",
+			type: "user",
+			value: [1],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: UserCollection.fields.get("multi_user")!,
+		validationData: {
+			media: [],
+			user: [{ id: 1 }],
+			document: [],
+		},
+		meta: {
+			useTranslations: UserCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	const maxItemsValidate = validateField({
+		field: {
+			key: "multi_user",
+			type: "user",
+			value: [1, 2, 3, 4],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: UserCollection.fields.get("multi_user")!,
+		validationData: {
+			media: [],
+			user: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+			document: [],
+		},
+		meta: {
+			useTranslations: UserCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	const indexedValidate = validateField({
+		field: {
+			key: "multi_user",
+			type: "user",
+			value: [1, 99, 100],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: UserCollection.fields.get("multi_user")!,
+		validationData: {
+			media: [],
+			user: [{ id: 1 }],
+			document: [],
+		},
+		meta: {
+			useTranslations: UserCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+
+	expect(minItemsValidate).toEqual([
+		{
+			key: "multi_user",
+			localeCode: null,
+			message: T("field_relation_min_items", {
+				min: 2,
+			}),
+		},
+	]);
+	expect(maxItemsValidate).toEqual([
+		{
+			key: "multi_user",
+			localeCode: null,
+			message: T("field_relation_max_items", {
+				max: 3,
+			}),
+		},
+	]);
+	expect(indexedValidate).toEqual([
+		{
+			key: "multi_user",
+			localeCode: null,
+			message: T("field_user_not_found"),
+			itemIndex: 1,
+		},
+		{
+			key: "multi_user",
+			localeCode: null,
+			message: T("field_user_not_found"),
+			itemIndex: 2,
+		},
+	]);
 });
 
 // -----------------------------------------------

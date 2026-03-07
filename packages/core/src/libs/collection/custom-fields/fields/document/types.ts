@@ -22,6 +22,8 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 	};
 	validation?: {
 		required?: boolean;
+		minItems?: number;
+		maxItems?: number;
 	};
 }
 

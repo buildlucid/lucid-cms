@@ -118,6 +118,125 @@ const getFieldValue = <T>(props: {
 };
 
 /**
+ * Checks whether a field error matches the field, locale, and item range being
+ * updated so it can be safely cleared from the store.
+ */
+const shouldClearFieldError = (
+	fieldError: FieldError,
+	target: {
+		key: string;
+		localeCode: string | null;
+		clearFromItemIndex?: number;
+	},
+) => {
+	if (fieldError.key !== target.key) return false;
+	if (fieldError.localeCode !== target.localeCode) return false;
+
+	if (target.clearFromItemIndex === undefined) {
+		return true;
+	}
+
+	return (
+		fieldError.itemIndex === undefined ||
+		fieldError.itemIndex >= target.clearFromItemIndex
+	);
+};
+
+/**
+ * Removes matching field errors from a single field array without traversing
+ * into nested repeater group errors.
+ */
+const clearFieldErrorsAtLevel = (
+	fieldErrors: FieldError[],
+	target: {
+		key: string;
+		localeCode: string | null;
+		clearFromItemIndex?: number;
+	},
+) => {
+	return fieldErrors.filter((fieldError) => {
+		return !shouldClearFieldError(fieldError, target);
+	});
+};
+
+/**
+ * Walks nested repeater group errors until it reaches the target group and
+ * clears the matching field errors within that group only.
+ */
+const searchAndClearFieldErrors = (
+	fieldErrors: FieldError[],
+	target: {
+		key: string;
+		localeCode: string | null;
+		groupRef: string;
+		clearFromItemIndex?: number;
+	},
+): FieldError[] => {
+	return fieldErrors.reduce<FieldError[]>((acc, fieldError) => {
+		if (!fieldError.groupErrors?.length) {
+			acc.push(fieldError);
+			return acc;
+		}
+
+		const nextGroupErrors = fieldError.groupErrors.reduce<
+			typeof fieldError.groupErrors
+		>((groupAcc, groupError) => {
+			if (groupError.ref === target.groupRef) {
+				const nextFields = clearFieldErrorsAtLevel(groupError.fields, target);
+				if (nextFields.length > 0) {
+					groupAcc.push({
+						...groupError,
+						fields: nextFields,
+					});
+				}
+				return groupAcc;
+			}
+
+			const nextFields = searchAndClearFieldErrors(groupError.fields, target);
+			if (nextFields.length > 0) {
+				groupAcc.push({
+					...groupError,
+					fields: nextFields,
+				});
+			}
+			return groupAcc;
+		}, []);
+
+		if (nextGroupErrors.length > 0) {
+			acc.push({
+				...fieldError,
+				groupErrors: nextGroupErrors,
+			});
+		}
+
+		return acc;
+	}, []);
+};
+
+/**
+ * Clears field errors from either the top level or a specific repeater group,
+ * preserving unrelated errors elsewhere in the tree.
+ */
+export const clearTargetFieldErrors = (
+	fieldErrors: FieldError[],
+	target: {
+		key: string;
+		localeCode: string | null;
+		groupRef?: string;
+		clearFromItemIndex?: number;
+	},
+) => {
+	if (!target.groupRef) {
+		return clearFieldErrorsAtLevel(fieldErrors, target);
+	}
+
+	return searchAndClearFieldErrors(fieldErrors, {
+		...target,
+		groupRef: target.groupRef,
+	});
+};
+
+/**
  * Returns the first selected relation ID from an array-backed relation field.
  */
 const getFirstRelationValue = (
@@ -419,6 +538,7 @@ const brickHelpers = {
 	getUpsertBricks,
 	customFieldId,
 	getFieldValue,
+	clearTargetFieldErrors,
 	getFirstRelationValue,
 	getFirstDocumentRelationValue,
 	getFieldRefs,

@@ -60,6 +60,15 @@ const MediaCollection = new CollectionBuilder("collection", {
 		validation: {
 			extensions: ["png"],
 		},
+	})
+	.addMedia("multi_media", {
+		config: {
+			multiple: true,
+		},
+		validation: {
+			minItems: 2,
+			maxItems: 3,
+		},
 	});
 
 test("successfully validate field - media", async () => {
@@ -321,6 +330,7 @@ test("fail to validate field - media", async () => {
 			key: "required_media",
 			localeCode: null,
 			message: T("field_media_not_found"),
+			itemIndex: 0,
 		},
 	]);
 
@@ -385,6 +395,7 @@ test("fail to validate field - media", async () => {
 			message: T("field_media_min_width", {
 				min: 100,
 			}),
+			itemIndex: 0,
 		},
 	]);
 
@@ -422,6 +433,7 @@ test("fail to validate field - media", async () => {
 			message: T("field_media_max_width", {
 				max: 200,
 			}),
+			itemIndex: 0,
 		},
 	]);
 
@@ -459,6 +471,7 @@ test("fail to validate field - media", async () => {
 			message: T("field_media_min_height", {
 				min: 100,
 			}),
+			itemIndex: 0,
 		},
 	]);
 
@@ -496,6 +509,7 @@ test("fail to validate field - media", async () => {
 			message: T("field_media_max_height", {
 				max: 200,
 			}),
+			itemIndex: 0,
 		},
 	]);
 
@@ -533,6 +547,7 @@ test("fail to validate field - media", async () => {
 			message: T("field_media_type", {
 				type: "image",
 			}),
+			itemIndex: 0,
 		},
 	]);
 
@@ -570,6 +585,142 @@ test("fail to validate field - media", async () => {
 			message: T("field_media_extension", {
 				extensions: "png",
 			}),
+			itemIndex: 0,
+		},
+	]);
+});
+
+test("media field validates multiple item counts and indexed errors", async () => {
+	const minItemsValidate = validateField({
+		field: {
+			key: "multi_media",
+			type: "media",
+			value: [1],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: MediaCollection.fields.get("multi_media")!,
+		validationData: {
+			media: [
+				{
+					id: 1,
+					type: "image",
+					file_extension: "png",
+					width: 150,
+					height: 150,
+				},
+			],
+			user: [],
+			document: [],
+		},
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	const maxItemsValidate = validateField({
+		field: {
+			key: "multi_media",
+			type: "media",
+			value: [1, 2, 3, 4],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: MediaCollection.fields.get("multi_media")!,
+		validationData: {
+			media: [
+				{
+					id: 1,
+					type: "image",
+					file_extension: "png",
+					width: 150,
+					height: 150,
+				},
+				{
+					id: 2,
+					type: "image",
+					file_extension: "png",
+					width: 150,
+					height: 150,
+				},
+				{
+					id: 3,
+					type: "image",
+					file_extension: "png",
+					width: 150,
+					height: 150,
+				},
+				{
+					id: 4,
+					type: "image",
+					file_extension: "png",
+					width: 150,
+					height: 150,
+				},
+			],
+			user: [],
+			document: [],
+		},
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	const indexedValidate = validateField({
+		field: {
+			key: "multi_media",
+			type: "media",
+			value: [1, 99, 100],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: MediaCollection.fields.get("multi_media")!,
+		validationData: {
+			media: [
+				{
+					id: 1,
+					type: "image",
+					file_extension: "png",
+					width: 150,
+					height: 150,
+				},
+			],
+			user: [],
+			document: [],
+		},
+		meta: {
+			useTranslations: MediaCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+
+	expect(minItemsValidate).toEqual([
+		{
+			key: "multi_media",
+			localeCode: null,
+			message: T("field_relation_min_items", {
+				min: 2,
+			}),
+		},
+	]);
+	expect(maxItemsValidate).toEqual([
+		{
+			key: "multi_media",
+			localeCode: null,
+			message: T("field_relation_max_items", {
+				max: 3,
+			}),
+		},
+	]);
+	expect(indexedValidate).toEqual([
+		{
+			key: "multi_media",
+			localeCode: null,
+			message: T("field_media_not_found"),
+			itemIndex: 1,
+		},
+		{
+			key: "multi_media",
+			localeCode: null,
+			message: T("field_media_not_found"),
+			itemIndex: 2,
 		},
 	]);
 });

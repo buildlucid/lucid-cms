@@ -13,12 +13,14 @@ import type {
 	CFProps,
 	CFResponse,
 	CustomFieldErrorItem,
+	CustomFieldValidationError,
 	FieldRelationRefTarget,
 	FieldRelationValidationInput,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
+import { validateRelationItemCount } from "../../utils/relation-item-count-validation.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { documentFieldConfig } from "./config.js";
 import type { DocumentFieldValue, DocumentValidationData } from "./types.js";
@@ -210,17 +212,24 @@ class DocumentCustomField extends CustomField<"document"> {
 			candidateValue,
 			this.config.config.multiple,
 		);
+		const itemCountValidation = validateRelationItemCount({
+			multiple: this.config.config.multiple,
+			length: normalizedValue.length,
+			validation: this.config.validation,
+		});
+		if (!itemCountValidation.valid) return itemCountValidation;
+		const allowedCollections = normalizeDocumentCollections(
+			this.config.collection,
+		);
+		const errors: CustomFieldValidationError[] = [];
 
-		for (const documentValue of normalizedValue) {
-			if (
-				!normalizeDocumentCollections(this.config.collection).includes(
-					documentValue.collectionKey,
-				)
-			) {
-				return {
-					valid: false,
+		for (const [itemIndex, documentValue] of normalizedValue.entries()) {
+			if (!allowedCollections.includes(documentValue.collectionKey)) {
+				errors.push({
+					itemIndex,
 					message: T("field_document_not_found"),
-				};
+				});
+				continue;
 			}
 
 			const findDocument = refData?.find(
@@ -230,11 +239,18 @@ class DocumentCustomField extends CustomField<"document"> {
 			);
 
 			if (findDocument === undefined) {
-				return {
-					valid: false,
+				errors.push({
+					itemIndex,
 					message: T("field_document_not_found"),
-				};
+				});
 			}
+		}
+
+		if (errors.length > 0) {
+			return {
+				valid: false,
+				errors,
+			};
 		}
 
 		return { valid: true };

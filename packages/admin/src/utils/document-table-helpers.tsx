@@ -99,7 +99,7 @@ export const getDocumentListingPreviewFields = (props: {
 	collection?: CollectionResponse;
 	documentRef?: DocumentRef;
 	contentLocale: string;
-}) => {
+}): Array<DocumentListingPreviewField> => {
 	const collection = props.collection;
 	if (!collection || !props.documentRef?.fields) return [];
 

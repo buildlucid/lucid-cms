@@ -9,6 +9,7 @@ import {
 import { MediaSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
+import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
 import helpers from "@/utils/helpers";
 
 interface MediaFieldProps {
@@ -20,6 +21,7 @@ interface MediaFieldProps {
 		repeaterKey?: string;
 		contentLocale: string;
 		fieldError: FieldError | undefined;
+		fieldErrors: FieldError[];
 		altLocaleError: boolean;
 		localised: boolean;
 		fieldColumnIsMissing: boolean;
@@ -75,6 +77,14 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			refs={fieldRef}
 			multiple={isMultiple()}
 			onChange={(value, refs) => {
+				const clearFromItemIndex = isMultiple()
+					? getChangedItemErrorStartIndex(
+							fieldValue(),
+							value,
+							(left, right) => left === right,
+						)
+					: undefined;
+
 				batch(() => {
 					if (refs.length) brickStore.get.addRef("media", refs);
 					brickStore.get.setFieldValue({
@@ -85,6 +95,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 						repeaterKey: props.state.repeaterKey,
 						value: value,
 						contentLocale: props.state.contentLocale,
+						clearFromItemIndex,
 					});
 					setValue(value);
 				});
@@ -102,7 +113,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			disabled={isDisabled()}
 			extensions={props.state.fieldConfig.validation?.extensions}
 			type={props.state.fieldConfig.validation?.type}
-			errors={props.state.fieldError}
+			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			hideOptionalText

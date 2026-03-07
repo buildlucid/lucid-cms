@@ -1,6 +1,7 @@
 import type {
 	CFConfig,
 	DocumentFieldValue,
+	DocumentRef,
 	FieldError,
 	FieldResponse,
 } from "@types";
@@ -14,6 +15,7 @@ import {
 import { DocumentSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
+import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
 import helpers from "@/utils/helpers";
 
 interface DocumentFieldProps {
@@ -25,6 +27,7 @@ interface DocumentFieldProps {
 		repeaterKey?: string;
 		contentLocale: string;
 		fieldError: FieldError | undefined;
+		fieldErrors: FieldError[];
 		altLocaleError: boolean;
 		localised: boolean;
 		fieldColumnIsMissing: boolean;
@@ -49,13 +52,16 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 		});
 	});
 	const fieldRef = createMemo(() => {
-		return brickHelpers.getFieldRef({
+		return brickHelpers.getFieldRefs({
 			fieldType: "document",
 			fieldValue: fieldValue(),
 		});
 	});
 	const primaryCollectionKey = createMemo(
 		() => props.state.fieldConfig.collection,
+	);
+	const isMultiple = createMemo(
+		() => props.state.fieldConfig.config.multiple === true,
 	);
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
@@ -78,10 +84,23 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			})}
 			collection={primaryCollectionKey()}
 			value={getValue()}
-			ref={fieldRef}
-			onChange={(value, ref) => {
+			refs={fieldRef}
+			multiple={isMultiple()}
+			onChange={(value, refs) => {
+				const clearFromItemIndex = isMultiple()
+					? getChangedItemErrorStartIndex(
+							fieldValue(),
+							value,
+							(left, right) =>
+								left?.id === right?.id &&
+								left?.collectionKey === right?.collectionKey,
+						)
+					: undefined;
+
 				batch(() => {
-					if (ref) brickStore.get.addRef("document", ref);
+					if (refs.length) {
+						brickStore.get.addRef("document", refs as DocumentRef[]);
+					}
 					brickStore.get.setFieldValue({
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
@@ -90,6 +109,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 						repeaterKey: props.state.repeaterKey,
 						value: value,
 						contentLocale: props.state.contentLocale,
+						clearFromItemIndex,
 					});
 					setValue(value);
 				});
@@ -102,7 +122,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.summary,
 				}),
 			}}
-			errors={props.state.fieldError}
+			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
 			disabled={isDisabled()}

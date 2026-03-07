@@ -31,6 +31,16 @@ const DocumentCollection = new CollectionBuilder("collection", {
 		validation: {
 			required: true,
 		},
+	})
+	.addDocument("multi_doc", {
+		collection: "page",
+		config: {
+			multiple: true,
+		},
+		validation: {
+			minItems: 2,
+			maxItems: 3,
+		},
 	});
 
 test("successfully validate field - document", async () => {
@@ -112,6 +122,7 @@ test("fail to validate field - document", async () => {
 			key: "required_doc",
 			localeCode: null,
 			message: T("field_document_not_found"),
+			itemIndex: 0,
 		},
 	]);
 
@@ -171,6 +182,111 @@ test("fail to validate field - document", async () => {
 			key: "wrong_collection",
 			localeCode: null,
 			message: T("field_document_not_found"),
+			itemIndex: 0,
+		},
+	]);
+});
+
+test("document field validates multiple item counts and indexed errors", async () => {
+	const minItemsValidate = validateField({
+		field: {
+			key: "multi_doc",
+			type: "document",
+			value: [{ id: 1, collectionKey: "page" }],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: DocumentCollection.fields.get("multi_doc")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [{ id: 1, collection_key: "page" }],
+		},
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	const maxItemsValidate = validateField({
+		field: {
+			key: "multi_doc",
+			type: "document",
+			value: [
+				{ id: 1, collectionKey: "page" },
+				{ id: 2, collectionKey: "page" },
+				{ id: 3, collectionKey: "page" },
+				{ id: 4, collectionKey: "page" },
+			],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: DocumentCollection.fields.get("multi_doc")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [
+				{ id: 1, collection_key: "page" },
+				{ id: 2, collection_key: "page" },
+				{ id: 3, collection_key: "page" },
+				{ id: 4, collection_key: "page" },
+			],
+		},
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	const indexedValidate = validateField({
+		field: {
+			key: "multi_doc",
+			type: "document",
+			value: [
+				{ id: 1, collectionKey: "page" },
+				{ id: 99, collectionKey: "page" },
+				{ id: 100, collectionKey: "blog" },
+			],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: DocumentCollection.fields.get("multi_doc")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [{ id: 1, collection_key: "page" }],
+		},
+		meta: {
+			useTranslations: DocumentCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+
+	expect(minItemsValidate).toEqual([
+		{
+			key: "multi_doc",
+			localeCode: null,
+			message: T("field_relation_min_items", {
+				min: 2,
+			}),
+		},
+	]);
+	expect(maxItemsValidate).toEqual([
+		{
+			key: "multi_doc",
+			localeCode: null,
+			message: T("field_relation_max_items", {
+				max: 3,
+			}),
+		},
+	]);
+	expect(indexedValidate).toEqual([
+		{
+			key: "multi_doc",
+			localeCode: null,
+			message: T("field_document_not_found"),
+			itemIndex: 1,
+		},
+		{
+			key: "multi_doc",
+			localeCode: null,
+			message: T("field_document_not_found"),
+			itemIndex: 2,
 		},
 	]);
 });

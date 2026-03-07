@@ -181,9 +181,14 @@ export type CustomFieldErrorItem = {
 	condition?: (...args: unknown[]) => boolean;
 	message: string;
 };
+export type CustomFieldValidationError = {
+	message: string;
+	itemIndex?: number;
+};
 export type CustomFieldValidateResponse = {
 	valid: boolean;
 	message?: string;
+	errors?: CustomFieldValidationError[];
 };
 
 // -----------------------------------------------

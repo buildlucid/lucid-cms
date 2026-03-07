@@ -9,6 +9,7 @@ import {
 import { UserSelect } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
+import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
 import helpers from "@/utils/helpers";
 
 interface UserFieldProps {
@@ -20,6 +21,7 @@ interface UserFieldProps {
 		repeaterKey?: string;
 		contentLocale: string;
 		fieldError: FieldError | undefined;
+		fieldErrors: FieldError[];
 		altLocaleError: boolean;
 		localised: boolean;
 		fieldColumnIsMissing: boolean;
@@ -77,6 +79,14 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			refs={fieldRef}
 			multiple={isMultiple()}
 			onChange={(value, refs) => {
+				const clearFromItemIndex = isMultiple()
+					? getChangedItemErrorStartIndex(
+							fieldValue(),
+							value,
+							(left, right) => left === right,
+						)
+					: undefined;
+
 				batch(() => {
 					if (refs.length) brickStore.get.addRef("user", refs);
 					brickStore.get.setFieldValue({
@@ -87,6 +97,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 						repeaterKey: props.state.repeaterKey,
 						value: value,
 						contentLocale: props.state.contentLocale,
+						clearFromItemIndex,
 					});
 					setValue(value);
 				});
@@ -99,7 +110,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.summary,
 				}),
 			}}
-			errors={props.state.fieldError}
+			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}

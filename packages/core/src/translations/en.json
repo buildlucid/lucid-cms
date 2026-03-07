@@ -102,6 +102,8 @@
 	"field_media_not_found": "We couldn't find the media you selected",
 	"field_user_not_found": "We couldn't find the user you selected",
 	"field_document_not_found": "We couldn't find the document you selected",
+	"field_relation_min_items": "Select at least {{min}} items",
+	"field_relation_max_items": "Select no more than {{max}} items",
 	"field_media_doesnt_have_type": "This media does not have a type",
 	"field_media_doesnt_have_width": "This media does not have a width",
 	"field_media_doesnt_have_height": "This media does not have a height",

@@ -278,6 +278,37 @@ export const validateField = (props: {
 }): FieldError[] => {
 	const errors: FieldError[] = [];
 	const refData = props.validationData[props.field.type];
+	const toFieldErrors = (localeCode: string | null, message?: string) => {
+		return (
+			message
+				? [{ message }]
+				: [
+						{
+							message: T("an_unknown_error_occurred_validating_the_field"),
+						},
+					]
+		).map((error) => ({
+			key: props.field.key,
+			localeCode,
+			message: error.message,
+		}));
+	};
+	const buildFieldErrors = (
+		localeCode: string | null,
+		validationResult: ReturnType<CustomField<FieldTypes>["validate"]>,
+	) => {
+		if (validationResult.errors?.length) {
+			return validationResult.errors.map((error) => ({
+				key: props.field.key,
+				localeCode,
+				message:
+					error.message || T("an_unknown_error_occurred_validating_the_field"),
+				itemIndex: error.itemIndex,
+			}));
+		}
+
+		return toFieldErrors(localeCode, validationResult.message);
+	};
 
 	//* handle fields with translations
 	if (props.field.translations) {
@@ -290,13 +321,7 @@ export const validateField = (props: {
 			});
 
 			if (!validationResult.valid) {
-				errors.push({
-					key: props.field.key,
-					localeCode,
-					message:
-						validationResult.message ||
-						T("an_unknown_error_occurred_validating_the_field"),
-				});
+				errors.push(...buildFieldErrors(localeCode, validationResult));
 			}
 		}
 	}
@@ -309,16 +334,14 @@ export const validateField = (props: {
 		});
 
 		if (!validationResult.valid) {
-			errors.push({
-				key: props.field.key,
-				localeCode:
+			errors.push(
+				...buildFieldErrors(
 					props.meta.useTranslations && props.instance.translationsEnabled
 						? props.meta.defaultLocale
 						: null,
-				message:
-					validationResult.message ||
-					T("an_unknown_error_occurred_validating_the_field"),
-			});
+					validationResult,
+				),
+			);
 		}
 	}
 

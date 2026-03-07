@@ -8,6 +8,7 @@ import type {
 	CFProps,
 	CFResponse,
 	CustomFieldErrorItem,
+	CustomFieldValidationError,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -16,6 +17,7 @@ import {
 	clampRelationInputValue,
 	normalizeStoredRelationValues,
 } from "../../utils/normalize-relation-values.js";
+import { validateRelationItemCount } from "../../utils/relation-item-count-validation.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { mediaFieldConfig } from "./config.js";
 import type { MediaValidationData } from "./types.js";
@@ -125,26 +127,34 @@ class MediaCustomField extends CustomField<"media"> {
 					(item): item is number => typeof item === "number",
 				)
 			: [];
+		const itemCountValidation = validateRelationItemCount({
+			multiple: this.config.config.multiple,
+			length: normalizedValue.length,
+			validation: this.config.validation,
+		});
+		if (!itemCountValidation.valid) return itemCountValidation;
 
-		for (const mediaId of normalizedValue) {
+		const errors: CustomFieldValidationError[] = [];
+		for (const [itemIndex, mediaId] of normalizedValue.entries()) {
 			const findMedia = refData?.find((m) => m.id === mediaId);
 			if (findMedia === undefined) {
-				return {
-					valid: false,
+				errors.push({
+					itemIndex,
 					message: T("field_media_not_found"),
-				};
+				});
+				continue;
 			}
 
 			// Check if value is in the options
 			if (this.config.validation?.extensions?.length) {
 				const extension = findMedia.file_extension;
 				if (!this.config.validation.extensions.includes(extension)) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_extension", {
 							extensions: this.config.validation.extensions.join(", "),
 						}),
-					};
+					});
 				}
 			}
 
@@ -152,19 +162,20 @@ class MediaCustomField extends CustomField<"media"> {
 			if (this.config.validation?.type) {
 				const type = findMedia.type;
 				if (!type) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_doesnt_have_type"),
-					};
+					});
+					continue;
 				}
 
 				if (this.config.validation.type !== type) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_type", {
 							type: this.config.validation.type,
 						}),
-					};
+					});
 				}
 			}
 
@@ -172,33 +183,34 @@ class MediaCustomField extends CustomField<"media"> {
 			if (this.config.validation?.width && findMedia.type === "image") {
 				const width = findMedia.width;
 				if (!width) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_doesnt_have_width"),
-					};
+					});
+					continue;
 				}
 
 				if (
 					this.config.validation.width.min &&
 					width < this.config.validation.width.min
 				) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_min_width", {
 							min: this.config.validation.width.min,
 						}),
-					};
+					});
 				}
 				if (
 					this.config.validation.width.max &&
 					width > this.config.validation.width.max
 				) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_max_width", {
 							max: this.config.validation.width.max,
 						}),
-					};
+					});
 				}
 			}
 
@@ -206,35 +218,43 @@ class MediaCustomField extends CustomField<"media"> {
 			if (this.config.validation?.height && findMedia.type === "image") {
 				const height = findMedia.height;
 				if (!height) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_doesnt_have_height"),
-					};
+					});
+					continue;
 				}
 
 				if (
 					this.config.validation.height.min &&
 					height < this.config.validation.height.min
 				) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_min_height", {
 							min: this.config.validation.height.min,
 						}),
-					};
+					});
 				}
 				if (
 					this.config.validation.height.max &&
 					height > this.config.validation.height.max
 				) {
-					return {
-						valid: false,
+					errors.push({
+						itemIndex,
 						message: T("field_media_max_height", {
 							max: this.config.validation.height.max,
 						}),
-					};
+					});
 				}
 			}
+		}
+
+		if (errors.length > 0) {
+			return {
+				valid: false,
+				errors,
+			};
 		}
 
 		return { valid: true };

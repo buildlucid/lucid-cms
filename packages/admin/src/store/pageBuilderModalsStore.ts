@@ -1,6 +1,6 @@
 import type {
 	DocumentFieldValue,
-	DocumentResponse,
+	DocumentRef,
 	LinkResValue,
 	MediaRef,
 	MediaResponse,
@@ -37,9 +37,14 @@ type ModalRegistry = {
 	documentSelect: {
 		data: {
 			collectionKey: string;
+			multiple?: boolean;
 			selected?: DocumentFieldValue[];
+			selectedRefs?: Array<DocumentRef>;
 		};
-		result: DocumentResponse;
+		result: {
+			value: DocumentFieldValue[];
+			refs: DocumentRef[];
+		};
 	};
 	userSelect: {
 		data: {

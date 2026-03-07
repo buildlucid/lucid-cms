@@ -16,6 +16,8 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 	};
 	validation?: {
 		required?: boolean;
+		minItems?: number;
+		maxItems?: number;
 		extensions?: string[];
 		type?: MediaType;
 		width?: {
