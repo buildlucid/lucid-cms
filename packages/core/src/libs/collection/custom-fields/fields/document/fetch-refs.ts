@@ -1,7 +1,3 @@
-import type {
-	FieldRefFetchInput,
-	FieldRefFetchOutput,
-} from "../../../../../services/documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../../../../../services/index.js";
 import type {
 	LucidBrickTableName,
@@ -17,6 +13,10 @@ import {
 	getDocumentVersionTableSchema,
 } from "../../../schema/runtime/runtime-schema-selectors.js";
 import type { CollectionSchemaTable } from "../../../schema/types.js";
+import type {
+	FieldRefFetchInput,
+	FieldRefFetchOutput,
+} from "../../utils/ref-fetch.js";
 
 const fetchDocumentRefs: ServiceFn<
 	[FieldRefFetchInput],

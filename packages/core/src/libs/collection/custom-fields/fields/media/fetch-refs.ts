@@ -1,10 +1,10 @@
-import type {
-	FieldRefFetchInput,
-	FieldRefFetchOutput,
-} from "../../../../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type { ServiceFn } from "../../../../../utils/services/types.js";
 import type { MediaPropsT } from "../../../../formatters/media.js";
 import { MediaRepository } from "../../../../repositories/index.js";
+import type {
+	FieldRefFetchInput,
+	FieldRefFetchOutput,
+} from "../../utils/ref-fetch.js";
 
 const fetchMediaRefs: ServiceFn<
 	[FieldRefFetchInput],

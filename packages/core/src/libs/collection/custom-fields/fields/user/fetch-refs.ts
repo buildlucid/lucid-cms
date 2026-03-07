@@ -1,10 +1,10 @@
-import type {
-	FieldRefFetchInput,
-	FieldRefFetchOutput,
-} from "../../../../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type { ServiceFn } from "../../../../../utils/services/types.js";
 import type { UserPropT } from "../../../../formatters/users.js";
 import { UsersRepository } from "../../../../repositories/index.js";
+import type {
+	FieldRefFetchInput,
+	FieldRefFetchOutput,
+} from "../../utils/ref-fetch.js";
 
 const fetchUserRefs: ServiceFn<
 	[FieldRefFetchInput],
