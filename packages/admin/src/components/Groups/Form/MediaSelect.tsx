@@ -1,3 +1,12 @@
+import {
+	closestCenter,
+	createSortable,
+	DragDropProvider,
+	DragDropSensors,
+	type DragEventHandler,
+	SortableProvider,
+	transformStyle,
+} from "@thisbeyond/solid-dnd";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
@@ -15,9 +24,11 @@ import Button from "@/components/Partials/Button";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
+import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import { moveArrayItem } from "@/utils/array-helpers";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import type { MediaRelationRef } from "@/utils/relation-field-helpers";
@@ -129,6 +140,21 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			selectedMediaRefs().filter((media) => media.id !== mediaId),
 		);
 	};
+	const reorderSelectedMedia = (ref: string, targetRef: string) => {
+		if (props.disabled) return;
+
+		const mediaRefs = selectedMediaRefs();
+		const fromIndex = mediaRefs.findIndex((media) => `${media.id}` === ref);
+		const toIndex = mediaRefs.findIndex((media) => `${media.id}` === targetRef);
+		const nextMediaRefs = moveArrayItem(mediaRefs, fromIndex, toIndex);
+
+		if (nextMediaRefs === mediaRefs) return;
+
+		props.onChange(
+			nextMediaRefs.map((media) => media.id),
+			nextMediaRefs,
+		);
+	};
 
 	// -------------------------------
 	// Memos
@@ -147,6 +173,27 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		fieldErrors().filter((error) => error.itemIndex === itemIndex);
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
+	const sortableIds = createMemo(() =>
+		selectedMediaRefs().map((media) => media.id),
+	);
+	const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+		brickStore.get.endRelationFieldDrag();
+
+		if (
+			!draggable ||
+			!droppable ||
+			typeof draggable.id !== "number" ||
+			typeof droppable.id !== "number" ||
+			draggable.id === droppable.id
+		) {
+			return;
+		}
+
+		reorderSelectedMedia(`${draggable.id}`, `${droppable.id}`);
+	};
+	const onDragStart: DragEventHandler = () => {
+		brickStore.get.startRelationFieldDrag();
+	};
 
 	// -------------------------------
 	// Render
@@ -313,108 +360,47 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					<Match when={isMultiple()}>
 						<div class="w-full overflow-hidden rounded-md border border-border dotted-background border-dashed">
 							<Show when={selectedMediaRefs().length > 0}>
-								<div class="relative z-20 grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 xl:grid-cols-3">
-									<For each={selectedMediaRefs()}>
-										{(media, index) => (
-											<div
-												class={classNames(
-													"group overflow-hidden rounded-md border bg-card-base",
-													{
-														"border-border": !hasItemError(index()),
-														"border-error-base ring-1 ring-inset ring-error-base":
-															hasItemError(index()),
-													},
+								<DragDropProvider
+									collisionDetector={closestCenter}
+									onDragStart={onDragStart}
+									onDragEnd={onDragEnd}
+								>
+									<DragDropSensors />
+									<SortableProvider ids={sortableIds()}>
+										<div class="relative z-20 grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 xl:grid-cols-3">
+											<For each={selectedMediaRefs()}>
+												{(media, index) => (
+													<MediaSortableItem
+														media={media}
+														title={
+															getMediaTitle(media) || T()("no_translation")
+														}
+														alt={getMediaAlt(media) || ""}
+														dimensions={getMediaDimensions(media)}
+														hasError={hasItemError(index())}
+														removeSelectedMedia={removeSelectedMedia}
+														disabled={props.disabled}
+													/>
 												)}
-											>
-												<div
-													class={classNames(
-														"relative border-b border-border p-3",
-														{
-															"rectangle-background":
-																media.type === "image" ||
-																media.type === "video",
-														},
-													)}
+											</For>
+											<Show when={selectedMediaRefs().length > 0}>
+												<button
+													type="button"
+													class="relative hidden h-full items-center justify-center overflow-hidden rounded-md border border-border text-unfocused transition-colors duration-200 before:absolute before:-inset-3 before:bg-secondary-base/5 before:blur-2xl hover:border-primary-muted-border hover:text-title lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2"
+													onClick={openMediaSelectModal}
+													disabled={props.disabled}
+													aria-label={T()("select_media", {
+														type: props.type || "media",
+													})}
 												>
-													<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-card-base via-card-base/80 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-														<div class="flex flex-wrap gap-1.5">
-															<Show when={media.isDeleted}>
-																<Pill theme="red">{T()("deleted")}</Pill>
-															</Show>
-															<Show when={getMediaDimensions(media)}>
-																<Pill theme="outline">
-																	{getMediaDimensions(media)}
-																</Pill>
-															</Show>
-															<Show when={media.mimeType}>
-																<Pill theme="outline">{media.mimeType}</Pill>
-															</Show>
-															<Show when={media.extension}>
-																<Pill theme="outline">
-																	{media.extension.toUpperCase()}
-																</Pill>
-															</Show>
-														</div>
-													</div>
-													<div class="flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
-														<MediaPreview
-															media={{
-																url: media.url,
-																type: media.type,
-															}}
-															alt={getMediaAlt(media) || ""}
-															richPreview={true}
-															imageFit="contain"
-														/>
-													</div>
-												</div>
-												<div class="p-3 flex items-center justify-between gap-2">
-													<div class="min-w-0">
-														<p class="line-clamp-1 text-sm font-medium text-subtitle">
-															{getMediaTitle(media) || T()("no_translation")}
-														</p>
-														<div class="mt-1">
-															<ClickToCopy
-																type="simple"
-																text={media.key || ""}
-																value={media.url || ""}
-																class="text-xs text-unfocused max-w-full"
-															/>
-														</div>
-													</div>
-
-													<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-														<Button
-															type="button"
-															theme="danger-subtle"
-															size="icon-subtle"
-															onClick={() => removeSelectedMedia(media.id)}
-															disabled={props.disabled}
-															aria-label={T()("remove")}
-														>
-															<FaSolidXmark size={14} />
-														</Button>
-													</div>
-												</div>
-											</div>
-										)}
-									</For>
-									<Show when={selectedMediaRefs().length > 0}>
-										<button
-											type="button"
-											class="relative hidden h-full items-center justify-center overflow-hidden rounded-md border border-border text-unfocused transition-colors duration-200 before:absolute before:-inset-3 before:bg-secondary-base/5 before:blur-2xl hover:border-primary-muted-border hover:text-title lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2"
-											onClick={openMediaSelectModal}
-											disabled={props.disabled}
-											aria-label={T()("select_media", {
-												type: props.type || "media",
-											})}
-										>
-											<span class="relative z-10">
-												<FaSolidPlus size={18} />
-											</span>
-										</button>
-									</Show>
-								</div>
+													<span class="relative z-10">
+														<FaSolidPlus size={18} />
+													</span>
+												</button>
+											</Show>
+										</div>
+									</SortableProvider>
+								</DragDropProvider>
 							</Show>
 						</div>
 						<div class="flex flex-wrap items-center justify-between gap-3 mt-3">
@@ -451,6 +437,102 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
+		</div>
+	);
+};
+
+const MediaSortableItem: Component<{
+	media: MediaRelationRef;
+	title: string;
+	alt: string;
+	dimensions: string | null;
+	hasError: boolean;
+	removeSelectedMedia: (mediaId: number) => void;
+	disabled?: boolean;
+}> = (props) => {
+	const sortable = createSortable(props.media.id);
+
+	return (
+		<div
+			// @ts-expect-error solid directive
+			use:sortable
+			style={transformStyle(sortable.transform)}
+			class={classNames(
+				"group overflow-hidden rounded-md border bg-card-base ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				{
+					"border-border": !props.hasError,
+					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
+					"opacity-60": sortable.isActiveDraggable,
+					"ring-1 ring-primary-base":
+						sortable.isActiveDroppable &&
+						!sortable.isActiveDraggable &&
+						!props.hasError,
+					"cursor-grab active:cursor-grabbing": props.disabled !== true,
+				},
+			)}
+		>
+			<div
+				class={classNames("relative border-b border-border p-3", {
+					"rectangle-background":
+						props.media.type === "image" || props.media.type === "video",
+				})}
+			>
+				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-card-base via-card-base/80 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+					<div class="flex flex-wrap gap-1.5">
+						<Show when={props.media.isDeleted}>
+							<Pill theme="red">{T()("deleted")}</Pill>
+						</Show>
+						<Show when={props.dimensions}>
+							<Pill theme="outline">{props.dimensions}</Pill>
+						</Show>
+						<Show when={props.media.mimeType}>
+							<Pill theme="outline">{props.media.mimeType}</Pill>
+						</Show>
+						<Show when={props.media.extension}>
+							<Pill theme="outline">{props.media.extension.toUpperCase()}</Pill>
+						</Show>
+					</div>
+				</div>
+				<div class="flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
+					<MediaPreview
+						media={{
+							url: props.media.url,
+							type: props.media.type,
+						}}
+						alt={props.alt}
+						richPreview={true}
+						imageFit="contain"
+					/>
+				</div>
+			</div>
+			<div class="flex items-center justify-between gap-2 p-3">
+				<div class="min-w-0">
+					<p class="line-clamp-1 text-sm font-medium text-subtitle">
+						{props.title}
+					</p>
+					<div class="mt-1">
+						<ClickToCopy
+							type="simple"
+							text={props.media.key || ""}
+							value={props.media.url || ""}
+							class="text-xs text-unfocused max-w-full"
+						/>
+					</div>
+				</div>
+
+				<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+					<Button
+						type="button"
+						theme="danger-subtle"
+						size="icon-subtle"
+						onClick={() => props.removeSelectedMedia(props.media.id)}
+						disabled={props.disabled}
+						aria-label={T()("remove")}
+					>
+						<FaSolidXmark size={14} />
+					</Button>
+				</div>
+			</div>
 		</div>
 	);
 };

@@ -1,3 +1,12 @@
+import {
+	closestCenter,
+	createSortable,
+	DragDropProvider,
+	DragDropSensors,
+	type DragEventHandler,
+	SortableProvider,
+	transformStyle,
+} from "@thisbeyond/solid-dnd";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
@@ -12,8 +21,10 @@ import {
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import { moveArrayItem } from "@/utils/array-helpers";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import type { UserRelationRef } from "@/utils/relation-field-helpers";
@@ -62,6 +73,21 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 			selectedUsers().filter((user) => user.id !== userId),
 		);
 	};
+	const reorderSelectedUsers = (ref: string, targetRef: string) => {
+		if (props.disabled) return;
+
+		const users = selectedUsers();
+		const fromIndex = users.findIndex((user) => `${user.id}` === ref);
+		const toIndex = users.findIndex((user) => `${user.id}` === targetRef);
+		const nextUsers = moveArrayItem(users, fromIndex, toIndex);
+
+		if (nextUsers === users) return;
+
+		props.onChange(
+			nextUsers.map((user) => user.id),
+			nextUsers,
+		);
+	};
 
 	// -------------------------------
 	// Memos
@@ -74,11 +100,30 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 		fieldErrors().filter((error) => error.itemIndex === itemIndex);
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
+	const sortableIds = createMemo(() => selectedUsers().map((user) => user.id));
 	const userName = createMemo(() => {
 		const user = selectedUser();
 		if (!user) return "";
 		return helpers.formatUserName(user, "username");
 	});
+	const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+		brickStore.get.endRelationFieldDrag();
+
+		if (
+			!draggable ||
+			!droppable ||
+			typeof draggable.id !== "number" ||
+			typeof droppable.id !== "number" ||
+			draggable.id === droppable.id
+		) {
+			return;
+		}
+
+		reorderSelectedUsers(`${draggable.id}`, `${droppable.id}`);
+	};
+	const onDragStart: DragEventHandler = () => {
+		brickStore.get.startRelationFieldDrag();
+	};
 
 	// -------------------------------
 	// Render
@@ -103,43 +148,27 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 					<Match when={isMultiple()}>
 						<div class="w-full">
 							<Show when={selectedUsers().length > 0}>
-								<div class="flex flex-col gap-2">
-									<For each={selectedUsers()}>
-										{(user, index) => (
-											<div
-												class={classNames(
-													"group flex items-center justify-between gap-3 rounded-md border bg-input-base px-3 py-2",
-													{
-														"border-border": !hasItemError(index()),
-														"border-error-base ring-1 ring-inset ring-error-base":
-															hasItemError(index()),
-													},
-												)}
-											>
-												<div class="min-w-0">
-													<p class="truncate text-sm font-medium text-subtitle">
-														{helpers.formatUserName(user, "username") || "-"}
-													</p>
-													<p class="truncate text-xs text-unfocused">
-														{user.email || "-"}
-													</p>
-												</div>
-												<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-													<Button
-														type="button"
-														theme="danger-subtle"
-														size="icon-subtle"
-														onClick={() => removeSelectedUser(user.id)}
+								<DragDropProvider
+									collisionDetector={closestCenter}
+									onDragStart={onDragStart}
+									onDragEnd={onDragEnd}
+								>
+									<DragDropSensors />
+									<SortableProvider ids={sortableIds()}>
+										<div class="flex flex-col gap-2">
+											<For each={selectedUsers()}>
+												{(user, index) => (
+													<UserSortableItem
+														user={user}
+														hasError={hasItemError(index())}
+														removeSelectedUser={removeSelectedUser}
 														disabled={props.disabled}
-														aria-label={T()("remove")}
-													>
-														<FaSolidXmark size={14} />
-													</Button>
-												</div>
-											</div>
-										)}
-									</For>
-								</div>
+													/>
+												)}
+											</For>
+										</div>
+									</SortableProvider>
+								</DragDropProvider>
 							</Show>
 							<div
 								class={classNames(
@@ -219,6 +248,55 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
+		</div>
+	);
+};
+
+const UserSortableItem: Component<{
+	user: UserRelationRef;
+	hasError: boolean;
+	removeSelectedUser: (userId: number) => void;
+	disabled?: boolean;
+}> = (props) => {
+	const sortable = createSortable(props.user.id);
+
+	return (
+		<div
+			// @ts-expect-error solid directive
+			use:sortable
+			style={transformStyle(sortable.transform)}
+			class={classNames(
+				"group flex items-center justify-between gap-3 rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				{
+					"border-border": !props.hasError,
+					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
+					"opacity-60": sortable.isActiveDraggable,
+					"ring-1 ring-primary-base":
+						sortable.isActiveDroppable &&
+						!sortable.isActiveDraggable &&
+						!props.hasError,
+					"cursor-grab active:cursor-grabbing": props.disabled !== true,
+				},
+			)}
+		>
+			<div class="min-w-0">
+				<p class="truncate text-sm font-medium text-subtitle">
+					{helpers.formatUserName(props.user, "username") || "-"}
+				</p>
+				<p class="truncate text-xs text-unfocused">{props.user.email || "-"}</p>
+			</div>
+			<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+				<Button
+					type="button"
+					theme="danger-subtle"
+					size="icon-subtle"
+					onClick={() => props.removeSelectedUser(props.user.id)}
+					disabled={props.disabled}
+					aria-label={T()("remove")}
+				>
+					<FaSolidXmark size={14} />
+				</Button>
+			</div>
 		</div>
 	);
 };

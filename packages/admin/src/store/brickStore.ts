@@ -41,6 +41,7 @@ const [get, set] = createStore<{
 	initialSnapshot: BrickSnapshot[] | null;
 	autoSaveCounter: number;
 	skipAutoSave: boolean;
+	relationFieldDragCount: number;
 	locked: boolean;
 	refs: Partial<Record<FieldTypes, FieldRefs[]>>;
 	collectionTranslations: boolean;
@@ -110,6 +111,8 @@ const [get, set] = createStore<{
 		fieldType: "media" | "document" | "user",
 		ref: FieldRefs | FieldRefs[],
 	) => void;
+	startRelationFieldDrag: () => void;
+	endRelationFieldDrag: () => void;
 }>({
 	bricks: [],
 	fieldsErrors: [],
@@ -118,6 +121,7 @@ const [get, set] = createStore<{
 	locked: false,
 	autoSaveCounter: 0,
 	skipAutoSave: true,
+	relationFieldDragCount: 0,
 	collectionTranslations: false,
 	refs: {},
 	reset() {
@@ -128,6 +132,7 @@ const [get, set] = createStore<{
 			set("initialSnapshot", null);
 			set("autoSaveCounter", 0);
 			set("skipAutoSave", true);
+			set("relationFieldDragCount", 0);
 			set("collectionTranslations", false);
 			set("refs", {});
 		});
@@ -577,6 +582,12 @@ const [get, set] = createStore<{
 				}
 			}),
 		);
+	},
+	startRelationFieldDrag() {
+		set("relationFieldDragCount", (prev) => prev + 1);
+	},
+	endRelationFieldDrag() {
+		set("relationFieldDragCount", (prev) => Math.max(0, prev - 1));
 	},
 });
 

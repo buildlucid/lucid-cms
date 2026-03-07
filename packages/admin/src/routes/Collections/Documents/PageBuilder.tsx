@@ -104,6 +104,8 @@ const CollectionsDocumentsEditRoute: Component<{
 		return `${docState.collectionKey()}:${routeDocumentId}:${routeVersionKey}`;
 	};
 	const setDocumentState = () => {
+		if (brickStore.get.relationFieldDragCount > 0) return;
+
 		const collection = docState.collection();
 		if (!collection) return;
 
@@ -170,6 +172,7 @@ const CollectionsDocumentsEditRoute: Component<{
 				docState.documentId(),
 				versionType(),
 				versionId(),
+				brickStore.get.relationFieldDragCount,
 			],
 			() => {
 				setDocumentState();

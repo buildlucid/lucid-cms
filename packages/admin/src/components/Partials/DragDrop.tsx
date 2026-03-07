@@ -63,7 +63,6 @@ const DragDrop: Component<DragDropProps> = (props) => {
 		};
 
 		if (getHasViewTransition()) {
-			// @ts-expect-error
 			document.startViewTransition(updateFn);
 		} else {
 			updateFn();

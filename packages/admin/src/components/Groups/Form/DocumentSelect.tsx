@@ -1,3 +1,12 @@
+import {
+	closestCenter,
+	createSortable,
+	DragDropProvider,
+	DragDropSensors,
+	type DragEventHandler,
+	SortableProvider,
+	transformStyle,
+} from "@thisbeyond/solid-dnd";
 import type {
 	DocumentFieldValue,
 	DocumentRef,
@@ -22,6 +31,7 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import { moveArrayItem } from "@/utils/array-helpers";
 import { getDocumentListingPreviewFields } from "@/utils/document-table-helpers";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
@@ -78,6 +88,28 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			),
 		);
 	};
+	const reorderSelectedDocuments = (ref: string, targetRef: string) => {
+		if (props.disabled) return;
+
+		const documents = selectedDocuments();
+		const fromIndex = documents.findIndex(
+			(document) => `${document.collectionKey}:${document.id}` === ref,
+		);
+		const toIndex = documents.findIndex(
+			(document) => `${document.collectionKey}:${document.id}` === targetRef,
+		);
+		const nextDocuments = moveArrayItem(documents, fromIndex, toIndex);
+
+		if (nextDocuments === documents) return;
+
+		props.onChange(
+			nextDocuments.map((document) => ({
+				id: document.id,
+				collectionKey: document.collectionKey,
+			})),
+			nextDocuments,
+		);
+	};
 
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale || "",
@@ -101,12 +133,35 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	};
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
+	const sortableIds = createMemo(() =>
+		selectedDocuments().map(
+			(document) => `${document.collectionKey}:${document.id}`,
+		),
+	);
 	const previewFields = (documentRef?: DocumentRef) =>
 		getDocumentListingPreviewFields({
 			collection: collection.data?.data,
 			documentRef,
 			contentLocale: contentLocale(),
 		}).slice(0, 3);
+	const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+		brickStore.get.endRelationFieldDrag();
+
+		if (
+			!draggable ||
+			!droppable ||
+			typeof draggable.id !== "string" ||
+			typeof droppable.id !== "string" ||
+			draggable.id === droppable.id
+		) {
+			return;
+		}
+
+		reorderSelectedDocuments(draggable.id, droppable.id);
+	};
+	const onDragStart: DragEventHandler = () => {
+		brickStore.get.startRelationFieldDrag();
+	};
 
 	return (
 		<div
@@ -128,75 +183,34 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				<Switch>
 					<Match when={isMultiple()}>
 						<div class="w-full">
-							<div class="flex flex-col gap-2">
-								<For each={selectedDocuments()}>
-									{(document, index) => (
-										<div
-											class={classNames(
-												"group rounded-md border bg-input-base px-3 py-2 transition-colors duration-200",
-												{
-													"border-border": !hasItemError(index()),
-													"border-error-base ring-1 ring-inset ring-error-base":
-														hasItemError(index()),
-												},
-											)}
-										>
-											<div class="flex items-start justify-between gap-3">
-												<div class="min-w-0 flex-1">
-													<div class="flex flex-wrap items-center gap-2">
-														<Pill theme="outline" class="text-[10px]">
-															#{document.id}
-														</Pill>
-														<p class="truncate text-sm font-medium text-subtitle">
-															{helpers.getLocaleValue({
-																value:
-																	collection.data?.data.details.singularName,
-																fallback: T()("document"),
-															})}
-														</p>
-													</div>
-													<Show when={previewFields(document).length > 0}>
-														<div class="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
-															<For each={previewFields(document)}>
-																{(preview) => (
-																	<div
-																		class="min-w-0 rounded-md border border-border bg-card-base px-2 py-1.5"
-																		title={`${preview.label}: ${preview.value}`}
-																	>
-																		<p class="truncate text-[10px] uppercase tracking-wide text-unfocused">
-																			{preview.label}
-																		</p>
-																		<p class="mt-0.5 truncate text-xs text-subtitle">
-																			{preview.value}
-																		</p>
-																	</div>
-																)}
-															</For>
-														</div>
-													</Show>
-												</div>
-												<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-													<Button
-														type="button"
-														theme="danger-subtle"
-														size="icon-subtle"
-														onClick={() =>
-															removeSelectedDocument({
-																id: document.id,
-																collectionKey: document.collectionKey,
-															})
-														}
+							<DragDropProvider
+								collisionDetector={closestCenter}
+								onDragStart={onDragStart}
+								onDragEnd={onDragEnd}
+							>
+								<DragDropSensors />
+								<SortableProvider ids={sortableIds()}>
+									<div class="flex flex-col gap-2">
+										<For each={selectedDocuments()}>
+											{(document, index) => {
+												return (
+													<DocumentSortableItem
+														document={document}
+														singularName={helpers.getLocaleValue({
+															value: collection.data?.data.details.singularName,
+															fallback: T()("document"),
+														})}
+														previewFields={previewFields(document)}
+														hasError={hasItemError(index())}
+														removeSelectedDocument={removeSelectedDocument}
 														disabled={props.disabled}
-														aria-label={T()("remove")}
-													>
-														<FaSolidXmark size={14} />
-													</Button>
-												</div>
-											</div>
-										</div>
-									)}
-								</For>
-							</div>
+													/>
+												);
+											}}
+										</For>
+									</div>
+								</SortableProvider>
+							</DragDropProvider>
 							<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
 								<Button
 									type="button"
@@ -299,6 +313,89 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
+		</div>
+	);
+};
+
+const DocumentSortableItem: Component<{
+	document: DocumentRef;
+	singularName: string;
+	previewFields: { label: string; value: string }[];
+	hasError: boolean;
+	removeSelectedDocument: (documentValue: DocumentFieldValue) => void;
+	disabled?: boolean;
+}> = (props) => {
+	const sortable = createSortable(
+		`${props.document.collectionKey}:${props.document.id}`,
+	);
+
+	return (
+		<div
+			// @ts-expect-error solid directive
+			use:sortable
+			style={transformStyle(sortable.transform)}
+			class={classNames(
+				"group rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				{
+					"border-border": !props.hasError,
+					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
+					"opacity-60": sortable.isActiveDraggable,
+					"ring-1 ring-primary-base":
+						sortable.isActiveDroppable &&
+						!sortable.isActiveDraggable &&
+						!props.hasError,
+					"cursor-grab active:cursor-grabbing": props.disabled !== true,
+				},
+			)}
+		>
+			<div class="flex items-start justify-between gap-3">
+				<div class="min-w-0 flex-1">
+					<div class="flex flex-wrap items-center gap-2">
+						<Pill theme="outline" class="text-[10px]">
+							#{props.document.id}
+						</Pill>
+						<p class="truncate text-sm font-medium text-subtitle">
+							{props.singularName}
+						</p>
+					</div>
+					<Show when={props.previewFields.length > 0}>
+						<div class="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
+							<For each={props.previewFields}>
+								{(preview) => (
+									<div
+										class="min-w-0 rounded-md border border-border bg-card-base px-2 py-1.5"
+										title={`${preview.label}: ${preview.value}`}
+									>
+										<p class="truncate text-[10px] uppercase tracking-wide text-unfocused">
+											{preview.label}
+										</p>
+										<p class="mt-0.5 truncate text-xs text-subtitle">
+											{preview.value}
+										</p>
+									</div>
+								)}
+							</For>
+						</div>
+					</Show>
+				</div>
+				<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+					<Button
+						type="button"
+						theme="danger-subtle"
+						size="icon-subtle"
+						onClick={() =>
+							props.removeSelectedDocument({
+								id: props.document.id,
+								collectionKey: props.document.collectionKey,
+							})
+						}
+						disabled={props.disabled}
+						aria-label={T()("remove")}
+					>
+						<FaSolidXmark size={14} />
+					</Button>
+				</div>
+			</div>
 		</div>
 	);
 };

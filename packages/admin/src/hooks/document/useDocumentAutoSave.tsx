@@ -91,6 +91,11 @@ export function useDocumentAutoSave(props: {
 	);
 
 	createEffect(() => {
+		if (brickStore.get.relationFieldDragCount > 0) {
+			debouncedAutoSave.clear();
+			return;
+		}
+
 		// Wait until initial snapshot is captured after store reset/refetch.
 		// Without this guard, mount-time editor sync events can bump autoSaveCounter
 		// and trigger autosave loops before baseline state exists.
