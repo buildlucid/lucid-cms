@@ -1,4 +1,4 @@
-import { createSignal, onMount } from "solid-js";
+import { createMemo, createSignal, onMount } from "solid-js";
 import {
 	DEFAULT_PAGE,
 	DEFAULT_PER_PAGE,
@@ -175,6 +175,46 @@ const useSearchParamsState = (
 		updateHasFiltersApplied();
 		setSettled(true);
 	};
+	const hasDefaultFiltersApplied = createMemo(() => {
+		const filters = getFilters();
+		for (const [key, currentValue] of filters) {
+			const target = schemaDefaults?.filters?.[key];
+			if (!target) continue;
+			if (target.type === "text") {
+				const left =
+					currentValue === undefined || currentValue === ""
+						? ""
+						: String(currentValue);
+				const right =
+					target.value === undefined || target.value === ""
+						? ""
+						: String(target.value);
+				if (left !== right) return false;
+			} else if (target.type === "boolean") {
+				const left =
+					currentValue === "" || currentValue === undefined
+						? undefined
+						: currentValue;
+				if (left !== target.value) return false;
+			} else if (target.type === "array") {
+				const toArray = (value: FilterValues): Array<string | number> => {
+					if (value === "" || value === undefined) return [];
+					if (Array.isArray(value)) return value;
+					if (typeof value === "boolean") return [value ? 1 : 0];
+					return [value];
+				};
+				const leftArr = toArray(currentValue);
+				const rightArr = toArray(target.value);
+				if (leftArr.length !== rightArr.length) return false;
+				for (let i = 0; i < leftArr.length; i++) {
+					if (String(leftArr[i]) !== String(rightArr[i])) return false;
+				}
+			} else if (currentValue !== target.value) {
+				return false;
+			}
+		}
+		return true;
+	});
 
 	onMount(() => {
 		setDefaultParams();
@@ -195,6 +235,7 @@ const useSearchParamsState = (
 				setSettled(true);
 			}, 1);
 		},
+		hasDefaultFiltersApplied,
 	};
 };
 

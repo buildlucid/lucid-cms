@@ -29,7 +29,7 @@ const deepMerge = (obj1: GenericObject, obj2: GenericObject): GenericObject => {
 
 // ---------------------------------------------
 // Returns any updated values in obj2 compared to obj1
-const deepDiff = <T>(obj1: T, obj2: T): Partial<T> => {
+const deepDiff = <T extends GenericObject>(obj1: T, obj2: T): Partial<T> => {
 	const result: Partial<T> = {};
 
 	for (const key in obj1) {
@@ -61,7 +61,7 @@ const deepDiff = <T>(obj1: T, obj2: T): Partial<T> => {
 
 	return result;
 };
-const updateData = <T>(obj1: T, obj2: T) => {
+const updateData = <T extends GenericObject>(obj1: T, obj2: T) => {
 	const result = deepDiff(obj1, obj2);
 
 	return {

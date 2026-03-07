@@ -110,26 +110,40 @@ const DocumentDynamicColumns: Component<{
 			collectionTranslations: props.collectionTranslations,
 		});
 	});
+	const datetimeField = createMemo(() =>
+		props.field.type === "datetime" ? props.field : undefined,
+	);
+	const textValue = createMemo(() =>
+		typeof fieldValue() === "string" ? (fieldValue() as string) : undefined,
+	);
+	const datetimeValue = createMemo(() =>
+		typeof fieldValue() === "string" || typeof fieldValue() === "number"
+			? (String(fieldValue()) as string)
+			: null,
+	);
 	const fieldRef = createMemo(() => {
-		// Only get ref for user fields (could extend to media/document if needed)
-		if (props.field.type !== "user") return undefined;
+		if (props.field.type !== "user") return null;
 
 		const relationValues = fieldValue();
 		const value = Array.isArray(relationValues)
 			? brickHelpers.getFirstRelationValue(relationValues)
 			: undefined;
-		if (value === undefined) return undefined;
+		if (value === undefined) return null;
 
 		const refs = props.document.refs?.user;
-		if (!refs) return undefined;
+		if (!refs) return null;
 
-		return refs.find(
-			(ref): ref is UserRef =>
-				"username" in ref &&
-				"email" in ref &&
-				"firstName" in ref &&
-				"lastName" in ref &&
-				ref.id === value,
+		return (
+			refs.find(
+				(ref): ref is UserRef =>
+					ref !== null &&
+					ref !== undefined &&
+					"username" in ref &&
+					"email" in ref &&
+					"firstName" in ref &&
+					"lastName" in ref &&
+					ref.id === value,
+			) ?? null
 		);
 	});
 
@@ -138,55 +152,52 @@ const DocumentDynamicColumns: Component<{
 	return (
 		<Switch
 			fallback={
-				<TextCol
-					text={"~"}
-					options={{ include: props?.include[props.index] }}
-				/>
+				<TextCol text="~" options={{ include: props.include[props.index] }} />
 			}
 		>
-			<Match when={fieldData()?.type === "text"}>
-				<TextCol
-					text={fieldValue() as string | undefined | null}
-					options={{ include: props?.include[props.index] }}
-				/>
+			<Match when={fieldData()?.type === "text" ? textValue() : undefined}>
+				{(text) => (
+					<TextCol
+						text={text()}
+						options={{ include: props.include[props.index] }}
+					/>
+				)}
 			</Match>
-			<Match when={fieldData()?.type === "textarea"}>
-				<TextCol
-					text={fieldValue() as string | undefined | null}
-					options={{
-						include: props?.include[props.index],
-						maxLines: 2,
-					}}
-				/>
+			<Match when={fieldData()?.type === "textarea" ? textValue() : undefined}>
+				{(text) => (
+					<TextCol
+						text={text()}
+						options={{
+							include: props.include[props.index],
+							maxLines: 2,
+						}}
+					/>
+				)}
 			</Match>
 			<Match when={fieldData()?.type === "datetime"}>
-				<DateCol
-					date={
-						typeof fieldValue() === "string" || typeof fieldValue() === "number"
-							? String(fieldValue())
-							: null
-					}
-					includeTime={props.field.config.useTime !== false}
-					localDateOnly={props.field.config.useTime === false}
-					fullWithTime={props.field.config.useTime !== false}
-					options={{ include: props?.include[props.index] }}
-				/>
+				<Show when={datetimeField()}>
+					{(field) => (
+						<DateCol
+							date={datetimeValue()}
+							includeTime={field().config.useTime !== false}
+							localDateOnly={field().config.useTime === false}
+							fullWithTime={field().config.useTime !== false}
+							options={{ include: props.include[props.index] }}
+						/>
+					)}
+				</Show>
 			</Match>
 			<Match when={fieldData()?.type === "checkbox"}>
 				<PillCol
-					text={
-						(fieldValue() as boolean | undefined | null)
-							? T()("yes")
-							: T()("no")
-					}
+					text={fieldValue() === true ? T()("yes") : T()("no")}
 					theme="primary-opaque"
-					options={{ include: props?.include[props.index] }}
+					options={{ include: props.include[props.index] }}
 				/>
 			</Match>
 			<Match when={fieldData()?.type === "user"}>
 				<AuthorCol
 					user={fieldRef()}
-					options={{ include: props?.include[props.index] }}
+					options={{ include: props.include[props.index] }}
 				/>
 			</Match>
 		</Switch>

@@ -1,5 +1,7 @@
 //* Limited 1 level deep and file/string only object to form data conversion
-const objectToFormData = <T = Record<string, string | File>>(
+const objectToFormData = <
+	T extends Record<string, unknown> = Record<string, string | File>,
+>(
 	obj: T,
 	stringify?: Record<string, boolean>,
 ): FormData => {

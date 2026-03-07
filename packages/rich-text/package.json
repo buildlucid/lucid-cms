@@ -4,20 +4,20 @@
 	"private": false,
 	"description": "Shared Tiptap extensions and rich text conversion utilities for Lucid CMS.",
 	"type": "module",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"module": "dist/index.mjs",
 	"exports": {
 		".": {
 			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.mts"
 		},
 		"./browser": {
 			"import": "./dist/browser.mjs",
-			"types": "./dist/browser.d.ts"
+			"types": "./dist/browser.d.mts"
 		},
 		"./server": {
 			"import": "./dist/server.mjs",
-			"types": "./dist/server.d.ts"
+			"types": "./dist/server.d.mts"
 		}
 	},
 	"scripts": {
@@ -54,6 +54,7 @@
 	},
 	"dependencies": {
 		"@tiptap/core": "^3.20.0",
+		"@tiptap/extension-underline": "^3.20.0",
 		"@tiptap/html": "^3.20.0",
 		"@tiptap/starter-kit": "^3.20.0"
 	},

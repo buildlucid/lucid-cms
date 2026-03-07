@@ -14,7 +14,7 @@
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"build": "vite build",
+		"build": "tsc --noEmit && vite build",
 		"dev": "vite",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",

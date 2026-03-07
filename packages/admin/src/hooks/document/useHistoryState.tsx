@@ -70,7 +70,7 @@ export function useHistoryState() {
 
 	// ------------------------------------------
 	// Memos
-	const collectionKey = createMemo(() => params.collectionKey);
+	const collectionKey = createMemo(() => params.collectionKey || "");
 	const documentId = createMemo(() =>
 		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
@@ -152,10 +152,11 @@ export function useHistoryState() {
 		if (!m || m.currentPage === null || m.lastPage === null) return false;
 		return m.currentPage < m.lastPage;
 	});
-	const collectionName = createMemo(() =>
-		helpers.getLocaleValue({
-			value: collection()?.details.name,
-		}),
+	const collectionName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: collection()?.details.name,
+			}) || T()("collection"),
 	);
 	const collectionSingularName = createMemo(
 		() =>
