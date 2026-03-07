@@ -276,6 +276,7 @@ export const HeaderBar: Component<{
 			</div>
 			<div
 				ref={stickyBarRef}
+				style={{ "view-transition-name": "document-builder-header" }}
 				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2.5"
 			>
 				<div class="flex items-center gap-2.5 w-full lg:w-auto">
