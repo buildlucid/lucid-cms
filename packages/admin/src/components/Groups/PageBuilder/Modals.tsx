@@ -75,11 +75,13 @@ export const Modals: Component<{
 					setOpen: () => pageBuilderModalsStore.close(),
 					extensions: mediaSelectModal()?.data.extensions,
 					type: mediaSelectModal()?.data.type,
+					multiple: mediaSelectModal()?.data.multiple,
 					selected: mediaSelectModal()?.data.selected,
+					selectedRefs: mediaSelectModal()?.data.selectedRefs,
 				}}
 				callbacks={{
-					onSelect: (media) =>
-						pageBuilderModalsStore.triggerAndClose("mediaSelect", media),
+					onSelect: (selection) =>
+						pageBuilderModalsStore.triggerAndClose("mediaSelect", selection),
 				}}
 			/>
 			<DocumentSelectPanel
@@ -98,11 +100,13 @@ export const Modals: Component<{
 				state={{
 					open: userSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close(),
+					multiple: userSelectModal()?.data.multiple,
 					selected: userSelectModal()?.data.selected,
+					selectedRefs: userSelectModal()?.data.selectedRefs,
 				}}
 				callbacks={{
-					onSelect: (user) =>
-						pageBuilderModalsStore.triggerAndClose("userSelect", user),
+					onSelect: (selection) =>
+						pageBuilderModalsStore.triggerAndClose("userSelect", selection),
 				}}
 			/>
 			<LinkSelectModal

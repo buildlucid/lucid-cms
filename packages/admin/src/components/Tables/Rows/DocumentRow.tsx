@@ -5,12 +5,13 @@ import type {
 	FieldTypes,
 	UserRef,
 } from "@types";
-import { type Component, createMemo, For, Match, Switch } from "solid-js";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import AuthorCol from "@/components/Tables/Columns/AuthorCol";
 import DateCol from "@/components/Tables/Columns/DateCol";
+import SelectCol from "@/components/Tables/Columns/SelectCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
@@ -28,6 +29,10 @@ interface DocumentRowProps extends TableRowProps {
 	callbacks?: {
 		setSelected?: (i: number) => void;
 		onClick?: () => void;
+	};
+	selection?: {
+		selected: boolean;
+		onChange: () => void;
 	};
 	current?: boolean;
 	theme?: TableTheme;
@@ -47,6 +52,17 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 			current={props.current}
 			theme={props.theme}
 		>
+			<Show when={props.selection}>
+				{(selection) => (
+					<SelectCol
+						type="td"
+						value={selection().selected}
+						onChange={selection().onChange}
+						theme={props.theme}
+						padding={props.options?.padding}
+					/>
+				)}
+			</Show>
 			<For each={props.fieldInclude}>
 				{(field, i) => {
 					if (field.type === "tab") return null;

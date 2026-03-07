@@ -137,6 +137,76 @@ const getFirstDocumentRelationValue = (
 	return fieldValue[0];
 };
 
+function getFieldRefs(props: {
+	fieldType: "media";
+	fieldValue: number[] | null | undefined;
+	collection?: string;
+}): Array<NonNullable<MediaRef>>;
+function getFieldRefs(props: {
+	fieldType: "user";
+	fieldValue: number[] | null | undefined;
+	collection?: string;
+}): Array<NonNullable<UserRef>>;
+function getFieldRefs(props: {
+	fieldType: "document";
+	fieldValue: DocumentFieldValue[] | null | undefined;
+	collection?: string;
+}): DocumentRef[];
+/**
+ * Returns matching refs for an array-backed relation field, preserving selection order.
+ */
+function getFieldRefs(props: {
+	fieldType: "media" | "document" | "user";
+	fieldValue: number[] | DocumentFieldValue[] | null | undefined;
+	collection?: string;
+}): Array<NonNullable<MediaRef>> | Array<NonNullable<UserRef>> | DocumentRef[] {
+	const refs = brickStore.get.refs[props.fieldType];
+	if (!refs) return [];
+
+	if (props.fieldType === "document") {
+		const documentRelations = (props.fieldValue ?? []) as DocumentFieldValue[];
+		return documentRelations.reduce<DocumentRef[]>((acc, relation) => {
+			const targetCollectionKey = props.collection ?? relation.collectionKey;
+			const match = refs.find((ref): ref is DocumentRef => {
+				if (!ref || !("collectionKey" in ref)) return false;
+				return (
+					ref.id === relation.id && ref.collectionKey === targetCollectionKey
+				);
+			});
+
+			if (match) acc.push(match);
+			return acc;
+		}, []);
+	}
+
+	const relationIds = (props.fieldValue ?? []) as number[];
+
+	if (props.fieldType === "media") {
+		return relationIds.reduce<Array<NonNullable<MediaRef>>>(
+			(acc, relationId) => {
+				const match = refs.find((ref): ref is NonNullable<MediaRef> => {
+					if (!ref || "collectionKey" in ref) return false;
+					return "url" in ref && ref.id === relationId;
+				});
+
+				if (match) acc.push(match);
+				return acc;
+			},
+			[],
+		);
+	}
+
+	return relationIds.reduce<Array<NonNullable<UserRef>>>((acc, relationId) => {
+		const match = refs.find((ref): ref is NonNullable<UserRef> => {
+			if (!ref || "collectionKey" in ref) return false;
+			return "username" in ref && ref.id === relationId;
+		});
+
+		if (match) acc.push(match);
+		return acc;
+	}, []);
+}
+
 function getFieldRef(props: {
 	fieldType: "media";
 	fieldValue: number[] | null | undefined;
@@ -160,27 +230,27 @@ function getFieldRef(props: {
 	fieldValue: number[] | DocumentFieldValue[] | null | undefined;
 	collection?: string;
 }): MediaRef | UserRef | DocumentRef | undefined {
-	const refs = brickStore.get.refs[props.fieldType];
-	if (!refs) return undefined;
-
 	if (props.fieldType === "document") {
-		const documentRelation = getFirstDocumentRelationValue(props.fieldValue);
-		if (!documentRelation) return undefined;
-
-		return refs.find((ref) => {
-			const targetCollectionKey =
-				props.collection ?? documentRelation.collectionKey;
-			return (
-				ref.id === documentRelation.id &&
-				ref.collectionKey === targetCollectionKey
-			);
-		});
+		return getFieldRefs({
+			fieldType: "document",
+			fieldValue: props.fieldValue as DocumentFieldValue[] | null | undefined,
+			collection: props.collection,
+		})[0];
 	}
 
-	const relationId = getFirstRelationValue(props.fieldValue);
-	if (relationId === undefined) return undefined;
+	if (props.fieldType === "media") {
+		return getFieldRefs({
+			fieldType: "media",
+			fieldValue: props.fieldValue as number[] | null | undefined,
+			collection: props.collection,
+		})[0];
+	}
 
-	return refs.find((ref) => ref.id === relationId);
+	return getFieldRefs({
+		fieldType: "user",
+		fieldValue: props.fieldValue as number[] | null | undefined,
+		collection: props.collection,
+	})[0];
 }
 
 /**
@@ -351,6 +421,7 @@ const brickHelpers = {
 	getFieldValue,
 	getFirstRelationValue,
 	getFirstDocumentRelationValue,
+	getFieldRefs,
 	getFieldRef,
 	hasErrorsOnOtherLocale,
 	objectifyFields,

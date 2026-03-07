@@ -99,6 +99,9 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addUser("author", {
 		displayInListing: true,
+		config: {
+			multiple: true,
+		},
 	});
 
 export default PageCollection;

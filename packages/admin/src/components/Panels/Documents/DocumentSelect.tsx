@@ -4,10 +4,17 @@ import type {
 	DocumentResponse,
 } from "@lucidcms/core/types";
 import { FaSolidCalendar } from "solid-icons/fa";
-import { type Component, createEffect, createMemo, Index } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Index,
+} from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
 import { Filter, PerPage } from "@/components/Groups/Query";
 import { Table } from "@/components/Groups/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
@@ -63,6 +70,7 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 				<DocumentSelectContent
 					collectionKey={props.state.collectionKey}
 					selected={props.state.selected}
+					onClose={() => props.state.setOpen(false)}
 					onSelect={(document) => {
 						props.callbacks.onSelect(document);
 						props.state.setOpen(false);
@@ -76,6 +84,7 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 interface DocumentSelectContentProps {
 	collectionKey: string | undefined;
 	selected?: DocumentFieldValue[];
+	onClose: () => void;
 	onSelect: (document: DocumentResponse) => void;
 }
 
@@ -84,6 +93,9 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 ) => {
 	// ------------------------------
 	// Hooks
+	const [selectedDocument, setSelectedDocument] = createSignal<
+		DocumentResponse | undefined
+	>(undefined);
 	const searchParams = useSearchParamsState({
 		filters: {},
 		sorts: {},
@@ -95,7 +107,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	// ----------------------------------
 	// Memos
 	const collectionKey = createMemo(() => props.collectionKey);
-	const selectedDocumentId = createMemo(() => props.selected?.[0]?.id);
+	const selectedDocumentId = createMemo(() => selectedDocument()?.id);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
@@ -176,6 +188,35 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			searchParams.setFilterSchema(filterConfig);
 		}
 	});
+	createEffect(() => {
+		const selectedId = props.selected?.[0]?.id;
+		if (!selectedId) {
+			setSelectedDocument(undefined);
+			return;
+		}
+		if (!documents.data?.data) return;
+
+		const matchingDocument = documents.data.data.find(
+			(doc) => doc.id === selectedId,
+		);
+		if (matchingDocument) {
+			setSelectedDocument(matchingDocument);
+		}
+	});
+
+	// ----------------------------------
+	// Functions
+	const toggleSelectedDocument = (document: DocumentResponse) => {
+		setSelectedDocument((prev) => {
+			if (prev?.id === document.id) return undefined;
+			return document;
+		});
+	};
+	const confirmSelection = () => {
+		const document = selectedDocument();
+		if (!document) return;
+		props.onSelect(document);
+	};
 
 	// ----------------------------------
 	// Render
@@ -279,6 +320,10 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 					rows={documents.data?.data.length || 0}
 					searchParams={searchParams}
 					head={[
+						{
+							label: "",
+							key: "select",
+						},
 						...getTableHeadColumns(),
 						{
 							label: T()("updated_at"),
@@ -313,16 +358,25 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									}}
 									callbacks={{
 										setSelected: setSelected,
-										onClick: () => props.onSelect(doc()),
+										onClick: () => toggleSelectedDocument(doc()),
 									}}
 									theme="secondary"
-									current={doc().id === selectedDocumentId()}
+									current={false}
+									selection={{
+										selected: doc().id === selectedDocumentId(),
+										onChange: () => toggleSelectedDocument(doc()),
+									}}
 								/>
 							)}
 						</Index>
 					)}
 				</Table>
 			</DynamicContent>
+			<PanelFooterActions
+				selectedCount={selectedDocumentId() ? 1 : 0}
+				onClose={props.onClose}
+				onConfirm={confirmSelection}
+			/>
 		</div>
 	);
 };

@@ -44,11 +44,14 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 		});
 	});
 	const fieldRef = createMemo(() => {
-		return brickHelpers.getFieldRef({
+		return brickHelpers.getFieldRefs({
 			fieldType: "media",
 			fieldValue: fieldValue(),
 		});
 	});
+	const isMultiple = createMemo(
+		() => props.state.fieldConfig.config.multiple === true,
+	);
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
@@ -69,10 +72,11 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 				groupRef: props.state.groupRef,
 			})}
 			value={getValue()}
-			ref={fieldRef}
-			onChange={(value, ref) => {
+			refs={fieldRef}
+			multiple={isMultiple()}
+			onChange={(value, refs) => {
 				batch(() => {
-					if (ref) brickStore.get.addRef("media", ref);
+					if (refs.length) brickStore.get.addRef("media", refs);
 					brickStore.get.setFieldValue({
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,

@@ -2,8 +2,9 @@ import type {
 	DocumentFieldValue,
 	DocumentResponse,
 	LinkResValue,
+	MediaRef,
 	MediaResponse,
-	UserResponse,
+	UserRef,
 } from "@lucidcms/core/types";
 import { createStore } from "solid-js/store";
 
@@ -17,9 +18,14 @@ type ModalRegistry = {
 		data: {
 			extensions?: string;
 			type?: string;
+			multiple?: boolean;
 			selected?: number[];
+			selectedRefs?: Array<NonNullable<MediaRef>>;
 		};
-		result: MediaResponse;
+		result: {
+			value: number[];
+			refs: Array<NonNullable<MediaRef>>;
+		};
 	};
 	mediaUpload: {
 		data: {
@@ -37,9 +43,14 @@ type ModalRegistry = {
 	};
 	userSelect: {
 		data: {
+			multiple?: boolean;
 			selected?: number[];
+			selectedRefs?: Array<NonNullable<UserRef>>;
 		};
-		result: UserResponse;
+		result: {
+			value: number[];
+			refs: Array<NonNullable<UserRef>>;
+		};
 	};
 	linkSelect: {
 		data: {

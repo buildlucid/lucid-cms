@@ -1,24 +1,35 @@
-import type { UserResponse } from "@lucidcms/core/types";
 import { FaSolidEnvelope, FaSolidIdCard, FaSolidT } from "solid-icons/fa";
-import { type Component, createMemo, Index } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Index,
+} from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
 import { Filter, PerPage } from "@/components/Groups/Query";
 import { Table, Tr } from "@/components/Groups/Table";
+import SelectCol from "@/components/Tables/Columns/SelectCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import T from "@/translations";
+import type { UserRelationRef } from "@/utils/relation-field-helpers";
+import { userResponseToRef } from "@/utils/relation-field-helpers";
 
 interface UserSelectPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
+		multiple?: boolean;
 		selected?: number[];
+		selectedRefs?: UserRelationRef[];
 	};
 	callbacks: {
-		onSelect: (user: UserResponse) => void;
+		onSelect: (selection: { value: number[]; refs: UserRelationRef[] }) => void;
 	};
 }
 
@@ -44,9 +55,12 @@ const UserSelectPanel: Component<UserSelectPanelProps> = (props) => {
 		>
 			{() => (
 				<UserSelectContent
+					multiple={props.state.multiple}
 					selected={props.state.selected}
-					onSelect={(user) => {
-						props.callbacks.onSelect(user);
+					selectedRefs={props.state.selectedRefs}
+					onClose={() => props.state.setOpen(false)}
+					onSelect={(selection) => {
+						props.callbacks.onSelect(selection);
 						props.state.setOpen(false);
 					}}
 				/>
@@ -56,12 +70,19 @@ const UserSelectPanel: Component<UserSelectPanelProps> = (props) => {
 };
 
 interface UserSelectContentProps {
+	multiple?: boolean;
 	selected?: number[];
-	onSelect: (user: UserResponse) => void;
+	selectedRefs?: UserRelationRef[];
+	onClose: () => void;
+	onSelect: (selection: { value: number[]; refs: UserRelationRef[] }) => void;
 }
 
 const UserSelectContent: Component<UserSelectContentProps> = (props) => {
-	const selectedUserId = createMemo(() => props.selected?.[0]);
+	const [selectedUsers, setSelectedUsers] = createSignal<UserRelationRef[]>([]);
+	const isMultiple = createMemo(() => props.multiple === true);
+	const selectedUserIds = createMemo(() =>
+		selectedUsers().map((user) => user.id),
+	);
 	const searchParams = useSearchParamsState({
 		filters: {
 			username: {
@@ -101,8 +122,44 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 
 	const isLoading = createMemo(() => users.isLoading);
 
+	createEffect(() => {
+		if (!props.selectedRefs) {
+			setSelectedUsers([]);
+			return;
+		}
+
+		setSelectedUsers(props.selectedRefs);
+	});
+
+	const toggleSelectedUser = (
+		user: Parameters<typeof userResponseToRef>[0],
+	) => {
+		const nextRef = userResponseToRef(user);
+
+		setSelectedUsers((prev) => {
+			const exists = prev.some(
+				(selectedUser) => selectedUser.id === nextRef.id,
+			);
+			if (exists) {
+				return prev.filter((selectedUser) => selectedUser.id !== nextRef.id);
+			}
+
+			if (!isMultiple()) {
+				return [nextRef];
+			}
+
+			return [...prev, nextRef];
+		});
+	};
+	const confirmSelection = () => {
+		props.onSelect({
+			value: selectedUserIds(),
+			refs: selectedUsers(),
+		});
+	};
+
 	return (
-		<div class="flex flex-col h-full pb-4">
+		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap">
 					<Filter
@@ -135,7 +192,7 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 			</div>
 
 			<DynamicContent
-				class="bg-card-base border border-border rounded-md"
+				class="grow bg-card-base border border-border rounded-md"
 				state={{
 					isError: users.isError,
 					isSuccess: users.isSuccess,
@@ -167,6 +224,10 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 					rows={users.data?.data.length || 0}
 					searchParams={searchParams}
 					head={[
+						{
+							label: "",
+							key: "select",
+						},
 						{
 							label: T()("username"),
 							key: "username",
@@ -211,25 +272,31 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 									callbacks={{
 										setSelected,
 									}}
-									onClick={() => props.onSelect(user())}
-									current={user().id === selectedUserId()}
+									onClick={() => toggleSelectedUser(user())}
 									theme="secondary"
 								>
-									<TextCol
-										text={user().username}
-										options={{ include: include[0] }}
+									<SelectCol
+										type="td"
+										value={selectedUserIds().includes(user().id)}
+										onChange={() => toggleSelectedUser(user())}
+										theme="secondary"
+										padding="16"
 									/>
 									<TextCol
-										text={user().firstName}
+										text={user().username}
 										options={{ include: include[1] }}
 									/>
 									<TextCol
-										text={user().lastName}
+										text={user().firstName}
 										options={{ include: include[2] }}
 									/>
 									<TextCol
-										text={user().email}
+										text={user().lastName}
 										options={{ include: include[3] }}
+									/>
+									<TextCol
+										text={user().email}
+										options={{ include: include[4] }}
 									/>
 								</Tr>
 							)}
@@ -237,6 +304,12 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 					)}
 				</Table>
 			</DynamicContent>
+
+			<PanelFooterActions
+				selectedCount={selectedUserIds().length}
+				onClose={props.onClose}
+				onConfirm={confirmSelection}
+			/>
 		</div>
 	);
 };

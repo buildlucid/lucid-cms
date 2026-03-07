@@ -1,6 +1,10 @@
-import type { MediaResponse } from "@lucidcms/core/types";
-import classNames from "classnames";
-import { type Component, createMemo, createSignal, For } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+} from "solid-js";
 import MediaBasicCard, {
 	MediaBasicCardLoading,
 } from "@/components/Cards/MediaBasicCard";
@@ -9,6 +13,7 @@ import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 import { Grid } from "@/components/Groups/Grid";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
 import { Filter, PerPage, Sort } from "@/components/Groups/Query";
 import ClearProcessedImages from "@/components/Modals/Media/ClearProcessedImages";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
@@ -17,6 +22,8 @@ import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
+import type { MediaRelationRef } from "@/utils/relation-field-helpers";
+import { mediaResponseToRef } from "@/utils/relation-field-helpers";
 
 interface MediaSelectPanelProps {
 	state: {
@@ -24,10 +31,15 @@ interface MediaSelectPanelProps {
 		setOpen: (state: boolean) => void;
 		extensions?: string;
 		type?: string;
+		multiple?: boolean;
 		selected?: number[];
+		selectedRefs?: MediaRelationRef[];
 	};
 	callbacks: {
-		onSelect: (media: MediaResponse) => void;
+		onSelect: (selection: {
+			value: number[];
+			refs: MediaRelationRef[];
+		}) => void;
 	};
 }
 
@@ -57,9 +69,12 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 				<SelectMediaContent
 					extensions={props.state.extensions}
 					type={props.state.type}
+					multiple={props.state.multiple}
 					selected={props.state.selected}
-					onSelect={(media) => {
-						props.callbacks.onSelect(media);
+					selectedRefs={props.state.selectedRefs}
+					onClose={() => props.state.setOpen(false)}
+					onSelect={(selection) => {
+						props.callbacks.onSelect(selection);
 						props.state.setOpen(false);
 					}}
 				/>
@@ -71,8 +86,11 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 interface SelectMediaContentProps {
 	extensions?: string;
 	type?: string;
+	multiple?: boolean;
 	selected?: number[];
-	onSelect: (media: MediaResponse) => void;
+	selectedRefs?: MediaRelationRef[];
+	onClose: () => void;
+	onSelect: (selection: { value: number[]; refs: MediaRelationRef[] }) => void;
 }
 
 const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
@@ -127,12 +145,18 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		},
 	);
 	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
+	const [selectedMedia, setSelectedMedia] = createSignal<MediaRelationRef[]>(
+		[],
+	);
 
 	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
-	const selectedMediaId = createMemo(() => props.selected?.[0]);
+	const isMultiple = createMemo(() => props.multiple === true);
 	const isShowingDeleted = createMemo(() => showingDeleted() === 1);
+	const selectedMediaIds = createMemo(() =>
+		selectedMedia().map((media) => media.id),
+	);
 
 	// ----------------------------------
 	// Queries
@@ -150,9 +174,49 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	});
 
 	// ----------------------------------
+	// Effects
+	createEffect(() => {
+		if (!props.selectedRefs) {
+			setSelectedMedia([]);
+			return;
+		}
+
+		setSelectedMedia(props.selectedRefs);
+	});
+
+	// ----------------------------------
+	// Functions
+	const toggleSelectedMedia = (
+		mediaItem: Parameters<typeof mediaResponseToRef>[0],
+	) => {
+		const nextRef = mediaResponseToRef(mediaItem);
+
+		setSelectedMedia((prev) => {
+			const exists = prev.some(
+				(selectedItem) => selectedItem.id === nextRef.id,
+			);
+			if (exists) {
+				return prev.filter((selectedItem) => selectedItem.id !== nextRef.id);
+			}
+
+			if (!isMultiple()) {
+				return [nextRef];
+			}
+
+			return [...prev, nextRef];
+		});
+	};
+	const confirmSelection = () => {
+		props.onSelect({
+			value: selectedMediaIds(),
+			refs: selectedMedia(),
+		});
+	};
+
+	// ----------------------------------
 	// Render
 	return (
-		<div class="flex flex-col h-full pb-4">
+		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap">
 					<Filter
@@ -255,35 +319,22 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 							setShowingDeleted(value ? 1 : 0);
 						}}
 						name={"isDeleted"}
+						theme="secondary"
 						copy={{
 							label: T()("show_deleted"),
 						}}
-						theme="error"
 					/>
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
 
 			<DynamicContent
-				class={classNames({
-					"bg-card-base border border-border rounded-md":
-						media.data?.data.length === 0,
-				})}
+				class="grow"
 				state={{
 					isError: media.isError,
 					isSuccess: media.isSuccess,
 					isEmpty: media.data?.data.length === 0,
 					searchParams: searchParams,
-				}}
-				options={{
-					padding: media.data?.data.length === 0 ? "16" : undefined,
-				}}
-				copy={{
-					noEntries: {
-						title: T()("no_media"),
-						description: T()("no_media_description"),
-						button: T()("upload_media"),
-					},
 				}}
 				slot={{
 					footer: (
@@ -298,6 +349,12 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						/>
 					),
 				}}
+				copy={{
+					noEntries: {
+						title: T()("no_media"),
+						description: T()("no_media_description"),
+					},
+				}}
 			>
 				<Grid
 					state={{
@@ -305,42 +362,46 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						totalItems: media.data?.data.length || 0,
 						searchParams: searchParams,
 					}}
-					slots={{
-						loadingCard: <MediaBasicCardLoading />,
-					}}
 				>
-					<For each={media.data?.data}>
-						{(item) => (
+					<For each={media.data?.data || []}>
+						{(mediaItem) => (
 							<MediaBasicCard
-								media={item}
+								media={mediaItem}
+								current={selectedMediaIds().includes(mediaItem.id)}
+								selected={selectedMediaIds().includes(mediaItem.id)}
+								isSelectable={true}
 								contentLocale={contentLocale()}
-								current={item.id === selectedMediaId()}
 								rowTarget={rowTarget}
 								showingDeleted={isShowingDeleted}
-								onClick={() => props.onSelect(item)}
+								onClick={() => toggleSelectedMedia(mediaItem)}
+								onSelect={() => toggleSelectedMedia(mediaItem)}
 							/>
 						)}
+					</For>
+					<For each={Array.from({ length: media.isLoading ? 8 : 0 })}>
+						{() => <MediaBasicCardLoading />}
 					</For>
 				</Grid>
 			</DynamicContent>
 
-			{/* Modals */}
-			<RestoreMedia
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().restore,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("restore", state);
-					},
-				}}
+			<PanelFooterActions
+				selectedCount={selectedMediaIds().length}
+				onClose={props.onClose}
+				onConfirm={confirmSelection}
 			/>
+
 			<ClearProcessedImages
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().clear,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("clear", state);
-					},
+					setOpen: (open) => rowTarget.setTrigger("clear", open),
+				}}
+			/>
+			<RestoreMedia
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().restore,
+					setOpen: (open) => rowTarget.setTrigger("restore", open),
 				}}
 			/>
 		</div>

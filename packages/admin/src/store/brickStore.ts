@@ -105,7 +105,10 @@ const [get, set] = createStore<{
 		parentRef: string | undefined;
 	}) => void;
 	setRefs: (document?: DocumentResponse) => void;
-	addRef: (fieldType: "media" | "document" | "user", ref: FieldRefs) => void;
+	addRef: (
+		fieldType: "media" | "document" | "user",
+		ref: FieldRefs | FieldRefs[],
+	) => void;
 }>({
 	bricks: [],
 	fieldsErrors: [],
@@ -494,35 +497,38 @@ const [get, set] = createStore<{
 		set(
 			"refs",
 			produce((draft) => {
+				const refsToAdd = Array.isArray(ref) ? ref : [ref];
 				if (!draft[fieldType]) {
 					draft[fieldType] = [];
 				}
 
 				const refs = draft[fieldType];
 
-				const existingIndex = refs.findIndex((existing) => {
-					if (!existing || !ref) return false;
+				for (const nextRef of refsToAdd) {
+					const existingIndex = refs.findIndex((existing) => {
+						if (!existing || !nextRef) return false;
 
-					if (fieldType === "document") {
-						const existingDoc = existing as DocumentRef;
-						const refDoc = ref as DocumentRef;
-						if (!existingDoc || !refDoc) return false;
-						return (
-							existingDoc.collectionKey === refDoc.collectionKey &&
-							existingDoc.id === refDoc.id
-						);
+						if (fieldType === "document") {
+							const existingDoc = existing as DocumentRef;
+							const refDoc = nextRef as DocumentRef;
+							if (!existingDoc || !refDoc) return false;
+							return (
+								existingDoc.collectionKey === refDoc.collectionKey &&
+								existingDoc.id === refDoc.id
+							);
+						}
+
+						const existingItem = existing;
+						const refItem = nextRef;
+						if (!existingItem || !refItem) return false;
+						return existingItem.id === refItem.id;
+					});
+
+					if (existingIndex !== -1) {
+						refs[existingIndex] = nextRef;
+					} else {
+						refs.push(nextRef);
 					}
-
-					const existingItem = existing;
-					const refItem = ref;
-					if (!existingItem || !refItem) return false;
-					return existingItem.id === refItem.id;
-				});
-
-				if (existingIndex !== -1) {
-					refs[existingIndex] = ref;
-				} else {
-					refs.push(ref);
 				}
 			}),
 		);

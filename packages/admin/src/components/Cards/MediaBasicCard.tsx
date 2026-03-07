@@ -1,6 +1,7 @@
 import type { MediaResponse } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import { Checkbox } from "@/components/Groups/Form";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
@@ -15,6 +16,9 @@ interface MediaBasicCardProps {
 	current: boolean;
 	contentLocale?: string;
 	onClick?: () => void;
+	onSelect?: () => void;
+	selected?: boolean;
+	isSelectable?: boolean;
 	rowTarget?: ReturnType<typeof useRowTarget<"clear" | "restore">>;
 	showingDeleted?: Accessor<boolean>;
 }
@@ -53,13 +57,9 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	// Return
 	return (
 		<li
-			class={classNames(
-				"bg-card-base border-border border rounded-md group overflow-hidden relative cursor-pointer transition-colors",
-				{
-					"border-primary-base bg-primary-muted-bg ring-1 ring-primary-muted-border":
-						props.current,
-				},
-			)}
+			class={
+				"bg-card-base border-border border rounded-md group overflow-hidden relative cursor-pointer transition-colors"
+			}
 			onClick={() => {
 				props.onClick?.();
 			}}
@@ -116,8 +116,21 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 				/>
 			</AspectRatio>
 			{/* Content */}
-			<div class="p-2 border-t border-border">
-				<h3 class="line-clamp-1 text-sm">{title() || T()("no_translation")}</h3>
+			<div class="border-t border-border p-2">
+				<div class="flex items-center gap-3">
+					<Show when={props.isSelectable}>
+						<Checkbox
+							value={props.selected === true}
+							onChange={() => props.onSelect?.()}
+							copy={{}}
+							noMargin={true}
+							fullWidth={false}
+						/>
+					</Show>
+					<h3 class="line-clamp-1 text-sm flex-1">
+						{title() || T()("no_translation")}
+					</h3>
+				</div>
 			</div>
 		</li>
 	);

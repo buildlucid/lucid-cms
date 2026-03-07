@@ -46,11 +46,14 @@ export const UserField: Component<UserFieldProps> = (props) => {
 		);
 	});
 	const fieldRef = createMemo(() => {
-		return brickHelpers.getFieldRef({
+		return brickHelpers.getFieldRefs({
 			fieldType: "user",
 			fieldValue: fieldValue(),
 		});
 	});
+	const isMultiple = createMemo(
+		() => props.state.fieldConfig.config.multiple === true,
+	);
 	const isDisabled = createMemo(
 		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
 	);
@@ -71,10 +74,11 @@ export const UserField: Component<UserFieldProps> = (props) => {
 				groupRef: props.state.groupRef,
 			})}
 			value={getValue()}
-			ref={fieldRef}
-			onChange={(value, ref) => {
+			refs={fieldRef}
+			multiple={isMultiple()}
+			onChange={(value, refs) => {
 				batch(() => {
-					if (ref) brickStore.get.addRef("user", ref);
+					if (refs.length) brickStore.get.addRef("user", refs);
 					brickStore.get.setFieldValue({
 						brickIndex: props.state.brickIndex,
 						fieldConfig: props.state.fieldConfig,
