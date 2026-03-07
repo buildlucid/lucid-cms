@@ -13,6 +13,7 @@ import {
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
+import RelationCount from "@/components/Partials/RelationCount";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -27,6 +28,8 @@ interface UserSelectProps {
 	refs: Accessor<UserRelationRef[] | undefined>;
 	onChange: (_value: number[], _refs: UserRelationRef[]) => void;
 	multiple?: boolean;
+	minItems?: number;
+	maxItems?: number;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -46,7 +49,15 @@ const USER_SELECT_DRAG_DROP_KEY = "user-select-zone";
 export const UserSelect: Component<UserSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
+	const canOpenSelectModal = () =>
+		props.disabled !== true &&
+		(props.multiple !== true ||
+			typeof props.maxItems !== "number" ||
+			(props.refs()?.length ?? 0) < props.maxItems);
+
 	const openUserSelectModal = () => {
+		if (!canOpenSelectModal()) return;
+
 		pageBuilderModalsStore.open("userSelect", {
 			data: {
 				multiple: isMultiple(),
@@ -89,6 +100,11 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 	const selectedUserIds = createMemo(() => props.value ?? []);
 	const selectedUsers = createMemo(() => props.refs() ?? []);
 	const selectedUser = createMemo(() => selectedUsers()[0]);
+	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
+	const hasReachedMaxItems = createMemo(
+		() => hasMaxItems() && selectedUsers().length >= (props.maxItems || 0),
+	);
+	const canAddMore = createMemo(() => !hasReachedMaxItems());
 	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
 	const getItemErrors = (itemIndex: number) =>
 		fieldErrors().filter((error) => error.itemIndex === itemIndex);
@@ -159,14 +175,22 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									theme="border-outline"
 									size="small"
 									onClick={openUserSelectModal}
-									disabled={props.disabled}
+									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
 									{T()("select_user")}
 								</Button>
 								<Show when={selectedUsers().length > 0}>
 									<p class="text-sm text-unfocused">
-										{selectedUserIds().length} {T()("selected").toLowerCase()}
+										<RelationCount
+											count={selectedUserIds().length}
+											min={props.minItems}
+											max={props.maxItems}
+										/>
+										{typeof props.minItems !== "number" &&
+										typeof props.maxItems !== "number"
+											? ` ${T()("selected").toLowerCase()}`
+											: ""}
 									</p>
 								</Show>
 							</div>
@@ -214,7 +238,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							theme="border-outline"
 							size="small"
 							onClick={openUserSelectModal}
-							disabled={props.disabled}
+							disabled={props.disabled || !canAddMore()}
 							classes="capitalize"
 						>
 							{T()("select_user")}

@@ -4,6 +4,7 @@ import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import DragDrop from "@/components/Partials/DragDrop";
+import RelationCount from "@/components/Partials/RelationCount";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations/index";
@@ -31,9 +32,11 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
 	const brickIndex = createMemo(() => props.state.brickIndex);
 	const groups = createMemo(() => props.state.fieldData?.groups || []);
+	const minGroups = createMemo(() => fieldConfig().validation?.minGroups);
+	const maxGroups = createMemo(() => fieldConfig().validation?.maxGroups);
 	const canAddGroup = createMemo(() => {
-		if (!fieldConfig().validation?.maxGroups) return true;
-		return groups().length < (fieldConfig().validation?.maxGroups || 0);
+		if (!maxGroups()) return true;
+		return groups().length < (maxGroups() || 0);
 	});
 	const dragDropKey = createMemo(() => {
 		return `${fieldConfig().key}-${props.state.parentRepeaterKey || ""}-${
@@ -76,16 +79,13 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 							value: fieldConfig().details?.label,
 						})}
 					</p>
-					<Show when={fieldConfig().validation?.maxGroups !== undefined}>
-						<span
-							class={classNames("text-body text-xs", {
-								"text-error-base": !canAddGroup(),
-							})}
-						>
-							{groups().length}
-							{"/"}
-							{fieldConfig().validation?.maxGroups}
-						</span>
+					<Show when={minGroups() !== undefined || maxGroups() !== undefined}>
+						<RelationCount
+							count={groups().length}
+							min={minGroups()}
+							max={maxGroups()}
+							class="text-body text-xs"
+						/>
 					</Show>
 				</div>
 				{/* Repeater Body */}

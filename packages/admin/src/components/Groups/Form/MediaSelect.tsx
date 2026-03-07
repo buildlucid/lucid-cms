@@ -16,6 +16,7 @@ import ClickToCopy from "@/components/Partials/ClickToCopy";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
+import RelationCount from "@/components/Partials/RelationCount";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
@@ -34,6 +35,8 @@ interface MediaSelectProps {
 	extensions?: string[];
 	type?: string;
 	multiple?: boolean;
+	minItems?: number;
+	maxItems?: number;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -53,6 +56,12 @@ const MEDIA_SELECT_DRAG_DROP_KEY = "media-select-zone";
 export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	// -------------------------------
 	// Functions
+	const canOpenSelectionPanels = () =>
+		props.disabled !== true &&
+		(props.multiple !== true ||
+			typeof props.maxItems !== "number" ||
+			(props.refs()?.length ?? 0) < props.maxItems);
+
 	const parseExtensions = (extensions?: string[]) => {
 		if (!extensions) return undefined;
 		return extensions
@@ -82,6 +91,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		return `${width}x${height}`;
 	};
 	const openMediaSelectModal = () => {
+		if (!canOpenSelectionPanels()) return;
+
 		pageBuilderModalsStore.open("mediaSelect", {
 			data: {
 				extensions: parseExtensions(props.extensions),
@@ -96,6 +107,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		});
 	};
 	const openMediaUploadPanel = () => {
+		if (!canOpenSelectionPanels()) return;
+
 		pageBuilderModalsStore.open("mediaUpload", {
 			data: {
 				extensions: parseExtensions(props.extensions),
@@ -103,6 +116,13 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			},
 			onCallback: (media) => {
 				const nextRef = mediaResponseToRef(media);
+				if (
+					isMultiple() &&
+					typeof props.maxItems === "number" &&
+					selectedMediaRefs().length >= props.maxItems
+				) {
+					return;
+				}
 
 				if (!isMultiple()) {
 					props.onChange([nextRef.id], [nextRef]);
@@ -157,6 +177,11 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	const selectedMediaIds = createMemo(() => props.value ?? []);
 	const selectedMediaRefs = createMemo(() => props.refs() ?? []);
 	const primarySelectedMedia = createMemo(() => selectedMediaRefs()[0]);
+	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
+	const hasReachedMaxItems = createMemo(
+		() => hasMaxItems() && selectedMediaRefs().length >= (props.maxItems || 0),
+	);
+	const canAddMore = createMemo(() => !hasReachedMaxItems());
 	const mediaTitle = createMemo(() => getMediaTitle(primarySelectedMedia()));
 	const mediaAlt = createMemo(() => getMediaAlt(primarySelectedMedia()));
 	const mediaDimensions = createMemo(() =>
@@ -190,7 +215,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				<Switch>
 					<Match when={selectedMediaIds().length === 0}>
 						<Show when={isMultiple()}>
-							<div class="min-h-42 flex items-center justify-center background-dotted border-dashed border-border rounded-md border">
+							<div class="min-h-42 flex items-center justify-center dotted-background border-dashed border-border rounded-md border">
 								<p class="text-sm text-unfocused">{T()("nothing_selected")}</p>
 							</div>
 						</Show>
@@ -204,7 +229,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								theme="border-outline"
 								size="small"
 								onClick={openMediaSelectModal}
-								disabled={props.disabled}
+								disabled={props.disabled || !canAddMore()}
 								classes="capitalize"
 							>
 								{T()("select_media", {
@@ -216,7 +241,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								theme="basic"
 								size="small"
 								onClick={openMediaUploadPanel}
-								disabled={props.disabled}
+								disabled={props.disabled || !canAddMore()}
 								classes="capitalize"
 							>
 								{T()("upload_media")}
@@ -360,9 +385,17 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											<Show when={selectedMediaRefs().length > 0}>
 												<button
 													type="button"
-													class="relative hidden h-full items-center justify-center overflow-hidden rounded-md border border-border text-unfocused transition-colors duration-200 before:absolute before:-inset-3 before:bg-secondary-base/5 before:blur-2xl hover:border-primary-muted-border hover:text-title lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2"
+													class={classNames(
+														"relative hidden h-full items-center justify-center overflow-hidden rounded-md border border-border text-unfocused transition-colors duration-200 before:absolute before:-inset-3 before:bg-secondary-base/5 before:blur-2xl lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2",
+														{
+															"hover:border-primary-muted-border hover:text-title":
+																!props.disabled && canAddMore(),
+															"cursor-not-allowed opacity-50":
+																props.disabled || !canAddMore(),
+														},
+													)}
 													onClick={openMediaSelectModal}
-													disabled={props.disabled}
+													disabled={props.disabled || !canAddMore()}
 													aria-label={T()("select_media", {
 														type: props.type || "media",
 													})}
@@ -384,7 +417,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									theme="border-outline"
 									size="small"
 									onClick={openMediaSelectModal}
-									disabled={props.disabled}
+									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
 									{T()("select_media", {
@@ -396,15 +429,25 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									theme="basic"
 									size="small"
 									onClick={openMediaUploadPanel}
-									disabled={props.disabled}
+									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
 									{T()("upload_media")}
 								</Button>
 							</div>
-							<p class="text-sm text-unfocused">
-								{selectedMediaIds().length} {T()("selected").toLowerCase()}
-							</p>
+							<Show when={selectedMediaIds().length > 0}>
+								<p class="text-sm text-unfocused">
+									<RelationCount
+										count={selectedMediaIds().length}
+										min={props.minItems}
+										max={props.maxItems}
+									/>
+									{typeof props.minItems !== "number" &&
+									typeof props.maxItems !== "number"
+										? ` ${T()("selected").toLowerCase()}`
+										: ""}
+								</p>
+							</Show>
 						</div>
 					</Match>
 				</Switch>

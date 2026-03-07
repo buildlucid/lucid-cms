@@ -78,6 +78,8 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			value={getValue()}
 			refs={fieldRef}
 			multiple={isMultiple()}
+			minItems={props.state.fieldConfig.validation?.minItems}
+			maxItems={props.state.fieldConfig.validation?.maxItems}
 			onChange={(value, refs) => {
 				const clearFromItemIndex = isMultiple()
 					? getChangedItemErrorStartIndex(

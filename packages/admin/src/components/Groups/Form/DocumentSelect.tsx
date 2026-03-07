@@ -19,6 +19,7 @@ import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import Pill from "@/components/Partials/Pill";
+import RelationCount from "@/components/Partials/RelationCount";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -36,6 +37,8 @@ interface DocumentSelectProps {
 	refs: Accessor<DocumentRef[] | undefined>;
 	onChange: (value: DocumentFieldValue[], refs: DocumentRef[]) => void;
 	multiple?: boolean;
+	minItems?: number;
+	maxItems?: number;
 	copy?: {
 		label?: string;
 		describedBy?: string;
@@ -53,7 +56,15 @@ interface DocumentSelectProps {
 const DOCUMENT_SELECT_DRAG_DROP_KEY = "document-select-zone";
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
+	const canOpenSelectModal = () =>
+		props.disabled !== true &&
+		(props.multiple !== true ||
+			typeof props.maxItems !== "number" ||
+			(props.refs()?.length ?? 0) < props.maxItems);
+
 	const openDocuSelectModal = () => {
+		if (!canOpenSelectModal()) return;
+
 		pageBuilderModalsStore.open("documentSelect", {
 			data: {
 				collectionKey: props.collection,
@@ -112,6 +123,11 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const isMultiple = createMemo(() => props.multiple === true);
 	const selectedDocumentValue = createMemo(() => props.value?.[0]);
 	const selectedDocuments = createMemo(() => props.refs() ?? []);
+	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
+	const hasReachedMaxItems = createMemo(
+		() => hasMaxItems() && selectedDocuments().length >= (props.maxItems || 0),
+	);
+	const canAddMore = createMemo(() => !hasReachedMaxItems());
 	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
 
 	const collection = api.collections.useGetSingle({
@@ -191,14 +207,22 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									theme="border-outline"
 									size="small"
 									onClick={openDocuSelectModal}
-									disabled={props.disabled}
+									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
 									{T()("select_document")}
 								</Button>
 								<Show when={selectedDocuments().length > 0}>
 									<p class="text-sm text-unfocused">
-										{selectedDocuments().length} {T()("selected").toLowerCase()}
+										<RelationCount
+											count={selectedDocuments().length}
+											min={props.minItems}
+											max={props.maxItems}
+										/>
+										{typeof props.minItems !== "number" &&
+										typeof props.maxItems !== "number"
+											? ` ${T()("selected").toLowerCase()}`
+											: ""}
 									</p>
 								</Show>
 							</div>
@@ -277,7 +301,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							theme="border-outline"
 							size="small"
 							onClick={openDocuSelectModal}
-							disabled={props.disabled}
+							disabled={props.disabled || !canAddMore()}
 							classes="capitalize"
 						>
 							{T()("select_document")}
