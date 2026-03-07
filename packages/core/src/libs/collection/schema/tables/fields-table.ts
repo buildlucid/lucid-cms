@@ -6,7 +6,6 @@ import type {
 	CFConfig,
 	FieldTypes,
 	ServiceResponse,
-	TabFieldConfig,
 } from "../../../../types.js";
 import registeredFields from "../../custom-fields/registered-fields.js";
 import {
@@ -31,7 +30,7 @@ import type {
  */
 const createFieldTables = (props: {
 	collection: CollectionBuilder;
-	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
+	fields: CFConfig<FieldTypes>[];
 	db: DatabaseAdapter;
 	type: Exclude<TableType, "document" | "versions">;
 	documentTable: string;
@@ -172,6 +171,9 @@ const createFieldTables = (props: {
 		const databaseMode = normalizeFieldDatabaseMode(databaseConfig.mode);
 
 		switch (databaseMode) {
+			case "ignore": {
+				break;
+			}
 			case "tree-table": {
 				if (!("tableType" in databaseConfig)) {
 					return {

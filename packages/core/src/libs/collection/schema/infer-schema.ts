@@ -37,7 +37,7 @@ const inferSchema = (
 		for (const brick of collection.brickInstances || []) {
 			const brickFieldsTableRes = createFieldTables({
 				collection: collection,
-				fields: brick.fieldTreeNoTab,
+				fields: brick.persistedFieldTree,
 				db: db,
 				type: "brick",
 				documentTable: documentTableRes.data.schema.name,
@@ -52,7 +52,7 @@ const inferSchema = (
 
 		const collectionFieldsTableRes = createFieldTables({
 			collection: collection,
-			fields: collection.fieldTreeNoTab,
+			fields: collection.persistedFieldTree,
 			db: db,
 			documentTable: documentTableRes.data.schema.name,
 			versionTable: versionTableRes.data.schema.name,

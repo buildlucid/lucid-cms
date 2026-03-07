@@ -127,7 +127,7 @@ const formatMultiple = (
 ): FieldResponse[] => {
 	return buildFieldTree(data, {
 		builder: meta.builder,
-		fieldConfig: meta.builder.fieldTreeNoTab,
+		fieldConfig: meta.builder.persistedFieldTree,
 		host: meta.host,
 		localization: meta.localization,
 		collection: meta.collection,

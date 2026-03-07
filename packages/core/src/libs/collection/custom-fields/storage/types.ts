@@ -6,7 +6,6 @@ import type {
 	FieldDatabaseMode,
 	FieldTypes,
 	SchemaDefinition,
-	TabFieldConfig,
 	TreeTableFieldDatabaseConfig,
 } from "../types.js";
 
@@ -36,7 +35,7 @@ export type RelationTableSchemaProps = {
 	};
 };
 
-export type StorageFieldConfig = Exclude<CFConfig<FieldTypes>, TabFieldConfig>;
+export type StorageFieldConfig = CFConfig<FieldTypes>;
 
 export type StorageModeDefinition<M extends FieldDatabaseMode> = {
 	mode: M;

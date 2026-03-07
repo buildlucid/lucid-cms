@@ -13,6 +13,8 @@ import SelectCustomField from "../../custom-fields/fields/select/custom-field.js
 import TextCustomField from "../../custom-fields/fields/text/custom-field.js";
 import TextareaCustomField from "../../custom-fields/fields/textarea/custom-field.js";
 import UserCustomField from "../../custom-fields/fields/user/custom-field.js";
+import registeredFields from "../../custom-fields/registered-fields.js";
+import { isStorageMode } from "../../custom-fields/storage/index.js";
 import type {
 	CFConfig,
 	CFProps,
@@ -29,13 +31,11 @@ class FieldBuilder {
 		repeaterDepth: {},
 	};
 	private cachedFieldTree: CFConfig<FieldTypes>[] | null = null;
-	private cachedFieldTreeNoTab:
-		| Exclude<CFConfig<FieldTypes>, TabFieldConfig>[]
-		| null = null;
+	private cachedPersistedFieldTree: CFConfig<FieldTypes>[] | null = null;
 
 	protected invalidateFieldTreeCache() {
 		this.cachedFieldTree = null;
-		this.cachedFieldTreeNoTab = null;
+		this.cachedPersistedFieldTree = null;
 	}
 
 	private registerField(key: string, field: CustomField<FieldTypes>) {
@@ -119,10 +119,13 @@ class FieldBuilder {
 		return this;
 	}
 	// Private Methods
-	private nestFields(excludeTabs: boolean): CFConfig<FieldTypes>[] {
+	private nestFields(persistedOnly: boolean): CFConfig<FieldTypes>[] {
 		const fields = Array.from(this.fields.values()).filter((field) => {
-			if (excludeTabs) {
-				return field.type !== "tab";
+			if (persistedOnly) {
+				return !isStorageMode(
+					registeredFields[field.type].config.database,
+					"ignore",
+				);
 			}
 			return true;
 		});
@@ -169,15 +172,12 @@ class FieldBuilder {
 
 		return this.cachedFieldTree;
 	}
-	get fieldTreeNoTab(): Exclude<CFConfig<FieldTypes>, TabFieldConfig>[] {
-		if (!this.cachedFieldTreeNoTab) {
-			this.cachedFieldTreeNoTab = this.nestFields(true) as Exclude<
-				CFConfig<FieldTypes>,
-				TabFieldConfig
-			>[];
+	get persistedFieldTree(): CFConfig<FieldTypes>[] {
+		if (!this.cachedPersistedFieldTree) {
+			this.cachedPersistedFieldTree = this.nestFields(true);
 		}
 
-		return this.cachedFieldTreeNoTab;
+		return this.cachedPersistedFieldTree;
 	}
 	get flatFields(): CFConfig<FieldTypes>[] {
 		const config: CFConfig<FieldTypes>[] = [];

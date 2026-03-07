@@ -346,17 +346,17 @@ test("fieldTree memoization invalidates on add operations", async () => {
 	expect(updatedTree.length).toBe(2);
 });
 
-test("fieldTreeNoTab memoization invalidates on repeater mutation", async () => {
+test("persistedFieldTree memoization invalidates on repeater mutation", async () => {
 	const instance = new FieldBuilder()
 		.addRepeater("repeater_test")
 		.addText("text_test");
 
-	const beforeEnd = instance.fieldTreeNoTab;
-	expect(instance.fieldTreeNoTab).toBe(beforeEnd);
+	const beforeEnd = instance.persistedFieldTree;
+	expect(instance.persistedFieldTree).toBe(beforeEnd);
 
 	instance.endRepeater();
 
-	const afterEnd = instance.fieldTreeNoTab;
+	const afterEnd = instance.persistedFieldTree;
 	expect(afterEnd).not.toBe(beforeEnd);
 
 	const repeater = afterEnd[0];

@@ -3,7 +3,7 @@ import type { FieldStaticConfig } from "../../types.js";
 export const tabFieldConfig = {
 	type: "tab",
 	database: {
-		mode: "column",
+		mode: "ignore",
 	},
 } as const satisfies FieldStaticConfig<"tab">;
 

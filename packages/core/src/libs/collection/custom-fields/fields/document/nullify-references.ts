@@ -4,14 +4,13 @@ import type {
 	FieldTypes,
 	LucidBrickTableName,
 	ServiceFn,
-	TabFieldConfig,
 } from "../../../../../types.js";
 import { getBricksTableSchema } from "../../../schema/runtime/runtime-schema-selectors.js";
 import type { CollectionSchemaTable } from "../../../schema/types.js";
 import { documentFieldConfig } from "./config.js";
 import { normalizeDocumentCollections } from "./utils/normalize-document-collections.js";
 
-type FieldConfig = Exclude<CFConfig<FieldTypes>, TabFieldConfig>;
+type FieldConfig = CFConfig<FieldTypes>;
 
 /**
  * Returns true when the field can reference the deleted collection.
@@ -106,7 +105,7 @@ const nullifyDocumentReferences: ServiceFn<
 		if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
 
 		collectReferenceTargets({
-			fields: collection.fieldTreeNoTab,
+			fields: collection.persistedFieldTree,
 			schemas: bricksTableSchemaRes.data,
 			collectionKey: collection.key,
 			targetCollectionKey: data.collectionKey,
@@ -115,7 +114,7 @@ const nullifyDocumentReferences: ServiceFn<
 
 		for (const brick of collection.brickInstances) {
 			collectReferenceTargets({
-				fields: brick.fieldTreeNoTab,
+				fields: brick.persistedFieldTree,
 				schemas: bricksTableSchemaRes.data,
 				collectionKey: collection.key,
 				targetCollectionKey: data.collectionKey,

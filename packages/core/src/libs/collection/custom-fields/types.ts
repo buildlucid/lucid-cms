@@ -97,10 +97,18 @@ export type OmitDefault<T> = T extends { config: unknown }
 		}
 	: T;
 
-export type FieldDatabaseMode = "column" | "relation-table" | "tree-table";
+export type FieldDatabaseMode =
+	| "column"
+	| "ignore"
+	| "relation-table"
+	| "tree-table";
 
 export type ColumnFieldDatabaseConfig = {
 	mode: "column";
+};
+
+export type IgnoreFieldDatabaseConfig = {
+	mode: "ignore";
 };
 
 export type RelationTableFieldDatabaseConfig<T extends string = string> = {
@@ -117,6 +125,7 @@ export type TreeTableFieldDatabaseConfig<T extends string = string> = {
 
 export type FieldDatabaseConfig<T extends string = string> =
 	| ColumnFieldDatabaseConfig
+	| IgnoreFieldDatabaseConfig
 	| RelationTableFieldDatabaseConfig<T>
 	| TreeTableFieldDatabaseConfig;
 

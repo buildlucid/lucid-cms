@@ -44,7 +44,7 @@ test("tab fields are added and nesting is correct", async () => {
 		.addCheckbox("checkbox_test");
 
 	expect(brick.fields.size).toBe(4);
-	expect(brick.fieldTreeNoTab.length).toBe(2);
+	expect(brick.persistedFieldTree.length).toBe(2);
 
 	const firstTab = brick.fieldTree[0];
 	if (firstTab?.type === "tab") {

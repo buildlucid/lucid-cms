@@ -124,6 +124,7 @@ const getTablePriority = (params: {
 		case "tree-table":
 			return treeTableMode.getInsertPriority(params.fieldPath);
 		case "column":
+		case "ignore":
 		case "relation-table":
 			return 0;
 	}
@@ -148,6 +149,7 @@ const applyTableModeColumns = (context: {
 			}
 			break;
 		case "column":
+		case "ignore":
 		case "relation-table":
 			break;
 	}
@@ -173,6 +175,7 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 			}
 		},
 	},
+	ignore: {},
 	"tree-table": {
 		buildChildTables: (context) => {
 			const databaseConfig =

@@ -211,6 +211,35 @@ describe("Schema inference", async () => {
 		);
 	});
 
+	test("ignores ui-only fields during schema inference", () => {
+		const brickScopedCollection = new CollectionBuilder("pages", {
+			mode: "multiple",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+			bricks: {
+				fixed: [new BrickBuilder("content").addTab("meta").addText("title")],
+			},
+		});
+
+		const res = inferSchema(brickScopedCollection, db);
+		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
+
+		expect(tableNames).toContain("lucid_doc__pages__content");
+		expect(tableNames).not.toContain("lucid_doc__pages__content__meta");
+
+		const brickTable = res.data?.tables.find(
+			(table) => table.name === "lucid_doc__pages__content",
+		);
+		expect(brickTable?.columns).toContainEqual(
+			expect.objectContaining({
+				name: "_title",
+				source: "field",
+			}),
+		);
+	});
+
 	test("marks generated custom field columns as non-removable", () => {
 		const res = inferSchema(pagesCollection, db);
 		const generatedFieldColumn = res.data?.tables

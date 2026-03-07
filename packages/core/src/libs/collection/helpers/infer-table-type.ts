@@ -14,7 +14,9 @@ const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
  */
 const customFieldTableConfigs = registeredFieldTypes.flatMap((fieldType) => {
 	const databaseConfig = registeredFields[fieldType].config.database;
-	if (databaseConfig.mode === "column") return [];
+	if (!("separator" in databaseConfig) || !("tableType" in databaseConfig)) {
+		return [];
+	}
 
 	return [
 		{

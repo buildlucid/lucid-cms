@@ -5,15 +5,23 @@ import registeredFields, {
 } from "../registered-fields.js";
 import type { FieldDatabaseConfig, FieldDatabaseMode } from "../types.js";
 import { columnMode } from "./column.js";
+import { ignoreMode } from "./ignore.js";
 import { relationTableMode } from "./relation-table.js";
 import { treeTableMode } from "./tree-table.js";
 import type { TableBackedFieldDatabaseConfig } from "./types.js";
 
 export const storageModes = {
 	column: columnMode,
+	ignore: ignoreMode,
 	"relation-table": relationTableMode,
 	"tree-table": treeTableMode,
 } as const;
+
+const isTableBackedFieldDatabaseConfig = (
+	config: FieldDatabaseConfig,
+): config is TableBackedFieldDatabaseConfig => {
+	return "tableType" in config && "separator" in config;
+};
 
 /**
  * Returns true when the provided table type is a custom-field table type.
@@ -35,7 +43,7 @@ export const getFieldDatabaseConfig = (
 
 	for (const fieldType of registeredFieldTypes) {
 		const databaseConfig = registeredFields[fieldType].config.database;
-		if (databaseConfig.mode === "column") continue;
+		if (!isTableBackedFieldDatabaseConfig(databaseConfig)) continue;
 		if (databaseConfig.tableType !== tableType) continue;
 
 		return databaseConfig;
@@ -58,7 +66,7 @@ export const isStorageMode = <M extends FieldDatabaseMode>(
  * Returns the base migration priority for a non-column storage mode.
  */
 export const getStorageModeBasePriority = (
-	mode: Exclude<FieldDatabaseMode, "column">,
+	mode: Exclude<FieldDatabaseMode, "column" | "ignore">,
 ): number => {
 	return storageModes[mode].baseTablePriority;
 };
@@ -76,6 +84,8 @@ export const isTreeTableType = (tableType: TableType): boolean => {
  */
 export const normalizeFieldDatabaseMode = (mode: string): FieldDatabaseMode => {
 	switch (mode) {
+		case "ignore":
+			return "ignore";
 		case "tree-table":
 			return "tree-table";
 		case "relation-table":
