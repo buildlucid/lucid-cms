@@ -1,12 +1,3 @@
-import {
-	closestCenter,
-	createSortable,
-	DragDropProvider,
-	DragDropSensors,
-	type DragEventHandler,
-	SortableProvider,
-	transformStyle,
-} from "@thisbeyond/solid-dnd";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
@@ -22,6 +13,7 @@ import {
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
+import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
 import brickStore from "@/store/brickStore";
@@ -55,6 +47,8 @@ interface MediaSelectProps {
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
 }
+
+const MEDIA_SELECT_DRAG_DROP_KEY = "media-select-zone";
 
 export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	// -------------------------------
@@ -173,27 +167,6 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		fieldErrors().filter((error) => error.itemIndex === itemIndex);
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
-	const sortableIds = createMemo(() =>
-		selectedMediaRefs().map((media) => media.id),
-	);
-	const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
-		brickStore.get.endRelationFieldDrag();
-
-		if (
-			!draggable ||
-			!droppable ||
-			typeof draggable.id !== "number" ||
-			typeof droppable.id !== "number" ||
-			draggable.id === droppable.id
-		) {
-			return;
-		}
-
-		reorderSelectedMedia(`${draggable.id}`, `${droppable.id}`);
-	};
-	const onDragStart: DragEventHandler = () => {
-		brickStore.get.startRelationFieldDrag();
-	};
 
 	// -------------------------------
 	// Render
@@ -360,13 +333,13 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					<Match when={isMultiple()}>
 						<div class="w-full overflow-hidden rounded-md border border-border dotted-background border-dashed">
 							<Show when={selectedMediaRefs().length > 0}>
-								<DragDropProvider
-									collisionDetector={closestCenter}
-									onDragStart={onDragStart}
-									onDragEnd={onDragEnd}
+								<DragDrop
+									animationMode="web-animation"
+									sortOrder={(ref, targetRef) => {
+										reorderSelectedMedia(ref, targetRef);
+									}}
 								>
-									<DragDropSensors />
-									<SortableProvider ids={sortableIds()}>
+									{({ dragDrop }) => (
 										<div class="relative z-20 grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 xl:grid-cols-3">
 											<For each={selectedMediaRefs()}>
 												{(media, index) => (
@@ -380,6 +353,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 														hasError={hasItemError(index())}
 														removeSelectedMedia={removeSelectedMedia}
 														disabled={props.disabled}
+														dragDrop={dragDrop}
 													/>
 												)}
 											</For>
@@ -399,8 +373,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 												</button>
 											</Show>
 										</div>
-									</SortableProvider>
-								</DragDropProvider>
+									)}
+								</DragDrop>
 							</Show>
 						</div>
 						<div class="flex flex-wrap items-center justify-between gap-3 mt-3">
@@ -448,28 +422,50 @@ const MediaSortableItem: Component<{
 	dimensions: string | null;
 	hasError: boolean;
 	removeSelectedMedia: (mediaId: number) => void;
+	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {
-	const sortable = createSortable(props.media.id);
-
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div
-			// @ts-expect-error solid directive
-			use:sortable
-			style={transformStyle(sortable.transform)}
+			data-dragkey={MEDIA_SELECT_DRAG_DROP_KEY}
+			data-dragref={`${props.media.id}`}
+			style={{
+				"view-transition-name": `media-select-item-${props.media.id}`,
+			}}
 			class={classNames(
 				"group overflow-hidden rounded-md border bg-card-base ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
 					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
-					"opacity-60": sortable.isActiveDraggable,
+					"opacity-60":
+						props.dragDrop.getDragging()?.ref === `${props.media.id}`,
 					"ring-1 ring-primary-base":
-						sortable.isActiveDroppable &&
-						!sortable.isActiveDraggable &&
+						props.dragDrop.getDraggingTarget()?.ref === `${props.media.id}` &&
+						props.dragDrop.getDragging()?.ref !== `${props.media.id}` &&
 						!props.hasError,
 					"cursor-grab active:cursor-grabbing": props.disabled !== true,
 				},
 			)}
+			draggable={props.disabled !== true}
+			onDragStart={(e) => {
+				brickStore.get.startRelationFieldDrag();
+				props.dragDrop.onDragStart(e, {
+					ref: `${props.media.id}`,
+					key: MEDIA_SELECT_DRAG_DROP_KEY,
+				});
+			}}
+			onDragEnd={(e) => {
+				props.dragDrop.onDragEnd(e);
+				brickStore.get.endRelationFieldDrag();
+			}}
+			onDragEnter={(e) =>
+				props.dragDrop.onDragEnter(e, {
+					ref: `${props.media.id}`,
+					key: MEDIA_SELECT_DRAG_DROP_KEY,
+				})
+			}
+			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			<div
 				class={classNames("relative border-b border-border p-3", {
@@ -493,7 +489,7 @@ const MediaSortableItem: Component<{
 						</Show>
 					</div>
 				</div>
-				<div class="flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
+				<div class="pointer-events-none flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
 					<MediaPreview
 						media={{
 							url: props.media.url,

@@ -1,12 +1,3 @@
-import {
-	closestCenter,
-	createSortable,
-	DragDropProvider,
-	DragDropSensors,
-	type DragEventHandler,
-	SortableProvider,
-	transformStyle,
-} from "@thisbeyond/solid-dnd";
 import type {
 	DocumentFieldValue,
 	DocumentRef,
@@ -26,8 +17,10 @@ import {
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
+import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -56,6 +49,8 @@ interface DocumentSelectProps {
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
 }
+
+const DOCUMENT_SELECT_DRAG_DROP_KEY = "document-select-zone";
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const openDocuSelectModal = () => {
@@ -133,35 +128,12 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	};
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
-	const sortableIds = createMemo(() =>
-		selectedDocuments().map(
-			(document) => `${document.collectionKey}:${document.id}`,
-		),
-	);
 	const previewFields = (documentRef?: DocumentRef) =>
 		getDocumentListingPreviewFields({
 			collection: collection.data?.data,
 			documentRef,
 			contentLocale: contentLocale(),
 		}).slice(0, 3);
-	const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
-		brickStore.get.endRelationFieldDrag();
-
-		if (
-			!draggable ||
-			!droppable ||
-			typeof draggable.id !== "string" ||
-			typeof droppable.id !== "string" ||
-			draggable.id === droppable.id
-		) {
-			return;
-		}
-
-		reorderSelectedDocuments(draggable.id, droppable.id);
-	};
-	const onDragStart: DragEventHandler = () => {
-		brickStore.get.startRelationFieldDrag();
-	};
 
 	return (
 		<div
@@ -183,19 +155,20 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				<Switch>
 					<Match when={isMultiple()}>
 						<div class="w-full">
-							<DragDropProvider
-								collisionDetector={closestCenter}
-								onDragStart={onDragStart}
-								onDragEnd={onDragEnd}
+							<DragDrop
+								animationMode="web-animation"
+								sortOrder={(ref, targetRef) => {
+									reorderSelectedDocuments(ref, targetRef);
+								}}
 							>
-								<DragDropSensors />
-								<SortableProvider ids={sortableIds()}>
+								{({ dragDrop }) => (
 									<div class="flex flex-col gap-2">
 										<For each={selectedDocuments()}>
 											{(document, index) => {
 												return (
 													<DocumentSortableItem
 														document={document}
+														dragId={`${document.collectionKey}:${document.id}`}
 														singularName={helpers.getLocaleValue({
 															value: collection.data?.data.details.singularName,
 															fallback: T()("document"),
@@ -204,13 +177,14 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 														hasError={hasItemError(index())}
 														removeSelectedDocument={removeSelectedDocument}
 														disabled={props.disabled}
+														dragDrop={dragDrop}
 													/>
 												);
 											}}
 										</For>
 									</div>
-								</SortableProvider>
-							</DragDropProvider>
+								)}
+							</DragDrop>
 							<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
 								<Button
 									type="button"
@@ -319,34 +293,54 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 
 const DocumentSortableItem: Component<{
 	document: DocumentRef;
+	dragId: string;
 	singularName: string;
 	previewFields: { label: string; value: string }[];
 	hasError: boolean;
 	removeSelectedDocument: (documentValue: DocumentFieldValue) => void;
+	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {
-	const sortable = createSortable(
-		`${props.document.collectionKey}:${props.document.id}`,
-	);
-
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div
-			// @ts-expect-error solid directive
-			use:sortable
-			style={transformStyle(sortable.transform)}
+			data-dragkey={DOCUMENT_SELECT_DRAG_DROP_KEY}
+			data-dragref={props.dragId}
+			style={{
+				"view-transition-name": `document-select-item-${props.document.collectionKey}-${props.document.id}`,
+			}}
 			class={classNames(
 				"group rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
 					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
-					"opacity-60": sortable.isActiveDraggable,
+					"opacity-60": props.dragDrop.getDragging()?.ref === props.dragId,
 					"ring-1 ring-primary-base":
-						sortable.isActiveDroppable &&
-						!sortable.isActiveDraggable &&
+						props.dragDrop.getDraggingTarget()?.ref === props.dragId &&
+						props.dragDrop.getDragging()?.ref !== props.dragId &&
 						!props.hasError,
 					"cursor-grab active:cursor-grabbing": props.disabled !== true,
 				},
 			)}
+			draggable={props.disabled !== true}
+			onDragStart={(e) => {
+				brickStore.get.startRelationFieldDrag();
+				props.dragDrop.onDragStart(e, {
+					ref: props.dragId,
+					key: DOCUMENT_SELECT_DRAG_DROP_KEY,
+				});
+			}}
+			onDragEnd={(e) => {
+				props.dragDrop.onDragEnd(e);
+				brickStore.get.endRelationFieldDrag();
+			}}
+			onDragEnter={(e) =>
+				props.dragDrop.onDragEnter(e, {
+					ref: props.dragId,
+					key: DOCUMENT_SELECT_DRAG_DROP_KEY,
+				})
+			}
+			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			<div class="flex items-start justify-between gap-3">
 				<div class="min-w-0 flex-1">

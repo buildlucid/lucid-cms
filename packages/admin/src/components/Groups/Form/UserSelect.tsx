@@ -1,12 +1,3 @@
-import {
-	closestCenter,
-	createSortable,
-	DragDropProvider,
-	DragDropSensors,
-	type DragEventHandler,
-	SortableProvider,
-	transformStyle,
-} from "@thisbeyond/solid-dnd";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
@@ -21,6 +12,7 @@ import {
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
+import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -48,6 +40,8 @@ interface UserSelectProps {
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
 }
+
+const USER_SELECT_DRAG_DROP_KEY = "user-select-zone";
 
 export const UserSelect: Component<UserSelectProps> = (props) => {
 	// -------------------------------
@@ -100,30 +94,11 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 		fieldErrors().filter((error) => error.itemIndex === itemIndex);
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
-	const sortableIds = createMemo(() => selectedUsers().map((user) => user.id));
 	const userName = createMemo(() => {
 		const user = selectedUser();
 		if (!user) return "";
 		return helpers.formatUserName(user, "username");
 	});
-	const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
-		brickStore.get.endRelationFieldDrag();
-
-		if (
-			!draggable ||
-			!droppable ||
-			typeof draggable.id !== "number" ||
-			typeof droppable.id !== "number" ||
-			draggable.id === droppable.id
-		) {
-			return;
-		}
-
-		reorderSelectedUsers(`${draggable.id}`, `${droppable.id}`);
-	};
-	const onDragStart: DragEventHandler = () => {
-		brickStore.get.startRelationFieldDrag();
-	};
 
 	// -------------------------------
 	// Render
@@ -148,13 +123,13 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 					<Match when={isMultiple()}>
 						<div class="w-full">
 							<Show when={selectedUsers().length > 0}>
-								<DragDropProvider
-									collisionDetector={closestCenter}
-									onDragStart={onDragStart}
-									onDragEnd={onDragEnd}
+								<DragDrop
+									animationMode="web-animation"
+									sortOrder={(ref, targetRef) => {
+										reorderSelectedUsers(ref, targetRef);
+									}}
 								>
-									<DragDropSensors />
-									<SortableProvider ids={sortableIds()}>
+									{({ dragDrop }) => (
 										<div class="flex flex-col gap-2">
 											<For each={selectedUsers()}>
 												{(user, index) => (
@@ -163,12 +138,13 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 														hasError={hasItemError(index())}
 														removeSelectedUser={removeSelectedUser}
 														disabled={props.disabled}
+														dragDrop={dragDrop}
 													/>
 												)}
 											</For>
 										</div>
-									</SortableProvider>
-								</DragDropProvider>
+									)}
+								</DragDrop>
 							</Show>
 							<div
 								class={classNames(
@@ -256,28 +232,50 @@ const UserSortableItem: Component<{
 	user: UserRelationRef;
 	hasError: boolean;
 	removeSelectedUser: (userId: number) => void;
+	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {
-	const sortable = createSortable(props.user.id);
-
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div
-			// @ts-expect-error solid directive
-			use:sortable
-			style={transformStyle(sortable.transform)}
+			data-dragkey={USER_SELECT_DRAG_DROP_KEY}
+			data-dragref={`${props.user.id}`}
+			style={{
+				"view-transition-name": `user-select-item-${props.user.id}`,
+			}}
 			class={classNames(
 				"group flex items-center justify-between gap-3 rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
 					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
-					"opacity-60": sortable.isActiveDraggable,
+					"opacity-60":
+						props.dragDrop.getDragging()?.ref === `${props.user.id}`,
 					"ring-1 ring-primary-base":
-						sortable.isActiveDroppable &&
-						!sortable.isActiveDraggable &&
+						props.dragDrop.getDraggingTarget()?.ref === `${props.user.id}` &&
+						props.dragDrop.getDragging()?.ref !== `${props.user.id}` &&
 						!props.hasError,
 					"cursor-grab active:cursor-grabbing": props.disabled !== true,
 				},
 			)}
+			draggable={props.disabled !== true}
+			onDragStart={(e) => {
+				brickStore.get.startRelationFieldDrag();
+				props.dragDrop.onDragStart(e, {
+					ref: `${props.user.id}`,
+					key: USER_SELECT_DRAG_DROP_KEY,
+				});
+			}}
+			onDragEnd={(e) => {
+				props.dragDrop.onDragEnd(e);
+				brickStore.get.endRelationFieldDrag();
+			}}
+			onDragEnter={(e) =>
+				props.dragDrop.onDragEnter(e, {
+					ref: `${props.user.id}`,
+					key: USER_SELECT_DRAG_DROP_KEY,
+				})
+			}
+			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			<div class="min-w-0">
 				<p class="truncate text-sm font-medium text-subtitle">
