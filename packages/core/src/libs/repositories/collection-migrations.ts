@@ -6,6 +6,7 @@ import type {
 	Select,
 } from "../db-adapter/types.js";
 import StaticRepository from "./parents/static-repository.js";
+import type { QueryProps } from "./types.js";
 
 export default class CollectionMigrationsRepository extends StaticRepository<"lucid_collection_migrations"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -14,10 +15,10 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
-		table_name_map: z.string(),
 		migration_plans: z.unknown(),
 		collection_schema: z.unknown(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
+		table_name_map: z.record(z.string(), z.string()),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -32,7 +33,14 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 	/**
 	 * Returns the latest migration row for a collection.
 	 */
-	async selectLatestByCollectionKey(props: { collectionKey: string }) {
+	async selectLatestByCollectionKey<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				collectionKey: string;
+			}
+		>,
+	) {
 		const query = this.db
 			.selectFrom(this.tableName)
 			.selectAll()
@@ -52,35 +60,42 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
-			enabled: false,
+			...props.validation,
 			mode: "single",
+			selectAll: true,
 		});
 	}
-
 	/**
-	 * Returns latest migration rows grouped by collection key.
+	 * Returns the latest migration row for each collection key.
 	 */
-	async selectLatestByCollectionKeysMap(props: { collectionKeys: string[] }) {
+	async selectLatestByCollectionKeysMap<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				collectionKeys: string[];
+			}
+		>,
+	) {
 		if (props.collectionKeys.length === 0) {
 			return {
 				error: undefined,
-				data: new Map<string, Select<LucidCollectionMigrations>>(),
+				data: [],
 			};
 		}
 
-		const latestIdsQuery = this.db
-			.selectFrom(this.tableName)
-			.select(["collection_key", (eb) => eb.fn.max("id").as("latest_id")])
-			.where("collection_key", "in", props.collectionKeys)
-			.groupBy("collection_key")
-			.as("latest_ids");
-
 		const query = this.db
 			.selectFrom("lucid_collection_migrations as cm")
-			.innerJoin(latestIdsQuery, (join) =>
-				join
-					.onRef("cm.collection_key", "=", "latest_ids.collection_key")
-					.onRef("cm.id", "=", "latest_ids.latest_id"),
+			.innerJoin(
+				this.db
+					.selectFrom(this.tableName)
+					.select(["collection_key", (eb) => eb.fn.max("id").as("latest_id")])
+					.where("collection_key", "in", props.collectionKeys)
+					.groupBy("collection_key")
+					.as("latest_ids"),
+				(join) =>
+					join
+						.onRef("cm.collection_key", "=", "latest_ids.collection_key")
+						.onRef("cm.id", "=", "latest_ids.latest_id"),
 			)
 			.selectAll("cm");
 
@@ -92,18 +107,10 @@ export default class CollectionMigrationsRepository extends StaticRepository<"lu
 		);
 		if (exec.response.error) return exec.response;
 
-		const latestByCollection = new Map<
-			string,
-			Select<LucidCollectionMigrations>
-		>();
-		for (const row of exec.response.data) {
-			if (latestByCollection.has(row.collection_key)) continue;
-			latestByCollection.set(row.collection_key, row);
-		}
-
-		return {
-			error: undefined,
-			data: latestByCollection,
-		};
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			selectAll: true,
+		});
 	}
 }

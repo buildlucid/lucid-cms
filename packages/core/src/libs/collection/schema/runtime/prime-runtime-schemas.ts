@@ -43,8 +43,18 @@ const primeRuntimeSchemas: ServiceFn<
 	const latestMigrationsRes =
 		await CollectionMigrations.selectLatestByCollectionKeysMap({
 			collectionKeys: nonCachedKeys,
+			validation: {
+				enabled: true,
+			},
 		});
 	if (latestMigrationsRes.error) return latestMigrationsRes;
+
+	const latestMigrationsByCollection = new Map(
+		latestMigrationsRes.data.map((migration) => [
+			migration.collection_key,
+			migration,
+		]),
+	);
 
 	for (const collectionKey of nonCachedKeys) {
 		const collection = context.config.collections.find(
@@ -62,7 +72,7 @@ const primeRuntimeSchemas: ServiceFn<
 		const localSchemaRes = inferSchema(collection, context.config.db);
 		if (localSchemaRes.error) return localSchemaRes;
 
-		const latestMigration = latestMigrationsRes.data.get(collectionKey);
+		const latestMigration = latestMigrationsByCollection.get(collectionKey);
 		if (!latestMigration) {
 			return {
 				data: undefined,
