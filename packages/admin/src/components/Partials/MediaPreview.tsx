@@ -43,7 +43,16 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 					<Switch>
 						<Match when={props.richPreview}>
 							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-							<audio src={props.media.url} class="w-2/3" controls />
+							<audio
+								src={props.media.url}
+								class="w-2/3"
+								controls
+								draggable={false}
+								onDragStart={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+							/>
 						</Match>
 						<Match when={!props.richPreview}>
 							<FaSolidFileAudio size={40} class="text-icon-base opacity-40" />
@@ -61,6 +70,11 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 								class="w-full h-full object-contain z-10 relative"
 								controls
 								preload="auto"
+								draggable={false}
+								onDragStart={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+								}}
 							/>
 						</Match>
 						<Match when={!props.richPreview}>
