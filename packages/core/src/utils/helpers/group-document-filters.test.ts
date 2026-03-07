@@ -17,8 +17,8 @@ describe("groupDocumentFilters", () => {
 	// Sample schema that matches the provided example
 	const sampleSchema: CollectionSchemaTable<LucidBrickTableName>[] = [
 		{
-			name: "lucid_doc__simple__simple",
-			rawName: "lucid_doc__simple__simple",
+			name: "lucid_document__simple__simple",
+			rawName: "lucid_document__simple__simple",
 			type: "brick",
 			key: { collection: "simple", brick: "simple", fieldPath: undefined },
 			columns: [
@@ -53,8 +53,8 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
-			name: "lucid_doc__simple__simple__items",
-			rawName: "lucid_doc__simple__simple__items",
+			name: "lucid_document__simple__simple__items",
+			rawName: "lucid_document__simple__simple__items",
 			type: `${constants.db.customFieldTablePrefix}repeater`,
 			key: { collection: "simple", brick: "simple", fieldPath: ["items"] },
 			columns: [
@@ -75,8 +75,8 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
-			name: "lucid_doc__simple__simple__items__nestedItems",
-			rawName: "lucid_doc__simple__simple__items__nestedItems",
+			name: "lucid_document__simple__simple__items__nestedItems",
+			rawName: "lucid_document__simple__simple__items__nestedItems",
 			type: `${constants.db.customFieldTablePrefix}repeater`,
 			key: {
 				collection: "simple",
@@ -108,8 +108,8 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
-			name: "lucid_doc__simple__simple-fixed",
-			rawName: "lucid_doc__simple__simple-fixed",
+			name: "lucid_document__simple__simple-fixed",
+			rawName: "lucid_document__simple__simple-fixed",
 			type: "brick",
 			key: {
 				collection: "simple",
@@ -134,8 +134,8 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
-			name: "lucid_doc__simple__fld",
-			rawName: "lucid_doc__simple__fld",
+			name: "lucid_document__simple__fld",
+			rawName: "lucid_document__simple__fld",
 			type: "document-fields",
 			key: { collection: "simple", brick: undefined, fieldPath: undefined },
 			columns: [
@@ -156,8 +156,8 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
-			name: "lucid_doc__simple__fld__people",
-			rawName: "lucid_doc__simple__fld__people",
+			name: "lucid_document__simple__fld__people",
+			rawName: "lucid_document__simple__fld__people",
 			type: `${constants.db.customFieldTablePrefix}repeater`,
 			key: { collection: "simple", brick: undefined, fieldPath: ["people"] },
 			columns: [
@@ -213,7 +213,7 @@ describe("groupDocumentFilters", () => {
 
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(1);
-		expect(result.brickFilters[0].table).toBe("lucid_doc__simple__fld");
+		expect(result.brickFilters[0].table).toBe("lucid_document__simple__fld");
 		expect(result.brickFilters[0].filters).toEqual([
 			{
 				key: "simpleHeading",
@@ -233,7 +233,7 @@ describe("groupDocumentFilters", () => {
 
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(1);
-		expect(result.brickFilters[0].table).toBe("lucid_doc__simple__fld");
+		expect(result.brickFilters[0].table).toBe("lucid_document__simple__fld");
 		expect(result.brickFilters[0].filters).toEqual([
 			{
 				key: "simpleHeading",
@@ -254,7 +254,7 @@ describe("groupDocumentFilters", () => {
 
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(1);
-		expect(result.brickFilters[0].table).toBe("lucid_doc__simple__simple");
+		expect(result.brickFilters[0].table).toBe("lucid_document__simple__simple");
 		expect(result.brickFilters[0].filters).toEqual([
 			{
 				key: "heading",
@@ -281,7 +281,7 @@ describe("groupDocumentFilters", () => {
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(1);
 		expect(result.brickFilters[0].table).toBe(
-			"lucid_doc__simple__simple__items",
+			"lucid_document__simple__simple__items",
 		);
 		expect(result.brickFilters[0].filters).toEqual([
 			{
@@ -304,7 +304,7 @@ describe("groupDocumentFilters", () => {
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(1);
 		expect(result.brickFilters[0].table).toBe(
-			"lucid_doc__simple__simple__items__nestedItems",
+			"lucid_document__simple__simple__items__nestedItems",
 		);
 		expect(result.brickFilters[0].filters).toEqual([
 			{
@@ -331,7 +331,9 @@ describe("groupDocumentFilters", () => {
 
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(1);
-		expect(result.brickFilters[0].table).toBe("lucid_doc__simple__fld__people");
+		expect(result.brickFilters[0].table).toBe(
+			"lucid_document__simple__fld__people",
+		);
 		expect(result.brickFilters[0].filters).toEqual([
 			{
 				key: "firstName",
@@ -361,16 +363,16 @@ describe("groupDocumentFilters", () => {
 
 		// Find each filter by table name
 		const docFieldsFilter = result.brickFilters.find(
-			(f) => f.table === "lucid_doc__simple__fld",
+			(f) => f.table === "lucid_document__simple__fld",
 		);
 		const brickFilter = result.brickFilters.find(
-			(f) => f.table === "lucid_doc__simple__simple",
+			(f) => f.table === "lucid_document__simple__simple",
 		);
 		const repeaterFilter = result.brickFilters.find(
-			(f) => f.table === "lucid_doc__simple__simple__items",
+			(f) => f.table === "lucid_document__simple__simple__items",
 		);
 		const docRepeaterFilter = result.brickFilters.find(
-			(f) => f.table === "lucid_doc__simple__fld__people",
+			(f) => f.table === "lucid_document__simple__fld__people",
 		);
 
 		expect(docFieldsFilter).toBeDefined();

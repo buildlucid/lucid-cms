@@ -7,8 +7,8 @@ const TABLE_NAME_LIMIT = 63;
 
 describe("inferTableType", () => {
 	test("document names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__pages";
-		const longRaw = `lucid_doc__${"a".repeat(60)}`;
+		const shortRaw = "lucid_document__pages";
+		const longRaw = `lucid_document__${"a".repeat(60)}`;
 
 		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
 		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
@@ -26,8 +26,8 @@ describe("inferTableType", () => {
 	});
 
 	test("versions names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__pages__ver";
-		const longRaw = `lucid_doc__${"a".repeat(38)}__ver`;
+		const shortRaw = "lucid_document__pages__ver";
+		const longRaw = `lucid_document__${"a".repeat(38)}__ver`;
 
 		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
 		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
@@ -45,8 +45,8 @@ describe("inferTableType", () => {
 	});
 
 	test("document-fields names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__pages__fld";
-		const longRaw = `lucid_doc__${"a".repeat(50)}__fld`;
+		const shortRaw = "lucid_document__pages__fld";
+		const longRaw = `lucid_document__${"a".repeat(50)}__fld`;
 
 		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
 		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
@@ -64,8 +64,8 @@ describe("inferTableType", () => {
 	});
 
 	test("brick names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__pages__hero";
-		const longRaw = `lucid_doc__${"a".repeat(38)}__${"hero".repeat(6)}`;
+		const shortRaw = "lucid_document__pages__hero";
+		const longRaw = `lucid_document__${"a".repeat(38)}__${"hero".repeat(6)}`;
 
 		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
 		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
@@ -83,9 +83,9 @@ describe("inferTableType", () => {
 	});
 
 	test("repeater names (short + hashed)", () => {
-		const shortRaw = "lucid_doc__page__banner__rep__items";
+		const shortRaw = "lucid_document__page__banner__rep__items";
 		const longRaw =
-			"lucid_doc__page__banner__rep__items__nested_items__deeply_nested_items";
+			"lucid_document__page__banner__rep__items__nested_items__deeply_nested_items";
 
 		const shortSafe = toSafeTableName(shortRaw, TABLE_NAME_LIMIT);
 		const longSafe = toSafeTableName(longRaw, TABLE_NAME_LIMIT);
@@ -107,18 +107,18 @@ describe("inferTableType", () => {
 	test("relation-table names (short + hashed)", () => {
 		const tableNames = [
 			{
-				short: "lucid_doc__page__banner__med__hero_image",
-				long: "lucid_doc__page__banner__med__hero_image__extremely_long_media_reference_key",
+				short: "lucid_document__page__banner__med__hero_image",
+				long: "lucid_document__page__banner__med__hero_image__extremely_long_media_reference_key",
 				tableType: `${constants.db.customFieldTablePrefix}media`,
 			},
 			{
-				short: "lucid_doc__page__banner__doc__related_post",
-				long: "lucid_doc__page__banner__doc__related_post__very_long_document_reference_key",
+				short: "lucid_document__page__banner__doc__related_post",
+				long: "lucid_document__page__banner__doc__related_post__very_long_document_reference_key",
 				tableType: `${constants.db.customFieldTablePrefix}document`,
 			},
 			{
-				short: "lucid_doc__page__banner__usr__author",
-				long: "lucid_doc__page__banner__usr__author__very_long_user_reference_key",
+				short: "lucid_document__page__banner__usr__author",
+				long: "lucid_document__page__banner__usr__author__very_long_user_reference_key",
 				tableType: `${constants.db.customFieldTablePrefix}user`,
 			},
 		] as const;

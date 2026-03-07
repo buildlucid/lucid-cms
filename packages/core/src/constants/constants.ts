@@ -125,8 +125,8 @@ export default Object.freeze({
 		//* postgres max table name length is 63 bytes
 		minTableNameByteLimit: 63,
 		//* max length for collection, brick keys. With the above and database adapter max table name length, we can ensure the table name is not too long
-		//* This is the max size given table structure "lucid_doc__{collection-key:18}__${brick-key:18}__{rep/usr/doc/med}_hash"
-		maxBuilderKeyLength: 18,
+		//* This is the max size given table structure "lucid_document__{collection-key:16}__${brick-key:16}__{rep/usr/doc/med}_hash"
+		maxBuilderKeyLength: 16,
 	},
 	logScopes: {
 		lucid: "lucid",

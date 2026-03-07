@@ -55,7 +55,7 @@ export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_doc__collection-key");
+		super(db, dbAdapter, "lucid_document__collection-key");
 	}
 	tableSchema = z.object({
 		is_deleted: z.union([

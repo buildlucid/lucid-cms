@@ -13,7 +13,7 @@ import toSafeTableName from "./to-safe-table-name.js";
  * Default parts for table names
  */
 export const collectionTableParts = {
-	document: "doc",
+	document: "document",
 	fields: "fld",
 	versions: "ver",
 };

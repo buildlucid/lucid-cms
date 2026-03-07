@@ -31,7 +31,7 @@ const toSafeTableName = (name: string, limit: number | null) => {
 	const segments = name.split(constants.db.nameSeparator);
 	const suffix = `_${hash}`;
 	// Keep the first sections stable. For relation tables this preserves:
-	// lucid_doc___{collection}__{scope}__{relation-separator}
+	// lucid_document__{collection}__{scope}__{relation-separator}
 	// and only hashes what's after it.
 	if (segments.length > 4) {
 		const stablePrefix = segments.slice(0, 4).join(constants.db.nameSeparator);

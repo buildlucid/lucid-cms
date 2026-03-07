@@ -36,7 +36,7 @@ describe("Schema inference", async () => {
 	test("infers basic document table structure", () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables[0]).toMatchObject({
-			name: "lucid_doc__pages",
+			name: "lucid_document__pages",
 			type: "document",
 		});
 	});
@@ -44,7 +44,7 @@ describe("Schema inference", async () => {
 	test("infers version table structure", () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables[1]).toMatchObject({
-			name: "lucid_doc__pages__ver",
+			name: "lucid_document__pages__ver",
 			type: "versions",
 		});
 	});
@@ -55,7 +55,7 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_doc__pages__fld__rep__authors",
+				name: "lucid_document__pages__fld__rep__authors",
 				type: `${constants.db.customFieldTablePrefix}repeater`,
 				key: expect.objectContaining({
 					fieldPath: ["authors"],
@@ -75,7 +75,7 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_doc__pages__fld__rep__authors__books",
+				name: "lucid_document__pages__fld__rep__authors__books",
 				type: `${constants.db.customFieldTablePrefix}repeater`,
 				key: expect.objectContaining({
 					fieldPath: ["authors", "books"],
@@ -94,18 +94,18 @@ describe("Schema inference", async () => {
 
 		const res = inferSchema(pagesCollection, db);
 		const mediaTable = res.data?.tables.find(
-			(table) => table.name === "lucid_doc__pages__fld__med__hero_media",
+			(table) => table.name === "lucid_document__pages__fld__med__hero_media",
 		);
 		const userTable = res.data?.tables.find(
-			(table) => table.name === "lucid_doc__pages__fld__usr__author",
+			(table) => table.name === "lucid_document__pages__fld__usr__author",
 		);
 		const documentTable = res.data?.tables.find(
-			(table) => table.name === "lucid_doc__pages__fld__doc__related_page",
+			(table) => table.name === "lucid_document__pages__fld__doc__related_page",
 		);
 
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_doc__pages__fld__med__hero_media",
+				name: "lucid_document__pages__fld__med__hero_media",
 				type: `${constants.db.customFieldTablePrefix}media`,
 				key: expect.objectContaining({
 					fieldPath: ["hero_media"],
@@ -114,7 +114,7 @@ describe("Schema inference", async () => {
 		);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_doc__pages__fld__usr__author",
+				name: "lucid_document__pages__fld__usr__author",
 				type: `${constants.db.customFieldTablePrefix}user`,
 				key: expect.objectContaining({
 					fieldPath: ["author"],
@@ -123,7 +123,7 @@ describe("Schema inference", async () => {
 		);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_doc__pages__fld__doc__related_page",
+				name: "lucid_document__pages__fld__doc__related_page",
 				type: `${constants.db.customFieldTablePrefix}document`,
 				key: expect.objectContaining({
 					fieldPath: ["related_page"],
@@ -162,13 +162,13 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
 
-		expect(tableNames).toContain("lucid_doc__pages__fld__med__avatar");
-		expect(tableNames).toContain("lucid_doc__pages__fld__usr__owner");
+		expect(tableNames).toContain("lucid_document__pages__fld__med__avatar");
+		expect(tableNames).toContain("lucid_document__pages__fld__usr__owner");
 		expect(tableNames).not.toContain(
-			"lucid_doc__pages__fld__rep__authors__med__avatar",
+			"lucid_document__pages__fld__rep__authors__med__avatar",
 		);
 		expect(tableNames).not.toContain(
-			"lucid_doc__pages__fld__rep__authors__socials__usr__owner",
+			"lucid_document__pages__fld__rep__authors__socials__usr__owner",
 		);
 	});
 
@@ -192,9 +192,9 @@ describe("Schema inference", async () => {
 		const res = inferSchema(brickScopedCollection, db);
 		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
 
-		expect(tableNames).toContain("lucid_doc__pages__content__med__avatar");
+		expect(tableNames).toContain("lucid_document__pages__content__med__avatar");
 		expect(tableNames).not.toContain(
-			"lucid_doc__pages__content__rep__authors__med__avatar",
+			"lucid_document__pages__content__rep__authors__med__avatar",
 		);
 	});
 
@@ -202,7 +202,7 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_doc__pages__hero",
+				name: "lucid_document__pages__hero",
 				type: "brick",
 				key: expect.objectContaining({
 					brick: "hero",
@@ -226,11 +226,11 @@ describe("Schema inference", async () => {
 		const res = inferSchema(brickScopedCollection, db);
 		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
 
-		expect(tableNames).toContain("lucid_doc__pages__content");
-		expect(tableNames).not.toContain("lucid_doc__pages__content__meta");
+		expect(tableNames).toContain("lucid_document__pages__content");
+		expect(tableNames).not.toContain("lucid_document__pages__content__meta");
 
 		const brickTable = res.data?.tables.find(
-			(table) => table.name === "lucid_doc__pages__content",
+			(table) => table.name === "lucid_document__pages__content",
 		);
 		expect(brickTable?.columns).toContainEqual(
 			expect.objectContaining({

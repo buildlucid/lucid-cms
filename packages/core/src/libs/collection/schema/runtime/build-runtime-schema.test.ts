@@ -8,8 +8,8 @@ describe("buildRuntimeSchema", () => {
 			key: "pages",
 			tables: [
 				{
-					name: "lucid_doc__pages__fld",
-					rawName: "lucid_doc__pages__fld",
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
 					type: "document-fields",
 					key: { collection: "pages" },
 					columns: [
@@ -34,8 +34,8 @@ describe("buildRuntimeSchema", () => {
 					],
 				},
 				{
-					name: "lucid_doc__pages__hero",
-					rawName: "lucid_doc__pages__hero",
+					name: "lucid_document__pages__hero",
+					rawName: "lucid_document__pages__hero",
 					type: "brick",
 					key: { collection: "pages", brick: "hero" },
 					columns: [
@@ -51,14 +51,14 @@ describe("buildRuntimeSchema", () => {
 		};
 
 		const filtered = buildRuntimeSchema(local, {
-			missingTableNames: new Set(["lucid_doc__pages__hero"]),
+			missingTableNames: new Set(["lucid_document__pages__hero"]),
 			missingColumnsByTable: new Map([
-				["lucid_doc__pages__fld", new Set(["_summary"])],
+				["lucid_document__pages__fld", new Set(["_summary"])],
 			]),
 		});
 
 		expect(filtered.tables).toHaveLength(1);
-		expect(filtered.tables[0]?.name).toBe("lucid_doc__pages__fld");
+		expect(filtered.tables[0]?.name).toBe("lucid_document__pages__fld");
 		expect(filtered.tables[0]?.columns.map((column) => column.name)).toEqual([
 			"id",
 			"_title",

@@ -28,7 +28,7 @@ const fetchDocumentRefs: ServiceFn<
 	);
 
 	const values = data.relations.flatMap((relation) => {
-		if (!relation.table.startsWith("lucid_doc__")) return [];
+		if (!relation.table.startsWith("lucid_document__")) return [];
 
 		const ids = Array.from(relation.values).filter(
 			(value): value is number => typeof value === "number",

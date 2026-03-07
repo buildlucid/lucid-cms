@@ -9,12 +9,12 @@ import type { MigrationPlan } from "./migration/types.js";
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data
- * - lucid_doc___{key}
- * - lucid_doc___{key}__ver
- * - lucid_doc___{key}__fld
- * - lucid_doc___{key}__{brick-key} * all potential bricks
- * - lucid_doc___{key}__{brick-key}__rep__{repeater-field-key} * for each repeater for a single brick
- * - lucid_doc___{key}__{brick-key}__{cf-relation-separator}__{field-key} * for each relation-table custom field
+ * - lucid_document__{key}
+ * - lucid_document__{key}__ver
+ * - lucid_document__{key}__fld
+ * - lucid_document__{key}__{brick-key} * all potential bricks
+ * - lucid_document__{key}__{brick-key}__rep__{repeater-field-key} * for each repeater for a single brick
+ * - lucid_document__{key}__{brick-key}__{cf-relation-separator}__{field-key} * for each relation-table custom field
  */
 const migrateCollections: ServiceFn<
 	[

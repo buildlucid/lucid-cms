@@ -189,11 +189,11 @@ describe("brick table construction", () => {
 			brickTables;
 
 		// verify table names
-		expect(fieldsTable.table).toBe("lucid_doc__simple__fld");
-		expect(simpleBrickTable.table).toBe("lucid_doc__simple__simple");
-		expect(itemsTable.table).toBe("lucid_doc__simple__simple__rep__items");
+		expect(fieldsTable.table).toBe("lucid_document__simple__fld");
+		expect(simpleBrickTable.table).toBe("lucid_document__simple__simple");
+		expect(itemsTable.table).toBe("lucid_document__simple__simple__rep__items");
 		expect(nestedItemsTable.table).toBe(
-			"lucid_doc__simple__simple__rep__items__nestedItems",
+			"lucid_document__simple__simple__rep__items__nestedItems",
 		);
 
 		// verify priorities
@@ -409,13 +409,13 @@ describe("brick table construction", () => {
 		const [rootTable, level1Table, level2Table, level3Table] = brickTables;
 
 		// verify table names
-		expect(rootTable.table).toBe("lucid_doc__deep__deep");
-		expect(level1Table.table).toBe("lucid_doc__deep__deep__rep__level1");
+		expect(rootTable.table).toBe("lucid_document__deep__deep");
+		expect(level1Table.table).toBe("lucid_document__deep__deep__rep__level1");
 		expect(level2Table.table).toBe(
-			"lucid_doc__deep__deep__rep__level1__level2",
+			"lucid_document__deep__deep__rep__level1__level2",
 		);
 		expect(level3Table.table).toBe(
-			"lucid_doc__deep__deep__rep__level1__level2__level3",
+			"lucid_document__deep__deep__rep__level1__level2__level3",
 		);
 
 		// verify priorities
@@ -540,22 +540,25 @@ describe("brick table construction", () => {
 		expect(brickTables).toHaveLength(6);
 
 		const fieldsTable = brickTables.find(
-			(table) => table.table === "lucid_doc__gallery__fld",
+			(table) => table.table === "lucid_document__gallery__fld",
 		);
 		const brickTable = brickTables.find(
-			(table) => table.table === "lucid_doc__gallery__gallery",
+			(table) => table.table === "lucid_document__gallery__gallery",
 		);
 		const repeaterTable = brickTables.find(
-			(table) => table.table === "lucid_doc__gallery__gallery__rep__items",
+			(table) => table.table === "lucid_document__gallery__gallery__rep__items",
 		);
 		const documentRelationTable = brickTables.find(
-			(table) => table.table === "lucid_doc__gallery__fld__doc__relatedPage",
+			(table) =>
+				table.table === "lucid_document__gallery__fld__doc__relatedPage",
 		);
 		const heroMediaRelationTable = brickTables.find(
-			(table) => table.table === "lucid_doc__gallery__gallery__med__heroMedia",
+			(table) =>
+				table.table === "lucid_document__gallery__gallery__med__heroMedia",
 		);
 		const itemMediaRelationTable = brickTables.find(
-			(table) => table.table === "lucid_doc__gallery__gallery__med__itemMedia",
+			(table) =>
+				table.table === "lucid_document__gallery__gallery__med__itemMedia",
 		);
 
 		expect(fieldsTable).toBeDefined();
@@ -700,7 +703,7 @@ describe("brick table construction", () => {
 		});
 
 		expect(brickTables).toHaveLength(1);
-		expect(brickTables[0]?.table).toBe("lucid_doc__articles__fld");
+		expect(brickTables[0]?.table).toBe("lucid_document__articles__fld");
 		expect(brickTables.find((table) => table.table.includes("__usr__"))).toBe(
 			undefined,
 		);

@@ -18,7 +18,7 @@ export interface BrickQueryResponse extends Select<LucidVersionTable> {
 
 export default class DocumentBricksRepository extends DynamicRepository<LucidBrickTableName> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_doc__collection-key__fld");
+		super(db, dbAdapter, "lucid_document__collection-key__fld");
 	}
 	tableSchema = z.object({
 		id: z.number(),
