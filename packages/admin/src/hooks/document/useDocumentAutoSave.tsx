@@ -18,6 +18,7 @@ export function useDocumentAutoSave(props: {
 }) {
 	let debounceProgressRaf: number | undefined;
 	let debounceProgressStart = 0;
+	let lastAttemptedAutoSaveCounter = 0;
 	const [isDebouncePending, setIsDebouncePending] = createSignal(false);
 	const [debounceProgress, setDebounceProgress] = createSignal(0);
 
@@ -63,8 +64,13 @@ export function useDocumentAutoSave(props: {
 		const collectionKey = props.collection()?.key;
 		const documentId = props.document()?.id;
 		const versionId = props.document()?.versionId;
+		const requestCounter = brickStore.get.autoSaveCounter;
 
-		if (!collectionKey || !documentId || !versionId) return;
+		if (!collectionKey || !documentId || !versionId || requestCounter === 0) {
+			return;
+		}
+
+		lastAttemptedAutoSaveCounter = requestCounter;
 
 		props.updateSingleVersionMutation.action.mutate({
 			collectionKey: collectionKey,
@@ -107,7 +113,15 @@ export function useDocumentAutoSave(props: {
 		if (brickStore.get.initialSnapshot === null) return;
 
 		if (!brickStore.getDocumentMutated()) return;
-		if (brickStore.get.autoSaveCounter === 0) return;
+		if (brickStore.get.autoSaveCounter === 0) {
+			lastAttemptedAutoSaveCounter = 0;
+			return;
+		}
+		// A failed autosave should pause until the user makes another edit.
+		// Otherwise the same invalid payload is retried every time isPending flips.
+		if (brickStore.get.autoSaveCounter === lastAttemptedAutoSaveCounter) {
+			return;
+		}
 		if (!props.hasAutoSavePermission()) return;
 		if (!props.autoSaveUserEnabled()) return;
 
