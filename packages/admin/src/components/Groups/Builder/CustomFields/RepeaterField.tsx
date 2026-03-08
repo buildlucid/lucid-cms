@@ -16,6 +16,7 @@ interface RepeaterFieldProps {
 		fieldConfig: CFConfig<"repeater">;
 		fieldData?: FieldResponse;
 		groupRef?: string;
+		groupPath?: string;
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
 		fieldError: FieldError | undefined;
@@ -57,6 +58,10 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const groupsByRef = createMemo(() => {
 		return new Map(groups().map((group) => [group.ref, group]));
 	});
+	const buildGroupPath = (index: number) => {
+		if (props.state.groupPath) return `${props.state.groupPath}.${index}`;
+		return `${index}`;
+	};
 
 	// -------------------------------
 	// Functions
@@ -118,6 +123,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 													fieldConfig: fieldConfig(),
 													dragDropKey: dragDropKey(),
 													groupRef: groupRef,
+													groupPath: buildGroupPath(i()),
 													group: () => groupsByRef().get(groupRef),
 													dragDrop: dragDrop,
 													repeaterKey: fieldConfig().key,

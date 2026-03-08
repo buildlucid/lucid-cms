@@ -23,6 +23,7 @@ import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
+import { useFocusSnapshot } from "@/hooks/useFocusSnapshot";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -84,6 +85,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	});
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
+	const { captureFocusSnapshot, restoreFocusSnapshot } = useFocusSnapshot();
 
 	// ------------------------------------------
 	// Setup document state
@@ -126,6 +128,8 @@ const CollectionsDocumentsEditRoute: Component<{
 			setStateLoading(true);
 		}
 
+		const focusSnapshot = shouldMerge ? captureFocusSnapshot() : null;
+
 		batch(() => {
 			if (!shouldMerge) {
 				brickStore.get.reset();
@@ -161,7 +165,10 @@ const CollectionsDocumentsEditRoute: Component<{
 
 		if (!shouldMerge) {
 			setStateLoading(false);
+			return;
 		}
+
+		restoreFocusSnapshot(focusSnapshot);
 	};
 
 	createEffect(

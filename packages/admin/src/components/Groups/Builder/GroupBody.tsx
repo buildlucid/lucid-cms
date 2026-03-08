@@ -24,6 +24,7 @@ interface GroupBodyProps {
 		brickIndex: number;
 		fieldConfig: CFConfig<"repeater">;
 		groupRef: string;
+		groupPath: string;
 		group: Accessor<FieldGroupResponse | undefined>;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
@@ -42,6 +43,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// Memos
 	const group = createMemo(() => props.state.group());
 	const ref = createMemo(() => props.state.groupRef);
+	const groupPath = createMemo(() => props.state.groupPath);
 	const brickIndex = createMemo(() => props.state.brickIndex);
 	const parentRef = createMemo(() => props.state.parentRef);
 	const parentRepeaterKey = createMemo(() => props.state.parentRepeaterKey);
@@ -242,6 +244,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									fieldConfig: config(),
 									fields: groupFields(),
 									groupRef: ref(),
+									groupPath: groupPath(),
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
 									fieldErrors: fieldErrors() || [],

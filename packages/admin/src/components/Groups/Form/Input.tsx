@@ -11,6 +11,7 @@ import {
 
 export const Input: Component<{
 	id: string;
+	focusKey?: string;
 	value: string;
 	onChange: (_value: string) => void;
 	type: string;
@@ -74,6 +75,7 @@ export const Input: Component<{
 					e.stopPropagation();
 				}}
 				id={props.id}
+				data-focus-key={props.focusKey}
 				name={props.name}
 				type={inputType()}
 				value={props.value}

@@ -5,6 +5,7 @@ import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 
 interface TextareaProps {
 	id: string;
+	focusKey?: string;
 	value: string;
 	onChange: (_value: string) => void;
 	name: string;
@@ -57,6 +58,7 @@ export const Textarea: Component<TextareaProps> = (props) => {
 					e.stopPropagation();
 				}}
 				id={props.id}
+				data-focus-key={props.focusKey}
 				name={props.name}
 				value={props.value}
 				onInput={(e) => props.onChange(e.currentTarget.value)}

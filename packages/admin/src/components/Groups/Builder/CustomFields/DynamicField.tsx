@@ -36,6 +36,7 @@ interface DynamicFieldProps {
 		missingFieldColumns: string[];
 
 		groupRef?: string;
+		groupPath?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
 	};
@@ -115,6 +116,12 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	const fieldColumnIsMissing = createMemo(() => {
 		return props.state.missingFieldColumns.includes(fieldConfig().key);
 	});
+	const focusKey = createMemo(() => {
+		const parts = [`brick:${props.state.brickIndex}`];
+		if (props.state.groupPath) parts.push(`group:${props.state.groupPath}`);
+		parts.push(`field:${fieldConfig().key}`);
+		return parts.join("|");
+	});
 
 	// -------------------------------
 	// Render
@@ -157,6 +164,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											fields: props.state.fields,
 											activeTab: props.state.activeTab,
 											groupRef: props.state.groupRef,
+											groupPath: props.state.groupPath,
 											repeaterKey: props.state.repeaterKey,
 											repeaterDepth: props.state.repeaterDepth,
 											fieldErrors: props.state.fieldErrors,
@@ -174,6 +182,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldConfig: fieldConfig() as CFConfig<"repeater">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
+								groupPath: props.state.groupPath,
 								parentRepeaterKey: props.state.repeaterKey,
 								repeaterDepth: props.state.repeaterDepth ?? 0,
 								fieldError: fieldError(),
@@ -190,6 +199,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
+								focusKey: focusKey(),
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
@@ -241,6 +251,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
+								focusKey: focusKey(),
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
@@ -262,6 +273,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
+								focusKey: focusKey(),
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
@@ -375,6 +387,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
+								focusKey: focusKey(),
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
@@ -391,6 +404,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
+								focusKey: focusKey(),
 								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
