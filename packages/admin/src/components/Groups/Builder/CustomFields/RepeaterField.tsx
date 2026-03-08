@@ -32,6 +32,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
 	const brickIndex = createMemo(() => props.state.brickIndex);
 	const groups = createMemo(() => props.state.fieldData?.groups || []);
+	const groupRefs = createMemo(() => groups().map((group) => group.ref));
 	const minGroups = createMemo(() => fieldConfig().validation?.minGroups);
 	const maxGroups = createMemo(() => fieldConfig().validation?.maxGroups);
 	const canAddGroup = createMemo(() => {
@@ -53,6 +54,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		return props.state.fieldError?.groupErrors || [];
 	});
 	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
+	const groupsByRef = createMemo(() => {
+		return new Map(groups().map((group) => [group.ref, group]));
+	});
 
 	// -------------------------------
 	// Functions
@@ -106,17 +110,18 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 						>
 							{({ dragDrop }) => (
 								<div class="w-full border border-border rounded-md overflow-hidden divide-y divide-border">
-									<For each={groups()}>
-										{(g, i) => (
+									<For each={groupRefs()}>
+										{(groupRef, i) => (
 											<GroupBody
 												state={{
 													brickIndex: brickIndex(),
 													fieldConfig: fieldConfig(),
 													dragDropKey: dragDropKey(),
-													group: g,
+													groupRef: groupRef,
+													group: () => groupsByRef().get(groupRef),
 													dragDrop: dragDrop,
 													repeaterKey: fieldConfig().key,
-													groupIndex: i(),
+													groupIndex: i,
 													repeaterDepth: props.state.repeaterDepth,
 													parentRepeaterKey: props.state.parentRepeaterKey,
 													parentRef: props.state.groupRef,

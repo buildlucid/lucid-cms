@@ -2,9 +2,9 @@ import type { CFConfig, FieldGroupResponse, GroupError } from "@types";
 import classNames from "classnames";
 import { FaSolidChevronUp, FaSolidGripLines } from "solid-icons/fa";
 import {
+	type Accessor,
 	type Component,
 	createMemo,
-	createSignal,
 	Index,
 	Show,
 } from "solid-js";
@@ -23,11 +23,12 @@ interface GroupBodyProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"repeater">;
-		group: FieldGroupResponse;
+		groupRef: string;
+		group: Accessor<FieldGroupResponse | undefined>;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
 		dragDropKey: string;
-		groupIndex: number;
+		groupIndex: Accessor<number>;
 		repeaterDepth: number;
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
@@ -38,12 +39,9 @@ interface GroupBodyProps {
 
 export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
-	// State
-	const [getGroupOpen, setGroupOpen] = createSignal(!!props.state.group.open);
-
-	// -------------------------------
 	// Memos
-	const ref = createMemo(() => props.state.group.ref);
+	const group = createMemo(() => props.state.group());
+	const ref = createMemo(() => props.state.groupRef);
 	const brickIndex = createMemo(() => props.state.brickIndex);
 	const parentRef = createMemo(() => props.state.parentRef);
 	const parentRepeaterKey = createMemo(() => props.state.parentRepeaterKey);
@@ -51,8 +49,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const configChildrenFields = createMemo(() => props.state.fieldConfig.fields);
 	const nextRepeaterDepth = createMemo(() => props.state.repeaterDepth + 1);
 	const groupFields = createMemo(() => {
-		return props.state.group.fields;
+		return group()?.fields || [];
 	});
+	const groupOpen = createMemo(() => group()?.open === true);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
@@ -61,7 +60,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	);
 	const groupError = createMemo(() => {
 		return props.state.groupErrors.find((g) => {
-			return g.ref === props.state.group.ref;
+			return g.ref === ref();
 		});
 	});
 	const fieldErrors = createMemo(() => {
@@ -99,7 +98,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// Functions
 	const toggleDropdown = () => {
-		setGroupOpen(!getGroupOpen());
 		brickStore.get.toggleGroupOpen({
 			brickIndex: brickIndex(),
 			repeaterKey: repeaterKey(),
@@ -115,7 +113,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		// biome-ignore lint/a11y/noStaticElementInteractions: explanation
 		<div
 			style={{
-				"view-transition-name": `group-item-${props.state.group.ref}`,
+				"view-transition-name": `group-item-${ref()}`,
 			}}
 			data-dragkey={props.state.dragDropKey}
 			class={classNames("w-full", {
@@ -153,7 +151,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					}
 				}}
 				id={`accordion-header-${ref()}`}
-				aria-expanded={getGroupOpen()}
+				aria-expanded={groupOpen()}
 				aria-controls={`accordion-content-${ref()}`}
 				role="button"
 				tabIndex="0"
@@ -184,7 +182,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					</button>
 					<div class="min-w-0 flex items-center gap-2">
 						<Pill theme="outline" class="shrink-0">
-							#{props.state.groupIndex + 1}
+							#{props.state.groupIndex() + 1}
 						</Pill>
 						<h3 class="text-sm text-subtitle font-medium truncate">
 							<Show when={titlePreview()}>{titlePreview()}</Show>
@@ -217,7 +215,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						classes={classNames(
 							"text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
-								"transform rotate-180": getGroupOpen(),
+								"transform rotate-180": groupOpen(),
 							},
 						)}
 					>
@@ -230,8 +228,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				class={classNames(
 					"bg-background-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
-						"scale-y-100 h-auto opacity-100 visible": getGroupOpen(),
-						"scale-y-0 h-0 opacity-0 invisible": !getGroupOpen(),
+						"scale-y-100 h-auto opacity-100 visible": groupOpen(),
+						"scale-y-0 h-0 opacity-0 invisible": !groupOpen(),
 					},
 				)}
 			>
