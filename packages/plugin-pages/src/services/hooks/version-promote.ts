@@ -3,6 +3,7 @@ import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
+import normalizePathField from "../../utils/normalize-path-field.js";
 import {
 	checkCircularParents,
 	checkDuplicateSlugParents,
@@ -16,6 +17,7 @@ import {
 	getTargetCollection,
 	setFullSlug,
 	updateFullSlugFields,
+	updateSlugFields,
 } from "../index.js";
 import afterUpsertHandler from "./after-upsert-handler.js";
 
@@ -77,6 +79,7 @@ const versionPromoteHandler =
 		});
 		if (checkFieldsExistRes.error) return checkFieldsExistRes;
 		const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
+		normalizePathField(slug);
 
 		// ----------------------------------------------------------------
 		// create fullSlug - close to the beforeUpsert hook
@@ -148,6 +151,21 @@ const versionPromoteHandler =
 					fullSlug: fullSlug,
 				},
 			});
+
+			const updateSlugRes = await updateSlugFields(context, {
+				docSlugs: [
+					{
+						documentId: data.data.documentId,
+						versionId: data.data.versionId,
+						slugs: slug.translations || {
+							[context.config.localization.defaultLocale]: slug.value || null,
+						},
+					},
+				],
+				versionType: data.data.versionType,
+				tables: data.meta.collectionTableNames,
+			});
+			if (updateSlugRes.error) return updateSlugRes;
 
 			const updateFullSlugRes = await updateFullSlugFields(context, {
 				docFullSlugs: [

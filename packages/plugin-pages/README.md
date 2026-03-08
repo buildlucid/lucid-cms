@@ -38,6 +38,10 @@ export default defineConfig((env) => ({
                 collectionKey: "page",
                 useTranslations: true,
                 displayFullSlug: true,
+                prefix: {
+                    en: "en",
+                    fr: "fr",
+                },
             }],
         }),
     ],
@@ -53,6 +57,7 @@ This plugin offers several configuration options to control its behavior. Aside 
 | `collectionKey` | `string` | - | The key of the collection that you wish to enable the plugin on |
 | `useTranslations` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
 | `displayFullSlug` | `boolean` | `false` | If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder |
+| `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
 
 ### useTranslations
 
@@ -61,3 +66,7 @@ If set to `true`, the plugin will enable translations for the `slug` and `fullSl
 ### displayFullSlug
 
 If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder, along with making it filterable and listable in the document listing. This is mostly intended for testing and development purposes, though there is no reason it can't be used in production. Please note, however, that the `fullSlug` field is always calculated, meaning it is not possible to edit this via the document page builder, and even if this option is set to `true`, the field will be disabled.
+
+### prefix
+
+If set, the plugin prepends the given prefix to the start of the computed `fullSlug`. This does not change the stored `slug` value itself. You can provide either a single string for all locales, or a locale map when translations are enabled.

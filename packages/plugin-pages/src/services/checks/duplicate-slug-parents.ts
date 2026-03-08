@@ -6,10 +6,12 @@ import type {
 	FieldInputSchema,
 	ServiceFn,
 } from "@lucidcms/core/types";
+import { sql } from "kysely";
 import constants from "../../constants.js";
 import T from "../../translations/index.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
+import normalizePathValue from "../../utils/normalize-path-value.js";
 
 /**
  *  Query for document fields that have same slug and parentPage for each slug translation (would cause duplicate fullSlug)
@@ -38,17 +40,19 @@ const checkDuplicateSlugParents: ServiceFn<
 			documentFields: fieldsTable,
 		} = data.tables;
 
-		const slugConditions = Object.entries(
-			data.fields.slug.translations || {},
-		).map(([localeCode, slug]) => ({
-			localeCode,
-			slug,
-		}));
+		const slugConditions = Object.entries(data.fields.slug.translations || {})
+			.map(([localeCode, slug]) => ({
+				localeCode,
+				slug: normalizePathValue(slug),
+			}))
+			.filter((item): item is { localeCode: string; slug: string } => {
+				return typeof item.slug === "string";
+			});
 
 		if (data.fields.slug.value) {
 			slugConditions.push({
 				localeCode: context.config.localization.defaultLocale,
-				slug: data.fields.slug.value,
+				slug: normalizePathValue(data.fields.slug.value) || "/",
 			});
 		}
 
@@ -101,7 +105,11 @@ const checkDuplicateSlugParents: ServiceFn<
 					or(
 						slugConditions.map(({ localeCode, slug }) =>
 							and([
-								eb(`${fieldsTable}.${slugColumn}`, "=", slug),
+								eb(
+									sql<string>`lower(${sql.ref(`${fieldsTable}.${slugColumn}`)})`,
+									"=",
+									slug,
+								),
 								localeCode
 									? eb(`${fieldsTable}.locale`, "=", localeCode)
 									: eb(`${fieldsTable}.locale`, "is", null),

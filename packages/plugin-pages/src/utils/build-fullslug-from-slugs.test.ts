@@ -9,7 +9,7 @@ const descendants: Array<DescendantFieldsResponse> = [
 		rows: [
 			{
 				locale: "en",
-				_slug: "test",
+				_slug: "Test",
 				_fullSlug: null,
 				_parentPage: 2,
 			},
@@ -21,7 +21,7 @@ const descendants: Array<DescendantFieldsResponse> = [
 		rows: [
 			{
 				locale: "en",
-				_slug: "parent",
+				_slug: "Parent",
 				_fullSlug: null,
 				_parentPage: 3,
 			},
@@ -33,7 +33,7 @@ const descendants: Array<DescendantFieldsResponse> = [
 		rows: [
 			{
 				locale: "en",
-				_slug: "grandparent",
+				_slug: "Grandparent",
 				_fullSlug: null,
 				_parentPage: null,
 			},

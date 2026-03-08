@@ -8,3 +8,4 @@ export { default as pluginOptions } from "./plugin-options.js";
 export { default as registerFields } from "./register-fields.js";
 export { default as setFullSlug } from "./set-full-slug.js";
 export { default as updateFullSlugFields } from "./update-fullslug-fields.js";
+export { default as updateSlugFields } from "./update-slug-fields.js";

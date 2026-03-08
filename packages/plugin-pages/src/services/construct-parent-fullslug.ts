@@ -5,6 +5,7 @@ import type {
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";
+import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 
 /**
@@ -38,6 +39,10 @@ const constructParentFullSlug = (data: {
 				parentFields: data.parentFields || [],
 				targetLocale: locale.code,
 				slug: data.fields.slug.translations[locale.code],
+				prefix: resolveCollectionPrefix({
+					collection: data.collection,
+					localeCode: locale.code,
+				}),
 			});
 		}
 	} else {
@@ -45,6 +50,10 @@ const constructParentFullSlug = (data: {
 			parentFields: data.parentFields || [],
 			targetLocale: data.localization.defaultLocale,
 			slug: data.fields.slug.value,
+			prefix: resolveCollectionPrefix({
+				collection: data.collection,
+				localeCode: data.localization.defaultLocale,
+			}),
 		});
 	}
 

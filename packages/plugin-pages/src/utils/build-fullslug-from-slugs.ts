@@ -1,4 +1,5 @@
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
+import formatFullSlug from "./format-fullslug.js";
 
 const buildFullSlugFromSlugs = (data: {
 	targetLocale: string;
@@ -16,9 +17,7 @@ const buildFullSlugFromSlugs = (data: {
 	const parentPageValue = rowForLocale._parentPage;
 
 	if (!parentPageValue) {
-		return postSlugFormat(
-			joinSlugs(data.topLevelFullSlug || "", slugFieldValue),
-		);
+		return formatFullSlug(data.topLevelFullSlug, slugFieldValue);
 	}
 
 	const parentDescendant = data.descendants.find(
@@ -26,9 +25,7 @@ const buildFullSlugFromSlugs = (data: {
 	);
 
 	if (!parentDescendant) {
-		return postSlugFormat(
-			joinSlugs(data.topLevelFullSlug || "", slugFieldValue),
-		);
+		return formatFullSlug(data.topLevelFullSlug, slugFieldValue);
 	}
 
 	const parentFullSlug = buildFullSlugFromSlugs({
@@ -38,22 +35,10 @@ const buildFullSlugFromSlugs = (data: {
 		topLevelFullSlug: data.topLevelFullSlug,
 	});
 
-	return postSlugFormat(
-		joinSlugs(parentFullSlug || data.topLevelFullSlug || "", slugFieldValue),
+	return formatFullSlug(
+		parentFullSlug || data.topLevelFullSlug,
+		slugFieldValue,
 	);
-};
-
-const joinSlugs = (...parts: string[]): string => {
-	return parts.filter(Boolean).join("/").replace(/\/+/g, "/");
-};
-
-const postSlugFormat = (slug: string | null | undefined): string | null => {
-	if (!slug) return null;
-	let res = slug;
-	if (!res.startsWith("/")) {
-		res = `/${res}`;
-	}
-	return res.replace(/\/\//g, "/");
 };
 
 export default buildFullSlugFromSlugs;

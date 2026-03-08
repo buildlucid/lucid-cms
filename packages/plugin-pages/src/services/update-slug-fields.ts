@@ -10,15 +10,15 @@ import T from "../translations/index.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 
 /**
- *  Update the fullSlug fields with the computed value
+ *  Update the slug fields with the computed value
  */
-const updateFullSlugFields: ServiceFn<
+const updateSlugFields: ServiceFn<
 	[
 		{
-			docFullSlugs: Array<{
+			docSlugs: Array<{
 				documentId: number;
 				versionId: number;
-				fullSlugs: Record<string, string | null>;
+				slugs: Record<string, string | null>;
 			}>;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			tables: {
@@ -31,18 +31,16 @@ const updateFullSlugFields: ServiceFn<
 > = async (context, data) => {
 	try {
 		const { documentFields: fieldsTable, version: versionTable } = data.tables;
-		const fullSlugColumn = prefixGeneratedColName(
-			constants.fields.fullSlug.key,
-		);
+		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
 
-		const updateFullSlugsPromises = [];
+		const updateSlugsPromises = [];
 
-		for (const doc of data.docFullSlugs) {
-			for (const [locale, fullSlug] of Object.entries(doc.fullSlugs)) {
-				updateFullSlugsPromises.push(
+		for (const doc of data.docSlugs) {
+			for (const [locale, slug] of Object.entries(doc.slugs)) {
+				updateSlugsPromises.push(
 					context.db.client
 						.updateTable(fieldsTable)
-						.set({ [fullSlugColumn]: normalizePathValue(fullSlug) })
+						.set({ [slugColumn]: normalizePathValue(slug) })
 						.where((eb) =>
 							eb.exists(
 								eb
@@ -60,7 +58,7 @@ const updateFullSlugFields: ServiceFn<
 			}
 		}
 
-		await Promise.all(updateFullSlugsPromises);
+		await Promise.all(updateSlugsPromises);
 
 		return {
 			error: undefined,
@@ -78,4 +76,4 @@ const updateFullSlugFields: ServiceFn<
 	}
 };
 
-export default updateFullSlugFields;
+export default updateSlugFields;

@@ -171,6 +171,10 @@ export default defineConfig((env) => ({
 					collectionKey: "page",
 					useTranslations: true,
 					displayFullSlug: true,
+					prefix: {
+						en: "en",
+						fr: "fr",
+					},
 				},
 				{
 					collectionKey: "test",
