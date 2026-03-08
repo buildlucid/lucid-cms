@@ -24,8 +24,8 @@ interface MutationWrapperProps<Params, Response> {
 	getSuccessToast?: () => { title: string; message: string };
 	getErrorToast?: () => { title: string; message: string };
 	invalidates?: string[];
-	onSuccess?: (_data: Response) => void;
-	onError?: (_errors: ErrorResponse | undefined) => void;
+	onSuccess?: (_data: Response, _params: Params) => void;
+	onError?: (_errors: ErrorResponse | undefined, _params: Params) => void;
 	onMutate?: (_params: Params) => void;
 }
 
@@ -84,7 +84,7 @@ const useMutationWrapper = <Params, Response>({
 
 	const mutation = useMutation(() => ({
 		mutationFn,
-		onSettled: (data, error) => {
+		onSettled: (data, error, params) => {
 			if (data) {
 				if (getSuccessToast) {
 					const successToastData = getSuccessToast();
@@ -95,7 +95,7 @@ const useMutationWrapper = <Params, Response>({
 					});
 				}
 				setErrors(undefined);
-				if (onSuccess) onSuccess(data);
+				if (onSuccess) onSuccess(data, params);
 				for (const query of invalidates) {
 					queryClient.invalidateQueries({
 						queryKey: [query],
@@ -112,7 +112,7 @@ const useMutationWrapper = <Params, Response>({
 				}
 				const errors = validateSetError(error);
 				setErrors(errors);
-				onError?.(errors);
+				onError?.(errors, params);
 			}
 		},
 		onMutate: onMutate,

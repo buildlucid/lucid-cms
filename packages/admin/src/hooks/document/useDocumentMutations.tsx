@@ -28,6 +28,7 @@ export function useDocumentMutations(props: {
 	const queryClient = useQueryClient();
 	const [releaseVersionType, setReleaseVersionType] =
 		createSignal<DocumentVersionType>();
+	let latestAutoSaveRequestCounter: number | null = null;
 
 	const createDocumentMutation = api.documents.useCreateSingle({
 		onSuccess: (data) => {
@@ -79,15 +80,26 @@ export function useDocumentMutations(props: {
 	});
 
 	const updateSingleVersionMutation = api.documents.useUpdateSingleVersion({
+		onMutate: () => {
+			latestAutoSaveRequestCounter = brickStore.get.autoSaveCounter;
+		},
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
-			// Reset autosave baseline after a successful save so refetch/sync diffs
-			// don't retrigger autosave until the next user edit.
+			const requestCounter = latestAutoSaveRequestCounter;
+			latestAutoSaveRequestCounter = null;
+
+			// If new edits landed after this autosave started, keep the current
+			// baseline so the refetch doesn't reconcile stale server state over
+			// newer local changes. The next autosave will pick up those edits.
+			if (requestCounter === null) return;
+			if (brickStore.get.autoSaveCounter !== requestCounter) return;
+
 			brickStore.set("autoSaveCounter", 0);
 			brickStore.get.captureInitialSnapshot();
 		},
 		onError: (errors) => {
+			latestAutoSaveRequestCounter = null;
 			brickStore.set(
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],

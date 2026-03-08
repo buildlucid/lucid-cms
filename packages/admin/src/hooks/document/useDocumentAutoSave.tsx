@@ -91,6 +91,11 @@ export function useDocumentAutoSave(props: {
 	);
 
 	createEffect(() => {
+		if (props.updateSingleVersionMutation.action.isPending) {
+			debouncedAutoSave.clear();
+			return;
+		}
+
 		if (brickStore.get.relationFieldDragCount > 0) {
 			debouncedAutoSave.clear();
 			return;

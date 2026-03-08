@@ -33,8 +33,9 @@ interface UseUpdateSingleVersionProps {
 		_data: ResponseBody<{
 			id: number;
 		}>,
+		_params: Params,
 	) => void;
-	onError?: (_errors: ErrorResponse | undefined) => void;
+	onError?: (_errors: ErrorResponse | undefined, _params: Params) => void;
 	onMutate?: (_params: Params) => void;
 	getCollectionName: () => string;
 }
