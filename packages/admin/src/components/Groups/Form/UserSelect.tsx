@@ -99,6 +99,9 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 	const isMultiple = createMemo(() => props.multiple === true);
 	const selectedUserIds = createMemo(() => props.value ?? []);
 	const selectedUsers = createMemo(() => props.refs() ?? []);
+	const selectedUsersById = createMemo(() => {
+		return new Map(selectedUsers().map((user) => [user.id, user]));
+	});
 	const selectedUser = createMemo(() => selectedUsers()[0]);
 	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
 	const hasReachedMaxItems = createMemo(
@@ -147,15 +150,19 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 								>
 									{({ dragDrop }) => (
 										<div class="flex flex-col gap-2">
-											<For each={selectedUsers()}>
-												{(user, index) => (
-													<UserSortableItem
-														user={user}
-														hasError={hasItemError(index())}
-														removeSelectedUser={removeSelectedUser}
-														disabled={props.disabled}
-														dragDrop={dragDrop}
-													/>
+											<For each={selectedUserIds()}>
+												{(userId, index) => (
+													<Show when={selectedUsersById().get(userId)}>
+														{(user) => (
+															<UserSortableItem
+																user={user()}
+																hasError={hasItemError(index())}
+																removeSelectedUser={removeSelectedUser}
+																disabled={props.disabled}
+																dragDrop={dragDrop}
+															/>
+														)}
+													</Show>
 												)}
 											</For>
 										</div>

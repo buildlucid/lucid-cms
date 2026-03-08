@@ -122,7 +122,20 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	);
 	const isMultiple = createMemo(() => props.multiple === true);
 	const selectedDocumentValue = createMemo(() => props.value?.[0]);
+	const selectedDocumentKeys = createMemo(() =>
+		(props.value ?? []).map(
+			(document) => `${document.collectionKey}:${document.id}`,
+		),
+	);
 	const selectedDocuments = createMemo(() => props.refs() ?? []);
+	const selectedDocumentsByKey = createMemo(() => {
+		return new Map(
+			selectedDocuments().map((document) => [
+				`${document.collectionKey}:${document.id}`,
+				document,
+			]),
+		);
+	});
 	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
 	const hasReachedMaxItems = createMemo(
 		() => hasMaxItems() && selectedDocuments().length >= (props.maxItems || 0),
@@ -179,22 +192,29 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							>
 								{({ dragDrop }) => (
 									<div class="flex flex-col gap-2">
-										<For each={selectedDocuments()}>
-											{(document, index) => {
+										<For each={selectedDocumentKeys()}>
+											{(documentKey, index) => {
 												return (
-													<DocumentSortableItem
-														document={document}
-														dragId={`${document.collectionKey}:${document.id}`}
-														singularName={helpers.getLocaleValue({
-															value: collection.data?.data.details.singularName,
-															fallback: T()("document"),
-														})}
-														previewFields={previewFields(document)}
-														hasError={hasItemError(index())}
-														removeSelectedDocument={removeSelectedDocument}
-														disabled={props.disabled}
-														dragDrop={dragDrop}
-													/>
+													<Show
+														when={selectedDocumentsByKey().get(documentKey)}
+													>
+														{(document) => (
+															<DocumentSortableItem
+																document={document()}
+																dragId={documentKey}
+																singularName={helpers.getLocaleValue({
+																	value:
+																		collection.data?.data.details.singularName,
+																	fallback: T()("document"),
+																})}
+																previewFields={previewFields(document())}
+																hasError={hasItemError(index())}
+																removeSelectedDocument={removeSelectedDocument}
+																disabled={props.disabled}
+																dragDrop={dragDrop}
+															/>
+														)}
+													</Show>
 												);
 											}}
 										</For>

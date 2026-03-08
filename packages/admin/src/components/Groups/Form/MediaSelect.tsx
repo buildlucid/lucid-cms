@@ -176,6 +176,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const selectedMediaIds = createMemo(() => props.value ?? []);
 	const selectedMediaRefs = createMemo(() => props.refs() ?? []);
+	const selectedMediaById = createMemo(() => {
+		return new Map(selectedMediaRefs().map((media) => [media.id, media]));
+	});
 	const primarySelectedMedia = createMemo(() => selectedMediaRefs()[0]);
 	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
 	const hasReachedMaxItems = createMemo(
@@ -366,20 +369,25 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								>
 									{({ dragDrop }) => (
 										<div class="relative z-20 grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 xl:grid-cols-3">
-											<For each={selectedMediaRefs()}>
-												{(media, index) => (
-													<MediaSortableItem
-														media={media}
-														title={
-															getMediaTitle(media) || T()("no_translation")
-														}
-														alt={getMediaAlt(media) || ""}
-														dimensions={getMediaDimensions(media)}
-														hasError={hasItemError(index())}
-														removeSelectedMedia={removeSelectedMedia}
-														disabled={props.disabled}
-														dragDrop={dragDrop}
-													/>
+											<For each={selectedMediaIds()}>
+												{(mediaId, index) => (
+													<Show when={selectedMediaById().get(mediaId)}>
+														{(media) => (
+															<MediaSortableItem
+																media={media()}
+																title={
+																	getMediaTitle(media()) ||
+																	T()("no_translation")
+																}
+																alt={getMediaAlt(media()) || ""}
+																dimensions={getMediaDimensions(media())}
+																hasError={hasItemError(index())}
+																removeSelectedMedia={removeSelectedMedia}
+																disabled={props.disabled}
+																dragDrop={dragDrop}
+															/>
+														)}
+													</Show>
 												)}
 											</For>
 											<Show when={selectedMediaRefs().length > 0}>
