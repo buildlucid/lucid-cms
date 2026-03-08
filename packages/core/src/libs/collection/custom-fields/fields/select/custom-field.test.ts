@@ -66,6 +66,27 @@ test("successfully validate field - select", async () => {
 	});
 	expect(standardValidate).length(0);
 
+	// Optional with empty value
+	const optionalEmptyValidate = validateField({
+		field: {
+			key: "standard_select",
+			type: "select",
+			value: "",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: SelectCollection.fields.get("standard_select")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [],
+		},
+		meta: {
+			useTranslations: SelectCollection.getData.config.useTranslations,
+			defaultLocale: "en",
+		},
+	});
+	expect(optionalEmptyValidate).length(0);
+
 	// Required
 	const requiredValidate = validateField({
 		field: {

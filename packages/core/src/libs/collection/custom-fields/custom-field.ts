@@ -161,17 +161,23 @@ abstract class CustomField<T extends FieldTypes> {
 		const fieldTypeRes = this.validateFieldType(props.type);
 		if (fieldTypeRes.valid === false) return fieldTypeRes;
 
-		const requiredRes = this.validateRequired(props.value);
+		const normalizedValue = this.normalizeInputValue(props.value);
+
+		const requiredRes = this.validateRequired(normalizedValue);
 		if (!requiredRes.valid) return requiredRes;
 
-		const zodRes = this.validateZodConstraint(props.value);
-		if (!zodRes.valid) return zodRes;
-
-		if (props.value === null || props.value === undefined) {
+		if (
+			normalizedValue === null ||
+			normalizedValue === undefined ||
+			normalizedValue === ""
+		) {
 			return { valid: true };
 		}
 
-		return this.uniqueValidation(props.value, props.refData);
+		const zodRes = this.validateZodConstraint(normalizedValue);
+		if (!zodRes.valid) return zodRes;
+
+		return this.uniqueValidation(normalizedValue, props.refData);
 	}
 	/** Validates that the submitted field type matches this instance type. */
 	private validateFieldType(type: FieldTypes) {
