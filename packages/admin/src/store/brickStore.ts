@@ -210,13 +210,20 @@ const [get, set] = createStore<{
 		);
 	},
 	removeBrick(brickIndex) {
+		let brickRemoved = false;
+
 		set(
 			"bricks",
 			produce((draft) => {
 				if (draft[brickIndex].type !== "builder") return;
 				draft.splice(brickIndex, 1);
+				brickRemoved = true;
 			}),
 		);
+
+		if (brickRemoved) {
+			set("autoSaveCounter", (prev) => prev + 1);
+		}
 	},
 	toggleBrickOpen(brickIndex) {
 		set(
@@ -227,6 +234,8 @@ const [get, set] = createStore<{
 		);
 	},
 	swapBrickOrder(props) {
+		let brickOrderChanged = false;
+
 		set(
 			"bricks",
 			produce((draft) => {
@@ -238,10 +247,15 @@ const [get, set] = createStore<{
 				const order = brick.order;
 				brick.order = targetBrick.order;
 				targetBrick.order = order;
+				brickOrderChanged = true;
 
 				draft.sort((a, b) => a.order - b.order);
 			}),
 		);
+
+		if (brickOrderChanged) {
+			set("autoSaveCounter", (prev) => prev + 1);
+		}
 	},
 	// Fields
 	setFieldValue(params) {
@@ -388,6 +402,8 @@ const [get, set] = createStore<{
 	},
 	// Groups
 	addRepeaterGroup(params) {
+		let groupAdded = false;
+
 		set(
 			"bricks",
 			params.brickIndex,
@@ -439,6 +455,7 @@ const [get, set] = createStore<{
 							fields: groupFields,
 						},
 					];
+					groupAdded = true;
 					return;
 				}
 
@@ -452,10 +469,17 @@ const [get, set] = createStore<{
 					open: false,
 					fields: groupFields,
 				});
+				groupAdded = true;
 			}),
 		);
+
+		if (groupAdded) {
+			set("autoSaveCounter", (prev) => prev + 1);
+		}
 	},
 	removeRepeaterGroup(params) {
+		let groupRemoved = false;
+
 		set(
 			"bricks",
 			params.brickIndex,
@@ -478,10 +502,17 @@ const [get, set] = createStore<{
 				if (targetGroupIndex === -1) return;
 
 				field.groups.splice(targetGroupIndex, 1);
+				groupRemoved = true;
 			}),
 		);
+
+		if (groupRemoved) {
+			set("autoSaveCounter", (prev) => prev + 1);
+		}
 	},
 	swapGroupOrder(params) {
+		let groupOrderChanged = false;
+
 		set(
 			"bricks",
 			params.brickIndex,
@@ -512,10 +543,15 @@ const [get, set] = createStore<{
 				field.groups[selectedIndex].order =
 					field.groups[targetGroupIndex].order;
 				field.groups[targetGroupIndex].order = groupOrder;
+				groupOrderChanged = true;
 
 				field.groups.sort((a, b) => a.order - b.order);
 			}),
 		);
+
+		if (groupOrderChanged) {
+			set("autoSaveCounter", (prev) => prev + 1);
+		}
 	},
 	toggleGroupOpen: (props) => {
 		set(
