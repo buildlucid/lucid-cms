@@ -123,6 +123,7 @@ const CollectionsDocumentsEditRoute: Component<{
 		const hasUnsavedChanges =
 			brickStore.get.initialSnapshot !== null &&
 			brickStore.getDocumentMutated();
+		let didHydrateStore = false;
 
 		if (!shouldMerge) {
 			setStateLoading(true);
@@ -154,12 +155,20 @@ const CollectionsDocumentsEditRoute: Component<{
 			}
 			brickStore.get.setRefs(document);
 			brickStore.set("locked", uiState.isBuilderLocked());
+			didHydrateStore = true;
 		});
 
 		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
-		snapshotTimeout = setTimeout(() => {
-			brickStore.get.captureInitialSnapshot();
-		}, 0);
+		snapshotTimeout = undefined;
+
+		// Only advance the dirty-state baseline after the store was actually
+		// rehydrated from server data. Same-view refetches that are skipped to
+		// protect unsaved edits must not mark the current local state as saved.
+		if (didHydrateStore) {
+			snapshotTimeout = setTimeout(() => {
+				brickStore.get.captureInitialSnapshot();
+			}, 0);
+		}
 
 		hydratedViewKey = nextViewKey;
 
