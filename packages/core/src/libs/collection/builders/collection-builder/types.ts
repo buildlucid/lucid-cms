@@ -1,4 +1,4 @@
-import type z from "zod";
+import type { infer } from "zod";
 import type { DocumentBuilderHooks } from "../../../../types/hooks.js";
 import type { LocaleValue } from "../../../../types/shared.js";
 import type {
@@ -13,7 +13,7 @@ import type CollectionConfigSchema from "./schema.js";
 export type DisplayInListing = boolean;
 
 export interface CollectionConfigSchemaType
-	extends z.infer<typeof CollectionConfigSchema> {
+	extends infer<typeof CollectionConfigSchema> {
 	hooks?: DocumentBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;

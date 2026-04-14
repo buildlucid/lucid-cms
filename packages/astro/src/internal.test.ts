@@ -1,0 +1,132 @@
+import { describe, expect, test } from "vitest";
+import {
+	assertAstroCompatibility,
+	buildCloudflareAdditionalWorkers,
+	buildCloudflareMainWorkerSource,
+	buildCloudflareRouteSource,
+	buildNodeRouteSource,
+	detectAstroRuntime,
+	detectLucidRuntime,
+} from "./internal.js";
+
+describe("@lucidcms/astro internals", () => {
+	test("detects supported runtime combinations", () => {
+		expect(detectLucidRuntime({ key: "node" } as never)).toBe("node");
+		expect(detectLucidRuntime({ key: "cloudflare" } as never)).toBe(
+			"cloudflare",
+		);
+		expect(
+			detectAstroRuntime({
+				name: "@astrojs/node",
+			} as never),
+		).toBe("node");
+		expect(
+			detectAstroRuntime({
+				name: "@astrojs/cloudflare",
+			} as never),
+		).toBe("cloudflare");
+	});
+
+	test("rejects unsupported or mismatched runtimes", () => {
+		expect(() => detectLucidRuntime(undefined)).toThrow(
+			/nodeAdapter\(\)|cloudflareAdapter\(\)/,
+		);
+		expect(() => detectLucidRuntime({ key: "bun" } as never)).toThrow(
+			/does not support the "bun" runtime adapter/,
+		);
+		expect(() => assertAstroCompatibility("node", undefined)).toThrow(
+			/requires an Astro adapter/,
+		);
+		expect(() =>
+			assertAstroCompatibility("node", {
+				name: "@astrojs/cloudflare",
+			} as never),
+		).toThrow(/runtimes must match/);
+		expect(
+			assertAstroCompatibility("cloudflare", {
+				name: "@astrojs/cloudflare",
+			} as never),
+		).toBe("cloudflare");
+	});
+
+	test("generates Node and Cloudflare route sources with optional env schema access", () => {
+		const nodeSource = buildNodeRouteSource("./lucid.config.ts");
+		const cloudflareSource = buildCloudflareRouteSource("./lucid.config.ts");
+
+		expect(nodeSource).toContain('Reflect.get(lucidConfigModule, "envSchema")');
+		expect(cloudflareSource).toContain(
+			'Reflect.get(lucidConfigModule, "envSchema")',
+		);
+		expect(nodeSource).toContain("export const prerender = false;");
+		expect(nodeSource).toContain("configEntryPoint: null");
+		expect(nodeSource).toContain('request.headers.get("x-forwarded-for")');
+		expect(cloudflareSource).toContain("export const prerender = false;");
+	});
+
+	test("generates the Cloudflare main worker with Astro fetch and Lucid scheduled handlers", () => {
+		const source = buildCloudflareMainWorkerSource({
+			configImportPath: "../lucid.config.ts",
+			customArtifacts: [
+				{
+					type: "worker-export",
+					custom: {
+						imports: [
+							{
+								path: "./plugin.js",
+								exports: ["queueHandler"],
+							},
+						],
+						exports: [
+							{
+								name: "queue",
+								params: ["batch", "env", "ctx"],
+								content: "return queueHandler(batch, env, ctx);",
+							},
+						],
+					},
+				} as never,
+			],
+		});
+
+		expect(source).toContain(
+			'import astroWorker from "@astrojs/cloudflare/entrypoints/server";',
+		);
+		expect(source).toContain("...astroWorker");
+		expect(source).toContain("async scheduled(controller, env, ctx)");
+		expect(source).toContain("queue(batch, env, ctx)");
+		expect(source).toContain('import { queueHandler } from "./plugin.js";');
+	});
+
+	test("generates additional Cloudflare worker entry files", () => {
+		const workers = buildCloudflareAdditionalWorkers([
+			{
+				type: "worker-entry",
+				custom: {
+					filename: "workers/queue-consumer",
+					imports: [
+						{
+							path: "./consumer.js",
+							default: "consumer",
+						},
+					],
+					exports: [
+						{
+							name: "fetch",
+							params: ["request", "env", "ctx"],
+							content: "return consumer.fetch(request, env, ctx);",
+						},
+					],
+				},
+			} as never,
+		]);
+
+		expect(workers).toHaveLength(1);
+		expect(workers[0]?.filename).toBe("queue-consumer");
+		expect(workers[0]?.source).toContain(
+			'import consumer from "./consumer.js";',
+		);
+		expect(workers[0]?.source).toContain(
+			"fetch(request, env, ctx) { return consumer.fetch(request, env, ctx); }",
+		);
+	});
+});

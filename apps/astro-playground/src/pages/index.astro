@@ -1,0 +1,145 @@
+---
+const output = import.meta.env.ASTRO_OUTPUT ?? "static";
+const runtime = import.meta.env.ASTRO_RUNTIME ?? "node";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Lucid Astro Playground</title>
+		<style>
+			:root {
+				font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+				color: #10213d;
+				background:
+					radial-gradient(circle at top left, rgba(245, 190, 116, 0.45), transparent 34%),
+					linear-gradient(180deg, #fcf7ec 0%, #f7f3eb 100%);
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+			}
+
+			main {
+				max-width: 72rem;
+				margin: 0 auto;
+				padding: 4rem 1.5rem 6rem;
+			}
+
+			.hero {
+				display: grid;
+				gap: 1.5rem;
+				padding: 2rem;
+				border-radius: 1.5rem;
+				background: rgba(255, 255, 255, 0.72);
+				box-shadow: 0 24px 80px rgba(28, 43, 74, 0.12);
+				backdrop-filter: blur(14px);
+			}
+
+			h1,
+			h2 {
+				font-family: "IBM Plex Serif", Georgia, serif;
+				margin: 0;
+			}
+
+			p {
+				margin: 0;
+				line-height: 1.6;
+			}
+
+			.actions,
+			.grid {
+				display: grid;
+				gap: 1rem;
+			}
+
+			.actions {
+				grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+			}
+
+			a.card,
+			section.card {
+				padding: 1.25rem;
+				border-radius: 1rem;
+				background: rgba(255, 255, 255, 0.78);
+				border: 1px solid rgba(16, 33, 61, 0.08);
+				color: inherit;
+				text-decoration: none;
+			}
+
+			a.card:hover {
+				transform: translateY(-2px);
+				transition: transform 160ms ease;
+			}
+
+			.grid {
+				grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+				margin-top: 2rem;
+			}
+
+			eyebrow {
+				display: inline-flex;
+				padding: 0.35rem 0.7rem;
+				border-radius: 999px;
+				background: rgba(16, 33, 61, 0.08);
+				font-size: 0.8rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<section class="hero">
+				<eyebrow>Lucid CMS + Astro</eyebrow>
+				<h1>Hybrid Astro routes with a mounted Lucid runtime.</h1>
+				<p>
+					This page stays prerendered, while Lucid runs on-demand under <code>/lucid</code>.
+					The same fixture can also be built with <code>ASTRO_OUTPUT=server</code> to check
+					full SSR mode.
+				</p>
+				<div class="actions">
+					<a class="card" href="/lucid">
+						<h2>Open Lucid</h2>
+						<p>Astro forwards the mounted Hono SPA and API under <code>/lucid</code>.</p>
+					</a>
+					<a class="card" href="/static">
+						<h2>Open Static Pages</h2>
+						<p>Prerendered Astro catch-all pages generated from Lucid client documents.</p>
+					</a>
+					<a class="card" href="/server">
+						<h2>Open Server Pages</h2>
+						<p>On-demand Astro catch-all pages fetched from Lucid by <code>_fullSlug</code>.</p>
+					</a>
+				</div>
+			</section>
+			<div class="grid">
+				<section class="card">
+					<h2>Astro Output</h2>
+					<p><code>{output}</code></p>
+				</section>
+				<section class="card">
+					<h2>Adapter Fixture</h2>
+					<p><code>{runtime}</code></p>
+				</section>
+				<section class="card">
+					<h2>Expected Admin Route</h2>
+					<p><code>/lucid</code></p>
+				</section>
+				<section class="card">
+					<h2>Static Example</h2>
+					<p><code>/static/about/team</code></p>
+				</section>
+				<section class="card">
+					<h2>Server Example</h2>
+					<p><code>/server/about/team</code></p>
+				</section>
+			</div>
+		</main>
+	</body>
+</html>

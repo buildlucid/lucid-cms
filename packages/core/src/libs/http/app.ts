@@ -101,6 +101,9 @@ const createApp = async (props: {
 			c.set("queue", queueInstance);
 			c.set("kv", kvInstance);
 			c.set("env", props.env ?? null);
+			c.set("cf", null);
+			c.set("caches", null);
+			c.set("ctx", null);
 			await next();
 		})
 		.route("/", routes)
@@ -145,6 +148,7 @@ const createApp = async (props: {
 					message: T("route_not_found_message"),
 				} satisfies LucidErrorData);
 			}
+			c.status(404);
 			return c.text(T("page_not_found"));
 		});
 

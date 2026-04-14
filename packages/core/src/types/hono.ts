@@ -30,6 +30,11 @@ export type LucidLocale = {
 	code: LocalesResponse["code"];
 };
 
+export type LucidExecutionContext = {
+	waitUntil: (promise: Promise<unknown>) => void;
+	passThroughOnException?: () => void;
+};
+
 export type LucidHonoVariables = {
 	config: Config;
 	runtimeContext: AdapterRuntimeContext;
@@ -39,6 +44,9 @@ export type LucidHonoVariables = {
 	clientIntegrationAuth: LucidClientIntegrationAuth;
 	locale: LucidLocale;
 	env: EnvironmentVariables | null;
+	cf: unknown | null;
+	caches: CacheStorage | null;
+	ctx: LucidExecutionContext | null;
 };
 
 export type LucidHonoGeneric = {

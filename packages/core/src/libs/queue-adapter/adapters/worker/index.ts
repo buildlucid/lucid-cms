@@ -1,4 +1,6 @@
-import { join } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
 import logger from "../../../logger/index.js";
@@ -10,6 +12,28 @@ const ADAPTER_KEY = "worker";
 export type WorkerQueueAdapterOptions = {
 	concurrentLimit?: number;
 	batchSize?: number;
+};
+
+const resolveWorkerConsumerUrl = (): URL => {
+	const localConsumerUrl = new URL("./consumer.mjs", import.meta.url);
+
+	try {
+		const require = createRequire(import.meta.url);
+		const packageJsonPath = require.resolve("@lucidcms/core/package.json");
+		return pathToFileURL(
+			join(
+				dirname(packageJsonPath),
+				"dist",
+				"libs",
+				"queue-adapter",
+				"adapters",
+				"worker",
+				"consumer.mjs",
+			),
+		);
+	} catch {
+		return localConsumerUrl;
+	}
 };
 
 /**
@@ -44,7 +68,7 @@ function workerQueueAdapter(
 					params.runtimeContext.configEntryPoint,
 				);
 
-				const workerUrl = new URL("./consumer.mjs", import.meta.url);
+				const workerUrl = resolveWorkerConsumerUrl();
 				worker = new Worker(workerUrl, {
 					workerData: {
 						options: {
