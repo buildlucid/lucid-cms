@@ -3,6 +3,7 @@ import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
+import type { RenderedTemplates } from "../email-adapter/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 export type RuntimeBuildArtifactFile = {
@@ -112,12 +113,91 @@ export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema>;
 
 export interface EnvironmentVariables extends Record<string, unknown> {}
 
+export type GetEnvVarsLogger = {
+	instance: CLILogger;
+	silent: boolean;
+};
+
+export type RuntimeAdapterEnvLoadResult = {
+	env: EnvironmentVariables;
+	state?: unknown;
+};
+
+export type RuntimeAdapterEnvLoader = (props: {
+	logger: GetEnvVarsLogger;
+	options?: Record<string, unknown>;
+}) =>
+	| EnvironmentVariables
+	| RuntimeAdapterEnvLoadResult
+	| Promise<EnvironmentVariables | RuntimeAdapterEnvLoadResult>;
+
+export type RuntimeAdapterCLI = {
+	serve: ServeHandler;
+	build: BuildHandler;
+};
+
+export type RuntimeAdapterCLILoader = (props: {
+	options?: Record<string, unknown>;
+	envResult?: RuntimeAdapterEnvLoadResult;
+}) => RuntimeAdapterCLI | Promise<RuntimeAdapterCLI>;
+
+export type RuntimeAdapterRuntimeLoader = (props: {
+	options?: Record<string, unknown>;
+}) => RuntimeAdapter | Promise<RuntimeAdapter>;
+
 export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
 
 export type ExtendedAdapterDefineConfig<T extends unknown[] = []> = (
 	env: EnvironmentVariables,
 	...args: T
 ) => LucidConfig;
+
+export interface AdapterOptionsByPath {
+	[path: string]: Record<string, unknown> | undefined;
+}
+
+export type ResolveAdapterOptions<AdapterFrom extends string> =
+	AdapterFrom extends keyof AdapterOptionsByPath
+		? AdapterOptionsByPath[AdapterFrom]
+		: Record<string, unknown> | undefined;
+
+export type LazyRuntimeAdapterReference<AdapterFrom extends string = string> = {
+	from: AdapterFrom;
+	options?: ResolveAdapterOptions<AdapterFrom>;
+};
+
+export type LucidConfigDefinitionMeta = {
+	emailTemplates?: RenderedTemplates;
+};
+
+export type LucidConfigDefinition<AdapterFrom extends string = string> = {
+	adapter: LazyRuntimeAdapterReference<AdapterFrom>;
+	config: AdapterDefineConfig;
+};
+
+export type RuntimeDefineConfig = <AdapterFrom extends string>(
+	definition: LucidConfigDefinition<AdapterFrom>,
+	meta?: LucidConfigDefinitionMeta,
+) => LucidConfigDefinition<AdapterFrom>;
+
+export type RuntimeAdapterRootModule = {
+	defineConfig: RuntimeDefineConfig;
+};
+
+export type RuntimeAdapterEnvModule = {
+	default?: RuntimeAdapterEnvLoader;
+	getEnvVars?: RuntimeAdapterEnvLoader;
+};
+
+export type RuntimeAdapterCLIModule = {
+	default?: RuntimeAdapterCLILoader;
+	cli?: RuntimeAdapterCLILoader;
+};
+
+export type RuntimeAdapterRuntimeModule = {
+	default?: RuntimeAdapterRuntimeLoader;
+	runtime?: RuntimeAdapterRuntimeLoader;
+};
 
 // ------------------------------------------------------------
 // Hono

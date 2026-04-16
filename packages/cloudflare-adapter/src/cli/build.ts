@@ -2,11 +2,11 @@ import { unlink } from "node:fs/promises";
 import {
 	stripAdapterExportPlugin,
 	stripImportsPlugin,
-} from "@lucidcms/core/helpers";
+} from "@lucidcms/core/build";
 import type { BuildHandler } from "@lucidcms/core/types";
 import { build } from "rolldown";
 import constants from "../constants.js";
-import getRuntimeContext from "../runtime-context.js";
+import getRuntimeContext from "../services/get-runtime-context.js";
 import prepareAdditionalWorkerEntries from "../services/prepare-additional-worker-entries.js";
 import prepareMainWorkerEntry from "../services/prepare-worker-entry.js";
 import writeWorkerEntries from "../services/write-worker-entries.js";

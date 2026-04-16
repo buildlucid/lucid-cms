@@ -1,10 +1,8 @@
+import { defineConfig } from "@lucidcms/core";
 import { CollectionBuilder } from "@lucidcms/core/builders";
-import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
 import testingConstants from "../../../constants/testing-constants.js";
-
-export const adapter = nodeAdapter();
 
 const collection = new CollectionBuilder("page", {
 	mode: "multiple",
@@ -16,19 +14,24 @@ const collection = new CollectionBuilder("page", {
 	.addText("title")
 	.addText("title");
 
-export default defineConfig(() => ({
-	logger: {
-		level: "silent",
+export default defineConfig({
+	adapter: {
+		from: "@lucidcms/node-adapter",
 	},
-	db: new SQLiteAdapter({
-		database: async () => new Database(":memory:"),
+	config: () => ({
+		logger: {
+			level: "silent",
+		},
+		db: new SQLiteAdapter({
+			database: async () => new Database(":memory:"),
+		}),
+		secrets: {
+			encryption: testingConstants.key,
+			cookie: testingConstants.key,
+			refreshToken: testingConstants.key,
+			accessToken: testingConstants.key,
+		},
+		collections: [collection],
+		plugins: [],
 	}),
-	secrets: {
-		encryption: testingConstants.key,
-		cookie: testingConstants.key,
-		refreshToken: testingConstants.key,
-		accessToken: testingConstants.key,
-	},
-	collections: [collection],
-	plugins: [],
-}));
+});

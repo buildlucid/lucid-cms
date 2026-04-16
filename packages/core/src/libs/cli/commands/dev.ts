@@ -7,6 +7,7 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import { getAdapterCLI } from "../../runtime-adapter/loaders.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
@@ -36,13 +37,9 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			await serverDestroy?.();
 
 			const configResult = await loadConfigFile({ path: configPath });
-
-			if (!configResult.adapter) {
-				cliLogger.error("No runtime adapter found");
-				logger.setBuffering(false);
-				rebuilding = false;
-				return;
-			}
+			const adapterCLI = await getAdapterCLI(configResult.definition.adapter, {
+				envResult: configResult.adapterEnvResult,
+			});
 
 			const envValid = await validateEnvVars({
 				envSchema: configResult.envSchema,
@@ -52,6 +49,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			generateTypes({
 				envSchema: configResult.envSchema,
 				configPath: configPath,
+				adapterFrom: configResult.definition.adapter.from,
 			});
 
 			if (!envValid) {
@@ -110,7 +108,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			process.stdout.write("\x1B[2J\x1B[3J\x1B[H");
 
-			const serverRes = await configResult.adapter.cli.serve({
+			const serverRes = await adapterCLI.serve({
 				config: configResult.config,
 				logger: {
 					instance: cliLogger,

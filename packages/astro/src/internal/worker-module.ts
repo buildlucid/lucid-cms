@@ -7,6 +7,7 @@ import type {
 } from "@lucidcms/cloudflare-adapter/types";
 import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
 import {
+	ASTRO_DEFINE_CONFIG_MODULE_ID,
 	CLOUDFLARE_RUNTIME_ENV_GLOBAL,
 	LUCID_EMAIL_TEMPLATES_JSON_FILENAME,
 	WORKER_ENTRY_ARTIFACT_TYPE,
@@ -114,7 +115,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 		{
 			path: "@lucidcms/core/runtime",
 			default: "lucid",
-			exports: ["processConfig"],
+			exports: ["resolveConfigDefinition"],
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
@@ -139,19 +140,23 @@ return astroWorker.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: `const runCronService = async () => {
-	const [{ default: config }] = await Promise.all([
+	const [{ default: configDefinition, envSchema }] = await Promise.all([
 		import(${JSON.stringify(configImportPath)}),
 	]);
 
-	const resolvedConfig = await processConfig(
-		config(env, {
+	const { config: resolvedConfig } = await resolveConfigDefinition({
+		definition: configDefinition,
+		envSchema,
+		defineConfigPath: ${JSON.stringify(ASTRO_DEFINE_CONFIG_MODULE_ID)},
+		meta: {
 			emailTemplates,
-		}),
-		{
+		},
+		env,
+		processConfigOptions: {
 			bypassCache: true,
 			skipPluginVersionCheck: true,
 		},
-	);
+	});
 	const kv = await (resolvedConfig.kv
 		? resolvedConfig.kv()
 		: passthroughKVAdapter());

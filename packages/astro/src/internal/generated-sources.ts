@@ -1,4 +1,5 @@
 import {
+	ASTRO_DEFINE_CONFIG_MODULE_ID,
 	CLOUDFLARE_DEV_ENV_GLOBAL,
 	CLOUDFLARE_RUNTIME_ENV_GLOBAL,
 	DEFAULT_REMOTE_ADDRESS,
@@ -14,34 +15,15 @@ import {
 export const buildNodeRouteSource = (
 	configImportPath: string,
 ): string => `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
-import lucid, { processConfig } from "@lucidcms/core/runtime";
-import { getRuntimeContext } from "@lucidcms/node-adapter";
+import lucid, { resolveConfigDefinition } from "@lucidcms/core/runtime";
+import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
 import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/runtime";
 import emailTemplates from "./${LUCID_EMAIL_TEMPLATES_MODULE_FILENAME}";
 import spaHtml from "./${LUCID_SPA_HTML_MODULE_FILENAME}";
 
 export const prerender = false;
 
-const configFactory = lucidConfigModule.default;
-const adapter =
-\ttypeof Reflect !== "undefined"
-\t\t? Reflect.get(lucidConfigModule, "adapter")
-\t\t: undefined;
-const envSchema =
-\ttypeof Reflect !== "undefined"
-\t\t? Reflect.get(lucidConfigModule, "envSchema")
-\t\t: undefined;
-
 let appPromise;
-let envValidated = false;
-
-const silentAdapterLogger = {
-\tinfo: () => {},
-\twarn: () => {},
-\tcolor: {
-\t\tblue: (value) => String(value),
-\t},
-};
 
 const resolveRemoteAddress = (request) => {
 \t// Astro proxies Lucid requests through its own server, so we recover the user IP here instead of assuming a dedicated Lucid server layer.
@@ -58,30 +40,17 @@ const resolveRemoteAddress = (request) => {
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
-\t\t\t// Hosted Astro boots Lucid directly from the generated route, so we ask
-\t\t\t// the runtime adapter to hydrate env the same way standalone Lucid would.
-\t\t\tconst env =
-\t\t\t\tadapter?.getEnvVars
-\t\t\t\t\t? await adapter.getEnvVars({
-\t\t\t\t\t\t\tlogger: {
-\t\t\t\t\t\t\t\tinstance: silentAdapterLogger,
-\t\t\t\t\t\t\t\tsilent: true,
-\t\t\t\t\t\t\t},
-\t\t\t\t\t\t})
-\t\t\t\t\t: process.env;
-\t\t\tif (!envValidated && envSchema) {
-\t\t\t\tenvSchema.parse(env);
-\t\t\t\tenvValidated = true;
-\t\t\t}
-
-\t\t\tconst resolvedConfig = await processConfig(
-\t\t\t\tconfigFactory(env, {
+\t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
+\t\t\t\tdefinition: lucidConfigModule.default,
+\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tdefineConfigPath: ${JSON.stringify(ASTRO_DEFINE_CONFIG_MODULE_ID)},
+\t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
-\t\t\t\t}),
-\t\t\t\t{
+\t\t\t\t},
+\t\t\t\tprocessConfigOptions: {
 \t\t\t\t\tbypassCache: true,
 \t\t\t\t},
-\t\t\t);
+\t\t\t});
 \t\t\tconst runtimeContext = {
 \t\t\t\t...getRuntimeContext({
 \t\t\t\t\tcompiled: false,
@@ -133,7 +102,6 @@ export const buildCloudflareRouteSource = (
 ): string => `export const prerender = false;
 
 let appPromise;
-let envValidated = false;
 let runtimeModulesPromise;
 let currentExecutionContext = null;
 
@@ -156,7 +124,7 @@ const loadRuntimeModules = async () => {
 \t\truntimeModulesPromise = Promise.all([
 \t\t\timport(${JSON.stringify(configImportPath)}),
 \t\t\timport("@lucidcms/core/runtime"),
-\t\t\timport("@lucidcms/cloudflare-adapter/runtime-context"),
+\t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
 \t\t\timport("@lucidcms/astro/runtime"),
 \t\t\timport("./${LUCID_EMAIL_TEMPLATES_MODULE_FILENAME}"),
 \t\t\timport("./${LUCID_SPA_HTML_MODULE_FILENAME}"),
@@ -169,14 +137,11 @@ const loadRuntimeModules = async () => {
 \t\t\t\temailTemplatesModule,
 \t\t\t\tspaHtmlModule,
 \t\t\t]) => ({
-\t\t\t\tconfigFactory: lucidConfigModule.default,
-\t\t\t\tenvSchema:
-\t\t\t\t\ttypeof Reflect !== "undefined"
-\t\t\t\t\t\t? Reflect.get(lucidConfigModule, "envSchema")
-\t\t\t\t\t\t: undefined,
+\t\t\t\tdefinition: lucidConfigModule.default,
+\t\t\t\tenvSchema: lucidConfigModule.envSchema,
 \t\t\t\tlucid: runtimeModule.default,
-\t\t\t\tprocessConfig: runtimeModule.processConfig,
-\t\t\t\tgetRuntimeContext: runtimeContextModule.default,
+\t\t\t\tresolveConfigDefinition: runtimeModule.resolveConfigDefinition,
+\t\t\t\tgetRuntimeContext: runtimeContextModule.getRuntimeContext,
 \t\t\t\tcreateLucidSpaResponse: astroRuntimeModule.createLucidSpaResponse,
 \t\t\t\tshouldServeLucidSpaShell:
 \t\t\t\t\tastroRuntimeModule.shouldServeLucidSpaShell,
@@ -194,28 +159,27 @@ const ensureApp = async () => {
 \t\tappPromise = (async () => {
 \t\t\tconst cloudflareEnv = getCloudflareEnv();
 \t\t\tconst {
-\t\t\t\tconfigFactory,
+\t\t\t\tdefinition,
 \t\t\t\tenvSchema,
 \t\t\t\tlucid,
-\t\t\t\tprocessConfig,
+\t\t\t\tresolveConfigDefinition,
 \t\t\t\tgetRuntimeContext,
 \t\t\t\temailTemplates,
 \t\t\t} = await loadRuntimeModules();
 
-\t\t\tif (!envValidated && envSchema) {
-\t\t\t\tenvSchema.parse(cloudflareEnv);
-\t\t\t\tenvValidated = true;
-\t\t\t}
-
-\t\t\tconst resolvedConfig = await processConfig(
-\t\t\t\tconfigFactory(cloudflareEnv, {
+\t\t\tconst { config: resolvedConfig } = await resolveConfigDefinition({
+\t\t\t\tdefinition,
+\t\t\t\tenvSchema,
+\t\t\t\tdefineConfigPath: ${JSON.stringify(ASTRO_DEFINE_CONFIG_MODULE_ID)},
+\t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
-\t\t\t\t}),
-\t\t\t\t{
+\t\t\t\t},
+\t\t\t\tenv: cloudflareEnv,
+\t\t\t\tprocessConfigOptions: {
 \t\t\t\t\tbypassCache: true,
 \t\t\t\t\tskipPluginVersionCheck: true,
 \t\t\t\t},
-\t\t\t);
+\t\t\t});
 
 \t\t\treturn lucid.createApp({
 \t\t\t\tconfig: resolvedConfig,

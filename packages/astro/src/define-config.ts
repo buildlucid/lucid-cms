@@ -1,31 +1,30 @@
 import type {
-	ExtendedAdapterDefineConfig,
 	LucidConfig,
-	RenderedTemplates,
+	LucidConfigDefinition,
+	LucidConfigDefinitionMeta,
+	RuntimeDefineConfig,
 } from "@lucidcms/core/types";
 
-type AstroConfigFactory = ExtendedAdapterDefineConfig<
-	[
-		meta?: {
-			emailTemplates?: RenderedTemplates;
+const defineConfig: RuntimeDefineConfig = <AdapterFrom extends string>(
+	definition: LucidConfigDefinition<AdapterFrom>,
+	meta?: LucidConfigDefinitionMeta,
+): LucidConfigDefinition<AdapterFrom> => {
+	return {
+		...definition,
+		config: (env) => {
+			const lucidConfig = definition.config(env);
+			return {
+				...lucidConfig,
+				preRenderedEmailTemplates: meta?.emailTemplates
+					? Object.fromEntries(
+							Object.entries(meta.emailTemplates).map(([key, value]) => [
+								key,
+								value.html,
+							]),
+						)
+					: lucidConfig.preRenderedEmailTemplates,
+			} satisfies LucidConfig;
 		},
-	]
->;
-
-const defineConfig = (factory: AstroConfigFactory): AstroConfigFactory => {
-	return (env, meta) => {
-		const lucidConfig = factory(env, meta);
-		return {
-			...lucidConfig,
-			preRenderedEmailTemplates: meta?.emailTemplates
-				? Object.fromEntries(
-						Object.entries(meta.emailTemplates).map(([key, value]) => [
-							key,
-							value.html,
-						]),
-					)
-				: lucidConfig.preRenderedEmailTemplates,
-		} satisfies LucidConfig;
 	};
 };
 

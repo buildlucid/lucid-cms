@@ -4,18 +4,16 @@
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
-import { z } from "@lucidcms/core";
+import { defineConfig, z } from "@lucidcms/core";
 import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
 import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
 import {
 	passthroughQueueAdapter,
 	workerQueueAdapter,
 } from "@lucidcms/core/queue-adapter";
-// import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
 // Plugins
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 // Adapters
-import { defineConfig, nodeAdapter } from "@lucidcms/node-adapter";
 import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
@@ -32,9 +30,6 @@ import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import transporter from "./src/services/email-transporter.js";
-
-export const adapter = nodeAdapter();
-// export const adapter = cloudflareAdapter();
 
 export const envSchema = z.object({
 	DATABASE_URL: z.string(),
@@ -55,163 +50,174 @@ export const envSchema = z.object({
 	// REDIS_CONNECTION: z.string(),
 });
 
-export default defineConfig((env) => ({
-	// security: {
-	// 	cors: {
-	// 		origin: [],
-	// 	},
-	// },
-	logger: {
-		level: "silent",
+export default defineConfig({
+	adapter: {
+		from: "@lucidcms/node-adapter",
+		// from: "@lucidcms/cloudflare-adapter",
+		// options: {
+		// 	server: {
+		// 		port: 1092,
+		// 	}
+		// },
 	},
-	db: new SQLiteAdapter({
-		database: async () => new Database("db.sqlite"),
-	}),
-	// db: new PostgresAdapter(env?.DATABASE_URL as string, {
-	// 	max: 5,
-	// }),
-	// db: new LibSQLAdapter({
-	// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-	// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-	// authToken: env?.TURSO_AUTH_TOKEN as string,
-	// }),
-	auth: {
-		password: {
-			enabled: true,
+	config: (env) => ({
+		// security: {
+		// 	cors: {
+		// 		origin: [],
+		// 	},
+		// },
+		logger: {
+			level: "silent",
 		},
-	},
-	secrets: {
-		encryption: env.LUCID_ENCRYPTION_SECRET,
-		cookie: env.LUCID_COOKIE_SECRET,
-		refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
-		accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
-	},
-	localization: {
-		locales: [
-			{
-				label: "English",
-				code: "en",
+		db: new SQLiteAdapter({
+			database: async () => new Database("db.sqlite"),
+		}),
+		// db: new PostgresAdapter(env?.DATABASE_URL as string, {
+		// 	max: 5,
+		// }),
+		// db: new LibSQLAdapter({
+		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
+		// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+		// authToken: env?.TURSO_AUTH_TOKEN as string,
+		// }),
+		auth: {
+			password: {
+				enabled: true,
 			},
-			{
-				label: "French",
-				code: "fr",
-			},
-		],
-		defaultLocale: "en",
-	},
-	openAPI: {
-		enabled: true,
-	},
-	media: {
-		// adapter: fileSystemMediaAdapter({
-		// 	uploadDir: "uploads",
-		// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
-		// }),
-		limits: {
-			fileSize: 200 * 1024 * 1024, // 200MB.
-			processedImages: 10,
 		},
-		images: {
-			storeProcessed: true,
-			onDemandFormats: true,
+		secrets: {
+			encryption: env.LUCID_ENCRYPTION_SECRET,
+			cookie: env.LUCID_COOKIE_SECRET,
+			refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
+			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
-		fallback: {
-			image: "https://placehold.co/600x400",
-			video: "https://cdn.pixabay.com/video/2026/01/05/326081_large.mp4",
-		},
-	},
-	// email: {
-	// 	adapter: passthroughEmailAdapter,
-	// },
-	queue: {
-		// adapter: passthroughQueueAdapter,
-		// adapter: passthroughQueueAdapter({
-		// 	bypassImmediateExecution: false,
-		// }),
-		// adapter: workerQueueAdapter(),
-		// adapter: workerQueueAdapter({
-		// 	concurrentLimit: 10,
-		// 	batchSize: 3,
-		// }),
-	},
-	// hooks: [
-	// 	{
-	// 		service: "documents",
-	// 		event: "beforeUpsert",
-	// 		handler: async (context, data) => {
-	// 			console.log("collection doc hook", data.meta.collectionKey);
-	// 		},
-	// 	},
-	// ],
-	collections: [
-		PageCollection,
-		BlogCollection,
-		MainMenuCollection,
-		SettingsCollection,
-		TestCollection,
-		SimpleCollection,
-	],
-	plugins: [
-		GitHubAuth({
-			clientId: env.GITHUB_CLIENT_ID,
-			clientSecret: env.GITHUB_CLIENT_SECRET,
-		}),
-		GoogleAuth({
-			clientId: env.GOOGLE_CLIENT_ID,
-			clientSecret: env.GOOGLE_CLIENT_SECRET,
-		}),
-		MicrosoftAuth({
-			clientId: env.MICROSOFT_CLIENT_ID,
-			clientSecret: env.MICROSOFT_CLIENT_SECRET,
-			tenant: env.MICROSOFT_TENANT_ID,
-		}),
-		PagesPlugin({
-			collections: [
+		localization: {
+			locales: [
 				{
-					collectionKey: "page",
-					useTranslations: true,
-					displayFullSlug: true,
-					prefix: {
-						en: "en",
-						fr: "fr",
-					},
+					label: "English",
+					code: "en",
 				},
 				{
-					collectionKey: "test",
-					useTranslations: true,
-					displayFullSlug: true,
+					label: "French",
+					code: "fr",
 				},
 			],
-		}),
-		// RedisPlugin({
-		// 	connection: env.REDIS_CONNECTION,
-		// }),
-		// NodemailerPlugin({
-		// 	transporter: transporter,
-		// }),
-		// ResendPlugin({
-		// 	apiKey: env.LUCID_RESEND_API_KEY,
-		// 	webhook: {
-		// 		enabled: true,
-		// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
+			defaultLocale: "en",
+		},
+		openAPI: {
+			enabled: true,
+		},
+		media: {
+			// adapter: fileSystemMediaAdapter({
+			// 	uploadDir: "uploads",
+			// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
+			// }),
+			limits: {
+				fileSize: 200 * 1024 * 1024, // 200MB.
+				processedImages: 10,
+			},
+			images: {
+				storeProcessed: true,
+				onDemandFormats: true,
+			},
+			fallback: {
+				image: "https://placehold.co/600x400",
+				video: "https://cdn.pixabay.com/video/2026/01/05/326081_large.mp4",
+			},
+		},
+		// email: {
+		// 	adapter: passthroughEmailAdapter,
+		// },
+		queue: {
+			// adapter: passthroughQueueAdapter,
+			// adapter: passthroughQueueAdapter({
+			// 	bypassImmediateExecution: false,
+			// }),
+			// adapter: workerQueueAdapter(),
+			// adapter: workerQueueAdapter({
+			// 	concurrentLimit: 10,
+			// 	batchSize: 3,
+			// }),
+		},
+		// hooks: [
+		// 	{
+		// 		service: "documents",
+		// 		event: "beforeUpsert",
+		// 		handler: async (context, data) => {
+		// 			console.log("collection doc hook", data.meta.collectionKey);
+		// 		},
 		// 	},
-		// }),
-		// S3Plugin({
-		// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-		// 	bucket: "headless-cms",
-		// 	clientOptions: {
-		// 		region: "auto",
-		// 		accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
-		// 		secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+		// ],
+		collections: [
+			PageCollection,
+			BlogCollection,
+			MainMenuCollection,
+			SettingsCollection,
+			TestCollection,
+			SimpleCollection,
+		],
+		plugins: [
+			GitHubAuth({
+				clientId: env.GITHUB_CLIENT_ID,
+				clientSecret: env.GITHUB_CLIENT_SECRET,
+			}),
+			GoogleAuth({
+				clientId: env.GOOGLE_CLIENT_ID,
+				clientSecret: env.GOOGLE_CLIENT_SECRET,
+			}),
+			MicrosoftAuth({
+				clientId: env.MICROSOFT_CLIENT_ID,
+				clientSecret: env.MICROSOFT_CLIENT_SECRET,
+				tenant: env.MICROSOFT_TENANT_ID,
+			}),
+			PagesPlugin({
+				collections: [
+					{
+						collectionKey: "page",
+						useTranslations: true,
+						displayFullSlug: true,
+						prefix: {
+							en: "en",
+							fr: "fr",
+						},
+					},
+					{
+						collectionKey: "test",
+						useTranslations: true,
+						displayFullSlug: true,
+					},
+				],
+			}),
+			// RedisPlugin({
+			// 	connection: env.REDIS_CONNECTION,
+			// }),
+			// NodemailerPlugin({
+			// 	transporter: transporter,
+			// }),
+			// ResendPlugin({
+			// 	apiKey: env.LUCID_RESEND_API_KEY,
+			// 	webhook: {
+			// 		enabled: true,
+			// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
+			// 	},
+			// }),
+			// S3Plugin({
+			// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+			// 	bucket: "headless-cms",
+			// 	clientOptions: {
+			// 		region: "auto",
+			// 		accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
+			// 		secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+			// 	},
+			// }),
+		],
+		// build: {
+		// 	paths: {
+		// 		outDir: "out",
 		// 	},
-		// }),
-	],
-	// build: {
-	// 	paths: {
-	// 		outDir: "out",
-	// 	},
-	// },
-	brand: {
-		name: "Playground",
-	},
-}));
+		// },
+		brand: {
+			name: "Playground",
+		},
+	}),
+});

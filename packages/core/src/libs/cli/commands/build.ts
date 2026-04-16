@@ -6,6 +6,10 @@ import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import {
+	getAdapterCLI,
+	getAdapterRuntime,
+} from "../../runtime-adapter/loaders.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
@@ -38,12 +42,12 @@ const buildCommand = async (options?: {
 			await mkdir(configRes.config.build.paths.outDir);
 		}
 
-		if (!configRes.adapter?.cli?.build) {
-			cliLogger.error("No build handler found in adapter", {
-				silent,
-			});
-			return;
-		}
+		const [adapterRuntime, adapterCLI] = await Promise.all([
+			getAdapterRuntime(configRes.definition.adapter),
+			getAdapterCLI(configRes.definition.adapter, {
+				envResult: configRes.adapterEnvResult,
+			}),
+		]);
 
 		//* the path to the config, relative from the CWD
 		const relativeConfigPath = path.relative(process.cwd(), configPath);
@@ -101,12 +105,12 @@ const buildCommand = async (options?: {
 			configPath,
 			outputPath: configRes.config.build.paths.outDir,
 			outputRelativeConfigPath: normalisedOutputRelativePath,
-			customArtifactTypes: configRes.adapter.config?.customBuildArtifacts,
+			customArtifactTypes: adapterRuntime.config?.customBuildArtifacts,
 		});
 
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
-			configRes.adapter.cli.build({
+			adapterCLI.build({
 				config: configRes.config,
 				configPath,
 				outputPath: configRes.config.build.paths.outDir,

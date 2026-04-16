@@ -1,12 +1,9 @@
 import type {
 	EnvironmentVariables,
-	RuntimeAdapter,
+	GetEnvVarsLogger,
 } from "@lucidcms/core/types";
-import type { PlatformProxy } from "wrangler";
-import type { AdapterOptions } from "../types.js";
-import dynamicImport from "../utils/dynamic-import.js";
-
-type GetEnvVarsLogger = Parameters<RuntimeAdapter["getEnvVars"]>[0]["logger"];
+import { getPlatformProxy, type PlatformProxy } from "wrangler";
+import type { AdapterOptions } from "./types.js";
 
 const getEnvVars = async (props: {
 	logger: GetEnvVarsLogger;
@@ -33,10 +30,6 @@ const getEnvVars = async (props: {
 		);
 	}
 
-	// Keep Wrangler opaque to host bundlers so Astro config loading does not
-	// try to prebundle Wrangler's heavier internals.
-	const { getPlatformProxy } =
-		await dynamicImport<typeof import("wrangler")>("wrangler");
 	const platformProxy = await getPlatformProxy(props.options?.platformProxy);
 
 	return {
@@ -46,3 +39,4 @@ const getEnvVars = async (props: {
 };
 
 export default getEnvVars;
+export { getEnvVars };

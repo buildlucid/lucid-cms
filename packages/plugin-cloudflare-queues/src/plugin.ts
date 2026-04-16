@@ -29,6 +29,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					{
 						path: `./${props.paths.outputRelativeConfigPath}`,
 						default: "config",
+						exports: ["envSchema"],
 					},
 					{
 						path: "@lucidcms/core/queue-adapter",
@@ -44,7 +45,11 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 					{
 						path: "@lucidcms/core/runtime",
-						exports: ["processConfig", "logger"],
+						exports: ["resolveConfigDefinition"],
+					},
+					{
+						path: "@lucidcms/core",
+						exports: ["logger"],
 					},
 					{
 						path: "./email-templates.json",
@@ -56,11 +61,18 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `const resolved = await processConfig(
-    config(env, {
+						content: /** ts */ `const { config: resolved } = await resolveConfigDefinition({
+    definition: config,
+    envSchema,
+    meta: {
         emailTemplates: emailTemplates,
-    }),
-);
+    },
+    env,
+    processConfigOptions: {
+        bypassCache: true,
+        skipPluginVersionCheck: true,
+    },
+});
 const kvInstance = await getKVAdapter(resolved);
 
 const internalQueueAdapter = passthroughQueueAdapter({

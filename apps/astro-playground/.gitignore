@@ -1,7 +1,7 @@
 /.astro
 /.lucid
-/astro-playground.sqlite
-/astro-playground.sqlite-shm
-/astro-playground.sqlite-wal
+/db.sqlite
+/db.sqlite-shm
+/db.sqlite-wal
 /dist
 /uploads

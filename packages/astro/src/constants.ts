@@ -1,4 +1,5 @@
 export const LUCID_ASTRO_INTEGRATION_NAME = "@lucidcms/astro";
+export const ASTRO_DEFINE_CONFIG_MODULE_ID = "@lucidcms/astro/define-config";
 export const LUCID_ASTRO_DEV_ASSET_PLUGIN_NAME = `${LUCID_ASTRO_INTEGRATION_NAME}:assets-dev`;
 export const LUCID_ASTRO_BUILD_ASSET_PLUGIN_NAME = `${LUCID_ASTRO_INTEGRATION_NAME}:assets-build`;
 

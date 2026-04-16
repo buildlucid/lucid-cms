@@ -4,12 +4,14 @@ import type { ZodType } from "zod";
 import constants from "../../constants/constants.js";
 import { logger } from "../../index.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
+import generateAdapterOptionsTypes from "./adapter-options-type.js";
 import generateEnvTypes from "./env-type.js";
 import type { GenerateTypesResult } from "./types.js";
 
 const generateTypes = async (props: {
 	envSchema?: ZodType;
 	configPath: string;
+	adapterFrom?: string;
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
 
@@ -26,9 +28,15 @@ const generateTypes = async (props: {
 			schema: props.envSchema,
 			configRelativePath: configRelativePath,
 		}),
+		generateAdapterOptionsTypes({
+			adapterFrom: props.adapterFrom,
+		}),
 	]);
 
 	for (const result of results) {
+		if (!result) {
+			continue;
+		}
 		if (result.imports) imports.push(result.imports);
 		if (result.types) moduleTypes[result.module].push(result.types);
 	}
@@ -40,7 +48,7 @@ ${imports.join("\n")}`;
 		if (types.length === 0) continue;
 
 		typesContent += `
-  
+
 declare module '${module}' {
   ${types.map((type) => `\t${type}`).join("\n")}
 }`;

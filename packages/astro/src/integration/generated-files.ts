@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { prepareBuildArtifacts } from "@lucidcms/core/helpers";
+import { prepareBuildArtifacts } from "@lucidcms/core/build";
 import {
 	LUCID_ASSET_DIRNAME,
 	LUCID_CLOUDFLARE_ROUTE_FILENAME,

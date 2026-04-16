@@ -1,17 +1,7 @@
 export { default as migrateCommand } from "./libs/cli/commands/migrate.js";
-export { default as getBuildPaths } from "./libs/cli/services/get-build-paths.js";
-export { default as processBuildArtifacts } from "./libs/cli/services/process-build-artifacts.js";
 export { default as validateEnvVars } from "./libs/cli/services/validate-env-vars.js";
 export { default as buildTableName } from "./libs/collection/helpers/build-table-name.js";
 export { default as prefixGeneratedColName } from "./libs/collection/helpers/prefix-generated-column-name.js";
-export { default as loadBuildProject } from "./libs/compile/load-build-project.js";
-export { default as prepareBuildArtifacts } from "./libs/compile/prepare-build-artifacts.js";
-export { default as prepareLucidPublicAssets } from "./libs/compile/prepare-lucid-public-assets.js";
-export { default as prepareLucidSPA } from "./libs/compile/prepare-lucid-spa.js";
 export { default as getConfigPath } from "./libs/config/get-config-path.js";
 export { default as loadConfigFile } from "./libs/config/load-config-file.js";
 export { default as processConfig } from "./libs/config/process-config.js";
-export { default as renderMjmlTemplates } from "./libs/email-adapter/templates/render-mjml-templates.js";
-export { default as handlePluginBuildHooks } from "./libs/plugins/hooks/handle-build.js";
-export { default as stripAdapterExportPlugin } from "./libs/runtime-adapter/plugins/strip-adapter-export-plugin.js";
-export { default as stripImportsPlugin } from "./libs/runtime-adapter/plugins/strip-imports-plugin.js";

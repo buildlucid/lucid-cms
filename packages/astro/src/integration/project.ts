@@ -2,12 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import {
 	loadBuildProject,
-	migrateCommand,
 	prepareLucidPublicAssets,
 	prepareLucidSPA,
-} from "@lucidcms/core/helpers";
+} from "@lucidcms/core/build";
+import { migrateCommand } from "@lucidcms/core/helpers";
 import {
 	ASTRO_CLIENT_DIRNAME,
+	ASTRO_DEFINE_CONFIG_MODULE_ID,
 	CLOUDFLARE_DEV_ENV_GLOBAL,
 	LUCID_MOUNT_PATH,
 } from "../constants.js";
@@ -39,6 +40,8 @@ export const loadLucidProject = async (
 		silent: true,
 		validateEnv: true,
 		renderEmailTemplates: true,
+		defineConfigPath: ASTRO_DEFINE_CONFIG_MODULE_ID,
+		loadRuntime: true,
 	});
 
 	if (!project.emailTemplates) {
@@ -56,16 +59,13 @@ export const loadLucidProject = async (
 };
 
 /**
- * Cloudflare dev bootstrap needs real adapter-backed bindings before migrate
- * and sync run, even though the earlier setup pass only needed config data.
+ * Astro dev re-runs config resolution right before migrate/sync so Lucid sees
+ * the same wrapper semantics during bootstrap as it does during route startup.
  */
 export const reloadLucidProjectForDevBootstrap = async (
 	project: ResolvedLucidProject,
 ): Promise<ResolvedLucidProject> => {
-	if (
-		project.runtime !== "cloudflare" ||
-		typeof project.loaded.adapter?.getEnvVars !== "function"
-	) {
+	if (project.runtime !== "cloudflare") {
 		return project;
 	}
 
@@ -75,6 +75,8 @@ export const reloadLucidProjectForDevBootstrap = async (
 		validateEnv: true,
 		generateTypes: false,
 		renderEmailTemplates: false,
+		defineConfigPath: ASTRO_DEFINE_CONFIG_MODULE_ID,
+		loadRuntime: true,
 	});
 
 	return {

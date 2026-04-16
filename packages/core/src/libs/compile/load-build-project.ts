@@ -2,15 +2,11 @@ import type { ZodType } from "zod";
 import validateEnvVars from "../cli/services/validate-env-vars.js";
 import getConfigPath from "../config/get-config-path.js";
 import loadConfigFile from "../config/load-config-file.js";
-import renderMjmlTemplates from "../email-adapter/templates/render-mjml-templates.js";
+import renderEmailTemplates from "../email-adapter/templates/render-mjml-templates.js";
+import type { RenderedTemplates } from "../email-adapter/types.js";
 import generateTypes from "../type-generation/index.js";
 
 type LoadConfigResult = Awaited<ReturnType<typeof loadConfigFile>>;
-type RenderedTemplates = Awaited<
-	ReturnType<
-		typeof import("../email-adapter/templates/render-mjml-templates.js")["default"]
-	>
->;
 
 export type LoadBuildProjectResult = {
 	configPath: string;
@@ -25,11 +21,15 @@ const loadBuildProject = async (props?: {
 	generateTypes?: boolean;
 	renderEmailTemplates?: boolean;
 	envSchema?: ZodType;
+	defineConfigPath?: string;
+	loadRuntime?: boolean;
 }): Promise<LoadBuildProjectResult> => {
 	const configPath = props?.configPath ?? getConfigPath(process.cwd());
 	const loaded = await loadConfigFile({
 		path: configPath,
 		silent: props?.silent,
+		defineConfigPath: props?.defineConfigPath,
+		loadRuntime: props?.loadRuntime,
 	});
 
 	const [envValid, _typeGen, emailTemplates] = await Promise.all([
@@ -42,9 +42,10 @@ const loadBuildProject = async (props?: {
 			generateTypes({
 				envSchema: props?.envSchema ?? loaded.envSchema,
 				configPath,
+				adapterFrom: loaded.definition.adapter.from,
 			}),
 		props?.renderEmailTemplates
-			? renderMjmlTemplates({
+			? renderEmailTemplates({
 					config: loaded.config,
 					silent: props?.silent,
 				})

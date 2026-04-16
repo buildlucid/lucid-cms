@@ -18,6 +18,10 @@
             "types": "./dist/api.d.mts",
             "default": "./dist/api.mjs"
         },
+        "./build": {
+            "types": "./dist/build.d.mts",
+            "default": "./dist/build.mjs"
+        },
         "./helpers": {
             "types": "./dist/helpers.d.mts",
             "default": "./dist/helpers.mjs"

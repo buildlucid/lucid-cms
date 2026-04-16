@@ -20,11 +20,12 @@ const prepareMainWorkerEntry = (
 		{
 			path: `./${configPath}`,
 			default: "config",
+			exports: ["envSchema"],
 		},
 		{
 			path: "@lucidcms/core/runtime",
 			default: "lucid",
-			exports: ["processConfig"],
+			exports: ["resolveConfigDefinition"],
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
@@ -35,8 +36,8 @@ const prepareMainWorkerEntry = (
 			default: "emailTemplates",
 		},
 		{
-			path: "@lucidcms/cloudflare-adapter/runtime-context",
-			default: "getRuntimeContext",
+			path: "@lucidcms/cloudflare-adapter/runtime",
+			exports: ["getRuntimeContext"],
 		},
 	];
 
@@ -45,14 +46,17 @@ const prepareMainWorkerEntry = (
 			name: "fetch",
 			async: true,
 			params: ["request", "env", "ctx"],
-			content: /** ts */ `const resolved = await processConfig(
-    config(env, {
+			content: /** ts */ `const { config: resolved } = await resolveConfigDefinition({
+    definition: config,
+    envSchema,
+    meta: {
         emailTemplates: emailTemplates,
-    }),
-    {
+    },
+    env,
+    processConfigOptions: {
         skipPluginVersionCheck: true,
     },
-);
+});
 
 const { app } = await lucid.createApp({
     config: resolved,
@@ -101,14 +105,17 @@ return app.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: /** ts */ `const runCronService = async () => {
-    const resolved = await processConfig(
-        config(env, {
+    const { config: resolved } = await resolveConfigDefinition({
+        definition: config,
+        envSchema,
+        meta: {
             emailTemplates: emailTemplates,
-        }),
-        {
+        },
+        env,
+        processConfigOptions: {
             skipPluginVersionCheck: true,
         },
-    );
+    });
     const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
 
     const cronJobSetup = await lucid.setupCronJobs({

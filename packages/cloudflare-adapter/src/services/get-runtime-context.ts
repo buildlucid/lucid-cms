@@ -1,7 +1,7 @@
 import type { AdapterRuntimeContext } from "@lucidcms/core/types";
-import { ADAPTER_KEY } from "./constants.js";
-import getCloudflareConnInfo from "./utils/cloudflare-conn-info.js";
-import getNodeConnInfo from "./utils/node-conn-info.js";
+import { ADAPTER_KEY } from "../constants.js";
+import getCloudflareConnInfo from "../utils/cloudflare-conn-info.js";
+import getNodeConnInfo from "../utils/node-conn-info.js";
 
 const getRuntimeContext = (params: {
 	server: "node" | "cloudflare";

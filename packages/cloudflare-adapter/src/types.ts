@@ -31,3 +31,6 @@ export type AdapterOptions = {
 		hostname?: string;
 	};
 };
+
+export type CloudflareAdapterOptions = AdapterOptions;
+export type AdapterOptionsType = CloudflareAdapterOptions;

@@ -1,10 +1,10 @@
-import { prefixGeneratedColName } from "../../../../../helpers.js";
 import type {
 	CFConfig,
 	FieldTypes,
 	LucidBrickTableName,
 	ServiceFn,
 } from "../../../../../types.js";
+import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import { getBricksTableSchema } from "../../../schema/runtime/runtime-schema-selectors.js";
 import type { CollectionSchemaTable } from "../../../schema/types.js";
 import { documentFieldConfig } from "./config.js";

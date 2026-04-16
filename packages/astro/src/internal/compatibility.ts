@@ -11,7 +11,7 @@ export const detectLucidRuntime = (
 ): LucidAstroRuntime => {
 	if (!adapter) {
 		throw new Error(
-			"Lucid Astro integration requires `export const adapter = nodeAdapter()` or `cloudflareAdapter()` in lucid.config.ts.",
+			'Lucid Astro integration requires `defineConfig({ adapter: { from: "@lucidcms/node-adapter" } })` or `@lucidcms/cloudflare-adapter` in lucid.config.ts.',
 		);
 	}
 

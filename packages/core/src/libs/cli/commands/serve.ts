@@ -4,6 +4,7 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import { getAdapterCLI } from "../../runtime-adapter/loaders.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
@@ -38,12 +39,9 @@ const serveCommand = async () => {
 		const configRes = await loadConfigFile({
 			path: configPath,
 		});
-
-		if (!configRes.adapter) {
-			cliLogger.error("No runtime adapter found");
-			logger.setBuffering(false);
-			process.exit(1);
-		}
+		const adapterCLI = await getAdapterCLI(configRes.definition.adapter, {
+			envResult: configRes.adapterEnvResult,
+		});
 
 		const envValid = await validateEnvVars({
 			envSchema: configRes.envSchema,
@@ -53,6 +51,7 @@ const serveCommand = async () => {
 		generateTypes({
 			envSchema: configRes.envSchema,
 			configPath: configPath,
+			adapterFrom: configRes.definition.adapter.from,
 		});
 
 		if (!envValid) {
@@ -101,7 +100,7 @@ const serveCommand = async () => {
 			process.exit(1);
 		}
 
-		const serverRes = await configRes.adapter.cli.serve({
+		const serverRes = await adapterCLI.serve({
 			config: configRes.config,
 			logger: {
 				instance: cliLogger,

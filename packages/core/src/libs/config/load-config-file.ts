@@ -5,23 +5,28 @@ import type { ZodType } from "zod";
 import type { Config } from "../../types/config.js";
 import cliLogger from "../cli/logger.js";
 import type {
-	AdapterDefineConfig,
 	EnvironmentVariables,
+	LucidConfigDefinition,
 	RuntimeAdapter,
+	RuntimeAdapterEnvLoadResult,
 } from "../runtime-adapter/types.js";
 import getConfigPath from "./get-config-path.js";
-import processConfig from "./process-config.js";
+import { resolveConfigDefinition } from "./resolve-config-definition.js";
 
 export type LoadConfigResult = {
 	config: Config;
 	adapter?: RuntimeAdapter;
 	envSchema?: ZodType;
 	env: EnvironmentVariables | undefined;
+	definition: LucidConfigDefinition;
+	adapterEnvResult?: RuntimeAdapterEnvLoadResult;
 };
 
 export const loadConfigFile = async (props?: {
 	path?: string;
 	silent?: boolean;
+	defineConfigPath?: string;
+	loadRuntime?: boolean;
 }): Promise<LoadConfigResult> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
@@ -32,34 +37,29 @@ export const loadConfigFile = async (props?: {
 	});
 
 	const configModule = await jiti.import<{
-		default: AdapterDefineConfig;
-		adapter?: RuntimeAdapter;
+		default: unknown;
 		envSchema?: ZodType;
 	}>(importPath);
+	const hasNamedEnvSchemaExport = Object.hasOwn(configModule, "envSchema");
 
-	let env: EnvironmentVariables | undefined;
-	if (configModule.adapter?.getEnvVars) {
-		env = await configModule.adapter?.getEnvVars({
-			logger: {
-				instance: cliLogger,
-				silent: props?.silent ?? false,
-			},
-		});
-	}
-
-	const configdefault = configModule.default(env || {});
-	const config = await processConfig(configdefault, {
-		bypassCache: true,
+	const resolved = await resolveConfigDefinition({
+		definition: configModule.default,
+		envSchema: hasNamedEnvSchemaExport ? configModule.envSchema : undefined,
+		defineConfigPath: props?.defineConfigPath,
+		loadRuntime: props?.loadRuntime,
+		logger: {
+			instance: cliLogger,
+			silent: props?.silent ?? false,
+		},
 	});
 
-	const adapter = configModule.adapter;
-	const envSchema = configModule.envSchema;
-
 	return {
-		config,
-		adapter,
-		envSchema,
-		env,
+		config: resolved.config,
+		adapter: resolved.adapter,
+		envSchema: resolved.envSchema,
+		env: resolved.env,
+		definition: resolved.definition,
+		adapterEnvResult: resolved.adapterEnvResult,
 	};
 };
 

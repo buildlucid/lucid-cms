@@ -3,7 +3,7 @@ import type {
 	AdapterRuntimeContext,
 	LucidHonoContext,
 } from "@lucidcms/core/types";
-import constants, { ADAPTER_KEY } from "./constants.js";
+import constants, { ADAPTER_KEY } from "../constants.js";
 
 const getRuntimeContext = (params: { compiled: boolean }) =>
 	({
