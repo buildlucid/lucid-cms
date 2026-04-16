@@ -3,6 +3,7 @@ import setupCronJobs from "./libs/runtime-adapter/setup-cron-jobs.js";
 
 export { default as z } from "zod";
 export { default as logger } from "./libs/logger/index.js";
+export { default as createToolkit } from "./libs/toolkit/create-toolkit.js";
 export { LucidError } from "./utils/errors/index.js";
 
 export default {

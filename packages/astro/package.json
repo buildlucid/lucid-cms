@@ -4,20 +4,24 @@
 	"private": false,
 	"description": "The official Astro integration for Lucid CMS",
 	"type": "module",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"module": "./dist/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.mts",
+			"default": "./dist/index.mjs"
+		},
+		"./define-config": {
+			"types": "./dist/define-config.d.mts",
+			"default": "./dist/define-config.mjs"
 		},
 		"./runtime": {
-			"import": "./dist/runtime.mjs",
-			"types": "./dist/runtime.d.ts"
+			"types": "./dist/runtime.d.mts",
+			"default": "./dist/runtime.mjs"
 		},
 		"./types": {
-			"import": "./dist/types.mjs",
-			"types": "./dist/types.d.ts"
+			"types": "./dist/types.d.mts",
+			"default": "./dist/types.mjs"
 		},
 		"./package.json": "./package.json"
 	},

@@ -1,0 +1,46 @@
+---
+import getToolkit from "../lucid/get-toolkit";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const toolkit = await getToolkit();
+
+	const response = await toolkit.documents.getMultiple({
+		collectionKey: "page",
+		status: "latest",
+		query: {
+			perPage: -1,
+		},
+	});
+
+	return response.data.map((page) => ({
+		params: {
+			slug:
+				page.fields?.fullSlug.translations?.en === "/"
+					? undefined
+					: page.fields?.fullSlug.translations?.en,
+		},
+		props: {
+			page,
+		},
+	}));
+}
+
+const { page } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{page.fields?.title.translations?.en} | Static Lucid Route</title>
+	</head>
+	<body>
+		<main>
+			<eyebrow>Static Lucid Client Route</eyebrow>
+			<h1>{page.fields?.title.translations?.['en']}</h1>
+			<p>Lucid full slug: <code>{page.fields?.fullSlug.translations?.en}</code></p>
+		</main>
+	</body>
+</html>

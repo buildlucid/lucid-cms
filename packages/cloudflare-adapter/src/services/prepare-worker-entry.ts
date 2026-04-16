@@ -22,24 +22,21 @@ const prepareMainWorkerEntry = (
 			default: "config",
 		},
 		{
-			path: "@lucidcms/core",
+			path: "@lucidcms/core/runtime",
 			default: "lucid",
+			exports: ["processConfig"],
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
 			exports: ["passthroughKVAdapter"],
 		},
 		{
-			path: "@lucidcms/core/helpers",
-			exports: ["processConfig"],
-		},
-		{
 			path: "./email-templates.json",
 			default: "emailTemplates",
 		},
 		{
-			path: "@lucidcms/cloudflare-adapter",
-			exports: ["getRuntimeContext"],
+			path: "@lucidcms/cloudflare-adapter/runtime-context",
+			default: "getRuntimeContext",
 		},
 	];
 
@@ -52,6 +49,9 @@ const prepareMainWorkerEntry = (
     config(env, {
         emailTemplates: emailTemplates,
     }),
+    {
+        skipPluginVersionCheck: true,
+    },
 );
 
 const { app } = await lucid.createApp({
@@ -105,6 +105,9 @@ return app.fetch(request, env, ctx);`,
         config(env, {
             emailTemplates: emailTemplates,
         }),
+        {
+            skipPluginVersionCheck: true,
+        },
     );
     const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
 

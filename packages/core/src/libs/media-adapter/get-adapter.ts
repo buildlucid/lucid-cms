@@ -1,4 +1,3 @@
-import fs from "node:fs/promises";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import logger from "../logger/index.js";
@@ -33,20 +32,10 @@ const getMediaAdapter = async (
 			};
 		}
 
-		//* we check if fs is available
-		await fs.access(".");
-
-		const { default: fileSystemAdapter } = await import(
-			"./adapters/file-system/index.js"
+		const { default: getDefaultMediaAdapter } = await import(
+			"./get-default-adapter.js"
 		);
-
-		return {
-			adapter: await fileSystemAdapter({
-				uploadDir: constants.defaultUploadDirectory,
-				secretKey: config.secrets.encryption,
-			}),
-			enabled: true,
-		};
+		return await getDefaultMediaAdapter(config);
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.mediaAdapter,

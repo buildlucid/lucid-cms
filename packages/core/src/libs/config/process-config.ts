@@ -7,7 +7,11 @@ import BrickConfigSchema from "../collection/builders/brick-builder/schema.js";
 import CollectionConfigSchema from "../collection/builders/collection-builder/schema.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import { initializeLogger } from "../logger/index.js";
-import checks from "./checks/index.js";
+import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
+import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
+import checkField from "./checks/check-field.js";
+import checkLocales from "./checks/check-locales.js";
+import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
 
@@ -23,6 +27,7 @@ const processConfig = async (
 	config: LucidConfig,
 	options?: {
 		bypassCache?: boolean;
+		skipPluginVersionCheck?: boolean;
 	},
 ): Promise<Config> => {
 	if (cachedConfig !== undefined && !options?.bypassCache) {
@@ -34,10 +39,16 @@ const processConfig = async (
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
 		for (const pluginDef of configRes.plugins) {
-			checks.checkPluginVersion({
-				key: pluginDef.key,
-				requiredVersions: pluginDef.lucid,
-			});
+			if (!options?.skipPluginVersionCheck) {
+				const { default: checkPluginVersion } = await import(
+					"./checks/check-plugin-version.js"
+				);
+
+				checkPluginVersion({
+					key: pluginDef.key,
+					requiredVersions: pluginDef.lucid,
+				});
+			}
 			if (pluginDef.hooks?.init) {
 				const res = await pluginDef.hooks.init();
 				if (res.error) {
@@ -57,10 +68,10 @@ const processConfig = async (
 	configRes = ConfigSchema.parse(configRes) as Config;
 
 	// localization checks
-	checks.checkLocales(configRes.localization);
+	checkLocales(configRes.localization);
 
 	// collection checks
-	checks.checkDuplicateBuilderKeys(
+	checkDuplicateBuilderKeys(
 		"collections",
 		configRes.collections.map((c) => c.getData.key),
 	);
@@ -70,21 +81,21 @@ const processConfig = async (
 
 		for (const field of collection.flatFields) {
 			CustomFieldSchema.parse(field);
-			checks.checkField(field, configRes);
+			checkField(field, configRes);
 		}
 
-		checks.checkDuplicateBuilderKeys(
+		checkDuplicateBuilderKeys(
 			"bricks",
 			collection.builderBricks.map((b) => b.key),
 		);
 
-		checks.checkDuplicateFieldKeys(
+		checkDuplicateFieldKeys(
 			"collection",
 			collection.key,
 			collection.meta.fieldKeys,
 		);
 
-		checks.checkRepeaterDepth(
+		checkRepeaterDepth(
 			"collection",
 			collection.key,
 			collection.meta.repeaterDepth,
@@ -94,11 +105,11 @@ const processConfig = async (
 			BrickConfigSchema.parse(brick.config);
 			for (const field of brick.flatFields) {
 				CustomFieldSchema.parse(field);
-				checks.checkField(field, configRes);
+				checkField(field, configRes);
 			}
 
-			checks.checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
-			checks.checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
+			checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
+			checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
 		}
 	}
 

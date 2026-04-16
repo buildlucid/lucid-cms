@@ -63,6 +63,35 @@ if (!page) {
 				margin: 0.75rem 0 0;
 			}
 
+			figure {
+				margin: 1.5rem 0 0;
+			}
+
+			img {
+				display: block;
+				width: 100%;
+				height: auto;
+				border-radius: 1rem;
+				box-shadow: 0 16px 48px rgba(16, 33, 61, 0.14);
+			}
+
+			article {
+				margin-top: 1.5rem;
+			}
+
+			article :global(p),
+			article :global(li),
+			article :global(blockquote) {
+				line-height: 1.7;
+			}
+
+			article :global(h2),
+			article :global(h3),
+			article :global(h4) {
+				font-family: "IBM Plex Serif", Georgia, serif;
+				margin: 1.5rem 0 0.5rem;
+			}
+
 			code,
 			a {
 				color: #1e5ca8;
@@ -76,7 +105,20 @@ if (!page) {
 					<>
 						<eyebrow>Server Lucid Client Route</eyebrow>
 						<h1>{page.title}</h1>
-						<p>{page.body}</p>
+						{
+							page.thumbnail && (
+								<figure>
+									<img
+										src={page.thumbnail.url}
+										alt={page.thumbnail.alt}
+										width={page.thumbnail.width ?? undefined}
+										height={page.thumbnail.height ?? undefined}
+										loading="eager"
+									/>
+								</figure>
+							)
+						}
+						<article set:html={page.bodyHtml}></article>
 						<p>Lucid full slug: <code>{page.fullSlug}</code></p>
 						<p>
 							<a href={`/static${page.fullSlug}`}>View the prerendered version</a>

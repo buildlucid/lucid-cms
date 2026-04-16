@@ -1,0 +1,33 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "lucid-astro-cloudflare-example",
+	"main": "./.lucid/astro/worker.ts",
+	"compatibility_date": "2025-06-12",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "./dist/client",
+		"binding": "ASSETS"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "CLOUDFLARE_KV",
+			"id": "33f2f137d7a7448397f9d8ed0faec853"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "CLOUDFLARE_QUEUES",
+				"queue": "lucid-astro-cloudflare-example-queue"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "lucid-astro-cloudflare-example-queue",
+				"max_batch_size": 10,
+				"max_batch_timeout": 30,
+				"max_retries": 3
+			}
+		]
+	}
+}

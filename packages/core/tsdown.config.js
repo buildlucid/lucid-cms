@@ -7,6 +7,7 @@ export default defineConfig({
         "src/types.ts",
         "src/api.ts",
         "src/helpers.ts",
+        "src/runtime.ts",
         "src/libs/cli/index.ts",
         "src/libs/queue-adapter/index.ts",
         "src/libs/queue-adapter/adapters/worker/consumer.ts",

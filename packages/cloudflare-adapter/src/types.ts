@@ -1,3 +1,5 @@
+import type { GetPlatformProxyOptions } from "wrangler";
+
 export type CloudflareWorkerImport = {
 	path: string;
 	default?: string;
@@ -20,4 +22,12 @@ export type CloudflareWorkerEntryArtifact = {
 	filename: string;
 	imports: CloudflareWorkerImport[];
 	exports: CloudflareWorkerExport[];
+};
+
+export type AdapterOptions = {
+	platformProxy?: GetPlatformProxyOptions;
+	server?: {
+		port?: number;
+		hostname?: string;
+	};
 };

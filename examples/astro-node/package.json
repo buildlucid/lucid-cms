@@ -1,0 +1,35 @@
+{
+	"name": "@lucidcms/astro-node-example",
+	"private": true,
+	"description": "This is the Lucid CMS Astro Node example app",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"sync": "lucidcms sync",
+		"migrate": "lucidcms migrate",
+		"migrate:rollback": "lucidcms migrate:rollback",
+		"migrate:reset": "lucidcms migrate:reset",
+		"migrate:fresh": "lucidcms migrate:fresh"
+	},
+	"dependencies": {
+		"astro": "^6.1.6",
+		"@astrojs/node": "^10.0.4",
+		"@lucidcms/core": "*",
+		"@lucidcms/astro": "*",
+		"@lucidcms/node-adapter": "*",
+		"@lucidcms/sqlite-adapter": "*",
+		"@lucidcms/plugin-pages": "*"
+	},
+	"author": "Lucid",
+	"license": "MIT",
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": ">=24.11.1"
+	}
+}

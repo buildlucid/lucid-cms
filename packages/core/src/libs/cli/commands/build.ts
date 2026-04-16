@@ -1,18 +1,15 @@
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import path, { join } from "node:path";
 import constants from "../../../constants/constants.js";
-import getConfigPath from "../../config/get-config-path.js";
-import loadConfigFile from "../../config/load-config-file.js";
+import loadBuildProject from "../../compile/load-build-project.js";
+import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
-import handlePluginBuildHooks from "../../plugins/hooks/handle-build.js";
-import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
-import processBuildArtifacts from "../services/process-build-artifacts.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -23,9 +20,12 @@ const buildCommand = async (options?: {
 }) => {
 	logger.setBuffering(true);
 	const startTime = cliLogger.startTimer();
-	const configPath = getConfigPath(process.cwd());
 	const silent = options?.silent ?? false;
-	const configRes = await loadConfigFile({ path: configPath, silent });
+	const buildProject = await loadBuildProject({
+		silent,
+		renderEmailTemplates: false,
+	});
+	const { configPath, loaded: configRes } = buildProject;
 
 	try {
 		if (options?.cacheSpa) {
@@ -65,29 +65,16 @@ const buildCommand = async (options?: {
 			".js",
 		);
 
-		generateTypes({
-			envSchema: configRes.envSchema,
-			configPath: configPath,
-		});
-
-		const [mjmlTemplatesRes, publicAssetsRes, pluginBuildArtifactsRes] =
-			await Promise.all([
-				prerenderMjmlTemplates({
-					config: configRes.config,
-					silent,
-				}),
-				copyPublicAssets({
-					config: configRes.config,
-					silent,
-				}),
-				handlePluginBuildHooks({
-					config: configRes.config,
-					silent,
-					configPath,
-					outputPath: configRes.config.build.paths.outDir,
-					outputRelativeConfigPath: normalisedOutputRelativePath,
-				}),
-			]);
+		const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
+			prerenderMjmlTemplates({
+				config: configRes.config,
+				silent,
+			}),
+			copyPublicAssets({
+				config: configRes.config,
+				silent,
+			}),
+		]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
 				mjmlTemplatesRes.error.message ?? "Failed to pre-render MJML templates",
@@ -108,21 +95,12 @@ const buildCommand = async (options?: {
 			logger.setBuffering(false);
 			process.exit(1);
 		}
-		if (pluginBuildArtifactsRes.error) {
-			cliLogger.error(
-				pluginBuildArtifactsRes.error.message ?? "Failed to build the plugins",
-				{
-					silent,
-				},
-			);
-			logger.setBuffering(false);
-			process.exit(1);
-		}
-
-		const processedArtifacts = await processBuildArtifacts({
-			artifacts: pluginBuildArtifactsRes.data,
-			outDir: configRes.config.build.paths.outDir,
+		const processedArtifacts = await prepareBuildArtifacts({
+			config: configRes.config,
 			silent,
+			configPath,
+			outputPath: configRes.config.build.paths.outDir,
+			outputRelativeConfigPath: normalisedOutputRelativePath,
 			customArtifactTypes: configRes.adapter.config?.customBuildArtifacts,
 		});
 

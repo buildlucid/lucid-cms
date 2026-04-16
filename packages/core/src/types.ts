@@ -12,6 +12,7 @@ export * from "./libs/permission/types.js";
 export * from "./libs/plugins/types.js";
 export * from "./libs/queue-adapter/types.js";
 export * from "./libs/runtime-adapter/types.js";
+export * from "./libs/toolkit/types.js";
 export * from "./types/config.js";
 export * from "./types/errors.js";
 export * from "./types/hono.js";

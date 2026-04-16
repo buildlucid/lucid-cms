@@ -213,8 +213,7 @@ const nodeAdapter = (options?: {
 					const entry = /* ts */ `
 import "dotenv/config";
 import config from "./${constants.CONFIG_FILE}.js";
-import lucid from "@lucidcms/core";
-import { processConfig } from "@lucidcms/core/helpers";
+import lucid, { processConfig } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
 import { getRuntimeContext } from "@lucidcms/node-adapter";

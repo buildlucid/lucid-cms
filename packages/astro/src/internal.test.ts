@@ -1,13 +1,17 @@
 import { describe, expect, test } from "vitest";
 import {
 	assertAstroCompatibility,
-	buildCloudflareAdditionalWorkers,
-	buildCloudflareMainWorkerSource,
-	buildCloudflareRouteSource,
-	buildNodeRouteSource,
 	detectAstroRuntime,
 	detectLucidRuntime,
-} from "./internal.js";
+} from "./internal/compatibility.js";
+import {
+	buildCloudflareRouteSource,
+	buildNodeRouteSource,
+} from "./internal/generated-sources.js";
+import {
+	buildCloudflareAdditionalWorkers,
+	buildCloudflareMainWorkerSource,
+} from "./internal/worker-module.js";
 
 describe("@lucidcms/astro internals", () => {
 	test("detects supported runtime combinations", () => {
@@ -57,8 +61,11 @@ describe("@lucidcms/astro internals", () => {
 		expect(cloudflareSource).toContain(
 			'Reflect.get(lucidConfigModule, "envSchema")',
 		);
+		expect(nodeSource).toContain('Reflect.get(lucidConfigModule, "adapter")');
 		expect(nodeSource).toContain("export const prerender = false;");
 		expect(nodeSource).toContain("configEntryPoint: null");
+		expect(nodeSource).toContain("adapter?.getEnvVars");
+		expect(nodeSource).toContain("silentAdapterLogger");
 		expect(nodeSource).toContain('request.headers.get("x-forwarded-for")');
 		expect(cloudflareSource).toContain("export const prerender = false;");
 	});

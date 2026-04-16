@@ -31,10 +31,6 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						default: "config",
 					},
 					{
-						path: "@lucidcms/core/helpers",
-						exports: ["processConfig"],
-					},
-					{
 						path: "@lucidcms/core/queue-adapter",
 						exports: [
 							"passthroughQueueAdapter",
@@ -47,8 +43,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						exports: ["getKVAdapter"],
 					},
 					{
-						path: "@lucidcms/core",
-						exports: ["logger"],
+						path: "@lucidcms/core/runtime",
+						exports: ["processConfig", "logger"],
 					},
 					{
 						path: "./email-templates.json",

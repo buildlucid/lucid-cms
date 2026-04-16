@@ -22,6 +22,10 @@
             "types": "./dist/helpers.d.mts",
             "default": "./dist/helpers.mjs"
         },
+        "./runtime": {
+            "types": "./dist/runtime.d.mts",
+            "default": "./dist/runtime.mjs"
+        },
         "./types": {
             "types": "./dist/types.d.mts",
             "default": "./dist/types.mjs"

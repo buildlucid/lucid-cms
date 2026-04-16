@@ -29,7 +29,7 @@ const PagesCollection = new CollectionBuilder("page", {
 		},
 		displayInListing: true,
 	})
-	.addTextarea("page_body", {
+	.addRichText("page_body", {
 		details: {
 			label: {
 				en: "Page body",
@@ -38,7 +38,16 @@ const PagesCollection = new CollectionBuilder("page", {
 		},
 		validation: {
 			required: true,
-			zod: z.string().min(8).max(2000),
+		},
+	})
+	.addMedia("thumbnail", {
+		details: {
+			label: {
+				en: "Thumbnail",
+			},
+		},
+		validation: {
+			required: true,
 		},
 	});
 
