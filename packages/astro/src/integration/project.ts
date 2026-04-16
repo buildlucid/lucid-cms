@@ -8,7 +8,7 @@ import {
 import { migrateCommand } from "@lucidcms/core/helpers";
 import {
 	ASTRO_CLIENT_DIRNAME,
-	ASTRO_DEFINE_CONFIG_MODULE_ID,
+	ASTRO_CONFIGURE_LUCID_MODULE_ID,
 	CLOUDFLARE_DEV_ENV_GLOBAL,
 	LUCID_MOUNT_PATH,
 } from "../constants.js";
@@ -40,7 +40,7 @@ export const loadLucidProject = async (
 		silent: true,
 		validateEnv: true,
 		renderEmailTemplates: true,
-		defineConfigPath: ASTRO_DEFINE_CONFIG_MODULE_ID,
+		configureLucidPath: ASTRO_CONFIGURE_LUCID_MODULE_ID,
 		loadRuntime: true,
 	});
 
@@ -75,7 +75,7 @@ export const reloadLucidProjectForDevBootstrap = async (
 		validateEnv: true,
 		generateTypes: false,
 		renderEmailTemplates: false,
-		defineConfigPath: ASTRO_DEFINE_CONFIG_MODULE_ID,
+		configureLucidPath: ASTRO_CONFIGURE_LUCID_MODULE_ID,
 		loadRuntime: true,
 	});
 

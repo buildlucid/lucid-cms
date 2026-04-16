@@ -6,10 +6,10 @@ import type {
 	LucidConfig,
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
-	RuntimeDefineConfig,
+	RuntimeConfigureLucid,
 } from "@lucidcms/core/types";
 
-const defineConfig: RuntimeDefineConfig = <AdapterFrom extends string>(
+const configureLucid: RuntimeConfigureLucid = <AdapterFrom extends string>(
 	definition: LucidConfigDefinition<AdapterFrom>,
 	_meta?: LucidConfigDefinitionMeta,
 ): LucidConfigDefinition<AdapterFrom> => {
@@ -52,4 +52,4 @@ const defineConfig: RuntimeDefineConfig = <AdapterFrom extends string>(
 	};
 };
 
-export default defineConfig;
+export default configureLucid;

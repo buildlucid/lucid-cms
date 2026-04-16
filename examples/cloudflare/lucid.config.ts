@@ -1,5 +1,5 @@
 import type { KVNamespace, Queue } from "@cloudflare/workers-types";
-import { defineConfig, z } from "@lucidcms/core";
+import { configureLucid, z } from "@lucidcms/core";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
@@ -29,7 +29,7 @@ export const envSchema = z.object({
 	CLOUDFLARE_QUEUES: z.custom<Queue>(),
 });
 
-export default defineConfig({
+export default configureLucid({
 	adapter: {
 		from: "@lucidcms/cloudflare-adapter",
 		options: {
@@ -40,9 +40,9 @@ export default defineConfig({
 	},
 	config: (env) => ({
 		db: new LibSQLAdapter({
-			url: env.TURSO_URL,
-			authToken: env.TURSO_AUTH_TOKEN,
-			// url: "http://127.0.0.1:8081",
+			// url: env.TURSO_URL,
+			// authToken: env.TURSO_AUTH_TOKEN,
+			url: "http://127.0.0.1:8081",
 		}),
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,

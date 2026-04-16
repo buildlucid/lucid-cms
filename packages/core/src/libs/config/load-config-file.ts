@@ -25,7 +25,7 @@ export type LoadConfigResult = {
 export const loadConfigFile = async (props?: {
 	path?: string;
 	silent?: boolean;
-	defineConfigPath?: string;
+	configureLucidPath?: string;
 	loadRuntime?: boolean;
 }): Promise<LoadConfigResult> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
@@ -45,7 +45,7 @@ export const loadConfigFile = async (props?: {
 	const resolved = await resolveConfigDefinition({
 		definition: configModule.default,
 		envSchema: hasNamedEnvSchemaExport ? configModule.envSchema : undefined,
-		defineConfigPath: props?.defineConfigPath,
+		configureLucidPath: props?.configureLucidPath,
 		loadRuntime: props?.loadRuntime,
 		logger: {
 			instance: cliLogger,

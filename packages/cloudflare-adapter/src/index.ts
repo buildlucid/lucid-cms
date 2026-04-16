@@ -1,1 +1,1 @@
-export { default as defineConfig } from "./services/define-config.js";
+export { default as configureLucid } from "./services/configure-lucid.js";

@@ -33,7 +33,7 @@ describe("@lucidcms/astro internals", () => {
 
 	test("rejects unsupported or mismatched runtimes", () => {
 		expect(() => detectLucidRuntime(undefined)).toThrow(
-			/defineConfig\(\{ adapter: \{ from:/,
+			/configureLucid\(\{ adapter: \{ from:/,
 		);
 		expect(() => detectLucidRuntime({ key: "bun" } as never)).toThrow(
 			/does not support the "bun" runtime adapter/,
@@ -59,7 +59,7 @@ describe("@lucidcms/astro internals", () => {
 
 		expect(nodeSource).toContain("resolveConfigDefinition");
 		expect(nodeSource).toContain(
-			'defineConfigPath: "@lucidcms/astro/define-config"',
+			'configureLucidPath: "@lucidcms/astro/configure-lucid"',
 		);
 		expect(nodeSource).not.toContain(
 			'Reflect.get(lucidConfigModule, "envSchema")',
@@ -68,7 +68,7 @@ describe("@lucidcms/astro internals", () => {
 			'Reflect.get(lucidConfigModule, "adapter")',
 		);
 		expect(cloudflareSource).toContain(
-			'defineConfigPath: "@lucidcms/astro/define-config"',
+			'configureLucidPath: "@lucidcms/astro/configure-lucid"',
 		);
 		expect(nodeSource).toContain("export const prerender = false;");
 		expect(nodeSource).toContain("configEntryPoint: null");
@@ -108,7 +108,7 @@ describe("@lucidcms/astro internals", () => {
 		expect(source).toContain("async scheduled(controller, env, ctx)");
 		expect(source).toContain("resolveConfigDefinition");
 		expect(source).toContain(
-			'defineConfigPath: "@lucidcms/astro/define-config"',
+			'configureLucidPath: "@lucidcms/astro/configure-lucid"',
 		);
 		expect(source).toContain("queue(batch, env, ctx)");
 		expect(source).toContain('import { queueHandler } from "./plugin.js";');

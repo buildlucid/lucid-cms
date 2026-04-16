@@ -11,9 +11,9 @@
 			"types": "./dist/index.d.mts",
 			"default": "./dist/index.mjs"
 		},
-		"./define-config": {
-			"types": "./dist/define-config.d.mts",
-			"default": "./dist/define-config.mjs"
+		"./configure-lucid": {
+			"types": "./dist/configure-lucid.d.mts",
+			"default": "./dist/configure-lucid.mjs"
 		},
 		"./runtime": {
 			"types": "./dist/runtime.d.mts",

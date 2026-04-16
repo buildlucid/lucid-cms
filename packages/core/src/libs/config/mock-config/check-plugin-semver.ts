@@ -1,9 +1,9 @@
-import { defineConfig } from "@lucidcms/core";
+import { configureLucid } from "@lucidcms/core";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
 import testingConstants from "../../../constants/testing-constants.js";
 
-export default defineConfig({
+export default configureLucid({
 	adapter: {
 		from: "@lucidcms/node-adapter",
 	},

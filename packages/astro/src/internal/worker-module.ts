@@ -7,7 +7,7 @@ import type {
 } from "@lucidcms/cloudflare-adapter/types";
 import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
 import {
-	ASTRO_DEFINE_CONFIG_MODULE_ID,
+	ASTRO_CONFIGURE_LUCID_MODULE_ID,
 	CLOUDFLARE_RUNTIME_ENV_GLOBAL,
 	LUCID_EMAIL_TEMPLATES_JSON_FILENAME,
 	WORKER_ENTRY_ARTIFACT_TYPE,
@@ -147,7 +147,7 @@ return astroWorker.fetch(request, env, ctx);`,
 	const { config: resolvedConfig } = await resolveConfigDefinition({
 		definition: configDefinition,
 		envSchema,
-		defineConfigPath: ${JSON.stringify(ASTRO_DEFINE_CONFIG_MODULE_ID)},
+		configureLucidPath: ${JSON.stringify(ASTRO_CONFIGURE_LUCID_MODULE_ID)},
 		meta: {
 			emailTemplates,
 		},

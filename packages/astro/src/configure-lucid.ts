@@ -2,10 +2,10 @@ import type {
 	LucidConfig,
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
-	RuntimeDefineConfig,
+	RuntimeConfigureLucid,
 } from "@lucidcms/core/types";
 
-const defineConfig: RuntimeDefineConfig = <AdapterFrom extends string>(
+const configureLucid: RuntimeConfigureLucid = <AdapterFrom extends string>(
 	definition: LucidConfigDefinition<AdapterFrom>,
 	meta?: LucidConfigDefinitionMeta,
 ): LucidConfigDefinition<AdapterFrom> => {
@@ -22,10 +22,10 @@ const defineConfig: RuntimeDefineConfig = <AdapterFrom extends string>(
 								value.html,
 							]),
 						)
-					: undefined,
+					: lucidConfig.preRenderedEmailTemplates,
 			} satisfies LucidConfig;
 		},
 	};
 };
 
-export default defineConfig;
+export default configureLucid;

@@ -1,3 +1,4 @@
+// biome-ignore lint/suspicious/noExplicitAny: explanation
 type AsyncFunction = (...args: any[]) => Promise<any>;
 type DefaultFunctionModule<T extends AsyncFunction> = {
 	default: T;

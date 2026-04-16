@@ -1,7 +1,7 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import {
-	getAdapterDefineConfig,
+	getAdapterConfigureLucid,
 	getAdapterEnv,
 	getAdapterRootModule,
 	getAdapterRuntime,
@@ -28,7 +28,7 @@ const defaultLoggerInstance = {
 } as unknown as GetEnvVarsLogger["instance"];
 
 export const invalidConfigDefinitionMessage =
-	"Lucid config must default export defineConfig({ adapter, config }).";
+	"Lucid config must default export configureLucid({ adapter, config }).";
 
 export type ResolveConfigDefinitionResult = {
 	config: Config;
@@ -83,7 +83,7 @@ export const resolveConfigDefinition = async (props: {
 	envSchema?: z.ZodType;
 	meta?: LucidConfigDefinitionMeta;
 	env?: EnvironmentVariables;
-	defineConfigPath?: string;
+	configureLucidPath?: string;
 	logger?: GetEnvVarsLogger;
 	loadRuntime?: boolean;
 	processConfigOptions?: Parameters<typeof processConfig>[1];
@@ -91,14 +91,15 @@ export const resolveConfigDefinition = async (props: {
 	const definition = assertConfigDefinition(props.definition);
 	const adapterRootModule = await getAdapterRootModule(definition.adapter.from);
 
-	// Hosted integrations can supply their own defineConfig wrapper so the
+	// Hosted integrations can supply their own configureLucid wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
-	const defineConfig =
-		props.defineConfigPath && props.defineConfigPath !== definition.adapter.from
-			? await getAdapterDefineConfig(props.defineConfigPath)
-			: adapterRootModule.defineConfig;
+	const configureLucid =
+		props.configureLucidPath &&
+		props.configureLucidPath !== definition.adapter.from
+			? await getAdapterConfigureLucid(props.configureLucidPath)
+			: adapterRootModule.configureLucid;
 
-	const wrappedDefinition = defineConfig(definition, props.meta);
+	const wrappedDefinition = configureLucid(definition, props.meta);
 	const logger = props.logger ?? {
 		instance: defaultLoggerInstance,
 		silent: true,

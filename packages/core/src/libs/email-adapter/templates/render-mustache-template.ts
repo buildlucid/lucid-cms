@@ -1,5 +1,5 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import Mustache from "mustache";
 import constants from "../../../constants/constants.js";
 import T from "../../../translations/index.js";
@@ -38,14 +38,9 @@ const renderMustacheTemplate: ServiceFn<
 			context.config.build.paths.outDir,
 			constants.emailRenderedOutput,
 		);
-		const importUrl = pathToFileURL(templatesPath).href;
-
-		const { default: renderedTemplates }: { default: RenderedTemplates } =
-			await import(importUrl, {
-				with: {
-					type: "json",
-				},
-			});
+		const renderedTemplates = JSON.parse(
+			await readFile(templatesPath, "utf-8"),
+		) as RenderedTemplates;
 
 		const templateData = renderedTemplates[data.template];
 		if (!templateData) {

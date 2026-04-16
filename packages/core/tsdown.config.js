@@ -4,6 +4,7 @@ import packageJson from "./package.json" with { type: "json" };
 export default defineConfig({
 	entry: [
 		"src/index.ts",
+		"src/configure-lucid.ts",
 		"src/types.ts",
 		"src/api.ts",
 		"src/build.ts",

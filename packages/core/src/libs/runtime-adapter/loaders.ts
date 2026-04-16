@@ -8,7 +8,7 @@ import type {
 	RuntimeAdapterEnvModule,
 	RuntimeAdapterRootModule,
 	RuntimeAdapterRuntimeModule,
-	RuntimeDefineConfig,
+	RuntimeConfigureLucid,
 } from "./types.js";
 
 const adapterModuleCache = new Map<string, Promise<unknown>>();
@@ -43,7 +43,7 @@ const getDefaultExport = <T>(
 
 /**
  * The root adapter package stays lightweight and only exposes config metadata
- * such as defineConfig and type-generation hints.
+ * such as configureLucid and type-generation hints.
  */
 export const getAdapterRootModule = async (
 	adapterFrom: string,
@@ -51,32 +51,32 @@ export const getAdapterRootModule = async (
 	const module =
 		await loadAdapterModule<Partial<RuntimeAdapterRootModule>>(adapterFrom);
 
-	if (typeof module.defineConfig !== "function") {
+	if (typeof module.configureLucid !== "function") {
 		throw new Error(
-			`Lucid could not load the defineConfig() export from "${adapterFrom}".`,
+			`Lucid could not load the configureLucid() export from "${adapterFrom}".`,
 		);
 	}
 
 	return module as RuntimeAdapterRootModule;
 };
 
-export const getAdapterDefineConfig = async (
+export const getAdapterConfigureLucid = async (
 	modulePath: string,
-): Promise<RuntimeDefineConfig> => {
+): Promise<RuntimeConfigureLucid> => {
 	const module = await loadAdapterModule<
 		Partial<RuntimeAdapterRootModule> & {
-			default?: RuntimeDefineConfig;
+			default?: RuntimeConfigureLucid;
 		}
 	>(modulePath);
-	const defineConfig = module.defineConfig ?? getDefaultExport(module);
+	const configureLucid = module.configureLucid ?? getDefaultExport(module);
 
-	if (typeof defineConfig !== "function") {
+	if (typeof configureLucid !== "function") {
 		throw new Error(
-			`Lucid could not load the defineConfig() export from "${modulePath}".`,
+			`Lucid could not load the configureLucid() export from "${modulePath}".`,
 		);
 	}
 
-	return defineConfig;
+	return configureLucid;
 };
 
 /**

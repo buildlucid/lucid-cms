@@ -175,13 +175,13 @@ export type LucidConfigDefinition<AdapterFrom extends string = string> = {
 	config: AdapterDefineConfig;
 };
 
-export type RuntimeDefineConfig = <AdapterFrom extends string>(
+export type RuntimeConfigureLucid = <AdapterFrom extends string>(
 	definition: LucidConfigDefinition<AdapterFrom>,
 	meta?: LucidConfigDefinitionMeta,
 ) => LucidConfigDefinition<AdapterFrom>;
 
 export type RuntimeAdapterRootModule = {
-	defineConfig: RuntimeDefineConfig;
+	configureLucid: RuntimeConfigureLucid;
 };
 
 export type RuntimeAdapterEnvModule = {

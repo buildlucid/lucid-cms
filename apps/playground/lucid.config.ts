@@ -4,7 +4,7 @@
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
-import { defineConfig, z } from "@lucidcms/core";
+import { configureLucid, z } from "@lucidcms/core";
 import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
 import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
 import {
@@ -50,7 +50,7 @@ export const envSchema = z.object({
 	// REDIS_CONNECTION: z.string(),
 });
 
-export default defineConfig({
+export default configureLucid({
 	adapter: {
 		from: "@lucidcms/node-adapter",
 		// from: "@lucidcms/cloudflare-adapter",

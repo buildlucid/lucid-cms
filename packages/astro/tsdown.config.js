@@ -4,7 +4,7 @@ export default defineConfig({
 	entry: [
 		"src/index.ts",
 		"src/runtime.ts",
-		"src/define-config.ts",
+		"src/configure-lucid.ts",
 		"src/types.ts",
 	],
 	dts: true,

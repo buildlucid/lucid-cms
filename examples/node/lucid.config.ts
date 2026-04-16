@@ -1,4 +1,4 @@
-import { defineConfig, z } from "@lucidcms/core";
+import { configureLucid, z } from "@lucidcms/core";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
@@ -13,7 +13,7 @@ export const envSchema = z.object({
 	ACCESS_TOKEN_SECRET: z.string(),
 });
 
-export default defineConfig({
+export default configureLucid({
 	adapter: {
 		from: "@lucidcms/node-adapter",
 	},

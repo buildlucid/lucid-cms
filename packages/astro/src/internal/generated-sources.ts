@@ -1,5 +1,5 @@
 import {
-	ASTRO_DEFINE_CONFIG_MODULE_ID,
+	ASTRO_CONFIGURE_LUCID_MODULE_ID,
 	CLOUDFLARE_DEV_ENV_GLOBAL,
 	CLOUDFLARE_RUNTIME_ENV_GLOBAL,
 	DEFAULT_REMOTE_ADDRESS,
@@ -43,7 +43,7 @@ const ensureApp = async () => {
 \t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
 \t\t\t\tdefinition: lucidConfigModule.default,
 \t\t\t\tenvSchema: lucidConfigModule.envSchema,
-\t\t\t\tdefineConfigPath: ${JSON.stringify(ASTRO_DEFINE_CONFIG_MODULE_ID)},
+\t\t\t\tconfigureLucidPath: ${JSON.stringify(ASTRO_CONFIGURE_LUCID_MODULE_ID)},
 \t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
 \t\t\t\t},
@@ -170,7 +170,7 @@ const ensureApp = async () => {
 \t\t\tconst { config: resolvedConfig } = await resolveConfigDefinition({
 \t\t\t\tdefinition,
 \t\t\t\tenvSchema,
-\t\t\t\tdefineConfigPath: ${JSON.stringify(ASTRO_DEFINE_CONFIG_MODULE_ID)},
+\t\t\t\tconfigureLucidPath: ${JSON.stringify(ASTRO_CONFIGURE_LUCID_MODULE_ID)},
 \t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
 \t\t\t\t},

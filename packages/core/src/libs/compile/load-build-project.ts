@@ -21,14 +21,14 @@ const loadBuildProject = async (props?: {
 	generateTypes?: boolean;
 	renderEmailTemplates?: boolean;
 	envSchema?: ZodType;
-	defineConfigPath?: string;
+	configureLucidPath?: string;
 	loadRuntime?: boolean;
 }): Promise<LoadBuildProjectResult> => {
 	const configPath = props?.configPath ?? getConfigPath(process.cwd());
 	const loaded = await loadConfigFile({
 		path: configPath,
 		silent: props?.silent,
-		defineConfigPath: props?.defineConfigPath,
+		configureLucidPath: props?.configureLucidPath,
 		loadRuntime: props?.loadRuntime,
 	});
 

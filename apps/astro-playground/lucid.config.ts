@@ -1,4 +1,4 @@
-import { defineConfig } from "@lucidcms/core";
+import { configureLucid } from "@lucidcms/core";
 import { passthroughQueueAdapter } from "@lucidcms/core/queue-adapter";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
@@ -8,7 +8,7 @@ import PagesCollection from "./src/collections/pages.js";
 const fixtureSecret =
 	"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
-export default defineConfig({
+export default configureLucid({
 	adapter: {
 		from: "@lucidcms/node-adapter",
 	},

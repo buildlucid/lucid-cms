@@ -1,5 +1,5 @@
 import type { KVNamespace, Queue } from "@cloudflare/workers-types";
-import { defineConfig, z } from "@lucidcms/core";
+import { configureLucid, z } from "@lucidcms/core";
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
@@ -20,7 +20,7 @@ export const envSchema = z.object({
 	CLOUDFLARE_QUEUES: z.custom<Queue>(),
 });
 
-export default defineConfig({
+export default configureLucid({
 	adapter: {
 		from: "@lucidcms/cloudflare-adapter",
 	},
