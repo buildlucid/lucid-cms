@@ -2,20 +2,18 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { LucidError } from "@lucidcms/core";
 import {
+	checkAllPluginsCompatibility,
 	loadBuildProject,
 	migrateCommand,
 	prepareLucidPublicAssets,
 	prepareLucidSPA,
 } from "@lucidcms/core/build";
-import {
-	ASTRO_CLIENT_DIRNAME,
-	ASTRO_CONFIGURE_LUCID_MODULE_ID,
-	CLOUDFLARE_DEV_ENV_GLOBAL,
-	LUCID_MOUNT_PATH,
-} from "../constants.js";
+import type { AdapterRuntimeContext } from "@lucidcms/core/types";
+import astroConstants from "../constants.js";
 import { detectLucidRuntime } from "../internal/compatibility.js";
 
 import type { LucidAstroRuntime } from "../types.js";
+import collectConfigDependencies from "./config-dependencies.js";
 import { collectFiles, ensureDirectory, pathExists } from "./filesystem.js";
 
 type BuildProject = Awaited<ReturnType<typeof loadBuildProject>>;
@@ -24,6 +22,7 @@ type RenderedTemplates = NonNullable<BuildProject["emailTemplates"]>;
 
 export type ResolvedLucidProject = {
 	configPath: string;
+	configDependencies: string[];
 	runtime: LucidAstroRuntime;
 	loaded: LoadConfigResult;
 	emailTemplates: RenderedTemplates;
@@ -36,13 +35,16 @@ export type ResolvedLucidProject = {
 export const loadLucidProject = async (
 	configPath: string,
 ): Promise<ResolvedLucidProject> => {
-	const project = await loadBuildProject({
-		configPath,
-		silent: true,
-		validateEnv: true,
-		renderEmailTemplates: true,
-		configureLucidPath: ASTRO_CONFIGURE_LUCID_MODULE_ID,
-	});
+	const [project, configDependencies] = await Promise.all([
+		loadBuildProject({
+			configPath,
+			silent: true,
+			validateEnv: true,
+			renderEmailTemplates: true,
+			configureLucidPath: astroConstants.integration.configureLucidModuleId,
+		}),
+		collectConfigDependencies(configPath),
+	]);
 
 	if (!project.emailTemplates) {
 		throw new LucidError({
@@ -53,6 +55,7 @@ export const loadLucidProject = async (
 
 	return {
 		configPath,
+		configDependencies,
 		runtime: detectLucidRuntime(project.loaded.adapter),
 		emailTemplates: project.emailTemplates,
 		loaded: project.loaded,
@@ -76,13 +79,54 @@ export const reloadLucidProjectForDevBootstrap = async (
 		validateEnv: true,
 		generateTypes: false,
 		renderEmailTemplates: false,
-		configureLucidPath: ASTRO_CONFIGURE_LUCID_MODULE_ID,
+		configureLucidPath: astroConstants.integration.configureLucidModuleId,
 	});
 
 	return {
 		...project,
 		loaded: reloaded.loaded,
 	};
+};
+
+/**
+ * Astro still relies on the real Lucid runtime adapters underneath, so hosted
+ * compatibility checks should use the same runtime contexts the CLI would
+ * expose for the matching Node or Cloudflare host.
+ */
+export const getAstroRuntimeContext = async (props: {
+	project: ResolvedLucidProject;
+	compiled: boolean;
+}): Promise<AdapterRuntimeContext> => {
+	if (props.project.runtime === "cloudflare") {
+		const { getRuntimeContext } = await import(
+			"@lucidcms/cloudflare-adapter/runtime"
+		);
+		return getRuntimeContext({
+			server: "cloudflare",
+			compiled: props.compiled,
+		});
+	}
+
+	const { getRuntimeContext } = await import("@lucidcms/node-adapter/runtime");
+	return getRuntimeContext({
+		compiled: props.compiled,
+	});
+};
+
+/**
+ * Plugin compatibility should fail during Astro setup, not after Lucid starts,
+ * so hosted projects stay aligned with the standalone build/serve commands.
+ */
+export const assertLucidPluginCompatibility = async (props: {
+	project: ResolvedLucidProject;
+	compiled: boolean;
+}) => {
+	const runtimeContext = await getAstroRuntimeContext(props);
+
+	await checkAllPluginsCompatibility({
+		runtimeContext,
+		config: props.project.loaded.config,
+	});
 };
 
 /**
@@ -113,7 +157,10 @@ export const prepareAssetSourceTree = async (
 	}
 
 	const spaResult = await prepareLucidSPA({
-		outDir: path.join(assetRoot, LUCID_MOUNT_PATH.replace(/^\//, "")),
+		outDir: path.join(
+			assetRoot,
+			astroConstants.paths.mountPath.replace(/^\//, ""),
+		),
 	});
 
 	if (spaResult.error) {
@@ -134,7 +181,7 @@ export const copyBuiltAssets = async (assetRoot: string, buildDir: string) => {
 		return;
 	}
 
-	const clientDir = path.join(buildDir, ASTRO_CLIENT_DIRNAME);
+	const clientDir = path.join(buildDir, astroConstants.paths.clientDirname);
 	const outputDir = (await pathExists(clientDir)) ? clientDir : buildDir;
 	const files = await collectFiles(assetRoot);
 
@@ -157,8 +204,22 @@ export const addLucidWatchFiles = async (
 	project: ResolvedLucidProject,
 	addWatchFile: (path: string | URL) => void,
 ) => {
-	addWatchFile(project.configPath);
-	addWatchFile(
+	const watchedPaths = new Set<string>();
+	const registerWatchPath = (watchPath: string) => {
+		const resolvedPath = path.resolve(watchPath);
+		if (watchedPaths.has(resolvedPath)) {
+			return;
+		}
+
+		watchedPaths.add(resolvedPath);
+		addWatchFile(resolvedPath);
+	};
+
+	registerWatchPath(project.configPath);
+	for (const dependencyPath of project.configDependencies) {
+		registerWatchPath(path.dirname(dependencyPath));
+	}
+	registerWatchPath(
 		path.isAbsolute(project.loaded.config.build.paths.emailTemplates)
 			? project.loaded.config.build.paths.emailTemplates
 			: path.join(
@@ -172,7 +233,7 @@ export const addLucidWatchFiles = async (
 		const resolvedPath = path.isAbsolute(inputPath)
 			? inputPath
 			: path.join(process.cwd(), inputPath);
-		addWatchFile(resolvedPath);
+		registerWatchPath(resolvedPath);
 	}
 };
 
@@ -186,8 +247,9 @@ export const runDevBootstrap = async (
 	const bootstrapProject = await reloadLucidProjectForDevBootstrap(project);
 
 	if (bootstrapProject.runtime === "cloudflare") {
-		(globalThis as Record<string, unknown>)[CLOUDFLARE_DEV_ENV_GLOBAL] =
-			bootstrapProject.loaded.env;
+		(globalThis as Record<string, unknown>)[
+			astroConstants.cloudflare.devEnvGlobal
+		] = bootstrapProject.loaded.env;
 	}
 
 	const migrationResult = await migrateCommand({

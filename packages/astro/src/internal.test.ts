@@ -68,12 +68,16 @@ describe("@lucidcms/astro internals", () => {
 			'Reflect.get(lucidConfigModule, "adapter")',
 		);
 		expect(cloudflareSource).toContain(
-			'configureLucidPath: "@lucidcms/astro/configure-lucid"',
+			'import("@lucidcms/astro/configure-lucid")',
 		);
 		expect(nodeSource).toContain("export const prerender = false;");
 		expect(nodeSource).toContain("configEntryPoint: null");
 		expect(nodeSource).toContain('request.headers.get("x-forwarded-for")');
 		expect(cloudflareSource).toContain("export const prerender = false;");
+		expect(cloudflareSource).toContain(
+			"context.locals?.cfContext ?? undefined",
+		);
+		expect(cloudflareSource).not.toContain("currentExecutionContext");
 	});
 
 	test("generates the Cloudflare main worker with Astro fetch and Lucid scheduled handlers", () => {
@@ -106,9 +110,9 @@ describe("@lucidcms/astro internals", () => {
 		);
 		expect(source).toContain("...astroWorker");
 		expect(source).toContain("async scheduled(controller, env, ctx)");
-		expect(source).toContain("resolveConfigDefinition");
+		expect(source).toContain("astroConfigureLucid(configDefinition");
 		expect(source).toContain(
-			'configureLucidPath: "@lucidcms/astro/configure-lucid"',
+			'import astroConfigureLucid from "@lucidcms/astro/configure-lucid";',
 		);
 		expect(source).toContain("queue(batch, env, ctx)");
 		expect(source).toContain('import { queueHandler } from "./plugin.js";');

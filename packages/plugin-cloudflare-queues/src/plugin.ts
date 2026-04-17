@@ -25,11 +25,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		lucid: LUCID_VERSION,
 		hooks: {
 			build: async (props) => {
+				const configImportPath = `./${props.paths.outputRelativeConfigPath}`;
 				const imports: CloudflareWorkerImport[] = [
-					{
-						path: `./${props.paths.outputRelativeConfigPath}`,
-						default: "config",
-					},
 					{
 						path: "@lucidcms/core/queue-adapter",
 						exports: [
@@ -63,7 +60,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `const wrappedDefinition = coreConfigureLucid(config);
+						content: /** ts */ `const { default: configDefinition, envSchema } =
+    await import(${JSON.stringify(configImportPath)});
+
+if (envSchema) {
+    envSchema.parse(env);
+}
+
+const wrappedDefinition = coreConfigureLucid(configDefinition);
 const lucidConfig = wrappedDefinition.config(env);
 lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
     Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),

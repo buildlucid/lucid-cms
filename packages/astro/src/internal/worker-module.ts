@@ -6,13 +6,7 @@ import type {
 	CloudflareWorkerImport,
 } from "@lucidcms/cloudflare-adapter/types";
 import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
-import {
-	ASTRO_CONFIGURE_LUCID_MODULE_ID,
-	CLOUDFLARE_RUNTIME_ENV_GLOBAL,
-	LUCID_EMAIL_TEMPLATES_JSON_FILENAME,
-	WORKER_ENTRY_ARTIFACT_TYPE,
-	WORKER_EXPORT_ARTIFACT_TYPE,
-} from "../constants.js";
+import astroConstants from "../constants.js";
 
 const mergeWorkerImports = (importsInput: CloudflareWorkerImport[]) => {
 	const importTracker = new Map<
@@ -128,7 +122,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 			exports: ["processConfig", "setupCronJobs"],
 		},
 		{
-			path: ASTRO_CONFIGURE_LUCID_MODULE_ID,
+			path: astroConstants.integration.configureLucidModuleId,
 			default: "astroConfigureLucid",
 		},
 		{
@@ -136,7 +130,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 			exports: ["passthroughKVAdapter"],
 		},
 		{
-			path: `./${LUCID_EMAIL_TEMPLATES_JSON_FILENAME}`,
+			path: `./${astroConstants.files.emailTemplatesJson}`,
 			default: "emailTemplates",
 		},
 	];
@@ -146,7 +140,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 			async: true,
 			params: ["request", "env", "ctx"],
 			content: `// Astro owns the main request handler, so we stash the bindings where the generated Lucid route can read them.
-globalThis[${JSON.stringify(CLOUDFLARE_RUNTIME_ENV_GLOBAL)}] = env;
+globalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] = env;
 return astroWorker.fetch(request, env, ctx);`,
 		},
 		{
@@ -190,7 +184,7 @@ ctx.waitUntil(runCronService());`,
 	];
 
 	for (const artifact of props.customArtifacts) {
-		if (artifact.type !== WORKER_EXPORT_ARTIFACT_TYPE) {
+		if (artifact.type !== astroConstants.workerArtifacts.exportType) {
 			continue;
 		}
 
@@ -214,7 +208,9 @@ export const buildCloudflareAdditionalWorkers = (
 	customArtifacts: RuntimeBuildArtifactCustom[],
 ): Array<{ filename: string; source: string }> => {
 	return customArtifacts
-		.filter((artifact) => artifact.type === WORKER_ENTRY_ARTIFACT_TYPE)
+		.filter(
+			(artifact) => artifact.type === astroConstants.workerArtifacts.entryType,
+		)
 		.map((artifact) => {
 			const custom = artifact.custom as CloudflareWorkerEntryArtifact;
 			const filename = path.basename(custom.filename);

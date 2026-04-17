@@ -1,13 +1,5 @@
 import type { LucidConfig, RenderedTemplates } from "@lucidcms/core/types";
-import {
-	HTML_CONTENT_TYPE,
-	HTTP_METHOD_HEAD,
-	HTTP_STATUS_OK,
-	LUCID_MOUNT_PATH,
-	LUCID_NON_SPA_PREFIXES,
-	NO_STORE_CACHE_CONTROL,
-	SPA_SHELL_METHODS,
-} from "./constants.js";
+import astroConstants, { lucidNonSpaPrefixes } from "./constants.js";
 
 export type LucidAstroConfigFactory = (
 	env: Record<string, unknown>,
@@ -24,11 +16,11 @@ export const createLucidSpaResponse = (
 	html: string,
 	method: string,
 ): Response => {
-	return new Response(method === HTTP_METHOD_HEAD ? null : html, {
-		status: HTTP_STATUS_OK,
+	return new Response(method === astroConstants.http.headMethod ? null : html, {
+		status: astroConstants.http.okStatus,
 		headers: {
-			"content-type": HTML_CONTENT_TYPE,
-			"cache-control": NO_STORE_CACHE_CONTROL,
+			"content-type": astroConstants.http.htmlContentType,
+			"cache-control": astroConstants.http.noStoreCacheControl,
 		},
 	});
 };
@@ -41,16 +33,18 @@ export const shouldServeLucidSpaShell = (
 	pathname: string,
 	method: string,
 ): boolean => {
-	if (!pathname.startsWith(LUCID_MOUNT_PATH)) {
-		return false;
-	}
-
-	if (!SPA_SHELL_METHODS.includes(method.toUpperCase() as never)) {
+	if (!pathname.startsWith(astroConstants.paths.mountPath)) {
 		return false;
 	}
 
 	if (
-		LUCID_NON_SPA_PREFIXES.some(
+		!astroConstants.http.spaShellMethods.includes(method.toUpperCase() as never)
+	) {
+		return false;
+	}
+
+	if (
+		lucidNonSpaPrefixes.some(
 			(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
 		)
 	) {

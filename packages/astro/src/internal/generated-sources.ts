@@ -1,12 +1,4 @@
-import {
-	ASTRO_CONFIGURE_LUCID_MODULE_ID,
-	CLOUDFLARE_DEV_ENV_GLOBAL,
-	CLOUDFLARE_RUNTIME_ENV_GLOBAL,
-	DEFAULT_REMOTE_ADDRESS,
-	HTTP_STATUS_NOT_FOUND,
-	LUCID_EMAIL_TEMPLATES_MODULE_FILENAME,
-	LUCID_SPA_HTML_MODULE_FILENAME,
-} from "../constants.js";
+import astroConstants from "../constants.js";
 
 /**
  * Astro's Node adapter does not expose Lucid's usual connection helper, so the
@@ -19,8 +11,8 @@ import { resolveConfigDefinition } from "@lucidcms/core/build";
 import { createApp } from "@lucidcms/core/runtime";
 import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
 import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/runtime";
-import emailTemplates from "./${LUCID_EMAIL_TEMPLATES_MODULE_FILENAME}";
-import spaHtml from "./${LUCID_SPA_HTML_MODULE_FILENAME}";
+import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import spaHtml from "./${astroConstants.files.spaHtmlModule}";
 
 export const prerender = false;
 
@@ -34,7 +26,7 @@ const resolveRemoteAddress = (request) => {
 \t\tfirstForwardedAddress ||
 \t\trequest.headers.get("x-real-ip") ||
 \t\trequest.headers.get("cf-connecting-ip") ||
-\t\t${JSON.stringify(DEFAULT_REMOTE_ADDRESS)}
+\t\t${JSON.stringify(astroConstants.defaults.remoteAddress)}
 \t);
 };
 
@@ -44,7 +36,7 @@ const ensureApp = async () => {
 \t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
 \t\t\t\tdefinition: lucidConfigModule.default,
 \t\t\t\tenvSchema: lucidConfigModule.envSchema,
-\t\t\t\tconfigureLucidPath: ${JSON.stringify(ASTRO_CONFIGURE_LUCID_MODULE_ID)},
+\t\t\t\tconfigureLucidPath: ${JSON.stringify(astroConstants.integration.configureLucidModuleId)},
 \t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
 \t\t\t\t},
@@ -86,7 +78,7 @@ export const ALL = async (context) => {
 \tconst response = await app.fetch(context.request);
 \tconst pathname = new URL(context.request.url).pathname;
 
-\tif (response.status === ${HTTP_STATUS_NOT_FOUND} && shouldServeLucidSpaShell(pathname, context.request.method)) {
+\tif (response.status === ${astroConstants.http.notFoundStatus} && shouldServeLucidSpaShell(pathname, context.request.method)) {
 \t\treturn createLucidSpaResponse(spaHtml, context.request.method);
 \t}
 
@@ -104,12 +96,11 @@ export const buildCloudflareRouteSource = (
 
 let appPromise;
 let runtimeModulesPromise;
-let currentExecutionContext = null;
 
 const getCloudflareEnv = () => {
 \tconst env =
-\t\tglobalThis[${JSON.stringify(CLOUDFLARE_RUNTIME_ENV_GLOBAL)}] ??
-\t\tglobalThis[${JSON.stringify(CLOUDFLARE_DEV_ENV_GLOBAL)}];
+\t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] ??
+\t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.devEnvGlobal)}];
 
 \tif (!env) {
 \t\tthrow new Error(
@@ -125,11 +116,11 @@ const loadRuntimeModules = async () => {
 \t\truntimeModulesPromise = Promise.all([
 \t\t\timport(${JSON.stringify(configImportPath)}),
 \t\t\timport("@lucidcms/core/runtime"),
-\t\t\timport(${JSON.stringify(ASTRO_CONFIGURE_LUCID_MODULE_ID)}),
+\t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
 \t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
 \t\t\timport("@lucidcms/astro/runtime"),
-\t\t\timport("./${LUCID_EMAIL_TEMPLATES_MODULE_FILENAME}"),
-\t\t\timport("./${LUCID_SPA_HTML_MODULE_FILENAME}"),
+\t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
+\t\t\timport("./${astroConstants.files.spaHtmlModule}"),
 \t\t]).then(
 \t\t\t([
 \t\t\t\tlucidConfigModule,
@@ -197,9 +188,9 @@ const ensureApp = async () => {
 \t\t\t\t\t\t\t\tc.set("env", c.env ?? cloudflareEnv);
 \t\t\t\t\t\t\t\tc.set("cf", c.req.raw.cf ?? null);
 \t\t\t\t\t\t\t\tc.set("caches", globalThis.caches ?? null);
-\t\t\t\t\t\t\t\tlet executionContext = currentExecutionContext;
+\t\t\t\t\t\t\t\tlet executionContext = null;
 \t\t\t\t\t\t\t\ttry {
-\t\t\t\t\t\t\t\t\texecutionContext = c.executionCtx ?? currentExecutionContext;
+\t\t\t\t\t\t\t\t\texecutionContext = c.executionCtx ?? null;
 \t\t\t\t\t\t\t\t} catch {}
 \t\t\t\t\t\t\t\tc.set(
 \t\t\t\t\t\t\t\t\t"ctx",
@@ -239,17 +230,14 @@ export const ALL = async (context) => {
 \t\tspaHtml,
 \t} = await loadRuntimeModules();
 \tconst { app } = await ensureApp();
-\t// Astro passes the execution context through locals, so we hold it briefly while Hono builds the request context.
-\tcurrentExecutionContext = context.locals?.cfContext ?? null;
 \tconst response = await app.fetch(
 \t\tcontext.request,
 \t\tcloudflareEnv,
-\t\tcurrentExecutionContext,
+\t\tcontext.locals?.cfContext ?? undefined,
 \t);
-\tcurrentExecutionContext = null;
 \tconst pathname = new URL(context.request.url).pathname;
 
-\tif (response.status === ${HTTP_STATUS_NOT_FOUND} && shouldServeLucidSpaShell(pathname, context.request.method)) {
+\tif (response.status === ${astroConstants.http.notFoundStatus} && shouldServeLucidSpaShell(pathname, context.request.method)) {
 \t\treturn createLucidSpaResponse(spaHtml, context.request.method);
 \t}
 

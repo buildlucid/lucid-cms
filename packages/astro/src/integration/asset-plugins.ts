@@ -3,15 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { lookup as lookupMimeType } from "mime-types";
 import type { Plugin } from "vite";
-import {
-	ASTRO_DEV_ORIGIN,
-	CONTENT_TYPE_HEADER,
-	DEFAULT_BINARY_CONTENT_TYPE,
-	HTTP_STATUS_OK,
-	LUCID_ASTRO_BUILD_ASSET_PLUGIN_NAME,
-	LUCID_ASTRO_DEV_ASSET_PLUGIN_NAME,
-	LUCID_MOUNT_PATH,
-} from "../constants.js";
+import astroConstants from "../constants.js";
 import { toPosixPath } from "../internal/paths.js";
 import { collectFiles, pathExists } from "./filesystem.js";
 
@@ -20,7 +12,7 @@ import { collectFiles, pathExists } from "./filesystem.js";
  * middleware lets `/lucid/*` resolve without asking the user to run a second server.
  */
 export const createLucidDevAssetPlugin = (assetRoot: string): Plugin => ({
-	name: LUCID_ASTRO_DEV_ASSET_PLUGIN_NAME,
+	name: astroConstants.integration.devAssetPluginName,
 	apply: "serve",
 	configureServer(server) {
 		server.middlewares.use(async (req, res, next) => {
@@ -30,9 +22,9 @@ export const createLucidDevAssetPlugin = (assetRoot: string): Plugin => ({
 			}
 
 			const pathname = decodeURIComponent(
-				new URL(req.url, ASTRO_DEV_ORIGIN).pathname,
+				new URL(req.url, astroConstants.http.devOrigin).pathname,
 			);
-			if (!pathname.startsWith(`${LUCID_MOUNT_PATH}/`)) {
+			if (!pathname.startsWith(`${astroConstants.paths.mountPath}/`)) {
 				next();
 				return;
 			}
@@ -54,10 +46,11 @@ export const createLucidDevAssetPlugin = (assetRoot: string): Plugin => ({
 				return;
 			}
 
-			res.statusCode = HTTP_STATUS_OK;
+			res.statusCode = astroConstants.http.okStatus;
 			res.setHeader(
-				CONTENT_TYPE_HEADER,
-				lookupMimeType(filePath) || DEFAULT_BINARY_CONTENT_TYPE,
+				astroConstants.http.contentTypeHeader,
+				lookupMimeType(filePath) ||
+					astroConstants.http.defaultBinaryContentType,
 			);
 			createReadStream(filePath).pipe(res);
 		});
@@ -69,7 +62,7 @@ export const createLucidDevAssetPlugin = (assetRoot: string): Plugin => ({
  * assets into the build graph without introducing a second bundling step.
  */
 export const createLucidBuildAssetPlugin = (assetRoot: string): Plugin => ({
-	name: LUCID_ASTRO_BUILD_ASSET_PLUGIN_NAME,
+	name: astroConstants.integration.buildAssetPluginName,
 	async generateBundle() {
 		if (!(await pathExists(assetRoot))) {
 			return;

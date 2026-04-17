@@ -1,21 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { prepareBuildArtifacts } from "@lucidcms/core/build";
-import {
-	LUCID_ASSET_DIRNAME,
-	LUCID_CLOUDFLARE_ROUTE_FILENAME,
-	LUCID_EMAIL_TEMPLATES_JSON_FILENAME,
-	LUCID_EMAIL_TEMPLATES_MODULE_FILENAME,
-	LUCID_INDEX_HTML_FILENAME,
-	LUCID_MOUNT_PATH,
-	LUCID_NODE_ROUTE_FILENAME,
-	LUCID_SPA_HTML_MODULE_FILENAME,
-	LUCID_WORKER_DIR,
-	LUCID_WORKER_FILENAME,
-	TYPESCRIPT_FILE_EXTENSION,
-	WORKER_ENTRY_ARTIFACT_TYPE,
-	WORKER_EXPORT_ARTIFACT_TYPE,
-} from "../constants.js";
+import astroConstants from "../constants.js";
 import {
 	buildCloudflareRouteSource,
 	buildNodeRouteSource,
@@ -40,33 +26,19 @@ export const writeGeneratedRouteFiles = async (props: {
 
 	const emailTemplatesModulePath = path.join(
 		props.codegenDir,
-		LUCID_EMAIL_TEMPLATES_MODULE_FILENAME,
+		astroConstants.files.emailTemplatesModule,
 	);
 	const spaHtmlModulePath = path.join(
 		props.codegenDir,
-		LUCID_SPA_HTML_MODULE_FILENAME,
+		astroConstants.files.spaHtmlModule,
 	);
 	const spaHtmlPath = path.join(
 		props.codegenDir,
-		LUCID_ASSET_DIRNAME,
-		LUCID_MOUNT_PATH.replace(/^\//, ""),
-		LUCID_INDEX_HTML_FILENAME,
+		astroConstants.paths.assetDirname,
+		astroConstants.paths.mountPath.replace(/^\//, ""),
+		astroConstants.files.indexHtml,
 	);
 	const spaHtml = await fs.readFile(spaHtmlPath, "utf-8");
-
-	await fs.writeFile(
-		emailTemplatesModulePath,
-		`const emailTemplates = ${JSON.stringify(props.project.emailTemplates, null, 2)};
-export default emailTemplates;
-`,
-	);
-
-	await fs.writeFile(
-		spaHtmlModulePath,
-		`const spaHtml = ${JSON.stringify(spaHtml)};
-export default spaHtml;
-`,
-	);
 
 	const configImportPath = toImportPath(
 		props.codegenDir,
@@ -74,16 +46,29 @@ export default spaHtml;
 	);
 	const routeFilename =
 		props.project.runtime === "node"
-			? LUCID_NODE_ROUTE_FILENAME
-			: LUCID_CLOUDFLARE_ROUTE_FILENAME;
+			? astroConstants.files.nodeRoute
+			: astroConstants.files.cloudflareRoute;
 	const routePath = path.join(props.codegenDir, routeFilename);
-
-	await fs.writeFile(
-		routePath,
+	const routeSource =
 		props.project.runtime === "node"
 			? buildNodeRouteSource(configImportPath)
-			: buildCloudflareRouteSource(configImportPath),
-	);
+			: buildCloudflareRouteSource(configImportPath);
+
+	await Promise.all([
+		fs.writeFile(
+			emailTemplatesModulePath,
+			`const emailTemplates = ${JSON.stringify(props.project.emailTemplates, null, 2)};
+export default emailTemplates;
+`,
+		),
+		fs.writeFile(
+			spaHtmlModulePath,
+			`const spaHtml = ${JSON.stringify(spaHtml)};
+export default spaHtml;
+`,
+		),
+		fs.writeFile(routePath, routeSource),
+	]);
 
 	return routePath;
 };
@@ -95,7 +80,7 @@ export default spaHtml;
 export const writeCloudflareWorkerFiles = async (
 	project: ResolvedLucidProject,
 ) => {
-	const workerDir = path.join(process.cwd(), LUCID_WORKER_DIR);
+	const workerDir = path.join(process.cwd(), astroConstants.paths.workerDir);
 	await fs.rm(workerDir, { recursive: true, force: true });
 	await ensureDirectory(workerDir);
 
@@ -110,37 +95,37 @@ export const writeCloudflareWorkerFiles = async (
 		outputPath: workerDir,
 		outputRelativeConfigPath,
 		customArtifactTypes: [
-			WORKER_EXPORT_ARTIFACT_TYPE,
-			WORKER_ENTRY_ARTIFACT_TYPE,
+			astroConstants.workerArtifacts.exportType,
+			astroConstants.workerArtifacts.entryType,
 		],
 	});
 
-	await fs.writeFile(
-		path.join(workerDir, LUCID_EMAIL_TEMPLATES_JSON_FILENAME),
-		JSON.stringify(project.emailTemplates, null, 2),
-	);
-
-	await fs.writeFile(
-		path.join(workerDir, LUCID_WORKER_FILENAME),
-		buildCloudflareMainWorkerSource({
-			configImportPath: outputRelativeConfigPath,
-			customArtifacts: processedArtifacts.custom,
-		}),
-	);
+	const mainWorkerSource = buildCloudflareMainWorkerSource({
+		configImportPath: outputRelativeConfigPath,
+		customArtifacts: processedArtifacts.custom,
+	});
 
 	const additionalWorkers = buildCloudflareAdditionalWorkers(
 		processedArtifacts.custom,
 	);
 
-	await Promise.all(
-		additionalWorkers.map(async (worker) => {
+	await Promise.all([
+		fs.writeFile(
+			path.join(workerDir, astroConstants.files.emailTemplatesJson),
+			JSON.stringify(project.emailTemplates, null, 2),
+		),
+		fs.writeFile(
+			path.join(workerDir, astroConstants.files.worker),
+			mainWorkerSource,
+		),
+		...additionalWorkers.map(async (worker) => {
 			const extension = path.extname(worker.filename)
 				? ""
-				: TYPESCRIPT_FILE_EXTENSION;
+				: astroConstants.files.typescriptExtension;
 			await fs.writeFile(
 				path.join(workerDir, `${worker.filename}${extension}`),
 				worker.source,
 			);
 		}),
-	);
+	]);
 };
