@@ -27,7 +27,7 @@ const processConfig = async (
 	config: LucidConfig,
 	options?: {
 		bypassCache?: boolean;
-		skipPluginVersionCheck?: boolean;
+		skipValidation?: boolean;
 	},
 ): Promise<Config> => {
 	if (cachedConfig !== undefined && !options?.bypassCache) {
@@ -39,7 +39,7 @@ const processConfig = async (
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
 		for (const pluginDef of configRes.plugins) {
-			if (!options?.skipPluginVersionCheck) {
+			if (!options?.skipValidation) {
 				const { default: checkPluginVersion } = await import(
 					"./checks/check-plugin-version.js"
 				);
@@ -64,52 +64,54 @@ const processConfig = async (
 		}
 	}
 
-	// validate config
-	configRes = ConfigSchema.parse(configRes) as Config;
+	if (!options?.skipValidation) {
+		// validate config
+		configRes = ConfigSchema.parse(configRes) as Config;
 
-	// localization checks
-	checkLocales(configRes.localization);
+		// localization checks
+		checkLocales(configRes.localization);
 
-	// collection checks
-	checkDuplicateBuilderKeys(
-		"collections",
-		configRes.collections.map((c) => c.getData.key),
-	);
-
-	for (const collection of configRes.collections) {
-		CollectionConfigSchema.parse(collection.config);
-
-		for (const field of collection.flatFields) {
-			CustomFieldSchema.parse(field);
-			checkField(field, configRes);
-		}
-
+		// collection checks
 		checkDuplicateBuilderKeys(
-			"bricks",
-			collection.builderBricks.map((b) => b.key),
+			"collections",
+			configRes.collections.map((c) => c.getData.key),
 		);
 
-		checkDuplicateFieldKeys(
-			"collection",
-			collection.key,
-			collection.meta.fieldKeys,
-		);
+		for (const collection of configRes.collections) {
+			CollectionConfigSchema.parse(collection.config);
 
-		checkRepeaterDepth(
-			"collection",
-			collection.key,
-			collection.meta.repeaterDepth,
-		);
-
-		for (const brick of collection.brickInstances) {
-			BrickConfigSchema.parse(brick.config);
-			for (const field of brick.flatFields) {
+			for (const field of collection.flatFields) {
 				CustomFieldSchema.parse(field);
 				checkField(field, configRes);
 			}
 
-			checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
-			checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
+			checkDuplicateBuilderKeys(
+				"bricks",
+				collection.builderBricks.map((b) => b.key),
+			);
+
+			checkDuplicateFieldKeys(
+				"collection",
+				collection.key,
+				collection.meta.fieldKeys,
+			);
+
+			checkRepeaterDepth(
+				"collection",
+				collection.key,
+				collection.meta.repeaterDepth,
+			);
+
+			for (const brick of collection.brickInstances) {
+				BrickConfigSchema.parse(brick.config);
+				for (const field of brick.flatFields) {
+					CustomFieldSchema.parse(field);
+					checkField(field, configRes);
+				}
+
+				checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
+				checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
+			}
 		}
 	}
 

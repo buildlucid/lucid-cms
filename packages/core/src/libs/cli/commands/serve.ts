@@ -4,7 +4,6 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
-import { getAdapterCLI } from "../../runtime-adapter/loaders.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
@@ -39,9 +38,15 @@ const serveCommand = async () => {
 		const configRes = await loadConfigFile({
 			path: configPath,
 		});
-		const adapterCLI = await getAdapterCLI(configRes.definition.adapter, {
-			envResult: configRes.adapterEnvResult,
-		});
+		const adapterCLI = configRes.adapter.cli;
+
+		if (!adapterCLI) {
+			cliLogger.error(
+				`Lucid could not load CLI handlers from "${configRes.definition.adapter.from}".`,
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
 
 		const envValid = await validateEnvVars({
 			envSchema: configRes.envSchema,

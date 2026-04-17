@@ -1,4 +1,4 @@
-import { createToolkit } from "@lucidcms/core";
+import { createToolkit } from "@lucidcms/core/toolkit";
 
 let toolkitPromise:
 	| Promise<Awaited<ReturnType<typeof createToolkit>>>

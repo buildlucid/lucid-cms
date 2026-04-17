@@ -6,10 +6,6 @@ import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
-import {
-	getAdapterCLI,
-	getAdapterRuntime,
-} from "../../runtime-adapter/loaders.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
@@ -25,13 +21,14 @@ const buildCommand = async (options?: {
 	logger.setBuffering(true);
 	const startTime = cliLogger.startTimer();
 	const silent = options?.silent ?? false;
-	const buildProject = await loadBuildProject({
-		silent,
-		renderEmailTemplates: false,
-	});
-	const { configPath, loaded: configRes } = buildProject;
 
 	try {
+		const buildProject = await loadBuildProject({
+			silent,
+			renderEmailTemplates: false,
+		});
+		const { configPath, loaded: configRes } = buildProject;
+
 		if (options?.cacheSpa) {
 			await partialBuildDirClear(configRes.config.build.paths.outDir);
 		} else {
@@ -42,12 +39,19 @@ const buildCommand = async (options?: {
 			await mkdir(configRes.config.build.paths.outDir);
 		}
 
-		const [adapterRuntime, adapterCLI] = await Promise.all([
-			getAdapterRuntime(configRes.definition.adapter),
-			getAdapterCLI(configRes.definition.adapter, {
-				envResult: configRes.adapterEnvResult,
-			}),
-		]);
+		const adapterRuntime = configRes.adapter;
+		const adapterCLI = configRes.adapter.cli;
+
+		if (!adapterCLI) {
+			cliLogger.error(
+				`Lucid could not load CLI handlers from "${configRes.definition.adapter.from}".`,
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
 
 		//* the path to the config, relative from the CWD
 		const relativeConfigPath = path.relative(process.cwd(), configPath);

@@ -14,7 +14,6 @@ test("should return lucid config object", async () => {
 test("should return lucid adapter object", async () => {
 	const res = await loadConfigFile({
 		path: path.resolve(__dirname, "./mock-config/lucid.config.ts"),
-		loadRuntime: true,
 	});
 
 	expect(typeof res.adapter).toBe("object");

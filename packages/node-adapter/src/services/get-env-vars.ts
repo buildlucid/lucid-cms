@@ -45,4 +45,3 @@ const getEnvVars = async ({
 };
 
 export default getEnvVars;
-export { getEnvVars };

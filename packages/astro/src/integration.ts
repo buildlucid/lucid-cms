@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getConfigPath } from "@lucidcms/core/helpers";
+import { getConfigPath } from "@lucidcms/core/build";
 import type { AstroIntegration } from "astro";
 import {
 	CROSS_FETCH_ALIAS_KEY,

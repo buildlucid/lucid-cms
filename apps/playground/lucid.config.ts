@@ -7,10 +7,7 @@ import MicrosoftAuth from "@lucidcms/auth-microsoft";
 import { configureLucid, z } from "@lucidcms/core";
 import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
 import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
-import {
-	passthroughQueueAdapter,
-	workerQueueAdapter,
-} from "@lucidcms/core/queue-adapter";
+import { passthroughQueueAdapter } from "@lucidcms/core/queue-adapter";
 // Plugins
 import LibSQLAdapter from "@lucidcms/libsql-adapter";
 // Adapters
@@ -132,11 +129,6 @@ export default configureLucid({
 			// adapter: passthroughQueueAdapter,
 			// adapter: passthroughQueueAdapter({
 			// 	bypassImmediateExecution: false,
-			// }),
-			// adapter: workerQueueAdapter(),
-			// adapter: workerQueueAdapter({
-			// 	concurrentLimit: 10,
-			// 	batchSize: 3,
 			// }),
 		},
 		// hooks: [

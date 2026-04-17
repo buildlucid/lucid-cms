@@ -20,12 +20,10 @@ const prepareMainWorkerEntry = (
 		{
 			path: `./${configPath}`,
 			default: "config",
-			exports: ["envSchema"],
 		},
 		{
 			path: "@lucidcms/core/runtime",
-			default: "lucid",
-			exports: ["resolveConfigDefinition"],
+			exports: ["createApp", "processConfig", "setupCronJobs"],
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
@@ -34,6 +32,10 @@ const prepareMainWorkerEntry = (
 		{
 			path: "./email-templates.json",
 			default: "emailTemplates",
+		},
+		{
+			path: "@lucidcms/cloudflare-adapter",
+			exports: ["configureLucid"],
 		},
 		{
 			path: "@lucidcms/cloudflare-adapter/runtime",
@@ -46,19 +48,17 @@ const prepareMainWorkerEntry = (
 			name: "fetch",
 			async: true,
 			params: ["request", "env", "ctx"],
-			content: /** ts */ `const { config: resolved } = await resolveConfigDefinition({
-    definition: config,
-    envSchema,
-    meta: {
-        emailTemplates: emailTemplates,
-    },
-    env,
-    processConfigOptions: {
-        skipPluginVersionCheck: true,
-    },
+			content: /** ts */ `const wrappedDefinition = configureLucid(config, {
+    emailTemplates: emailTemplates,
 });
+const resolved = await processConfig(
+    wrappedDefinition.config(env),
+    {
+        skipValidation: true,
+    },
+);
 
-const { app } = await lucid.createApp({
+const { app } = await createApp({
     config: resolved,
     env: env,
     runtimeContext: getRuntimeContext({
@@ -105,20 +105,18 @@ return app.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: /** ts */ `const runCronService = async () => {
-    const { config: resolved } = await resolveConfigDefinition({
-        definition: config,
-        envSchema,
-        meta: {
-            emailTemplates: emailTemplates,
-        },
-        env,
-        processConfigOptions: {
-            skipPluginVersionCheck: true,
-        },
+    const wrappedDefinition = configureLucid(config, {
+        emailTemplates: emailTemplates,
     });
+    const resolved = await processConfig(
+        wrappedDefinition.config(env),
+        {
+            skipValidation: true,
+        },
+    );
     const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
 
-    const cronJobSetup = await lucid.setupCronJobs({
+    const cronJobSetup = await setupCronJobs({
         createQueue: true,
     });
     await cronJobSetup.register({

@@ -1,3 +1,5 @@
+export { default as buildTableName } from "./libs/collection/helpers/build-table-name.js";
+export { default as prefixGeneratedColName } from "./libs/collection/helpers/prefix-generated-column-name.js";
 export { default as authenticateMiddleware } from "./libs/http/middleware/authenticate.js";
 export { default as authorizePrivateMediaMiddleware } from "./libs/http/middleware/authorize-private-media.js";
 export { default as cacheMiddleware } from "./libs/http/middleware/cache.js";

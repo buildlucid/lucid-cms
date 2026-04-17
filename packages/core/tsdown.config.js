@@ -4,16 +4,14 @@ import packageJson from "./package.json" with { type: "json" };
 export default defineConfig({
 	entry: [
 		"src/index.ts",
-		"src/configure-lucid.ts",
 		"src/types.ts",
-		"src/api.ts",
 		"src/build.ts",
-		"src/helpers.ts",
+		"src/plugin.ts",
+		"src/toolkit.ts",
 		"src/runtime.ts",
 		"src/libs/cli/index.ts",
 		"src/libs/queue-adapter/index.ts",
 		"src/libs/queue-adapter/adapters/worker/consumer.ts",
-		"src/libs/collection/builders/index.ts",
 		"src/libs/db-adapter/index.ts",
 		"src/libs/email-adapter/index.ts",
 		// "src/libs/image-processor/index.ts",

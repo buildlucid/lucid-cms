@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import lucid from "@lucidcms/core/runtime";
+import { createApp } from "@lucidcms/core/runtime";
 import type { ServeHandler } from "@lucidcms/core/types";
 import getRuntimeContext from "../services/runtime-context.js";
 import type { NodeAdapterOptions } from "../types.js";
@@ -22,7 +22,7 @@ const serveCommand =
 			compiled: false,
 		});
 
-		const { app, destroy, issues } = await lucid.createApp({
+		const { app, destroy, issues } = await createApp({
 			config,
 			runtimeContext: runtimeContext,
 			env: process.env,

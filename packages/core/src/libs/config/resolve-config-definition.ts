@@ -1,10 +1,10 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
+import { LucidError } from "../../utils/errors/index.js";
 import {
+	createAdapter,
 	getAdapterConfigureLucid,
-	getAdapterEnv,
-	getAdapterRootModule,
-	getAdapterRuntime,
+	getAdapterModule,
 } from "../runtime-adapter/loaders.js";
 import type {
 	EnvironmentVariables,
@@ -12,7 +12,6 @@ import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
 	RuntimeAdapter,
-	RuntimeAdapterEnvLoadResult,
 } from "../runtime-adapter/types.js";
 import processConfig from "./process-config.js";
 
@@ -32,11 +31,10 @@ export const invalidConfigDefinitionMessage =
 
 export type ResolveConfigDefinitionResult = {
 	config: Config;
-	adapter?: RuntimeAdapter;
+	adapter: RuntimeAdapter;
 	envSchema?: z.ZodType;
 	env: EnvironmentVariables | undefined;
 	definition: LucidConfigDefinition;
-	adapterEnvResult?: RuntimeAdapterEnvLoadResult;
 };
 
 const isConfigDefinition = (
@@ -66,7 +64,9 @@ const assertConfigDefinition = (
 	value: unknown,
 ): LucidConfigDefinition<string> => {
 	if (!isConfigDefinition(value)) {
-		throw new Error(invalidConfigDefinitionMessage);
+		throw new LucidError({
+			message: invalidConfigDefinitionMessage,
+		});
 	}
 
 	return value;
@@ -85,11 +85,10 @@ export const resolveConfigDefinition = async (props: {
 	env?: EnvironmentVariables;
 	configureLucidPath?: string;
 	logger?: GetEnvVarsLogger;
-	loadRuntime?: boolean;
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
-	const adapterRootModule = await getAdapterRootModule(definition.adapter.from);
+	const adapterModule = await getAdapterModule(definition.adapter.from);
 
 	// Hosted integrations can supply their own configureLucid wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
@@ -97,22 +96,23 @@ export const resolveConfigDefinition = async (props: {
 		props.configureLucidPath &&
 		props.configureLucidPath !== definition.adapter.from
 			? await getAdapterConfigureLucid(props.configureLucidPath)
-			: adapterRootModule.configureLucid;
+			: adapterModule.configureLucid;
 
 	const wrappedDefinition = configureLucid(definition, props.meta);
+	const adapter = await createAdapter(adapterModule, wrappedDefinition.adapter);
 	const logger = props.logger ?? {
 		instance: defaultLoggerInstance,
 		silent: true,
 	};
 	// Env loading is optional because some hosts, like Astro Cloudflare, already
 	// own the runtime bindings and can pass them in directly.
-	const adapterEnvResult =
-		props.env === undefined
-			? await getAdapterEnv(wrappedDefinition.adapter, {
+	const env =
+		props.env ??
+		(adapter.getEnvVars
+			? await adapter.getEnvVars({
 					logger,
 				})
-			: undefined;
-	const env = props.env ?? adapterEnvResult?.env;
+			: undefined);
 	const envSchema = props.envSchema;
 
 	if (envSchema && env) {
@@ -122,12 +122,8 @@ export const resolveConfigDefinition = async (props: {
 	// processConfig remains the shared source of truth for plugin init, merging
 	// and validation once the adapter/env/bootstrap layer has been resolved.
 	const config = await processConfig(wrappedDefinition.config(env || {}), {
-		bypassCache: true,
 		...(props.processConfigOptions ?? {}),
 	});
-	const adapter = props.loadRuntime
-		? await getAdapterRuntime(wrappedDefinition.adapter)
-		: undefined;
 
 	return {
 		config,
@@ -135,7 +131,6 @@ export const resolveConfigDefinition = async (props: {
 		envSchema,
 		env,
 		definition: wrappedDefinition,
-		adapterEnvResult,
 	};
 };
 

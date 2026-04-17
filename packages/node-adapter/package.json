@@ -11,14 +11,6 @@
 			"types": "./dist/index.d.mts",
 			"default": "./dist/index.mjs"
 		},
-		"./env": {
-			"types": "./dist/env.d.mts",
-			"default": "./dist/env.mjs"
-		},
-		"./cli": {
-			"types": "./dist/cli.d.mts",
-			"default": "./dist/cli.mjs"
-		},
 		"./runtime": {
 			"types": "./dist/runtime.d.mts",
 			"default": "./dist/runtime.mjs"

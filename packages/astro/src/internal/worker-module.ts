@@ -17,12 +17,15 @@ import {
 const mergeWorkerImports = (importsInput: CloudflareWorkerImport[]) => {
 	const importTracker = new Map<
 		string,
-		{ default?: string; exports: Set<string> }
+		{
+			default?: string;
+			exports: Map<string, string | undefined>;
+		}
 	>();
 
 	for (const imp of importsInput) {
 		const existing = importTracker.get(imp.path) || {
-			exports: new Set<string>(),
+			exports: new Map<string, string | undefined>(),
 		};
 
 		if (imp.default) {
@@ -31,7 +34,12 @@ const mergeWorkerImports = (importsInput: CloudflareWorkerImport[]) => {
 
 		if (imp.exports) {
 			for (const namedExport of imp.exports) {
-				existing.exports.add(namedExport);
+				if (typeof namedExport === "string") {
+					existing.exports.set(namedExport, undefined);
+					continue;
+				}
+
+				existing.exports.set(namedExport.name, namedExport.as);
 			}
 		}
 
@@ -45,7 +53,10 @@ const mergeWorkerImports = (importsInput: CloudflareWorkerImport[]) => {
 			parts.push(data.default);
 		}
 		if (data.exports.size > 0) {
-			parts.push(`{ ${Array.from(data.exports).join(", ")} }`);
+			const namedImports = Array.from(data.exports.entries()).map(
+				([name, alias]) => (alias ? `${name} as ${alias}` : name),
+			);
+			parts.push(`{ ${namedImports.join(", ")} }`);
 		}
 
 		imports.push(
@@ -114,8 +125,11 @@ export const buildCloudflareMainWorkerSource = (props: {
 	const imports: CloudflareWorkerImport[] = [
 		{
 			path: "@lucidcms/core/runtime",
-			default: "lucid",
-			exports: ["resolveConfigDefinition"],
+			exports: ["processConfig", "setupCronJobs"],
+		},
+		{
+			path: ASTRO_CONFIGURE_LUCID_MODULE_ID,
+			default: "astroConfigureLucid",
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
@@ -144,24 +158,21 @@ return astroWorker.fetch(request, env, ctx);`,
 		import(${JSON.stringify(configImportPath)}),
 	]);
 
-	const { config: resolvedConfig } = await resolveConfigDefinition({
-		definition: configDefinition,
-		envSchema,
-		configureLucidPath: ${JSON.stringify(ASTRO_CONFIGURE_LUCID_MODULE_ID)},
-		meta: {
-			emailTemplates,
-		},
-		env,
-		processConfigOptions: {
-			bypassCache: true,
-			skipPluginVersionCheck: true,
-		},
+	if (envSchema) {
+		envSchema.parse(env);
+	}
+
+	const wrappedDefinition = astroConfigureLucid(configDefinition, {
+		emailTemplates,
+	});
+	const resolvedConfig = await processConfig(wrappedDefinition.config(env), {
+		skipValidation: true,
 	});
 	const kv = await (resolvedConfig.kv
 		? resolvedConfig.kv()
 		: passthroughKVAdapter());
 
-	const cronJobSetup = await lucid.setupCronJobs({
+	const cronJobSetup = await setupCronJobs({
 		createQueue: true,
 	});
 	await cronJobSetup.register({

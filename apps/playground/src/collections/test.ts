@@ -1,5 +1,4 @@
-import { z } from "@lucidcms/core";
-import { CollectionBuilder } from "@lucidcms/core/builders";
+import { CollectionBuilder, z } from "@lucidcms/core";
 import IntroBrick from "../bricks/intro.js";
 
 const TestCollection = new CollectionBuilder("test", {

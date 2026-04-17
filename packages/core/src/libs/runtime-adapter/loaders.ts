@@ -1,23 +1,14 @@
+import { LucidError } from "../../utils/errors/index.js";
 import type {
-	GetEnvVarsLogger,
 	LazyRuntimeAdapterReference,
 	RuntimeAdapter,
-	RuntimeAdapterCLI,
-	RuntimeAdapterCLIModule,
-	RuntimeAdapterEnvLoadResult,
-	RuntimeAdapterEnvModule,
-	RuntimeAdapterRootModule,
-	RuntimeAdapterRuntimeModule,
+	RuntimeAdapterModule,
 	RuntimeConfigureLucid,
 } from "./types.js";
 
 const adapterModuleCache = new Map<string, Promise<unknown>>();
 
-/**
- * Adapter capabilities are imported on demand so config loading can stay
- * lightweight in hosted environments that only need one slice of adapter code.
- */
-const loadAdapterModule = async <T>(modulePath: string): Promise<T> => {
+const loadModule = async <T>(modulePath: string): Promise<T> => {
 	const cachedModule = adapterModuleCache.get(modulePath);
 	if (cachedModule) {
 		return cachedModule as Promise<T>;
@@ -28,11 +19,6 @@ const loadAdapterModule = async <T>(modulePath: string): Promise<T> => {
 	return modulePromise;
 };
 
-const getAdapterSubpath = (
-	adapterFrom: string,
-	subpath: "env" | "cli" | "runtime",
-) => `${adapterFrom}/${subpath}`;
-
 const getDefaultExport = <T>(
 	module:
 		| {
@@ -42,128 +28,75 @@ const getDefaultExport = <T>(
 ): T | undefined => module?.default;
 
 /**
- * The root adapter package stays lightweight and only exposes config metadata
- * such as configureLucid and type-generation hints.
+ * Runtime adapter packages are discovered from user config, so we cache the
+ * module promises here to avoid re-importing the same package during bootstrap
+ * while still leaving the boundary dynamic for host-specific builds.
  */
-export const getAdapterRootModule = async (
+export const getAdapterModule = async (
 	adapterFrom: string,
-): Promise<RuntimeAdapterRootModule> => {
-	const module =
-		await loadAdapterModule<Partial<RuntimeAdapterRootModule>>(adapterFrom);
+): Promise<RuntimeAdapterModule> => {
+	const module = await loadModule<Partial<RuntimeAdapterModule>>(adapterFrom);
 
 	if (typeof module.configureLucid !== "function") {
-		throw new Error(
-			`Lucid could not load the configureLucid() export from "${adapterFrom}".`,
-		);
+		throw new LucidError({
+			message: `Lucid could not load the configureLucid() export from "${adapterFrom}".`,
+		});
 	}
 
-	return module as RuntimeAdapterRootModule;
+	const adapter = module.adapter ?? getDefaultExport(module);
+
+	if (typeof adapter !== "function") {
+		throw new LucidError({
+			message: `Lucid could not load the adapter() export from "${adapterFrom}".`,
+		});
+	}
+
+	return {
+		configureLucid: module.configureLucid,
+		adapter,
+	};
 };
 
+/**
+ * Hosted integrations can provide their own wrapper module so Lucid can keep
+ * the runtime adapter identity while still applying host-specific config
+ * shaping, like Astro's hosted email template handling.
+ */
 export const getAdapterConfigureLucid = async (
 	modulePath: string,
 ): Promise<RuntimeConfigureLucid> => {
-	const module = await loadAdapterModule<
-		Partial<RuntimeAdapterRootModule> & {
+	const module = await loadModule<
+		Partial<RuntimeAdapterModule> & {
 			default?: RuntimeConfigureLucid;
 		}
 	>(modulePath);
 	const configureLucid = module.configureLucid ?? getDefaultExport(module);
 
 	if (typeof configureLucid !== "function") {
-		throw new Error(
-			`Lucid could not load the configureLucid() export from "${modulePath}".`,
-		);
+		throw new LucidError({
+			message: `Lucid could not load the configureLucid() export from "${modulePath}".`,
+		});
 	}
 
 	return configureLucid;
 };
 
 /**
- * Env loading is isolated because some runtimes need host-specific bindings
- * while others only need dotenv-style process env hydration.
+ * Adapters stay as factories so they can keep per-instance state, like the
+ * Cloudflare adapter's platform proxy, while config loading still describes
+ * them declaratively via `adapter.from`.
  */
-export const getAdapterEnv = async (
-	adapter: LazyRuntimeAdapterReference<string>,
-	props: {
-		logger: GetEnvVarsLogger;
-	},
-): Promise<RuntimeAdapterEnvLoadResult> => {
-	const modulePath = getAdapterSubpath(adapter.from, "env");
-	const module = await loadAdapterModule<RuntimeAdapterEnvModule>(modulePath);
-	const loadEnv = module.getEnvVars ?? getDefaultExport(module);
-
-	if (typeof loadEnv !== "function") {
-		throw new Error(
-			`Lucid could not load the env adapter export from "${modulePath}".`,
-		);
-	}
-
-	const result = await loadEnv({
-		logger: props.logger,
-		options: adapter.options as Record<string, unknown> | undefined,
-	});
-
-	if (
-		result &&
-		typeof result === "object" &&
-		Object.hasOwn(result, "env") &&
-		typeof result.env === "object" &&
-		result.env !== null
-	) {
-		return result as RuntimeAdapterEnvLoadResult;
-	}
-
-	return {
-		env: result as RuntimeAdapterEnvLoadResult["env"],
-	};
-};
-
-/**
- * CLI handlers are only needed for standalone Lucid commands, so we resolve
- * them separately from config loading and pass through any env-loader state.
- */
-export const getAdapterCLI = async (
-	adapter: LazyRuntimeAdapterReference<string>,
-	props?: {
-		envResult?: RuntimeAdapterEnvLoadResult;
-	},
-): Promise<RuntimeAdapterCLI> => {
-	const modulePath = getAdapterSubpath(adapter.from, "cli");
-	const module = await loadAdapterModule<RuntimeAdapterCLIModule>(modulePath);
-	const loadCLI = module.cli ?? getDefaultExport(module);
-
-	if (typeof loadCLI !== "function") {
-		throw new Error(
-			`Lucid could not load the cli adapter export from "${modulePath}".`,
-		);
-	}
-
-	return loadCLI({
-		options: adapter.options as Record<string, unknown> | undefined,
-		envResult: props?.envResult,
-	});
-};
-
-/**
- * Runtime metadata stays separate so hosted integrations can detect runtime
- * compatibility without pulling CLI or env-only dependencies into memory.
- */
-export const getAdapterRuntime = async (
+export const createAdapter = async (
+	module: RuntimeAdapterModule,
 	adapter: LazyRuntimeAdapterReference<string>,
 ): Promise<RuntimeAdapter> => {
-	const modulePath = getAdapterSubpath(adapter.from, "runtime");
-	const module =
-		await loadAdapterModule<RuntimeAdapterRuntimeModule>(modulePath);
-	const loadRuntime = module.runtime ?? getDefaultExport(module);
+	const adapterFactory = module.adapter;
 
-	if (typeof loadRuntime !== "function") {
-		throw new Error(
-			`Lucid could not load the runtime adapter export from "${modulePath}".`,
-		);
+	if (!adapterFactory) {
+		throw new LucidError({
+			message: "Lucid could not instantiate the configured adapter.",
+		});
 	}
 
-	return loadRuntime({
-		options: adapter.options as Record<string, unknown> | undefined,
-	});
+	return adapterFactory(adapter.options as Record<string, unknown> | undefined);
 };

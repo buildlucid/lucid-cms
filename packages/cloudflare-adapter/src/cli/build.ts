@@ -80,6 +80,11 @@ const buildCommand: BuildHandler = async ({
 						},
 					},
 					platform: "node",
+					resolve: {
+						alias: {
+							"cross-fetch": "cross-fetch/dist/browser-ponyfill.js",
+						},
+					},
 					plugins: [
 						{
 							name: "import-meta-polyfill",
@@ -90,7 +95,7 @@ const buildCommand: BuildHandler = async ({
 								);
 							},
 						},
-						stripAdapterExportPlugin("cloudflareAdapter"),
+						stripAdapterExportPlugin("adapter"),
 						stripImportsPlugin("cloudflare-adapter", [
 							"wrangler",
 							"@hono/node-server",

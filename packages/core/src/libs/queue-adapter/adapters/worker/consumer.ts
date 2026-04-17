@@ -41,7 +41,13 @@ const getConfig = async (): Promise<{
 }> => {
 	try {
 		const configPath = getConfigPath(process.cwd());
-		const result = await loadConfigFile({ path: configPath, silent: true });
+		const result = await loadConfigFile({
+			path: configPath,
+			silent: true,
+			processConfigOptions: {
+				skipValidation: true,
+			},
+		});
 		return {
 			config: result.config,
 			env: result.env,
@@ -55,6 +61,7 @@ const getConfig = async (): Promise<{
 
 		const processedConfig = await processConfig(configFn(runtime.env || {}), {
 			bypassCache: true,
+			skipValidation: true,
 		});
 
 		return {

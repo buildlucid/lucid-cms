@@ -3,7 +3,13 @@ import type { GetPlatformProxyOptions } from "wrangler";
 export type CloudflareWorkerImport = {
 	path: string;
 	default?: string;
-	exports?: string[];
+	exports?: Array<
+		| string
+		| {
+				name: string;
+				as?: string;
+		  }
+	>;
 };
 
 export type CloudflareWorkerExport = {

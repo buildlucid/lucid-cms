@@ -1,5 +1,5 @@
-import { serviceWrapper } from "../../api.js";
 import constants from "../../constants/constants.js";
+import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import { QueueJobsRepository } from "../repositories/index.js";

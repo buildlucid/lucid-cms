@@ -14,11 +14,16 @@ const buildTempWorkerEntry = (
 	const exports: string[] = [];
 	const importTracker = new Map<
 		string,
-		{ default?: string; exports: Set<string> }
+		{
+			default?: string;
+			exports: Map<string, string | undefined>;
+		}
 	>();
 
 	for (const imp of importsInput) {
-		const existing = importTracker.get(imp.path) || { exports: new Set() };
+		const existing = importTracker.get(imp.path) || {
+			exports: new Map<string, string | undefined>(),
+		};
 
 		if (imp.default) {
 			// if (existing.default && existing.default !== imp.default) {}
@@ -27,7 +32,12 @@ const buildTempWorkerEntry = (
 
 		if (imp.exports) {
 			for (const e of imp.exports) {
-				existing.exports.add(e);
+				if (typeof e === "string") {
+					existing.exports.set(e, undefined);
+					continue;
+				}
+
+				existing.exports.set(e.name, e.as);
 			}
 		}
 
@@ -46,7 +56,10 @@ const buildTempWorkerEntry = (
 			parts.push(data.default);
 		}
 		if (data.exports.size > 0) {
-			parts.push(`{ ${Array.from(data.exports).join(", ")} }`);
+			const namedImports = Array.from(data.exports.entries()).map(
+				([name, alias]) => (alias ? `${name} as ${alias}` : name),
+			);
+			parts.push(`{ ${namedImports.join(", ")} }`);
 		}
 
 		if (parts.length > 0) {

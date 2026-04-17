@@ -1,5 +1,5 @@
+import type { CollectionBuilder } from "@lucidcms/core";
 import { z } from "@lucidcms/core";
-import type { CollectionBuilder } from "@lucidcms/core/builders";
 import type { WritableDraft } from "immer";
 import constants from "../constants.js";
 import T from "../translations/index.js";

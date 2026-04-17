@@ -1,5 +1,5 @@
 import path from "node:path";
-import { createToolkit } from "@lucidcms/core";
+import { createToolkit } from "@lucidcms/core/toolkit";
 
 const PAGE_COLLECTION_KEY = "page";
 const PAGE_STATUS = "latest";

@@ -109,8 +109,6 @@ export type AdapterRuntimeContext = {
 	configEntryPoint: string | null;
 };
 
-export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema>;
-
 export interface EnvironmentVariables extends Record<string, unknown> {}
 
 export type GetEnvVarsLogger = {
@@ -118,39 +116,16 @@ export type GetEnvVarsLogger = {
 	silent: boolean;
 };
 
-export type RuntimeAdapterEnvLoadResult = {
-	env: EnvironmentVariables;
-	state?: unknown;
-};
-
 export type RuntimeAdapterEnvLoader = (props: {
 	logger: GetEnvVarsLogger;
-	options?: Record<string, unknown>;
-}) =>
-	| EnvironmentVariables
-	| RuntimeAdapterEnvLoadResult
-	| Promise<EnvironmentVariables | RuntimeAdapterEnvLoadResult>;
+}) => EnvironmentVariables | Promise<EnvironmentVariables>;
 
 export type RuntimeAdapterCLI = {
 	serve: ServeHandler;
 	build: BuildHandler;
 };
 
-export type RuntimeAdapterCLILoader = (props: {
-	options?: Record<string, unknown>;
-	envResult?: RuntimeAdapterEnvLoadResult;
-}) => RuntimeAdapterCLI | Promise<RuntimeAdapterCLI>;
-
-export type RuntimeAdapterRuntimeLoader = (props: {
-	options?: Record<string, unknown>;
-}) => RuntimeAdapter | Promise<RuntimeAdapter>;
-
 export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
-
-export type ExtendedAdapterDefineConfig<T extends unknown[] = []> = (
-	env: EnvironmentVariables,
-	...args: T
-) => LucidConfig;
 
 export interface AdapterOptionsByPath {
 	[path: string]: Record<string, unknown> | undefined;
@@ -180,23 +155,19 @@ export type RuntimeConfigureLucid = <AdapterFrom extends string>(
 	meta?: LucidConfigDefinitionMeta,
 ) => LucidConfigDefinition<AdapterFrom>;
 
-export type RuntimeAdapterRootModule = {
-	configureLucid: RuntimeConfigureLucid;
-};
-
-export type RuntimeAdapterEnvModule = {
-	default?: RuntimeAdapterEnvLoader;
+export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema> & {
 	getEnvVars?: RuntimeAdapterEnvLoader;
+	cli?: RuntimeAdapterCLI;
 };
 
-export type RuntimeAdapterCLIModule = {
-	default?: RuntimeAdapterCLILoader;
-	cli?: RuntimeAdapterCLILoader;
-};
+export type RuntimeAdapterFactory = (
+	options?: Record<string, unknown>,
+) => RuntimeAdapter | Promise<RuntimeAdapter>;
 
-export type RuntimeAdapterRuntimeModule = {
-	default?: RuntimeAdapterRuntimeLoader;
-	runtime?: RuntimeAdapterRuntimeLoader;
+export type RuntimeAdapterModule = {
+	configureLucid: RuntimeConfigureLucid;
+	adapter?: RuntimeAdapterFactory;
+	default?: RuntimeAdapterFactory;
 };
 
 // ------------------------------------------------------------

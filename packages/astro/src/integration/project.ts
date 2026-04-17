@@ -1,11 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { LucidError } from "@lucidcms/core";
 import {
 	loadBuildProject,
+	migrateCommand,
 	prepareLucidPublicAssets,
 	prepareLucidSPA,
 } from "@lucidcms/core/build";
-import { migrateCommand } from "@lucidcms/core/helpers";
 import {
 	ASTRO_CLIENT_DIRNAME,
 	ASTRO_CONFIGURE_LUCID_MODULE_ID,
@@ -41,13 +42,13 @@ export const loadLucidProject = async (
 		validateEnv: true,
 		renderEmailTemplates: true,
 		configureLucidPath: ASTRO_CONFIGURE_LUCID_MODULE_ID,
-		loadRuntime: true,
 	});
 
 	if (!project.emailTemplates) {
-		throw new Error(
-			"Lucid Astro integration could not prepare email templates for build.",
-		);
+		throw new LucidError({
+			message:
+				"Lucid Astro integration could not prepare email templates for build.",
+		});
 	}
 
 	return {
@@ -76,7 +77,6 @@ export const reloadLucidProjectForDevBootstrap = async (
 		generateTypes: false,
 		renderEmailTemplates: false,
 		configureLucidPath: ASTRO_CONFIGURE_LUCID_MODULE_ID,
-		loadRuntime: true,
 	});
 
 	return {
@@ -105,7 +105,11 @@ export const prepareAssetSourceTree = async (
 	});
 
 	if (publicResult.error) {
-		throw new Error(publicResult.error.message);
+		throw new LucidError({
+			message:
+				publicResult.error.message ??
+				"Lucid Astro integration could not prepare the Lucid public assets.",
+		});
 	}
 
 	const spaResult = await prepareLucidSPA({
@@ -113,7 +117,11 @@ export const prepareAssetSourceTree = async (
 	});
 
 	if (spaResult.error) {
-		throw new Error(spaResult.error.message);
+		throw new LucidError({
+			message:
+				spaResult.error.message ??
+				"Lucid Astro integration could not prepare the Lucid SPA assets.",
+		});
 	}
 };
 
@@ -192,8 +200,9 @@ export const runDevBootstrap = async (
 	});
 
 	if (!migrationResult) {
-		throw new Error(
-			"Lucid Astro integration could not prepare the Lucid schema for astro dev.",
-		);
+		throw new LucidError({
+			message:
+				"Lucid Astro integration could not prepare the Lucid schema for astro dev.",
+		});
 	}
 };

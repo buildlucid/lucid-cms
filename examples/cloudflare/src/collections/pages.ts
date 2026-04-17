@@ -1,8 +1,7 @@
-import { z } from "@lucidcms/core";
-import { CollectionBuilder } from "@lucidcms/core/builders";
+import { CollectionBuilder, z } from "@lucidcms/core";
+import HeroBrick from "../bricks/hero.js";
 import SeoBrick from "../bricks/seo.js";
 import TextareaBrick from "../bricks/textarea.js";
-import HeroBrick from "../bricks/hero.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",

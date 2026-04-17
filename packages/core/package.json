@@ -1,149 +1,145 @@
 {
-    "name": "@lucidcms/core",
-    "version": "0.12.0-alpha.1",
-    "description": "The core of the Lucid CMS. It's responsible for spinning up the API and serving the CMS.",
-    "type": "module",
-    "types": "./dist/index.d.mts",
-    "module": "dist/index.mjs",
-    "exports": {
-        ".": {
-            "import": "./dist/index.mjs",
-            "types": "./dist/index.d.mts"
-        },
-        "./cli": {
-            "types": "./dist/libs/cli/index.d.mts",
-            "default": "./dist/libs/cli/index.mjs"
-        },
-        "./api": {
-            "types": "./dist/api.d.mts",
-            "default": "./dist/api.mjs"
-        },
-        "./build": {
-            "types": "./dist/build.d.mts",
-            "default": "./dist/build.mjs"
-        },
-        "./helpers": {
-            "types": "./dist/helpers.d.mts",
-            "default": "./dist/helpers.mjs"
-        },
-        "./runtime": {
-            "types": "./dist/runtime.d.mts",
-            "default": "./dist/runtime.mjs"
-        },
-        "./types": {
-            "types": "./dist/types.d.mts",
-            "default": "./dist/types.mjs"
-        },
-        "./queue-adapter": {
-            "types": "./dist/libs/queue-adapter/index.d.mts",
-            "default": "./dist/libs/queue-adapter/index.mjs"
-        },
-        "./builders": {
-            "types": "./dist/libs/collection/builders/index.d.mts",
-            "default": "./dist/libs/collection/builders/index.mjs"
-        },
-        "./db-adapter": {
-            "types": "./dist/libs/db-adapter/index.d.mts",
-            "default": "./dist/libs/db-adapter/index.mjs"
-        },
-        "./email-adapter": {
-            "types": "./dist/libs/email-adapter/index.d.mts",
-            "default": "./dist/libs/email-adapter/index.mjs"
-        },
-        "./kv-adapter": {
-            "types": "./dist/libs/kv-adapter/index.d.mts",
-            "default": "./dist/libs/kv-adapter/index.mjs"
-        },
-        "./media-adapter": {
-            "types": "./dist/libs/media-adapter/index.d.mts",
-            "default": "./dist/libs/media-adapter/index.mjs"
-        },
-        "./package.json": "./package.json"
-    },
-    "scripts": {
-        "build": "tsc && tsdown",
-        "dev": "tsdown --watch --no-clean",
-        "format": "biome format ./src",
-        "format:fix": "biome format --write ./src",
-        "lint": "biome lint ./src",
-        "lint:fix": "biome lint --write ./src",
-        "check": "biome check ./src",
-        "check:fix": "biome check --write ./src"
-    },
-    "files": [
-        "dist",
-        "templates",
-        "public",
-        "spa"
-    ],
-    "author": "Lucid",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/buildlucid/lucid-cms.git",
-        "directory": "packages/core"
-    },
-    "keywords": [
-        "CMS",
-        "Headless",
-        "Node",
-        "Typescript",
-        "ESM",
-        "Hono",
-        "Kysely",
-        "Cloudflare",
-        "Lucid CMS",
-        "Lucid"
-    ],
-    "devDependencies": {
-        "@biomejs/biome": "^2.4.4",
-        "@lucidcms/config": "*",
-        "@types/lodash.merge": "^4.6.9",
-        "@types/mime-types": "^3.0.1",
-        "@types/mjml": "^4.7.4",
-        "@types/mustache": "^4.2.6",
-        "@types/node": "^24.10.4",
-        "@types/semver": "^7.7.1",
-        "@types/slug": "^5.0.9",
-        "tsdown": "^0.20.3",
-        "typescript": "^5.9.3"
-    },
-    "dependencies": {
-        "@hono/standard-validator": "^0.2.2",
-        "@inquirer/prompts": "^8.3.0",
-        "@noble/hashes": "^2.0.1",
-        "@scalar/hono-api-reference": "^0.9.46",
-        "better-sqlite3": "^12.6.2",
-        "boxen": "^8.0.1",
-        "chokidar": "^5.0.0",
-        "commander": "^14.0.3",
-        "date-fns": "^4.1.0",
-        "file-type": "^21.3.0",
-        "hono": "^4.12.3",
-        "hono-openapi": "^1.2.0",
-        "immer": "^11.1.4",
-        "jiti": "^2.6.1",
-        "kysely": "0.28.11",
-        "lodash.merge": "^4.6.2",
-        "mime-types": "^3.0.2",
-        "minimatch": "^10.2.4",
-        "mjml": "5.0.0-alpha.6",
-        "mustache": "^4.2.0",
-        "node-object-hash": "^3.1.1",
-        "picocolors": "^1.1.1",
-        "semver": "^7.7.4",
-        "sharp": "^0.34.5",
-        "slug": "^11.0.1",
-        "zod": "^4.3.6"
-    },
-    "volta": {
-        "node": "24.11.1"
-    },
-    "engines": {
-        "node": "^24.0.0"
-    },
-    "bin": {
-        "lucidcms": "./dist/libs/cli/index.mjs"
-    },
-    "sideEffects": false,
-    "license": "BSL-1.0"
+	"name": "@lucidcms/core",
+	"version": "0.12.0-alpha.1",
+	"description": "The core of the Lucid CMS. It's responsible for spinning up the API and serving the CMS.",
+	"type": "module",
+	"types": "./dist/index.d.mts",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.mts"
+		},
+		"./cli": {
+			"types": "./dist/libs/cli/index.d.mts",
+			"default": "./dist/libs/cli/index.mjs"
+		},
+		"./build": {
+			"types": "./dist/build.d.mts",
+			"default": "./dist/build.mjs"
+		},
+		"./plugin": {
+			"types": "./dist/plugin.d.mts",
+			"default": "./dist/plugin.mjs"
+		},
+		"./toolkit": {
+			"types": "./dist/toolkit.d.mts",
+			"default": "./dist/toolkit.mjs"
+		},
+		"./runtime": {
+			"types": "./dist/runtime.d.mts",
+			"default": "./dist/runtime.mjs"
+		},
+		"./types": {
+			"types": "./dist/types.d.mts",
+			"default": "./dist/types.mjs"
+		},
+		"./queue-adapter": {
+			"types": "./dist/libs/queue-adapter/index.d.mts",
+			"default": "./dist/libs/queue-adapter/index.mjs"
+		},
+		"./db-adapter": {
+			"types": "./dist/libs/db-adapter/index.d.mts",
+			"default": "./dist/libs/db-adapter/index.mjs"
+		},
+		"./email-adapter": {
+			"types": "./dist/libs/email-adapter/index.d.mts",
+			"default": "./dist/libs/email-adapter/index.mjs"
+		},
+		"./kv-adapter": {
+			"types": "./dist/libs/kv-adapter/index.d.mts",
+			"default": "./dist/libs/kv-adapter/index.mjs"
+		},
+		"./media-adapter": {
+			"types": "./dist/libs/media-adapter/index.d.mts",
+			"default": "./dist/libs/media-adapter/index.mjs"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "tsc && tsdown",
+		"dev": "tsdown --watch --no-clean",
+		"format": "biome format ./src",
+		"format:fix": "biome format --write ./src",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
+	},
+	"files": [
+		"dist",
+		"templates",
+		"public",
+		"spa"
+	],
+	"author": "Lucid",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/buildlucid/lucid-cms.git",
+		"directory": "packages/core"
+	},
+	"keywords": [
+		"CMS",
+		"Headless",
+		"Node",
+		"Typescript",
+		"ESM",
+		"Hono",
+		"Kysely",
+		"Cloudflare",
+		"Lucid CMS",
+		"Lucid"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.4",
+		"@lucidcms/config": "*",
+		"@types/lodash.merge": "^4.6.9",
+		"@types/mime-types": "^3.0.1",
+		"@types/mjml": "^4.7.4",
+		"@types/mustache": "^4.2.6",
+		"@types/node": "^24.10.4",
+		"@types/semver": "^7.7.1",
+		"@types/slug": "^5.0.9",
+		"tsdown": "^0.20.3",
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@hono/standard-validator": "^0.2.2",
+		"@inquirer/prompts": "^8.3.0",
+		"@noble/hashes": "^2.0.1",
+		"@scalar/hono-api-reference": "^0.9.46",
+		"better-sqlite3": "^12.6.2",
+		"boxen": "^8.0.1",
+		"chokidar": "^5.0.0",
+		"commander": "^14.0.3",
+		"date-fns": "^4.1.0",
+		"file-type": "^21.3.0",
+		"hono": "^4.12.3",
+		"hono-openapi": "^1.2.0",
+		"immer": "^11.1.4",
+		"jiti": "^2.6.1",
+		"kysely": "0.28.11",
+		"lodash.merge": "^4.6.2",
+		"mime-types": "^3.0.2",
+		"minimatch": "^10.2.4",
+		"mjml": "5.0.0-alpha.6",
+		"mustache": "^4.2.0",
+		"node-object-hash": "^3.1.1",
+		"picocolors": "^1.1.1",
+		"semver": "^7.7.4",
+		"sharp": "^0.34.5",
+		"slug": "^11.0.1",
+		"zod": "^4.3.6"
+	},
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
+	"bin": {
+		"lucidcms": "./dist/libs/cli/index.mjs"
+	},
+	"sideEffects": false,
+	"license": "BSL-1.0"
 }

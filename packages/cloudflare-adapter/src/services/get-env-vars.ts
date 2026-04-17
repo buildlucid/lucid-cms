@@ -3,7 +3,7 @@ import type {
 	GetEnvVarsLogger,
 } from "@lucidcms/core/types";
 import { getPlatformProxy, type PlatformProxy } from "wrangler";
-import type { AdapterOptions } from "./types.js";
+import type { AdapterOptions } from "../types.js";
 
 const getEnvVars = async (props: {
 	logger: GetEnvVarsLogger;
@@ -39,4 +39,3 @@ const getEnvVars = async (props: {
 };
 
 export default getEnvVars;
-export { getEnvVars };

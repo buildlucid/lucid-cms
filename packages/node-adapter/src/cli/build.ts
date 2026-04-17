@@ -39,7 +39,7 @@ const buildCommand: BuildHandler = async ({
 			},
 			plugins: [
 				nodeExternals(),
-				stripAdapterExportPlugin("nodeAdapter"),
+				stripAdapterExportPlugin("adapter"),
 				stripImportsPlugin("node-adapter", ["rolldown"]),
 				// 	{
 				// 		name: "bundle-analyzer",
@@ -88,19 +88,23 @@ const buildCommand: BuildHandler = async ({
 
 		const entry = /* ts */ `
 import config, { envSchema } from "./${constants.CONFIG_FILE}.js";
-import lucid, { resolveConfigDefinition } from "@lucidcms/core/runtime";
+import { resolveConfigDefinition } from "@lucidcms/core/build";
+import { createApp, setupCronJobs } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
-import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
+import { getRuntimeContext } from "@lucidcms/node-adapter";
 
 const startServer = async () => {
 	try {
 		const { config: resolved, env } = await resolveConfigDefinition({
 			definition: config,
 			envSchema,
+			processConfigOptions: {
+				skipValidation: true,
+			},
 		});
 
-		const { app, destroy, queue, kv } = await lucid.createApp({
+		const { app, destroy, queue, kv } = await createApp({
 			config: resolved,
 			env: env,
 			runtimeContext: getRuntimeContext({
@@ -108,7 +112,7 @@ const startServer = async () => {
             }),
 		});
 
-		const cronJobSetup = await lucid.setupCronJobs({
+		const cronJobSetup = await setupCronJobs({
 			createQueue: false,
 		});
 

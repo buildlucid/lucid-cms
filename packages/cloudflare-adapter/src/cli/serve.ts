@@ -3,7 +3,7 @@ import { relative } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { getBuildPaths } from "@lucidcms/core/build";
-import lucid from "@lucidcms/core/runtime";
+import { createApp } from "@lucidcms/core/runtime";
 import type { LucidHonoGeneric, ServeHandler } from "@lucidcms/core/types";
 import { Hono } from "hono";
 import type { PlatformProxy } from "wrangler";
@@ -51,7 +51,7 @@ const serveCommand =
 			compiled: false,
 		});
 
-		const { app, destroy, issues } = await lucid.createApp({
+		const { app, destroy, issues } = await createApp({
 			config,
 			runtimeContext: runtimeContext,
 			env: platformProxy?.env,

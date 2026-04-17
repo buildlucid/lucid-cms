@@ -8,48 +8,45 @@ import type {
 	LucidConfigDefinitionMeta,
 	RuntimeConfigureLucid,
 } from "@lucidcms/core/types";
+import { produce } from "immer";
 
 const configureLucid: RuntimeConfigureLucid = <AdapterFrom extends string>(
 	definition: LucidConfigDefinition<AdapterFrom>,
 	_meta?: LucidConfigDefinitionMeta,
 ): LucidConfigDefinition<AdapterFrom> => {
-	return {
-		...definition,
-		config: (env) => {
+	return produce(definition, (draft) => {
+		draft.config = (env) => {
 			const lucidConfig = definition.config(env);
-			return {
-				...lucidConfig,
-				hono: {
-					routes: [
-						...(lucidConfig.hono?.routes || []),
-						async (app, config) => {
-							const paths = getBuildPaths(config);
-							app.use(
-								"/*",
-								serveStatic({
-									rewriteRequestPath: (path) => {
-										const relativeClientDist = relative(
-											process.cwd(),
-											paths.publicDist,
-										);
-										return `${relativeClientDist}${path}`;
-									},
-								}),
-							);
-							app.get("/lucid", (c) => {
-								const html = readFileSync(paths.spaDistHtml, "utf-8");
-								return c.html(html);
-							});
-							app.get("/lucid/*", (c) => {
-								const html = readFileSync(paths.spaDistHtml, "utf-8");
-								return c.html(html);
-							});
-						},
-					],
-				},
-			} satisfies LucidConfig;
-		},
-	};
+
+			return produce(lucidConfig, (lucidDraft) => {
+				lucidDraft.hono ??= {};
+				lucidDraft.hono.routes ??= [];
+				lucidDraft.hono.routes.push(async (app, config) => {
+					const paths = getBuildPaths(config);
+					app.use(
+						"/*",
+						serveStatic({
+							rewriteRequestPath: (path) => {
+								const relativeClientDist = relative(
+									process.cwd(),
+									paths.publicDist,
+								);
+								return `${relativeClientDist}${path}`;
+							},
+						}),
+					);
+					app.get("/lucid", (c) => {
+						const html = readFileSync(paths.spaDistHtml, "utf-8");
+						return c.html(html);
+					});
+					app.get("/lucid/*", (c) => {
+						const html = readFileSync(paths.spaDistHtml, "utf-8");
+						return c.html(html);
+					});
+				});
+			}) satisfies LucidConfig;
+		};
+	});
 };
 
 export default configureLucid;

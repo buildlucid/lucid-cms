@@ -29,7 +29,6 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					{
 						path: `./${props.paths.outputRelativeConfigPath}`,
 						default: "config",
-						exports: ["envSchema"],
 					},
 					{
 						path: "@lucidcms/core/queue-adapter",
@@ -45,11 +44,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 					{
 						path: "@lucidcms/core/runtime",
-						exports: ["resolveConfigDefinition"],
+						exports: ["processConfig"],
 					},
 					{
 						path: "@lucidcms/core",
-						exports: ["logger"],
+						exports: [
+							{ name: "configureLucid", as: "coreConfigureLucid" },
+							"logger",
+						],
 					},
 					{
 						path: "./email-templates.json",
@@ -61,18 +63,17 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `const { config: resolved } = await resolveConfigDefinition({
-    definition: config,
-    envSchema,
-    meta: {
-        emailTemplates: emailTemplates,
+						content: /** ts */ `const wrappedDefinition = coreConfigureLucid(config);
+const lucidConfig = wrappedDefinition.config(env);
+lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
+    Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
+);
+const resolved = await processConfig(
+    lucidConfig,
+    {
+        skipValidation: true,
     },
-    env,
-    processConfigOptions: {
-        bypassCache: true,
-        skipPluginVersionCheck: true,
-    },
-});
+);
 const kvInstance = await getKVAdapter(resolved);
 
 const internalQueueAdapter = passthroughQueueAdapter({

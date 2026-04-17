@@ -7,7 +7,6 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
-import { getAdapterCLI } from "../../runtime-adapter/loaders.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
@@ -37,9 +36,15 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			await serverDestroy?.();
 
 			const configResult = await loadConfigFile({ path: configPath });
-			const adapterCLI = await getAdapterCLI(configResult.definition.adapter, {
-				envResult: configResult.adapterEnvResult,
-			});
+			const adapterCLI = configResult.adapter.cli;
+
+			if (!adapterCLI) {
+				cliLogger.error(
+					`Lucid could not load CLI handlers from "${configResult.definition.adapter.from}".`,
+				);
+				logger.setBuffering(false);
+				process.exit(1);
+			}
 
 			const envValid = await validateEnvVars({
 				envSchema: configResult.envSchema,
@@ -194,6 +199,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 		"**/node_modules/**",
 		"**/.git/**",
 		"**/.lucid/**",
+		"**/.wrangler/**",
+		"**/.mf/**",
 		distPath,
 		"**/*.log",
 		"**/.DS_Store",

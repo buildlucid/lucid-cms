@@ -3,7 +3,7 @@ import {
 	honoOpenAPIResponse,
 	LucidAPIError,
 	serviceWrapper,
-} from "@lucidcms/core/api";
+} from "@lucidcms/core/plugin";
 import type { LucidHonoContext } from "@lucidcms/core/types";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";

@@ -1,3 +1,4 @@
+import { LucidError } from "@lucidcms/core";
 import type { RuntimeAdapter } from "@lucidcms/core/types";
 import type { AstroAdapter } from "astro";
 import type { LucidAstroRuntime } from "../types.js";
@@ -10,18 +11,19 @@ export const detectLucidRuntime = (
 	adapter: RuntimeAdapter | undefined,
 ): LucidAstroRuntime => {
 	if (!adapter) {
-		throw new Error(
-			'Lucid Astro integration requires `configureLucid({ adapter: { from: "@lucidcms/node-adapter" } })` or `@lucidcms/cloudflare-adapter` in lucid.config.ts.',
-		);
+		throw new LucidError({
+			message:
+				'Lucid Astro integration requires `configureLucid({ adapter: { from: "@lucidcms/node-adapter" } })` or `@lucidcms/cloudflare-adapter` in lucid.config.ts.',
+		});
 	}
 
 	if (adapter.key === "node" || adapter.key === "cloudflare") {
 		return adapter.key;
 	}
 
-	throw new Error(
-		`Lucid Astro integration does not support the "${adapter.key}" runtime adapter yet.`,
-	);
+	throw new LucidError({
+		message: `Lucid Astro integration does not support the "${adapter.key}" runtime adapter yet.`,
+	});
 };
 
 /**
@@ -59,15 +61,16 @@ export const assertAstroCompatibility = (
 	const astroRuntime = detectAstroRuntime(astroAdapter);
 
 	if (!astroRuntime) {
-		throw new Error(
-			"Lucid Astro integration requires an Astro adapter. Add `@astrojs/node` or `@astrojs/cloudflare` to astro.config.*.",
-		);
+		throw new LucidError({
+			message:
+				"Lucid Astro integration requires an Astro adapter. Add `@astrojs/node` or `@astrojs/cloudflare` to astro.config.*.",
+		});
 	}
 
 	if (astroRuntime !== lucidRuntime) {
-		throw new Error(
-			`Lucid is configured for the "${lucidRuntime}" runtime, but Astro is using the "${astroRuntime}" adapter. These runtimes must match.`,
-		);
+		throw new LucidError({
+			message: `Lucid is configured for the "${lucidRuntime}" runtime, but Astro is using the "${astroRuntime}" adapter. These runtimes must match.`,
+		});
 	}
 
 	return astroRuntime;

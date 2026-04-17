@@ -1,5 +1,5 @@
 import { inspect } from "node:util";
-import { prefixGeneratedColName } from "@lucidcms/core/helpers";
+import { prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,

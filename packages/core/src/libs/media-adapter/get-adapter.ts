@@ -32,10 +32,20 @@ const getMediaAdapter = async (
 			};
 		}
 
-		const { default: getDefaultMediaAdapter } = await import(
-			"./get-default-adapter.js"
+		const fs = await import("node:fs/promises");
+		await fs.access(".");
+
+		const { default: fileSystemAdapter } = await import(
+			"./adapters/file-system/index.js"
 		);
-		return await getDefaultMediaAdapter(config);
+
+		return {
+			adapter: await fileSystemAdapter({
+				uploadDir: constants.defaultUploadDirectory,
+				secretKey: config.secrets.encryption,
+			}),
+			enabled: true,
+		};
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.mediaAdapter,
