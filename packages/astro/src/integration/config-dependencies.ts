@@ -53,18 +53,18 @@ const buildSourceCandidates = (resolvedPath: string): string[] => {
 	if (ext === ".js") {
 		return [
 			resolvedPath,
-			resolvedPath.slice(0, -ext.length) + ".ts",
-			resolvedPath.slice(0, -ext.length) + ".tsx",
-			resolvedPath.slice(0, -ext.length) + ".jsx",
+			`${resolvedPath.slice(0, -ext.length)}.ts`,
+			`${resolvedPath.slice(0, -ext.length)}.tsx`,
+			`${resolvedPath.slice(0, -ext.length)}.jsx`,
 		];
 	}
 
 	if (ext === ".mjs") {
-		return [resolvedPath, resolvedPath.slice(0, -ext.length) + ".mts"];
+		return [resolvedPath, `${resolvedPath.slice(0, -ext.length)}.mts`];
 	}
 
 	if (ext === ".cjs") {
-		return [resolvedPath, resolvedPath.slice(0, -ext.length) + ".cts"];
+		return [resolvedPath, `${resolvedPath.slice(0, -ext.length)}.cts`];
 	}
 
 	return [resolvedPath];

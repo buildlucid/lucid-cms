@@ -1,3 +1,5 @@
+export type { Toolkit } from "@lucidcms/core/toolkit";
+
 import type { RenderedTemplates } from "@lucidcms/core/types";
 
 export type LucidAstroConfigMeta = {

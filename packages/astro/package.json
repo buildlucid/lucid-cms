@@ -15,6 +15,10 @@
 			"types": "./dist/configure-lucid.d.mts",
 			"default": "./dist/configure-lucid.mjs"
 		},
+		"./toolkit": {
+			"types": "./toolkit.d.mts",
+			"default": "./dist/toolkit.mjs"
+		},
 		"./runtime": {
 			"types": "./dist/runtime.d.mts",
 			"default": "./dist/runtime.mjs"
@@ -36,7 +40,8 @@
 		"check:fix": "biome check --write ./src"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"toolkit.d.mts"
 	],
 	"author": "Lucid",
 	"repository": {

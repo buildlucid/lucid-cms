@@ -1,24 +1,24 @@
-import { createToolkitServiceContext } from "./config.js";
 import createDocumentsToolkit from "./documents/index.js";
 import createLocalesToolkit from "./locales/index.js";
 import createMediaToolkit from "./media/index.js";
-import type { CreateToolkitOptions, Toolkit } from "./types.js";
+import type { Toolkit, ToolkitContext } from "./types.js";
 
 /**
- * Creates a server-side toolkit for reading content, locales, and media from Lucid.
+ * Creates a server-side toolkit for reading Lucid documents, locales, and media.
  *
- * This is intended for server environments that can load your Lucid config directly.
- * For client-side data fetching, or runtimes that do not support Node.js modules such
- * as `fs`, the Lucid SDK is the better fit.
+ * Use this in server code when you want a small, read-focused API for Lucid
+ * content, locales, and media.
  *
- * When Lucid needs to build absolute URLs, it uses `options.requestUrl` first, then
+ * For client-side data fetching, use the Lucid SDK instead.
+ *
+ * When Lucid needs to build absolute URLs, it uses `requestUrl`, then
  * `config.baseUrl`, and finally falls back to `http://localhost:6543`.
  *
  * Each toolkit method returns Lucid's standard `{ error, data }` response shape.
  *
  * @example
  * ```ts
- * const toolkit = await createToolkit();
+ * const toolkit = createToolkit(serviceContext);
  *
  * await toolkit.documents.getMultiple({
  *   collectionKey: "page",
@@ -28,16 +28,10 @@ import type { CreateToolkitOptions, Toolkit } from "./types.js";
  * });
  * ```
  */
-const createToolkit = async (
-	options?: CreateToolkitOptions,
-): Promise<Toolkit> => {
-	const context = await createToolkitServiceContext(options);
-
-	return {
-		documents: createDocumentsToolkit(context),
-		locales: createLocalesToolkit(context),
-		media: createMediaToolkit(context),
-	};
-};
+const createToolkit = (context: ToolkitContext): Toolkit => ({
+	documents: createDocumentsToolkit(context),
+	locales: createLocalesToolkit(context),
+	media: createMediaToolkit(context),
+});
 
 export default createToolkit;

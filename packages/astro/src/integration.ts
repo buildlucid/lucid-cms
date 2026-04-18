@@ -55,6 +55,15 @@ const lucidCMS = (): AstroIntegration => {
 				project = await loadLucidProject(configPath);
 				devBootstrapPromise = undefined;
 
+				if (project.runtime === "cloudflare") {
+					(globalThis as Record<string, unknown>)[
+						astroConstants.cloudflare.prerenderContextGlobal
+					] = {
+						config: project.loaded.config,
+						env: project.loaded.env,
+					};
+				}
+
 				codegenDir = fileURLToPath(createCodegenDir());
 				assetRoot = path.join(codegenDir, astroConstants.paths.assetDirname);
 
@@ -88,15 +97,20 @@ const lucidCMS = (): AstroIntegration => {
 
 				updateConfig({
 					vite: {
-						resolve:
-							project.runtime === "cloudflare"
-								? {
-										alias: {
+						resolve: {
+							alias: {
+								[astroConstants.integration.toolkitModuleId]: path.join(
+									codegenDir,
+									astroConstants.files.toolkitModule,
+								),
+								...(project.runtime === "cloudflare"
+									? {
 											[astroConstants.cloudflare.crossFetchAliasKey]:
 												astroConstants.cloudflare.crossFetchBrowserEntry,
-										},
-									}
-								: undefined,
+										}
+									: {}),
+							},
+						},
 						plugins: [createLucidDevAssetPlugin(assetRoot)],
 					},
 				});

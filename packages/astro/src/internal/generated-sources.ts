@@ -87,6 +87,54 @@ export const ALL = async (context) => {
 `;
 
 /**
+ * Astro pages need a generated toolkit helper so they can reuse Lucid's resolved
+ * config without each project wiring the runtime setup by hand.
+ */
+export const buildNodeToolkitSource = (
+	configImportPath: string,
+): string => `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
+import { resolveConfigDefinition } from "@lucidcms/core/build";
+import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
+import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+
+let toolkitPromise;
+
+/** Reuses one resolved toolkit across Astro page calls in the same server process. */
+const ensureToolkit = async () => {
+\tif (!toolkitPromise) {
+\t\ttoolkitPromise = (async () => {
+\t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
+\t\t\t\tdefinition: lucidConfigModule.default,
+\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tconfigureLucidPath: ${JSON.stringify(astroConstants.integration.configureLucidModuleId)},
+\t\t\t\tmeta: {
+\t\t\t\t\temailTemplates,
+\t\t\t\t},
+\t\t\t\tprocessConfigOptions: {
+\t\t\t\t\tskipValidation: true,
+\t\t\t\t},
+\t\t\t});
+\t\t\tconst context = createToolkitServiceContext({
+\t\t\t\tconfig: resolvedConfig,
+\t\t\t\tenv,
+\t\t\t});
+
+\t\t\treturn createToolkit(context);
+\t\t})().catch((error) => {
+\t\t\ttoolkitPromise = undefined;
+\t\t\tthrow error;
+\t\t});
+\t}
+
+\treturn toolkitPromise;
+};
+
+export const getToolkit = async () => ensureToolkit();
+
+export default getToolkit;
+`;
+
+/**
  * The Cloudflare route is generated as Astro code so it can marry Astro's
  * request context with the Lucid app instance that Hono expects.
  */
@@ -243,4 +291,123 @@ export const ALL = async (context) => {
 
 \treturn response;
 };
+`;
+
+/**
+ * Cloudflare projects need a generated toolkit helper that can work both during
+ * request handling and during Astro prerendering.
+ */
+export const buildCloudflareToolkitSource = (
+	configImportPath: string,
+): string => `let toolkitPromise;
+let runtimeModulesPromise;
+
+/** Reads the build-time Lucid context captured during Astro setup for prerender. */
+const getPrerenderContext = () =>
+\tglobalThis[${JSON.stringify(astroConstants.cloudflare.prerenderContextGlobal)}] ??
+\tnull;
+
+/** Reads Cloudflare env bindings when they exist without forcing prerender to fail. */
+const readCloudflareEnv = () =>
+\tglobalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] ??
+\tglobalThis[${JSON.stringify(astroConstants.cloudflare.devEnvGlobal)}] ??
+\tnull;
+
+/** Ensures request-time toolkit calls fail clearly when Worker bindings are missing. */
+const getCloudflareEnv = () => {
+\tconst env = readCloudflareEnv();
+
+\tif (!env) {
+\t\tthrow new Error(
+\t\t\t"Lucid Astro could not access the Cloudflare Worker env bindings for this request.",
+\t\t);
+\t}
+
+\treturn env;
+};
+
+/** Loads the modules needed to build the runtime-specific toolkit instance. */
+const loadRuntimeModules = async () => {
+\tif (!runtimeModulesPromise) {
+\t\truntimeModulesPromise = Promise.all([
+\t\t\timport(${JSON.stringify(configImportPath)}),
+\t\t\timport("@lucidcms/core/runtime"),
+\t\t\timport("@lucidcms/core/toolkit"),
+\t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
+\t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
+\t\t]).then(
+\t\t\t([
+\t\t\t\tlucidConfigModule,
+\t\t\t\truntimeModule,
+\t\t\t\ttoolkitModule,
+\t\t\t\tconfigureLucidModule,
+\t\t\t\temailTemplatesModule,
+\t\t\t]) => ({
+\t\t\t\tdefinition: lucidConfigModule.default,
+\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tprocessConfig: runtimeModule.processConfig,
+\t\t\t\tcreateToolkit: toolkitModule.createToolkit,
+\t\t\t\tcreateToolkitServiceContext:
+\t\t\t\t\ttoolkitModule.createToolkitServiceContext,
+\t\t\t\tconfigureLucid: configureLucidModule.default,
+\t\t\t\temailTemplates: emailTemplatesModule.default,
+\t\t\t}),
+\t\t);
+\t}
+
+\treturn runtimeModulesPromise;
+};
+
+/** Reuses one resolved toolkit across Astro page calls in the same server process. */
+const ensureToolkit = async () => {
+\tif (!toolkitPromise) {
+\t\ttoolkitPromise = (async () => {
+\t\t\tconst cloudflareEnv = readCloudflareEnv();
+\t\t\tconst {
+\t\t\t\tcreateToolkit,
+\t\t\t\tcreateToolkitServiceContext,
+\t\t\t\tdefinition,
+\t\t\t\tenvSchema,
+\t\t\t\tprocessConfig,
+\t\t\t\tconfigureLucid,
+\t\t\t\temailTemplates,
+\t\t\t} = await loadRuntimeModules();
+\t\t\tconst prerenderContext = !cloudflareEnv ? getPrerenderContext() : null;
+
+\t\t\tif (prerenderContext) {
+\t\t\t\treturn createToolkit(createToolkitServiceContext(prerenderContext));
+\t\t\t}
+\t\t\tconst resolvedCloudflareEnv = getCloudflareEnv();
+
+\t\t\tif (envSchema) {
+\t\t\t\tenvSchema.parse(resolvedCloudflareEnv);
+\t\t\t}
+
+\t\t\tconst wrappedDefinition = configureLucid(definition, {
+\t\t\t\temailTemplates,
+\t\t\t});
+\t\t\tconst resolvedConfig = await processConfig(
+\t\t\t\twrappedDefinition.config(resolvedCloudflareEnv),
+\t\t\t\t{
+\t\t\t\tskipValidation: true,
+\t\t\t\t},
+\t\t\t);
+\t\t\tconst context = createToolkitServiceContext({
+\t\t\t\tconfig: resolvedConfig,
+\t\t\t\tenv: resolvedCloudflareEnv,
+\t\t\t});
+
+\t\t\treturn createToolkit(context);
+\t\t})().catch((error) => {
+\t\t\ttoolkitPromise = undefined;
+\t\t\tthrow error;
+\t\t});
+\t}
+
+\treturn toolkitPromise;
+};
+
+export const getToolkit = async () => ensureToolkit();
+
+export default getToolkit;
 `;

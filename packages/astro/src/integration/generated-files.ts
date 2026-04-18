@@ -4,7 +4,9 @@ import { prepareBuildArtifacts } from "@lucidcms/core/build";
 import astroConstants from "../constants.js";
 import {
 	buildCloudflareRouteSource,
+	buildCloudflareToolkitSource,
 	buildNodeRouteSource,
+	buildNodeToolkitSource,
 } from "../internal/generated-sources.js";
 import { toImportPath, toPosixPath } from "../internal/paths.js";
 import { buildCloudflareMainWorkerSource } from "../internal/worker-module.js";
@@ -29,6 +31,10 @@ export const writeGeneratedRouteFiles = async (props: {
 		props.codegenDir,
 		astroConstants.files.spaHtmlModule,
 	);
+	const toolkitModulePath = path.join(
+		props.codegenDir,
+		astroConstants.files.toolkitModule,
+	);
 	const spaHtmlPath = path.join(
 		props.codegenDir,
 		astroConstants.paths.assetDirname,
@@ -50,6 +56,10 @@ export const writeGeneratedRouteFiles = async (props: {
 		props.project.runtime === "node"
 			? buildNodeRouteSource(configImportPath)
 			: buildCloudflareRouteSource(configImportPath);
+	const toolkitSource =
+		props.project.runtime === "node"
+			? buildNodeToolkitSource(configImportPath)
+			: buildCloudflareToolkitSource(configImportPath);
 
 	await Promise.all([
 		fs.writeFile(
@@ -64,6 +74,7 @@ export default emailTemplates;
 export default spaHtml;
 `,
 		),
+		fs.writeFile(toolkitModulePath, toolkitSource),
 		fs.writeFile(routePath, routeSource),
 	]);
 

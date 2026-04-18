@@ -10,6 +10,7 @@ const astroConstants = {
 	integration: {
 		name: "@lucidcms/astro",
 		configureLucidModuleId: "@lucidcms/astro/configure-lucid",
+		toolkitModuleId: "@lucidcms/astro/toolkit",
 		devAssetPluginName: "@lucidcms/astro:assets-dev",
 		buildAssetPluginName: "@lucidcms/astro:assets-build",
 	},
@@ -28,6 +29,7 @@ const astroConstants = {
 		indexHtml: "index.html",
 		emailTemplatesModule: "lucid-email-templates.generated.ts",
 		spaHtmlModule: "lucid-spa-html.generated.ts",
+		toolkitModule: "lucid-toolkit.generated.ts",
 		nodeRoute: "lucid-node.route.ts",
 		cloudflareRoute: "lucid-cloudflare.route.ts",
 		emailTemplatesJson: "email-templates.json",
@@ -54,6 +56,7 @@ const astroConstants = {
 		crossFetchBrowserEntry: "cross-fetch/dist/browser-ponyfill.js",
 		runtimeEnvGlobal: "__LUCID_ASTRO_CLOUDFLARE_ENV__",
 		devEnvGlobal: "__LUCID_ASTRO_CLOUDFLARE_DEV_ENV__",
+		prerenderContextGlobal: "__LUCID_ASTRO_CLOUDFLARE_PRERENDER_CONTEXT__",
 	},
 	defaults: {
 		remoteAddress: "127.0.0.1",

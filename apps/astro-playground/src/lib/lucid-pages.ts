@@ -1,4 +1,4 @@
-import { createToolkit } from "@lucidcms/core/toolkit";
+import getToolkit from "@lucidcms/astro/toolkit";
 
 const PAGE_COLLECTION_KEY = "page";
 const PAGE_STATUS = "latest";
@@ -36,10 +36,6 @@ export type PlaygroundPage = {
 		height: number | null;
 	} | null;
 };
-
-let toolkitPromise:
-	| Promise<Awaited<ReturnType<typeof createToolkit>>>
-	| undefined;
 
 const getFieldValue = (
 	document: LucidClientDocument,
@@ -199,19 +195,6 @@ const mapPageDocument = (document: LucidClientDocument): PlaygroundPage => {
 		bodyHtml: renderRichTextHtml(getUnknownFieldValue(document, "page_body")),
 		thumbnail: getMediaRef(document, "thumbnail"),
 	};
-};
-
-const getToolkit = async () => {
-	if (!toolkitPromise) {
-		toolkitPromise = createToolkit({
-			requestUrl: "http://astro-playground.local/lucid",
-		}).catch((error) => {
-			toolkitPromise = undefined;
-			throw error;
-		});
-	}
-
-	return toolkitPromise;
 };
 
 export const getAllPages = async (): Promise<PlaygroundPage[]> => {

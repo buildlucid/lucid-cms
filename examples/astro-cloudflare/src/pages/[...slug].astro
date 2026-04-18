@@ -1,39 +1,61 @@
 ---
-import getToolkit from "../lucid/get-toolkit";
+import getToolkit from "@lucidcms/astro/toolkit";
 
-export const prerender = true;
+export const prerender = false;
 
-export async function getStaticPaths() {
-	const toolkit = await getToolkit();
+const fullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
+const toolkit = await getToolkit();
 
-	const response = await toolkit.documents.getMultiple({
-		collectionKey: "page",
-		status: "latest",
-		query: {
-			perPage: -1,
+const response = await toolkit.documents.getSingle({
+	collectionKey: "page",
+	status: "latest",
+	query: {
+		filter: {
+			_fullSlug: {
+				value: fullSlug,
+			},
 		},
-	});
+	},
+});
 
-	if (response.error) {
-		throw new Error(
-			response.error.message ?? "Failed to fetch Lucid pages for static paths.",
-		);
-	}
-
-	return response.data.data.map((page) => ({
-		params: {
-			slug:
-				page.fields?.fullSlug.translations?.en === "/"
-					? undefined
-					: page.fields?.fullSlug.translations?.en,
-		},
-		props: {
-			page,
-		},
-	}));
+if (response.error) {
+	Astro.response.status = 404;
+	return;
 }
 
-const { page } = Astro.props;
+const page = response.data;
+
+// export async function getStaticPaths() {
+// 	const toolkit = await getToolkit();
+
+// 	const response = await toolkit.documents.getMultiple({
+// 		collectionKey: "page",
+// 		status: "latest",
+// 		query: {
+// 			perPage: -1,
+// 		},
+// 	});
+
+// 	if (response.error) {
+// 		throw new Error(
+// 			response.error.message ?? "Failed to fetch Lucid pages for static paths.",
+// 		);
+// 	}
+
+// 	return response.data.data.map((page) => ({
+// 		params: {
+// 			slug:
+// 				page.fields?.fullSlug.translations?.en === "/"
+// 					? undefined
+// 					: page.fields?.fullSlug.translations?.en,
+// 		},
+// 		props: {
+// 			page,
+// 		},
+// 	}));
+// }
+
+// const { page } = Astro.props;
 ---
 
 <html lang="en">

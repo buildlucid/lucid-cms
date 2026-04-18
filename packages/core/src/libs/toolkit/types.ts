@@ -1,8 +1,25 @@
+import type { KVAdapterInstance } from "../../libs/kv-adapter/types.js";
+import type { QueueAdapterInstance } from "../../libs/queue-adapter/types.js";
+import type { EnvironmentVariables } from "../../libs/runtime-adapter/types.js";
+import type { Config } from "../../types/config.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitLocales } from "./locales/index.js";
 import type { ToolkitMedia } from "./media/index.js";
 
-export type CreateToolkitOptions = {
+/** Lucid service context used by `createToolkit()`. */
+export type ToolkitContext = ServiceContext;
+
+/** Inputs for building a toolkit service context from resolved Lucid config. */
+export type CreateToolkitServiceContextOptions = {
+	/** Resolved Lucid config to build the toolkit from. */
+	config: Config;
+	/** Optional runtime env bindings associated with the config. */
+	env?: EnvironmentVariables | null;
+	/** Optional queue adapter instance to use for toolkit-backed services. */
+	queue?: QueueAdapterInstance;
+	/** Optional KV adapter instance to use for toolkit-backed services. */
+	kv?: KVAdapterInstance;
 	/**
 	 * Request URL to use when Lucid needs to build absolute URLs.
 	 * If omitted, Lucid uses `config.baseUrl`, then falls back to `http://localhost:6543`.
