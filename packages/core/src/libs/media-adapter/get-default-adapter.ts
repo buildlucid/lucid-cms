@@ -10,14 +10,8 @@ const getDefaultMediaAdapter = async (config: Config) => {
 	const fs = (await import(fsSpecifier)) as typeof import("node:fs/promises");
 	await fs.access(".");
 
-	const fileSystemAdapterSpecifier = [
-		".",
-		"adapters",
-		"file-system",
-		"index.js",
-	].join("/");
 	const { default: fileSystemAdapter } = (await import(
-		fileSystemAdapterSpecifier
+		`./adapters/file-system/index.js`
 	)) as {
 		default: typeof import("./adapters/file-system/index.js")["default"];
 	};

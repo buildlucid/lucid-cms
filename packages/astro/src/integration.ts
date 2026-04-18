@@ -54,6 +54,13 @@ const lucidCMS = (): AstroIntegration => {
 				const configPath = getConfigPath(process.cwd());
 				project = await loadLucidProject(configPath);
 				devBootstrapPromise = undefined;
+				const lucidSsrExternal = [
+					"@lucidcms/core",
+					"@lucidcms/astro",
+					project.runtime === "cloudflare"
+						? "@lucidcms/cloudflare-adapter"
+						: "@lucidcms/node-adapter",
+				];
 
 				if (project.runtime === "cloudflare") {
 					(globalThis as Record<string, unknown>)[
@@ -97,6 +104,13 @@ const lucidCMS = (): AstroIntegration => {
 
 				updateConfig({
 					vite: {
+						...(command === "dev"
+							? {
+									ssr: {
+										external: lucidSsrExternal,
+									},
+								}
+							: {}),
 						resolve: {
 							alias: {
 								[astroConstants.integration.toolkitModuleId]: path.join(

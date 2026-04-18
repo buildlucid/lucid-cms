@@ -24,7 +24,7 @@ pnpm-debug.log*
 .idea/
 
 # lucid cms
-./uploads
+uploads
 .lucid
 db.sqlite
 db.sqlite-shm
