@@ -1,4 +1,4 @@
-import { logger } from "../../../index.js";
+import logger from "../../logger/index.js";
 import type {
 	AdapterKeys,
 	RuntimeSupport,

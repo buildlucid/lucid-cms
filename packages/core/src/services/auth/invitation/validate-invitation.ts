@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
-import { logger } from "../../../index.js";
 import formatter from "../../../libs/formatters/index.js";
+import logger from "../../../libs/logger/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,

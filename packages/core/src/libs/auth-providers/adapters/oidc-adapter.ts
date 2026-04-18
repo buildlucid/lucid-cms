@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import { logger } from "../../../index.js";
+import logger from "../../../libs/logger/index.js";
 import T from "../../../translations/index.js";
 import mapStandardUserInfo from "../helpers/default-user-info-mapper.js";
 import type { OIDCAdapter, OIDCAuthConfig } from "../types.js";
