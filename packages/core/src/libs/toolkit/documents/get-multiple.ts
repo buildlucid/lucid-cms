@@ -1,34 +1,44 @@
+import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
 import { documentServices } from "../../../services/index.js";
-import type { ServiceContext } from "../../../utils/services/types.js";
+import type { ClientDocumentResponse } from "../../../types/response.js";
 import type {
-	ToolkitDocumentsGetMultipleInput,
-	ToolkitDocumentsGetMultipleResult,
-} from "../types.js";
-import { normalizeGetMultipleQuery, throwToolkitError } from "../utils.js";
+	ServiceContext,
+	ServiceResponse,
+} from "../../../utils/services/types.js";
+import { normalizePaginatedQuery, runToolkitService } from "../utils.js";
+import type { ToolkitDocumentStatus } from "./index.js";
+
+export type ToolkitDocumentsGetMultipleQuery = Omit<
+	ClientGetMultipleQueryParams,
+	"page" | "perPage"
+> & {
+	page?: number;
+	perPage?: number;
+};
+
+export type ToolkitDocumentsGetMultipleInput = {
+	collectionKey: string;
+	status?: ToolkitDocumentStatus;
+	query?: ToolkitDocumentsGetMultipleQuery;
+};
+
+export type ToolkitDocumentsGetMultipleResult = {
+	data: ClientDocumentResponse[];
+	count: number;
+};
 
 const getMultiple = async (
 	context: ServiceContext,
 	input: ToolkitDocumentsGetMultipleInput,
-): Promise<ToolkitDocumentsGetMultipleResult> => {
-	const response = await documentServices.client.getMultiple(context, {
-		collectionKey: input.collectionKey,
-		status: input.status ?? "latest",
-		query: normalizeGetMultipleQuery(input.query),
-	});
-
-	if (response.error) {
-		throwToolkitError(
-			response.error,
-			"Lucid toolkit could not fetch multiple documents.",
-		);
-	}
-
-	const { data } = response;
-	if (!data) {
-		throw new Error("Lucid toolkit returned no data for getMultiple.");
-	}
-
-	return data;
-};
+): ServiceResponse<ToolkitDocumentsGetMultipleResult> =>
+	runToolkitService(
+		() =>
+			documentServices.client.getMultiple(context, {
+				collectionKey: input.collectionKey,
+				status: input.status ?? "latest",
+				query: normalizePaginatedQuery(input.query),
+			}),
+		"Lucid toolkit could not fetch multiple documents.",
+	);
 
 export default getMultiple;

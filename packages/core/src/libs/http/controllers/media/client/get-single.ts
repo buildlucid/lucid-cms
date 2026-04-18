@@ -51,7 +51,7 @@ const getSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const context = getServiceContext(c);
 
-		const media = await serviceWrapper(mediaServices.getSingle, {
+		const media = await serviceWrapper(mediaServices.client.getSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

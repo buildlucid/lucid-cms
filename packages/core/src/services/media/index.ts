@@ -1,4 +1,5 @@
 export * as checks from "./checks/index.js";
+export * as client from "./client/index.js";
 export { default as createSingle } from "./create-single.js";
 export { default as deleteBatch } from "./delete-batch.js";
 export { default as deleteMultiplePermanently } from "./delete-multiple-permanently.js";

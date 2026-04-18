@@ -1,36 +1,76 @@
 import constants from "../../constants/constants.js";
-import type {
-	ClientGetMultipleQueryParams,
-	ClientGetSingleQueryParams,
-} from "../../schemas/documents.js";
-import type { LucidErrorData } from "../../types/errors.js";
+import decodeError from "../../utils/errors/decode-error.js";
+import type { ServiceResponse } from "../../utils/services/types.js";
 
-export const defaultToolkitRequestUrl = "http://localhost";
+type PaginatedQuery = {
+	page?: number;
+	perPage?: number;
+};
 
-export const normalizeGetMultipleQuery = (
-	query?: Omit<ClientGetMultipleQueryParams, "page" | "perPage"> & {
-		page?: number;
-		perPage?: number;
-	},
-): ClientGetMultipleQueryParams => ({
-	filter: query?.filter,
-	sort: query?.sort,
-	page: query?.page ?? constants.query.page,
-	perPage: query?.perPage ?? constants.query.perPage,
-});
+type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
 
-export const normalizeGetSingleQuery = (
-	query?: ClientGetSingleQueryParams,
-): ClientGetSingleQueryParams => ({
-	filter: query?.filter,
-	include: query?.include,
-});
+/** Applies Lucid's default pagination when toolkit callers omit it. */
+export const normalizePaginatedQuery = <T extends PaginatedQuery>(
+	query?: T,
+): Omit<T, "page" | "perPage"> & { page: number; perPage: number } => {
+	const normalizedQuery = query ?? ({} as T);
 
-export const throwToolkitError = (
-	error: LucidErrorData,
+	return {
+		...normalizedQuery,
+		page: normalizedQuery.page ?? constants.query.page,
+		perPage: normalizedQuery.perPage ?? constants.query.perPage,
+	};
+};
+
+/** Clones optional query objects so toolkit services can pass a stable shape downstream. */
+export const normalizeQuery = <T extends object>(query?: T): T =>
+	({ ...(query ?? {}) }) as T;
+
+/** Converts unexpected exceptions into standard Lucid service error values. */
+export const runToolkitService = async <T>(
+	callback: () => ServiceResponse<T>,
 	messageFallback: string,
-): never => {
-	throw new Error(error.message ?? messageFallback, {
-		cause: error,
-	});
+): ServiceResponse<T> => {
+	try {
+		const response = await callback();
+
+		if (response.error || response.data !== undefined) {
+			return response;
+		}
+
+		return {
+			error: {
+				type: "basic",
+				message: messageFallback,
+				status: 500,
+			},
+			data: undefined,
+		} satisfies ResolvedServiceResponse<T>;
+	} catch (error) {
+		if (error instanceof Error) {
+			const decodedError = decodeError(error);
+
+			return {
+				error: {
+					type: "basic",
+					name: decodedError.name,
+					message: decodedError.message ?? messageFallback,
+					status: decodedError.status,
+					code: decodedError.code,
+					errors: decodedError.errors,
+				},
+				data: undefined,
+			} satisfies ResolvedServiceResponse<T>;
+		}
+
+		return {
+			error: {
+				type: "basic",
+				name: constants.errors.name,
+				message: messageFallback,
+				status: constants.errors.status,
+			},
+			data: undefined,
+		} satisfies ResolvedServiceResponse<T>;
+	}
 };

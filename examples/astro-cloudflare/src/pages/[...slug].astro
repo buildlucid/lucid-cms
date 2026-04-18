@@ -14,7 +14,13 @@ export async function getStaticPaths() {
 		},
 	});
 
-	return response.data.map((page) => ({
+	if (response.error) {
+		throw new Error(
+			response.error.message ?? "Failed to fetch Lucid pages for static paths.",
+		);
+	}
+
+	return response.data.data.map((page) => ({
 		params: {
 			slug:
 				page.fields?.fullSlug.translations?.en === "/"

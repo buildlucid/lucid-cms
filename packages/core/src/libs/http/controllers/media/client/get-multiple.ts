@@ -63,7 +63,7 @@ const getMultipleController = factory.createHandlers(
 		);
 		const context = getServiceContext(c);
 
-		const media = await serviceWrapper(mediaServices.getMultiple, {
+		const media = await serviceWrapper(mediaServices.client.getMultiple, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

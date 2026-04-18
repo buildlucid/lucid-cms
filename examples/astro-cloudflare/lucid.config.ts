@@ -25,6 +25,7 @@ export default configureLucid({
 		from: "@lucidcms/cloudflare-adapter",
 	},
 	config: (env) => ({
+		baseUrl: "http://localhost:4321",
 		db: new LibSQLAdapter({
 			url: "http://127.0.0.1:8081",
 		}),

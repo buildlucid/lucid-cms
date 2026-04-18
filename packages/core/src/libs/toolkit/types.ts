@@ -1,56 +1,30 @@
-import type {
-	ClientGetMultipleQueryParams,
-	ClientGetSingleQueryParams,
-} from "../../schemas/documents.js";
-import type { ClientDocumentResponse } from "../../types/response.js";
-import type { DocumentVersionType } from "../db-adapter/types.js";
-
-export type ToolkitDocumentStatus = Exclude<DocumentVersionType, "revision">;
+import type { ToolkitDocuments } from "./documents/index.js";
+import type { ToolkitLocales } from "./locales/index.js";
+import type { ToolkitMedia } from "./media/index.js";
 
 export type CreateToolkitOptions = {
-	configPath?: string;
+	/**
+	 * Request URL to use when Lucid needs to build absolute URLs.
+	 * If omitted, Lucid uses `config.baseUrl`, then falls back to `http://localhost:6543`.
+	 */
 	requestUrl?: string;
 };
 
-export type ToolkitDocumentsGetMultipleQuery = Omit<
-	ClientGetMultipleQueryParams,
-	"page" | "perPage"
-> & {
-	page?: number;
-	perPage?: number;
-};
-
-export type ToolkitDocumentsGetSingleQuery = Omit<
-	ClientGetSingleQueryParams,
-	never
->;
-
-export type ToolkitDocumentsGetMultipleInput = {
-	collectionKey: string;
-	status?: ToolkitDocumentStatus;
-	query?: ToolkitDocumentsGetMultipleQuery;
-};
-
-export type ToolkitDocumentsGetSingleInput = {
-	collectionKey: string;
-	status?: ToolkitDocumentStatus;
-	query?: ToolkitDocumentsGetSingleQuery;
-};
-
-export type ToolkitDocumentsGetMultipleResult = {
-	data: ClientDocumentResponse[];
-	count: number;
-};
-
-export type ToolkitDocuments = {
-	getMultiple: (
-		input: ToolkitDocumentsGetMultipleInput,
-	) => Promise<ToolkitDocumentsGetMultipleResult>;
-	getSingle: (
-		input: ToolkitDocumentsGetSingleInput,
-	) => Promise<ClientDocumentResponse>;
-};
-
 export type Toolkit = {
+	/** Helpers for reading collection documents. */
 	documents: ToolkitDocuments;
+	/** Helpers for reading enabled locales. */
+	locales: ToolkitLocales;
+	/** Helpers for reading and processing media. */
+	media: ToolkitMedia;
 };
+
+export type * from "./documents/get-multiple.js";
+export type * from "./documents/get-single.js";
+export type * from "./documents/index.js";
+export type * from "./locales/get-all.js";
+export type * from "./locales/index.js";
+export type * from "./media/get-multiple.js";
+export type * from "./media/get-single.js";
+export type * from "./media/index.js";
+export type * from "./media/process-media.js";

@@ -46,7 +46,7 @@ const processMediaController = factory.createHandlers(
 	async (c) => {
 		const context = getServiceContext(c);
 
-		const media = await serviceWrapper(mediaServices.processMedia, {
+		const media = await serviceWrapper(mediaServices.client.processMedia, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

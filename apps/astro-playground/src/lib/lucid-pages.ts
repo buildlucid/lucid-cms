@@ -1,9 +1,7 @@
-import path from "node:path";
 import { createToolkit } from "@lucidcms/core/toolkit";
 
 const PAGE_COLLECTION_KEY = "page";
 const PAGE_STATUS = "latest";
-const configPath = path.resolve(process.cwd(), "lucid.config.ts");
 
 type LucidField = {
 	value?: unknown;
@@ -206,7 +204,6 @@ const mapPageDocument = (document: LucidClientDocument): PlaygroundPage => {
 const getToolkit = async () => {
 	if (!toolkitPromise) {
 		toolkitPromise = createToolkit({
-			configPath,
 			requestUrl: "http://astro-playground.local/lucid",
 		}).catch((error) => {
 			toolkitPromise = undefined;
@@ -232,9 +229,14 @@ export const getAllPages = async (): Promise<PlaygroundPage[]> => {
 			],
 		},
 	});
+
+	if (response.error) {
+		throw new Error(response.error.message ?? "Failed to load Lucid pages.");
+	}
+
 	const uniquePages = new Map<string, PlaygroundPage>();
 
-	for (const page of response.data.map(mapPageDocument)) {
+	for (const page of response.data.data.map(mapPageDocument)) {
 		if (page.fullSlug !== "/" && !page.fullSlug.startsWith("/")) {
 			continue;
 		}
@@ -252,30 +254,25 @@ export const getPageByFullSlug = async (
 ): Promise<PlaygroundPage | null> => {
 	const toolkit = await getToolkit();
 
-	try {
-		const response = await toolkit.documents.getSingle({
-			collectionKey: PAGE_COLLECTION_KEY,
-			status: PAGE_STATUS,
-			query: {
-				filter: {
-					_fullSlug: {
-						value: fullSlug,
-					},
+	const response = await toolkit.documents.getSingle({
+		collectionKey: PAGE_COLLECTION_KEY,
+		status: PAGE_STATUS,
+		query: {
+			filter: {
+				_fullSlug: {
+					value: fullSlug,
 				},
 			},
-		});
+		},
+	});
 
-		return mapPageDocument(response);
-	} catch (error) {
-		const cause =
-			error instanceof Error && typeof error.cause === "object"
-				? (error.cause as { status?: number })
-				: undefined;
-
-		if (cause?.status === 404) {
-			return null;
-		}
-
-		throw error;
+	if (response.error?.status === 404) {
+		return null;
 	}
+
+	if (response.error) {
+		throw new Error(response.error.message ?? "Failed to load a Lucid page.");
+	}
+
+	return mapPageDocument(response.data);
 };
