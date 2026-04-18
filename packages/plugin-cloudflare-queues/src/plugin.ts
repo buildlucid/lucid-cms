@@ -1,5 +1,4 @@
 import type {
-	CloudflareWorkerEntryArtifact,
 	CloudflareWorkerExport,
 	CloudflareWorkerExportArtifact,
 	CloudflareWorkerImport,
@@ -155,24 +154,6 @@ for (const message of batch.messages) {
 }`,
 					},
 				];
-
-				if (pluginOptions.consumer === "separate") {
-					return {
-						error: undefined,
-						data: {
-							artifacts: [
-								{
-									type: "worker-entry",
-									custom: {
-										filename: "queue-consumer",
-										imports,
-										exports,
-									},
-								} satisfies RuntimeBuildArtifactCustom<CloudflareWorkerEntryArtifact>,
-							],
-						},
-					};
-				}
 
 				return {
 					error: undefined,

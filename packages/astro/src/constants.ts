@@ -36,7 +36,6 @@ const astroConstants = {
 	},
 	workerArtifacts: {
 		exportType: "worker-export",
-		entryType: "worker-entry",
 	},
 	http: {
 		devOrigin: "http://astro.local",

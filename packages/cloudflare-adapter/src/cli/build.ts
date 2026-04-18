@@ -7,7 +7,6 @@ import type { BuildHandler } from "@lucidcms/core/types";
 import { build } from "rolldown";
 import constants from "../constants.js";
 import getRuntimeContext from "../services/get-runtime-context.js";
-import prepareAdditionalWorkerEntries from "../services/prepare-additional-worker-entries.js";
 import prepareMainWorkerEntry from "../services/prepare-worker-entry.js";
 import writeWorkerEntries from "../services/write-worker-entries.js";
 
@@ -34,31 +33,20 @@ const buildCommand: BuildHandler = async ({
 			outputRelativeConfigPath,
 			buildArtifacts.custom,
 		);
-		const additionalWorkerEntries = prepareAdditionalWorkerEntries(
-			buildArtifacts.custom,
-		);
 
-		const allEntries = [
+		const entryFilepath = `${outputPath}/temp-entry.${extension}`;
+
+		const tempFiles = await writeWorkerEntries([
 			{
-				key: constants.ENTRY_FILE,
-				filepath: `${outputPath}/temp-entry.${extension}`,
+				filepath: entryFilepath,
 				...mainWorkerEntry,
 			},
-			...additionalWorkerEntries.map((entry) => ({
-				...entry,
-				filepath: `${outputPath}/${entry.key}.${extension}`,
-			})),
-		];
-
-		const tempFiles = await writeWorkerEntries(allEntries);
+		]);
 
 		//* build files
 		await Promise.all(
 			Object.entries({
-				...allEntries.reduce<Record<string, string>>((acc, entry) => {
-					acc[entry.key] = entry.filepath;
-					return acc;
-				}, {}),
+				[constants.ENTRY_FILE]: entryFilepath,
 				...buildArtifacts.compile,
 			}).map(([key, inputPath]) =>
 				build({

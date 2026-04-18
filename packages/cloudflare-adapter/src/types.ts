@@ -24,12 +24,6 @@ export type CloudflareWorkerExportArtifact = {
 	exports: CloudflareWorkerExport[];
 };
 
-export type CloudflareWorkerEntryArtifact = {
-	filename: string;
-	imports: CloudflareWorkerImport[];
-	exports: CloudflareWorkerExport[];
-};
-
 export type AdapterOptions = {
 	platformProxy?: GetPlatformProxyOptions;
 	server?: {

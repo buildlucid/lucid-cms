@@ -7,10 +7,7 @@ import {
 	buildNodeRouteSource,
 } from "../internal/generated-sources.js";
 import { toImportPath, toPosixPath } from "../internal/paths.js";
-import {
-	buildCloudflareAdditionalWorkers,
-	buildCloudflareMainWorkerSource,
-} from "../internal/worker-module.js";
+import { buildCloudflareMainWorkerSource } from "../internal/worker-module.js";
 import { ensureDirectory } from "./filesystem.js";
 import type { ResolvedLucidProject } from "./project.js";
 
@@ -74,8 +71,8 @@ export default spaHtml;
 };
 
 /**
- * Cloudflare sidecar artifacts still need Lucid-owned worker files, but we
- * isolate them under `.lucid/astro` so Astro remains the primary app build.
+ * Astro's Cloudflare hosting uses a single Lucid-owned worker entry that
+ * layers Lucid hooks onto Astro's generated server worker.
  */
 export const writeCloudflareWorkerFiles = async (
 	project: ResolvedLucidProject,
@@ -94,20 +91,13 @@ export const writeCloudflareWorkerFiles = async (
 		configPath: project.configPath,
 		outputPath: workerDir,
 		outputRelativeConfigPath,
-		customArtifactTypes: [
-			astroConstants.workerArtifacts.exportType,
-			astroConstants.workerArtifacts.entryType,
-		],
+		customArtifactTypes: [astroConstants.workerArtifacts.exportType],
 	});
 
 	const mainWorkerSource = buildCloudflareMainWorkerSource({
 		configImportPath: outputRelativeConfigPath,
 		customArtifacts: processedArtifacts.custom,
 	});
-
-	const additionalWorkers = buildCloudflareAdditionalWorkers(
-		processedArtifacts.custom,
-	);
 
 	await Promise.all([
 		fs.writeFile(
@@ -118,14 +108,5 @@ export const writeCloudflareWorkerFiles = async (
 			path.join(workerDir, astroConstants.files.worker),
 			mainWorkerSource,
 		),
-		...additionalWorkers.map(async (worker) => {
-			const extension = path.extname(worker.filename)
-				? ""
-				: astroConstants.files.typescriptExtension;
-			await fs.writeFile(
-				path.join(workerDir, `${worker.filename}${extension}`),
-				worker.source,
-			);
-		}),
 	]);
 };

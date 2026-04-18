@@ -4,11 +4,10 @@ import lucidCMS from "@lucidcms/astro";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-	output: "server",
+	output: "static",
 	adapter: cloudflare({
 		imageService: "passthrough",
 		prerenderEnvironment: "node",
-		sessionKVBindingName: "CLOUDFLARE_KV",
 	}),
 	integrations: [lucidCMS()],
 });

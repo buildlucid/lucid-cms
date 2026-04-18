@@ -8,10 +8,7 @@ import {
 	buildCloudflareRouteSource,
 	buildNodeRouteSource,
 } from "./internal/generated-sources.js";
-import {
-	buildCloudflareAdditionalWorkers,
-	buildCloudflareMainWorkerSource,
-} from "./internal/worker-module.js";
+import { buildCloudflareMainWorkerSource } from "./internal/worker-module.js";
 
 describe("@lucidcms/astro internals", () => {
 	test("detects supported runtime combinations", () => {
@@ -116,38 +113,5 @@ describe("@lucidcms/astro internals", () => {
 		);
 		expect(source).toContain("queue(batch, env, ctx)");
 		expect(source).toContain('import { queueHandler } from "./plugin.js";');
-	});
-
-	test("generates additional Cloudflare worker entry files", () => {
-		const workers = buildCloudflareAdditionalWorkers([
-			{
-				type: "worker-entry",
-				custom: {
-					filename: "workers/queue-consumer",
-					imports: [
-						{
-							path: "./consumer.js",
-							default: "consumer",
-						},
-					],
-					exports: [
-						{
-							name: "fetch",
-							params: ["request", "env", "ctx"],
-							content: "return consumer.fetch(request, env, ctx);",
-						},
-					],
-				},
-			} as never,
-		]);
-
-		expect(workers).toHaveLength(1);
-		expect(workers[0]?.filename).toBe("queue-consumer");
-		expect(workers[0]?.source).toContain(
-			'import consumer from "./consumer.js";',
-		);
-		expect(workers[0]?.source).toContain(
-			"fetch(request, env, ctx) { return consumer.fetch(request, env, ctx); }",
-		);
 	});
 });

@@ -10,10 +10,7 @@ const adapter = (options?: AdapterOptions): RuntimeAdapter => {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
 		config: {
-			customBuildArtifacts: [
-				constants.WORKER_EXPORT_ARTIFACT_TYPE,
-				constants.WORKER_ENTRY_ARTIFACT_TYPE,
-			],
+			customBuildArtifacts: [constants.WORKER_EXPORT_ARTIFACT_TYPE],
 		},
 		getEnvVars: async ({ logger }: { logger: GetEnvVarsLogger }) => {
 			const { default: getEnvVars } = await import(

@@ -1,6 +1,4 @@
-import path from "node:path";
 import type {
-	CloudflareWorkerEntryArtifact,
 	CloudflareWorkerExport,
 	CloudflareWorkerExportArtifact,
 	CloudflareWorkerImport,
@@ -74,7 +72,7 @@ const renderWorkerHandlers = (
 
 /**
  * Cloudflare plugin artifacts all target the same worker module shape, so this
- * keeps the source layout consistent across the main entry and sidecar workers.
+ * keeps the source layout consistent across the merged worker Lucid emits.
  */
 export const buildCloudflareWorkerModule = (props: {
 	imports: CloudflareWorkerImport[];
@@ -198,29 +196,4 @@ ctx.waitUntil(runCronService());`,
 		exports,
 		includeAstroHandler: true,
 	});
-};
-
-/**
- * Sidecar workers are still allowed for non-HTTP concerns such as queues, but
- * we keep them under the same codegen path so Astro builds remain the entry.
- */
-export const buildCloudflareAdditionalWorkers = (
-	customArtifacts: RuntimeBuildArtifactCustom[],
-): Array<{ filename: string; source: string }> => {
-	return customArtifacts
-		.filter(
-			(artifact) => artifact.type === astroConstants.workerArtifacts.entryType,
-		)
-		.map((artifact) => {
-			const custom = artifact.custom as CloudflareWorkerEntryArtifact;
-			const filename = path.basename(custom.filename);
-
-			return {
-				filename,
-				source: buildCloudflareWorkerModule({
-					imports: custom.imports,
-					exports: custom.exports,
-				}),
-			};
-		});
 };
