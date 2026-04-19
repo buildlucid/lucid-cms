@@ -54,14 +54,22 @@ export const writeGeneratedRouteFiles = async (props: {
 	const routePath = path.join(props.codegenDir, routeFilename);
 	const routeSource =
 		props.project.runtime === "node"
-			? buildNodeRouteSource(configImportPath)
+			? buildNodeRouteSource(
+					configImportPath,
+					props.project.loaded.definition.adapter.module,
+					props.project.loaded.definition.database.module,
+				)
 			: buildCloudflareRouteSource(
 					configImportPath,
 					props.project.loaded.definition.database.module,
 				);
 	const toolkitSource =
 		props.project.runtime === "node"
-			? buildNodeToolkitSource(configImportPath)
+			? buildNodeToolkitSource(
+					configImportPath,
+					props.project.loaded.definition.adapter.module,
+					props.project.loaded.definition.database.module,
+				)
 			: buildCloudflareToolkitSource(
 					configImportPath,
 					props.project.loaded.definition.database.module,

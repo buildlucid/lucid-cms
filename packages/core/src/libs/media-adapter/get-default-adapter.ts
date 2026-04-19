@@ -6,15 +6,12 @@ import type { Config } from "../../types/config.js";
  * Node's fs APIs, so we keep that capability check behind a lazy boundary.
  */
 const getDefaultMediaAdapter = async (config: Config) => {
-	const fsSpecifier = ["node:fs", "promises"].join("/");
-	const fs = (await import(fsSpecifier)) as typeof import("node:fs/promises");
+	const fs = await import("node:fs/promises");
 	await fs.access(".");
 
-	const { default: fileSystemAdapter } = (await import(
+	const { default: fileSystemAdapter } = await import(
 		`./adapters/file-system/index.js`
-	)) as {
-		default: typeof import("./adapters/file-system/index.js")["default"];
-	};
+	);
 
 	return fileSystemAdapter({
 		uploadDir: constants.defaultUploadDirectory,

@@ -50,17 +50,25 @@ describe("@lucidcms/astro internals", () => {
 		).toBe("cloudflare");
 	});
 
-	test("generates Node and Cloudflare route sources via lazy config resolution", () => {
-		const nodeSource = buildNodeRouteSource("./lucid.config.ts");
+	test("generates Node and Cloudflare route sources with concrete adapter imports", () => {
+		const nodeSource = buildNodeRouteSource(
+			"./lucid.config.ts",
+			"@lucidcms/node-adapter",
+			"@lucidcms/sqlite-adapter",
+		);
 		const cloudflareSource = buildCloudflareRouteSource(
 			"./lucid.config.ts",
 			"@lucidcms/sqlite-adapter",
 		);
 
-		expect(nodeSource).toContain("resolveConfigDefinition");
+		expect(nodeSource).toContain('import("@lucidcms/node-adapter")');
 		expect(nodeSource).toContain(
-			'configureLucidPath: "@lucidcms/astro/configure-lucid"',
+			'import ConfiguredDatabaseAdapter from "@lucidcms/sqlite-adapter";',
 		);
+		expect(nodeSource).toContain(
+			'import configureLucid from "@lucidcms/astro/configure-lucid";',
+		);
+		expect(nodeSource).not.toContain("resolveConfigDefinition");
 		expect(nodeSource).not.toContain(
 			'Reflect.get(lucidConfigModule, "envSchema")',
 		);

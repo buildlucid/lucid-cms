@@ -8,6 +8,7 @@ import CollectionConfigSchema from "../collection/builders/collection-builder/sc
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import { initializeLogger } from "../logger/index.js";
+import type { LucidConfigRecipe } from "../runtime-adapter/types.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
@@ -30,6 +31,7 @@ const processConfig = async (
 		bypassCache?: boolean;
 		skipValidation?: boolean;
 		resolvedDb?: DatabaseAdapter;
+		recipe?: LucidConfigRecipe;
 	},
 ): Promise<Config> => {
 	if (cachedConfig !== undefined && !options?.bypassCache) {
@@ -55,6 +57,10 @@ const processConfig = async (
 	Object.assign(configRes, {
 		db: options.resolvedDb,
 	});
+
+	if (options?.recipe) {
+		configRes = produce(configRes, options.recipe);
+	}
 
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {

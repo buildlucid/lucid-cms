@@ -1,4 +1,5 @@
 import type { AddressInfo } from "node:net";
+import type { WritableDraft } from "immer";
 import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
@@ -128,6 +129,7 @@ export type RuntimeAdapterCLI = {
 };
 
 export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
+export type LucidConfigRecipe = (draft: WritableDraft<Config>) => void;
 
 export interface AdapterOptionsByModule {
 	[path: string]: Record<string, unknown> | undefined;
@@ -179,13 +181,20 @@ export type LucidConfigDefinition<
 	config: AdapterDefineConfig;
 };
 
+export type WrappedLucidConfigDefinition<
+	AdapterModule extends string = string,
+	DatabaseModule extends string = string,
+> = LucidConfigDefinition<AdapterModule, DatabaseModule> & {
+	recipe?: LucidConfigRecipe;
+};
+
 export type RuntimeConfigureLucid = <
 	AdapterModule extends string,
 	DatabaseModule extends string,
 >(
-	definition: LucidConfigDefinition<AdapterModule, DatabaseModule>,
+	definition: WrappedLucidConfigDefinition<AdapterModule, DatabaseModule>,
 	meta?: LucidConfigDefinitionMeta,
-) => LucidConfigDefinition<AdapterModule, DatabaseModule>;
+) => WrappedLucidConfigDefinition<AdapterModule, DatabaseModule>;
 
 export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema> & {
 	getEnvVars?: RuntimeAdapterEnvLoader;

@@ -6,17 +6,61 @@ import astroConstants from "../constants.js";
  */
 export const buildNodeRouteSource = (
 	configImportPath: string,
-): string => `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
-import { resolveConfigDefinition } from "@lucidcms/core/build";
-import { createApp } from "@lucidcms/core/runtime";
+	runtimeAdapterImportPath: string,
+	databaseAdapterImportPath: string,
+): string => {
+	const runtimeAdapterErrorMessage = JSON.stringify(
+		`Lucid Astro could not load the runtime adapter export from "${runtimeAdapterImportPath}".`,
+	);
+
+	return `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
+import ConfiguredDatabaseAdapter from ${JSON.stringify(databaseAdapterImportPath)};
+import { createApp, createConfiguredDatabaseAdapter, processConfig } from "@lucidcms/core/runtime";
 import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
 import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/runtime";
+import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 import spaHtml from "./${astroConstants.files.spaHtmlModule}";
 
 export const prerender = false;
 
 let appPromise;
+let runtimeAdapterModulePromise;
+
+const silentLogger = {
+\tinstance: {
+\t\tinfo: () => {},
+\t\twarn: () => {},
+\t\terror: () => {},
+\t\tlog: () => {},
+\t\tsuccess: () => {},
+\t\tcolor: {
+\t\t\tblue: (value) => String(value),
+\t\t},
+\t},
+\tsilent: true,
+};
+
+const loadRuntimeAdapterModule = async () => {
+\tif (!runtimeAdapterModulePromise) {
+\t\truntimeAdapterModulePromise = import(${JSON.stringify(runtimeAdapterImportPath)});
+\t}
+
+\treturn runtimeAdapterModulePromise;
+};
+
+const getAdapterFactory = async () => {
+\tconst runtimeAdapterModule = await loadRuntimeAdapterModule();
+\tconst adapterFactory =
+\t\truntimeAdapterModule.adapter ??
+\t\truntimeAdapterModule.default;
+
+\tif (typeof adapterFactory !== "function") {
+\t\tthrow new Error(${runtimeAdapterErrorMessage});
+\t}
+
+\treturn adapterFactory;
+};
 
 const resolveRemoteAddress = (request) => {
 \t// Astro proxies Lucid requests through its own server, so we recover the user IP here instead of assuming a dedicated Lucid server layer.
@@ -33,16 +77,30 @@ const resolveRemoteAddress = (request) => {
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
-\t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
-\t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.env,
-\t\t\t\tconfigureLucidPath: ${JSON.stringify(astroConstants.integration.configureLucidModuleId)},
-\t\t\t\tmeta: {
-\t\t\t\t\temailTemplates,
-\t\t\t\t},
-\t\t\t\tprocessConfigOptions: {
-\t\t\t\t\tskipValidation: true,
-\t\t\t\t},
+\t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
+\t\t\t\temailTemplates,
+\t\t\t});
+\t\t\tconst adapterFactory = await getAdapterFactory();
+\t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
+\t\t\tconst env = adapter.getEnvVars
+\t\t\t\t? await adapter.getEnvVars({
+\t\t\t\t\tlogger: silentLogger,
+\t\t\t\t})
+\t\t\t\t: undefined;
+
+\t\t\tif (lucidConfigModule.env && env) {
+\t\t\t\tlucidConfigModule.env.parse(env);
+\t\t\t}
+
+\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
+\t\t\t\tConfiguredDatabaseAdapter,
+\t\t\t\twrappedDefinition.database,
+\t\t\t\tenv,
+\t\t\t);
+\t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
+\t\t\t\trecipe: wrappedDefinition.recipe,
+\t\t\t\tresolvedDb: databaseAdapter,
+\t\t\t\tskipValidation: true,
 \t\t\t});
 \t\t\tconst runtimeContext = {
 \t\t\t\t...getRuntimeContext({
@@ -85,6 +143,7 @@ export const ALL = async (context) => {
 \treturn response;
 };
 `;
+};
 
 /**
  * Astro pages need a generated toolkit helper so they can reuse Lucid's resolved
@@ -92,27 +151,86 @@ export const ALL = async (context) => {
  */
 export const buildNodeToolkitSource = (
 	configImportPath: string,
-): string => `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
-import { resolveConfigDefinition } from "@lucidcms/core/build";
+	runtimeAdapterImportPath: string,
+	databaseAdapterImportPath: string,
+): string => {
+	const runtimeAdapterErrorMessage = JSON.stringify(
+		`Lucid Astro could not load the runtime adapter export from "${runtimeAdapterImportPath}".`,
+	);
+
+	return `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
+import ConfiguredDatabaseAdapter from ${JSON.stringify(databaseAdapterImportPath)};
+import { createConfiguredDatabaseAdapter, processConfig } from "@lucidcms/core/runtime";
 import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
+import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 
 let toolkitPromise;
+let runtimeAdapterModulePromise;
+
+const silentLogger = {
+\tinstance: {
+\t\tinfo: () => {},
+\t\twarn: () => {},
+\t\terror: () => {},
+\t\tlog: () => {},
+\t\tsuccess: () => {},
+\t\tcolor: {
+\t\t\tblue: (value) => String(value),
+\t\t},
+\t},
+\tsilent: true,
+};
+
+const loadRuntimeAdapterModule = async () => {
+\tif (!runtimeAdapterModulePromise) {
+\t\truntimeAdapterModulePromise = import(${JSON.stringify(runtimeAdapterImportPath)});
+\t}
+
+\treturn runtimeAdapterModulePromise;
+};
+
+const getAdapterFactory = async () => {
+\tconst runtimeAdapterModule = await loadRuntimeAdapterModule();
+\tconst adapterFactory =
+\t\truntimeAdapterModule.adapter ??
+\t\truntimeAdapterModule.default;
+
+\tif (typeof adapterFactory !== "function") {
+\t\tthrow new Error(${runtimeAdapterErrorMessage});
+\t}
+
+\treturn adapterFactory;
+};
 
 /** Reuses one resolved toolkit across Astro page calls in the same server process. */
 const ensureToolkit = async () => {
 \tif (!toolkitPromise) {
 \t\ttoolkitPromise = (async () => {
-\t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
-\t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.env,
-\t\t\t\tconfigureLucidPath: ${JSON.stringify(astroConstants.integration.configureLucidModuleId)},
-\t\t\t\tmeta: {
-\t\t\t\t\temailTemplates,
-\t\t\t\t},
-\t\t\t\tprocessConfigOptions: {
-\t\t\t\t\tskipValidation: true,
-\t\t\t\t},
+\t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
+\t\t\t\temailTemplates,
+\t\t\t});
+\t\t\tconst adapterFactory = await getAdapterFactory();
+\t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
+\t\t\tconst env = adapter.getEnvVars
+\t\t\t\t? await adapter.getEnvVars({
+\t\t\t\t\tlogger: silentLogger,
+\t\t\t\t})
+\t\t\t\t: undefined;
+
+\t\t\tif (lucidConfigModule.env && env) {
+\t\t\t\tlucidConfigModule.env.parse(env);
+\t\t\t}
+
+\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
+\t\t\t\tConfiguredDatabaseAdapter,
+\t\t\t\twrappedDefinition.database,
+\t\t\t\tenv,
+\t\t\t);
+\t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
+\t\t\t\trecipe: wrappedDefinition.recipe,
+\t\t\t\tresolvedDb: databaseAdapter,
+\t\t\t\tskipValidation: true,
 \t\t\t});
 \t\t\tconst context = createToolkitServiceContext({
 \t\t\t\tconfig: resolvedConfig,
@@ -133,6 +251,7 @@ export const getToolkit = async () => ensureToolkit();
 
 export default getToolkit;
 `;
+};
 
 /**
  * The Cloudflare route is generated as Astro code so it can marry Astro's
@@ -232,6 +351,7 @@ const ensureApp = async () => {
 \t\t\t\tcloudflareEnv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(cloudflareEnv), {
+\t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
 \t\t\t});
@@ -416,6 +536,7 @@ const ensureToolkit = async () => {
 \t\t\tconst resolvedConfig = await processConfig(
 \t\t\t\twrappedDefinition.config(resolvedCloudflareEnv),
 \t\t\t\t{
+\t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
 \t\t\t\t},

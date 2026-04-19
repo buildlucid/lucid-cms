@@ -69,6 +69,7 @@ const databaseAdapter = createConfiguredDatabaseAdapter(
 const resolved = await processConfig(
     wrappedDefinition.config(env),
     {
+        recipe: wrappedDefinition.recipe,
         resolvedDb: databaseAdapter,
         skipValidation: true,
     },
@@ -132,6 +133,7 @@ return app.fetch(request, env, ctx);`,
     const resolved = await processConfig(
         wrappedDefinition.config(env),
         {
+            recipe: wrappedDefinition.recipe,
             resolvedDb: databaseAdapter,
             skipValidation: true,
         },

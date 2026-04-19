@@ -1,34 +1,30 @@
 import type {
-	LucidConfig,
-	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
 	RuntimeConfigureLucid,
+	WrappedLucidConfigDefinition,
 } from "@lucidcms/core/types";
-import { produce } from "immer";
 
 const configureLucid: RuntimeConfigureLucid = <
 	AdapterModule extends string,
 	DatabaseModule extends string,
 >(
-	definition: LucidConfigDefinition<AdapterModule, DatabaseModule>,
+	definition: WrappedLucidConfigDefinition<AdapterModule, DatabaseModule>,
 	meta?: LucidConfigDefinitionMeta,
-): LucidConfigDefinition<AdapterModule, DatabaseModule> => {
-	return produce(definition, (draft) => {
-		draft.config = (env) => {
-			const lucidConfig = definition.config(env);
-
-			return produce(lucidConfig, (lucidDraft) => {
-				lucidDraft.preRenderedEmailTemplates = meta?.emailTemplates
-					? Object.fromEntries(
-							Object.entries(meta.emailTemplates).map(([key, value]) => [
-								key,
-								value.html,
-							]),
-						)
-					: undefined;
-			}) satisfies LucidConfig;
-		};
-	});
+) => {
+	return {
+		...definition,
+		recipe: (draft) => {
+			definition.recipe?.(draft);
+			draft.preRenderedEmailTemplates = meta?.emailTemplates
+				? Object.fromEntries(
+						Object.entries(meta.emailTemplates).map(([key, value]) => [
+							key,
+							value.html,
+						]),
+					)
+				: undefined;
+		},
+	};
 };
 
 export default configureLucid;

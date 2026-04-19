@@ -1,9 +1,9 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
+import { createConfiguredDatabaseAdapter } from "../runtime-adapter/create-configured-database-adapter.js";
 import {
 	createAdapter,
-	createConfiguredDatabaseAdapter,
 	getAdapterConfigureLucid,
 	getAdapterModule,
 	getDatabaseAdapterClass,
@@ -14,6 +14,7 @@ import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
 	RuntimeAdapter,
+	WrappedLucidConfigDefinition,
 } from "../runtime-adapter/types.js";
 import processConfig from "./process-config.js";
 
@@ -36,7 +37,7 @@ export type ResolveConfigDefinitionResult = {
 	adapter: RuntimeAdapter;
 	envSchema?: z.ZodType;
 	env: EnvironmentVariables | undefined;
-	definition: LucidConfigDefinition;
+	definition: WrappedLucidConfigDefinition;
 };
 
 const isConfigDefinition = (
@@ -135,6 +136,7 @@ export const resolveConfigDefinition = async (props: {
 	// and validation once the adapter/env/bootstrap layer has been resolved.
 	const config = await processConfig(wrappedDefinition.config(env || {}), {
 		...(props.processConfigOptions ?? {}),
+		recipe: wrappedDefinition.recipe,
 		resolvedDb: db,
 	});
 

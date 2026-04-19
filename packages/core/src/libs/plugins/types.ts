@@ -1,9 +1,9 @@
-import type { WritableDraft } from "immer";
 import type { Config } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type {
 	AdapterRuntimeContext,
 	LucidConfigDefinition,
+	LucidConfigRecipe,
 	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactCustom,
 	RuntimeBuildArtifactFile,
@@ -40,7 +40,7 @@ export type LucidPluginHooks = {
 	build?: LucidPluginHookBuild;
 };
 
-export type LucidPluginRecipe = (draft: WritableDraft<Config>) => void;
+export type LucidPluginRecipe = LucidConfigRecipe;
 
 export type LucidPluginResponse = {
 	/**
