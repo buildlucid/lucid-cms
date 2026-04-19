@@ -1,7 +1,5 @@
 import { configureLucid, z } from "@lucidcms/core";
 import PagesPlugin from "@lucidcms/plugin-pages";
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const envSchema = z.object({
@@ -13,12 +11,15 @@ export const envSchema = z.object({
 
 export default configureLucid({
 	adapter: {
-		from: "@lucidcms/node-adapter",
+		module: "@lucidcms/node-adapter",
+	},
+	database: {
+		module: "@lucidcms/sqlite-adapter",
+		options: {
+			database: "db.sqlite",
+		},
 	},
 	config: (env) => ({
-		db: new SQLiteAdapter({
-			database: async () => new Database("db.sqlite"),
-		}),
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,
 			cookie: env.COOKIE_SECRET,

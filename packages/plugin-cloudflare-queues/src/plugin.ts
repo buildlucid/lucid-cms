@@ -40,7 +40,11 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 					{
 						path: "@lucidcms/core/runtime",
-						exports: ["processConfig"],
+						exports: ["createConfiguredDatabaseAdapter", "processConfig"],
+					},
+					{
+						path: props.definition.database.module,
+						default: "ConfiguredDatabaseAdapter",
 					},
 					{
 						path: "@lucidcms/core",
@@ -71,9 +75,15 @@ const lucidConfig = wrappedDefinition.config(env);
 lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
     Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
 );
+const databaseAdapter = createConfiguredDatabaseAdapter(
+    ConfiguredDatabaseAdapter,
+    wrappedDefinition.database,
+    env,
+);
 const resolved = await processConfig(
     lucidConfig,
     {
+        resolvedDb: databaseAdapter,
         skipValidation: true,
     },
 );

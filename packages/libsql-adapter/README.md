@@ -15,23 +15,28 @@ npm install @lucidcms/libsql-adapter
 To use the LibSQL adapter, you must add it to your Lucid CMS configuration file. You'll need to provide the database URL and, optionally, an authentication token.
 
 ```typescript
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-import LibSQLAdapter from "@lucidcms/libsql-adapter";
+import { configureLucid } from "@lucidcms/core";
 
-export const adapter = nodeAdapter();
-
-export default defineConfig((env) => ({
-    db: new LibSQLAdapter({
-        url: env.LIBSQL_URL,
-        authToken: env.LIBSQL_AUTH_TOKEN,
+export default configureLucid({
+    adapter: {
+        module: "@lucidcms/node-adapter",
+    },
+    database: {
+        module: "@lucidcms/libsql-adapter",
+        options: (env) => ({
+            url: env.LIBSQL_URL,
+            authToken: env.LIBSQL_AUTH_TOKEN,
+        }),
+    },
+    config: () => ({
+        // ...other config
     }),
-    // ...other config
-}));
+});
 ```
 
 ## Configuration
 
-The adapter accepts a configuration object with the following options:
+The adapter constructor accepts a configuration object via `database.options` with the following options:
 
 | Property | Type | Description |
 |----------|------|-------------|

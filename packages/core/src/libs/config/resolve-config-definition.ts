@@ -3,8 +3,10 @@ import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import {
 	createAdapter,
+	createConfiguredDatabaseAdapter,
 	getAdapterConfigureLucid,
 	getAdapterModule,
+	getDatabaseAdapterClass,
 } from "../runtime-adapter/loaders.js";
 import type {
 	EnvironmentVariables,
@@ -27,7 +29,7 @@ const defaultLoggerInstance = {
 } as unknown as GetEnvVarsLogger["instance"];
 
 export const invalidConfigDefinitionMessage =
-	"Lucid config must default export configureLucid({ adapter, config }).";
+	"Lucid config must default export configureLucid({ adapter, database, config }).";
 
 export type ResolveConfigDefinitionResult = {
 	config: Config;
@@ -45,13 +47,14 @@ const isConfigDefinition = (
 	}
 
 	const definition = value as {
-		adapter?: { from?: unknown };
-		env?: unknown;
+		adapter?: { module?: unknown };
+		database?: { module?: unknown };
 		config?: unknown;
 	};
 
 	return (
-		typeof definition.adapter?.from === "string" &&
+		typeof definition.adapter?.module === "string" &&
+		typeof definition.database?.module === "string" &&
 		typeof definition.config === "function"
 	);
 };
@@ -88,13 +91,13 @@ export const resolveConfigDefinition = async (props: {
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
-	const adapterModule = await getAdapterModule(definition.adapter.from);
+	const adapterModule = await getAdapterModule(definition.adapter.module);
 
 	// Hosted integrations can supply their own configureLucid wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
 	const configureLucid =
 		props.configureLucidPath &&
-		props.configureLucidPath !== definition.adapter.from
+		props.configureLucidPath !== definition.adapter.module
 			? await getAdapterConfigureLucid(props.configureLucidPath)
 			: adapterModule.configureLucid;
 
@@ -119,10 +122,20 @@ export const resolveConfigDefinition = async (props: {
 		envSchema.parse(env);
 	}
 
+	const DatabaseAdapterCtor = await getDatabaseAdapterClass(
+		wrappedDefinition.database.module,
+	);
+	const db = createConfiguredDatabaseAdapter(
+		DatabaseAdapterCtor,
+		wrappedDefinition.database,
+		env,
+	);
+
 	// processConfig remains the shared source of truth for plugin init, merging
 	// and validation once the adapter/env/bootstrap layer has been resolved.
 	const config = await processConfig(wrappedDefinition.config(env || {}), {
 		...(props.processConfigOptions ?? {}),
+		resolvedDb: db,
 	});
 
 	return {

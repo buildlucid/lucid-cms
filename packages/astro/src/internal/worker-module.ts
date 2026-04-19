@@ -109,6 +109,7 @@ export default worker;
  */
 export const buildCloudflareMainWorkerSource = (props: {
 	configImportPath: string;
+	databaseAdapterImportPath: string;
 	customArtifacts: RuntimeBuildArtifactCustom[];
 }): string => {
 	const configImportPath = props.configImportPath.startsWith(".")
@@ -117,7 +118,15 @@ export const buildCloudflareMainWorkerSource = (props: {
 	const imports: CloudflareWorkerImport[] = [
 		{
 			path: "@lucidcms/core/runtime",
-			exports: ["processConfig", "setupCronJobs"],
+			exports: [
+				"createConfiguredDatabaseAdapter",
+				"processConfig",
+				"setupCronJobs",
+			],
+		},
+		{
+			path: props.databaseAdapterImportPath,
+			default: "ConfiguredDatabaseAdapter",
 		},
 		{
 			path: astroConstants.integration.configureLucidModuleId,
@@ -157,7 +166,13 @@ return astroWorker.fetch(request, env, ctx);`,
 	const wrappedDefinition = astroConfigureLucid(configDefinition, {
 		emailTemplates,
 	});
+	const databaseAdapter = createConfiguredDatabaseAdapter(
+		ConfiguredDatabaseAdapter,
+		wrappedDefinition.database,
+		env,
+	);
 	const resolvedConfig = await processConfig(wrappedDefinition.config(env), {
+		resolvedDb: databaseAdapter,
 		skipValidation: true,
 	});
 	const kv = await (resolvedConfig.kv

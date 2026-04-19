@@ -3,6 +3,7 @@ import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import type { RenderedTemplates } from "../email-adapter/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
@@ -57,6 +58,7 @@ export type RuntimeBuildArtifacts = {
 
 export type BuildHandler = (props: {
 	config: Config;
+	definition: LucidConfigDefinition;
 	configPath: string;
 	outputPath: string;
 	outputRelativeConfigPath: string;
@@ -127,33 +129,63 @@ export type RuntimeAdapterCLI = {
 
 export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
 
-export interface AdapterOptionsByPath {
+export interface AdapterOptionsByModule {
 	[path: string]: Record<string, unknown> | undefined;
 }
 
-export type ResolveAdapterOptions<AdapterFrom extends string> =
-	AdapterFrom extends keyof AdapterOptionsByPath
-		? AdapterOptionsByPath[AdapterFrom]
+export interface DatabaseAdapterOptionsByModule {
+	[path: string]: Record<string, unknown> | undefined;
+}
+
+export type ResolveAdapterOptions<AdapterModule extends string> =
+	AdapterModule extends keyof AdapterOptionsByModule
+		? AdapterOptionsByModule[AdapterModule]
 		: Record<string, unknown> | undefined;
 
-export type LazyRuntimeAdapterReference<AdapterFrom extends string = string> = {
-	from: AdapterFrom;
-	options?: ResolveAdapterOptions<AdapterFrom>;
+export type ResolveDatabaseAdapterOptions<DatabaseModule extends string> =
+	DatabaseModule extends keyof DatabaseAdapterOptionsByModule
+		? DatabaseAdapterOptionsByModule[DatabaseModule]
+		: Record<string, unknown> | undefined;
+
+export type LazyRuntimeAdapterReference<AdapterModule extends string = string> =
+	{
+		module: AdapterModule;
+		options?: ResolveAdapterOptions<AdapterModule>;
+	};
+
+export type DatabaseAdapterOptionsResolver<DatabaseModule extends string> = (
+	env: EnvironmentVariables,
+) => ResolveDatabaseAdapterOptions<DatabaseModule> | undefined;
+
+export type LazyDatabaseAdapterReference<
+	DatabaseModule extends string = string,
+> = {
+	module: DatabaseModule;
+	options?:
+		| ResolveDatabaseAdapterOptions<DatabaseModule>
+		| DatabaseAdapterOptionsResolver<DatabaseModule>;
 };
 
 export type LucidConfigDefinitionMeta = {
 	emailTemplates?: RenderedTemplates;
 };
 
-export type LucidConfigDefinition<AdapterFrom extends string = string> = {
-	adapter: LazyRuntimeAdapterReference<AdapterFrom>;
+export type LucidConfigDefinition<
+	AdapterModule extends string = string,
+	DatabaseModule extends string = string,
+> = {
+	adapter: LazyRuntimeAdapterReference<AdapterModule>;
+	database: LazyDatabaseAdapterReference<DatabaseModule>;
 	config: AdapterDefineConfig;
 };
 
-export type RuntimeConfigureLucid = <AdapterFrom extends string>(
-	definition: LucidConfigDefinition<AdapterFrom>,
+export type RuntimeConfigureLucid = <
+	AdapterModule extends string,
+	DatabaseModule extends string,
+>(
+	definition: LucidConfigDefinition<AdapterModule, DatabaseModule>,
 	meta?: LucidConfigDefinitionMeta,
-) => LucidConfigDefinition<AdapterFrom>;
+) => LucidConfigDefinition<AdapterModule, DatabaseModule>;
 
 export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema> & {
 	getEnvVars?: RuntimeAdapterEnvLoader;
@@ -164,10 +196,18 @@ export type RuntimeAdapterFactory = (
 	options?: Record<string, unknown>,
 ) => RuntimeAdapter | Promise<RuntimeAdapter>;
 
+export type DatabaseAdapterClass = new (
+	options?: Record<string, unknown>,
+) => DatabaseAdapter;
+
 export type RuntimeAdapterModule = {
 	configureLucid: RuntimeConfigureLucid;
 	adapter?: RuntimeAdapterFactory;
 	default?: RuntimeAdapterFactory;
+};
+
+export type DatabaseAdapterModule = {
+	default?: DatabaseAdapterClass;
 };
 
 // ------------------------------------------------------------

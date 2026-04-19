@@ -13,7 +13,7 @@ export const detectLucidRuntime = (
 	if (!adapter) {
 		throw new LucidError({
 			message:
-				'Lucid Astro integration requires `configureLucid({ adapter: { from: "@lucidcms/node-adapter" } })` or `@lucidcms/cloudflare-adapter` in lucid.config.ts.',
+				'Lucid Astro integration requires `configureLucid({ adapter: { module: "@lucidcms/node-adapter" }, database: { module: "..." }, config })` or `@lucidcms/cloudflare-adapter` in lucid.config.ts.',
 		});
 	}
 

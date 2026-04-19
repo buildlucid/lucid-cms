@@ -5,13 +5,15 @@ import constants from "../../constants/constants.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
 import logger from "../logger/index.js";
 import generateAdapterOptionsTypes from "./adapter-options-type.js";
+import generateDatabaseOptionsTypes from "./database-options-type.js";
 import generateEnvTypes from "./env-type.js";
 import type { GenerateTypesResult } from "./types.js";
 
 const generateTypes = async (props: {
 	envSchema?: ZodType;
 	configPath: string;
-	adapterFrom?: string;
+	adapterModule?: string;
+	databaseModule?: string;
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
 
@@ -29,7 +31,10 @@ const generateTypes = async (props: {
 			configRelativePath: configRelativePath,
 		}),
 		generateAdapterOptionsTypes({
-			adapterFrom: props.adapterFrom,
+			adapterModule: props.adapterModule,
+		}),
+		generateDatabaseOptionsTypes({
+			databaseModule: props.databaseModule,
 		}),
 	]);
 

@@ -9,15 +9,11 @@ import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
 import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
 import { passthroughQueueAdapter } from "@lucidcms/core/queue-adapter";
 // Plugins
-import LibSQLAdapter from "@lucidcms/libsql-adapter";
 // Adapters
 import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
 import S3Plugin from "@lucidcms/plugin-s3";
-import PostgresAdapter from "@lucidcms/postgres-adapter";
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
 import { describeRoute } from "hono-openapi";
 import BlogCollection from "./src/collections/blogs.js";
 import MainMenuCollection from "./src/collections/main-menu.js";
@@ -49,13 +45,26 @@ export const envSchema = z.object({
 
 export default configureLucid({
 	adapter: {
-		from: "@lucidcms/node-adapter",
-		// from: "@lucidcms/cloudflare-adapter",
+		module: "@lucidcms/node-adapter",
+		// module: "@lucidcms/cloudflare-adapter",
 		// options: {
 		// 	server: {
 		// 		port: 1092,
 		// 	}
 		// },
+	},
+	database: {
+		module: "@lucidcms/sqlite-adapter",
+		// module: "@lucidcms/postgres-adapter",
+		// options: (env) => ({
+		// 	url: env?.DATABASE_URL as string,
+		// 	max: 5,
+		// }),
+		// module: "@lucidcms/libsql-adapter",
+		// options: (env) => ({
+		// 	url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+		// 	authToken: env?.TURSO_AUTH_TOKEN as string,
+		// }),
 	},
 	config: (env) => ({
 		// security: {
@@ -66,17 +75,6 @@ export default configureLucid({
 		logger: {
 			level: "silent",
 		},
-		db: new SQLiteAdapter({
-			database: async () => new Database("db.sqlite"),
-		}),
-		// db: new PostgresAdapter(env?.DATABASE_URL as string, {
-		// 	max: 5,
-		// }),
-		// db: new LibSQLAdapter({
-		// url: "http://127.0.0.1:8081", //"libsql://lucid-willyallop.turso.io",
-		// url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		// authToken: env?.TURSO_AUTH_TOKEN as string,
-		// }),
 		auth: {
 			password: {
 				enabled: true,

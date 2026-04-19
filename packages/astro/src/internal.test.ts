@@ -30,7 +30,7 @@ describe("@lucidcms/astro internals", () => {
 
 	test("rejects unsupported or mismatched runtimes", () => {
 		expect(() => detectLucidRuntime(undefined)).toThrow(
-			/configureLucid\(\{ adapter: \{ from:/,
+			/configureLucid\(\{ adapter: \{ module:/,
 		);
 		expect(() => detectLucidRuntime({ key: "bun" } as never)).toThrow(
 			/does not support the "bun" runtime adapter/,
@@ -52,7 +52,10 @@ describe("@lucidcms/astro internals", () => {
 
 	test("generates Node and Cloudflare route sources via lazy config resolution", () => {
 		const nodeSource = buildNodeRouteSource("./lucid.config.ts");
-		const cloudflareSource = buildCloudflareRouteSource("./lucid.config.ts");
+		const cloudflareSource = buildCloudflareRouteSource(
+			"./lucid.config.ts",
+			"@lucidcms/sqlite-adapter",
+		);
 
 		expect(nodeSource).toContain("resolveConfigDefinition");
 		expect(nodeSource).toContain(
@@ -80,6 +83,7 @@ describe("@lucidcms/astro internals", () => {
 	test("generates the Cloudflare main worker with Astro fetch and Lucid scheduled handlers", () => {
 		const source = buildCloudflareMainWorkerSource({
 			configImportPath: "../lucid.config.ts",
+			databaseAdapterImportPath: "@lucidcms/sqlite-adapter",
 			customArtifacts: [
 				{
 					type: "worker-export",

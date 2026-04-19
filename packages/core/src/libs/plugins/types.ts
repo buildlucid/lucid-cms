@@ -3,6 +3,7 @@ import type { Config } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type {
 	AdapterRuntimeContext,
+	LucidConfigDefinition,
 	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactCustom,
 	RuntimeBuildArtifactFile,
@@ -18,6 +19,7 @@ export type LucidPluginBuildHookResult = {
 
 export type LucidPluginHookInit = () => ServiceResponse<undefined>;
 export type LucidPluginHookBuild = (props: {
+	definition: LucidConfigDefinition;
 	paths: {
 		configPath: string;
 		outputPath: string;

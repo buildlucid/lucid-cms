@@ -17,7 +17,6 @@ import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
-
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
 
 export type Select<T> = {
@@ -54,6 +53,10 @@ export type DatabaseConfig = {
 		 * Whether the database supports the ALTER COLUMN statement.
 		 */
 		alterColumn: boolean;
+		/**
+		 * Whether the database supports transactions.
+		 */
+		transaction: boolean;
 		/**
 		 * Whether multiple columns can be altered in a single ALTER TABLE statement.
 		 * Some databases require separate statements for each column modification.

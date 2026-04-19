@@ -10,7 +10,13 @@ import type { LucidConfigDefinition } from "./types.js";
  * ```ts
  * export default configureLucid({
  *   adapter: {
- *     from: "@lucidcms/node-adapter",
+ *     module: "@lucidcms/node-adapter",
+ *   },
+ *   database: {
+ *     module: "@lucidcms/sqlite-adapter",
+ *     options: {
+ *       database: "./db.sqlite",
+ *     },
  *   },
  *   config: (env) => ({
  *     collections: [],
@@ -19,9 +25,12 @@ import type { LucidConfigDefinition } from "./types.js";
  * });
  * ```
  */
-const configureLucid = <AdapterFrom extends string>(
-	definition: LucidConfigDefinition<AdapterFrom>,
-): LucidConfigDefinition<AdapterFrom> => {
+const configureLucid = <
+	AdapterModule extends string,
+	DatabaseModule extends string,
+>(
+	definition: LucidConfigDefinition<AdapterModule, DatabaseModule>,
+): LucidConfigDefinition<AdapterModule, DatabaseModule> => {
 	return produce(definition, () => {});
 };
 

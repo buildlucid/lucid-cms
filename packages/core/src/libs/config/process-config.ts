@@ -6,6 +6,7 @@ import LucidError from "../../utils/errors/lucid-error.js";
 import BrickConfigSchema from "../collection/builders/brick-builder/schema.js";
 import CollectionConfigSchema from "../collection/builders/collection-builder/schema.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
+import type DatabaseAdapter from "../db-adapter/adapter-base.js";
 import { initializeLogger } from "../logger/index.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
@@ -28,13 +29,32 @@ const processConfig = async (
 	options?: {
 		bypassCache?: boolean;
 		skipValidation?: boolean;
+		resolvedDb?: DatabaseAdapter;
 	},
 ): Promise<Config> => {
 	if (cachedConfig !== undefined && !options?.bypassCache) {
 		return cachedConfig;
 	}
 
+	if (Object.hasOwn(config, "db")) {
+		throw new LucidError({
+			message:
+				"Lucid config must not define `config.db`. Move your database adapter to the top-level `database: { module, options }` descriptor instead.",
+		});
+	}
+
+	if (!options?.resolvedDb) {
+		throw new LucidError({
+			message:
+				"Lucid could not resolve the configured database adapter. Define it via `configureLucid({ database: { module, options }, config })`.",
+		});
+	}
+
 	let configRes = mergeConfig(config, defaultConfig);
+
+	Object.assign(configRes, {
+		db: options.resolvedDb,
+	});
 
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {

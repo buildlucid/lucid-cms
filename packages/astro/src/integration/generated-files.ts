@@ -55,11 +55,17 @@ export const writeGeneratedRouteFiles = async (props: {
 	const routeSource =
 		props.project.runtime === "node"
 			? buildNodeRouteSource(configImportPath)
-			: buildCloudflareRouteSource(configImportPath);
+			: buildCloudflareRouteSource(
+					configImportPath,
+					props.project.loaded.definition.database.module,
+				);
 	const toolkitSource =
 		props.project.runtime === "node"
 			? buildNodeToolkitSource(configImportPath)
-			: buildCloudflareToolkitSource(configImportPath);
+			: buildCloudflareToolkitSource(
+					configImportPath,
+					props.project.loaded.definition.database.module,
+				);
 
 	await Promise.all([
 		fs.writeFile(
@@ -98,6 +104,7 @@ export const writeCloudflareWorkerFiles = async (
 
 	const processedArtifacts = await prepareBuildArtifacts({
 		config: project.loaded.config,
+		definition: project.loaded.definition,
 		silent: true,
 		configPath: project.configPath,
 		outputPath: workerDir,
@@ -107,6 +114,7 @@ export const writeCloudflareWorkerFiles = async (
 
 	const mainWorkerSource = buildCloudflareMainWorkerSource({
 		configImportPath: outputRelativeConfigPath,
+		databaseAdapterImportPath: project.loaded.definition.database.module,
 		customArtifacts: processedArtifacts.custom,
 	});
 

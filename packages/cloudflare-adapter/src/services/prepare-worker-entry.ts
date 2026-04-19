@@ -11,6 +11,7 @@ import type {
  */
 const prepareMainWorkerEntry = (
 	configPath: string,
+	databaseAdapterImportPath: string,
 	customArtifacts: RuntimeBuildArtifactCustom[],
 ): {
 	imports: CloudflareWorkerImport[];
@@ -23,7 +24,16 @@ const prepareMainWorkerEntry = (
 		},
 		{
 			path: "@lucidcms/core/runtime",
-			exports: ["createApp", "processConfig", "setupCronJobs"],
+			exports: [
+				"createApp",
+				"createConfiguredDatabaseAdapter",
+				"processConfig",
+				"setupCronJobs",
+			],
+		},
+		{
+			path: databaseAdapterImportPath,
+			default: "ConfiguredDatabaseAdapter",
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
@@ -51,9 +61,15 @@ const prepareMainWorkerEntry = (
 			content: /** ts */ `const wrappedDefinition = configureLucid(config, {
     emailTemplates: emailTemplates,
 });
+const databaseAdapter = createConfiguredDatabaseAdapter(
+    ConfiguredDatabaseAdapter,
+    wrappedDefinition.database,
+    env,
+);
 const resolved = await processConfig(
     wrappedDefinition.config(env),
     {
+        resolvedDb: databaseAdapter,
         skipValidation: true,
     },
 );
@@ -108,9 +124,15 @@ return app.fetch(request, env, ctx);`,
     const wrappedDefinition = configureLucid(config, {
         emailTemplates: emailTemplates,
     });
+    const databaseAdapter = createConfiguredDatabaseAdapter(
+        ConfiguredDatabaseAdapter,
+        wrappedDefinition.database,
+        env,
+    );
     const resolved = await processConfig(
         wrappedDefinition.config(env),
         {
+            resolvedDb: databaseAdapter,
             skipValidation: true,
         },
     );

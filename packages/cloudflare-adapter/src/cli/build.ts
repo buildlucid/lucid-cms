@@ -11,6 +11,7 @@ import prepareMainWorkerEntry from "../services/prepare-worker-entry.js";
 import writeWorkerEntries from "../services/write-worker-entries.js";
 
 const buildCommand: BuildHandler = async ({
+	definition,
 	configPath,
 	outputPath,
 	outputRelativeConfigPath,
@@ -31,6 +32,7 @@ const buildCommand: BuildHandler = async ({
 
 		const mainWorkerEntry = prepareMainWorkerEntry(
 			outputRelativeConfigPath,
+			definition.database.module,
 			buildArtifacts.custom,
 		);
 

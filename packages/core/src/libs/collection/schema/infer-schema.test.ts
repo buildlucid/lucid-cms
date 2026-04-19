@@ -1,5 +1,4 @@
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
@@ -12,7 +11,7 @@ import inferSchema from "./infer-schema.js";
 describe("Schema inference", async () => {
 	let pagesCollection: CollectionBuilder;
 	const db = new SQLiteAdapter({
-		database: async () => new Database(":memory:"),
+		database: ":memory:",
 	});
 
 	beforeEach(() => {

@@ -1,5 +1,4 @@
 import { configureLucid, z } from "@lucidcms/core";
-import LibSQLAdapter from "@lucidcms/libsql-adapter";
 import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
 import PagesPlugin from "@lucidcms/plugin-pages";
@@ -31,16 +30,19 @@ export const envSchema = z.object({
 
 export default configureLucid({
 	adapter: {
-		from: "@lucidcms/cloudflare-adapter",
+		module: "@lucidcms/cloudflare-adapter",
+	},
+	database: {
+		module: "@lucidcms/libsql-adapter",
+		options: (env) => ({
+			url: env.LIBSQL_URL,
+			authToken: env.LIBSQL_AUTH_TOKEN,
+		}),
 	},
 	config: (env) => ({
 		brand: {
 			name: "Playground",
 		},
-		db: new LibSQLAdapter({
-			url: env.LIBSQL_URL,
-			authToken: env.LIBSQL_AUTH_TOKEN,
-		}),
 		logger: {
 			level: "silent",
 		},

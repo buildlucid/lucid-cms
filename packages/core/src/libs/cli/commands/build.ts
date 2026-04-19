@@ -44,7 +44,7 @@ const buildCommand = async (options?: {
 
 		if (!adapterCLI) {
 			cliLogger.error(
-				`Lucid could not load CLI handlers from "${configRes.definition.adapter.from}".`,
+				`Lucid could not load CLI handlers from "${configRes.definition.adapter.module}".`,
 				{
 					silent,
 				},
@@ -105,6 +105,7 @@ const buildCommand = async (options?: {
 		}
 		const processedArtifacts = await prepareBuildArtifacts({
 			config: configRes.config,
+			definition: configRes.definition,
 			silent,
 			configPath,
 			outputPath: configRes.config.build.paths.outDir,
@@ -116,6 +117,7 @@ const buildCommand = async (options?: {
 			vite.buildApp(configRes.config),
 			adapterCLI.build({
 				config: configRes.config,
+				definition: configRes.definition,
 				configPath,
 				outputPath: configRes.config.build.paths.outDir,
 				outputRelativeConfigPath: normalisedOutputRelativePath,

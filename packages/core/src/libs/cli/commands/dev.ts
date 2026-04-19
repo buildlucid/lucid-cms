@@ -40,7 +40,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			if (!adapterCLI) {
 				cliLogger.error(
-					`Lucid could not load CLI handlers from "${configResult.definition.adapter.from}".`,
+					`Lucid could not load CLI handlers from "${configResult.definition.adapter.module}".`,
 				);
 				logger.setBuffering(false);
 				process.exit(1);
@@ -54,7 +54,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			generateTypes({
 				envSchema: configResult.envSchema,
 				configPath: configPath,
-				adapterFrom: configResult.definition.adapter.from,
+				adapterModule: configResult.definition.adapter.module,
+				databaseModule: configResult.definition.database.module,
 			});
 
 			if (!envValid) {

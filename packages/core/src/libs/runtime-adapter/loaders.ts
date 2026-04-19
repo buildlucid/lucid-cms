@@ -1,5 +1,9 @@
 import { LucidError } from "../../utils/errors/index.js";
 import type {
+	DatabaseAdapterClass,
+	DatabaseAdapterModule,
+	EnvironmentVariables,
+	LazyDatabaseAdapterReference,
 	LazyRuntimeAdapterReference,
 	RuntimeAdapter,
 	RuntimeAdapterModule,
@@ -33,13 +37,13 @@ const getDefaultExport = <T>(
  * while still leaving the boundary dynamic for host-specific builds.
  */
 export const getAdapterModule = async (
-	adapterFrom: string,
+	adapterModule: string,
 ): Promise<RuntimeAdapterModule> => {
-	const module = await loadModule<Partial<RuntimeAdapterModule>>(adapterFrom);
+	const module = await loadModule<Partial<RuntimeAdapterModule>>(adapterModule);
 
 	if (typeof module.configureLucid !== "function") {
 		throw new LucidError({
-			message: `Lucid could not load the configureLucid() export from "${adapterFrom}".`,
+			message: `Lucid could not load the configureLucid() export from "${adapterModule}".`,
 		});
 	}
 
@@ -47,7 +51,7 @@ export const getAdapterModule = async (
 
 	if (typeof adapter !== "function") {
 		throw new LucidError({
-			message: `Lucid could not load the adapter() export from "${adapterFrom}".`,
+			message: `Lucid could not load the adapter() export from "${adapterModule}".`,
 		});
 	}
 
@@ -84,7 +88,7 @@ export const getAdapterConfigureLucid = async (
 /**
  * Adapters stay as factories so they can keep per-instance state, like the
  * Cloudflare adapter's platform proxy, while config loading still describes
- * them declaratively via `adapter.from`.
+ * them declaratively via `adapter.module`.
  */
 export const createAdapter = async (
 	module: RuntimeAdapterModule,
@@ -99,4 +103,65 @@ export const createAdapter = async (
 	}
 
 	return adapterFactory(adapter.options as Record<string, unknown> | undefined);
+};
+
+const isPromiseLike = (value: unknown): value is PromiseLike<unknown> => {
+	return (
+		(typeof value === "object" || typeof value === "function") &&
+		value !== null &&
+		"then" in value
+	);
+};
+
+export const getDatabaseAdapterClass = async (
+	databaseModule: string,
+): Promise<DatabaseAdapterClass> => {
+	const module =
+		await loadModule<Partial<DatabaseAdapterModule>>(databaseModule);
+	const DatabaseAdapterCtor = getDefaultExport(module);
+
+	if (typeof DatabaseAdapterCtor !== "function") {
+		throw new LucidError({
+			message: `Lucid could not load the default database adapter export from "${databaseModule}".`,
+		});
+	}
+
+	return DatabaseAdapterCtor;
+};
+
+const resolveDatabaseAdapterOptions = <DatabaseModule extends string>(
+	database: LazyDatabaseAdapterReference<DatabaseModule>,
+	env: EnvironmentVariables | undefined,
+): Record<string, unknown> | undefined => {
+	const options = database.options;
+
+	if (typeof options !== "function") {
+		return options as Record<string, unknown> | undefined;
+	}
+
+	const resolvedOptions = options(env ?? {});
+
+	if (isPromiseLike(resolvedOptions)) {
+		throw new LucidError({
+			message: `Lucid database options for "${database.module}" must be a plain object or a synchronous function.`,
+		});
+	}
+
+	return resolvedOptions as Record<string, unknown> | undefined;
+};
+
+export const createConfiguredDatabaseAdapter = <DatabaseModule extends string>(
+	DatabaseAdapterCtor: DatabaseAdapterClass,
+	database: LazyDatabaseAdapterReference<DatabaseModule>,
+	env: EnvironmentVariables | undefined,
+) => {
+	if (typeof DatabaseAdapterCtor !== "function") {
+		throw new LucidError({
+			message: "Lucid could not instantiate the configured database adapter.",
+		});
+	}
+
+	const options = resolveDatabaseAdapterOptions(database, env);
+
+	return new DatabaseAdapterCtor(options);
 };

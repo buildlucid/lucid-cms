@@ -1,4 +1,7 @@
-import type { RuntimeBuildArtifact } from "../../../libs/runtime-adapter/types.js";
+import type {
+	LucidConfigDefinition,
+	RuntimeBuildArtifact,
+} from "../../../libs/runtime-adapter/types.js";
 import type { Config } from "../../../types/config.js";
 import type { ServiceResponse } from "../../../types.js";
 import cliLogger from "../../cli/logger.js";
@@ -8,6 +11,7 @@ import cliLogger from "../../cli/logger.js";
  */
 const handlePluginBuildHooks = async (props: {
 	config: Config;
+	definition: LucidConfigDefinition;
 	silent?: boolean;
 	configPath: string;
 	outputPath: string;
@@ -23,6 +27,7 @@ const handlePluginBuildHooks = async (props: {
 					return;
 				}
 				const res = await plugin.hooks.build({
+					definition: props.definition,
 					paths: {
 						configPath: props.configPath,
 						outputPath: props.outputPath,

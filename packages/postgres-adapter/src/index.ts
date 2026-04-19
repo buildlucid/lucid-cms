@@ -16,13 +16,30 @@ import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
 
+export type PostgresClientOptions = Omit<
+	NonNullable<Parameters<typeof postgres>[1]>,
+	"onnotice"
+>;
+
+export type PostgresAdapterOptions = PostgresClientOptions & {
+	url: string;
+};
+
 class PostgresAdapter extends DatabaseAdapter {
-	constructor(url: string, options?: Parameters<typeof postgres>[1]) {
+	constructor(config?: PostgresAdapterOptions) {
+		if (!config?.url) {
+			throw new Error(
+				'PostgresAdapter requires a "url" option. Example: { url: env.DATABASE_URL }',
+			);
+		}
+
+		const { url, ...postgresOptions } = config;
+
 		super({
 			adapter: "postgres",
 			dialect: new PostgresJSDialect({
 				postgres: postgres(url, {
-					...options,
+					...postgresOptions,
 					onnotice: () => {},
 				}),
 			}),
@@ -41,6 +58,7 @@ class PostgresAdapter extends DatabaseAdapter {
 			tableNameByteLimit: 63,
 			support: {
 				alterColumn: true,
+				transaction: true,
 				multipleAlterTables: true,
 				autoIncrement: false,
 				boolean: true,
@@ -84,7 +102,7 @@ class PostgresAdapter extends DatabaseAdapter {
 			is_unique: boolean;
 		}>`
             WITH table_columns AS (
-                SELECT 
+                SELECT
                     c.table_name,
                     c.column_name AS name,
                     c.data_type AS type,
@@ -94,33 +112,33 @@ class PostgresAdapter extends DatabaseAdapter {
                     CASE WHEN uc.constraint_name IS NOT NULL THEN true ELSE false END AS is_unique
                 FROM information_schema.columns c
                 LEFT JOIN (
-                    SELECT 
+                    SELECT
                         kcu.table_name,
                         kcu.column_name,
                         tc.constraint_name
                     FROM information_schema.table_constraints tc
-                    JOIN information_schema.key_column_usage kcu 
+                    JOIN information_schema.key_column_usage kcu
                         ON tc.constraint_name = kcu.constraint_name
                     WHERE tc.constraint_type = 'PRIMARY KEY'
-                ) pk ON 
-                    c.table_name = pk.table_name AND 
+                ) pk ON
+                    c.table_name = pk.table_name AND
                     c.column_name = pk.column_name
                 LEFT JOIN (
-                    SELECT 
+                    SELECT
                         kcu.table_name,
                         kcu.column_name,
                         tc.constraint_name
                     FROM information_schema.table_constraints tc
-                    JOIN information_schema.key_column_usage kcu 
+                    JOIN information_schema.key_column_usage kcu
                         ON tc.constraint_name = kcu.constraint_name
                     WHERE tc.constraint_type = 'UNIQUE'
-                ) uc ON 
-                    c.table_name = uc.table_name AND 
+                ) uc ON
+                    c.table_name = uc.table_name AND
                     c.column_name = uc.column_name
                 WHERE c.table_name LIKE 'lucid_%'
             ),
             foreign_keys AS (
-                SELECT 
+                SELECT
                     kcu.table_name,
                     kcu.column_name,
                     ccu.table_name AS referenced_table,
@@ -128,21 +146,21 @@ class PostgresAdapter extends DatabaseAdapter {
                     rc.update_rule AS on_update,
                     rc.delete_rule AS on_delete
                 FROM information_schema.key_column_usage kcu
-                JOIN information_schema.referential_constraints rc 
+                JOIN information_schema.referential_constraints rc
                     ON kcu.constraint_name = rc.constraint_name
-                JOIN information_schema.constraint_column_usage ccu 
+                JOIN information_schema.constraint_column_usage ccu
                     ON rc.unique_constraint_name = ccu.constraint_name
                 WHERE kcu.table_name LIKE 'lucid_%'
             )
-            SELECT 
+            SELECT
                 tc.*,
                 fk.referenced_table AS fk_table,
                 fk.referenced_column AS fk_column,
                 fk.on_update AS fk_on_update,
                 fk.on_delete AS fk_on_delete
             FROM table_columns tc
-            LEFT JOIN foreign_keys fk ON 
-                tc.table_name = fk.table_name AND 
+            LEFT JOIN foreign_keys fk ON
+                tc.table_name = fk.table_name AND
                 tc.name = fk.column_name
         `.execute(client);
 
@@ -184,8 +202,8 @@ class PostgresAdapter extends DatabaseAdapter {
 	}
 	async dropAllTables(): Promise<void> {
 		const tables = await sql<{ tablename: string }>`
-                SELECT tablename 
-                FROM pg_tables 
+                SELECT tablename
+                FROM pg_tables
                 WHERE schemaname = 'public'
             `.execute(this.client);
 

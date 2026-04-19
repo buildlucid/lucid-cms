@@ -10,6 +10,10 @@
 		".": {
 			"import": "./dist/index.mjs",
 			"types": "./dist/index.d.ts"
+		},
+		"./types": {
+			"import": "./dist/types.mjs",
+			"types": "./dist/types.d.ts"
 		}
 	},
 	"scripts": {
@@ -19,17 +23,25 @@
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
-        "check": "biome check ./src",
-        "check:fix": "biome check --write ./src"
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"author": "Lucid",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/buildlucid/lucid-cms.git",
 		"directory": "packages/libsql-adapter"
 	},
-	"keywords": ["CMS", "Lucid CMS", "Lucid", "LibSQL", "DB Adapter"],
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"Lucid",
+		"LibSQL",
+		"DB Adapter"
+	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
 		"@lucidcms/config": "*",
@@ -45,11 +57,11 @@
 	"peerDependencies": {
 		"@lucidcms/core": "^0.12.0-alpha.1"
 	},
-    "volta": {
-        "node": "24.11.1"
-    },
-    "engines": {
-        "node": "^24.0.0"
-    },
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
 	"license": "MIT"
 }

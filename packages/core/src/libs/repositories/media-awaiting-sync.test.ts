@@ -1,11 +1,10 @@
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
 import { afterAll, describe, expect, test } from "vitest";
 import MediaAwaitingSyncRepository from "./media-awaiting-sync";
 
 describe("Tests for the media awaiting sync repository", async () => {
 	const db = new SQLiteAdapter({
-		database: async () => new Database(":memory:"),
+		database: ":memory:",
 	});
 
 	afterAll(() => {
@@ -21,6 +20,7 @@ describe("Tests for the media awaiting sync repository", async () => {
 		expect(table).toBeDefined();
 
 		for (const column of table?.columns || []) {
+			// @ts-expect-error
 			expect(MediaAwaitingSync.columnFormats[column.name]).toEqual(
 				column.dataType.toLowerCase(),
 			);

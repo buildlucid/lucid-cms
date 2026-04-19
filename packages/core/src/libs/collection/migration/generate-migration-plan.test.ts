@@ -1,5 +1,4 @@
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
-import Database from "better-sqlite3";
 import { afterAll, describe, expect, test } from "vitest";
 import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
 import type { InferredTable } from "../../../types.js";
@@ -7,7 +6,7 @@ import generateMigrationPlan from "./generate-migration-plan.js";
 
 describe("Generate migration plan", () => {
 	const db = new SQLiteAdapter({
-		database: async () => new Database(":memory:"),
+		database: ":memory:",
 	});
 
 	afterAll(() => {

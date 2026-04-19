@@ -5,14 +5,11 @@ import constants from "../../../../constants/constants.js";
 import type { Config } from "../../../../types.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
-import processConfig from "../../../config/process-config.js";
+import { resolveConfigDefinition } from "../../../config/resolve-config-definition.js";
 import getKVAdapter from "../../../kv-adapter/get-adapter.js";
 import logger from "../../../logger/index.js";
 import { QueueJobsRepository } from "../../../repositories/index.js";
-import type {
-	AdapterDefineConfig,
-	EnvironmentVariables,
-} from "../../../runtime-adapter/types.js";
+import type { EnvironmentVariables } from "../../../runtime-adapter/types.js";
 import executeSingleJob from "../../execute-single-job.js";
 import passthroughQueueAdapter from "../passthrough.js";
 import type { WorkerQueueAdapterOptions } from "./index.js";
@@ -57,16 +54,19 @@ const getConfig = async (): Promise<{
 		const configUrl = pathToFileURL(configPath).href;
 
 		const configModule = await import(configUrl);
-		const configFn = configModule.default as AdapterDefineConfig;
 
-		const processedConfig = await processConfig(configFn(runtime.env || {}), {
-			bypassCache: true,
-			skipValidation: true,
+		const resolved = await resolveConfigDefinition({
+			definition: configModule.default,
+			env: runtime.env,
+			processConfigOptions: {
+				bypassCache: true,
+				skipValidation: true,
+			},
 		});
 
 		return {
-			config: processedConfig,
-			env: runtime.env,
+			config: resolved.config,
+			env: resolved.env,
 		};
 	}
 };

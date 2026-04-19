@@ -140,6 +140,7 @@ export default getToolkit;
  */
 export const buildCloudflareRouteSource = (
 	configImportPath: string,
+	databaseAdapterImportPath: string,
 ): string => `export const prerender = false;
 
 let appPromise;
@@ -164,6 +165,7 @@ const loadRuntimeModules = async () => {
 \t\truntimeModulesPromise = Promise.all([
 \t\t\timport(${JSON.stringify(configImportPath)}),
 \t\t\timport("@lucidcms/core/runtime"),
+\t\t\timport(${JSON.stringify(databaseAdapterImportPath)}),
 \t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
 \t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
 \t\t\timport("@lucidcms/astro/runtime"),
@@ -173,6 +175,7 @@ const loadRuntimeModules = async () => {
 \t\t\t([
 \t\t\t\tlucidConfigModule,
 \t\t\t\truntimeModule,
+\t\t\t\tdatabaseAdapterModule,
 \t\t\t\tconfigureLucidModule,
 \t\t\t\truntimeContextModule,
 \t\t\t\tastroRuntimeModule,
@@ -182,6 +185,9 @@ const loadRuntimeModules = async () => {
 \t\t\t\tdefinition: lucidConfigModule.default,
 \t\t\t\tenvSchema: lucidConfigModule.envSchema,
 \t\t\t\tcreateApp: runtimeModule.createApp,
+\t\t\t\tcreateConfiguredDatabaseAdapter:
+\t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
+\t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,
 \t\t\t\tprocessConfig: runtimeModule.processConfig,
 \t\t\t\tconfigureLucid: configureLucidModule.default,
 \t\t\t\tgetRuntimeContext: runtimeContextModule.getRuntimeContext,
@@ -205,6 +211,8 @@ const ensureApp = async () => {
 \t\t\t\tdefinition,
 \t\t\t\tenvSchema,
 \t\t\t\tcreateApp,
+\t\t\t\tcreateConfiguredDatabaseAdapter,
+\t\t\t\tDatabaseAdapterClass,
 \t\t\t\tprocessConfig,
 \t\t\t\tconfigureLucid,
 \t\t\t\tgetRuntimeContext,
@@ -218,7 +226,13 @@ const ensureApp = async () => {
 \t\t\tconst wrappedDefinition = configureLucid(definition, {
 \t\t\t\temailTemplates,
 \t\t\t});
+\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
+\t\t\t\tDatabaseAdapterClass,
+\t\t\t\twrappedDefinition.database,
+\t\t\t\tcloudflareEnv,
+\t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(cloudflareEnv), {
+\t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
 \t\t\t});
 
@@ -299,6 +313,7 @@ export const ALL = async (context) => {
  */
 export const buildCloudflareToolkitSource = (
 	configImportPath: string,
+	databaseAdapterImportPath: string,
 ): string => `let toolkitPromise;
 let runtimeModulesPromise;
 
@@ -332,6 +347,7 @@ const loadRuntimeModules = async () => {
 \t\truntimeModulesPromise = Promise.all([
 \t\t\timport(${JSON.stringify(configImportPath)}),
 \t\t\timport("@lucidcms/core/runtime"),
+\t\t\timport(${JSON.stringify(databaseAdapterImportPath)}),
 \t\t\timport("@lucidcms/core/toolkit"),
 \t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
 \t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
@@ -339,12 +355,16 @@ const loadRuntimeModules = async () => {
 \t\t\t([
 \t\t\t\tlucidConfigModule,
 \t\t\t\truntimeModule,
+\t\t\t\tdatabaseAdapterModule,
 \t\t\t\ttoolkitModule,
 \t\t\t\tconfigureLucidModule,
 \t\t\t\temailTemplatesModule,
 \t\t\t]) => ({
 \t\t\t\tdefinition: lucidConfigModule.default,
 \t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tcreateConfiguredDatabaseAdapter:
+\t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
+\t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,
 \t\t\t\tprocessConfig: runtimeModule.processConfig,
 \t\t\t\tcreateToolkit: toolkitModule.createToolkit,
 \t\t\t\tcreateToolkitServiceContext:
@@ -368,6 +388,8 @@ const ensureToolkit = async () => {
 \t\t\t\tcreateToolkitServiceContext,
 \t\t\t\tdefinition,
 \t\t\t\tenvSchema,
+\t\t\t\tcreateConfiguredDatabaseAdapter,
+\t\t\t\tDatabaseAdapterClass,
 \t\t\t\tprocessConfig,
 \t\t\t\tconfigureLucid,
 \t\t\t\temailTemplates,
@@ -386,9 +408,15 @@ const ensureToolkit = async () => {
 \t\t\tconst wrappedDefinition = configureLucid(definition, {
 \t\t\t\temailTemplates,
 \t\t\t});
+\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
+\t\t\t\tDatabaseAdapterClass,
+\t\t\t\twrappedDefinition.database,
+\t\t\t\tresolvedCloudflareEnv,
+\t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(
 \t\t\t\twrappedDefinition.config(resolvedCloudflareEnv),
 \t\t\t\t{
+\t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
 \t\t\t\t},
 \t\t\t);

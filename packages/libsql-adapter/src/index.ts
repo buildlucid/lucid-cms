@@ -37,6 +37,7 @@ class LibSQLAdapter extends DatabaseAdapter {
 			tableNameByteLimit: null,
 			support: {
 				alterColumn: false,
+				transaction: true,
 				multipleAlterTables: false,
 				boolean: false,
 				autoIncrement: true,
@@ -80,20 +81,20 @@ class LibSQLAdapter extends DatabaseAdapter {
 		}>`
                 WITH RECURSIVE
                 tables AS (
-                    SELECT name as table_name 
-                    FROM sqlite_master 
+                    SELECT name as table_name
+                    FROM sqlite_master
                     WHERE type='table'
                         AND name NOT LIKE 'sqlite_%'
                 ),
                 table_info AS (
-                    SELECT 
+                    SELECT
                         tables.table_name,
                         p.*
                     FROM tables
                     CROSS JOIN pragma_table_info(tables.table_name) as p
                 ),
                 foreign_keys AS (
-                    SELECT 
+                    SELECT
                         tables.table_name,
                         fk.'from' as column_name,
                         fk.'table' as referenced_table,
@@ -104,7 +105,7 @@ class LibSQLAdapter extends DatabaseAdapter {
                     CROSS JOIN pragma_foreign_key_list(tables.table_name) as fk
                 ),
                 unique_constraints AS (
-                    SELECT 
+                    SELECT
                         tables.table_name,
                         idx.name as index_name,
                         idx.'unique' as is_unique,
@@ -114,7 +115,7 @@ class LibSQLAdapter extends DatabaseAdapter {
                     CROSS JOIN pragma_index_info(idx.name) as info
                     WHERE idx.'unique' = 1
                 )
-                SELECT 
+                SELECT
                     t.*,
                     fk.referenced_table as fk_table,
                     fk.referenced_column as fk_column,
@@ -122,8 +123,8 @@ class LibSQLAdapter extends DatabaseAdapter {
                     fk.on_delete as fk_on_delete,
                     CASE WHEN uc.column_name IS NOT NULL THEN 1 ELSE 0 END as is_unique
                 FROM table_info t
-                LEFT JOIN foreign_keys fk ON 
-                    t.table_name = fk.table_name AND 
+                LEFT JOIN foreign_keys fk ON
+                    t.table_name = fk.table_name AND
                     t.name = fk.column_name
                 LEFT JOIN unique_constraints uc ON
                     t.table_name = uc.table_name AND

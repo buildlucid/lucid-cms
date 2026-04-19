@@ -77,8 +77,6 @@ export type SecurityContentSecurityPolicy = {
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
-	/** A Postgres, SQLite or LibSQL database adapter instance. */
-	db: DatabaseAdapter;
 	/** KV storage settings. */
 	kv?: {
 		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */

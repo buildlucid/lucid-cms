@@ -10,10 +10,13 @@ import type {
 } from "@lucidcms/core/types";
 import { produce } from "immer";
 
-const configureLucid: RuntimeConfigureLucid = <AdapterFrom extends string>(
-	definition: LucidConfigDefinition<AdapterFrom>,
+const configureLucid: RuntimeConfigureLucid = <
+	AdapterModule extends string,
+	DatabaseModule extends string,
+>(
+	definition: LucidConfigDefinition<AdapterModule, DatabaseModule>,
 	_meta?: LucidConfigDefinitionMeta,
-): LucidConfigDefinition<AdapterFrom> => {
+): LucidConfigDefinition<AdapterModule, DatabaseModule> => {
 	return produce(definition, (draft) => {
 		draft.config = (env) => {
 			const lucidConfig = definition.config(env);
