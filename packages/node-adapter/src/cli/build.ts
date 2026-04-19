@@ -87,7 +87,7 @@ const buildCommand: BuildHandler = async ({
 		});
 
 		const entry = /* ts */ `
-import config, { envSchema } from "./${constants.CONFIG_FILE}.js";
+import * as lucidConfigModule from "./${constants.CONFIG_FILE}.js";
 import { resolveConfigDefinition } from "@lucidcms/core/build";
 import { createApp, setupCronJobs } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
@@ -97,8 +97,8 @@ import { getRuntimeContext } from "@lucidcms/node-adapter";
 const startServer = async () => {
 	try {
 		const { config: resolved, env } = await resolveConfigDefinition({
-			definition: config,
-			envSchema,
+			definition: lucidConfigModule.default,
+			envSchema: lucidConfigModule.env,
 			processConfigOptions: {
 				skipValidation: true,
 			},

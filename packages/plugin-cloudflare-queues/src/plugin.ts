@@ -63,7 +63,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `const { default: configDefinition, envSchema } =
+						content: /** ts */ `const { default: configDefinition, env: envSchema } =
     await import(${JSON.stringify(configImportPath)});
 
 if (envSchema) {

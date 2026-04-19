@@ -35,7 +35,7 @@ const ensureApp = async () => {
 \t\tappPromise = (async () => {
 \t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
 \t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tenvSchema: lucidConfigModule.env,
 \t\t\t\tconfigureLucidPath: ${JSON.stringify(astroConstants.integration.configureLucidModuleId)},
 \t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
@@ -105,7 +105,7 @@ const ensureToolkit = async () => {
 \t\ttoolkitPromise = (async () => {
 \t\t\tconst { config: resolvedConfig, env } = await resolveConfigDefinition({
 \t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tenvSchema: lucidConfigModule.env,
 \t\t\t\tconfigureLucidPath: ${JSON.stringify(astroConstants.integration.configureLucidModuleId)},
 \t\t\t\tmeta: {
 \t\t\t\t\temailTemplates,
@@ -183,7 +183,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\tspaHtmlModule,
 \t\t\t]) => ({
 \t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tenvSchema: lucidConfigModule.env,
 \t\t\t\tcreateApp: runtimeModule.createApp,
 \t\t\t\tcreateConfiguredDatabaseAdapter:
 \t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
@@ -361,7 +361,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\temailTemplatesModule,
 \t\t\t]) => ({
 \t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.envSchema,
+\t\t\t\tenvSchema: lucidConfigModule.env,
 \t\t\t\tcreateConfiguredDatabaseAdapter:
 \t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
 \t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,

@@ -155,7 +155,7 @@ return astroWorker.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: `const runCronService = async () => {
-	const [{ default: configDefinition, envSchema }] = await Promise.all([
+	const [{ default: configDefinition, env: envSchema }] = await Promise.all([
 		import(${JSON.stringify(configImportPath)}),
 	]);
 

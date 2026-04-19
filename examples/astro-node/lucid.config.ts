@@ -2,7 +2,7 @@ import { configureLucid, z } from "@lucidcms/core";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import PageCollection from "./src/lucid/collections/pages.js";
 
-export const envSchema = z.object({
+export const env = z.object({
 	ENCRYPTION_SECRET: z.string(),
 	COOKIE_SECRET: z.string(),
 	REFRESH_TOKEN_SECRET: z.string(),

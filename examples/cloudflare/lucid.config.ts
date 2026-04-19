@@ -5,7 +5,7 @@ import PagesPlugin from "@lucidcms/plugin-pages";
 import S3Plugin from "@lucidcms/plugin-s3";
 import PageCollection from "./src/collections/pages.js";
 
-export const envSchema = z.object({
+export const env = z.object({
 	LIBSQL_URL: z.string(),
 	LIBSQL_AUTH_TOKEN: z.string().optional(),
 	ENCRYPTION_SECRET: z.string(),

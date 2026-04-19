@@ -11,7 +11,7 @@ import SettingsCollection from "./src/lucid/collections/settings.js";
 import SimpleCollection from "./src/lucid/collections/simple.js";
 import TestCollection from "./src/lucid/collections/test.js";
 
-export const envSchema = z.object({
+export const env = z.object({
 	LIBSQL_URL: z.string(),
 	LIBSQL_AUTH_TOKEN: z.string().optional(),
 	LUCID_ENCRYPTION_SECRET: z.string(),

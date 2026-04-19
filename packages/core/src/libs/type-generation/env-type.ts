@@ -12,10 +12,10 @@ const generateEnvTypes = async (props: {
 	return {
 		module: constants.typeGeneration.modules.coreTypes,
 		types: props.schema
-			? "interface EnvironmentVariables extends z.infer<typeof envSchema> {}"
+			? "interface EnvironmentVariables extends z.infer<typeof env> {}"
 			: "interface EnvironmentVariables extends Record<string, unknown> {}",
 		imports: props.schema
-			? `import type { envSchema } from "${props.configRelativePath}";
+			? `import type { env } from "${props.configRelativePath}";
 import type { z } from "@lucidcms/core";`
 			: undefined,
 	};

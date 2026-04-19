@@ -38,13 +38,13 @@ export const loadConfigFile = async (props?: {
 
 	const configModule = await jiti.import<{
 		default: unknown;
-		envSchema?: ZodType;
+		env?: ZodType;
 	}>(importPath);
-	const hasNamedEnvSchemaExport = Object.hasOwn(configModule, "envSchema");
+	const hasNamedEnvExport = Object.hasOwn(configModule, "env");
 
 	const resolved = await resolveConfigDefinition({
 		definition: configModule.default,
-		envSchema: hasNamedEnvSchemaExport ? configModule.envSchema : undefined,
+		envSchema: hasNamedEnvExport ? configModule.env : undefined,
 		configureLucidPath: props?.configureLucidPath,
 		logger: {
 			instance: cliLogger,

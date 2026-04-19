@@ -24,7 +24,7 @@ import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import transporter from "./src/services/email-transporter.js";
 
-export const envSchema = z.object({
+export const env = z.object({
 	DATABASE_URL: z.string(),
 	LUCID_ENCRYPTION_SECRET: z.string(),
 	LUCID_COOKIE_SECRET: z.string(),
