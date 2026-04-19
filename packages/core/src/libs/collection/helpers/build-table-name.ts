@@ -7,16 +7,8 @@ import {
 	isCustomFieldTableType,
 	isStorageMode,
 } from "../custom-fields/storage/index.js";
+import { collectionTableParts } from "./table-parts.js";
 import toSafeTableName from "./to-safe-table-name.js";
-
-/**
- * Default parts for table names
- */
-export const collectionTableParts = {
-	document: "document",
-	fields: "fld",
-	versions: "ver",
-};
 
 /**
  * Builds out the table name based on its type and available keys

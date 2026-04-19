@@ -5,7 +5,7 @@ import registeredFields, {
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
-import { collectionTableParts } from "./build-table-name.js";
+import { collectionTableParts } from "./table-parts.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
 

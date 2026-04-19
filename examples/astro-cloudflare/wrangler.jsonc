@@ -7,11 +7,19 @@
 	"main": "./.lucid/astro/worker.ts",
 	"compatibility_date": "2026-04-17",
 	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"logs": {
+			"enabled": true
+		}
+	},
 	"kv_namespaces": [
 		{
-			"binding": "LUCID_KV"
+			"binding": "KV_BINDING"
 		}
 	],
+	"triggers": {
+		"crons": ["0 0 * * *"]
+	},
 	"assets": {
 		"directory": "./dist/client",
 		"binding": "ASSETS"

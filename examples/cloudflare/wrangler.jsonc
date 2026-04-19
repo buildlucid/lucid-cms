@@ -18,6 +18,9 @@
 			"binding": "KV_BINDING"
 		}
 	],
+	"triggers": {
+		"crons": ["0 0 * * *"]
+	},
 	"build": {
 		"watch_dir": "./src",
 		"command": "lucidcms build --cache-spa --silent",

@@ -1,10 +1,28 @@
 ---
-import { getPageByFullSlug } from "../../lib/lucid-pages.js";
+import getToolkit from "@lucidcms/astro/toolkit";
+import PageCollection from "../../lucid/collections/pages";
 
 export const prerender = false;
 
 const fullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
-const page = await getPageByFullSlug(fullSlug);
+const toolkit = await getToolkit();
+const response = await toolkit.documents.getSingle({
+	collectionKey: PageCollection.key,
+	status: "latest",
+	query: {
+		filter: {
+			_fullSlug: {
+				value: fullSlug,
+			},
+		},
+	},
+});
+
+if (response.error && response.error.status !== 404) {
+	throw new Error(response.error.message ?? "Failed to load the page.");
+}
+
+const page = response.error ? null : response.data;
 
 if (!page) {
 	Astro.response.status = 404;
@@ -16,7 +34,9 @@ if (!page) {
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<title>
-			{page ? `${page.title} | Server Lucid Route` : "Page Not Found | Server Lucid Route"}
+			{page
+				? `${page.fields?.page_title?.translations?.en || "Untitled page"} | Server Lucid Route`
+				: "Page Not Found | Server Lucid Route"}
 		</title>
 		<style>
 			:root {
@@ -104,24 +124,14 @@ if (!page) {
 				page ? (
 					<>
 						<eyebrow>Server Lucid Client Route</eyebrow>
-						<h1>{page.title}</h1>
-						{
-							page.thumbnail && (
-								<figure>
-									<img
-										src={page.thumbnail.url}
-										alt={page.thumbnail.alt}
-										width={page.thumbnail.width ?? undefined}
-										height={page.thumbnail.height ?? undefined}
-										loading="eager"
-									/>
-								</figure>
-							)
-						}
-						<article set:html={page.bodyHtml}></article>
-						<p>Lucid full slug: <code>{page.fullSlug}</code></p>
+						<h1>{page.fields?.page_title?.translations?.en || "Untitled page"}</h1>
 						<p>
-							<a href={`/static${page.fullSlug}`}>View the prerendered version</a>
+							Lucid full slug: <code>{page.fields?.fullSlug?.translations?.en || fullSlug}</code>
+						</p>
+						<p>
+							<a href={`/static${page.fields?.fullSlug?.translations?.en || fullSlug}`}>
+								View the prerendered version
+							</a>
 						</p>
 					</>
 				) : (
@@ -129,8 +139,8 @@ if (!page) {
 						<eyebrow>Server Lucid Client Route</eyebrow>
 						<h1>Lucid page not found</h1>
 						<p>
-							No page matched <code>{fullSlug}</code> when the Astro route queried the
-							Lucid client document endpoint with <code>filter[_fullSlug]</code>.
+							No page matched <code>{fullSlug}</code> when the Astro route queried
+							the Lucid client document endpoint with <code>filter[_fullSlug]</code>.
 						</p>
 					</>
 				)

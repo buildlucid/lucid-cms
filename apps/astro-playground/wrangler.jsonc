@@ -1,0 +1,34 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "lucid-astro-playground",
+	"main": "./.lucid/astro/worker.ts",
+	"compatibility_date": "2026-04-17",
+	"compatibility_flags": ["nodejs_compat"],
+	"kv_namespaces": [
+		{
+			"binding": "LUCID_KV"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "LUCID_QUEUE",
+				"queue": "lucid-astro-playground"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "lucid-astro-playground",
+				"max_batch_size": 1,
+				"max_retries": 3
+			}
+		]
+	},
+	"triggers": {
+		"crons": ["0 0 * * *"]
+	},
+	"assets": {
+		"directory": "./dist/client",
+		"binding": "ASSETS"
+	}
+}

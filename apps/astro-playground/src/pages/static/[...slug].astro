@@ -1,14 +1,49 @@
 ---
-import { getAllPages } from "../../lib/lucid-pages.js";
+import getToolkit from "@lucidcms/astro/toolkit";
+import PageCollection from "../../lucid/collections/pages";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-	const pages = await getAllPages();
+	const toolkit = await getToolkit();
+	const response = await toolkit.documents.getMultiple({
+		collectionKey: PageCollection.key,
+		status: "latest",
+		query: {
+			perPage: 100,
+			sort: [
+				{
+					key: "updatedAt",
+					value: "asc",
+				},
+			],
+		},
+	});
 
-	return pages.map((page) => ({
+	if (response.error) {
+		throw new Error(response.error.message ?? "Failed to load Lucid pages.");
+	}
+
+	const uniquePages = new Map();
+
+	for (const page of response.data.data) {
+		const fullSlug = page.fields?.fullSlug?.translations?.en;
+
+		if (typeof fullSlug !== "string" || !fullSlug.startsWith("/")) {
+			continue;
+		}
+
+		if (!uniquePages.has(fullSlug)) {
+			uniquePages.set(fullSlug, page);
+		}
+	}
+
+	return [...uniquePages.values()].map((page) => ({
 		params: {
-			slug: page.fullSlug === "/" ? undefined : page.fullSlug.slice(1),
+			slug:
+				page.fields?.fullSlug?.translations?.en === "/"
+					? undefined
+					: String(page.fields?.fullSlug?.translations?.en).slice(1),
 		},
 		props: {
 			page,
@@ -23,7 +58,9 @@ const { page } = Astro.props;
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
-		<title>{page.title} | Static Lucid Route</title>
+		<title>
+			{page.fields?.page_title?.translations?.en || "Untitled page"} | Static Lucid Route
+		</title>
 		<style>
 			:root {
 				font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -107,23 +144,15 @@ const { page } = Astro.props;
 	<body>
 		<main>
 			<eyebrow>Static Lucid Client Route</eyebrow>
-			<h1>{page.title}</h1>
-			{
-				page.thumbnail && (
-					<figure>
-						<img
-							src={page.thumbnail.url}
-							alt={page.thumbnail.alt}
-							width={page.thumbnail.width ?? undefined}
-							height={page.thumbnail.height ?? undefined}
-							loading="eager"
-						/>
-					</figure>
-				)
-			}
-			<article set:html={page.bodyHtml}></article>
-			<p>Lucid full slug: <code>{page.fullSlug}</code></p>
-			<p><a href={`/server${page.fullSlug}`}>View the server-rendered version</a></p>
+			<h1>{page.fields?.page_title?.translations?.en || "Untitled page"}</h1>
+			<p>
+				Lucid full slug: <code>{page.fields?.fullSlug?.translations?.en || "/"}</code>
+			</p>
+			<p>
+				<a href={`/server${page.fields?.fullSlug?.translations?.en || "/"}`}>
+					View the server-rendered version
+				</a>
+			</p>
 		</main>
 	</body>
 </html>

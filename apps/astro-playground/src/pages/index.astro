@@ -1,6 +1,6 @@
 ---
-const output = import.meta.env.ASTRO_OUTPUT ?? "static";
-const runtime = import.meta.env.ASTRO_RUNTIME ?? "node";
+const output = "server";
+const runtime = "cloudflare";
 ---
 
 <html lang="en">
@@ -100,8 +100,8 @@ const runtime = import.meta.env.ASTRO_RUNTIME ?? "node";
 				<h1>Hybrid Astro routes with a mounted Lucid runtime.</h1>
 				<p>
 					This page stays prerendered, while Lucid runs on-demand under <code>/lucid</code>.
-					The same fixture can also be built with <code>ASTRO_OUTPUT=server</code> to check
-					full SSR mode.
+					Use the routes below to compare prerendered and server-rendered page fetches
+					against the Cloudflare-backed Lucid runtime.
 				</p>
 				<div class="actions">
 					<a class="card" href="/lucid">

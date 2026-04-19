@@ -5,3 +5,5 @@
 /db.sqlite-wal
 /dist
 /uploads
+/.dev.vars
+/.wrangler

@@ -3,13 +3,15 @@
 	"type": "module",
 	"version": "0.0.1",
 	"engines": {
-		"node": ">=22.12.0"
+		"node": ">=24.11.1"
 	},
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
+		"wrangler:dev": "npm run build && wrangler dev",
+		"wrangler:deploy": "npm run build && wrangler deploy",
 		"sync": "lucidcms sync",
 		"migrate": "lucidcms migrate",
 		"migrate:rollback": "lucidcms migrate:rollback",
@@ -18,13 +20,21 @@
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.1.9",
-		"@astrojs/node": "^10.0.4",
 		"@lucidcms/astro": "*",
+		"@lucidcms/cloudflare-adapter": "*",
 		"@lucidcms/core": "*",
-		"@lucidcms/node-adapter": "*",
+		"@lucidcms/libsql-adapter": "*",
+		"@lucidcms/plugin-cloudflare-kv": "*",
+		"@lucidcms/plugin-cloudflare-queues": "*",
 		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/sqlite-adapter": "*",
-		"astro": "^6.1.6",
-		"better-sqlite3": "^12.6.2"
+		"@lucidcms/plugin-resend": "*",
+		"@lucidcms/plugin-s3": "*",
+		"astro": "^6.1.6"
+	},
+	"devDependencies": {
+		"wrangler": "^4.82.2"
+	},
+	"volta": {
+		"node": "24.11.1"
 	}
 }

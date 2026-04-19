@@ -18,10 +18,12 @@
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
-        "check": "biome check ./src",
-        "check:fix": "biome check --write ./src"
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
 	},
-	"files": ["dist/**"],
+	"files": [
+		"dist/**"
+	],
 	"author": "Lucid",
 	"repository": {
 		"type": "git",
@@ -40,13 +42,15 @@
 		"@lucidcms/core": "^0.12.0-alpha.1"
 	},
 	"dependencies": {
+		"hono": "^4.12.3",
+		"hono-openapi": "^1.2.0",
 		"svix": "^1.86.0"
 	},
-    "volta": {
-        "node": "24.11.1"
-    },
-    "engines": {
-        "node": "^24.0.0"
-    },
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
 	"license": "MIT"
 }
