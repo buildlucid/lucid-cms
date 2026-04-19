@@ -8,9 +8,9 @@
 		"dev": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
+		"astro": "astro",
 		"wrangler:dev": "npm run build && wrangler dev",
 		"wrangler:deploy": "npm run build && wrangler deploy",
-		"astro": "astro",
 		"sync": "lucidcms sync",
 		"migrate": "lucidcms migrate",
 		"migrate:rollback": "lucidcms migrate:rollback",
@@ -24,10 +24,9 @@
 		"@lucidcms/astro": "*",
 		"@lucidcms/cloudflare-adapter": "*",
 		"@lucidcms/libsql-adapter": "*",
-		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/plugin-s3": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
-		"@lucidcms/plugin-cloudflare-queues": "*"
+		"@lucidcms/plugin-pages": "*",
+		"@lucidcms/plugin-s3": "*"
 	},
 	"devDependencies": {
 		"wrangler": "^4.82.2"

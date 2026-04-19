@@ -7,4 +7,3 @@ db.sqlite-wal
 /.dev.vars
 /dist
 /.wrangler
-/wrangler.jsonc

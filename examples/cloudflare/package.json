@@ -13,23 +13,22 @@
 		"migrate:rollback": "lucidcms migrate:rollback",
 		"migrate:reset": "lucidcms migrate:reset",
 		"migrate:fresh": "lucidcms migrate:fresh",
-		"wrangler:dev": "lucidcms build --silent && wrangler --env dev dev --test-scheduled",
-		"wrangler:deploy": "npm run build && wrangler --env prod deploy"
+		"wrangler:dev": "lucidcms build --silent && wrangler dev --test-scheduled",
+		"wrangler:deploy": "npm run build && wrangler deploy"
 	},
 	"dependencies": {
 		"@lucidcms/cloudflare-adapter": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/libsql-adapter": "*",
-		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/plugin-resend": "*",
-		"@lucidcms/plugin-s3": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
-		"@lucidcms/plugin-cloudflare-queues": "*"
+		"@lucidcms/plugin-pages": "*",
+		"@lucidcms/plugin-s3": "*"
 	},
 	"author": "Lucid",
 	"license": "MIT",
 	"devDependencies": {
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"wrangler": "^4.82.2"
 	},
 	"volta": {
 		"node": "24.11.1"

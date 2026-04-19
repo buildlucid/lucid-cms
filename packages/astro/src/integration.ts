@@ -23,8 +23,17 @@ import {
 import { assertAstroCompatibility } from "./internal/compatibility.js";
 
 /**
- * Lucid is hosted inside Astro, so this integration focuses on preparing the
- * Lucid runtime and assets while leaving Astro in charge of the app lifecycle.
+ * Add Lucid CMS to your Astro project.
+ *
+ * @example
+ * ```ts
+ * import { defineConfig } from "astro/config";
+ * import lucidCMS from "@lucidcms/astro";
+ *
+ * export default defineConfig({
+ * 	integrations: [lucidCMS()],
+ * });
+ * ```
  */
 const lucidCMS = (): AstroIntegration => {
 	let project: ResolvedLucidProject | undefined;

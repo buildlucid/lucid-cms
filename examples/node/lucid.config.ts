@@ -2,9 +2,7 @@ import { configureLucid, z } from "@lucidcms/core";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import Database from "better-sqlite3";
-import NewsCollection from "./src/collections/news.js";
 import PageCollection from "./src/collections/pages.js";
-import SettingsCollection from "./src/collections/settings.js";
 
 export const envSchema = z.object({
 	ENCRYPTION_SECRET: z.string(),
@@ -27,14 +25,13 @@ export default configureLucid({
 			refreshToken: env.REFRESH_TOKEN_SECRET,
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
-		collections: [PageCollection, NewsCollection, SettingsCollection],
+		collections: [PageCollection],
 		plugins: [
 			PagesPlugin({
 				collections: [
 					{
-						collectionKey: "page",
-						useTranslations: true,
-						displayFullSlug: false,
+						collectionKey: PageCollection.key,
+						displayFullSlug: true,
 					},
 				],
 			}),

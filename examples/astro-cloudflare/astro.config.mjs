@@ -8,6 +8,7 @@ export default defineConfig({
 	adapter: cloudflare({
 		imageService: "passthrough",
 		prerenderEnvironment: "node",
+		sessionKVBindingName: "KV_BINDING",
 	}),
 	integrations: [lucidCMS()],
 });

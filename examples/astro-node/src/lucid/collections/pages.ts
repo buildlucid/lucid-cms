@@ -1,44 +1,32 @@
 import { CollectionBuilder, z } from "@lucidcms/core";
-import HeroBrick from "../bricks/hero.js";
+import ContentBrick from "../bricks/content.js";
 import SeoBrick from "../bricks/seo.js";
-import TextareaBrick from "../bricks/textarea.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
 		name: "Pages",
 		singularName: "Page",
-		summary: "Manage the pages and content on your website.",
-	},
-	config: {
-		useTranslations: true,
-		useRevisions: true,
-		useAutoSave: true,
-		environments: [
-			{
-				key: "production",
-				name: "Production",
-			},
-		],
 	},
 	bricks: {
 		fixed: [SeoBrick],
-		builder: [HeroBrick, TextareaBrick],
+		builder: [ContentBrick],
 	},
 })
 	.addText("title", {
 		details: {
-			label: "Page title",
-			summary: "The title of the page.",
+			label: "Title",
 		},
 		validation: {
 			required: true,
-			zod: z.string().min(2).max(128),
+			zod: z.string().min(2).max(96),
 		},
 		displayInListing: true,
 	})
-	.addUser("author", {
-		displayInListing: true,
+	.addTextarea("summary", {
+		details: {
+			label: "Summary",
+		},
 	});
 
 export default PageCollection;

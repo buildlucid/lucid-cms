@@ -16,7 +16,6 @@ export default configureLucid({
 		from: "@lucidcms/node-adapter",
 	},
 	config: (env) => ({
-		baseUrl: "http://localhost:4321",
 		db: new SQLiteAdapter({
 			database: async () => new Database("db.sqlite"),
 		}),
@@ -31,9 +30,8 @@ export default configureLucid({
 			PagesPlugin({
 				collections: [
 					{
-						collectionKey: "page",
-						useTranslations: true,
-						displayFullSlug: false,
+						collectionKey: PageCollection.key,
+						displayFullSlug: true,
 					},
 				],
 			}),

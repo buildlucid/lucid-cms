@@ -1,0 +1,26 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "lucid-cloudflare-example",
+	"main": "dist/server.js",
+	"compatibility_date": "2026-04-17",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"logs": {
+			"enabled": true
+		}
+	},
+	"assets": {
+		"directory": "./dist/public/",
+		"binding": "ASSETS"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "KV_BINDING"
+		}
+	],
+	"build": {
+		"watch_dir": "./src",
+		"command": "lucidcms build --cache-spa --silent",
+		"cwd": "./"
+	}
+}

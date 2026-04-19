@@ -22,7 +22,8 @@
 		"@lucidcms/astro": "*",
 		"@lucidcms/node-adapter": "*",
 		"@lucidcms/sqlite-adapter": "*",
-		"@lucidcms/plugin-pages": "*"
+		"@lucidcms/plugin-pages": "*",
+		"better-sqlite3": "^12.6.2"
 	},
 	"author": "Lucid",
 	"license": "MIT",

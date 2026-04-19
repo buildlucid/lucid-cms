@@ -1,0 +1,263 @@
+:root {
+	--primary-base: #c1fe77;
+	--primary-hover: #d0ff96;
+	--primary-contrast: #131313;
+	--background-base: #171717;
+	--panel-base: #0f0f0f;
+	--card-base: rgba(255, 255, 255, 0.03);
+	--card-strong: rgba(255, 255, 255, 0.06);
+	--title: #f1f1f1;
+	--body: #a1a1a1;
+	--muted: #6b7280;
+	--border: rgba(255, 255, 255, 0.1);
+	font-family:
+		Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+		"Segoe UI", sans-serif;
+	color: var(--body);
+	background: var(--background-base);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	background: var(--background-base);
+	color: var(--body);
+}
+
+a {
+	color: inherit;
+}
+
+.page-shell {
+	min-height: 100vh;
+	padding: 16px 16px 0;
+}
+
+.page-backdrop {
+	min-height: calc(100vh - 16px);
+	border: 1px solid var(--border);
+	border-bottom: 0;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
+	background:
+		radial-gradient(
+			900px 600px at 5% 0,
+			rgba(193, 254, 119, 0.07),
+			transparent 60%
+		),
+		radial-gradient(
+			800px 500px at 100% 100%,
+			rgba(208, 255, 150, 0.05),
+			transparent 60%
+		),
+		var(--panel-base);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.page-frame {
+	width: 100%;
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 28px 24px 64px;
+}
+
+.page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 72px;
+}
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+}
+
+.brand-logo {
+	width: 148px;
+	height: 30px;
+	display: block;
+}
+
+.page-nav {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 12px;
+}
+
+.nav-link,
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.03);
+	color: var(--title);
+	padding: 12px 16px;
+	text-decoration: none;
+	transition:
+		border-color 0.2s ease,
+		background-color 0.2s ease,
+		transform 0.05s ease;
+}
+
+.nav-link:hover,
+.button:hover,
+.nav-link:focus-visible,
+.button:focus-visible {
+	border-color: rgba(255, 255, 255, 0.16);
+	background: rgba(255, 255, 255, 0.06);
+	outline: 0;
+}
+
+.button-primary {
+	background: var(--primary-base);
+	border-color: var(--primary-base);
+	color: var(--primary-contrast);
+}
+
+.button-primary:hover,
+.button-primary:focus-visible {
+	background: var(--primary-hover);
+	border-color: var(--primary-hover);
+}
+
+.eyebrow {
+	margin: 0 0 16px;
+	color: var(--primary-base);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.welcome-card {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 72px 0 24px;
+	text-align: center;
+}
+
+.welcome-title {
+	margin: 0;
+	color: var(--title);
+	font-size: clamp(38px, 7vw, 58px);
+	line-height: 1.08;
+	letter-spacing: -0.05em;
+}
+
+.welcome-copy {
+	max-width: 38rem;
+	margin: 18px auto 0;
+	font-size: 16px;
+	line-height: 1.75;
+}
+
+.welcome-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 12px;
+	margin-top: 32px;
+}
+
+.content-card {
+	max-width: 780px;
+	margin: 0 auto;
+	margin-top: 40px;
+}
+
+.document-panel {
+	border: 1px solid var(--border);
+	border-radius: 20px;
+	background: rgba(255, 255, 255, 0.03);
+	backdrop-filter: blur(10px);
+	overflow: hidden;
+}
+
+.document-row {
+	display: grid;
+	grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+	gap: 24px;
+	align-items: center;
+	padding: 18px 24px;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	text-align: left;
+}
+
+.document-row:first-child {
+	border-top: 0;
+}
+
+.document-label {
+	color: rgba(255, 255, 255, 0.52);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.document-value {
+	margin: 0;
+	color: var(--title);
+	font-size: 16px;
+	line-height: 1.6;
+	word-break: break-word;
+	text-align: right;
+}
+
+code {
+	font-family:
+		"SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
+	font-size: 0.95em;
+}
+
+.welcome-copy code {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.04);
+	padding: 2px 8px;
+	color: var(--title);
+	font-size: 0.88em;
+	vertical-align: baseline;
+}
+
+@media (max-width: 720px) {
+	.page-frame {
+		padding: 24px 20px 48px;
+	}
+
+	.welcome-card {
+		padding-top: 40px;
+	}
+
+	.content-card {
+		margin-top: 32px;
+	}
+
+	.document-row {
+		grid-template-columns: 1fr;
+		gap: 8px;
+		padding: 16px 18px;
+	}
+
+	.document-value {
+		text-align: left;
+	}
+}
