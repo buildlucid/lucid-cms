@@ -1,7 +1,7 @@
 import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { ClientIntegrationResponse } from "../../types/response.js";
+import type { ClientIntegration } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -10,7 +10,7 @@ const getSingle: ServiceFn<
 			id: number;
 		},
 	],
-	ClientIntegrationResponse
+	ClientIntegration
 > = async (context, data) => {
 	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db.client,

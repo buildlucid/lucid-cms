@@ -2,9 +2,9 @@ import type CollectionBuilder from "../../../libs/collection/builders/collection
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
-	BrickResponse,
 	Config,
-	FieldResponse,
+	InternalDocumentBrick,
+	InternalDocumentField,
 	LucidBrickTableName,
 } from "../../../types.js";
 import constructBrickTable, {
@@ -17,8 +17,8 @@ import constructBrickTable, {
 const aggregateBrickTables = (params: {
 	versionId: number;
 	documentId: number;
-	bricks?: Array<BrickInputSchema> | Array<BrickResponse>;
-	fields?: Array<FieldInputSchema> | Array<FieldResponse>;
+	bricks?: Array<BrickInputSchema> | Array<InternalDocumentBrick>;
+	fields?: Array<FieldInputSchema> | Array<InternalDocumentField>;
 	collection: CollectionBuilder;
 	localization: Config["localization"];
 	tableNameByteLimit: number | null;

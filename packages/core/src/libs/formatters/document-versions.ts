@@ -1,7 +1,4 @@
-import type {
-	DocumentVersionResponse,
-	LucidBrickTableName,
-} from "../../types.js";
+import type { DocumentVersion, LucidBrickTableName } from "../../types.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { RevisionsQueryResponse } from "../repositories/document-versions.js";
@@ -10,7 +7,7 @@ import formatter from "./index.js";
 const formatMultiple = (props: {
 	versions: RevisionsQueryResponse[];
 	bricksSchema: CollectionSchemaTable<LucidBrickTableName>[];
-}): DocumentVersionResponse[] => {
+}): DocumentVersion[] => {
 	return props.versions.map((v) =>
 		formatSingle({
 			version: v,
@@ -22,8 +19,8 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	version: RevisionsQueryResponse;
 	bricksSchema: CollectionSchemaTable<LucidBrickTableName>[];
-}): DocumentVersionResponse => {
-	const formattedBricks: DocumentVersionResponse["bricks"] = {
+}): DocumentVersion => {
+	const formattedBricks: DocumentVersion["bricks"] = {
 		builder: [],
 		fixed: [],
 	};

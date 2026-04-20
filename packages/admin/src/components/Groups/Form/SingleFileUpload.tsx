@@ -1,4 +1,4 @@
-import type { ErrorResult, MediaResponse } from "@types";
+import type { ErrorResult, Media } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
@@ -30,7 +30,7 @@ export interface SingleFileUploadProps {
 		setRemovedCurrent: (_value: boolean) => void;
 	};
 	currentFile?: {
-		type?: MediaResponse["type"];
+		type?: Media["type"];
 		url?: string;
 		name?: string;
 	};
@@ -229,7 +229,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 						<FilePreviewScreen
 							data={{
 								url: props.currentFile?.url as string,
-								type: props.currentFile?.type as MediaResponse["type"],
+								type: props.currentFile?.type as Media["type"],
 								name: props.currentFile?.name as string,
 							}}
 							actions={{
@@ -250,7 +250,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 interface FilePreviewScreenProps {
 	data: {
 		url: string;
-		type: MediaResponse["type"];
+		type: Media["type"];
 		name: string;
 	};
 	actions: {

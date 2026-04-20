@@ -2,10 +2,10 @@ import type {
 	DocumentFieldValue,
 	DocumentRef,
 	LinkResValue,
+	Media,
 	MediaRef,
-	MediaResponse,
 	UserRef,
-} from "@lucidcms/core/types";
+} from "@types";
 import { createStore } from "solid-js/store";
 
 // ------------------------------------
@@ -32,7 +32,7 @@ type ModalRegistry = {
 			extensions?: string;
 			type?: string;
 		};
-		result: MediaResponse;
+		result: Media;
 	};
 	documentSelect: {
 		data: {
@@ -101,7 +101,7 @@ const [get, set] = createStore<PageBuilderModalsStoreState>({
  * @example
  * pageBuilderModalsStore.open("mediaSelect", {
  *   data: { extensions: "jpg,png", selected: 123 },
- *   onCallback: (media) => console.log(media.url), // media is MediaResponse
+ *   onCallback: (media) => console.log(media.url), // media is Media
  * });
  */
 function open<K extends ModalType>(
@@ -189,4 +189,4 @@ export default pageBuilderModalsStore;
 // Type Exports for Component Props
 // ------------------------------------
 
-export type { ModalRegistry, ModalType, ModalState };
+export type { ModalRegistry, ModalState, ModalType };

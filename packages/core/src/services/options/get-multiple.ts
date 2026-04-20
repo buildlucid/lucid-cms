@@ -2,7 +2,7 @@ import { optionsFormatter } from "../../libs/formatters/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { OptionsName } from "../../schemas/options.js";
 import T from "../../translations/index.js";
-import type { OptionsResponse } from "../../types/response.js";
+import type { Option } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -11,7 +11,7 @@ const getMultiple: ServiceFn<
 			names: OptionsName[];
 		},
 	],
-	OptionsResponse[]
+	Option[]
 > = async (context, data) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
 

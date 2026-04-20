@@ -2,7 +2,7 @@ import renderMustacheTemplate from "../../libs/email-adapter/templates/render-mu
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { EmailResponse } from "../../types/response.js";
+import type { Email } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 			renderTemplate: boolean;
 		},
 	],
-	EmailResponse
+	Email
 > = async (context, data) => {
 	const Emails = new EmailsRepository(context.db.client, context.config.db);
 

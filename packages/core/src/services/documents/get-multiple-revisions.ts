@@ -8,7 +8,7 @@ import formatter, {
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
-import type { DocumentVersionResponse } from "../../types/response.js";
+import type { DocumentVersion } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 
@@ -21,7 +21,7 @@ const getMultipleRevisions: ServiceFn<
 		},
 	],
 	{
-		data: DocumentVersionResponse[];
+		data: DocumentVersion[];
 		count: number;
 	}
 > = async (context, data) => {

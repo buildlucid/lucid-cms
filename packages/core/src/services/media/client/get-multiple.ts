@@ -1,5 +1,5 @@
 import type { GetMultipleQueryParams } from "../../../schemas/media.js";
-import type { MediaResponse } from "../../../types/response.js";
+import type { Media } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getMultiple from "../get-multiple.js";
 
@@ -11,7 +11,7 @@ const getMultipleClient: ServiceFn<
 		},
 	],
 	{
-		data: MediaResponse[];
+		data: Media[];
 		count: number;
 	}
 > = async (context, data) => getMultiple(context, data);

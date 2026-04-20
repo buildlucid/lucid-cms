@@ -2,7 +2,7 @@ import { usersFormatter } from "../../libs/formatters/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type { UserResponse } from "../../types.js";
+import type { User } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAuthenticatedUser: ServiceFn<
@@ -12,7 +12,7 @@ const getAuthenticatedUser: ServiceFn<
 			authUser: LucidAuth;
 		},
 	],
-	UserResponse
+	User
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
 

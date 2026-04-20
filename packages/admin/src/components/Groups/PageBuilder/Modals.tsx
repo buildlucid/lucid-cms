@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import type { CollectionResponse } from "@types";
+import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
@@ -139,9 +139,7 @@ export const Modals: Component<{
 					open: props.hooks.uiState.getDeleteOpen(),
 					setOpen: props.hooks.uiState.setDeleteOpen,
 				}}
-				collection={
-					props.hooks.state.collectionQuery?.data?.data as CollectionResponse
-				}
+				collection={props.hooks.state.collectionQuery?.data?.data as Collection}
 				callbacks={{
 					onSuccess: () => {
 						navigate(

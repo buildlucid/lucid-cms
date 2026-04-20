@@ -7,7 +7,7 @@ import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
-import type { DocumentResponse } from "../../types/response.js";
+import type { InternalCollectionDocument } from "../../types/response.js";
 import { getBaseUrl, groupDocumentFilters } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
@@ -23,7 +23,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: DocumentResponse[];
+		data: InternalCollectionDocument[];
 		count: number;
 	}
 > = async (context, data) => {

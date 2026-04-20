@@ -1,5 +1,5 @@
 import { mediaServices } from "../../../services/index.js";
-import type { MediaResponse } from "../../../types/response.js";
+import type { Media } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -13,7 +13,7 @@ export type ToolkitMediaGetSingleInput = {
 const getSingle = async (
 	context: ServiceContext,
 	input: ToolkitMediaGetSingleInput,
-): ServiceResponse<MediaResponse> =>
+): ServiceResponse<Media> =>
 	runToolkitService(
 		() => mediaServices.client.getSingle(context, input),
 		"Lucid toolkit could not fetch a media item.",

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { LicenseResponse, ResponseBody } from "@types";
+import type { License, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -17,7 +17,7 @@ const useGetStatus = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["license.getStatus", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<LicenseResponse>>({
+			request<ResponseBody<License>>({
 				url: "/lucid/api/v1/license/status",
 				query: queryParams(),
 				config: {

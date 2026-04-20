@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { JobResponse, ResponseBody } from "@types";
+import type { Job, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -21,7 +21,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["jobs.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<JobResponse>>({
+			request<ResponseBody<Job>>({
 				url: `/lucid/api/v1/jobs/${queryParams().location?.jobId}`,
 				config: {
 					method: "GET",

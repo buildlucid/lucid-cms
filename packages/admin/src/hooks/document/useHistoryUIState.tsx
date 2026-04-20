@@ -1,11 +1,11 @@
-import type { CollectionResponse, DocumentVersionType } from "@types";
+import type { Collection, DocumentVersionType } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import type api from "@/services/api";
 import type { UseDocumentUIState } from "./useDocumentUIState";
 
 export function useHistoryUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
-	collection: Accessor<CollectionResponse | undefined>;
+	collection: Accessor<Collection | undefined>;
 }): UseDocumentUIState {
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);

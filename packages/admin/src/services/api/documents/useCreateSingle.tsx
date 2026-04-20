@@ -1,4 +1,8 @@
-import type { ErrorResponse, FieldResponse, ResponseBody } from "@types";
+import type {
+	ErrorResponse,
+	InternalDocumentField,
+	ResponseBody,
+} from "@types";
 import type { BrickData } from "@/store/brickStore";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -8,7 +12,7 @@ export interface Params {
 	collectionKey: string;
 	body: {
 		bricks: Array<BrickData>;
-		fields: Array<FieldResponse>;
+		fields: Array<InternalDocumentField>;
 	};
 }
 

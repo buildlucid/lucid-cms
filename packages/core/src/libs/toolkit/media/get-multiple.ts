@@ -1,6 +1,6 @@
 import type { ClientGetMultipleQueryParams } from "../../../schemas/media.js";
 import { mediaServices } from "../../../services/index.js";
-import type { MediaResponse } from "../../../types/response.js";
+import type { Media } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -21,7 +21,7 @@ export type ToolkitMediaGetMultipleInput = {
 };
 
 export type ToolkitMediaGetMultipleResult = {
-	data: MediaResponse[];
+	data: Media[];
 	count: number;
 };
 

@@ -16,10 +16,10 @@ import type { TableType } from "../../../libs/collection/schema/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
-	BrickResponse,
 	FieldDatabaseMode,
-	FieldResponse,
 	Insert,
+	InternalDocumentBrick,
+	InternalDocumentField,
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../../types.js";
@@ -31,11 +31,11 @@ export type InsertBrickTables = {
 	priority: number;
 };
 
-type ConstructField = FieldInputSchema | FieldResponse;
+type ConstructField = FieldInputSchema | InternalDocumentField;
 
 export type ConstructBrickTableParams = {
 	type: Exclude<TableType, "versions" | "document">;
-	brick?: BrickInputSchema | BrickResponse;
+	brick?: BrickInputSchema | InternalDocumentBrick;
 	targetFields: ConstructField[];
 	fieldPath?: Array<string>;
 	priority?: number;

@@ -1,7 +1,7 @@
 import formatter, { emailsFormatter } from "../../libs/formatters/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/email.js";
-import type { EmailResponse } from "../../types/response.js";
+import type { Email } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -11,7 +11,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: EmailResponse[];
+		data: Email[];
 		count: number;
 	}
 > = async (context, data) => {

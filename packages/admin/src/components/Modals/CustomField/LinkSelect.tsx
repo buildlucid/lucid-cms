@@ -1,4 +1,4 @@
-import type { LinkResValue } from "@lucidcms/core/types";
+import type { LinkResValue } from "@types";
 import { type Component, createEffect, createSignal } from "solid-js";
 import { Input, Switch } from "@/components/Groups/Form";
 import { Modal } from "@/components/Groups/Modal";

@@ -1,4 +1,4 @@
-import type { MediaShareLinkResponse } from "@types";
+import type { MediaShareLink } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import CopyRow from "@/components/Tables/Columns/CopyRow";
@@ -10,7 +10,7 @@ import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
 
 interface ShareLinkRowProps extends TableRowProps {
-	link: MediaShareLinkResponse;
+	link: MediaShareLink;
 	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"delete" | "update">>;
 	theme?: "primary" | "secondary";

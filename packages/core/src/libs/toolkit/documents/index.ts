@@ -1,4 +1,4 @@
-import type { ClientDocumentResponse } from "../../../types/response.js";
+import type { CollectionDocument } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -58,7 +58,7 @@ export type ToolkitDocuments = {
 	 */
 	getSingle: (
 		input: ToolkitDocumentsGetSingleInput,
-	) => ServiceResponse<ClientDocumentResponse>;
+	) => ServiceResponse<CollectionDocument>;
 };
 
 /** Creates document helpers for a toolkit instance. */

@@ -1,4 +1,4 @@
-import type { CollectionBrickConfig, CollectionResponse } from "@types";
+import type { Collection, CollectionBrickConfig } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidChevronUp,
@@ -27,7 +27,7 @@ import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
-	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
 }
@@ -152,7 +152,7 @@ interface BuilderBrickRowProps {
 	brick: BrickData;
 	configByKey: Accessor<Map<string, CollectionBrickConfig>>;
 	brickIndexByRef: Accessor<Map<string, number>>;
-	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionMigrationStatus: Collection["migrationStatus"];
 	dragDrop: DragDropCBT;
 	collectionKey?: string;
 	documentId?: number;

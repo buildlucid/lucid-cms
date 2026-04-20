@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { MediaResponse, ResponseBody } from "@types";
+import type { Media, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -33,7 +33,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["media.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<MediaResponse[]>>({
+			request<ResponseBody<Media[]>>({
 				url: "/lucid/api/v1/media",
 				query: queryParams(),
 				config: {

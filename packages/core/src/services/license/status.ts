@@ -1,12 +1,12 @@
 import constants from "../../constants/constants.js";
 import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
-import type { LicenseResponse } from "../../types.js";
+import type { License } from "../../types.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { licenseServices } from "../index.js";
 
-const licenseStatus: ServiceFn<[], LicenseResponse> = async (context) => {
+const licenseStatus: ServiceFn<[], License> = async (context) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
 
 	const licenseOptionsRes = await Options.selectMultiple({

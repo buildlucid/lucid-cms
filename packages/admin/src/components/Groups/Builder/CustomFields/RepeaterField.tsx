@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
@@ -14,7 +14,7 @@ interface RepeaterFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"repeater">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		groupPath?: string;
 		parentRepeaterKey?: string;

@@ -1,4 +1,9 @@
-import type { CFConfig, FieldError, FieldResponse, FieldTypes } from "@types";
+import type {
+	CFConfig,
+	FieldError,
+	FieldTypes,
+	InternalDocumentField,
+} from "@types";
 import classNames from "classnames";
 import {
 	type Component,
@@ -30,7 +35,7 @@ interface DynamicFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<FieldTypes>;
-		fields: FieldResponse[];
+		fields: InternalDocumentField[];
 		fieldErrors: FieldError[];
 		activeTab?: string;
 		missingFieldColumns: string[];
@@ -141,7 +146,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			</Show>
 			<div
 				class={classNames("w-full h-full", {
-					"pl-[38px]": fieldConfig().type !== "tab",
+					"pl-9.5": fieldConfig().type !== "tab",
 				})}
 			>
 				<Switch>

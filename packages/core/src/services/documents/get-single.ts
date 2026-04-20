@@ -4,7 +4,7 @@ import { documentsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
-import type { DocumentResponse } from "../../types.js";
+import type { InternalCollectionDocument } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices, documentBrickServices } from "../index.js";
 
@@ -18,7 +18,7 @@ const getSingle: ServiceFn<
 			query: GetSingleQueryParams;
 		},
 	],
-	DocumentResponse
+	InternalCollectionDocument
 > = async (context, data) => {
 	const Document = new DocumentsRepository(
 		context.db.client,

@@ -1,7 +1,7 @@
 import { rolesFormatter } from "../../libs/formatters/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { RoleResponse } from "../../types/response.js";
+import type { Role } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -10,7 +10,7 @@ const getSingle: ServiceFn<
 			id: number;
 		},
 	],
-	RoleResponse
+	Role
 > = async (context, data) => {
 	const Roles = new RolesRepository(context.db.client, context.config.db);
 

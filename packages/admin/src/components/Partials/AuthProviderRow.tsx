@@ -1,4 +1,4 @@
-import type { AuthProvidersResponse, UserResponse } from "@types";
+import type { AuthProviders, User } from "@types";
 import { FaSolidCircleUser } from "solid-icons/fa";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, onCleanup, Show } from "solid-js";
@@ -7,8 +7,8 @@ import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 
 const AuthProviderRow: Component<{
-	provider: AuthProvidersResponse["providers"][number];
-	linkedProvider?: NonNullable<UserResponse["authProviders"]>[number];
+	provider: AuthProviders["providers"][number];
+	linkedProvider?: NonNullable<User["authProviders"]>[number];
 	onUnlink?: () => void;
 	onLink?: () => void;
 	isLoading?: boolean;

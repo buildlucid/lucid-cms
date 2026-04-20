@@ -1,7 +1,7 @@
 import { jobsFormatter } from "../../libs/formatters/index.js";
 import { QueueJobsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { JobResponse } from "../../types/response.js";
+import type { Job } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -10,7 +10,7 @@ const getSingle: ServiceFn<
 			id: number;
 		},
 	],
-	JobResponse
+	Job
 > = async (context, data) => {
 	const Jobs = new QueueJobsRepository(context.db.client, context.config.db);
 

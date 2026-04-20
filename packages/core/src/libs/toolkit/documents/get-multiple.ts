@@ -1,6 +1,6 @@
 import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
 import { documentServices } from "../../../services/index.js";
-import type { ClientDocumentResponse } from "../../../types/response.js";
+import type { CollectionDocument } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -23,7 +23,7 @@ export type ToolkitDocumentsGetMultipleInput = {
 };
 
 export type ToolkitDocumentsGetMultipleResult = {
-	data: ClientDocumentResponse[];
+	data: CollectionDocument[];
 	count: number;
 };
 

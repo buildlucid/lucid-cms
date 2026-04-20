@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { CollectionResponse, ResponseBody } from "@types";
+import type { Collection, ResponseBody } from "@types";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,7 +18,7 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["collections.getAll", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<CollectionResponse[]>>({
+			request<ResponseBody<Collection[]>>({
 				url: "/lucid/api/v1/collections",
 				query: queryParams(),
 				config: {

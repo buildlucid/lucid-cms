@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Select } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
@@ -10,7 +10,7 @@ interface SelectFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"select">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;

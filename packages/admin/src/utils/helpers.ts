@@ -1,4 +1,4 @@
-import type { LocaleValue, MediaResponse, UserResponse } from "@types";
+import type { LocaleValue, Media, User } from "@types";
 import type { Accessor, Setter } from "solid-js";
 import { getLocale } from "@/translations";
 import safeDeepEqual from "@/utils/safe-deep-equal";
@@ -89,7 +89,7 @@ const bytesToSize = (bytes?: number | null): string => {
 
 // ---------------------------------------------
 // Get media type from mime type
-const getMediaType = (mimeType?: string): MediaResponse["type"] => {
+const getMediaType = (mimeType?: string): Media["type"] => {
 	if (!mimeType) return "unknown";
 	const normalizedMimeType = mimeType.toLowerCase().split(";")[0]?.trim();
 
@@ -118,9 +118,9 @@ const getMediaType = (mimeType?: string): MediaResponse["type"] => {
 // Format user name
 const formatUserName = (
 	user: {
-		username: UserResponse["username"];
-		firstName?: UserResponse["firstName"];
-		lastName?: UserResponse["lastName"];
+		username: User["username"];
+		firstName?: User["firstName"];
+		lastName?: User["lastName"];
 	},
 	pref?: "username",
 ): string => {
@@ -151,9 +151,9 @@ const formatUserName = (
 // ---------------------------------------------
 // Format User Initials
 const formatUserInitials = (user: {
-	firstName?: UserResponse["firstName"];
-	lastName?: UserResponse["lastName"];
-	username: UserResponse["username"];
+	firstName?: User["firstName"];
+	lastName?: User["lastName"];
+	username: User["username"];
 }): string => {
 	if (user.firstName && user.lastName) {
 		return `${user.firstName[0]}${user.lastName[0]}`;

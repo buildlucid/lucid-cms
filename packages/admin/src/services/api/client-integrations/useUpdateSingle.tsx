@@ -1,4 +1,4 @@
-import type { ClientIntegrationResponse, ResponseBody } from "@types";
+import type { ClientIntegration, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -15,7 +15,7 @@ interface Params {
 }
 
 export const updateSingleReq = (params: Params) => {
-	return request<ResponseBody<ClientIntegrationResponse>>({
+	return request<ResponseBody<ClientIntegration>>({
 		url: `/lucid/api/v1/client-integrations/${params.id}`,
 		csrf: true,
 		config: {
@@ -35,7 +35,7 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	// Mutation
 	return serviceHelpers.useMutationWrapper<
 		Params,
-		ResponseBody<ClientIntegrationResponse>
+		ResponseBody<ClientIntegration>
 	>({
 		mutationFn: updateSingleReq,
 		invalidates: ["clientIntegrations.getAll", "clientIntegrations.getSingle"],

@@ -1,12 +1,12 @@
-import type { ErrorResponse, MediaResponse } from "@types";
+import type { ErrorResponse, Media } from "@types";
 import { createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
 import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useCreateMedia = () => {
-	const [getTitle, setTitle] = createSignal<MediaResponse["title"]>([]);
-	const [getAlt, setAlt] = createSignal<MediaResponse["alt"]>([]);
+	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
+	const [getAlt, setAlt] = createSignal<Media["alt"]>([]);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
@@ -99,7 +99,7 @@ export const useCreateMedia = () => {
 	const createMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
-	): Promise<MediaResponse | null> => {
+	): Promise<Media | null> => {
 		let fileKey = getKey();
 
 		if (file) {

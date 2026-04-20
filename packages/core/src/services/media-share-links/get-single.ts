@@ -1,6 +1,6 @@
 import { mediaShareLinksFormatter } from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
-import type { MediaShareLinkResponse } from "../../types/response.js";
+import type { MediaShareLink } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -11,7 +11,7 @@ const getSingle: ServiceFn<
 			linkId: number;
 		},
 	],
-	MediaShareLinkResponse
+	MediaShareLink
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,

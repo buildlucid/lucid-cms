@@ -1,4 +1,4 @@
-import type { MediaResponse, ResponseBody } from "@types";
+import type { Media, ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -23,7 +23,7 @@ interface Params {
 }
 
 export const createSingleReq = (params: Params) => {
-	return request<ResponseBody<MediaResponse>>({
+	return request<ResponseBody<Media>>({
 		url: "/lucid/api/v1/media",
 		csrf: true,
 		config: {
@@ -34,21 +34,19 @@ export const createSingleReq = (params: Params) => {
 };
 
 interface UseCreateSingleProps {
-	onSuccess?: (_data: ResponseBody<MediaResponse>) => void;
+	onSuccess?: (_data: ResponseBody<Media>) => void;
 	onError?: () => void;
 }
 
 const useCreateSingle = (props?: UseCreateSingleProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<MediaResponse>>(
-		{
-			mutationFn: createSingleReq,
-			invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
-			onSuccess: props?.onSuccess,
-			onError: props?.onError,
-		},
-	);
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Media>>({
+		mutationFn: createSingleReq,
+		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
+		onSuccess: props?.onSuccess,
+		onError: props?.onError,
+	});
 };
 
 export default useCreateSingle;

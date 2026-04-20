@@ -1,4 +1,5 @@
 export * from "./libs/auth-providers/types.js";
+export * from "./libs/collection/builders/brick-builder/types.js";
 export * from "./libs/collection/builders/collection-builder/types.js";
 export * from "./libs/collection/custom-fields/types.js";
 export * from "./libs/db-adapter/types.js";
@@ -17,6 +18,7 @@ export * from "./types/config.js";
 export * from "./types/errors.js";
 export * from "./types/hono.js";
 export * from "./types/hooks.js";
+export * from "./types/query-params.js";
 export * from "./types/response.js";
 export * from "./types/schema.js";
 export * from "./types/shared.js";

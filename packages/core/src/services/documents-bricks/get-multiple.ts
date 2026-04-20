@@ -10,9 +10,9 @@ import {
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type {
-	BrickResponse,
-	DocumentResponse,
-	FieldResponse,
+	InternalCollectionDocument,
+	InternalDocumentBrick,
+	InternalDocumentField,
 } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -35,9 +35,9 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		bricks: Array<BrickResponse>;
-		fields: Array<FieldResponse>;
-		refs: DocumentResponse["refs"];
+		bricks: Array<InternalDocumentBrick>;
+		fields: Array<InternalDocumentField>;
+		refs: InternalCollectionDocument["refs"];
 	}
 > = async (context, data) => {
 	const DocumentBricks = new DocumentBricksRepository(

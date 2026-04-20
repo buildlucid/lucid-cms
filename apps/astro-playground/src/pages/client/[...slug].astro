@@ -1,0 +1,149 @@
+---
+import { createClient } from "@lucidcms/client";
+import PageCollection from "../../lucid/collections/pages";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const client = createClient({
+		baseUrl: import.meta.env.LUCID_CLIENT_BASE_URL as string,
+		apiKey: import.meta.env.LUCID_CLIENT_API_KEY as string,
+	});
+
+	const response = await client.documents.getMultiple({
+		collectionKey: PageCollection.key,
+		status: "latest",
+		query: {
+			perPage: 100,
+			sort: [
+				{
+					key: "updatedAt",
+					value: "asc",
+				},
+			],
+		},
+	});
+	if (response.error) {
+		throw new Error(response.error.message ?? "Failed to load Lucid pages.");
+	}
+
+	return response.data.data.map((page) => {
+		const fullSlug = page.fields?.fullSlug?.translations?.en;
+
+		return {
+			params: {
+				slug: fullSlug === "/" ? undefined : String(fullSlug).slice(1),
+			},
+			props: {
+				page,
+			},
+		};
+	});
+}
+
+// biome-ignore lint/correctness/noUnusedVariables: Used in the Astro template below.
+const { page } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>
+			{page.fields?.page_title?.translations?.en || "Untitled page"} | Client Lucid Route
+		</title>
+		<style>
+			:root {
+				font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+				background:
+					radial-gradient(circle at top left, rgba(255, 173, 96, 0.35), transparent 30%),
+					linear-gradient(180deg, #fff9ef 0%, #f4efe5 100%);
+				color: #14253f;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				padding: 2rem;
+			}
+
+			main {
+				max-width: 48rem;
+				margin: 0 auto;
+				padding: 2rem;
+				border-radius: 1.5rem;
+				background: rgba(255, 255, 255, 0.8);
+				box-shadow: 0 24px 80px rgba(20, 37, 63, 0.12);
+			}
+
+			eyebrow {
+				display: inline-flex;
+				padding: 0.35rem 0.7rem;
+				border-radius: 999px;
+				background: rgba(20, 37, 63, 0.08);
+				font-size: 0.78rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			h1 {
+				margin: 1rem 0 0.75rem;
+				font-family: "IBM Plex Serif", Georgia, serif;
+				font-size: clamp(2rem, 4vw, 3rem);
+			}
+
+			p {
+				line-height: 1.7;
+				margin: 0.75rem 0 0;
+			}
+
+			figure {
+				margin: 1.5rem 0 0;
+			}
+
+			img {
+				display: block;
+				width: 100%;
+				height: auto;
+				border-radius: 1rem;
+				box-shadow: 0 16px 48px rgba(20, 37, 63, 0.14);
+			}
+
+			article {
+				margin-top: 1.5rem;
+			}
+
+			article :global(p),
+			article :global(li),
+			article :global(blockquote) {
+				line-height: 1.7;
+			}
+
+			article :global(h2),
+			article :global(h3),
+			article :global(h4) {
+				font-family: "IBM Plex Serif", Georgia, serif;
+				margin: 1.5rem 0 0.5rem;
+			}
+
+			code,
+			a {
+				color: #8b3d12;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<eyebrow>Client Lucid Client Route</eyebrow>
+			<h1>{page.fields?.page_title?.translations?.en || "Untitled page"}</h1>
+			<p>
+				Lucid full slug: <code>{page.fields?.fullSlug?.translations?.en || "/"}</code>
+			</p>
+			<p>
+				<a href={`/server${page.fields?.fullSlug?.translations?.en || "/"}`}>
+					View the server-rendered version
+				</a>
+			</p>
+		</main>
+	</body>
+</html>

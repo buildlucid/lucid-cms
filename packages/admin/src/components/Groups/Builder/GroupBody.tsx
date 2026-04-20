@@ -1,4 +1,4 @@
-import type { CFConfig, FieldGroupResponse, GroupError } from "@types";
+import type { CFConfig, GroupError, InternalDocumentFieldGroup } from "@types";
 import classNames from "classnames";
 import { FaSolidChevronUp, FaSolidGripLines } from "solid-icons/fa";
 import {
@@ -25,7 +25,7 @@ interface GroupBodyProps {
 		fieldConfig: CFConfig<"repeater">;
 		groupRef: string;
 		groupPath: string;
-		group: Accessor<FieldGroupResponse | undefined>;
+		group: Accessor<InternalDocumentFieldGroup | undefined>;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
 		dragDropKey: string;

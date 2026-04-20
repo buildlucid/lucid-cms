@@ -1,0 +1,64 @@
+{
+	"name": "@lucidcms/client",
+	"version": "0.1.0",
+	"private": false,
+	"description": "The official client package for Lucid CMS public integration endpoints.",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"module": "./dist/index.js",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"import": "./dist/types.js"
+		}
+	},
+	"scripts": {
+		"prebuild": "npm run generate:client-types",
+		"build": "tsc && tsdown",
+		"dev": "tsdown --watch",
+		"format": "biome format ./src",
+		"format:fix": "biome format --write ./src",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src",
+		"generate:client-types": "node ./scripts/generate-client-types.mjs"
+	},
+	"files": [
+		"dist"
+	],
+	"author": "Lucid",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/buildlucid/lucid-cms.git",
+		"directory": "packages/client"
+	},
+	"keywords": [
+		"CMS",
+		"Client",
+		"SDK",
+		"Lucid CMS",
+		"Lucid",
+		"Fetch",
+		"Browser"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.4",
+		"@lucidcms/config": "*",
+		"@types/node": "^24.10.4",
+		"tsdown": "^0.20.3",
+		"typescript": "^5.9.3"
+	},
+	"sideEffects": false,
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"license": "MIT"
+}

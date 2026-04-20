@@ -1,15 +1,15 @@
 import type {
 	BrickError,
 	CFConfig,
+	Collection,
 	CollectionBrickConfig,
-	CollectionResponse,
 	DocumentRef,
-	DocumentResponse,
 	FieldError,
-	FieldRefs,
-	FieldResponse,
-	FieldResponseValue,
+	FieldRef,
 	FieldTypes,
+	FieldValue,
+	InternalCollectionDocument,
+	InternalDocumentField,
 } from "@types";
 import { nanoid } from "nanoid";
 import { batch } from "solid-js";
@@ -23,7 +23,7 @@ export interface BrickData {
 	order: number;
 	type: "builder" | "fixed" | "collection-fields";
 	open: boolean;
-	fields: Array<FieldResponse>;
+	fields: Array<InternalDocumentField>;
 }
 
 interface BrickSnapshot {
@@ -31,7 +31,7 @@ interface BrickSnapshot {
 	key: string;
 	order: number;
 	type: "builder" | "fixed" | "collection-fields";
-	fields: Array<FieldResponse>;
+	fields: Array<InternalDocumentField>;
 }
 
 const [get, set] = createStore<{
@@ -43,16 +43,16 @@ const [get, set] = createStore<{
 	skipAutoSave: boolean;
 	relationFieldDragCount: number;
 	locked: boolean;
-	refs: Partial<Record<FieldTypes, FieldRefs[]>>;
+	refs: Partial<Record<FieldTypes, FieldRef[]>>;
 	collectionTranslations: boolean;
 	reset: () => void;
 	setBricks: (
-		document?: DocumentResponse,
-		collection?: CollectionResponse,
+		document?: InternalCollectionDocument,
+		collection?: Collection,
 	) => void;
 	syncBricks: (
-		document?: DocumentResponse,
-		collection?: CollectionResponse,
+		document?: InternalCollectionDocument,
+		collection?: Collection,
 	) => void;
 	captureInitialSnapshot: () => void;
 	addBrick: (props: { brickConfig: CollectionBrickConfig }) => void;
@@ -65,7 +65,7 @@ const [get, set] = createStore<{
 		fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
 		repeaterKey?: string;
 		ref?: string;
-		value: FieldResponseValue;
+		value: FieldValue;
 		contentLocale: string;
 		clearFromItemIndex?: number;
 	}) => void;
@@ -75,7 +75,7 @@ const [get, set] = createStore<{
 		ref?: string;
 		repeaterKey?: string;
 		locales: string[];
-	}) => FieldResponse;
+	}) => InternalDocumentField;
 	addRepeaterGroup: (params: {
 		brickIndex: number;
 		fieldConfig: CFConfig<Exclude<FieldTypes, "tab">>[];
@@ -106,10 +106,10 @@ const [get, set] = createStore<{
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 	}) => void;
-	setRefs: (document?: DocumentResponse) => void;
+	setRefs: (document?: InternalCollectionDocument) => void;
 	addRef: (
 		fieldType: "media" | "document" | "user",
-		ref: FieldRefs | FieldRefs[],
+		ref: FieldRef | FieldRef[],
 	) => void;
 	startRelationFieldDrag: () => void;
 	endRelationFieldDrag: () => void;
@@ -343,7 +343,7 @@ const [get, set] = createStore<{
 		}
 	},
 	addField(params) {
-		const newField: FieldResponse = {
+		const newField: InternalDocumentField = {
 			key: params.fieldConfig.key,
 			type: params.fieldConfig.type,
 		};
@@ -420,10 +420,10 @@ const [get, set] = createStore<{
 				if (field.type !== "repeater") return;
 				if (field.groups === undefined) field.groups = [];
 
-				const groupFields: FieldResponse[] = [];
+				const groupFields: InternalDocumentField[] = [];
 
 				for (const field of params.fieldConfig) {
-					const newField: FieldResponse = {
+					const newField: InternalDocumentField = {
 						key: field.key,
 						type: field.type,
 					};
@@ -566,7 +566,7 @@ const [get, set] = createStore<{
 					repeaterKey: props.parentRepeaterKey,
 				});
 
-				if (!field || !field.groups) return;
+				if (!field?.groups) return;
 
 				const group = field.groups.find((g) => g.ref === props.ref);
 				if (!group) return;

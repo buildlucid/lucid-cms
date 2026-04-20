@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import type { MediaFolderBreadcrumbResponse } from "@types";
+import type { MediaFolderBreadcrumb } from "@types";
 import { FaSolidChevronRight, FaSolidHouse } from "solid-icons/fa";
 import { type Accessor, type Component, For, Match, Switch } from "solid-js";
 import T from "@/translations";
@@ -7,7 +7,7 @@ import T from "@/translations";
 export const Breadcrumbs: Component<{
 	state: {
 		parentFolderId: Accessor<number | string | undefined>;
-		breadcrumbs: MediaFolderBreadcrumbResponse[];
+		breadcrumbs: MediaFolderBreadcrumb[];
 	};
 }> = (props) => {
 	// ----------------------------------------

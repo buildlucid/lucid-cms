@@ -1,9 +1,6 @@
 import type { Config } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type {
-	SettingsInclude,
-	SettingsResponse,
-} from "../../types/response.js";
+import type { Settings, SettingsInclude } from "../../types/response.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 import { licenseFormatter } from "./index.js";
@@ -29,12 +26,12 @@ const formatSingle = (props: {
 	config: Config;
 	includes: SettingsInclude[] | undefined;
 	authUser?: LucidAuth;
-}): SettingsResponse => {
+}): Settings => {
 	const includes = props.includes ?? [];
 	if (includes.length === 0) return {};
 
 	const includeSet = new Set(includes);
-	const response: SettingsResponse = {};
+	const response: Settings = {};
 
 	if (includeSet.has("email")) {
 		response.email = {

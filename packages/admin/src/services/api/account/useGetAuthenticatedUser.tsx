@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, UserResponse } from "@types";
+import type { ResponseBody, User } from "@types";
 import { createEffect, createMemo } from "solid-js";
 import userStore from "@/store/userStore";
 import getLoginRedirectURL from "@/utils/login-route";
@@ -26,7 +26,7 @@ const useGetAuthenticatedUser = (
 	const query = useQuery(() => ({
 		queryKey: ["users.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<UserResponse>>({
+			request<ResponseBody<User>>({
 				url: "/lucid/api/v1/account",
 				config: {
 					method: "GET",

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ClientIntegrationResponse, ResponseBody } from "@types";
+import type { ClientIntegration, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -21,7 +21,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["clientIntegrations.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<ClientIntegrationResponse>>({
+			request<ResponseBody<ClientIntegration>>({
 				url: `/lucid/api/v1/client-integrations/${queryParams().location?.id}`,
 				config: {
 					method: "GET",

@@ -1,8 +1,8 @@
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
-import type { AuthProvidersResponse } from "../../../types.js";
+import type { AuthProviders } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-const getProviders: ServiceFn<[], AuthProvidersResponse> = async (context) => {
+const getProviders: ServiceFn<[], AuthProviders> = async (context) => {
 	const providersRes = getAvailableProviders(context.config);
 
 	const providers = providersRes.providers.map((p) => {
@@ -12,7 +12,7 @@ const getProviders: ServiceFn<[], AuthProvidersResponse> = async (context) => {
 			type: p.type,
 			key: p.key,
 		};
-	}) satisfies AuthProvidersResponse["providers"];
+	}) satisfies AuthProviders["providers"];
 
 	return {
 		error: undefined,

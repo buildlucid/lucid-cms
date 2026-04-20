@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, SettingsInclude, SettingsResponse } from "@types";
+import type { ResponseBody, Settings, SettingsInclude } from "@types";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,7 +19,7 @@ const useGetSettings = (params?: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["settings.getSettings", queryKey(), params?.key?.()],
 		queryFn: () =>
-			request<ResponseBody<SettingsResponse>>({
+			request<ResponseBody<Settings>>({
 				url: "/lucid/api/v1/settings",
 				query: queryParams(),
 				config: {

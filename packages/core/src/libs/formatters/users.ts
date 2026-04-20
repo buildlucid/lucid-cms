@@ -1,5 +1,5 @@
 import type { LucidAuth } from "../../types/hono.js";
-import type { UserResponse } from "../../types/response.js";
+import type { User } from "../../types/response.js";
 import type { BooleanInt } from "../db-adapter/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
@@ -52,7 +52,7 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	user: UserPropT;
 	authUser?: LucidAuth;
-}): UserResponse => {
+}): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
 	});
@@ -69,7 +69,7 @@ const formatSingle = (props: {
 		resourceOwnerId: props.user.id,
 	});
 
-	const response: UserResponse = {
+	const response: User = {
 		id: props.user.id,
 		email: props.user.email,
 		username: props.user.username,

@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import {
 	batch,
 	type Component,
@@ -16,7 +16,7 @@ interface MediaFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"media">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;

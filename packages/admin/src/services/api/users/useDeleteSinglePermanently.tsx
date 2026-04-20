@@ -1,4 +1,4 @@
-import type { ResponseBody, RoleResponse } from "@types";
+import type { ResponseBody, Role } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -8,7 +8,7 @@ interface Params {
 }
 
 export const deleteSinglePermanentlyReq = (params: Params) => {
-	return request<ResponseBody<RoleResponse>>({
+	return request<ResponseBody<Role>>({
 		url: `/lucid/api/v1/users/${params.id}/permanent`,
 		csrf: true,
 		config: {
@@ -25,7 +25,7 @@ interface UseDeleteProps {
 const useDeleteSinglePermanently = (props: UseDeleteProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<RoleResponse>>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Role>>({
 		mutationFn: deleteSinglePermanentlyReq,
 		getSuccessToast: () => ({
 			title: T()("user_deleted_toast_title"),

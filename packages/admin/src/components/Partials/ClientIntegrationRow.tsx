@@ -1,4 +1,4 @@
-import type { ClientIntegrationResponse } from "@types";
+import type { ClientIntegration } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
 import { Permissions } from "@/constants/permissions";
@@ -8,7 +8,7 @@ import T from "@/translations";
 import ActionDropdown from "./ActionDropdown";
 
 interface ClientIntegrationRow {
-	clientIntegration: ClientIntegrationResponse;
+	clientIntegration: ClientIntegration;
 	rowTarget: ReturnType<
 		typeof useRowTarget<"delete" | "update" | "regenerateAPIKey">
 	>;

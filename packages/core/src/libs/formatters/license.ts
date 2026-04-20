@@ -1,4 +1,4 @@
-import type { LicenseResponse } from "../../types/response.js";
+import type { License } from "../../types/response.js";
 import type { BooleanInt } from "../../types.js";
 import formatter from "./index.js";
 
@@ -9,7 +9,7 @@ interface LicensePropsT {
 	errorMessage: string | null;
 }
 
-const formatSingle = (props: { license: LicensePropsT }): LicenseResponse => {
+const formatSingle = (props: { license: LicensePropsT }): License => {
 	return {
 		key: createLicenseKeyFromLast4(props.license.last4),
 		valid: formatter.formatBoolean(props.license.valid),

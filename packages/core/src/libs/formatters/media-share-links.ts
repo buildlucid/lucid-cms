@@ -1,8 +1,8 @@
 import constants from "../../constants/constants.js";
 import type {
-	MediaShareLinkResponse,
+	MediaShareLink,
 	MediaType,
-	ShareLinkAccessResponse,
+	ShareLinkAccess,
 } from "../../types/response.js";
 import { createShareLinkUrl } from "../../utils/media/index.js";
 import formatter from "./index.js";
@@ -39,7 +39,7 @@ const formatShareAccess = (props: {
 	link: ShareLinkAccessPropsT;
 	shareUrl: string;
 	passwordRequired: boolean;
-}): ShareLinkAccessResponse => {
+}): ShareLinkAccess => {
 	const link = props.link;
 	const mediaType = (link.media_type ?? "unknown") as MediaType;
 	const previewableTypes = constants.media.previewableTypes;
@@ -78,14 +78,14 @@ const formatShareAccess = (props: {
 const formatMultiple = (props: {
 	links: MediaShareLinkPropsT[];
 	host: string;
-}): MediaShareLinkResponse[] => {
+}): MediaShareLink[] => {
 	return props.links.map((l) => formatSingle({ link: l, host: props.host }));
 };
 
 const formatSingle = (props: {
 	link: MediaShareLinkPropsT;
 	host: string;
-}): MediaShareLinkResponse => {
+}): MediaShareLink => {
 	const hasExpired = props.link.expires_at
 		? new Date(props.link.expires_at).getTime() < Date.now()
 		: false;

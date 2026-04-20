@@ -1,4 +1,4 @@
-import type { RoleResponse } from "../../types/response.js";
+import type { Role } from "../../types/response.js";
 import type { Permission } from "../permission/types.js";
 import formatter from "./index.js";
 
@@ -23,7 +23,7 @@ const formatMultiple = (props: { roles: RolePropsT[] }) => {
 	);
 };
 
-const formatSingle = (props: { role: RolePropsT }): RoleResponse => {
+const formatSingle = (props: { role: RolePropsT }): Role => {
 	return {
 		id: props.role.id,
 		name: props.role.name,

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import type { SupportedLocales, UserResponse } from "@types";
+import type { SupportedLocales, User } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -86,7 +86,7 @@ export const Account: Component = () => {
 	const linkedProvidersByKey = createMemo(() => {
 		const authProviders = user()?.authProviders ?? [];
 		return authProviders.reduce<
-			Record<string, NonNullable<UserResponse["authProviders"]>[number]>
+			Record<string, NonNullable<User["authProviders"]>[number]>
 		>((map, provider) => {
 			if (provider) {
 				map[provider.providerKey] = provider;

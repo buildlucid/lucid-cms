@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Color } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
@@ -9,7 +9,7 @@ interface ColorFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"color">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;

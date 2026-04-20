@@ -3,7 +3,7 @@ import type {
 	DocumentFieldValue,
 	DocumentRef,
 	FieldError,
-	FieldResponse,
+	InternalDocumentField,
 } from "@types";
 import {
 	batch,
@@ -22,7 +22,7 @@ interface DocumentFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"document">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;

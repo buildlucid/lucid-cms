@@ -1,4 +1,4 @@
-import type { MediaShareLinkResponse, ResponseBody } from "@types";
+import type { MediaShareLink, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -14,7 +14,7 @@ interface Params {
 }
 
 interface Response {
-	id: MediaShareLinkResponse["id"];
+	id: MediaShareLink["id"];
 }
 
 export const createSingleReq = (params: Params) => {

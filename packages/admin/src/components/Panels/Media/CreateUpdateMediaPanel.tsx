@@ -1,4 +1,4 @@
-import type { MediaResponse } from "@lucidcms/core/types";
+import type { Media } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -28,7 +28,7 @@ interface CreateUpdateMediaPanelProps {
 		parentFolderId: Accessor<number | string | undefined>;
 	};
 	callbacks?: {
-		onSuccess?: (_media: MediaResponse) => void;
+		onSuccess?: (_media: Media) => void;
 	};
 }
 

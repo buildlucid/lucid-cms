@@ -1,4 +1,4 @@
-import type { CollectionResponse } from "../../types/response.js";
+import type { Collection } from "../../types/response.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
 
@@ -35,7 +35,7 @@ const formatSingle = (props: {
 		id?: number;
 		collection_key: string;
 	}>;
-}): CollectionResponse => {
+}): Collection => {
 	const collectionData = props.collection.getData;
 	const key = props.collection.key;
 

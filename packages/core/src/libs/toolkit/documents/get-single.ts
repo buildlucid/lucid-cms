@@ -1,6 +1,6 @@
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
 import { documentServices } from "../../../services/index.js";
-import type { ClientDocumentResponse } from "../../../types/response.js";
+import type { CollectionDocument } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -22,7 +22,7 @@ export type ToolkitDocumentsGetSingleInput = {
 const getSingle = async (
 	context: ServiceContext,
 	input: ToolkitDocumentsGetSingleInput,
-): ServiceResponse<ClientDocumentResponse> =>
+): ServiceResponse<CollectionDocument> =>
 	runToolkitService(
 		() =>
 			documentServices.client.getSingle(context, {

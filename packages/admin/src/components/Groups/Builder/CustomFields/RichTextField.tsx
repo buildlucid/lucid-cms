@@ -1,5 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { RichText } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
@@ -10,7 +10,7 @@ interface RichTextFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"rich-text">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		focusKey: string;

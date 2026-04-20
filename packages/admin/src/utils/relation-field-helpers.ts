@@ -1,17 +1,17 @@
 import type {
 	DocumentRef,
-	DocumentResponse,
+	InternalCollectionDocument,
+	Media,
 	MediaRef,
-	MediaResponse,
+	User,
 	UserRef,
-	UserResponse,
 } from "@types";
 import brickHelpers from "@/utils/brick-helpers";
 
 export type MediaRelationRef = NonNullable<MediaRef>;
 export type UserRelationRef = NonNullable<UserRef>;
 
-export const mediaResponseToRef = (media: MediaResponse): MediaRelationRef => ({
+export const mediaResponseToRef = (media: Media): MediaRelationRef => ({
 	id: media.id,
 	url: media.url,
 	key: media.key,
@@ -39,7 +39,7 @@ export const mediaResponseToRef = (media: MediaResponse): MediaRelationRef => ({
 	public: media.public,
 });
 
-export const userResponseToRef = (user: UserResponse): UserRelationRef => ({
+export const userResponseToRef = (user: User): UserRelationRef => ({
 	id: user.id,
 	username: user.username,
 	email: user.email,
@@ -51,7 +51,9 @@ export const userResponseToRef = (user: UserResponse): UserRelationRef => ({
  * Converts a document response into the ref shape stored by relation fields in
  * the page builder.
  */
-export const documentResponseToRef = (doc: DocumentResponse): DocumentRef => ({
+export const documentResponseToRef = (
+	doc: InternalCollectionDocument,
+): DocumentRef => ({
 	id: doc.id,
 	collectionKey: doc.collectionKey,
 	fields: doc.fields ? brickHelpers.objectifyFields(doc.fields) : null,

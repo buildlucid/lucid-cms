@@ -4,7 +4,7 @@ import formatter, {
 } from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { ShareLinkAccessResponse } from "../../types/response.js";
+import type { ShareLinkAccess } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import { createShareStreamUrl } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -16,7 +16,7 @@ const getShareAccess: ServiceFn<
 			sessionCookie?: string;
 		},
 	],
-	ShareLinkAccessResponse
+	ShareLinkAccess
 > = async (context, data) => {
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,

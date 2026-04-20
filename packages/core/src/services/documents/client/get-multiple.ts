@@ -9,7 +9,7 @@ import formatter, {
 } from "../../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
-import type { ClientDocumentResponse } from "../../../types/response.js";
+import type { CollectionDocument } from "../../../types/response.js";
 import {
 	getBaseUrl,
 	groupDocumentFilters,
@@ -28,7 +28,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: ClientDocumentResponse[];
+		data: CollectionDocument[];
 		count: number;
 	}
 > = async (context, data) => {

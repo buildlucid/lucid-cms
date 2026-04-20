@@ -1,7 +1,7 @@
 import formatter, { rolesFormatter } from "../../libs/formatters/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/roles.js";
-import type { RoleResponse } from "../../types/response.js";
+import type { Role } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -11,7 +11,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: RoleResponse[];
+		data: Role[];
 		count: number;
 	}
 > = async (context, data) => {

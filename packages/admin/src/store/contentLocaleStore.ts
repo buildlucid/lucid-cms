@@ -1,10 +1,10 @@
-import type { LocalesResponse } from "@types";
+import type { Locale } from "@types";
 import { createStore } from "solid-js/store";
 
 type ContentLangStoreT = {
 	contentLocale: string | undefined;
-	locales: LocalesResponse[];
-	syncContentLocale: (_locales: LocalesResponse[]) => void;
+	locales: Locale[];
+	syncContentLocale: (_locales: Locale[]) => void;
 	setContentLocale: (_contentLocale?: string) => void;
 };
 
@@ -22,7 +22,7 @@ const [get, set] = createStore<ContentLangStoreT>({
 	contentLocale: getInitialContentLocale(),
 	locales: [],
 
-	syncContentLocale(locales: LocalesResponse[]) {
+	syncContentLocale(locales: Locale[]) {
 		if (locales.length === 0) {
 			set("contentLocale", undefined);
 			return;

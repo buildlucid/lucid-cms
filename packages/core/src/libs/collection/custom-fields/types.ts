@@ -160,11 +160,11 @@ export type CFConfig<T extends FieldTypes> = CustomFieldMap[T]["config"];
 export type CFProps<T extends FieldTypes> = CustomFieldMap[T]["props"];
 export type CFResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];
 
-export type FieldResponseValue =
+export type FieldValue =
 	| CustomFieldMap[FieldTypes]["response"]["value"]
 	| undefined;
 
-export type FieldRefs =
+export type FieldRef =
 	| CustomFieldMap[FieldTypes]["response"]["ref"]
 	| undefined;
 

@@ -6,7 +6,7 @@ import {
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
-import type { ValidateInvitationResponse } from "../../../types.js";
+import type { ValidateInvitation } from "../../../types.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -19,7 +19,7 @@ const validateInvitation: ServiceFn<
 			token: string;
 		},
 	],
-	ValidateInvitationResponse
+	ValidateInvitation
 > = async (context, data) => {
 	const UserTokens = new UserTokensRepository(
 		context.db.client,

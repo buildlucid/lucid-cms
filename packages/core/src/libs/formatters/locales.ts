@@ -1,4 +1,4 @@
-import type { LocalesResponse } from "../../types/response.js";
+import type { Locale } from "../../types/response.js";
 import type { Config } from "../../types.js";
 import type { LucidLocales, Select } from "../db-adapter/types.js";
 import formatter from "./index.js";
@@ -6,7 +6,7 @@ import formatter from "./index.js";
 const formatMultiple = (props: {
 	locales: Select<LucidLocales>[];
 	localization: Config["localization"];
-}): LocalesResponse[] => {
+}): Locale[] => {
 	return props.locales
 		.map((l) => {
 			const configLocale = props.localization.locales.find(
@@ -28,7 +28,7 @@ const formatSingle = (props: {
 	locale: Select<LucidLocales>;
 	configLocale: Config["localization"]["locales"][0];
 	defaultLocale: Config["localization"]["defaultLocale"];
-}): LocalesResponse => {
+}): Locale => {
 	return {
 		code: props.locale.code,
 		name: props.configLocale.label,

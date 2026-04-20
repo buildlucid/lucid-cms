@@ -1,4 +1,4 @@
-import type { UserLoginResponse } from "../../types/response.js";
+import type { UserLogin } from "../../types/response.js";
 import formatter from "./index.js";
 
 interface UserLoginPropT {
@@ -19,9 +19,7 @@ const formatMultiple = (props: { userLogins: UserLoginPropT[] }) => {
 	);
 };
 
-const formatSingle = (props: {
-	userLogin: UserLoginPropT;
-}): UserLoginResponse => {
+const formatSingle = (props: { userLogin: UserLoginPropT }): UserLogin => {
 	return {
 		id: props.userLogin.id,
 		userId: props.userLogin.user_id,

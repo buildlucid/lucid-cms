@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, ValidateInvitationResponse } from "@types";
+import type { ResponseBody, ValidateInvitation } from "@types";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,7 +19,7 @@ const useValidateInvitation = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["auth.validateInvitation", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<ValidateInvitationResponse>>({
+			request<ResponseBody<ValidateInvitation>>({
 				url: `/lucid/api/v1/auth/invitation/validate/${queryParams().location?.token}`,
 				config: {
 					method: "GET",

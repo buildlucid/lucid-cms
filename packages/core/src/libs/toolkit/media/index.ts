@@ -1,7 +1,4 @@
-import type {
-	MediaResponse,
-	MediaUrlResponse,
-} from "../../../types/response.js";
+import type { Media, MediaUrl } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -22,13 +19,9 @@ export type ToolkitMedia = {
 		input?: ToolkitMediaGetMultipleInput,
 	) => ServiceResponse<ToolkitMediaGetMultipleResult>;
 	/** Returns a single media item by ID. */
-	getSingle: (
-		input: ToolkitMediaGetSingleInput,
-	) => ServiceResponse<MediaResponse>;
+	getSingle: (input: ToolkitMediaGetSingleInput) => ServiceResponse<Media>;
 	/** Returns a media URL, with optional processing such as resizing or format changes. */
-	processMedia: (
-		input: ToolkitMediaProcessInput,
-	) => ServiceResponse<MediaUrlResponse>;
+	processMedia: (input: ToolkitMediaProcessInput) => ServiceResponse<MediaUrl>;
 };
 
 /** Creates media helpers for a toolkit instance. */

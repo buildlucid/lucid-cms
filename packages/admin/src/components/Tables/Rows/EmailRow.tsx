@@ -1,4 +1,4 @@
-import type { EmailResponse } from "@types";
+import type { Email } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
@@ -11,7 +11,7 @@ import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
 
 interface EmailRowProps extends TableRowProps {
-	email: EmailResponse;
+	email: Email;
 	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"preview" | "resend" | "delete">>;
 }

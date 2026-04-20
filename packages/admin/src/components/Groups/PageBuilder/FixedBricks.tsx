@@ -1,4 +1,4 @@
-import type { CollectionBrickConfig, CollectionResponse } from "@types";
+import type { Collection, CollectionBrickConfig } from "@types";
 import { FaSolidShield } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For } from "solid-js";
 import { BrickBody } from "@/components/Groups/Builder";
@@ -7,7 +7,7 @@ import helpers from "@/utils/helpers";
 
 interface FixedBricksProps {
 	brickConfig: CollectionBrickConfig[];
-	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
 }
@@ -55,7 +55,7 @@ interface FixedBrickRowProps {
 	brick: BrickData;
 	configByKey: Accessor<Map<string, CollectionBrickConfig>>;
 	brickIndexByRef: Accessor<Map<string, number>>;
-	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
 }

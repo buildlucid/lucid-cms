@@ -1,4 +1,4 @@
-import type { ResponseBody, UserResponse } from "@types";
+import type { ResponseBody, User } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -15,7 +15,7 @@ interface Params {
 }
 
 export const updateSingleReq = (params: Params) => {
-	return request<ResponseBody<UserResponse>>({
+	return request<ResponseBody<User>>({
 		url: `/lucid/api/v1/users/${params.id}`,
 		csrf: true,
 		config: {
@@ -33,7 +33,7 @@ interface UseUpdateSingleProps {
 const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<UserResponse>>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<User>>({
 		mutationFn: updateSingleReq,
 		getSuccessToast: () => ({
 			title: T()("user_update_toast_title"),

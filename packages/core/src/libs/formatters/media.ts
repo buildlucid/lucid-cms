@@ -1,5 +1,5 @@
 import type { BooleanInt } from "../../libs/db-adapter/types.js";
-import type { MediaResponse, MediaType } from "../../types/response.js";
+import type { Media, MediaType } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import formatter from "./index.js";
 
@@ -60,10 +60,7 @@ const formatMultiple = (props: { media: MediaPropsT[]; host: string }) => {
 	);
 };
 
-const formatSingle = (props: {
-	media: MediaPropsT;
-	host: string;
-}): MediaResponse => {
+const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 	return {
 		id: props.media.id,
 		key: props.media.key,

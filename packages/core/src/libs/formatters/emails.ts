@@ -1,4 +1,4 @@
-import type { EmailResponse } from "../../types/response.js";
+import type { Email } from "../../types/response.js";
 import type {
 	BooleanInt,
 	EmailDeliveryStatus,
@@ -42,10 +42,7 @@ const formatMultiple = (props: { emails: EmailPropT[] }) => {
 	);
 };
 
-const formatSingle = (props: {
-	email: EmailPropT;
-	html?: string;
-}): EmailResponse => {
+const formatSingle = (props: { email: EmailPropT; html?: string }): Email => {
 	return {
 		id: props.email.id,
 		type: props.email.type,

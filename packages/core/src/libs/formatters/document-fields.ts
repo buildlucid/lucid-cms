@@ -3,11 +3,11 @@ import type { FieldRefResponse } from "../../services/documents-bricks/helpers/f
 import type {
 	CFConfig,
 	Config,
-	FieldAltResponse,
-	FieldGroupResponse,
-	FieldResponse,
-	FieldResponseValue,
+	DocumentField,
 	FieldTypes,
+	FieldValue,
+	InternalDocumentField,
+	InternalDocumentFieldGroup,
 	LucidBricksTable,
 	LucidBrickTableName,
 	Select,
@@ -117,14 +117,14 @@ const getTreeTableChildFieldConfig = (
 };
 
 /**
- * The entry point for building out the FieldResponse array.
+ * The entry point for building out the InternalDocumentField array.
  *
  * Formats, creates groups, creates nested structure, marries refData etc.
  */
 const formatMultiple = (
 	data: FieldFormatData,
 	meta: FieldFormatMeta,
-): FieldResponse[] => {
+): InternalDocumentField[] => {
 	return buildFieldTree(data, {
 		builder: meta.builder,
 		fieldConfig: meta.builder.persistedFieldTree,
@@ -138,7 +138,7 @@ const formatMultiple = (
 };
 
 /**
- *  Recursively build out the FieldResponse based on the nested fieldConfig
+ *  Recursively build out the InternalDocumentField based on the nested fieldConfig
  */
 const buildFieldTree = (
 	data: FieldFormatData,
@@ -147,8 +147,8 @@ const buildFieldTree = (
 		treeLevel?: number;
 		groupRef?: string;
 	},
-): FieldResponse[] => {
-	const fieldsRes: FieldResponse[] = [];
+): InternalDocumentField[] => {
+	const fieldsRes: InternalDocumentField[] = [];
 
 	//* loop over fieldConfig (nested field structure - no tabs)
 	for (const config of meta.fieldConfig) {
@@ -211,7 +211,7 @@ const buildFieldTree = (
 };
 
 /**
- * Responsible for building a single FieldResponse object.
+ * Responsible for building a single InternalDocumentField object.
  *
  * Adds in empty locale values, formats the value and constructs either translations or values based on the fields config
  */
@@ -224,7 +224,7 @@ const buildField = (
 		fieldConfig: CFConfig<FieldTypes>;
 		groupRef?: string;
 	},
-): FieldResponse | null => {
+): InternalDocumentField | null => {
 	const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
 	if (!cfInstance) return null;
 
@@ -235,7 +235,7 @@ const buildField = (
 		cfInstance.translationsEnabled === true &&
 		meta.collection.getData.config.useTranslations === true
 	) {
-		const fieldTranslations: Record<string, FieldResponseValue> = {};
+		const fieldTranslations: Record<string, FieldValue> = {};
 
 		//* populate the translations/meta
 		for (const locale of meta.localization.locales) {
@@ -283,8 +283,8 @@ const buildTreeGroups = (
 		treeLevel: number;
 		groupRef?: string;
 	},
-): FieldGroupResponse[] => {
-	const groupsRes: FieldGroupResponse[] = [];
+): InternalDocumentFieldGroup[] => {
+	const groupsRes: InternalDocumentFieldGroup[] = [];
 
 	//* using DocumentBricksFormatter.getBrickTreeRows, get the target tree-table rows and construct groups from them
 	const treeRows = DocumentBricksFormatter.getBrickTreeRows({
@@ -347,8 +347,8 @@ const buildTreeGroups = (
  * Returns fields as an object, with the keys being the custom field keys instead of an array of fields
  */
 const objectifyFields = (
-	fields: FieldResponse[],
-): Record<string, FieldAltResponse> => {
+	fields: InternalDocumentField[],
+): Record<string, DocumentField> => {
 	return fields.reduce(
 		(acc, field) => {
 			if (!field) return acc;
@@ -361,10 +361,10 @@ const objectifyFields = (
 						fields: objectifyFields(g.fields || []),
 					};
 				}),
-			} satisfies FieldAltResponse;
+			} satisfies DocumentField;
 			return acc;
 		},
-		{} as Record<string, FieldAltResponse>,
+		{} as Record<string, DocumentField>,
 	);
 };
 

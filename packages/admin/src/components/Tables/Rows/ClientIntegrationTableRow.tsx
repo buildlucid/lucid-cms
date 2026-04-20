@@ -1,4 +1,4 @@
-import type { ClientIntegrationResponse } from "@types";
+import type { ClientIntegration } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
@@ -11,7 +11,7 @@ import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
 
 interface ClientIntegrationTableRowProps extends TableRowProps {
-	clientIntegration: ClientIntegrationResponse;
+	clientIntegration: ClientIntegration;
 	include: boolean[];
 	rowTarget: ReturnType<
 		typeof useRowTarget<"delete" | "update" | "regenerateAPIKey">

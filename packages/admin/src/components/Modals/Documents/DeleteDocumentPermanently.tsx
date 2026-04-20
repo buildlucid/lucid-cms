@@ -1,4 +1,4 @@
-import type { CollectionResponse } from "@types";
+import type { Collection } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
@@ -7,7 +7,7 @@ import helpers from "@/utils/helpers";
 
 interface DeleteDocumentPermanentlyProps {
 	id: Accessor<number | undefined>;
-	collection: CollectionResponse;
+	collection: Collection;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;

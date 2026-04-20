@@ -2,10 +2,10 @@ import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	BrickError,
-	CollectionResponse,
-	DocumentResponse,
+	Collection,
 	DocumentVersionType,
 	FieldError,
+	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createSignal } from "solid-js";
 import api from "@/services/api";
@@ -15,13 +15,13 @@ import { getBodyError } from "@/utils/error-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 export function useDocumentMutations(props: {
-	collection: Accessor<CollectionResponse | undefined>;
+	collection: Accessor<Collection | undefined>;
 	collectionKey: () => string;
 	documentId: () => number | undefined;
 	collectionSingularName: () => string;
 	version: Accessor<"latest" | string>;
 	mode: "create" | "edit" | "revisions";
-	document?: () => DocumentResponse | undefined;
+	document?: () => InternalCollectionDocument | undefined;
 	versionId: () => number | undefined;
 }) {
 	const navigate = useNavigate();

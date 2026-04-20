@@ -1,9 +1,9 @@
 import type {
 	BrickError,
-	CollectionResponse,
-	DocumentResponse,
+	Collection,
 	DocumentVersionType,
 	FieldError,
+	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import { Permissions } from "@/constants/permissions";
@@ -17,9 +17,9 @@ import { getBodyError } from "@/utils/error-helpers";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
-	collection: Accessor<CollectionResponse | undefined>;
+	collection: Accessor<Collection | undefined>;
 	documentQuery: ReturnType<typeof api.documents.useGetSingle>;
-	document: Accessor<DocumentResponse | undefined>;
+	document: Accessor<InternalCollectionDocument | undefined>;
 	mode: "create" | "edit" | "history";
 	version: Accessor<"latest" | string>;
 	versionId: Accessor<number | undefined>;

@@ -1,4 +1,4 @@
-import type { ResponseBody, UserResponse } from "@types";
+import type { ResponseBody, User } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -8,7 +8,7 @@ interface Params {
 }
 
 export const deleteSingleReq = (params: Params) => {
-	return request<ResponseBody<UserResponse>>({
+	return request<ResponseBody<User>>({
 		url: `/lucid/api/v1/users/${params.id}`,
 		csrf: true,
 		config: {
@@ -25,7 +25,7 @@ interface UseDeleteProps {
 const useDeleteSingle = (props: UseDeleteProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<UserResponse>>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<User>>({
 		mutationFn: deleteSingleReq,
 		getSuccessToast: () => ({
 			title: T()("user_deleted_toast_title"),

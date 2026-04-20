@@ -1,5 +1,5 @@
 import { debounce } from "@solid-primitives/scheduled";
-import type { CollectionResponse, DocumentResponse } from "@types";
+import type { Collection, InternalCollectionDocument } from "@types";
 import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js";
 import type api from "@/services/api";
 import brickStore from "@/store/brickStore";
@@ -11,8 +11,8 @@ export function useDocumentAutoSave(props: {
 	updateSingleVersionMutation: ReturnType<
 		typeof api.documents.useUpdateSingleVersion
 	>;
-	document: Accessor<DocumentResponse | undefined>;
-	collection: Accessor<CollectionResponse | undefined>;
+	document: Accessor<InternalCollectionDocument | undefined>;
+	collection: Accessor<Collection | undefined>;
 	hasAutoSavePermission: Accessor<boolean | undefined>;
 	autoSaveUserEnabled: Accessor<boolean>;
 }) {

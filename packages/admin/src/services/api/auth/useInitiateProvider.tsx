@@ -1,4 +1,4 @@
-import type { InitiateAuthResponse, ResponseBody } from "@types";
+import type { InitiateAuth, ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -12,7 +12,7 @@ interface Params {
 }
 
 export const initiateProviderReq = (params: Params) => {
-	return request<ResponseBody<InitiateAuthResponse>>({
+	return request<ResponseBody<InitiateAuth>>({
 		url: `/lucid/api/v1/auth/providers/${params.providerKey}/initiate`,
 		csrf: true,
 		config: {
@@ -23,15 +23,12 @@ export const initiateProviderReq = (params: Params) => {
 };
 
 interface UseInitiateProviderProps {
-	onSuccess?: (data: ResponseBody<InitiateAuthResponse>) => void;
+	onSuccess?: (data: ResponseBody<InitiateAuth>) => void;
 	onError?: () => void;
 }
 
 const useInitiateProvider = (props?: UseInitiateProviderProps) => {
-	return serviceHelpers.useMutationWrapper<
-		Params,
-		ResponseBody<InitiateAuthResponse>
-	>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<InitiateAuth>>({
 		mutationFn: initiateProviderReq,
 		onSuccess: (data) => {
 			if (data?.data?.redirectUrl) {

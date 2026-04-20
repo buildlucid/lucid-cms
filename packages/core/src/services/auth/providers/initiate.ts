@@ -11,10 +11,7 @@ import {
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
-import type {
-	AuthStateActionType,
-	InitiateAuthResponse,
-} from "../../../types.js";
+import type { AuthStateActionType, InitiateAuth } from "../../../types.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -29,7 +26,7 @@ const initiate: ServiceFn<
 			authenticatedUserId?: number;
 		},
 	],
-	InitiateAuthResponse
+	InitiateAuth
 > = async (context, data) => {
 	const UserTokens = new UserTokensRepository(
 		context.db.client,

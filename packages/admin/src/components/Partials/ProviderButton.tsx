@@ -1,11 +1,11 @@
-import type { AuthProvidersResponse } from "@types";
+import type { AuthProviders } from "@types";
 import { FaSolidCircleUser } from "solid-icons/fa";
 import { type Component, Show } from "solid-js";
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
 
 const ProviderButton: Component<{
-	provider: AuthProvidersResponse["providers"][number];
+	provider: AuthProviders["providers"][number];
 	onClick: () => void;
 	disabled: boolean;
 	isLoading?: boolean;

@@ -1,4 +1,4 @@
-import type { MediaResponse } from "@types";
+import type { Media } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
@@ -12,7 +12,7 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 interface MediaBasicCardProps {
-	media: MediaResponse;
+	media: Media;
 	current: boolean;
 	contentLocale?: string;
 	onClick?: () => void;

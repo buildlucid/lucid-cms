@@ -1,9 +1,9 @@
 import { localesFormatter } from "../../libs/formatters/index.js";
 import { LocalesRepository } from "../../libs/repositories/index.js";
-import type { LocalesResponse } from "../../types/response.js";
+import type { Locale } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-const getAll: ServiceFn<[], LocalesResponse[]> = async (context) => {
+const getAll: ServiceFn<[], Locale[]> = async (context) => {
 	const Locales = new LocalesRepository(context.db.client, context.config.db);
 
 	const localesRes = await Locales.selectMultiple({

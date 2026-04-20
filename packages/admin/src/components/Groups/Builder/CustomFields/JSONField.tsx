@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -22,7 +22,7 @@ interface JSONFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"json">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;

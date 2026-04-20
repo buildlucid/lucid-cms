@@ -1,4 +1,4 @@
-import type { FieldAltResponse } from "../../../../../types/response.js";
+import type { DocumentField } from "../../../../../types/response.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export type DocumentFieldValue = {
@@ -38,7 +38,7 @@ export type DocumentRef = {
 	id: number;
 	versionId?: number;
 	collectionKey: string;
-	fields: Record<string, FieldAltResponse> | null;
+	fields: Record<string, DocumentField> | null;
 };
 
 export type DocumentValidationData = {

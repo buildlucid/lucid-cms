@@ -1,12 +1,12 @@
-import type { ErrorResponse, MediaResponse } from "@types";
+import type { ErrorResponse, Media } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
 import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
-	const [getTitle, setTitle] = createSignal<MediaResponse["title"]>([]);
-	const [getAlt, setAlt] = createSignal<MediaResponse["alt"]>([]);
+	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
+	const [getAlt, setAlt] = createSignal<Media["alt"]>([]);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,

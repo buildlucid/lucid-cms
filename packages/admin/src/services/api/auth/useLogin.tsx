@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import type { ResponseBody, UserResponse } from "@types";
+import type { ResponseBody, User } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -10,7 +10,7 @@ interface Params {
 }
 
 export const loginReq = (params: Params) => {
-	return request<ResponseBody<UserResponse>>({
+	return request<ResponseBody<User>>({
 		url: "/lucid/api/v1/auth/login",
 		csrf: true,
 		config: {
@@ -30,7 +30,7 @@ const useLogin = (props?: UseLoginProps) => {
 
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<UserResponse>>({
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<User>>({
 		mutationFn: loginReq,
 		getSuccessToast: () => ({
 			title: T()("login_success_toast_title"),

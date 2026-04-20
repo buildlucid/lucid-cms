@@ -1,14 +1,14 @@
 import type {
 	BrickError,
 	CFConfig,
-	CollectionResponse,
+	Collection,
+	DocumentField,
 	DocumentFieldValue,
 	DocumentRef,
-	DocumentResponse,
-	FieldAltResponse,
 	FieldError,
-	FieldResponse,
 	FieldTypes,
+	InternalCollectionDocument,
+	InternalDocumentField,
 	MediaRef,
 	UserRef,
 } from "@types";
@@ -16,11 +16,11 @@ import { nanoid } from "nanoid";
 import brickStore from "@/store/brickStore";
 
 const findFieldRecursive = (props: {
-	fields: FieldResponse[];
+	fields: InternalDocumentField[];
 	targetKey: string;
 	groupRef?: string;
 	repeaterKey?: string;
-}): FieldResponse | null => {
+}): InternalDocumentField | null => {
 	for (const field of props.fields) {
 		// Direct match for top-level fields if no repeater key is specified
 		if (
@@ -99,7 +99,7 @@ const customFieldId = (props: {
 
 const getFieldValue = <T>(props: {
 	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
-	fieldData?: FieldResponse;
+	fieldData?: InternalDocumentField;
 	contentLocale: string;
 	collectionTranslations?: boolean;
 }) => {
@@ -405,11 +405,11 @@ const hasErrorsOnOtherLocale = (props: {
 };
 
 /**
- * Converts a FieldResponse array into a FieldAltResponse object
+ * Converts a InternalDocumentField array into a DocumentField object
  */
 const objectifyFields = (
-	fields: FieldResponse[],
-): Record<string, FieldAltResponse> => {
+	fields: InternalDocumentField[],
+): Record<string, DocumentField> => {
 	return fields.reduce(
 		(acc, field) => {
 			if (!field) return acc;
@@ -422,10 +422,10 @@ const objectifyFields = (
 						fields: objectifyFields(g.fields || []),
 					};
 				}),
-			} satisfies FieldAltResponse;
+			} satisfies DocumentField;
 			return acc;
 		},
-		{} as Record<string, FieldAltResponse>,
+		{} as Record<string, DocumentField>,
 	);
 };
 
@@ -448,9 +448,9 @@ const getBrickSyncKey = (brick: {
  * fields while applying fresh field values from the server response.
  */
 const preserveRepeaterGroupOpenState = (
-	nextFields: FieldResponse[] = [],
-	currentFields: FieldResponse[] = [],
-): FieldResponse[] => {
+	nextFields: InternalDocumentField[] = [],
+	currentFields: InternalDocumentField[] = [],
+): InternalDocumentField[] => {
 	const currentFieldsByKey = new Map(
 		currentFields.map((field) => [field.key, field]),
 	);
@@ -486,15 +486,15 @@ const preserveRepeaterGroupOpenState = (
  * collection pseudo brick and any missing fixed brick placeholders.
  */
 const buildBricks = (props: {
-	document?: DocumentResponse;
-	collection?: CollectionResponse;
+	document?: InternalCollectionDocument;
+	collection?: Collection;
 }): Array<{
 	ref: string;
 	key: string;
 	order: number;
 	type: "builder" | "fixed" | "collection-fields";
 	open: boolean;
-	fields: FieldResponse[];
+	fields: InternalDocumentField[];
 }> => {
 	const documentBricks = structuredClone(props.document?.bricks) || [];
 	const collectionFields = structuredClone(props.document?.fields) || [];

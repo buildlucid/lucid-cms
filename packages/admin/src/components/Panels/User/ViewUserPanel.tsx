@@ -1,4 +1,4 @@
-import type { AuthProvidersResponse, UserResponse } from "@types";
+import type { AuthProviders, User } from "@types";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import { Panel } from "@/components/Groups/Panel";
@@ -75,9 +75,9 @@ const ViewUserPanelContent: Component<{
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
-		user: UserResponse | undefined;
+		user: User | undefined;
 	};
-	providers: AuthProvidersResponse["providers"] | undefined;
+	providers: AuthProviders["providers"] | undefined;
 }> = (props) => {
 	// ---------------------------------
 	// Memos
@@ -85,7 +85,7 @@ const ViewUserPanelContent: Component<{
 		return props.state.user?.roles?.map((r) => r.name).join(", ") || "-";
 	});
 	const providersByKey = createMemo(() => {
-		const map: Record<string, AuthProvidersResponse["providers"][number]> = {};
+		const map: Record<string, AuthProviders["providers"][number]> = {};
 		const list = props.providers ?? [];
 		for (const provider of list) {
 			map[provider.key] = provider;
@@ -107,8 +107,8 @@ const ViewUserPanelContent: Component<{
 				(
 					item,
 				): item is {
-					provider: AuthProvidersResponse["providers"][number];
-					linked: NonNullable<UserResponse["authProviders"]>[number];
+					provider: AuthProviders["providers"][number];
+					linked: NonNullable<User["authProviders"]>[number];
 				} => item !== null,
 			);
 	});

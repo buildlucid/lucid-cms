@@ -1,7 +1,7 @@
 import formatter, { mediaFormatter } from "../../libs/formatters/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
-import type { MediaResponse } from "../../types/response.js";
+import type { Media } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -13,7 +13,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: MediaResponse[];
+		data: Media[];
 		count: number;
 	}
 > = async (context, data) => {

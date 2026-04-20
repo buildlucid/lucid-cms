@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import type { CollectionResponse } from "@types";
+import type { Collection } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { IconLinkFull } from "@/components/Groups/Navigation";
@@ -35,8 +35,8 @@ export type NavigationMenuContentProps = {
 	showAccessAndPermissions: boolean;
 	collectionsIsLoading: boolean;
 	collectionsIsError: boolean;
-	multiCollections: CollectionResponse[];
-	singleCollections: CollectionResponse[];
+	multiCollections: Collection[];
+	singleCollections: Collection[];
 };
 
 export const NavigationMenuContent: Component<NavigationMenuContentProps> = (

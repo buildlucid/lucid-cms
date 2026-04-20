@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.1.9",
 		"@lucidcms/astro": "*",
+		"@lucidcms/client": "*",
 		"@lucidcms/cloudflare-adapter": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/libsql-adapter": "*",

@@ -1,0 +1,15 @@
+{
+	"extends": "@lucidcms/config/tsconfig.base.json",
+	"exclude": [
+		"./coverage",
+		"./dist",
+		"./node_modules",
+		"./smoke",
+		"./.turbo",
+		"**/*.test.ts"
+	],
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./dist"
+	}
+}

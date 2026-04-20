@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import type { CFConfig, CollectionResponse, FieldTypes } from "@types";
+import type { CFConfig, Collection, FieldTypes } from "@types";
 import { FaSolidCalendar } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
@@ -22,7 +22,7 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const DocumentsList: Component<{
 	state: {
-		collection?: CollectionResponse;
+		collection?: Collection;
 		isLoading: boolean;
 		displayInListing: Accessor<CFConfig<FieldTypes>[]>;
 		collectionIsSuccess: Accessor<boolean>;
@@ -261,7 +261,7 @@ export const DocumentsList: Component<{
 								index={i}
 								document={doc()}
 								fieldInclude={props.state.displayInListing()}
-								collection={props.state.collection as CollectionResponse}
+								collection={props.state.collection as Collection}
 								include={include}
 								contentLocale={contentLocale()}
 								selected={selected[i]}
@@ -358,13 +358,13 @@ export const DocumentsList: Component<{
 						rowTarget.setTrigger("delete", state);
 					},
 				}}
-				collection={props.state.collection as CollectionResponse}
+				collection={props.state.collection as Collection}
 			/>
 			{/* TODO: add support to selec the target environment */}
 			{/* <PromoteToDraft
 				id={rowTarget.getTargetId}
 				publishedVersionId={getPublishedVersionId}
-				collection={props.state.collection as CollectionResponse}
+				collection={props.state.collection as Collection}
 				state={{
 					open: rowTarget.getTriggers().promote,
 					setOpen: (state: boolean) => {
@@ -385,7 +385,7 @@ export const DocumentsList: Component<{
 			{/* <PublishDocument
 				id={rowTarget.getTargetId}
 				draftVersionId={getDraftVersionId}
-				collection={props.state.collection as CollectionResponse}
+				collection={props.state.collection as Collection}
 				state={{
 					open: rowTarget.getTriggers().publish,
 					setOpen: (state: boolean) => {
@@ -416,7 +416,7 @@ export const DocumentsList: Component<{
 			/>
 			<DeleteDocumentPermanently
 				id={rowTarget.getTargetId}
-				collection={props.state.collection as CollectionResponse}
+				collection={props.state.collection as Collection}
 				state={{
 					open: rowTarget.getTriggers().deletePermanently,
 					setOpen: (state: boolean) => {

@@ -3,7 +3,7 @@ import formatter, {
 } from "../../libs/formatters/index.js";
 import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/media-folders.js";
-import type { MultipleMediaFolderResponse } from "../../types/response.js";
+import type { MultipleMediaFolder } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -13,7 +13,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: MultipleMediaFolderResponse;
+		data: MultipleMediaFolder;
 		count: number;
 	}
 > = async (context, data) => {

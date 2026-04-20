@@ -1,4 +1,4 @@
-import type { CollectionResponse, DocumentResponse } from "@types";
+import type { Collection, InternalCollectionDocument } from "@types";
 import classNames from "classnames";
 import {
 	type Accessor,
@@ -21,8 +21,8 @@ const TimelineDetails: Component<{
 	onRevisionNameChange: (value: string) => void;
 	onRestore: () => void;
 	onPromote: () => void;
-	collection: Accessor<CollectionResponse | undefined>;
-	document: Accessor<DocumentResponse | undefined>;
+	collection: Accessor<Collection | undefined>;
+	document: Accessor<InternalCollectionDocument | undefined>;
 }> = (props) => {
 	// ----------------------------------
 	// Memos

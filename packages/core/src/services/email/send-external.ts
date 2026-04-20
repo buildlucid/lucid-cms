@@ -1,4 +1,4 @@
-import type { EmailResponse } from "../../types/response.js";
+import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices } from "../index.js";
@@ -23,7 +23,7 @@ const sendExternal: ServiceFn<
 	],
 	{
 		jobId: string;
-		email: EmailResponse;
+		email: Email;
 	}
 > = async (context, data) =>
 	serviceWrapper(emailServices.sendEmail, {

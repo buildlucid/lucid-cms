@@ -9,7 +9,7 @@ import {
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { MediaResponse } from "../../types.js";
+import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -39,7 +39,7 @@ const createSingle: ServiceFn<
 			userId: number;
 		},
 	],
-	MediaResponse
+	Media
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db.client, context.config.db);
 	const MediaTranslations = new MediaTranslationsRepository(

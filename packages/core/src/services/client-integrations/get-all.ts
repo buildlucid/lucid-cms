@@ -3,7 +3,7 @@ import formatter, {
 } from "../../libs/formatters/index.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import type { GetAllQueryParams } from "../../schemas/client-integrations.js";
-import type { ClientIntegrationResponse } from "../../types/response.js";
+import type { ClientIntegration } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<
@@ -13,7 +13,7 @@ const getAll: ServiceFn<
 		},
 	],
 	{
-		data: ClientIntegrationResponse[];
+		data: ClientIntegration[];
 		count: number;
 	}
 > = async (context, data) => {

@@ -1,4 +1,4 @@
-import type { UserResponse } from "@types";
+import type { User } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -105,7 +105,7 @@ const UpdateUserPanel: Component<{
 				acc[provider.providerKey] = provider;
 				return acc;
 			},
-			{} as Record<string, NonNullable<UserResponse["authProviders"]>[number]>,
+			{} as Record<string, NonNullable<User["authProviders"]>[number]>,
 		);
 	});
 	const updateData = createMemo(() => {

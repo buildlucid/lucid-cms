@@ -1,16 +1,14 @@
-import type { OptionsResponse } from "../../types/response.js";
+import type { Option } from "../../types/response.js";
 import type { LucidOptions, Select } from "../db-adapter/types.js";
 import formatter from "./index.js";
 
 const formatMultiple = (props: {
 	options: Select<LucidOptions>[];
-}): OptionsResponse[] => {
+}): Option[] => {
 	return props.options.map((o) => formatSingle({ option: o }));
 };
 
-const formatSingle = (props: {
-	option: Select<LucidOptions>;
-}): OptionsResponse => {
+const formatSingle = (props: { option: Select<LucidOptions> }): Option => {
 	return {
 		name: props.option.name,
 		valueText: props.option.value_text,

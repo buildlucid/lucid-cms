@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, UserLoginResponse } from "@types";
+import type { ResponseBody, UserLogin } from "@types";
 import { createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -25,7 +25,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["userLogins.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<UserLoginResponse[]>>({
+			request<ResponseBody<UserLogin[]>>({
 				url: `/lucid/api/v1/users/logins/${queryParams().location?.userId}`,
 				query: queryParams(),
 				config: {

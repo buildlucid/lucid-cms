@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { DocumentVersionResponse, ResponseBody } from "@types";
+import type { DocumentVersion, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -28,7 +28,7 @@ const useGetMultipleRevisions = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["documents.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<DocumentVersionResponse[]>>({
+			request<ResponseBody<DocumentVersion[]>>({
 				url: `/lucid/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.documentId}/revisions`,

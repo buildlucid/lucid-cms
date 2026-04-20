@@ -1,4 +1,4 @@
-import type { EmailResponse, ResponseBody } from "@types";
+import type { Email, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -8,7 +8,7 @@ interface Params {
 }
 
 export const deleteSingleReq = (params: Params) => {
-	return request<ResponseBody<EmailResponse>>({
+	return request<ResponseBody<Email>>({
 		url: `/lucid/api/v1/emails/${params.id}`,
 		csrf: true,
 		config: {
@@ -25,18 +25,16 @@ interface UseDeleteProps {
 const useDeleteSingle = (props: UseDeleteProps) => {
 	// -----------------------------
 	// Mutation
-	return serviceHelpers.useMutationWrapper<Params, ResponseBody<EmailResponse>>(
-		{
-			mutationFn: deleteSingleReq,
-			getSuccessToast: () => ({
-				title: T()("email_deleted_toast_title"),
-				message: T()("email_deleted_toast_message"),
-			}),
-			invalidates: ["email.getMultiple"],
-			onSuccess: props.onSuccess,
-			onError: props.onError,
-		},
-	);
+	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Email>>({
+		mutationFn: deleteSingleReq,
+		getSuccessToast: () => ({
+			title: T()("email_deleted_toast_title"),
+			message: T()("email_deleted_toast_message"),
+		}),
+		invalidates: ["email.getMultiple"],
+		onSuccess: props.onSuccess,
+		onError: props.onError,
+	});
 };
 
 export default useDeleteSingle;

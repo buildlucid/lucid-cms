@@ -1,9 +1,9 @@
 import type {
-	CollectionResponse,
+	Collection,
 	DocumentFieldValue,
 	DocumentRef,
-	DocumentResponse,
-} from "@lucidcms/core/types";
+	InternalCollectionDocument,
+} from "@types";
 import { FaSolidCalendar } from "solid-icons/fa";
 import {
 	type Component,
@@ -195,7 +195,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		setSelectedDocuments(props.selectedRefs ?? []);
 	});
 
-	const toggleSelectedDocument = (document: DocumentResponse) => {
+	const toggleSelectedDocument = (document: InternalCollectionDocument) => {
 		const nextRef = documentResponseToRef(document);
 
 		setSelectedDocuments((prev) => {
@@ -354,7 +354,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									index={i}
 									document={doc()}
 									fieldInclude={getCollectionFieldIncludes()}
-									collection={collection.data?.data as CollectionResponse}
+									collection={collection.data?.data as Collection}
 									include={include}
 									contentLocale={contentLocale()}
 									selected={selected[i]}

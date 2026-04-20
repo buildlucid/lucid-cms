@@ -3,7 +3,7 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { CollectionResponse } from "../../types/response.js";
+import type { Collection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -15,7 +15,7 @@ const getSingle: ServiceFn<
 			key: string;
 		},
 	],
-	CollectionResponse
+	Collection
 > = async (context, data) => {
 	const collection = context.config.collections?.find(
 		(c) => c.key === data.key,

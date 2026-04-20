@@ -5,8 +5,8 @@ import type { AdapterRuntimeContext } from "../libs/runtime-adapter/types.js";
 import type {
 	Config,
 	EnvironmentVariables,
-	LocalesResponse,
-	UserPermissionsResponse,
+	Locale,
+	UserPermission,
 } from "../types.js";
 
 export type LucidAuth = {
@@ -14,7 +14,7 @@ export type LucidAuth = {
 	username: string;
 	email: string;
 	superAdmin: boolean;
-	permissions: UserPermissionsResponse["permissions"] | undefined;
+	permissions: UserPermission["permissions"] | undefined;
 	exp: number;
 	iat: number;
 	nonce: string;
@@ -27,7 +27,7 @@ export type LucidClientIntegrationAuth = {
 };
 
 export type LucidLocale = {
-	code: LocalesResponse["code"];
+	code: Locale["code"];
 };
 
 export type LucidExecutionContext = {

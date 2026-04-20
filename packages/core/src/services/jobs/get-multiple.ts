@@ -1,7 +1,7 @@
 import formatter, { jobsFormatter } from "../../libs/formatters/index.js";
 import { QueueJobsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/jobs.js";
-import type { JobResponse } from "../../types/response.js";
+import type { Job } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -11,7 +11,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: JobResponse[];
+		data: Job[];
 		count: number;
 	}
 > = async (context, data) => {

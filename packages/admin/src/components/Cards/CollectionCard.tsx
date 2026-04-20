@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import type { CollectionResponse } from "@types";
+import type { Collection } from "@types";
 import { FaSolidBox, FaSolidBoxesStacked } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import helpers from "@/utils/helpers";
@@ -17,7 +17,7 @@ export const CollectionCardLoading: Component = () => {
 };
 
 const CollectionCard: Component<{
-	collection: CollectionResponse;
+	collection: Collection;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos

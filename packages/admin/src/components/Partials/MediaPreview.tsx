@@ -1,4 +1,4 @@
-import type { MediaResponse } from "@types";
+import type { Media } from "@types";
 import {
 	FaSolidFile,
 	FaSolidFileAudio,
@@ -11,7 +11,7 @@ import Image from "@/components/Partials/Image";
 
 interface MediaPreviewProps {
 	media: {
-		type: MediaResponse["type"];
+		type: Media["type"];
 		url: string;
 	};
 	richPreview?: boolean;

@@ -1,4 +1,4 @@
-import type { RoleResponse } from "@types";
+import type { Role } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
@@ -10,7 +10,7 @@ import type { TableRowProps } from "@/types/components";
 import DateCol from "../Columns/DateCol";
 
 interface RoleRowProps extends TableRowProps {
-	role: RoleResponse;
+	role: Role;
 	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"update" | "delete">>;
 }

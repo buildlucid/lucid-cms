@@ -1,4 +1,4 @@
-import type { LocalesResponse } from "../../../types/response.js";
+import type { Locale } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -7,7 +7,7 @@ import getAll from "./get-all.js";
 
 export type ToolkitLocales = {
 	/** Returns all enabled locales. */
-	getAll: () => ServiceResponse<LocalesResponse[]>;
+	getAll: () => ServiceResponse<Locale[]>;
 };
 
 /** Creates locale helpers for a toolkit instance. */

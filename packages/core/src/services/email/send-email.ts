@@ -4,7 +4,7 @@ import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
-import type { EmailResponse } from "../../types/response.js";
+import type { Email } from "../../types/response.js";
 import { getEmailFrom } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -27,7 +27,7 @@ const sendEmail: ServiceFn<
 	],
 	{
 		jobId: string;
-		email: EmailResponse;
+		email: Email;
 	}
 > = async (context, data) => {
 	const Emails = new EmailsRepository(context.db.client, context.config.db);

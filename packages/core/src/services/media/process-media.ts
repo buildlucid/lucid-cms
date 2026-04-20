@@ -3,7 +3,7 @@ import {
 	ProcessedImagesRepository,
 } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
-import type { MediaUrlResponse } from "../../types/response.js";
+import type { MediaUrl } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import { createMediaUrl, generateProcessKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -16,7 +16,7 @@ const processMedia: ServiceFn<
 			body: ImageProcessorOptions;
 		},
 	],
-	MediaUrlResponse
+	MediaUrl
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db.client, context.config.db);
 	const ProcessedImage = new ProcessedImagesRepository(

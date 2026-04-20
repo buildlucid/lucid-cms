@@ -1,8 +1,8 @@
 import type {
 	CFConfig,
-	CollectionResponse,
-	DocumentResponse,
+	Collection,
 	FieldTypes,
+	InternalCollectionDocument,
 	UserRef,
 } from "@types";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
@@ -20,8 +20,8 @@ import brickHelpers from "@/utils/brick-helpers";
 import PillCol from "../Columns/PillCol";
 
 interface DocumentRowProps extends TableRowProps {
-	document: DocumentResponse;
-	collection: CollectionResponse;
+	document: InternalCollectionDocument;
+	collection: Collection;
 	fieldInclude: CFConfig<FieldTypes>[];
 	include: boolean[];
 	actions?: ActionDropdownProps["actions"];
@@ -89,7 +89,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 
 const DocumentDynamicColumns: Component<{
 	field: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
-	document: DocumentResponse;
+	document: InternalCollectionDocument;
 	include: boolean[];
 	index: number;
 	collectionTranslations: boolean;

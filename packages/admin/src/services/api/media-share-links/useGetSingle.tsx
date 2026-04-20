@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { MediaShareLinkResponse, ResponseBody } from "@types";
+import type { MediaShareLink, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -22,7 +22,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["mediaShareLinks.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<MediaShareLinkResponse>>({
+			request<ResponseBody<MediaShareLink>>({
 				url: `/lucid/api/v1/media/${queryParams().location?.mediaId}/share-links/${queryParams().location?.id}`,
 				config: {
 					method: "GET",

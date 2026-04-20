@@ -1,4 +1,4 @@
-import type { UserPermissionsResponse } from "../../types/response.js";
+import type { UserPermission } from "../../types/response.js";
 import type { Permission } from "../../types.js";
 
 interface UserPermissionRolesPropsT {
@@ -12,7 +12,7 @@ interface UserPermissionRolesPropsT {
 
 const formatMultiple = (props: {
 	roles: UserPermissionRolesPropsT[];
-}): UserPermissionsResponse => {
+}): UserPermission => {
 	if (!props.roles) {
 		return {
 			roles: [],

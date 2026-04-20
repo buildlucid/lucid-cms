@@ -1,4 +1,4 @@
-import type { EmailDeliveryStatus, EmailResponse } from "@lucidcms/core/types";
+import type { Email, EmailDeliveryStatus } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
@@ -9,7 +9,7 @@ import type { TableRowProps } from "@/types/components";
 import DateCol from "../Columns/DateCol";
 
 interface EmailTransactionRowProps extends TableRowProps {
-	transaction: EmailResponse["transactions"][number];
+	transaction: Email["transactions"][number];
 	include: boolean[];
 	theme?: TableTheme;
 }

@@ -1,14 +1,14 @@
 import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type {
-	BrickAltResponse,
-	BrickResponse,
-	ClientDocumentResponse,
+	CollectionDocument,
 	Config,
-	DocumentResponse,
+	DocumentBrick,
+	FieldRef,
 	FieldRefParams,
-	FieldRefs,
-	FieldResponse,
 	FieldTypes,
+	InternalCollectionDocument,
+	InternalDocumentBrick,
+	InternalDocumentField,
 	LucidBrickTableName,
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
@@ -33,8 +33,8 @@ const formatMultiple = (props: {
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 }) => {
 	return props.documents.map((d) => {
-		let fields: FieldResponse[] | null = null;
-		let bricks: BrickResponse[] | null = null;
+		let fields: InternalDocumentField[] | null = null;
+		let bricks: InternalDocumentBrick[] | null = null;
 		if (props.hasFields) {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
@@ -78,11 +78,11 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
-	bricks?: BrickResponse[];
-	fields?: FieldResponse[] | null;
-	refs?: DocumentResponse["refs"];
+	bricks?: InternalDocumentBrick[];
+	fields?: InternalDocumentField[] | null;
+	refs?: InternalCollectionDocument["refs"];
 	config: Config;
-}): DocumentResponse => {
+}): InternalCollectionDocument => {
 	return {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
@@ -116,14 +116,14 @@ const formatSingle = (props: {
 			: null,
 		createdAt: formatter.formatDate(props.document.created_at),
 		updatedAt: formatter.formatDate(props.document.updated_at),
-	} satisfies DocumentResponse;
+	} satisfies InternalCollectionDocument;
 };
 
 const formatVersion = (props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
-}): DocumentResponse["version"] => {
-	const versions: DocumentResponse["version"] = {
+}): InternalCollectionDocument["version"] => {
+	const versions: InternalCollectionDocument["version"] = {
 		latest: null,
 	};
 
@@ -157,10 +157,10 @@ const formatClientMultiple = (props: {
 	hasBricks: boolean;
 	refData?: FieldRefResponse;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-}): ClientDocumentResponse[] => {
+}): CollectionDocument[] => {
 	return props.documents.map((d) => {
-		let fields: FieldResponse[] | null = null;
-		let bricks: BrickResponse[] | null = null;
+		let fields: InternalDocumentField[] | null = null;
+		let bricks: InternalDocumentBrick[] | null = null;
 		if (props.hasFields) {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
@@ -204,11 +204,11 @@ const formatClientMultiple = (props: {
 const formatClientSingle = (props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
-	bricks?: BrickResponse[];
-	fields?: FieldResponse[] | null;
-	refs?: DocumentResponse["refs"];
+	bricks?: InternalDocumentBrick[];
+	fields?: InternalDocumentField[] | null;
+	refs?: InternalCollectionDocument["refs"];
 	config: Config;
-}): ClientDocumentResponse => {
+}): CollectionDocument => {
 	const res = formatSingle({
 		document: props.document,
 		collection: props.collection,
@@ -225,14 +225,14 @@ const formatClientSingle = (props: {
 					return {
 						...b,
 						fields: documentFieldsFormatter.objectifyFields(b.fields),
-					} satisfies BrickAltResponse;
+					} satisfies DocumentBrick;
 				})
 			: null,
 		fields: res.fields
 			? documentFieldsFormatter.objectifyFields(res.fields)
 			: null,
 		refs: res.refs ?? null,
-	} satisfies ClientDocumentResponse;
+	} satisfies CollectionDocument;
 };
 
 const formatRefs = (props: {
@@ -241,8 +241,8 @@ const formatRefs = (props: {
 	config: Config;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-}): Partial<Record<FieldTypes, FieldRefs[]>> | null => {
-	const refs: Partial<Record<FieldTypes, FieldRefs[]>> = {};
+}): Partial<Record<FieldTypes, FieldRef[]>> | null => {
+	const refs: Partial<Record<FieldTypes, FieldRef[]>> = {};
 	if (!props.data) return null;
 
 	const localization = {
@@ -255,7 +255,7 @@ const formatRefs = (props: {
 		const refData = props.data.data[key];
 		if (!formatRef || !refData || !Array.isArray(refData)) continue;
 
-		const formattedRefs: FieldRefs[] = [];
+		const formattedRefs: FieldRef[] = [];
 		for (const item of refData) {
 			if (item === null || item === undefined) continue;
 

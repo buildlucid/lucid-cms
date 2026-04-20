@@ -1,4 +1,4 @@
-import type { JobResponse } from "../../types/response.js";
+import type { Job } from "../../types/response.js";
 import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
 import formatter from "./index.js";
 
@@ -31,7 +31,7 @@ const formatMultiple = (props: { jobs: JobPropT[] }) => {
 	);
 };
 
-const formatSingle = (props: { job: JobPropT }): JobResponse => {
+const formatSingle = (props: { job: JobPropT }): Job => {
 	return {
 		id: props.job.id,
 		jobId: props.job.job_id,

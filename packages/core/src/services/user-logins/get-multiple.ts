@@ -1,7 +1,7 @@
 import formatter, { userLoginsFormatter } from "../../libs/formatters/index.js";
 import { UserLoginsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/user-logins.js";
-import type { UserLoginResponse } from "../../types/response.js";
+import type { UserLogin } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -12,7 +12,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: UserLoginResponse[];
+		data: UserLogin[];
 		count: number;
 	}
 > = async (context, data) => {

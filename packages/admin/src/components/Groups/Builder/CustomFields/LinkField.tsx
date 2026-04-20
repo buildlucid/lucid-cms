@@ -1,4 +1,9 @@
-import type { CFConfig, FieldError, FieldResponse, LinkResValue } from "@types";
+import type {
+	CFConfig,
+	FieldError,
+	InternalDocumentField,
+	LinkResValue,
+} from "@types";
 import {
 	batch,
 	type Component,
@@ -15,7 +20,7 @@ interface LinkFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"link">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		contentLocale: string;

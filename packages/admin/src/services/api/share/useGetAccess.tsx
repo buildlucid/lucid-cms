@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody, ShareLinkAccessResponse } from "@types";
+import type { ResponseBody, ShareLinkAccess } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,7 +19,7 @@ const useGetAccess = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["share.getAccess", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<ShareLinkAccessResponse>>({
+			request<ResponseBody<ShareLinkAccess>>({
 				url: `/lucid/api/v1/share/${queryParams().location?.token}`,
 				config: {
 					method: "GET",

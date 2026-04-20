@@ -1,4 +1,4 @@
-import type { JobResponse } from "@types";
+import type { Job } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import DateCol from "@/components/Tables/Columns/DateCol";
@@ -11,7 +11,7 @@ import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
 
 interface JobRowProps extends TableRowProps {
-	job: JobResponse;
+	job: Job;
 	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"preview">>;
 }

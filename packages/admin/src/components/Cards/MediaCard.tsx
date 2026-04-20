@@ -1,5 +1,5 @@
 import { createDraggable } from "@thisbeyond/solid-dnd";
-import type { MediaResponse } from "@types";
+import type { Media } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
@@ -15,7 +15,7 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 interface MediaCardProps {
-	media: MediaResponse;
+	media: Media;
 	rowTarget: ReturnType<
 		typeof useRowTarget<
 			| "clear"

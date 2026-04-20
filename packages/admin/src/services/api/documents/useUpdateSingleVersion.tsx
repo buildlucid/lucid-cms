@@ -1,4 +1,8 @@
-import type { ErrorResponse, FieldResponse, ResponseBody } from "@types";
+import type {
+	ErrorResponse,
+	InternalDocumentField,
+	ResponseBody,
+} from "@types";
 import type { BrickData } from "@/store/brickStore";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -9,7 +13,7 @@ export interface Params {
 	versionId: number;
 	body: {
 		bricks?: Array<BrickData>;
-		fields?: Array<FieldResponse>;
+		fields?: Array<InternalDocumentField>;
 	};
 }
 

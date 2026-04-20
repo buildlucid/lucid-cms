@@ -1,4 +1,4 @@
-import type { UserResponse } from "@types";
+import type { User } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
 import { Tr } from "@/components/Groups/Table";
 import TextCol from "@/components/Tables/Columns/TextCol";
@@ -11,7 +11,7 @@ import DateCol from "../Columns/DateCol";
 import PillCol from "../Columns/PillCol";
 
 interface UserRowProps extends TableRowProps {
-	user: UserResponse;
+	user: User;
 	include: boolean[];
 	rowTarget: ReturnType<
 		typeof useRowTarget<

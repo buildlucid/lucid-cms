@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import type { DocumentResponse, DocumentVersionResponse } from "@types";
+import type { DocumentVersion, InternalCollectionDocument } from "@types";
 import { createEffect, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -61,7 +61,7 @@ export function useHistoryState() {
 	);
 
 	const [accumulatedRevisions, setAccumulatedRevisions] = createSignal<
-		DocumentVersionResponse[]
+		DocumentVersion[]
 	>([]);
 	const [revisionName, setRevisionName] = createSignal("");
 	const [selectedItem, setSelectedItem] = createSignal<TimelineItem | null>(
@@ -166,7 +166,7 @@ export function useHistoryState() {
 	);
 	const groupedRevisions = createMemo(() => {
 		const revisions = accumulatedRevisions();
-		const groups: Map<string, DocumentVersionResponse[]> = new Map();
+		const groups: Map<string, DocumentVersion[]> = new Map();
 
 		for (const revision of revisions) {
 			const dateKey = getDateGroupKey(revision.createdAt);
@@ -189,8 +189,8 @@ export function useHistoryState() {
 
 		const isInSyncWithPromotedFrom = (
 			item:
-				| DocumentVersionResponse
-				| NonNullable<DocumentResponse["version"]["latest"]>,
+				| DocumentVersion
+				| NonNullable<InternalCollectionDocument["version"]["latest"]>,
 		): boolean => {
 			const promotedFromItem = allItems.find((i) => i.id === item.promotedFrom);
 			if (!promotedFromItem) return false;
@@ -462,7 +462,7 @@ export type TimelineItem = {
 	isReleased: boolean;
 	inSyncWithPromotedFrom: boolean;
 	promotedFromLatest: boolean;
-	bricks?: DocumentVersionResponse["bricks"];
+	bricks?: DocumentVersion["bricks"];
 	environmentVersions?: TimelineItem[];
 };
 

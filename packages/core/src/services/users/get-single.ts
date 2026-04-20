@@ -3,7 +3,7 @@ import type { QueryBuilderWhere } from "../../libs/query-builder/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type { UserResponse } from "../../types/response.js";
+import type { User } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -15,7 +15,7 @@ const getSingle: ServiceFn<
 			authUser: LucidAuth;
 		},
 	],
-	UserResponse
+	User
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
 

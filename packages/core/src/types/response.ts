@@ -6,9 +6,9 @@ import type {
 } from "../libs/collection/builders/collection-builder/types.js";
 import type {
 	CFConfig,
-	FieldRefs,
-	FieldResponseValue,
+	FieldRef,
 	FieldTypes,
+	FieldValue,
 } from "../libs/collection/custom-fields/types.js";
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type { DocumentVersionType } from "../libs/db-adapter/types.js";
@@ -23,7 +23,7 @@ import type { AuthProvider, EmailDeliveryStatus, EmailType } from "../types.js";
 import type { ErrorResult } from "./errors.js";
 import type { LocaleValue } from "./shared.js";
 
-export type UserPermissionsResponse = {
+export type UserPermission = {
 	roles: Array<{
 		id: number;
 		name: string;
@@ -31,7 +31,7 @@ export type UserPermissionsResponse = {
 	permissions: Permission[];
 };
 
-export type UserResponse = {
+export type User = {
 	id: number;
 	username: string;
 	firstName: string | null;
@@ -45,8 +45,8 @@ export type UserResponse = {
 	superAdmin?: boolean;
 	triggerPasswordReset?: boolean | null;
 	invitationAccepted?: boolean;
-	roles?: UserPermissionsResponse["roles"];
-	permissions?: UserPermissionsResponse["permissions"];
+	roles?: UserPermission["roles"];
+	permissions?: UserPermission["permissions"];
 	hasPassword?: boolean;
 	authProviders?: Array<{
 		id: number;
@@ -56,17 +56,17 @@ export type UserResponse = {
 	}>;
 };
 
-export type AuthProvidersResponse = {
+export type AuthProviders = {
 	disablePassword: boolean;
 	providers: Array<Omit<AuthProvider, "config" | "enabled">>;
 };
-export type InitiateAuthResponse = {
+export type InitiateAuth = {
 	redirectUrl: string;
 };
 
 export type SettingsInclude = "email" | "media" | "license" | "system";
 
-export interface SettingsResponse {
+export interface Settings {
 	email?: {
 		simulated: boolean;
 		templates: string[];
@@ -102,7 +102,7 @@ export interface SettingsResponse {
 	};
 }
 
-export interface RoleResponse {
+export interface Role {
 	id: number;
 	name: string;
 	description: string | null;
@@ -116,14 +116,14 @@ export interface RoleResponse {
 	updatedAt: string | null;
 }
 
-export interface OptionsResponse {
+export interface Option {
 	name: OptionsName;
 	valueText: string | null;
 	valueInt: number | null;
 	valueBool: boolean | null;
 }
 
-export interface LicenseResponse {
+export interface License {
 	key: string | null;
 	valid: boolean;
 	lastChecked: number | null;
@@ -138,7 +138,7 @@ export type MediaType =
 	| "archive"
 	| "unknown";
 
-export interface MediaResponse {
+export interface Media {
 	id: number;
 	key: string;
 	url: string;
@@ -171,11 +171,11 @@ export interface MediaResponse {
 	updatedAt: string | null;
 }
 
-export interface MediaUrlResponse {
+export interface MediaUrl {
 	url: string;
 }
 
-export interface MediaShareLinkResponse {
+export interface MediaShareLink {
 	id: number;
 	token: string;
 	url: string;
@@ -190,7 +190,7 @@ export interface MediaShareLinkResponse {
 	hasPassword: boolean;
 }
 
-export interface ShareLinkAccessGrantedResponse {
+export interface ShareLinkAccessGranted {
 	token: string;
 	name: string | null;
 	description: string | null;
@@ -210,16 +210,14 @@ export interface ShareLinkAccessGrantedResponse {
 	};
 }
 
-export interface ShareLinkAccessProtectedResponse {
+export interface ShareLinkAccessProtected {
 	token: string;
 	passwordRequired: true;
 }
 
-export type ShareLinkAccessResponse =
-	| ShareLinkAccessGrantedResponse
-	| ShareLinkAccessProtectedResponse;
+export type ShareLinkAccess = ShareLinkAccessGranted | ShareLinkAccessProtected;
 
-export interface MediaFolderResponse {
+export interface MediaFolder {
 	id: number;
 	title: string;
 	parentFolderId: number | null;
@@ -235,17 +233,17 @@ export interface MediaFolderResponse {
 	createdAt: string | null;
 	updatedAt: string | null;
 }
-export interface MediaFolderBreadcrumbResponse {
+export interface MediaFolderBreadcrumb {
 	id: number;
 	title: string;
 	parentFolderId: number | null;
 }
-export interface MultipleMediaFolderResponse {
-	folders: MediaFolderResponse[];
-	breadcrumbs: MediaFolderBreadcrumbResponse[];
+export interface MultipleMediaFolder {
+	folders: MediaFolder[];
+	breadcrumbs: MediaFolderBreadcrumb[];
 }
 
-export interface LocalesResponse {
+export interface Locale {
 	code: string;
 	name: string | null;
 	isDefault: boolean;
@@ -253,7 +251,7 @@ export interface LocalesResponse {
 	updatedAt: string | null;
 }
 
-export interface EmailResponse {
+export interface Email {
 	id: number;
 	mailDetails: {
 		from: {
@@ -286,7 +284,7 @@ export interface EmailResponse {
 	updatedAt?: string | null;
 }
 
-export interface JobResponse {
+export interface Job {
 	id: number;
 	jobId: string;
 	eventType: QueueEvent;
@@ -307,7 +305,7 @@ export interface JobResponse {
 	updatedAt: string | null;
 }
 
-export interface CollectionResponse {
+export interface Collection {
 	key: string;
 	documentId?: number | null;
 	mode: CollectionConfigSchemaType["mode"];
@@ -333,55 +331,55 @@ export interface CollectionResponse {
 	fields: CFConfig<FieldTypes>[];
 }
 
-export interface BrickResponse {
+export interface InternalDocumentBrick {
 	ref: string;
 	key: string;
 	order: number;
 	open: boolean;
 	type: BrickTypes;
-	fields: Array<FieldResponse>;
+	fields: Array<InternalDocumentField>;
 	id: number;
 }
-export interface BrickAltResponse {
+export interface DocumentBrick {
 	ref: string;
 	key: string;
 	order: number;
 	open: boolean;
 	type: BrickTypes;
-	fields: Record<string, FieldAltResponse>;
+	fields: Record<string, DocumentField>;
 	id: number;
 }
 
-export interface FieldResponse {
+export interface InternalDocumentField {
 	key: string;
 	type: FieldTypes;
 	groupRef?: string;
-	translations?: Record<string, FieldResponseValue>;
-	value?: FieldResponseValue;
-	groups?: Array<FieldGroupResponse>;
+	translations?: Record<string, FieldValue>;
+	value?: FieldValue;
+	groups?: Array<InternalDocumentFieldGroup>;
 }
-export interface FieldAltResponse {
+export interface DocumentField {
 	key: string;
 	type: FieldTypes;
 	groupRef?: string;
-	translations?: Record<string, FieldResponseValue>;
-	value?: FieldResponseValue;
-	groups?: Array<FieldGroupAltResponse>;
+	translations?: Record<string, FieldValue>;
+	value?: FieldValue;
+	groups?: Array<DocumentFieldGroup>;
 }
-export interface FieldGroupResponse {
+export interface InternalDocumentFieldGroup {
 	ref: string;
 	order: number;
 	open: boolean;
-	fields: Array<FieldResponse>;
+	fields: Array<InternalDocumentField>;
 }
-export interface FieldGroupAltResponse {
+export interface DocumentFieldGroup {
 	ref: string;
 	order: number;
 	open: boolean;
-	fields: Record<string, FieldAltResponse>;
+	fields: Record<string, DocumentField>;
 }
 
-export interface DocumentVersionResponse {
+export interface DocumentVersion {
 	id: number;
 	versionType: DocumentVersionType;
 	promotedFrom: number | null;
@@ -404,7 +402,7 @@ export interface DocumentVersionResponse {
 	>;
 }
 
-export interface DocumentResponse {
+export interface InternalCollectionDocument {
 	id: number;
 	collectionKey: string;
 	status: DocumentVersionType | null;
@@ -437,11 +435,12 @@ export interface DocumentResponse {
 		username: string | null;
 	} | null;
 
-	bricks?: Array<BrickResponse> | null;
-	fields?: Array<FieldResponse> | null;
-	refs?: Partial<Record<FieldTypes, FieldRefs[]>> | null;
+	bricks?: Array<InternalDocumentBrick> | null;
+	fields?: Array<InternalDocumentField> | null;
+	refs?: Partial<Record<FieldTypes, FieldRef[]>> | null;
 }
-export interface ClientDocumentResponse {
+
+export interface CollectionDocument {
 	id: number;
 	collectionKey: string | null;
 	status: DocumentVersionType | null;
@@ -471,11 +470,36 @@ export interface ClientDocumentResponse {
 		lastName: string | null;
 		username: string | null;
 	} | null;
-
-	bricks?: Array<BrickAltResponse> | null;
-	fields?: Record<string, FieldAltResponse> | null;
-	refs?: Partial<Record<FieldTypes, FieldRefs[]>> | null;
+	bricks?: Array<DocumentBrick> | null;
+	fields?: Record<string, DocumentField> | null;
+	refs?: Partial<Record<FieldTypes, FieldRef[]>> | null;
 }
+
+export type ClientIntegration = z.infer<typeof clientIntegrationResponseSchema>;
+
+export interface UserLogin {
+	id: number;
+	userId: number | null;
+	tokenId: number | null;
+	authMethod: string;
+	ipAddress: string | null;
+	userAgent: string | null;
+	createdAt: string | null;
+}
+
+export interface ValidateInvitation {
+	valid: boolean;
+	user?: {
+		id: User["id"];
+		email: User["email"];
+		username: User["username"];
+		firstName: User["firstName"];
+		lastName: User["lastName"];
+	};
+}
+
+// ----------------
+// Response Types
 
 export interface ResponseBody<D = unknown> {
 	data: D;
@@ -507,29 +531,4 @@ export interface ErrorResponse {
 	name: string;
 	message: string;
 	errors?: ErrorResult;
-}
-
-export type ClientIntegrationResponse = z.infer<
-	typeof clientIntegrationResponseSchema
->;
-
-export interface UserLoginResponse {
-	id: number;
-	userId: number | null;
-	tokenId: number | null;
-	authMethod: string;
-	ipAddress: string | null;
-	userAgent: string | null;
-	createdAt: string | null;
-}
-
-export interface ValidateInvitationResponse {
-	valid: boolean;
-	user?: {
-		id: UserResponse["id"];
-		email: UserResponse["email"];
-		username: UserResponse["username"];
-		firstName: UserResponse["firstName"];
-		lastName: UserResponse["lastName"];
-	};
 }

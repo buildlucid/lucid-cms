@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
-import type { MediaFolderResponse } from "@types";
+import type { MediaFolder } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
@@ -25,7 +25,7 @@ export const MediaFolderCardLoading: Component = () => {
 };
 
 export const MediaFolderCard: Component<{
-	folder: MediaFolderResponse;
+	folder: MediaFolder;
 	isDragging: Accessor<boolean>;
 	rowTarget: ReturnType<typeof useRowTarget<"updateFolder">>;
 }> = (props) => {

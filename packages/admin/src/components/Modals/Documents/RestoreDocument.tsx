@@ -1,4 +1,4 @@
-import type { CollectionResponse } from "@types";
+import type { Collection } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
@@ -6,7 +6,7 @@ import T from "@/translations";
 
 interface RestoreDocumentProps {
 	id: Accessor<number | undefined>;
-	collection: CollectionResponse | undefined;
+	collection: Collection | undefined;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;

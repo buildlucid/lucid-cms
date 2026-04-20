@@ -1,6 +1,6 @@
 import { mediaServices } from "../../../services/index.js";
 import type { ImageProcessorOptions } from "../../../types/config.js";
-import type { MediaUrlResponse } from "../../../types/response.js";
+import type { MediaUrl } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -15,7 +15,7 @@ export type ToolkitMediaProcessInput = {
 const processMedia = async (
 	context: ServiceContext,
 	input: ToolkitMediaProcessInput,
-): ServiceResponse<MediaUrlResponse> =>
+): ServiceResponse<MediaUrl> =>
 	runToolkitService(
 		() =>
 			mediaServices.client.processMedia(context, {

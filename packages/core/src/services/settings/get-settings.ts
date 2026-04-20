@@ -5,10 +5,7 @@ import getImageProcessor from "../../libs/image-processor/get-processor.js";
 import passthroughProcessor from "../../libs/image-processor/processors/passthrough.js";
 import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type {
-	SettingsInclude,
-	SettingsResponse,
-} from "../../types/response.js";
+import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { optionServices, processedImageServices } from "../index.js";
 
@@ -20,7 +17,7 @@ const getSettings: ServiceFn<
 			authUser: LucidAuth;
 		},
 	],
-	SettingsResponse
+	Settings
 > = async (context, data) => {
 	const [
 		optionsRes,

@@ -1,8 +1,8 @@
 import type {
 	CFConfig,
-	CollectionResponse,
+	Collection,
+	DocumentField,
 	DocumentRef,
-	FieldAltResponse,
 	FieldTypes,
 } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
@@ -36,7 +36,7 @@ export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
 	});
 };
 
-export const collectionFieldFilters = (collection?: CollectionResponse) => {
+export const collectionFieldFilters = (collection?: Collection) => {
 	return (
 		collection?.fields.filter((f) => {
 			return f.type !== "repeater";
@@ -54,7 +54,7 @@ export const formatFieldFilters = (props: { fieldKey: string }) => {
 	return `_${props.fieldKey}`;
 };
 
-export const collectionFieldIncludes = (collection?: CollectionResponse) => {
+export const collectionFieldIncludes = (collection?: Collection) => {
 	const fieldsRes: CFConfig<FieldTypes>[] = [];
 
 	const fieldRecursive = (fields?: CFConfig<FieldTypes>[]) => {
@@ -96,7 +96,7 @@ export const formatDateTimeListValue = (
 };
 
 export const getDocumentListingPreviewFields = (props: {
-	collection?: CollectionResponse;
+	collection?: Collection;
 	documentRef?: DocumentRef;
 	contentLocale: string;
 }): Array<DocumentListingPreviewField> => {
@@ -134,9 +134,9 @@ export const getDocumentListingPreviewFields = (props: {
 };
 
 const findDocumentField = (props: {
-	fields: Record<string, FieldAltResponse>;
+	fields: Record<string, DocumentField>;
 	fieldKey: string;
-}): FieldAltResponse | undefined => {
+}): DocumentField | undefined => {
 	for (const field of Object.values(props.fields)) {
 		if (field.key === props.fieldKey) return field;
 
@@ -154,7 +154,7 @@ const findDocumentField = (props: {
 
 const getDocumentFieldValue = (props: {
 	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
-	fieldData?: FieldAltResponse;
+	fieldData?: DocumentField;
 	contentLocale: string;
 	collectionTranslations: boolean;
 }) => {
@@ -175,7 +175,7 @@ const getDocumentFieldValue = (props: {
 
 const formatDocumentPreviewValue = (props: {
 	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
-	fieldData?: FieldAltResponse;
+	fieldData?: DocumentField;
 	contentLocale: string;
 	collectionTranslations: boolean;
 }) => {

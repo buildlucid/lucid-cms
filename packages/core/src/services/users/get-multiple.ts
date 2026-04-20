@@ -2,7 +2,7 @@ import formatter, { usersFormatter } from "../../libs/formatters/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type { UserResponse } from "../../types/response.js";
+import type { User } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -13,7 +13,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: UserResponse[];
+		data: User[];
 		count: number;
 	}
 > = async (context, data) => {

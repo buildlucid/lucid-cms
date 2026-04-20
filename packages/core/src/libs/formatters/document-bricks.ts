@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
 import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
-import type { BrickResponse } from "../../types/response.js";
+import type { InternalDocumentBrick } from "../../types/response.js";
 import type {
 	Config,
-	FieldResponse,
+	InternalDocumentField,
 	LucidBricksTable,
 	LucidBrickTableName,
 	Select,
@@ -26,13 +26,13 @@ const formatMultiple = (props: {
 	refData: FieldRefResponse;
 	config: Config;
 	host: string;
-}): BrickResponse[] => {
+}): InternalDocumentBrick[] => {
 	const brickSchemas = props.bricksSchema.filter(
 		(schema) => schema.type === "brick",
 	);
 	if (brickSchemas.length === 0) return [];
 
-	const brickResponses: BrickResponse[] = [];
+	const brickResponses: InternalDocumentBrick[] = [];
 
 	for (const schema of brickSchemas) {
 		const tableData = props.bricksQuery[schema.name];
@@ -100,7 +100,7 @@ const formatDocumentFields = (props: {
 	refData: FieldRefResponse;
 	config: Config;
 	host: string;
-}): FieldResponse[] => {
+}): InternalDocumentField[] => {
 	const documentFieldsSchema = props.bricksSchema.find(
 		(bs) => bs.type === "document-fields",
 	);

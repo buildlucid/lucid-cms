@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { EmailResponse, ResponseBody } from "@types";
+import type { Email, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -21,7 +21,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["email.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<EmailResponse>>({
+			request<ResponseBody<Email>>({
 				url: `/lucid/api/v1/emails/${queryParams().location?.emailId}`,
 				config: {
 					method: "GET",

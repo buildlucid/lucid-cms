@@ -1,7 +1,7 @@
 import { localesFormatter } from "../../libs/formatters/index.js";
 import { LocalesRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { LocalesResponse } from "../../types/response.js";
+import type { Locale } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -10,7 +10,7 @@ const getSingle: ServiceFn<
 			code: string;
 		},
 	],
-	LocalesResponse
+	Locale
 > = async (context, data) => {
 	const Locales = new LocalesRepository(context.db.client, context.config.db);
 

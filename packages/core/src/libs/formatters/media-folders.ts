@@ -1,4 +1,4 @@
-import type { MediaFolderResponse } from "../../types/response.js";
+import type { MediaFolder } from "../../types/response.js";
 import formatter from "./index.js";
 
 export interface MediaFolderPropsT {
@@ -47,8 +47,8 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	folder: MediaFolderPropsT | MediaFolderWithHierarchyPropsT;
-}): MediaFolderResponse => {
-	let meta: MediaFolderResponse["meta"] | undefined;
+}): MediaFolder => {
+	let meta: MediaFolder["meta"] | undefined;
 	if (
 		"level" in props.folder &&
 		"order" in props.folder &&

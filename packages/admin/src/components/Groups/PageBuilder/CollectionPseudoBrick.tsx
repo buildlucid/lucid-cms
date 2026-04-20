@@ -1,11 +1,11 @@
-import type { CFConfig, CollectionResponse, FieldTypes } from "@types";
+import type { CFConfig, Collection, FieldTypes } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
 import { BrickBody } from "@/components/Groups/Builder";
 import brickStore, { type BrickData } from "@/store/brickStore";
 
 interface CollectionPseudoBrickProps {
 	fields: CFConfig<FieldTypes>[];
-	collectionMigrationStatus: CollectionResponse["migrationStatus"];
+	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
 }

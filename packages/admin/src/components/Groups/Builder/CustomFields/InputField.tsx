@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldResponse } from "@types";
+import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Input } from "@/components/Groups/Form";
 import brickStore from "@/store/brickStore";
@@ -10,7 +10,7 @@ interface InputFieldProps {
 	state: {
 		brickIndex: number;
 		fieldConfig: CFConfig<"text" | "number" | "datetime">;
-		fieldData?: FieldResponse;
+		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		focusKey: string;

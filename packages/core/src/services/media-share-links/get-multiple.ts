@@ -3,7 +3,7 @@ import formatter, {
 } from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleShareLinksQueryParams } from "../../schemas/media-share-links.js";
-import type { MediaShareLinkResponse } from "../../types/response.js";
+import type { MediaShareLink } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: MediaShareLinkResponse[];
+		data: MediaShareLink[];
 		count: number;
 	}
 > = async (context, data) => {

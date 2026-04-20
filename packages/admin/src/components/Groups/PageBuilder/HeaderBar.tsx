@@ -1,4 +1,4 @@
-import type { CollectionResponse, DocumentResponse } from "@types";
+import type { Collection, InternalCollectionDocument } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidCalendarPlus,
@@ -30,12 +30,12 @@ export const HeaderBar: Component<{
 	version?: Accessor<"latest" | string>;
 	versionId?: Accessor<number | undefined>;
 	state: {
-		collection: Accessor<CollectionResponse | undefined>;
+		collection: Accessor<Collection | undefined>;
 		collectionKey: Accessor<string>;
 		collectionName: Accessor<string>;
 		collectionSingularName: Accessor<string>;
 		documentID: Accessor<number | undefined>;
-		document: Accessor<DocumentResponse | undefined>;
+		document: Accessor<InternalCollectionDocument | undefined>;
 		ui: UseDocumentUIState;
 		autoSave?: UseDocumentAutoSave;
 		autoSaveUserEnabled?: Accessor<boolean>;
