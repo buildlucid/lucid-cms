@@ -1,3 +1,4 @@
+import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { createFieldRefFetchPlan } from "../../utils/ref-fetch.js";
 import { userFieldConfig } from "./config.js";
 import UserCustomField from "./custom-field.js";
@@ -12,4 +13,5 @@ export default {
 	fetchRefs: fetchUserRefs,
 	validateInput: validateUserInputData,
 	formatRef: formatUserRef,
+	clientTypeGen: createValueFieldTypeGenerator("number[]"),
 };

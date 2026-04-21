@@ -2,6 +2,7 @@ import { CLIENT_BASE_PATH } from "../constants.js";
 import type {
 	FilterObject,
 	FilterValue,
+	QueryFilters,
 	SortValue,
 } from "../types/contracts.js";
 
@@ -36,6 +37,73 @@ const appendFilter = (
 ) => {
 	const suffix = filter.operator ? `:${filter.operator}` : "";
 	params.set(`filter[${key}${suffix}]`, serializeFilterValue(filter.value));
+};
+
+/**
+ * Detects Lucid's filter leaf shape so nested filter objects can be flattened safely.
+ */
+const isFilterObject = (value: unknown): value is FilterObject => {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		return false;
+	}
+
+	const keys = Object.keys(value);
+
+	return (
+		keys.length > 0 &&
+		keys.every((key) => key === "value" || key === "operator") &&
+		"value" in value
+	);
+};
+
+/**
+ * Recursively flattens nested filter objects into Lucid's dotted query param key format.
+ */
+const flattenFilterBranch = (
+	value: Record<string, unknown>,
+	path: string[],
+	flattened: Record<string, FilterObject>,
+) => {
+	for (const [key, branchValue] of Object.entries(value)) {
+		if (branchValue === undefined || branchValue === null) continue;
+
+		if (isFilterObject(branchValue)) {
+			flattened[[...path, key].join(".")] = branchValue;
+			continue;
+		}
+
+		if (typeof branchValue === "object" && !Array.isArray(branchValue)) {
+			flattenFilterBranch(
+				branchValue as Record<string, unknown>,
+				[...path, key],
+				flattened,
+			);
+		}
+	}
+};
+
+/**
+ * Converts DX-friendly nested filter objects into the flat query param keys the API expects.
+ */
+const flattenFilters = (
+	filters: QueryFilters,
+): Record<string, FilterObject> => {
+	const flattened: Record<string, FilterObject> = {};
+
+	for (const [key, value] of Object.entries(filters)) {
+		if (value === undefined || value === null) continue;
+
+		if (isFilterObject(value)) {
+			flattened[key] = value;
+			continue;
+		}
+
+		if (typeof value === "object" && !Array.isArray(value)) {
+			flattenFilterBranch(value as Record<string, unknown>, [key], flattened);
+		}
+	}
+
+	return flattened;
 };
 
 /**
@@ -83,7 +151,7 @@ export const serializeQuery = (query?: Record<string, unknown>): string => {
 
 		if (key === "filter" && value && typeof value === "object") {
 			for (const [filterKey, filterValue] of Object.entries(
-				value as Record<string, FilterObject>,
+				flattenFilters(value as QueryFilters),
 			)) {
 				if (!filterValue) continue;
 				appendFilter(params, filterKey, filterValue);

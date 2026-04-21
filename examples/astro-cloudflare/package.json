@@ -9,6 +9,7 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
+		"typegen": "lucidcms typegen",
 		"wrangler:dev": "npm run build && wrangler dev",
 		"wrangler:deploy": "npm run build && wrangler deploy",
 		"sync": "lucidcms sync",

@@ -1,9 +1,12 @@
-import type { CollectionDocument } from "../../../types/response.js";
+import type {
+	CollectionDocument,
+	CollectionDocumentKey,
+	CollectionDocumentStatus,
+} from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import type { DocumentVersionType } from "../../db-adapter/types.js";
 import type {
 	ToolkitDocumentsGetMultipleInput,
 	ToolkitDocumentsGetMultipleResult,
@@ -12,7 +15,9 @@ import getMultiple from "./get-multiple.js";
 import type { ToolkitDocumentsGetSingleInput } from "./get-single.js";
 import getSingle from "./get-single.js";
 
-export type ToolkitDocumentStatus = Exclude<DocumentVersionType, "revision">;
+export type ToolkitDocumentStatus<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = CollectionDocumentStatus<TCollectionKey>;
 
 /**
  * Document helpers for reading collection content.
@@ -34,9 +39,9 @@ export type ToolkitDocuments = {
 	 * });
 	 * ```
 	 */
-	getMultiple: (
-		input: ToolkitDocumentsGetMultipleInput,
-	) => ServiceResponse<ToolkitDocumentsGetMultipleResult>;
+	getMultiple: <TCollectionKey extends CollectionDocumentKey>(
+		input: ToolkitDocumentsGetMultipleInput<TCollectionKey>,
+	) => ServiceResponse<ToolkitDocumentsGetMultipleResult<TCollectionKey>>;
 	/**
 	 * Returns a single document from a collection.
 	 *
@@ -56,9 +61,9 @@ export type ToolkitDocuments = {
 	 * });
 	 * ```
 	 */
-	getSingle: (
-		input: ToolkitDocumentsGetSingleInput,
-	) => ServiceResponse<CollectionDocument>;
+	getSingle: <TCollectionKey extends CollectionDocumentKey>(
+		input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
+	) => ServiceResponse<CollectionDocument<TCollectionKey>>;
 };
 
 /** Creates document helpers for a toolkit instance. */

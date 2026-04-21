@@ -148,7 +148,11 @@ const formatVersion = (props: {
 	return versions;
 };
 
-const formatClientMultiple = (props: {
+/**
+ * Formats multiple documents into the client-facing document shape while
+ * preserving the caller's collection-key generic at the formatter boundary.
+ */
+const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
 	config: Config;
@@ -157,7 +161,7 @@ const formatClientMultiple = (props: {
 	hasBricks: boolean;
 	refData?: FieldRefResponse;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-}): CollectionDocument[] => {
+}): CollectionDocument<TCollectionKey>[] => {
 	return props.documents.map((d) => {
 		let fields: InternalDocumentField[] | null = null;
 		let bricks: InternalDocumentBrick[] | null = null;
@@ -190,7 +194,7 @@ const formatClientMultiple = (props: {
 			bricksTableSchema: props.bricksTableSchema,
 		});
 
-		return formatClientSingle({
+		return formatClientSingle<TCollectionKey>({
 			document: d,
 			collection: props.collection,
 			config: props.config,
@@ -201,14 +205,18 @@ const formatClientMultiple = (props: {
 	});
 };
 
-const formatClientSingle = (props: {
+/**
+ * Formats one document into the client response shape used by the public
+ * client and toolkit helpers.
+ */
+const formatClientSingle = <TCollectionKey extends string = string>(props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
 	bricks?: InternalDocumentBrick[];
 	fields?: InternalDocumentField[] | null;
 	refs?: InternalCollectionDocument["refs"];
 	config: Config;
-}): CollectionDocument => {
+}): CollectionDocument<TCollectionKey> => {
 	const res = formatSingle({
 		document: props.document,
 		collection: props.collection,
@@ -228,11 +236,9 @@ const formatClientSingle = (props: {
 					} satisfies DocumentBrick;
 				})
 			: null,
-		fields: res.fields
-			? documentFieldsFormatter.objectifyFields(res.fields)
-			: null,
+		fields: documentFieldsFormatter.objectifyFields(res.fields ?? []),
 		refs: res.refs ?? null,
-	} satisfies CollectionDocument;
+	} as unknown as CollectionDocument<TCollectionKey>;
 };
 
 const formatRefs = (props: {

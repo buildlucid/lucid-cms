@@ -1,6 +1,6 @@
 import type z from "zod";
 import constants from "../../constants/constants.js";
-import type { GenerateTypesResult } from "./types.js";
+import type { TypeGenerationContribution } from "./types.js";
 
 /**
  * Generates the EnvironmentVariables interface based on the provided schema
@@ -8,16 +8,24 @@ import type { GenerateTypesResult } from "./types.js";
 const generateEnvTypes = async (props: {
 	schema: z.ZodType | undefined;
 	configRelativePath: string;
-}): Promise<GenerateTypesResult> => {
+}): Promise<TypeGenerationContribution> => {
 	return {
-		module: constants.typeGeneration.modules.coreTypes,
-		types: props.schema
-			? "interface EnvironmentVariables extends z.infer<typeof env> {}"
-			: "interface EnvironmentVariables extends Record<string, unknown> {}",
 		imports: props.schema
-			? `import type { env } from "${props.configRelativePath}";
-import type { z } from "@lucidcms/core";`
+			? [
+					`import type { env } from "${props.configRelativePath}";`,
+					'import type { z } from "@lucidcms/core";',
+				]
 			: undefined,
+		moduleAugmentations: [
+			{
+				module: constants.typeGeneration.modules.coreTypes,
+				declarations: [
+					props.schema
+						? "interface EnvironmentVariables extends z.infer<typeof env> {}"
+						: "interface EnvironmentVariables extends Record<string, unknown> {}",
+				],
+			},
+		],
 	};
 };
 

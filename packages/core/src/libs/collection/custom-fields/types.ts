@@ -168,6 +168,33 @@ export type FieldRef =
 	| CustomFieldMap[FieldTypes]["response"]["ref"]
 	| undefined;
 
+export type ClientFieldTypeGenerationContext<
+	T extends FieldTypes = FieldTypes,
+> = {
+	field: CFConfig<T>;
+};
+
+export type ClientFieldTypeGenerationResult = {
+	valueType: string;
+	fieldType?: string;
+	declarations?: string[];
+};
+
+export type ClientFieldTypeGenerator<T extends FieldTypes = FieldTypes> = (
+	context: ClientFieldTypeGenerationContext<T>,
+) => ClientFieldTypeGenerationResult;
+
+export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
+	config: FieldStaticConfig<T>;
+	class: abstract new (...args: never[]) => unknown;
+	planFetchRefs?: unknown;
+	fetchRefs?: unknown;
+	validateInput?: unknown;
+	formatRef?: unknown;
+	nullifyReferences?: unknown;
+	clientTypeGen?: ClientFieldTypeGenerator<T> | null;
+};
+
 export type FieldRelationValidationInput = Record<string, number[]>;
 
 export type FieldRelationRefTarget = {

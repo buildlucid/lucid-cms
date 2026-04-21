@@ -100,10 +100,7 @@ const documentResponseSchema = documentResponseBaseSchema.extend({
 });
 const documentClientResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickClientResponseSchema).nullable().optional(),
-	fields: z
-		.record(z.string(), z.array(fieldClientResponseSchema))
-		.nullable()
-		.optional(),
+	fields: z.record(z.string(), z.array(fieldClientResponseSchema)),
 	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
 });
 

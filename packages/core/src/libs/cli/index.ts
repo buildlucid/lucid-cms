@@ -10,6 +10,7 @@ import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateRollbackCommand from "./commands/migrate-rollback.js";
 import serveCommand from "./commands/serve.js";
 import syncCommand from "./commands/sync.js";
+import typegenCommand from "./commands/typegen.js";
 
 // TODO: split this into 3 seperate exports and scripts, one for node, one for bun, one for deno. lucidcms:node, lucidcms:bun, lucidcms:deno
 const program = new Command();
@@ -42,6 +43,11 @@ program
 	)
 	.option("--silent", "Suppress all logging output")
 	.action(buildCommand);
+
+program
+	.command("typegen")
+	.description("Generate Lucid type files")
+	.action(typegenCommand);
 
 program
 	.command("migrate")

@@ -58,6 +58,8 @@ const serveCommand = async () => {
 			configPath: configPath,
 			adapterModule: configRes.definition.adapter.module,
 			databaseModule: configRes.definition.database.module,
+			collections: configRes.config.collections,
+			localization: configRes.config.localization,
 		});
 
 		if (!envValid) {

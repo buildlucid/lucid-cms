@@ -1,3 +1,4 @@
+export { default as flattenDocumentFilters } from "./flatten-document-filters.js";
 export { default as formatBytes } from "./format-bytes.js";
 export { default as formatEmailSubject } from "./format-email-subject.js";
 export { default as generateSecret } from "./generate-secret.js";

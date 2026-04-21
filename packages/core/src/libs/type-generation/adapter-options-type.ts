@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import type { GenerateTypesResult } from "./types.js";
+import type { TypeGenerationContribution } from "./types.js";
 
 const generatedAdapterOptionsImport = "LucidAdapterOptions";
 
@@ -8,15 +8,23 @@ const generatedAdapterOptionsImport = "LucidAdapterOptions";
  */
 const generateAdapterOptionsTypes = async (props: {
 	adapterModule?: string;
-}): Promise<GenerateTypesResult | undefined> => {
+}): Promise<TypeGenerationContribution | undefined> => {
 	if (!props.adapterModule) {
 		return undefined;
 	}
 
 	return {
-		module: constants.typeGeneration.modules.coreTypes,
-		types: `interface AdapterOptionsByModule { ${JSON.stringify(props.adapterModule)}: ${generatedAdapterOptionsImport}; }`,
-		imports: `import type { AdapterOptionsType as ${generatedAdapterOptionsImport} } from "${props.adapterModule}/types";`,
+		imports: [
+			`import type { AdapterOptionsType as ${generatedAdapterOptionsImport} } from "${props.adapterModule}/types";`,
+		],
+		moduleAugmentations: [
+			{
+				module: constants.typeGeneration.modules.coreTypes,
+				declarations: [
+					`interface AdapterOptionsByModule { ${JSON.stringify(props.adapterModule)}: ${generatedAdapterOptionsImport}; }`,
+				],
+			},
+		],
 	};
 };
 

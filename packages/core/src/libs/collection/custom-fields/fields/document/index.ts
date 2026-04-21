@@ -1,3 +1,4 @@
+import { createDocumentValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { createFieldRefFetchPlan } from "../../utils/ref-fetch.js";
 import { documentFieldConfig } from "./config.js";
 import DocumentCustomField from "./custom-field.js";
@@ -14,4 +15,5 @@ export default {
 	validateInput: validateDocumentInputData,
 	formatRef: formatDocumentRef,
 	nullifyReferences: nullifyDocumentReferences,
+	clientTypeGen: createDocumentValueFieldTypeGenerator(),
 };

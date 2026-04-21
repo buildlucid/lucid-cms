@@ -1,9 +1,6 @@
 import { DEFAULT_DOCUMENT_STATUS } from "../constants.js";
 import type {
-	CollectionDocument,
-	ResponseBody,
-} from "../generated/core-client-types.js";
-import type {
+	CollectionDocumentStatus,
 	DocumentsGetMultipleQuery,
 	DocumentsGetSingleQuery,
 } from "../types/contracts.js";
@@ -12,46 +9,63 @@ import type {
 	LucidRequestOptions,
 	LucidTransport,
 } from "../types/transport.js";
+import type {
+	CollectionDocument,
+	CollectionDocumentKey,
+	ResponseBody,
+} from "../types.js";
 import { encodePathSegment } from "../utils/url.js";
 
-export type DocumentsGetSingleInput = {
-	collectionKey: string;
-	status?: string;
-	query?: DocumentsGetSingleQuery;
+/** Input for fetching one document from a collection. */
+export type DocumentsGetSingleInput<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = {
+	collectionKey: TCollectionKey;
+	status?: CollectionDocumentStatus<TCollectionKey>;
+	query?: DocumentsGetSingleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
 };
 
-export type DocumentsGetMultipleInput = {
-	collectionKey: string;
-	status?: string;
-	query?: DocumentsGetMultipleQuery;
+/** Input for fetching multiple documents from a collection. */
+export type DocumentsGetMultipleInput<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = {
+	collectionKey: TCollectionKey;
+	status?: CollectionDocumentStatus<TCollectionKey>;
+	query?: DocumentsGetMultipleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
 };
 
-export type DocumentsGetSingleResponse = ResponseBody<CollectionDocument>;
+/** The response body returned when requesting one document from a collection. */
+export type DocumentsGetSingleResponse<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = ResponseBody<CollectionDocument<TCollectionKey>>;
 
-export type DocumentsGetMultipleResponse = ResponseBody<CollectionDocument[]>;
+/** The paginated response body returned when requesting multiple documents. */
+export type DocumentsGetMultipleResponse<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = ResponseBody<Array<CollectionDocument<TCollectionKey>>>;
 
 export interface LucidDocumentsClient {
 	/** Returns the Lucid response body for one document in a collection. */
-	getSingle(
-		input: DocumentsGetSingleInput,
-	): Promise<LucidClientResponse<DocumentsGetSingleResponse>>;
+	getSingle<TCollectionKey extends CollectionDocumentKey>(
+		input: DocumentsGetSingleInput<TCollectionKey>,
+	): Promise<LucidClientResponse<DocumentsGetSingleResponse<TCollectionKey>>>;
 
 	/** Returns the Lucid response body for a paginated document list. */
-	getMultiple(
-		input: DocumentsGetMultipleInput,
-	): Promise<LucidClientResponse<DocumentsGetMultipleResponse>>;
+	getMultiple<TCollectionKey extends CollectionDocumentKey>(
+		input: DocumentsGetMultipleInput<TCollectionKey>,
+	): Promise<LucidClientResponse<DocumentsGetMultipleResponse<TCollectionKey>>>;
 }
 
-/**
- * Creates the internal documents resource wrapper so the root client can delegate typed document requests.
- */
+/** Creates the documents resource for the public Lucid client. */
 export const createDocumentsClient = (
 	transport: LucidTransport,
 ): LucidDocumentsClient => ({
-	getSingle: async (input) =>
-		await transport.request<DocumentsGetSingleResponse>({
+	getSingle: async <TCollectionKey extends CollectionDocumentKey>(
+		input: DocumentsGetSingleInput<TCollectionKey>,
+	) =>
+		await transport.request<DocumentsGetSingleResponse<TCollectionKey>>({
 			operation: "documents.getSingle",
 			method: "GET",
 			path: `/document/${encodePathSegment(input.collectionKey)}/${encodePathSegment(
@@ -60,8 +74,10 @@ export const createDocumentsClient = (
 			query: input.query,
 			request: input.request,
 		}),
-	getMultiple: async (input) =>
-		await transport.request<DocumentsGetMultipleResponse>({
+	getMultiple: async <TCollectionKey extends CollectionDocumentKey>(
+		input: DocumentsGetMultipleInput<TCollectionKey>,
+	) =>
+		await transport.request<DocumentsGetMultipleResponse<TCollectionKey>>({
 			operation: "documents.getMultiple",
 			method: "GET",
 			path: `/documents/${encodePathSegment(input.collectionKey)}/${encodePathSegment(

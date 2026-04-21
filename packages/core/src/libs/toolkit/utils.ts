@@ -1,10 +1,19 @@
 import constants from "../../constants/constants.js";
+import type {
+	QueryFilters,
+	QueryParamFilters,
+} from "../../types/query-params.js";
 import decodeError from "../../utils/errors/decode-error.js";
+import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 
 type PaginatedQuery = {
 	page?: number;
 	perPage?: number;
+};
+
+type DocumentQuery = {
+	filter?: QueryFilters;
 };
 
 type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
@@ -17,6 +26,38 @@ export const normalizePaginatedQuery = <T extends PaginatedQuery>(
 
 	return {
 		...normalizedQuery,
+		page: normalizedQuery.page ?? constants.query.page,
+		perPage: normalizedQuery.perPage ?? constants.query.perPage,
+	};
+};
+
+/** Flattens nested document filters so toolkit calls match the internal service query shape. */
+export const normalizeDocumentQuery = <T extends DocumentQuery>(
+	query?: T,
+): Omit<T, "filter"> & { filter?: QueryParamFilters } => {
+	const normalizedQuery = query ?? ({} as T);
+
+	return {
+		...normalizedQuery,
+		filter: flattenDocumentFilters(normalizedQuery.filter),
+	};
+};
+
+/** Applies pagination defaults and flattens nested document filters for toolkit document queries. */
+export const normalizePaginatedDocumentQuery = <
+	T extends PaginatedQuery & DocumentQuery,
+>(
+	query?: T,
+): Omit<T, "filter" | "page" | "perPage"> & {
+	filter?: QueryParamFilters;
+	page: number;
+	perPage: number;
+} => {
+	const normalizedQuery = query ?? ({} as T);
+
+	return {
+		...normalizedQuery,
+		filter: flattenDocumentFilters(normalizedQuery.filter),
 		page: normalizedQuery.page ?? constants.query.page,
 		perPage: normalizedQuery.perPage ?? constants.query.perPage,
 	};

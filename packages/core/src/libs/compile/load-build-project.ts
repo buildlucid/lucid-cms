@@ -47,6 +47,8 @@ const loadBuildProject = async (props?: {
 				configPath,
 				adapterModule: loaded.definition.adapter.module,
 				databaseModule: loaded.definition.database.module,
+				collections: loaded.config.collections,
+				localization: loaded.config.localization,
 			}),
 		props?.renderEmailTemplates
 			? import("../email-adapter/templates/render-mjml-templates.js").then(

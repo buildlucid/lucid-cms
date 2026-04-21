@@ -21,6 +21,10 @@ import type { clientIntegrationResponseSchema } from "../schemas/client-integrat
 import type { OptionsName } from "../schemas/options.js";
 import type { AuthProvider, EmailDeliveryStatus, EmailType } from "../types.js";
 import type { ErrorResult } from "./errors.js";
+import type {
+	CollectionDocumentStatus,
+	CollectionDocumentVersionKey,
+} from "./query-params.js";
 import type { LocaleValue } from "./shared.js";
 
 export type UserPermission = {
@@ -340,13 +344,95 @@ export interface InternalDocumentBrick {
 	fields: Array<InternalDocumentField>;
 	id: number;
 }
-export interface DocumentBrick {
+export type DocumentRelationValue<TCollectionKey extends string = string> = {
+	id: number;
+	collectionKey: TCollectionKey;
+};
+
+// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+export interface CollectionDocumentFieldsByCollection {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+export interface CollectionDocumentBricksByCollection {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
+export interface CollectionDocumentLocaleCodes {}
+
+export type DocumentFieldMap = Record<string, DocumentField>;
+
+type CollectionDocumentBrickKey = Extract<
+	keyof CollectionDocumentBricksByCollection,
+	string
+>;
+
+type CollectionDocumentFieldKey = Extract<
+	keyof CollectionDocumentFieldsByCollection,
+	string
+>;
+
+type KnownCollectionDocumentKey = CollectionDocumentFieldKey;
+
+type KnownCollectionDocumentLocaleCode = Extract<
+	keyof CollectionDocumentLocaleCodes,
+	string
+>;
+
+export type CollectionDocumentKey = KnownCollectionDocumentKey | (string & {});
+
+type ExactCollectionDocumentTranslations<TValue> = {
+	[TLocaleCode in KnownCollectionDocumentLocaleCode]: TValue;
+};
+
+export type CollectionDocumentLocaleCode = [
+	KnownCollectionDocumentLocaleCode,
+] extends [never]
+	? string
+	: KnownCollectionDocumentLocaleCode | (string & {});
+
+export type CollectionDocumentTranslations<TValue> = [
+	KnownCollectionDocumentLocaleCode,
+] extends [never]
+	? Record<string, TValue>
+	: ExactCollectionDocumentTranslations<TValue> &
+			Partial<Record<string, TValue>>;
+
+type ResolveCollectionDocumentFields<TCollectionKey extends string | null> =
+	TCollectionKey extends CollectionDocumentFieldKey
+		? CollectionDocumentFieldsByCollection[TCollectionKey]
+		: DocumentFieldMap;
+
+type ResolveCollectionDocumentBricks<TCollectionKey extends string | null> =
+	TCollectionKey extends CollectionDocumentBrickKey
+		? CollectionDocumentBricksByCollection[TCollectionKey]
+		: DocumentBrick;
+
+type ResolveCollectionDocumentKey<TCollectionKey extends string | null> = [
+	TCollectionKey,
+] extends [string]
+	? TCollectionKey
+	: CollectionDocumentKey | null;
+
+type ResolveCollectionDocumentStatus<TCollectionKey extends string | null> =
+	CollectionDocumentStatus<
+		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
+	>;
+
+type ResolveCollectionDocumentVersionKey<TCollectionKey extends string | null> =
+	CollectionDocumentVersionKey<
+		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
+	>;
+
+export interface DocumentBrick<
+	TKey extends string = string,
+	TBrickType extends BrickTypes = BrickTypes,
+	TFields extends DocumentFieldMap = DocumentFieldMap,
+> {
 	ref: string;
-	key: string;
+	key: TKey;
 	order: number;
 	open: boolean;
-	type: BrickTypes;
-	fields: Record<string, DocumentField>;
+	type: TBrickType;
+	fields: TFields;
 	id: number;
 }
 
@@ -358,25 +444,78 @@ export interface InternalDocumentField {
 	value?: FieldValue;
 	groups?: Array<InternalDocumentFieldGroup>;
 }
-export interface DocumentField {
-	key: string;
-	type: FieldTypes;
-	groupRef?: string;
-	translations?: Record<string, FieldValue>;
-	value?: FieldValue;
-	groups?: Array<DocumentFieldGroup>;
+export interface DocumentFieldGroup<
+	TFields extends DocumentFieldMap = DocumentFieldMap,
+> {
+	ref: string;
+	order: number;
+	open: boolean;
+	fields: TFields;
 }
+
+export interface DocumentField<
+	TKey extends string = string,
+	TType extends FieldTypes = FieldTypes,
+	TValue = FieldValue,
+	TGroupFields extends DocumentFieldMap = DocumentFieldMap,
+> {
+	key: TKey;
+	type: TType;
+	groupRef?: string;
+	translations?: CollectionDocumentTranslations<TValue>;
+	value?: TValue;
+	groups?: Array<DocumentFieldGroup<TGroupFields>>;
+}
+
+type DocumentFieldGroupRefShape<THasGroupRef extends boolean> =
+	THasGroupRef extends true ? { groupRef: string } : { groupRef?: never };
+
+export type ValueDocumentField<
+	TKey extends string = string,
+	TType extends FieldTypes = FieldTypes,
+	TValue = FieldValue,
+	THasGroupRef extends boolean = false,
+> = Omit<
+	DocumentField<TKey, TType, TValue>,
+	"groupRef" | "groups" | "translations" | "value"
+> & {
+	value: TValue;
+	translations?: never;
+	groups?: never;
+} & DocumentFieldGroupRefShape<THasGroupRef>;
+
+export type TranslatedDocumentField<
+	TKey extends string = string,
+	TType extends FieldTypes = FieldTypes,
+	TValue = FieldValue,
+	THasGroupRef extends boolean = false,
+> = Omit<
+	DocumentField<TKey, TType, TValue>,
+	"groupRef" | "groups" | "translations" | "value"
+> & {
+	translations: CollectionDocumentTranslations<TValue>;
+	value?: never;
+	groups?: never;
+} & DocumentFieldGroupRefShape<THasGroupRef>;
+
+export type GroupDocumentField<
+	TKey extends string = string,
+	TType extends FieldTypes = FieldTypes,
+	TGroupFields extends DocumentFieldMap = DocumentFieldMap,
+	THasGroupRef extends boolean = false,
+> = Omit<
+	DocumentField<TKey, TType, never, TGroupFields>,
+	"groupRef" | "groups" | "translations" | "value"
+> & {
+	groups: Array<DocumentFieldGroup<TGroupFields>>;
+	value?: never;
+	translations?: never;
+} & DocumentFieldGroupRefShape<THasGroupRef>;
 export interface InternalDocumentFieldGroup {
 	ref: string;
 	order: number;
 	open: boolean;
 	fields: Array<InternalDocumentField>;
-}
-export interface DocumentFieldGroup {
-	ref: string;
-	order: number;
-	open: boolean;
-	fields: Record<string, DocumentField>;
 }
 
 export interface DocumentVersion {
@@ -440,12 +579,15 @@ export interface InternalCollectionDocument {
 	refs?: Partial<Record<FieldTypes, FieldRef[]>> | null;
 }
 
-export interface CollectionDocument {
+export interface CollectionDocument<
+	TCollectionKey extends
+		CollectionDocumentKey | null = CollectionDocumentKey | null,
+> {
 	id: number;
-	collectionKey: string | null;
-	status: DocumentVersionType | null;
+	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
+	status: ResolveCollectionDocumentStatus<TCollectionKey> | null;
 	version: Record<
-		string,
+		ResolveCollectionDocumentVersionKey<TCollectionKey>,
 		{
 			id: number;
 			promotedFrom: number | null;
@@ -470,8 +612,8 @@ export interface CollectionDocument {
 		lastName: string | null;
 		username: string | null;
 	} | null;
-	bricks?: Array<DocumentBrick> | null;
-	fields?: Record<string, DocumentField> | null;
+	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>> | null;
+	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	refs?: Partial<Record<FieldTypes, FieldRef[]>> | null;
 }
 

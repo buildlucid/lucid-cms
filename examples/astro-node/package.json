@@ -9,6 +9,7 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
+		"typegen": "lucidcms typegen",
 		"sync": "lucidcms sync",
 		"migrate": "lucidcms migrate",
 		"migrate:rollback": "lucidcms migrate:rollback",

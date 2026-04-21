@@ -8,6 +8,7 @@
         "dev": "lucidcms dev",
         "serve": "lucidcms serve",
         "build": "lucidcms build",
+        "typegen": "lucidcms typegen",
         "start": "lucidcms build && node dist/server.js",
         "sync": "lucidcms sync",
         "migrate": "lucidcms migrate",

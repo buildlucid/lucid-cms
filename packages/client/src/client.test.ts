@@ -21,7 +21,7 @@ describe("@lucidcms/client", () => {
 						createdAt: null,
 						updatedAt: null,
 						updatedBy: null,
-						fields: null,
+						fields: {},
 						refs: null,
 					},
 					meta: {
@@ -55,6 +55,19 @@ describe("@lucidcms/client", () => {
 					_fullSlug: {
 						value: "/about",
 					},
+					banner: {
+						_title: {
+							value: "About us",
+						},
+					},
+					fields: {
+						sections: {
+							// @ts-expect-error
+							_section_title: {
+								value: "Hero",
+							},
+						},
+					},
 				},
 				include: ["bricks"],
 			},
@@ -69,7 +82,7 @@ describe("@lucidcms/client", () => {
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&include=bricks",
+			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks",
 		);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});

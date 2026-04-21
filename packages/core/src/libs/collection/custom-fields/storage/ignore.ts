@@ -1,6 +1,10 @@
-import type { StorageModeDefinition } from "./types.js";
+import type { IgnoreModeDefinition } from "./types.js";
 
-export const ignoreMode: StorageModeDefinition<"ignore"> = {
+export const ignoreMode: IgnoreModeDefinition = {
 	mode: "ignore",
 	baseTablePriority: 0,
+	clientTypeGen: () => ({
+		omitted: true,
+		declarations: [],
+	}),
 };

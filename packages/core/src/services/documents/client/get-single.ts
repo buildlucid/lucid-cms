@@ -2,26 +2,39 @@ import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../../libs/db-adapter/types.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
 import T from "../../../translations/index.js";
-import type { CollectionDocument } from "../../../types/response.js";
+import type {
+	CollectionDocument,
+	CollectionDocumentStatus,
+} from "../../../types.js";
 import { groupDocumentFilters } from "../../../utils/helpers/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../../utils/services/types.js";
 import { collectionServices, documentBrickServices } from "../../index.js";
 
-const getSingle: ServiceFn<
-	[
-		{
-			collectionKey: string;
-			status: Exclude<DocumentVersionType, "revision">;
-			query: ClientGetSingleQueryParams;
-		},
-	],
-	CollectionDocument
-> = async (context, data) => {
+type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
+	collectionKey: TCollectionKey;
+	status: CollectionDocumentStatus<TCollectionKey>;
+	query: ClientGetSingleQueryParams;
+};
+
+type ClientDocumentsGetSingleService = <TCollectionKey extends string>(
+	context: ServiceContext,
+	data: ClientDocumentsGetSingleInput<TCollectionKey>,
+) => ServiceResponse<CollectionDocument<TCollectionKey>>;
+
+/** Fetches one client-facing document with a response type tied to the collection key. */
+const getSingle: ClientDocumentsGetSingleService = async <
+	TCollectionKey extends string,
+>(
+	context: ServiceContext,
+	data: ClientDocumentsGetSingleInput<TCollectionKey>,
+): ServiceResponse<CollectionDocument<TCollectionKey>> => {
 	const Documents = new DocumentsRepository(
 		context.db.client,
 		context.config.db,
@@ -85,7 +98,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: documentsFormatter.formatClientSingle({
+		data: documentsFormatter.formatClientSingle<TCollectionKey>({
 			document: documentRes.data,
 			collection: collectionRes.data,
 			bricks: bricksRes.data.bricks,

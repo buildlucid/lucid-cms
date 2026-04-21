@@ -77,4 +77,27 @@ export const treeTableMode: TreeTableModeDefinition = {
 	 * Returns migration priority offset for a given tree depth.
 	 */
 	getPriorityOffsetForDepth: (depth) => depth * TREE_TABLE_DEPTH_PRIORITY,
+	clientTypeGen: (props) => {
+		const childFields = treeTableMode.getChildFieldConfigs(props.field) ?? [];
+		const renderedChildFields = props.helpers.renderFieldMap(childFields, {
+			builder: props.builder,
+			collectionUsesTranslations: props.collectionUsesTranslations,
+			withinGroup: true,
+		});
+
+		return {
+			fieldType:
+				props.fieldType ??
+				props.helpers.renderBaseFieldType({
+					field: props.field,
+					mode: "groups",
+					groupFieldsType: renderedChildFields.typeText,
+					hasGroupRef: props.hasGroupRef,
+				}),
+			declarations: [
+				...(props.declarations ?? []),
+				...renderedChildFields.declarations,
+			],
+		};
+	},
 };

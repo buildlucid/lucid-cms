@@ -56,6 +56,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 				configPath: configPath,
 				adapterModule: configResult.definition.adapter.module,
 				databaseModule: configResult.definition.database.module,
+				collections: configResult.config.collections,
+				localization: configResult.config.localization,
 			});
 
 			if (!envValid) {

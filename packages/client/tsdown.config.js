@@ -12,4 +12,5 @@ export default defineConfig({
 	minify: true,
 	platform: "browser",
 	target: "es2022",
+	unbundle: true,
 });

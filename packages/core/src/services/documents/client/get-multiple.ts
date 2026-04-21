@@ -3,35 +3,51 @@ import {
 	getDocumentFieldsTableSchema,
 	getTableNames,
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../../libs/db-adapter/types.js";
 import formatter, {
 	documentsFormatter,
 } from "../../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
-import type { CollectionDocument } from "../../../types/response.js";
+import type {
+	CollectionDocument,
+	CollectionDocumentStatus,
+} from "../../../types.js";
 import {
 	getBaseUrl,
 	groupDocumentFilters,
 } from "../../../utils/helpers/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../../utils/services/types.js";
 import extractRelatedEntityIds from "../../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRefData from "../../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../../index.js";
 
-const getMultiple: ServiceFn<
-	[
-		{
-			collectionKey: string;
-			status: Exclude<DocumentVersionType, "revision">;
-			query: ClientGetMultipleQueryParams;
-		},
-	],
+type ClientDocumentsGetMultipleInput<TCollectionKey extends string = string> = {
+	collectionKey: TCollectionKey;
+	status: CollectionDocumentStatus<TCollectionKey>;
+	query: ClientGetMultipleQueryParams;
+};
+
+type ClientDocumentsGetMultipleResult<TCollectionKey extends string = string> =
 	{
-		data: CollectionDocument[];
+		data: CollectionDocument<TCollectionKey>[];
 		count: number;
-	}
-> = async (context, data) => {
+	};
+
+type ClientDocumentsGetMultipleService = <TCollectionKey extends string>(
+	context: ServiceContext,
+	data: ClientDocumentsGetMultipleInput<TCollectionKey>,
+) => ServiceResponse<ClientDocumentsGetMultipleResult<TCollectionKey>>;
+
+/** Fetches multiple client-facing documents with collection-aware response typing. */
+const getMultiple: ClientDocumentsGetMultipleService = async <
+	TCollectionKey extends string,
+>(
+	context: ServiceContext,
+	data: ClientDocumentsGetMultipleInput<TCollectionKey>,
+): ServiceResponse<ClientDocumentsGetMultipleResult<TCollectionKey>> => {
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});
@@ -99,7 +115,7 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: documentsFormatter.formatClientMultiple({
+			data: documentsFormatter.formatClientMultiple<TCollectionKey>({
 				documents: documentsRes.data?.[0] || [],
 				collection: collectionRes.data,
 				config: context.config,

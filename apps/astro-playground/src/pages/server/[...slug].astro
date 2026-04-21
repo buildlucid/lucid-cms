@@ -1,13 +1,13 @@
 ---
 import getToolkit from "@lucidcms/astro/toolkit";
-import PageCollection from "../../lucid/collections/pages";
 
 export const prerender = false;
 
 const fullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
 const toolkit = await getToolkit();
+
 const response = await toolkit.documents.getSingle({
-	collectionKey: PageCollection.key,
+	collectionKey: "page",
 	status: "latest",
 	query: {
 		filter: {

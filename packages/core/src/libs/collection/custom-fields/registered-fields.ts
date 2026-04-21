@@ -13,7 +13,7 @@ import tab from "./fields/tab/index.js";
 import text from "./fields/text/index.js";
 import textarea from "./fields/textarea/index.js";
 import user from "./fields/user/index.js";
-import type { FieldTypes } from "./types.js";
+import type { FieldTypes, RegisteredFieldDefinition } from "./types.js";
 import { fieldTypes } from "./types.js";
 
 const registeredFields = {
@@ -32,7 +32,9 @@ const registeredFields = {
 	textarea: textarea,
 	user: user,
 	"rich-text": richText,
-} as const satisfies Record<FieldTypes, unknown>;
+} as const satisfies {
+	[K in FieldTypes]: RegisteredFieldDefinition<K>;
+};
 
 export const registeredFieldTypes: readonly FieldTypes[] = fieldTypes;
 

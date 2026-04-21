@@ -10,7 +10,7 @@ test("generates environment types from the config definition export", async () =
 	expect(result.imports).toContain(
 		'import type { env } from "../lucid.config.ts";',
 	);
-	expect(result.types).toContain(
+	expect(result.moduleAugmentations[0]?.declarations).toContain(
 		"interface EnvironmentVariables extends z.infer<typeof env> {}",
 	);
 });

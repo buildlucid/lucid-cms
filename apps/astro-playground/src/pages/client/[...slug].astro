@@ -1,48 +1,32 @@
 ---
 import { createClient } from "@lucidcms/client";
-import PageCollection from "../../lucid/collections/pages";
 
-export const prerender = true;
+export const prerender = false;
 
-export async function getStaticPaths() {
-	const client = createClient({
-		baseUrl: import.meta.env.LUCID_CLIENT_BASE_URL as string,
-		apiKey: import.meta.env.LUCID_CLIENT_API_KEY as string,
-	});
+const fullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
 
-	const response = await client.documents.getMultiple({
-		collectionKey: PageCollection.key,
-		status: "latest",
-		query: {
-			perPage: 100,
-			sort: [
-				{
-					key: "updatedAt",
-					value: "asc",
-				},
-			],
+const client = createClient({
+	baseUrl: import.meta.env.LUCID_CLIENT_BASE_URL as string,
+	apiKey: import.meta.env.LUCID_CLIENT_API_KEY as string,
+});
+
+const response = await client.documents.getSingle({
+	collectionKey: "page",
+	status: "latest",
+	query: {
+		filter: {
+			_fullSlug: {
+				value: fullSlug,
+			},
 		},
-	});
-	if (response.error) {
-		throw new Error(response.error.message ?? "Failed to load Lucid pages.");
-	}
+	},
+});
 
-	return response.data.data.map((page) => {
-		const fullSlug = page.fields?.fullSlug?.translations?.en;
+const page = response.data?.data;
 
-		return {
-			params: {
-				slug: fullSlug === "/" ? undefined : String(fullSlug).slice(1),
-			},
-			props: {
-				page,
-			},
-		};
-	});
+if (!page) {
+	throw new Error("Page not found.");
 }
-
-// biome-ignore lint/correctness/noUnusedVariables: Used in the Astro template below.
-const { page } = Astro.props;
 ---
 
 <html lang="en">
@@ -50,7 +34,7 @@ const { page } = Astro.props;
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<title>
-			{page.fields?.page_title?.translations?.en || "Untitled page"} | Client Lucid Route
+			{page.fields.page_title?.translations?.en || "Untitled page"} | Client Lucid Route
 		</title>
 		<style>
 			:root {

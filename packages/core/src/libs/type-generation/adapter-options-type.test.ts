@@ -9,7 +9,7 @@ test("generates adapter option types keyed by adapter.module", async () => {
 	expect(result?.imports).toContain(
 		'import type { AdapterOptionsType as LucidAdapterOptions } from "@lucidcms/node-adapter/types";',
 	);
-	expect(result?.types).toContain(
+	expect(result?.moduleAugmentations[0]?.declarations).toContain(
 		'interface AdapterOptionsByModule { "@lucidcms/node-adapter": LucidAdapterOptions; }',
 	);
 });
