@@ -1,5 +1,5 @@
-import type { Readable } from "node:stream";
 import constants from "../../constants/constants.js";
+import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import {
 	chooseAcceptHeaderFormat,
@@ -29,7 +29,7 @@ const streamMedia: ServiceFn<
 		key: string;
 		contentLength: number | undefined;
 		contentType: string | undefined;
-		body: Readable;
+		body: MediaAdapterStreamBody;
 		isPartialContent?: boolean;
 		totalSize?: number;
 		range?: {

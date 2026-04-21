@@ -1,6 +1,6 @@
 # Lucid CMS: Cloudflare
 
-Minimal Lucid CMS example using the Cloudflare adapter, LibSQL, the Pages plugin, S3 media storage, and a Cloudflare KV adapter.
+Minimal Lucid CMS example using the Cloudflare adapter, LibSQL, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
 
 ## Commands
 

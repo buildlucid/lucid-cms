@@ -52,6 +52,7 @@ A modern, TypeScript-first headless CMS designed for ultimate flexibility. Power
 - **[Nodemailer](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-nodemailer):** Extend the email strategy to support Nodemailer by passing down a custom transport.
 - **[Resend](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-resend):** Extend the email strategy to use [Resend](https://resend.com/home).
 - **[S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3):** Extend the media strategy to support using any S3 compatible storage solution.
+- **[Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2):** Extend the media strategy to use a Cloudflare R2 binding, with an optional HTTP fallback for direct browser uploads.
 - **Menus:** Coming soon!
 - **Form Builder:** Coming soon!
 

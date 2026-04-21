@@ -1,5 +1,6 @@
 import { createWriteStream } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
+import { Readable } from "node:stream";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceUploadSingle,
@@ -15,7 +16,11 @@ export default (options: FileSystemMediaAdapterOptions) => {
 				await writeFile(targetPath, props.data);
 			} else {
 				const writeStream = createWriteStream(targetPath);
-				props.data.pipe(writeStream);
+				const readable =
+					props.data instanceof Readable
+						? props.data
+						: Readable.fromWeb(props.data as never);
+				readable.pipe(writeStream);
 				await new Promise<void>((resolve, reject) => {
 					writeStream.on("finish", resolve);
 					writeStream.on("error", reject);

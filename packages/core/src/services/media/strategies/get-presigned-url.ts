@@ -23,6 +23,7 @@ const getPresignedUrl: ServiceFn<
 		data.key,
 		{
 			host: getBaseUrl(context),
+			secretKey: context.config.secrets.cookie,
 			mimeType: data.mimeType,
 			extension: data.extension,
 		},

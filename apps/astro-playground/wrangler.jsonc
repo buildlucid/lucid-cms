@@ -9,6 +9,12 @@
 			"binding": "LUCID_KV"
 		}
 	],
+	"r2_buckets": [
+		{
+			"binding": "LUCID_MEDIA_BUCKET",
+			"bucket_name": "lucid-astro-playground-media"
+		}
+	],
 	"queues": {
 		"producers": [
 			{

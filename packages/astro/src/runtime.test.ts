@@ -15,6 +15,9 @@ describe("@lucidcms/astro runtime", () => {
 		expect(shouldServeLucidSpaShell("/lucid/content/entries", "HEAD")).toBe(
 			true,
 		);
+		expect(shouldServeLucidSpaShell("/lucid/share/NpirTvp6gb5R", "GET")).toBe(
+			true,
+		);
 	});
 
 	test("does not serve the SPA shell for API, asset, or non-GET requests", () => {

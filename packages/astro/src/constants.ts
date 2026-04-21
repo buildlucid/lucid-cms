@@ -82,7 +82,6 @@ export const lucidNonSpaPrefixes = [
 	`${astroConstants.paths.mountPath}/cdn`,
 	`${astroConstants.paths.mountPath}/documentation`,
 	`${astroConstants.paths.mountPath}/openapi`,
-	`${astroConstants.paths.mountPath}/share`,
 ] as const;
 
 export default astroConstants;

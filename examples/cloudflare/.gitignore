@@ -7,3 +7,8 @@ db.sqlite-wal
 /.dev.vars
 /dist
 /.wrangler
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp

@@ -38,3 +38,7 @@ yarn-error.log*
 # lucid
 tmp
 db.sqlite
+._*
+.idea/
+.vscode/
+*.swp

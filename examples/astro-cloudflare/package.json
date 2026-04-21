@@ -26,8 +26,8 @@
 		"@lucidcms/cloudflare-adapter": "*",
 		"@lucidcms/libsql-adapter": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
-		"@lucidcms/plugin-pages": "*",
-		"@lucidcms/plugin-s3": "*"
+		"@lucidcms/plugin-cloudflare-r2": "*",
+		"@lucidcms/plugin-pages": "*"
 	},
 	"devDependencies": {
 		"wrangler": "^4.82.2"

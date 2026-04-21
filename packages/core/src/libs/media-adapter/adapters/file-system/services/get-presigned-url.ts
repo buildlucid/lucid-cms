@@ -1,8 +1,9 @@
-import crypto from "node:crypto";
+import { createSignedMediaUrl } from "../../../signed-url.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetPresignedUrl,
 } from "../../../types.js";
+import { FILE_SYSTEM_UPLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const getPresignedUrl: MediaAdapterServiceGetPresignedUrl = async (
@@ -10,16 +11,15 @@ export default (options: FileSystemMediaAdapterOptions) => {
 		meta,
 	) => {
 		try {
-			const timestamp = Date.now();
-			const token = crypto
-				.createHmac("sha256", options.secretKey)
-				.update(`${key}${timestamp}`)
-				.digest("hex");
-
 			return {
 				error: undefined,
 				data: {
-					url: `${meta.host}/lucid/api/v1/fs/upload?key=${key}&token=${token}&timestamp=${timestamp}`,
+					url: createSignedMediaUrl({
+						host: meta.host,
+						path: FILE_SYSTEM_UPLOAD_PATH,
+						key,
+						secretKey: options.secretKey,
+					}),
 				},
 			};
 		} catch (e) {

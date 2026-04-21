@@ -33,3 +33,6 @@ pnpm-debug.log*
 db.sqlite
 db.sqlite-shm
 db.sqlite-wal
+._*
+.vscode/
+*.swp

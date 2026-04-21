@@ -1,9 +1,9 @@
 import { configureLucid, z } from "@lucidcms/core";
 import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
 import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
+import CloudflareR2Plugin from "@lucidcms/plugin-cloudflare-r2";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import ResendPlugin from "@lucidcms/plugin-resend";
-import S3Plugin from "@lucidcms/plugin-s3";
 import BlogCollection from "./src/lucid/collections/blogs.js";
 import MainMenuCollection from "./src/lucid/collections/main-menu.js";
 import PageCollection from "./src/lucid/collections/pages.js";
@@ -20,10 +20,7 @@ export const env = z.object({
 	LUCID_ACCESS_TOKEN_SECRET: z.string(),
 	LUCID_RESEND_API_KEY: z.string(),
 	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
-	LUCID_R2_ENDPOINT: z.string(),
-	LUCID_R2_BUCKET: z.string(),
-	LUCID_R2_ACCESS_KEY: z.string(),
-	LUCID_R2_SECRET_KEY: z.string(),
+	LUCID_MEDIA_BUCKET: z.any(),
 	LUCID_KV: z.any(),
 	LUCID_QUEUE: z.any(),
 });
@@ -69,7 +66,7 @@ export default configureLucid({
 		},
 		media: {
 			limits: {
-				fileSize: 200 * 1024 * 1024,
+				fileSize: 100 * 1024 * 1024,
 				processedImages: 10,
 			},
 			images: {
@@ -120,20 +117,14 @@ export default configureLucid({
 			CloudflareQueuesPlugin({
 				binding: env.LUCID_QUEUE,
 			}),
+			CloudflareR2Plugin({
+				binding: env.LUCID_MEDIA_BUCKET,
+			}),
 			ResendPlugin({
 				apiKey: env.LUCID_RESEND_API_KEY,
 				webhook: {
 					enabled: true,
 					secret: env.LUCID_RESEND_WEBHOOK_SECRET,
-				},
-			}),
-			S3Plugin({
-				endpoint: env.LUCID_R2_ENDPOINT,
-				bucket: env.LUCID_R2_BUCKET,
-				clientOptions: {
-					region: "auto",
-					accessKeyId: env.LUCID_R2_ACCESS_KEY,
-					secretAccessKey: env.LUCID_R2_SECRET_KEY,
 				},
 			}),
 		],

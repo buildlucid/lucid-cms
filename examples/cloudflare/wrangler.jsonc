@@ -18,6 +18,12 @@
 			"binding": "KV_BINDING"
 		}
 	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA_BUCKET",
+			"bucket_name": "lucid-cloudflare-example-media"
+		}
+	],
 	"triggers": {
 		"crons": ["0 0 * * *"]
 	},

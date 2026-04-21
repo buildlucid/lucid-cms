@@ -1,8 +1,7 @@
 import { configureLucid, z } from "@lucidcms/core";
-import { passthroughKVAdapter } from "@lucidcms/core/kv-adapter";
 import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
+import CloudflareR2Plugin from "@lucidcms/plugin-cloudflare-r2";
 import PagesPlugin from "@lucidcms/plugin-pages";
-import S3Plugin from "@lucidcms/plugin-s3";
 import PageCollection from "./src/collections/pages.js";
 
 export const env = z.object({
@@ -13,10 +12,7 @@ export const env = z.object({
 	REFRESH_TOKEN_SECRET: z.string(),
 	ACCESS_TOKEN_SECRET: z.string(),
 	KV_BINDING: z.any(),
-	S3_ENDPOINT: z.string(),
-	S3_BUCKET: z.string(),
-	S3_ACCESS_KEY: z.string(),
-	S3_SECRET_KEY: z.string(),
+	MEDIA_BUCKET: z.any(),
 });
 
 export default configureLucid({
@@ -38,9 +34,6 @@ export default configureLucid({
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
 		collections: [PageCollection],
-		kv: {
-			adapter: passthroughKVAdapter(),
-		},
 		plugins: [
 			PagesPlugin({
 				collections: [
@@ -53,14 +46,8 @@ export default configureLucid({
 			CloudflareKVPlugin({
 				binding: env.KV_BINDING,
 			}),
-			S3Plugin({
-				endpoint: env.S3_ENDPOINT,
-				bucket: env.S3_BUCKET,
-				clientOptions: {
-					region: "auto",
-					accessKeyId: env.S3_ACCESS_KEY,
-					secretAccessKey: env.S3_SECRET_KEY,
-				},
+			CloudflareR2Plugin({
+				binding: env.MEDIA_BUCKET,
 			}),
 		],
 	}),

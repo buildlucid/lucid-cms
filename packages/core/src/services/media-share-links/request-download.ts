@@ -20,6 +20,7 @@ const requestDownload: ServiceFn<
 		data.mediaKey,
 		{
 			host: getBaseUrl(context),
+			secretKey: context.config.secrets.cookie,
 		},
 	);
 	if (downloadUrlRes.error) return downloadUrlRes;

@@ -1,10 +1,21 @@
 import type { Readable } from "node:stream";
 import type { MediaType, ServiceResponse } from "../../types.js";
 
+export type MediaAdapterStreamBody =
+	| Readable
+	| ReadableStream<Uint8Array>
+	| Uint8Array;
+
+export type MediaAdapterUploadBody =
+	| Readable
+	| ReadableStream<Uint8Array>
+	| Buffer;
+
 export type MediaAdapterServiceGetPresignedUrl = (
 	key: string,
 	meta: {
 		host: string;
+		secretKey: string;
 		mimeType: string;
 		extension?: string;
 	},
@@ -17,6 +28,7 @@ export type MediaAdapterServiceGetDownloadUrl = (
 	key: string,
 	meta: {
 		host: string;
+		secretKey: string;
 	},
 ) => ServiceResponse<{
 	url: string;
@@ -39,7 +51,7 @@ export type MediaAdapterServiceStream = (
 ) => ServiceResponse<{
 	contentLength: number | undefined;
 	contentType: string | undefined;
-	body: Readable;
+	body: MediaAdapterStreamBody;
 	isPartialContent?: boolean;
 	totalSize?: number;
 	range?: {
@@ -50,7 +62,7 @@ export type MediaAdapterServiceStream = (
 
 export type MediaAdapterServiceUploadSingle = (props: {
 	key: string;
-	data: Readable | Buffer;
+	data: MediaAdapterUploadBody;
 	meta: {
 		mimeType: string;
 		extension: string;

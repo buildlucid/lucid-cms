@@ -27,10 +27,10 @@
 		"@lucidcms/core": "*",
 		"@lucidcms/libsql-adapter": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
+		"@lucidcms/plugin-cloudflare-r2": "*",
 		"@lucidcms/plugin-cloudflare-queues": "*",
 		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/plugin-resend": "*",
-		"@lucidcms/plugin-s3": "*",
 		"astro": "^6.1.6"
 	},
 	"devDependencies": {

@@ -1,6 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import constants from "../../constants/constants.js";
-import { keyPaths } from "../../libs/media-adapter/adapters/file-system/helpers.js";
+import {
+	FILE_SYSTEM_UPLOAD_PATH,
+	keyPaths,
+} from "../../libs/media-adapter/adapters/file-system/helpers.js";
 import type { FileSystemMediaAdapterOptions } from "../../libs/media-adapter/types.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -22,6 +25,7 @@ const uploadSingle: ServiceFn<
 		key: data.key,
 		token: data.token,
 		timestamp: data.timestamp,
+		path: FILE_SYSTEM_UPLOAD_PATH,
 		secretKey:
 			data.mediaAdapterOptions?.secretKey ?? context.config.secrets.cookie,
 	});

@@ -8,3 +8,8 @@ db.sqlite-wal
 /dist
 /.wrangler
 /wrangler.jsonc
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp

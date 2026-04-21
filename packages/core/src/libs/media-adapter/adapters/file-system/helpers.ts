@@ -1,6 +1,9 @@
 import path from "node:path";
 import T from "../../../../translations/index.js";
 
+export const FILE_SYSTEM_UPLOAD_PATH = "fs/upload";
+export const FILE_SYSTEM_DOWNLOAD_PATH = "fs/download";
+
 export const keyPaths = (key: string, uploadDir: string) => {
 	// key example: 2024/01/gdfh4-banner
 	const keyPath = key.split("/").slice(0, -1).join("/");

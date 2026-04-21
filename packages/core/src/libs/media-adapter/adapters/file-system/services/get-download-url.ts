@@ -1,9 +1,9 @@
-import crypto from "node:crypto";
-import constants from "../../../../../constants/constants.js";
+import { createSignedMediaUrl } from "../../../signed-url.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetDownloadUrl,
 } from "../../../types.js";
+import { FILE_SYSTEM_DOWNLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
@@ -11,22 +11,15 @@ export default (options: FileSystemMediaAdapterOptions) => {
 		meta,
 	) => {
 		try {
-			const timestamp = Date.now();
-			const token = crypto
-				.createHmac("sha256", options.secretKey)
-				.update(`${key}${timestamp}`)
-				.digest("hex");
-
-			const query = new URLSearchParams({
-				key,
-				token,
-				timestamp: String(timestamp),
-			});
-
 			return {
 				error: undefined,
 				data: {
-					url: `${meta.host}/${constants.directories.base}/api/v1/fs/download?${query.toString()}`,
+					url: createSignedMediaUrl({
+						host: meta.host,
+						path: FILE_SYSTEM_DOWNLOAD_PATH,
+						key,
+						secretKey: options.secretKey,
+					}),
 				},
 			};
 		} catch (e) {

@@ -1,5 +1,8 @@
-import type { Readable } from "node:stream";
-import type { FileSystemMediaAdapterOptions } from "../../libs/media-adapter/types.js";
+import { FILE_SYSTEM_DOWNLOAD_PATH } from "../../libs/media-adapter/adapters/file-system/helpers.js";
+import type {
+	FileSystemMediaAdapterOptions,
+	MediaAdapterStreamBody,
+} from "../../libs/media-adapter/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import { validatePresignedToken } from "./checks/index.js";
@@ -17,13 +20,14 @@ const downloadSingle: ServiceFn<
 		key: string;
 		contentLength: number | undefined;
 		contentType: string | undefined;
-		body: Readable;
+		body: MediaAdapterStreamBody;
 	}
 > = async (context, data) => {
 	const checkPresignedTokenRes = await validatePresignedToken(context, {
 		key: data.key,
 		token: data.token,
 		timestamp: data.timestamp,
+		path: FILE_SYSTEM_DOWNLOAD_PATH,
 		secretKey:
 			data.mediaAdapterOptions?.secretKey ?? context.config.secrets.cookie,
 	});

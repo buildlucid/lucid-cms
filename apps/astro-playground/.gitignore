@@ -7,3 +7,8 @@
 /uploads
 /.dev.vars
 /.wrangler
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp

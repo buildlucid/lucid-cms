@@ -1,4 +1,9 @@
-import { PassThrough, type Readable } from "node:stream";
+import { PassThrough } from "node:stream";
+import {
+	splitBodyForProcessing,
+	toNodeReadable,
+} from "../../libs/media-adapter/index.js";
+import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -20,7 +25,7 @@ const processImage: ServiceFn<
 		key: string;
 		contentLength: number | undefined;
 		contentType: string | undefined;
-		body: Readable;
+		body: MediaAdapterStreamBody;
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =
@@ -44,10 +49,14 @@ const processImage: ServiceFn<
 		};
 	}
 
+	const { processingBody, fallbackBody } = splitBodyForProcessing(
+		mediaRes.data.body,
+	);
+
 	// Optimize image
 	const [imageRes, processedCountRes] = await Promise.all([
 		processedImageServices.optimizeImage(context, {
-			stream: mediaRes.data.body,
+			stream: toNodeReadable(processingBody),
 			options: data.options,
 		}),
 		processedImageServices.getSingleCount(context, {
@@ -62,7 +71,7 @@ const processImage: ServiceFn<
 				key: data.key,
 				contentLength: mediaRes.data.contentLength,
 				contentType: mediaRes.data.contentType,
-				body: mediaRes.data.body,
+				body: fallbackBody,
 			},
 		};
 	}

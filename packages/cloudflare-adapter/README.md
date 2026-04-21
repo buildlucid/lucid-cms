@@ -60,24 +60,18 @@ cwd = "./"
 
 ## Media Storage
 
-Due to the nature of Cloudflare Workers, they don't support file system operations. Because of this, you'll want to avoid the [LocalStorage](https://lucidjs.build/en/cms/docs/plugins/localstorage) plugin. Instead, we recommend using the [S3](https://lucidjs.build/en/cms/docs/plugins/s3) plugin along with Cloudflare R2 or other S3-compatible storage.
+Due to the nature of Cloudflare Workers, they don't support file system operations. Because of this, you'll want to avoid the [LocalStorage](https://lucidjs.build/en/cms/docs/plugins/localstorage) plugin. For Cloudflare R2 bindings, we recommend the [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2) plugin. For other object stores, the [S3](https://lucidjs.build/en/cms/docs/plugins/s3) plugin remains the generic option.
 
 ```typescript
 import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
-import LucidS3 from "@lucidcms/plugin-s3";
+import CloudflareR2 from "@lucidcms/plugin-cloudflare-r2";
 
 export const adapter = cloudflareAdapter();
 
 export default defineConfig((env) => ({
     plugins: [
-        LucidS3({
-            endpoint: env.S3_ENDPOINT,
-            bucket: env.S3_BUCKET,
-            clientOptions: {
-                region: "auto",
-                accessKeyId: env.S3_ACCESS_KEY_ID,
-                secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-            },
+        CloudflareR2({
+            binding: env.MEDIA_BUCKET,
         }),
     ],
     // ...other config

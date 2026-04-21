@@ -1,5 +1,4 @@
-import crypto from "node:crypto";
-import constants from "../../../constants/constants.js";
+import { validateSignedMediaUrl } from "../../../libs/media-adapter/signed-url.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -10,19 +9,21 @@ const validatePresignedToken: ServiceFn<
 			token: string;
 			timestamp: string;
 			secretKey: string;
+			path: string;
+			query?: Record<string, string | number | undefined>;
 		},
 	],
 	undefined
 > = async (_, data) => {
-	const expectedToken = crypto
-		.createHmac("sha256", data.secretKey)
-		.update(`${data.key}${data.timestamp}`)
-		.digest("hex");
-
 	if (
-		data.token !== expectedToken ||
-		Date.now() - Number.parseInt(data.timestamp, 10) >
-			constants.presignedUrlExpiration
+		!validateSignedMediaUrl({
+			path: data.path,
+			key: data.key,
+			token: data.token,
+			timestamp: data.timestamp,
+			secretKey: data.secretKey,
+			query: data.query,
+		})
 	) {
 		return {
 			error: {
