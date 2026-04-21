@@ -20,7 +20,10 @@ import {
 	type ResolvedLucidProject,
 	runDevBootstrap,
 } from "./integration/project.js";
+import { lucidAdminBarIconSvg } from "./internal/admin-bar/icon.js";
+import { normalizeLucidAdminBarOptions } from "./internal/admin-bar/shared.js";
 import { assertAstroCompatibility } from "./internal/compatibility.js";
+import type { LucidAstroIntegrationOptions } from "./types.js";
 
 /**
  * Add Lucid CMS to your Astro project.
@@ -35,11 +38,15 @@ import { assertAstroCompatibility } from "./internal/compatibility.js";
  * });
  * ```
  */
-const lucidCMS = (): AstroIntegration => {
+const lucidCMS = (
+	options: LucidAstroIntegrationOptions = {},
+): AstroIntegration => {
 	let project: ResolvedLucidProject | undefined;
 	let assetRoot = "";
 	let codegenDir = "";
 	let routeEntrypoint = "";
+	let middlewareEntrypoint = "";
+	let devToolbarAppEntrypoint = "";
 	let devBootstrapPromise: Promise<void> | undefined;
 	let currentCommand: "dev" | "build" | "preview" | "sync" | undefined;
 	const registeredWatchPaths = new Set<string>();
@@ -48,8 +55,11 @@ const lucidCMS = (): AstroIntegration => {
 		name: astroConstants.integration.name,
 		hooks: {
 			"astro:config:setup": async ({
+				addDevToolbarApp,
+				addMiddleware,
 				addWatchFile,
 				command,
+				config,
 				createCodegenDir,
 				injectRoute,
 				updateConfig,
@@ -82,12 +92,17 @@ const lucidCMS = (): AstroIntegration => {
 
 				codegenDir = fileURLToPath(createCodegenDir());
 				assetRoot = path.join(codegenDir, astroConstants.paths.assetDirname);
+				const adminBarOptions = normalizeLucidAdminBarOptions(options.adminBar);
 
 				await prepareAssetSourceTree(project, assetRoot);
-				routeEntrypoint = await writeGeneratedRouteFiles({
+				const generatedFiles = await writeGeneratedRouteFiles({
 					project,
 					codegenDir,
+					adminBar: adminBarOptions,
 				});
+				routeEntrypoint = generatedFiles.routePath;
+				middlewareEntrypoint = generatedFiles.middlewarePath;
+				devToolbarAppEntrypoint = generatedFiles.devToolbarAppPath;
 				await addLucidWatchFiles(project, (watchPath) => {
 					const normalizedPath =
 						typeof watchPath === "string"
@@ -110,6 +125,23 @@ const lucidCMS = (): AstroIntegration => {
 					pattern: `${astroConstants.paths.mountPath}/[...path]`,
 					entrypoint: routeEntrypoint,
 				});
+				if (
+					!adminBarOptions.disable &&
+					(command === "dev" || config.output === "server")
+				) {
+					addMiddleware({
+						order: "post",
+						entrypoint: middlewareEntrypoint,
+					});
+				}
+				if (!adminBarOptions.disable && command === "dev") {
+					addDevToolbarApp({
+						id: astroConstants.integration.adminBarDevToolbarAppId,
+						name: astroConstants.integration.adminBarDevToolbarAppName,
+						icon: lucidAdminBarIconSvg,
+						entrypoint: devToolbarAppEntrypoint,
+					});
+				}
 
 				updateConfig({
 					vite: {

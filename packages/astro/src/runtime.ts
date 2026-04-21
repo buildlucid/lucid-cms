@@ -58,3 +58,13 @@ export const shouldServeLucidSpaShell = (
 
 	return true;
 };
+
+export {
+	maybeInjectLucidAdminBar,
+	shouldInjectLucidAdminBar,
+} from "./internal/admin-bar/middleware.js";
+export {
+	buildLucidAdminBarEditHref,
+	normalizeLucidAdminBarOptions,
+	readLucidAdminBarContext,
+} from "./internal/admin-bar/shared.js";

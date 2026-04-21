@@ -1,4 +1,5 @@
 ---
+import { setAdminBar } from "@lucidcms/astro";
 import getToolkit from "@lucidcms/astro/toolkit";
 import PageCollection from "../../lucid/collections/pages";
 
@@ -52,6 +53,13 @@ export async function getStaticPaths() {
 }
 
 const { page } = Astro.props;
+
+setAdminBar(Astro, {
+	edit: {
+		collectionKey: PageCollection.key,
+		documentId: page.id,
+	},
+});
 ---
 
 <html lang="en">

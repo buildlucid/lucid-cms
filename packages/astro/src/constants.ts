@@ -11,6 +11,11 @@ const astroConstants = {
 		name: "@lucidcms/astro",
 		configureLucidModuleId: "@lucidcms/astro/configure-lucid",
 		toolkitModuleId: "@lucidcms/astro/toolkit",
+		adminBarLocalsKey: "__lucid_astro_admin_bar__",
+		adminBarStateGlobalKey: "__lucid_astro_admin_bar_state__",
+		adminBarStateEvent: "lucid:admin-bar-state",
+		adminBarDevToolbarAppId: "@lucidcms/astro:admin-bar",
+		adminBarDevToolbarAppName: "Lucid CMS",
 		devAssetPluginName: "@lucidcms/astro:assets-dev",
 		buildAssetPluginName: "@lucidcms/astro:assets-build",
 	},
@@ -30,6 +35,8 @@ const astroConstants = {
 		emailTemplatesModule: "lucid-email-templates.generated.ts",
 		spaHtmlModule: "lucid-spa-html.generated.ts",
 		toolkitModule: "lucid-toolkit.generated.ts",
+		middlewareModule: "lucid-admin-bar.middleware.ts",
+		devToolbarAppModule: "lucid-admin-bar.dev-toolbar.ts",
 		nodeRoute: "lucid-node.route.ts",
 		cloudflareRoute: "lucid-cloudflare.route.ts",
 		emailTemplatesJson: "email-templates.json",
@@ -58,8 +65,15 @@ const astroConstants = {
 		devEnvGlobal: "__LUCID_ASTRO_CLOUDFLARE_DEV_ENV__",
 		prerenderContextGlobal: "__LUCID_ASTRO_CLOUDFLARE_PRERENDER_CONTEXT__",
 	},
+	urls: {
+		documentation:
+			"https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/",
+	},
 	defaults: {
 		remoteAddress: "127.0.0.1",
+		adminBar: {
+			disable: false,
+		},
 	},
 } as const;
 

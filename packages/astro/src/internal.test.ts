@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest";
 import {
+	buildCloudflareAdminBarMiddlewareSource,
+	buildLucidAdminBarDevToolbarAppSource,
+	buildNodeAdminBarMiddlewareSource,
+} from "./internal/admin-bar/generated-sources.js";
+import {
 	assertAstroCompatibility,
 	detectAstroRuntime,
 	detectLucidRuntime,
@@ -86,6 +91,64 @@ describe("@lucidcms/astro internals", () => {
 			"context.locals?.cfContext ?? undefined",
 		);
 		expect(cloudflareSource).not.toContain("currentExecutionContext");
+	});
+
+	test("generates Node and Cloudflare admin bar middleware sources", () => {
+		const nodeSource = buildNodeAdminBarMiddlewareSource(
+			"./lucid.config.ts",
+			"@lucidcms/node-adapter",
+			"@lucidcms/sqlite-adapter",
+			{
+				disable: false,
+			},
+		);
+		const cloudflareSource = buildCloudflareAdminBarMiddlewareSource(
+			"./lucid.config.ts",
+			"@lucidcms/sqlite-adapter",
+			{
+				disable: true,
+			},
+		);
+
+		expect(nodeSource).toContain(
+			'import { defineMiddleware } from "astro:middleware";',
+		);
+		expect(nodeSource).toContain(
+			'import { maybeInjectLucidAdminBar } from "@lucidcms/astro/runtime";',
+		);
+		expect(nodeSource).toContain('"disable": false');
+		expect(nodeSource).toContain("return maybeInjectLucidAdminBar({");
+		expect(nodeSource).toContain("return app.fetch(request);");
+
+		expect(cloudflareSource).toContain(
+			'import { defineMiddleware } from "astro:middleware";',
+		);
+		expect(cloudflareSource).toContain('"disable": true');
+		expect(cloudflareSource).toContain(
+			"context.locals?.cfContext ?? undefined",
+		);
+		expect(cloudflareSource).toContain("return maybeInjectLucidAdminBar({");
+	});
+
+	test("generates the Lucid dev toolbar app source", () => {
+		const source = buildLucidAdminBarDevToolbarAppSource();
+
+		expect(source).toContain(
+			'import { defineToolbarApp } from "astro/toolbar";',
+		);
+		expect(source).toContain("astro-dev-toolbar-window");
+		expect(source).toContain("Docs");
+		expect(source).toContain("Edit document");
+		expect(source).toContain(
+			"https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/",
+		);
+		expect(source).toContain("window.location.assign");
+		expect(source).toContain(
+			'window.open(href, "_blank", "noopener,noreferrer")',
+		);
+		expect(source).toContain("lucid:admin-bar-state");
+		expect(source).not.toContain("Logout");
+		expect(source).not.toContain("Login");
 	});
 
 	test("generates the Cloudflare main worker with Astro fetch and Lucid scheduled handlers", () => {

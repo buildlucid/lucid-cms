@@ -45,7 +45,9 @@ const useGetAuthenticatedUser = (
 			if (options?.authLayout) {
 				return;
 			}
-			navigate(getLoginRedirectURL(location.search));
+			navigate(getLoginRedirectURL(location.search), {
+				replace: true,
+			});
 		}
 	});
 

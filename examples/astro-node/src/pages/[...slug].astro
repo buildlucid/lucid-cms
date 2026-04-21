@@ -1,4 +1,5 @@
 ---
+import { setAdminBar } from "@lucidcms/astro";
 import getToolkit from "@lucidcms/astro/toolkit";
 import PageCollection from "../lucid/collections/pages";
 import "../index.css";
@@ -19,6 +20,16 @@ const response = await toolkit.documents.getSingle({
 });
 
 const page = response.data;
+
+if (page) {
+	setAdminBar(Astro, {
+		edit: {
+			collectionKey: PageCollection.key,
+			documentId: page.id,
+			label: `Edit ${page.fields.title.value}`,
+		},
+	});
+}
 ---
 
 <html lang="en">

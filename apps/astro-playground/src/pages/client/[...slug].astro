@@ -1,4 +1,5 @@
 ---
+import { setAdminBar } from "@lucidcms/astro";
 import { createClient } from "@lucidcms/client";
 
 export const prerender = false;
@@ -27,6 +28,13 @@ const page = response.data?.data;
 if (!page) {
 	throw new Error("Page not found.");
 }
+
+setAdminBar(Astro, {
+	edit: {
+		collectionKey: "page",
+		documentId: page.id,
+	},
+});
 ---
 
 <html lang="en">

@@ -1,4 +1,5 @@
 ---
+import { setAdminBar } from "@lucidcms/astro";
 import getToolkit from "@lucidcms/astro/toolkit";
 
 export const prerender = false;
@@ -26,6 +27,13 @@ const page = response.error ? null : response.data;
 
 if (!page) {
 	Astro.response.status = 404;
+} else {
+	setAdminBar(Astro, {
+		edit: {
+			collectionKey: "page",
+			documentId: page.id,
+		},
+	});
 }
 ---
 
