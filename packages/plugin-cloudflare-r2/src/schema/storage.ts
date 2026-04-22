@@ -17,7 +17,7 @@ export const controllerSchemas = {
 				}),
 				key: z.string().trim().meta({
 					description: "The media key.",
-					example: "public/5ttogd-placeholder-image.png",
+					example: "public/123e4567e89b12d3a456426614174000",
 				}),
 				extension: z.string().trim().optional().meta({
 					description: "The file extension.",
@@ -44,7 +44,15 @@ export const controllerSchemas = {
 				}),
 				key: z.string().trim().meta({
 					description: "The media key.",
-					example: "public/5ttogd-placeholder-image.png",
+					example: "public/123e4567e89b12d3a456426614174000",
+				}),
+				fileName: z.string().trim().optional().meta({
+					description: "The original file name to use for downloads.",
+					example: "placeholder-image.png",
+				}),
+				extension: z.string().trim().optional().meta({
+					description: "The file extension to use for download fallbacks.",
+					example: "png",
 				}),
 			}),
 			formatted: undefined,

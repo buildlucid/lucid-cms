@@ -7,6 +7,7 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { normalizeMediaKey } from "../../../../utils/media/index.js";
 import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-response.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -142,15 +143,20 @@ const streamSingleController = factory.createHandlers(
 		const params = c.req.valid("param");
 		const query = c.req.valid("query");
 		const context = getServiceContext(c);
+		const normalizedKey = normalizeMediaKey(params.key);
 
 		const range = parseRangeHeader(c.req.header("range"));
+		const ifNoneMatch = c.req.header("if-none-match");
+		const cacheControl = "public, max-age=0, must-revalidate";
+		let etag: string | undefined;
 
 		const response = await serviceWrapper(cdnServices.streamMedia, {
 			transaction: false,
 		})(context, {
-			key: params.key,
+			key: normalizedKey,
 			query: query,
 			accept: c.req.header("accept"),
+			ifNoneMatch: !range ? ifNoneMatch : undefined,
 			range,
 		});
 
@@ -171,15 +177,29 @@ const streamSingleController = factory.createHandlers(
 			return c.redirect(streamFallbackMedia.data.redirectUrl, 302);
 		}
 
+		etag = response.data.etag ?? undefined;
+
+		if (response.data.notModified) {
+			applyRangeHeaders(c, { cacheControl });
+			applyStreamingHeaders(c, {
+				key: response.data.key,
+				etag,
+			});
+			c.status(304);
+			return c.body(null);
+		}
+
 		applyRangeHeaders(c, {
 			isPartial: response.data.isPartialContent,
 			range: response.data.range,
 			totalSize: response.data.totalSize,
+			cacheControl,
 		});
 		applyStreamingHeaders(c, {
 			key: response.data.key,
 			contentLength: response.data.contentLength,
 			contentType: response.data.contentType,
+			etag,
 		});
 
 		return stream(c, async (stream) => {

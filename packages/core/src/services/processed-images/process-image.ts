@@ -6,6 +6,7 @@ import {
 import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
+import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	mediaServices,
@@ -18,6 +19,7 @@ const processImage: ServiceFn<
 		{
 			key: string;
 			processKey: string;
+			ifNoneMatch?: string;
 			options: ImageProcessorOptions;
 		},
 	],
@@ -26,6 +28,8 @@ const processImage: ServiceFn<
 		contentLength: number | undefined;
 		contentType: string | undefined;
 		body: MediaAdapterStreamBody;
+		etag?: string | null;
+		notModified?: boolean;
 	}
 > = async (context, data) => {
 	const mediaStrategyRes =
@@ -45,6 +49,7 @@ const processImage: ServiceFn<
 				contentLength: mediaRes.data.contentLength,
 				contentType: mediaRes.data.contentType,
 				body: mediaRes.data.body,
+				etag: mediaRes.data.etag,
 			},
 		};
 	}
@@ -72,6 +77,23 @@ const processImage: ServiceFn<
 				contentLength: mediaRes.data.contentLength,
 				contentType: mediaRes.data.contentType,
 				body: fallbackBody,
+				etag: mediaRes.data.etag,
+			},
+		};
+	}
+
+	let processedEtag = createBufferETag(imageRes.data.buffer);
+
+	if (data.ifNoneMatch && matchesETag(data.ifNoneMatch, processedEtag)) {
+		return {
+			error: undefined,
+			data: {
+				key: data.processKey,
+				contentLength: undefined,
+				contentType: imageRes.data.mimeType,
+				body: new Uint8Array(),
+				etag: processedEtag,
+				notModified: true,
 			},
 		};
 	}
@@ -88,6 +110,7 @@ const processImage: ServiceFn<
 				contentLength: imageRes.data.size,
 				contentType: imageRes.data.mimeType,
 				body: stream,
+				etag: processedEtag,
 			},
 		};
 	}
@@ -101,6 +124,7 @@ const processImage: ServiceFn<
 				contentLength: imageRes.data.size,
 				contentType: imageRes.data.mimeType,
 				body: stream,
+				etag: processedEtag,
 			},
 		};
 	}
@@ -120,6 +144,7 @@ const processImage: ServiceFn<
 				contentLength: imageRes.data.size,
 				contentType: imageRes.data.mimeType,
 				body: stream,
+				etag: processedEtag,
 			},
 		};
 	}
@@ -145,11 +170,12 @@ const processImage: ServiceFn<
 					contentLength: imageRes.data.size,
 					contentType: imageRes.data.mimeType,
 					body: stream,
+					etag: processedEtag,
 				},
 			};
 		}
 
-		await Promise.all([
+		const [createProcessedImageRes, uploadRes] = await Promise.all([
 			ProcessedImages.createSingle({
 				data: {
 					key: data.processKey,
@@ -168,6 +194,44 @@ const processImage: ServiceFn<
 				},
 			}),
 		]);
+
+		if (
+			createProcessedImageRes.error !== undefined ||
+			uploadRes.error !== undefined
+		) {
+			await optionServices.adjustInt(context, {
+				name: "media_storage_used",
+				delta: imageRes.data.size * -1,
+				min: 0,
+			});
+
+			await Promise.allSettled([
+				createProcessedImageRes.error === undefined
+					? ProcessedImages.deleteSingle({
+							where: [{ key: "key", operator: "=", value: data.processKey }],
+							returning: ["key"],
+						})
+					: Promise.resolve(),
+				uploadRes.error === undefined
+					? mediaStrategyRes.data.delete(data.processKey)
+					: Promise.resolve(),
+			]);
+
+			return {
+				error: undefined,
+				data: {
+					key: data.processKey,
+					contentLength: imageRes.data.size,
+					contentType: imageRes.data.mimeType,
+					body: stream,
+					etag: processedEtag,
+				},
+			};
+		}
+
+		if (uploadRes.error === undefined && uploadRes.data?.etag) {
+			processedEtag = uploadRes.data.etag;
+		}
 	}
 
 	return {
@@ -177,6 +241,7 @@ const processImage: ServiceFn<
 			contentLength: imageRes.data.size,
 			contentType: imageRes.data.mimeType,
 			body: stream,
+			etag: processedEtag,
 		},
 	};
 };

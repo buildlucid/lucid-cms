@@ -238,6 +238,7 @@
 	"cron_job_error_message": "An error occurred while running/registering the cron jobs.",
 	"running_cron_jobs": "Running cron jobs...",
 	"media_error_missing_file_name": "If you are updating the media file, a file name must be provided.",
+	"media_error_type_change_not_allowed": "Replacing media with a different media type is not supported.",
 	"seed_error_name": "Seed Error",
 	"seed_error_message": "An error occurred while seeding the database.",
 	"running_database_seed_jobs": "Running database seed jobs...",

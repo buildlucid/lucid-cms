@@ -2,6 +2,7 @@
 	"object_not_found": "The requested R2 object could not be found.",
 	"object_body_undefined": "The R2 object body is undefined.",
 	"copy_source_missing": "The source object could not be found before rename.",
+	"copy_failed": "The object could not be verified after being copied.",
 	"an_unknown_error_occurred": "An unknown error occurred",
 	"invalid_or_expired_signed_url": "The signed media URL is invalid or has expired.",
 	"missing_upload_body": "The upload body is missing.",

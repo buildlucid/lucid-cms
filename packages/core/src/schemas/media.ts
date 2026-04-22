@@ -6,7 +6,11 @@ const mediaResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 1 }),
 	key: z.string().meta({
 		description: "Media key",
-		example: "public/5ttogd-placeholder-image.png",
+		example: "public/123e4567e89b12d3a456426614174000",
+	}),
+	fileName: z.string().nullable().meta({
+		description: "Original file name",
+		example: "placeholder-image.png",
 	}),
 	folderId: z.number().nullable().meta({
 		description: "Media folder ID",
@@ -14,7 +18,8 @@ const mediaResponseSchema = z.object({
 	}),
 	url: z.string().meta({
 		description: "Media URL",
-		example: "https://example.com/cdn/public/5ttogd-placeholder-image.png",
+		example:
+			"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/placeholder-image",
 	}),
 	public: z.boolean().meta({
 		description:
@@ -315,7 +320,7 @@ export const controllerSchemas = {
 				.trim()
 				.meta({
 					description: "The media key",
-					example: "public/5ttogd-placeholder-image.png",
+					example: "public/123e4567e89b12d3a456426614174000",
 				})
 				.optional(),
 			public: z
@@ -474,6 +479,11 @@ export const controllerSchemas = {
 				description: "Whether the media is public",
 				example: true,
 			}),
+			temporary: z.boolean().optional().meta({
+				description:
+					"Whether the upload target should be temporary and awaiting promotion.",
+				example: false,
+			}),
 		}),
 		query: {
 			string: undefined,
@@ -487,7 +497,7 @@ export const controllerSchemas = {
 			}),
 			key: z.string().meta({
 				description: "The media key",
-				example: "public/5ttogd-placeholder-image.png",
+				example: "public/123e4567e89b12d3a456426614174000",
 			}),
 			headers: z
 				.record(z.string(), z.string())
@@ -504,7 +514,7 @@ export const controllerSchemas = {
 		body: z.object({
 			key: z.string().trim().meta({
 				description: "The media key",
-				example: "public/5ttogd-placeholder-image.png",
+				example: "public/123e4567e89b12d3a456426614174000",
 			}),
 			folderId: z
 				.number()
@@ -598,36 +608,12 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	client: {
 		processMedia: {
-			body: z.object({
-				width: z
-					.number()
-					.refine((val) => val > 0, {
-						message: "Width must be greater than 0",
-					})
-					.refine((val) => val <= 2000, {
-						message: "Width must be less than or equal to 2000",
-					})
-					.optional(),
-				height: z
-					.number()
-					.refine((val) => val > 0, {
-						message: "Height must be greater than 0",
-					})
-					.refine((val) => val <= 2000, {
-						message: "Height must be less than or equal to 2000",
-					})
-					.optional(),
-				format: z.enum(["jpeg", "png", "webp", "avif"]).optional(),
-				quality: z
-					.number()
-					.refine((val) => val > 0, {
-						message: "Quality must be greater than 0",
-					})
-					.refine((val) => val <= 100, {
-						message: "Quality must be less than or equal to 100",
-					})
-					.optional(),
-			}),
+			body: z
+				.object({
+					preset: z.string().trim().optional(),
+					format: z.enum(["jpeg", "png", "webp", "avif"]).optional(),
+				})
+				.default({}),
 			query: {
 				string: undefined,
 				formatted: undefined,
@@ -635,14 +621,14 @@ export const controllerSchemas = {
 			params: z.object({
 				key: z.string().trim().meta({
 					description: "The media key you wish to stream",
-					example: "public/5ttogd-placeholder-image.png",
+					example: "public/123e4567e89b12d3a456426614174000",
 				}),
 			}),
 			response: z.object({
 				url: z.string().meta({
 					description: "The URL of the media",
 					example:
-						"https://example.com/cdn/public/5ttogd-placeholder-image.png",
+						"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/placeholder-image?preset=thumbnail&format=webp",
 				}),
 			}),
 		},

@@ -1,18 +1,22 @@
 import { constants, createReadStream } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import path from "node:path";
-import mime from "mime-types";
 import T from "../../../../../translations/index.js";
+import {
+	createBufferETag,
+	matchesETag,
+} from "../../../../../utils/http/etag.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceStream,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
+import { readStoredMetadata } from "../metadata.js";
 
 export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 	const stream: MediaAdapterServiceStream = async (
 		key: string,
 		options?: {
+			ifNoneMatch?: string;
 			range?: {
 				start: number;
 				end?: number;
@@ -37,15 +41,32 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 				stat(targetPath),
 				fileType.fileTypeFromFile(targetPath),
 			]);
+			const etag = createBufferETag(
+				Buffer.from(`${stats.mtime.getTime()}-${stats.size}`),
+			);
 			let mimeType: string | undefined;
 			const totalSize = stats.size;
 			if (fileTypeResult) {
 				mimeType = fileTypeResult.mime;
 			} else {
-				const fileExtension = path.extname(targetPath);
-				mimeType = mime.lookup(fileExtension) || undefined;
-				if (mimeType === "application/mp4") mimeType = "video/mp4";
+				mimeType =
+					(await readStoredMetadata(adapterOptions.uploadDir, key))?.mimeType ??
+					undefined;
 			}
+
+			if (!options?.range && matchesETag(options?.ifNoneMatch, etag)) {
+				return {
+					error: undefined,
+					data: {
+						contentLength: undefined,
+						contentType: mimeType || undefined,
+						body: new Uint8Array(),
+						etag,
+						notModified: true,
+					},
+				};
+			}
+
 			//* handle range requests
 			if (options?.range) {
 				const start = options.range.start;
@@ -68,6 +89,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 						contentLength,
 						contentType: mimeType || undefined,
 						body: body,
+						etag,
 						isPartialContent: true,
 						totalSize,
 						range: { start, end },
@@ -82,6 +104,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 					contentLength: totalSize,
 					contentType: mimeType || undefined,
 					body: body,
+					etag,
 					isPartialContent: false,
 					totalSize,
 				},

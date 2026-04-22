@@ -33,7 +33,12 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	// Functions
 	const getMediaPresignedUrl = async (fileName: string, mimeType: string) => {
 		await getPresignedUrl.action.mutateAsync({
-			body: { fileName, mimeType, public: getPublic() },
+			body: {
+				fileName,
+				mimeType,
+				public: getPublic(),
+				temporary: true,
+			},
 		});
 	};
 	const uploadFile = async (file: File) => {

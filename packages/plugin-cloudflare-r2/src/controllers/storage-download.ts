@@ -18,6 +18,7 @@ import { controllerSchemas } from "../schema/storage.js";
 import storageDownload from "../services/storage-download.js";
 import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
+import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 import getServiceContext from "../utils/get-service-context.js";
 
 const factory = createFactory();
@@ -59,6 +60,8 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 				key: query.key,
 				token: query.token,
 				timestamp: query.timestamp,
+				fileName: query.fileName,
+				extension: query.extension,
 			});
 			if (downloadMedia.error) throw new LucidAPIError(downloadMedia.error);
 			if (!downloadMedia.data) {
@@ -71,8 +74,14 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 
 			const downloadData = downloadMedia.data;
 
-			const fileName = query.key.split("/").filter(Boolean).at(-1) ?? query.key;
-			c.header("Content-Disposition", `attachment; filename="${fileName}"`);
+			c.header(
+				"Content-Disposition",
+				buildDownloadContentDisposition({
+					key: query.key,
+					fileName: query.fileName,
+					extension: query.extension,
+				}),
+			);
 			if (downloadData.contentLength !== undefined) {
 				c.header("Content-Length", String(downloadData.contentLength));
 			}

@@ -5,11 +5,9 @@ import type {
 	CollectionDocumentVersionKey,
 } from "./query-params.js";
 
-export type ImageProcessorOptions = {
-	width?: number;
-	height?: number;
+export type MediaProcessOptions = {
+	preset?: string;
 	format?: "webp" | "avif" | "jpeg" | "png";
-	quality?: number;
 };
 
 type BrickType = "builder" | "fixed";
@@ -296,6 +294,7 @@ export type MediaRef = {
 	id: number;
 	url: string;
 	key: string;
+	fileName: string | null;
 	mimeType: string;
 	extension: string;
 	fileSize: number;
@@ -324,6 +323,7 @@ export interface Media {
 	id: number;
 	key: string;
 	url: string;
+	fileName: string | null;
 	folderId: number | null;
 	title: Array<{
 		localeCode: string | null;

@@ -9,7 +9,8 @@ import { mediaServices, optionServices } from "../index.js";
 const clearSingle: ServiceFn<
 	[
 		{
-			id: number;
+			id?: number;
+			key?: string;
 		},
 	],
 	undefined
@@ -17,27 +18,42 @@ const clearSingle: ServiceFn<
 	const mediaStrategyRes =
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
+	if (!data.key && data.id === undefined) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 
 	const ProcessedImages = new ProcessedImagesRepository(
 		context.db.client,
 		context.config.db,
 	);
-	const Media = new MediaRepository(context.db.client, context.config.db);
+	let mediaKey = data.key;
 
-	const mediaRes = await Media.selectSingle({
-		select: ["key"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
+	if (!mediaKey) {
+		const Media = new MediaRepository(context.db.client, context.config.db);
+
+		const mediaRes = await Media.selectSingle({
+			select: ["key"],
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.id,
+				},
+			],
+			validation: {
+				enabled: true,
 			},
-		],
-		validation: {
-			enabled: true,
-		},
-	});
-	if (mediaRes.error) return mediaRes;
+		});
+		if (mediaRes.error) return mediaRes;
+
+		mediaKey = mediaRes.data.key;
+	}
 
 	const processedImagesRes = await ProcessedImages.selectMultiple({
 		select: ["key", "file_size"],
@@ -45,7 +61,7 @@ const clearSingle: ServiceFn<
 			{
 				key: "media_key",
 				operator: "=",
-				value: mediaRes.data.key,
+				value: mediaKey,
 			},
 		],
 		validation: {
@@ -75,7 +91,7 @@ const clearSingle: ServiceFn<
 				{
 					key: "media_key",
 					operator: "=",
-					value: mediaRes.data.key,
+					value: mediaKey,
 				},
 			],
 		}),

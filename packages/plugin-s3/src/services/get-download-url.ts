@@ -3,19 +3,25 @@ import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../constants.js";
 import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
+import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (key) => {
+	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
+		key,
+		meta,
+	) => {
 		try {
 			const objectUrl = new URL(
 				`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,
 			);
 			objectUrl.searchParams.set("X-Amz-Expires", String(PRESIGNED_URL_EXPIRY));
-
-			const fileName = key.split("/").filter(Boolean).at(-1) ?? key;
 			objectUrl.searchParams.set(
 				"response-content-disposition",
-				`attachment; filename="${fileName}"`,
+				buildDownloadContentDisposition({
+					key,
+					fileName: meta.fileName,
+					extension: meta.extension,
+				}),
 			);
 
 			const response = await client.sign(

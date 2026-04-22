@@ -8,6 +8,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const stream: MediaAdapterServiceStream = async (
 		key: string,
 		options?: {
+			ifNoneMatch?: string;
 			range?: {
 				start: number;
 				end?: number;
@@ -24,6 +25,10 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 					end !== undefined ? `bytes=${start}-${end}` : `bytes=${start}-`;
 			}
 
+			if (options?.ifNoneMatch) {
+				headers["If-None-Match"] = options.ifNoneMatch;
+			}
+
 			const response = await client.sign(
 				new Request(
 					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,
@@ -35,6 +40,19 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			);
 
 			const result = await fetch(response);
+
+			if (result.status === 304) {
+				return {
+					error: undefined,
+					data: {
+						contentLength: undefined,
+						contentType: undefined,
+						body: new Uint8Array(),
+						etag: result.headers.get("etag"),
+						notModified: true,
+					},
+				};
+			}
 
 			if (!result.ok) {
 				return {
@@ -76,6 +94,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 
 			const contentLength = result.headers.get("content-length");
 			const contentType = result.headers.get("content-type");
+			const etag = result.headers.get("etag");
 
 			return {
 				error: undefined,
@@ -85,6 +104,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 						: undefined,
 					contentType: contentType || undefined,
 					body: result.body as unknown as Readable,
+					etag: etag || null,
 					isPartialContent,
 					totalSize:
 						totalSize ||

@@ -36,8 +36,10 @@ const formatMediaRef = (
 		url: createMediaUrl({
 			key: value.key,
 			host: params.host,
+			fileName: value.file_name,
 		}),
 		key: value.key,
+		fileName: value.file_name,
 		mimeType: value.mime_type,
 		extension: value.file_extension,
 		fileSize: value.file_size,

@@ -33,6 +33,19 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 				storageClass: source.storageClass,
 			});
 
+			const target = await pluginOptions.binding.head(props.to);
+			if (!target || target.size !== source.size) {
+				await pluginOptions.binding.delete(props.to);
+
+				return {
+					error: {
+						type: "plugin",
+						message: T("copy_failed"),
+					},
+					data: undefined,
+				};
+			}
+
 			try {
 				await pluginOptions.binding.delete(props.from);
 			} catch (error) {

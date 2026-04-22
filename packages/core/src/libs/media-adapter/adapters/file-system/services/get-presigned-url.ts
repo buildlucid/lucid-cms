@@ -19,6 +19,10 @@ export default (options: FileSystemMediaAdapterOptions) => {
 						path: FILE_SYSTEM_UPLOAD_PATH,
 						key,
 						secretKey: options.secretKey,
+						query: {
+							mimeType: meta.mimeType,
+							extension: meta.extension,
+						},
 					}),
 				},
 			};

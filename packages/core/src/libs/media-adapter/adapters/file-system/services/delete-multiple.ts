@@ -5,6 +5,7 @@ import type {
 	MediaAdapterServiceDeleteMultiple,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
+import { deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (keys) => {
@@ -14,6 +15,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 				try {
 					await access(targetPath, constants.F_OK);
 					await unlink(targetPath);
+					await deleteStoredMetadata(options.uploadDir, key);
 				} catch {}
 			}
 			return {

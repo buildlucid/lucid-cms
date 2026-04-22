@@ -38,6 +38,7 @@ export type MediaRef = {
 	id: number;
 	url: string;
 	key: string;
+	fileName: string | null;
 	mimeType: string;
 	extension: string;
 	fileSize: number;

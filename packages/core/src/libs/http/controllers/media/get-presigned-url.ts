@@ -55,6 +55,7 @@ const getPresignedUrlController = factory.createHandlers(
 			fileName: body.fileName,
 			mimeType: body.mimeType,
 			public: body.public,
+			temporary: body.temporary,
 		});
 		if (presignedUrl.error) throw new LucidAPIError(presignedUrl.error);
 

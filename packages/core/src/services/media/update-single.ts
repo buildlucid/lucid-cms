@@ -8,6 +8,8 @@ import {
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import type { MediaType } from "../../types/response.js";
+import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
@@ -52,7 +54,15 @@ const updateSingle: ServiceFn<
 	);
 
 	const mediaRes = await Media.selectSingle({
-		select: ["id", "key", "file_size", "public", "type"],
+		select: [
+			"id",
+			"key",
+			"file_size",
+			"file_extension",
+			"public",
+			"type",
+			"e_tag",
+		],
 		where: [
 			{
 				key: "id",
@@ -97,6 +107,8 @@ const updateSingle: ServiceFn<
 	>["data"];
 
 	let renamedKey: string | undefined;
+	const currentPublic = formatter.formatBoolean(mediaRes.data.public);
+	const targetPublic = data.public ?? currentPublic;
 
 	if (data.key !== undefined && data.fileName !== undefined) {
 		const awaitingSync = await mediaServices.checks.checkAwaitingSync(context, {
@@ -105,11 +117,21 @@ const updateSingle: ServiceFn<
 		if (awaitingSync.error) return awaitingSync;
 
 		const updateRes = await mediaServices.strategies.update(context, {
-			id: mediaRes.data.id,
 			previousSize: mediaRes.data.file_size,
 			previousKey: mediaRes.data.key,
+			previousType: mediaRes.data.type as MediaType,
+			previousEtag: mediaRes.data.e_tag,
 			updatedKey: data.key,
 			fileName: data.fileName,
+			targetKey:
+				targetPublic === currentPublic
+					? mediaRes.data.key
+					: changeKeyVisibility({
+							key: mediaRes.data.key,
+							visibility: targetPublic
+								? constants.media.visibilityKeys.public
+								: constants.media.visibilityKeys.private,
+						}),
 		});
 		if (updateRes.error) return updateRes;
 
@@ -117,19 +139,11 @@ const updateSingle: ServiceFn<
 	}
 
 	//* if no new key/file provided but public flag differs, rename the key only
-	if (
-		data.key === undefined &&
-		data.fileName === undefined &&
-		data.public !== undefined
-	) {
-		const currentPublic = formatter.formatBoolean(mediaRes.data.public);
+	if (data.key === undefined && data.public !== undefined) {
 		if (currentPublic !== data.public) {
 			const targetVisibility = data.public
 				? constants.media.visibilityKeys.public
 				: constants.media.visibilityKeys.private;
-			const { default: changeKeyVisibility } = await import(
-				"../../utils/media/change-key-visibility.js"
-			);
 			const newKey = changeKeyVisibility({
 				key: mediaRes.data.key,
 				visibility: targetVisibility,
@@ -166,76 +180,79 @@ const updateSingle: ServiceFn<
 		(updateObjectRes !== undefined || renamedKey !== undefined) &&
 		mediaRes.data.type === "image";
 
-	const [
-		mediaUpdateRes,
-		deleteMediaSyncRes,
-		mediaTranslationsRes,
-		clearProcessedRes,
-	] = await Promise.all([
-		Media.updateSingle({
-			where: [{ key: "id", operator: "=", value: data.id }],
-			data: {
-				key: updateObjectRes?.key ?? renamedKey,
-				e_tag: updateObjectRes?.etag,
-				type: updateObjectRes?.type,
-				mime_type: updateObjectRes?.mimeType,
-				file_extension: updateObjectRes?.extension,
-				file_size: updateObjectRes?.size,
-				width: data.width,
-				height: data.height,
-				blur_hash: data.blurHash,
-				average_color: data.averageColor,
-				is_dark: data.isDark,
-				is_light: data.isLight,
-				folder_id: data.folderId,
-				public: isPublic ?? data.public,
-				is_deleted: data.isDeleted,
-				is_deleted_at: data.isDeleted
-					? new Date().toISOString()
-					: data.isDeleted === false
-						? null
-						: undefined,
-				deleted_by: data.isDeleted
-					? data.userId
-					: data.isDeleted === false
-						? null
-						: undefined,
-				updated_at: new Date().toISOString(),
-				updated_by: data.userId,
-			},
-			returning: ["id"],
-			validation: {
-				enabled: true,
-			},
-		}),
-		updateObjectRes !== undefined
-			? MediaAwaitingSync.deleteSingle({
-					where: [{ key: "key", operator: "=", value: data.key }],
-					returning: ["key"],
-					validation: {
-						enabled: true,
-					},
-				})
-			: Promise.resolve({ error: undefined, data: undefined }),
-		translations.length > 0
-			? MediaTranslations.upsertMultiple({
-					data: translations,
-					returning: ["id"],
-					validation: {
-						enabled: true,
-					},
-				})
-			: Promise.resolve({ error: undefined, data: undefined }),
-		shouldClearProcessed
-			? processedImageServices.clearSingle(context, {
-					id: mediaRes.data.id,
-				})
-			: Promise.resolve({ error: undefined, data: undefined }),
-	]);
-	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
+	const [mediaUpdateRes, mediaTranslationsRes, clearProcessedRes] =
+		await Promise.all([
+			Media.updateSingle({
+				where: [{ key: "id", operator: "=", value: data.id }],
+				data: {
+					key: updateObjectRes?.key ?? renamedKey,
+					e_tag: updateObjectRes?.etag,
+					type: updateObjectRes?.type,
+					mime_type: updateObjectRes?.mimeType,
+					file_extension: updateObjectRes?.extension,
+					file_name: data.fileName,
+					file_size: updateObjectRes?.size,
+					width: data.width,
+					height: data.height,
+					blur_hash: data.blurHash,
+					average_color: data.averageColor,
+					is_dark: data.isDark,
+					is_light: data.isLight,
+					folder_id: data.folderId,
+					public: isPublic ?? data.public,
+					is_deleted: data.isDeleted,
+					is_deleted_at: data.isDeleted
+						? new Date().toISOString()
+						: data.isDeleted === false
+							? null
+							: undefined,
+					deleted_by: data.isDeleted
+						? data.userId
+						: data.isDeleted === false
+							? null
+							: undefined,
+					updated_at: new Date().toISOString(),
+					updated_by: data.userId,
+				},
+				returning: ["id"],
+				validation: {
+					enabled: true,
+				},
+			}),
+			translations.length > 0
+				? MediaTranslations.upsertMultiple({
+						data: translations,
+						returning: ["id"],
+						validation: {
+							enabled: true,
+						},
+					})
+				: Promise.resolve({ error: undefined, data: undefined }),
+			shouldClearProcessed
+				? processedImageServices.clearSingle(context, {
+						id: mediaRes.data.id,
+						key: mediaRes.data.key,
+					})
+				: Promise.resolve({ error: undefined, data: undefined }),
+		]);
 	if (mediaUpdateRes.error) return mediaUpdateRes;
 	if (mediaTranslationsRes.error) return mediaTranslationsRes;
 	if (clearProcessedRes.error) return clearProcessedRes;
+
+	if (
+		updateObjectRes !== undefined &&
+		updateObjectRes.sourceDeleted !== false &&
+		data.key !== undefined
+	) {
+		const deleteMediaSyncRes = await MediaAwaitingSync.deleteSingle({
+			where: [{ key: "key", operator: "=", value: data.key }],
+			returning: ["key"],
+			validation: {
+				enabled: true,
+			},
+		});
+		if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
+	}
 
 	await Promise.all([
 		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {

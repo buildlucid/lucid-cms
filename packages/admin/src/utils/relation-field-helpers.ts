@@ -15,6 +15,7 @@ export const mediaResponseToRef = (media: Media): MediaRelationRef => ({
 	id: media.id,
 	url: media.url,
 	key: media.key,
+	fileName: media.fileName,
 	mimeType: media.meta.mimeType,
 	extension: media.meta.extension,
 	fileSize: media.meta.fileSize,

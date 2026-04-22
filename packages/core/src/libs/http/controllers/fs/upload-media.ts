@@ -65,6 +65,8 @@ const uploadMediaController = factory.createHandlers(
 		})(context, {
 			buffer: buffer ? Buffer.from(buffer) : undefined,
 			key: query.key,
+			mimeType: query.mimeType,
+			extension: query.extension,
 			token: query.token,
 			timestamp: query.timestamp,
 			mediaAdapterOptions: mediaAdapter.adapter?.getOptions?.(),

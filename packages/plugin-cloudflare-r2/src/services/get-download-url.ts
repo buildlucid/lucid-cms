@@ -2,6 +2,7 @@ import type { MediaAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY, STORAGE_DOWNLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
+import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 import { createSignedMediaUrl } from "../utils/signed-media-url.js";
 
 /**
@@ -23,6 +24,10 @@ export default (
 							path: STORAGE_DOWNLOAD_PATH,
 							key,
 							secretKey: meta.secretKey,
+							query: {
+								fileName: meta.fileName ?? undefined,
+								extension: meta.extension ?? undefined,
+							},
 						}),
 					},
 				};
@@ -36,11 +41,13 @@ export default (
 				`${pluginOptions.http.endpoint}/${pluginOptions.http.bucket}/${key}`,
 			);
 			objectUrl.searchParams.set("X-Amz-Expires", String(PRESIGNED_URL_EXPIRY));
-
-			const fileName = key.split("/").filter(Boolean).at(-1) ?? key;
 			objectUrl.searchParams.set(
 				"response-content-disposition",
-				`attachment; filename="${fileName}"`,
+				buildDownloadContentDisposition({
+					key,
+					fileName: meta.fileName,
+					extension: meta.extension,
+				}),
 			);
 
 			const response = await client.sign(

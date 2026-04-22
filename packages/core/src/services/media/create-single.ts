@@ -80,6 +80,7 @@ const createSingle: ServiceFn<
 				type: syncMediaRes.data.type,
 				mime_type: syncMediaRes.data.mimeType,
 				file_extension: syncMediaRes.data.extension,
+				file_name: data.fileName,
 				file_size: syncMediaRes.data.size,
 				width: data.width ?? null,
 				height: data.height ?? null,

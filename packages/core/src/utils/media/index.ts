@@ -1,12 +1,17 @@
+export { default as buildDownloadContentDisposition } from "./build-download-content-disposition.js";
 export { default as changeKeyVisibility } from "./change-key-visibility.js";
 export { default as chooseAcceptHeaderFormat } from "./choose-accept-header-format.js";
 export { default as createMediaUrl } from "./create-media-url.js";
 export { default as createShareLinkUrl } from "./create-share-link-url.js";
 export { default as createShareStreamUrl } from "./create-share-stream-url.js";
+export { default as formatMediaBrowserKey } from "./format-media-browser-key.js";
 export { default as generateKey } from "./generate-key.js";
 export { default as generateProcessKey } from "./generate-process-key.js";
+export { default as getDownloadFileName } from "./get-download-file-name.js";
 export type { FileMetadata } from "./get-file-metadata.js";
 export { default as getFileMetadata } from "./get-file-metadata.js";
 export { default as getKeyVisibility } from "./get-key-visibility.js";
 export { default as getMediaType } from "./get-media-type.js";
 export { default as isProcessedImageKey } from "./is-processed-image-key.js";
+export { default as normalizeMediaKey } from "./normalize-media-key.js";
+export { default as resolveProcessingRequest } from "./resolve-processing-request.js";

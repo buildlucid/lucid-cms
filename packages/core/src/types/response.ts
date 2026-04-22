@@ -146,6 +146,7 @@ export interface Media {
 	id: number;
 	key: string;
 	url: string;
+	fileName: string | null;
 	folderId: number | null;
 	title: {
 		localeCode: string | null;

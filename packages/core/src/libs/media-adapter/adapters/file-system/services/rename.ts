@@ -5,6 +5,7 @@ import type {
 	MediaAdapterServiceRenameKey,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
+import { copyStoredMetadata, deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const rename: MediaAdapterServiceRenameKey = async (props) => {
@@ -14,7 +15,9 @@ export default (options: FileSystemMediaAdapterOptions) => {
 
 			await mkdir(path.dirname(to.targetPath), { recursive: true });
 			await copyFile(from.targetPath, to.targetPath);
+			await copyStoredMetadata(options.uploadDir, props.from, props.to);
 			await rm(from.targetPath);
+			await deleteStoredMetadata(options.uploadDir, props.from);
 
 			return {
 				error: undefined,

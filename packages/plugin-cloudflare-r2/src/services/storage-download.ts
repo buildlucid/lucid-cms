@@ -14,6 +14,8 @@ const storageDownload =
 				key: string;
 				token: string;
 				timestamp: string;
+				fileName?: string;
+				extension?: string;
 			},
 		],
 		{
@@ -37,6 +39,10 @@ const storageDownload =
 				token: data.token,
 				timestamp: data.timestamp,
 				secretKey: context.config.secrets.cookie,
+				query: {
+					fileName: data.fileName,
+					extension: data.extension,
+				},
 			})
 		) {
 			return {

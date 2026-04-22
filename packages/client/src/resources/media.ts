@@ -1,6 +1,6 @@
 import type {
-	ImageProcessorOptions,
 	Media,
+	MediaProcessOptions,
 	MediaUrl,
 	ResponseBody,
 } from "../generated/core-client-types.js";
@@ -32,7 +32,7 @@ export type MediaGetMultipleResponse = ResponseBody<Media[]>;
 
 export type MediaProcessInput = {
 	key: string;
-	body?: ImageProcessorOptions;
+	body?: MediaProcessOptions;
 	request?: LucidRequestOptions;
 };
 

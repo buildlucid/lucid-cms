@@ -10,6 +10,7 @@ export interface MediaPropsT {
 	type: string;
 	mime_type: string;
 	file_extension: string;
+	file_name: string | null;
 	file_size: number;
 	width: number | null;
 	height: number | null;
@@ -64,10 +65,12 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 	return {
 		id: props.media.id,
 		key: props.media.key,
+		fileName: props.media.file_name,
 		folderId: props.media.folder_id,
 		url: createMediaUrl({
 			key: props.media.key,
 			host: props.host,
+			fileName: props.media.file_name,
 		}),
 		title:
 			props.media.translations?.map((t) => ({

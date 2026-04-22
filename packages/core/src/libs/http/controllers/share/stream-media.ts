@@ -99,6 +99,7 @@ const streamMediaController = factory.createHandlers(
 			key: response.data.key,
 			contentLength: response.data.contentLength,
 			contentType: response.data.contentType,
+			etag: response.data.etag ?? undefined,
 		});
 
 		return stream(c, async (stream) => {

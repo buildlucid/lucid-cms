@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import normalizeMediaKey from "./normalize-media-key.js";
 
 type MediaVisibility =
 	(typeof constants.media.visibilityKeys)[keyof typeof constants.media.visibilityKeys];
@@ -7,7 +8,9 @@ type MediaVisibility =
  * Infers the visibility based on the media key.
  */
 const getKeyVisibility = (key: string): MediaVisibility => {
-	return key.startsWith(`${constants.media.visibilityKeys.public}/`)
+	const normalizedKey = normalizeMediaKey(key);
+
+	return normalizedKey.startsWith(`${constants.media.visibilityKeys.public}/`)
 		? constants.media.visibilityKeys.public
 		: constants.media.visibilityKeys.private;
 };

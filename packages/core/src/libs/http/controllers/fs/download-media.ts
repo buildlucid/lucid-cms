@@ -9,6 +9,7 @@ import { controllerSchemas } from "../../../../schemas/fs.js";
 import { fsServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
+import { buildDownloadContentDisposition } from "../../../../utils/media/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
@@ -65,12 +66,18 @@ const downloadMediaController = factory.createHandlers(
 			key: query.key,
 			token: query.token,
 			timestamp: query.timestamp,
+			fileName: query.fileName,
+			extension: query.extension,
 			mediaAdapterOptions: mediaAdapter.adapter?.getOptions?.(),
 		});
 		if (downloadMedia.error) throw new LucidAPIError(downloadMedia.error);
 
-		const fileName = query.key.split("/").filter(Boolean).at(-1) ?? query.key;
-		c.header("Content-Disposition", `attachment; filename="${fileName}"`);
+		const contentDisposition = buildDownloadContentDisposition({
+			key: query.key,
+			fileName: query.fileName,
+			extension: query.extension,
+		});
+		c.header("Content-Disposition", contentDisposition);
 		if (downloadMedia.data.contentLength !== undefined) {
 			c.header("Content-Length", String(downloadMedia.data.contentLength));
 		}

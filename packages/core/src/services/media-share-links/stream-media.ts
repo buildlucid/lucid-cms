@@ -22,6 +22,7 @@ const streamMedia: ServiceFn<
 		contentLength: number | undefined;
 		contentType: string | undefined;
 		body: MediaAdapterStreamBody;
+		etag?: string | null;
 		isPartialContent?: boolean;
 		totalSize?: number;
 		range?: {
@@ -46,6 +47,7 @@ const streamMedia: ServiceFn<
 			contentLength: res.data.contentLength,
 			contentType: res.data.contentType,
 			body: res.data.body,
+			etag: res.data.etag,
 			isPartialContent: res.data.isPartialContent,
 			totalSize: res.data.totalSize,
 			range: res.data.range,

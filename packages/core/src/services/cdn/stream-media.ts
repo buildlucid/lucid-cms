@@ -1,17 +1,18 @@
-import constants from "../../constants/constants.js";
+import mime from "mime-types";
 import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
+import T from "../../translations/index.js";
 import {
-	chooseAcceptHeaderFormat,
 	generateProcessKey,
 	isProcessedImageKey,
+	normalizeMediaKey,
+	resolveProcessingRequest,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
 
 /**
- * Streams the media based on the key.
- * If a preset is provided, it will generate a processed image and stream that.
+ * Streams the canonical media key and applies presets or formats on demand.
  */
 const streamMedia: ServiceFn<
 	[
@@ -19,6 +20,7 @@ const streamMedia: ServiceFn<
 			key: string;
 			query: StreamSingleQueryParams;
 			accept: string | undefined;
+			ifNoneMatch?: string;
 			range?: {
 				start: number;
 				end?: number;
@@ -30,6 +32,8 @@ const streamMedia: ServiceFn<
 		contentLength: number | undefined;
 		contentType: string | undefined;
 		body: MediaAdapterStreamBody;
+		etag?: string | null;
+		notModified?: boolean;
 		isPartialContent?: boolean;
 		totalSize?: number;
 		range?: {
@@ -42,50 +46,43 @@ const streamMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const isProcessedKey = isProcessedImageKey(data.key);
+	const normalizedKey = normalizeMediaKey(data.key);
+	const isProcessedKey = isProcessedImageKey(normalizedKey);
 
-	//* if its already processed, dont allow it to be processed further
 	if (isProcessedKey) {
-		const res = await mediaStrategyRes.data.stream(data.key, {
-			range: data.range,
-		});
-		if (res.error) return res;
 		return {
-			error: undefined,
-			data: {
-				key: data.key,
-				contentLength: res.data.contentLength,
-				contentType: res.data.contentType,
-				body: res.data.body,
-				isPartialContent: res.data.isPartialContent,
-				totalSize: res.data.totalSize,
-				range: res.data.range,
+			error: {
+				type: "basic",
+				status: 404,
+				name: T("media_not_found_name"),
+				message: T("media_not_found_message"),
 			},
+			data: undefined,
 		};
 	}
 
-	// ------------------------------
-	// OG Image
+	const processingRequest = resolveProcessingRequest({
+		presets: context.config.media.images.presets,
+		onDemandFormats: context.config.media.images.onDemandFormats,
+		query: data.query,
+		accept: data.accept,
+	});
 
-	const selectedPreset =
-		context.config.media.images.presets?.[data.query.preset ?? ""];
-	const format = context.config.media.images.onDemandFormats
-		? chooseAcceptHeaderFormat(data.accept, data.query.format)
-		: selectedPreset?.format;
-	const quality = selectedPreset?.quality ?? constants.media.imagePresetQuality;
-
-	if (!selectedPreset && !format) {
-		const res = await mediaStrategyRes.data.stream(data.key, {
+	if (!processingRequest.hasProcessing) {
+		const res = await mediaStrategyRes.data.stream(normalizedKey, {
+			ifNoneMatch: data.ifNoneMatch,
 			range: data.range,
 		});
 		if (res.error) return res;
 		return {
 			error: undefined,
 			data: {
-				key: data.key,
+				key: normalizedKey,
 				contentLength: res.data.contentLength,
 				contentType: res.data.contentType,
 				body: res.data.body,
+				etag: res.data.etag,
+				notModified: res.data.notModified,
 				isPartialContent: res.data.isPartialContent,
 				totalSize: res.data.totalSize,
 				range: res.data.range,
@@ -95,17 +92,26 @@ const streamMedia: ServiceFn<
 
 	// ------------------------------
 	// Processed Image
+	let sourceExtension: string | null = processingRequest.format ?? null;
+	if (!sourceExtension) {
+		const metaRes = await mediaStrategyRes.data.getMeta(normalizedKey);
+		if (metaRes.error) return metaRes;
+		sourceExtension = mime.extension(metaRes.data.mimeType || "") || null;
+	}
+
 	const processKey = generateProcessKey({
-		key: data.key,
+		key: normalizedKey,
+		extension: sourceExtension,
 		options: {
-			format,
-			quality: quality,
-			width: selectedPreset?.width,
-			height: selectedPreset?.height,
+			format: processingRequest.format,
+			quality: processingRequest.quality,
+			width: processingRequest.width,
+			height: processingRequest.height,
 		},
 	});
 
 	const res = await mediaStrategyRes.data.stream(processKey, {
+		ifNoneMatch: data.ifNoneMatch,
 		range: data.range,
 	});
 	if (res.data) {
@@ -116,6 +122,8 @@ const streamMedia: ServiceFn<
 				contentLength: res.data.contentLength,
 				contentType: res.data.contentType,
 				body: res.data.body,
+				etag: res.data.etag,
+				notModified: res.data.notModified,
 				isPartialContent: res.data.isPartialContent,
 				totalSize: res.data.totalSize,
 				range: res.data.range,
@@ -125,13 +133,14 @@ const streamMedia: ServiceFn<
 
 	// Process
 	return await processedImageServices.processImage(context, {
-		key: data.key,
+		key: normalizedKey,
 		processKey: processKey,
+		ifNoneMatch: data.ifNoneMatch,
 		options: {
-			format,
-			quality: quality,
-			width: selectedPreset?.width,
-			height: selectedPreset?.height,
+			format: processingRequest.format,
+			quality: processingRequest.quality,
+			width: processingRequest.width,
+			height: processingRequest.height,
 		},
 	});
 };

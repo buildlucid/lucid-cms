@@ -348,6 +348,7 @@ export interface LucidMedia {
 	type: string;
 	mime_type: string;
 	file_extension: string;
+	file_name: string | null;
 	file_size: number;
 	width: number | null;
 	height: number | null;

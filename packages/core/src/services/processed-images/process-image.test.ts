@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -103,5 +104,79 @@ describe("processImage", () => {
 		expect(
 			await readStream(response.data?.body as ReadableStream<Uint8Array>),
 		).toBe("fallback-image");
+	});
+
+	test("returns a stable etag for generated processed images and short-circuits matching revalidation requests", async () => {
+		const sourceBody = new ReadableStream<Uint8Array>({
+			start(controller) {
+				controller.enqueue(new TextEncoder().encode("source-image"));
+				controller.close();
+			},
+		});
+		const processedBuffer = Buffer.from("processed-image");
+		const processedEtag = crypto
+			.createHash("md5")
+			.update(processedBuffer)
+			.digest("hex");
+
+		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				stream: vi.fn().mockResolvedValue({
+					error: undefined,
+					data: {
+						contentLength: 12,
+						contentType: "image/png",
+						body: sourceBody,
+						etag: "source-etag",
+					},
+				}),
+				upload: vi.fn(),
+			},
+		});
+
+		mocks.optimizeImage.mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				buffer: processedBuffer,
+				mimeType: "image/webp",
+				size: processedBuffer.length,
+				extension: "webp",
+				shouldStore: false,
+			},
+		});
+
+		mocks.getSingleCount.mockResolvedValueOnce({
+			error: undefined,
+			data: 0,
+		});
+
+		const response = await processImage(
+			{
+				config: {
+					media: {
+						limits: {
+							processedImages: 10,
+						},
+						images: {
+							storeProcessed: false,
+						},
+					},
+				},
+			} as never,
+			{
+				key: "media/original.png",
+				processKey: "media/processed.webp",
+				ifNoneMatch: `"${processedEtag}"`,
+				options: {
+					format: "webp",
+				},
+			},
+		);
+
+		expect(response.error).toBeUndefined();
+		expect(response.data?.etag).toBe(processedEtag);
+		expect(response.data?.notModified).toBe(true);
+		expect(response.data?.body).toEqual(new Uint8Array());
 	});
 });

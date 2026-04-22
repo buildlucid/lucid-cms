@@ -67,6 +67,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("file_extension", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("file_name", adapter.getDataType("text"))
 				.addColumn("file_size", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)

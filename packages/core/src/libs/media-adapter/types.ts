@@ -29,6 +29,8 @@ export type MediaAdapterServiceGetDownloadUrl = (
 	meta: {
 		host: string;
 		secretKey: string;
+		fileName?: string | null;
+		extension?: string | null;
 	},
 ) => ServiceResponse<{
 	url: string;
@@ -43,6 +45,7 @@ export type MediaAdapterServiceGetMeta = (key: string) => ServiceResponse<{
 export type MediaAdapterServiceStream = (
 	key: string,
 	options?: {
+		ifNoneMatch?: string;
 		range?: {
 			start: number;
 			end?: number;
@@ -52,6 +55,8 @@ export type MediaAdapterServiceStream = (
 	contentLength: number | undefined;
 	contentType: string | undefined;
 	body: MediaAdapterStreamBody;
+	etag?: string | null;
+	notModified?: boolean;
 	isPartialContent?: boolean;
 	totalSize?: number;
 	range?: {

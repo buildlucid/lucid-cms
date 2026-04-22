@@ -1,4 +1,5 @@
 import type { LucidHonoContext } from "../../../types/hono.js";
+import { formatETag } from "../../../utils/http/etag.js";
 
 export const applyStreamingHeaders = (
 	c: LucidHonoContext,
@@ -6,6 +7,7 @@ export const applyStreamingHeaders = (
 		contentLength?: number;
 		contentType?: string;
 		key?: string;
+		etag?: string;
 	},
 ) => {
 	c.header("Accept-Ranges", "bytes");
@@ -14,6 +16,7 @@ export const applyStreamingHeaders = (
 	if (opts.contentLength !== undefined)
 		c.header("Content-Length", String(opts.contentLength));
 	if (opts.contentType) c.header("Content-Type", opts.contentType);
+	if (opts.etag) c.header("ETag", formatETag(opts.etag));
 };
 
 export const applyRangeHeaders = (
@@ -22,6 +25,7 @@ export const applyRangeHeaders = (
 		isPartial?: boolean;
 		range?: { start: number; end: number };
 		totalSize?: number;
+		cacheControl?: string;
 	},
 ) => {
 	if (info.isPartial && info.range && info.totalSize !== undefined) {
@@ -31,7 +35,10 @@ export const applyRangeHeaders = (
 			`bytes ${info.range.start}-${info.range.end}/${info.totalSize}`,
 		);
 	} else {
-		c.header("Cache-Control", "public, max-age=31536000, immutable");
+		c.header(
+			"Cache-Control",
+			info.cacheControl ?? "public, max-age=31536000, immutable",
+		);
 	}
 };
 

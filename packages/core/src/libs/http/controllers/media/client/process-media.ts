@@ -23,7 +23,7 @@ const factory = createFactory();
 const processMediaController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get a single media item by key and return the URL. This supports processing and fallback images.",
+			"Get a single media item by key and return the public CDN URL. This supports image presets and formats.",
 		tags: ["client-media"],
 		summary: "Get Media URL",
 		responses: honoOpenAPIResponse({

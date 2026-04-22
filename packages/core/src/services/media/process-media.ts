@@ -1,30 +1,42 @@
-import {
-	MediaRepository,
-	ProcessedImagesRepository,
-} from "../../libs/repositories/index.js";
-import type { ImageProcessorOptions } from "../../types/config.js";
+import { MediaRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import type { MediaProcessOptions } from "../../types/client.js";
 import type { MediaUrl } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
-import { createMediaUrl, generateProcessKey } from "../../utils/media/index.js";
+import {
+	createMediaUrl,
+	isProcessedImageKey,
+	normalizeMediaKey,
+	resolveProcessingRequest,
+} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices, processedImageServices } from "../index.js";
+import { mediaServices } from "../index.js";
 
 const processMedia: ServiceFn<
 	[
 		{
 			key: string;
-			body: ImageProcessorOptions;
+			body: MediaProcessOptions;
 		},
 	],
 	MediaUrl
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const ProcessedImage = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
-
 	const baseUrl = getBaseUrl(context);
+	const normalizedKey = normalizeMediaKey(data.key);
+
+	if (isProcessedImageKey(normalizedKey)) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				name: T("media_not_found_name"),
+				message: T("media_not_found_message"),
+			},
+			data: undefined,
+		};
+	}
+
+	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	const mediaStrategyRes =
 		await mediaServices.checks.checkHasMediaStrategy(context);
@@ -32,100 +44,66 @@ const processMedia: ServiceFn<
 
 	//* fetches the media item, if its not an image return the original url
 	const mediaRes = await Media.selectSingle({
-		select: ["type"],
+		select: ["type", "key", "file_name"],
 		where: [
 			{
-				key: "type",
+				key: "key",
 				operator: "=",
-				value: "image",
+				value: normalizedKey,
 			},
 		],
 	});
 	if (mediaRes.error) return mediaRes;
+	if (!mediaRes.data) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: T("media_not_found_message"),
+			},
+			data: undefined,
+		};
+	}
 	if (mediaRes.data?.type !== "image") {
 		return {
 			error: undefined,
 			data: {
 				url: createMediaUrl({
-					key: data.key,
+					key: mediaRes.data.key,
 					host: baseUrl,
+					fileName: mediaRes.data.file_name,
 				}),
 			},
 		};
 	}
 
-	//* if no processing is requested, return the original url
-	if (
-		data.body.format === undefined &&
-		data.body?.width === undefined &&
-		data.body?.height === undefined &&
-		data.body?.quality === undefined
-	) {
+	const processingRequest = resolveProcessingRequest({
+		presets: context.config.media.images.presets,
+		onDemandFormats: context.config.media.images.onDemandFormats,
+		query: data.body,
+	});
+
+	if (!processingRequest.hasProcessing) {
 		return {
 			error: undefined,
 			data: {
 				url: createMediaUrl({
-					key: data.key,
+					key: mediaRes.data.key,
 					host: baseUrl,
+					fileName: mediaRes.data.file_name,
 				}),
 			},
 		};
 	}
-
-	//* generate the process key
-	const processKey = generateProcessKey({
-		key: data.key,
-		options: {
-			format: data.body.format,
-			quality: data.body.quality,
-			width: data.body.width,
-			height: data.body.height,
-		},
-	});
-
-	//* check if the processed media already exists
-	const processedImageRes = await ProcessedImage.selectSingle({
-		select: ["key"],
-		where: [
-			{
-				key: "key",
-				operator: "=",
-				value: processKey,
-			},
-		],
-	});
-	if (processedImageRes.error) return processedImageRes;
-	if (processedImageRes.data) {
-		return {
-			error: undefined,
-			data: {
-				url: createMediaUrl({
-					key: processKey,
-					host: baseUrl,
-				}),
-			},
-		};
-	}
-
-	//* process the image
-	const processRes = await processedImageServices.processImage(context, {
-		key: data.key,
-		processKey: processKey,
-		options: {
-			format: data.body.format,
-			quality: data.body.quality,
-			width: data.body.width,
-			height: data.body.height,
-		},
-	});
-	if (processRes.error) return processRes;
 
 	return {
 		error: undefined,
 		data: {
 			url: createMediaUrl({
-				key: processKey,
+				key: mediaRes.data.key,
 				host: baseUrl,
+				fileName: mediaRes.data.file_name,
+				query: processingRequest.publicQuery,
 			}),
 		},
 	};

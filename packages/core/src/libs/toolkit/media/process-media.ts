@@ -1,5 +1,5 @@
 import { mediaServices } from "../../../services/index.js";
-import type { ImageProcessorOptions } from "../../../types/config.js";
+import type { MediaProcessOptions } from "../../../types/client.js";
 import type { MediaUrl } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -9,7 +9,7 @@ import { normalizeQuery, runToolkitService } from "../utils.js";
 
 export type ToolkitMediaProcessInput = {
 	key: string;
-	body?: ImageProcessorOptions;
+	body?: MediaProcessOptions;
 };
 
 const processMedia = async (

@@ -6,6 +6,7 @@ import type {
 	MediaAdapterServiceDeleteSingle,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
+import { deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const deletSingle: MediaAdapterServiceDeleteSingle = async (key) => {
@@ -22,6 +23,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 				};
 			}
 			await unlink(targetPath);
+			await deleteStoredMetadata(options.uploadDir, key);
 			return {
 				error: undefined,
 				data: undefined,

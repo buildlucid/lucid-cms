@@ -6,6 +6,47 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 	return async (key, options) => {
 		try {
 			if (!options?.range) {
+				if (options?.ifNoneMatch) {
+					const object = await pluginOptions.binding.get(key, {
+						onlyIf: new Headers({
+							"If-None-Match": options.ifNoneMatch,
+						}),
+					});
+
+					if (!object) {
+						return {
+							error: {
+								type: "plugin",
+								message: T("object_not_found"),
+							},
+							data: undefined,
+						};
+					}
+
+					if (!("body" in object)) {
+						return {
+							error: undefined,
+							data: {
+								contentLength: undefined,
+								contentType: object.httpMetadata?.contentType,
+								body: new Uint8Array(),
+								etag: object.etag || null,
+								notModified: true,
+							},
+						};
+					}
+
+					return {
+						error: undefined,
+						data: {
+							contentLength: object.size,
+							contentType: object.httpMetadata?.contentType,
+							body: object.body,
+							etag: object.etag || null,
+						},
+					};
+				}
+
 				const object = await pluginOptions.binding.get(key);
 
 				if (!object) {
@@ -24,6 +65,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 						contentLength: object.size,
 						contentType: object.httpMetadata?.contentType,
 						body: object.body,
+						etag: object.etag || null,
 					},
 				};
 			}
@@ -65,6 +107,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 					contentLength: end - start + 1,
 					contentType: object.httpMetadata?.contentType,
 					body: object.body,
+					etag: object.etag || meta.etag || null,
 					isPartialContent: true,
 					totalSize: meta.size,
 					range: {

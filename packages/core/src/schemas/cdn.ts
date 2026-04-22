@@ -39,7 +39,7 @@ export const controllerSchemas = {
 		params: z.object({
 			key: z.string().trim().meta({
 				description: "The media key you wish to stream",
-				example: "2024/09/5ttogd-placeholder-image.png",
+				example: "public/123e4567e89b12d3a456426614174000/placeholder-image",
 			}),
 		}),
 		response: undefined,

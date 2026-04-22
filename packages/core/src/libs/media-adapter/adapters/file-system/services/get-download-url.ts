@@ -19,6 +19,10 @@ export default (options: FileSystemMediaAdapterOptions) => {
 						path: FILE_SYSTEM_DOWNLOAD_PATH,
 						key,
 						secretKey: options.secretKey,
+						query: {
+							fileName: meta.fileName ?? undefined,
+							extension: meta.extension ?? undefined,
+						},
 					}),
 				},
 			};

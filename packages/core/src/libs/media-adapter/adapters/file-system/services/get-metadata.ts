@@ -1,14 +1,13 @@
 import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import path from "node:path";
-import mime from "mime-types";
 import T from "../../../../../translations/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetMeta,
 } from "../../../types.js";
 import { keyPaths } from "../helpers.js";
+import { readStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const getMetadata: MediaAdapterServiceGetMeta = async (key) => {
@@ -34,9 +33,8 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			if (fileTypeResult) {
 				mimeType = fileTypeResult.mime;
 			} else {
-				const fileExtension = path.extname(targetPath);
-				mimeType = mime.lookup(fileExtension) || null;
-				if (mimeType === "application/mp4") mimeType = "video/mp4";
+				mimeType =
+					(await readStoredMetadata(options.uploadDir, key))?.mimeType ?? null;
 			}
 			const etag = crypto
 				.createHash("md5")

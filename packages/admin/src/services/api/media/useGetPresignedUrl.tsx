@@ -7,6 +7,7 @@ interface Params {
 		fileName: string;
 		mimeType: string;
 		public: boolean;
+		temporary?: boolean;
 	};
 }
 

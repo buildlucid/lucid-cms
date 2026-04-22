@@ -1,4 +1,5 @@
-import slug from "slug";
+import crypto from "node:crypto";
+import constants from "../../constants/constants.js";
 import T from "../../translations/index.js";
 import type { ServiceResponse } from "../services/types.js";
 
@@ -7,13 +8,12 @@ import type { ServiceResponse } from "../services/types.js";
  */
 const generateKey = (props: {
 	name: string;
-	extension: string | null;
 	public: boolean;
+	temporary?: boolean;
 }): Awaited<ServiceResponse<string>> => {
-	const [name, extension] = props.name.split(".");
-	const ext = props.extension || extension;
+	const name = props.name.trim();
 
-	if (!name || !ext) {
+	if (!name) {
 		return {
 			error: {
 				type: "basic",
@@ -25,15 +25,14 @@ const generateKey = (props: {
 		};
 	}
 
-	let filename = slug(name, {
-		lower: true,
-	});
-	if (filename.length > 254) filename = filename.slice(0, 254);
-	const uuid = Math.random().toString(36).slice(-6);
+	const uuid = crypto.randomUUID().replaceAll("-", "");
+	const prefix = props.temporary
+		? `${constants.media.awaitingSyncKey}/`
+		: `${props.public ? "public" : "private"}/`;
 
 	return {
 		error: undefined,
-		data: `${props.public ? "public/" : "private/"}${uuid}-${filename}.${ext}`,
+		data: `${prefix}${uuid}`,
 	};
 };
 

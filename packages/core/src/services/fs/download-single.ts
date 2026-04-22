@@ -13,6 +13,8 @@ const downloadSingle: ServiceFn<
 			key: string;
 			token: string;
 			timestamp: string;
+			fileName?: string;
+			extension?: string;
 			mediaAdapterOptions?: FileSystemMediaAdapterOptions;
 		},
 	],
@@ -30,6 +32,10 @@ const downloadSingle: ServiceFn<
 		path: FILE_SYSTEM_DOWNLOAD_PATH,
 		secretKey:
 			data.mediaAdapterOptions?.secretKey ?? context.config.secrets.cookie,
+		query: {
+			fileName: data.fileName,
+			extension: data.extension,
+		},
 	});
 	if (checkPresignedTokenRes.error) return checkPresignedTokenRes;
 

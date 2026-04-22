@@ -15,11 +15,9 @@ type CollectionDocumentStatus<TCollectionKey extends string = string> = TCollect
 type CollectionDocumentVersionKey<TCollectionKey extends string = string> = TCollectionKey extends CollectionDocumentVersionKeyCollectionKey ? CollectionDocumentVersionKeysByCollection[TCollectionKey] : DefaultCollectionDocumentVersionKey;
 //#endregion
 //#region src/types/client.d.ts
-type ImageProcessorOptions = {
-  width?: number;
-  height?: number;
+type MediaProcessOptions = {
+  preset?: string;
   format?: "webp" | "avif" | "jpeg" | "png";
-  quality?: number;
 };
 type BrickType = "builder" | "fixed";
 type FieldType = "checkbox" | "color" | "datetime" | "document" | "json" | "link" | "media" | "number" | "repeater" | "rich-text" | "select" | "tab" | "text" | "textarea" | "user";
@@ -152,6 +150,7 @@ type MediaRef = {
   id: number;
   url: string;
   key: string;
+  fileName: string | null;
   mimeType: string;
   extension: string;
   fileSize: number;
@@ -178,6 +177,7 @@ interface Media {
   id: number;
   key: string;
   url: string;
+  fileName: string | null;
   folderId: number | null;
   title: Array<{
     localeCode: string | null;
@@ -273,4 +273,4 @@ interface ErrorResponse {
   errors?: ErrorResult;
 }
 //#endregion
-export type { CollectionDocument, CollectionDocumentBricksByCollection, CollectionDocumentFieldsByCollection, CollectionDocumentKey, CollectionDocumentLocaleCode, CollectionDocumentLocaleCodes, CollectionDocumentTranslations, DocumentBrick, DocumentField, DocumentFieldGroup, DocumentFieldMap, DocumentRef, DocumentRelationValue, DocumentVersion, ErrorResponse, GroupDocumentField, ImageProcessorOptions, Locale, Media, MediaRef, MediaType, MediaUrl, ResponseBody, TranslatedDocumentField, UserRef, ValueDocumentField };
+export type { CollectionDocument, CollectionDocumentBricksByCollection, CollectionDocumentFieldsByCollection, CollectionDocumentKey, CollectionDocumentLocaleCode, CollectionDocumentLocaleCodes, CollectionDocumentTranslations, DocumentBrick, DocumentField, DocumentFieldGroup, DocumentFieldMap, DocumentRef, DocumentRelationValue, DocumentVersion, ErrorResponse, GroupDocumentField, Locale, Media, MediaProcessOptions, MediaRef, MediaType, MediaUrl, ResponseBody, TranslatedDocumentField, UserRef, ValueDocumentField };
