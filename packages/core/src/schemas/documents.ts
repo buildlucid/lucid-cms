@@ -571,6 +571,9 @@ export const controllerSchemas = {
 						"filter[updatedAt]": queryString.schema.filter(false, {
 							example: "2025-03-15T09:22:10Z",
 						}),
+						"filter[isDeleted]": queryString.schema.filter(false, {
+							example: "true",
+						}),
 						"filter[_customFieldKey]": queryString.schema.filter(true, {
 							description:
 								"Prefix custom field keys with an underscore to filter by them",
@@ -608,6 +611,7 @@ export const controllerSchemas = {
 								updatedBy: queryFormatted.schema.filters.single.optional(),
 								createdAt: queryFormatted.schema.filters.single.optional(),
 								updatedAt: queryFormatted.schema.filters.single.optional(),
+								isDeleted: queryFormatted.schema.filters.single.optional(),
 							}),
 						])
 						.optional(),
@@ -645,6 +649,9 @@ export const controllerSchemas = {
 						}),
 						"filter[updatedAt]": queryString.schema.filter(false, {
 							example: "2025-03-15T09:22:10Z",
+						}),
+						"filter[isDeleted]": queryString.schema.filter(false, {
+							example: "true",
 						}),
 						"filter[_customFieldKey]": queryString.schema.filter(true, {
 							description:
@@ -698,6 +705,7 @@ export const controllerSchemas = {
 									.optional(),
 								createdAt: queryFormatted.schema.filters.single.optional(),
 								updatedAt: queryFormatted.schema.filters.single.optional(),
+								isDeleted: queryFormatted.schema.filters.single.optional(),
 							}),
 						])
 						.optional(),

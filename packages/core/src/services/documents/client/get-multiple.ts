@@ -13,6 +13,7 @@ import type {
 	CollectionDocumentStatus,
 } from "../../../types.js";
 import {
+	applyDefaultQueryFilters,
 	getBaseUrl,
 	groupDocumentFilters,
 } from "../../../utils/helpers/index.js";
@@ -70,9 +71,16 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
+	const query: ClientGetMultipleQueryParams = {
+		...data.query,
+		filter: applyDefaultQueryFilters(data.query.filter, {
+			isDeleted: { value: "false" },
+		}),
+	};
+
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
-		data.query.filter,
+		query.filter,
 	);
 
 	const tableNameRes = await getTableNames(context, data.collectionKey);
@@ -81,7 +89,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
 			status: data.status,
-			query: data.query,
+			query,
 			documentFilters,
 			brickFilters: brickFilters,
 			collection: collectionRes.data,

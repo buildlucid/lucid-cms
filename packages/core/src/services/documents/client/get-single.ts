@@ -10,7 +10,10 @@ import type {
 	CollectionDocument,
 	CollectionDocumentStatus,
 } from "../../../types.js";
-import { groupDocumentFilters } from "../../../utils/helpers/index.js";
+import {
+	applyDefaultQueryFilters,
+	groupDocumentFilters,
+} from "../../../utils/helpers/index.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -54,15 +57,22 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
+	const query: ClientGetSingleQueryParams = {
+		...data.query,
+		filter: applyDefaultQueryFilters(data.query.filter, {
+			isDeleted: { value: "false" },
+		}),
+	};
+
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
-		data.query.filter,
+		query.filter,
 	);
 
 	const documentRes = await Documents.selectSingleFiltered(
 		{
 			status: data.status,
-			query: data.query,
+			query,
 			documentFilters,
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
@@ -92,7 +102,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		versionId: documentRes.data.version_id,
 		collectionKey: collectionRes.data.key,
 		versionType: data.status,
-		documentFieldsOnly: !data.query.include?.includes("bricks"),
+		documentFieldsOnly: !query.include?.includes("bricks"),
 	});
 	if (bricksRes.error) return bricksRes;
 
