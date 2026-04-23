@@ -23,6 +23,7 @@
 		"@astrojs/cloudflare": "^13.1.9",
 		"@lucidcms/core": "*",
 		"@lucidcms/astro": "*",
+		"@lucidcms/client": "*",
 		"@lucidcms/cloudflare-adapter": "*",
 		"@lucidcms/libsql-adapter": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",

@@ -1,14 +1,14 @@
 ---
 import { setAdminBar } from "@lucidcms/astro";
 import getToolkit from "@lucidcms/astro/toolkit";
-import PageCollection from "../lucid/collections/pages";
+import { asDocument } from "@lucidcms/client";
 import "../index.css";
 
 export const prerender = false;
 const toolkit = await getToolkit();
 
 const response = await toolkit.documents.getSingle({
-	collectionKey: PageCollection.key,
+	collectionKey: "page",
 	status: "latest",
 	query: {
 		filter: {
@@ -19,16 +19,25 @@ const response = await toolkit.documents.getSingle({
 	},
 });
 
-const page = response.data;
+// if (response.error) {
+// 	return Astro.redirect("/404");
+// }
+
+const page = asDocument(response.data);
 
 if (page) {
 	setAdminBar(Astro, {
 		edit: {
-			collectionKey: PageCollection.key,
+			collectionKey: page.collectionKey,
 			documentId: page.id,
 		},
 	});
 }
+
+const title = page?.field("title").value();
+const summary = page?.field("summary").value();
+const fullSlug = page?.field("fullSlug").value();
+const slug = page?.field("slug").value();
 ---
 
 <html lang="en">
@@ -42,8 +51,8 @@ if (page) {
 			rel="stylesheet"
 		/>
 		<title>
-			{page?.fields?.title.value
-				? `${page.fields.title.value} | Lucid CMS`
+			{title
+				? `${title} | Lucid CMS`
 				: "Lucid CMS"}
 		</title>
 	</head>
@@ -99,7 +108,7 @@ if (page) {
 							{page ? (
 								<>
 									This route is rendering your <code>page</code> document from
-									<code>{page.fields?.fullSlug?.value || "/"}</code>. Update it in
+									<code>{fullSlug || "/"}</code>. Update it in
 									Lucid and refresh to see the latest content here.
 								</>
 							) : (
@@ -128,37 +137,37 @@ if (page) {
 								<div class="document-row">
 									<span class="document-label">Title</span>
 									<p class="document-value">
-										{page.fields?.title?.value || "Not set"}
+										{title || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Summary</span>
 									<p class="document-value">
-										{page.fields?.summary?.value || "Not set"}
+										{summary || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Slug</span>
 									<p class="document-value">
-										{page.fields?.slug?.value || "Not set"}
+										{slug || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Full slug</span>
 									<p class="document-value">
-										{page.fields?.fullSlug?.value || "Not set"}
+										{fullSlug || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Brick fields</span>
 									<p class="document-value">
-										{page.bricks?.reduce(
+										{page.bricks().reduce(
 											(count, brick) =>
-												count + Object.keys(brick.fields ?? {}).length,
+												count + Object.keys(brick.raw.fields ?? {}).length,
 											0,
 										) ?? 0}
 									</p>
@@ -167,8 +176,8 @@ if (page) {
 								<div class="document-row">
 									<span class="document-label">Created</span>
 									<p class="document-value">
-										{page.createdAt
-											? new Date(page.createdAt).toLocaleString("en-GB", {
+										{page?.raw.createdAt
+											? new Date(page.raw.createdAt).toLocaleString("en-GB", {
 													dateStyle: "medium",
 													timeStyle: "short",
 												})

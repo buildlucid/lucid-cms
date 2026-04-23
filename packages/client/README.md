@@ -90,6 +90,73 @@ Use the locales client to fetch every configured locale.
 const locales = await client.locales.getAll();
 ```
 
+## Document Helpers
+
+You can also wrap a document response with `asDocument` to get locale-aware field and brick helpers without changing the raw client response shape.
+
+```typescript
+import { asDocument, createClient } from "@lucidcms/client";
+
+const client = createClient({
+    baseUrl: "https://example.com",
+    apiKey: "<your-client-api-key>",
+});
+
+const response = await client.documents.getSingle({
+    collectionKey: "page",
+});
+
+if (!response.error) {
+    const page = asDocument(response.data.data, {
+        locale: "en",
+    });
+
+    const title = page.field("page_title").value();
+    const relatedPage = page.field("related_page").ref();
+    const seo = page.brick({
+        type: "fixed",
+        key: "seo",
+    });
+    const builderBricks = page.bricks({
+        type: "builder",
+    });
+
+    console.log(seo?.field("canonical_url").value());
+
+    for (const brick of builderBricks) {
+        console.log(brick.key, brick.order);
+    }
+}
+```
+
+The low-level helpers are also available if you prefer to work with the raw response data directly:
+
+```typescript
+import {
+    getBrick,
+    getBricks,
+    getFieldGroups,
+    getFieldRef,
+    getFieldRefs,
+    getFieldValue,
+} from "@lucidcms/client";
+
+const title = getFieldValue(page.fields.page_title, {
+    locale: "en",
+});
+const related = getFieldRef(page, page.fields.related_page);
+const images = getFieldRefs(page, page.fields.hero_image);
+const sections = getFieldGroups(page.fields.sections);
+const contentBricks = getBricks(page, {
+    type: "builder",
+});
+const seo = getBrick(page, {
+    type: "fixed",
+    key: "seo",
+});
+const canonicalUrl = seo?.fields.canonical_url.value;
+```
+
 ## Types
 
 A separate type-only entrypoint is also available:
@@ -97,6 +164,7 @@ A separate type-only entrypoint is also available:
 ```typescript
 import type {
     CollectionDocument,
+    DocumentView,
     DocumentRef,
     MediaRef,
     UserRef,

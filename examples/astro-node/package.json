@@ -19,12 +19,12 @@
 	"dependencies": {
 		"astro": "^6.1.6",
 		"@astrojs/node": "^10.0.4",
-		"@lucidcms/core": "*",
 		"@lucidcms/astro": "*",
+		"@lucidcms/client": "*",
+		"@lucidcms/core": "*",
 		"@lucidcms/node-adapter": "*",
 		"@lucidcms/sqlite-adapter": "*",
-		"@lucidcms/plugin-pages": "*",
-		"better-sqlite3": "^12.6.2"
+		"@lucidcms/plugin-pages": "*"
 	},
 	"author": "Lucid",
 	"license": "MIT",

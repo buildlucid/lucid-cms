@@ -7,7 +7,6 @@ import type {
 	DocumentRef,
 	DocumentRelationValue,
 	DocumentVersion,
-	ErrorResponse,
 	GroupDocumentField,
 	Locale,
 	Media,
@@ -15,7 +14,6 @@ import type {
 	MediaRef,
 	MediaType,
 	MediaUrl,
-	ResponseBody,
 	UserRef,
 	ValueDocumentField,
 } from "./generated/core-client-types.js";
@@ -36,6 +34,13 @@ type CollectionDocumentVersionSummary = Pick<
 	DocumentVersion,
 	"id" | "promotedFrom" | "contentId" | "createdAt" | "createdBy"
 >;
+
+type CollectionDocumentRef =
+	| DocumentRef
+	| MediaRef
+	| UserRef
+	| null
+	| undefined;
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentFieldsByCollection {}
@@ -98,35 +103,31 @@ export type TranslatedDocumentField<
 	groups?: never;
 } & DocumentFieldGroupRefShape<THasGroupRef>;
 
-type ResolveCollectionDocumentFields<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentFields<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentFieldKey
 		? CollectionDocumentFieldsByCollection[TCollectionKey]
 		: DocumentFieldMap;
 
-type ResolveCollectionDocumentBricks<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentBrickKey
 		? CollectionDocumentBricksByCollection[TCollectionKey]
 		: DocumentBrick;
 
-type ResolveCollectionDocumentKey<TCollectionKey extends string | null> = [
-	TCollectionKey,
-] extends [string]
-	? TCollectionKey
-	: CollectionDocumentKey | null;
+type ResolveCollectionDocumentKey<TCollectionKey extends string> =
+	TCollectionKey;
 
-type ResolveCollectionDocumentStatus<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentStatus<TCollectionKey extends string> =
 	CollectionDocumentStatus<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
-type ResolveCollectionDocumentVersionKey<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentVersionKey<TCollectionKey extends string> =
 	CollectionDocumentVersionKey<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
 export interface CollectionDocument<
-	TCollectionKey extends
-		CollectionDocumentKey | null = CollectionDocumentKey | null,
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > {
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
@@ -141,11 +142,17 @@ export interface CollectionDocument<
 	updatedBy: CollectionDocumentAuthor;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
-	refs?: Partial<
-		Record<string, Array<DocumentRef | MediaRef | UserRef>>
-	> | null;
+	refs?: Partial<Record<string, CollectionDocumentRef[]>> | null;
 }
 
+export type {
+	DocumentBrickFilter,
+	DocumentBrickView,
+	DocumentFieldGroupView,
+	DocumentFieldView,
+	DocumentView,
+	DocumentViewOptions,
+} from "./helpers/documents/types.js";
 export type {
 	DocumentsGetMultipleInput,
 	DocumentsGetMultipleResponse,
@@ -211,8 +218,6 @@ export type {
 	DocumentFieldMap,
 	DocumentRef,
 	DocumentRelationValue,
-	DocumentVersion,
-	ErrorResponse,
 	GroupDocumentField,
 	Locale,
 	LucidClient,
@@ -221,7 +226,6 @@ export type {
 	MediaRef,
 	MediaType,
 	MediaUrl,
-	ResponseBody,
 	UserRef,
 	ValueDocumentField,
 };

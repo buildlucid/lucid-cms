@@ -1,14 +1,14 @@
 ---
 import { setAdminBar } from "@lucidcms/astro";
 import getToolkit from "@lucidcms/astro/toolkit";
-import PageCollection from "../../lucid/collections/pages";
+import { asDocument } from "@lucidcms/client";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
 	const toolkit = await getToolkit();
 	const response = await toolkit.documents.getMultiple({
-		collectionKey: PageCollection.key,
+		collectionKey: "page",
 		status: "latest",
 		query: {
 			perPage: 100,
@@ -25,26 +25,12 @@ export async function getStaticPaths() {
 		throw new Error(response.error.message ?? "Failed to load Lucid pages.");
 	}
 
-	const uniquePages = new Map();
-
-	for (const page of response.data.data) {
-		const fullSlug = page.fields?.fullSlug?.translations?.en;
-
-		if (typeof fullSlug !== "string" || !fullSlug.startsWith("/")) {
-			continue;
-		}
-
-		if (!uniquePages.has(fullSlug)) {
-			uniquePages.set(fullSlug, page);
-		}
-	}
-
-	return [...uniquePages.values()].map((page) => ({
+	return response.data.data.map((page) => ({
 		params: {
 			slug:
-				page.fields?.fullSlug?.translations?.en === "/"
+				page.fields.fullSlug.translations.en === "/"
 					? undefined
-					: String(page.fields?.fullSlug?.translations?.en).slice(1),
+					: String(page.fields.fullSlug.translations.en).slice(1),
 		},
 		props: {
 			page,
@@ -52,14 +38,21 @@ export async function getStaticPaths() {
 	}));
 }
 
-const { page } = Astro.props;
+const { page: pageDocument } = Astro.props;
+
+const page = asDocument(pageDocument, {
+	locale: "en",
+});
 
 setAdminBar(Astro, {
 	edit: {
-		collectionKey: PageCollection.key,
+		collectionKey: page.collectionKey,
 		documentId: page.id,
 	},
 });
+
+const title = page.field("page_title").value();
+const pageFullSlug = page.field("fullSlug").value();
 ---
 
 <html lang="en">
@@ -67,7 +60,7 @@ setAdminBar(Astro, {
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<title>
-			{page.fields?.page_title?.translations?.en || "Untitled page"} | Static Lucid Route
+			{title || "Untitled page"} | Static Lucid Route
 		</title>
 		<style>
 			:root {
@@ -152,12 +145,12 @@ setAdminBar(Astro, {
 	<body>
 		<main>
 			<eyebrow>Static Lucid Client Route</eyebrow>
-			<h1>{page.fields?.page_title?.translations?.en || "Untitled page"}</h1>
+			<h1>{title || "Untitled page"}</h1>
 			<p>
-				Lucid full slug: <code>{page.fields?.fullSlug?.translations?.en || "/"}</code>
+				Lucid full slug: <code>{pageFullSlug || "/"}</code>
 			</p>
 			<p>
-				<a href={`/server${page.fields?.fullSlug?.translations?.en || "/"}`}>
+				<a href={`/server${pageFullSlug || "/"}`}>
 					View the server-rendered version
 				</a>
 			</p>

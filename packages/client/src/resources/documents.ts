@@ -1,4 +1,5 @@
 import { DEFAULT_DOCUMENT_STATUS } from "../constants.js";
+import type { ResponseBody } from "../generated/core-client-types.js";
 import type {
 	CollectionDocumentStatus,
 	DocumentsGetMultipleQuery,
@@ -9,11 +10,7 @@ import type {
 	LucidRequestOptions,
 	LucidTransport,
 } from "../types/transport.js";
-import type {
-	CollectionDocument,
-	CollectionDocumentKey,
-	ResponseBody,
-} from "../types.js";
+import type { CollectionDocument, CollectionDocumentKey } from "../types.js";
 import { encodePathSegment } from "../utils/url.js";
 
 /** Input for fetching one document from a collection. */

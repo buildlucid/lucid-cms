@@ -91,11 +91,11 @@ type CollectionDocumentKey = KnownCollectionDocumentKey | (string & {});
 type ExactCollectionDocumentTranslations<TValue> = { [TLocaleCode in KnownCollectionDocumentLocaleCode]: TValue };
 type CollectionDocumentLocaleCode = [KnownCollectionDocumentLocaleCode] extends [never] ? string : KnownCollectionDocumentLocaleCode | (string & {});
 type CollectionDocumentTranslations<TValue> = [KnownCollectionDocumentLocaleCode] extends [never] ? Record<string, TValue> : ExactCollectionDocumentTranslations<TValue> & Partial<Record<string, TValue>>;
-type ResolveCollectionDocumentFields<TCollectionKey extends string | null> = TCollectionKey extends CollectionDocumentFieldKey ? CollectionDocumentFieldsByCollection[TCollectionKey] : DocumentFieldMap;
-type ResolveCollectionDocumentBricks<TCollectionKey extends string | null> = TCollectionKey extends CollectionDocumentBrickKey ? CollectionDocumentBricksByCollection[TCollectionKey] : DocumentBrick;
-type ResolveCollectionDocumentKey<TCollectionKey extends string | null> = [TCollectionKey] extends [string] ? TCollectionKey : CollectionDocumentKey | null;
-type ResolveCollectionDocumentStatus<TCollectionKey extends string | null> = CollectionDocumentStatus<Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>>;
-type ResolveCollectionDocumentVersionKey<TCollectionKey extends string | null> = CollectionDocumentVersionKey<Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>>;
+type ResolveCollectionDocumentFields<TCollectionKey extends string> = TCollectionKey extends CollectionDocumentFieldKey ? CollectionDocumentFieldsByCollection[TCollectionKey] : DocumentFieldMap;
+type ResolveCollectionDocumentBricks<TCollectionKey extends string> = TCollectionKey extends CollectionDocumentBrickKey ? CollectionDocumentBricksByCollection[TCollectionKey] : DocumentBrick;
+type ResolveCollectionDocumentKey<TCollectionKey extends string> = TCollectionKey;
+type ResolveCollectionDocumentStatus<TCollectionKey extends string> = CollectionDocumentStatus<Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>>;
+type ResolveCollectionDocumentVersionKey<TCollectionKey extends string> = CollectionDocumentVersionKey<Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>>;
 interface DocumentFieldGroup<TFields extends DocumentFieldMap = DocumentFieldMap> {
   ref: string;
   order: number;
@@ -235,7 +235,7 @@ interface DocumentVersion {
     brickKey: string | null;
   }>>>;
 }
-interface CollectionDocument<TCollectionKey extends CollectionDocumentKey | null = CollectionDocumentKey | null> {
+interface CollectionDocument<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> {
   id: number;
   collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
   status: ResolveCollectionDocumentStatus<TCollectionKey> | null;

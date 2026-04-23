@@ -1,12 +1,15 @@
 import type { JSONContent } from "@tiptap/core";
-import { generateHTML, generateJSON } from "@tiptap/html";
+import {
+	generateHTML as tiptapGenerateHTML,
+	generateJSON as tiptapGenerateJSON,
+} from "@tiptap/html";
 import { extensions } from "./extensions.js";
 import type { RichTextJSON } from "./types.js";
 
-export const toHTML = (json: RichTextJSON): string => {
-	return generateHTML(json as JSONContent, extensions);
+export const generateHTML = (json: RichTextJSON): string => {
+	return tiptapGenerateHTML(json as JSONContent, extensions);
 };
 
-export const toJSON = (html: string): RichTextJSON => {
-	return generateJSON(html, extensions) as RichTextJSON;
+export const generateJSON = (html: string): RichTextJSON => {
+	return tiptapGenerateJSON(html, extensions) as RichTextJSON;
 };

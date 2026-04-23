@@ -164,28 +164,25 @@ export type CollectionDocumentTranslations<TValue> = [
 	: ExactCollectionDocumentTranslations<TValue> &
 			Partial<Record<string, TValue>>;
 
-type ResolveCollectionDocumentFields<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentFields<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentFieldKey
 		? CollectionDocumentFieldsByCollection[TCollectionKey]
 		: DocumentFieldMap;
 
-type ResolveCollectionDocumentBricks<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentBrickKey
 		? CollectionDocumentBricksByCollection[TCollectionKey]
 		: DocumentBrick;
 
-type ResolveCollectionDocumentKey<TCollectionKey extends string | null> = [
-	TCollectionKey,
-] extends [string]
-	? TCollectionKey
-	: CollectionDocumentKey | null;
+type ResolveCollectionDocumentKey<TCollectionKey extends string> =
+	TCollectionKey;
 
-type ResolveCollectionDocumentStatus<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentStatus<TCollectionKey extends string> =
 	CollectionDocumentStatus<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
-type ResolveCollectionDocumentVersionKey<TCollectionKey extends string | null> =
+type ResolveCollectionDocumentVersionKey<TCollectionKey extends string> =
 	CollectionDocumentVersionKey<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
@@ -391,8 +388,7 @@ export interface DocumentVersion {
 }
 
 export interface CollectionDocument<
-	TCollectionKey extends
-		CollectionDocumentKey | null = CollectionDocumentKey | null,
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > {
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;

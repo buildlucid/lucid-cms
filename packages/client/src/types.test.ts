@@ -1,5 +1,13 @@
+import type {
+	CollectionDocument as CoreCollectionDocument,
+	DocumentBrick as CoreDocumentBrick,
+	DocumentRelationValue as CoreDocumentRelationValue,
+	GroupDocumentField as CoreGroupDocumentField,
+	TranslatedDocumentField as CoreTranslatedDocumentField,
+	ValueDocumentField as CoreValueDocumentField,
+} from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
-import { createClient } from "./index.js";
+import { asDocument, createClient } from "./index.js";
 import { createDocumentsClient } from "./resources/documents.js";
 import type {
 	CollectionDocument,
@@ -105,6 +113,70 @@ declare module "./types.js" {
 	}
 }
 
+declare module "@lucidcms/core/types" {
+	interface CollectionDocumentFieldsByCollection {
+		page: {
+			page_title: CoreTranslatedDocumentField<
+				"page_title",
+				"text",
+				string | null
+			>;
+			related_page: CoreValueDocumentField<
+				"related_page",
+				"document",
+				Array<CoreDocumentRelationValue<"page">>
+			>;
+			sections: CoreGroupDocumentField<
+				"sections",
+				"repeater",
+				{
+					heading: CoreValueDocumentField<
+						"heading",
+						"text",
+						string | null,
+						true
+					>;
+				}
+			>;
+		};
+	}
+
+	interface CollectionDocumentBricksByCollection {
+		page:
+			| CoreDocumentBrick<
+					"banner",
+					"builder",
+					{
+						title: CoreTranslatedDocumentField<"title", "text", string | null>;
+					}
+			  >
+			| CoreDocumentBrick<
+					"seo",
+					"fixed",
+					{
+						canonical_url: CoreValueDocumentField<
+							"canonical_url",
+							"text",
+							string | null
+						>;
+					}
+			  >;
+	}
+
+	interface CollectionDocumentLocaleCodes {
+		en: true;
+		fr: true;
+	}
+
+	interface CollectionDocumentStatusesByCollection {
+		page: "latest" | "revision" | "published";
+	}
+
+	interface CollectionDocumentVersionKeysByCollection {
+		page: "latest" | "published";
+	}
+}
+
 test("collection documents narrow to generated collection field and brick types", () => {
 	expectTypeOf<CollectionDocument<"page">["fields"]>().toEqualTypeOf<{
 		page_title: TranslatedDocumentField<"page_title", "text", string | null>;
@@ -185,6 +257,9 @@ test("collection documents narrow to generated collection field and brick types"
 	expectTypeOf<CollectionDocument<"page">["status"]>().toEqualTypeOf<
 		"latest" | "revision" | "published" | null
 	>();
+	expectTypeOf<
+		CollectionDocument<"page">["collectionKey"]
+	>().toEqualTypeOf<"page">();
 	expectTypeOf<CollectionDocument<"page">["version"]>().toEqualTypeOf<
 		Record<
 			"latest" | "published",
@@ -196,6 +271,45 @@ test("collection documents narrow to generated collection field and brick types"
 				createdBy: number | null;
 			} | null
 		>
+	>();
+});
+
+test("document helpers accept toolkit collection documents without widening fields", () => {
+	expectTypeOf<
+		CoreCollectionDocument<"page">["collectionKey"]
+	>().toEqualTypeOf<"page">();
+
+	type ToolkitDocumentView = ReturnType<
+		typeof asDocument<CoreCollectionDocument<"page">>
+	>;
+
+	expectTypeOf<ToolkitDocumentView>().toMatchTypeOf<{
+		collectionKey: "page";
+		field: (key: "page_title") => {
+			value: () => string | null | undefined;
+		};
+	}>();
+});
+
+test("asDocument accepts optional toolkit documents for direct response wrapping", () => {
+	const page = asDocument(
+		undefined as CoreCollectionDocument<"page"> | undefined,
+		{
+			locale: "en",
+		},
+	);
+
+	expectTypeOf(page).toMatchTypeOf<
+		| {
+				collectionKey: "page";
+				field: (key: "page_title") => {
+					value: () => string | null | undefined;
+				};
+		  }
+		| undefined
+	>();
+	expectTypeOf(page?.field("page_title").value()).toEqualTypeOf<
+		string | null | undefined
 	>();
 });
 

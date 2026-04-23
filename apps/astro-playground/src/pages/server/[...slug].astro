@@ -1,6 +1,7 @@
 ---
 import { setAdminBar } from "@lucidcms/astro";
 import getToolkit from "@lucidcms/astro/toolkit";
+import { asDocument } from "@lucidcms/client";
 
 export const prerender = false;
 
@@ -23,18 +24,23 @@ if (response.error && response.error.status !== 404) {
 	throw new Error(response.error.message ?? "Failed to load the page.");
 }
 
-const page = response.error ? null : response.data;
+const page = asDocument(response.error ? null : response.data, {
+	locale: "en",
+});
 
 if (!page) {
 	Astro.response.status = 404;
 } else {
 	setAdminBar(Astro, {
 		edit: {
-			collectionKey: "page",
+			collectionKey: page.collectionKey,
 			documentId: page.id,
 		},
 	});
 }
+
+const title = page?.field("page_title").value();
+const pageFullSlug = page?.field("fullSlug").value();
 ---
 
 <html lang="en">
@@ -43,7 +49,7 @@ if (!page) {
 		<meta name="viewport" content="width=device-width" />
 		<title>
 			{page
-				? `${page.fields?.page_title?.translations?.en || "Untitled page"} | Server Lucid Route`
+				? `${title || "Untitled page"} | Server Lucid Route`
 				: "Page Not Found | Server Lucid Route"}
 		</title>
 		<style>
@@ -132,12 +138,12 @@ if (!page) {
 				page ? (
 					<>
 						<eyebrow>Server Lucid Client Route</eyebrow>
-						<h1>{page.fields?.page_title?.translations?.en || "Untitled page"}</h1>
+						<h1>{title || "Untitled page"}</h1>
 						<p>
-							Lucid full slug: <code>{page.fields?.fullSlug?.translations?.en || fullSlug}</code>
+							Lucid full slug: <code>{pageFullSlug || fullSlug}</code>
 						</p>
 						<p>
-							<a href={`/static${page.fields?.fullSlug?.translations?.en || fullSlug}`}>
+							<a href={`/static${pageFullSlug || fullSlug}`}>
 								View the prerendered version
 							</a>
 						</p>

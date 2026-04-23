@@ -167,7 +167,7 @@ test("generates collection-aware client document types that lean on the public L
 }`,
 		);
 		expect(clientContent).toContain(
-			`export type CollectionDocument<TCollectionKey extends CollectionDocumentKey | null = CollectionDocumentKey | null> = CoreCollectionDocument<TCollectionKey>;`,
+			`export type CollectionDocument<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
 		);
 		expect(clientContent).not.toContain('"content_tab"');
 		expect(clientContent).toContain("declare module '@lucidcms/core/types'");

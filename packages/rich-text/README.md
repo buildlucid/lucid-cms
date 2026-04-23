@@ -8,7 +8,8 @@ It provides:
 
 - A shared `extensions` array for Tiptap.
 - A `RichTextJSON` type for rich text field values.
-- Browser and server conversion utilities for HTML and JSON.
+- Browser and server HTML generation utilities.
+- Browser and server JSON generation utilities.
 
 ## Installation
 
@@ -37,8 +38,9 @@ import { extensions, type RichTextJSON } from "@lucidcms/rich-text";
 Use browser-safe conversion helpers from `@lucidcms/rich-text/browser`.
 
 ```typescript
-import { toHTML, toJSON } from "@lucidcms/rich-text/browser";
+import { generateHTML, generateJSON } from "@lucidcms/rich-text/browser";
 import type { RichTextJSON } from "@lucidcms/rich-text";
+import Heading from "@tiptap/extension-heading";
 
 const json: RichTextJSON = {
 	type: "doc",
@@ -50,18 +52,29 @@ const json: RichTextJSON = {
 	],
 };
 
-const html = toHTML(json);
-const nextJson = toJSON(html);
+const html = generateHTML(json);
+const customHtml = generateHTML(json, {
+	extensions: [
+		Heading.configure({
+			HTMLAttributes: {
+				class: "prose-heading",
+			},
+		}),
+	],
+});
+const nextJson = generateJSON(html);
 ```
+
+Browser `generateHTML` accepts optional custom extensions, which are merged into Lucid's required extension set by extension name.
 
 ## Server Utilities
 
 Use server-safe conversion helpers from `@lucidcms/rich-text/server`.
 
 ```typescript
-import { toHTML, toJSON } from "@lucidcms/rich-text/server";
+import { generateHTML, generateJSON } from "@lucidcms/rich-text/server";
 
-const html = toHTML({
+const html = generateHTML({
 	type: "doc",
 	content: [
 		{
@@ -71,11 +84,11 @@ const html = toHTML({
 	],
 });
 
-const json = toJSON(html);
+const json = generateJSON(html);
 ```
 
 ## Shared Extensions
 
-Both browser and server conversion helpers use the shared `extensions` array internally.
+Both browser and server helpers use the shared `extensions` array internally.
 
 This means consumers do not need to provide extension definitions when converting rich text content.
