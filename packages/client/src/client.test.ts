@@ -62,7 +62,6 @@ describe("@lucidcms/client", () => {
 					},
 					fields: {
 						sections: {
-							// @ts-expect-error
 							_section_title: {
 								value: "Hero",
 							},
@@ -231,6 +230,7 @@ describe("@lucidcms/client", () => {
 							},
 						};
 					},
+					// @ts-expect-error
 					onResponse: () => {
 						requestOrder.push("response");
 					},

@@ -10,7 +10,6 @@ const honoOpenAPIParamaters = (props: {
 	headers?: {
 		// undefine means dont include in the schema, boolean means required or not
 		csrf?: boolean;
-		contentLocale?: boolean;
 		authorization?: boolean;
 	};
 	params?: ZodType;
@@ -24,18 +23,6 @@ const honoOpenAPIParamaters = (props: {
 			name: "X-CSRF-Token",
 			required: props.headers.csrf,
 			description: T("open_api_csrf_header_description"),
-			schema: {
-				type: "string",
-			},
-		});
-	}
-	if (props.headers?.contentLocale !== undefined) {
-		paramaters.push({
-			in: "header",
-			name: "lucid-content-locale",
-			required: props.headers.contentLocale,
-			description: T("open_api_content_locale_header_description"),
-			example: "en",
 			schema: {
 				type: "string",
 			},

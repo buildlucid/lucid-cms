@@ -16,7 +16,6 @@ export type ToolkitMediaGetMultipleQuery = Omit<
 };
 
 export type ToolkitMediaGetMultipleInput = {
-	localeCode?: string;
 	query?: ToolkitMediaGetMultipleQuery;
 };
 
@@ -33,8 +32,6 @@ const getMultiple = async (
 		() =>
 			mediaServices.client.getMultiple(context, {
 				query: normalizePaginatedQuery(input.query),
-				localeCode:
-					input.localeCode ?? context.config.localization.defaultLocale,
 			}),
 		"Lucid toolkit could not fetch multiple media items.",
 	);

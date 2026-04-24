@@ -3,7 +3,6 @@ import {
 	AUTHORIZATION_HEADER,
 	CONTENT_TYPE_HEADER,
 	JSON_CONTENT_TYPE,
-	LOCALE_HEADER,
 } from "../../constants.js";
 import type { LucidHeaderFactory } from "../../types/transport.js";
 
@@ -39,13 +38,12 @@ const mergeHeaders = (
 };
 
 /**
- * Builds the final Lucid request headers, including auth, locale, and JSON body defaults.
+ * Builds the final Lucid request headers, including auth and JSON body defaults.
  */
 export const buildRequestHeaders = async (input: {
 	baseHeaders?: HeadersInit | LucidHeaderFactory;
 	requestHeaders?: HeadersInit;
 	apiKey: string;
-	localeCode?: string;
 	hasBody: boolean;
 }): Promise<Headers> => {
 	const baseHeaders = await resolveHeaders(input.baseHeaders);
@@ -53,10 +51,6 @@ export const buildRequestHeaders = async (input: {
 
 	headers.set(ACCEPT_HEADER, JSON_CONTENT_TYPE);
 	headers.set(AUTHORIZATION_HEADER, input.apiKey);
-
-	if (input.localeCode) {
-		headers.set(LOCALE_HEADER, input.localeCode);
-	}
 
 	if (input.hasBody && !headers.has(CONTENT_TYPE_HEADER)) {
 		headers.set(CONTENT_TYPE_HEADER, JSON_CONTENT_TYPE);

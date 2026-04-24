@@ -163,9 +163,6 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	const media = api.media.useGetMultiple({
 		queryParams: {
 			queryString: searchParams.getQueryString,
-			headers: {
-				"lucid-content-locale": contentLocale,
-			},
 			filters: {
 				isDeleted: showingDeleted,
 				public: 1,

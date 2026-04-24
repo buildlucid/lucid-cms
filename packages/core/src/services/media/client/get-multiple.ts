@@ -7,7 +7,6 @@ const getMultipleClient: ServiceFn<
 	[
 		{
 			query: GetMultipleQueryParams;
-			localeCode: string;
 		},
 	],
 	{

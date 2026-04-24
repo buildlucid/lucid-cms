@@ -9,7 +9,6 @@ const getMultiple: ServiceFn<
 	[
 		{
 			query: GetMultipleQueryParams;
-			localeCode: string;
 		},
 	],
 	{
@@ -20,7 +19,6 @@ const getMultiple: ServiceFn<
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
 	const mediaRes = await Media.selectMultipleFilteredFixed({
-		localeCode: data.localeCode,
 		queryParams: data.query,
 		validation: {
 			enabled: true,

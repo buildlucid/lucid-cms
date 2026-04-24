@@ -107,9 +107,6 @@ export const MediaList: Component<{
 				folderId: props.state.parentFolderId,
 				isDeleted: isDeletedFilter,
 			},
-			headers: {
-				"lucid-content-locale": contentLocale,
-			},
 		},
 		enabled: () => props.state.searchParams.getSettled(),
 	});

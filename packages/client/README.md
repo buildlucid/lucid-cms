@@ -68,19 +68,23 @@ Use the media client to fetch media items or generate processed media URLs.
 
 ```typescript
 const media = await client.media.getMultiple({
-    localeCode: "en",
+    query: {
+        filter: {
+            title: {
+                value: "Hero",
+            },
+        },
+    },
 });
 
 const processed = await client.media.process({
     key: "public/hero.jpg",
     body: {
-        width: 1200,
+        preset: "thumbnail", 
         format: "webp",
     },
 });
 ```
-
-The `localeCode` option is request-scoped and is primarily useful for media list requests where Lucid needs a locale when filtering or sorting translated media fields.
 
 ## Locales
 

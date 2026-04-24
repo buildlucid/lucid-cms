@@ -6,7 +6,6 @@ export default Object.freeze({
 	openAPIDocsRoute: "/lucid/documentation",
 	headers: {
 		csrf: "X-CSRF-Token",
-		contentLocale: "lucid-content-locale",
 	},
 	cookies: {
 		csrf: "_csrf",

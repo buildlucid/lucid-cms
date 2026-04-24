@@ -16,7 +16,6 @@
 	"open_api_response_204": "No content response",
 	"open_api_response_default": "Catch all error response",
 	"open_api_csrf_header_description": "A token that is used to protect against CSRF attacks. CSRF middleware expects this value to be passed in the header so it can be compared to the httpOnly _csrf cookie.",
-	"open_api_content_locale_header_description": "The locale code of the content you wish to filter translations by. If left empty, the default language will be used.",
 	"open_api_authorization_header_description": "The Authorization header is required for client integrations and should take the API key as the value.",
 	"login_suspended_error_message": "Your account has been suspended. Please contact an administrator.",
 	"login_locked_error_message": "Your account has been locked. Please contact an administrator.",

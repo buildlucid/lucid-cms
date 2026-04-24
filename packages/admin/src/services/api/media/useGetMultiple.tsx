@@ -17,9 +17,6 @@ interface QueryParams {
 		public?: Accessor<1 | 0> | 0 | 1;
 	};
 	perPage?: number;
-	headers: {
-		"lucid-content-locale": Accessor<string | undefined> | string;
-	};
 }
 
 const useGetMultiple = (params: QueryHook<QueryParams>) => {
@@ -38,7 +35,6 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 				query: queryParams(),
 				config: {
 					method: "GET",
-					headers: queryParams().headers,
 				},
 			}),
 		get enabled() {

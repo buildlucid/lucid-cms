@@ -17,7 +17,6 @@ export type LucidRequestOptions = {
 	signal?: AbortSignal;
 	abortController?: AbortController;
 	timeoutMs?: number;
-	localeCode?: string;
 	retry?: LucidRetryInput;
 };
 

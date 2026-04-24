@@ -11,7 +11,6 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
-import contentLocale from "../../middleware/content-locale.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -30,13 +29,9 @@ const getMultipleController = factory.createHandlers(
 		}),
 		parameters: honoOpenAPIParamaters({
 			query: controllerSchemas.getMultiple.query.string,
-			headers: {
-				contentLocale: true,
-			},
 		}),
 	}),
 	authenticate,
-	contentLocale,
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const context = getServiceContext(c);
@@ -57,7 +52,6 @@ const getMultipleController = factory.createHandlers(
 			},
 		})(context, {
 			query: formattedQuery,
-			localeCode: c.get("locale").code,
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 

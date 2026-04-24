@@ -296,7 +296,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		props: QueryProps<
 			V,
 			{
-				localeCode: string;
 				queryParams: GetMultipleQueryParams;
 			}
 		>,
@@ -305,6 +304,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			async () => {
 				const mainQuery = this.db
 					.selectFrom("lucid_media")
+					.leftJoin("lucid_media_translations as translation", (join) =>
+						join.onRef("translation.media_id", "=", "lucid_media.id"),
+					)
 					.select((eb) => [
 						"lucid_media.id",
 						"lucid_media.key",
@@ -327,6 +329,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_deleted_at",
 						"lucid_media.deleted_by",
 						"lucid_media.public",
+						eb.fn.min<string>("translation.title").as("title_sort"),
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb
@@ -344,25 +347,18 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							)
 							.as("translations"),
 					])
-					.leftJoin("lucid_media_translations as translation", (join) =>
-						join
-							.onRef("translation.media_id", "=", "lucid_media.id")
-							.on("translation.locale_code", "=", props.localeCode),
-					)
 					.where(
 						"lucid_media.is_hidden",
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
 					)
-					.groupBy(["lucid_media.id", "translation.title", "translation.alt"]);
+					.groupBy("lucid_media.id");
 
 				const countQuery = this.db
 					.selectFrom("lucid_media")
 					.select(sql`count(distinct lucid_media.id)`.as("count"))
 					.leftJoin("lucid_media_translations as translation", (join) =>
-						join
-							.onRef("translation.media_id", "=", "lucid_media.id")
-							.on("translation.locale_code", "=", props.localeCode),
+						join.onRef("translation.media_id", "=", "lucid_media.id"),
 					)
 					.where(
 						"lucid_media.is_hidden",
@@ -384,7 +380,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 									...this.queryConfig.tableKeys.filters,
 								},
 								sorts: {
-									title: "translation.title",
+									// @ts-expect-error
+									title: "title_sort",
 									...this.queryConfig.tableKeys.sorts,
 								},
 							},

@@ -73,7 +73,6 @@ export const createTransport = (
 					baseHeaders: options.headers,
 					requestHeaders: descriptor.request?.headers,
 					apiKey: options.apiKey,
-					localeCode: descriptor.request?.localeCode,
 					hasBody: descriptor.body !== undefined,
 				});
 

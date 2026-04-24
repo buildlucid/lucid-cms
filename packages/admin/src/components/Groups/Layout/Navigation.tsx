@@ -197,14 +197,14 @@ export const NavigationChrome: Component = () => {
 
 			{/* Desktop Navigation */}
 			<div class="hidden md:flex bg-sidebar-base max-h-screen sticky top-0 z-10">
-				<div class="w-[220px] h-full flex flex-col overflow-y-auto scrollbar">
+				<div class="w-55 h-full flex flex-col overflow-y-auto scrollbar">
 					<div class="pt-6 px-4">
 						<div class="flex items-center pl-2">
 							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-6" />
 						</div>
 					</div>
 					<NavigationMenuContent
-						class="w-[220px] flex-1"
+						class="w-55 flex-1"
 						showLicenseAlert={showLicenseAlert()}
 						logoutPending={logout.action.isPending}
 						onLogout={() => logout.action.mutate({})}

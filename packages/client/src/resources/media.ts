@@ -22,7 +22,6 @@ export type MediaGetSingleInput = {
 
 export type MediaGetMultipleInput = {
 	query?: MediaGetMultipleQuery;
-	localeCode?: string;
 	request?: LucidRequestOptions;
 };
 
@@ -74,10 +73,7 @@ export const createMediaClient = (
 			method: "GET",
 			path: "/media",
 			query: input.query,
-			request: {
-				...input.request,
-				localeCode: input.localeCode ?? input.request?.localeCode,
-			},
+			request: input.request,
 		}),
 	process: async (input) =>
 		await transport.request<MediaProcessResponse>({

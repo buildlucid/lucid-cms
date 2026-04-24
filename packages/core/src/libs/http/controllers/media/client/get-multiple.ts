@@ -2,7 +2,6 @@ import { minutesToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/media.js";
 import { mediaServices } from "../../../../../services/index.js";
 import T from "../../../../../translations/index.js";
@@ -17,7 +16,6 @@ import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
-import contentLocale from "../../../middleware/content-locale.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -39,18 +37,15 @@ const getMultipleController = factory.createHandlers(
 			query: controllerSchemas.client.getMultiple.query.string,
 			headers: {
 				authorization: true,
-				contentLocale: true,
 			},
 		}),
 	}),
 	clientAuthentication,
 	clientScopes([ClientScopes.MediaRead]),
-	contentLocale,
 	validate("query", controllerSchemas.client.getMultiple.query.string),
 	cache({
 		ttl: minutesToSeconds(5),
 		mode: "include-query",
-		includeHeaders: [constants.headers.contentLocale],
 		tags: [cacheKeys.http.tags.clientMedia],
 	}),
 	async (c) => {
@@ -72,7 +67,6 @@ const getMultipleController = factory.createHandlers(
 			},
 		})(context, {
 			query: formattedQuery,
-			localeCode: c.get("locale").code,
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 
