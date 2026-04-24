@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -9,14 +9,20 @@ import stream from "./stream.js";
 import uploadSingle from "./upload-single.js";
 
 describe("file-system upload metadata", () => {
+	const cwd = process.cwd();
+	let projectDir: string;
 	let uploadDir: string;
 
 	beforeEach(async () => {
-		uploadDir = await mkdtemp(path.join(os.tmpdir(), "lucid-fs-media-"));
+		projectDir = await mkdtemp(path.join(os.tmpdir(), "lucid-fs-media-"));
+		uploadDir = path.join(projectDir, "uploads");
+		await mkdir(uploadDir);
+		process.chdir(projectDir);
 	});
 
 	afterEach(async () => {
-		await rm(uploadDir, { recursive: true, force: true });
+		process.chdir(cwd);
+		await rm(projectDir, { recursive: true, force: true });
 	});
 
 	it("preserves mime metadata for extensionless keys", async () => {
@@ -42,16 +48,16 @@ describe("file-system upload metadata", () => {
 		expect(metadataRes.error).toBeUndefined();
 		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
 
-		const metadataFile = await readFile(
-			getStoredMetadataFilePath(uploadDir),
-			"utf8",
-		);
+		const metadataFile = await readFile(getStoredMetadataFilePath(), "utf8");
 		expect(JSON.parse(metadataFile)).toEqual({
 			"public/uuid": {
 				mimeType: "image/svg+xml",
 				extension: "svg",
 			},
 		});
+		await expect(
+			access(path.join(uploadDir, ".lucid", "file-system-meta.json")),
+		).rejects.toThrow();
 
 		const streamRes = await stream(options)("public/uuid");
 		expect(streamRes.error).toBeUndefined();

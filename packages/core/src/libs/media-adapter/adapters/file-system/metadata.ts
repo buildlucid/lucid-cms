@@ -1,6 +1,8 @@
 import { constants } from "node:fs";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import constantsConfig from "../../../../constants/constants.js";
+import { ensureLucidDirectoryExists } from "../../../../utils/helpers/lucid-directory.js";
 
 type StoredFileMetadata = {
 	mimeType?: string | null;
@@ -9,16 +11,19 @@ type StoredFileMetadata = {
 
 type StoredMetadataIndex = Record<string, StoredFileMetadata>;
 
-const METADATA_DIRECTORY = ".lucid";
 const METADATA_FILE_NAME = "file-system-meta.json";
 
-const getMetadataFilePath = (uploadDir: string) =>
-	path.join(uploadDir, METADATA_DIRECTORY, METADATA_FILE_NAME);
+const getMetadataFilePath = () =>
+	path.join(
+		process.cwd(),
+		constantsConfig.directories.lucid,
+		METADATA_FILE_NAME,
+	);
 
 const readStoredMetadataIndex = async (
-	uploadDir: string,
+	_uploadDir: string,
 ): Promise<StoredMetadataIndex> => {
-	const metadataPath = getMetadataFilePath(uploadDir);
+	const metadataPath = getMetadataFilePath();
 
 	try {
 		await access(metadataPath, constants.F_OK);
@@ -41,10 +46,13 @@ const readStoredMetadataIndex = async (
 };
 
 const writeStoredMetadataIndex = async (
-	uploadDir: string,
+	_uploadDir: string,
 	index: StoredMetadataIndex,
 ) => {
-	const metadataPath = getMetadataFilePath(uploadDir);
+	const metadataPath = path.join(
+		await ensureLucidDirectoryExists(),
+		METADATA_FILE_NAME,
+	);
 
 	await mkdir(path.dirname(metadataPath), { recursive: true });
 
