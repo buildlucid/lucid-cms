@@ -1,6 +1,7 @@
 import type { User } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { Tr } from "@/components/Groups/Table";
+import { Td, Tr } from "@/components/Groups/Table";
+import UserDisplay from "@/components/Partials/UserDisplay";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
@@ -170,7 +171,18 @@ const UserRow: Component<UserRowProps> = (props) => {
 			options={props.options}
 			callbacks={props.callbacks}
 		>
-			<TextCol text={username()} options={{ include: props?.include[0] }} />
+			<Td options={{ include: props?.include[0] }}>
+				<UserDisplay
+					user={{
+						username: username(),
+						firstName: props.user.firstName,
+						lastName: props.user.lastName,
+						profilePicture: props.user.profilePicture,
+					}}
+					mode="short"
+					size="small"
+				/>
+			</Td>
 			<TextCol
 				text={props.user.firstName}
 				options={{ include: props?.include[1] }}

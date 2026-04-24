@@ -2,26 +2,32 @@ import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js";
 import deleteMultiplePermanently from "../../../controllers/users/delete-multiple-permanently.js";
+import deleteProfilePicture from "../../../controllers/users/delete-profile-picture.js";
 import deleteSingle from "../../../controllers/users/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/users/delete-single-permanently.js";
 import getMultiple from "../../../controllers/users/get-multiple.js";
+import getProfilePicturePresignedUrl from "../../../controllers/users/get-profile-picture-presigned-url.js";
 import getSingle from "../../../controllers/users/get-single.js";
 import inviteSingle from "../../../controllers/users/invite-single.js";
 import resendInvitation from "../../../controllers/users/resend-invitation.js";
 import restoreMultiple from "../../../controllers/users/restore-multiple.js";
 import revokeRefreshTokens from "../../../controllers/users/revoke-refresh-tokens.js";
 import unlinkAuthProvider from "../../../controllers/users/unlink-auth-provider.js";
+import updateProfilePicture from "../../../controllers/users/update-profile-picture.js";
 import updateSingle from "../../../controllers/users/update-single.js";
 
 const usersRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/:id", ...getSingle)
 	.get("/logins/:id", ...getMultipleLogins)
+	.post("/:id/profile-picture/presigned-url", ...getProfilePicturePresignedUrl)
+	.post("/:id/profile-picture", ...updateProfilePicture)
 	.post("/:id/resend-invitation", ...resendInvitation)
 	.post("/:id/revoke-refresh-tokens", ...revokeRefreshTokens)
 	.post("/", ...inviteSingle)
 	.post("/restore", ...restoreMultiple)
 	.delete("/:id/auth-providers/:providerId", ...unlinkAuthProvider)
+	.delete("/:id/profile-picture", ...deleteProfilePicture)
 	.delete("/permanent", ...deleteMultiplePermanently)
 	.delete("/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:id", ...deleteSingle)

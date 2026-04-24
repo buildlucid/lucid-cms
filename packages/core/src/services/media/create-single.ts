@@ -9,6 +9,7 @@ import {
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import type { MediaType } from "../../types/response.js";
 import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
@@ -36,6 +37,8 @@ const createSingle: ServiceFn<
 				value: string | null;
 			}[];
 			folderId?: number | null;
+			isHidden?: boolean;
+			allowedType?: MediaType;
 			userId: number;
 		},
 	],
@@ -62,6 +65,7 @@ const createSingle: ServiceFn<
 	const syncMediaRes = await mediaServices.strategies.syncMedia(context, {
 		key: data.key,
 		fileName: data.fileName,
+		allowedType: data.allowedType,
 	});
 	if (syncMediaRes.error) return syncMediaRes;
 
@@ -89,6 +93,7 @@ const createSingle: ServiceFn<
 				is_dark: data.isDark ?? null,
 				is_light: data.isLight ?? null,
 				folder_id: data.folderId ?? null,
+				is_hidden: data.isHidden ?? false,
 				created_by: data.userId,
 				updated_by: data.userId,
 				updated_at: new Date().toISOString(),

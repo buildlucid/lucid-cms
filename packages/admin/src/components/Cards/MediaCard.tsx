@@ -73,6 +73,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
+	const displayTitle = createMemo(() => {
+		return title() || helpers.formatFileNameTitle(props.media.fileName);
+	});
 	const alt = createMemo(() => {
 		return helpers.getTranslation(props.media.alt, props.contentLocale);
 	});
@@ -225,7 +228,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			>
 				<MediaPreview
 					media={props.media}
-					alt={alt() || title() || ""}
+					alt={alt() || displayTitle() || ""}
 					imageFit={props.media.type === "image" ? "contain" : undefined}
 				/>
 			</AspectRatio>
@@ -252,7 +255,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						</div>
 					</Show>
 					<div class="min-w-0 flex-1">
-						<h3 class="mb-0.5 line-clamp-1 text-sm">{title() || "-"}</h3>
+						<h3 class="mb-0.5 line-clamp-1 text-sm">{displayTitle() || "-"}</h3>
 						<ClickToCopy
 							type="simple"
 							text={props.media.key}

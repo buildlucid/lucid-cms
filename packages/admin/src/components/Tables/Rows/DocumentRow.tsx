@@ -142,6 +142,7 @@ const DocumentDynamicColumns: Component<{
 					"email" in ref &&
 					"firstName" in ref &&
 					"lastName" in ref &&
+					"profilePicture" in ref &&
 					ref.id === value,
 			) ?? null
 		);

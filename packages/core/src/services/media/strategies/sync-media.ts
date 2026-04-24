@@ -10,6 +10,7 @@ const syncMedia: ServiceFn<
 		{
 			key: string;
 			fileName: string;
+			allowedType?: MediaType;
 		},
 	],
 	{
@@ -45,6 +46,28 @@ const syncMedia: ServiceFn<
 		fileName: data.fileName,
 	});
 	if (fileMetaData.error) return fileMetaData;
+
+	if (
+		data.allowedType !== undefined &&
+		fileMetaData.data.type !== data.allowedType
+	) {
+		await mediaStrategyRes.data.delete(data.key);
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				errors: {
+					file: {
+						code: "media_error",
+						message: T("media_error_invalid_type", {
+							type: data.allowedType,
+						}),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
 
 	const storageLimit = context.config.media.limits.storage;
 	const adjustStorageRes = await optionServices.adjustInt(context, {

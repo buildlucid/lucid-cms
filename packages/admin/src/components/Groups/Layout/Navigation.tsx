@@ -151,7 +151,7 @@ export const NavigationChrome: Component = () => {
 											username: currentUser().username || "",
 											firstName: currentUser().firstName,
 											lastName: currentUser().lastName,
-											thumbnail: undefined,
+											profilePicture: currentUser().profilePicture,
 										}}
 										mode="icon"
 										size="small"

@@ -1,4 +1,5 @@
 import type { SharedFieldConfig } from "../../types.js";
+import type { MediaRef } from "../media/types.js";
 
 export interface UserFieldConfig extends SharedFieldConfig {
 	type: "user";
@@ -29,6 +30,7 @@ export type UserRef = {
 	email: string;
 	firstName: string | null;
 	lastName: string | null;
+	profilePicture: MediaRef;
 } | null;
 
 export type UserValidationData = {

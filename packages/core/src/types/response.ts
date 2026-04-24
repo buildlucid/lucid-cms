@@ -9,6 +9,7 @@ import type {
 	FieldRef,
 	FieldTypes,
 	FieldValue,
+	MediaRef,
 } from "../libs/collection/custom-fields/types.js";
 import type { MigrationStatus } from "../libs/collection/get-collection-migration-status.js";
 import type { DocumentVersionType } from "../libs/db-adapter/types.js";
@@ -42,6 +43,7 @@ export type User = {
 	lastName: string | null;
 	isDeleted: boolean;
 	email: string;
+	profilePicture: MediaRef;
 	deletedAt?: string | null;
 	createdAt?: string | null;
 	updatedAt?: string | null;

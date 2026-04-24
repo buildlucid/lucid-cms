@@ -314,6 +314,7 @@ export type UserRef = {
 	email: string;
 	firstName: string | null;
 	lastName: string | null;
+	profilePicture: MediaRef;
 } | null;
 
 export interface Media {

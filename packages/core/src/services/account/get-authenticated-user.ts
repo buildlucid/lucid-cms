@@ -3,6 +3,7 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAuthenticatedUser: ServiceFn<
@@ -44,6 +45,8 @@ const getAuthenticatedUser: ServiceFn<
 		data: usersFormatter.formatSingle({
 			user: userRes.data,
 			authUser: data.authUser,
+			host: getBaseUrl(context),
+			locales: context.config.localization.locales.map((locale) => locale.code),
 		}),
 	};
 };

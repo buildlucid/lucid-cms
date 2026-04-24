@@ -74,6 +74,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		return (
 			helpers.getRecordTranslation(media?.title, contentLocale()) ||
 			helpers.getRecordTranslation(media?.alt, contentLocale()) ||
+			helpers.formatFileNameTitle(media?.fileName) ||
 			media?.key ||
 			""
 		);

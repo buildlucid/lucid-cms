@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import type { Collection } from "@types";
+import type { Collection, User } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { IconLinkFull } from "@/components/Groups/Navigation";
@@ -17,11 +17,7 @@ export type NavigationMenuContentProps = {
 	onNavigate?: () => void;
 	logoutPending?: boolean;
 	onLogout?: () => void;
-	user?: {
-		username?: string | null;
-		firstName?: string | null;
-		lastName?: string | null;
-	};
+	user?: Pick<User, "username" | "firstName" | "lastName" | "profilePicture">;
 	showLicenseAlert: boolean;
 	canReadDocuments: boolean;
 	canReadMedia: boolean;
@@ -219,7 +215,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 											username: props.user?.username || "",
 											firstName: props.user?.firstName,
 											lastName: props.user?.lastName,
-											thumbnail: undefined,
+											profilePicture: props.user?.profilePicture,
 										}}
 										mode="long"
 									/>

@@ -303,6 +303,7 @@ const page = {
 				email: "alice@example.com",
 				firstName: "Alice",
 				lastName: "A",
+				profilePicture: null,
 			},
 			{
 				id: 101,
@@ -310,6 +311,7 @@ const page = {
 				email: "bob@example.com",
 				firstName: "Bob",
 				lastName: "B",
+				profilePicture: null,
 			},
 		],
 	},

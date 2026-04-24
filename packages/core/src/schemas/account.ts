@@ -3,6 +3,17 @@ import T from "../translations/index.js";
 import type { ControllerSchema } from "../types.js";
 import { userResponseSchema } from "./users.js";
 
+const profilePictureTranslationSchema = z.object({
+	localeCode: z.string().trim().meta({
+		description: "The locale code for the translated profile picture metadata",
+		example: "en",
+	}),
+	value: z.string().trim().nullable().meta({
+		description: "The translated value",
+		example: "Profile photo",
+	}),
+});
+
 export const controllerSchemas = {
 	getMe: {
 		body: undefined,
@@ -161,6 +172,107 @@ export const controllerSchemas = {
 				})
 				.optional(),
 		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	getProfilePicturePresignedUrl: {
+		body: z.object({
+			fileName: z.string().trim().meta({
+				description: "The profile picture file name",
+				example: "profile.png",
+			}),
+			mimeType: z.string().trim().meta({
+				description: "The profile picture MIME type",
+				example: "image/png",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z.object({
+			url: z.string().meta({
+				description: "The presigned URL to upload the profile picture to",
+				example: "https://example.com/cdn/key",
+			}),
+			key: z.string().meta({
+				description: "The media key",
+				example: "public/123e4567e89b12d3a456426614174000",
+			}),
+			headers: z
+				.record(z.string(), z.string())
+				.meta({
+					description: "The headers to use when uploading media",
+					example: {
+						"x-amz-meta-extension": "png",
+					},
+				})
+				.optional(),
+		}),
+	} satisfies ControllerSchema,
+	updateProfilePicture: {
+		body: z
+			.object({
+				key: z.string().trim().optional().meta({
+					description: "The uploaded media key",
+					example: "public/123e4567e89b12d3a456426614174000",
+				}),
+				fileName: z.string().trim().optional().meta({
+					description: "The profile picture file name",
+					example: "profile.png",
+				}),
+				width: z.number().optional().meta({
+					description: "The image width",
+					example: 100,
+				}),
+				height: z.number().optional().meta({
+					description: "The image height",
+					example: 100,
+				}),
+				blurHash: z.string().trim().optional().meta({
+					description: "The blur hash",
+					example: "AQABAAAABAAAAgAA...",
+				}),
+				averageColor: z.string().trim().optional().meta({
+					description: "The average color",
+					example: "rgba(255, 255, 255, 1)",
+				}),
+				isDark: z.boolean().optional().meta({
+					description: "Whether the image is dark",
+					example: true,
+				}),
+				isLight: z.boolean().optional().meta({
+					description: "Whether the image is light",
+					example: true,
+				}),
+				title: z.array(profilePictureTranslationSchema).optional().meta({
+					description: "Translated profile picture titles",
+				}),
+				alt: z.array(profilePictureTranslationSchema).optional().meta({
+					description: "Translated profile picture alt text",
+				}),
+			})
+			.refine(
+				(data) => (data.key === undefined) === (data.fileName === undefined),
+				{
+					message: T("profile_picture_file_name_key_required"),
+					path: ["fileName"],
+				},
+			),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: undefined,
+	} satisfies ControllerSchema,
+	deleteProfilePicture: {
+		body: undefined,
 		query: {
 			string: undefined,
 			formatted: undefined,

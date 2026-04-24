@@ -14,6 +14,7 @@ import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import RelationCount from "@/components/Partials/RelationCount";
+import UserDisplay from "@/components/Partials/UserDisplay";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -206,13 +207,20 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 					<Match when={!isMultiple() && selectedUser()}>
 						<div class="group w-full border border-border rounded-md bg-input-base px-3 py-2">
 							<div class="flex items-center justify-between gap-3">
-								<div class="min-w-0 flex-1">
-									<span class="text-sm font-medium text-subtitle truncate block">
-										{userName() || "-"}
-									</span>
-									<p class="text-xs text-unfocused truncate">
-										{selectedUser()?.email || "-"}
-									</p>
+								<div class="flex min-w-0 flex-1 items-center gap-2.5">
+									<Show when={selectedUser()}>
+										{(user) => (
+											<UserDisplay user={user()} mode="icon" size="medium" />
+										)}
+									</Show>
+									<div class="min-w-0">
+										<span class="text-sm font-medium text-subtitle truncate block">
+											{userName() || "-"}
+										</span>
+										<p class="text-xs text-unfocused truncate">
+											{selectedUser()?.email || "-"}
+										</p>
+									</div>
 								</div>
 								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
@@ -308,11 +316,16 @@ const UserSortableItem: Component<{
 			}
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
-			<div class="min-w-0">
-				<p class="truncate text-sm font-medium text-subtitle">
-					{helpers.formatUserName(props.user, "username") || "-"}
-				</p>
-				<p class="truncate text-xs text-unfocused">{props.user.email || "-"}</p>
+			<div class="flex min-w-0 items-center gap-2.5">
+				<UserDisplay user={props.user} mode="icon" size="medium" />
+				<div class="min-w-0">
+					<p class="truncate text-sm font-medium text-subtitle">
+						{helpers.formatUserName(props.user, "username") || "-"}
+					</p>
+					<p class="truncate text-xs text-unfocused">
+						{props.user.email || "-"}
+					</p>
+				</div>
 			</div>
 			<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 				<Button

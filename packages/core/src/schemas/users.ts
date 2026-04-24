@@ -1,6 +1,101 @@
 import z from "zod";
+import T from "../translations/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+
+const userIdParamSchema = z.object({
+	id: z.string().trim().meta({
+		description: "The user's ID",
+		example: 1,
+	}),
+});
+const profilePictureTranslationSchema = z.object({
+	localeCode: z.string().trim().meta({
+		description: "The locale code for the translated profile picture metadata",
+		example: "en",
+	}),
+	value: z.string().trim().nullable().meta({
+		description: "The translated value",
+		example: "Profile photo",
+	}),
+});
+const profilePicturePresignedUrlBodySchema = z.object({
+	fileName: z.string().trim().meta({
+		description: "The profile picture file name",
+		example: "profile.png",
+	}),
+	mimeType: z.string().trim().meta({
+		description: "The profile picture MIME type",
+		example: "image/png",
+	}),
+});
+const profilePicturePresignedUrlResponseSchema = z.object({
+	url: z.string().meta({
+		description: "The presigned URL to upload the profile picture to",
+		example: "https://example.com/cdn/key",
+	}),
+	key: z.string().meta({
+		description: "The media key",
+		example: "public/123e4567e89b12d3a456426614174000",
+	}),
+	headers: z
+		.record(z.string(), z.string())
+		.meta({
+			description: "The headers to use when uploading media",
+			example: {
+				"x-amz-meta-extension": "png",
+			},
+		})
+		.optional(),
+});
+const updateProfilePictureBodySchema = z
+	.object({
+		key: z.string().trim().optional().meta({
+			description: "The uploaded media key",
+			example: "public/123e4567e89b12d3a456426614174000",
+		}),
+		fileName: z.string().trim().optional().meta({
+			description: "The profile picture file name",
+			example: "profile.png",
+		}),
+		width: z.number().optional().meta({
+			description: "The image width",
+			example: 100,
+		}),
+		height: z.number().optional().meta({
+			description: "The image height",
+			example: 100,
+		}),
+		blurHash: z.string().trim().optional().meta({
+			description: "The blur hash",
+			example: "AQABAAAABAAAAgAA...",
+		}),
+		averageColor: z.string().trim().optional().meta({
+			description: "The average color",
+			example: "rgba(255, 255, 255, 1)",
+		}),
+		isDark: z.boolean().optional().meta({
+			description: "Whether the image is dark",
+			example: true,
+		}),
+		isLight: z.boolean().optional().meta({
+			description: "Whether the image is light",
+			example: true,
+		}),
+		title: z.array(profilePictureTranslationSchema).optional().meta({
+			description: "Translated profile picture titles",
+		}),
+		alt: z.array(profilePictureTranslationSchema).optional().meta({
+			description: "Translated profile picture alt text",
+		}),
+	})
+	.refine(
+		(data) => (data.key === undefined) === (data.fileName === undefined),
+		{
+			message: T("profile_picture_file_name_key_required"),
+			path: ["fileName"],
+		},
+	);
 
 const userResponsePermissionSchema = z.string().meta({
 	description: "A permission identifier",
@@ -16,6 +111,72 @@ const userResponseRoleSchema = z.object({
 		example: "Admin",
 	}),
 });
+export const userProfilePictureSchema = z
+	.object({
+		id: z.number().meta({ description: "Media ID", example: 1 }),
+		url: z.string().meta({
+			description: "Media URL",
+			example:
+				"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/profile-image",
+		}),
+		key: z.string().meta({
+			description: "Media key",
+			example: "public/123e4567e89b12d3a456426614174000",
+		}),
+		fileName: z.string().nullable().meta({
+			description: "Original file name",
+			example: "profile.png",
+		}),
+		mimeType: z
+			.string()
+			.meta({ description: "MIME type", example: "image/png" }),
+		extension: z
+			.string()
+			.meta({ description: "File extension", example: "png" }),
+		fileSize: z
+			.number()
+			.meta({ description: "File size in bytes", example: 100 }),
+		width: z
+			.number()
+			.nullable()
+			.meta({ description: "Image width", example: 100 }),
+		height: z
+			.number()
+			.nullable()
+			.meta({ description: "Image height", example: 100 }),
+		blurHash: z.string().nullable().meta({
+			description: "BlurHash for image previews",
+			example: "AQABAAAABAAAAgAA...",
+		}),
+		averageColor: z.string().nullable().meta({
+			description: "Average color of the image",
+			example: "rgba(255, 255, 255, 1)",
+		}),
+		isDark: z.boolean().nullable().meta({
+			description: "Whether the image is predominantly dark",
+			example: true,
+		}),
+		isLight: z.boolean().nullable().meta({
+			description: "Whether the image is predominantly light",
+			example: true,
+		}),
+		title: z.record(z.string(), z.string()).meta({
+			description: "Translated titles by locale",
+		}),
+		alt: z.record(z.string(), z.string()).meta({
+			description: "Translated alt text by locale",
+		}),
+		type: z.string().meta({ description: "Media type", example: "image" }),
+		isDeleted: z.boolean().meta({
+			description: "Whether the media is deleted",
+			example: false,
+		}),
+		public: z.boolean().meta({
+			description: "Whether the media is public",
+			example: true,
+		}),
+	})
+	.nullable();
 
 export const userResponseSchema = z.object({
 	id: z.number().meta({
@@ -32,6 +193,9 @@ export const userResponseSchema = z.object({
 	email: z.email().meta({
 		description: "The user's email address",
 		example: "admin@lucidcms.io",
+	}),
+	profilePicture: userProfilePictureSchema.meta({
+		description: "The user's profile picture media reference",
 	}),
 	username: z.string().meta({
 		description: "The user's username",
@@ -221,12 +385,34 @@ export const controllerSchemas = {
 			string: undefined,
 			formatted: undefined,
 		},
-		params: z.object({
-			id: z.string().trim().meta({
-				description: "The user's ID",
-				example: 1,
-			}),
-		}),
+		params: userIdParamSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	getProfilePicturePresignedUrl: {
+		body: profilePicturePresignedUrlBodySchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: userIdParamSchema,
+		response: profilePicturePresignedUrlResponseSchema,
+	} satisfies ControllerSchema,
+	updateProfilePicture: {
+		body: updateProfilePictureBodySchema,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: userIdParamSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	deleteProfilePicture: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: userIdParamSchema,
 		response: undefined,
 	} satisfies ControllerSchema,
 	getSingle: {
@@ -235,12 +421,7 @@ export const controllerSchemas = {
 			string: undefined,
 			formatted: undefined,
 		},
-		params: z.object({
-			id: z.string().trim().meta({
-				description: "The user's ID",
-				example: 1,
-			}),
-		}),
+		params: userIdParamSchema,
 		response: userResponseSchema,
 	} satisfies ControllerSchema,
 	getMultiple: {

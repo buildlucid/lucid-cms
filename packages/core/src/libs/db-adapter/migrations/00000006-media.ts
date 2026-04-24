@@ -78,6 +78,16 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("is_dark", adapter.getDataType("boolean"))
 				.addColumn("is_light", adapter.getDataType("boolean"))
 				.addColumn("custom_meta", adapter.getDataType("text"))
+				.addColumn("is_hidden", adapter.getDataType("boolean"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "false"),
+							),
+						),
+				)
 				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -118,6 +128,21 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_media_key")
 				.on("lucid_media")
 				.column("key")
+				.execute();
+
+			await db.schema
+				.alterTable("lucid_users")
+				.addColumn(
+					"profile_picture_media_id",
+					adapter.getDataType("integer"),
+					(col) => col.references("lucid_media.id").onDelete("set null"),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_users_profile_picture_media_id")
+				.on("lucid_users")
+				.column("profile_picture_media_id")
 				.execute();
 
 			await db.schema

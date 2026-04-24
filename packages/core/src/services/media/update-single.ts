@@ -38,6 +38,7 @@ const updateSingle: ServiceFn<
 			isDark?: boolean | null;
 			isLight?: boolean | null;
 			isDeleted?: boolean;
+			allowedType?: MediaType;
 			userId: number;
 		},
 	],
@@ -122,6 +123,7 @@ const updateSingle: ServiceFn<
 			previousType: mediaRes.data.type as MediaType,
 			previousEtag: mediaRes.data.e_tag,
 			updatedKey: data.key,
+			allowedType: data.allowedType,
 			fileName: data.fileName,
 			targetKey:
 				targetPublic === currentPublic

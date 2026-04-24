@@ -1,6 +1,7 @@
 import type { BooleanInt } from "../../libs/db-adapter/types.js";
 import type { Media, MediaType } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
+import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
 import formatter from "./index.js";
 
 export interface MediaPropsT {
@@ -103,8 +104,50 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 	};
 };
 
+const formatRef = (props: {
+	media?: MediaPropsT | null;
+	host: string;
+	locales: string[];
+}): MediaRef => {
+	if (!props.media) return null;
+
+	return {
+		id: props.media.id,
+		url: createMediaUrl({
+			key: props.media.key,
+			host: props.host,
+			fileName: props.media.file_name,
+		}),
+		key: props.media.key,
+		fileName: props.media.file_name,
+		mimeType: props.media.mime_type,
+		extension: props.media.file_extension,
+		fileSize: props.media.file_size,
+		width: props.media.width,
+		height: props.media.height,
+		blurHash: props.media.blur_hash,
+		averageColor: props.media.average_color,
+		isDark: formatter.formatBoolean(props.media.is_dark),
+		isLight: formatter.formatBoolean(props.media.is_light),
+		title: objectifyTranslations(
+			"title",
+			props.media.translations || [],
+			props.locales,
+		),
+		alt: objectifyTranslations(
+			"alt",
+			props.media.translations || [],
+			props.locales,
+		),
+		type: props.media.type as MediaType,
+		public: formatter.formatBoolean(props.media.public),
+		isDeleted: formatter.formatBoolean(props.media.is_deleted),
+	};
+};
+
 export default {
 	formatMultiple,
 	formatSingle,
+	formatRef,
 	objectifyTranslations,
 };

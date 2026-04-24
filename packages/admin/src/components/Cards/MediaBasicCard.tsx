@@ -48,6 +48,9 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
+	const displayTitle = createMemo(() => {
+		return title() || helpers.formatFileNameTitle(props.media.fileName);
+	});
 	const alt = createMemo(() => {
 		return helpers.getTranslation(props.media.alt, props.contentLocale);
 	});
@@ -111,7 +114,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 			>
 				<MediaPreview
 					media={props.media}
-					alt={alt() || title() || ""}
+					alt={alt() || displayTitle() || ""}
 					imageFit={props.media.type === "image" ? "contain" : undefined}
 				/>
 			</AspectRatio>
@@ -128,7 +131,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 						/>
 					</Show>
 					<h3 class="line-clamp-1 text-sm flex-1">
-						{title() || T()("no_translation")}
+						{displayTitle() || T()("no_translation")}
 					</h3>
 				</div>
 			</div>

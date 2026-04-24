@@ -4,6 +4,8 @@ import type { BooleanInt } from "../db-adapter/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 import formatter from "./index.js";
+import type { MediaPropsT } from "./media.js";
+import mediaFormatter from "./media.js";
 import userPermissionsFormatter from "./user-permissions.js";
 
 export interface UserPropT {
@@ -21,6 +23,7 @@ export interface UserPropT {
 	is_deleted: BooleanInt | null;
 	is_deleted_at: Date | string | null;
 	password?: string | null;
+	profile_picture?: MediaPropsT[];
 	auth_providers?: {
 		id: number;
 		provider_key: string;
@@ -40,11 +43,15 @@ export interface UserPropT {
 const formatMultiple = (props: {
 	users: UserPropT[];
 	authUser?: LucidAuth;
+	host: string;
+	locales: string[];
 }) => {
 	return props.users.map((u) =>
 		formatSingle({
 			user: u,
 			authUser: props.authUser,
+			host: props.host,
+			locales: props.locales,
 		}),
 	);
 };
@@ -52,6 +59,8 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	user: UserPropT;
 	authUser?: LucidAuth;
+	host: string;
+	locales: string[];
 }): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
@@ -76,6 +85,11 @@ const formatSingle = (props: {
 		firstName: props.user.first_name,
 		lastName: props.user.last_name,
 		isDeleted: formatter.formatBoolean(props.user.is_deleted ?? false),
+		profilePicture: mediaFormatter.formatRef({
+			media: props.user.profile_picture?.[0],
+			host: props.host,
+			locales: props.locales,
+		}),
 	};
 
 	if (canViewDetails) {

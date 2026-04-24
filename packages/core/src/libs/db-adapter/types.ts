@@ -219,6 +219,7 @@ export interface LucidUsers {
 	is_deleted: BooleanInt | null;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number | null;
+	profile_picture_media_id: number | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
@@ -357,6 +358,7 @@ export interface LucidMedia {
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	custom_meta: string | null;
+	is_hidden: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number | null;

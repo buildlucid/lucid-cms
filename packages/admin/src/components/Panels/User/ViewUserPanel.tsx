@@ -3,6 +3,7 @@ import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import { Panel } from "@/components/Groups/Panel";
 import DetailsList from "@/components/Partials/DetailsList";
+import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -128,6 +129,15 @@ const ViewUserPanelContent: Component<{
 	// Render
 	return (
 		<>
+			<SectionHeading title={T()("profile_picture")} />
+			<ProfilePicturePreviewCard
+				user={{
+					username: props.state.user?.username,
+					firstName: props.state.user?.firstName,
+					lastName: props.state.user?.lastName,
+					profilePicture: props.state.user?.profilePicture,
+				}}
+			/>
 			<SectionHeading title={T()("details")} />
 			<DetailsList
 				type="text"

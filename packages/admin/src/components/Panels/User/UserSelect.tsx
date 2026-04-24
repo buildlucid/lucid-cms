@@ -11,7 +11,8 @@ import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
 import { Filter, PerPage } from "@/components/Groups/Query";
-import { Table, Tr } from "@/components/Groups/Table";
+import { Table, Td, Tr } from "@/components/Groups/Table";
+import UserDisplay from "@/components/Partials/UserDisplay";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
@@ -282,10 +283,22 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 										theme="secondary"
 										padding="16"
 									/>
-									<TextCol
-										text={user().username}
-										options={{ include: include[1] }}
-									/>
+									<Td
+										options={{
+											include: include[1],
+											padding: "16",
+										}}
+									>
+										<UserDisplay
+											user={{
+												username: user().username,
+												firstName: user().firstName,
+												lastName: user().lastName,
+												profilePicture: user().profilePicture,
+											}}
+											mode="short"
+										/>
+									</Td>
 									<TextCol
 										text={user().firstName}
 										options={{ include: include[2] }}

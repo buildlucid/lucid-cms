@@ -46,6 +46,7 @@ export const userResponseToRef = (user: User): UserRelationRef => ({
 	email: user.email,
 	firstName: user.firstName,
 	lastName: user.lastName,
+	profilePicture: user.profilePicture,
 });
 
 /**

@@ -1,10 +1,12 @@
-import type { Media } from "@types";
+import type { ErrorResponse, Media, User } from "@types";
 import {
 	type Accessor,
 	type Component,
 	createEffect,
 	createMemo,
+	createSignal,
 	For,
+	on,
 	Show,
 } from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
@@ -27,6 +29,10 @@ interface CreateUpdateMediaPanelProps {
 		setOpen: (_state: boolean) => void;
 		parentFolderId: Accessor<number | string | undefined>;
 	};
+	profilePicture?: {
+		media: User["profilePicture"];
+		userId?: number;
+	};
 	callbacks?: {
 		onSuccess?: (_media: Media) => void;
 	};
@@ -36,21 +42,34 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	props,
 ) => {
 	// ------------------------------
-	// State
-	const panelMode = createMemo(() => {
-		return props.id === undefined ? "create" : "update";
-	});
+	// State & Hooks
+	const [uploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const createMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
-
+	const isProfilePicture = createMemo(() => props.profilePicture !== undefined);
+	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const profilePictureMedia = createMemo(
+		() => props.profilePicture?.media ?? null,
+	);
+	const panelMode = createMemo(() => {
+		if (props.profilePicture) {
+			return profilePictureMedia() === null ? "create" : "update";
+		}
+		return props.id === undefined ? "create" : "update";
+	});
 	const MediaFile = useSingleFileUpload({
 		id: "file",
 		disableRemoveCurrent: true,
 		name: "file",
 		required: true,
-		errors: panelMode() === "create" ? createMedia.errors : updateMedia?.errors,
+		accept: isProfilePicture() ? "image/*" : undefined,
+		errors: () => mutateErrors(),
 		noMargin: false,
 	});
+	const accountGetPresignedUrl = api.account.useGetProfilePicturePresignedUrl();
+	const userGetPresignedUrl = api.users.useGetProfilePicturePresignedUrl();
+	const accountUpdateProfilePicture = api.account.useUpdateProfilePicture();
+	const userUpdateProfilePicture = api.users.useUpdateProfilePicture();
 
 	// ---------------------------------
 	// Queries
@@ -60,21 +79,26 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				id: props.id as Accessor<number | undefined>,
 			},
 		},
-		enabled: () => panelMode() === "update" && props.state.open,
+		enabled: () =>
+			!isProfilePicture() && panelMode() === "update" && props.state.open,
 	});
 
 	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
 		queryParams: {},
+		enabled: () => !isProfilePicture(),
 	});
 
 	// ---------------------------------
 	// Memos
-	const locales = createMemo(() => contentLocaleStore.get.locales);
-
 	const showAltInput = createMemo(() => {
 		if (MediaFile.getFile() !== null) {
 			const type = helpers.getMediaType(MediaFile.getMimeType());
 			return type === "image";
+		}
+		if (isProfilePicture()) {
+			return (
+				panelMode() === "update" && profilePictureMedia()?.type === "image"
+			);
 		}
 		return panelMode() === "create" ? false : media.data?.data.type === "image";
 	});
@@ -100,11 +124,28 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 
 	const mutateIsLoading = createMemo(() => {
+		if (isProfilePicture()) {
+			return (
+				accountGetPresignedUrl.action.isPending ||
+				userGetPresignedUrl.action.isPending ||
+				accountUpdateProfilePicture.action.isPending ||
+				userUpdateProfilePicture.action.isPending
+			);
+		}
 		return panelMode() === "create"
 			? createMedia.isLoading()
 			: updateMedia?.isLoading() || false;
 	});
 	const mutateErrors = createMemo(() => {
+		if (isProfilePicture()) {
+			return (
+				accountGetPresignedUrl.errors() ||
+				userGetPresignedUrl.errors() ||
+				accountUpdateProfilePicture.errors() ||
+				userUpdateProfilePicture.errors() ||
+				uploadErrors()
+			);
+		}
 		return panelMode() === "create"
 			? createMedia.errors()
 			: updateMedia?.errors();
@@ -120,6 +161,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 
 	const targetAction = createMemo(() => {
+		if (isProfilePicture()) return createMedia;
 		return panelMode() === "create" ? createMedia : updateMedia;
 	});
 	const targetState = createMemo(() => {
@@ -130,8 +172,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const { changed, data } = helpers.updateData(
 			{
 				key: undefined,
-				title: media.data?.data.title || [],
-				alt: media.data?.data.alt || [],
+				title: isProfilePicture()
+					? recordToTranslations(profilePictureMedia()?.title)
+					: media.data?.data.title || [],
+				alt: isProfilePicture()
+					? recordToTranslations(profilePictureMedia()?.alt)
+					: media.data?.data.alt || [],
 				folderId: media.data?.data.folderId ?? null,
 				public: media.data?.data.public ?? true,
 			},
@@ -153,6 +199,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		};
 	});
 	const mutateIsDisabled = createMemo(() => {
+		if (isProfilePicture() && panelMode() === "update") {
+			return !updateData().changed;
+		}
 		if (panelMode() === "create") {
 			return MediaFile.getFile() === null;
 		}
@@ -160,6 +209,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 
 	const panelContent = createMemo(() => {
+		if (isProfilePicture()) {
+			return {
+				title:
+					panelMode() === "create"
+						? T()("set_profile_picture")
+						: T()("update_profile_picture"),
+				submit: panelMode() === "create" ? T()("set") : T()("update"),
+			};
+		}
 		if (panelMode() === "create") {
 			return {
 				title: T()("create_media_panel_title"),
@@ -172,6 +230,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		};
 	});
 	const panelFetchState = createMemo(() => {
+		if (isProfilePicture()) {
+			return {
+				isLoading: false,
+				isError: false,
+			};
+		}
 		if (panelMode() === "create") {
 			return {
 				isLoading: foldersHierarchy.isLoading,
@@ -186,13 +250,175 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 	// ---------------------------------
 	// Functions
-	const inputError = (index: number) => {
+	function inputError(index: number) {
 		const errors = getBodyError("translations", mutateErrors)?.children;
 		if (errors) return errors[index];
 		return undefined;
-	};
+	}
+	function recordToTranslations(record?: Record<string, string>) {
+		return locales().map((locale) => ({
+			localeCode: locale.code,
+			value: record?.[locale.code] ?? null,
+		}));
+	}
+	function toProfileTranslations(translations?: Media["title"]) {
+		return (translations || [])
+			.filter((translation) => translation.localeCode !== null)
+			.map((translation) => ({
+				localeCode: translation.localeCode as string,
+				value: translation.value,
+			}));
+	}
+	function setFileError(message: string) {
+		setUploadErrors({
+			status: 400,
+			name: T()("media_upload_error"),
+			message,
+			errors: {
+				body: {
+					file: {
+						message,
+					},
+				},
+			},
+		});
+	}
+	async function uploadProfilePictureFile(file: File) {
+		if (!file.type.startsWith("image/")) {
+			setFileError(T()("profile_picture_image_only"));
+			return null;
+		}
+
+		try {
+			setUploadErrors(undefined);
+			const presignedUrl =
+				props.profilePicture?.userId !== undefined
+					? await userGetPresignedUrl.action.mutateAsync({
+							userId: props.profilePicture.userId,
+							body: {
+								fileName: file.name,
+								mimeType: file.type,
+							},
+						})
+					: await accountGetPresignedUrl.action.mutateAsync({
+							body: {
+								fileName: file.name,
+								mimeType: file.type,
+							},
+						});
+
+			const response = await fetch(presignedUrl.data.url, {
+				method: "PUT",
+				body: file,
+				headers: {
+					...(file.type ? { "content-type": file.type } : {}),
+					...presignedUrl.data.headers,
+				},
+			});
+
+			let bodyMessage = "";
+			if (response.headers.get("content-type")?.includes("application/json")) {
+				const body = await response.json();
+				bodyMessage = body?.message || "";
+			}
+
+			if (!response.ok) {
+				setUploadErrors({
+					status: response.status,
+					name: T()("media_upload_error"),
+					message: T()("media_upload_error_description"),
+					errors: {
+						body: {
+							file: {
+								message: bodyMessage || "",
+							},
+						},
+					},
+				});
+				return null;
+			}
+
+			return presignedUrl.data.key;
+		} catch (error) {
+			setUploadErrors({
+				status: 500,
+				name: T()("media_upload_error"),
+				message:
+					error instanceof Error
+						? error.message
+						: T()("media_upload_error_description"),
+			});
+			return null;
+		}
+	}
+	async function updateProfilePicture(
+		file: File | null,
+		imageMeta: Awaited<ReturnType<typeof MediaFile.getImageMeta>>,
+	) {
+		let key: string | null = null;
+		if (file) {
+			key = await uploadProfilePictureFile(file);
+			if (!key) return false;
+		}
+
+		const body = {
+			key: key ?? undefined,
+			fileName: file?.name,
+			width: imageMeta?.width,
+			height: imageMeta?.height,
+			blurHash: imageMeta?.blurHash,
+			averageColor: imageMeta?.averageColor,
+			isDark: imageMeta?.isDark,
+			isLight: imageMeta?.isLight,
+			title: toProfileTranslations(targetState()?.title()),
+			alt: toProfileTranslations(targetState()?.alt()),
+		};
+
+		if (props.profilePicture?.userId !== undefined) {
+			await userUpdateProfilePicture.action.mutateAsync({
+				userId: props.profilePicture.userId,
+				body,
+			});
+			return true;
+		}
+
+		await accountUpdateProfilePicture.action.mutateAsync(body);
+		return true;
+	}
+	function hydrateProfilePictureState() {
+		const profilePicture = profilePictureMedia();
+
+		createMedia.setTitle(recordToTranslations(profilePicture?.title));
+		createMedia.setAlt(recordToTranslations(profilePicture?.alt));
+		createMedia.setFolderId(null);
+		createMedia.setPublic(true);
+		MediaFile.reset();
+		if (profilePicture) {
+			MediaFile.setCurrentFile({
+				name: profilePicture.fileName ?? profilePicture.key,
+				url:
+					profilePicture.type === "image"
+						? `${profilePicture.url}?preset=thumbnail&format=webp`
+						: profilePicture.url,
+				type: profilePicture.type,
+			});
+		}
+	}
+
+	// ---------------------------------
+	// Handlers
 	const onSubmit = async () => {
 		const imageMeta = await MediaFile.getImageMeta();
+
+		if (isProfilePicture()) {
+			const success = await updateProfilePicture(
+				MediaFile.getFile(),
+				imageMeta,
+			);
+			if (!success) return;
+			props.state.setOpen(false);
+			return;
+		}
 
 		if (panelMode() === "create") {
 			const media = await createMedia.createMedia(
@@ -218,7 +444,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 	// ---------------------------------
 	// Effects
+	createEffect(
+		on(
+			[isProfilePicture, profilePictureMedia, () => props.state.open],
+			([profilePictureMode, _, open]) => {
+				if (profilePictureMode && open) {
+					hydrateProfilePictureState();
+				}
+			},
+		),
+	);
+
 	createEffect(() => {
+		if (isProfilePicture()) return;
 		if (media.isSuccess && panelMode() === "update") {
 			updateMedia?.setTitle(media.data?.data.title || []);
 			updateMedia?.setAlt(media.data?.data.alt || []);
@@ -266,6 +504,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					createMedia.reset();
 					updateMedia?.reset();
 					MediaFile.reset();
+					setUploadErrors(undefined);
 				},
 			}}
 			copy={panelContent()}
@@ -333,36 +572,38 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							</Show>
 						)}
 					</For>
-					<Select
-						id="media-folder"
-						value={targetState()?.folderId() ?? undefined}
-						onChange={(val) => {
-							const id =
-								typeof val === "string" ? Number.parseInt(val, 10) : val;
-							targetAction()?.setFolderId(id);
-						}}
-						name="media-folder"
-						options={folderOptions()}
-						copy={{ label: T()("folder") }}
-						required={false}
-						errors={getBodyError("folderId", mutateErrors())}
-						noMargin={false}
-						noClear={true}
-					/>
-					<Checkbox
-						id="public"
-						value={targetState()?.public() ?? true}
-						onChange={(val) => {
-							targetAction()?.setPublic(val);
-						}}
-						name="public"
-						copy={{
-							label: T()("publicly_available"),
-							tooltip: T()("media_public_description"),
-						}}
-						errors={getBodyError("featured", mutateErrors())}
-					/>
-					<Show when={props.id !== undefined}>
+					<Show when={!isProfilePicture()}>
+						<Select
+							id="media-folder"
+							value={targetState()?.folderId() ?? undefined}
+							onChange={(val) => {
+								const id =
+									typeof val === "string" ? Number.parseInt(val, 10) : val;
+								targetAction()?.setFolderId(id);
+							}}
+							name="media-folder"
+							options={folderOptions()}
+							copy={{ label: T()("folder") }}
+							required={false}
+							errors={getBodyError("folderId", mutateErrors())}
+							noMargin={false}
+							noClear={true}
+						/>
+						<Checkbox
+							id="public"
+							value={targetState()?.public() ?? true}
+							onChange={(val) => {
+								targetAction()?.setPublic(val);
+							}}
+							name="public"
+							copy={{
+								label: T()("publicly_available"),
+								tooltip: T()("media_public_description"),
+							}}
+							errors={getBodyError("featured", mutateErrors())}
+						/>
+					</Show>
+					<Show when={!isProfilePicture() && props.id !== undefined}>
 						<SectionHeading title={T()("meta")} />
 						<DetailsList
 							type="text"

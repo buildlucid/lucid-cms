@@ -29,7 +29,7 @@ const AuthorCol: Component<AuthorColProps> = (props) => {
 							username: props.user?.username || "",
 							firstName: props.user?.firstName,
 							lastName: props.user?.lastName,
-							thumbnail: undefined,
+							profilePicture: props.user?.profilePicture,
 						}}
 						mode="short"
 					/>

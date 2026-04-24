@@ -41,6 +41,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				z.literal(this.dbAdapter.config.defaults.boolean.false),
 			])
 			.nullable(),
+		is_hidden: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		translations: z
 			.array(
 				z.object({
@@ -80,6 +84,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		is_dark: this.dbAdapter.getDataType("boolean"),
 		is_light: this.dbAdapter.getDataType("boolean"),
 		custom_meta: this.dbAdapter.getDataType("text"),
+		is_hidden: this.dbAdapter.getDataType("boolean"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		deleted_by: this.dbAdapter.getDataType("integer"),
@@ -99,6 +104,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				isDeleted: "is_deleted",
 				deletedBy: "deleted_by",
 				public: "public",
+				isHidden: "is_hidden",
 			},
 			sorts: {
 				createdAt: "created_at",
@@ -343,6 +349,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.onRef("translation.media_id", "=", "lucid_media.id")
 							.on("translation.locale_code", "=", props.localeCode),
 					)
+					.where(
+						"lucid_media.is_hidden",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					)
 					.groupBy(["lucid_media.id", "translation.title", "translation.alt"]);
 
 				const countQuery = this.db
@@ -352,6 +363,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						join
 							.onRef("translation.media_id", "=", "lucid_media.id")
 							.on("translation.locale_code", "=", props.localeCode),
+					)
+					.where(
+						"lucid_media.is_hidden",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
 					);
 
 				const { main, count } = queryBuilder.main(

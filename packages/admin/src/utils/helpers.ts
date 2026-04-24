@@ -115,6 +115,19 @@ const getMediaType = (mimeType?: string): Media["type"] => {
 };
 
 // ---------------------------------------------
+// Format file name as a readable title
+const formatFileNameTitle = (fileName?: string | null): string => {
+	if (!fileName) return "";
+	const normalized = fileName.split(/[\\/]/).pop()?.trim() ?? "";
+	if (!normalized) return "";
+
+	const extensionIndex = normalized.lastIndexOf(".");
+	if (extensionIndex <= 0) return normalized;
+
+	return normalized.slice(0, extensionIndex);
+};
+
+// ---------------------------------------------
 // Format user name
 const formatUserName = (
 	user: {
@@ -232,6 +245,7 @@ const helpers = {
 	resolveValue,
 	bytesToSize,
 	getMediaType,
+	formatFileNameTitle,
 	formatUserName,
 	formatUserInitials,
 	updateTranslation,

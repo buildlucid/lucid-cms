@@ -12,7 +12,9 @@ import SectionHeading from "@/components/Blocks/SectionHeading";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
+import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
+import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -27,7 +29,7 @@ const UpdateUserPanel: Component<{
 	};
 }> = (props) => {
 	// ------------------------------
-	// State
+	// State & Hooks
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
 		SelectMultipleValueT[]
 	>([]);
@@ -35,6 +37,8 @@ const UpdateUserPanel: Component<{
 	const [getIsLocked, setIsLocked] = createSignal(false);
 	const [getUnlinkingProviderKey, setUnlinkingProviderKey] =
 		createSignal<string>();
+	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
+		createSignal(false);
 
 	// ---------------------------------
 	// Queries
@@ -72,23 +76,7 @@ const UpdateUserPanel: Component<{
 			setUnlinkingProviderKey(params.providerKey);
 		},
 	});
-
-	// ---------------------------------
-	// Effects
-	createEffect(() => {
-		if (user.isSuccess) {
-			setSelectedRoles(
-				user.data?.data.roles?.map((role) => {
-					return {
-						value: role.id,
-						label: role.name,
-					};
-				}) || [],
-			);
-			setIsSuperAdmin(user.data?.data.superAdmin || false);
-			setIsLocked(user.data?.data.isLocked || false);
-		}
-	});
+	const deleteProfilePicture = api.users.useDeleteProfilePicture();
 
 	// ---------------------------------
 	// Memos
@@ -122,130 +110,198 @@ const UpdateUserPanel: Component<{
 			},
 		);
 	});
+	const profilePictureMediaId = createMemo(
+		() => user.data?.data.profilePicture?.id,
+	);
+
+	// ---------------------------------
+	// Handlers
+	const handleSubmit = () => {
+		updateUser.action.mutate({
+			id: props.id() as number,
+			body: updateData().data,
+		});
+	};
+	const handleReset = () => {
+		updateUser.reset();
+		deleteProfilePicture.reset();
+	};
+	const handleClearProfilePicture = () => {
+		const userId = props.id();
+		if (!userId) return;
+
+		deleteProfilePicture.action.mutate({
+			userId,
+		});
+	};
+
+	// ---------------------------------
+	// Effects
+	createEffect(() => {
+		if (user.isSuccess) {
+			setSelectedRoles(
+				user.data?.data.roles?.map((role) => {
+					return {
+						value: role.id,
+						label: role.name,
+					};
+				}) || [],
+			);
+			setIsSuperAdmin(user.data?.data.superAdmin || false);
+			setIsLocked(user.data?.data.isLocked || false);
+		}
+	});
 
 	// ---------------------------------
 	// Render
 	return (
-		<Panel
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			fetchState={{
-				isLoading: isLoading(),
-				isError: isError(),
-			}}
-			mutateState={{
-				isLoading: updateUser.action.isPending,
-				isDisabled: !updateData().changed,
-				errors: updateUser.errors(),
-			}}
-			callbacks={{
-				onSubmit: () => {
-					updateUser.action.mutate({
-						id: props.id() as number,
-						body: updateData().data,
-					});
-				},
-				reset: () => {
-					updateUser.reset();
-				},
-			}}
-			copy={{
-				title: T()("update_user_panel_title"),
-				submit: T()("update"),
-			}}
-			options={{
-				padding: "24",
-			}}
-		>
-			{() => (
-				<>
-					<SectionHeading title={T()("details")} />
-					<SelectMultiple
-						id="roles"
-						values={getSelectedRoles()}
-						onChange={setSelectedRoles}
-						name={"roles"}
-						copy={{
-							label: T()("roles"),
-						}}
-						options={
-							roles.data?.data.map((role) => {
-								return {
-									value: role.id,
-									label: role.name,
-								};
-							}) || []
-						}
-						errors={getBodyError("roleIds", updateUser.errors)}
-					/>
-					<Show when={userStore.get.user?.superAdmin}>
-						<Switch
-							id="superAdmin"
-							value={getIsSuperAdmin()}
-							onChange={setIsSuperAdmin}
-							name={"superAdmin"}
-							theme="relaxed"
-							copy={{
-								true: T()("yes"),
-								false: T()("no"),
-								label: T()("is_super_admin"),
+		<>
+			<Panel
+				state={{
+					open: props.state.open,
+					setOpen: props.state.setOpen,
+				}}
+				fetchState={{
+					isLoading: isLoading(),
+					isError: isError(),
+				}}
+				mutateState={{
+					isLoading: updateUser.action.isPending,
+					isDisabled: !updateData().changed,
+					errors: updateUser.errors(),
+				}}
+				callbacks={{
+					onSubmit: handleSubmit,
+					reset: handleReset,
+				}}
+				copy={{
+					title: T()("update_user_panel_title"),
+					submit: T()("update"),
+				}}
+				options={{
+					padding: "24",
+				}}
+			>
+				{() => (
+					<>
+						<SectionHeading title={T()("profile_picture")} />
+						<ProfilePicturePreviewCard
+							user={{
+								username: user.data?.data.username,
+								firstName: user.data?.data.firstName,
+								lastName: user.data?.data.lastName,
+								profilePicture: user.data?.data.profilePicture,
 							}}
-							errors={getBodyError("superAdmin", updateUser.errors)}
-							hideOptionalText={true}
-						/>
-						<Switch
-							id="isLocked"
-							value={getIsLocked()}
-							onChange={setIsLocked}
-							name={"isLocked"}
-							theme="relaxed"
-							copy={{
-								true: T()("locked"),
-								false: T()("unlocked"),
-								label: T()("is_locked"),
-							}}
-							errors={getBodyError("isLocked", updateUser.errors)}
-							hideOptionalText={true}
-						/>
-					</Show>
-					<Show when={userStore.get.user?.superAdmin}>
-						<SectionHeading title={T()("auth_providers")} />
-						<Show
-							when={(providers.data?.data.providers?.length ?? 0) > 0}
-							fallback={
-								<span class="text-sm text-body">{T()("no_results")}</span>
+							onEdit={() => setProfilePicturePanelOpen(true)}
+							onClear={
+								user.data?.data.profilePicture && props.id()
+									? handleClearProfilePicture
+									: undefined
 							}
-						>
-							<div class="flex flex-col gap-3">
-								<For each={providers.data?.data.providers || []}>
-									{(provider) => (
-										<AuthProviderRow
-											provider={provider}
-											linkedProvider={linkedProvidersByKey()[provider.key]}
-											isLoading={
-												unlinkAuthProvider.action.isPending &&
-												getUnlinkingProviderKey() === provider.key
-											}
-											onUnlink={() => {
-												const userId = props.id();
-												if (!userId) return;
-
-												unlinkAuthProvider.action.mutate({
-													userId,
-													providerKey: provider.key,
-												});
-											}}
-										/>
-									)}
-								</For>
-							</div>
+							clearLoading={deleteProfilePicture.action.isPending}
+						/>
+						<SectionHeading title={T()("details")} />
+						<SelectMultiple
+							id="roles"
+							values={getSelectedRoles()}
+							onChange={setSelectedRoles}
+							name={"roles"}
+							copy={{
+								label: T()("roles"),
+							}}
+							options={
+								roles.data?.data.map((role) => {
+									return {
+										value: role.id,
+										label: role.name,
+									};
+								}) || []
+							}
+							errors={getBodyError("roleIds", updateUser.errors)}
+						/>
+						<Show when={userStore.get.user?.superAdmin}>
+							<Switch
+								id="superAdmin"
+								value={getIsSuperAdmin()}
+								onChange={setIsSuperAdmin}
+								name={"superAdmin"}
+								theme="relaxed"
+								copy={{
+									true: T()("yes"),
+									false: T()("no"),
+									label: T()("is_super_admin"),
+								}}
+								errors={getBodyError("superAdmin", updateUser.errors)}
+								hideOptionalText={true}
+							/>
+							<Switch
+								id="isLocked"
+								value={getIsLocked()}
+								onChange={setIsLocked}
+								name={"isLocked"}
+								theme="relaxed"
+								copy={{
+									true: T()("locked"),
+									false: T()("unlocked"),
+									label: T()("is_locked"),
+								}}
+								errors={getBodyError("isLocked", updateUser.errors)}
+								hideOptionalText={true}
+							/>
 						</Show>
-					</Show>
-				</>
-			)}
-		</Panel>
+						<Show when={userStore.get.user?.superAdmin}>
+							<SectionHeading title={T()("auth_providers")} />
+							<Show
+								when={(providers.data?.data.providers?.length ?? 0) > 0}
+								fallback={
+									<span class="text-sm text-body">{T()("no_results")}</span>
+								}
+							>
+								<div class="flex flex-col gap-3">
+									<For each={providers.data?.data.providers || []}>
+										{(provider) => (
+											<AuthProviderRow
+												provider={provider}
+												linkedProvider={linkedProvidersByKey()[provider.key]}
+												isLoading={
+													unlinkAuthProvider.action.isPending &&
+													getUnlinkingProviderKey() === provider.key
+												}
+												onUnlink={() => {
+													const userId = props.id();
+													if (!userId) return;
+
+													unlinkAuthProvider.action.mutate({
+														userId,
+														providerKey: provider.key,
+													});
+												}}
+											/>
+										)}
+									</For>
+								</div>
+							</Show>
+						</Show>
+					</>
+				)}
+			</Panel>
+			<Show when={props.id()}>
+				{(targetUserId) => (
+					<CreateUpdateMediaPanel
+						id={profilePictureMediaId}
+						state={{
+							open: profilePicturePanelOpen(),
+							setOpen: setProfilePicturePanelOpen,
+							parentFolderId: () => undefined,
+						}}
+						profilePicture={{
+							media: user.data?.data.profilePicture ?? null,
+							userId: targetUserId(),
+						}}
+					/>
+				)}
+			</Show>
+		</>
 	);
 };
 

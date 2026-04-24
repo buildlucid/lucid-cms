@@ -66,6 +66,7 @@ const isUserRef = (value: unknown): value is NonNullable<UserRef> => {
 		value !== undefined &&
 		typeof value === "object" &&
 		"username" in value &&
+		"profilePicture" in value &&
 		"id" in value
 	);
 };

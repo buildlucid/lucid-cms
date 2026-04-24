@@ -14,8 +14,10 @@ import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Confirmation } from "@/components/Groups/Modal";
 import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
+import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import Button from "@/components/Partials/Button";
+import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import constants from "@/constants";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -33,10 +35,15 @@ export const Account: Component = () => {
 	const [passwordModalOpen, setPasswordModalOpen] = createSignal(false);
 	const [revokeSessionsModalOpen, setRevokeSessionsModalOpen] =
 		createSignal(false);
+	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
+		createSignal(false);
 
 	// ----------------------------------------
 	// Memos
 	const user = createMemo(() => userStore.get.user);
+	const profilePictureMediaId = createMemo(
+		() => user()?.profilePicture?.id ?? undefined,
+	);
 
 	// ----------------------------------------
 	// Queries
@@ -69,6 +76,7 @@ export const Account: Component = () => {
 			setRevokeSessionsModalOpen(false);
 		},
 	});
+	const deleteProfilePicture = api.account.useDeleteProfilePicture();
 
 	// ----------------------------------------
 	// Derived state
@@ -94,6 +102,12 @@ export const Account: Component = () => {
 			return map;
 		}, {});
 	});
+
+	// ----------------------------------------
+	// Handlers
+	const handleClearProfilePicture = () => {
+		deleteProfilePicture.action.mutate({});
+	};
 
 	// ----------------------------------------
 	// Effects
@@ -145,6 +159,25 @@ export const Account: Component = () => {
 				padding: "24",
 			}}
 		>
+			{/* Profile Picture */}
+			<InfoRow.Root
+				title={T()("profile_picture")}
+				description={T()("profile_picture_description")}
+			>
+				<ProfilePicturePreviewCard
+					user={{
+						username: user()?.username,
+						firstName: user()?.firstName,
+						lastName: user()?.lastName,
+						profilePicture: user()?.profilePicture,
+					}}
+					onEdit={() => setProfilePicturePanelOpen(true)}
+					onClear={
+						user()?.profilePicture ? handleClearProfilePicture : undefined
+					}
+					clearLoading={deleteProfilePicture.action.isPending}
+				/>
+			</InfoRow.Root>
 			{/* Account Details */}
 			<InfoRow.Root
 				title={T()("account_details")}
@@ -369,6 +402,17 @@ export const Account: Component = () => {
 						setRevokeSessionsModalOpen(false);
 						revokeRefreshTokens.reset();
 					},
+				}}
+			/>
+			<CreateUpdateMediaPanel
+				id={profilePictureMediaId}
+				state={{
+					open: profilePicturePanelOpen(),
+					setOpen: setProfilePicturePanelOpen,
+					parentFolderId: () => undefined,
+				}}
+				profilePicture={{
+					media: user()?.profilePicture ?? null,
 				}}
 			/>
 		</DynamicContent>

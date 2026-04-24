@@ -43,6 +43,59 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		]),
 		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
 		deleted_by: z.number().nullable(),
+		profile_picture_media_id: z.number().nullable().optional(),
+		profile_picture: z
+			.array(
+				z.object({
+					id: z.number(),
+					key: z.string(),
+					folder_id: z.number().nullable(),
+					e_tag: z.string().nullable(),
+					type: z.string(),
+					mime_type: z.string(),
+					file_extension: z.string(),
+					file_name: z.string().nullable(),
+					file_size: z.number(),
+					width: z.number().nullable(),
+					height: z.number().nullable(),
+					created_at: z.union([z.string(), z.date()]).nullable(),
+					updated_at: z.union([z.string(), z.date()]).nullable(),
+					blur_hash: z.string().nullable(),
+					average_color: z.string().nullable(),
+					is_dark: z
+						.union([
+							z.literal(this.dbAdapter.config.defaults.boolean.true),
+							z.literal(this.dbAdapter.config.defaults.boolean.false),
+						])
+						.nullable(),
+					is_light: z
+						.union([
+							z.literal(this.dbAdapter.config.defaults.boolean.true),
+							z.literal(this.dbAdapter.config.defaults.boolean.false),
+						])
+						.nullable(),
+					is_deleted: z.union([
+						z.literal(this.dbAdapter.config.defaults.boolean.true),
+						z.literal(this.dbAdapter.config.defaults.boolean.false),
+					]),
+					is_deleted_at: z.union([z.string(), z.date()]).nullable(),
+					deleted_by: z.number().nullable(),
+					public: z.union([
+						z.literal(this.dbAdapter.config.defaults.boolean.true),
+						z.literal(this.dbAdapter.config.defaults.boolean.false),
+					]),
+					translations: z
+						.array(
+							z.object({
+								title: z.string().nullable(),
+								alt: z.string().nullable(),
+								locale_code: z.string().nullable(),
+							}),
+						)
+						.optional(),
+				}),
+			)
+			.optional(),
 		auth_providers: z
 			.array(
 				z.object({
@@ -87,6 +140,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		deleted_by: this.dbAdapter.getDataType("integer"),
+		profile_picture_media_id: this.dbAdapter.getDataType("integer"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
@@ -242,6 +296,61 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						),
 				)
 				.as("auth_providers"),
+			this.dbAdapter
+				.jsonArrayFrom(
+					eb
+						.selectFrom("lucid_media")
+						.select((mediaEb) => [
+							"lucid_media.id",
+							"lucid_media.key",
+							"lucid_media.folder_id",
+							"lucid_media.e_tag",
+							"lucid_media.type",
+							"lucid_media.mime_type",
+							"lucid_media.file_extension",
+							"lucid_media.file_name",
+							"lucid_media.file_size",
+							"lucid_media.width",
+							"lucid_media.height",
+							"lucid_media.created_at",
+							"lucid_media.updated_at",
+							"lucid_media.blur_hash",
+							"lucid_media.average_color",
+							"lucid_media.is_dark",
+							"lucid_media.is_light",
+							"lucid_media.is_deleted",
+							"lucid_media.is_deleted_at",
+							"lucid_media.deleted_by",
+							"lucid_media.public",
+							this.dbAdapter
+								.jsonArrayFrom(
+									mediaEb
+										.selectFrom("lucid_media_translations")
+										.select([
+											"lucid_media_translations.title",
+											"lucid_media_translations.alt",
+											"lucid_media_translations.locale_code",
+										])
+										.whereRef(
+											"lucid_media_translations.media_id",
+											"=",
+											"lucid_media.id",
+										),
+								)
+								.as("translations"),
+						])
+						.whereRef(
+							"lucid_media.id",
+							"=",
+							"lucid_users.profile_picture_media_id",
+						)
+						.where(
+							"lucid_media.is_deleted",
+							"=",
+							this.dbAdapter.getDefault("boolean", "false"),
+						),
+				)
+				.as("profile_picture"),
 		]);
 
 		query = queryBuilder.select(query, props.where);
@@ -269,6 +378,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"password",
 				"roles",
 				"auth_providers",
+				"profile_picture",
 			],
 		});
 	}
@@ -283,7 +393,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 	) {
 		let query = this.db
 			.selectFrom("lucid_users")
-			.select([
+			.select((eb) => [
 				"email",
 				"first_name",
 				"last_name",
@@ -296,6 +406,61 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"is_deleted",
 				"is_deleted_at",
 				"invitation_accepted",
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_media")
+							.select((mediaEb) => [
+								"lucid_media.id",
+								"lucid_media.key",
+								"lucid_media.folder_id",
+								"lucid_media.e_tag",
+								"lucid_media.type",
+								"lucid_media.mime_type",
+								"lucid_media.file_extension",
+								"lucid_media.file_name",
+								"lucid_media.file_size",
+								"lucid_media.width",
+								"lucid_media.height",
+								"lucid_media.created_at",
+								"lucid_media.updated_at",
+								"lucid_media.blur_hash",
+								"lucid_media.average_color",
+								"lucid_media.is_dark",
+								"lucid_media.is_light",
+								"lucid_media.is_deleted",
+								"lucid_media.is_deleted_at",
+								"lucid_media.deleted_by",
+								"lucid_media.public",
+								this.dbAdapter
+									.jsonArrayFrom(
+										mediaEb
+											.selectFrom("lucid_media_translations")
+											.select([
+												"lucid_media_translations.title",
+												"lucid_media_translations.alt",
+												"lucid_media_translations.locale_code",
+											])
+											.whereRef(
+												"lucid_media_translations.media_id",
+												"=",
+												"lucid_media.id",
+											),
+									)
+									.as("translations"),
+							])
+							.whereRef(
+								"lucid_media.id",
+								"=",
+								"lucid_users.profile_picture_media_id",
+							)
+							.where(
+								"lucid_media.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("profile_picture"),
 			])
 			.where("id", "in", props.ids);
 
@@ -322,6 +487,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"super_admin",
 				"invitation_accepted",
 				"is_locked",
+				"profile_picture",
 			],
 		});
 	}
@@ -411,6 +577,61 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.whereRef("user_id", "=", "lucid_users.id"),
 							)
 							.as("roles"),
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media")
+									.select((mediaEb) => [
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.folder_id",
+										"lucid_media.e_tag",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.created_at",
+										"lucid_media.updated_at",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+										"lucid_media.is_deleted",
+										"lucid_media.is_deleted_at",
+										"lucid_media.deleted_by",
+										"lucid_media.public",
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														"lucid_media.id",
+													),
+											)
+											.as("translations"),
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"lucid_users.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
+									),
+							)
+							.as("profile_picture"),
 					])
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
@@ -465,6 +686,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"is_locked",
 				"roles",
 				"invitation_accepted",
+				"profile_picture",
 			],
 		});
 	}
