@@ -16,6 +16,7 @@ import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
+import resolvePoster from "./helpers/resolve-poster.js";
 
 const createSingle: ServiceFn<
 	[
@@ -36,8 +37,17 @@ const createSingle: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
+			description?: {
+				localeCode: string;
+				value: string | null;
+			}[];
+			summary?: {
+				localeCode: string;
+				value: string | null;
+			}[];
 			folderId?: number | null;
 			isHidden?: boolean;
+			posterId?: number | null;
 			allowedType?: MediaType;
 			userId: number;
 		},
@@ -75,10 +85,19 @@ const createSingle: ServiceFn<
 	//* upload endpoint and this media update endpoint which the SPA calls afterwards
 	const isPublic = keyVisibility === constants.media.visibilityKeys.public;
 
+	//* verify the poster exists
+	if (data.posterId !== undefined && data.posterId !== null) {
+		const posterRes = await resolvePoster(context, {
+			posterId: data.posterId,
+		});
+		if (posterRes.error) return posterRes;
+	}
+
 	const [mediaRes, deleteMediaSyncRes, mediaAdapter] = await Promise.all([
 		Media.createSingle({
 			data: {
 				key: syncMediaRes.data.key,
+				poster_id: data.posterId ?? null,
 				e_tag: syncMediaRes.data.etag ?? undefined,
 				public: isPublic,
 				type: syncMediaRes.data.type,
@@ -132,9 +151,26 @@ const createSingle: ServiceFn<
 		};
 	}
 
+	if (data.posterId !== undefined && data.posterId !== null) {
+		const hidePosterRes = await Media.updateSingle({
+			where: [{ key: "id", operator: "=", value: data.posterId }],
+			data: {
+				is_hidden: true,
+				updated_at: new Date().toISOString(),
+				updated_by: data.userId,
+			},
+			validation: {
+				enabled: true,
+			},
+		});
+		if (hidePosterRes.error) return hidePosterRes;
+	}
+
 	const translations = prepareMediaTranslations({
 		title: data.title || [],
 		alt: data.alt || [],
+		description: data.description || [],
+		summary: data.summary || [],
 		mediaId: mediaRes.data.id,
 	});
 	if (translations.length > 0) {

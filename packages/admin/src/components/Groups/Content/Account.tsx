@@ -14,7 +14,7 @@ import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Confirmation } from "@/components/Groups/Modal";
 import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
-import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import CreateUpdateProfilePicturePanel from "@/components/Panels/Media/CreateUpdateProfilePicturePanel";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import Button from "@/components/Partials/Button";
 import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
@@ -41,9 +41,6 @@ export const Account: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const user = createMemo(() => userStore.get.user);
-	const profilePictureMediaId = createMemo(
-		() => user()?.profilePicture?.id ?? undefined,
-	);
 
 	// ----------------------------------------
 	// Queries
@@ -404,14 +401,10 @@ export const Account: Component = () => {
 					},
 				}}
 			/>
-			<CreateUpdateMediaPanel
-				id={profilePictureMediaId}
+			<CreateUpdateProfilePicturePanel
 				state={{
 					open: profilePicturePanelOpen(),
 					setOpen: setProfilePicturePanelOpen,
-					parentFolderId: () => undefined,
-				}}
-				profilePicture={{
 					media: user()?.profilePicture ?? null,
 				}}
 			/>

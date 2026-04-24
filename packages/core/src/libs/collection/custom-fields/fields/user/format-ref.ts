@@ -20,10 +20,9 @@ const formatUserRef = (
 		username: value.username,
 		firstName: value.first_name,
 		lastName: value.last_name,
-		profilePicture: mediaFormatter.formatRef({
-			media: value.profile_picture?.[0],
+		profilePicture: mediaFormatter.formatEmbed({
+			poster: value.profile_picture?.[0],
 			host: params.host,
-			locales: params.localization.locales,
 		}),
 	} satisfies CFResponse<"user">["ref"];
 };

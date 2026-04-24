@@ -8,9 +8,11 @@ import {
 	FaSolidFileLines,
 	FaSolidFileVideo,
 	FaSolidFileZipper,
+	FaSolidPlay,
 } from "solid-icons/fa";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	Match,
@@ -28,10 +30,17 @@ import { LucidError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 
 const ShareRoute: Component = () => {
+	// --------------------------------------------
+	// State & Hooks
 	const params = useParams<{ token: string }>();
 	const [password, setPassword] = createSignal("");
+	const [showVideoPreview, setShowVideoPreview] = createSignal(false);
+	let videoPreviewRef: HTMLVideoElement | undefined;
 
 	const token = createMemo(() => params.token);
+
+	// --------------------------------------------
+	// Queries & Mutations
 	const shareAccess = api.share.useGetAccess({
 		queryParams: {
 			location: {
@@ -43,6 +52,8 @@ const ShareRoute: Component = () => {
 	const authorizeShare = api.share.useAuthorize();
 	const requestDownload = api.share.useRequestDownload();
 
+	// --------------------------------------------
+	// Memos
 	const accessData = createMemo(() => shareAccess.data?.data);
 	const accessError = createMemo(() => {
 		const error = shareAccess.error;
@@ -55,6 +66,9 @@ const ShareRoute: Component = () => {
 		return access;
 	});
 	const shareUrl = createMemo(() => grantedAccess()?.media.shareUrl ?? "");
+	const posterShareUrl = createMemo(
+		() => grantedAccess()?.media.poster?.shareUrl,
+	);
 	const isExpired = createMemo(() => {
 		if (accessError()?.status === 410) return true;
 		return grantedAccess()?.hasExpired === true;
@@ -72,6 +86,23 @@ const ShareRoute: Component = () => {
 		);
 	});
 
+	// --------------------------------------------
+	// Effects
+	createEffect(() => {
+		posterShareUrl();
+		shareUrl();
+		setShowVideoPreview(false);
+	});
+
+	createEffect(() => {
+		if (!showVideoPreview()) return;
+		videoPreviewRef?.play().catch(() => {
+			// Browser autoplay policies can still block playback in some contexts.
+		});
+	});
+
+	// --------------------------------------------
+	// Render
 	return (
 		<Switch>
 			<Match when={shareAccess.isLoading}>
@@ -126,12 +157,39 @@ const ShareRoute: Component = () => {
 													}
 												>
 													<div class="w-full aspect-video flex items-center justify-center min-w-0">
-														{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-														<video
-															src={shareUrl()}
-															class="w-full h-full object-contain"
-															controls
-														/>
+														<Show
+															when={posterShareUrl() && !showVideoPreview()}
+															fallback={
+																// biome-ignore lint/a11y/useMediaCaption: explanation
+																<video
+																	ref={videoPreviewRef}
+																	src={shareUrl()}
+																	class="w-full h-full object-contain"
+																	controls
+																	autoplay
+																/>
+															}
+														>
+															<div class="w-full h-full relative bg-input-base overflow-hidden">
+																<img
+																	src={posterShareUrl()}
+																	alt={grantedAccess()?.name || ""}
+																	class="w-full h-full object-cover"
+																/>
+																<button
+																	type="button"
+																	aria-label={T()("play_video")}
+																	onClick={() => {
+																		setShowVideoPreview(true);
+																	}}
+																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white fill-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-base"
+																>
+																	<span class="w-14 h-14 rounded-full bg-black/60 border border-white/25 flex items-center justify-center">
+																		<FaSolidPlay class="ml-1 w-5 h-5" />
+																	</span>
+																</button>
+															</div>
+														</Show>
 													</div>
 												</Match>
 												<Match

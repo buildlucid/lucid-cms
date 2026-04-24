@@ -2,6 +2,85 @@ import z from "zod";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
+const mediaTranslationResponseSchema = z.object({
+	localeCode: z
+		.string()
+		.meta({ description: "Locale code", example: "en" })
+		.nullable(),
+	value: z.string().meta({ description: "Translated value" }).nullable(),
+});
+
+const mediaMetaResponseSchema = z
+	.object({
+		mimeType: z
+			.string()
+			.meta({ description: "MIME type", example: "image/jpeg" }),
+		extension: z
+			.string()
+			.meta({ description: "File extension", example: "jpeg" }),
+		fileSize: z
+			.number()
+			.meta({ description: "File size in bytes", example: 100 }),
+		width: z
+			.number()
+			.nullable()
+			.meta({ description: "Image width", example: 100 }),
+		height: z
+			.number()
+			.nullable()
+			.meta({ description: "Image height", example: 100 }),
+		blurHash: z.string().nullable().meta({
+			description: "BlurHash for image previews",
+			example: "AQABAAAABAAAAgAA...",
+		}),
+		averageColor: z.string().nullable().meta({
+			description: "Average color of the image",
+			example: "rgba(255, 255, 255, 1)",
+		}),
+		isDark: z.boolean().nullable().meta({
+			description: "Whether the image is predominantly dark",
+			example: true,
+		}),
+		isLight: z.boolean().nullable().meta({
+			description: "Whether the image is predominantly light",
+			example: true,
+		}),
+	})
+	.meta({
+		description: "Media metadata",
+	});
+
+export const mediaEmbedResponseSchema = z.object({
+	id: z.number().meta({ description: "Media ID", example: 2 }),
+	key: z.string().meta({
+		description: "Media key",
+		example: "public/123e4567e89b12d3a456426614174000",
+	}),
+	url: z.string().meta({
+		description: "Media URL",
+		example:
+			"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/poster",
+	}),
+	fileName: z.string().nullable().meta({
+		description: "Original file name",
+		example: "placeholder-image.png",
+	}),
+	type: z.string().meta({ description: "Media type", example: "image" }),
+	title: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated titles",
+	}),
+	alt: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated alt texts",
+	}),
+	description: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated descriptions",
+	}),
+	summary: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated summaries",
+	}),
+	meta: mediaMetaResponseSchema,
+});
+
 const mediaResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 1 }),
 	key: z.string().meta({
@@ -16,6 +95,12 @@ const mediaResponseSchema = z.object({
 		description: "Media folder ID",
 		example: 1,
 	}),
+	poster: mediaEmbedResponseSchema
+		.nullable()
+		.meta({
+			description: "Poster media data",
+		})
+		.optional(),
 	url: z.string().meta({
 		description: "Media URL",
 		example:
@@ -26,74 +111,20 @@ const mediaResponseSchema = z.object({
 			"Media visibility. Private media can only be accessed by authorized users and when shared",
 		example: true,
 	}),
-	title: z
-		.array(
-			z.object({
-				localeCode: z
-					.string()
-					.meta({ description: "Locale code", example: "en" }),
-				value: z.string().meta({
-					description: "Title value",
-				}),
-			}),
-		)
-		.meta({
-			description: "Translated titles",
-		}),
-	alt: z
-		.array(
-			z.object({
-				localeCode: z
-					.string()
-					.meta({ description: "Locale code", example: "en" }),
-				value: z.string().meta({
-					description: "Alt text value",
-				}),
-			}),
-		)
-		.meta({
-			description: "Translated alt texts",
-		}),
+	title: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated titles",
+	}),
+	alt: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated alt texts",
+	}),
+	description: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated descriptions",
+	}),
+	summary: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated summaries",
+	}),
 	type: z.string().meta({ description: "Media type", example: "image" }),
-	meta: z
-		.object({
-			mimeType: z
-				.string()
-				.meta({ description: "MIME type", example: "image/jpeg" }),
-			extension: z
-				.string()
-				.meta({ description: "File extension", example: "jpeg" }),
-			fileSize: z
-				.number()
-				.meta({ description: "File size in bytes", example: 100 }),
-			width: z
-				.number()
-				.nullable()
-				.meta({ description: "Image width", example: 100 }),
-			height: z
-				.number()
-				.nullable()
-				.meta({ description: "Image height", example: 100 }),
-			blurHash: z.string().nullable().meta({
-				description: "BlurHash for image previews",
-				example: "AQABAAAABAAAAgAA...",
-			}),
-			averageColor: z.string().nullable().meta({
-				description: "Average color of the image",
-				example: "rgba(255, 255, 255, 1)",
-			}),
-			isDark: z.boolean().nullable().meta({
-				description: "Whether the image is predominantly dark",
-				example: true,
-			}),
-			isLight: z.boolean().nullable().meta({
-				description: "Whether the image is predominantly light",
-				example: true,
-			}),
-		})
-		.meta({
-			description: "Media metadata",
-		}),
+	meta: mediaMetaResponseSchema,
 	isDeleted: z.boolean().nullable().meta({
 		description: "Whether the media is deleted",
 		example: true,
@@ -372,6 +403,32 @@ export const controllerSchemas = {
 					}),
 				)
 				.optional(),
+			description: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.trim()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().trim().nullable().meta({
+							description: "Description value",
+						}),
+					}),
+				)
+				.optional(),
+			summary: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.trim()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().trim().nullable().meta({
+							description: "Summary value",
+						}),
+					}),
+				)
+				.optional(),
 			width: z
 				.number()
 				.nullable()
@@ -427,6 +484,14 @@ export const controllerSchemas = {
 				.meta({
 					description: "Whether the media is deleted",
 					example: true,
+				})
+				.optional(),
+			posterId: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The poster media ID",
+					example: 1,
 				})
 				.optional(),
 		}),
@@ -554,6 +619,32 @@ export const controllerSchemas = {
 					}),
 				)
 				.optional(),
+			description: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.trim()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().trim().nullable().meta({
+							description: "Description value",
+						}),
+					}),
+				)
+				.optional(),
+			summary: z
+				.array(
+					z.object({
+						localeCode: z
+							.string()
+							.trim()
+							.meta({ description: "Locale code", example: "en" }),
+						value: z.string().trim().nullable().meta({
+							description: "Summary value",
+						}),
+					}),
+				)
+				.optional(),
 			width: z
 				.number()
 				.meta({
@@ -595,6 +686,21 @@ export const controllerSchemas = {
 				.boolean()
 				.meta({
 					description: "Whether the image is light",
+					example: true,
+				})
+				.optional(),
+			posterId: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The poster media ID",
+					example: 1,
+				})
+				.optional(),
+			isHidden: z
+				.boolean()
+				.meta({
+					description: "Whether the media should be hidden from library lists",
 					example: true,
 				})
 				.optional(),

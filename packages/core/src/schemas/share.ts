@@ -33,6 +33,11 @@ const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
 			height: z.number().nullable(),
 			previewable: z.boolean(),
 			shareUrl: z.string(),
+			poster: z
+				.object({
+					shareUrl: z.string(),
+				})
+				.nullable(),
 		}),
 	}),
 ]);
@@ -65,7 +70,9 @@ export const controllerSchemas = {
 	streamShareMedia: {
 		body: undefined,
 		query: {
-			string: undefined,
+			string: z.object({
+				poster: z.enum(["true", "false"]).optional(),
+			}),
 			formatted: undefined,
 		},
 		params: z.object({

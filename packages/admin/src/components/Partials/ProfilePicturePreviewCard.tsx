@@ -1,4 +1,4 @@
-import type { MediaRef } from "@types";
+import type { ProfilePicture } from "@types";
 import classNames from "classnames";
 import { FaSolidPen, FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
 import {
@@ -23,7 +23,7 @@ interface ProfilePicturePreviewCardProps {
 		username?: string | null;
 		firstName?: string | null;
 		lastName?: string | null;
-		profilePicture?: MediaRef;
+		profilePicture?: ProfilePicture | null;
 	};
 	onEdit?: () => void;
 	onClear?: () => void;
@@ -56,21 +56,19 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 	);
 	const mediaDimensions = createMemo(() => {
 		const profilePicture = media();
-		if (!profilePicture?.width || !profilePicture.height) return null;
+		if (!profilePicture?.meta.width || !profilePicture.meta.height) return null;
 
-		return `${profilePicture.width} x ${profilePicture.height}`;
+		return `${profilePicture.meta.width} x ${profilePicture.meta.height}`;
 	});
 	const hasMediaMeta = createMemo(() => {
 		const profilePicture = media();
 		if (!profilePicture) return false;
 
 		return (
-			profilePicture.isDeleted ||
-			profilePicture.public === false ||
-			Boolean(profilePicture.fileSize) ||
+			Boolean(profilePicture.meta.fileSize) ||
 			Boolean(mediaDimensions()) ||
-			Boolean(profilePicture.mimeType) ||
-			Boolean(profilePicture.extension)
+			Boolean(profilePicture.meta.mimeType) ||
+			Boolean(profilePicture.meta.extension)
 		);
 	});
 	const title = createMemo(() => {
@@ -78,11 +76,11 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 		if (!profilePicture) return props.user.username ?? T()("profile_picture");
 
 		return (
-			helpers.getRecordTranslation(
+			helpers.getTranslation(
 				profilePicture.title,
 				contentLocaleStore.get.contentLocale,
 			) ||
-			helpers.getRecordTranslation(
+			helpers.getTranslation(
 				profilePicture.alt,
 				contentLocaleStore.get.contentLocale,
 			) ||
@@ -95,7 +93,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 		if (!profilePicture) return "";
 
 		return (
-			helpers.getRecordTranslation(
+			helpers.getTranslation(
 				profilePicture.alt,
 				contentLocaleStore.get.contentLocale,
 			) ||
@@ -154,40 +152,23 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						{(profilePicture) => (
 							<Show when={hasMediaMeta()}>
 								<div class="pointer-events-none absolute top-0 right-0 left-0 z-20 flex flex-wrap items-center gap-2 bg-linear-to-b from-card-base via-card-base/80 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-									<Show
-										when={
-											profilePicture().isDeleted ||
-											profilePicture().public === false
-										}
-									>
-										<div class="flex flex-wrap items-center gap-2">
-											<Show when={profilePicture().isDeleted}>
-												<Pill theme="red" tooltip={T()("deleted_pill_tooltip")}>
-													{T()("deleted")}
-												</Pill>
-											</Show>
-											<Show when={!profilePicture().public}>
-												<Pill theme="red" tooltip={T()("private_pill_tooltip")}>
-													{T()("private")}
-												</Pill>
-											</Show>
-										</div>
-									</Show>
 									<div class="flex flex-wrap items-center gap-2">
-										<Show when={profilePicture().fileSize}>
+										<Show when={profilePicture().meta.fileSize}>
 											<Pill theme="outline">
-												{helpers.bytesToSize(profilePicture().fileSize)}
+												{helpers.bytesToSize(profilePicture().meta.fileSize)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
 											<Pill theme="outline">{mediaDimensions()}</Pill>
 										</Show>
-										<Show when={profilePicture().mimeType}>
-											<Pill theme="outline">{profilePicture().mimeType}</Pill>
-										</Show>
-										<Show when={profilePicture().extension}>
+										<Show when={profilePicture().meta.mimeType}>
 											<Pill theme="outline">
-												{profilePicture().extension.toUpperCase()}
+												{profilePicture().meta.mimeType}
+											</Pill>
+										</Show>
+										<Show when={profilePicture().meta.extension}>
+											<Pill theme="outline">
+												{profilePicture().meta.extension.toUpperCase()}
 											</Pill>
 										</Show>
 									</div>

@@ -61,6 +61,8 @@ const updateSingleController = factory.createHandlers(
 			folderId: body.folderId,
 			title: body.title,
 			alt: body.alt,
+			description: body.description,
+			summary: body.summary,
 			width: body.width,
 			height: body.height,
 			blurHash: body.blurHash,
@@ -68,6 +70,7 @@ const updateSingleController = factory.createHandlers(
 			isDark: body.isDark,
 			isLight: body.isLight,
 			isDeleted: body.isDeleted,
+			posterId: body.posterId,
 			userId: c.get("auth").id,
 		});
 		if (updateMedia.error) throw new LucidAPIError(updateMedia.error);

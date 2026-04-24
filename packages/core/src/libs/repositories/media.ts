@@ -15,6 +15,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		id: z.number(),
 		key: z.string(),
 		folder_id: z.number().nullable(),
+		poster_id: z.number().nullable(),
 		e_tag: z.string().nullable(),
 		public: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
@@ -50,7 +51,49 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				z.object({
 					title: z.string().nullable(),
 					alt: z.string().nullable(),
+					description: z.string().nullable(),
+					summary: z.string().nullable(),
 					locale_code: z.string().nullable(),
+				}),
+			)
+			.optional(),
+		poster: z
+			.array(
+				z.object({
+					id: z.number(),
+					key: z.string(),
+					type: z.string(),
+					mime_type: z.string(),
+					file_extension: z.string(),
+					file_name: z.string().nullable(),
+					file_size: z.number(),
+					width: z.number().nullable(),
+					height: z.number().nullable(),
+					blur_hash: z.string().nullable(),
+					average_color: z.string().nullable(),
+					is_dark: z
+						.union([
+							z.literal(this.dbAdapter.config.defaults.boolean.true),
+							z.literal(this.dbAdapter.config.defaults.boolean.false),
+						])
+						.nullable(),
+					is_light: z
+						.union([
+							z.literal(this.dbAdapter.config.defaults.boolean.true),
+							z.literal(this.dbAdapter.config.defaults.boolean.false),
+						])
+						.nullable(),
+					translations: z
+						.array(
+							z.object({
+								title: z.string().nullable().optional(),
+								alt: z.string().nullable(),
+								description: z.string().nullable().optional(),
+								summary: z.string().nullable().optional(),
+								locale_code: z.string().nullable(),
+							}),
+						)
+						.optional(),
 				}),
 			)
 			.optional(),
@@ -70,6 +113,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		id: this.dbAdapter.getDataType("primary"),
 		key: this.dbAdapter.getDataType("text"),
 		folder_id: this.dbAdapter.getDataType("integer"),
+		poster_id: this.dbAdapter.getDataType("integer"),
 		e_tag: this.dbAdapter.getDataType("text"),
 		public: this.dbAdapter.getDataType("boolean"),
 		type: this.dbAdapter.getDataType("text"),
@@ -136,6 +180,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
+				"poster_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -157,10 +202,52 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
+							.selectFrom("lucid_media as poster")
+							.select([
+								"poster.id",
+								"poster.key",
+								"poster.type",
+								"poster.mime_type",
+								"poster.file_extension",
+								"poster.file_name",
+								"poster.file_size",
+								"poster.width",
+								"poster.height",
+								"poster.blur_hash",
+								"poster.average_color",
+								"poster.is_dark",
+								"poster.is_light",
+								this.dbAdapter
+									.jsonArrayFrom(
+										eb
+											.selectFrom("lucid_media_translations")
+											.select([
+												"lucid_media_translations.title",
+												"lucid_media_translations.alt",
+												"lucid_media_translations.description",
+												"lucid_media_translations.summary",
+												"lucid_media_translations.locale_code",
+											])
+											.whereRef(
+												"lucid_media_translations.media_id",
+												"=",
+												"lucid_media.poster_id",
+											),
+									)
+									.as("translations"),
+							])
+							.whereRef("poster.id", "=", "lucid_media.poster_id"),
+					)
+					.as("poster"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
 							.selectFrom("lucid_media_translations")
 							.select([
 								"lucid_media_translations.title",
 								"lucid_media_translations.alt",
+								"lucid_media_translations.description",
+								"lucid_media_translations.summary",
 								"lucid_media_translations.locale_code",
 							])
 							.whereRef(
@@ -185,6 +272,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
+				"poster_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -204,6 +292,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"deleted_by",
 				"translations",
 				"public",
+				"poster",
 			],
 		});
 	}
@@ -221,6 +310,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
+				"poster_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -242,10 +332,52 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
+							.selectFrom("lucid_media as poster")
+							.select([
+								"poster.id",
+								"poster.key",
+								"poster.type",
+								"poster.mime_type",
+								"poster.file_extension",
+								"poster.file_name",
+								"poster.file_size",
+								"poster.width",
+								"poster.height",
+								"poster.blur_hash",
+								"poster.average_color",
+								"poster.is_dark",
+								"poster.is_light",
+								this.dbAdapter
+									.jsonArrayFrom(
+										eb
+											.selectFrom("lucid_media_translations")
+											.select([
+												"lucid_media_translations.title",
+												"lucid_media_translations.alt",
+												"lucid_media_translations.description",
+												"lucid_media_translations.summary",
+												"lucid_media_translations.locale_code",
+											])
+											.whereRef(
+												"lucid_media_translations.media_id",
+												"=",
+												"lucid_media.poster_id",
+											),
+									)
+									.as("translations"),
+							])
+							.whereRef("poster.id", "=", "lucid_media.poster_id"),
+					)
+					.as("poster"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
 							.selectFrom("lucid_media_translations")
 							.select([
 								"lucid_media_translations.title",
 								"lucid_media_translations.alt",
+								"lucid_media_translations.description",
+								"lucid_media_translations.summary",
 								"lucid_media_translations.locale_code",
 							])
 							.whereRef(
@@ -270,6 +402,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
+				"poster_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -289,6 +422,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"deleted_by",
 				"translations",
 				"public",
+				"poster",
 			],
 		});
 	}
@@ -311,6 +445,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.id",
 						"lucid_media.key",
 						"lucid_media.folder_id",
+						"lucid_media.poster_id",
 						"lucid_media.e_tag",
 						"lucid_media.type",
 						"lucid_media.mime_type",
@@ -329,6 +464,46 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_deleted_at",
 						"lucid_media.deleted_by",
 						"lucid_media.public",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media as poster")
+									.select([
+										"poster.id",
+										"poster.key",
+										"poster.type",
+										"poster.mime_type",
+										"poster.file_extension",
+										"poster.file_name",
+										"poster.file_size",
+										"poster.width",
+										"poster.height",
+										"poster.blur_hash",
+										"poster.average_color",
+										"poster.is_dark",
+										"poster.is_light",
+										this.dbAdapter
+											.jsonArrayFrom(
+												eb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														"lucid_media.poster_id",
+													),
+											)
+											.as("translations"),
+									])
+									.whereRef("poster.id", "=", "lucid_media.poster_id"),
+							)
+							.as("poster"),
 						eb.fn.min<string>("translation.title").as("title_sort"),
 						this.dbAdapter
 							.jsonArrayFrom(
@@ -337,6 +512,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 									.select([
 										"lucid_media_translations.title",
 										"lucid_media_translations.alt",
+										"lucid_media_translations.description",
+										"lucid_media_translations.summary",
 										"lucid_media_translations.locale_code",
 									])
 									.whereRef(
@@ -412,6 +589,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
+				"poster_id",
 				"e_tag",
 				"type",
 				"mime_type",
@@ -421,6 +599,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"width",
 				"height",
 				"translations",
+				"poster",
 				"created_at",
 				"updated_at",
 				"blur_hash",

@@ -19,6 +19,8 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 		locale_code: z.string(),
 		title: z.string().nullable(),
 		alt: z.string().nullable(),
+		description: z.string().nullable(),
+		summary: z.string().nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -26,6 +28,8 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 		locale_code: this.dbAdapter.getDataType("text"),
 		title: this.dbAdapter.getDataType("text"),
 		alt: this.dbAdapter.getDataType("text"),
+		description: this.dbAdapter.getDataType("text"),
+		summary: this.dbAdapter.getDataType("text"),
 	};
 	queryConfig = undefined;
 
@@ -57,6 +61,8 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 				oc.columns(["media_id", "locale_code"]).doUpdateSet((eb) => ({
 					title: eb.ref("excluded.title"),
 					alt: eb.ref("excluded.alt"),
+					description: eb.ref("excluded.description"),
+					summary: eb.ref("excluded.summary"),
 				})),
 			)
 			.$if(

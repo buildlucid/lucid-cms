@@ -28,7 +28,9 @@ const rewriteDeclarationImports = (content) =>
  * Rewrites declaration re-exports so TypeScript treats the generated bundle as type-only.
  */
 const rewriteDeclarationExports = (content) =>
-	content.replace(/^export\s+\{/gm, "export type {");
+	content.replace(/^export\s+\{([^}]*)\};/gm, (_match, exports) => {
+		return `export type {${exports.replace(/\btype\s+/g, "")}};`;
+	});
 
 /**
  * Builds the core client types and copies the bundled declaration into client.

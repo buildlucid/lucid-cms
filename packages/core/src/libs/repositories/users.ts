@@ -329,6 +329,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										.select([
 											"lucid_media_translations.title",
 											"lucid_media_translations.alt",
+											"lucid_media_translations.description",
+											"lucid_media_translations.summary",
 											"lucid_media_translations.locale_code",
 										])
 										.whereRef(
@@ -439,6 +441,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 											.select([
 												"lucid_media_translations.title",
 												"lucid_media_translations.alt",
+												"lucid_media_translations.description",
+												"lucid_media_translations.summary",
 												"lucid_media_translations.locale_code",
 											])
 											.whereRef(
@@ -610,6 +614,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													.select([
 														"lucid_media_translations.title",
 														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
 														"lucid_media_translations.locale_code",
 													])
 													.whereRef(

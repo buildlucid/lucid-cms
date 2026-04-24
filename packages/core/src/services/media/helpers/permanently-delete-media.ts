@@ -1,0 +1,116 @@
+import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../../libs/kv-adapter/http-cache.js";
+import {
+	MediaRepository,
+	ProcessedImagesRepository,
+} from "../../../libs/repositories/index.js";
+import T from "../../../translations/index.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import { mediaServices } from "../../index.js";
+
+const permanentlyDeleteMedia: ServiceFn<
+	[
+		{
+			id: number;
+			deletePoster?: boolean;
+		},
+	],
+	undefined
+> = async (context, data) => {
+	const mediaStrategyRes =
+		await mediaServices.checks.checkHasMediaStrategy(context);
+	if (mediaStrategyRes.error) return mediaStrategyRes;
+
+	const Media = new MediaRepository(context.db.client, context.config.db);
+	const ProcessedImages = new ProcessedImagesRepository(
+		context.db.client,
+		context.config.db,
+	);
+
+	const getMediaRes = await Media.selectSingle({
+		select: ["key", "poster_id"],
+		where: [
+			{
+				key: "id",
+				operator: "=",
+				value: data.id,
+			},
+		],
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: T("media_not_found_message"),
+				status: 404,
+			},
+		},
+	});
+	if (getMediaRes.error) return getMediaRes;
+
+	const [processedImagesRes, deleteMediaRes] = await Promise.all([
+		ProcessedImages.selectMultiple({
+			select: ["key", "file_size"],
+			where: [
+				{
+					key: "media_key",
+					operator: "=",
+					value: getMediaRes.data.key,
+				},
+			],
+			validation: {
+				enabled: true,
+			},
+		}),
+		Media.deleteSingle({
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.id,
+				},
+			],
+			returning: ["file_size", "id", "key"],
+			validation: {
+				enabled: true,
+			},
+		}),
+	]);
+	if (processedImagesRes.error) return processedImagesRes;
+	if (deleteMediaRes.error) return deleteMediaRes;
+
+	const [_, deleteObjectRes] = await Promise.all([
+		mediaStrategyRes.data.deleteMultiple(
+			processedImagesRes.data.map((i) => i.key),
+		),
+		mediaServices.strategies.deleteObject(context, {
+			key: deleteMediaRes.data.key,
+			size: deleteMediaRes.data.file_size,
+			processedSize: processedImagesRes.data.reduce(
+				(acc, i) => acc + i.file_size,
+				0,
+			),
+		}),
+	]);
+	if (deleteObjectRes.error) return deleteObjectRes;
+
+	if (data.deletePoster === true && getMediaRes.data.poster_id !== null) {
+		const posterDeleteRes = await permanentlyDeleteMedia(context, {
+			id: getMediaRes.data.poster_id,
+			deletePoster: false,
+		});
+		if (posterDeleteRes.error) return posterDeleteRes;
+	}
+
+	await Promise.all([
+		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {
+			hash: true,
+		}),
+		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+	]);
+
+	return {
+		error: undefined,
+		data: undefined,
+	};
+};
+
+export default permanentlyDeleteMedia;

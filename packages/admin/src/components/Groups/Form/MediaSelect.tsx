@@ -72,8 +72,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	};
 	const getMediaTitle = (media?: MediaRelationRef) => {
 		return (
-			helpers.getRecordTranslation(media?.title, contentLocale()) ||
-			helpers.getRecordTranslation(media?.alt, contentLocale()) ||
+			helpers.getTranslation(media?.title, contentLocale()) ||
+			helpers.getTranslation(media?.alt, contentLocale()) ||
 			helpers.formatFileNameTitle(media?.fileName) ||
 			media?.key ||
 			""
@@ -81,13 +81,13 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	};
 	const getMediaAlt = (media?: MediaRelationRef) => {
 		return (
-			helpers.getRecordTranslation(media?.alt, contentLocale()) ||
+			helpers.getTranslation(media?.alt, contentLocale()) ||
 			getMediaTitle(media)
 		);
 	};
 	const getMediaDimensions = (media?: MediaRelationRef) => {
-		const width = media?.width ?? null;
-		const height = media?.height ?? null;
+		const width = media?.meta.width ?? null;
+		const height = media?.meta.height ?? null;
 		if (!width || !height) return null;
 		return `${width}x${height}`;
 	};
@@ -282,22 +282,24 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										</div>
 									</Show>
 									<div class="flex flex-wrap items-center gap-2 ">
-										<Show when={primarySelectedMedia()?.fileSize}>
+										<Show when={primarySelectedMedia()?.meta.fileSize}>
 											<Pill theme="outline">
-												{helpers.bytesToSize(primarySelectedMedia()?.fileSize)}
+												{helpers.bytesToSize(
+													primarySelectedMedia()?.meta.fileSize,
+												)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
 											<Pill theme="outline">{mediaDimensions()}</Pill>
 										</Show>
-										<Show when={primarySelectedMedia()?.mimeType}>
+										<Show when={primarySelectedMedia()?.meta.mimeType}>
 											<Pill theme="outline">
-												{primarySelectedMedia()?.mimeType}
+												{primarySelectedMedia()?.meta.mimeType}
 											</Pill>
 										</Show>
-										<Show when={primarySelectedMedia()?.extension}>
+										<Show when={primarySelectedMedia()?.meta.extension}>
 											<Pill theme="outline">
-												{primarySelectedMedia()?.extension.toUpperCase()}
+												{primarySelectedMedia()?.meta.extension.toUpperCase()}
 											</Pill>
 										</Show>
 									</div>
@@ -307,6 +309,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										media={{
 											url: primarySelectedMedia()?.url || "",
 											type: primarySelectedMedia()?.type || "image",
+											poster: primarySelectedMedia()?.poster,
 										}}
 										alt={mediaAlt() || ""}
 										richPreview={true}
@@ -533,11 +536,13 @@ const MediaSortableItem: Component<{
 						<Show when={props.dimensions}>
 							<Pill theme="outline">{props.dimensions}</Pill>
 						</Show>
-						<Show when={props.media.mimeType}>
-							<Pill theme="outline">{props.media.mimeType}</Pill>
+						<Show when={props.media.meta.mimeType}>
+							<Pill theme="outline">{props.media.meta.mimeType}</Pill>
 						</Show>
-						<Show when={props.media.extension}>
-							<Pill theme="outline">{props.media.extension.toUpperCase()}</Pill>
+						<Show when={props.media.meta.extension}>
+							<Pill theme="outline">
+								{props.media.meta.extension.toUpperCase()}
+							</Pill>
 						</Show>
 					</div>
 				</div>
@@ -546,6 +551,7 @@ const MediaSortableItem: Component<{
 						media={{
 							url: props.media.url,
 							type: props.media.type,
+							poster: props.media.poster,
 						}}
 						alt={props.alt}
 						richPreview={true}

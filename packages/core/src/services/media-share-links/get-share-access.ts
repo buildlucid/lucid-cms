@@ -71,12 +71,21 @@ const getShareAccess: ServiceFn<
 		token: linkRes.data.token,
 		host,
 	});
+	const posterShareUrl =
+		linkRes.data.media_poster_key && linkRes.data.media_poster_type === "image"
+			? createShareStreamUrl({
+					token: linkRes.data.token,
+					host,
+					poster: true,
+				})
+			: undefined;
 
 	return {
 		error: undefined,
 		data: mediaShareLinksFormatter.formatShareAccess({
 			link: linkRes.data,
 			shareUrl,
+			posterShareUrl,
 			passwordRequired,
 		}),
 	};

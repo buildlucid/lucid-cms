@@ -20,6 +20,7 @@ const authorizeShare: ServiceFn<
 	],
 	{
 		mediaKey: string;
+		posterKey: string | null;
 		passwordRequired: boolean;
 	}
 > = async (context, data) => {
@@ -90,6 +91,7 @@ const authorizeShare: ServiceFn<
 				data: {
 					passwordRequired: true,
 					mediaKey: linkRes.data.media_key,
+					posterKey: linkRes.data.media_poster_key ?? null,
 				},
 			};
 		}
@@ -119,6 +121,7 @@ const authorizeShare: ServiceFn<
 		error: undefined,
 		data: {
 			mediaKey: linkRes.data.media_key,
+			posterKey: linkRes.data.media_poster_key ?? null,
 			passwordRequired: false,
 		},
 	};

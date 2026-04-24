@@ -33,11 +33,14 @@ export interface ShareLinkAccessPropsT {
 	media_file_size: number | null;
 	media_width: number | null;
 	media_height: number | null;
+	media_poster_key: string | null;
+	media_poster_type: string | null;
 }
 
 const formatShareAccess = (props: {
 	link: ShareLinkAccessPropsT;
 	shareUrl: string;
+	posterShareUrl?: string;
 	passwordRequired: boolean;
 }): ShareLinkAccess => {
 	const link = props.link;
@@ -71,6 +74,12 @@ const formatShareAccess = (props: {
 			height: link.media_height ?? null,
 			previewable,
 			shareUrl: props.shareUrl,
+			poster:
+				props.posterShareUrl && link.media_poster_type === "image"
+					? {
+							shareUrl: props.posterShareUrl,
+						}
+					: null,
 		},
 	};
 };

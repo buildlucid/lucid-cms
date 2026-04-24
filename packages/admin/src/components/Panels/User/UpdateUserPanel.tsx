@@ -12,7 +12,7 @@ import SectionHeading from "@/components/Blocks/SectionHeading";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
-import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import CreateUpdateProfilePicturePanel from "@/components/Panels/Media/CreateUpdateProfilePicturePanel";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import api from "@/services/api";
@@ -110,9 +110,6 @@ const UpdateUserPanel: Component<{
 			},
 		);
 	});
-	const profilePictureMediaId = createMemo(
-		() => user.data?.data.profilePicture?.id,
-	);
 
 	// ---------------------------------
 	// Handlers
@@ -287,14 +284,10 @@ const UpdateUserPanel: Component<{
 			</Panel>
 			<Show when={props.id()}>
 				{(targetUserId) => (
-					<CreateUpdateMediaPanel
-						id={profilePictureMediaId}
+					<CreateUpdateProfilePicturePanel
 						state={{
 							open: profilePicturePanelOpen(),
 							setOpen: setProfilePicturePanelOpen,
-							parentFolderId: () => undefined,
-						}}
-						profilePicture={{
 							media: user.data?.data.profilePicture ?? null,
 							userId: targetUserId(),
 						}}

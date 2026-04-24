@@ -1,4 +1,12 @@
-import type { ErrorResponse, Media, User } from "@types";
+import type { ErrorResponse, Media } from "@types";
+import classNames from "classnames";
+import {
+	FaSolidArrowRotateLeft,
+	FaSolidArrowUpFromBracket,
+	FaSolidImage,
+	FaSolidMagnifyingGlass,
+	FaSolidXmark,
+} from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -6,13 +14,13 @@ import {
 	createMemo,
 	createSignal,
 	For,
-	on,
 	Show,
 } from "solid-js";
-import SectionHeading from "@/components/Blocks/SectionHeading";
-import { Checkbox, Input, Select } from "@/components/Groups/Form";
+import { Checkbox, Input, Select, Textarea } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
+import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
+import Pill from "@/components/Partials/Pill";
 import { useCreateMedia, useUpdateMedia } from "@/hooks/actions";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
@@ -29,10 +37,6 @@ interface CreateUpdateMediaPanelProps {
 		setOpen: (_state: boolean) => void;
 		parentFolderId: Accessor<number | string | undefined>;
 	};
-	profilePicture?: {
-		media: User["profilePicture"];
-		userId?: number;
-	};
 	callbacks?: {
 		onSuccess?: (_media: Media) => void;
 	};
@@ -43,33 +47,38 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 ) => {
 	// ------------------------------
 	// State & Hooks
+	let posterInputRef: HTMLInputElement | undefined;
 	const [uploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
+	const [posterAlt, setPosterAlt] = createSignal<Media["alt"]>([]);
+	const [activeTab, setActiveTab] = createSignal<"details" | "poster" | "meta">(
+		"details",
+	);
 	const createMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
-	const isProfilePicture = createMemo(() => props.profilePicture !== undefined);
-	const locales = createMemo(() => contentLocaleStore.get.locales);
-	const profilePictureMedia = createMemo(
-		() => props.profilePicture?.media ?? null,
-	);
-	const panelMode = createMemo(() => {
-		if (props.profilePicture) {
-			return profilePictureMedia() === null ? "create" : "update";
-		}
-		return props.id === undefined ? "create" : "update";
-	});
+	const updatePosterAlt = api.media.useUpdateSingle();
+
 	const MediaFile = useSingleFileUpload({
 		id: "file",
 		disableRemoveCurrent: true,
 		name: "file",
 		required: true,
-		accept: isProfilePicture() ? "image/*" : undefined,
 		errors: () => mutateErrors(),
 		noMargin: false,
 	});
-	const accountGetPresignedUrl = api.account.useGetProfilePicturePresignedUrl();
-	const userGetPresignedUrl = api.users.useGetProfilePicturePresignedUrl();
-	const accountUpdateProfilePicture = api.account.useUpdateProfilePicture();
-	const userUpdateProfilePicture = api.users.useUpdateProfilePicture();
+	const PosterFile = useSingleFileUpload({
+		id: "poster",
+		name: "file",
+		accept: "image/*",
+		errors: () => mutateErrors(),
+		noMargin: false,
+	});
+
+	// ---------------------------------
+	// Memos
+	const panelMode = createMemo(() => {
+		return props.id === undefined ? "create" : "update";
+	});
+	const locales = createMemo(() => contentLocaleStore.get.locales);
 
 	// ---------------------------------
 	// Queries
@@ -79,13 +88,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				id: props.id as Accessor<number | undefined>,
 			},
 		},
-		enabled: () =>
-			!isProfilePicture() && panelMode() === "update" && props.state.open,
+		enabled: () => panelMode() === "update" && props.state.open,
 	});
 
 	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
 		queryParams: {},
-		enabled: () => !isProfilePicture(),
 	});
 
 	// ---------------------------------
@@ -95,12 +102,115 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			const type = helpers.getMediaType(MediaFile.getMimeType());
 			return type === "image";
 		}
-		if (isProfilePicture()) {
-			return (
-				panelMode() === "update" && profilePictureMedia()?.type === "image"
-			);
-		}
 		return panelMode() === "create" ? false : media.data?.data.type === "image";
+	});
+	const showPosterInput = createMemo(() => {
+		return panelMode() === "update" && media.data?.data.type === "video";
+	});
+	const currentMediaType = createMemo(() => {
+		if (MediaFile.getFile() !== null) {
+			return helpers.getMediaType(MediaFile.getMimeType());
+		}
+		return media.data?.data.type;
+	});
+	const showDescriptionInput = createMemo(() => {
+		const type = currentMediaType();
+		return type === "video" || type === "audio";
+	});
+	const showSummaryInput = createMemo(() => {
+		return currentMediaType() === "document";
+	});
+	const showPosterAltInput = createMemo(() => {
+		return (
+			showPosterInput() &&
+			PosterFile.getRemovedCurrent() !== true &&
+			(PosterFile.getFile() !== null || media.data?.data.poster != null)
+		);
+	});
+	const posterPreview = createMemo(() => {
+		const file = PosterFile.getFile();
+		if (file) {
+			return {
+				name: file.name,
+				url: URL.createObjectURL(file),
+				isNew: true,
+			};
+		}
+
+		if (
+			PosterFile.getRemovedCurrent() !== true &&
+			media.data?.data.poster != null
+		) {
+			return {
+				name: T()("poster"),
+				url: `${media.data?.data.poster?.url}?preset=thumbnail&format=webp`,
+				isNew: false,
+			};
+		}
+
+		return null;
+	});
+	const posterMeta = createMemo(() => {
+		const file = PosterFile.getFile();
+		if (file) {
+			return {
+				fileSize: file.size,
+				mimeType: file.type,
+				extension: file.name.split(".").pop() || "",
+				width: null,
+				height: null,
+			};
+		}
+
+		if (
+			PosterFile.getRemovedCurrent() !== true &&
+			media.data?.data.poster != null
+		) {
+			return {
+				fileSize: media.data.data.poster.meta.fileSize,
+				mimeType: media.data.data.poster.meta.mimeType,
+				extension: media.data.data.poster.meta.extension,
+				width: media.data.data.poster.meta.width,
+				height: media.data.data.poster.meta.height,
+			};
+		}
+
+		return null;
+	});
+	const posterMetaPills = createMemo(() => {
+		const meta = posterMeta();
+		if (!meta) return [];
+
+		const pills = [
+			helpers.bytesToSize(meta.fileSize),
+			meta.width && meta.height ? `${meta.width} x ${meta.height}` : undefined,
+			meta.mimeType,
+			meta.extension ? meta.extension.toUpperCase() : undefined,
+		];
+
+		return pills.filter(Boolean) as string[];
+	});
+	const posterEmptyDescription = createMemo(() => {
+		if (PosterFile.getRemovedCurrent() && media.data?.data.poster) {
+			return T()("poster_removed_pending");
+		}
+		return T()("poster_empty_description");
+	});
+	const fileSizeMeta = createMemo(() => {
+		const values = [
+			helpers.bytesToSize(media.data?.data.meta.fileSize ?? 0),
+			posterMeta()?.fileSize !== undefined
+				? helpers.bytesToSize(posterMeta()?.fileSize)
+				: undefined,
+		].filter(Boolean);
+		return values.join(", ");
+	});
+	const extensionMeta = createMemo(() => {
+		const values = [
+			media.data?.data.meta.extension,
+			posterMeta()?.extension,
+		].filter(Boolean);
+		return values.join(", ");
 	});
 
 	const folderOptions = createMemo(() => {
@@ -124,44 +234,63 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 
 	const mutateIsLoading = createMemo(() => {
-		if (isProfilePicture()) {
-			return (
-				accountGetPresignedUrl.action.isPending ||
-				userGetPresignedUrl.action.isPending ||
-				accountUpdateProfilePicture.action.isPending ||
-				userUpdateProfilePicture.action.isPending
-			);
-		}
 		return panelMode() === "create"
 			? createMedia.isLoading()
-			: updateMedia?.isLoading() || false;
+			: updateMedia?.isLoading() ||
+					createMedia.isLoading() ||
+					updatePosterAlt.action.isPending ||
+					false;
 	});
 	const mutateErrors = createMemo(() => {
-		if (isProfilePicture()) {
-			return (
-				accountGetPresignedUrl.errors() ||
-				userGetPresignedUrl.errors() ||
-				accountUpdateProfilePicture.errors() ||
-				userUpdateProfilePicture.errors() ||
-				uploadErrors()
-			);
-		}
 		return panelMode() === "create"
-			? createMedia.errors()
-			: updateMedia?.errors();
+			? createMedia.errors() || uploadErrors()
+			: updateMedia?.errors() ||
+					createMedia.errors() ||
+					uploadErrors() ||
+					updatePosterAlt.errors();
 	});
 
 	const hasTranslationErrors = createMemo(() => {
-		const titleErrors = getBodyError("title", mutateErrors)?.children;
-		const altErrors = getBodyError("alt", mutateErrors)?.children;
+		const titleErrors = getBodyError("title", mutateErrors())?.children;
+		const altErrors = getBodyError("alt", mutateErrors())?.children;
+		const descriptionErrors = getBodyError(
+			"description",
+			mutateErrors(),
+		)?.children;
+		const summaryErrors = getBodyError("summary", mutateErrors())?.children;
 		return (
 			(titleErrors && titleErrors.length > 0) ||
-			(altErrors && altErrors.length > 0)
+			(altErrors && altErrors.length > 0) ||
+			(descriptionErrors && descriptionErrors.length > 0) ||
+			(summaryErrors && summaryErrors.length > 0)
 		);
+	});
+	const hasDetailsErrors = createMemo(() => {
+		return (
+			Boolean(getBodyError("translations", mutateErrors())) ||
+			Boolean(getBodyError("title", mutateErrors())) ||
+			Boolean(getBodyError("alt", mutateErrors())) ||
+			Boolean(getBodyError("description", mutateErrors())) ||
+			Boolean(getBodyError("summary", mutateErrors())) ||
+			Boolean(getBodyError("folderId", mutateErrors())) ||
+			Boolean(getBodyError("featured", mutateErrors()))
+		);
+	});
+	const hasPosterErrors = createMemo(() => {
+		return Boolean(
+			getBodyError("posterId", mutateErrors()) ||
+				getBodyError("file", mutateErrors()) ||
+				getBodyError("alt", updatePosterAlt.errors()),
+		);
+	});
+	const visibleTabs = createMemo<Array<"details" | "poster" | "meta">>(() => {
+		const tabs: Array<"details" | "poster" | "meta"> = ["details"];
+		if (showPosterInput()) tabs.push("poster");
+		if (props.id !== undefined) tabs.push("meta");
+		return tabs;
 	});
 
 	const targetAction = createMemo(() => {
-		if (isProfilePicture()) return createMedia;
 		return panelMode() === "create" ? createMedia : updateMedia;
 	});
 	const targetState = createMemo(() => {
@@ -172,26 +301,39 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const { changed, data } = helpers.updateData(
 			{
 				key: undefined,
-				title: isProfilePicture()
-					? recordToTranslations(profilePictureMedia()?.title)
-					: media.data?.data.title || [],
-				alt: isProfilePicture()
-					? recordToTranslations(profilePictureMedia()?.alt)
-					: media.data?.data.alt || [],
+				title: media.data?.data.title || [],
+				alt: media.data?.data.alt || [],
+				description: media.data?.data.description || [],
+				summary: media.data?.data.summary || [],
 				folderId: media.data?.data.folderId ?? null,
 				public: media.data?.data.public ?? true,
+				posterId: showPosterInput()
+					? (media.data?.data.poster?.id ?? null)
+					: undefined,
+				posterAlt: showPosterAltInput()
+					? (media.data?.data.poster?.alt ?? [])
+					: undefined,
 			},
 			{
 				key: state?.key(),
 				title: state?.title(),
 				alt: state?.alt(),
+				description: showDescriptionInput() ? state?.description() : undefined,
+				summary: showSummaryInput() ? state?.summary() : undefined,
 				folderId: state?.folderId(),
 				public: state?.public(),
+				posterId: showPosterInput()
+					? PosterFile.getRemovedCurrent()
+						? null
+						: state?.posterId()
+					: undefined,
+				posterAlt: showPosterAltInput() ? posterAlt() : undefined,
 			},
 		);
 
 		let resChanged = changed;
 		if (MediaFile.getFile()) resChanged = true;
+		if (PosterFile.getFile()) resChanged = true;
 
 		return {
 			changed: resChanged,
@@ -199,9 +341,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		};
 	});
 	const mutateIsDisabled = createMemo(() => {
-		if (isProfilePicture() && panelMode() === "update") {
-			return !updateData().changed;
-		}
 		if (panelMode() === "create") {
 			return MediaFile.getFile() === null;
 		}
@@ -209,15 +348,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 
 	const panelContent = createMemo(() => {
-		if (isProfilePicture()) {
-			return {
-				title:
-					panelMode() === "create"
-						? T()("set_profile_picture")
-						: T()("update_profile_picture"),
-				submit: panelMode() === "create" ? T()("set") : T()("update"),
-			};
-		}
 		if (panelMode() === "create") {
 			return {
 				title: T()("create_media_panel_title"),
@@ -230,12 +360,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		};
 	});
 	const panelFetchState = createMemo(() => {
-		if (isProfilePicture()) {
-			return {
-				isLoading: false,
-				isError: false,
-			};
-		}
 		if (panelMode() === "create") {
 			return {
 				isLoading: foldersHierarchy.isLoading,
@@ -251,7 +375,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	// ---------------------------------
 	// Functions
 	function inputError(index: number) {
-		const errors = getBodyError("translations", mutateErrors)?.children;
+		const errors = getBodyError("translations", mutateErrors())?.children;
 		if (errors) return errors[index];
 		return undefined;
 	}
@@ -260,14 +384,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			localeCode: locale.code,
 			value: record?.[locale.code] ?? null,
 		}));
-	}
-	function toProfileTranslations(translations?: Media["title"]) {
-		return (translations || [])
-			.filter((translation) => translation.localeCode !== null)
-			.map((translation) => ({
-				localeCode: translation.localeCode as string,
-				value: translation.value,
-			}));
 	}
 	function setFileError(message: string) {
 		setUploadErrors({
@@ -283,142 +399,97 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			},
 		});
 	}
-	async function uploadProfilePictureFile(file: File) {
-		if (!file.type.startsWith("image/")) {
-			setFileError(T()("profile_picture_image_only"));
-			return null;
-		}
-
-		try {
-			setUploadErrors(undefined);
-			const presignedUrl =
-				props.profilePicture?.userId !== undefined
-					? await userGetPresignedUrl.action.mutateAsync({
-							userId: props.profilePicture.userId,
-							body: {
-								fileName: file.name,
-								mimeType: file.type,
-							},
-						})
-					: await accountGetPresignedUrl.action.mutateAsync({
-							body: {
-								fileName: file.name,
-								mimeType: file.type,
-							},
-						});
-
-			const response = await fetch(presignedUrl.data.url, {
-				method: "PUT",
-				body: file,
-				headers: {
-					...(file.type ? { "content-type": file.type } : {}),
-					...presignedUrl.data.headers,
-				},
-			});
-
-			let bodyMessage = "";
-			if (response.headers.get("content-type")?.includes("application/json")) {
-				const body = await response.json();
-				bodyMessage = body?.message || "";
-			}
-
-			if (!response.ok) {
-				setUploadErrors({
-					status: response.status,
-					name: T()("media_upload_error"),
-					message: T()("media_upload_error_description"),
-					errors: {
-						body: {
-							file: {
-								message: bodyMessage || "",
-							},
-						},
-					},
-				});
-				return null;
-			}
-
-			return presignedUrl.data.key;
-		} catch (error) {
-			setUploadErrors({
-				status: 500,
-				name: T()("media_upload_error"),
-				message:
-					error instanceof Error
-						? error.message
-						: T()("media_upload_error_description"),
-			});
-			return null;
-		}
+	function posterAltError(index: number) {
+		const errors = getBodyError("alt", updatePosterAlt.errors())?.children;
+		if (errors) return errors[index];
+		return undefined;
 	}
-	async function updateProfilePicture(
-		file: File | null,
-		imageMeta: Awaited<ReturnType<typeof MediaFile.getImageMeta>>,
-	) {
-		let key: string | null = null;
-		if (file) {
-			key = await uploadProfilePictureFile(file);
-			if (!key) return false;
+	function descriptionError(index: number) {
+		const errors = getBodyError("description", mutateErrors())?.children;
+		if (errors) return errors[index];
+		return undefined;
+	}
+	function summaryError(index: number) {
+		const errors = getBodyError("summary", mutateErrors())?.children;
+		if (errors) return errors[index];
+		return undefined;
+	}
+	function tabLabel(tab: "details" | "poster" | "meta") {
+		if (tab === "details") return T()("details");
+		if (tab === "poster") return T()("poster");
+		return T()("meta");
+	}
+	function tabHasError(tab: "details" | "poster" | "meta") {
+		if (tab === "details") return hasDetailsErrors();
+		if (tab === "poster") return hasPosterErrors();
+		return false;
+	}
+	function openPosterFileBrowser() {
+		posterInputRef?.click();
+	}
+	function previewPosterFile() {
+		const preview = posterPreview();
+		if (!preview) return;
+		const url = preview.url.includes("?")
+			? preview.url.split("?")[0]
+			: preview.url;
+		window.open(url, "_blank");
+	}
+	function clearPosterFile() {
+		PosterFile.setGetFile(null);
+		PosterFile.setGetRemovedCurrent(true);
+	}
+	function undoPosterFile() {
+		PosterFile.setGetFile(null);
+		PosterFile.setGetRemovedCurrent(false);
+		setPosterAlt(media.data?.data.poster?.alt ?? recordToTranslations());
+	}
+	async function createPoster() {
+		const file = PosterFile.getFile();
+		if (!file) return undefined;
+
+		if (!file.type.startsWith("image/")) {
+			setFileError(T()("poster_image_only"));
+			return null;
 		}
 
-		const body = {
-			key: key ?? undefined,
-			fileName: file?.name,
-			width: imageMeta?.width,
-			height: imageMeta?.height,
-			blurHash: imageMeta?.blurHash,
-			averageColor: imageMeta?.averageColor,
-			isDark: imageMeta?.isDark,
-			isLight: imageMeta?.isLight,
-			title: toProfileTranslations(targetState()?.title()),
-			alt: toProfileTranslations(targetState()?.alt()),
-		};
+		const imageMeta = await PosterFile.getImageMeta();
+		const poster = await createMedia.createMedia(file, imageMeta, {
+			title: [],
+			alt: posterAlt(),
+			folderId: null,
+			public: targetState()?.public() ?? true,
+			isHidden: true,
+		});
 
-		if (props.profilePicture?.userId !== undefined) {
-			await userUpdateProfilePicture.action.mutateAsync({
-				userId: props.profilePicture.userId,
-				body,
-			});
+		return poster?.id ?? null;
+	}
+	async function updateExistingPosterAlt() {
+		const poster = media.data?.data.poster;
+		if (!poster || PosterFile.getFile() || PosterFile.getRemovedCurrent()) {
 			return true;
 		}
 
-		await accountUpdateProfilePicture.action.mutateAsync(body);
-		return true;
-	}
-	function hydrateProfilePictureState() {
-		const profilePicture = profilePictureMedia();
+		const { changed } = helpers.updateData(
+			{ alt: poster.alt },
+			{ alt: posterAlt() },
+		);
+		if (!changed) return true;
 
-		createMedia.setTitle(recordToTranslations(profilePicture?.title));
-		createMedia.setAlt(recordToTranslations(profilePicture?.alt));
-		createMedia.setFolderId(null);
-		createMedia.setPublic(true);
-		MediaFile.reset();
-		if (profilePicture) {
-			MediaFile.setCurrentFile({
-				name: profilePicture.fileName ?? profilePicture.key,
-				url:
-					profilePicture.type === "image"
-						? `${profilePicture.url}?preset=thumbnail&format=webp`
-						: profilePicture.url,
-				type: profilePicture.type,
-			});
-		}
+		await updatePosterAlt.action.mutateAsync({
+			id: poster.id,
+			body: {
+				alt: posterAlt(),
+			},
+		});
+
+		return true;
 	}
 
 	// ---------------------------------
 	// Handlers
 	const onSubmit = async () => {
 		const imageMeta = await MediaFile.getImageMeta();
-
-		if (isProfilePicture()) {
-			const success = await updateProfilePicture(
-				MediaFile.getFile(),
-				imageMeta,
-			);
-			if (!success) return;
-			props.state.setOpen(false);
-			return;
-		}
 
 		if (panelMode() === "create") {
 			const media = await createMedia.createMedia(
@@ -431,6 +502,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			props.callbacks?.onSuccess?.(media);
 			props.state.setOpen(false);
 		} else {
+			const posterId = await createPoster();
+			if (posterId === null) return;
+			if (posterId !== undefined) {
+				updateMedia?.setPosterId(posterId);
+			} else if (PosterFile.getRemovedCurrent()) {
+				updateMedia?.setPosterId(null);
+			}
+
 			const success = await updateMedia?.updateMedia(
 				MediaFile.getFile(),
 				imageMeta,
@@ -438,30 +517,23 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 			if (!success) return;
 
+			const posterAltSuccess = await updateExistingPosterAlt();
+			if (!posterAltSuccess) return;
+
 			props.state.setOpen(false);
 		}
 	};
 
-	// ---------------------------------
-	// Effects
-	createEffect(
-		on(
-			[isProfilePicture, profilePictureMedia, () => props.state.open],
-			([profilePictureMode, _, open]) => {
-				if (profilePictureMode && open) {
-					hydrateProfilePictureState();
-				}
-			},
-		),
-	);
-
 	createEffect(() => {
-		if (isProfilePicture()) return;
 		if (media.isSuccess && panelMode() === "update") {
 			updateMedia?.setTitle(media.data?.data.title || []);
 			updateMedia?.setAlt(media.data?.data.alt || []);
+			updateMedia?.setDescription(media.data?.data.description || []);
+			updateMedia?.setSummary(media.data?.data.summary || []);
 			updateMedia?.setFolderId(media.data?.data.folderId ?? null);
 			updateMedia?.setPublic(media.data?.data.public ?? true);
+			updateMedia?.setPosterId(media.data?.data.poster?.id ?? null);
+			setPosterAlt(media.data?.data.poster?.alt ?? recordToTranslations());
 			MediaFile.reset();
 			MediaFile.setCurrentFile({
 				name: media.data.data.key,
@@ -472,6 +544,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					: undefined,
 				type: media.data?.data.type || undefined,
 			});
+			PosterFile.reset();
+			if (media.data?.data.poster) {
+				PosterFile.setCurrentFile({
+					name: T()("poster"),
+					url: `${media.data.data.poster.url}?preset=thumbnail&format=webp`,
+					type: "image",
+				});
+			}
 		}
 	});
 
@@ -481,6 +561,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			if (createMedia.state.folderId() !== newFolderId) {
 				createMedia.setFolderId(newFolderId);
 			}
+		}
+	});
+
+	createEffect(() => {
+		if (!visibleTabs().includes(activeTab())) {
+			setActiveTab("details");
 		}
 	});
 
@@ -503,7 +589,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				reset: () => {
 					createMedia.reset();
 					updateMedia?.reset();
+					updatePosterAlt.reset();
 					MediaFile.reset();
+					PosterFile.reset();
+					setPosterAlt([]);
+					setActiveTab("details");
 					setUploadErrors(undefined);
 				},
 			}}
@@ -520,59 +610,31 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			{(lang) => (
 				<>
 					<MediaFile.Render />
-					<SectionHeading title={T()("details")} />
-					<For each={locales()}>
-						{(locale, index) => (
-							<Show when={locale.code === lang?.contentLocale()}>
-								<Input
-									id={`name-${locale.code}`}
-									value={
-										helpers.getTranslation(
-											targetState()?.title(),
-											locale.code,
-										) || ""
-									}
-									onChange={(val) => {
-										helpers.updateTranslation(targetAction()?.setTitle, {
-											localeCode: locale.code,
-											value: val,
-										});
-									}}
-									name={`name-${locale.code}`}
-									type="text"
-									copy={{
-										label: T()("name"),
-									}}
-									errors={getErrorObject(inputError(index())?.name)}
-									autoComplete="off"
-								/>
-								<Show when={showAltInput()}>
-									<Input
-										id={`alt-${locale.code}`}
-										value={
-											helpers.getTranslation(
-												targetState()?.alt(),
-												locale.code,
-											) || ""
-										}
-										onChange={(val) => {
-											helpers.updateTranslation(targetAction()?.setAlt, {
-												localeCode: locale.code,
-												value: val,
-											});
-										}}
-										name={`alt-${locale.code}`}
-										type="text"
-										copy={{
-											label: T()("alt"),
-										}}
-										errors={getErrorObject(inputError(index())?.alt)}
-									/>
-								</Show>
-							</Show>
-						)}
-					</For>
-					<Show when={!isProfilePicture()}>
+					<div class="mt-6 border-b border-border mb-4">
+						<div class="flex flex-row flex-wrap items-center gap-4">
+							<For each={visibleTabs()}>
+								{(tab) => (
+									<button
+										type="button"
+										class={classNames(
+											"border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base transition-colors duration-200",
+											{
+												"border-primary-base text-title": activeTab() === tab,
+												"border-transparent text-body hover:border-primary-base":
+													activeTab() !== tab && !tabHasError(tab),
+												"border-error-base text-error-base":
+													activeTab() !== tab && tabHasError(tab),
+											},
+										)}
+										onClick={() => setActiveTab(tab)}
+									>
+										{tabLabel(tab)}
+									</button>
+								)}
+							</For>
+						</div>
+					</div>
+					<Show when={activeTab() === "details"}>
 						<Select
 							id="media-folder"
 							value={targetState()?.folderId() ?? undefined}
@@ -602,17 +664,248 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							}}
 							errors={getBodyError("featured", mutateErrors())}
 						/>
+						<For each={locales()}>
+							{(locale, index) => (
+								<Show when={locale.code === lang?.contentLocale()}>
+									<Input
+										id={`name-${locale.code}`}
+										value={
+											helpers.getTranslation(
+												targetState()?.title(),
+												locale.code,
+											) || ""
+										}
+										onChange={(val) => {
+											helpers.updateTranslation(targetAction()?.setTitle, {
+												localeCode: locale.code,
+												value: val,
+											});
+										}}
+										name={`name-${locale.code}`}
+										type="text"
+										copy={{
+											label: T()("name"),
+										}}
+										errors={getErrorObject(inputError(index())?.name)}
+										autoComplete="off"
+									/>
+									<Show when={showAltInput()}>
+										<Input
+											id={`alt-${locale.code}`}
+											value={
+												helpers.getTranslation(
+													targetState()?.alt(),
+													locale.code,
+												) || ""
+											}
+											onChange={(val) => {
+												helpers.updateTranslation(targetAction()?.setAlt, {
+													localeCode: locale.code,
+													value: val,
+												});
+											}}
+											name={`alt-${locale.code}`}
+											type="text"
+											copy={{
+												label: T()("alt"),
+											}}
+											errors={getErrorObject(inputError(index())?.alt)}
+										/>
+									</Show>
+									<Show when={showDescriptionInput()}>
+										<Textarea
+											id={`description-${locale.code}`}
+											value={
+												helpers.getTranslation(
+													targetState()?.description(),
+													locale.code,
+												) || ""
+											}
+											onChange={(val) => {
+												helpers.updateTranslation(
+													targetAction()?.setDescription,
+													{
+														localeCode: locale.code,
+														value: val,
+													},
+												);
+											}}
+											name={`description-${locale.code}`}
+											copy={{
+												label: T()("description"),
+											}}
+											errors={getErrorObject(descriptionError(index()))}
+										/>
+									</Show>
+									<Show when={showSummaryInput()}>
+										<Textarea
+											id={`summary-${locale.code}`}
+											value={
+												helpers.getTranslation(
+													targetState()?.summary(),
+													locale.code,
+												) || ""
+											}
+											onChange={(val) => {
+												helpers.updateTranslation(targetAction()?.setSummary, {
+													localeCode: locale.code,
+													value: val,
+												});
+											}}
+											name={`summary-${locale.code}`}
+											copy={{
+												label: T()("summary"),
+											}}
+											errors={getErrorObject(summaryError(index()))}
+										/>
+									</Show>
+								</Show>
+							)}
+						</For>
 					</Show>
-					<Show when={!isProfilePicture() && props.id !== undefined}>
-						<SectionHeading title={T()("meta")} />
+					<Show when={activeTab() === "poster" && showPosterInput()}>
+						<input
+							ref={posterInputRef}
+							type="file"
+							name="poster"
+							id="poster"
+							accept="image/*"
+							class="hidden"
+							onChange={(e) => {
+								if (e.currentTarget.files?.length) {
+									PosterFile.setGetFile(e.currentTarget.files[0]);
+									PosterFile.setGetRemovedCurrent(false);
+								}
+							}}
+						/>
+						<div class="w-full rounded-md border border-border bg-input-base mb-3">
+							<div class="grid grid-cols-[112px_1fr_auto] items-center gap-3 p-3">
+								<div class="h-20 rounded-sm border border-border rectangle-background overflow-hidden flex items-center justify-center bg-background-base">
+									<Show
+										when={posterPreview()}
+										fallback={<FaSolidImage class="w-6 h-6 text-icon-fade" />}
+									>
+										{(preview) => (
+											<img
+												src={preview().url}
+												alt={preview().name}
+												class="w-full h-full object-contain z-10"
+											/>
+										)}
+									</Show>
+								</div>
+								<div class="min-w-0">
+									<p class="text-sm font-medium text-subtitle truncate">
+										{posterPreview()?.name ?? T()("no_poster_selected")}
+									</p>
+									<Show
+										when={posterMetaPills().length > 0}
+										fallback={
+											<p class="text-xs text-unfocused mt-1">
+												{posterEmptyDescription()}
+											</p>
+										}
+									>
+										<div class="flex items-center gap-1.5 flex-wrap mt-2">
+											<For each={posterMetaPills()}>
+												{(pill) => (
+													<Pill theme="outline" class="text-[10px]">
+														{pill}
+													</Pill>
+												)}
+											</For>
+											<Show when={posterPreview()?.isNew}>
+												<Pill theme="primary-opaque" class="text-[10px]">
+													{T()("poster_pending_upload")}
+												</Pill>
+											</Show>
+										</div>
+									</Show>
+								</div>
+								<div class="flex items-center justify-center gap-1 self-center">
+									<Show when={posterPreview()}>
+										<Button
+											type="button"
+											theme="secondary-subtle"
+											size="icon-subtle"
+											onClick={previewPosterFile}
+											aria-label={T()("preview")}
+										>
+											<FaSolidMagnifyingGlass size={14} />
+										</Button>
+									</Show>
+									<Button
+										type="button"
+										theme="secondary-subtle"
+										size="icon-subtle"
+										onClick={openPosterFileBrowser}
+										aria-label={T()("upload")}
+									>
+										<FaSolidArrowUpFromBracket size={14} />
+									</Button>
+									<Show when={posterPreview()}>
+										<Button
+											type="button"
+											theme="danger-subtle"
+											size="icon-subtle"
+											onClick={clearPosterFile}
+											aria-label={T()("remove")}
+										>
+											<FaSolidXmark size={14} />
+										</Button>
+									</Show>
+									<Show
+										when={
+											PosterFile.getRemovedCurrent() && media.data?.data.poster
+										}
+									>
+										<Button
+											type="button"
+											theme="secondary-subtle"
+											size="icon-subtle"
+											onClick={undoPosterFile}
+											aria-label={T()("back_to_current_file")}
+										>
+											<FaSolidArrowRotateLeft size={14} />
+										</Button>
+									</Show>
+								</div>
+							</div>
+						</div>
+						<Show when={showPosterAltInput()}>
+							<For each={locales()}>
+								{(locale, index) => (
+									<Show when={locale.code === lang?.contentLocale()}>
+										<Input
+											id={`poster-alt-${locale.code}`}
+											value={
+												helpers.getTranslation(posterAlt(), locale.code) || ""
+											}
+											onChange={(val) => {
+												helpers.updateTranslation(setPosterAlt, {
+													localeCode: locale.code,
+													value: val,
+												});
+											}}
+											name={`poster-alt-${locale.code}`}
+											type="text"
+											copy={{
+												label: T()("poster_alt"),
+											}}
+											errors={getErrorObject(posterAltError(index()))}
+										/>
+									</Show>
+								)}
+							</For>
+						</Show>
+					</Show>
+					<Show when={activeTab() === "meta" && props.id !== undefined}>
 						<DetailsList
 							type="text"
 							items={[
 								{
 									label: T()("file_size"),
-									value: helpers.bytesToSize(
-										media.data?.data.meta.fileSize ?? 0,
-									),
+									value: fileSizeMeta(),
 								},
 								{
 									label: T()("dimensions"),
@@ -621,7 +914,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								},
 								{
 									label: T()("extension"),
-									value: media.data?.data.meta.extension,
+									value: extensionMeta(),
 								},
 								{
 									label: T()("mime_type"),

@@ -42,8 +42,10 @@ const streamMediaController = factory.createHandlers(
 		windowMs: minutesToMilliseconds(1),
 	}),
 	validate("param", controllerSchemas.streamShareMedia.params),
+	validate("query", controllerSchemas.streamShareMedia.query.string),
 	async (c) => {
 		const { token } = c.req.valid("param");
+		const query = c.req.valid("query");
 		const context = getServiceContext(c);
 		const range = parseRangeHeader(c.req.header("range"));
 
@@ -85,9 +87,14 @@ const streamMediaController = factory.createHandlers(
 			});
 		}
 
+		const mediaKey =
+			query.poster === "true" && authorizeRes.data.posterKey
+				? authorizeRes.data.posterKey
+				: authorizeRes.data.mediaKey;
+
 		const response = await serviceWrapper(mediaShareLinkServices.streamMedia, {
 			transaction: false,
-		})(context, { mediaKey: authorizeRes.data.mediaKey, range });
+		})(context, { mediaKey, range });
 		if (response.error) throw new LucidAPIError(response.error);
 
 		applyRangeHeaders(c, {

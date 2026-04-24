@@ -13,7 +13,9 @@ import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
+import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
+import resolvePoster from "./helpers/resolve-poster.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -31,6 +33,14 @@ const updateSingle: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
+			description?: {
+				localeCode: string;
+				value: string | null;
+			}[];
+			summary?: {
+				localeCode: string;
+				value: string | null;
+			}[];
 			width?: number | null;
 			height?: number | null;
 			blurHash?: string | null;
@@ -38,6 +48,7 @@ const updateSingle: ServiceFn<
 			isDark?: boolean | null;
 			isLight?: boolean | null;
 			isDeleted?: boolean;
+			posterId?: number | null;
 			allowedType?: MediaType;
 			userId: number;
 		},
@@ -63,6 +74,7 @@ const updateSingle: ServiceFn<
 			"public",
 			"type",
 			"e_tag",
+			"poster_id",
 		],
 		where: [
 			{
@@ -84,8 +96,18 @@ const updateSingle: ServiceFn<
 	const translations = prepareMediaTranslations({
 		title: data.title || [],
 		alt: data.alt || [],
+		description: data.description || [],
+		summary: data.summary || [],
 		mediaId: mediaRes.data.id,
 	});
+
+	if (data.posterId !== undefined && data.posterId !== null) {
+		const posterRes = await resolvePoster(context, {
+			posterId: data.posterId,
+			parentId: data.id,
+		});
+		if (posterRes.error) return posterRes;
+	}
 
 	if (data.key !== undefined && data.fileName === undefined) {
 		return {
@@ -201,6 +223,7 @@ const updateSingle: ServiceFn<
 					is_dark: data.isDark,
 					is_light: data.isLight,
 					folder_id: data.folderId,
+					poster_id: data.posterId,
 					public: isPublic ?? data.public,
 					is_deleted: data.isDeleted,
 					is_deleted_at: data.isDeleted
@@ -240,6 +263,34 @@ const updateSingle: ServiceFn<
 	if (mediaUpdateRes.error) return mediaUpdateRes;
 	if (mediaTranslationsRes.error) return mediaTranslationsRes;
 	if (clearProcessedRes.error) return clearProcessedRes;
+
+	const posterWasRemoved =
+		data.posterId !== undefined &&
+		mediaRes.data.poster_id !== null &&
+		data.posterId !== mediaRes.data.poster_id;
+
+	if (data.posterId !== undefined && data.posterId !== null) {
+		const hidePosterRes = await Media.updateSingle({
+			where: [{ key: "id", operator: "=", value: data.posterId }],
+			data: {
+				is_hidden: true,
+				updated_at: new Date().toISOString(),
+				updated_by: data.userId,
+			},
+			validation: {
+				enabled: true,
+			},
+		});
+		if (hidePosterRes.error) return hidePosterRes;
+	}
+
+	if (posterWasRemoved) {
+		const deletePosterRes = await permanentlyDeleteMedia(context, {
+			id: mediaRes.data.poster_id as number,
+			deletePoster: false,
+		});
+		if (deletePosterRes.error) return deletePosterRes;
+	}
 
 	if (
 		updateObjectRes !== undefined &&

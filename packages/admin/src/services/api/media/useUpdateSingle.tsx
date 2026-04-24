@@ -16,6 +16,14 @@ interface Params {
 			localeCode: string | null;
 			value: string | null;
 		}>;
+		description?: Array<{
+			localeCode: string | null;
+			value: string | null;
+		}>;
+		summary?: Array<{
+			localeCode: string | null;
+			value: string | null;
+		}>;
 		folderId?: number | null;
 		width?: number | null;
 		height?: number | null;
@@ -25,6 +33,7 @@ interface Params {
 		isLight?: boolean | null;
 		isDeleted?: boolean | null;
 		public?: boolean;
+		posterId?: number | null;
 	};
 }
 

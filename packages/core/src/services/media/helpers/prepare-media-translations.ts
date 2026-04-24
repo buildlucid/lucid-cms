@@ -9,6 +9,14 @@ const prepareMediaTranslations = (props: {
 		localeCode: string;
 		value: string | null;
 	}[];
+	description?: {
+		localeCode: string;
+		value: string | null;
+	}[];
+	summary?: {
+		localeCode: string;
+		value: string | null;
+	}[];
 	mediaId: number;
 }): Array<Omit<Insert<LucidMediaTranslations>, "id">> => {
 	const translations: Array<Omit<Insert<LucidMediaTranslations>, "id">> = [];
@@ -20,12 +28,22 @@ const prepareMediaTranslations = (props: {
 	for (const alt of props.alt) {
 		uniqueLocales.add(alt.localeCode);
 	}
+	for (const description of props.description || []) {
+		uniqueLocales.add(description.localeCode);
+	}
+	for (const summary of props.summary || []) {
+		uniqueLocales.add(summary.localeCode);
+	}
 
 	for (const locale of uniqueLocales) {
 		translations.push({
 			locale_code: locale,
 			title: props.title.find((t) => t.localeCode === locale)?.value ?? null,
 			alt: props.alt.find((a) => a.localeCode === locale)?.value ?? null,
+			description:
+				props.description?.find((d) => d.localeCode === locale)?.value ?? null,
+			summary:
+				props.summary?.find((s) => s.localeCode === locale)?.value ?? null,
 			media_id: props.mediaId,
 		});
 	}

@@ -223,13 +223,18 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			<AspectRatio
 				ratio="16:9"
 				innerClass={classNames("overflow-hidden z-0 bg-card-hover", {
-					"rectangle-background": props.media.type === "image",
+					"rectangle-background":
+						props.media.type === "image" || props.media.poster,
 				})}
 			>
 				<MediaPreview
 					media={props.media}
 					alt={alt() || displayTitle() || ""}
-					imageFit={props.media.type === "image" ? "contain" : undefined}
+					imageFit={
+						props.media.type === "image" || props.media.poster
+							? "contain"
+							: undefined
+					}
 				/>
 			</AspectRatio>
 			{/* Content */}

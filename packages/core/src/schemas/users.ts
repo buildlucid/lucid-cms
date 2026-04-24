@@ -2,6 +2,7 @@ import z from "zod";
 import T from "../translations/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+import { mediaEmbedResponseSchema } from "./media.js";
 
 const userIdParamSchema = z.object({
 	id: z.string().trim().meta({
@@ -111,72 +112,6 @@ const userResponseRoleSchema = z.object({
 		example: "Admin",
 	}),
 });
-export const userProfilePictureSchema = z
-	.object({
-		id: z.number().meta({ description: "Media ID", example: 1 }),
-		url: z.string().meta({
-			description: "Media URL",
-			example:
-				"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/profile-image",
-		}),
-		key: z.string().meta({
-			description: "Media key",
-			example: "public/123e4567e89b12d3a456426614174000",
-		}),
-		fileName: z.string().nullable().meta({
-			description: "Original file name",
-			example: "profile.png",
-		}),
-		mimeType: z
-			.string()
-			.meta({ description: "MIME type", example: "image/png" }),
-		extension: z
-			.string()
-			.meta({ description: "File extension", example: "png" }),
-		fileSize: z
-			.number()
-			.meta({ description: "File size in bytes", example: 100 }),
-		width: z
-			.number()
-			.nullable()
-			.meta({ description: "Image width", example: 100 }),
-		height: z
-			.number()
-			.nullable()
-			.meta({ description: "Image height", example: 100 }),
-		blurHash: z.string().nullable().meta({
-			description: "BlurHash for image previews",
-			example: "AQABAAAABAAAAgAA...",
-		}),
-		averageColor: z.string().nullable().meta({
-			description: "Average color of the image",
-			example: "rgba(255, 255, 255, 1)",
-		}),
-		isDark: z.boolean().nullable().meta({
-			description: "Whether the image is predominantly dark",
-			example: true,
-		}),
-		isLight: z.boolean().nullable().meta({
-			description: "Whether the image is predominantly light",
-			example: true,
-		}),
-		title: z.record(z.string(), z.string()).meta({
-			description: "Translated titles by locale",
-		}),
-		alt: z.record(z.string(), z.string()).meta({
-			description: "Translated alt text by locale",
-		}),
-		type: z.string().meta({ description: "Media type", example: "image" }),
-		isDeleted: z.boolean().meta({
-			description: "Whether the media is deleted",
-			example: false,
-		}),
-		public: z.boolean().meta({
-			description: "Whether the media is public",
-			example: true,
-		}),
-	})
-	.nullable();
 
 export const userResponseSchema = z.object({
 	id: z.number().meta({
@@ -194,7 +129,7 @@ export const userResponseSchema = z.object({
 		description: "The user's email address",
 		example: "admin@lucidcms.io",
 	}),
-	profilePicture: userProfilePictureSchema.meta({
+	profilePicture: mediaEmbedResponseSchema.nullable().meta({
 		description: "The user's profile picture media reference",
 	}),
 	username: z.string().meta({

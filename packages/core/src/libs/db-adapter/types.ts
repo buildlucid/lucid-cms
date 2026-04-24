@@ -344,6 +344,7 @@ export interface LucidMedia {
 	id: Generated<number>;
 	key: string;
 	folder_id: number | null;
+	poster_id: number | null;
 	e_tag: string | null;
 	public: BooleanInt;
 	type: string;
@@ -388,6 +389,8 @@ export interface LucidMediaTranslations {
 	locale_code: string;
 	title: string | null;
 	alt: string | null;
+	description: string | null;
+	summary: string | null;
 }
 
 export interface LucidMediaAwaitingSync {

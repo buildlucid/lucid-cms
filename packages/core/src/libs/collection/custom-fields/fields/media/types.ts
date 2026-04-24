@@ -1,4 +1,4 @@
-import type { MediaType } from "../../../../../types/response.js";
+import type { Media, MediaType } from "../../../../../types/response.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface MediaFieldConfig extends SharedFieldConfig {
@@ -34,26 +34,7 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 export type MediaFieldProps = Partial<Omit<MediaFieldConfig, "type">>;
 
 export type MediaResValue = number[];
-export type MediaRef = {
-	id: number;
-	url: string;
-	key: string;
-	fileName: string | null;
-	mimeType: string;
-	extension: string;
-	fileSize: number;
-	width: number | null;
-	height: number | null;
-	blurHash: string | null;
-	averageColor: string | null;
-	isDark: boolean | null;
-	isLight: boolean | null;
-	title: Record<string, string>;
-	alt: Record<string, string>;
-	type: MediaType;
-	isDeleted: boolean;
-	public: boolean;
-} | null;
+export type MediaRef = Media;
 
 export type MediaValidationData = {
 	id: number;
@@ -68,6 +49,6 @@ export type MediaCustomFieldMapItem = {
 	config: MediaFieldConfig;
 	response: {
 		value: MediaResValue;
-		ref: MediaRef;
+		ref: MediaRef | null;
 	};
 };

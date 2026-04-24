@@ -1,4 +1,4 @@
-import type { MediaRef } from "@types";
+import type { ProfilePicture } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import helpers from "@/utils/helpers";
@@ -8,7 +8,7 @@ interface UserDisplayProps {
 		username?: string | null;
 		firstName?: string | null;
 		lastName?: string | null;
-		profilePicture?: MediaRef;
+		profilePicture?: ProfilePicture | null;
 	};
 	mode: "short" | "long" | "icon";
 	size?: "small" | "medium" | "large";

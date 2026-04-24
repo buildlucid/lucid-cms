@@ -49,6 +49,9 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("folder_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media_folders.id").onDelete("set null"),
 				)
+				.addColumn("poster_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_media.id").onDelete("set null"),
+				)
 				.addColumn("e_tag", adapter.getDataType("text"))
 				.addColumn("public", adapter.getDataType("boolean"), (col) =>
 					col
@@ -131,6 +134,12 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createIndex("idx_lucid_media_poster_id")
+				.on("lucid_media")
+				.column("poster_id")
+				.execute();
+
+			await db.schema
 				.alterTable("lucid_users")
 				.addColumn(
 					"profile_picture_media_id",
@@ -162,6 +171,8 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("title", adapter.getDataType("text"))
 				.addColumn("alt", adapter.getDataType("text"))
+				.addColumn("description", adapter.getDataType("text"))
+				.addColumn("summary", adapter.getDataType("text"))
 				.addUniqueConstraint(
 					"lucid_media_translations_media_id_locale_code_unique",
 					["media_id", "locale_code"],

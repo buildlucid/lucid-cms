@@ -7,11 +7,20 @@ import type { ImageMeta } from "../useSingleFileUpload";
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
 	const [getAlt, setAlt] = createSignal<Media["alt"]>([]);
+	const [getDescription, setDescription] = createSignal<
+		NonNullable<Media["description"]>
+	>([]);
+	const [getSummary, setSummary] = createSignal<NonNullable<Media["summary"]>>(
+		[],
+	);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
 	);
 	const [getPublic, setPublic] = createSignal<boolean>(true);
+	const [getPosterId, setPosterId] = createSignal<number | null | undefined>(
+		undefined,
+	);
 	const [getPresignedUrlValue, setPresignedUrlValue] = createSignal<string>();
 	const [getPresignedUrlHeaders, setPresignedUrlHeaders] =
 		createSignal<Record<string, string>>();
@@ -122,6 +131,8 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				fileName: file?.name,
 				title: getTitle(),
 				alt: getAlt(),
+				description: getDescription(),
+				summary: getSummary(),
 				folderId: getFolderId() ?? null,
 				width: imageMeta?.width,
 				height: imageMeta?.height,
@@ -130,6 +141,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				isDark: imageMeta?.isDark,
 				isLight: imageMeta?.isLight,
 				public: getPublic(),
+				posterId: getPosterId(),
 			},
 		});
 
@@ -157,24 +169,33 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		updateMedia,
 		setTitle,
 		setAlt,
+		setDescription,
+		setSummary,
 		setFolderId,
 		setPublic,
+		setPosterId,
 		errors: errors,
 		isLoading: isLoading,
 		state: {
 			title: getTitle,
 			alt: getAlt,
+			description: getDescription,
+			summary: getSummary,
 			key: getKey,
 			folderId: getFolderId,
 			public: getPublic,
+			posterId: getPosterId,
 		},
 		reset: () => {
 			setTitle([]);
 			setAlt([]);
+			setDescription([]);
+			setSummary([]);
 			setKey(undefined);
 			setFolderId(undefined);
 			setPresignedUrlValue(undefined);
 			setPublic(true);
+			setPosterId(undefined);
 			setUploadErrors();
 			updateSingle.reset();
 		},

@@ -5,15 +5,25 @@ import serviceHelpers from "@/utils/service-helpers";
 interface Params {
 	key?: string;
 	fileName?: string;
-	title: Array<{
+	title?: Array<{
 		localeCode: string | null;
 		value: string | null;
 	}>;
-	alt: Array<{
+	alt?: Array<{
+		localeCode: string | null;
+		value: string | null;
+	}>;
+	description?: Array<{
+		localeCode: string | null;
+		value: string | null;
+	}>;
+	summary?: Array<{
 		localeCode: string | null;
 		value: string | null;
 	}>;
 	folderId?: number | null;
+	posterId?: number | null;
+	isHidden?: boolean;
 	width?: number;
 	height?: number;
 	blurHash?: string;

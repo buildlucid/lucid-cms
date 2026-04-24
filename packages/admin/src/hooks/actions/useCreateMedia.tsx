@@ -7,6 +7,12 @@ import type { ImageMeta } from "../useSingleFileUpload";
 export const useCreateMedia = () => {
 	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
 	const [getAlt, setAlt] = createSignal<Media["alt"]>([]);
+	const [getDescription, setDescription] = createSignal<
+		NonNullable<Media["description"]>
+	>([]);
+	const [getSummary, setSummary] = createSignal<NonNullable<Media["summary"]>>(
+		[],
+	);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
@@ -34,6 +40,15 @@ export const useCreateMedia = () => {
 	const getMediaPresignedUrl = async (fileName: string, mimeType: string) => {
 		await getPresignedUrl.action.mutateAsync({
 			body: { fileName, mimeType, public: getPublic() },
+		});
+	};
+	const getMediaPresignedUrlWithPublic = async (
+		fileName: string,
+		mimeType: string,
+		publicValue: boolean,
+	) => {
+		await getPresignedUrl.action.mutateAsync({
+			body: { fileName, mimeType, public: publicValue },
 		});
 	};
 	const uploadFile = async (file: File) => {
@@ -99,11 +114,29 @@ export const useCreateMedia = () => {
 	const createMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
+		options?: {
+			title?: Media["title"];
+			alt?: Media["alt"];
+			description?: NonNullable<Media["description"]>;
+			summary?: NonNullable<Media["summary"]>;
+			folderId?: number | null;
+			public?: boolean;
+			isHidden?: boolean;
+			posterId?: number | null;
+		},
 	): Promise<Media | null> => {
 		let fileKey = getKey();
 
 		if (file) {
-			await getMediaPresignedUrl(file.name, file.type);
+			if (options?.public !== undefined) {
+				await getMediaPresignedUrlWithPublic(
+					file.name,
+					file.type,
+					options.public,
+				);
+			} else {
+				await getMediaPresignedUrl(file.name, file.type);
+			}
 			const uploadFileRes = await uploadFile(file);
 			if (!uploadFileRes) return null;
 			fileKey = uploadFileRes;
@@ -112,9 +145,13 @@ export const useCreateMedia = () => {
 		const result = await createSingle.action.mutateAsync({
 			key: fileKey,
 			fileName: file?.name,
-			title: getTitle(),
-			alt: getAlt(),
-			folderId: getFolderId() ?? null,
+			title: options?.title ?? getTitle(),
+			alt: options?.alt ?? getAlt(),
+			description: options?.description ?? getDescription(),
+			summary: options?.summary ?? getSummary(),
+			folderId: options?.folderId ?? getFolderId() ?? null,
+			posterId: options?.posterId,
+			isHidden: options?.isHidden,
 			width: imageMeta?.width,
 			height: imageMeta?.height,
 			blurHash: imageMeta?.blurHash,
@@ -147,6 +184,8 @@ export const useCreateMedia = () => {
 		createMedia,
 		setTitle,
 		setAlt,
+		setDescription,
+		setSummary,
 		setFolderId,
 		setPublic,
 		errors: errors,
@@ -154,13 +193,18 @@ export const useCreateMedia = () => {
 		state: {
 			title: getTitle,
 			alt: getAlt,
+			description: getDescription,
+			summary: getSummary,
 			key: getKey,
 			folderId: getFolderId,
 			public: getPublic,
+			posterId: () => undefined,
 		},
 		reset: () => {
 			setTitle([]);
 			setAlt([]);
+			setDescription([]);
+			setSummary([]);
 			setKey(undefined);
 			setFolderId(undefined);
 			setPresignedUrlValue(undefined);
