@@ -1,4 +1,4 @@
-import type { MediaProcessOptions } from "../../../types/client.js";
+import type { MediaProcessOptions } from "@lucidcms/types";
 import type { MediaUrl } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import processMedia from "../process-media.js";

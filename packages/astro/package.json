@@ -58,10 +58,9 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
-		"@lucidcms/cloudflare-adapter": "*",
-		"@lucidcms/config": "*",
-		"@lucidcms/core": "*",
-		"@lucidcms/node-adapter": "*",
+		"@lucidcms/cloudflare-adapter": "1.1.0",
+		"@lucidcms/core": "0.12.0-alpha.1",
+		"@lucidcms/node-adapter": "1.0.1",
 		"@types/mime-types": "^3.0.1",
 		"@types/node": "^24.10.4",
 		"astro": "^6.1.6",

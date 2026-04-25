@@ -17,7 +17,6 @@
 		}
 	},
 	"scripts": {
-		"prebuild": "npm run generate:client-types",
 		"build": "tsc && tsdown",
 		"dev": "tsdown --watch",
 		"format": "biome format ./src",
@@ -25,8 +24,7 @@
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
 		"check": "biome check ./src",
-		"check:fix": "biome check --write ./src",
-		"generate:client-types": "node ./scripts/generate-client-types.mjs"
+		"check:fix": "biome check --write ./src"
 	},
 	"files": [
 		"dist"
@@ -48,10 +46,12 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
-		"@lucidcms/config": "*",
 		"@types/node": "^24.10.4",
 		"tsdown": "^0.20.3",
 		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@lucidcms/types": "^0.1.0"
 	},
 	"sideEffects": false,
 	"volta": {

@@ -1,4 +1,4 @@
-import type { ErrorResponse } from "../generated/core-client-types.js";
+import type { ErrorResponse } from "@lucidcms/types";
 
 export type LucidClientErrorKind =
 	| "http"

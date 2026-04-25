@@ -3,7 +3,7 @@ import type {
 	MediaProcessOptions,
 	MediaUrl,
 	ResponseBody,
-} from "../generated/core-client-types.js";
+} from "@lucidcms/types";
 import type { MediaGetMultipleQuery } from "../types/contracts.js";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {

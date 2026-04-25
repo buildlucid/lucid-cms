@@ -1,8 +1,27 @@
 {
-	"extends": "@lucidcms/config/tsconfig.base.json",
 	"compilerOptions": {
+		"verbatimModuleSyntax": true,
+		"moduleDetection": "force",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"resolveJsonModule": true,
+		"target": "ESNext",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"removeComments": false,
+		"preserveConstEnums": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"skipLibCheck": true,
 		"rootDir": "./src",
 		"outDir": "./dist"
 	},
-	"exclude": ["./dist", "./node_modules", "./.turbo"]
+	"exclude": [
+		"./dist",
+		"./node_modules",
+		"./.turbo"
+	]
 }

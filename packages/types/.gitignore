@@ -1,0 +1,11 @@
+/dist/
+/cms/
+/node_modules/
+db.sqlite
+/uploads/
+/spa
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp

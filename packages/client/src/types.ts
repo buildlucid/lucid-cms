@@ -1,4 +1,3 @@
-import type { LucidClient } from "./client.js";
 import type {
 	DocumentBrick,
 	DocumentField,
@@ -19,7 +18,8 @@ import type {
 	ProfilePicture,
 	UserRef,
 	ValueDocumentField,
-} from "./generated/core-client-types.js";
+} from "@lucidcms/types";
+import type { LucidClient } from "./client.js";
 import type {
 	CollectionDocumentStatus,
 	CollectionDocumentVersionKey,

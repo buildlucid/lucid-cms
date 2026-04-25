@@ -1,5 +1,5 @@
+import type { ResponseBody } from "@lucidcms/types";
 import { DEFAULT_DOCUMENT_STATUS } from "../constants.js";
-import type { ResponseBody } from "../generated/core-client-types.js";
 import type {
 	CollectionDocumentStatus,
 	DocumentsGetMultipleQuery,

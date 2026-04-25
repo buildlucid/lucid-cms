@@ -48,7 +48,7 @@
 		"@codemirror/state": "^6.5.4",
 		"@codemirror/view": "^6.39.16",
 		"@kobalte/core": "^0.13.11",
-		"@lucidcms/rich-text": "*",
+		"@lucidcms/rich-text": "1.0.0",
 		"@solid-primitives/scheduled": "^1.5.3",
 		"@solidjs/router": "^0.15.4",
 		"@tailwindcss/vite": "^4.2.1",

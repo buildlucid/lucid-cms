@@ -19,22 +19,29 @@
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
-        "check": "biome check ./src",
-        "check:fix": "biome check --write ./src"
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"author": "Lucid",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/buildlucid/lucid-cms.git",
 		"directory": "packages/plugin-s3"
 	},
-	"keywords": ["CMS", "Lucid CMS", "Lucid", "S3", "Plugin"],
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"Lucid",
+		"S3",
+		"Plugin"
+	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
-		"@lucidcms/config": "*",
-		"@lucidcms/core": "*",
-        "@types/node": "^24.10.4",
+		"@lucidcms/core": "0.12.0-alpha.1",
+		"@types/node": "^24.10.4",
 		"tsdown": "^0.20.3",
 		"typescript": "^5.9.3"
 	},
@@ -44,11 +51,11 @@
 	"dependencies": {
 		"aws4fetch": "^1.0.20"
 	},
-    "volta": {
-        "node": "24.11.1"
-    },
-    "engines": {
-        "node": "^24.0.0"
-    },
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
 	"license": "MIT"
 }

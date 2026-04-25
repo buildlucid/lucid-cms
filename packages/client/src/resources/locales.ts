@@ -1,4 +1,4 @@
-import type { Locale, ResponseBody } from "../generated/core-client-types.js";
+import type { Locale, ResponseBody } from "@lucidcms/types";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	LucidRequestOptions,

@@ -48,7 +48,6 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
-		"@lucidcms/config": "*",
 		"tsdown": "^0.20.3",
 		"typescript": "^5.9.3"
 	},

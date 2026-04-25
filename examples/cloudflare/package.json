@@ -18,12 +18,12 @@
 		"wrangler:deploy": "npm run build && wrangler deploy"
 	},
 	"dependencies": {
-		"@lucidcms/cloudflare-adapter": "*",
-		"@lucidcms/core": "*",
-		"@lucidcms/libsql-adapter": "*",
-		"@lucidcms/plugin-cloudflare-kv": "*",
-		"@lucidcms/plugin-cloudflare-r2": "*",
-		"@lucidcms/plugin-pages": "*"
+		"@lucidcms/cloudflare-adapter": "1.1.0",
+		"@lucidcms/core": "0.12.0-alpha.1",
+		"@lucidcms/libsql-adapter": "1.0.2",
+		"@lucidcms/plugin-cloudflare-kv": "1.0.0",
+		"@lucidcms/plugin-cloudflare-r2": "1.0.0",
+		"@lucidcms/plugin-pages": "0.3.3"
 	},
 	"author": "Lucid",
 	"license": "MIT",

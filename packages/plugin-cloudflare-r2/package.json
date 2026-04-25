@@ -41,8 +41,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
 		"@cloudflare/workers-types": "^4.20260301.1",
-		"@lucidcms/config": "*",
-		"@lucidcms/core": "*",
+		"@lucidcms/core": "0.12.0-alpha.1",
 		"@types/node": "^24.10.4",
 		"tsdown": "^0.20.3",
 		"typescript": "^5.9.3"
@@ -53,6 +52,7 @@
 	"dependencies": {
 		"aws4fetch": "^1.0.20",
 		"hono": "^4.12.3",
+		"@hono/standard-validator": "^0.2.2",
 		"hono-openapi": "^1.2.0"
 	},
 	"volta": {

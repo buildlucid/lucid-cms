@@ -1,6 +1,6 @@
+import type { MediaProcessOptions } from "@lucidcms/types";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
-import type { MediaProcessOptions } from "../../types/client.js";
 import type { MediaUrl } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import {

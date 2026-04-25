@@ -92,7 +92,6 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.4",
-		"@lucidcms/config": "*",
 		"@types/lodash.merge": "^4.6.9",
 		"@types/mime-types": "^3.0.1",
 		"@types/mjml": "^4.7.4",
@@ -105,6 +104,7 @@
 	},
 	"dependencies": {
 		"@inquirer/prompts": "^8.3.0",
+		"@lucidcms/types": "^0.1.0",
 		"@noble/hashes": "^2.0.1",
 		"@scalar/hono-api-reference": "^0.9.46",
 		"better-sqlite3": "^12.6.2",
@@ -115,6 +115,7 @@
 		"file-type": "^21.3.0",
 		"hono": "^4.12.3",
 		"hono-openapi": "^1.2.0",
+		"@hono/standard-validator": "^0.2.2",
 		"immer": "^11.1.4",
 		"jiti": "^2.6.1",
 		"kysely": "0.28.11",

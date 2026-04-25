@@ -1,29 +1,40 @@
 {
-    "extends": "@lucidcms/config/tsconfig.base.json",
-    "exclude": [
-        "./coverage",
-        "./dist",
-        "jest.config.ts",
-        "./cms",
-        "./node_modules",
-        "./temp",
-        "./.turbo",
-        "./scripts",
-        "./vitest.config.ts",
-        "**/*.test.ts",
-        "**/mock-config/**",
-        "./src/utils/test-helpers/config/**",
-    ],
-    "compilerOptions": {
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "paths": {
-            "@lucidcms/sqlite-adapter": [
-                "../sqlite-adapter/src"
-            ],
-            "@lucidcms/node-adapter": [
-                "../node-adapter/src"
-            ]
-        }
-    },
+	"compilerOptions": {
+		"verbatimModuleSyntax": true,
+		"moduleDetection": "force",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"resolveJsonModule": true,
+		"target": "ESNext",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"removeComments": false,
+		"preserveConstEnums": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"skipLibCheck": true,
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"paths": {
+			"@lucidcms/sqlite-adapter": ["../sqlite-adapter/src"],
+			"@lucidcms/node-adapter": ["../node-adapter/src"]
+		}
+	},
+	"exclude": [
+		"./coverage",
+		"./dist",
+		"jest.config.ts",
+		"./cms",
+		"./node_modules",
+		"./temp",
+		"./.turbo",
+		"./scripts",
+		"./vitest.config.ts",
+		"**/*.test.ts",
+		"**/mock-config/**",
+		"./src/utils/test-helpers/config/**"
+	]
 }
