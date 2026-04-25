@@ -79,8 +79,10 @@ export type SecurityContentSecurityPolicy = {
 export interface LucidConfig {
 	/** KV storage settings. */
 	kv?: {
-		/** The KV adapter to use. If not provided, it will fallback to a better-sqlite3 custom adapter, then falls back to a passthrough adapter. */
+		/** The KV adapter to use. If not provided, Lucid will use the default better-sqlite3 KV adapter. */
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
+		/** Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter. */
+		namespace?: string | false;
 	};
 	/** Security settings. */
 	security?: {
@@ -293,6 +295,8 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
+		/** Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter. */
+		namespace?: string | false;
 	};
 	auth: {
 		password: {

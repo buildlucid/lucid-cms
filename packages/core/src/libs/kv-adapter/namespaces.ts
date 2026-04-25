@@ -1,11 +1,11 @@
-import { randomUUID } from "node:crypto";
+import { bytesToHex, randomBytes } from "@noble/hashes/utils.js";
 import cacheKeys from "./cache-keys.js";
 import type { KVAdapterInstance } from "./types.js";
 
 const DEFAULT_NAMESPACE_TOKEN = "0";
 
 const createNamespaceToken = () => {
-	return `${Date.now()}:${randomUUID()}`;
+	return `${Date.now()}:${bytesToHex(randomBytes(16))}`;
 };
 
 /**
@@ -31,12 +31,16 @@ export const getNamespaceTokens = async (
 	namespaces: string[],
 ) => {
 	const uniqueNamespaces = Array.from(new Set(namespaces));
-	const tokenPairs = await Promise.all(
-		uniqueNamespaces.map(async (namespace) => [
-			namespace,
-			await getNamespaceToken(kv, namespace),
-		]),
+	const tokens = await kv.getMany<string>(
+		uniqueNamespaces.map((namespace) => ({
+			key: cacheKeys.namespace.token(namespace),
+			options: { hash: true },
+		})),
 	);
+	const tokenPairs = uniqueNamespaces.map((namespace, index) => [
+		namespace,
+		tokens[index]?.value ?? DEFAULT_NAMESPACE_TOKEN,
+	]);
 
 	return Object.fromEntries(tokenPairs);
 };
@@ -60,9 +64,11 @@ export const invalidateNamespaces = async (
 	kv: KVAdapterInstance,
 	namespaces: string[],
 ) => {
-	await Promise.all(
-		Array.from(new Set(namespaces)).map((namespace) =>
-			invalidateNamespace(kv, namespace),
-		),
+	await kv.setMany(
+		Array.from(new Set(namespaces)).map((namespace) => ({
+			key: cacheKeys.namespace.token(namespace),
+			value: createNamespaceToken(),
+			options: { hash: true },
+		})),
 	);
 };

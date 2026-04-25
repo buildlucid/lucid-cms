@@ -1,7 +1,11 @@
 import { confirm } from "@inquirer/prompts";
 import type { Config } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import getKVAdapter from "../../kv-adapter/get-adapter.js";
+import {
+	destroyKVAdapter,
+	getInitializedKVAdapter,
+} from "../../kv-adapter/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
@@ -11,6 +15,7 @@ const migrateResetCommand = (props?: {
 	mode: "process" | "return";
 }) => {
 	return async (options?: { force?: boolean }) => {
+		let kvInstance: KVAdapterInstance | undefined;
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
@@ -87,8 +92,10 @@ const migrateResetCommand = (props?: {
 			}
 
 			cliLogger.info("Clearing KV cache...");
-			const kvInstance = await getKVAdapter(config);
+			kvInstance = await getInitializedKVAdapter(config);
 			await kvInstance.clear();
+			await destroyKVAdapter(kvInstance);
+			kvInstance = undefined;
 
 			const endTime = startTime();
 			if (mode === "process") {
@@ -115,6 +122,7 @@ const migrateResetCommand = (props?: {
 				return true;
 			}
 		} catch (error) {
+			await destroyKVAdapter(kvInstance);
 			cliLogger.error(
 				"Database reset failed",
 				error instanceof Error ? error.message : "Unknown error",

@@ -4,6 +4,7 @@ import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import cacheKeys from "../../kv-adapter/cache-keys.js";
+import { supportsKVIncrement } from "../../kv-adapter/utils.js";
 
 type RateLimitMode = "ip" | "user" | "client";
 
@@ -105,40 +106,52 @@ const rateLimiter = (options: RateLimitOptions) =>
 			if (scope) key += `:${scope}`;
 		}
 
-		const now = Date.now();
-		const existing = await kv.get<RateLimitRecord>(key);
+		let count: number;
+		let resetSeconds: number;
 
-		let record: RateLimitRecord;
-		if (existing && existing.resetTime > now) {
-			record = {
-				count: existing.count + 1,
-				resetTime: existing.resetTime,
-			};
+		if (supportsKVIncrement(kv)) {
+			const ttl = Math.max(1, Math.ceil(options.windowMs / 1000));
+			const result = await kv.increment(`${key}:counter`, {
+				expirationTtl: ttl,
+			});
+
+			count = result.value;
+			resetSeconds = result.expirationTtl ?? ttl;
 		} else {
-			record = {
-				count: 1,
-				resetTime: now + options.windowMs,
-			};
+			const now = Date.now();
+			const existing = await kv.get<RateLimitRecord>(key);
+
+			let record: RateLimitRecord;
+			if (existing && existing.resetTime > now) {
+				record = {
+					count: existing.count + 1,
+					resetTime: existing.resetTime,
+				};
+			} else {
+				record = {
+					count: 1,
+					resetTime: now + options.windowMs,
+				};
+			}
+
+			const ttl = Math.max(
+				1,
+				Math.ceil((record.resetTime - now) / 1000) +
+					constants.rateLimit.ttlBufferSeconds,
+			);
+			await kv.set(key, record, { expirationTtl: ttl });
+
+			count = record.count;
+			resetSeconds = Math.max(0, Math.ceil((record.resetTime - now) / 1000));
 		}
 
-		const ttl = Math.max(
-			1,
-			Math.ceil((record.resetTime - now) / 1000) +
-				constants.rateLimit.ttlBufferSeconds,
-		);
-		await kv.set(key, record, { expirationTtl: ttl });
-
-		const resetSeconds = Math.max(
-			0,
-			Math.ceil((record.resetTime - now) / 1000),
-		);
-		const remaining = Math.max(0, options.limit - record.count);
+		const remaining = Math.max(0, options.limit - count);
 
 		c.header("RateLimit-Limit", options.limit.toString());
 		c.header("RateLimit-Remaining", remaining.toString());
 		c.header("RateLimit-Reset", resetSeconds.toString());
 
-		if (record.count > options.limit) {
+		if (count > options.limit) {
 			c.header("Retry-After", resetSeconds.toString());
 			throw new LucidAPIError({
 				type: "rate_limit",

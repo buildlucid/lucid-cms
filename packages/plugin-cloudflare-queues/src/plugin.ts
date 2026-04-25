@@ -36,7 +36,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 					{
 						path: "@lucidcms/core/kv-adapter",
-						exports: ["getKVAdapter"],
+						exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 					},
 					{
 						path: "@lucidcms/core/runtime",
@@ -87,80 +87,87 @@ const resolved = await processConfig(
         skipValidation: true,
     },
 );
-const kvInstance = await getKVAdapter(resolved);
+const kvInstance = await getInitializedKVAdapter(resolved);
 
 const internalQueueAdapter = passthroughQueueAdapter({
     bypassImmediateExecution: true,
 });
 
-for (const message of batch.messages) {
-    try {
-        const { jobId, event, payload } = message.body;
+try {
+    for (const message of batch.messages) {
+        try {
+            const { jobId, event, payload } = message.body;
 
-        logger.debug({
-            message: "Processing Cloudflare queue message",
-            scope: logScope,
-            data: { jobId, event },
-        });
-
-        const calculateExponentialBackoff = (attempts, baseDelaySeconds) => {
-            return baseDelaySeconds * (2 ** (attempts - 1));
-        };
-
-        const result = await executeSingleJob(
-            {
-                config: resolved,
-                db: { client: resolved.db.client },
-                env: env || null,
-                queue: internalQueueAdapter,
-                kv: kvInstance,
-                requestUrl: "",
-            },
-            {
-                jobId,
-                event,
-                payload,
-                attempts: message.attempts - 1, // starts at 1
-                maxAttempts: ${pluginOptions.maxRetries ?? MAX_RETRIES},
-                setNextRetryAt: false,
-            },
-        );
-
-        if (result.success) {
             logger.debug({
-                message: "Job completed successfully",
+                message: "Processing Cloudflare queue message",
                 scope: logScope,
                 data: { jobId, event },
             });
-            message.ack();
-        } else if (result.shouldRetry) {
-            logger.debug({
-                message: "Job failed, will retry",
-                scope: logScope,
-                data: { jobId, event, message: result.message },
-            });
-            message.retry({
-                delaySeconds: calculateExponentialBackoff(message.attempts, ${pluginOptions.baseDelaySeconds ?? BASE_DELAY_SECONDS}),
-            });
-        } else {
+
+            const calculateExponentialBackoff = (attempts, baseDelaySeconds) => {
+                return baseDelaySeconds * (2 ** (attempts - 1));
+            };
+
+            const result = await executeSingleJob(
+                {
+                    config: resolved,
+                    db: { client: resolved.db.client },
+                    env: env || null,
+                    queue: internalQueueAdapter,
+                    kv: kvInstance,
+                    requestUrl: "",
+                },
+                {
+                    jobId,
+                    event,
+                    payload,
+                    attempts: message.attempts - 1, // starts at 1
+                    maxAttempts: ${pluginOptions.maxRetries ?? MAX_RETRIES},
+                    setNextRetryAt: false,
+                },
+            );
+
+            if (result.success) {
+                logger.debug({
+                    message: "Job completed successfully",
+                    scope: logScope,
+                    data: { jobId, event },
+                });
+                message.ack();
+            } else if (result.shouldRetry) {
+                logger.debug({
+                    message: "Job failed, will retry",
+                    scope: logScope,
+                    data: { jobId, event, message: result.message },
+                });
+                message.retry({
+                    delaySeconds: calculateExponentialBackoff(message.attempts, ${pluginOptions.baseDelaySeconds ?? BASE_DELAY_SECONDS}),
+                });
+            } else {
+                logger.error({
+                    message: "Job failed permanently",
+                    scope: logScope,
+                    data: { jobId, event, message: result.message },
+                });
+                message.ack();
+            }
+        } catch (error) {
             logger.error({
-                message: "Job failed permanently",
+                message: "Error processing queue message",
                 scope: logScope,
-                data: { jobId, event, message: result.message },
+                data: {
+                    error: error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack : undefined,
+                },
             });
-            message.ack();
+            message.retry();
         }
-    } catch (error) {
-        logger.error({
-            message: "Error processing queue message",
-            scope: logScope,
-            data: {
-                error: error instanceof Error ? error.message : String(error),
-                stack: error instanceof Error ? error.stack : undefined,
-            },
-        });
-        message.retry();
     }
+} finally {
+    await Promise.allSettled([
+        destroyKVAdapter(kvInstance),
+        resolved.db.client.destroy(),
+    ]);
 }`,
 					},
 				];

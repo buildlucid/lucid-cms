@@ -1,17 +1,30 @@
-import { resolveKey } from "@lucidcms/core/kv-adapter";
+import {
+	DEFAULT_KV_NAMESPACE,
+	getNamespacePrefix,
+	resolveKey,
+	resolveKeyInput,
+} from "@lucidcms/core/kv-adapter";
 import type {
 	KVAdapterInstance,
+	KVKeyInput,
 	KVKeyOptions,
+	KVSetInput,
 	KVSetOptions,
 } from "@lucidcms/core/types";
 import type { PluginOptions } from "./types.js";
+import getCloudflareKVExpirationTtl from "./utils/get-cloudflare-kv-expiration-ttl.js";
+import parseKVValue from "./utils/parse-kv-value.js";
+import serialiseKVValue from "./utils/serialise-kv-value.js";
 
-const MILLISECONDS_PER_SECOND = 1000;
 const MAX_KEY_BYTES = 512;
-const MIN_TTL_SECONDS = 60;
 const CLEAR_BATCH_SIZE = 100;
 
 const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
+	const namespace = options.namespace ?? DEFAULT_KV_NAMESPACE;
+	const namespacePrefix = getNamespacePrefix(namespace);
+	const resolveCloudflareKey = (key: string, keyOptions?: KVKeyOptions) =>
+		resolveKey(key, keyOptions, { maxKeyBytes: MAX_KEY_BYTES, namespace });
+
 	return {
 		type: "kv-adapter",
 		key: "cloudflare-kv",
@@ -19,64 +32,97 @@ const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			key: string,
 			kvOptions?: KVKeyOptions,
 		): Promise<R | null> => {
-			const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+			const resolvedKey = resolveCloudflareKey(key, kvOptions);
 			const value = await options.binding.get(resolvedKey, { type: "text" });
 			if (value === null) return null;
 
-			try {
-				return JSON.parse(value) as R;
-			} catch {
-				return value as R;
-			}
+			return parseKVValue(value);
 		},
 		set: async (
 			key: string,
 			value: unknown,
 			kvOptions?: KVSetOptions,
 		): Promise<void> => {
-			const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
-			const serialised =
-				typeof value === "string" ? value : JSON.stringify(value);
+			const resolvedKey = resolveCloudflareKey(key, kvOptions);
+			const expirationTtl = getCloudflareKVExpirationTtl(kvOptions);
 
-			let expirationTtl: number | undefined;
-
-			if (kvOptions?.expirationTtl) {
-				expirationTtl = Math.max(MIN_TTL_SECONDS, kvOptions.expirationTtl);
-			} else if (kvOptions?.expirationTimestamp) {
-				const nowSeconds = Math.floor(Date.now() / MILLISECONDS_PER_SECOND);
-				expirationTtl = Math.max(
-					MIN_TTL_SECONDS,
-					kvOptions.expirationTimestamp - nowSeconds,
-				);
-			}
-
-			await options.binding.put(resolvedKey, serialised, {
+			await options.binding.put(resolvedKey, serialiseKVValue(value), {
 				expirationTtl,
 			});
 		},
 		has: async (key: string, kvOptions?: KVKeyOptions): Promise<boolean> => {
-			const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+			const resolvedKey = resolveCloudflareKey(key, kvOptions);
 			const value = await options.binding.get(resolvedKey, { type: "text" });
 			return value !== null;
 		},
 		delete: async (key: string, kvOptions?: KVKeyOptions): Promise<void> => {
-			const resolvedKey = resolveKey(key, kvOptions, MAX_KEY_BYTES);
+			const resolvedKey = resolveCloudflareKey(key, kvOptions);
 			await options.binding.delete(resolvedKey);
+		},
+		getMany: async <R>(keys: KVKeyInput[], kvOptions?: KVKeyOptions) => {
+			return Promise.all(
+				keys.map(async (input) => {
+					const resolved = resolveKeyInput(input, kvOptions);
+					const value = await options.binding.get(
+						resolveCloudflareKey(resolved.key, resolved.options),
+						{ type: "text" },
+					);
+
+					return {
+						key: resolved.key,
+						value: value === null ? null : parseKVValue<R>(value),
+					};
+				}),
+			);
+		},
+		setMany: async (items: Array<KVSetInput>, kvOptions?: KVSetOptions) => {
+			await Promise.all(
+				items.map((item) => {
+					const itemOptions = {
+						...(kvOptions ?? {}),
+						...(item.options ?? {}),
+					};
+					const resolvedKey = resolveCloudflareKey(item.key, itemOptions);
+					const expirationTtl = getCloudflareKVExpirationTtl(itemOptions);
+
+					return options.binding.put(
+						resolvedKey,
+						serialiseKVValue(item.value),
+						{ expirationTtl },
+					);
+				}),
+			);
+		},
+		deleteMany: async (keys: KVKeyInput[], kvOptions?: KVKeyOptions) => {
+			const resolvedKeys = keys.map((input) => {
+				const resolved = resolveKeyInput(input, kvOptions);
+				return resolveCloudflareKey(resolved.key, resolved.options);
+			});
+
+			for (let i = 0; i < resolvedKeys.length; i += CLEAR_BATCH_SIZE) {
+				const batch = resolvedKeys.slice(i, i + CLEAR_BATCH_SIZE);
+				await Promise.all(batch.map((key) => options.binding.delete(key)));
+			}
 		},
 		clear: async (): Promise<void> => {
 			let cursor: string | undefined;
 
 			while (true) {
 				const keys = cursor
-					? await options.binding.list({ cursor })
-					: await options.binding.list();
+					? await options.binding.list({
+							cursor,
+							prefix: namespacePrefix || undefined,
+						})
+					: await options.binding.list({
+							prefix: namespacePrefix || undefined,
+						});
 
 				if (keys.keys.length > 0) {
-					for (let i = 0; i < keys.keys.length; i += CLEAR_BATCH_SIZE) {
-						const batch = keys.keys.slice(i, i + CLEAR_BATCH_SIZE);
-						await Promise.all(
-							batch.map((key) => options.binding.delete(key.name)),
-						);
+					const resolvedKeys = keys.keys.map((key) => key.name);
+
+					for (let i = 0; i < resolvedKeys.length; i += CLEAR_BATCH_SIZE) {
+						const batch = resolvedKeys.slice(i, i + CLEAR_BATCH_SIZE);
+						await Promise.all(batch.map((key) => options.binding.delete(key)));
 					}
 				}
 

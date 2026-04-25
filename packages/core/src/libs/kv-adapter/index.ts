@@ -2,7 +2,9 @@ import constants from "../../constants/constants.js";
 
 export { default as betterSQLiteKVAdapter } from "./adapters/better-sqlite.js";
 export { default as passthroughKVAdapter } from "./adapters/passthrough.js";
+export * from "./constants.js";
 export { default as getKVAdapter } from "./get-adapter.js";
+export * from "./lifecycle.js";
 export * from "./namespaces.js";
 export * from "./utils.js";
 

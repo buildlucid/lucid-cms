@@ -3,7 +3,11 @@ import { Migrator } from "kysely";
 import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import getKVAdapter from "../../kv-adapter/get-adapter.js";
+import {
+	destroyKVAdapter,
+	getInitializedKVAdapter,
+} from "../../kv-adapter/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
@@ -12,6 +16,7 @@ const migrateRollbackCommand = async (options?: {
 	force?: boolean;
 	steps?: number;
 }) => {
+	let kvInstance: KVAdapterInstance | undefined;
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
@@ -159,8 +164,10 @@ const migrateRollbackCommand = async (options?: {
 		}
 
 		cliLogger.info("Clearing KV cache...");
-		const kvInstance = await getKVAdapter(config);
+		kvInstance = await getInitializedKVAdapter(config);
 		await kvInstance.clear();
+		await destroyKVAdapter(kvInstance);
+		kvInstance = undefined;
 
 		const endTime = startTime();
 		cliLogger.log(
@@ -178,6 +185,7 @@ const migrateRollbackCommand = async (options?: {
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
+		await destroyKVAdapter(kvInstance);
 		cliLogger.error(
 			"Rollback failed",
 			error instanceof Error ? error.message : "Unknown error",

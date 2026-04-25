@@ -13,6 +13,14 @@ const passthroughKVAdapter = (): KVAdapterInstance => ({
 	set: async () => {},
 	has: async () => false,
 	delete: async () => {},
+	getMany: async (keys) =>
+		keys.map((key) => ({
+			key: typeof key === "string" ? key : key.key,
+			value: null,
+		})),
+	setMany: async () => {},
+	deleteMany: async () => {},
+	increment: async () => ({ value: 1 }),
 	clear: async () => {},
 });
 

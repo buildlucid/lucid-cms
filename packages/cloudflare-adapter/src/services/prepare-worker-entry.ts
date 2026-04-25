@@ -37,7 +37,7 @@ const prepareMainWorkerEntry = (
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
-			exports: ["passthroughKVAdapter"],
+			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{
 			path: "./email-templates.json",
@@ -138,19 +138,26 @@ return app.fetch(request, env, ctx);`,
             skipValidation: true,
         },
     );
-    const kv = await (resolved.kv ? resolved.kv() : passthroughKVAdapter());
+    const kv = await getInitializedKVAdapter(resolved);
 
-    const cronJobSetup = await setupCronJobs({
-        createQueue: true,
-    });
-    await cronJobSetup.register({
-        config: resolved,
-        db: { client: resolved.db.client },
-        queue: cronJobSetup.queue,
-        env: env,
-        kv: kv,
-        requestUrl: "",
-    });
+    try {
+        const cronJobSetup = await setupCronJobs({
+            createQueue: true,
+        });
+        await cronJobSetup.register({
+            config: resolved,
+            db: { client: resolved.db.client },
+            queue: cronJobSetup.queue,
+            env: env,
+            kv: kv,
+            requestUrl: "",
+        });
+    } finally {
+        await Promise.allSettled([
+            destroyKVAdapter(kv),
+            resolved.db.client.destroy(),
+        ]);
+    }
 };
 
 ctx.waitUntil(runCronService());`,

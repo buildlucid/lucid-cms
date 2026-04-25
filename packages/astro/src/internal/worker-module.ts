@@ -134,7 +134,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 		},
 		{
 			path: "@lucidcms/core/kv-adapter",
-			exports: ["passthroughKVAdapter"],
+			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{
 			path: `./${astroConstants.files.emailTemplatesJson}`,
@@ -176,22 +176,27 @@ return astroWorker.fetch(request, env, ctx);`,
 		resolvedDb: databaseAdapter,
 		skipValidation: true,
 	});
-	const kv = await (resolvedConfig.kv
-		? resolvedConfig.kv()
-		: passthroughKVAdapter());
+		const kv = await getInitializedKVAdapter(resolvedConfig);
 
-	const cronJobSetup = await setupCronJobs({
-		createQueue: true,
-	});
-	await cronJobSetup.register({
-		config: resolvedConfig,
-		db: { client: resolvedConfig.db.client },
-		queue: cronJobSetup.queue,
-		env,
-		kv,
-		requestUrl: "",
-	});
-};
+		try {
+			const cronJobSetup = await setupCronJobs({
+				createQueue: true,
+			});
+			await cronJobSetup.register({
+				config: resolvedConfig,
+				db: { client: resolvedConfig.db.client },
+				queue: cronJobSetup.queue,
+				env,
+				kv,
+				requestUrl: "",
+			});
+		} finally {
+			await Promise.allSettled([
+				destroyKVAdapter(kv),
+				resolvedConfig.db.client.destroy(),
+			]);
+		}
+	};
 
 ctx.waitUntil(runCronService());`,
 		},

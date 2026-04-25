@@ -6,7 +6,11 @@ import type { Config } from "../../../../types.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
 import { resolveConfigDefinition } from "../../../config/resolve-config-definition.js";
-import getKVAdapter from "../../../kv-adapter/get-adapter.js";
+import {
+	destroyKVAdapter,
+	getInitializedKVAdapter,
+} from "../../../kv-adapter/lifecycle.js";
+import type { KVAdapterInstance } from "../../../kv-adapter/types.js";
 import logger from "../../../logger/index.js";
 import { QueueJobsRepository } from "../../../repositories/index.js";
 import type { EnvironmentVariables } from "../../../runtime-adapter/types.js";
@@ -72,10 +76,12 @@ const getConfig = async (): Promise<{
 };
 
 const startConsumer = async () => {
+	let kvInstance: KVAdapterInstance | undefined;
 	try {
 		const { config, env } = await getConfig();
 
-		const kvInstance = await getKVAdapter(config);
+		kvInstance = await getInitializedKVAdapter(config);
+		const kv = kvInstance;
 
 		const internalQueueAdapter = passthroughQueueAdapter({
 			bypassImmediateExecution: true,
@@ -86,6 +92,24 @@ const startConsumer = async () => {
 		// -----------------------------------------
 		// Polling
 		let pollInterval = MIN_POLL_INTERVAL;
+		let pollTimeout: ReturnType<typeof setTimeout> | undefined;
+		let shuttingDown = false;
+
+		const shutdown = async (exitCode: number) => {
+			if (shuttingDown) return;
+			shuttingDown = true;
+			if (pollTimeout) clearTimeout(pollTimeout);
+			await destroyKVAdapter(kvInstance);
+			await config.db.client.destroy();
+			process.exit(exitCode);
+		};
+
+		process.once("SIGINT", () => {
+			void shutdown(0);
+		});
+		process.once("SIGTERM", () => {
+			void shutdown(0);
+		});
 
 		/**
 		 * Polls for jobs and processes them
@@ -143,7 +167,7 @@ const startConsumer = async () => {
 										//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
 										//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
 										queue: internalQueueAdapter,
-										kv: kvInstance,
+										kv,
 										requestUrl: config.baseUrl ?? "",
 									},
 									{
@@ -166,11 +190,13 @@ const startConsumer = async () => {
 				});
 			}
 
-			setTimeout(poll, pollInterval);
+			if (!shuttingDown) {
+				pollTimeout = setTimeout(poll, pollInterval);
+			}
 		};
 
 		parentPort?.on("message", ({ type }) => {
-			if (type === "CHECK_NOW") poll();
+			if (type === "CHECK_NOW" && !shuttingDown) poll();
 		});
 
 		logger.debug({
@@ -179,6 +205,7 @@ const startConsumer = async () => {
 		});
 		poll();
 	} catch (error) {
+		await destroyKVAdapter(kvInstance);
 		logger.error({
 			message: "Consumer startup error",
 			scope: constants.logScopes.queueAdapter,

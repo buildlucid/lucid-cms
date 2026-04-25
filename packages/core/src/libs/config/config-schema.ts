@@ -212,6 +212,7 @@ const ConfigSchema = z.object({
 	kv: z
 		.object({
 			adapter: KVAdapterSchema.optional(),
+			namespace: z.union([z.string().min(1), z.literal(false)]).optional(),
 		})
 		.optional(),
 	collections: z.array(z.unknown()),

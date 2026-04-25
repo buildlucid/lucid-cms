@@ -3,7 +3,11 @@ import T from "../../../translations/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
+import {
+	destroyKVAdapter,
+	getInitializedKVAdapter,
+} from "../../kv-adapter/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import logger from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
 import getCronJobs, {
@@ -13,6 +17,7 @@ import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 const cronCommand = async (jobName?: string) => {
+	let kv: KVAdapterInstance | undefined;
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
@@ -69,7 +74,8 @@ const cronCommand = async (jobName?: string) => {
 		//* create a passthrough queue adapter with immediate execution enabled so
 		//* any jobs pushed to the queue by the cron are executed straight away
 		const queue = passthroughQueueAdapter();
-		const kv = passthroughKVAdapter();
+		kv = await getInitializedKVAdapter(configRes.config);
+		const kvInstance = kv;
 
 		//* run the selected cron job with retry support
 		const maxRetries = 3;
@@ -90,7 +96,7 @@ const cronCommand = async (jobName?: string) => {
 				config: configRes.config,
 				env: configRes.env ?? null,
 				queue: queue,
-				kv: kv,
+				kv: kvInstance,
 				requestUrl: configRes.config.baseUrl ?? "",
 			});
 
@@ -113,6 +119,8 @@ const cronCommand = async (jobName?: string) => {
 				`Cron job "${job.label}" failed after ${maxRetries} attempts:`,
 				lastError ?? "Unknown error",
 			);
+			await destroyKVAdapter(kv);
+			kv = undefined;
 			logger.setBuffering(false);
 			process.exit(1);
 		}
@@ -130,9 +138,12 @@ const cronCommand = async (jobName?: string) => {
 			},
 		);
 
+		await destroyKVAdapter(kv);
+		kv = undefined;
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
+		await destroyKVAdapter(kv);
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}

@@ -15,7 +15,7 @@ import type {
 } from "../../types.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
 import getEmailAdapter from "../email-adapter/get-adapter.js";
-import getKVAdapter from "../kv-adapter/get-adapter.js";
+import { getInitializedKVAdapter } from "../kv-adapter/lifecycle.js";
 import getMediaAdapter from "../media-adapter/get-adapter.js";
 import getQueueAdapter from "../queue-adapter/get-adapter.js";
 import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
@@ -42,10 +42,7 @@ const createApp = async (props: {
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 
-	const kvInstance = await getKVAdapter(props.config).then(async (i) => {
-		await i.lifecycle?.init?.();
-		return i;
-	});
+	const kvInstance = await getInitializedKVAdapter(props.config);
 
 	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
 		getQueueAdapter(props.config, props.runtimeContext).then(async (a) => {

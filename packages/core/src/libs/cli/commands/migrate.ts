@@ -4,7 +4,11 @@ import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import passthroughKVAdapter from "../../kv-adapter/adapters/passthrough.js";
-import getKVAdapter from "../../kv-adapter/get-adapter.js";
+import {
+	destroyKVAdapter,
+	getInitializedKVAdapter,
+} from "../../kv-adapter/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv-adapter/types.js";
 import logger from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
 import cliLogger from "../logger.js";
@@ -20,6 +24,12 @@ const migrateCommand = (props?: {
 		skipEnvValidation?: boolean;
 		force?: boolean;
 	}) => {
+		let kvInstance: KVAdapterInstance | undefined;
+		const cleanupKV = async () => {
+			await destroyKVAdapter(kvInstance);
+			kvInstance = undefined;
+		};
+
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
@@ -161,7 +171,7 @@ const migrateCommand = (props?: {
 				}
 			}
 
-			const kvInstance = await getKVAdapter(config);
+			kvInstance = await getInitializedKVAdapter(config);
 
 			//* run database migrations if needed
 			if (needsDbMigrations) {
@@ -179,9 +189,13 @@ const migrateCommand = (props?: {
 					);
 					if (error instanceof Error) cliLogger.errorInstance(error);
 					if (mode === "process") {
+						await cleanupKV();
 						logger.setBuffering(false);
 						process.exit(1);
-					} else return false;
+					} else {
+						await cleanupKV();
+						return false;
+					}
 				}
 			}
 
@@ -201,9 +215,13 @@ const migrateCommand = (props?: {
 						preCollectionSyncResult.error.message || "unknown",
 					);
 					if (mode === "process") {
+						await cleanupKV();
 						logger.setBuffering(false);
 						process.exit(1);
-					} else return false;
+					} else {
+						await cleanupKV();
+						return false;
+					}
 				}
 			}
 
@@ -230,9 +248,13 @@ const migrateCommand = (props?: {
 							result.error.message || "",
 						);
 						if (mode === "process") {
+							await cleanupKV();
 							logger.setBuffering(false);
 							process.exit(1);
-						} else return false;
+						} else {
+							await cleanupKV();
+							return false;
+						}
 					}
 					cliLogger.success(
 						"Collection migrations completed",
@@ -245,9 +267,13 @@ const migrateCommand = (props?: {
 					);
 					if (error instanceof Error) cliLogger.errorInstance(error);
 					if (mode === "process") {
+						await cleanupKV();
 						logger.setBuffering(false);
 						process.exit(1);
-					} else return false;
+					} else {
+						await cleanupKV();
+						return false;
+					}
 				}
 			}
 
@@ -255,12 +281,14 @@ const migrateCommand = (props?: {
 			if (!skipSyncSteps) {
 				const syncResult = await runSyncTasks(config, mode, kvInstance);
 				if (!syncResult && mode === "return") {
+					await cleanupKV();
 					return false;
 				}
 			}
 
 			cliLogger.info("Clearing KV cache...");
 			await kvInstance.clear();
+			await cleanupKV();
 
 			const endTime = startTime();
 			if (mode === "process") {
@@ -286,6 +314,7 @@ const migrateCommand = (props?: {
 				return true;
 			}
 		} catch (error) {
+			await cleanupKV();
 			cliLogger.error(
 				"Migration failed",
 				error instanceof Error ? error.message : "Unknown error",
