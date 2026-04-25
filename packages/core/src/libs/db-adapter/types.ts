@@ -9,6 +9,10 @@ import type {
 } from "kysely";
 import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
+import type {
+	SecurityAuditAction,
+	SecurityAuditRoleSnapshot,
+} from "../../types/security-audit.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { CollectionSchema } from "../collection/schema/types.js";
@@ -290,6 +294,27 @@ export interface LucidUserLogins {
 	created_at: TimestampImmutable;
 }
 
+export interface LucidSecurityAuditLogs {
+	id: Generated<number>;
+	user_id: number | null;
+	action: SecurityAuditAction;
+	performed_by: number | null;
+	performed_by_roles: JSONColumnType<
+		SecurityAuditRoleSnapshot[],
+		SecurityAuditRoleSnapshot[],
+		SecurityAuditRoleSnapshot[]
+	>;
+	performed_by_super_admin: ColumnType<
+		BooleanInt,
+		BooleanInt | undefined,
+		BooleanInt
+	>;
+	ip_address: string;
+	previous_value: string;
+	new_value: string;
+	created_at: TimestampImmutable;
+}
+
 export interface LucidEmails {
 	id: Generated<number>;
 	from_address: string;
@@ -538,6 +563,7 @@ export interface LucidDB {
 	lucid_user_tokens: LucidUserTokens;
 	lucid_user_logins: LucidUserLogins;
 	lucid_user_auth_providers: LucidUserAuthProviders;
+	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_media_folders: LucidMediaFolders;

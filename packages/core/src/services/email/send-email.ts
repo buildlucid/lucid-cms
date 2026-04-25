@@ -36,7 +36,7 @@ const sendEmail: ServiceFn<
 		context.config.db,
 	);
 
-	const emailFrom = getEmailFrom(context.config, context.requestUrl);
+	const emailFrom = getEmailFrom(context.config, context.request.url);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
 

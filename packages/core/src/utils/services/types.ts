@@ -15,8 +15,12 @@ export type ServiceContext = {
 	env: EnvironmentVariables | null;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
-	/** The request URL from the Hono context. Used to derive the base URL if config.baseUrl is not set. */
-	requestUrl: string;
+	request: {
+		/** The request URL. Used to derive the base URL if config.baseUrl is not set. */
+		url: string;
+		/** The connecting client IP address when the service runs in an HTTP request context. */
+		ipAddress?: string | null;
+	};
 };
 export type ServiceProps<T> = {
 	serviceConfig?: ServiceContext;

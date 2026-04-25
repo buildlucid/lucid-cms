@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import {
 	UserAuthProvidersRepository,
@@ -6,6 +7,7 @@ import {
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { securityAuditServices } from "../index.js";
 
 /**
  * Unlinks an auth provider from the target user.
@@ -117,7 +119,7 @@ const unlinkAuthProvider: ServiceFn<
 		};
 	}
 
-	const [deleteRes, updateRes] = await Promise.all([
+	const [deleteRes, updateRes, auditRes] = await Promise.all([
 		UserAuthProviders.deleteSingle({
 			returning: ["id"],
 			where: [
@@ -160,9 +162,17 @@ const unlinkAuthProvider: ServiceFn<
 				},
 			},
 		}),
+		securityAuditServices.logSecurityAudit(context, {
+			userId: data.targetUserId,
+			action: constants.securityAudit.actions.authProviderUnlink,
+			performedBy: data.auth.id,
+			previousValue: data.providerKey,
+			newValue: "unlinked",
+		}),
 	]);
 	if (deleteRes.error) return deleteRes;
 	if (updateRes.error) return updateRes;
+	if (auditRes.error) return auditRes;
 
 	return {
 		error: undefined,

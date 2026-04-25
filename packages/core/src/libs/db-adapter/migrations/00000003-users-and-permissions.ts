@@ -361,6 +361,81 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_auth_states")
 				.column("state")
 				.execute();
+
+			await db.schema
+				.createTable("lucid_security_audit_logs")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("action", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("performed_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("performed_by_roles", adapter.getDataType("json"), (col) =>
+					col.notNull(),
+				)
+				.addColumn(
+					"performed_by_super_admin",
+					adapter.getDataType("boolean"),
+					(col) =>
+						col
+							.defaultTo(
+								adapter.formatDefaultValue(
+									"boolean",
+									adapter.getDefault("boolean", "false"),
+								),
+							)
+							.notNull(),
+				)
+				.addColumn("ip_address", adapter.getDataType("varchar", 255), (col) =>
+					col.notNull(),
+				)
+				.addColumn("previous_value", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("new_value", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_security_audit_logs_user_id")
+				.on("lucid_security_audit_logs")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_security_audit_logs_action")
+				.on("lucid_security_audit_logs")
+				.column("action")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_security_audit_logs_performed_by")
+				.on("lucid_security_audit_logs")
+				.column("performed_by")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_security_audit_logs_created_at")
+				.on("lucid_security_audit_logs")
+				.column("created_at")
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

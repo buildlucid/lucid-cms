@@ -28,7 +28,7 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
-				requestUrl: config.baseUrl ?? "",
+				request: { url: config.baseUrl ?? "" },
 			}),
 			syncServices.syncCollections({
 				db: { client: config.db.client },
@@ -36,7 +36,7 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
-				requestUrl: config.baseUrl ?? "",
+				request: { url: config.baseUrl ?? "" },
 			}),
 		]);
 

@@ -6,7 +6,12 @@ import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices, userServices } from "../index.js";
+import {
+	emailServices,
+	securityAuditServices,
+	userServices,
+} from "../index.js";
+import prepareUpdateSingleAuditLogs from "./helpers/prepare-update-single-audit-logs.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -45,8 +50,7 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	const userRes = await Users.selectSingle({
-		select: ["id", "first_name"],
+	const userRes = await Users.selectSinglePreset({
 		where: [
 			{
 				key: "id",
@@ -70,7 +74,7 @@ const updateSingle: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const [emailExists, usernameExists] = await Promise.all([
-		normalizedEmail
+		normalizedEmail !== undefined && normalizedEmail !== userRes.data.email
 			? Users.selectSingle({
 					select: ["email"],
 					where: [
@@ -78,6 +82,11 @@ const updateSingle: ServiceFn<
 							key: "email",
 							operator: "=",
 							value: normalizedEmail,
+						},
+						{
+							key: "id",
+							operator: "!=",
+							value: data.userId,
 						},
 					],
 				})
@@ -98,7 +107,11 @@ const updateSingle: ServiceFn<
 	if (emailExists?.error) return emailExists;
 	if (usernameExists?.error) return usernameExists;
 
-	if (normalizedEmail !== undefined && emailExists?.data !== undefined) {
+	if (
+		normalizedEmail !== undefined &&
+		normalizedEmail !== userRes.data.email &&
+		emailExists?.data !== undefined
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -140,7 +153,23 @@ const updateSingle: ServiceFn<
 		encryptSecret = genSecret.encryptSecret;
 	}
 
-	const [updateUserRes, updateRoelsRes] = await Promise.all([
+	const auditLogsRes = await prepareUpdateSingleAuditLogs(context, {
+		userId: data.userId,
+		performedBy: data.auth.id,
+		currentUser: {
+			email: userRes.data.email,
+			superAdmin: userRes.data.super_admin,
+			roles: userRes.data.roles ?? [],
+		},
+		normalizedEmail,
+		passwordChanged: hashedPassword !== undefined,
+		roleIds: data.roleIds,
+		superAdmin: data.superAdmin,
+		canUpdateSuperAdmin: data.auth.superAdmin,
+	});
+	if (auditLogsRes.error) return auditLogsRes;
+
+	const [updateUserRes, updateRolesRes] = await Promise.all([
 		Users.updateSingle({
 			data: {
 				first_name: data.firstName,
@@ -175,16 +204,25 @@ const updateSingle: ServiceFn<
 			roleIds: data.roleIds,
 		}),
 	]);
-	if (updateRoelsRes.error) return updateRoelsRes;
+	if (updateRolesRes.error) return updateRolesRes;
 	if (updateUserRes.error) return updateUserRes;
 
-	if (normalizedEmail !== undefined) {
+	const auditResults = await Promise.all(
+		auditLogsRes.data.logs.map((auditLog) =>
+			securityAuditServices.logSecurityAudit(context, auditLog),
+		),
+	);
+	for (const auditRes of auditResults) {
+		if (auditRes.error) return auditRes;
+	}
+
+	if (auditLogsRes.data.emailChange) {
 		const baseUrl = getBaseUrl(context);
 
 		const sendEmailRes = await emailServices.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",
-			to: normalizedEmail,
+			to: auditLogsRes.data.emailChange.newValue,
 			subject: formatEmailSubject(
 				T("email_update_success_subject"),
 				context.config.brand?.name,

@@ -97,7 +97,7 @@ const cronCommand = async (jobName?: string) => {
 				env: configRes.env ?? null,
 				queue: queue,
 				kv: kvInstance,
-				requestUrl: configRes.config.baseUrl ?? "",
+				request: { url: configRes.config.baseUrl ?? "" },
 			});
 
 			if (!result.error) {

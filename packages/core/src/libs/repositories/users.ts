@@ -231,6 +231,51 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			select: ["id", "username", "email", "super_admin", "roles"],
 		});
 	}
+	async selectAuditActorById<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				id: number;
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select((eb) => [
+				"id",
+				"super_admin",
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_user_roles")
+							.innerJoin(
+								"lucid_roles",
+								"lucid_roles.id",
+								"lucid_user_roles.role_id",
+							)
+							.select([
+								"lucid_roles.id",
+								"lucid_roles.name",
+								"lucid_roles.description",
+							])
+							.whereRef("user_id", "=", "lucid_users.id")
+							.orderBy("lucid_roles.id", "asc"),
+					)
+					.as("roles"),
+			])
+			.where("id", "=", props.id);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectAuditActorById",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: ["id", "super_admin", "roles"],
+		});
+	}
 	async selectSinglePreset<V extends boolean = false>(
 		props: QueryProps<
 			V,

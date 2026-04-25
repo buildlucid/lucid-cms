@@ -168,7 +168,7 @@ const startConsumer = async () => {
 										//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
 										queue: internalQueueAdapter,
 										kv,
-										requestUrl: config.baseUrl ?? "",
+										request: { url: config.baseUrl ?? "" },
 									},
 									{
 										jobId: job.job_id,

@@ -24,7 +24,10 @@ export type CreateToolkitServiceContextOptions = {
 	 * Request URL to use when Lucid needs to build absolute URLs.
 	 * If omitted, Lucid uses `config.baseUrl`, then falls back to `http://localhost:6543`.
 	 */
-	requestUrl?: string;
+	request?: {
+		url?: string;
+		ipAddress?: string | null;
+	};
 };
 
 export type Toolkit = {

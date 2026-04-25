@@ -3,12 +3,12 @@ import type { Config } from "../../types/config.js";
 /**
  * Returns the email "from" values based on the following priority:
  * 1. If config.email.from is set, use it
- * 2. If requestUrl is provided, use noreply@{host} and "Lucid CMS" for the name
+ * 2. If a request URL is provided, use noreply@{host} and "Lucid CMS" for the name
  * 3. Fallback to noreply@example.com and "Lucid CMS" for the name
  */
 const getEmailFrom = (
 	config: Config,
-	requestUrl: string | undefined,
+	url: string | undefined,
 ): {
 	email: string;
 	name: string;
@@ -20,11 +20,11 @@ const getEmailFrom = (
 		};
 	}
 
-	if (requestUrl) {
+	if (url) {
 		try {
-			const url = new URL(requestUrl);
+			const parsedUrl = new URL(url);
 			return {
-				email: `noreply@${url.hostname}`,
+				email: `noreply@${parsedUrl.hostname}`,
 				name: "Lucid CMS",
 			};
 		} catch {}

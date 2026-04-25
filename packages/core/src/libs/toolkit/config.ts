@@ -20,8 +20,13 @@ export const createToolkitServiceContext = (
 	env: options.env ?? null,
 	queue: options.queue ?? passthroughQueueAdapter(),
 	kv: options.kv ?? passthroughKVAdapter(),
-	requestUrl:
-		options.requestUrl ?? options.config.baseUrl ?? toolkitFallbackRequestUrl,
+	request: {
+		url:
+			options.request?.url ??
+			options.config.baseUrl ??
+			toolkitFallbackRequestUrl,
+		ipAddress: options.request?.ipAddress ?? null,
+	},
 });
 
 export type { Config, EnvironmentVariables };

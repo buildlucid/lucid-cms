@@ -10,7 +10,7 @@ const getBaseUrl = (context: ServiceContext): string => {
 		return context.config.baseUrl;
 	}
 
-	const url = new URL(context.requestUrl);
+	const url = new URL(context.request.url);
 	return url.origin;
 };
 

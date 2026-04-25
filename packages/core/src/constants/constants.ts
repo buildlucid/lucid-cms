@@ -206,6 +206,15 @@ export default Object.freeze({
 		invitationResent: "invitation_resent",
 		expired: "expired",
 	} as const,
+	securityAudit: {
+		actions: {
+			emailChange: "email_change",
+			passwordChange: "password_change",
+			roleChange: "role_change",
+			authProviderUnlink: "auth_provider_unlink",
+		},
+		redactedValue: "[REDACTED]",
+	} as const,
 	authState: {
 		actionTypes: {
 			invitation: "invitation",

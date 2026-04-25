@@ -11,7 +11,11 @@ import {
 	getBaseUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices, userTokenServices } from "../index.js";
+import {
+	emailServices,
+	securityAuditServices,
+	userTokenServices,
+} from "../index.js";
 
 const resetPassword: ServiceFn<
 	[
@@ -44,6 +48,17 @@ const resetPassword: ServiceFn<
 		tokenType: constants.userTokens.passwordReset,
 	});
 	if (tokenRes.error) return tokenRes;
+
+	if (tokenRes.data.user_id === null) {
+		return {
+			error: {
+				type: "basic",
+				message: T("token_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 
 	const userRes = await Users.selectSingle({
 		select: ["id"],
@@ -121,28 +136,38 @@ const resetPassword: ServiceFn<
 		scrypt(data.password, secret, constants.scrypt),
 	).toString("base64");
 
-	const updatedUserRes = await Users.updateSingle({
-		data: {
-			password: hashedPassword,
-			secret: encryptSecret,
-			updated_at: new Date().toISOString(),
-		},
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: tokenRes.data.user_id,
+	const [updatedUserRes, auditRes] = await Promise.all([
+		Users.updateSingle({
+			data: {
+				password: hashedPassword,
+				secret: encryptSecret,
+				updated_at: new Date().toISOString(),
 			},
-		],
-		returning: ["id", "first_name", "last_name", "email"],
-		validation: {
-			enabled: true,
-			defaultError: {
-				status: 400,
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: tokenRes.data.user_id,
+				},
+			],
+			returning: ["id", "first_name", "last_name", "email"],
+			validation: {
+				enabled: true,
+				defaultError: {
+					status: 400,
+				},
 			},
-		},
-	});
+		}),
+		securityAuditServices.logSecurityAudit(context, {
+			userId: tokenRes.data.user_id,
+			action: constants.securityAudit.actions.passwordChange,
+			performedBy: tokenRes.data.user_id,
+			previousValue: constants.securityAudit.redactedValue,
+			newValue: constants.securityAudit.redactedValue,
+		}),
+	]);
 	if (updatedUserRes.error) return updatedUserRes;
+	if (auditRes.error) return auditRes;
 
 	const baseUrl = getBaseUrl(context);
 

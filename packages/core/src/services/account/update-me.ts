@@ -5,7 +5,11 @@ import type { LucidAuth } from "../../types/hono.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { accountServices, emailServices } from "../index.js";
+import {
+	accountServices,
+	emailServices,
+	securityAuditServices,
+} from "../index.js";
 
 const updateMe: ServiceFn<
 	[
@@ -38,7 +42,7 @@ const updateMe: ServiceFn<
 		data.email !== undefined ? normalizeEmailInput(data.email) : undefined;
 
 	const getUserRes = await Users.selectSingle({
-		select: ["super_admin", "password", "first_name", "secret"],
+		select: ["super_admin", "password", "first_name", "secret", "email"],
 		where: [
 			{
 				key: "id",
@@ -56,8 +60,11 @@ const updateMe: ServiceFn<
 	});
 	if (getUserRes.error) return getUserRes;
 
+	const emailChanged =
+		normalizedEmail !== undefined && normalizedEmail !== getUserRes.data.email;
+
 	const [userWithEmail, userWithUsername, updatePassword] = await Promise.all([
-		normalizedEmail !== undefined
+		emailChanged
 			? Users.selectSingle({
 					select: ["id"],
 					where: [
@@ -135,38 +142,60 @@ const updateMe: ServiceFn<
 		};
 	}
 
-	const updateMeRes = await Users.updateSingle({
-		data: {
-			first_name: data.firstName,
-			last_name: data.lastName,
-			username: data.username,
-			email: normalizedEmail,
-			updated_at: new Date().toISOString(),
-			password: updatePassword.data.newPassword,
-			secret: updatePassword.data.encryptSecret,
-			triggered_password_reset: updatePassword.data.triggerPasswordReset,
-		},
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.auth.id,
-			},
-		],
-		returning: ["id", "first_name", "last_name", "email"],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: T("route_user_me_update_error_message"),
-				status: 400,
-			},
-		},
-	});
+	const [updateMeRes, emailChangedAuditRes, updatePasswordAuditRes] =
+		await Promise.all([
+			Users.updateSingle({
+				data: {
+					first_name: data.firstName,
+					last_name: data.lastName,
+					username: data.username,
+					email: normalizedEmail,
+					updated_at: new Date().toISOString(),
+					password: updatePassword.data.newPassword,
+					secret: updatePassword.data.encryptSecret,
+					triggered_password_reset: updatePassword.data.triggerPasswordReset,
+				},
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: data.auth.id,
+					},
+				],
+				returning: ["id", "first_name", "last_name", "email"],
+				validation: {
+					enabled: true,
+					defaultError: {
+						message: T("route_user_me_update_error_message"),
+						status: 400,
+					},
+				},
+			}),
+			emailChanged
+				? securityAuditServices.logSecurityAudit(context, {
+						userId: data.auth.id,
+						action: constants.securityAudit.actions.emailChange,
+						performedBy: data.auth.id,
+						previousValue: getUserRes.data.email,
+						newValue: normalizedEmail,
+					})
+				: undefined,
+			updatePassword.data.newPassword !== undefined
+				? securityAuditServices.logSecurityAudit(context, {
+						userId: data.auth.id,
+						action: constants.securityAudit.actions.passwordChange,
+						performedBy: data.auth.id,
+						previousValue: constants.securityAudit.redactedValue,
+						newValue: constants.securityAudit.redactedValue,
+					})
+				: undefined,
+		]);
 	if (updateMeRes.error) return updateMeRes;
+	if (emailChangedAuditRes?.error) return emailChangedAuditRes;
+	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
 
-	if (normalizedEmail !== undefined) {
+	if (emailChanged) {
 		const baseUrl = getBaseUrl(context);
-
 		const sendEmail = await emailServices.sendEmail(context, {
 			template: constants.emailTemplates.emailChanged,
 			type: "internal",

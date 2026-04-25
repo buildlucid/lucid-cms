@@ -78,6 +78,8 @@ const verifyToken = async (
 
 		if (tokenRes.data.revoked_at !== null) {
 			if (tokenRes.data.replaced_by_token_id !== null) {
+				const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+
 				await revokeUserTokens(
 					{
 						db: { client: config.db.client },
@@ -85,7 +87,10 @@ const verifyToken = async (
 						queue: c.get("queue"),
 						env: c.get("env"),
 						kv: c.get("kv"),
-						requestUrl: c.req.url,
+						request: {
+							url: c.req.url,
+							ipAddress: connectionInfo.address ?? null,
+						},
 					},
 					{
 						userId: tokenRes.data.user_id,

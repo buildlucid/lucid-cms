@@ -69,7 +69,7 @@ const migrateCommand = (props?: {
 					queue: queue,
 					env: null,
 					kv: passthroughKVAdapter(),
-					requestUrl: config.baseUrl ?? "",
+					request: { url: config.baseUrl ?? "" },
 				},
 				{
 					dryRun: true,
@@ -207,7 +207,7 @@ const migrateCommand = (props?: {
 					queue: queue,
 					env: null,
 					kv: kvInstance,
-					requestUrl: config.baseUrl ?? "",
+					request: { url: config.baseUrl ?? "" },
 				});
 				if (preCollectionSyncResult.error) {
 					cliLogger.error(
@@ -236,7 +236,7 @@ const migrateCommand = (props?: {
 							queue: queue,
 							env: null,
 							kv: kvInstance,
-							requestUrl: config.baseUrl ?? "",
+							request: { url: config.baseUrl ?? "" },
 						},
 						{ dryRun: false },
 					);
