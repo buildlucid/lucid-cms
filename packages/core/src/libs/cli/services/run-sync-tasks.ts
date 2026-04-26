@@ -3,10 +3,10 @@ import type { Config } from "../../../types.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
-} from "../../kv-adapter/lifecycle.js";
-import type { KVAdapterInstance } from "../../kv-adapter/types.js";
+} from "../../kv/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
-import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
+import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import cliLogger from "../logger.js";
 
 const runSyncTasks = async (

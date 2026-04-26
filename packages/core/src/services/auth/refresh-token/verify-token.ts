@@ -1,7 +1,7 @@
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
-import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
+import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";

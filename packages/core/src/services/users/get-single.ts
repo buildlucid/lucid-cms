@@ -1,5 +1,5 @@
+import type { QueryBuilderWhere } from "../../libs/db/query-builder/index.js";
 import { usersFormatter } from "../../libs/formatters/index.js";
-import type { QueryBuilderWhere } from "../../libs/query-builder/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";

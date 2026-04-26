@@ -1,6 +1,6 @@
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
-import type { BooleanInt } from "../db-adapter/types.js";
+import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 import formatter from "./index.js";

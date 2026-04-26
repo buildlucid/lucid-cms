@@ -1,9 +1,9 @@
 import constants from "../../constants/constants.js";
-import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
+import getEmailAdapter from "../../libs/email/get-adapter.js";
 import { settingsFormatter } from "../../libs/formatters/index.js";
 import getImageProcessor from "../../libs/image-processor/get-processor.js";
 import passthroughProcessor from "../../libs/image-processor/processors/passthrough.js";
-import getMediaAdapter from "../../libs/media-adapter/get-adapter.js";
+import getMediaAdapter from "../../libs/media/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";

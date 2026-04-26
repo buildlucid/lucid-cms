@@ -9,13 +9,8 @@ import constants from "../../../constants/constants.js";
 import T from "../../../translations/index.js";
 import type { LucidErrorData } from "../../../types.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
-import type DatabaseAdapter from "../../db-adapter/adapter-base.js";
-import type {
-	Insert,
-	KyselyDB,
-	LucidDB,
-	Update,
-} from "../../db-adapter/types.js";
+import type DatabaseAdapter from "../../db/adapter-base.js";
+import type { Insert, KyselyDB, LucidDB, Update } from "../../db/types.js";
 import logger from "../../logger/index.js";
 import type {
 	ExecuteMeta,

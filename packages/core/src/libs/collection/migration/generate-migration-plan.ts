@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
-import type DatabaseAdapter from "../../../libs/db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../../libs/db/adapter-base.js";
 import logger from "../../../libs/logger/index.js";
 import type { InferredTable, ServiceResponse } from "../../../types.js";
 import determineColumnModType from "../helpers/column-mod-type.js";

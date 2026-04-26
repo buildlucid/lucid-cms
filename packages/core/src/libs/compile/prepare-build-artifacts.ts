@@ -4,7 +4,7 @@ import handlePluginBuildHooks from "../plugins/hooks/handle-build.js";
 import type {
 	LucidConfigDefinition,
 	RuntimeBuildArtifacts,
-} from "../runtime-adapter/types.js";
+} from "../runtime/types.js";
 
 const prepareBuildArtifacts = async (props: {
 	config: Config;

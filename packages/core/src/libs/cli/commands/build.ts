@@ -3,7 +3,7 @@ import path, { join } from "node:path";
 import constants from "../../../constants/constants.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
-import prerenderMjmlTemplates from "../../email-adapter/templates/prerender-mjml-templates.js";
+import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import vite from "../../vite/index.js";

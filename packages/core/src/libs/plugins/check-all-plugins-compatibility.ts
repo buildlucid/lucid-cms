@@ -1,5 +1,5 @@
 import type { Config } from "../../types/config.js";
-import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
+import type { AdapterRuntimeContext } from "../runtime/types.js";
 
 /**
  * Responsible for checking the compatibility of the plugins with the current runtime context and config.

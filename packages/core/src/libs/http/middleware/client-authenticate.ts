@@ -9,7 +9,7 @@ import type {
 import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
-import cacheKeys from "../../kv-adapter/cache-keys.js";
+import cacheKeys from "../../kv/cache-keys.js";
 import getServiceContext from "../utils/get-service-context.js";
 
 const clientAuthentication = createMiddleware(

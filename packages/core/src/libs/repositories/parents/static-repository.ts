@@ -1,14 +1,9 @@
 import { sql } from "kysely";
 import type { QueryParams } from "../../../types/query-params.js";
-import type {
-	Insert,
-	LucidDB,
-	Select,
-	Update,
-} from "../../db-adapter/types.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
-} from "../../query-builder/index.js";
+} from "../../db/query-builder/index.js";
+import type { Insert, LucidDB, Select, Update } from "../../db/types.js";
 import type { QueryProps } from "../types.js";
 import BaseRepository from "./base-repository.js";
 

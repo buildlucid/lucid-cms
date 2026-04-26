@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import type { BooleanInt } from "../../../libs/db-adapter/types.js";
+import type { BooleanInt } from "../../../libs/db/types.js";
 import formatter from "../../../libs/formatters/index.js";
 import { RolesRepository } from "../../../libs/repositories/index.js";
 import type {

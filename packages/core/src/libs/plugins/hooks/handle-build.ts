@@ -1,7 +1,7 @@
 import type {
 	LucidConfigDefinition,
 	RuntimeBuildArtifact,
-} from "../../../libs/runtime-adapter/types.js";
+} from "../../../libs/runtime/types.js";
 import type { Config } from "../../../types/config.js";
 import type { ServiceResponse } from "../../../types.js";
 import cliLogger from "../../cli/logger.js";

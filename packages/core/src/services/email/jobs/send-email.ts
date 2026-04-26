@@ -1,12 +1,12 @@
-import getEmailAdapter from "../../../libs/email-adapter/get-adapter.js";
+import getEmailAdapter from "../../../libs/email/get-adapter.js";
 import {
 	createStoredEmailData,
 	hasNeverStoreEmailStorageRules,
 	resolveEmailData,
 	stripNeverStoreEmailData,
-} from "../../../libs/email-adapter/storage/index.js";
-import renderMustacheTemplate from "../../../libs/email-adapter/templates/render-mustache-template.js";
-import type { EmailStrategyResponse } from "../../../libs/email-adapter/types.js";
+} from "../../../libs/email/storage/index.js";
+import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
+import type { EmailStrategyResponse } from "../../../libs/email/types.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,

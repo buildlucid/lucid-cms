@@ -1,4 +1,4 @@
-import type { BooleanInt } from "../../libs/db-adapter/types.js";
+import type { BooleanInt } from "../../libs/db/types.js";
 import type {
 	Media,
 	MediaEmbed,

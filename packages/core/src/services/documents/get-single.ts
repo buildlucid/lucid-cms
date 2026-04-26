@@ -1,5 +1,5 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../libs/db-adapter/types.js";
+import type { DocumentVersionType } from "../../libs/db/types.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";

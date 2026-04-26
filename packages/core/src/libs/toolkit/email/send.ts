@@ -4,7 +4,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import type { EmailStorageConfig } from "../../email-adapter/storage/types.js";
+import type { EmailStorageConfig } from "../../email/storage/types.js";
 import { runToolkitService } from "../utils.js";
 
 export type ToolkitEmailSendInput = {

@@ -1,4 +1,4 @@
-import type DatabaseAdapter from "../../../db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../../db/adapter-base.js";
 import type { CustomFieldTableType } from "../../schema/types.js";
 import type {
 	CFConfig,

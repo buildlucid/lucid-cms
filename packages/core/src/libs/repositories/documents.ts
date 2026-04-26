@@ -16,7 +16,8 @@ import type {
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
+import queryBuilder from "../db/query-builder/index.js";
 import type {
 	DocumentVersionType,
 	Insert,
@@ -25,8 +26,7 @@ import type {
 	LucidDocumentTableName,
 	LucidVersionTableName,
 	Select,
-} from "../db-adapter/types.js";
-import queryBuilder from "../query-builder/index.js";
+} from "../db/types.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
 

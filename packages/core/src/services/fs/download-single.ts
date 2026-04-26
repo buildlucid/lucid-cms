@@ -1,8 +1,8 @@
-import { FILE_SYSTEM_DOWNLOAD_PATH } from "../../libs/media-adapter/adapters/file-system/helpers.js";
+import { FILE_SYSTEM_DOWNLOAD_PATH } from "../../libs/media/adapters/file-system/helpers.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterStreamBody,
-} from "../../libs/media-adapter/types.js";
+} from "../../libs/media/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import { validatePresignedToken } from "./checks/index.js";

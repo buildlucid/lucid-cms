@@ -1,10 +1,10 @@
-import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
+import getEmailAdapter from "../../libs/email/get-adapter.js";
 import {
 	createStoredEmailData,
 	type EmailStorageConfig,
 	normalizeEmailStorageConfig,
 	resolveEmailData,
-} from "../../libs/email-adapter/storage/index.js";
+} from "../../libs/email/storage/index.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import {
 	EmailsRepository,

@@ -5,9 +5,9 @@ import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
 import { configureLucid, z } from "@lucidcms/core";
-import { passthroughEmailAdapter } from "@lucidcms/core/email-adapter";
-import { fileSystemMediaAdapter } from "@lucidcms/core/media-adapter";
-import { passthroughQueueAdapter } from "@lucidcms/core/queue-adapter";
+import { passthroughEmailAdapter } from "@lucidcms/core/email";
+import { fileSystemMediaAdapter } from "@lucidcms/core/media";
+import { passthroughQueueAdapter } from "@lucidcms/core/queue";
 // Plugins
 // Adapters
 import NodemailerPlugin from "@lucidcms/plugin-nodemailer";

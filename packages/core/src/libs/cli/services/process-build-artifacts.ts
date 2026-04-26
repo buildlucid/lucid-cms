@@ -6,7 +6,7 @@ import type {
 	RuntimeBuildArtifactCustom,
 	RuntimeBuildArtifactFile,
 	RuntimeBuildArtifacts,
-} from "../../runtime-adapter/types.js";
+} from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 
 export const CORE_ARTIFACT_TYPES = ["file", "compile"];

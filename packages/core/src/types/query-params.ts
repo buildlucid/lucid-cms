@@ -1,5 +1,5 @@
 import type { ComparisonOperatorExpression } from "kysely";
-import type { DocumentVersionType } from "../libs/db-adapter/types.js";
+import type { DocumentVersionType } from "../libs/db/types.js";
 
 // -----------------------------------------------
 // Filters

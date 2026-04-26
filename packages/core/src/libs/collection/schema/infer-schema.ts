@@ -1,7 +1,7 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
-import type DatabaseAdapter from "../../db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../db/adapter-base.js";
 import createDocumentTable from "./tables/document-table.js";
 import createFieldTables from "./tables/fields-table.js";
 import createVersionsTable from "./tables/versions-table.js";

@@ -1,4 +1,4 @@
-import type { BooleanInt } from "../db-adapter/types.js";
+import type { BooleanInt } from "../db/types.js";
 
 export { default as clientIntegrationsFormatter } from "./client-integrations.js";
 export { default as collectionsFormatter } from "./collections.js";

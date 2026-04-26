@@ -6,8 +6,8 @@ import loadConfigFile from "../../config/load-config-file.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
-} from "../../kv-adapter/lifecycle.js";
-import type { KVAdapterInstance } from "../../kv-adapter/types.js";
+} from "../../kv/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";

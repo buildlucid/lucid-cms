@@ -1,11 +1,11 @@
 import { sql } from "kysely";
 import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
-import type { KyselyDB, LucidUsers, Select } from "../db-adapter/types.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
-} from "../query-builder/index.js";
+} from "../db/query-builder/index.js";
+import type { KyselyDB, LucidUsers, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 

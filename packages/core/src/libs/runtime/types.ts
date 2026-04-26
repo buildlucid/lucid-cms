@@ -4,8 +4,8 @@ import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
-import type { RenderedTemplates } from "../email-adapter/types.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
+import type { RenderedTemplates } from "../email/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 export type RuntimeBuildArtifactFile = {

@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { getCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import constants from "../../../constants/constants.js";
-import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
+import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";

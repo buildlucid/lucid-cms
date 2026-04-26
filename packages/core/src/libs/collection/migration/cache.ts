@@ -1,6 +1,6 @@
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import cacheKeys from "../../kv-adapter/cache-keys.js";
+import cacheKeys from "../../kv/cache-keys.js";
 import type { MigrationPlan } from "../migration/types.js";
 import { getCollectionsSignature } from "../schema/runtime/cache-signature.js";
 import type { CollectionSchema } from "../schema/types.js";

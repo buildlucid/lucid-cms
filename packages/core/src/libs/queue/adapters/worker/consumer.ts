@@ -9,11 +9,11 @@ import { resolveConfigDefinition } from "../../../config/resolve-config-definiti
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
-} from "../../../kv-adapter/lifecycle.js";
-import type { KVAdapterInstance } from "../../../kv-adapter/types.js";
+} from "../../../kv/lifecycle.js";
+import type { KVAdapterInstance } from "../../../kv/types.js";
 import logger from "../../../logger/index.js";
 import { QueueJobsRepository } from "../../../repositories/index.js";
-import type { EnvironmentVariables } from "../../../runtime-adapter/types.js";
+import type { EnvironmentVariables } from "../../../runtime/types.js";
 import executeSingleJob from "../../execute-single-job.js";
 import passthroughQueueAdapter from "../passthrough.js";
 import type { WorkerQueueAdapterOptions } from "./index.js";

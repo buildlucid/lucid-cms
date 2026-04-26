@@ -1,5 +1,5 @@
 import mime from "mime-types";
-import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
+import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import T from "../../translations/index.js";
 import {

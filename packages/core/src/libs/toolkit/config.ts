@@ -1,8 +1,8 @@
-import type { EnvironmentVariables } from "../../libs/runtime-adapter/types.js";
+import type { EnvironmentVariables } from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import { passthroughKVAdapter } from "../kv-adapter/index.js";
-import { passthroughQueueAdapter } from "../queue-adapter/index.js";
+import { passthroughKVAdapter } from "../kv/index.js";
+import { passthroughQueueAdapter } from "../queue/index.js";
 import type { CreateToolkitServiceContextOptions } from "./types.js";
 
 const toolkitFallbackRequestUrl = "http://localhost:6543";

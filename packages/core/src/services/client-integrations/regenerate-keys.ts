@@ -1,4 +1,4 @@
-import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";

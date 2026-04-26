@@ -16,9 +16,9 @@ import type {
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { CollectionSchema } from "../collection/schema/types.js";
-import type { EmailStorageConfig } from "../email-adapter/storage/types.js";
-import type { EmailDeliveryStatus, EmailType } from "../email-adapter/types.js";
-import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
+import type { EmailStorageConfig } from "../email/storage/types.js";
+import type { EmailDeliveryStatus, EmailType } from "../email/types.js";
+import type { QueueEvent, QueueJobStatus } from "../queue/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;

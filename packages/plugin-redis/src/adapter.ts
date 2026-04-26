@@ -3,7 +3,7 @@ import {
 	getNamespacePrefix,
 	resolveKey,
 	resolveKeyInput,
-} from "@lucidcms/core/kv-adapter";
+} from "@lucidcms/core/kv";
 import type {
 	KVAdapterInstance,
 	KVIncrementOptions,

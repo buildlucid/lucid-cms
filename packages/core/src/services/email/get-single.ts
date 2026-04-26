@@ -1,5 +1,5 @@
-import { resolveEmailData } from "../../libs/email-adapter/storage/index.js";
-import renderMustacheTemplate from "../../libs/email-adapter/templates/render-mustache-template.js";
+import { resolveEmailData } from "../../libs/email/storage/index.js";
+import renderMustacheTemplate from "../../libs/email/templates/render-mustache-template.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";

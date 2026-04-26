@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import type { EmailStorageConfig } from "../../libs/email-adapter/storage/types.js";
+import type { EmailStorageConfig } from "../../libs/email/storage/types.js";
 import T from "../../translations/index.js";
 import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";

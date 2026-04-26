@@ -1,4 +1,4 @@
-import type DatabaseAdapter from "../../../libs/db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../../libs/db/adapter-base.js";
 import type { ModifyColumnOperation } from "../migration/types.js";
 
 /**

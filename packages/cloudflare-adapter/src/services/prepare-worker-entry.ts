@@ -36,7 +36,7 @@ const prepareMainWorkerEntry = (
 			default: "ConfiguredDatabaseAdapter",
 		},
 		{
-			path: "@lucidcms/core/kv-adapter",
+			path: "@lucidcms/core/kv",
 			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{

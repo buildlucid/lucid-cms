@@ -1,5 +1,5 @@
-import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
-import { getEmailResendState } from "../../libs/email-adapter/storage/index.js";
+import getEmailAdapter from "../../libs/email/get-adapter.js";
+import { getEmailResendState } from "../../libs/email/storage/index.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,

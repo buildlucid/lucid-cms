@@ -1,4 +1,4 @@
-import type { UserTokenType } from "../../libs/db-adapter/types.js";
+import type { UserTokenType } from "../../libs/db/types.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import hashUserToken from "../../utils/helpers/hash-user-token.js";

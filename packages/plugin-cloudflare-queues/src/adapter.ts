@@ -1,9 +1,5 @@
 import { logger } from "@lucidcms/core";
-import {
-	executeSingleJob,
-	insertJobs,
-	logScope,
-} from "@lucidcms/core/queue-adapter";
+import { executeSingleJob, insertJobs, logScope } from "@lucidcms/core/queue";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
 import type { PluginOptions } from "./types.js";

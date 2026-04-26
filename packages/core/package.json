@@ -34,25 +34,25 @@
 			"types": "./dist/types.d.mts",
 			"default": "./dist/types.mjs"
 		},
-		"./queue-adapter": {
-			"types": "./dist/libs/queue-adapter/index.d.mts",
-			"default": "./dist/libs/queue-adapter/index.mjs"
+		"./queue": {
+			"types": "./dist/libs/queue/index.d.mts",
+			"default": "./dist/libs/queue/index.mjs"
 		},
-		"./db-adapter": {
-			"types": "./dist/libs/db-adapter/index.d.mts",
-			"default": "./dist/libs/db-adapter/index.mjs"
+		"./db": {
+			"types": "./dist/libs/db/index.d.mts",
+			"default": "./dist/libs/db/index.mjs"
 		},
-		"./email-adapter": {
-			"types": "./dist/libs/email-adapter/index.d.mts",
-			"default": "./dist/libs/email-adapter/index.mjs"
+		"./email": {
+			"types": "./dist/libs/email/index.d.mts",
+			"default": "./dist/libs/email/index.mjs"
 		},
-		"./kv-adapter": {
-			"types": "./dist/libs/kv-adapter/index.d.mts",
-			"default": "./dist/libs/kv-adapter/index.mjs"
+		"./kv": {
+			"types": "./dist/libs/kv/index.d.mts",
+			"default": "./dist/libs/kv/index.mjs"
 		},
-		"./media-adapter": {
-			"types": "./dist/libs/media-adapter/index.d.mts",
-			"default": "./dist/libs/media-adapter/index.mjs"
+		"./media": {
+			"types": "./dist/libs/media/index.d.mts",
+			"default": "./dist/libs/media/index.mjs"
 		},
 		"./package.json": "./package.json"
 	},

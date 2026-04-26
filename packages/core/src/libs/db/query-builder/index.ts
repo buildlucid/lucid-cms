@@ -3,7 +3,7 @@ import type {
 	OperandValueExpressionOrList,
 	ReferenceExpression,
 } from "kysely";
-import type { LucidDB } from "../db-adapter/types.js";
+import type { LucidDB } from "../types.js";
 import deleteQueryBuilder from "./delete-query-builder.js";
 import queryBuilder from "./query-builder.js";
 import selectQueryBuilder from "./select-query-builder.js";

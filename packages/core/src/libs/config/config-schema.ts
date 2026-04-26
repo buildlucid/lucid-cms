@@ -3,20 +3,11 @@ import z from "zod";
 import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
-import type {
-	EmailAdapter,
-	EmailAdapterInstance,
-} from "../email-adapter/types.js";
-import type { KVAdapter, KVAdapterInstance } from "../kv-adapter/types.js";
+import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
+import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
-import type {
-	MediaAdapter,
-	MediaAdapterInstance,
-} from "../media-adapter/types.js";
-import type {
-	QueueAdapter,
-	QueueAdapterInstance,
-} from "../queue-adapter/types.js";
+import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
+import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
 
 const HonoAppSchema = z.custom<
 	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>

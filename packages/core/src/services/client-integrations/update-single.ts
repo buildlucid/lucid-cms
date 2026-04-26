@@ -1,4 +1,4 @@
-import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
 import {
 	ClientIntegrationScopesRepository,
 	ClientIntegrationsRepository,

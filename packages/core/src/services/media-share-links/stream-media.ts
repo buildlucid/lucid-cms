@@ -1,4 +1,4 @@
-import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
+import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 

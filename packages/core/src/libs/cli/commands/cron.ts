@@ -6,13 +6,11 @@ import loadConfigFile from "../../config/load-config-file.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
-} from "../../kv-adapter/lifecycle.js";
-import type { KVAdapterInstance } from "../../kv-adapter/types.js";
+} from "../../kv/lifecycle.js";
+import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
-import passthroughQueueAdapter from "../../queue-adapter/adapters/passthrough.js";
-import getCronJobs, {
-	type CronJobKey,
-} from "../../runtime-adapter/cron-jobs.js";
+import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
+import getCronJobs, { type CronJobKey } from "../../runtime/cron-jobs.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 

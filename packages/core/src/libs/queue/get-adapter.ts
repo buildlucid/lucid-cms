@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import logger from "../logger/index.js";
-import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
+import type { AdapterRuntimeContext } from "../runtime/types.js";
 import passthroughQueueAdapter from "./adapters/passthrough.js";
 import type { QueueAdapterInstance } from "./types.js";
 

@@ -3,8 +3,8 @@ import T from "../../translations/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
-import passthroughQueueAdapter from "../queue-adapter/adapters/passthrough.js";
-import type { QueueAdapterInstance } from "../queue-adapter/types.js";
+import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
+import type { QueueAdapterInstance } from "../queue/types.js";
 import getCronJobs, { type CronJobDefinition } from "./cron-jobs.js";
 
 const MAX_RETRIES = 3;

@@ -1,6 +1,6 @@
 import z from "zod";
 import type { CollectionSchemaColumn } from "../collection/schema/types.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
 import type {
 	KyselyDB,
 	LucidBricksTable,
@@ -8,7 +8,7 @@ import type {
 	LucidVersionTable,
 	LucidVersionTableName,
 	Select,
-} from "../db-adapter/types.js";
+} from "../db/types.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig } from "./types.js";
 

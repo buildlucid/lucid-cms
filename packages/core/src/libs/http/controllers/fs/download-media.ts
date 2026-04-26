@@ -15,7 +15,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import getMediaAdapter from "../../../media-adapter/get-adapter.js";
+import getMediaAdapter from "../../../media/get-adapter.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import getServiceContext from "../../utils/get-service-context.js";

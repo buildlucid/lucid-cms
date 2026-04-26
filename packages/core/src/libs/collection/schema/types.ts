@@ -1,7 +1,7 @@
 import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
 import type { FieldTypes } from "../../../types.js";
-import type { OnDelete, OnUpdate } from "../../db-adapter/types.js";
+import type { OnDelete, OnUpdate } from "../../db/types.js";
 
 export type CoreTableType =
 	| "document"

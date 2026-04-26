@@ -5,7 +5,7 @@ import type {
 	EmailStorageConfig,
 	EmailType,
 } from "../../types.js";
-import { getEmailResendState } from "../email-adapter/storage/index.js";
+import { getEmailResendState } from "../email/storage/index.js";
 import formatter from "./index.js";
 
 interface EmailPropT {

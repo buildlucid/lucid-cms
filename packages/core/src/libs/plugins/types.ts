@@ -7,7 +7,7 @@ import type {
 	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactCustom,
 	RuntimeBuildArtifactFile,
-} from "../runtime-adapter/types.js";
+} from "../runtime/types.js";
 
 export type LucidPluginBuildHookResult = {
 	artifacts?: Array<

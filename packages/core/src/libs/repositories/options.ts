@@ -1,13 +1,8 @@
 import { sql } from "kysely";
 import z from "zod";
 import { optionsNameSchema } from "../../schemas/options.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
-import type {
-	Insert,
-	KyselyDB,
-	LucidOptions,
-	Select,
-} from "../db-adapter/types.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
+import type { Insert, KyselyDB, LucidOptions, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 

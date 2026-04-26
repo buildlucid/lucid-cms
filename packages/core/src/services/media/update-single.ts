@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import cacheKeys from "../../libs/kv-adapter/cache-keys.js";
-import { invalidateHttpCacheTags } from "../../libs/kv-adapter/http-cache.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaRepository,

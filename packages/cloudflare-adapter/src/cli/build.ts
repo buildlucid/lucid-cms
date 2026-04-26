@@ -64,7 +64,7 @@ const buildCommand: BuildHandler = async ({
 							const noSideEffects = [
 								"kv-adapter/adapters/better-sqlite",
 								"image-processor/processors/sharp",
-								"media-adapter/adapters/file-system",
+								"media/adapters/file-system",
 							];
 							return !noSideEffects.some((path) => id.includes(path));
 						},

@@ -2,8 +2,8 @@ import { PassThrough } from "node:stream";
 import {
 	splitBodyForProcessing,
 	toNodeReadable,
-} from "../../libs/media-adapter/index.js";
-import type { MediaAdapterStreamBody } from "../../libs/media-adapter/types.js";
+} from "../../libs/media/index.js";
+import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";

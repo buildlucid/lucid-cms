@@ -4,22 +4,22 @@ import type z from "zod";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
-import type DatabaseAdapter from "../libs/db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../libs/db/adapter-base.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
-} from "../libs/email-adapter/types.js";
-import type { KVAdapter, KVAdapterInstance } from "../libs/kv-adapter/types.js";
+} from "../libs/email/types.js";
+import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
 	MediaAdapter,
 	MediaAdapterInstance,
-} from "../libs/media-adapter/types.js";
+} from "../libs/media/types.js";
 import type { LucidPluginResponse } from "../libs/plugins/types.js";
 import type {
 	QueueAdapter,
 	QueueAdapterInstance,
-} from "../libs/queue-adapter/types.js";
+} from "../libs/queue/types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";

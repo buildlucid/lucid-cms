@@ -133,7 +133,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 			default: "astroConfigureLucid",
 		},
 		{
-			path: "@lucidcms/core/kv-adapter",
+			path: "@lucidcms/core/kv",
 			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{

@@ -1,5 +1,5 @@
 import type { ComparisonOperatorExpression } from "kysely";
-import type { FilterObject } from "../../../types/query-params.js";
+import type { FilterObject } from "../../../../types/query-params.js";
 
 const getFilterOperator = (
 	key: string,

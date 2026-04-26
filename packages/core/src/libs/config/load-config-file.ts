@@ -8,7 +8,7 @@ import type {
 	EnvironmentVariables,
 	LucidConfigDefinition,
 	RuntimeAdapter,
-} from "../runtime-adapter/types.js";
+} from "../runtime/types.js";
 import getConfigPath from "./get-config-path.js";
 import { resolveConfigDefinition } from "./resolve-config-definition.js";
 

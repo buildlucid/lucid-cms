@@ -1,5 +1,5 @@
 import type { Readable } from "node:stream";
-import type { MediaAdapterServiceStream } from "../../../libs/media-adapter/types.js";
+import type { MediaAdapterServiceStream } from "../../../libs/media/types.js";
 
 const MIME_SNIFF_BYTES = 8192;
 

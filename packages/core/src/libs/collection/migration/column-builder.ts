@@ -3,7 +3,7 @@ import type {
 	AlterTableColumnAlteringBuilder,
 	CreateTableBuilder,
 } from "kysely";
-import type DatabaseAdapter from "../../../libs/db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../../libs/db/adapter-base.js";
 import type {
 	AddColumnOperation,
 	ModifyColumnOperation,

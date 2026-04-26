@@ -1,13 +1,13 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import { createConfiguredDatabaseAdapter } from "../runtime-adapter/create-configured-database-adapter.js";
+import { createConfiguredDatabaseAdapter } from "../runtime/create-configured-database-adapter.js";
 import {
 	createAdapter,
 	getAdapterConfigureLucid,
 	getAdapterModule,
 	getDatabaseAdapterClass,
-} from "../runtime-adapter/loaders.js";
+} from "../runtime/loaders.js";
 import type {
 	EnvironmentVariables,
 	GetEnvVarsLogger,
@@ -15,7 +15,7 @@ import type {
 	LucidConfigDefinitionMeta,
 	RuntimeAdapter,
 	WrappedLucidConfigDefinition,
-} from "../runtime-adapter/types.js";
+} from "../runtime/types.js";
 import processConfig from "./process-config.js";
 
 const defaultLoggerInstance = {

@@ -27,7 +27,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				const configImportPath = `./${props.paths.outputRelativeConfigPath}`;
 				const imports: CloudflareWorkerImport[] = [
 					{
-						path: "@lucidcms/core/queue-adapter",
+						path: "@lucidcms/core/queue",
 						exports: [
 							"passthroughQueueAdapter",
 							"logScope",
@@ -35,7 +35,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						],
 					},
 					{
-						path: "@lucidcms/core/kv-adapter",
+						path: "@lucidcms/core/kv",
 						exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 					},
 					{

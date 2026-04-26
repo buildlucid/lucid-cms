@@ -1,5 +1,5 @@
-import getMediaAdapter from "../../../libs/media-adapter/get-adapter.js";
-import type { MediaAdapterInstance } from "../../../libs/media-adapter/types.js";
+import getMediaAdapter from "../../../libs/media/get-adapter.js";
+import type { MediaAdapterInstance } from "../../../libs/media/types.js";
 import T from "../../../translations/index.js";
 import type {
 	ServiceContext,

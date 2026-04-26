@@ -1,7 +1,7 @@
 import type { Context } from "hono";
-import type { KVAdapterInstance } from "../libs/kv-adapter/types.js";
-import type { QueueAdapterInstance } from "../libs/queue-adapter/types.js";
-import type { AdapterRuntimeContext } from "../libs/runtime-adapter/types.js";
+import type { KVAdapterInstance } from "../libs/kv/types.js";
+import type { QueueAdapterInstance } from "../libs/queue/types.js";
+import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
 import type {
 	Config,
 	EnvironmentVariables,

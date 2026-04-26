@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import cacheKeys from "../../../libs/kv-adapter/cache-keys.js";
+import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

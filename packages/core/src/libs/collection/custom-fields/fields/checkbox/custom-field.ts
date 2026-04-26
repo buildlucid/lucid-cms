@@ -2,7 +2,7 @@ import merge from "lodash.merge";
 import z from "zod";
 import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
-import type { BooleanInt } from "../../../../db-adapter/types.js";
+import type { BooleanInt } from "../../../../db/types.js";
 import formatter from "../../../../formatters/index.js";
 import CustomField from "../../custom-field.js";
 import type {

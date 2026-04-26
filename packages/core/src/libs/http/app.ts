@@ -14,11 +14,11 @@ import type {
 	LucidErrorData,
 } from "../../types.js";
 import { LucidAPIError } from "../../utils/errors/index.js";
-import getEmailAdapter from "../email-adapter/get-adapter.js";
-import { getInitializedKVAdapter } from "../kv-adapter/lifecycle.js";
-import getMediaAdapter from "../media-adapter/get-adapter.js";
-import getQueueAdapter from "../queue-adapter/get-adapter.js";
-import type { AdapterRuntimeContext } from "../runtime-adapter/types.js";
+import getEmailAdapter from "../email/get-adapter.js";
+import { getInitializedKVAdapter } from "../kv/lifecycle.js";
+import getMediaAdapter from "../media/get-adapter.js";
+import getQueueAdapter from "../queue/get-adapter.js";
+import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";

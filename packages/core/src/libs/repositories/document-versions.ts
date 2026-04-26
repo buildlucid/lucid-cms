@@ -7,7 +7,8 @@ import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,
 } from "../collection/schema/types.js";
-import type DatabaseAdapter from "../db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
+import queryBuilder from "../db/query-builder/index.js";
 import type {
 	DocumentVersionType,
 	KyselyDB,
@@ -16,8 +17,7 @@ import type {
 	LucidVersionTable,
 	LucidVersionTableName,
 	Select,
-} from "../db-adapter/types.js";
-import queryBuilder from "../query-builder/index.js";
+} from "../db/types.js";
 import type { BrickQueryResponse } from "./document-bricks.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";

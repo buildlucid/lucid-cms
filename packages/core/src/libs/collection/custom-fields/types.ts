@@ -2,12 +2,12 @@ import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
 import type { Config } from "../../../types/config.js";
 import type { LocaleValue } from "../../../types/shared.js";
-import type DatabaseAdapter from "../../db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../db/adapter-base.js";
 import type {
 	LucidBrickTableName,
 	OnDelete,
 	OnUpdate,
-} from "../../db-adapter/types.js";
+} from "../../db/types.js";
 import type { CollectionBuilder } from "../builders/index.js";
 import type { CollectionSchemaTable } from "../schema/types.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";

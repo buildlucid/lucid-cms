@@ -1,5 +1,5 @@
 import type { ClientIntegration } from "../../types/response.js";
-import type { BooleanInt } from "../db-adapter/types.js";
+import type { BooleanInt } from "../db/types.js";
 import type { ClientScope } from "../permission/client-scopes.js";
 import formatter from "./index.js";
 

@@ -1,5 +1,5 @@
 import type { UpdateQueryBuilder } from "kysely";
-import type { LucidDB } from "../db-adapter/types.js";
+import type { LucidDB } from "../types.js";
 import type { QueryBuilderWhere } from "./index.js";
 
 const updateQueryBuilder = <

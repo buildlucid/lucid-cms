@@ -1,4 +1,4 @@
-import { validateSignedMediaUrl } from "../../../libs/media-adapter/signed-url.js";
+import { validateSignedMediaUrl } from "../../../libs/media/signed-url.js";
 import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

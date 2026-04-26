@@ -11,7 +11,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import cacheKeys from "../../../../kv-adapter/cache-keys.js";
+import cacheKeys from "../../../../kv/cache-keys.js";
 import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";

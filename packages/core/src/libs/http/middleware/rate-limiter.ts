@@ -3,8 +3,8 @@ import constants from "../../../constants/constants.js";
 import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import cacheKeys from "../../kv-adapter/cache-keys.js";
-import { supportsKVIncrement } from "../../kv-adapter/utils.js";
+import cacheKeys from "../../kv/cache-keys.js";
+import { supportsKVIncrement } from "../../kv/utils.js";
 
 type RateLimitMode = "ip" | "user" | "client";
 

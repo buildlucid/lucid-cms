@@ -10,7 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import type { DocumentVersionType } from "../../../db-adapter/types.js";
+import type { DocumentVersionType } from "../../../db/types.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";

@@ -3,7 +3,7 @@ import { LucidError } from "../../utils/errors/index.js";
 import validateEnvVars from "../cli/services/validate-env-vars.js";
 import getConfigPath from "../config/get-config-path.js";
 import loadConfigFile from "../config/load-config-file.js";
-import type { RenderedTemplates } from "../email-adapter/types.js";
+import type { RenderedTemplates } from "../email/types.js";
 import generateTypes from "../type-generation/index.js";
 
 type LoadConfigResult = Awaited<ReturnType<typeof loadConfigFile>>;
@@ -51,7 +51,7 @@ const loadBuildProject = async (props?: {
 				localization: loaded.config.localization,
 			}),
 		props?.renderEmailTemplates
-			? import("../email-adapter/templates/render-mjml-templates.js").then(
+			? import("../email/templates/render-mjml-templates.js").then(
 					({ default: renderEmailTemplates }) =>
 						renderEmailTemplates({
 							config: loaded.config,

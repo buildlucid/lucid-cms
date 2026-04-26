@@ -1,10 +1,8 @@
 import { createMiddleware } from "hono/factory";
 import { hasher } from "node-object-hash";
 import type { LucidHonoContext } from "../../../types/hono.js";
-import cacheKeys, {
-	type HttpStaticValues,
-} from "../../kv-adapter/cache-keys.js";
-import { getHttpCacheNamespaceTokens } from "../../kv-adapter/http-cache.js";
+import cacheKeys, { type HttpStaticValues } from "../../kv/cache-keys.js";
+import { getHttpCacheNamespaceTokens } from "../../kv/http-cache.js";
 
 const hashInstance = hasher({ sort: true, coerce: true });
 

@@ -1,6 +1,6 @@
-import type { KVAdapterInstance } from "../../libs/kv-adapter/types.js";
-import type { QueueAdapterInstance } from "../../libs/queue-adapter/types.js";
-import type { EnvironmentVariables } from "../../libs/runtime-adapter/types.js";
+import type { KVAdapterInstance } from "../../libs/kv/types.js";
+import type { QueueAdapterInstance } from "../../libs/queue/types.js";
+import type { EnvironmentVariables } from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitDocuments } from "./documents/index.js";

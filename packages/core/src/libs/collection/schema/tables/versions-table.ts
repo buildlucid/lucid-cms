@@ -1,5 +1,5 @@
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
-import type DatabaseAdapter from "../../../../libs/db-adapter/adapter-base.js";
+import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import type { ServiceResponse } from "../../../../types.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "../types.js";

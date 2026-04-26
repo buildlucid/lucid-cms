@@ -1,5 +1,5 @@
 import type { Option } from "../../types/response.js";
-import type { LucidOptions, Select } from "../db-adapter/types.js";
+import type { LucidOptions, Select } from "../db/types.js";
 import formatter from "./index.js";
 
 const formatMultiple = (props: {
