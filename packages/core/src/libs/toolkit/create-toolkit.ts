@@ -1,13 +1,14 @@
 import createDocumentsToolkit from "./documents/index.js";
+import createEmailToolkit from "./email/index.js";
 import createLocalesToolkit from "./locales/index.js";
 import createMediaToolkit from "./media/index.js";
 import type { Toolkit, ToolkitContext } from "./types.js";
 
 /**
- * Creates a server-side toolkit for reading Lucid documents, locales, and media.
+ * Creates a server-side toolkit for reading Lucid data.
  *
  * Use this in server code when you want a small, read-focused API for Lucid
- * content, locales, and media.
+ * content, locales, media, and external email sends.
  *
  * For client-side data fetching, use the Lucid SDK instead.
  *
@@ -30,6 +31,7 @@ import type { Toolkit, ToolkitContext } from "./types.js";
  */
 const createToolkit = (context: ToolkitContext): Toolkit => ({
 	documents: createDocumentsToolkit(context),
+	email: createEmailToolkit(context),
 	locales: createLocalesToolkit(context),
 	media: createMediaToolkit(context),
 });

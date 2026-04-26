@@ -177,7 +177,7 @@ const requestEmailChange: ServiceFn<
 		lastName: data.lastName,
 		oldEmail: data.oldEmail,
 		newEmail: data.newEmail,
-		logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+		logoUrl: `${baseUrl}${constants.email.assets.logo}`,
 		brand: {
 			name: context.config.brand?.name,
 		},
@@ -190,11 +190,12 @@ const requestEmailChange: ServiceFn<
 			T("email_change_confirm_subject"),
 			context.config.brand?.name,
 		),
-		template: constants.emailTemplates.emailChangeConfirm,
+		template: constants.email.templates.emailChangeConfirm.key,
 		data: {
 			...commonData,
-			confirmLink: `${baseUrl}${constants.locations.emailChangeConfirm}?token=${confirmTokenRes.data.token}`,
+			confirmLink: `${baseUrl}${constants.email.locations.emailChangeConfirm}?token=${confirmTokenRes.data.token}`,
 		},
+		storage: constants.email.templates.emailChangeConfirm.storage,
 	});
 	if (confirmEmailRes.error) return confirmEmailRes;
 
@@ -205,11 +206,12 @@ const requestEmailChange: ServiceFn<
 			T("email_change_revert_subject"),
 			context.config.brand?.name,
 		),
-		template: constants.emailTemplates.emailChangeRevert,
+		template: constants.email.templates.emailChangeRevert.key,
 		data: {
 			...commonData,
-			revertLink: `${baseUrl}${constants.locations.emailChangeRevert}?token=${revertTokenRes.data.token}`,
+			revertLink: `${baseUrl}${constants.email.locations.emailChangeRevert}?token=${revertTokenRes.data.token}`,
 		},
+		storage: constants.email.templates.emailChangeRevert.storage,
 	});
 	if (revertEmailRes.error) return revertEmailRes;
 

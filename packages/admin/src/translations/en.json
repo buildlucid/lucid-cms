@@ -377,6 +377,8 @@
 	"delete_email_modal_description": "Are you sure you want to delete this email?",
 	"resend_email_modal_title": "Resend Email",
 	"resend_email_modal_description": "Are you sure you want to resend this email?",
+	"resend_email_unavailable_toast_title": "Email can't be resent",
+	"resend_email_unavailable_toast_message": "This email has passed its resend window or included data that is no longer stored. Trigger the original action again to send a fresh email.",
 	"delete_document_modal_title": "Delete {{name}}",
 	"delete_document_modal_description": "Are you sure you want to delete this {{name}}? This will delete all versions as well as the revisions.",
 	"publish_document_modal_title": "Publish {{name}}",

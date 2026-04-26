@@ -16,6 +16,7 @@ import type {
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { CollectionSchema } from "../collection/schema/types.js";
+import type { EmailStorageConfig } from "../email-adapter/storage/types.js";
 import type { EmailDeliveryStatus, EmailType } from "../email-adapter/types.js";
 import type { QueueEvent, QueueJobStatus } from "../queue-adapter/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
@@ -348,6 +349,11 @@ export interface LucidEmails {
 		//* __insert__ includes a Record as the base repository handles formatting via formatData method
 		Record<string, unknown> | null,
 		Record<string, unknown> | null
+	>;
+	storage_strategy: JSONColumnType<
+		EmailStorageConfig,
+		EmailStorageConfig | null,
+		EmailStorageConfig | null
 	>;
 	type: EmailType;
 	current_status: EmailDeliveryStatus;

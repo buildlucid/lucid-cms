@@ -44,7 +44,9 @@ const getSettings: ServiceFn<
 		(o) => o.name === "license_key_last4",
 	);
 
-	const defaultTemplates = Object.values(constants.emailTemplates);
+	const defaultTemplates = Object.values(constants.email.templates).map(
+		(template) => template.key,
+	);
 	const preRenderedTemplates = context.config.preRenderedEmailTemplates
 		? Object.keys(context.config.preRenderedEmailTemplates)
 		: [];

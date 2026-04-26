@@ -30,6 +30,10 @@ export interface Email {
 	attemptCount: number;
 	lastAttemptedAt: string | null;
 	html: string | null;
+	resend: {
+		enabled: boolean;
+		reason?: "outsideResendWindow" | "unstoredData";
+	};
 	transactions: {
 		deliveryStatus: EmailDeliveryStatus;
 		message: string | null;

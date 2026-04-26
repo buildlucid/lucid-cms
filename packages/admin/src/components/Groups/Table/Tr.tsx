@@ -29,7 +29,7 @@ export const Tr: Component<TrProps> = (props) => {
 			return props.actions
 				.filter((a) => a.actionExclude !== true)
 				.find((action) => {
-					return action.permission !== false;
+					return action.permission !== false && action.disabled !== true;
 				});
 		}
 	});
@@ -59,7 +59,7 @@ export const Tr: Component<TrProps> = (props) => {
 		<tr
 			class={classNames("duration-200 transition-colors", {
 				"cursor-pointer": firstPermittedAction() !== undefined || props.onClick,
-				"outline outline-1 outline-primary-muted-border outline-offset-[-1px] [&>td]:bg-primary-muted-bg [&>td]:after:border-primary-muted-border":
+				"outline outline-primary-muted-border -outline-offset-1 [&>td]:bg-primary-muted-bg [&>td]:after:border-primary-muted-border":
 					props.current,
 				"bg-background-base hover:bg-background-hover":
 					(props.theme === "primary" || props.theme === undefined) &&

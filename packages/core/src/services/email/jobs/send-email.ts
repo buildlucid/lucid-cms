@@ -1,4 +1,10 @@
 import getEmailAdapter from "../../../libs/email-adapter/get-adapter.js";
+import {
+	createStoredEmailData,
+	hasNeverStoreEmailStorageRules,
+	resolveEmailData,
+	stripNeverStoreEmailData,
+} from "../../../libs/email-adapter/storage/index.js";
 import renderMustacheTemplate from "../../../libs/email-adapter/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email-adapter/types.js";
 import {
@@ -6,6 +12,7 @@ import {
 	EmailTransactionsRepository,
 } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
+import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const sendEmail: ServiceFn<
@@ -35,6 +42,7 @@ const sendEmail: ServiceFn<
 				"bcc",
 				"template",
 				"data",
+				"storage_strategy",
 				"type",
 				"attempt_count",
 				"created_at",
@@ -59,11 +67,38 @@ const sendEmail: ServiceFn<
 	]);
 	if (emailRes.error) return emailRes;
 
-	const html = await renderMustacheTemplate(context, {
-		template: emailRes.data.template,
+	const sendDataRes = resolveEmailData({
 		data: emailRes.data.data,
+		storage: emailRes.data.storage_strategy,
+		encryptionKey: context.config.secrets.encryption,
+		mode: "send",
 	});
-	if (html.error) {
+	const hasNeverStoreRes = hasNeverStoreEmailStorageRules(
+		emailRes.data.storage_strategy,
+	);
+
+	let preSendError: LucidErrorData | undefined =
+		sendDataRes.error ?? hasNeverStoreRes.error;
+	let sendData: Record<string, unknown> | null = null;
+	let hasNeverStore = false;
+	let htmlData: string | undefined;
+
+	if (preSendError === undefined) {
+		sendData = sendDataRes.error ? null : sendDataRes.data;
+		hasNeverStore = hasNeverStoreRes.error ? false : hasNeverStoreRes.data;
+
+		const html = await renderMustacheTemplate(context, {
+			template: emailRes.data.template,
+			data: sendData,
+		});
+		if (html.error) {
+			preSendError = html.error;
+		} else {
+			htmlData = html.data;
+		}
+	}
+
+	if (preSendError) {
 		await Promise.all([
 			Emails.updateSingle({
 				where: [{ key: "id", operator: "=", value: emailRes.data.id }],
@@ -78,13 +113,16 @@ const sendEmail: ServiceFn<
 				where: [{ key: "id", operator: "=", value: data.transactionId }],
 				data: {
 					delivery_status: "failed",
-					message: html.error.message,
+					message: preSendError.message,
 					updated_at: new Date().toISOString(),
 				},
 			}),
 		]);
 
-		return html;
+		return {
+			error: preSendError,
+			data: undefined,
+		};
 	}
 
 	let result: EmailStrategyResponse | undefined;
@@ -105,12 +143,12 @@ const sendEmail: ServiceFn<
 						email: emailRes.data.from_address,
 						name: emailRes.data.from_name,
 					},
-					html: html.data,
+					html: htmlData ?? "",
 					cc: emailRes.data.cc ?? undefined,
 					bcc: emailRes.data.bcc ?? undefined,
 				},
 				{
-					data: emailRes.data.data,
+					data: sendData ?? {},
 					template: emailRes.data.template,
 				},
 			);
@@ -123,6 +161,30 @@ const sendEmail: ServiceFn<
 				externalMessageId: null,
 			};
 		}
+	}
+
+	const shouldStripNeverStore =
+		result.success === true && hasNeverStore === true;
+	let cleanedData: Record<string, unknown> | null | undefined;
+
+	if (shouldStripNeverStore) {
+		const strippedDataRes = stripNeverStoreEmailData({
+			data: sendData,
+			storage: emailRes.data.storage_strategy,
+		});
+		if (strippedDataRes.error) return strippedDataRes;
+
+		const cleanedDataRes = createStoredEmailData({
+			data: strippedDataRes.data,
+			storage: emailRes.data.storage_strategy,
+			encryptionKey: context.config.secrets.encryption,
+			options: {
+				encryptNeverStore: false,
+			},
+		});
+		if (cleanedDataRes.error) return cleanedDataRes;
+
+		cleanedData = cleanedDataRes.data;
 	}
 
 	const [updateRes, emailTransactionRes] = await Promise.all([
@@ -139,6 +201,7 @@ const sendEmail: ServiceFn<
 				attempt_count: (emailRes.data.attempt_count ?? 0) + 1,
 				last_attempted_at: new Date().toISOString(),
 				updated_at: new Date().toISOString(),
+				...(cleanedData !== undefined ? { data: cleanedData } : {}),
 			},
 		}),
 		EmailTransactions.updateSingle({

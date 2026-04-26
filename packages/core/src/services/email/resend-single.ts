@@ -1,4 +1,5 @@
 import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
+import { getEmailResendState } from "../../libs/email-adapter/storage/index.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
@@ -24,7 +25,7 @@ const resendSingle: ServiceFn<
 
 	const [emailRes, emailAdapter] = await Promise.all([
 		Emails.selectSingle({
-			select: ["id"],
+			select: ["id", "created_at", "storage_strategy"],
 			where: [
 				{
 					key: "id",
@@ -43,6 +44,23 @@ const resendSingle: ServiceFn<
 		getEmailAdapter(context.config),
 	]);
 	if (emailRes.error) return emailRes;
+
+	const resend = getEmailResendState({
+		createdAt: emailRes.data.created_at,
+		storage: emailRes.data.storage_strategy,
+		resendWindowDays: context.config.email.resendWindowDays,
+	});
+	if (resend.error) return resend;
+
+	if (!resend.data.enabled) {
+		return {
+			error: {
+				message: T("email_resend_not_available"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 
 	const [updateEmailRes, transactionRes] = await Promise.all([
 		Emails.updateSingle({

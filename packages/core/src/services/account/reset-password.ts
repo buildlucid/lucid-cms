@@ -172,7 +172,7 @@ const resetPassword: ServiceFn<
 	const baseUrl = getBaseUrl(context);
 
 	const sendEmail = await emailServices.sendEmail(context, {
-		template: constants.emailTemplates.passwordResetSuccess,
+		template: constants.email.templates.passwordResetSuccess.key,
 		type: "internal",
 		to: updatedUserRes.data.email,
 		subject: formatEmailSubject(
@@ -182,7 +182,7 @@ const resetPassword: ServiceFn<
 		data: {
 			firstName: updatedUserRes.data.first_name,
 			lastName: updatedUserRes.data.last_name,
-			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
 			brand: {
 				name: context.config.brand?.name,
 			},

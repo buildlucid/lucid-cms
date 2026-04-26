@@ -1,3 +1,6 @@
+import constants from "../../constants/constants.js";
+import type { EmailStorageConfig } from "../../libs/email-adapter/storage/types.js";
+import T from "../../translations/index.js";
 import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -15,6 +18,7 @@ const sendExternal: ServiceFn<
 			data: {
 				[key: string]: unknown;
 			};
+			storage?: EmailStorageConfig;
 			from?: {
 				email?: string;
 				name?: string;
@@ -25,8 +29,23 @@ const sendExternal: ServiceFn<
 		jobId: string;
 		email: Email;
 	}
-> = async (context, data) =>
-	serviceWrapper(emailServices.sendEmail, {
+> = async (context, data) => {
+	const internalTemplate = Object.values(constants.email.templates).find(
+		(template) => template.key === data.template && template.external === false,
+	);
+
+	if (internalTemplate) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("email_template_internal_only"),
+			},
+			data: undefined,
+		};
+	}
+
+	return serviceWrapper(emailServices.sendEmail, {
 		transaction: true,
 	})(context, {
 		type: "external",
@@ -37,7 +56,9 @@ const sendExternal: ServiceFn<
 		bcc: data.bcc,
 		replyTo: data.replyTo,
 		data: data.data,
+		storage: data.storage,
 		from: data.from,
 	});
+};
 
 export default sendExternal;

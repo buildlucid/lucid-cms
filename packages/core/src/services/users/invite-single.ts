@@ -124,17 +124,18 @@ const inviteSingle: ServiceFn<
 			T("user_invite_email_subject"),
 			context.config.brand?.name,
 		),
-		template: constants.emailTemplates.userInvite,
+		template: constants.email.templates.userInvite.key,
 		data: {
 			firstName: data.firstName,
 			lastName: data.lastName,
 			email: email,
-			inviteLink: `${baseUrl}${constants.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
-			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+			inviteLink: `${baseUrl}${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
+			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
 			brand: {
 				name: context.config.brand?.name,
 			},
 		},
+		storage: constants.email.templates.userInvite.storage,
 	});
 	if (sendEmailRes.error) return sendEmailRes;
 

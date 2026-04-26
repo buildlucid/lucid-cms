@@ -20,7 +20,7 @@ const prerenderMjmlTemplates = async (props: {
 
 		const outputPath = path.join(
 			props.config.build.paths.outDir,
-			constants.emailRenderedOutput,
+			constants.email.renderedOutput,
 		);
 		await writeFile(outputPath, JSON.stringify(renderedTemplates, null, 2));
 

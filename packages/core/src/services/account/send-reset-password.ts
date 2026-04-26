@@ -71,17 +71,18 @@ const sendResetPassword: ServiceFn<
 			T("reset_password_email_subject"),
 			context.config.brand?.name,
 		),
-		template: constants.emailTemplates.resetPassword,
+		template: constants.email.templates.resetPassword.key,
 		data: {
 			firstName: userExistsRes.data.first_name,
 			lastName: userExistsRes.data.last_name,
 			email: userExistsRes.data.email,
-			resetLink: `${baseUrl}${constants.locations.resetPassword}?token=${userToken.data.token}`,
-			logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+			resetLink: `${baseUrl}${constants.email.locations.resetPassword}?token=${userToken.data.token}`,
+			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
 			brand: {
 				name: context.config.brand?.name,
 			},
 		},
+		storage: constants.email.templates.resetPassword.storage,
 	});
 	if (sendEmail.error) return sendEmail;
 

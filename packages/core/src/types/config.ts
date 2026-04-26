@@ -172,6 +172,8 @@ export interface LucidConfig {
 			| Promise<EmailAdapterInstance>;
 		/** When set to true, the plugin will not send emails but will still return as a success */
 		simulate?: boolean;
+		/** Number of days an email can be resent for after it was created. */
+		resendWindowDays?: number;
 	};
 	/** The pre-rendered MJML templates to use. */
 	preRenderedEmailTemplates?: Record<string, string>;
@@ -314,6 +316,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| EmailAdapterInstance
 			| Promise<EmailAdapterInstance>;
 		simulate: boolean;
+		resendWindowDays: number;
 	};
 	openAPI: {
 		enabled: boolean;

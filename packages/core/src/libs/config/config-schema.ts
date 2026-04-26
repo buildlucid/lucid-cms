@@ -153,6 +153,7 @@ const ConfigSchema = z.object({
 				})
 				.optional(),
 			simulate: z.boolean().optional(),
+			resendWindowDays: z.number().int().min(0).optional(),
 			adapter: EmailAdapterSchema.optional(),
 		})
 		.optional(),

@@ -233,7 +233,7 @@ const updateSingle: ServiceFn<
 		const baseUrl = getBaseUrl(context);
 
 		const sendEmailRes = await emailServices.sendEmail(context, {
-			template: constants.emailTemplates.emailChanged,
+			template: constants.email.templates.emailChanged.key,
 			type: "internal",
 			to: auditLogsRes.data.emailChange.newValue,
 			subject: formatEmailSubject(
@@ -242,7 +242,7 @@ const updateSingle: ServiceFn<
 			),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
-				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
+				logoUrl: `${baseUrl}${constants.email.assets.logo}`,
 				brand: {
 					name: context.config.brand?.name,
 				},

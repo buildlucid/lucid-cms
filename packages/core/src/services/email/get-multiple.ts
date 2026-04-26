@@ -27,6 +27,7 @@ const getMultiple: ServiceFn<
 			"cc",
 			"bcc",
 			"template",
+			"storage_strategy",
 			"type",
 			"current_status",
 			"attempt_count",
@@ -46,6 +47,7 @@ const getMultiple: ServiceFn<
 		data: {
 			data: emailsFormatter.formatMultiple({
 				emails: emailsRes.data[0],
+				resendWindowDays: context.config.email.resendWindowDays,
 			}),
 			count: formatter.parseCount(emailsRes.data[1]?.count),
 		},

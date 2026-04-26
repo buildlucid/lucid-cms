@@ -21,6 +21,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 	},
 	email: {
 		simulate: false,
+		resendWindowDays: 7,
 	},
 	openAPI: {
 		enabled: false,

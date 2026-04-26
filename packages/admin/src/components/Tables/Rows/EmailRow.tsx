@@ -43,6 +43,12 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTrigger("resend", true);
 					},
 					permission: userStore.get.hasPermission([Permissions.EmailSend]).all,
+					disabled: props.email.resend.enabled !== true,
+					disabledToast: {
+						title: T()("resend_email_unavailable_toast_title"),
+						message: T()("resend_email_unavailable_toast_message"),
+						status: "warning",
+					},
 					actionExclude: true,
 				},
 				{

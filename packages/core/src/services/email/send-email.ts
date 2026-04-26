@@ -1,4 +1,10 @@
 import getEmailAdapter from "../../libs/email-adapter/get-adapter.js";
+import {
+	createStoredEmailData,
+	type EmailStorageConfig,
+	normalizeEmailStorageConfig,
+	resolveEmailData,
+} from "../../libs/email-adapter/storage/index.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import {
 	EmailsRepository,
@@ -19,6 +25,7 @@ const sendEmail: ServiceFn<
 			bcc?: string;
 			replyTo?: string;
 			data: Record<string, unknown>;
+			storage?: EmailStorageConfig;
 			from?: {
 				email?: string;
 				name?: string;
@@ -39,6 +46,15 @@ const sendEmail: ServiceFn<
 	const emailFrom = getEmailFrom(context.config, context.request.url);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
+	const storageStrategyRes = normalizeEmailStorageConfig(data.storage);
+	if (storageStrategyRes.error) return storageStrategyRes;
+
+	const storedDataRes = createStoredEmailData({
+		data: data.data,
+		storage: storageStrategyRes.data,
+		encryptionKey: context.config.secrets.encryption,
+	});
+	if (storedDataRes.error) return storedDataRes;
 
 	const [newEmailRes, emailAdapter] = await Promise.all([
 		Emails.createSingle({
@@ -50,7 +66,8 @@ const sendEmail: ServiceFn<
 				template: data.template,
 				cc: data.cc,
 				bcc: data.bcc,
-				data: data.data,
+				data: storedDataRes.data,
+				storage_strategy: storageStrategyRes.data,
 				type: data.type,
 				current_status: "scheduled",
 				attempt_count: 0,
@@ -123,13 +140,23 @@ const sendEmail: ServiceFn<
 		return queueRes;
 	}
 
+	const previewDataRes = resolveEmailData({
+		data: newEmailRes.data.data,
+		storage: newEmailRes.data.storage_strategy,
+		encryptionKey: context.config.secrets.encryption,
+		mode: "preview",
+	});
+	if (previewDataRes.error) return previewDataRes;
+
 	return {
 		error: undefined,
 		data: {
 			jobId: queueRes.data.jobId,
 			email: emailsFormatter.formatSingle({
 				email: newEmailRes.data,
+				data: previewDataRes.data,
 				html: undefined,
+				resendWindowDays: context.config.email.resendWindowDays,
 			}),
 		},
 	};

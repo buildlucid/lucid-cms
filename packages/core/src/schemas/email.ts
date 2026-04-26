@@ -84,6 +84,16 @@ const emailResponseSchema = z.object({
 	html: z.string().nullable().meta({
 		description: "The rendered HTML content of the email template",
 	}),
+	resend: z.object({
+		enabled: z.boolean().meta({
+			description: "Whether this email can currently be resent",
+			example: true,
+		}),
+		reason: z.enum(["outsideResendWindow", "unstoredData"]).optional().meta({
+			description: "Why resend is disabled, if unavailable",
+			example: "outsideResendWindow",
+		}),
+	}),
 	transactions: z.array(
 		z.object({
 			deliveryStatus: emailDeliveryStatusSchema.meta({

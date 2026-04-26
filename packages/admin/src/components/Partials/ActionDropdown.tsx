@@ -24,6 +24,13 @@ export interface ActionDropdownProps {
 		href?: string;
 		permission?: boolean;
 		hide?: boolean;
+		disabled?: boolean;
+		disabledToast?: {
+			title: string;
+			message?: string;
+			status?: "success" | "error" | "warning" | "info";
+			duration?: number;
+		};
 		isLoading?: boolean;
 		actionExclude?: boolean;
 		theme?: "error" | "primary";
@@ -92,11 +99,23 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	const getActionItemClasses = (action: ActionItem) =>
 		classNames(liItemClasses, {
 			"cursor-not-allowed": action.permission === false,
+			"opacity-50 cursor-not-allowed": action.disabled === true,
 			"hover:bg-error-hover hover:text-error-contrast":
-				getActionTheme(action) === "error",
+				getActionTheme(action) === "error" && action.disabled !== true,
 			"hover:bg-primary-base hover:text-primary-contrast":
-				getActionTheme(action) === "primary",
+				getActionTheme(action) === "primary" && action.disabled !== true,
 		});
+
+	// ----------------------------------------
+	// Functions
+	const spawnDisabledToast = (action: ActionItem) => {
+		if (!action.disabledToast) return;
+
+		spawnToast({
+			...action.disabledToast,
+			status: action.disabledToast.status ?? "warning",
+		});
+	};
 
 	// ----------------------------------------
 	// Render
@@ -158,6 +177,11 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 															status: "warning",
 														});
 														e.preventDefault();
+														return;
+													}
+													if (action.disabled === true) {
+														e.preventDefault();
+														spawnDisabledToast(action);
 													}
 												}}
 											>
@@ -176,6 +200,10 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 															message: T()("no_permission_toast_message"),
 															status: "warning",
 														});
+														return;
+													}
+													if (action.disabled === true) {
+														spawnDisabledToast(action);
 														return;
 													}
 													action.onClick?.();

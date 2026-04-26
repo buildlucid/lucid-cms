@@ -4,6 +4,7 @@ import type { EnvironmentVariables } from "../../libs/runtime-adapter/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitDocuments } from "./documents/index.js";
+import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitLocales } from "./locales/index.js";
 import type { ToolkitMedia } from "./media/index.js";
 
@@ -33,6 +34,8 @@ export type CreateToolkitServiceContextOptions = {
 export type Toolkit = {
 	/** Helpers for reading collection documents. */
 	documents: ToolkitDocuments;
+	/** Helpers for sending external emails. */
+	email: ToolkitEmail;
 	/** Helpers for reading enabled locales. */
 	locales: ToolkitLocales;
 	/** Helpers for reading and processing media. */
@@ -42,6 +45,8 @@ export type Toolkit = {
 export type * from "./documents/get-multiple.js";
 export type * from "./documents/get-single.js";
 export type * from "./documents/index.js";
+export type * from "./email/index.js";
+export type * from "./email/send.js";
 export type * from "./locales/get-all.js";
 export type * from "./locales/index.js";
 export type * from "./media/get-multiple.js";

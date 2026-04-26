@@ -2,8 +2,10 @@ import type { Email } from "../../types/response.js";
 import type {
 	BooleanInt,
 	EmailDeliveryStatus,
+	EmailStorageConfig,
 	EmailType,
 } from "../../types.js";
+import { getEmailResendState } from "../email-adapter/storage/index.js";
 import formatter from "./index.js";
 
 interface EmailPropT {
@@ -22,6 +24,7 @@ interface EmailPropT {
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 	data?: Record<string, unknown> | null;
+	storage_strategy?: EmailStorageConfig | null;
 	transactions?: {
 		delivery_status: EmailDeliveryStatus;
 		message: string | null;
@@ -34,15 +37,30 @@ interface EmailPropT {
 	}[];
 }
 
-const formatMultiple = (props: { emails: EmailPropT[] }) => {
+const formatMultiple = (props: {
+	emails: EmailPropT[];
+	resendWindowDays: number;
+}) => {
 	return props.emails.map((e) =>
 		formatSingle({
 			email: e,
+			resendWindowDays: props.resendWindowDays,
 		}),
 	);
 };
 
-const formatSingle = (props: { email: EmailPropT; html?: string }): Email => {
+const formatSingle = (props: {
+	email: EmailPropT;
+	data?: Record<string, unknown> | null;
+	html?: string;
+	resendWindowDays: number;
+}): Email => {
+	const resend = getEmailResendState({
+		createdAt: props.email.created_at,
+		storage: props.email.storage_strategy,
+		resendWindowDays: props.resendWindowDays,
+	});
+
 	return {
 		id: props.email.id,
 		type: props.email.type,
@@ -58,8 +76,12 @@ const formatSingle = (props: { email: EmailPropT; html?: string }): Email => {
 			bcc: props.email.bcc,
 			template: props.email.template,
 		},
-		data: props.email.data ?? null,
+		data: props.data ?? props.email.data ?? null,
 		html: props.html ?? null,
+		resend: resend.data ?? {
+			enabled: false,
+			reason: "outsideResendWindow",
+		},
 		transactions: props.email.transactions
 			? props.email.transactions.map((t) => ({
 					deliveryStatus: t.delivery_status,

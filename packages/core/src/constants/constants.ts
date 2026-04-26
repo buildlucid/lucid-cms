@@ -1,5 +1,6 @@
 import { PermissionGroups } from "../libs/permission/definitions.js";
 import T from "../translations/index.js";
+import emailConstants from "./emails.js";
 
 export default Object.freeze({
 	locales: ["en"] as const,
@@ -67,15 +68,7 @@ export default Object.freeze({
 		page: 1,
 		perPage: 10,
 	},
-	locations: {
-		resetPassword: "/lucid/reset-password",
-		acceptInvitation: "/lucid/accept-invitation",
-		emailChangeConfirm: "/lucid/email-change/confirm",
-		emailChangeRevert: "/lucid/email-change/revert",
-	},
-	assets: {
-		emailLogo: "/lucid/assets/email-logo.svg",
-	},
+	email: emailConstants,
 	errors: {
 		name: T("default_error_name"),
 		message: T("default_error_message"),
@@ -83,15 +76,6 @@ export default Object.freeze({
 		code: undefined,
 		errors: undefined,
 	},
-	emailTemplates: {
-		resetPassword: "reset-password",
-		userInvite: "user-invite",
-		passwordResetSuccess: "password-reset-success",
-		emailChanged: "email-changed",
-		emailChangeConfirm: "email-change-confirm",
-		emailChangeRevert: "email-change-revert",
-	},
-	emailRenderedOutput: "email-templates.json",
 	rateLimit: {
 		ttlBufferSeconds: 1,
 		scopes: {

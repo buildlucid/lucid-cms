@@ -3,6 +3,7 @@ export * from "./libs/collection/builders/brick-builder/types.js";
 export * from "./libs/collection/builders/collection-builder/types.js";
 export * from "./libs/collection/custom-fields/types.js";
 export * from "./libs/db-adapter/types.js";
+export * from "./libs/email-adapter/storage/types.js";
 export * from "./libs/email-adapter/types.js";
 export * from "./libs/kv-adapter/types.js";
 export * from "./libs/logger/types.js";
