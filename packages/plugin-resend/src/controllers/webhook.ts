@@ -28,6 +28,7 @@ const webhookController = (pluginOptions: PluginOptions) =>
 		// validate("json", controllerSchemas.webhook.body),
 		async (c: LucidHonoContext) => {
 			const rawBody = await c.req.text();
+			const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 
 			const webhookRes = await serviceWrapper(webhook, {
 				transaction: true,
@@ -43,7 +44,10 @@ const webhookController = (pluginOptions: PluginOptions) =>
 					queue: c.get("queue"),
 					env: c.get("env"),
 					kv: c.get("kv"),
-					requestUrl: c.req.url,
+					request: {
+						url: c.req.url,
+						ipAddress: connectionInfo.address ?? null,
+					},
 				},
 				{
 					rawBody: rawBody,

@@ -18,6 +18,16 @@ const prepareLucidSPA = async (props: {
 			"../../../",
 			constants.directories.viteBuild,
 		);
+		const spaInputHtml = join(spaInput, "index.html");
+		const spaOutputHtml = join(props.outDir, "index.html");
+
+		try {
+			await fs.access(spaInputHtml);
+		} catch {
+			throw new Error(
+				`Lucid SPA build artifact is missing at ${spaInputHtml}. Build @lucidcms/admin before preparing Lucid assets, or ensure @lucidcms/core includes its spa directory.`,
+			);
+		}
 
 		await fs.cp(spaInput, props.outDir, { recursive: true });
 		await fs.mkdir(join(props.outDir, constants.directories.plugins), {
@@ -27,6 +37,13 @@ const prepareLucidSPA = async (props: {
 			join(props.outDir, constants.directories.plugins, "test-component.js"),
 			testPluginCode,
 		);
+		try {
+			await fs.access(spaOutputHtml);
+		} catch {
+			throw new Error(
+				`Lucid SPA index.html was not copied to ${spaOutputHtml}.`,
+			);
+		}
 
 		return {
 			data: undefined,

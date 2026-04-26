@@ -5,6 +5,8 @@ import type { LucidHonoContext, ServiceContext } from "@lucidcms/core/types";
  * plugin-owned routes can call services without depending on private core files.
  */
 const getServiceContext = (c: LucidHonoContext): ServiceContext => {
+	const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+
 	return {
 		db: {
 			client: c.get("config").db.client,
@@ -13,7 +15,10 @@ const getServiceContext = (c: LucidHonoContext): ServiceContext => {
 		queue: c.get("queue"),
 		env: c.get("env"),
 		kv: c.get("kv"),
-		requestUrl: c.req.url,
+		request: {
+			url: c.req.url,
+			ipAddress: connectionInfo.address ?? null,
+		},
 	};
 };
 
