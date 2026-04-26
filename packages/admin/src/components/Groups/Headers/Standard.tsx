@@ -6,6 +6,7 @@ import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Link from "@/components/Partials/Link";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import HeaderPrimaryActions, {
 	type HeaderPrimaryAction,
@@ -95,7 +96,8 @@ export const Standard: Component<{
 	const showContentLocale = createMemo(() => {
 		return (
 			props.actions?.contentLocale !== undefined &&
-			props.actions.contentLocale !== false
+			props.actions.contentLocale !== false &&
+			contentLocaleStore.get.locales.length > 1
 		);
 	});
 	const showLinkAction = createMemo(() => {

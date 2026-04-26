@@ -15,10 +15,26 @@ interface ContentLocaleSelectProps {
 
 const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 	// ----------------------------------
+	// Memos
+	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
+	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const hasMultipleLocales = createMemo(() => locales().length > 1);
+	const options = createMemo(() => {
+		return (
+			locales().map((l) => ({
+				value: l.code,
+				label: `${l.name ? `${l.name} (${l.code})` : l.code}`,
+			})) || []
+		);
+	});
+
+	// ----------------------------------
 	// Hooks
 	useKeyboardShortcuts({
 		changeLocale: {
 			permission: () => {
+				if (!hasMultipleLocales()) return false;
+
 				const isInModal = inModal();
 
 				const isGlobalSelector = props.value === undefined;
@@ -34,6 +50,8 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 				return true;
 			},
 			callback: () => {
+				if (!hasMultipleLocales()) return;
+
 				const currentLocaleCode =
 					props.value !== undefined ? props.value : contentLocale();
 				const availableLocales = locales();
@@ -52,24 +70,11 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 		},
 	});
 
-	// ----------------------------------
-	// Memos
-	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
-	const locales = createMemo(() => contentLocaleStore.get.locales);
-	const options = createMemo(() => {
-		return (
-			locales().map((l) => ({
-				value: l.code,
-				label: `${l.name ? `${l.name} (${l.code})` : l.code}`,
-			})) || []
-		);
-	});
-
 	// ----------------------------------------
 	// Render
 	return (
 		<Switch>
-			<Match when={props.value === undefined}>
+			<Match when={props.value === undefined && hasMultipleLocales()}>
 				<Select
 					id={"content-locale"}
 					value={contentLocale()}
@@ -87,7 +92,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					shortcutDisplay={props.showShortcut ? "compact" : undefined}
 				/>
 			</Match>
-			<Match when={props.value !== undefined}>
+			<Match when={props.value !== undefined && hasMultipleLocales()}>
 				<Select
 					id={"content-locale"}
 					value={props.value}

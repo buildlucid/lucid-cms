@@ -7,6 +7,7 @@ import {
 	type Accessor,
 	type Component,
 	createEffect,
+	createMemo,
 	createSignal,
 	type JSXElement,
 	Match,
@@ -80,6 +81,15 @@ export const BottomPanel: Component<{
 		if (defaultLocale) return defaultLocale.code;
 		return contentLocaleStore.get.contentLocale;
 	};
+
+	// ------------------------------
+	// Memos
+	const showContentLocaleSelect = createMemo(() => {
+		return (
+			props.langauge?.contentLocale === true &&
+			contentLocaleStore.get.locales.length > 1
+		);
+	});
 
 	// ------------------------------
 	// Effects
@@ -177,7 +187,7 @@ export const BottomPanel: Component<{
 											<span class="sr-only">{T()("back")}</span>
 										</Dialog.CloseButton>
 									</div>
-									<Show when={props.langauge?.contentLocale}>
+									<Show when={showContentLocaleSelect()}>
 										<div class="mt-2">
 											<ContentLocaleSelect
 												value={contentLocale()}

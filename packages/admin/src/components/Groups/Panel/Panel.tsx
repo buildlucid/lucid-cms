@@ -7,6 +7,7 @@ import {
 	type Accessor,
 	type Component,
 	createEffect,
+	createMemo,
 	createSignal,
 	type JSXElement,
 	Match,
@@ -82,6 +83,15 @@ export const Panel: Component<{
 	};
 
 	// ------------------------------
+	// Memos
+	const showContentLocaleSelect = createMemo(() => {
+		return (
+			props.langauge?.contentLocale === true &&
+			contentLocaleStore.get.locales.length > 1
+		);
+	});
+
+	// ------------------------------
 	// Effects
 	createEffect(() => {
 		if (props.state.open) {
@@ -110,7 +120,7 @@ export const Panel: Component<{
 				<Dialog.Overlay class="fixed inset-0 z-40 bg-background-base/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-4 z-40 flex justify-end">
 					<Dialog.Content
-						class="w-full relative flex flex-col rounded-xl scrollbar border border-border  max-w-[800px] bg-background-base animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
+						class="w-full relative flex flex-col rounded-xl scrollbar border border-border max-w-200 bg-background-base animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.hasAttribute("data-panel-ignore")) {
@@ -177,7 +187,7 @@ export const Panel: Component<{
 											<span class="sr-only">{T()("back")}</span>
 										</Dialog.CloseButton>
 									</div>
-									<Show when={props.langauge?.contentLocale}>
+									<Show when={showContentLocaleSelect()}>
 										<div class="mt-2">
 											<ContentLocaleSelect
 												value={contentLocale()}

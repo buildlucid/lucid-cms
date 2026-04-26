@@ -74,14 +74,14 @@ export const Th: Component<ThProps> = (props) => {
 				<Match when={props?.label !== undefined}>
 					<Switch>
 						<Match when={props.options?.sortable !== true}>
-							<div class="flex items-center min-h-[50px]">
+							<div class="flex items-center min-h-12.5">
 								<span class="text-sm mr-2.5 fill-body">{props?.icon}</span>
 								<span class="text-sm text-body">{props?.label}</span>
 							</div>
 						</Match>
 						<Match when={props.options?.sortable === true}>
 							<button
-								class="justify-between flex items-center w-full min-h-[50px]"
+								class="justify-between flex items-center w-full min-h-12.5"
 								onClick={() => {
 									if (props.searchParams === undefined) return;
 									if (props.key === undefined) return;

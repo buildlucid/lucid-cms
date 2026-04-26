@@ -343,7 +343,7 @@ export const HeaderBar: Component<{
 									}
 								>
 									<div class="flex items-center">
-										<FaSolidLanguage size={20} />
+										<FaSolidLanguage size={16} />
 										<span class="ml-2.5 text-base font-medium text-body">
 											{displayLocale()?.name} ({displayLocale()?.code})
 										</span>
