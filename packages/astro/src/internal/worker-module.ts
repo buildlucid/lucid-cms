@@ -172,6 +172,7 @@ return astroWorker.fetch(request, env, ctx);`,
 		env,
 	);
 	const resolvedConfig = await processConfig(wrappedDefinition.config(env), {
+		bypassCache: true,
 		recipe: wrappedDefinition.recipe,
 		resolvedDb: databaseAdapter,
 		skipValidation: true,

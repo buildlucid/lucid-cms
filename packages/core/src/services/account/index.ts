@@ -1,9 +1,15 @@
+export { default as cancelEmailChange } from "./cancel-email-change.js";
 export * as checks from "./checks/index.js";
+export { default as confirmEmailChange } from "./confirm-email-change.js";
 export { default as deleteProfilePicture } from "./delete-profile-picture.js";
 export { default as getAuthenticatedUser } from "./get-authenticated-user.js";
 export { default as getProfilePicturePresignedUrl } from "./get-profile-picture-presigned-url.js";
+export { default as requestEmailChange } from "./request-email-change.js";
 export { default as resetPassword } from "./reset-password.js";
+export { default as revertEmailChange } from "./revert-email-change.js";
 export { default as revokeAllRefreshTokens } from "./revoke-all-refresh-tokens.js";
 export { default as sendResetPassword } from "./send-reset-password.js";
 export { default as updateMe } from "./update-me.js";
 export { default as updateProfilePicture } from "./update-profile-picture.js";
+export { default as verifyEmailChangeConfirm } from "./verify-email-change-confirm.js";
+export { default as verifyEmailChangeRevert } from "./verify-email-change-revert.js";

@@ -16,6 +16,8 @@ export default class UserTokensRepository extends StaticRepository<"lucid_user_t
 			z.literal(constants.userTokens.passwordReset),
 			z.literal(constants.userTokens.refresh),
 			z.literal(constants.userTokens.invitation),
+			z.literal(constants.userTokens.emailChangeConfirm),
+			z.literal(constants.userTokens.emailChangeRevert),
 		]),
 		token: z.string(),
 		revoked_at: z.union([z.string(), z.date()]).nullable(),

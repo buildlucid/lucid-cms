@@ -61,6 +61,11 @@ const formatSingle = (props: {
 	authUser?: LucidAuth;
 	host: string;
 	locales: string[];
+	pendingEmailChange?: {
+		email: string;
+		requestedAt: Date | string | null;
+		expiresAt: Date | string | null;
+	} | null;
 }): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
@@ -119,6 +124,18 @@ const formatSingle = (props: {
 				linkedAt: formatter.formatDate(p.linked_at),
 			};
 		});
+	}
+
+	if (props.pendingEmailChange !== undefined) {
+		response.pendingEmailChange = props.pendingEmailChange
+			? {
+					email: props.pendingEmailChange.email,
+					requestedAt: formatter.formatDate(
+						props.pendingEmailChange.requestedAt,
+					),
+					expiresAt: formatter.formatDate(props.pendingEmailChange.expiresAt),
+				}
+			: null;
 	}
 
 	return response;

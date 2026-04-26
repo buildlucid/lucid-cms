@@ -70,6 +70,8 @@ export default Object.freeze({
 	locations: {
 		resetPassword: "/lucid/reset-password",
 		acceptInvitation: "/lucid/accept-invitation",
+		emailChangeConfirm: "/lucid/email-change/confirm",
+		emailChangeRevert: "/lucid/email-change/revert",
 	},
 	assets: {
 		emailLogo: "/lucid/assets/email-logo.svg",
@@ -86,6 +88,8 @@ export default Object.freeze({
 		userInvite: "user-invite",
 		passwordResetSuccess: "password-reset-success",
 		emailChanged: "email-changed",
+		emailChangeConfirm: "email-change-confirm",
+		emailChangeRevert: "email-change-revert",
 	},
 	emailRenderedOutput: "email-templates.json",
 	rateLimit: {
@@ -156,6 +160,7 @@ export default Object.freeze({
 	accessTokenExpiration: 300, // 5 minutes in seconds
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
+	emailChangeTokenExpirationMinutes: 1440, // 24 hours in minutes
 	presignedUrlExpiration: 3600000, // 1 hour in ms
 	shareLinkExpiration: 86400, // 24 hours in seconds
 	documentation:
@@ -191,6 +196,8 @@ export default Object.freeze({
 		passwordReset: "password_reset",
 		refresh: "refresh",
 		invitation: "invitation",
+		emailChangeConfirm: "email_change_confirm",
+		emailChangeRevert: "email_change_revert",
 	} as const,
 	refreshTokenRevokeReasons: {
 		logout: "logout",
@@ -199,12 +206,24 @@ export default Object.freeze({
 		reuseDetected: "reuse_detected",
 		accountRevokeAll: "account_revoke_all",
 		adminRevokeAll: "admin_revoke_all",
+		emailChangeReverted: "email_change_reverted",
 	} as const,
 	userTokenRevokeReasons: {
 		passwordResetUsed: "password_reset_used",
 		invitationAccepted: "invitation_accepted",
 		invitationResent: "invitation_resent",
+		emailChangeConfirmed: "email_change_confirmed",
+		emailChangeCancelled: "email_change_cancelled",
+		emailChangeReverted: "email_change_reverted",
+		emailChangeSuperseded: "email_change_superseded",
 		expired: "expired",
+	} as const,
+	emailChangeRequestStatuses: {
+		pending: "pending",
+		confirmed: "confirmed",
+		cancelled: "cancelled",
+		reverted: "reverted",
+		superseded: "superseded",
 	} as const,
 	securityAudit: {
 		actions: {

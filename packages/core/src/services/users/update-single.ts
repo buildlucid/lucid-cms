@@ -1,6 +1,9 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
+import {
+	EmailChangeRequestsRepository,
+	UsersRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
@@ -36,6 +39,10 @@ const updateSingle: ServiceFn<
 	number
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(
+		context.db.client,
+		context.config.db,
+	);
 	const normalizedEmail =
 		data.email !== undefined ? normalizeEmailInput(data.email) : undefined;
 
@@ -73,7 +80,7 @@ const updateSingle: ServiceFn<
 	});
 	if (userRes.error) return userRes;
 
-	const [emailExists, usernameExists] = await Promise.all([
+	const [emailExists, reservedEmail, usernameExists] = await Promise.all([
 		normalizedEmail !== undefined && normalizedEmail !== userRes.data.email
 			? Users.selectSingle({
 					select: ["email"],
@@ -91,6 +98,11 @@ const updateSingle: ServiceFn<
 					],
 				})
 			: undefined,
+		normalizedEmail !== undefined && normalizedEmail !== userRes.data.email
+			? EmailChangeRequests.selectReservedByEmail({
+					email: normalizedEmail,
+				})
+			: undefined,
 		data.username
 			? Users.selectSingle({
 					select: ["username"],
@@ -105,12 +117,13 @@ const updateSingle: ServiceFn<
 			: undefined,
 	]);
 	if (emailExists?.error) return emailExists;
+	if (reservedEmail?.error) return reservedEmail;
 	if (usernameExists?.error) return usernameExists;
 
 	if (
 		normalizedEmail !== undefined &&
 		normalizedEmail !== userRes.data.email &&
-		emailExists?.data !== undefined
+		(emailExists?.data !== undefined || reservedEmail?.data !== undefined)
 	) {
 		return {
 			error: {

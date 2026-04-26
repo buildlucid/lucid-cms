@@ -114,7 +114,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 							class="w-full h-96"
 							srcdoc={previewHtml()}
 							title="Preview"
-							sandbox=""
+							sandbox="allow-same-origin"
 							referrerPolicy="no-referrer"
 						/>
 					</div>

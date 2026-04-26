@@ -271,6 +271,9 @@ export interface LucidUserRoles {
 export type UserTokenType =
 	(typeof constants.userTokens)[keyof typeof constants.userTokens];
 
+export type EmailChangeRequestStatus =
+	(typeof constants.emailChangeRequestStatuses)[keyof typeof constants.emailChangeRequestStatuses];
+
 export interface LucidUserTokens {
 	id: Generated<number>;
 	user_id: number;
@@ -282,6 +285,22 @@ export interface LucidUserTokens {
 	replaced_by_token_id: number | null;
 	created_at: TimestampImmutable;
 	expiry_date: TimestampMutateable;
+}
+
+export interface LucidEmailChangeRequests {
+	id: Generated<number>;
+	user_id: number;
+	old_email: string;
+	new_email: string;
+	confirm_token_id: number;
+	revert_token_id: number;
+	status: EmailChangeRequestStatus;
+	confirmed_at: TimestampMutateable;
+	cancelled_at: TimestampMutateable;
+	reverted_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+	expires_at: TimestampMutateable;
 }
 
 export interface LucidUserLogins {
@@ -561,6 +580,7 @@ export interface LucidDB {
 	lucid_role_permissions: LucidRolePermissions;
 	lucid_user_roles: LucidUserRoles;
 	lucid_user_tokens: LucidUserTokens;
+	lucid_email_change_requests: LucidEmailChangeRequests;
 	lucid_user_logins: LucidUserLogins;
 	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_security_audit_logs: LucidSecurityAuditLogs;

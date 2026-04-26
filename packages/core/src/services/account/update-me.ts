@@ -2,14 +2,9 @@ import constants from "../../constants/constants.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	accountServices,
-	emailServices,
-	securityAuditServices,
-} from "../index.js";
+import { accountServices, securityAuditServices } from "../index.js";
 
 const updateMe: ServiceFn<
 	[
@@ -63,24 +58,7 @@ const updateMe: ServiceFn<
 	const emailChanged =
 		normalizedEmail !== undefined && normalizedEmail !== getUserRes.data.email;
 
-	const [userWithEmail, userWithUsername, updatePassword] = await Promise.all([
-		emailChanged
-			? Users.selectSingle({
-					select: ["id"],
-					where: [
-						{
-							key: "email",
-							operator: "=",
-							value: normalizedEmail,
-						},
-						{
-							key: "id",
-							operator: "!=",
-							value: data.auth.id,
-						},
-					],
-				})
-			: undefined,
+	const [userWithUsername, updatePassword] = await Promise.all([
 		data.username !== undefined
 			? Users.selectSingle({
 					select: ["id"],
@@ -107,25 +85,9 @@ const updateMe: ServiceFn<
 			encryptionKey: context.config.secrets.encryption,
 		}),
 	]);
-	if (userWithEmail?.error) return userWithEmail;
 	if (userWithUsername?.error) return userWithUsername;
 	if (updatePassword.error) return updatePassword;
 
-	if (normalizedEmail !== undefined && userWithEmail?.data !== undefined) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				errors: {
-					email: {
-						code: "invalid",
-						message: T("this_email_is_already_in_use"),
-					},
-				},
-			},
-			data: undefined,
-		};
-	}
 	if (data.username !== undefined && userWithUsername?.data !== undefined) {
 		return {
 			error: {
@@ -142,77 +104,58 @@ const updateMe: ServiceFn<
 		};
 	}
 
-	const [updateMeRes, emailChangedAuditRes, updatePasswordAuditRes] =
-		await Promise.all([
-			Users.updateSingle({
-				data: {
-					first_name: data.firstName,
-					last_name: data.lastName,
-					username: data.username,
-					email: normalizedEmail,
-					updated_at: new Date().toISOString(),
-					password: updatePassword.data.newPassword,
-					secret: updatePassword.data.encryptSecret,
-					triggered_password_reset: updatePassword.data.triggerPasswordReset,
+	const [updateMeRes, updatePasswordAuditRes] = await Promise.all([
+		Users.updateSingle({
+			data: {
+				first_name: data.firstName,
+				last_name: data.lastName,
+				username: data.username,
+				updated_at: new Date().toISOString(),
+				password: updatePassword.data.newPassword,
+				secret: updatePassword.data.encryptSecret,
+				triggered_password_reset: updatePassword.data.triggerPasswordReset,
+			},
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.auth.id,
 				},
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.auth.id,
-					},
-				],
-				returning: ["id", "first_name", "last_name", "email"],
-				validation: {
-					enabled: true,
-					defaultError: {
-						message: T("route_user_me_update_error_message"),
-						status: 400,
-					},
+			],
+			returning: ["id", "first_name", "last_name", "email"],
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("route_user_me_update_error_message"),
+					status: 400,
 				},
-			}),
-			emailChanged
-				? securityAuditServices.logSecurityAudit(context, {
-						userId: data.auth.id,
-						action: constants.securityAudit.actions.emailChange,
-						performedBy: data.auth.id,
-						previousValue: getUserRes.data.email,
-						newValue: normalizedEmail,
-					})
-				: undefined,
-			updatePassword.data.newPassword !== undefined
-				? securityAuditServices.logSecurityAudit(context, {
-						userId: data.auth.id,
-						action: constants.securityAudit.actions.passwordChange,
-						performedBy: data.auth.id,
-						previousValue: constants.securityAudit.redactedValue,
-						newValue: constants.securityAudit.redactedValue,
-					})
-				: undefined,
-		]);
+			},
+		}),
+		updatePassword.data.newPassword !== undefined
+			? securityAuditServices.logSecurityAudit(context, {
+					userId: data.auth.id,
+					action: constants.securityAudit.actions.passwordChange,
+					performedBy: data.auth.id,
+					previousValue: constants.securityAudit.redactedValue,
+					newValue: constants.securityAudit.redactedValue,
+				})
+			: undefined,
+	]);
 	if (updateMeRes.error) return updateMeRes;
-	if (emailChangedAuditRes?.error) return emailChangedAuditRes;
 	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
 
 	if (emailChanged) {
-		const baseUrl = getBaseUrl(context);
-		const sendEmail = await emailServices.sendEmail(context, {
-			template: constants.emailTemplates.emailChanged,
-			type: "internal",
-			to: normalizedEmail,
-			subject: formatEmailSubject(
-				T("email_update_success_subject"),
-				context.config.brand?.name,
-			),
-			data: {
-				firstName: data.firstName || getUserRes.data.first_name,
-				logoUrl: `${baseUrl}${constants.assets.emailLogo}`,
-				brand: {
-					name: context.config.brand?.name,
-				},
+		const requestEmailChangeRes = await accountServices.requestEmailChange(
+			context,
+			{
+				auth: data.auth,
+				oldEmail: getUserRes.data.email,
+				newEmail: normalizedEmail as string,
+				firstName: updateMeRes.data.first_name,
+				lastName: updateMeRes.data.last_name,
 			},
-		});
-		if (sendEmail.error) return sendEmail;
+		);
+		if (requestEmailChangeRes.error) return requestEmailChangeRes;
 	}
 
 	if (getUserRes.data.super_admin === 0) {

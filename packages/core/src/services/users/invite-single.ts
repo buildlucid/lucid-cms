@@ -1,6 +1,7 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import {
+	EmailChangeRequestsRepository,
 	UserRolesRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
@@ -26,9 +27,13 @@ const inviteSingle: ServiceFn<
 	number
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(
+		context.db.client,
+		context.config.db,
+	);
 	const email = normalizeEmailInput(data.email);
 
-	const [userExistsRes, roleExistsRes] = await Promise.all([
+	const [userExistsRes, reservedEmailRes, roleExistsRes] = await Promise.all([
 		Users.selectSingleByEmailUsername({
 			select: ["id", "username", "email"],
 			where: {
@@ -36,28 +41,33 @@ const inviteSingle: ServiceFn<
 				email: email,
 			},
 		}),
+		EmailChangeRequests.selectReservedByEmail({
+			email,
+		}),
 		userServices.checks.checkRolesExist(context, {
 			roleIds: data.roleIds,
 		}),
 	]);
 	if (userExistsRes.error) return userExistsRes;
+	if (reservedEmailRes.error) return reservedEmailRes;
 	if (roleExistsRes.error) return roleExistsRes;
 
-	if (userExistsRes.data !== undefined) {
+	if (userExistsRes.data !== undefined || reservedEmailRes.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
 				status: 500,
 				errors: {
 					email:
-						userExistsRes.data.email === email
+						userExistsRes.data?.email === email ||
+						reservedEmailRes.data !== undefined
 							? {
 									code: "invalid",
 									message: T("duplicate_entry_error_message"),
 								}
 							: undefined,
 					username:
-						userExistsRes.data.username === data.username
+						userExistsRes.data?.username === data.username
 							? {
 									code: "invalid",
 									message: T("duplicate_entry_error_message"),

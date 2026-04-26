@@ -13,6 +13,10 @@ const SetupRoute = lazy(() => import("@/routes/Setup"));
 const ForgotPasswordRoute = lazy(() => import("@/routes/ForgotPassword"));
 const ResetPasswordRoute = lazy(() => import("@/routes/ResetPassword"));
 const AcceptInvitationRoute = lazy(() => import("@/routes/AcceptInvitation"));
+const EmailChangeConfirmRoute = lazy(
+	() => import("@/routes/EmailChangeConfirm"),
+);
+const EmailChangeRevertRoute = lazy(() => import("@/routes/EmailChangeRevert"));
 const ShareRoute = lazy(() => import("@/routes/Share"));
 const DashboardRoute = lazy(() => import("@/routes/Dashboard"));
 const MediaListRoute = lazy(() => import("@/routes/Media/List"));
@@ -190,6 +194,11 @@ const AppRouter: Component = () => {
 				<Route path="/accept-invitation" component={AcceptInvitationRoute} />
 			</Route>
 			<Route path="/lucid" component={PublicRoutes}>
+				<Route
+					path="/email-change/confirm"
+					component={EmailChangeConfirmRoute}
+				/>
+				<Route path="/email-change/revert" component={EmailChangeRevertRoute} />
 				<Route path="/share/:token" component={ShareRoute} />
 			</Route>
 		</Router>

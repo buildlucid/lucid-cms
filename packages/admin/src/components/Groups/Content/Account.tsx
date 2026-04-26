@@ -186,6 +186,7 @@ export const Account: Component = () => {
 						lastName={user()?.lastName ?? undefined}
 						username={user()?.username ?? undefined}
 						email={user()?.email ?? undefined}
+						pendingEmailChange={user()?.pendingEmailChange}
 					/>
 				</InfoRow.Content>
 			</InfoRow.Root>

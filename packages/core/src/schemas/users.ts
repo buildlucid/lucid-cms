@@ -129,6 +129,23 @@ export const userResponseSchema = z.object({
 		description: "The user's email address",
 		example: "admin@lucidcms.io",
 	}),
+	pendingEmailChange: z
+		.object({
+			email: z.email().meta({
+				description: "The pending email address awaiting confirmation",
+				example: "new-admin@lucidcms.io",
+			}),
+			requestedAt: z.string().nullable().meta({
+				description: "When the email change was requested",
+				example: "2021-06-10T20:00:00.000Z",
+			}),
+			expiresAt: z.string().nullable().meta({
+				description: "When the pending email change expires",
+				example: "2021-06-11T20:00:00.000Z",
+			}),
+		})
+		.nullable()
+		.optional(),
 	profilePicture: mediaEmbedResponseSchema.nullable().meta({
 		description: "The user's profile picture media reference",
 	}),

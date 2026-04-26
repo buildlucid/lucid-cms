@@ -33,7 +33,7 @@ export const updateMeReq = (params: Params) => {
 };
 
 interface useUpdateMeProps {
-	onSuccess?: () => void;
+	onSuccess?: (_data: ResponseBody<undefined>, _params: Params) => void;
 	onError?: () => void;
 }
 

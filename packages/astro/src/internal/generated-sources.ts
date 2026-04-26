@@ -98,6 +98,7 @@ const ensureApp = async () => {
 \t\t\t\tenv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
+\t\t\t\tbypassCache: true,
 \t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
@@ -228,6 +229,7 @@ const ensureToolkit = async () => {
 \t\t\t\tenv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
+\t\t\t\tbypassCache: true,
 \t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
@@ -351,6 +353,7 @@ const ensureApp = async () => {
 \t\t\t\tcloudflareEnv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(cloudflareEnv), {
+\t\t\t\tbypassCache: true,
 \t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
@@ -536,9 +539,10 @@ const ensureToolkit = async () => {
 \t\t\tconst resolvedConfig = await processConfig(
 \t\t\t\twrappedDefinition.config(resolvedCloudflareEnv),
 \t\t\t\t{
-\t\t\t\trecipe: wrappedDefinition.recipe,
-\t\t\t\tresolvedDb: databaseAdapter,
-\t\t\t\tskipValidation: true,
+\t\t\t\t\tbypassCache: true,
+\t\t\t\t\trecipe: wrappedDefinition.recipe,
+\t\t\t\t\tresolvedDb: databaseAdapter,
+\t\t\t\t\tskipValidation: true,
 \t\t\t\t},
 \t\t\t);
 \t\t\tconst context = createToolkitServiceContext({

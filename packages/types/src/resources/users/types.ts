@@ -47,6 +47,11 @@ export type User = {
 	lastName: string | null;
 	isDeleted: boolean;
 	email: string;
+	pendingEmailChange?: {
+		email: string;
+		requestedAt: string | null;
+		expiresAt: string | null;
+	} | null;
 	profilePicture: ProfilePicture | null;
 	deletedAt?: string | null;
 	createdAt?: string | null;

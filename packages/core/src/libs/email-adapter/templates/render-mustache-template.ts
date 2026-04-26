@@ -22,14 +22,22 @@ const renderMustacheTemplate: ServiceFn<
 	if (context.config.preRenderedEmailTemplates) {
 		const preRenderedTemplate =
 			context.config.preRenderedEmailTemplates[data.template];
-		if (preRenderedTemplate) {
-			const renderedTemplate = Mustache.render(preRenderedTemplate, data.data);
-
+		if (preRenderedTemplate === undefined) {
 			return {
-				error: undefined,
-				data: renderedTemplate,
+				error: {
+					message: T("template_not_found_message"),
+					status: 404,
+				},
+				data: undefined,
 			};
 		}
+
+		const renderedTemplate = Mustache.render(preRenderedTemplate, data.data);
+
+		return {
+			error: undefined,
+			data: renderedTemplate,
+		};
 	}
 
 	try {

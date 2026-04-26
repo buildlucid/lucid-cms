@@ -14,6 +14,7 @@ const createSingle: ServiceFn<
 	],
 	{
 		token: string;
+		tokenId: number;
 	}
 > = async (context, data) => {
 	const UserTokens = new UserTokensRepository(
@@ -31,6 +32,7 @@ const createSingle: ServiceFn<
 			expiry_date: data.expiryDate,
 			token: hashedToken,
 		},
+		returning: ["id"],
 		validation: {
 			enabled: true,
 		},
@@ -41,6 +43,7 @@ const createSingle: ServiceFn<
 		error: undefined,
 		data: {
 			token: token,
+			tokenId: userTokenRes.data.id,
 		},
 	};
 };

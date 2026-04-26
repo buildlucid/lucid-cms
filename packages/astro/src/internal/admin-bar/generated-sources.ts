@@ -266,6 +266,7 @@ const ensureApp = async () => {
 \t\t\t\tenv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
+\t\t\t\tbypassCache: true,
 \t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
@@ -407,6 +408,7 @@ const ensureApp = async () => {
 \t\t\t\tcloudflareEnv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(cloudflareEnv), {
+\t\t\t\tbypassCache: true,
 \t\t\t\trecipe: wrappedDefinition.recipe,
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,

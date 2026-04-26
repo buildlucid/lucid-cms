@@ -14,6 +14,13 @@ const profilePictureTranslationSchema = z.object({
 	}),
 });
 
+const emailChangeTokenParamsSchema = z.object({
+	token: z.string().meta({
+		description: "A unique token granted when an email change is requested",
+		example: "838ece1033bf7c7468e873e79ba2a3ec",
+	}),
+});
+
 export const controllerSchemas = {
 	getMe: {
 		body: undefined,
@@ -85,6 +92,51 @@ export const controllerSchemas = {
 				example: "838ece1033bf7c7468e873e79ba2a3ec",
 			}),
 		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	verifyEmailChangeConfirm: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: emailChangeTokenParamsSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	confirmEmailChange: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: emailChangeTokenParamsSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	verifyEmailChangeRevert: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: emailChangeTokenParamsSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	revertEmailChange: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: emailChangeTokenParamsSchema,
+		response: undefined,
+	} satisfies ControllerSchema,
+	cancelEmailChange: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
 		response: undefined,
 	} satisfies ControllerSchema,
 	unlinkAuthProvider: {

@@ -6,6 +6,7 @@ export { default as CollectionsRepository } from "./collections.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
 export { default as DocumentVersionsRepository } from "./document-versions.js";
 export { default as DocumentsRepository } from "./documents.js";
+export { default as EmailChangeRequestsRepository } from "./email-change-requests.js";
 export { default as EmailTransactionsRepository } from "./email-transactions.js";
 export { default as EmailsRepository } from "./emails.js";
 export { default as LocalesRepository } from "./locales.js";

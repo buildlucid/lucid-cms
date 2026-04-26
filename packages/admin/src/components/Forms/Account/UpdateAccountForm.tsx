@@ -1,4 +1,5 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import type { User } from "@types";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { Form, Input } from "@/components/Groups/Form";
 import api from "@/services/api";
 import T from "@/translations";
@@ -10,6 +11,7 @@ interface UpdateAccountFormProps {
 	lastName: string | undefined;
 	username: string | undefined;
 	email: string | undefined;
+	pendingEmailChange?: User["pendingEmailChange"];
 }
 
 const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
@@ -22,7 +24,14 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 
 	// ----------------------------------------
 	// Mutations
-	const updateMe = api.account.useUpdateMe();
+	const updateMe = api.account.useUpdateMe({
+		onSuccess: (_data, params) => {
+			if (params.email !== undefined) {
+				setEmail(props.email ?? "");
+			}
+		},
+	});
+	const cancelEmailChange = api.account.useCancelEmailChange();
 
 	// ----------------------------------------
 	// Memos
@@ -113,6 +122,23 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				required={true}
 				errors={getBodyError("email", updateMe.errors)}
 			/>
+			<Show when={props.pendingEmailChange}>
+				{(pendingEmailChange) => (
+					<p class="mt-2 text-sm text-body">
+						{T()("pending_email_change_description", {
+							email: pendingEmailChange().email,
+						})}{" "}
+						<button
+							type="button"
+							class="text-body underline underline-offset-2 transition-colors hover:text-title disabled:cursor-not-allowed disabled:opacity-60"
+							disabled={cancelEmailChange.action.isPending}
+							onClick={() => cancelEmailChange.action.mutate({})}
+						>
+							{T()("cancel")}
+						</button>
+					</p>
+				)}
+			</Show>
 		</Form>
 	);
 };

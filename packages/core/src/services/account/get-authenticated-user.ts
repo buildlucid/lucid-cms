@@ -1,5 +1,8 @@
 import { usersFormatter } from "../../libs/formatters/index.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
+import {
+	EmailChangeRequestsRepository,
+	UsersRepository,
+} from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types.js";
@@ -16,29 +19,39 @@ const getAuthenticatedUser: ServiceFn<
 	User
 > = async (context, data) => {
 	const Users = new UsersRepository(context.db.client, context.config.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
-	const userRes = await Users.selectSinglePreset({
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.userId,
+	const [userRes, pendingEmailChangeRes] = await Promise.all([
+		Users.selectSinglePreset({
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.userId,
+				},
+				{
+					key: "is_deleted",
+					operator: "=",
+					value: context.config.db.getDefault("boolean", "false"),
+				},
+			],
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("user_not_found_message"),
+					status: 404,
+				},
 			},
-			{
-				key: "is_deleted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: T("user_not_found_message"),
-				status: 404,
-			},
-		},
-	});
+		}),
+		EmailChangeRequests.selectActivePendingForUser({
+			userId: data.userId,
+		}),
+	]);
 	if (userRes.error) return userRes;
+	if (pendingEmailChangeRes.error) return pendingEmailChangeRes;
 
 	return {
 		error: undefined,
@@ -47,6 +60,13 @@ const getAuthenticatedUser: ServiceFn<
 			authUser: data.authUser,
 			host: getBaseUrl(context),
 			locales: context.config.localization.locales.map((locale) => locale.code),
+			pendingEmailChange: pendingEmailChangeRes.data
+				? {
+						email: pendingEmailChangeRes.data.new_email,
+						requestedAt: pendingEmailChangeRes.data.created_at,
+						expiresAt: pendingEmailChangeRes.data.expires_at,
+					}
+				: null,
 		}),
 	};
 };

@@ -290,6 +290,73 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_email_change_requests")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").notNull().onDelete("cascade"),
+				)
+				.addColumn("old_email", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("new_email", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("confirm_token_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_user_tokens.id").notNull().onDelete("cascade"),
+				)
+				.addColumn("revert_token_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_user_tokens.id").notNull().onDelete("cascade"),
+				)
+				.addColumn("status", adapter.getDataType("varchar", 255), (col) =>
+					col.notNull(),
+				)
+				.addColumn("confirmed_at", adapter.getDataType("timestamp"))
+				.addColumn("cancelled_at", adapter.getDataType("timestamp"))
+				.addColumn("reverted_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_change_requests_user_status")
+				.on("lucid_email_change_requests")
+				.columns(["user_id", "status", "expires_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_change_requests_confirm_token")
+				.on("lucid_email_change_requests")
+				.column("confirm_token_id")
+				.unique()
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_change_requests_revert_token")
+				.on("lucid_email_change_requests")
+				.column("revert_token_id")
+				.unique()
+				.execute();
+
+			await db.schema
 				.createTable("lucid_user_logins")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
