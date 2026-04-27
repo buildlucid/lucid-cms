@@ -2,10 +2,9 @@ import T from "../../../translations/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
-import { getFileMetadata } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices, optionServices } from "../../index.js";
-import detectStreamMimeType from "../helpers/detect-stream-mime-type.js";
+import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const update: ServiceFn<
 	[
@@ -52,11 +51,6 @@ const update: ServiceFn<
 	const mediaMetaRes = await mediaStrategyRes.data.getMeta(data.updatedKey);
 	if (mediaMetaRes.error) return mediaMetaRes;
 
-	const detectedMimeType = await detectStreamMimeType(
-		mediaStrategyRes.data.stream,
-		data.updatedKey,
-	);
-
 	// Ensure we available storage space
 	const proposedSizeRes = await mediaServices.checks.checkCanUpdateMedia(
 		context,
@@ -69,52 +63,17 @@ const update: ServiceFn<
 		return proposedSizeRes;
 	}
 
-	const fileMetaData = await getFileMetadata({
-		mimeType: detectedMimeType ?? mediaMetaRes.data.mimeType,
+	const fileMetaData = await validateUploadedMedia({
+		stream: mediaStrategyRes.data.stream,
+		key: data.updatedKey,
 		fileName: data.fileName,
+		mimeType: mediaMetaRes.data.mimeType,
+		allowedType: data.allowedType,
+		expectedType: data.previousType,
 	});
 	if (fileMetaData.error) {
 		await cleanupUpdatedKey();
 		return fileMetaData;
-	}
-
-	if (
-		data.allowedType !== undefined &&
-		fileMetaData.data.type !== data.allowedType
-	) {
-		await cleanupUpdatedKey();
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				errors: {
-					file: {
-						code: "media_error",
-						message: T("media_error_invalid_type", {
-							type: data.allowedType,
-						}),
-					},
-				},
-			},
-			data: undefined,
-		};
-	}
-
-	if (fileMetaData.data.type !== data.previousType) {
-		await cleanupUpdatedKey();
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				errors: {
-					file: {
-						code: "media_error",
-						message: T("media_error_type_change_not_allowed"),
-					},
-				},
-			},
-			data: undefined,
-		};
 	}
 
 	const delta = mediaMetaRes.data.size - data.previousSize;

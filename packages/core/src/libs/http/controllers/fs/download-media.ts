@@ -77,6 +77,7 @@ const downloadMediaController = factory.createHandlers(
 			fileName: query.fileName,
 			extension: query.extension,
 		});
+		c.header("X-Content-Type-Options", "nosniff");
 		c.header("Content-Disposition", contentDisposition);
 		if (downloadMedia.data.contentLength !== undefined) {
 			c.header("Content-Length", String(downloadMedia.data.contentLength));

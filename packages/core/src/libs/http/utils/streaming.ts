@@ -11,6 +11,7 @@ export const applyStreamingHeaders = (
 	},
 ) => {
 	c.header("Accept-Ranges", "bytes");
+	c.header("X-Content-Type-Options", "nosniff");
 	if (opts.key)
 		c.header("Content-Disposition", `inline; filename="${opts.key}"`);
 	if (opts.contentLength !== undefined)

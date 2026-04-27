@@ -10,6 +10,7 @@ import T from "../../translations/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkCanStoreMedia from "./checks/check-can-store-media.js";
 
 export type UploadSessionResponse =
 	| {
@@ -59,6 +60,11 @@ const createUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const sizeRes = await checkCanStoreMedia(context, {
+		size: data.size,
+	});
+	if (sizeRes.error) return sizeRes;
 
 	const extension = mime.extension(data.mimeType);
 	const keyRes = generateKey({

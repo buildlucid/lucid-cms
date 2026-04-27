@@ -1,9 +1,9 @@
 import T from "../../../translations/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
-import { getFileMetadata } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices, optionServices } from "../../index.js";
+import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const syncMedia: ServiceFn<
 	[
@@ -41,32 +41,16 @@ const syncMedia: ServiceFn<
 		return proposedSizeRes;
 	}
 
-	const fileMetaData = await getFileMetadata({
+	const fileMetaData = await validateUploadedMedia({
+		stream: mediaStrategyRes.data.stream,
+		key: data.key,
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
+		allowedType: data.allowedType,
 	});
-	if (fileMetaData.error) return fileMetaData;
-
-	if (
-		data.allowedType !== undefined &&
-		fileMetaData.data.type !== data.allowedType
-	) {
+	if (fileMetaData.error) {
 		await mediaStrategyRes.data.delete(data.key);
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				errors: {
-					file: {
-						code: "media_error",
-						message: T("media_error_invalid_type", {
-							type: data.allowedType,
-						}),
-					},
-				},
-			},
-			data: undefined,
-		};
+		return fileMetaData;
 	}
 
 	const storageLimit = context.config.media.limits.storage;
