@@ -448,6 +448,24 @@ export interface LucidMediaAwaitingSync {
 	timestamp: TimestampImmutable;
 }
 
+export interface LucidMediaUploadSessions {
+	session_id: string;
+	key: string;
+	adapter_key: string;
+	adapter_upload_id: string | null;
+	mode: "single" | "resumable";
+	status: "active" | "completed" | "aborted";
+	file_name: string;
+	mime_type: string;
+	file_extension: string | null;
+	file_size: number;
+	part_size: number | null;
+	created_by: number | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+	expires_at: TimestampMutateable;
+}
+
 export interface HeadlessProcessedImages {
 	key: string;
 	media_key: string | null;
@@ -596,6 +614,7 @@ export interface LucidDB {
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
+	lucid_media_upload_sessions: LucidMediaUploadSessions;
 	lucid_media_share_links: LucidMediaShareLinks;
 	lucid_processed_images: HeadlessProcessedImages;
 	lucid_client_integrations: LucidClientIntegrations;

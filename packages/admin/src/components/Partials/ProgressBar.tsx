@@ -1,9 +1,10 @@
 import classNames from "classnames";
-import { type Component, createSignal, onMount, Show } from "solid-js";
+import { type Component, createEffect, createSignal, Show } from "solid-js";
 
 interface ProgressBarProps {
 	progress: number;
 	type: "usage" | "target";
+	variant?: "default" | "edge";
 	labels?: {
 		start?: string;
 		end?: string;
@@ -16,8 +17,8 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 	const [getProgress, setProgress] = createSignal(0);
 
 	// ----------------------------------------
-	// On Mount
-	onMount(() => {
+	// Effects
+	createEffect(() => {
 		setProgress(props.progress);
 	});
 
@@ -26,7 +27,10 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 	return (
 		<>
 			<div
-				class="w-full bg-input-base h-3 rounded-md overflow-hidden"
+				class={classNames("w-full bg-input-base overflow-hidden", {
+					"h-3 rounded-md": props.variant !== "edge",
+					"h-2 rounded-none bg-primary-base/20": props.variant === "edge",
+				})}
 				role="progressbar"
 				aria-valuenow={getProgress()}
 				aria-valuemin="0"
@@ -35,13 +39,16 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 				tabIndex={-1}
 			>
 				<div
-					class={classNames("h-full rounded-md duration-200 transition-all", {
+					class={classNames("h-full duration-200 transition-all", {
+						"rounded-md": props.variant !== "edge",
 						// usage
 						"bg-error-base": props.type === "usage" && getProgress() > 90,
 						"bg-white": props.type === "usage" && getProgress() <= 90,
 						// target
-						"bg-primary-base": props.type === "target" && getProgress() > 90,
-						"bg-primary-base ": props.type === "target" && getProgress() <= 90,
+						"bg-primary-base":
+							props.type === "target" && props.variant !== "edge",
+						"bg-primary-base/70":
+							props.type === "target" && props.variant === "edge",
 					})}
 					style={{
 						width: `${getProgress()}%`,

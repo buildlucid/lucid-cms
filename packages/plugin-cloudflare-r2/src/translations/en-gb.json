@@ -11,5 +11,13 @@
 	"route_storage_upload_error_name": "Cloudflare R2 Upload Error",
 	"route_storage_upload_error_message": "There was an error uploading a file through the Cloudflare R2 binding.",
 	"route_storage_download_error_name": "Cloudflare R2 Download Error",
-	"route_storage_download_error_message": "There was an error downloading a file through the Cloudflare R2 binding."
+	"route_storage_download_error_message": "There was an error downloading a file through the Cloudflare R2 binding.",
+	"http_fallback_not_configured": "HTTP fallback is not configured.",
+	"http_client_not_configured": "HTTP client is not configured.",
+	"failed_to_generate_download_url": "Failed to generate a download URL.",
+	"upload_session_failed": "Upload session failed with status {{status}} and message {{statusText}}.",
+	"upload_id_missing": "The storage provider did not return an upload ID.",
+	"list_parts_failed": "List parts failed with status {{status}} and message {{statusText}}.",
+	"complete_upload_failed": "Complete upload failed with status {{status}} and message {{statusText}}.",
+	"abort_upload_failed": "Abort upload failed with status {{status}} and message {{statusText}}."
 }

@@ -1,8 +1,8 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../schemas/users.js";
-import { accountServices } from "../../../../services/index.js";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { mediaServices } from "../../../../services/index.js";
 import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -21,58 +21,58 @@ import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
-const getProfilePicturePresignedUrlController = factory.createHandlers(
+const createUploadSessionController = factory.createHandlers(
 	describeRoute({
-		description: "Get a presigned URL to upload a user's profile picture.",
-		tags: ["users"],
-		summary: "Get User Profile Picture Presigned URL",
+		description: "Create an upload session for a single media item.",
+		tags: ["media"],
+		summary: "Create Upload Session",
 		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(
-				controllerSchemas.getProfilePicturePresignedUrl.response,
-			),
+			schema: z.toJSONSchema(controllerSchemas.createUploadSession.response),
 		}),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.getProfilePicturePresignedUrl.params,
 			headers: {
 				csrf: true,
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(
-			controllerSchemas.getProfilePicturePresignedUrl.body,
+			controllerSchemas.createUploadSession.body,
 		),
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.UsersUpdate]),
-	validate("param", controllerSchemas.getProfilePicturePresignedUrl.params),
-	validate("json", controllerSchemas.getProfilePicturePresignedUrl.body),
+	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
+	validate("json", controllerSchemas.createUploadSession.body),
 	async (c) => {
 		const body = c.req.valid("json");
 		const context = getServiceContext(c);
 
-		const presignedUrl = await serviceWrapper(
-			accountServices.getProfilePicturePresignedUrl,
+		const uploadSession = await serviceWrapper(
+			mediaServices.createUploadSession,
 			{
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("route_user_profile_picture_presigned_url_error_name"),
-					message: T("route_user_profile_picture_presigned_url_error_message"),
+					name: T("route_media_upload_session_error_name"),
+					message: T("route_media_upload_session_error_message"),
 				},
 			},
 		)(context, {
 			fileName: body.fileName,
 			mimeType: body.mimeType,
+			size: body.size,
+			public: body.public,
+			temporary: body.temporary,
+			userId: c.get("auth").id,
 		});
-		if (presignedUrl.error) throw new LucidAPIError(presignedUrl.error);
+		if (uploadSession.error) throw new LucidAPIError(uploadSession.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: presignedUrl.data,
+				data: uploadSession.data,
 			}),
 		);
 	},
 );
 
-export default getProfilePicturePresignedUrlController;
+export default createUploadSessionController;

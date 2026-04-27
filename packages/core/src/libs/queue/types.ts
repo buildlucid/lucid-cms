@@ -12,6 +12,7 @@ import type {
 export type QueueEvent<T extends string = string> =
 	| "email:send"
 	| "media:delete"
+	| "media:abort-upload-session"
 	| "media:delete-unsynced"
 	| "media:update-storage"
 	| "collections:delete"

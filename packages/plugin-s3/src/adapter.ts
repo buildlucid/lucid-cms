@@ -4,9 +4,13 @@ import deleteMultiple from "./services/delete-multiple.js";
 import deletSingle from "./services/delete-single.js";
 import getDownloadUrl from "./services/get-download-url.js";
 import getMetadata from "./services/get-metadata.js";
-import getPresignedUrl from "./services/get-presigned-url.js";
 import rename from "./services/rename.js";
 import stream from "./services/steam.js";
+import { abortUploadSession } from "./services/upload-session/abort-upload-session.js";
+import { completeUploadSession } from "./services/upload-session/complete-upload-session.js";
+import { createUploadSession } from "./services/upload-session/create-upload-session.js";
+import { getUploadPartUrls } from "./services/upload-session/get-upload-part-urls.js";
+import { listUploadParts } from "./services/upload-session/list-upload-parts.js";
 import uploadSingle from "./services/upload-single.js";
 import type { PluginOptions } from "./types/types.js";
 
@@ -16,7 +20,11 @@ const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
 	return {
 		type: "media-adapter",
 		key: "s3",
-		getPresignedUrl: getPresignedUrl(client, options),
+		createUploadSession: createUploadSession(client, options),
+		getUploadPartUrls: getUploadPartUrls(client, options),
+		listUploadParts: listUploadParts(client, options),
+		completeUploadSession: completeUploadSession(client, options),
+		abortUploadSession: abortUploadSession(client, options),
 		getDownloadUrl: getDownloadUrl(client, options),
 		getMeta: getMetadata(client, options),
 		stream: stream(client, options),

@@ -20,7 +20,7 @@ const profilePictureTranslationSchema = z.object({
 		example: "Profile photo",
 	}),
 });
-const profilePicturePresignedUrlBodySchema = z.object({
+const profilePictureUploadSessionBodySchema = z.object({
 	fileName: z.string().trim().meta({
 		description: "The profile picture file name",
 		example: "profile.png",
@@ -29,26 +29,32 @@ const profilePicturePresignedUrlBodySchema = z.object({
 		description: "The profile picture MIME type",
 		example: "image/png",
 	}),
-});
-const profilePicturePresignedUrlResponseSchema = z.object({
-	url: z.string().meta({
-		description: "The presigned URL to upload the profile picture to",
-		example: "https://example.com/cdn/key",
+	size: z.number().nonnegative().meta({
+		description: "The file size in bytes",
+		example: 1048576,
 	}),
-	key: z.string().meta({
-		description: "The media key",
-		example: "public/123e4567e89b12d3a456426614174000",
-	}),
-	headers: z
-		.record(z.string(), z.string())
-		.meta({
-			description: "The headers to use when uploading media",
-			example: {
-				"x-amz-meta-extension": "png",
-			},
-		})
-		.optional(),
 });
+const uploadPartSchema = z.object({
+	partNumber: z.number().int().positive(),
+	etag: z.string().trim(),
+	size: z.number().nonnegative().optional(),
+});
+const profilePictureUploadSessionResponseSchema = z.discriminatedUnion("mode", [
+	z.object({
+		mode: z.literal("single"),
+		key: z.string(),
+		url: z.string(),
+		headers: z.record(z.string(), z.string()).optional(),
+	}),
+	z.object({
+		mode: z.literal("resumable"),
+		key: z.string(),
+		sessionId: z.string(),
+		partSize: z.number(),
+		expiresAt: z.string(),
+		uploadedParts: z.array(uploadPartSchema),
+	}),
+]);
 const updateProfilePictureBodySchema = z
 	.object({
 		key: z.string().trim().optional().meta({
@@ -340,14 +346,14 @@ export const controllerSchemas = {
 		params: userIdParamSchema,
 		response: undefined,
 	} satisfies ControllerSchema,
-	getProfilePicturePresignedUrl: {
-		body: profilePicturePresignedUrlBodySchema,
+	createProfilePictureUploadSession: {
+		body: profilePictureUploadSessionBodySchema,
 		query: {
 			string: undefined,
 			formatted: undefined,
 		},
 		params: userIdParamSchema,
-		response: profilePicturePresignedUrlResponseSchema,
+		response: profilePictureUploadSessionResponseSchema,
 	} satisfies ControllerSchema,
 	updateProfilePicture: {
 		body: updateProfilePictureBodySchema,

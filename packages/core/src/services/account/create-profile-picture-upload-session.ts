@@ -2,19 +2,18 @@ import T from "../../translations/index.js";
 import { getMediaType } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
+import type { UploadSessionResponse } from "../media/create-upload-session.js";
 
-const getProfilePicturePresignedUrl: ServiceFn<
+const createProfilePictureUploadSession: ServiceFn<
 	[
 		{
 			fileName: string;
 			mimeType: string;
+			size: number;
+			userId: number;
 		},
 	],
-	{
-		url: string;
-		key: string;
-		headers?: Record<string, string>;
-	}
+	UploadSessionResponse
 > = async (context, data) => {
 	if (getMediaType(data.mimeType) !== "image") {
 		return {
@@ -34,11 +33,13 @@ const getProfilePicturePresignedUrl: ServiceFn<
 		};
 	}
 
-	return mediaServices.getPresignedUrl(context, {
+	return mediaServices.createUploadSession(context, {
 		fileName: data.fileName,
 		mimeType: data.mimeType,
+		size: data.size,
 		public: true,
+		userId: data.userId,
 	});
 };
 
-export default getProfilePicturePresignedUrl;
+export default createProfilePictureUploadSession;

@@ -193,7 +193,7 @@ const createApp = async (props: {
 						{
 							name: "media",
 							description:
-								"Media endpoints for creating, updating, deleting, getting presigned URLs and clearing processed images.",
+								"Media endpoints for creating, updating, deleting, creating upload sessions and clearing processed images.",
 						},
 						{
 							name: "media-folders",

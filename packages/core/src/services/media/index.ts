@@ -1,13 +1,17 @@
+export { default as abortUploadSession } from "./abort-upload-session.js";
 export * as checks from "./checks/index.js";
 export * as client from "./client/index.js";
+export { default as completeUploadSession } from "./complete-upload-session.js";
 export { default as createSingle } from "./create-single.js";
+export { default as createUploadSession } from "./create-upload-session.js";
 export { default as deleteBatch } from "./delete-batch.js";
 export { default as deleteMultiplePermanently } from "./delete-multiple-permanently.js";
 export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
 export { default as getMultiple } from "./get-multiple.js";
-export { default as getPresignedUrl } from "./get-presigned-url.js";
 export { default as getSingle } from "./get-single.js";
+export { default as getUploadPartUrls } from "./get-upload-part-urls.js";
+export { default as getUploadSession } from "./get-upload-session.js";
 export { default as moveFolder } from "./move-folder.js";
 export { default as processMedia } from "./process-media.js";
 export { default as restoreMultiple } from "./restore-multiple.js";

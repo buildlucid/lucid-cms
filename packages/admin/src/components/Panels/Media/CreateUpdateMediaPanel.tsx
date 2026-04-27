@@ -21,6 +21,7 @@ import { Panel } from "@/components/Groups/Panel";
 import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
 import Pill from "@/components/Partials/Pill";
+import ProgressBar from "@/components/Partials/ProgressBar";
 import { useCreateMedia, useUpdateMedia } from "@/hooks/actions";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
@@ -55,7 +56,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	);
 	const createMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
-	const updatePosterAlt = api.media.useUpdateSingle();
 
 	const MediaFile = useSingleFileUpload({
 		id: "file",
@@ -63,6 +63,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		name: "file",
 		required: true,
 		errors: () => mutateErrors(),
+		progress: () => ({
+			active:
+				Boolean(targetAction()?.isLoading()) && targetUploadProgress() > 0,
+			value: targetUploadProgress(),
+		}),
 		noMargin: false,
 	});
 	const PosterFile = useSingleFileUpload({
@@ -81,7 +86,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const locales = createMemo(() => contentLocaleStore.get.locales);
 
 	// ---------------------------------
-	// Queries
+	// Queries & Mutations
 	const media = api.media.useGetSingle({
 		queryParams: {
 			location: {
@@ -90,7 +95,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		},
 		enabled: () => panelMode() === "update" && props.state.open,
 	});
-
+	const updatePosterAlt = api.media.useUpdateSingle();
 	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
 		queryParams: {},
 	});
@@ -293,6 +298,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const targetAction = createMemo(() => {
 		return panelMode() === "create" ? createMedia : updateMedia;
 	});
+	const targetUploadProgress = createMemo(() => {
+		return targetAction()?.uploadProgress() ?? 0;
+	});
+	const posterUploadProgress = createMemo(() => {
+		return createMedia.uploadProgress();
+	});
+	const posterUploadActive = createMemo(() => {
+		return createMedia.isLoading() && posterUploadProgress() > 0;
+	});
 	const targetState = createMemo(() => {
 		return targetAction()?.state;
 	});
@@ -464,7 +478,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 		return poster?.id ?? null;
 	}
-	async function updateExistingPosterAlt() {
+
+	// ---------------------------------
+	// Handlers
+	const updateExistingPosterAlt = async () => {
 		const poster = media.data?.data.poster;
 		if (!poster || PosterFile.getFile() || PosterFile.getRemovedCurrent()) {
 			return true;
@@ -484,7 +501,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		});
 
 		return true;
-	}
+	};
 
 	// ---------------------------------
 	// Handlers
@@ -524,6 +541,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		}
 	};
 
+	// ---------------------------------
+	// Effects
 	createEffect(() => {
 		if (media.isSuccess && panelMode() === "update") {
 			updateMedia?.setTitle(media.data?.data.title || []);
@@ -778,7 +797,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								}
 							}}
 						/>
-						<div class="w-full rounded-md border border-border bg-input-base mb-3">
+						<div class="w-full rounded-md border border-border bg-input-base mb-3 overflow-hidden relative">
 							<div class="grid grid-cols-[112px_1fr_auto] items-center gap-3 p-3">
 								<div class="h-20 rounded-sm border border-border rectangle-background overflow-hidden flex items-center justify-center bg-background-base">
 									<Show
@@ -871,6 +890,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									</Show>
 								</div>
 							</div>
+							<Show when={posterUploadActive()}>
+								<div class="absolute inset-x-0 bottom-0 z-20">
+									<ProgressBar
+										progress={posterUploadProgress()}
+										type="target"
+										variant="edge"
+									/>
+								</div>
+							</Show>
 						</div>
 						<Show when={showPosterAltInput()}>
 							<For each={locales()}>

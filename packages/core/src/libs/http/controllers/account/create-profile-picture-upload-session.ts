@@ -19,15 +19,15 @@ import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
-const getProfilePicturePresignedUrlController = factory.createHandlers(
+const createProfilePictureUploadSessionController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get a presigned URL to upload the authenticated user's profile picture.",
+			"Create an upload session for the authenticated user's profile picture.",
 		tags: ["account"],
-		summary: "Get Profile Picture Presigned URL",
+		summary: "Create Profile Picture Upload Session",
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(
-				controllerSchemas.getProfilePicturePresignedUrl.response,
+				controllerSchemas.createProfilePictureUploadSession.response,
 			),
 		}),
 		parameters: honoOpenAPIParamaters({
@@ -36,39 +36,41 @@ const getProfilePicturePresignedUrlController = factory.createHandlers(
 			},
 		}),
 		requestBody: honoOpenAPIRequestBody(
-			controllerSchemas.getProfilePicturePresignedUrl.body,
+			controllerSchemas.createProfilePictureUploadSession.body,
 		),
 	}),
 	validateCSRF,
 	authenticate,
-	validate("json", controllerSchemas.getProfilePicturePresignedUrl.body),
+	validate("json", controllerSchemas.createProfilePictureUploadSession.body),
 	async (c) => {
 		const body = c.req.valid("json");
 		const context = getServiceContext(c);
 
-		const presignedUrl = await serviceWrapper(
-			accountServices.getProfilePicturePresignedUrl,
+		const uploadSession = await serviceWrapper(
+			accountServices.createProfilePictureUploadSession,
 			{
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("route_profile_picture_presigned_url_error_name"),
-					message: T("route_profile_picture_presigned_url_error_message"),
+					name: T("route_profile_picture_upload_session_error_name"),
+					message: T("route_profile_picture_upload_session_error_message"),
 				},
 			},
 		)(context, {
 			fileName: body.fileName,
 			mimeType: body.mimeType,
+			size: body.size,
+			userId: c.get("auth").id,
 		});
-		if (presignedUrl.error) throw new LucidAPIError(presignedUrl.error);
+		if (uploadSession.error) throw new LucidAPIError(uploadSession.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: presignedUrl.data,
+				data: uploadSession.data,
 			}),
 		);
 	},
 );
 
-export default getProfilePicturePresignedUrlController;
+export default createProfilePictureUploadSessionController;

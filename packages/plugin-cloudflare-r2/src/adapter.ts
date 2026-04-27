@@ -5,9 +5,14 @@ import deleteMultiple from "./services/delete-multiple.js";
 import deleteSingle from "./services/delete-single.js";
 import getDownloadUrl from "./services/get-download-url.js";
 import getMetadata from "./services/get-metadata.js";
-import getPresignedUrl from "./services/get-presigned-url.js";
 import rename from "./services/rename.js";
 import stream from "./services/stream.js";
+import { abortUploadSession } from "./services/upload-session/abort-upload-session.js";
+import { completeUploadSession } from "./services/upload-session/complete-upload-session.js";
+import { createUploadSession } from "./services/upload-session/create-upload-session.js";
+import { getUploadPartUrls } from "./services/upload-session/get-upload-part-urls.js";
+import { listUploadParts } from "./services/upload-session/list-upload-parts.js";
+
 import uploadSingle from "./services/upload-single.js";
 import type { PluginOptions } from "./types.js";
 
@@ -23,7 +28,19 @@ const cloudflareR2Adapter: MediaAdapter<PluginOptions> = (options) => {
 	return {
 		type: "media-adapter",
 		key: ADAPTER_KEY,
-		getPresignedUrl: getPresignedUrl(httpClient, options),
+		createUploadSession: createUploadSession(httpClient, options),
+		getUploadPartUrls: options.http
+			? getUploadPartUrls(httpClient, options)
+			: undefined,
+		listUploadParts: options.http
+			? listUploadParts(httpClient, options)
+			: undefined,
+		completeUploadSession: options.http
+			? completeUploadSession(httpClient, options)
+			: undefined,
+		abortUploadSession: options.http
+			? abortUploadSession(httpClient, options)
+			: undefined,
 		getDownloadUrl: getDownloadUrl(httpClient, options),
 		getMeta: getMetadata(options),
 		stream: stream(options),

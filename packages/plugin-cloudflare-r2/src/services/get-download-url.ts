@@ -1,6 +1,7 @@
 import type { MediaAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY, STORAGE_DOWNLOAD_PATH } from "../constants.js";
+import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 import { createSignedMediaUrl } from "../utils/signed-media-url.js";
@@ -34,7 +35,13 @@ export default (
 			}
 
 			if (!client) {
-				throw new Error("HTTP client is not configured.");
+				return {
+					error: {
+						type: "plugin",
+						message: T("http_client_not_configured"),
+					},
+					data: undefined,
+				};
 			}
 
 			const objectUrl = new URL(
@@ -72,7 +79,7 @@ export default (
 					message:
 						error instanceof Error
 							? error.message
-							: "Failed to generate a download URL.",
+							: T("failed_to_generate_download_url"),
 				},
 				data: undefined,
 			};

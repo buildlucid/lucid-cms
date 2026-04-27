@@ -203,6 +203,57 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_media_upload_sessions")
+				.addColumn("session_id", adapter.getDataType("text"), (col) =>
+					col.primaryKey(),
+				)
+				.addColumn("key", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("adapter_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("adapter_upload_id", adapter.getDataType("text"))
+				.addColumn("mode", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("status", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("file_name", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("mime_type", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("file_extension", adapter.getDataType("text"))
+				.addColumn("file_size", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("part_size", adapter.getDataType("integer"))
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_media_upload_sessions_key")
+				.on("lucid_media_upload_sessions")
+				.column("key")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_media_upload_sessions_expires_at")
+				.on("lucid_media_upload_sessions")
+				.column("expires_at")
+				.execute();
+
+			await db.schema
 				.createTable("lucid_processed_images")
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.primaryKey(),

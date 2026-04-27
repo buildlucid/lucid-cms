@@ -62,13 +62,14 @@ describe("Cloudflare R2 plugin", () => {
 					} as {
 						media: {
 							adapter?: {
-								getPresignedUrl: (
+								createUploadSession: (
 									key: string,
 									meta: {
 										host: string;
 										secretKey: string;
 										mimeType: string;
 										extension?: string;
+										size: number;
 									},
 								) => Promise<{
 									error?: {
@@ -76,6 +77,8 @@ describe("Cloudflare R2 plugin", () => {
 										message: string;
 									};
 									data?: {
+										key: string;
+										mode: "single";
 										url: string;
 									};
 								}>;
@@ -87,14 +90,16 @@ describe("Cloudflare R2 plugin", () => {
 				})()
 			: undefined;
 
-		const result = await adapter?.getPresignedUrl("public/test.png", {
+		const result = await adapter?.createUploadSession("public/test.png", {
 			host: "https://example.com",
 			secretKey: "a".repeat(64),
 			mimeType: "image/png",
 			extension: "png",
+			size: 1024,
 		});
 
 		expect(result?.error).toBeUndefined();
+		expect(result?.data?.key).toBe("public/test.png");
 		expect(result?.data?.url).toContain(
 			"/lucid/api/v1/media/r2/storage/upload?",
 		);

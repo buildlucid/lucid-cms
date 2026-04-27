@@ -15,6 +15,7 @@ interface UseSingleFileUploadProps {
 	accept?: SingleFileUploadProps["accept"];
 	required?: SingleFileUploadProps["required"];
 	disabled?: SingleFileUploadProps["disabled"];
+	progress?: Accessor<SingleFileUploadProps["progress"]>;
 	errors?: Accessor<ErrorResponse | undefined>;
 	noMargin?: SingleFileUploadProps["noMargin"];
 }
@@ -167,6 +168,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 				accept={data.accept}
 				required={data.required}
 				disabled={data.disabled}
+				progress={data.progress?.()}
 				errors={data.errors ? getBodyError(data.name, data.errors) : undefined}
 				noMargin={data.noMargin}
 			/>

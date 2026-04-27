@@ -21,51 +21,51 @@ import getServiceContext from "../../utils/get-service-context.js";
 
 const factory = createFactory();
 
-const getPresignedUrlController = factory.createHandlers(
+const completeUploadSessionController = factory.createHandlers(
 	describeRoute({
-		description: "Get a presigned URL to upload a single media item.",
+		description: "Complete a resumable upload session.",
 		tags: ["media"],
-		summary: "Get Presigned URL",
+		summary: "Complete Upload Session",
 		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.getPresignedUrl.response),
+			schema: z.toJSONSchema(controllerSchemas.completeUploadSession.response),
 		}),
 		parameters: honoOpenAPIParamaters({
-			headers: {
-				csrf: true,
-			},
+			headers: { csrf: true },
+			params: controllerSchemas.completeUploadSession.params,
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.getPresignedUrl.body),
+		requestBody: honoOpenAPIRequestBody(
+			controllerSchemas.completeUploadSession.body,
+		),
 	}),
 	validateCSRF,
 	authenticate,
 	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
-	validate("json", controllerSchemas.getPresignedUrl.body),
+	validate("param", controllerSchemas.completeUploadSession.params),
+	validate("json", controllerSchemas.completeUploadSession.body),
 	async (c) => {
+		const params = c.req.valid("param");
 		const body = c.req.valid("json");
 		const context = getServiceContext(c);
 
-		const presignedUrl = await serviceWrapper(mediaServices.getPresignedUrl, {
-			transaction: false,
-			defaultError: {
-				type: "basic",
-				name: T("route_media_presigned_url_error_name"),
-				message: T("route_media_presigned_url_error_message"),
+		const completed = await serviceWrapper(
+			mediaServices.completeUploadSession,
+			{
+				transaction: true,
+				defaultError: {
+					type: "basic",
+					name: T("route_media_upload_session_error_name"),
+					message: T("route_media_upload_session_error_message"),
+				},
 			},
-		})(context, {
-			fileName: body.fileName,
-			mimeType: body.mimeType,
-			public: body.public,
-			temporary: body.temporary,
+		)(context, {
+			sessionId: params.sessionId,
+			parts: body.parts,
 		});
-		if (presignedUrl.error) throw new LucidAPIError(presignedUrl.error);
+		if (completed.error) throw new LucidAPIError(completed.error);
 
 		c.status(200);
-		return c.json(
-			formatAPIResponse(c, {
-				data: presignedUrl.data,
-			}),
-		);
+		return c.json(formatAPIResponse(c, { data: completed.data }));
 	},
 );
 
-export default getPresignedUrlController;
+export default completeUploadSessionController;

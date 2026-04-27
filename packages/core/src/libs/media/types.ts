@@ -11,18 +11,71 @@ export type MediaAdapterUploadBody =
 	| ReadableStream<Uint8Array>
 	| Buffer;
 
-export type MediaAdapterServiceGetPresignedUrl = (
+export type MediaAdapterUploadPart = {
+	partNumber: number;
+	etag: string;
+	size?: number;
+};
+
+export type MediaAdapterCreateUploadSessionResponse =
+	| {
+			mode: "single";
+			key: string;
+			url: string;
+			headers?: Record<string, string>;
+	  }
+	| {
+			mode: "resumable";
+			key: string;
+			uploadId: string;
+			partSize: number;
+			expiresAt: string;
+			uploadedParts: MediaAdapterUploadPart[];
+	  };
+
+export type MediaAdapterServiceCreateUploadSession = (
 	key: string,
 	meta: {
 		host: string;
 		secretKey: string;
 		mimeType: string;
 		extension?: string;
+		size: number;
 	},
-) => ServiceResponse<{
-	url: string;
-	headers?: Record<string, string>;
+) => ServiceResponse<MediaAdapterCreateUploadSessionResponse>;
+
+export type MediaAdapterServiceGetUploadPartUrls = (props: {
+	key: string;
+	uploadId: string;
+	partNumbers: number[];
+	expiresAt: string;
+}) => ServiceResponse<{
+	parts: Array<{
+		partNumber: number;
+		url: string;
+		headers?: Record<string, string>;
+	}>;
 }>;
+
+export type MediaAdapterServiceListUploadParts = (props: {
+	key: string;
+	uploadId: string;
+}) => ServiceResponse<{
+	uploadedParts: MediaAdapterUploadPart[];
+}>;
+
+export type MediaAdapterServiceCompleteUploadSession = (props: {
+	key: string;
+	uploadId: string;
+	parts: MediaAdapterUploadPart[];
+}) => ServiceResponse<{
+	etag?: string | null;
+}>;
+
+export type MediaAdapterServiceAbortUploadSession = (props: {
+	key: string;
+	uploadId: string;
+}) => ServiceResponse<undefined>;
 
 export type MediaAdapterServiceGetDownloadUrl = (
 	key: string,
@@ -117,8 +170,16 @@ export type MediaAdapterInstance<T = any> = {
 	/**
 	 * The media adapter services
 	 */
-	/** Generate a presigned URL */
-	getPresignedUrl: MediaAdapterServiceGetPresignedUrl;
+	/** Create a single or resumable upload session */
+	createUploadSession: MediaAdapterServiceCreateUploadSession;
+	/** Generate upload URLs for resumable upload parts */
+	getUploadPartUrls?: MediaAdapterServiceGetUploadPartUrls;
+	/** List already uploaded resumable upload parts */
+	listUploadParts?: MediaAdapterServiceListUploadParts;
+	/** Complete a resumable upload session */
+	completeUploadSession?: MediaAdapterServiceCompleteUploadSession;
+	/** Abort a resumable upload session */
+	abortUploadSession?: MediaAdapterServiceAbortUploadSession;
 	/** Generate a direct download URL */
 	getDownloadUrl: MediaAdapterServiceGetDownloadUrl;
 	/** Get media metadata  */

@@ -15,6 +15,7 @@ export { default as MediaAwaitingSyncRepository } from "./media-awaiting-sync.js
 export { default as MediaFoldersRepository } from "./media-folders.js";
 export { default as MediaShareLinksRepository } from "./media-share-links.js";
 export { default as MediaTranslationsRepository } from "./media-translations.js";
+export { default as MediaUploadSessionsRepository } from "./media-upload-sessions.js";
 export { default as OptionsRepository } from "./options.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
 export { default as QueueJobsRepository } from "./queue-jobs.js";

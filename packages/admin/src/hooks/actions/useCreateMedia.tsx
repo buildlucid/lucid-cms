@@ -2,6 +2,7 @@ import type { ErrorResponse, Media } from "@types";
 import { createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
+import { uploadMediaFile } from "@/utils/upload-session";
 import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useCreateMedia = () => {
@@ -18,85 +19,41 @@ export const useCreateMedia = () => {
 		undefined,
 	);
 	const [getPublic, setPublic] = createSignal<boolean>(true);
-	const [getPresignedUrlValue, setPresignedUrlValue] = createSignal<string>();
-	const [getPresignedUrlHeaders, setPresignedUrlHeaders] =
-		createSignal<Record<string, string>>();
 	const [getUploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const [getUploadLoading, setUploadLoading] = createSignal<boolean>(false);
+	const [getUploadProgress, setUploadProgress] = createSignal<number>(0);
 
 	// -------------------------
 	// Mutations
 	const createSingle = api.media.useCreateSingle();
-	const getPresignedUrl = api.media.useGetPresignedUrl({
-		onSuccess: (data) => {
-			setKey(data.data.key);
-			setPresignedUrlValue(data.data.url);
-			setPresignedUrlHeaders(data.data.headers);
-		},
-	});
+	const createUploadSession = api.media.useCreateUploadSession();
 
 	// -------------------------
 	// Functions
-	const getMediaPresignedUrl = async (fileName: string, mimeType: string) => {
-		await getPresignedUrl.action.mutateAsync({
-			body: { fileName, mimeType, public: getPublic() },
-		});
-	};
-	const getMediaPresignedUrlWithPublic = async (
-		fileName: string,
-		mimeType: string,
-		publicValue: boolean,
-	) => {
-		await getPresignedUrl.action.mutateAsync({
-			body: { fileName, mimeType, public: publicValue },
-		});
-	};
-	const uploadFile = async (file: File) => {
+	const uploadFile = async (file: File, publicValue: boolean) => {
 		try {
 			setUploadLoading(true);
-			const key = getKey();
-			const presignedUrl = getPresignedUrlValue();
-
-			if (!key || !presignedUrl) {
-				setUploadErrors({
-					status: 400,
-					name: T()("media_upload_error"),
-					message: T()("media_no_key_or_presigned_url"),
-				});
-				return null;
-			}
-			const response = await fetch(presignedUrl, {
-				method: "PUT",
-				body: file,
-				headers: {
-					...(file.type ? { "content-type": file.type } : {}),
-					...getPresignedUrlHeaders(),
-				},
-			});
-
-			let bodyMessage = "";
-			if (response.headers.get("content-type")?.includes("application/json")) {
-				const body = await response.json();
-				bodyMessage = body?.message || "";
-			}
-
-			if (!response.ok) {
-				setUploadErrors({
-					status: response.status,
-					name: T()("media_upload_error"),
-					message: T()("media_upload_error_description"),
-					errors: {
+			setUploadProgress(0);
+			const uploadRes = await uploadMediaFile({
+				file,
+				scope: `media:create:${publicValue}`,
+				start: () =>
+					createUploadSession.action.mutateAsync({
 						body: {
-							file: {
-								message: bodyMessage || "",
-							},
+							fileName: file.name,
+							mimeType: file.type,
+							size: file.size,
+							public: publicValue,
 						},
-					},
-				});
+					}),
+				onProgress: setUploadProgress,
+			});
+			if (uploadRes.error) {
+				setUploadErrors(uploadRes.error);
 				return null;
 			}
-
-			return key;
+			setKey(uploadRes.data);
+			return uploadRes.data;
 		} catch (error) {
 			setUploadErrors({
 				status: 500,
@@ -128,16 +85,10 @@ export const useCreateMedia = () => {
 		let fileKey = getKey();
 
 		if (file) {
-			if (options?.public !== undefined) {
-				await getMediaPresignedUrlWithPublic(
-					file.name,
-					file.type,
-					options.public,
-				);
-			} else {
-				await getMediaPresignedUrl(file.name, file.type);
-			}
-			const uploadFileRes = await uploadFile(file);
+			const uploadFileRes = await uploadFile(
+				file,
+				options?.public ?? getPublic(),
+			);
 			if (!uploadFileRes) return null;
 			fileKey = uploadFileRes;
 		}
@@ -168,13 +119,13 @@ export const useCreateMedia = () => {
 	const isLoading = createMemo(() => {
 		return (
 			createSingle.action.isPending ||
-			getPresignedUrl.action.isPending ||
+			createUploadSession.action.isPending ||
 			getUploadLoading()
 		);
 	});
 	const errors = createMemo(() => {
 		return (
-			createSingle.errors() || getPresignedUrl.errors() || getUploadErrors()
+			createSingle.errors() || createUploadSession.errors() || getUploadErrors()
 		);
 	});
 
@@ -190,6 +141,7 @@ export const useCreateMedia = () => {
 		setPublic,
 		errors: errors,
 		isLoading: isLoading,
+		uploadProgress: getUploadProgress,
 		state: {
 			title: getTitle,
 			alt: getAlt,
@@ -207,9 +159,9 @@ export const useCreateMedia = () => {
 			setSummary([]);
 			setKey(undefined);
 			setFolderId(undefined);
-			setPresignedUrlValue(undefined);
 			setPublic(true);
 			setUploadErrors();
+			setUploadProgress(0);
 			createSingle.reset();
 		},
 	};

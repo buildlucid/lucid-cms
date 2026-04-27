@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import cancelEmailChangeController from "../../../controllers/account/cancel-email-change.js";
 import confirmEmailChangeController from "../../../controllers/account/confirm-email-change.js";
+import createProfilePictureUploadSessionController from "../../../controllers/account/create-profile-picture-upload-session.js";
 import deleteProfilePictureController from "../../../controllers/account/delete-profile-picture.js";
 import getMeController from "../../../controllers/account/get-me.js";
-import getProfilePicturePresignedUrlController from "../../../controllers/account/get-profile-picture-presigned-url.js";
 import resetPasswordController from "../../../controllers/account/reset-password.js";
 import revertEmailChangeController from "../../../controllers/account/revert-email-change.js";
 import revokeRefreshTokensController from "../../../controllers/account/revoke-refresh-tokens.js";
@@ -25,8 +25,8 @@ const accountRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/email-change/revert/:token", ...revertEmailChangeController)
 	.delete("/email-change", ...cancelEmailChangeController)
 	.post(
-		"/profile-picture/presigned-url",
-		...getProfilePicturePresignedUrlController,
+		"/profile-picture/upload-session",
+		...createProfilePictureUploadSessionController,
 	)
 	.post("/profile-picture", ...updateProfilePictureController)
 	.patch("/reset-password/:token", ...resetPasswordController)

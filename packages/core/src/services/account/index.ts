@@ -1,9 +1,9 @@
 export { default as cancelEmailChange } from "./cancel-email-change.js";
 export * as checks from "./checks/index.js";
 export { default as confirmEmailChange } from "./confirm-email-change.js";
+export { default as createProfilePictureUploadSession } from "./create-profile-picture-upload-session.js";
 export { default as deleteProfilePicture } from "./delete-profile-picture.js";
 export { default as getAuthenticatedUser } from "./get-authenticated-user.js";
-export { default as getProfilePicturePresignedUrl } from "./get-profile-picture-presigned-url.js";
 export { default as requestEmailChange } from "./request-email-change.js";
 export { default as resetPassword } from "./reset-password.js";
 export { default as revertEmailChange } from "./revert-email-change.js";

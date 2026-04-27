@@ -50,6 +50,36 @@ const mediaMetaResponseSchema = z
 		description: "Media metadata",
 	});
 
+const uploadPartSchema = z.object({
+	partNumber: z.number().int().positive(),
+	etag: z.string().trim(),
+	size: z.number().nonnegative().optional(),
+});
+
+const uploadSessionResponseSchema = z.discriminatedUnion("mode", [
+	z.object({
+		mode: z.literal("single"),
+		key: z.string(),
+		url: z.string(),
+		headers: z.record(z.string(), z.string()).optional(),
+	}),
+	z.object({
+		mode: z.literal("resumable"),
+		key: z.string(),
+		sessionId: z.string(),
+		partSize: z.number(),
+		expiresAt: z.string(),
+		uploadedParts: z.array(uploadPartSchema),
+	}),
+]);
+
+const uploadSessionParamsSchema = z.object({
+	sessionId: z.string().trim().meta({
+		description: "The upload session ID",
+		example: "1e2230b6-8b62-4f31-a2d4-f4723d58d74a",
+	}),
+});
+
 export const mediaEmbedResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 2 }),
 	key: z.string().meta({
@@ -530,7 +560,7 @@ export const controllerSchemas = {
 		params: undefined,
 		response: undefined,
 	} satisfies ControllerSchema,
-	getPresignedUrl: {
+	createUploadSession: {
 		body: z.object({
 			fileName: z.string().trim().meta({
 				description: "The file name",
@@ -540,13 +570,16 @@ export const controllerSchemas = {
 				description: "The media's mime type",
 				example: "image/jpeg",
 			}),
+			size: z.number().nonnegative().meta({
+				description: "The file size in bytes",
+				example: 10485760,
+			}),
 			public: z.boolean().meta({
 				description: "Whether the media is public",
 				example: true,
 			}),
 			temporary: z.boolean().optional().meta({
-				description:
-					"Whether the upload target should be temporary and awaiting promotion.",
+				description: "Whether the upload target should be temporary.",
 				example: false,
 			}),
 		}),
@@ -555,25 +588,57 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: z.object({
-			url: z.string().meta({
-				description: "The presigned URL to upload media to",
-				example: "https://example.com/cdn/key",
-			}),
-			key: z.string().meta({
-				description: "The media key",
-				example: "public/123e4567e89b12d3a456426614174000",
-			}),
-			headers: z
-				.record(z.string(), z.string())
-				.meta({
-					description: "The headers to use when uploading media",
-					example: {
-						"x-amz-meta-extension": "jpg",
-					},
-				})
-				.optional(),
+		response: uploadSessionResponseSchema,
+	} satisfies ControllerSchema,
+	getUploadSession: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: uploadSessionParamsSchema,
+		response: uploadSessionResponseSchema,
+	} satisfies ControllerSchema,
+	getUploadPartUrls: {
+		body: z.object({
+			partNumbers: z.array(z.number().int().positive()).min(1),
 		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: uploadSessionParamsSchema,
+		response: z.object({
+			parts: z.array(
+				z.object({
+					partNumber: z.number().int().positive(),
+					url: z.string(),
+					headers: z.record(z.string(), z.string()).optional(),
+				}),
+			),
+		}),
+	} satisfies ControllerSchema,
+	completeUploadSession: {
+		body: z.object({
+			parts: z.array(uploadPartSchema).min(1),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: uploadSessionParamsSchema,
+		response: z.object({
+			key: z.string(),
+		}),
+	} satisfies ControllerSchema,
+	abortUploadSession: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: uploadSessionParamsSchema,
+		response: undefined,
 	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({

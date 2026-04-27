@@ -25,7 +25,7 @@ const resolveWorkerConsumerUrl = (): URL => {
 				dirname(packageJsonPath),
 				"dist",
 				"libs",
-				"queue-adapter",
+				"queue",
 				"adapters",
 				"worker",
 				"consumer.mjs",

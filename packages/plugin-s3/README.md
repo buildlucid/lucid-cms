@@ -66,7 +66,8 @@ Configuration options for the S3 client connection.
 
 ## Bucket Configuration
 
-As Lucid CMS uses presigned URLs to upload media from the client, you will need to configure your S3 bucket's CORS policy. This will need to allow `PUT` requests, along with the `Content-Type` and `Origin` headers.
+Lucid CMS uploads media from the client using upload sessions. Single-upload sessions and resumable multipart upload parts are signed by the S3 adapter, so your bucket CORS policy must allow `PUT` requests, along with the `Content-Type` and `Origin` headers.
+Expose the `ETag` response header if possible so the admin UI can complete multipart uploads without an extra server-side reconciliation request.
 
 ### Example Cloudflare R2 CORS Policy
 
@@ -84,6 +85,9 @@ As Lucid CMS uses presigned URLs to upload media from the client, you will need 
             "Origin",
             "Content-Type",
             "x-amz-meta-*"
+        ],
+        "ExposeHeaders": [
+            "ETag"
         ]
     }
 ]

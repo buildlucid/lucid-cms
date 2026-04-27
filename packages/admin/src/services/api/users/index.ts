@@ -1,10 +1,10 @@
+import useCreateProfilePictureUploadSession from "./useCreateProfilePictureUploadSession";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteMultiplePermanently from "./useDeleteMultiplePermanently";
 import useDeleteProfilePicture from "./useDeleteProfilePicture";
 import useDeleteSingle from "./useDeleteSingle";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 import useGetMultiple from "./useGetMultiple";
-import useGetProfilePicturePresignedUrl from "./useGetProfilePicturePresignedUrl";
 import useGetSingle from "./useGetSingle";
 import useResendInvitation from "./useResendInvitation";
 import useRestore from "./useRestore";
@@ -16,7 +16,7 @@ import useUpdateSingle from "./useUpdateSingle";
 const exportObject = {
 	useGetMultiple,
 	useGetSingle,
-	useGetProfilePicturePresignedUrl,
+	useCreateProfilePictureUploadSession,
 	useUpdateSingle,
 	useUpdateProfilePicture,
 	useCreateSingle,

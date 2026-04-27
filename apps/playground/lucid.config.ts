@@ -191,15 +191,15 @@ export default configureLucid({
 			// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
 			// 	},
 			// }),
-			// S3Plugin({
-			// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-			// 	bucket: "headless-cms",
-			// 	clientOptions: {
-			// 		region: "auto",
-			// 		accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
-			// 		secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
-			// 	},
-			// }),
+			S3Plugin({
+				endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+				bucket: "headless-cms",
+				clientOptions: {
+					region: "auto",
+					accessKeyId: env?.LUCID_S3_ACCESS_KEY as string,
+					secretAccessKey: env?.LUCID_S3_SECRET_KEY as string,
+				},
+			}),
 		],
 		// build: {
 		// 	paths: {

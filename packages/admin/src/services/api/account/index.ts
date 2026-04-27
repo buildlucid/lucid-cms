@@ -1,9 +1,9 @@
 import useCancelEmailChange from "./useCancelEmailChange";
 import useConfirmEmailChange from "./useConfirmEmailChange";
+import useCreateProfilePictureUploadSession from "./useCreateProfilePictureUploadSession";
 import useDeleteProfilePicture from "./useDeleteProfilePicture";
 import useForgotPassword from "./useForgotPassword";
 import useGetAuthenticatedUser from "./useGetAuthenticatedUser";
-import useGetProfilePicturePresignedUrl from "./useGetProfilePicturePresignedUrl";
 import useResetPassword from "./useResetPassword";
 import useRevertEmailChange from "./useRevertEmailChange";
 import useRevokeRefreshTokens from "./useRevokeRefreshTokens";
@@ -27,7 +27,7 @@ const exportObject = {
 	useUpdateMe,
 	useRevokeRefreshTokens,
 	useUnlinkAuthProvider,
-	useGetProfilePicturePresignedUrl,
+	useCreateProfilePictureUploadSession,
 	useUpdateProfilePicture,
 	useDeleteProfilePicture,
 };

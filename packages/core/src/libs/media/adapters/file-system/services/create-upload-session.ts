@@ -1,12 +1,12 @@
 import { createSignedMediaUrl } from "../../../signed-url.js";
 import type {
 	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceGetPresignedUrl,
+	MediaAdapterServiceCreateUploadSession,
 } from "../../../types.js";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const getPresignedUrl: MediaAdapterServiceGetPresignedUrl = async (
+	const createUploadSession: MediaAdapterServiceCreateUploadSession = async (
 		key,
 		meta,
 	) => {
@@ -14,6 +14,8 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			return {
 				error: undefined,
 				data: {
+					mode: "single",
+					key,
 					url: createSignedMediaUrl({
 						host: meta.host,
 						path: FILE_SYSTEM_UPLOAD_PATH,
@@ -38,5 +40,5 @@ export default (options: FileSystemMediaAdapterOptions) => {
 		}
 	};
 
-	return getPresignedUrl;
+	return createUploadSession;
 };

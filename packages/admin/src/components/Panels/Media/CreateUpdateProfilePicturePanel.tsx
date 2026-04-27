@@ -17,6 +17,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import { uploadMediaFile } from "@/utils/upload-session";
 
 interface CreateUpdateProfilePicturePanelProps {
 	state: {
@@ -33,6 +34,8 @@ const CreateUpdateProfilePicturePanel: Component<
 	// ------------------------------
 	// State & Hooks
 	const [uploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
+	const [uploadLoading, setUploadLoading] = createSignal(false);
+	const [uploadProgress, setUploadProgress] = createSignal(0);
 	const createMedia = useCreateMedia();
 
 	const MediaFile = useSingleFileUpload({
@@ -42,13 +45,19 @@ const CreateUpdateProfilePicturePanel: Component<
 		required: true,
 		accept: "image/*",
 		errors: () => mutateErrors(),
+		progress: () => ({
+			active: uploadLoading(),
+			value: uploadProgress(),
+		}),
 		noMargin: false,
 	});
 
 	// ---------------------------------
 	// Queries & Mutations
-	const accountGetPresignedUrl = api.account.useGetProfilePicturePresignedUrl();
-	const userGetPresignedUrl = api.users.useGetProfilePicturePresignedUrl();
+	const accountCreateUploadSession =
+		api.account.useCreateProfilePictureUploadSession();
+	const userCreateUploadSession =
+		api.users.useCreateProfilePictureUploadSession();
 	const accountUpdateProfilePicture = api.account.useUpdateProfilePicture();
 	const userUpdateProfilePicture = api.users.useUpdateProfilePicture();
 
@@ -69,16 +78,17 @@ const CreateUpdateProfilePicturePanel: Component<
 	});
 	const mutateIsLoading = createMemo(() => {
 		return (
-			accountGetPresignedUrl.action.isPending ||
-			userGetPresignedUrl.action.isPending ||
+			accountCreateUploadSession.action.isPending ||
+			userCreateUploadSession.action.isPending ||
 			accountUpdateProfilePicture.action.isPending ||
-			userUpdateProfilePicture.action.isPending
+			userUpdateProfilePicture.action.isPending ||
+			uploadLoading()
 		);
 	});
 	const mutateErrors = createMemo(() => {
 		return (
-			accountGetPresignedUrl.errors() ||
-			userGetPresignedUrl.errors() ||
+			accountCreateUploadSession.errors() ||
+			userCreateUploadSession.errors() ||
 			accountUpdateProfilePicture.errors() ||
 			userUpdateProfilePicture.errors() ||
 			uploadErrors()
@@ -171,54 +181,35 @@ const CreateUpdateProfilePicturePanel: Component<
 
 		try {
 			setUploadErrors(undefined);
-			const presignedUrl =
-				props.state.userId !== undefined
-					? await userGetPresignedUrl.action.mutateAsync({
-							userId: props.state.userId,
-							body: {
-								fileName: file.name,
-								mimeType: file.type,
-							},
-						})
-					: await accountGetPresignedUrl.action.mutateAsync({
-							body: {
-								fileName: file.name,
-								mimeType: file.type,
-							},
-						});
-
-			const response = await fetch(presignedUrl.data.url, {
-				method: "PUT",
-				body: file,
-				headers: {
-					...(file.type ? { "content-type": file.type } : {}),
-					...presignedUrl.data.headers,
-				},
+			setUploadLoading(true);
+			setUploadProgress(0);
+			const uploadRes = await uploadMediaFile({
+				file,
+				scope: `profile-picture:${props.state.userId ?? "me"}`,
+				start: () =>
+					props.state.userId !== undefined
+						? userCreateUploadSession.action.mutateAsync({
+								userId: props.state.userId,
+								body: {
+									fileName: file.name,
+									mimeType: file.type,
+									size: file.size,
+								},
+							})
+						: accountCreateUploadSession.action.mutateAsync({
+								body: {
+									fileName: file.name,
+									mimeType: file.type,
+									size: file.size,
+								},
+							}),
+				onProgress: setUploadProgress,
 			});
-
-			let bodyMessage = "";
-			if (response.headers.get("content-type")?.includes("application/json")) {
-				const body = await response.json();
-				bodyMessage = body?.message || "";
-			}
-
-			if (!response.ok) {
-				setUploadErrors({
-					status: response.status,
-					name: T()("media_upload_error"),
-					message: T()("media_upload_error_description"),
-					errors: {
-						body: {
-							file: {
-								message: bodyMessage || "",
-							},
-						},
-					},
-				});
+			if (uploadRes.error) {
+				setUploadErrors(uploadRes.error);
 				return null;
 			}
-
-			return presignedUrl.data.key;
+			return uploadRes.data;
 		} catch (error) {
 			setUploadErrors({
 				status: 500,
@@ -229,6 +220,8 @@ const CreateUpdateProfilePicturePanel: Component<
 						: T()("media_upload_error_description"),
 			});
 			return null;
+		} finally {
+			setUploadLoading(false);
 		}
 	}
 	async function updateProfilePicture(
@@ -322,6 +315,7 @@ const CreateUpdateProfilePicturePanel: Component<
 					createMedia.reset();
 					MediaFile.reset();
 					setUploadErrors(undefined);
+					setUploadProgress(0);
 				},
 			}}
 			copy={panelContent()}

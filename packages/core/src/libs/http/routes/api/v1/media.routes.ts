@@ -1,15 +1,19 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import abortUploadSession from "../../../controllers/media/abort-upload-session.js";
 import clearAllProcessed from "../../../controllers/media/clear-all-processed.js";
 import clearSingleProcessed from "../../../controllers/media/clear-single-processed.js";
+import completeUploadSession from "../../../controllers/media/complete-upload-session.js";
 import createSingle from "../../../controllers/media/create-single.js";
+import createUploadSession from "../../../controllers/media/create-upload-session.js";
 import deleteBatch from "../../../controllers/media/delete-batch.js";
 import deleteMultiplePermanently from "../../../controllers/media/delete-multiple-permanently.js";
 import deleteSingle from "../../../controllers/media/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/media/delete-single-permanently.js";
 import getMultiple from "../../../controllers/media/get-multiple.js";
-import getPresignedUrl from "../../../controllers/media/get-presigned-url.js";
 import getSingle from "../../../controllers/media/get-single.js";
+import getUploadPartUrls from "../../../controllers/media/get-upload-part-urls.js";
+import getUploadSession from "../../../controllers/media/get-upload-session.js";
 import moveFolder from "../../../controllers/media/move-folder.js";
 import restoreMultiple from "../../../controllers/media/restore-multiple.js";
 import updateSingle from "../../../controllers/media/update-single.js";
@@ -31,11 +35,14 @@ const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/folders", ...getMultipleFolders)
 	.get("/folders/hierarchy", ...getAllFoldersHierarchy)
+	.get("/upload-session/:sessionId", ...getUploadSession)
 	.get("/:id/share-links", ...getMediaShareLinks)
 	.get("/:id/share-links/:linkId", ...getSingleMediaShareLink)
 	.get("/:id", ...getSingle)
 	.post("/folders", ...createSingleFolder)
-	.post("/presigned-url", ...getPresignedUrl)
+	.post("/upload-session", ...createUploadSession)
+	.post("/upload-session/:sessionId/parts", ...getUploadPartUrls)
+	.post("/upload-session/:sessionId/complete", ...completeUploadSession)
 	.post("/", ...createSingle)
 	.post("/restore", ...restoreMultiple)
 	.post("/:id/share-links", ...createMediaShareLink)
@@ -45,6 +52,7 @@ const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/:id", ...updateSingle)
 	.delete("/folders/:id", ...deleteSingleFolder)
 	.delete("/processed", ...clearAllProcessed)
+	.delete("/upload-session/:sessionId", ...abortUploadSession)
 	.delete("/share-links", ...deleteAllMediaShareLinksSystem)
 	.delete("/batch", ...deleteBatch)
 	.delete("/permanent", ...deleteMultiplePermanently)

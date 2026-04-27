@@ -146,6 +146,8 @@ export default Object.freeze({
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
 	emailChangeTokenExpirationMinutes: 1440, // 24 hours in minutes
 	presignedUrlExpiration: 3600000, // 1 hour in ms
+	uploadSessionExpiration: 3600000, // 1 hour in ms
+	uploadSessionPartSize: 8 * 1024 * 1024, // 8MiB
 	shareLinkExpiration: 86400, // 24 hours in seconds
 	documentation:
 		"https://lucidjs.build/en/cms/docs/configuration/configuring-lucid-cms/",
