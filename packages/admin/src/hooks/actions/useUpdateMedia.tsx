@@ -2,8 +2,8 @@ import type { ErrorResponse, Media } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
+import type { ImageMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
-import type { ImageMeta } from "../useSingleFileUpload";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
@@ -103,6 +103,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				focalPoint: getFocalPoint(),
 				blurHash: imageMeta?.blurHash,
 				averageColor: imageMeta?.averageColor,
+				base64: imageMeta?.base64,
 				isDark: imageMeta?.isDark,
 				isLight: imageMeta?.isLight,
 				public: getPublic(),

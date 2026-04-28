@@ -259,6 +259,7 @@ const page = {
 				height: 800,
 				blurHash: null,
 				averageColor: null,
+				base64: null,
 				isDark: null,
 				isLight: null,
 				title: {
@@ -283,6 +284,7 @@ const page = {
 				height: 900,
 				blurHash: null,
 				averageColor: null,
+				base64: null,
 				isDark: null,
 				isLight: null,
 				title: {

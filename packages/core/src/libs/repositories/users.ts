@@ -64,6 +64,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					updated_at: z.union([z.string(), z.date()]).nullable(),
 					blur_hash: z.string().nullable(),
 					average_color: z.string().nullable(),
+					base64: z.string().nullable().optional(),
 					is_dark: z
 						.union([
 							z.literal(this.dbAdapter.config.defaults.boolean.true),
@@ -365,6 +366,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							"lucid_media.updated_at",
 							"lucid_media.blur_hash",
 							"lucid_media.average_color",
+							"lucid_media.base64",
 							"lucid_media.is_dark",
 							"lucid_media.is_light",
 							"lucid_media.is_deleted",
@@ -479,6 +481,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								"lucid_media.updated_at",
 								"lucid_media.blur_hash",
 								"lucid_media.average_color",
+								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
 								"lucid_media.is_deleted",
@@ -654,6 +657,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_media.updated_at",
 										"lucid_media.blur_hash",
 										"lucid_media.average_color",
+										"lucid_media.base64",
 										"lucid_media.is_dark",
 										"lucid_media.is_light",
 										"lucid_media.is_deleted",

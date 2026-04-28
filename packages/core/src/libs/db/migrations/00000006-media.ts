@@ -80,6 +80,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("focal_y", adapter.getDataType("integer"))
 				.addColumn("blur_hash", adapter.getDataType("text"))
 				.addColumn("average_color", adapter.getDataType("text"))
+				.addColumn("base64", adapter.getDataType("text"))
 				.addColumn("is_dark", adapter.getDataType("boolean"))
 				.addColumn("is_light", adapter.getDataType("boolean"))
 				.addColumn("custom_meta", adapter.getDataType("text"))

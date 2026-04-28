@@ -51,6 +51,11 @@ const mediaMetaResponseSchema = z
 			description: "Average color of the image",
 			example: "rgba(255, 255, 255, 1)",
 		}),
+		base64: z.string().nullable().meta({
+			description: "Tiny base64-encoded image placeholder",
+			example:
+				"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
+		}),
 		isDark: z.boolean().nullable().meta({
 			description: "Whether the image is predominantly dark",
 			example: true,
@@ -510,6 +515,16 @@ export const controllerSchemas = {
 					example: "rgba(255, 255, 255, 1)",
 				})
 				.optional(),
+			base64: z
+				.string()
+				.trim()
+				.nullable()
+				.meta({
+					description: "Tiny base64-encoded image placeholder",
+					example:
+						"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
+				})
+				.optional(),
 			isDark: z
 				.boolean()
 				.nullable()
@@ -758,6 +773,16 @@ export const controllerSchemas = {
 				.meta({
 					description: "The average color",
 					example: "rgba(255, 255, 255, 1)",
+				})
+				.optional(),
+			base64: z
+				.string()
+				.trim()
+				.nullable()
+				.meta({
+					description: "Tiny base64-encoded image placeholder",
+					example:
+						"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
 				})
 				.optional(),
 			isDark: z

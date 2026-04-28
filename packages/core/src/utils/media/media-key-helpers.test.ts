@@ -46,9 +46,10 @@ describe("media key helpers", () => {
 			formatMediaBrowserKey({
 				key: "public/123e4567e89b12d3a456426614174000",
 				fileName: "Screenshot 2026-02-13 at 10.png",
+				extension: "png",
 			}),
 		).toBe(
-			"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10",
+			"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10.png",
 		);
 	});
 
@@ -57,9 +58,21 @@ describe("media key helpers", () => {
 			formatMediaBrowserKey({
 				key: "public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
 				fileName: "Screenshot 2026-02-13 at 10.png",
+				extension: "webp",
 			}),
 		).toBe(
-			"public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10",
+			"public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10.webp",
+		);
+	});
+
+	it("omits the visual extension when it is not available", () => {
+		expect(
+			formatMediaBrowserKey({
+				key: "public/123e4567e89b12d3a456426614174000",
+				fileName: "Screenshot 2026-02-13 at 10.png",
+			}),
+		).toBe(
+			"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10",
 		);
 	});
 
@@ -85,13 +98,14 @@ describe("media key helpers", () => {
 				host: "https://example.com",
 				key: "public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
 				fileName: "Screenshot 2026-02-13 at 10.png",
+				extension: "webp",
 				query: {
 					preset: "thumbnail",
 					format: "webp",
 				},
 			}),
 		).toBe(
-			"https://example.com/lucid/cdn/public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10?preset=thumbnail&format=webp",
+			"https://example.com/lucid/cdn/public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10.webp?preset=thumbnail&format=webp",
 		);
 	});
 

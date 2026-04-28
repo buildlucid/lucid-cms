@@ -317,6 +317,11 @@ export const controllerSchemas = {
 					description: "The average color",
 					example: "rgba(255, 255, 255, 1)",
 				}),
+				base64: z.string().trim().nullable().optional().meta({
+					description: "Tiny base64-encoded image placeholder",
+					example:
+						"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
+				}),
 				isDark: z.boolean().optional().meta({
 					description: "Whether the image is dark",
 					example: true,

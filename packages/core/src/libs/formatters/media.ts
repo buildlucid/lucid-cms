@@ -27,6 +27,7 @@ export interface MediaPropsT {
 	updated_at: Date | string | null;
 	blur_hash: string | null;
 	average_color: string | null;
+	base64?: string | null;
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	translations?: Array<{
@@ -58,6 +59,7 @@ export interface MediaPosterPropsT {
 	focal_y?: number | null;
 	blur_hash: string | null;
 	average_color: string | null;
+	base64?: string | null;
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	translations?: Array<{
@@ -123,6 +125,7 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 			key: props.media.key,
 			host: props.host,
 			fileName: props.media.file_name,
+			extension: props.media.file_extension,
 		}),
 		title:
 			props.media.translations?.map((t) => ({
@@ -154,6 +157,8 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 			focalPoint: formatFocalPoint(props.media.focal_x, props.media.focal_y),
 			blurHash: props.media.blur_hash,
 			averageColor: props.media.average_color,
+			base64:
+				props.media.type === "image" ? (props.media.base64 ?? null) : null,
 			isDark: formatter.formatBoolean(props.media.is_dark),
 			isLight: formatter.formatBoolean(props.media.is_light),
 		},
@@ -195,6 +200,7 @@ const formatEmbed = (props: {
 			key: props.poster.key,
 			host: props.host,
 			fileName: props.poster.file_name,
+			extension: props.poster.file_extension,
 		}),
 		fileName: props.poster.file_name,
 		type: props.poster.type as MediaType,
@@ -227,6 +233,8 @@ const formatEmbed = (props: {
 			focalPoint: formatFocalPoint(props.poster.focal_x, props.poster.focal_y),
 			blurHash: props.poster.blur_hash,
 			averageColor: props.poster.average_color,
+			base64:
+				props.poster.type === "image" ? (props.poster.base64 ?? null) : null,
 			isDark: formatter.formatBoolean(props.poster.is_dark),
 			isLight: formatter.formatBoolean(props.poster.is_light),
 		},

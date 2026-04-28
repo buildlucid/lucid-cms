@@ -13,6 +13,7 @@ interface Params {
 		focalPoint?: Media["meta"]["focalPoint"];
 		blurHash?: string;
 		averageColor?: string;
+		base64?: string | null;
 		isDark?: boolean;
 		isLight?: boolean;
 		title?: {

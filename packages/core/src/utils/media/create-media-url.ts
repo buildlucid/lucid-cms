@@ -8,12 +8,14 @@ const createMediaUrl = (props: {
 	key: string;
 	host: string;
 	fileName?: string | null;
+	extension?: string | null;
 	query?: Record<string, string | undefined>;
 }) => {
 	const url = new URL(
 		`${props.host}/${constants.directories.base}/cdn/${formatMediaBrowserKey({
 			key: props.key,
 			fileName: props.fileName,
+			extension: props.extension,
 		})}`,
 	);
 

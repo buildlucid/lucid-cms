@@ -2,15 +2,14 @@ import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
+import { applyMetadataHeaders } from "./metadata-headers.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const uploadSingle: MediaAdapterServiceUploadSingle = async (props) => {
 		try {
 			const headers = new Headers();
 
-			if (props.meta.mimeType) headers.set("Content-Type", props.meta.mimeType);
-			if (props.meta.extension)
-				headers.set("x-amz-meta-extension", props.meta.extension);
+			applyMetadataHeaders(headers, props.meta);
 
 			const response = await client.sign(
 				new Request(

@@ -37,6 +37,7 @@ export interface SingleFileUploadProps {
 	currentFile?: {
 		type?: Media["type"];
 		url?: string;
+		focalPointUrl?: string;
 		name?: string;
 		width?: number | null;
 		height?: number | null;
@@ -247,6 +248,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 						<FilePreviewScreen
 							data={{
 								url: props.currentFile?.url as string,
+								focalPointUrl: props.currentFile?.focalPointUrl,
 								type: props.currentFile?.type as Media["type"],
 								name: props.currentFile?.name as string,
 								width: props.currentFile?.width,
@@ -272,6 +274,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 interface FilePreviewScreenProps {
 	data: {
 		url: string;
+		focalPointUrl?: string;
 		type: Media["type"];
 		name: string;
 		width?: number | null;
@@ -316,7 +319,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						open: focalEditorOpen(),
 						setOpen: setFocalEditorOpen,
 					}}
-					src={props.data.url}
+					src={props.data.focalPointUrl ?? props.data.url}
 					alt={props.data.name}
 					dimensions={{
 						width: props.data.width,

@@ -244,6 +244,7 @@ const CreateUpdateProfilePicturePanel: Component<
 			focalPoint: MediaFile.getFocalPoint(),
 			blurHash: imageMeta?.blurHash,
 			averageColor: imageMeta?.averageColor,
+			base64: imageMeta?.base64,
 			isDark: imageMeta?.isDark,
 			isLight: imageMeta?.isLight,
 			title: toProfileTranslations(createMedia.state.title()),
@@ -273,6 +274,7 @@ const CreateUpdateProfilePicturePanel: Component<
 			MediaFile.setCurrentFile({
 				name: profilePicture.fileName ?? profilePicture.key,
 				url: `${profilePicture.url}?preset=thumbnail&format=webp`,
+				focalPointUrl: profilePicture.url,
 				type: profilePicture.type,
 				width: profilePicture.meta.width,
 				height: profilePicture.meta.height,

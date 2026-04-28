@@ -19,6 +19,7 @@ const updateProfilePicture: ServiceFn<
 			} | null;
 			blurHash?: string;
 			averageColor?: string;
+			base64?: string | null;
 			isDark?: boolean;
 			isLight?: boolean;
 			title?: {
@@ -88,6 +89,7 @@ const updateProfilePicture: ServiceFn<
 			focalPoint: data.focalPoint,
 			blurHash: data.blurHash,
 			averageColor: data.averageColor,
+			base64: data.base64,
 			isDark: data.isDark,
 			isLight: data.isLight,
 			allowedType: "image",
@@ -143,6 +145,7 @@ const updateProfilePicture: ServiceFn<
 		focalPoint: data.focalPoint ?? undefined,
 		blurHash: data.blurHash,
 		averageColor: data.averageColor,
+		base64: data.base64,
 		isDark: data.isDark,
 		isLight: data.isLight,
 		title: data.title || [],

@@ -2,6 +2,7 @@ import type { MediaAdapterUploadPart } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import type { PluginOptions } from "../../types/types.js";
+import { applyMetadataHeaders } from "../metadata-headers.js";
 
 /** Builds the S3 object URL that aws4fetch signs for multipart operations. */
 export const objectUrl = (
@@ -39,11 +40,11 @@ export const createSingleUploadSession = async (
 	meta: {
 		mimeType: string;
 		extension?: string;
+		size?: number;
 	},
 ) => {
 	const headers = new Headers();
-	if (meta.mimeType) headers.set("Content-Type", meta.mimeType);
-	if (meta.extension) headers.set("x-amz-meta-extension", meta.extension);
+	applyMetadataHeaders(headers, meta);
 
 	const response = await client.sign(
 		new Request(

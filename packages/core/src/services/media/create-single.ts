@@ -31,6 +31,7 @@ const createSingle: ServiceFn<
 			};
 			blurHash?: string;
 			averageColor?: string;
+			base64?: string | null;
 			isDark?: boolean;
 			isLight?: boolean;
 			title?: {
@@ -142,6 +143,8 @@ const createSingle: ServiceFn<
 						: null,
 				blur_hash: data.blurHash ?? null,
 				average_color: data.averageColor ?? null,
+				base64:
+					syncMediaRes.data.type === "image" ? (data.base64 ?? null) : null,
 				is_dark: data.isDark ?? null,
 				is_light: data.isLight ?? null,
 				folder_id: data.folderId ?? null,

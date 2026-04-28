@@ -3,6 +3,7 @@ import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import T from "../../translations/index.js";
 import type { PluginOptions } from "../../types/types.js";
+import { applyMetadataHeaders } from "../metadata-headers.js";
 import {
 	createSingleUploadSession,
 	extractXmlValue,
@@ -32,8 +33,7 @@ export const createUploadSession = (
 			}
 
 			const headers = new Headers();
-			if (meta.mimeType) headers.set("Content-Type", meta.mimeType);
-			if (meta.extension) headers.set("x-amz-meta-extension", meta.extension);
+			applyMetadataHeaders(headers, meta);
 
 			const signed = await client.sign(
 				new Request(objectUrl(pluginOptions, key, "?uploads"), {

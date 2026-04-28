@@ -11,6 +11,7 @@ const getMediaType = (mimeType?: string | null): MediaType => {
 	if (mt.startsWith("audio/")) return "audio";
 	if (
 		mt === "application/pdf" ||
+		mt === "application/json" ||
 		mt.startsWith("application/vnd") ||
 		mt.startsWith("text/")
 	)

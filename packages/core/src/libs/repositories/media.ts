@@ -32,6 +32,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		focal_y: z.number().nullable(),
 		blur_hash: z.string().nullable(),
 		average_color: z.string().nullable(),
+		base64: z.string().nullable().optional(),
 		is_dark: z
 			.union([
 				z.literal(this.dbAdapter.config.defaults.boolean.true),
@@ -75,6 +76,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					focal_y: z.number().nullable(),
 					blur_hash: z.string().nullable(),
 					average_color: z.string().nullable(),
+					base64: z.string().nullable().optional(),
 					is_dark: z
 						.union([
 							z.literal(this.dbAdapter.config.defaults.boolean.true),
@@ -131,6 +133,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		focal_y: this.dbAdapter.getDataType("integer"),
 		blur_hash: this.dbAdapter.getDataType("text"),
 		average_color: this.dbAdapter.getDataType("text"),
+		base64: this.dbAdapter.getDataType("text"),
 		is_dark: this.dbAdapter.getDataType("boolean"),
 		is_light: this.dbAdapter.getDataType("boolean"),
 		custom_meta: this.dbAdapter.getDataType("text"),
@@ -201,6 +204,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"updated_at",
 				"blur_hash",
 				"average_color",
+				"base64",
 				"is_dark",
 				"is_light",
 				"is_deleted",
@@ -225,6 +229,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"poster.focal_y",
 								"poster.blur_hash",
 								"poster.average_color",
+								"poster.base64",
 								"poster.is_dark",
 								"poster.is_light",
 								this.dbAdapter
@@ -297,6 +302,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"updated_at",
 				"blur_hash",
 				"average_color",
+				"base64",
 				"is_dark",
 				"is_light",
 				"is_deleted",
@@ -337,6 +343,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"updated_at",
 				"blur_hash",
 				"average_color",
+				"base64",
 				"is_dark",
 				"is_light",
 				"is_deleted",
@@ -361,6 +368,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"poster.focal_y",
 								"poster.blur_hash",
 								"poster.average_color",
+								"poster.base64",
 								"poster.is_dark",
 								"poster.is_light",
 								this.dbAdapter
@@ -433,6 +441,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"updated_at",
 				"blur_hash",
 				"average_color",
+				"base64",
 				"is_dark",
 				"is_light",
 				"is_deleted",

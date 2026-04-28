@@ -49,6 +49,7 @@ const updateSingle: ServiceFn<
 			} | null;
 			blurHash?: string | null;
 			averageColor?: string | null;
+			base64?: string | null;
 			isDark?: boolean | null;
 			isLight?: boolean | null;
 			isDeleted?: boolean;
@@ -273,6 +274,7 @@ const updateSingle: ServiceFn<
 									: Math.round(data.focalPoint.y * 10000),
 					blur_hash: data.blurHash,
 					average_color: data.averageColor,
+					base64: finalType !== "image" ? null : data.base64,
 					is_dark: data.isDark,
 					is_light: data.isLight,
 					folder_id: data.folderId,

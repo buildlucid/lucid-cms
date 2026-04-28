@@ -63,6 +63,7 @@ const createSingleController = factory.createHandlers(
 			focalPoint: body.focalPoint,
 			blurHash: body.blurHash,
 			averageColor: body.averageColor,
+			base64: body.base64,
 			isDark: body.isDark,
 			isLight: body.isLight,
 			folderId: body.folderId,

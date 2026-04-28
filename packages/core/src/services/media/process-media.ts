@@ -44,7 +44,7 @@ const processMedia: ServiceFn<
 
 	//* fetches the media item, if its not an image return the original url
 	const mediaRes = await Media.selectSingle({
-		select: ["type", "key", "file_name"],
+		select: ["type", "key", "file_name", "file_extension"],
 		where: [
 			{
 				key: "key",
@@ -72,6 +72,7 @@ const processMedia: ServiceFn<
 					key: mediaRes.data.key,
 					host: baseUrl,
 					fileName: mediaRes.data.file_name,
+					extension: mediaRes.data.file_extension,
 				}),
 			},
 		};
@@ -91,6 +92,7 @@ const processMedia: ServiceFn<
 					key: mediaRes.data.key,
 					host: baseUrl,
 					fileName: mediaRes.data.file_name,
+					extension: mediaRes.data.file_extension,
 				}),
 			},
 		};
@@ -103,6 +105,8 @@ const processMedia: ServiceFn<
 				key: mediaRes.data.key,
 				host: baseUrl,
 				fileName: mediaRes.data.file_name,
+				extension:
+					processingRequest.publicQuery.format ?? mediaRes.data.file_extension,
 				query: processingRequest.publicQuery,
 			}),
 		},

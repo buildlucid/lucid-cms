@@ -4,7 +4,7 @@ import { type Component, createEffect, createSignal, Show } from "solid-js";
 interface ProgressBarProps {
 	progress: number;
 	type: "usage" | "target";
-	variant?: "default" | "edge";
+	variant?: "default" | "edge" | "edge-thin";
 	labels?: {
 		start?: string;
 		end?: string;
@@ -28,8 +28,10 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 		<>
 			<div
 				class={classNames("w-full bg-input-base overflow-hidden", {
-					"h-3 rounded-md": props.variant !== "edge",
+					"h-3 rounded-md":
+						props.variant !== "edge" && props.variant !== "edge-thin",
 					"h-2 rounded-none bg-primary-base/20": props.variant === "edge",
+					"h-1 rounded-none bg-primary-base/20": props.variant === "edge-thin",
 				})}
 				role="progressbar"
 				aria-valuenow={getProgress()}
@@ -46,9 +48,12 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 						"bg-white": props.type === "usage" && getProgress() <= 90,
 						// target
 						"bg-primary-base":
-							props.type === "target" && props.variant !== "edge",
+							props.type === "target" &&
+							props.variant !== "edge" &&
+							props.variant !== "edge-thin",
 						"bg-primary-base/70":
-							props.type === "target" && props.variant === "edge",
+							props.type === "target" &&
+							(props.variant === "edge" || props.variant === "edge-thin"),
 					})}
 					style={{
 						width: `${getProgress()}%`,

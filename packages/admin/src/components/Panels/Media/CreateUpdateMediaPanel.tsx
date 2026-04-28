@@ -16,6 +16,7 @@ import {
 	createSignal,
 	For,
 	Show,
+	untrack,
 } from "solid-js";
 import { Checkbox, Input, Select, Textarea } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
@@ -35,6 +36,7 @@ import helpers from "@/utils/helpers";
 
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
+	initialFile?: Accessor<File | null | undefined>;
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
@@ -138,9 +140,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const posterPreview = createMemo(() => {
 		const file = PosterFile.getFile();
 		if (file) {
+			const url = URL.createObjectURL(file);
 			return {
 				name: file.name,
-				url: URL.createObjectURL(file),
+				url,
+				focalPointUrl: url,
 				isNew: true,
 			};
 		}
@@ -152,6 +156,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			return {
 				name: T()("poster"),
 				url: `${media.data?.data.poster?.url}?preset=thumbnail&format=webp`,
+				focalPointUrl: media.data?.data.poster?.url,
 				isNew: false,
 			};
 		}
@@ -591,6 +596,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						? `${media.data.data.url}?preset=thumbnail&format=webp`
 						: media.data.data.url
 					: undefined,
+				focalPointUrl: media.data?.data.url,
 				type: media.data?.data.type || undefined,
 				width: media.data?.data.meta.width,
 				height: media.data?.data.meta.height,
@@ -601,6 +607,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				PosterFile.setCurrentFile({
 					name: T()("poster"),
 					url: `${media.data.data.poster.url}?preset=thumbnail&format=webp`,
+					focalPointUrl: media.data.data.poster.url,
 					type: "image",
 					width: media.data.data.poster.meta.width,
 					height: media.data.data.poster.meta.height,
@@ -617,6 +624,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				createMedia.setFolderId(newFolderId);
 			}
 		}
+	});
+
+	createEffect(() => {
+		const initialFile = props.initialFile?.();
+		if (!props.state.open || panelMode() !== "create" || !initialFile) return;
+
+		untrack(() => {
+			if (MediaFile.getFile() === initialFile) return;
+			MediaFile.setGetFile(initialFile);
+			MediaFile.setGetRemovedCurrent(false);
+			MediaFile.setFocalPoint(null);
+			setUploadErrors(undefined);
+		});
 	});
 
 	createEffect(() => {
@@ -944,7 +964,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											open: posterFocalEditorOpen(),
 											setOpen: setPosterFocalEditorOpen,
 										}}
-										src={preview().url}
+										src={preview().focalPointUrl ?? preview().url}
 										alt={preview().name}
 										dimensions={{
 											width: posterMeta()?.width,

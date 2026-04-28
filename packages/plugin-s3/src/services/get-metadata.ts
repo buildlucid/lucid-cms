@@ -2,6 +2,7 @@ import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
+import { METADATA_SIZE_HEADER, parseStoredSize } from "./metadata-headers.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const getMetadata: MediaAdapterServiceGetMeta = async (key) => {
@@ -30,9 +31,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				};
 			}
 
-			const contentLength = result.headers.get("content-length");
+			const contentLength =
+				parseStoredSize(result.headers.get("content-length")) ??
+				parseStoredSize(result.headers.get(METADATA_SIZE_HEADER));
 
-			if (!contentLength) {
+			if (contentLength === null) {
 				return {
 					error: {
 						message: T("object_missing_metadata"),
@@ -47,7 +50,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			return {
 				error: undefined,
 				data: {
-					size: Number.parseInt(contentLength, 10),
+					size: contentLength,
 					mimeType: contentType || null,
 					etag: etag || null,
 				},
