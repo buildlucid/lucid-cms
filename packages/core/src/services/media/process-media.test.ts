@@ -37,6 +37,7 @@ describe("media process service", () => {
 				type: "image",
 				key: "public/123e4567e89b12d3a456426614174000",
 				file_name: "Screenshot 2026-03-26 at 15.png",
+				file_extension: "png",
 			},
 		});
 
@@ -74,7 +75,7 @@ describe("media process service", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data?.url).toBe(
-			"https://example.com/lucid/cdn/public/123e4567e89b12d3a456426614174000/screenshot-2026-03-26-at-15?preset=thumbnail&format=webp",
+			"https://example.com/lucid/cdn/public/123e4567e89b12d3a456426614174000/screenshot-2026-03-26-at-15.webp?preset=thumbnail&format=webp",
 		);
 	});
 
