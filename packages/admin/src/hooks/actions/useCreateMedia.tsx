@@ -80,6 +80,7 @@ export const useCreateMedia = () => {
 			public?: boolean;
 			isHidden?: boolean;
 			posterId?: number | null;
+			focalPoint?: Media["meta"]["focalPoint"];
 		},
 	): Promise<Media | null> => {
 		let fileKey = getKey();
@@ -105,6 +106,7 @@ export const useCreateMedia = () => {
 			isHidden: options?.isHidden,
 			width: imageMeta?.width,
 			height: imageMeta?.height,
+			focalPoint: options?.focalPoint ?? undefined,
 			blurHash: imageMeta?.blurHash,
 			averageColor: imageMeta?.averageColor,
 			isDark: imageMeta?.isDark,

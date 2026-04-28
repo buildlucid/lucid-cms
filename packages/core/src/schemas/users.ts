@@ -73,6 +73,22 @@ const updateProfilePictureBodySchema = z
 			description: "The image height",
 			example: 100,
 		}),
+		focalPoint: z
+			.object({
+				x: z.number().min(0).max(1).meta({
+					description: "Horizontal focal point, normalized from 0 to 1",
+					example: 0.5,
+				}),
+				y: z.number().min(0).max(1).meta({
+					description: "Vertical focal point, normalized from 0 to 1",
+					example: 0.5,
+				}),
+			})
+			.nullable()
+			.optional()
+			.meta({
+				description: "The image focal point",
+			}),
 		blurHash: z.string().trim().optional().meta({
 			description: "The blur hash",
 			example: "AQABAAAABAAAAgAA...",

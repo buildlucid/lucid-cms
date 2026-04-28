@@ -43,6 +43,10 @@ const updateSingle: ServiceFn<
 			}[];
 			width?: number | null;
 			height?: number | null;
+			focalPoint?: {
+				x: number;
+				y: number;
+			} | null;
 			blurHash?: string | null;
 			averageColor?: string | null;
 			isDark?: boolean | null;
@@ -92,6 +96,22 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (mediaRes.error) return mediaRes;
+
+	if (data.focalPoint !== undefined && mediaRes.data.type !== "image") {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				errors: {
+					focalPoint: {
+						code: "media_error",
+						message: T("media_error_focal_point_image_only"),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
 
 	const translations = prepareMediaTranslations({
 		title: data.title || [],
@@ -162,6 +182,23 @@ const updateSingle: ServiceFn<
 		updateObjectRes = updateRes.data;
 	}
 
+	const finalType = updateObjectRes?.type ?? mediaRes.data.type;
+	if (data.focalPoint !== undefined && finalType !== "image") {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				errors: {
+					focalPoint: {
+						code: "media_error",
+						message: T("media_error_focal_point_image_only"),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
+
 	//* if no new key/file provided but public flag differs, rename the key only
 	if (data.key === undefined && data.public !== undefined) {
 		if (currentPublic !== data.public) {
@@ -218,6 +255,22 @@ const updateSingle: ServiceFn<
 					file_size: updateObjectRes?.size,
 					width: data.width,
 					height: data.height,
+					focal_x:
+						finalType !== "image"
+							? null
+							: data.focalPoint === undefined
+								? undefined
+								: data.focalPoint === null
+									? null
+									: Math.round(data.focalPoint.x * 10000),
+					focal_y:
+						finalType !== "image"
+							? null
+							: data.focalPoint === undefined
+								? undefined
+								: data.focalPoint === null
+									? null
+									: Math.round(data.focalPoint.y * 10000),
 					blur_hash: data.blurHash,
 					average_color: data.averageColor,
 					is_dark: data.isDark,

@@ -57,6 +57,7 @@ const updateProfilePictureController = factory.createHandlers(
 			fileName: body.fileName,
 			width: body.width,
 			height: body.height,
+			focalPoint: body.focalPoint,
 			blurHash: body.blurHash,
 			averageColor: body.averageColor,
 			isDark: body.isDark,

@@ -3,6 +3,7 @@ import classNames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
+	FaSolidBullseye,
 	FaSolidImage,
 	FaSolidMagnifyingGlass,
 	FaSolidXmark,
@@ -18,6 +19,7 @@ import {
 } from "solid-js";
 import { Checkbox, Input, Select, Textarea } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
+import FocalPointEditor from "@/components/Modals/Media/FocalPointEditor";
 import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
 import Pill from "@/components/Partials/Pill";
@@ -51,6 +53,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	let posterInputRef: HTMLInputElement | undefined;
 	const [uploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const [posterAlt, setPosterAlt] = createSignal<Media["alt"]>([]);
+	const [posterFocalEditorOpen, setPosterFocalEditorOpen] = createSignal(false);
 	const [activeTab, setActiveTab] = createSignal<"details" | "poster" | "meta">(
 		"details",
 	);
@@ -324,8 +327,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				posterId: showPosterInput()
 					? (media.data?.data.poster?.id ?? null)
 					: undefined,
+				focalPoint:
+					media.data?.data.type === "image"
+						? (media.data.data.meta.focalPoint ?? null)
+						: undefined,
 				posterAlt: showPosterAltInput()
 					? (media.data?.data.poster?.alt ?? [])
+					: undefined,
+				posterFocalPoint: showPosterAltInput()
+					? (media.data?.data.poster?.meta.focalPoint ?? null)
 					: undefined,
 			},
 			{
@@ -341,7 +351,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						? null
 						: state?.posterId()
 					: undefined,
+				focalPoint:
+					currentMediaType() === "image"
+						? MediaFile.getFocalPoint()
+						: undefined,
 				posterAlt: showPosterAltInput() ? posterAlt() : undefined,
+				posterFocalPoint: showPosterAltInput()
+					? PosterFile.getFocalPoint()
+					: undefined,
 			},
 		);
 
@@ -452,10 +469,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	function clearPosterFile() {
 		PosterFile.setGetFile(null);
 		PosterFile.setGetRemovedCurrent(true);
+		PosterFile.setFocalPoint(null);
 	}
 	function undoPosterFile() {
 		PosterFile.setGetFile(null);
 		PosterFile.setGetRemovedCurrent(false);
+		PosterFile.setFocalPoint(media.data?.data.poster?.meta.focalPoint ?? null);
 		setPosterAlt(media.data?.data.poster?.alt ?? recordToTranslations());
 	}
 	async function createPoster() {
@@ -474,6 +493,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			folderId: null,
 			public: targetState()?.public() ?? true,
 			isHidden: true,
+			focalPoint: PosterFile.getFocalPoint() ?? undefined,
 		});
 
 		return poster?.id ?? null;
@@ -488,8 +508,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		}
 
 		const { changed } = helpers.updateData(
-			{ alt: poster.alt },
-			{ alt: posterAlt() },
+			{ alt: poster.alt, focalPoint: poster.meta.focalPoint ?? null },
+			{ alt: posterAlt(), focalPoint: PosterFile.getFocalPoint() },
 		);
 		if (!changed) return true;
 
@@ -497,6 +517,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			id: poster.id,
 			body: {
 				alt: posterAlt(),
+				focalPoint: PosterFile.getFocalPoint(),
 			},
 		});
 
@@ -512,6 +533,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			const media = await createMedia.createMedia(
 				MediaFile.getFile(),
 				imageMeta,
+				{
+					focalPoint:
+						currentMediaType() === "image"
+							? (MediaFile.getFocalPoint() ?? undefined)
+							: undefined,
+				},
 			);
 
 			if (media === null) return;
@@ -527,6 +554,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				updateMedia?.setPosterId(null);
 			}
 
+			updateMedia?.setFocalPoint(
+				currentMediaType() === "image" ? MediaFile.getFocalPoint() : undefined,
+			);
 			const success = await updateMedia?.updateMedia(
 				MediaFile.getFile(),
 				imageMeta,
@@ -562,6 +592,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						: media.data.data.url
 					: undefined,
 				type: media.data?.data.type || undefined,
+				width: media.data?.data.meta.width,
+				height: media.data?.data.meta.height,
+				focalPoint: media.data?.data.meta.focalPoint ?? null,
 			});
 			PosterFile.reset();
 			if (media.data?.data.poster) {
@@ -569,6 +602,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					name: T()("poster"),
 					url: `${media.data.data.poster.url}?preset=thumbnail&format=webp`,
 					type: "image",
+					width: media.data.data.poster.meta.width,
+					height: media.data.data.poster.meta.height,
+					focalPoint: media.data.data.poster.meta.focalPoint ?? null,
 				});
 			}
 		}
@@ -612,6 +648,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					MediaFile.reset();
 					PosterFile.reset();
 					setPosterAlt([]);
+					setPosterFocalEditorOpen(false);
 					setActiveTab("details");
 					setUploadErrors(undefined);
 				},
@@ -794,6 +831,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								if (e.currentTarget.files?.length) {
 									PosterFile.setGetFile(e.currentTarget.files[0]);
 									PosterFile.setGetRemovedCurrent(false);
+									PosterFile.setFocalPoint(null);
 								}
 							}}
 						/>
@@ -852,6 +890,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										>
 											<FaSolidMagnifyingGlass size={14} />
 										</Button>
+										<Button
+											type="button"
+											theme="secondary-subtle"
+											size="icon-subtle"
+											onClick={() => setPosterFocalEditorOpen(true)}
+											aria-label={T()("edit_focal_point")}
+										>
+											<FaSolidBullseye size={14} />
+										</Button>
 									</Show>
 									<Button
 										type="button"
@@ -890,6 +937,24 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									</Show>
 								</div>
 							</div>
+							<Show when={posterPreview()}>
+								{(preview) => (
+									<FocalPointEditor
+										state={{
+											open: posterFocalEditorOpen(),
+											setOpen: setPosterFocalEditorOpen,
+										}}
+										src={preview().url}
+										alt={preview().name}
+										dimensions={{
+											width: posterMeta()?.width,
+											height: posterMeta()?.height,
+										}}
+										value={PosterFile.getFocalPoint()}
+										onSave={PosterFile.setFocalPoint}
+									/>
+								)}
+							</Show>
 							<Show when={posterUploadActive()}>
 								<div class="absolute inset-x-0 bottom-0 z-20">
 									<ProgressBar

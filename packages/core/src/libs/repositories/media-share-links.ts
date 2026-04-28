@@ -31,6 +31,8 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 		media_file_size: z.number().nullable().optional(),
 		media_width: z.number().nullable().optional(),
 		media_height: z.number().nullable().optional(),
+		media_focal_x: z.number().nullable().optional(),
+		media_focal_y: z.number().nullable().optional(),
 		media_poster_key: z.string().nullable().optional(),
 		media_poster_type: z.string().nullable().optional(),
 	});
@@ -102,6 +104,8 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 						"lucid_media.file_size as media_file_size",
 						"lucid_media.width as media_width",
 						"lucid_media.height as media_height",
+						"lucid_media.focal_x as media_focal_x",
+						"lucid_media.focal_y as media_focal_y",
 						"poster.key as media_poster_key",
 						"poster.type as media_poster_type",
 					])
@@ -137,6 +141,8 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 				"media_file_size",
 				"media_width",
 				"media_height",
+				"media_focal_x",
+				"media_focal_y",
 				"media_poster_key",
 				"media_poster_type",
 			],

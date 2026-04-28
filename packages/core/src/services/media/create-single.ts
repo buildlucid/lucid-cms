@@ -25,6 +25,10 @@ const createSingle: ServiceFn<
 			fileName: string;
 			width?: number;
 			height?: number;
+			focalPoint?: {
+				x: number;
+				y: number;
+			};
 			blurHash?: string;
 			averageColor?: string;
 			isDark?: boolean;
@@ -79,6 +83,27 @@ const createSingle: ServiceFn<
 	});
 	if (syncMediaRes.error) return syncMediaRes;
 
+	if (data.focalPoint !== undefined && syncMediaRes.data.type !== "image") {
+		await mediaServices.strategies.deleteObject(context, {
+			key: syncMediaRes.data.key,
+			size: syncMediaRes.data.size,
+			processedSize: 0,
+		});
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				errors: {
+					focalPoint: {
+						code: "media_error",
+						message: T("media_error_focal_point_image_only"),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
+
 	const keyVisibility = getKeyVisibility(syncMediaRes.data.key);
 
 	//* we infer the public value based on the key so there cannot be drift between the media uploaded via the
@@ -107,6 +132,14 @@ const createSingle: ServiceFn<
 				file_size: syncMediaRes.data.size,
 				width: data.width ?? null,
 				height: data.height ?? null,
+				focal_x:
+					syncMediaRes.data.type === "image" && data.focalPoint
+						? Math.round(data.focalPoint.x * 10000)
+						: null,
+				focal_y:
+					syncMediaRes.data.type === "image" && data.focalPoint
+						? Math.round(data.focalPoint.y * 10000)
+						: null,
 				blur_hash: data.blurHash ?? null,
 				average_color: data.averageColor ?? null,
 				is_dark: data.isDark ?? null,

@@ -31,6 +31,12 @@ const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
 			fileSize: z.number(),
 			width: z.number().nullable(),
 			height: z.number().nullable(),
+			focalPoint: z
+				.object({
+					x: z.number(),
+					y: z.number(),
+				})
+				.nullable(),
 			previewable: z.boolean(),
 			shareUrl: z.string(),
 			poster: z

@@ -108,11 +108,13 @@ const CreateUpdateProfilePicturePanel: Component<
 				key: undefined,
 				title: hydrateTranslations(profilePictureMedia()?.title),
 				alt: hydrateTranslations(profilePictureMedia()?.alt),
+				focalPoint: profilePictureMedia()?.meta.focalPoint ?? null,
 			},
 			{
 				key: createMedia.state.key(),
 				title: createMedia.state.title(),
 				alt: createMedia.state.alt(),
+				focalPoint: MediaFile.getFocalPoint(),
 			},
 		);
 
@@ -239,6 +241,7 @@ const CreateUpdateProfilePicturePanel: Component<
 			fileName: file?.name,
 			width: imageMeta?.width,
 			height: imageMeta?.height,
+			focalPoint: MediaFile.getFocalPoint(),
 			blurHash: imageMeta?.blurHash,
 			averageColor: imageMeta?.averageColor,
 			isDark: imageMeta?.isDark,
@@ -271,6 +274,9 @@ const CreateUpdateProfilePicturePanel: Component<
 				name: profilePicture.fileName ?? profilePicture.key,
 				url: `${profilePicture.url}?preset=thumbnail&format=webp`,
 				type: profilePicture.type,
+				width: profilePicture.meta.width,
+				height: profilePicture.meta.height,
+				focalPoint: profilePicture.meta.focalPoint ?? null,
 			});
 		}
 	}

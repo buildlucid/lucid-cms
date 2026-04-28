@@ -39,10 +39,18 @@ const deepDiff = <T extends GenericObject>(obj1: T, obj2: T): Partial<T> => {
 					result[key] = obj2[key];
 				}
 			} else if (typeof obj1[key] === "object" && obj1[key] !== null) {
-				const diff = deepDiff(obj1[key], obj2[key]);
-				if (Object.keys(diff).length > 0) {
-					// @ts-expect-error
-					result[key] = diff;
+				if (
+					typeof obj2[key] === "object" &&
+					obj2[key] !== null &&
+					!Array.isArray(obj2[key])
+				) {
+					const diff = deepDiff(obj1[key], obj2[key]);
+					if (Object.keys(diff).length > 0) {
+						// @ts-expect-error
+						result[key] = diff;
+					}
+				} else if (!safeDeepEqual(obj1[key], obj2[key])) {
+					result[key] = obj2[key];
 				}
 			} else {
 				if (obj1[key] !== obj2[key]) {

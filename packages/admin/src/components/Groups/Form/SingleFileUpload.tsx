@@ -3,6 +3,7 @@ import classNames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
+	FaSolidBullseye,
 	FaSolidFile,
 	FaSolidMagnifyingGlass,
 	FaSolidXmark,
@@ -17,6 +18,9 @@ import {
 	Switch,
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
+import FocalPointEditor, {
+	type FocalPoint,
+} from "@/components/Modals/Media/FocalPointEditor";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -34,6 +38,13 @@ export interface SingleFileUploadProps {
 		type?: Media["type"];
 		url?: string;
 		name?: string;
+		width?: number | null;
+		height?: number | null;
+		focalPoint?: FocalPoint | null;
+	};
+	focalPoint?: {
+		value: FocalPoint | null;
+		setValue: (_value: FocalPoint | null) => void;
 	};
 	disableRemoveCurrent?: boolean;
 
@@ -188,6 +199,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								name: props.state.value?.name as string,
 							}}
 							progress={props.progress}
+							focalPoint={props.focalPoint}
 							actions={{
 								clearFile,
 								uploadFile,
@@ -237,8 +249,11 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								url: props.currentFile?.url as string,
 								type: props.currentFile?.type as Media["type"],
 								name: props.currentFile?.name as string,
+								width: props.currentFile?.width,
+								height: props.currentFile?.height,
 							}}
 							progress={props.progress}
+							focalPoint={props.focalPoint}
 							actions={{
 								clearFile: props.disableRemoveCurrent ? undefined : clearFile,
 								downloadFile,
@@ -259,10 +274,16 @@ interface FilePreviewScreenProps {
 		url: string;
 		type: Media["type"];
 		name: string;
+		width?: number | null;
+		height?: number | null;
 	};
 	progress?: {
 		active: boolean;
 		value: number;
+	};
+	focalPoint?: {
+		value: FocalPoint | null;
+		setValue: (_value: FocalPoint | null) => void;
 	};
 	actions: {
 		clearFile?: () => void;
@@ -273,15 +294,38 @@ interface FilePreviewScreenProps {
 
 const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	// ------------------------------------
+	// State
+	const [focalEditorOpen, setFocalEditorOpen] = createSignal(false);
+
+	// ------------------------------------
 	// Classes
 	const actionButtonClasses = classNames(
 		"bg-input-base text-input-contrast hover:text-secondary-contrast border border-border h-8 flex justify-center items-center font-medium text-sm py-2 px-2 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base",
+	);
+	const showFocalPoint = createMemo(
+		() => props.data.type === "image" && props.focalPoint !== undefined,
 	);
 
 	// ------------------------------------
 	// Render
 	return (
 		<div class="relative w-full h-full flex justify-center items-center flex-col">
+			<Show when={showFocalPoint()}>
+				<FocalPointEditor
+					state={{
+						open: focalEditorOpen(),
+						setOpen: setFocalEditorOpen,
+					}}
+					src={props.data.url}
+					alt={props.data.name}
+					dimensions={{
+						width: props.data.width,
+						height: props.data.height,
+					}}
+					value={props.focalPoint?.value ?? null}
+					onSave={(value) => props.focalPoint?.setValue(value)}
+				/>
+			</Show>
 			<Switch
 				fallback={
 					<div
@@ -338,7 +382,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				</Match>
 			</Switch>
 			<Show when={props.progress?.active}>
-				<div class="absolute inset-x-0 bottom-[49px] z-20">
+				<div class="absolute inset-x-0 bottom-12.25 z-20">
 					<ProgressBar
 						progress={props.progress?.value ?? 0}
 						type="target"
@@ -351,11 +395,26 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					"w-full z-10 relative grid gap-2 p-2 bg-background-base border-t border-border",
 					{
 						"grid-cols-2":
-							props.actions.downloadFile === undefined ||
-							props.actions.clearFile === undefined,
+							[
+								props.actions.downloadFile,
+								showFocalPoint() ? true : undefined,
+								props.actions.uploadFile,
+								props.actions.clearFile,
+							].filter(Boolean).length === 2,
 						"grid-cols-3":
-							props.actions.downloadFile !== undefined &&
-							props.actions.clearFile !== undefined,
+							[
+								props.actions.downloadFile,
+								showFocalPoint() ? true : undefined,
+								props.actions.uploadFile,
+								props.actions.clearFile,
+							].filter(Boolean).length === 3,
+						"grid-cols-4":
+							[
+								props.actions.downloadFile,
+								showFocalPoint() ? true : undefined,
+								props.actions.uploadFile,
+								props.actions.clearFile,
+							].filter(Boolean).length === 4,
 					},
 				)}
 			>
@@ -370,6 +429,16 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					>
 						<FaSolidMagnifyingGlass class="block md:mr-2 text-current" />
 						<span class="hidden md:inline">{T()("preview")}</span>
+					</button>
+				</Show>
+				<Show when={showFocalPoint()}>
+					<button
+						type="button"
+						class={classNames(actionButtonClasses)}
+						onClick={() => setFocalEditorOpen(true)}
+					>
+						<FaSolidBullseye class="block md:mr-2 text-current" />
+						<span class="hidden md:inline">{T()("focal_point")}</span>
 					</button>
 				</Show>
 				<button

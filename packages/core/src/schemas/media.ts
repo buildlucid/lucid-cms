@@ -10,6 +10,17 @@ const mediaTranslationResponseSchema = z.object({
 	value: z.string().meta({ description: "Translated value" }).nullable(),
 });
 
+const focalPointSchema = z.object({
+	x: z.number().min(0).max(1).meta({
+		description: "Horizontal focal point, normalized from 0 to 1",
+		example: 0.5,
+	}),
+	y: z.number().min(0).max(1).meta({
+		description: "Vertical focal point, normalized from 0 to 1",
+		example: 0.5,
+	}),
+});
+
 const mediaMetaResponseSchema = z
 	.object({
 		mimeType: z
@@ -29,6 +40,9 @@ const mediaMetaResponseSchema = z
 			.number()
 			.nullable()
 			.meta({ description: "Image height", example: 100 }),
+		focalPoint: focalPointSchema.nullable().meta({
+			description: "Image focal point for presentation cropping",
+		}),
 		blurHash: z.string().nullable().meta({
 			description: "BlurHash for image previews",
 			example: "AQABAAAABAAAAgAA...",
@@ -475,6 +489,9 @@ export const controllerSchemas = {
 					example: 100,
 				})
 				.optional(),
+			focalPoint: focalPointSchema.nullable().optional().meta({
+				description: "The image focal point",
+			}),
 			blurHash: z
 				.string()
 				.trim()
@@ -724,6 +741,9 @@ export const controllerSchemas = {
 					example: 100,
 				})
 				.optional(),
+			focalPoint: focalPointSchema.optional().meta({
+				description: "The image focal point",
+			}),
 			blurHash: z
 				.string()
 				.trim()

@@ -13,6 +13,10 @@ const updateProfilePicture: ServiceFn<
 			fileName?: string;
 			width?: number;
 			height?: number;
+			focalPoint?: {
+				x: number;
+				y: number;
+			} | null;
 			blurHash?: string;
 			averageColor?: string;
 			isDark?: boolean;
@@ -81,6 +85,7 @@ const updateProfilePicture: ServiceFn<
 			alt: data.alt,
 			width: data.width,
 			height: data.height,
+			focalPoint: data.focalPoint,
 			blurHash: data.blurHash,
 			averageColor: data.averageColor,
 			isDark: data.isDark,
@@ -135,6 +140,7 @@ const updateProfilePicture: ServiceFn<
 		fileName: data.fileName,
 		width: data.width,
 		height: data.height,
+		focalPoint: data.focalPoint ?? undefined,
 		blurHash: data.blurHash,
 		averageColor: data.averageColor,
 		isDark: data.isDark,

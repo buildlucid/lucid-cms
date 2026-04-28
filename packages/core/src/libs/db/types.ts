@@ -404,6 +404,8 @@ export interface LucidMedia {
 	file_size: number;
 	width: number | null;
 	height: number | null;
+	focal_x: number | null;
+	focal_y: number | null;
 	blur_hash: string | null;
 	average_color: string | null;
 	is_dark: BooleanInt | null;

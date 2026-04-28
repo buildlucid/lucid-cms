@@ -38,6 +38,10 @@ export interface MediaMeta {
 	fileSize: number;
 	width: number | null;
 	height: number | null;
+	focalPoint: {
+		x: number;
+		y: number;
+	} | null;
 	blurHash: string | null;
 	averageColor: string | null;
 	isDark: boolean | null;
@@ -96,6 +100,10 @@ export interface ShareLinkAccessGranted {
 		fileSize: number;
 		width: number | null;
 		height: number | null;
+		focalPoint: {
+			x: number;
+			y: number;
+		} | null;
 		previewable: boolean;
 		shareUrl: string;
 		poster: {

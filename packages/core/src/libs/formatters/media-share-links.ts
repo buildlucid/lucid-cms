@@ -6,6 +6,7 @@ import type {
 } from "../../types/response.js";
 import { createShareLinkUrl } from "../../utils/media/index.js";
 import formatter from "./index.js";
+import { formatFocalPoint } from "./media.js";
 
 export interface MediaShareLinkPropsT {
 	id: number;
@@ -33,6 +34,8 @@ export interface ShareLinkAccessPropsT {
 	media_file_size: number | null;
 	media_width: number | null;
 	media_height: number | null;
+	media_focal_x: number | null;
+	media_focal_y: number | null;
 	media_poster_key: string | null;
 	media_poster_type: string | null;
 }
@@ -72,6 +75,7 @@ const formatShareAccess = (props: {
 			fileSize: link.media_file_size ?? 0,
 			width: link.media_width ?? null,
 			height: link.media_height ?? null,
+			focalPoint: formatFocalPoint(link.media_focal_x, link.media_focal_y),
 			previewable,
 			shareUrl: props.shareUrl,
 			poster:

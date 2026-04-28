@@ -21,6 +21,8 @@ export interface MediaPropsT {
 	file_size: number;
 	width: number | null;
 	height: number | null;
+	focal_x?: number | null;
+	focal_y?: number | null;
 	created_at: Date | string | null;
 	updated_at: Date | string | null;
 	blur_hash: string | null;
@@ -52,6 +54,8 @@ export interface MediaPosterPropsT {
 	file_size: number;
 	width: number | null;
 	height: number | null;
+	focal_x?: number | null;
+	focal_y?: number | null;
 	blur_hash: string | null;
 	average_color: string | null;
 	is_dark: BooleanInt | null;
@@ -85,6 +89,19 @@ const objectifyTranslations = (
 		}),
 		{},
 	);
+};
+
+export const formatFocalPoint = (
+	x: number | null | undefined,
+	y: number | null | undefined,
+): Media["meta"]["focalPoint"] => {
+	if (x === null || y === null || x === undefined || y === undefined)
+		return null;
+
+	return {
+		x: x / 10000,
+		y: y / 10000,
+	};
 };
 
 const formatMultiple = (props: { media: MediaPropsT[]; host: string }) => {
@@ -134,6 +151,7 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 			fileSize: props.media.file_size,
 			width: props.media.width,
 			height: props.media.height,
+			focalPoint: formatFocalPoint(props.media.focal_x, props.media.focal_y),
 			blurHash: props.media.blur_hash,
 			averageColor: props.media.average_color,
 			isDark: formatter.formatBoolean(props.media.is_dark),
@@ -206,6 +224,7 @@ const formatEmbed = (props: {
 			fileSize: props.poster.file_size,
 			width: props.poster.width,
 			height: props.poster.height,
+			focalPoint: formatFocalPoint(props.poster.focal_x, props.poster.focal_y),
 			blurHash: props.poster.blur_hash,
 			averageColor: props.poster.average_color,
 			isDark: formatter.formatBoolean(props.poster.is_dark),
@@ -233,5 +252,6 @@ export default {
 	formatEmbed,
 	formatPoster,
 	formatRef,
+	formatFocalPoint,
 	objectifyTranslations,
 };

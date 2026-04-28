@@ -26,6 +26,7 @@ interface Params {
 	isHidden?: boolean;
 	width?: number;
 	height?: number;
+	focalPoint?: Media["meta"]["focalPoint"];
 	blurHash?: string;
 	averageColor?: string;
 	isDark?: boolean;

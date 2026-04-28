@@ -1,4 +1,4 @@
-import type { ResponseBody } from "@types";
+import type { Media, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -27,6 +27,7 @@ interface Params {
 		folderId?: number | null;
 		width?: number | null;
 		height?: number | null;
+		focalPoint?: Media["meta"]["focalPoint"];
 		blurHash?: string | null;
 		averageColor?: string | null;
 		isDark?: boolean | null;

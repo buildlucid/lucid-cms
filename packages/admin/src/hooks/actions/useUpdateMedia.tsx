@@ -22,6 +22,9 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const [getPosterId, setPosterId] = createSignal<number | null | undefined>(
 		undefined,
 	);
+	const [getFocalPoint, setFocalPoint] = createSignal<
+		Media["meta"]["focalPoint"] | undefined
+	>(undefined);
 	const [getUploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const [getUploadLoading, setUploadLoading] = createSignal<boolean>(false);
 	const [getUploadProgress, setUploadProgress] = createSignal<number>(0);
@@ -97,6 +100,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				folderId: getFolderId() ?? null,
 				width: imageMeta?.width,
 				height: imageMeta?.height,
+				focalPoint: getFocalPoint(),
 				blurHash: imageMeta?.blurHash,
 				averageColor: imageMeta?.averageColor,
 				isDark: imageMeta?.isDark,
@@ -135,6 +139,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		setFolderId,
 		setPublic,
 		setPosterId,
+		setFocalPoint,
 		errors: errors,
 		isLoading: isLoading,
 		uploadProgress: getUploadProgress,
@@ -147,6 +152,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			folderId: getFolderId,
 			public: getPublic,
 			posterId: getPosterId,
+			focalPoint: getFocalPoint,
 		},
 		reset: () => {
 			setTitle([]);
@@ -157,6 +163,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			setFolderId(undefined);
 			setPublic(true);
 			setPosterId(undefined);
+			setFocalPoint(undefined);
 			setUploadErrors();
 			setUploadProgress(0);
 			updateSingle.reset();

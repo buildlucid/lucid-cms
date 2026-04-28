@@ -4,6 +4,7 @@ import { FastAverageColor } from "fast-average-color";
 import { type Accessor, createSignal } from "solid-js";
 import { SingleFileUpload } from "@/components/Groups/Form";
 import type { SingleFileUploadProps } from "@/components/Groups/Form/SingleFileUpload";
+import type { FocalPoint } from "@/components/Modals/Media/FocalPointEditor";
 import { getBodyError } from "@/utils/error-helpers";
 
 interface UseSingleFileUploadProps {
@@ -38,6 +39,9 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const [getCurrentFile, setCurrentFile] = createSignal<
 		SingleFileUploadProps["currentFile"]
 	>(data.currentFile);
+	const [getFocalPoint, setFocalPoint] = createSignal<FocalPoint | null>(
+		data.currentFile?.focalPoint ?? null,
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -143,7 +147,12 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		getRemovedCurrent,
 		setGetRemovedCurrent,
 		getCurrentFile,
-		setCurrentFile,
+		setCurrentFile: (file: SingleFileUploadProps["currentFile"]) => {
+			setCurrentFile(file);
+			setFocalPoint(file?.focalPoint ?? null);
+		},
+		getFocalPoint,
+		setFocalPoint,
 		getMimeType,
 		getFileName,
 		getImageMeta,
@@ -151,16 +160,27 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setGetFile(null);
 			setGetRemovedCurrent(false);
 			setCurrentFile(data.currentFile);
+			setFocalPoint(data.currentFile?.focalPoint ?? null);
 		},
 		Render: () => (
 			<SingleFileUpload
 				state={{
 					value: getFile(),
-					setValue: setGetFile,
+					setValue: (file) => {
+						setGetFile(file);
+						if (file) setFocalPoint(null);
+					},
 					removedCurrent: getRemovedCurrent(),
-					setRemovedCurrent: setGetRemovedCurrent,
+					setRemovedCurrent: (removed) => {
+						setGetRemovedCurrent(removed);
+						if (removed) setFocalPoint(null);
+					},
 				}}
 				currentFile={getCurrentFile()}
+				focalPoint={{
+					value: getFocalPoint(),
+					setValue: setFocalPoint,
+				}}
 				disableRemoveCurrent={data.disableRemoveCurrent}
 				id={data.id}
 				name={data.name}
