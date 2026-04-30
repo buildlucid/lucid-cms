@@ -37,7 +37,7 @@
 		"Lucid CMS",
 		"Lucid"
 	],
-	"license": "BSL-1.0",
+	"license": "BUSL-1.1",
 	"devDependencies": {
 		"@types/classnames": "^2.3.4",
 		"@types/object-hash": "^3.0.6",

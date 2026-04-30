@@ -10,6 +10,7 @@ export { default as deleteSingle } from "./delete-single.js";
 export { default as deleteSinglePermanently } from "./delete-single-permanently.js";
 export { default as getMultiple } from "./get-multiple.js";
 export { default as getSingle } from "./get-single.js";
+export { default as getStorageUsage } from "./get-storage-usage.js";
 export { default as getUploadPartUrls } from "./get-upload-part-urls.js";
 export { default as getUploadSession } from "./get-upload-session.js";
 export { default as moveFolder } from "./move-folder.js";

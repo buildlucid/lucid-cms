@@ -29,6 +29,7 @@ export type Permission =
 	| "integrations:delete"
 	| "integrations:regenerate"
 	| "settings:read"
+	| "settings:update"
 	| "license:update"
 	| "cache:clear";
 

@@ -175,6 +175,28 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 
 	// ----------------------------------------
 	// queries
+	async sumFileSize() {
+		const query = this.db
+			.selectFrom("lucid_media")
+			.select(sql<string | number>`COALESCE(SUM(file_size), 0)`.as("total"));
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					{ total: string | number | null } | undefined
+				>,
+			{
+				method: "sumFileSize",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: Number(exec.response.data?.total ?? 0),
+		};
+	}
+
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,

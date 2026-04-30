@@ -34,6 +34,34 @@ const defaultOptions: ServiceFn<[], undefined> = async (
 			if (createStorageOptionRes.error) return createStorageOptionRes;
 		}
 
+		const systemAlertEmailOptionRes = await Options.selectSingle({
+			select: ["name"],
+			where: [
+				{
+					key: "name",
+					operator: "=",
+					value: "system_alert_email",
+				},
+			],
+		});
+		if (systemAlertEmailOptionRes.error) return systemAlertEmailOptionRes;
+
+		if (systemAlertEmailOptionRes.data === undefined) {
+			const createSystemAlertEmailOptionRes = await Options.createSingle({
+				data: {
+					name: "system_alert_email",
+					value_text: null,
+				},
+				returning: ["name", "value_text"],
+				validation: {
+					enabled: true,
+				},
+			});
+			if (createSystemAlertEmailOptionRes.error) {
+				return createSystemAlertEmailOptionRes;
+			}
+		}
+
 		return {
 			error: undefined,
 			data: undefined,

@@ -41,6 +41,12 @@ const cronJobsMap = () =>
 			error: T("an_error_occurred_updating_media_storage"),
 			transaction: false,
 		},
+		"check-system-alerts": {
+			fn: cronServices.checkSystemAlerts,
+			label: "Check system alerts",
+			error: T("an_error_occurred_checking_system_alerts"),
+			transaction: false,
+		},
 		"delete-expired-unsynced-media": {
 			fn: cronServices.deleteExpiredUnsyncedMedia,
 			label: "Delete expired unsynced media",

@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { KyselyDB } from "../db/types.js";
@@ -18,4 +19,28 @@ export default class ProcessedImagesRepository extends StaticRepository<"lucid_p
 		file_size: this.dbAdapter.getDataType("integer"),
 	};
 	queryConfig = undefined;
+
+	// ----------------------------------------
+	// queries
+	async sumFileSize() {
+		const query = this.db
+			.selectFrom("lucid_processed_images")
+			.select(sql<string | number>`COALESCE(SUM(file_size), 0)`.as("total"));
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					{ total: string | number | null } | undefined
+				>,
+			{
+				method: "sumFileSize",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: Number(exec.response.data?.total ?? 0),
+		};
+	}
 }

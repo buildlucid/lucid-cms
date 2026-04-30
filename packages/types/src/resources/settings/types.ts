@@ -33,11 +33,13 @@ export interface Settings {
 		media: string | null;
 		email: string;
 		imageProcessor: string | null;
+		alertEmail: string | null;
 	};
 }
 
 export type OptionsName =
 	| "media_storage_used"
+	| "system_alert_email"
 	| "license_key"
 	| "license_key_last4"
 	| "license_valid"

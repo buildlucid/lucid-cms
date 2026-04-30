@@ -325,16 +325,21 @@ abstract class DynamicRepository<
 		>,
 		dynamicConfig: DynamicConfig<Table>,
 	) {
-		let query = this.db
-			.deleteFrom(dynamicConfig.tableName)
-			.$if(
-				props.returnAll !== true &&
-					props.returning !== undefined &&
-					props.returning.length > 0,
-				// @ts-expect-error
-				(qb) => qb.returning(props.returning),
-			)
-			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+		let query = this.db.deleteFrom(dynamicConfig.tableName);
+
+		if (
+			props.returnAll !== true &&
+			props.returning !== undefined &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
 
 		// @ts-expect-error
 		query = queryBuilder.delete(query, props.where);
@@ -368,16 +373,21 @@ abstract class DynamicRepository<
 		>,
 		dynamicConfig: DynamicConfig<Table>,
 	) {
-		let query = this.db
-			.deleteFrom(dynamicConfig.tableName)
-			.$if(
-				props.returnAll !== true &&
-					props.returning !== undefined &&
-					props.returning.length > 0,
-				// @ts-expect-error
-				(qb) => qb.returning(props.returning),
-			)
-			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+		let query = this.db.deleteFrom(dynamicConfig.tableName);
+
+		if (
+			props.returnAll !== true &&
+			props.returning !== undefined &&
+			props.returning.length > 0
+		) {
+			// @ts-expect-error
+			query = query.returning(props.returning);
+		}
+
+		if (props.returnAll) {
+			// @ts-expect-error
+			query = query.returningAll();
+		}
 
 		// @ts-expect-error
 		query = queryBuilder.delete(query, props.where);

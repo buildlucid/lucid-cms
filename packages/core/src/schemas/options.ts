@@ -2,6 +2,7 @@ import z from "zod";
 
 export const optionsNameSchema = z.union([
 	z.literal("media_storage_used"),
+	z.literal("system_alert_email"),
 	z.literal("license_key"),
 	z.literal("license_key_last4"),
 	z.literal("license_valid"),

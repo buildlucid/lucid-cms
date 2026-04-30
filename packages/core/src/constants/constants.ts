@@ -69,6 +69,16 @@ export default Object.freeze({
 		perPage: 10,
 	},
 	email: emailConstants,
+	alerts: {
+		storage: {
+			type: "storage" as const,
+			thresholds: [
+				{ percent: 80, level: "warning", cooldownDays: 7 },
+				{ percent: 90, level: "warning", cooldownDays: 3 },
+				{ percent: 100, level: "critical", cooldownDays: 1 },
+			] as const,
+		},
+	},
 	errors: {
 		name: T("default_error_name"),
 		message: T("default_error_message"),

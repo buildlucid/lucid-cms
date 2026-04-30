@@ -1,3 +1,4 @@
+export { default as checkSystemAlerts } from "./check-system-alerts.js";
 export { default as clearExpiredAuthStates } from "./clear-expired-auth-states.js";
 export { default as clearExpiredCollections } from "./clear-expired-collections.js";
 export { default as clearExpiredLocales } from "./clear-expired-locales.js";

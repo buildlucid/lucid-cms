@@ -1,47 +1,15 @@
-import {
-	MediaRepository,
-	OptionsRepository,
-	ProcessedImagesRepository,
-} from "../../../libs/repositories/index.js";
+import { OptionsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import getStorageUsage from "../get-storage-usage.js";
 
 /**
  * Recalculates and updates the media storage usage option
  */
 const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
 	const Options = new OptionsRepository(context.db.client, context.config.db);
 
-	const [mediaItemsRes, processedImagesRes] = await Promise.all([
-		Media.selectMultiple({
-			select: ["file_size"],
-			validation: {
-				enabled: true,
-			},
-		}),
-		ProcessedImages.selectMultiple({
-			select: ["file_size"],
-			validation: {
-				enabled: true,
-			},
-		}),
-	]);
-	if (processedImagesRes.error) return processedImagesRes;
-	if (mediaItemsRes.error) return mediaItemsRes;
-
-	const totlaMediaSize = mediaItemsRes.data.reduce((acc, item) => {
-		return acc + item.file_size;
-	}, 0);
-	const totalProcessedImagesSize = processedImagesRes.data.reduce(
-		(acc, item) => {
-			return acc + item.file_size;
-		},
-		0,
-	);
+	const storageUsageRes = await getStorageUsage(context);
+	if (storageUsageRes.error) return storageUsageRes;
 
 	const updateMediaStorageRes = await Options.updateSingle({
 		where: [
@@ -52,7 +20,7 @@ const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
 			},
 		],
 		data: {
-			value_int: totlaMediaSize + totalProcessedImagesSize,
+			value_int: storageUsageRes.data.total,
 		},
 		returning: ["name"],
 		validation: {

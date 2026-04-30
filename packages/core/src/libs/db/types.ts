@@ -380,6 +380,25 @@ export interface LucidEmailTransactions {
 	updated_at: TimestampMutateable;
 }
 
+export type AlertType = "storage";
+export type AlertLevel = "info" | "warning" | "error" | "critical";
+
+export interface LucidAlerts {
+	id: Generated<number>;
+	type: AlertType;
+	level: AlertLevel;
+	dedupe_key: string;
+	title: string;
+	message: string;
+	metadata: JSONColumnType<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		Record<string, unknown>
+	>;
+	email_id: number | null;
+	created_at: TimestampImmutable;
+}
+
 export interface LucidMediaFolders {
 	id: Generated<number>;
 	title: string;
@@ -613,6 +632,7 @@ export interface LucidDB {
 	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;
 	lucid_email_transactions: LucidEmailTransactions;
+	lucid_alerts: LucidAlerts;
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;

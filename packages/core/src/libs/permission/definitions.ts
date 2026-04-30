@@ -44,6 +44,7 @@ export const Permissions = {
 
 	// Settings permissions
 	SettingsRead: "settings:read",
+	SettingsUpdate: "settings:update",
 	LicenseUpdate: "license:update",
 	CacheClear: "cache:clear",
 } as const;
@@ -113,6 +114,7 @@ export const PermissionGroups = Object.freeze({
 		key: "settings_permissions",
 		permissions: [
 			Permissions.SettingsRead,
+			Permissions.SettingsUpdate,
 			Permissions.LicenseUpdate,
 			Permissions.CacheClear,
 		],

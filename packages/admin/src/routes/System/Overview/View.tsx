@@ -1,5 +1,6 @@
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
+import UpdateSystemAlertsForm from "@/components/Forms/System/UpdateSystemAlertsForm";
 import { Standard } from "@/components/Groups/Headers";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
@@ -201,6 +202,20 @@ const SystemOverviewRoute: Component = () => {
 								</For>
 							</div>
 						</Show>
+					</InfoRow.Content>
+				</InfoRow.Root>
+				<InfoRow.Root
+					title={T()("system_alerts")}
+					description={T()("system_alerts_description")}
+				>
+					<InfoRow.Content
+						title={T()(Permissions.SettingsUpdate)}
+						description={T()("system_alert_email_description")}
+						reducedMargin={true}
+					>
+						<UpdateSystemAlertsForm
+							alertEmail={systemInfo()?.alertEmail ?? null}
+						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
 				<InfoRow.Root

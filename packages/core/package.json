@@ -141,5 +141,5 @@
 		"lucidcms": "./dist/libs/cli/index.mjs"
 	},
 	"sideEffects": false,
-	"license": "BSL-1.0"
+	"license": "BUSL-1.1"
 }

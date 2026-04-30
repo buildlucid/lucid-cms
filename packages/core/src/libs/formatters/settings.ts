@@ -15,6 +15,7 @@ interface SettingsPropsT {
 	emailSimulated: boolean;
 	emailTemplates: string[];
 	imageProcessorKey: string | null;
+	systemAlertEmail: string | null;
 	runtimeKey: string;
 	queueKey: string;
 	kvKey: string;
@@ -85,6 +86,7 @@ const formatSingle = (props: {
 			media: props.settings.mediaAdapterKey,
 			email: props.settings.emailAdapterKey,
 			imageProcessor: props.settings.imageProcessorKey,
+			alertEmail: props.settings.systemAlertEmail,
 		};
 	}
 

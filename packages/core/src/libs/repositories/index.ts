@@ -1,3 +1,4 @@
+export { default as AlertsRepository } from "./alerts.js";
 export { default as AuthStatesRepository } from "./auth-states.js";
 export { default as ClientIntegrationScopesRepository } from "./client-integration-scopes.js";
 export { default as ClientIntegrationsRepository } from "./client-integrations.js";

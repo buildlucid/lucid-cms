@@ -1,4 +1,5 @@
 export type QueueEvent<T extends string = string> =
+	| "alert:execute"
 	| "email:send"
 	| "media:delete"
 	| "media:delete-unsynced"

@@ -8,6 +8,7 @@ import deleteAwaitingSyncMediaJob from "../../services/media/jobs/delete-awaitin
 import hardDeleteSingleMediaJob from "../../services/media/jobs/hard-delete-single.js";
 import updateMediaStorageJob from "../../services/media/jobs/update-storage.js";
 import deleteUserJob from "../../services/users/jobs/delete-single.js";
+import executeAlert from "../alerts/execute-alert.js";
 import type {
 	QueueEvent,
 	QueueJobHandlerFn,
@@ -15,6 +16,7 @@ import type {
 } from "./types.js";
 
 const jobHandlersMap: Record<QueueEvent, QueueJobHandlerFn> = {
+	"alert:execute": executeAlert,
 	"email:send": sendEmailJob,
 	"media:delete": hardDeleteSingleMediaJob,
 	"media:abort-upload-session": abortUploadSessionJob,

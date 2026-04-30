@@ -62,6 +62,11 @@ const emailConstants = Object.freeze({
 				},
 			},
 		},
+		storageAlert: {
+			key: "storage-alert",
+			external: false,
+			storage: null,
+		},
 	},
 } as const);
 

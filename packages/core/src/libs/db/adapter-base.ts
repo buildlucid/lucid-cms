@@ -22,6 +22,7 @@ import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
 import Migration00000009 from "./migrations/00000009-share-links.js";
+import Migration00000010 from "./migrations/00000010-alerts.js";
 import type {
 	DatabaseConfig,
 	InferredTable,
@@ -61,6 +62,7 @@ export default abstract class DatabaseAdapter {
 		"00000007-collections",
 		"00000008-integrations",
 		"00000009-share-link",
+		"00000010-alerts",
 	];
 	abstract initialize(): Promise<void>;
 	/**
@@ -253,6 +255,7 @@ export default abstract class DatabaseAdapter {
 			"00000007-collections": Migration00000007(this),
 			"00000008-integrations": Migration00000008(this),
 			"00000009-share-link": Migration00000009(this),
+			"00000010-alerts": Migration00000010(this),
 		};
 	}
 }

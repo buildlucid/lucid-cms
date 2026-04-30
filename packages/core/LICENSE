@@ -4,10 +4,14 @@ Parameters
 
 Licensor:                   Proto Digital
 
-Licensed Work:              Lucid CMS
+Licensed Work:              The @lucidcms/core package.
                             The Licensed Work is (c) 2025 Proto Digital.
 
-Additional Use Grant:       None 
+Additional Use Grant:       You may make production use of the Licensed Work
+                            solely for Non-Commercial Purposes. A
+                            "Non-Commercial Purpose" is a purpose that is not
+                            primarily intended for or directed toward
+                            commercial advantage or monetary compensation.
 
 Change Date:                4 years from the public release date of each version,
                             unless otherwise specified in that version’s release notes.

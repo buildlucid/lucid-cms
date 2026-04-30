@@ -10,6 +10,7 @@ import type {
 } from "../../utils/services/types.js";
 
 export type QueueEvent<T extends string = string> =
+	| "alert:execute"
 	| "email:send"
 	| "media:delete"
 	| "media:abort-upload-session"

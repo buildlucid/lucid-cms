@@ -27,7 +27,7 @@ const getSettings: ServiceFn<
 		image,
 	] = await Promise.all([
 		optionServices.getMultiple(context, {
-			names: ["media_storage_used", "license_key_last4"],
+			names: ["media_storage_used", "license_key_last4", "system_alert_email"],
 		}),
 		processedImageServices.getCount(context),
 		getMediaAdapter(context.config),
@@ -42,6 +42,9 @@ const getSettings: ServiceFn<
 	);
 	const licenseKeyLast4Res = optionsRes.data.find(
 		(o) => o.name === "license_key_last4",
+	);
+	const systemAlertEmailRes = optionsRes.data.find(
+		(o) => o.name === "system_alert_email",
 	);
 
 	const defaultTemplates = Object.values(constants.email.templates).map(
@@ -69,6 +72,7 @@ const getSettings: ServiceFn<
 				emailSimulated: emailAdapter.simulated,
 				emailTemplates,
 				imageProcessorKey,
+				systemAlertEmail: systemAlertEmailRes?.valueText ?? null,
 				runtimeKey: data.runtime,
 				queueKey: context.queue.key,
 				kvKey: context.kv.key,

@@ -1,3 +1,4 @@
+import enqueueAlertExecution from "../../../libs/alerts/enqueue-alert-execution.js";
 import T from "../../../translations/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { MediaType } from "../../../types/response.js";
@@ -100,6 +101,16 @@ const update: ServiceFn<
 				data: undefined,
 			};
 		}
+
+		void enqueueAlertExecution(context, {
+			key: "storage-check",
+			source: "programmatic",
+			trigger: "media_replacement_rejected",
+			metadata: {
+				cause: "storage_limit_exceeded",
+				operation: "replace",
+			},
+		});
 
 		return {
 			error: {
