@@ -101,8 +101,16 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),
 				},
 			)}
-			onClick={() => {
+			onClick={(event) => {
 				if (props.isDragging()) return;
+				if (event.shiftKey && canSelect()) {
+					if (isSelected()) {
+						mediaStore.get.removeSelectedMedia(props.media.id);
+					} else {
+						mediaStore.get.addSelectedMedia(props.media.id);
+					}
+					return;
+				}
 				props.rowTarget.setTargetId(props.media.id);
 				if (props.showingDeleted?.()) {
 					props.rowTarget.setTrigger("view", true);

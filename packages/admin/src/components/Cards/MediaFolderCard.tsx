@@ -54,8 +54,16 @@ export const MediaFolderCard: Component<{
 
 	// ----------------------------------
 	// Handlers
-	const navigateToFolder = () => {
+	const navigateToFolder = (event?: MouseEvent) => {
 		if (props.isDragging()) return;
+		if (event?.shiftKey && hasUpdatePermission()) {
+			if (isSelected()) {
+				mediaStore.get.removeSelectedFolder(props.folder.id);
+			} else {
+				mediaStore.get.addSelectedFolder(props.folder.id);
+			}
+			return;
+		}
 		navigate(getPath(), {
 			scroll: false,
 		});
