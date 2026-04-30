@@ -1,4 +1,3 @@
-import enqueueAlertExecution from "../../../libs/alerts/enqueue-alert-execution.js";
 import T from "../../../translations/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
@@ -74,15 +73,6 @@ const syncMedia: ServiceFn<
 		}
 
 		await mediaStrategyRes.data.delete(data.key);
-		void enqueueAlertExecution(context, {
-			key: "storage-check",
-			source: "programmatic",
-			trigger: "media_upload_rejected",
-			metadata: {
-				cause: "storage_limit_exceeded",
-				operation: "create",
-			},
-		});
 
 		return {
 			error: {
