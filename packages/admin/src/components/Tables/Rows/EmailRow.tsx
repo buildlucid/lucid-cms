@@ -17,6 +17,17 @@ interface EmailRowProps extends TableRowProps {
 }
 
 const EmailRow: Component<EmailRowProps> = (props) => {
+	const priorityTheme = () => {
+		switch (props.email.mailDetails.priority) {
+			case "high":
+				return "error-opaque";
+			case "low":
+				return "outline";
+			default:
+				return "primary-opaque";
+		}
+	};
+
 	// ----------------------------------
 	// Render
 	return (
@@ -76,40 +87,45 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				}
 				options={{ include: props?.include[0] }}
 			/>
+			<PillCol
+				text={props.email.mailDetails.priority}
+				theme={priorityTheme()}
+				options={{ include: props?.include[1] }}
+			/>
 			<TextCol
 				text={props.email.mailDetails.subject}
-				options={{ include: props?.include[1], maxLines: 2 }}
+				options={{ include: props?.include[2], maxLines: 2 }}
 			/>
 			<PillCol
 				text={props.email.mailDetails.template}
-				options={{ include: props?.include[2] }}
+				options={{ include: props?.include[3] }}
 				theme={"outline"}
 			/>
 			<TextCol
 				text={props.email.mailDetails.to}
-				options={{ include: props?.include[3], maxLines: 1 }}
+				options={{ include: props?.include[4], maxLines: 1 }}
 			/>
 			<TextCol
 				text={props.email.mailDetails.from.address}
-				options={{ include: props?.include[4], maxLines: 1 }}
+				options={{ include: props?.include[5], maxLines: 1 }}
 			/>
 			<PillCol
 				text={props.email.attemptCount || 0}
 				theme={"outline"}
-				options={{ include: props?.include[5] }}
+				options={{ include: props?.include[6] }}
 			/>
 			<PillCol
 				text={props.email.type}
 				theme={"outline"}
-				options={{ include: props?.include[6] }}
-			/>
-			<DateCol
-				date={props.email.createdAt}
 				options={{ include: props?.include[7] }}
 			/>
 			<DateCol
-				date={props.email.lastAttemptedAt}
+				date={props.email.createdAt}
 				options={{ include: props?.include[8] }}
+			/>
+			<DateCol
+				date={props.email.lastAttemptedAt}
+				options={{ include: props?.include[9] }}
 			/>
 		</Tr>
 	);

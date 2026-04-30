@@ -112,6 +112,7 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 				percent: threshold.percent,
 			}),
 			template: constants.email.templates.storageAlert.key,
+			priority: "high",
 			data: {
 				brand: context.config.brand,
 				triggerSource: source,

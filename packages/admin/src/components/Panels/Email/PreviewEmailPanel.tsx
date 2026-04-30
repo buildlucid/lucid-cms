@@ -131,6 +131,10 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 								value: email.data?.data.mailDetails.template ?? undefined,
 							},
 							{
+								label: T()("priority"),
+								value: email.data?.data.mailDetails.priority ?? undefined,
+							},
+							{
 								label: T()("to"),
 								value: email.data?.data.mailDetails.to ?? undefined,
 							},

@@ -5,6 +5,7 @@ import {
 	normalizeEmailStorageConfig,
 	resolveEmailData,
 } from "../../libs/email/storage/index.js";
+import type { EmailHeaders, EmailPriority } from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import {
 	EmailsRepository,
@@ -24,6 +25,8 @@ const sendEmail: ServiceFn<
 			cc?: string;
 			bcc?: string;
 			replyTo?: string;
+			priority?: EmailPriority;
+			headers?: EmailHeaders;
 			data: Record<string, unknown>;
 			storage?: EmailStorageConfig;
 			from?: {
@@ -64,6 +67,8 @@ const sendEmail: ServiceFn<
 				to_address: data.to,
 				subject: data.subject,
 				template: data.template,
+				priority: data.priority ?? "normal",
+				headers: data.headers ?? null,
 				cc: data.cc,
 				bcc: data.bcc,
 				data: storedDataRes.data,

@@ -19,6 +19,12 @@ export const emailTypeSchema = z.union([
 	z.literal("internal"),
 ]);
 
+export const emailPrioritySchema = z.union([
+	z.literal("low"),
+	z.literal("normal"),
+	z.literal("high"),
+]);
+
 const emailResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The email ID",
@@ -55,6 +61,10 @@ const emailResponseSchema = z.object({
 			description:
 				"The template identifier used for generating the email content",
 			example: "welcome-email",
+		}),
+		priority: emailPrioritySchema.meta({
+			description: "The priority hint supplied to the email adapter",
+			example: "high",
 		}),
 	}),
 	data: z
@@ -173,6 +183,9 @@ export const controllerSchemas = {
 					"filter[template]": queryString.schema.filter(false, {
 						example: "password-reset",
 					}),
+					"filter[priority]": queryString.schema.filter(true, {
+						example: "high",
+					}),
 					sort: queryString.schema.sort(
 						"lastAttemptedAt,attemptCount,createdAt,updatedAt",
 					),
@@ -188,6 +201,7 @@ export const controllerSchemas = {
 						currentStatus: queryFormatted.schema.filters.union.optional(),
 						type: queryFormatted.schema.filters.union.optional(), // internal | external
 						template: queryFormatted.schema.filters.single.optional(),
+						priority: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
 				sort: z

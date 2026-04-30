@@ -3,6 +3,7 @@ import {
 	LUCID_VERSION,
 	PLUGIN_IDENTIFIER,
 	PLUGIN_KEY,
+	priorityHeaders,
 	WEBHOOK_ENABLED,
 } from "./constants.js";
 import routes from "./routes/index.js";
@@ -52,6 +53,10 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							...(email.bcc && { bcc: email.bcc }),
 							...(email.replyTo && { reply_to: email.replyTo }),
 							...(email.text && { text: email.text }),
+							headers: {
+								...priorityHeaders[email.priority],
+								...(email.headers || {}),
+							},
 						};
 
 						const response = await fetch("https://api.resend.com/emails", {

@@ -34,6 +34,10 @@ const EmailListRoute: Component = () => {
 					value: "",
 					type: "array",
 				},
+				priority: {
+					value: "",
+					type: "array",
+				},
 			},
 			sorts: {
 				createdAt: "desc",
@@ -137,6 +141,25 @@ const EmailListRoute: Component = () => {
 												{
 													label: T()("external"),
 													value: "external",
+												},
+											],
+										},
+										{
+											label: T()("priority"),
+											key: "priority",
+											type: "multi-select",
+											options: [
+												{
+													label: "Low",
+													value: "low",
+												},
+												{
+													label: "Normal",
+													value: "normal",
+												},
+												{
+													label: "High",
+													value: "high",
 												},
 											],
 										},

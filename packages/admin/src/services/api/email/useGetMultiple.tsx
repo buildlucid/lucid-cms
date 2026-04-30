@@ -12,6 +12,7 @@ interface QueryParams {
 		currentStatus?: Accessor<string[]>;
 		type?: Accessor<string[]>;
 		template?: Accessor<string>;
+		priority?: Accessor<string[]>;
 	};
 	perPage?: number;
 }

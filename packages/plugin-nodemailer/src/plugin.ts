@@ -1,5 +1,10 @@
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
-import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
+import {
+	LUCID_VERSION,
+	PLUGIN_IDENTIFIER,
+	PLUGIN_KEY,
+	priorityHeaders,
+} from "./constants.js";
 import T from "./translations/index.js";
 import type { PluginOptions } from "./types/types.js";
 import isValidData from "./utils/is-valid-data.js";
@@ -32,6 +37,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							};
 						}
 						await verifyTransporter(pluginOptions.transporter);
+
 						const data = await pluginOptions.transporter.sendMail({
 							from: `${email.from.name} <${email.from.email}>`,
 							to: email.to,
@@ -39,6 +45,11 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							cc: email.cc,
 							bcc: email.bcc,
 							replyTo: email.replyTo,
+							priority: email.priority,
+							headers: {
+								...priorityHeaders[email.priority],
+								...(email.headers || {}),
+							},
 							text: email.text,
 							html: email.html,
 						});

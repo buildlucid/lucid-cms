@@ -27,6 +27,8 @@ const getMultiple: ServiceFn<
 			"cc",
 			"bcc",
 			"template",
+			"priority",
+			"headers",
 			"storage_strategy",
 			"type",
 			"current_status",

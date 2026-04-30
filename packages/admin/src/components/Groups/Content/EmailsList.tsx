@@ -1,6 +1,7 @@
 import {
 	FaSolidCalendar,
 	FaSolidEnvelope,
+	FaSolidFlag,
 	FaSolidPaperPlane,
 	FaSolidT,
 } from "solid-icons/fa";
@@ -80,6 +81,11 @@ export const EmailsList: Component<{
 						label: T()("status"),
 						key: "status",
 						icon: <FaSolidT />,
+					},
+					{
+						label: T()("priority"),
+						key: "priority",
+						icon: <FaSolidFlag />,
 					},
 					{
 						label: T()("subject"),

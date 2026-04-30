@@ -10,6 +10,7 @@ export type EmailDeliveryStatus =
 	| "scheduled";
 
 export type EmailType = "external" | "internal";
+export type EmailPriority = "low" | "normal" | "high";
 
 export interface Email {
 	id: number;
@@ -23,6 +24,7 @@ export interface Email {
 		cc: null | string;
 		bcc: null | string;
 		template: string;
+		priority: EmailPriority;
 	};
 	data: Record<string, unknown> | null;
 	type: EmailType;

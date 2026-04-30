@@ -1,5 +1,8 @@
 import z from "zod";
-import { emailDeliveryStatusSchema } from "../../schemas/email.js";
+import {
+	emailDeliveryStatusSchema,
+	emailPrioritySchema,
+} from "../../schemas/email.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { KyselyDB } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -17,6 +20,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		cc: z.string().nullable(),
 		bcc: z.string().nullable(),
 		template: z.string(),
+		priority: emailPrioritySchema,
+		headers: z.record(z.string(), z.string()).nullable(),
 		data: z.record(z.string(), z.unknown()).nullable(),
 		storage_strategy: z.record(z.string(), z.unknown()).nullable(),
 		type: z.string(),
@@ -52,6 +57,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		cc: this.dbAdapter.getDataType("text"),
 		bcc: this.dbAdapter.getDataType("text"),
 		template: this.dbAdapter.getDataType("text"),
+		priority: this.dbAdapter.getDataType("text"),
+		headers: this.dbAdapter.getDataType("json"),
 		data: this.dbAdapter.getDataType("json"),
 		storage_strategy: this.dbAdapter.getDataType("json"),
 		type: this.dbAdapter.getDataType("text"),
@@ -68,6 +75,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				subject: "subject",
 				type: "type",
 				template: "template",
+				priority: "priority",
 				currentStatus: "current_status",
 			},
 			sorts: {
@@ -104,6 +112,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"cc",
 				"bcc",
 				"template",
+				"priority",
+				"headers",
 				"data",
 				"storage_strategy",
 				"type",
@@ -154,6 +164,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"cc",
 				"bcc",
 				"template",
+				"priority",
+				"headers",
 				"data",
 				"storage_strategy",
 				"type",

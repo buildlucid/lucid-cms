@@ -2,6 +2,7 @@ import type { Email } from "../../types/response.js";
 import type {
 	BooleanInt,
 	EmailDeliveryStatus,
+	EmailPriority,
 	EmailStorageConfig,
 	EmailType,
 } from "../../types.js";
@@ -17,6 +18,7 @@ interface EmailPropT {
 	cc: string | null;
 	bcc: string | null;
 	template: string;
+	priority: EmailPriority;
 	type: EmailType;
 	current_status: EmailDeliveryStatus;
 	attempt_count: number;
@@ -75,6 +77,7 @@ const formatSingle = (props: {
 			cc: props.email.cc,
 			bcc: props.email.bcc,
 			template: props.email.template,
+			priority: props.email.priority,
 		},
 		data: props.data ?? props.email.data ?? null,
 		html: props.html ?? null,

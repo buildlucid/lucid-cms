@@ -41,6 +41,8 @@ const sendEmail: ServiceFn<
 				"cc",
 				"bcc",
 				"template",
+				"priority",
+				"headers",
 				"data",
 				"storage_strategy",
 				"type",
@@ -146,6 +148,8 @@ const sendEmail: ServiceFn<
 					html: htmlData ?? "",
 					cc: emailRes.data.cc ?? undefined,
 					bcc: emailRes.data.bcc ?? undefined,
+					priority: emailRes.data.priority,
+					headers: emailRes.data.headers,
 				},
 				{
 					data: sendData ?? {},

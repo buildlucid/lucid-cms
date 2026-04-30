@@ -13,6 +13,8 @@ export type RenderedTemplates = {
 
 export type EmailDeliveryStatus = z.infer<typeof emailDeliveryStatusSchema>;
 export type EmailType = z.infer<typeof emailTypeSchema>;
+export type EmailPriority = "low" | "normal" | "high";
+export type EmailHeaders = Record<string, string>;
 
 export type EmailStrategyResponse = {
 	success: boolean;
@@ -35,6 +37,8 @@ export type EmailAdapterServiceSend = (
 		cc?: string;
 		bcc?: string;
 		replyTo?: string;
+		priority: EmailPriority;
+		headers?: EmailHeaders | null;
 	},
 	meta: {
 		data: {
